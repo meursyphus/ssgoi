@@ -1,0 +1,15 @@
+export { default } from './ts-tags.mjs';
+import './typescript.mjs';
+import './es-tag-css.mjs';
+import './css.mjs';
+import './javascript.mjs';
+import './es-tag-glsl.mjs';
+import './glsl.mjs';
+import './c.mjs';
+import './es-tag-html.mjs';
+import './html.mjs';
+import './es-tag-sql.mjs';
+import './sql.mjs';
+import './es-tag-xml.mjs';
+import './xml.mjs';
+import './java.mjs';

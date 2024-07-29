@@ -1,0 +1,61 @@
+{
+    "name": "prettier-plugin-svelte",
+    "version": "3.2.6",
+    "description": "Svelte plugin for prettier",
+    "main": "plugin.js",
+    "files": [
+        "plugin.js",
+        "plugin.js.map",
+        "browser.js",
+        "index.d.ts"
+    ],
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "default": "./plugin.js"
+        },
+        "./browser": "./browser.js",
+        "./package.json": "./package.json"
+    },
+    "scripts": {
+        "build": "rollup -c",
+        "check": "tsc --noEmit",
+        "check:watch": "tsc --noEmit --watch",
+        "test": "ava",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sveltejs/prettier-plugin-svelte.git"
+    },
+    "keywords": [
+        "prettier",
+        "svelte"
+    ],
+    "author": "James Birtles <jameshbirtles@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/sveltejs/prettier-plugin-svelte/issues"
+    },
+    "homepage": "https://github.com/sveltejs/prettier-plugin-svelte#readme",
+    "devDependencies": {
+        "@rollup/plugin-alias": "^5.1.0",
+        "@rollup/plugin-commonjs": "14.0.0",
+        "@rollup/plugin-node-resolve": "11.0.1",
+        "@types/node": "^14.0.0",
+        "ava": "3.15.0",
+        "prettier": "^3.0.0",
+        "rollup": "2.36.0",
+        "rollup-plugin-typescript": "1.0.1",
+        "svelte": "^4.2.7",
+        "ts-node": "^10.1.1",
+        "tslib": "^2.6.0",
+        "typescript": "5.1.3"
+    },
+    "peerDependencies": {
+        "prettier": "^3.0.0",
+        "svelte": "^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0"
+    }
+}
