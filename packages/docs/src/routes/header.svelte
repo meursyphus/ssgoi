@@ -1,35 +1,33 @@
 <script lang="ts">
-	import * as config from '$lib/config'
-  import Toggle from './toggle.svelte'
+	import * as config from '$lib/config';
+	import Toggle from './toggle.svelte';
 </script>
 
-<nav>
-  <!-- Title -->
-	<a href="/" class="title">
-		<b>{config.title}</b>
+<header class="bg-background px-4 lg:px-6 h-14 flex items-center justify-between">
+	<a href="#" class="flex items-center">
+		<span class="text-2xl font-bold text-primary">SUGOI</span>
 	</a>
-
-  <!-- Navigation -->
-	<ul class="links">
-		<li>
-			<a href="/docs">Docs</a>
-		</li>
-		<li>
-			<a href="/rss.xml" target="_blank">RSS</a>
-		</li>
-	</ul>
-
-  <!-- Theme -->
-  <Toggle />
-</nav>
+	<nav class="hidden lg:flex gap-4 sm:gap-6">
+		<a
+			href="/docs"
+			class="text-sm font-medium hover:underline underline-offset-4 text-primary-foreground"
+		>
+			Docs
+		</a>
+		<a
+			href="/rss.xml"
+			target="_blank"
+			class="text-sm font-medium hover:underline underline-offset-4 text-primary-foreground"
+		>
+			RSS
+		</a>
+	</nav>
+	<Toggle />
+</header>
 
 <style>
 	nav {
 		padding-block: var(--size-7);
-	}
-
-	.links {
-		margin-block: var(--size-7);
 	}
 
 	a {
@@ -41,12 +39,6 @@
 		nav {
 			display: flex;
 			justify-content: space-between;
-		}
-
-		.links {
-			display: flex;
-			gap: var(--size-7);
-			margin-block: 0;
 		}
 	}
 </style>
