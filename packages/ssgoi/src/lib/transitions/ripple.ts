@@ -24,7 +24,7 @@ const ripple: Transition = {
 		return {
 			duration,
 			css(u) {
-				return `${out} z-index: 1; clip-path: circle(${u * 100}% at 50% ${offset}%);`;
+				return `${out} z-index: 100; clip-path: circle(${u * 100}% at 50% ${offset}%);`;
 			}
 		};
 	}

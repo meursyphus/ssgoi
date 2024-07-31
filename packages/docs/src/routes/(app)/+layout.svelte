@@ -6,7 +6,7 @@
 	import 'open-props/normalize';
 	import 'open-props/buttons';
 
-	import '../app.css';
+	import '../../app.css';
 </script>
 
 <div class="layout">

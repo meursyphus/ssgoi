@@ -1,11 +1,10 @@
 <script lang="ts">
-	import * as config from '$lib/config';
 	import Toggle from './toggle.svelte';
 </script>
 
 <header class="bg-background px-4 lg:px-6 h-14 flex items-center justify-between">
-	<a href="#" class="flex items-center">
-		<span class="text-2xl font-bold text-primary">SUGOI</span>
+	<a href="/" class="flex items-center">
+		<span class="text-2xl font-bold text-primary">SSGOI</span>
 	</a>
 	<nav class="hidden lg:flex gap-4 sm:gap-6">
 		<a

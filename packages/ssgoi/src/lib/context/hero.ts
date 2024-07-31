@@ -47,7 +47,6 @@ function transition(items: ClientRectMap, counterparts: ClientRectMap, intro: bo
 		items.set(params.key, {
 			rect
 		});
-		console.log(items, counterparts, params.key, intro, counterparts.has(params.key));
 		return () => {
 			if (counterparts.has(params.key)) {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion

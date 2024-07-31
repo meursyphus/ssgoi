@@ -1,10 +1,16 @@
 <script lang="ts">
 	import type { onNavigate as _onNavigate } from '$app/navigation';
-	import context from './context/index.js';
+	import type { TransitionConfig } from '$lib/types.js';
+	import context from '../context/index.js';
 
 	export let onNavigate: typeof _onNavigate;
+	export let config: TransitionConfig;
 
-	const pageTransitionContext = context.pageTranstion.init();
+	/**
+	 * Context init!!
+	 */
+	context.config.init(config);
+	const pageTransitionContext = context.pageTransition.init();
 	const scrollHistoryContext = context.scrollHistory.init();
 	context.hero.init();
 

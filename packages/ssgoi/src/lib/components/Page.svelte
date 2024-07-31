@@ -7,6 +7,7 @@
 	function transitionIn(node: Element) {
 		const { from, to } = pageTransitionContext;
 		const transition = config({ path: from!.url.pathname }, { path: to!.url.pathname });
+		console.log(from!.url.pathname, to!.url.pathname);
 		return transition.in(node, {});
 	}
 

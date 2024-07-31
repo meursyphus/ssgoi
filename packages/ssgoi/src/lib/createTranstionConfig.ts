@@ -1,11 +1,13 @@
 import type { TransitionConfigInput, TransitionConfig, RouteInfo, TransitionEffect, TransitionFunction } from './types.js';
 import { none } from '$lib/transitions/index.js';
+import { normalizePath } from '$lib/utils/index.js';
+
 const defaultTransition: TransitionEffect = none;
 
 export function createTransitionConfig(config: TransitionConfigInput): TransitionConfig {
   return (from: RouteInfo, to: RouteInfo): TransitionEffect => {
-    const fromRoute = findMatchingRoute(from.path, Object.keys(config));
-    const toRoute = findMatchingRoute(to.path, Object.keys(config));
+    const fromRoute = findMatchingRoute(normalizePath(from.path), Object.keys(config));
+    const toRoute = findMatchingRoute(normalizePath(to.path), Object.keys(config));
 
     if (fromRoute && toRoute) {
       const inTransition = config[fromRoute][toRoute];
