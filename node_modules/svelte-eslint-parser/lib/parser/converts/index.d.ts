@@ -1,1 +1,0 @@
-export { convertSvelteRoot } from "./root";

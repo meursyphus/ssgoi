@@ -1,16 +1,16 @@
 {
-  "name": "svelte-page-transition-workspace",
+  "name": "ssgoi-workspace",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "docs:start": "npm run dev --workspace=docs"
   },
   "author": "",
   "license": "ISC",
-  "description": "Svelte Page Transition 워크스페이스",
+  "description": "SSGOI 워크스페이스",
   "dependencies": {
     "rehype-slug": "^6.0.0",
     "remark-toc": "^9.0.0",

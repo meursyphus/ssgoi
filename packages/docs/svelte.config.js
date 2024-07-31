@@ -15,7 +15,7 @@ const mdsvexOptions = {
 				themes: ['poimandres'],
 				langs: ['javascript', 'typescript']
 			})
-			await highlighter.loadLanguage('javascript', 'typescript')
+			await highlighter.loadLanguage('javascript', 'typescript', 'svelte')
 			const html = highlighter.codeToHtml(code, { lang, theme: 'poimandres' })
 			return `{@html \`${html}\` }`
 		}
