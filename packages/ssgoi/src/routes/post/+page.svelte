@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PageTranstion, transitions } from '$lib/index.js';
+	import { TempPageWrapper, transitions } from '$lib/index.js';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 	import { faker } from '@faker-js/faker';
 
@@ -20,11 +20,7 @@
 	const posts: { title: string; content: string }[] = postFactory.createList(15);
 </script>
 
-<PageTranstion
-	animations={[
-		{ path: '/blog', transtion: transitions.scrollDownToUp },
-		{ transtion: transitions.fade }
-	]}
+<TempPageWrapper
 >
 	<div class="posts">
 		{#each posts as post}
@@ -34,7 +30,7 @@
 			</div>
 		{/each}
 	</div>
-</PageTranstion>
+</TempPageWrapper>
 
 <style>
 	.posts {

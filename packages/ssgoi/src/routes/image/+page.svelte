@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Hero from '$lib/Hero.svelte';
-	import { PageTranstion, transitions } from '$lib/index.js';
+	import Hero from '$lib/_legacy/Hero.svelte';
+	import { TempPageWrapper, transitions } from '$lib/index.js';
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 
@@ -10,13 +10,7 @@
 		.map((color) => color.toString());
 </script>
 
-<PageTranstion
-	animations={[
-		{ transtion: transitions.none },
-		{ path: '/blog', transtion: transitions.ripple },
-		{ path: '/post', transtion: transitions.ripple }
-	]}
->
+<TempPageWrapper>
 	<div class="tmp">
 		<div class="container">
 			{#each colors as key (key)}
@@ -31,7 +25,7 @@
 			{/each}
 		</div>
 	</div>
-</PageTranstion>
+</TempPageWrapper>
 
 <style>
 	.tmp {

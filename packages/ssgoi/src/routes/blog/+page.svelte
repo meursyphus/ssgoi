@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PageTranstion, transitions } from '$lib/index.js';
+	import { TempPageWrapper, transitions } from '$lib/index.js';
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 
@@ -16,19 +16,14 @@
 	})).createList(10);
 </script>
 
-<PageTranstion
-	animations={[
-		{ path: '/post', transtion: transitions.scrollUpToDown },
-		{ transtion: transitions.fade }
-	]}
->
+<TempPageWrapper>
 	{#each blogs as blog}
 		<article>
 			<h1>{blog.name}</h1>
 			<p class="spread">{blog.description}</p>
 		</article>
 	{/each}
-</PageTranstion>
+</TempPageWrapper>
 
 <style>
 	article {

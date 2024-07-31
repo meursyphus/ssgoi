@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { PageTranstion, transitions } from '$lib/index.js';
+	import { TempPageWrapper, transitions } from '$lib/index.js';
 	import { page } from '$app/stores';
-	import Hero from '$lib/Hero.svelte';
+	import Hero from '$lib/_legacy/Hero.svelte';
 	const a = $page.params.color;
 </script>
 
-<PageTranstion animations={[{ transtion: transitions.none }]}>
+<TempPageWrapper>
 	<div class="root">
 		<Hero key={a}>
 			<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
 		</Hero>
 	</div>
-</PageTranstion>
+</TempPageWrapper>
 
 <style>
 	.root {

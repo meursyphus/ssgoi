@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onNavigate, beforeNavigate } from '$app/navigation';
-	import { PageTransitionRoot } from '$lib/index.js';
+	import Sggoi from '$lib/components/Sggoi.svelte';
+	import config from './example-config.js';
 </script>
 
 <div class="root">
@@ -10,9 +11,9 @@
 		<a href="/image">Image</a>
 	</header>
 	<main>
-		<PageTransitionRoot {onNavigate}>
+		<Sggoi {onNavigate} {config}>
 			<slot />
-		</PageTransitionRoot>
+		</Sggoi>
 	</main>
 
 	<footer>this is footer</footer>

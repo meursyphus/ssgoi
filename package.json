@@ -1,20 +1,17 @@
 {
   "name": "ssgoi-workspace",
   "version": "1.0.0",
-  "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "docs:start": "npm run dev --workspace=docs"
+    "docs:start": "npm run dev --workspace=docs",
+    "start": "npm run dev --workspace=ssgoi"
   },
   "author": "",
   "license": "ISC",
   "description": "SSGOI 워크스페이스",
   "dependencies": {
-    "rehype-slug": "^6.0.0",
-    "remark-toc": "^9.0.0",
-    "remark-unwrap-images": "^4.0.0",
-    "shiki": "^1.12.0"
+
   }
 }
