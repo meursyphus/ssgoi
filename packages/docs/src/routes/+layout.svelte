@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Footer from './footer.svelte'
-	import Header from './header.svelte'
+	import Footer from './footer.svelte';
+	import Header from './header.svelte';
 
-	import 'open-props/style'
-	import 'open-props/normalize'
-	import 'open-props/buttons'
+	import 'open-props/style';
+	import 'open-props/normalize';
+	import 'open-props/buttons';
 
-	import '../app.css'
+	import '../app.css';
 </script>
 
 <div class="layout">
-  <!-- Header -->
+	<!-- Header -->
 	<Header />
 
 	<main>
@@ -18,7 +18,7 @@
 		<slot />
 	</main>
 
-  <!-- Footer -->
+	<!-- Footer -->
 	<Footer />
 </div>
 
@@ -40,5 +40,10 @@
 		.layout {
 			padding-inline: 0;
 		}
+	}
+
+	:global(body) {
+		overflow-y: scroll;
+		scrollbar-width: thin;
 	}
 </style>

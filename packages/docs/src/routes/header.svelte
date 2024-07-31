@@ -12,10 +12,7 @@
   <!-- Navigation -->
 	<ul class="links">
 		<li>
-			<a href="/about">About</a>
-		</li>
-		<li>
-			<a href="/contact">Contact</a>
+			<a href="/docs">Docs</a>
 		</li>
 		<li>
 			<a href="/rss.xml" target="_blank">RSS</a>

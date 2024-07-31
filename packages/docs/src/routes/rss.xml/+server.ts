@@ -24,7 +24,6 @@ export async function GET({ fetch }) {
 							<description>${post.description}</description>
 							<link>${config.url}/${post.slug}</link>
 							<guid isPermaLink="true">${config.url}/${post.slug}</guid>
-							<pubDate>${new Date(post.date).toUTCString()}</pubDate>
 						</item>
 					`
 					)
