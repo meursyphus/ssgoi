@@ -1,17 +1,17 @@
 <script lang="ts">
 	import Hero from '$lib/components/Hero.svelte';
-	import TempPageWrapper from '$lib/_legacy/TempWrapper.svelte';
+	import Page from '$lib/components/Page.svelte';
 	import { page } from '$app/stores';
 	const a = $page.params.color;
 </script>
 
-<TempPageWrapper>
-	<div class="root">
-		<Hero key={a}>
-			<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
-		</Hero>
+<Page>
+<div class="root">
+	<Hero key={a}>
+		<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
+	</Hero>
 	</div>
-</TempPageWrapper>
+</Page>
 
 <style>
 	.root {

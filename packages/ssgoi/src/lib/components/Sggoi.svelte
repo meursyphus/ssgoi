@@ -2,6 +2,7 @@
 	import type { onNavigate as _onNavigate } from '$app/navigation';
 	import type { TransitionConfig } from '$lib/types.js';
 	import context from '../context/index.js';
+	import TempWrapper from './Page.svelte';
 
 	export let onNavigate: typeof _onNavigate;
 	export let config: TransitionConfig;

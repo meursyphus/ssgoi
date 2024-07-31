@@ -20,6 +20,3 @@
 <div in:transitionIn|global out:transitionOut|global>
 	<slot />
 </div>
-
-<style>
-</style>

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { TempPageWrapper, transitions } from '$lib/index.js';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 	import { faker } from '@faker-js/faker';
+	import Page from '$lib/components/Page.svelte';
 
 	type Post = {
 		id: number;
@@ -20,17 +20,16 @@
 	const posts: { title: string; content: string }[] = postFactory.createList(15);
 </script>
 
-<TempPageWrapper
->
-	<div class="posts">
-		{#each posts as post}
-			<div class="post">
-				<h2>{post.title}</h2>
-				<p>{post.content}</p>
-			</div>
+<Page>
+<div class="posts">
+	{#each posts as post}
+		<div class="post">
+			<h2>{post.title}</h2>
+			<p>{post.content}</p>
+		</div>
 		{/each}
 	</div>
-</TempPageWrapper>
+</Page>
 
 <style>
 	.posts {

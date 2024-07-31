@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Hero from '$lib/components/Hero.svelte';
-	import TempPageWrapper from '$lib/_legacy/TempWrapper.svelte'
+	import Page from '$lib/components/Page.svelte';
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
-
 
 	faker.seed(14);
 	const colors = new FixtureFactory(() => faker.color.human())
@@ -11,22 +10,22 @@
 		.map((color) => color.toString());
 </script>
 
-<TempPageWrapper>
-	<div class="tmp">
-		<div class="container">
-			{#each colors as key (key)}
-				<!-- <a href="/image/{key}">
+<Page>
+<div class="tmp">
+	<div class="container">
+		{#each colors as key (key)}
+			<!-- <a href="/image/{key}">
 					<div style="background: {key};" class="box"></div>
 				</a> -->
-				<Hero {key}>
-					<a href="/image/{key}">
-						<div style="background: {key};" class="box"></div>
-					</a>
-				</Hero>
-			{/each}
-		</div>
+			<Hero {key}>
+				<a href="/image/{key}">
+					<div style="background: {key};" class="box"></div>
+				</a>
+			</Hero>
+		{/each}
 	</div>
-</TempPageWrapper>
+	</div>
+</Page>
 
 <style>
 	.tmp {
