@@ -1,8 +1,9 @@
 <script lang="ts">
-	import Hero from '$lib/_legacy/Hero.svelte';
-	import { TempPageWrapper, transitions } from '$lib/index.js';
+	import Hero from '$lib/components/Hero.svelte';
+	import TempPageWrapper from '$lib/_legacy/TempWrapper.svelte'
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
+
 
 	faker.seed(14);
 	const colors = new FixtureFactory(() => faker.color.human())

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { TempPageWrapper, transitions } from '$lib/index.js';
+	import Hero from '$lib/components/Hero.svelte';
+	import TempPageWrapper from '$lib/_legacy/TempWrapper.svelte';
 	import { page } from '$app/stores';
-	import Hero from '$lib/_legacy/Hero.svelte';
 	const a = $page.params.color;
 </script>
 

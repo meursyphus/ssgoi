@@ -1,8 +1,8 @@
 <script lang="ts">
-	import context from '$lib/_legacy/context/index.js';
+	import context from '$lib/context/index.js';
 	export let key: string;
 
-	const pageTranstionContext = context.pageTranstion.get();
+	const pageTranstionContext = context.pageTransition.get();
 	const scrollHistoryContext = context.scrollHistory.get();
 	const scrollTop =
 		pageTranstionContext.from == null
