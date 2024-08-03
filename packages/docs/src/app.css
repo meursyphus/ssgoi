@@ -1,0 +1,68 @@
+@import '@fontsource/manrope';
+@import '@fontsource/jetbrains-mono';
+
+:root {
+  /* Light mode colors */
+  --color-bg-light: #ffffff;
+  --color-text-light: #333333;
+  --color-primary-light: #3b82f6;
+  --color-secondary-light: #10b981;
+  --color-accent-light: #f59e0b;
+  --color-border-light: #e5e7eb;
+
+  /* Dark mode colors */
+  --color-bg-dark: #1f2937;
+  --color-text-dark: #f3f4f6;
+  --color-primary-dark: #60a5fa;
+  --color-secondary-dark: #34d399;
+  --color-accent-dark: #fbbf24;
+  --color-border-dark: #4b5563;
+
+  /* Font families */
+  --font-sans: 'Manrope', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Font sizes */
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  /* Spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+
+  /* Border radius */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-full: 9999px;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html[color-scheme="light"] {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-light);
+}
+
+html[color-scheme="dark"] {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
+}
+
+/* Additional global styles... */
