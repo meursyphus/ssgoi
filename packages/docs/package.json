@@ -42,6 +42,7 @@
 		"@fontsource/jetbrains-mono": "^5.0.20",
 		"@fontsource/manrope": "^5.0.20",
 		"@reflow-work/test-fixture-factory": "^1.8.0",
+		"@sveltejs/adapter-cloudflare": "^4.7.0",
 		"lucide-svelte": "^0.417.0",
 		"open-props": "^1.7.5"
 	}
