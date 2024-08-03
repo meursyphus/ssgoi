@@ -10,19 +10,16 @@
 </script>
 
 <PageTransition>
-<div class="tmp">
-	<div class="container">
-		{#each colors as key (key)}
-			<!-- <a href="/image/{key}">
-					<div style="background: {key};" class="box"></div>
-				</a> -->
-			<Hero {key}>
-				<a href="/image/{key}">
-					<div style="background: {key};" class="box"></div>
-				</a>
-			</Hero>
-		{/each}
-	</div>
+	<div class="tmp">
+		<div class="container">
+			{#each colors as key (key)}
+				<Hero {key}>
+					<a href="/demo/image/{key}">
+						<div style="background: {key};" class="box"></div>
+					</a>
+				</Hero>
+			{/each}
+		</div>
 	</div>
 </PageTransition>
 

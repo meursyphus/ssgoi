@@ -1,28 +1,25 @@
 import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
-  '/': {
+  '/demo/blog': {
+    '/demo/post': transitions.scrollDownToUp,
+    '/demo/image': transitions.ripple,
     '*': transitions.fade
   },
-  '/blog': {
-    '/post': transitions.scrollDownToUp,
-    '/image': transitions.ripple,
+  '/demo/post': {
+    '/demo/blog': transitions.scrollUpToDown,
+    '/demo/image': transitions.ripple,
     '*': transitions.fade
   },
-  '/post': {
-    '/blog': transitions.scrollUpToDown,
-    '/image': transitions.ripple,
-    '*': transitions.fade
-  },
-  '/image': {
+  '/demo/image': {
     '/': transitions.none,
-    '/blog': transitions.ripple,
-    '/post': transitions.ripple,
-    '/image/:color': transitions.none,
+    '/demo/blog': transitions.ripple,
+    '/demo/post': transitions.ripple,
+    '/demo/image/:color': transitions.none,
     '*': transitions.fade
   },
-  '/image/:color': {
-    '/image': transitions.none,
+  '/demo/image/:color': {
+    '/demo/image': transitions.none,
     '*': transitions.fade
   },
   '*': {

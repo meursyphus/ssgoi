@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { PageTransition, Hero} from 'ssgoi';
+	import { PageTransition, Hero } from 'ssgoi';
 	import { page } from '$app/stores';
 	const a = $page.params.color;
 </script>
 
 <PageTransition>
-<div class="root">
-	<Hero key={a}>
-			<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
+	<div class="root">
+		<Hero key={a}>
+			<a href="/demo/image" style="background: {$page.params.color}" class="box"
+				>{$page.params.color}</a
+			>
 		</Hero>
 	</div>
 </PageTransition>
