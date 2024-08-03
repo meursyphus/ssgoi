@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "docs:start": "npm run dev --workspace=docs",
-    "start": "npm run dev --workspace=docs"
+    "start": "npm run dev --workspace=docs",
+    "build": "npm run package --workspace=ssgoi"
   },
   "author": "",
   "license": "ISC",

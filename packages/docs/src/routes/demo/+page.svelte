@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { PageTransition } from 'ssgoi';
 </script>
 
-<div class="root"></div>
+<PageTransition>
+	<div class="root"></div>
+</PageTransition>
 
 <style>
 	.root {

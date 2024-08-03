@@ -1,33 +1,32 @@
-import { scrollDownToUp, scrollUpToDown, fade, ripple, none } from '$lib/transitions/index.js';
-import { createTransitionConfig } from '$lib/createTranstionConfig.js';
+import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
   '/': {
-    '*': fade
+    '*': transitions.fade
   },
   '/blog': {
-    '/post': scrollDownToUp,
-    '/image': ripple,
-    '*': fade
+    '/post': transitions.scrollDownToUp,
+    '/image': transitions.ripple,
+    '*': transitions.fade
   },
   '/post': {
-    '/blog': scrollUpToDown,
-    '/image': ripple,
-    '*': fade
+    '/blog': transitions.scrollUpToDown,
+    '/image': transitions.ripple,
+    '*': transitions.fade
   },
   '/image': {
-    '/': none,
-    '/blog': ripple,
-    '/post': ripple,
-    '/image/:color': none,
-    '*': none
+    '/': transitions.none,
+    '/blog': transitions.ripple,
+    '/post': transitions.ripple,
+    '/image/:color': transitions.none,
+    '*': transitions.fade
   },
   '/image/:color': {
-    '/image': none,
-    '*': fade
+    '/image': transitions.none,
+    '*': transitions.fade
   },
   '*': {
-    '*': fade
+    '*': transitions.fade
   }
 });
 

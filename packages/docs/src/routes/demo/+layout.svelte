@@ -6,14 +6,14 @@
 
 <div class="root">
 	<header>
-		<a href="/blog">Blog</a>
-		<a href="/post">Post</a>
-		<a href="/image">Image</a>
+		<a href="/demo/blog">Blog</a>
+		<a href="/demo/post">Post</a>
+		<a href="/demo/image">Image</a>
 	</header>
 	<main>
-		<Sggoi {onNavigate} {config}>
+		<Ssgoi {onNavigate} {config}>
 			<slot />
-		</Sggoi>
+		</Ssgoi>
 	</main>
 
 	<footer>this is footer</footer>
