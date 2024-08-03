@@ -2,7 +2,22 @@ import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
   transitions: [
-    // Specific routes take precedence
+    {
+      from: '/demo/blog',
+      to: '/demo/image',
+      transitions: {
+        in: transitions.ripple.in,
+        out: transitions.fade.out
+      }
+    },
+    {
+      from: '/demo/image',
+      to: '/demo/blog',
+      transitions: {
+        in: transitions.none.in,
+        out: transitions.ripple.out
+      }
+    },
     {
       from: '/demo/blog',
       to: '/demo/post',
@@ -21,7 +36,18 @@ const config = createTransitionConfig({
     {
       from: '/demo/post',
       to: '/demo/image',
-      transitions: transitions.ripple
+      transitions: {
+        in: transitions.ripple.in,
+        out: transitions.fade.out
+      }
+    },
+    {
+      from: '/demo/image',
+      to: '/demo/post',
+      transitions: {
+        in: transitions.none.in,
+        out: transitions.ripple.out
+      }
     },
     {
       from: '/demo/image',
@@ -31,18 +57,18 @@ const config = createTransitionConfig({
     {
       from: '/demo/image',
       to: '/demo/blog',
-      transitions: transitions.fade
-    },
-    {
-      from: '/demo/image',
-      to: '/demo/post',
-      transitions: transitions.fade
+      transitions: transitions.ripple
     },
     // More general rules
     {
+      to: '/demo/image/*',
+      from: '/demo/image',
+      transitions: transitions.none,
+    },
+    {
       from: '/demo/image/*',
       to: '/demo/image',
-      transitions: transitions.none
+      transitions: transitions.none,
     },
     // Catch-all rules for /demo/image
     {
