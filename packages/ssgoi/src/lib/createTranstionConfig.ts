@@ -10,8 +10,8 @@ export function createTransitionConfig(config: TransitionConfigInput): Transitio
     const toRoute = findMatchingRoute(normalizePath(to.path), Object.keys(config));
 
     if (fromRoute && toRoute) {
-      const inTransition = config[fromRoute][toRoute];
-      const outTransition = config[toRoute][fromRoute];
+      const inTransition = config[fromRoute][toRoute] ?? defaultTransition
+      const outTransition = config[toRoute][fromRoute] ?? defaultTransition
 
       return {
         in: (node, params) => {

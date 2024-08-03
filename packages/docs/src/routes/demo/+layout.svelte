@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onNavigate, beforeNavigate } from '$app/navigation';
+	import { onNavigate } from '$app/navigation';
 	import { Ssgoi } from 'ssgoi';
 	import config from './example-config.js';
 </script>
