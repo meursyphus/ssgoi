@@ -1,6 +1,6 @@
 ---
 title: "Contributing to SSGOI"
-description: "Learn how to contribute to the SSGOI project and become a part of our transition-loving community"
+description: "Guidelines for contributing to the SSGOI project and becoming part of the community"
 order: 1
 group: "Community"
 ---

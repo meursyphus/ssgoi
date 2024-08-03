@@ -5,81 +5,83 @@ order: 3
 group: "Getting Started"
 ---
 
-# SSGOI Basic Usage: Let's Get Those Pages Moving!
+# SSGOI Basic Usage: Crafting Your First Transition 🎭
 
-Welcome to the SSGOI basic usage guide! You've installed SSGOI, and now you're ready to make your pages transition smoother than a buttered dolphin. Let's dive in!
+Ready to see some magic? Let's create your first SSGOI transition! Follow these steps to add smooth transitions to your Svelte app.
 
-## Step 1: Import SSGOI
+## 1. Create a Transition Configuration 🛠️
 
-First things first, let's bring SSGOI into your Svelte app. In your main layout file (usually `src/routes/__layout.svelte` for SvelteKit), add this import:
+First, let's set up your transition rules. Create a new file called `transitionConfig.ts` in your project:
 
-```javascript
-import { PageTransition } from 'ssgoi';
-```
-
-Congratulations! You've taken the first step towards transition greatness.
-
-## Step 2: Set Up the Configuration
-
-Now, let's tell SSGOI how you want your pages to move. Create a new file called `transitionConfig.js` in your `src/lib` folder:
-
-```javascript
+```typescript
 import { createTransitionConfig, transitions } from 'ssgoi';
 
-const transitionConfig = createTransitionConfig({
-  '/': {
-    '*': transitions.fade
-  },
-  '/about': {
-    '*': transitions.slide
-  },
-  '*': {
-    '*': transitions.fade
-  }
+const config = createTransitionConfig({
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: transitions.fade(),
+      symmetric: true
+    },
+    {
+      from: '/blog',
+      to: '/post/*',
+      transition: (from, to) => {
+        return from.path === '/blog' ? transitions.slideRight() : transitions.slideLeft();
+      }
+    }
+  ],
+  defaultTransition: transitions.fade()
 });
 
-export default transitionConfig;
+export default config;
 ```
 
-This configuration is like a dance instructor for your pages. It's telling the home page to fade, the about page to slide, and everything else to fade. Fancy!
+This configuration sets up fade transitions between home and about pages, and slide transitions between blog and post pages.
 
-## Step 3: Wrap Your Content
+## 2. Set Up SSGOI in Your Layout 🏗️
 
-Back in your layout file, wrap your main content with the `PageTransition` component:
+Now, let's integrate SSGOI into your main layout file (usually `__layout.svelte` in SvelteKit):
 
 ```svelte
-<script>
-  import { PageTransition } from 'ssgoi';
-  import transitionConfig from '$lib/transitionConfig';
+<script lang="ts">
+  import { onNavigate } from '$app/navigation';
+  import { Ssgoi } from 'ssgoi';
+  import config from './transitionConfig';
 </script>
 
-<PageTransition {transitionConfig}>
+<Ssgoi {onNavigate} {config}>
   <slot />
+</Ssgoi>
+```
+
+This wraps your entire app with SSGOI, allowing it to manage transitions between pages.
+
+## 3. Add PageTransition to Your Pages 🎬
+
+Finally, wrap the content of each page with the `PageTransition` component:
+
+```svelte
+<script lang="ts">
+  import { PageTransition } from 'ssgoi';
+</script>
+
+<PageTransition>
+  <h1>Welcome to my awesome page!</h1>
+  <p>This content will transition smoothly.</p>
 </PageTransition>
 ```
 
-You've just given your content the ability to dance in and out of view. It's like magic, but with more JavaScript!
+Repeat this for all your pages to enable transitions.
 
-## Step 4: Marvel at Your Work
+## And... Action! 🎉
 
-That's it! Your pages should now transition smoothly when navigating. If they don't, don't panic! Check your configuration, make sure your routes are correct, and remember - even the smoothest operators hit a bump sometimes.
+That's it! Your Svelte app is now equipped with smooth page transitions. Navigate between pages to see the magic happen!
 
-## Bonus: Dynamic Transitions
+Remember:
+- The `Ssgoi` component goes in your layout file.
+- The `PageTransition` component goes in each individual page file.
+- Customize your transitions in the `transitionConfig.ts` file.
 
-Feeling adventurous? Try a dynamic transition! Update your config like this:
-
-```javascript
-'/blog': {
-  '*': () => {
-    return Math.random() > 0.5 ? transitions.fade : transitions.slide;
-  }
-}
-```
-
-Now your blog page will randomly fade or slide. It's like a box of chocolates - you never know what you're gonna get!
-
-## Wrapping Up
-
-You've now mastered the basics of SSGOI. Your pages are transitioning, your users are amazed, and you're feeling smoother than ever. But wait, there's more! Check out our advanced guides to learn about custom transitions, optimizing performance, and more.
-
-Remember, with SSGOI, every page load is an opportunity for pizzazz. Use this power wisely, and may your transitions always be smooth and your load times swift!
+Now go forth and create some transition magic! ✨🚀

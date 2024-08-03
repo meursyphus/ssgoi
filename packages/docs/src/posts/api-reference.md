@@ -1,133 +1,198 @@
 ---
-title: "SSGOI API Reference"
-description: "Comprehensive guide to SSGOI's API, including functions, components, and configuration options"
-order: 1
-group: "Reference"
+title: "SSGOI Performance Optimization"
+description: "Best practices for optimizing SSGOI transitions for smooth and efficient performance"
+order: 5
+group: "Advanced"
 ---
 
-# SSGOI API Specification
+# SSGOI Performance Optimization: Smooth as Butter, Light as a Feather 🧈🪶
 
-## Overview
+Want your transitions to be smoother than a freshly waxed slide? Let's optimize SSGOI for peak performance!
 
-SSGOI (쓱고이) is a page transition library for Svelte applications. This document outlines the API specification for configuring and using SSGOI in your projects.
+## The Performance Pillars 🏛️
 
-## Type Definitions
+1. Efficient animations
+2. Minimal DOM manipulation
+3. Smart asset management
+4. Proper configuration
 
-```typescript
-import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
+Let's dive into each of these!
 
-export interface RouteInfo {
-  path: string;
-}
+## 1. Efficient Animations: The Need for Speed 🏎️
 
-export type TransitionEffect = {
-  in: (node: Element, params?: any) => SvelteTransitionConfig;
-  out: (node: Element, params?: any) => SvelteTransitionConfig;
-};
+### Use GPU-accelerated properties
 
-export type TransitionFunction = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
+Stick to these properties for the smoothest animations:
 
-export interface TransitionDefinition {
-  from: string;
-  to: string;
-  transitions: TransitionEffect | TransitionFunction;
-  symmetric?: boolean;
-}
-
-export interface TransitionConfigInput {
-  transitions: TransitionDefinition[];
-  defaultTransition: TransitionEffect | TransitionFunction;
-}
-
-export type TransitionConfig = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
-```
-
-## Key Concepts
-
-### RouteInfo
-
-Represents basic information about a route.
-
-### TransitionEffect
-
-Defines the `in` and `out` transitions for a page transition.
-
-### TransitionFunction
-
-A function that dynamically determines the transition effect based on the `from` and `to` routes.
-
-### TransitionDefinition
-
-Defines a single transition rule, specifying the `from` and `to` routes, and the transition to apply.
-
-### TransitionConfigInput
-
-The main configuration object for SSGOI, containing an array of transition definitions and a default transition.
-
-### TransitionConfig
-
-The final, compiled configuration function that determines the transition effect for any given route change.
-
-## Usage
-
-### Creating a Configuration
-
-Use the `createTransitionConfig` function to create your SSGOI configuration:
+- `transform`
+- `opacity`
 
 ```typescript
-import { createTransitionConfig, transitions } from 'ssgoi';
-
-const config = createTransitionConfig({
-  transitions: [
-    {
-      from: '/home',
-      to: '/about',
-      transitions: transitions.fade,
-      symmetric: true
-    },
-    {
-      from: '/blog',
-      to: '/post/:id',
-      transitions: (from, to) => {
-        // Dynamic transition logic
-        return from.path === '/blog' ? transitions.slideRight : transitions.slideLeft;
-      }
-    }
-  ],
-  defaultTransition: transitions.fade
+const smoothTransition = () => ({
+  in: (node, params) => ({
+    duration: 300,
+    css: (t) => `
+      transform: translateX(${100 - t * 100}%);
+      opacity: ${t};
+    `
+  })
 });
 ```
 
-### Applying the Configuration
+Avoid properties that trigger layout recalculation like `width`, `height`, `top`, or `left`.
 
-Apply the configuration to your Svelte app's routing system. The exact method may vary depending on your routing solution.
+### Keep it Simple
 
-## Key Features
+Complex animations can be cool, but they can also be costly. Aim for simplicity:
 
-1. **Explicit From-To Relationships**: Each transition rule clearly defines both the starting and ending routes.
+```typescript
+// Good 👍
+const simpleTransition = transitions.fade({ duration: 300 });
 
-2. **Symmetric Transitions**: Easily define bidirectional transitions with the `symmetric` option.
+// Potentially Costly 👎
+const complexTransition = transitions.combine(
+  transitions.rotate({ duration: 500 }),
+  transitions.scale({ duration: 500 }),
+  transitions.blur({ duration: 500 })
+);
+```
 
-3. **Dynamic Transitions**: Use functions to determine transitions based on runtime conditions.
+## 2. Minimal DOM Manipulation: Less is More 🧘‍♀️
 
-4. **Fallback Transitions**: A default transition is applied when no specific rules match.
+### Use `will-change`
 
-5. **Wildcard Support**: Use `*` in route patterns for flexible matching.
+Tell the browser what's going to change:
 
-6. **Priority-Based Rules**: Transitions are evaluated in the order they are defined, allowing for specific rules to take precedence over general ones.
+```typescript
+const optimizedTransition = () => ({
+  in: (node, params) => {
+    node.style.willChange = 'transform, opacity';
+    return {
+      duration: 300,
+      css: (t) => `
+        transform: translateX(${100 - t * 100}%);
+        opacity: ${t};
+      `,
+      tick: (t, u) => {
+        if (t === 1) node.style.willChange = 'auto';
+      }
+    };
+  }
+});
+```
 
-## Best Practices
+Remember to reset `will-change` after the transition to avoid unnecessary memory usage.
 
-1. Order your transitions from most specific to least specific.
-2. Use the `symmetric` option to reduce duplication when appropriate.
-3. Leverage dynamic transitions for complex logic, but prefer static transitions for simplicity when possible.
-4. Always provide a sensible default transition.
-5. Use wildcard patterns judiciously to avoid unexpected behavior.
+### Avoid Forced Synchronous Layouts
 
-## Performance Considerations
+Don't read layout properties and then immediately change them:
 
-- Keep the number of transition rules manageable to ensure quick evaluation.
-- Use simple transitions for frequent route changes.
-- Consider the performance impact of complex dynamic transition functions.
+```typescript
+// Bad 👎
+const badTransition = (node, params) => {
+  const height = node.offsetHeight; // Forces layout
+  node.style.height = `${height * 2}px`; // Triggers another layout
+};
 
-This specification provides a flexible and powerful way to define page transitions in your Svelte applications using SSGOI.
+// Good 👍
+const goodTransition = (node, params) => {
+  requestAnimationFrame(() => {
+    const height = node.offsetHeight;
+    node.style.height = `${height * 2}px`;
+  });
+};
+```
+
+## 3. Smart Asset Management: Lightening the Load 🏋️‍♂️
+
+### Preload Critical Resources
+
+Use the `preloadCode` function to load the next page's JavaScript:
+
+```typescript
+import { preloadCode } from 'ssgoi';
+
+// In your component
+onMount(() => {
+  preloadCode('/next-page');
+});
+```
+
+### Optimize Images
+
+For hero transitions involving images, ensure they're optimized:
+
+1. Use appropriate sizes
+2. Choose the right format (WebP for broad support)
+3. Implement lazy loading for images below the fold
+
+```html
+<img src="optimized-image.webp" loading="lazy" alt="Description" />
+```
+
+## 4. Proper Configuration: The Right Tool for the Job 🔧
+
+### Use Appropriate Transition Duration
+
+Shorter durations often feel snappier:
+
+```typescript
+const snappyConfig = createTransitionConfig({
+  transitions: [
+    {
+      from: '*',
+      to: '*',
+      transition: transitions.fade({ duration: 150 }) // Quick and smooth
+    }
+  ]
+});
+```
+
+### Implement Progressive Enhancement
+
+Provide a fallback for browsers that don't support certain features:
+
+```typescript
+const progressiveTransition = () => {
+  if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    return transitions.none(); // No transition for users who prefer reduced motion
+  }
+  return transitions.fade();
+};
+```
+
+## Performance Monitoring: Keeping Score 📊
+
+### Use Browser DevTools
+
+1. Open your browser's DevTools
+2. Go to the Performance tab
+3. Record while performing transitions
+4. Analyze for long tasks, layout thrashing, or excessive style recalculations
+
+### Implement Real User Monitoring (RUM)
+
+Consider using tools like Google Analytics or custom timing APIs to measure real-world performance:
+
+```javascript
+// Measure transition duration
+const start = performance.now();
+// ... perform transition ...
+const duration = performance.now() - start;
+console.log(`Transition took ${duration}ms`);
+```
+
+## The Optimization Checklist ✅
+
+Before shipping, ensure you've considered:
+
+- [ ] Using GPU-accelerated properties
+- [ ] Keeping animations simple and purposeful
+- [ ] Minimizing DOM manipulation
+- [ ] Preloading critical resources
+- [ ] Optimizing assets (especially images)
+- [ ] Configuring appropriate transition durations
+- [ ] Implementing progressive enhancement
+- [ ] Monitoring performance in real-world scenarios
+
+Remember, performance optimization is an ongoing process. Keep testing, keep measuring, and keep refining. Your users will thank you with smooth, joyful interactions! 🚀✨
