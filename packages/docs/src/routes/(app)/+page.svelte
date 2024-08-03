@@ -20,6 +20,20 @@
 		</div>
 	</section>
 
+	<section class="examples" in:fly={{ y: 50, duration: 500, delay: 400 }}>
+		<h2>See It in Action</h2>
+		<div class="gif-container">
+			<div class="gif-wrapper">
+				<img src="/page-transition.gif" alt="Page Transition Example" class="example-gif" />
+				<p>Smooth Page Transitions</p>
+			</div>
+			<div class="gif-wrapper">
+				<img src="/hero-transition.gif" alt="Hero Transition Example" class="example-gif" />
+				<p>Seamless Hero Transitions</p>
+			</div>
+		</div>
+	</section>
+
 	<section class="features" in:fly={{ y: 50, duration: 500, delay: 500 }}>
 		<h2>Key Features</h2>
 		<div class="feature-grid">
@@ -49,24 +63,25 @@
 		margin: 0 auto;
 		padding: var(--spacing-8);
 	}
-
 	.hero {
 		text-align: center;
 		margin-bottom: var(--spacing-16);
 	}
-
 	h1 {
 		font-size: var(--font-size-4xl);
 		margin-bottom: var(--spacing-4);
 	}
-
+	h2 {
+		font-size: var(--font-size-3xl);
+		margin-bottom: var(--spacing-8);
+		text-align: center;
+	}
 	.cta-buttons {
 		display: flex;
 		justify-content: center;
 		gap: var(--spacing-4);
 		margin-top: var(--spacing-8);
 	}
-
 	.btn {
 		padding: var(--spacing-3) var(--spacing-6);
 		border-radius: var(--radius-md);
@@ -76,28 +91,60 @@
 			background-color 0.3s,
 			color 0.3s;
 	}
-
 	.btn-primary {
 		background-color: var(--color-primary-light);
 		color: white;
 	}
-
 	.btn-secondary {
 		background-color: var(--color-secondary-light);
 		color: white;
 	}
-
+	.examples {
+		margin-bottom: var(--spacing-16);
+	}
+	.gif-container {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-8);
+		flex-wrap: wrap;
+	}
+	.gif-wrapper {
+		text-align: center;
+		width: 100%;
+		max-width: 250px; /* Match the original width of the GIF */
+	}
+	.example-gif {
+		width: 100%;
+		aspect-ratio: 250 / 497; /* Set the aspect ratio based on original dimensions */
+		object-fit: cover; /* Ensure the image covers the container */
+		border-radius: var(--radius-lg);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+	/* Dark mode styles */
+	:global(html[color-scheme='dark']) .example-gif {
+		box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+	}
+	@media (max-width: 768px) {
+		.cta-buttons {
+			flex-direction: column;
+		}
+		.gif-container {
+			flex-direction: column;
+			align-items: center;
+		}
+		.gif-wrapper {
+			max-width: 200px; /* Slightly smaller for mobile devices */
+		}
+	}
 	.features {
 		text-align: center;
 	}
-
 	.feature-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		gap: var(--spacing-8);
 		margin-top: var(--spacing-8);
 	}
-
 	.feature-card {
 		background-color: var(--color-bg-light);
 		padding: var(--spacing-6);
@@ -107,29 +154,19 @@
 			transform 0.3s,
 			box-shadow 0.3s;
 	}
-
 	.feature-card:hover {
 		transform: translateY(-5px);
 		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 	}
-
 	/* Dark mode styles */
 	:global(html[color-scheme='dark']) .btn-primary {
 		background-color: var(--color-primary-dark);
 	}
-
 	:global(html[color-scheme='dark']) .btn-secondary {
 		background-color: var(--color-secondary-dark);
 	}
-
 	:global(html[color-scheme='dark']) .feature-card {
 		background-color: var(--color-bg-dark);
 		box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
-	}
-
-	@media (max-width: 768px) {
-		.cta-buttons {
-			flex-direction: column;
-		}
 	}
 </style>

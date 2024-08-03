@@ -36,7 +36,7 @@ After installation, you'll need to set up SSGOI in your project. Here's a quick 
 We'll dive deeper into these steps in the next section, but here's a sneak peek of what your main layout file might look like:
 
 ```svelte
-<script lang="ts">
+<script>
   import { onNavigate } from '$app/navigation';
   import { Ssgoi } from 'ssgoi';
   import config from './your-transition-config';

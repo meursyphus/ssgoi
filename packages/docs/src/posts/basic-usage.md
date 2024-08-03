@@ -45,7 +45,7 @@ This configuration sets up fade transitions between home and about pages, and sl
 Now, let's integrate SSGOI into your main layout file (usually `__layout.svelte` in SvelteKit):
 
 ```svelte
-<script lang="ts">
+<script>
   import { onNavigate } from '$app/navigation';
   import { Ssgoi } from 'ssgoi';
   import config from './transitionConfig';
@@ -63,7 +63,7 @@ This wraps your entire app with SSGOI, allowing it to manage transitions between
 Finally, wrap the content of each page with the `PageTransition` component:
 
 ```svelte
-<script lang="ts">
+<script>
   import { PageTransition } from 'ssgoi';
 </script>
 
