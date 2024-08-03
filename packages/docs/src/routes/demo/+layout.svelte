@@ -6,62 +6,86 @@
 
 <div class="root">
 	<header>
-		<a href="/demo/blog">Blog</a>
-		<a href="/demo/post">Post</a>
-		<a href="/demo/image">Image</a>
+		<nav>
+			<a href="/demo/blog">Blog</a>
+			<a href="/demo/post">Post</a>
+			<a href="/demo/image">Image</a>
+		</nav>
 	</header>
 	<main>
 		<Ssgoi {onNavigate} {config}>
 			<slot />
 		</Ssgoi>
 	</main>
-
-	<footer>this is footer</footer>
+	<footer>
+		<p>&copy; 2023 SSGOI Demo. All rights reserved.</p>
+		<div class="social-links">
+			<a href="#" aria-label="Facebook">FB</a>
+			<a href="#" aria-label="Twitter">TW</a>
+			<a href="#" aria-label="Instagram">IG</a>
+		</div>
+	</footer>
 </div>
 
 <style>
-	header {
-		background-color: #f00;
-		height: 60px;
-		font-size: large;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 24px;
-	}
-
-	footer {
-		background-color: black;
-		color: white;
-		height: 300px;
-		font-size: xx-large;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
 	.root {
-		min-height: 100%;
+		font-family: 'Roboto', sans-serif;
+		background-color: #f0f4f8;
+		color: #333;
+		margin: 0;
+		padding: 0;
 		display: flex;
 		flex-direction: column;
-		background-color: bisque;
+		min-height: 100vh;
+	}
+
+	main > :global(div > div) {
+		background-color: #f0f4f8;
+	}
+
+	header {
+		background-color: #3498db;
+		padding: 1rem;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	nav {
+		display: flex;
+		justify-content: center;
+		gap: 2rem;
+	}
+
+	header a {
+		color: white;
+		text-decoration: none;
+		font-weight: bold;
+		font-size: 1.1rem;
+		transition: color 0.3s ease;
+	}
+
+	header a:hover {
+		color: #ecf0f1;
 	}
 
 	main {
 		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
+		padding: 2rem;
 	}
 
-	:global(body) {
-		flex-grow: 1;
+	footer {
+		background-color: #34495e;
+		color: white;
+		padding: 1rem;
+		text-align: center;
 	}
 
-	:global(html) {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		background-color: blue;
-		overflow-y: scroll;
+	.social-links {
+		margin-top: 0.5rem;
+	}
+
+	.social-links a {
+		color: white;
+		margin: 0 0.5rem;
+		text-decoration: none;
 	}
 </style>
