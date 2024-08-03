@@ -11,14 +11,17 @@ export type TransitionEffect = {
 
 export type TransitionFunction = (context: TransitionContext) => TransitionEffect;
 
+/**
+ * @todo: Add information about is-mobile here in the future
+ */
 export interface TransitionContext {
+  //isMobile: boolean
 }
 
 export interface TransitionDefinition {
   from: string;
   to: string;
   transitions: TransitionEffect | TransitionFunction;
-  symmetric?: boolean;
 }
 
 export interface TransitionConfigInput {

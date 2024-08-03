@@ -9,11 +9,13 @@ function getOffset(node: Element) {
 	return offset;
 }
 
-const ripple: Transition = {
+const ripple: Transition = ({ duration = 500, delay = 0, easing }: { duration?: number, delay?: number, easing?: (t: number) => number } = {}) => ({
 	in(node) {
 		const offset = getOffset(node);
 		return {
-			duration: 500,
+			duration,
+			delay,
+			easing,
 			css(t) {
 				return `clip-path: circle(${t * 100}% at 50% ${offset}%);`;
 			}
@@ -22,12 +24,14 @@ const ripple: Transition = {
 	out(node) {
 		const offset = getOffset(node);
 		return {
-			duration: 500,
+			duration,
+			delay,
+			easing,
 			css(u) {
 				return `${out} z-index: 100; clip-path: circle(${u * 100}% at 50% ${offset}%);`;
 			}
 		};
 	}
-};
+});
 
 export default ripple;

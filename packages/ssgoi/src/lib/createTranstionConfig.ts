@@ -1,8 +1,8 @@
-import type {  TransitionDefinition,  TransitionEffect, TransitionFunction, TransitionContext, RouteInfo } from './types.js';
+import type { TransitionDefinition, TransitionEffect, TransitionFunction, TransitionContext, RouteInfo } from './types.js';
 import { none } from '$lib/transitions/index.js';
 import { normalizePath } from '$lib/utils/index.js';
 
-const defaultTransition: TransitionEffect = none;
+const defaultTransition: TransitionEffect = none();
 
 export function createTransitionConfig(config: {
   transitions: TransitionDefinition[];

@@ -5,157 +5,129 @@ order: 1
 group: "Reference"
 ---
 
-# SSGOI API Reference: Your Transition Spell Book 🧙‍♂️
+# SSGOI API Specification
 
-Welcome to the SSGOI API Reference, where we unveil the secrets of smooth transitions! This is your comprehensive guide to all the magical incantations (functions), powerful artifacts (components), and mystical configurations that SSGOI offers. Let's dive into the arcane arts of page transitions!
+## Overview
 
-## Table of Contents
+SSGOI (쓱고이) is a page transition library for Svelte applications. This document outlines the API specification for configuring and using SSGOI in your projects.
 
-1. [Core Functions](#core-functions)
-2. [Components](#components)
-3. [Transition Effects](#transition-effects)
-4. [Configuration](#configuration)
-5. [Utility Functions](#utility-functions)
+## Type Definitions
 
-## Core Functions
+```typescript
+import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
 
-### `createTransitionConfig(config: TransitionConfigInput): TransitionConfig`
+export interface RouteInfo {
+  path: string;
+}
 
-The grand architect of your transition realm. Use this to define how your pages should move.
+export type TransitionEffect = {
+  in: (node: Element, params?: any) => SvelteTransitionConfig;
+  out: (node: Element, params?: any) => SvelteTransitionConfig;
+};
+
+export type TransitionFunction = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
+
+export interface TransitionDefinition {
+  from: string;
+  to: string;
+  transitions: TransitionEffect | TransitionFunction;
+  symmetric?: boolean;
+}
+
+export interface TransitionConfigInput {
+  transitions: TransitionDefinition[];
+  defaultTransition: TransitionEffect | TransitionFunction;
+}
+
+export type TransitionConfig = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
+```
+
+## Key Concepts
+
+### RouteInfo
+
+Represents basic information about a route.
+
+### TransitionEffect
+
+Defines the `in` and `out` transitions for a page transition.
+
+### TransitionFunction
+
+A function that dynamically determines the transition effect based on the `from` and `to` routes.
+
+### TransitionDefinition
+
+Defines a single transition rule, specifying the `from` and `to` routes, and the transition to apply.
+
+### TransitionConfigInput
+
+The main configuration object for SSGOI, containing an array of transition definitions and a default transition.
+
+### TransitionConfig
+
+The final, compiled configuration function that determines the transition effect for any given route change.
+
+## Usage
+
+### Creating a Configuration
+
+Use the `createTransitionConfig` function to create your SSGOI configuration:
 
 ```typescript
 import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
-  '/': { '*': transitions.fade },
-  '/blog': { 
-    '/blog/:id': transitions.slide,
-    '*': transitions.fade
-  },
-  '*': { '*': transitions.zoom }
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transitions: transitions.fade,
+      symmetric: true
+    },
+    {
+      from: '/blog',
+      to: '/post/:id',
+      transitions: (from, to) => {
+        // Dynamic transition logic
+        return from.path === '/blog' ? transitions.slideRight : transitions.slideLeft;
+      }
+    }
+  ],
+  defaultTransition: transitions.fade
 });
 ```
 
-Parameters:
-- `config`: An object mapping routes to their respective transitions.
+### Applying the Configuration
 
-Returns:
-- A `TransitionConfig` object to be used with the `PageTransition` component.
+Apply the configuration to your Svelte app's routing system. The exact method may vary depending on your routing solution.
 
-## Components
+## Key Features
 
-### `PageTransition`
+1. **Explicit From-To Relationships**: Each transition rule clearly defines both the starting and ending routes.
 
-The mystical portal through which your pages travel. Wrap your app's content with this component to enable transitions.
+2. **Symmetric Transitions**: Easily define bidirectional transitions with the `symmetric` option.
 
-```svelte
-<script>
-  import { PageTransition } from 'ssgoi';
-  import transitionConfig from './transitionConfig';
-</script>
+3. **Dynamic Transitions**: Use functions to determine transitions based on runtime conditions.
 
-<PageTransition {transitionConfig}>
-  <slot />
-</PageTransition>
-```
+4. **Fallback Transitions**: A default transition is applied when no specific rules match.
 
-Props:
-- `transitionConfig`: The configuration object created by `createTransitionConfig`.
+5. **Wildcard Support**: Use `*` in route patterns for flexible matching.
 
-## Transition Effects
+6. **Priority-Based Rules**: Transitions are evaluated in the order they are defined, allowing for specific rules to take precedence over general ones.
 
-SSGOI comes with a set of pre-defined transition effects, each more magical than the last!
+## Best Practices
 
-### `transitions.fade`
+1. Order your transitions from most specific to least specific.
+2. Use the `symmetric` option to reduce duplication when appropriate.
+3. Leverage dynamic transitions for complex logic, but prefer static transitions for simplicity when possible.
+4. Always provide a sensible default transition.
+5. Use wildcard patterns judiciously to avoid unexpected behavior.
 
-Makes your page fade in and out like a ghost at a disco.
+## Performance Considerations
 
-```typescript
-transitions.fade({ duration?: number })
-```
+- Keep the number of transition rules manageable to ensure quick evaluation.
+- Use simple transitions for frequent route changes.
+- Consider the performance impact of complex dynamic transition functions.
 
-### `transitions.slide`
-
-Slides your page in and out like it's on a cosmic treadmill.
-
-```typescript
-transitions.slide({ duration?: number, direction?: 'left' | 'right' | 'up' | 'down' })
-```
-
-### `transitions.zoom`
-
-Zooms your page in and out like it's being viewed through a cosmic magnifying glass.
-
-```typescript
-transitions.zoom({ duration?: number, scale?: number })
-```
-
-### `transitions.flip`
-
-Flips your page like a interdimensional pancake.
-
-```typescript
-transitions.flip({ duration?: number, direction?: 'x' | 'y' })
-```
-
-## Configuration
-
-### `TransitionConfigInput`
-
-The blueprint of your transition universe.
-
-```typescript
-type TransitionConfigInput = {
-  [fromRoute: string]: {
-    [toRoute: string]: TransitionEffect | TransitionFunction
-  }
-};
-
-type TransitionFunction = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
-
-interface RouteInfo {
-  path: string;
-  params: Record<string, string>;
-  query: Record<string, string>;
-}
-```
-
-## Utility Functions
-
-### `isMobile(): boolean`
-
-A crystal ball to detect if the user is on a mobile device.
-
-```typescript
-import { isMobile } from 'ssgoi';
-
-const config = createTransitionConfig({
-  '*': { '*': isMobile() ? transitions.fade : transitions.slide }
-});
-```
-
-Returns:
-- `true` if the user is on a mobile device, `false` otherwise.
-
-### `preloadCode(path: string): Promise<void>`
-
-Summons the spirits of future pages to preload them.
-
-```typescript
-import { preloadCode } from 'ssgoi';
-
-// Preload the about page
-preloadCode('/about');
-```
-
-Parameters:
-- `path`: The path of the page to preload.
-
-Returns:
-- A Promise that resolves when the preloading is complete.
-
----
-
-And there you have it, brave transition wizard! You now possess the knowledge of SSGOI's most powerful spells and artifacts. Use them wisely, and may your transitions always be smooth and your users always be amazed!
-
-Remember, with great transition power comes great transition responsibility. Now go forth and make the web a more magical place! 🌟🔮
+This specification provides a flexible and powerful way to define page transitions in your Svelte applications using SSGOI.
