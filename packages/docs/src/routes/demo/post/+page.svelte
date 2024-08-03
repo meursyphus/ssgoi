@@ -34,6 +34,7 @@
 <style>
 	.posts {
 		padding: 16px;
+		background-color: #f2f2f2;
 	}
 
 	.post {

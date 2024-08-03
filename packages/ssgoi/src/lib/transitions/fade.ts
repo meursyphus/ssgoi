@@ -2,17 +2,17 @@ import type { Transition } from './type.js';
 import { out } from './boilerflate/index.js';
 
 const fade: Transition = {
-	in(node, { duration = 300 }) {
+	in(node) {
 		return {
-			duration,
+			duration: 300,
 			css(t) {
 				return `opacity: ${t};`;
 			}
 		};
 	},
-	out(node, { duration = 300 }) {
+	out(node) {
 		return {
-			duration,
+			duration: 300,
 			css(t) {
 				return `${out}; opacity: ${t}`;
 			}

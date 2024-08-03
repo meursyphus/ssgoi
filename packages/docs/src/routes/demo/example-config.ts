@@ -1,30 +1,62 @@
 import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
-  '/demo/blog': {
-    '/demo/post': transitions.scrollDownToUp,
-    '/demo/image': transitions.ripple,
-    '*': transitions.fade
-  },
-  '/demo/post': {
-    '/demo/blog': transitions.scrollUpToDown,
-    '/demo/image': transitions.ripple,
-    '*': transitions.fade
-  },
-  '/demo/image': {
-    '/': transitions.none,
-    '/demo/blog': transitions.ripple,
-    '/demo/post': transitions.ripple,
-    '/demo/image/:color': transitions.none,
-    '*': transitions.fade
-  },
-  '/demo/image/:color': {
-    '/demo/image': transitions.none,
-    '*': transitions.fade
-  },
-  '*': {
-    '*': transitions.fade
-  }
+  transitions: [
+    // Specific routes take precedence
+    {
+      from: '/demo/blog',
+      to: '/demo/post',
+      transitions: transitions.scrollUpToDown
+    },
+    {
+      from: '/demo/post',
+      to: '/demo/blog',
+      transitions: transitions.scrollDownToUp
+    },
+    {
+      from: '/demo/blog',
+      to: '/demo/image',
+      transitions: transitions.ripple
+    },
+    {
+      from: '/demo/post',
+      to: '/demo/image',
+      transitions: transitions.ripple
+    },
+    {
+      from: '/demo/image',
+      to: '/',
+      transitions: transitions.none
+    },
+    {
+      from: '/demo/image',
+      to: '/demo/blog',
+      transitions: transitions.fade
+    },
+    {
+      from: '/demo/image',
+      to: '/demo/post',
+      transitions: transitions.fade
+    },
+    // More general rules
+    {
+      from: '/demo/image/*',
+      to: '/demo/image',
+      transitions: transitions.none
+    },
+    // Catch-all rules for /demo/image
+    {
+      from: '/demo/image',
+      to: '*',
+      transitions: transitions.fade
+    },
+    {
+      from: '/demo/image/*',
+      to: '*',
+      transitions: transitions.fade
+    }
+  ],
+  defaultTransition: transitions.fade
 });
 
 export default config;

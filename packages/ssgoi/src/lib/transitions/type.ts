@@ -1,6 +1,6 @@
 import type { TransitionConfig } from 'svelte/transition';
 
-type GetTranstionConfig = (node: Element, option: { duration?: number }) => TransitionConfig;
+type GetTranstionConfig = (node: Element) => TransitionConfig;
 
 export type Transition = {
 	in: GetTranstionConfig;

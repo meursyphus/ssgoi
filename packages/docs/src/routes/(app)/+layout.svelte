@@ -1,12 +1,6 @@
 <script lang="ts">
 	import Footer from './footer.svelte';
 	import Header from './header.svelte';
-
-	import 'open-props/style';
-	import 'open-props/normalize';
-	import 'open-props/buttons';
-
-	import '../../app.css';
 </script>
 
 <div class="layout">
