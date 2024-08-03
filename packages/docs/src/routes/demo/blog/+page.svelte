@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
-	import Page from '$lib/components/Page.svelte';
+	import { PageTransition, Ssgoi } from 'ssgoi';
 
 	type Blog = {
 		name: string;
@@ -16,14 +16,14 @@
 	})).createList(10);
 </script>
 
-<Page>
-{#each blogs as blog}
-	<article>
-		<h1>{blog.name}</h1>
-		<p class="spread">{blog.description}</p>
+<PageTransition>
+	{#each blogs as blog}
+		<article>
+			<h1>{blog.name}</h1>
+			<p class="spread">{blog.description}</p>
 		</article>
 	{/each}
-</Page>
+</PageTransition>
 
 <style>
 	article {

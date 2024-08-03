@@ -1,17 +1,16 @@
 <script lang="ts">
-	import Hero from '$lib/components/Hero.svelte';
-	import Page from '$lib/components/Page.svelte';
+	import { PageTransition, Hero} from 'ssgoi';
 	import { page } from '$app/stores';
 	const a = $page.params.color;
 </script>
 
-<Page>
+<PageTransition>
 <div class="root">
 	<Hero key={a}>
-		<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
-	</Hero>
+			<a href="/image" style="background: {$page.params.color}" class="box">{$page.params.color}</a>
+		</Hero>
 	</div>
-</Page>
+</PageTransition>
 
 <style>
 	.root {

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Hero from '$lib/components/Hero.svelte';
-	import Page from '$lib/components/Page.svelte';
+	import { PageTransition, Hero } from 'ssgoi';
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 
@@ -10,7 +9,7 @@
 		.map((color) => color.toString());
 </script>
 
-<Page>
+<PageTransition>
 <div class="tmp">
 	<div class="container">
 		{#each colors as key (key)}
@@ -25,7 +24,7 @@
 		{/each}
 	</div>
 	</div>
-</Page>
+</PageTransition>
 
 <style>
 	.tmp {

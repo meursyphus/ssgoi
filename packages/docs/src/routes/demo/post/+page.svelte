@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 	import { faker } from '@faker-js/faker';
-	import Page from '$lib/components/Page.svelte';
+	import { PageTransition } from 'ssgoi';
 
 	type Post = {
 		id: number;
@@ -20,7 +20,7 @@
 	const posts: { title: string; content: string }[] = postFactory.createList(15);
 </script>
 
-<Page>
+<PageTransition>
 	<div class="posts">
 		{#each posts as post}
 			<div class="post">
@@ -29,7 +29,7 @@
 			</div>
 		{/each}
 	</div>
-</Page>
+</PageTransition>
 
 <style>
 	.posts {

@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "docs:start": "npm run dev --workspace=docs",
-    "start": "npm run dev --workspace=ssgoi"
+    "start": "npm run dev --workspace=docs"
   },
   "author": "",
   "license": "ISC",

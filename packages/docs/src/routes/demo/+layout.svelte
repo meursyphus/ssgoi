@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onNavigate, beforeNavigate } from '$app/navigation';
-	import Sggoi from '$lib/components/Sggoi.svelte';
+	import { Ssgoi } from 'ssgoi';
 	import config from './example-config.js';
 </script>
 
