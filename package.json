@@ -1,6 +1,8 @@
 {
   "name": "ssgoi-workspace",
+  "homepage": "https://ssgoi.pages.dev",
   "version": "1.0.0",
+  "description": "SSGOI is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications.",
   "workspaces": [
     "packages/*"
   ],
@@ -9,9 +11,16 @@
     "build": "npm run package --workspace=ssgoi",
     "docs:build": "npm run build --workspace=docs"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "SSGOI 워크스페이스",
+  "author": "meursyphus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meursyphus/ssgoi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "keywords": ["svelte", "sveltekit", "page-transition", "animation"],
   "dependencies": {
 
   }
