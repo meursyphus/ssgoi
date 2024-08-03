@@ -1,39 +1,56 @@
 <script lang="ts">
-	import Footer from './footer.svelte';
 	import Header from './header.svelte';
+	import Footer from './footer.svelte';
+	import { theme } from '$lib/theme';
 </script>
 
-<div class="layout">
-	<!-- Header -->
+<div class="app" class:dark={$theme === 'dark'}>
 	<Header />
-
 	<main>
-		<!-- Black hole for other content -->
 		<slot />
 	</main>
-
-	<!-- Footer -->
 	<Footer />
 </div>
 
 <style>
-	.layout {
+	:global(html, body) {
 		height: 100%;
-		max-inline-size: 1440px;
-		display: grid;
-		grid-template-rows: auto 1fr auto;
-		margin-inline: auto;
-		padding-inline: var(--size-7);
+		margin: 0;
+		padding: 0;
 	}
-
-	@media (min-width: 1440px) {
-		.layout {
-			padding-inline: 0;
-		}
-	}
-
 	:global(body) {
 		overflow-y: scroll;
-		scrollbar-width: thin;
+	}
+
+	.app {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		background-color: var(--color-bg-light);
+		color: var(--color-text-light);
+		transition:
+			background-color 0.3s,
+			color 0.3s;
+	}
+
+	main {
+		flex: 1;
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: var(--spacing-4);
+		box-sizing: border-box;
+	}
+
+	/* Dark mode styles */
+	.app.dark {
+		background-color: var(--color-bg-dark);
+		color: var(--color-text-dark);
+	}
+
+	@media (max-width: 768px) {
+		main {
+			padding: var(--spacing-2);
+		}
 	}
 </style>

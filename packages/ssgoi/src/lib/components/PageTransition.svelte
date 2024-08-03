@@ -9,7 +9,7 @@
 
 	function transitionIn(node: Element): TransitionConfig {
 		const { from, to } = pageTransitionContext;
-		if (from == null || to == null) return none.in(node);
+		if (from == null || to == null) return none().in(node);
 
 		const transition = config({ path: from.url.pathname }, { path: to.url.pathname });
 		return transition.in(node);
@@ -17,7 +17,7 @@
 
 	function transitionOut(node: Element): TransitionConfig {
 		const { from, to } = pageTransitionContext;
-		if (from == null || to == null) return none.out(node);
+		if (from == null || to == null) return none().out(node);
 
 		const transition = config({ path: from.url.pathname }, { path: to.url.pathname });
 		return transition.out(node);

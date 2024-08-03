@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
 	import * as config from '$lib/config';
 </script>
 
@@ -6,121 +8,128 @@
 	<title>{config.title}</title>
 </svelte:head>
 
-<div class="flex flex-col min-h-[100dvh]">
-	<main class="flex-1">
-		<section
-			class="flex flex-col justify-center w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-[#6366F1] to-[#EC4899] bg-size-200% bg-pos-0 animate-gradient-x"
-		>
-			<div class="container px-4 md:px-6 text-center">
-				<div
-					class="text-4xl font-bold tracking-tighter text-primary-foreground sm:text-5xl md:text-6xl"
-				>
-					SGGOI: Turning Your Site into Supermodels!
-				</div>
-				<p class="max-w-[700px] mx-auto mt-4 text-lg text-primary-foreground/90 md:text-xl">
-					Because your pages deserve to strut their stuff
-				</p>
-				<div class="mt-8 flex justify-center gap-4">
-					<button class="px-6 py-3">Join the Show</button>
-					<a
-						href="/demo"
-						class="inline-flex items-center justify-center rounded-md bg-primary-foreground/10 px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-foreground"
-					>
-						<div class="w-5 h-5 bg-gray-400 mr-2"></div>
-						Watch Demo
-					</a>
-				</div>
-				<div class="mt-12 flex justify-center">
-					<div class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-background shadow-lg">
-						<div
-							class="absolute inset-0 z-10 bg-gradient-to-r from-[#6366F1]/50 to-[#EC4899]/50 blur-[100px]"
-						/>
-						<div class="relative z-20 flex items-center justify-center p-8">
-							<div class="grid grid-cols-2 gap-4">
-								<div
-									class="flex items-center justify-center rounded-md bg-primary-foreground/10 p-4 transition-transform hover:scale-105"
-								>
-									<div class="w-8 h-8 bg-gray-400"></div>
-								</div>
-								<div
-									class="flex items-center justify-center rounded-md bg-primary-foreground/10 p-4 transition-transform hover:scale-105"
-								>
-									<div class="w-8 h-8 bg-gray-400"></div>
-								</div>
-								<div
-									class="flex items-center justify-center rounded-md bg-primary-foreground/10 p-4 transition-transform hover:scale-105"
-								>
-									<div class="w-8 h-8 bg-gray-400"></div>
-								</div>
-								<div
-									class="flex items-center justify-center rounded-md bg-primary-foreground/10 p-4 transition-transform hover:scale-105"
-								>
-									<div class="w-8 h-8 bg-gray-400"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+<div class="landing-page" in:fade={{ duration: 300, delay: 300 }}>
+	<section class="hero" in:fly={{ y: 50, duration: 500, delay: 300 }}>
+		<h1>{config.title}</h1>
+		<p>Turning Your Site into Supermodels!</p>
+		<div class="cta-buttons">
+			<a href="/docs" class="btn btn-primary">Get Started</a>
+			<a href="/demo" class="btn btn-secondary" target="_blank" rel="noopener noreferrer"
+				>Watch Demo</a
+			>
+		</div>
+	</section>
+
+	<section class="features" in:fly={{ y: 50, duration: 500, delay: 500 }}>
+		<h2>Key Features</h2>
+		<div class="feature-grid">
+			<div class="feature-card">
+				<h3>Smooth Transitions</h3>
+				<p>Effortless page transitions that captivate your audience.</p>
 			</div>
-		</section>
-		<section class="w-full py-12 md:py-24 lg:py-32">
-			<div class="container px-4 md:px-6">
-				<div class="text-center">
-					<h2 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-						Watch Your Page is Moving!
-					</h2>
-					<p class="max-w-[700px] mx-auto mt-4 text-muted-foreground md:text-xl">
-						Discover the key features that make SGGOI the ultimate page transition library for your
-						Svelte applications.
-					</p>
-				</div>
-				<div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-					<div class="rounded-lg bg-background p-6 shadow-sm transition-transform hover:scale-105">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
-						>
-							<div class="w-6 h-6 bg-gray-400"></div>
-						</div>
-						<h3 class="mt-4 text-lg font-semibold">Smooth</h3>
-						<p class="mt-2 text-muted-foreground">
-							Effortless transitions that captivate your audience
-						</p>
-					</div>
-					<div class="rounded-lg bg-background p-6 shadow-sm transition-transform hover:scale-105">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
-						>
-							<div class="w-6 h-6 bg-gray-400"></div>
-						</div>
-						<h3 class="mt-4 text-lg font-semibold">Stylish</h3>
-						<p class="mt-2 text-muted-foreground">
-							Elevate your brand with custom-tailored transitions
-						</p>
-					</div>
-					<div class="rounded-lg bg-background p-6 shadow-sm transition-transform hover:scale-105">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
-						>
-							<div class="w-6 h-6 bg-gray-400"></div>
-						</div>
-						<h3 class="mt-4 text-lg font-semibold">Engaging</h3>
-						<p class="mt-2 text-muted-foreground">
-							Keep your users captivated with seamless navigation
-						</p>
-					</div>
-					<div class="rounded-lg bg-background p-6 shadow-sm transition-transform hover:scale-105">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
-						>
-							<div class="w-6 h-6 bg-gray-400"></div>
-						</div>
-						<h3 class="mt-4 text-lg font-semibold">Delightful</h3>
-						<p class="mt-2 text-muted-foreground">
-							Delight your developers with easy-to-use transitions
-						</p>
-					</div>
-				</div>
+			<div class="feature-card">
+				<h3>Easy Integration</h3>
+				<p>Seamlessly integrate with your existing Svelte projects.</p>
 			</div>
-		</section>
-	</main>
+			<div class="feature-card">
+				<h3>Customizable</h3>
+				<p>Tailor transitions to match your brand and design.</p>
+			</div>
+			<div class="feature-card">
+				<h3>Performance Optimized</h3>
+				<p>Smooth transitions without sacrificing load times.</p>
+			</div>
+		</div>
+	</section>
 </div>
+
+<style>
+	.landing-page {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: var(--spacing-8);
+	}
+
+	.hero {
+		text-align: center;
+		margin-bottom: var(--spacing-16);
+	}
+
+	h1 {
+		font-size: var(--font-size-4xl);
+		margin-bottom: var(--spacing-4);
+	}
+
+	.cta-buttons {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-4);
+		margin-top: var(--spacing-8);
+	}
+
+	.btn {
+		padding: var(--spacing-3) var(--spacing-6);
+		border-radius: var(--radius-md);
+		font-weight: bold;
+		text-decoration: none;
+		transition:
+			background-color 0.3s,
+			color 0.3s;
+	}
+
+	.btn-primary {
+		background-color: var(--color-primary-light);
+		color: white;
+	}
+
+	.btn-secondary {
+		background-color: var(--color-secondary-light);
+		color: white;
+	}
+
+	.features {
+		text-align: center;
+	}
+
+	.feature-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: var(--spacing-8);
+		margin-top: var(--spacing-8);
+	}
+
+	.feature-card {
+		background-color: var(--color-bg-light);
+		padding: var(--spacing-6);
+		border-radius: var(--radius-lg);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		transition:
+			transform 0.3s,
+			box-shadow 0.3s;
+	}
+
+	.feature-card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	/* Dark mode styles */
+	:global(html[color-scheme='dark']) .btn-primary {
+		background-color: var(--color-primary-dark);
+	}
+
+	:global(html[color-scheme='dark']) .btn-secondary {
+		background-color: var(--color-secondary-dark);
+	}
+
+	:global(html[color-scheme='dark']) .feature-card {
+		background-color: var(--color-bg-dark);
+		box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+	}
+
+	@media (max-width: 768px) {
+		.cta-buttons {
+			flex-direction: column;
+		}
+	}
+</style>

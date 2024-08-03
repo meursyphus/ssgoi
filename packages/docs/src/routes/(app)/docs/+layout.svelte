@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { normalizePath } from '$lib/utils';
 	import type { PageData } from './$types';
+	import { fly } from 'svelte/transition';
 
 	export let data: PageData;
 
@@ -48,10 +49,19 @@
 		};
 		return groupOrder[group as keyof typeof groupOrder] || 99;
 	}
+
+	let isSidebarOpen = false;
+
+	function toggleSidebar() {
+		isSidebarOpen = !isSidebarOpen;
+	}
 </script>
 
-<div class="layout">
-	<nav>
+<div class="docs-layout">
+	<button class="sidebar-toggle" on:click={toggleSidebar} aria-label="Toggle sidebar">
+		{isSidebarOpen ? '✕' : '☰'}
+	</button>
+	<nav class:open={isSidebarOpen}>
 		{#each navigation as group}
 			<div class="group">
 				<h3>{group.name}</h3>
@@ -70,78 +80,121 @@
 			</div>
 		{/each}
 	</nav>
-	<main>
+	<main in:fly={{ y: 20, duration: 300 }}>
 		<slot />
 	</main>
 </div>
 
 <style>
-	.layout {
+	.docs-layout {
 		display: flex;
-		height: 100vh;
+		min-height: calc(100vh - var(--header-height));
 	}
-
 	nav {
-		width: 250px;
-		padding: 20px;
+		width: 280px;
+		padding: var(--spacing-6) var(--spacing-4);
 		overflow-y: auto;
-		border-right: 1px solid #eee;
+		background-color: var(--color-bg-light);
+		border-right: 1px solid var(--color-border-light);
+		transition: transform 0.3s ease-in-out;
 	}
-
 	.group {
-		margin-bottom: 20px;
+		margin-bottom: var(--spacing-6);
 	}
-
 	h3 {
-		font-size: 1.2em;
+		font-size: var(--font-size-lg);
 		font-weight: bold;
-		margin-bottom: 10px;
+		margin-bottom: var(--spacing-3);
+		color: var(--color-primary-light);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
-
 	ul {
 		list-style-type: none;
 		padding: 0;
+		margin: 0;
 	}
-
 	li {
-		margin-bottom: 5px;
+		margin-bottom: var(--spacing-2);
+		padding-left: var(--spacing-3);
+		border-left: 2px solid transparent;
 	}
-
 	a {
+		display: block;
 		text-decoration: none;
-		color: #333;
+		color: var(--color-text-light);
+		transition:
+			color 0.3s,
+			border-color 0.3s;
+		padding: var(--spacing-2) 0;
+		font-size: var(--font-size-sm);
 	}
-
+	a:hover,
+	a.active {
+		color: var(--color-primary-light);
+	}
 	a.active {
 		font-weight: bold;
-		color: #0066cc;
 	}
-
+	li:has(a.active) {
+		border-left-color: var(--color-primary-light);
+	}
 	main {
 		flex-grow: 1;
-		padding: 20px;
+		padding: var(--spacing-6);
 		overflow-y: auto;
 	}
-
-	main::-webkit-scrollbar {
-		width: 5px;
+	.sidebar-toggle {
+		display: none;
 	}
-
-	main::-webkit-scrollbar-track {
-		background: var(--surface-1);
+	/* Dark mode styles */
+	:global(html[color-scheme='dark']) nav {
+		background-color: var(--color-bg-dark);
+		border-right-color: var(--color-border-dark);
 	}
-
-	main::-webkit-scrollbar-thumb {
-		background: var(--surface-3);
-		border-radius: 5px;
+	:global(html[color-scheme='dark']) h3 {
+		color: var(--color-primary-dark);
 	}
-
-	main::-webkit-scrollbar-thumb:hover {
-		background: var(--surface-4);
+	:global(html[color-scheme='dark']) a {
+		color: var(--color-text-dark);
 	}
-
-	main {
-		scrollbar-width: thin;
-		scrollbar-color: var(--surface-3) var(--surface-1);
+	:global(html[color-scheme='dark']) a:hover,
+	:global(html[color-scheme='dark']) a.active {
+		color: var(--color-primary-dark);
+	}
+	:global(html[color-scheme='dark']) li:has(a.active) {
+		border-left-color: var(--color-primary-dark);
+	}
+	@media (max-width: 768px) {
+		nav {
+			position: fixed;
+			top: var(--header-height);
+			left: 0;
+			bottom: 0;
+			transform: translateX(-100%);
+			z-index: 1000;
+		}
+		nav.open {
+			transform: translateX(0);
+		}
+		.sidebar-toggle {
+			display: block;
+			position: fixed;
+			top: calc(var(--header-height) + var(--spacing-4));
+			left: var(--spacing-4);
+			z-index: 1001;
+			background-color: var(--color-primary-light);
+			color: white;
+			border: none;
+			border-radius: var(--radius-full);
+			width: 40px;
+			height: 40px;
+			font-size: var(--font-size-xl);
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+		:global(html[color-scheme='dark']) .sidebar-toggle {
+			background-color: var(--color-primary-dark);
+		}
 	}
 </style>

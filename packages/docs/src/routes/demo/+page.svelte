@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { PageTransition } from 'ssgoi';
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	let currentFeature = 0;
 	const features = [
@@ -28,8 +29,14 @@
 		<p class="tagline">Experience the magic of smooth page transitions</p>
 
 		<div class="feature-showcase">
-			<h2>{features[currentFeature].title}</h2>
-			<p>{features[currentFeature].description}</p>
+			{#key currentFeature}
+				<h2 style="position: absolute; top: 40px;" transition:fade>
+					{features[currentFeature].title}
+				</h2>
+				<p style="position: absolute; top: 100px;" transition:fade>
+					{features[currentFeature].description}
+				</p>
+			{/key}
 		</div>
 
 		<div class="demo-links">
@@ -69,6 +76,11 @@
 		padding: 2rem;
 		margin-bottom: 2rem;
 		transition: all 0.3s ease;
+		height: 150px;
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	.feature-showcase h2 {

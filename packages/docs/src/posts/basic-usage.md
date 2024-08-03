@@ -22,13 +22,13 @@ const config = createTransitionConfig({
       from: '/home',
       to: '/about',
       transition: transitions.fade(),
-      symmetric: true
+      
     },
     {
       from: '/blog',
       to: '/post/*',
-      transition: (from, to) => {
-        return from.path === '/blog' ? transitions.slideRight() : transitions.slideLeft();
+      transition: (context) => {
+        return context.isMobile ? transitions.slideRight() : transitions.fade()
       }
     }
   ],

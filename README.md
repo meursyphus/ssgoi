@@ -35,7 +35,6 @@ const config = createTransitionConfig({
       from: '/home',
       to: '/about',
       transitions: transitions.fade(),
-      symmetric: true
     },
     {
       from: '/blog',
