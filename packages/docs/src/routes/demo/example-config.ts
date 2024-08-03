@@ -21,12 +21,12 @@ const config = createTransitionConfig({
     {
       from: '/demo/blog',
       to: '/demo/post',
-      transitions: transitions.scrollUpToDown
+      transitions: transitions.scrollDownToUp
     },
     {
       from: '/demo/post',
       to: '/demo/blog',
-      transitions: transitions.scrollDownToUp
+      transitions: transitions.scrollUpToDown
     },
     {
       from: '/demo/blog',
