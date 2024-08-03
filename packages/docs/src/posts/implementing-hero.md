@@ -36,12 +36,12 @@ Let's create a hero transition for a product in a list to its detail page.
 Product List Page:
 ```svelte
 <script lang="ts">
-import { Hero, PageTransition } from 'ssgoi';
+  import { Hero, PageTransition } from 'ssgoi';
 
-const products = [
-  { id: 1, name: 'Super Gadget', image: '/gadget.jpg' },
-  // ... more products
-];
+  const products = [
+    { id: 1, name: 'Super Gadget', image: '/gadget.jpg' },
+    // ... more products
+  ];
 </script>
 
 <PageTransition>

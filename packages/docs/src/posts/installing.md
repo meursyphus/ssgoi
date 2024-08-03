@@ -49,7 +49,7 @@ We'll dive deeper into these steps in the next section, but here's a sneak peek 
 
 ## What's Next? 🚀
 
-```ascii
+```
  [Installation Complete!]
           |
           v

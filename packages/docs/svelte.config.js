@@ -1,7 +1,7 @@
 import adapter from '@sveltejs/adapter-cloudflare';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import { mdsvex } from 'mdsvex';
-import { createHighlighter } from 'shiki'
+import { mdsvex , escapeSvelte } from 'mdsvex';
+import { getSingletonHighlighter } from 'shiki'
 import remarkUnwrapImages from 'remark-unwrap-images'
 import remarkToc from 'remark-toc'
 import rehypeSlug from 'rehype-slug'
@@ -11,12 +11,12 @@ const mdsvexOptions = {
 	extensions: ['.md'],
 	highlight: {
 		highlighter: async (code, lang = 'text') => {
-			const highlighter = await createHighlighter({
+			const highlighter = await getSingletonHighlighter({
 				themes: ['poimandres'],
-				langs: ['javascript', 'typescript']
+				langs: ['javascript', 'typescript', 'bash', 'svelte']
 			})
-			await highlighter.loadLanguage('javascript', 'typescript', 'svelte')
-			const html = highlighter.codeToHtml(code, { lang, theme: 'poimandres' })
+			await highlighter.loadLanguage('javascript', 'typescript', 'svelte', 'bash', )
+			const html = escapeSvelte(highlighter.codeToHtml(code, { lang, theme: 'poimandres' }))
 			return `{@html \`${html}\` }`
 		}
 	},
