@@ -12,7 +12,12 @@
 	"bugs": {
 		"url": "https://github.com/meursyphus/ssgoi/issues"
 	},
-	"keywords": ["svelte", "sveltekit", "page-transition", "animation"],
+	"keywords": [
+		"svelte",
+		"sveltekit",
+		"page-transition",
+		"animation"
+	],
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",

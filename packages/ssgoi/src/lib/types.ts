@@ -1,12 +1,12 @@
 import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
 
 export interface RouteInfo {
-  path: string;
+	path: string;
 }
 
 export type TransitionEffect = {
-  in: (node: Element) => SvelteTransitionConfig;
-  out: (node: Element) => SvelteTransitionConfig;
+	in: (node: Element) => SvelteTransitionConfig;
+	out: (node: Element) => SvelteTransitionConfig;
 };
 
 export type TransitionFunction = (context: TransitionContext) => TransitionEffect;
@@ -15,18 +15,18 @@ export type TransitionFunction = (context: TransitionContext) => TransitionEffec
  * @todo: Add information about is-mobile here in the future
  */
 export interface TransitionContext {
-  //isMobile: boolean
+	// isMobile: boolean
 }
 
 export interface TransitionDefinition {
-  from: string;
-  to: string;
-  transitions: TransitionEffect | TransitionFunction;
+	from: string;
+	to: string;
+	transitions: TransitionEffect | TransitionFunction;
 }
 
 export interface TransitionConfigInput {
-  transitions: TransitionDefinition[];
-  defaultTransition: TransitionEffect | TransitionFunction;
+	transitions: TransitionDefinition[];
+	defaultTransition: TransitionEffect | TransitionFunction;
 }
 
 export type TransitionConfig = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
