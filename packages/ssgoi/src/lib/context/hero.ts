@@ -1,7 +1,7 @@
+import { isFunction } from '$lib/utils/index.js';
 import { getContext, setContext } from 'svelte';
 import { cubicOut } from 'svelte/easing';
 import type { CrossfadeParams, TransitionConfig } from 'svelte/transition';
-import { isFunction } from '$lib/utils/index.js';
 
 const KEY = Symbol('hero');
 
@@ -49,7 +49,6 @@ function transition(items: ClientRectMap, counterparts: ClientRectMap, intro: bo
 		});
 		return () => {
 			if (counterparts.has(params.key)) {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				const { rect } = counterparts.get(params.key)!;
 				counterparts.delete(params.key);
 
@@ -60,7 +59,6 @@ function transition(items: ClientRectMap, counterparts: ClientRectMap, intro: bo
 			// (i.e. wasn't claimed by the other list)
 			// then we need to supply an outro
 			items.delete(params.key);
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			return fallback();
 		};
 	};

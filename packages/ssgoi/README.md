@@ -5,6 +5,7 @@ SSGOI (쓱고이) is a powerful and easy-to-use page transition library for Svel
 ## What's in a name?
 
 SSGOI combines two fantastic ideas:
+
 - "쓱" (sseuk): A Korean onomatopoeia for a quick, smooth movement - just like our page transitions!
 - "すごい" (sugoi): Japanese for "amazing" - because that's what your users will say when they see these transitions!
 
@@ -30,21 +31,21 @@ npm install ssgoi
 import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
-  transitions: [
-    {
-      from: '/home',
-      to: '/about',
-      transitions: transitions.fade(),
-    },
-    {
-      from: '/blog',
-      to: '/post/*',
-      transitions: (from, to) => {
-        return from.path === '/blog' ? transitions.slideRight() : transitions.slideLeft();
-      }
-    }
-  ],
-  defaultTransition: transitions.fade()
+	transitions: [
+		{
+			from: '/home',
+			to: '/about',
+			transitions: transitions.fade()
+		},
+		{
+			from: '/blog',
+			to: '/post/*',
+			transitions: (from, to) => {
+				return from.path === '/blog' ? transitions.slideRight() : transitions.slideLeft();
+			}
+		}
+	],
+	defaultTransition: transitions.fade()
 });
 ```
 
@@ -56,43 +57,43 @@ Here's a simplified example of how to set up SSGOI in your layout:
 
 ```svelte
 <script lang="ts">
-  import { onNavigate } from '$app/navigation';
-  import { Ssgoi } from 'ssgoi';
-  import config from './your-transition-config';
+	import { onNavigate } from '$app/navigation';
+	import { Ssgoi } from 'ssgoi';
+	import config from './your-transition-config';
 </script>
 
 <div class="app-layout">
-  <header>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/contact">Contact</a>
-    </nav>
-  </header>
+	<header>
+		<nav>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/contact">Contact</a>
+		</nav>
+	</header>
 
-  <main>
-    <Ssgoi {onNavigate} {config}>
-      <slot />
-    </Ssgoi>
-  </main>
+	<main>
+		<Ssgoi {onNavigate} {config}>
+			<slot />
+		</Ssgoi>
+	</main>
 
-  <footer>
-    <p>&copy; 2023 Your App Name</p>
-  </footer>
+	<footer>
+		<p>&copy; 2023 Your App Name</p>
+	</footer>
 </div>
 
 <style>
-  .app-layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+	.app-layout {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
 
-  main {
-    flex-grow: 1;
-  }
+	main {
+		flex-grow: 1;
+	}
 
-  /* Add more styles as needed */
+	/* Add more styles as needed */
 </style>
 ```
 
@@ -118,39 +119,40 @@ Example usage in a page component:
 
 ```svelte
 <script lang="ts">
-  import { PageTransition } from 'ssgoi';
+	import { PageTransition } from 'ssgoi';
 
-  const posts = [
-    { id: 1, title: 'First Post', content: 'This is the first post content.' },
-    { id: 2, title: 'Second Post', content: 'This is the second post content.' },
-  ];
+	const posts = [
+		{ id: 1, title: 'First Post', content: 'This is the first post content.' },
+		{ id: 2, title: 'Second Post', content: 'This is the second post content.' }
+	];
 </script>
 
 <PageTransition>
-  <div class="posts-container">
-    <h1>Featured Posts</h1>
-    {#each posts as post (post.id)}
-      <article class="post">
-        <h2>{post.title}</h2>
-        <p>{post.content}</p>
-      </article>
-    {/each}
-  </div>
+	<div class="posts-container">
+		<h1>Featured Posts</h1>
+		{#each posts as post (post.id)}
+			<article class="post">
+				<h2>{post.title}</h2>
+				<p>{post.content}</p>
+			</article>
+		{/each}
+	</div>
 </PageTransition>
 
 <style>
-  .posts-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-  .post {
-    margin-bottom: 1rem;
-  }
+	.posts-container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 1rem;
+	}
+	.post {
+		margin-bottom: 1rem;
+	}
 </style>
 ```
 
 Important notes:
+
 1. The `PageTransition` component should be used in each individual page component, not in the main layout.
 2. It wraps the entire content of the page, allowing SSGOI to manage the transition effects when navigating to and from this page.
 3. You don't need to pass any props to `PageTransition`. The transition logic is handled by the `Ssgoi` component in your main layout.
@@ -167,32 +169,32 @@ Example usage:
 
 ```svelte
 <script lang="ts">
-  import { PageTransition, Hero } from 'ssgoi';
+	import { PageTransition, Hero } from 'ssgoi';
 
-  const colors = [
-    { name: 'Red', hex: 'FF0000' },
-    { name: 'Green', hex: '00FF00' },
-    { name: 'Blue', hex: '0000FF' },
-  ];
+	const colors = [
+		{ name: 'Red', hex: 'FF0000' },
+		{ name: 'Green', hex: '00FF00' },
+		{ name: 'Blue', hex: '0000FF' }
+	];
 </script>
 
 <PageTransition>
-  <div class="color-gallery">
-    <h1>Color Gallery</h1>
-    <div class="container">
-      {#each colors as color (color.hex)}
-        <Hero key={'#' + color.hex}>
-          <a href="/color/{color.hex}" class="color-card">
-            <div style="background: #{color.hex};" class="color-box"></div>
-            <div class="color-info">
-              <h2>{color.name}</h2>
-              <p>#{color.hex}</p>
-            </div>
-          </a>
-        </Hero>
-      {/each}
-    </div>
-  </div>
+	<div class="color-gallery">
+		<h1>Color Gallery</h1>
+		<div class="container">
+			{#each colors as color (color.hex)}
+				<Hero key={'#' + color.hex}>
+					<a href="/color/{color.hex}" class="color-card">
+						<div style="background: #{color.hex};" class="color-box"></div>
+						<div class="color-info">
+							<h2>{color.name}</h2>
+							<p>#{color.hex}</p>
+						</div>
+					</a>
+				</Hero>
+			{/each}
+		</div>
+	</div>
 </PageTransition>
 ```
 
@@ -200,34 +202,34 @@ Example usage:
 
 ```svelte
 <script lang="ts">
-  import { PageTransition, Hero } from 'ssgoi';
-  import { page } from '$app/stores';
+	import { PageTransition, Hero } from 'ssgoi';
+	import { page } from '$app/stores';
 
-  const color = '#' + $page.params.color;
+	const color = '#' + $page.params.color;
 </script>
 
 <PageTransition>
-  <Hero key={color}>
-    <div class="color-detail" style="background-color: {color};">
-      <h1>{color}</h1>
-      <a href="/demo/image">Back to Gallery</a>
-    </div>
-  </Hero>
+	<Hero key={color}>
+		<div class="color-detail" style="background-color: {color};">
+			<h1>{color}</h1>
+			<a href="/demo/image">Back to Gallery</a>
+		</div>
+	</Hero>
 </PageTransition>
 
 <style>
-  .color-detail {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-  }
-  a {
-    margin-top: 1rem;
-    color: white;
-  }
+	.color-detail {
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: white;
+	}
+	a {
+		margin-top: 1rem;
+		color: white;
+	}
 </style>
 ```
 
@@ -245,25 +247,24 @@ When using hero transitions, it's recommended to set the page transition to `non
 
 ```typescript
 const config = createTransitionConfig({
-  transitions: [
-    {
-      from: '/demo/image',
-      to: '/color/*',
-      transitions: transitions.none(),
-    },
-    {
-      from: '/color/*',
-      to: '/demo/image',
-      transitions: transitions.none(),
-    },
-    // Other transitions...
-  ],
-  defaultTransition: transitions.fade()
+	transitions: [
+		{
+			from: '/demo/image',
+			to: '/color/*',
+			transitions: transitions.none()
+		},
+		{
+			from: '/color/*',
+			to: '/demo/image',
+			transitions: transitions.none()
+		}
+		// Other transitions...
+	],
+	defaultTransition: transitions.fade()
 });
 ```
 
 By following these guidelines, you can create smooth and engaging hero transitions in your Svelte application using SSGOI.
-
 
 By following these guidelines, you can create smooth and engaging transitions in your Svelte application using SSGOI.
 

@@ -1,5 +1,5 @@
+import { out } from './boilerplate/index.js';
 import type { Transition } from './type.js';
-import { out } from './boilerflate/index.js';
 
 function getOffset(node: Element) {
 	const totalHeight = node.clientHeight;
@@ -9,7 +9,11 @@ function getOffset(node: Element) {
 	return offset;
 }
 
-const ripple: Transition = ({ duration = 500, delay = 0, easing }: { duration?: number, delay?: number, easing?: (t: number) => number } = {}) => ({
+const ripple: Transition = ({
+	duration = 500,
+	delay = 0,
+	easing
+}: { duration?: number; delay?: number; easing?: (t: number) => number } = {}) => ({
 	in(node) {
 		const offset = getOffset(node);
 		return {

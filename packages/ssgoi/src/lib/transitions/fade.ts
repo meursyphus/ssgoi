@@ -1,7 +1,11 @@
+import { out } from './boilerplate/index.js';
 import type { Transition } from './type.js';
-import { out } from './boilerflate/index.js';
 
-const fade: Transition = ({ duration, delay, easing  }: { duration?: number, delay?: number, easing?: (t: number) => number } = {}) => ({
+const fade: Transition = ({
+	duration,
+	delay,
+	easing
+}: { duration?: number; delay?: number; easing?: (t: number) => number } = {}) => ({
 	in(node) {
 		return {
 			duration,
