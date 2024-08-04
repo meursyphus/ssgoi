@@ -1,10 +1,9 @@
 <script lang="ts">
 	import Header from './header.svelte';
 	import Footer from './footer.svelte';
-	import { theme } from '$lib/theme';
 </script>
 
-<div class="app" class:dark={$theme === 'dark'}>
+<div class="app">
 	<Header />
 	<main>
 		<slot />
@@ -43,7 +42,7 @@
 	}
 
 	/* Dark mode styles */
-	.app.dark {
+	:global(html[color-scheme='dark']) .app {
 		background-color: var(--color-bg-dark);
 		color: var(--color-text-dark);
 	}
