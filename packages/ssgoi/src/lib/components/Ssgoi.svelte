@@ -30,7 +30,7 @@
 	});
 </script>
 
-<div class="page-transition-root">
+<div data-ssgoi class="page-transition-root">
 	<slot />
 </div>
 
