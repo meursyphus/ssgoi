@@ -80,6 +80,11 @@ const config = createTransitionConfig({
       from: '/demo/image/*',
       to: '*',
       transitions: transitions.fade()
+    },
+    {
+      from: '/demo/pinterest',
+      to: '/demo/pinterest/*',
+      transitions: transitions.pinterest()
     }
   ],
   defaultTransition: transitions.fade()

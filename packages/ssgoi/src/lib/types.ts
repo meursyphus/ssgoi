@@ -1,12 +1,19 @@
 import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
 
+type GetTranstionConfig = (node: HTMLElement) => (SvelteTransitionConfig | (() => SvelteTransitionConfig));
+
+export type Transition<T = object> = (params?: T) => {
+	in: GetTranstionConfig;
+	out: GetTranstionConfig;
+};
+
 export interface RouteInfo {
 	path: string;
 }
 
 export type TransitionEffect = {
-	in: (node: Element) => SvelteTransitionConfig;
-	out: (node: Element) => SvelteTransitionConfig;
+	in: GetTranstionConfig;
+	out: GetTranstionConfig;
 };
 
 export type TransitionFunction = (context: TransitionContext) => TransitionEffect;
