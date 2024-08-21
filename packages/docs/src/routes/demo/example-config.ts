@@ -85,7 +85,7 @@ const config = createTransitionConfig({
     {
       from: '/demo/pinterest',
       to: '/demo/pinterest/*',
-      transitions: pinterest({ duration: 10000 })
+      transitions: pinterest()
     }
   ],
   defaultTransition: transitions.fade()

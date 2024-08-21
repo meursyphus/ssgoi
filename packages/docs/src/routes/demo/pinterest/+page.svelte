@@ -18,9 +18,6 @@
 					style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
 					data-pinterest-key={item.color}
 				>
-					<div class="item-info">
-						<h2>{item.color}</h2>
-					</div>
 				</a>
 			{/each}
 		</Masonry>
@@ -42,20 +39,6 @@
 		text-align: center;
 		max-width: 600px;
 		margin: 0 auto 2rem;
-	}
-
-	/* .masonry-item:hover {
-		transform: scale(1.05);
-	} */
-	.item-info {
-		background: rgba(0, 0, 0, 0.5);
-		width: 100%;
-		padding: 0.5rem;
-		text-align: center;
-	}
-	h2 {
-		margin: 0;
-		font-size: 1.2rem;
 	}
 	p {
 		margin: 0.5rem 0 0;

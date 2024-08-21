@@ -1,5 +1,5 @@
 export const items = [
-  { color: 'tomato', aspectRatio: '2 / 3' },
+  { color: 'tomato', aspectRatio: '2 / 2' },
   { color: 'dodgerblue', aspectRatio: '3 / 5' },
   { color: 'limegreen', aspectRatio: '2 / 4' },
   { color: 'gold', aspectRatio: '3 / 4' },

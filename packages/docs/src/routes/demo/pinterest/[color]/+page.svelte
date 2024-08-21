@@ -57,6 +57,7 @@
 
 	.color-box {
 		width: 100%;
+		border-radius: 16px;
 	}
 
 	.content {

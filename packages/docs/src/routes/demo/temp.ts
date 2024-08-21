@@ -1,5 +1,12 @@
+import { linear, cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 const out = 'position: absolute; left: 0px; top: 0px; width: 100%;';
+function getRootRect() {
+  const root = document.querySelector('[data-ssgoi]')
+  if (root == null) throw new Error("No root element found on ssgoi")
+  return root.getBoundingClientRect()
+}
+
 
 type GetTranstionConfig = (node: HTMLElement) => (TransitionConfig | (() => TransitionConfig));
 
@@ -8,7 +15,6 @@ export type Transition<T = object> = (params?: T) => {
   out: GetTranstionConfig;
 };
 
-
 const pinterest: Transition<{
   duration?: number;
   delay?: number;
@@ -16,7 +22,7 @@ const pinterest: Transition<{
 }> = ({
   duration = 300,
   delay = 0,
-  easing = (t) => t
+  easing = cubicOut
 }: { duration?: number; delay?: number; easing?: (t: number) => number } = {}) => {
     let to_receive: HTMLElement | null = null;
     let to_send: HTMLElement | null = null;
@@ -38,6 +44,11 @@ const pinterest: Transition<{
 
             const from_rect = getPinterestRect(from_node, commonKey);
             const to_rect = getPinterestRect(to_node, commonKey);
+            const page = node.getBoundingClientRect();
+            const root = getRootRect()
+            const root_rect = new DOMRect(root.left, root.top, page.width, page.height);
+
+
 
             if (!from_rect || !to_rect) {
               clearCounterpart();
@@ -57,7 +68,7 @@ const pinterest: Transition<{
               delay,
               easing,
               css: (t: number, u: number) => `
-              ${intro ? calculateInTransition(from_rect, to_rect, t) : calculateOutTransition(from_rect, to_rect, u)}
+              ${intro ? calculateInTransition(from_rect, to_rect, root_rect, t) : calculateOutTransition(from_rect, to_rect, u)}
             `
             };
           }
@@ -98,7 +109,6 @@ function getPinterestRect(page: HTMLElement, key: string): DOMRect | null {
   }
 
   const rect = page.getBoundingClientRect();
-  console.log(rect, 'rect')
   if (rect == null) {
     return null
   }
@@ -118,16 +128,35 @@ function findCommonKey(fromPage: HTMLElement, toPage: HTMLElement): string | nul
   return null;
 }
 
-function calculateInTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
-  // 시작 크기를 이미지의 원래 크기로 설정
-  const startClip = Math.max(fromRect.width, fromRect.height) / 2;
-  const endClip = Math.max(window.innerWidth, window.innerHeight) * 1.5; // 화면보다 약간 크게 설정
+function calculateInTransition(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, t: number) {
+  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
+  const scale = Math.max(scaleX, scaleY);
+
+
+  // clip-path 계산
+  const startTop = (fromRect.top) / rootRect.height * 100;
+  const startRight = ((rootRect.width - (fromRect.left + fromRect.width)) / rootRect.width) * 100;
+  const startBottom = ((rootRect.height - (fromRect.top + fromRect.height)) / rootRect.height) * 100;
+  const startLeft = (fromRect.left) / rootRect.width * 100;
+
+  const u = 1 - t;
+  const currentTop = startTop * u;
+  const currentRight = startRight * u;
+  const currentBottom = startBottom * u;
+  const currentLeft = startLeft * u;
 
   return `
+    clip-path: inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%);
     transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
-    transform: scale(${1 + (fromRect.width / toRect.width - 1) * (1 - t)});
-    clip-path: circle(${startClip + (endClip - startClip) * t}px at center);
-    opacity: 0;
+    transform: 
+      translate(${dx * u}px, ${dy * u}px)
+      scale(${1 + (scale - 1) * u});
   `;
 }
 
@@ -139,9 +168,7 @@ function calculateOutTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-
+  const scale = Math.max(scaleX, scaleY)
 
   return `
     ${out}
@@ -149,5 +176,6 @@ function calculateOutTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
     transform: 
       translate(${dx * t}px, ${dy * t}px)
       scale(${1 + (scale - 1) * t});
+    opacity: ${1 - t};
   `;
 }
