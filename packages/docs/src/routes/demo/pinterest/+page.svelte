@@ -1,17 +1,6 @@
 <script lang="ts">
 	import { PageTransition, Pinterest } from 'ssgoi';
-
-	const items = [
-		{ color: 'red', height: 300 },
-		{ color: 'blue', height: 250 },
-		{ color: 'green', height: 350 },
-		{ color: 'yellow', height: 200 },
-		{ color: 'purple', height: 280 },
-		{ color: 'orange', height: 320 },
-		{ color: 'pink', height: 270 },
-		{ color: 'cyan', height: 230 },
-		{ color: 'magenta', height: 310 }
-	];
+	import { items } from './images';
 </script>
 
 <PageTransition>
@@ -26,11 +15,10 @@
 					<a
 						href="/demo/pinterest/{item.color}"
 						class="masonry-item"
-						style="background-color: {item.color}; height: {item.height}px;"
+						style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
 					>
 						<div class="item-info">
 							<h2>{item.color}</h2>
-							<p>{item.height}px</p>
 						</div>
 					</a>
 				</Pinterest>
@@ -61,12 +49,13 @@
 		display: flex;
 		flex-direction: column;
 		flex-wrap: wrap;
-		max-height: 1000px; /* Adjust this value based on your needs */
 		gap: 1rem;
+		width: 100%;
 	}
 
 	.masonry-item {
 		display: flex;
+		width: 400px;
 		align-items: flex-end;
 		justify-content: center;
 		border-radius: 8px;
