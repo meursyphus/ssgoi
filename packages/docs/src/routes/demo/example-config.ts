@@ -1,4 +1,5 @@
 import { createTransitionConfig, transitions } from 'ssgoi';
+import pinterest from './temp';
 
 const config = createTransitionConfig({
   transitions: [
@@ -84,7 +85,7 @@ const config = createTransitionConfig({
     {
       from: '/demo/pinterest',
       to: '/demo/pinterest/*',
-      transitions: transitions.pinterest({ duration: 10000 })
+      transitions: pinterest({ duration: 10000 })
     }
   ],
   defaultTransition: transitions.fade()

@@ -2,11 +2,13 @@
 	import { PageTransition, Pinterest } from 'ssgoi';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { items } from '../images';
 
 	const color = $page.params.color;
 	const height = 300; // This should be dynamically fetched based on the color
 	let textColor = 'white';
 	let copied = false;
+	const ratio = items.find((item) => item.color === color)!.aspectRatio;
 
 	onMount(() => {
 		// Simple function to determine if text should be black or white based on background color
@@ -27,7 +29,7 @@
 <PageTransition>
 	<div class="root">
 		<Pinterest key={color}>
-			<div class="color-box" style="background-color: {color};"></div>
+			<div class="color-box" style="background-color: {color}; aspect-ratio: {ratio};"></div>
 		</Pinterest>
 		<div class="content">
 			<div class="color-info">
@@ -55,7 +57,6 @@
 
 	.color-box {
 		width: 100%;
-		height: 50vh;
 	}
 
 	.content {

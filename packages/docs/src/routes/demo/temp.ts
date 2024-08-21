@@ -1,6 +1,12 @@
-import getRootRect from '$lib/utils/getRootRect.js';
-import out from './boilerplate/out.js';
-import type { Transition } from './type.js';
+import type { TransitionConfig } from 'svelte/transition';
+const out = 'position: absolute; left: 0px; top: 0px; width: 100%;';
+
+type GetTranstionConfig = (node: HTMLElement) => (TransitionConfig | (() => TransitionConfig));
+
+export type Transition<T = object> = (params?: T) => {
+  in: GetTranstionConfig;
+  out: GetTranstionConfig;
+};
 
 
 const pinterest: Transition<{
@@ -92,6 +98,7 @@ function getPinterestRect(page: HTMLElement, key: string): DOMRect | null {
   }
 
   const rect = page.getBoundingClientRect();
+  console.log(rect, 'rect')
   if (rect == null) {
     return null
   }
@@ -128,12 +135,12 @@ function calculateOutTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
   const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
-  console.log(fromRect, toRect)
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
   const scale = Math.max(scaleX, scaleY);
+
 
 
   return `

@@ -1,43 +1,42 @@
 <script lang="ts">
 	import { PageTransition, Pinterest } from 'ssgoi';
 	import { items } from './images';
+	import Masonry from '$lib/components/masonry.svelte';
 </script>
 
 <PageTransition>
 	<div class="masonry-gallery">
-		<h1>Color Masonry Gallery</h1>
+		<div class="h1">Color Masonry Gallery</div>
 		<p class="intro">
 			Explore our unique collection of colored boxes. Click on any box to see details!
 		</p>
-		<div class="masonry-container">
-			{#each items as item (item.color)}
-				<Pinterest key={item.color}>
-					<a
-						href="/demo/pinterest/{item.color}"
-						class="masonry-item"
-						style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
-					>
-						<div class="item-info">
-							<h2>{item.color}</h2>
-						</div>
-					</a>
-				</Pinterest>
+		<Masonry {items} gridGap="1rem" colWidth="calc(50% - 1rem)">
+			{#each items as item, index (item.color)}
+				<a
+					href="/demo/pinterest/{item.color}"
+					class="masonry-item"
+					style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
+					data-pinterest-key={item.color}
+				>
+					<div class="item-info">
+						<h2>{item.color}</h2>
+					</div>
+				</a>
 			{/each}
-		</div>
+		</Masonry>
 	</div>
 </PageTransition>
 
 <style>
 	.masonry-gallery {
-		padding: 2rem;
 	}
-
-	h1 {
+	.h1 {
 		color: #2c3e50;
 		text-align: center;
 		margin-bottom: 1rem;
+		font-size: 2rem;
+		font-weight: 700;
 	}
-
 	.intro {
 		color: #7f8c8d;
 		text-align: center;
@@ -45,17 +44,24 @@
 		margin: 0 auto 2rem;
 	}
 
-	.masonry-container {
-		display: flex;
-		flex-direction: column;
-		flex-wrap: wrap;
-		gap: 1rem;
+	/* .masonry-item:hover {
+		transform: scale(1.05);
+	} */
+	.item-info {
+		background: rgba(0, 0, 0, 0.5);
 		width: 100%;
+		padding: 0.5rem;
+		text-align: center;
 	}
-
+	h2 {
+		margin: 0;
+		font-size: 1.2rem;
+	}
+	p {
+		margin: 0.5rem 0 0;
+	}
 	.masonry-item {
 		display: flex;
-		width: 400px;
 		align-items: flex-end;
 		justify-content: center;
 		border-radius: 8px;
@@ -64,43 +70,5 @@
 		transition: transform 0.3s ease;
 		text-decoration: none;
 		color: white;
-	}
-
-	@media (max-width: 1200px) {
-		.masonry-item {
-			width: calc(33.333% - 1rem);
-		}
-	}
-
-	@media (max-width: 900px) {
-		.masonry-item {
-			width: calc(50% - 1rem);
-		}
-	}
-
-	@media (max-width: 600px) {
-		.masonry-item {
-			width: 100%;
-		}
-	}
-
-	.masonry-item:hover {
-		transform: scale(1.05);
-	}
-
-	.item-info {
-		background: rgba(0, 0, 0, 0.5);
-		width: 100%;
-		padding: 0.5rem;
-		text-align: center;
-	}
-
-	h2 {
-		margin: 0;
-		font-size: 1.2rem;
-	}
-
-	p {
-		margin: 0.5rem 0 0;
 	}
 </style>
