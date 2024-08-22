@@ -7,14 +7,21 @@
 <div class="root">
 	<header>
 		<a class="home" href="/demo">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-				<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z"/>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="24"
+				height="24"
+				fill="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z" />
 			</svg>
 		</a>
 		<nav>
 			<a href="/demo/blog">Blog</a>
 			<a href="/demo/post">Post</a>
 			<a href="/demo/image">Image</a>
+			<a href="/demo/pinterest">Pinterest</a>
 		</nav>
 	</header>
 	<main>

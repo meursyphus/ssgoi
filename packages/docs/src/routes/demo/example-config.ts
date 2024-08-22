@@ -3,6 +3,16 @@ import { createTransitionConfig, transitions } from 'ssgoi';
 const config = createTransitionConfig({
   transitions: [
     {
+      from: '/demo/pinterest/*',
+      to: '/demo/pinterest',
+      transitions: transitions.pinterest.exit()
+    },
+    {
+      from: '/demo/pinterest',
+      to: '/demo/pinterest/*',
+      transitions: transitions.pinterest.enter()
+    },
+    {
       from: '/demo/blog',
       to: '/demo/image',
       transitions: {
