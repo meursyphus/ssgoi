@@ -1,4 +1,4 @@
-import { linear, cubicOut } from 'svelte/easing';
+import { cubicOut, linear } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 const out = 'position: absolute; left: 0px; top: 0px; width: 100%;';
 function getRootRect() {
@@ -15,15 +15,19 @@ export type Transition<T = object> = (params?: T) => {
   out: GetTranstionConfig;
 };
 
-const pinterest: Transition<{
+export const pinterestToDetail = pinterest(detailIn, detailOut)
+export const pinterestToGallery = pinterest(galleryIn, galleryOut)
+
+function pinterest(inTransition: PinterestTranstion, outTranstion: PinterestTranstion): Transition<{
   duration?: number;
   delay?: number;
   easing?: (t: number) => number;
-}> = ({
-  duration = 300,
-  delay = 0,
-  easing = cubicOut
-}: { duration?: number; delay?: number; easing?: (t: number) => number } = {}) => {
+}> {
+  return ({
+    duration = 500,
+    delay = 0,
+    easing = cubicOut,
+  }: { duration?: number; delay?: number; easing?: (t: number) => number } = {}) => {
     let to_receive: HTMLElement | null = null;
     let to_send: HTMLElement | null = null;
 
@@ -48,8 +52,6 @@ const pinterest: Transition<{
             const root = getRootRect()
             const root_rect = new DOMRect(root.left, root.top, page.width, page.height);
 
-
-
             if (!from_rect || !to_rect) {
               clearCounterpart();
               return {
@@ -60,7 +62,6 @@ const pinterest: Transition<{
               };
             }
 
-
             clearCounterpart();
 
             return {
@@ -68,8 +69,8 @@ const pinterest: Transition<{
               delay,
               easing,
               css: (t: number, u: number) => `
-              ${intro ? calculateInTransition(from_rect, to_rect, root_rect, t) : calculateOutTransition(from_rect, to_rect, u)}
-            `
+                ${intro ? inTransition(from_rect, to_rect, root_rect, t) : outTranstion(from_rect, to_rect, root_rect, u)}
+              `
             };
           }
 
@@ -99,8 +100,9 @@ const pinterest: Transition<{
       )
     };
   };
+}
 
-export default pinterest;
+
 
 function getPinterestRect(page: HTMLElement, key: string): DOMRect | null {
   const element = page.querySelector(`[data-pinterest-key="${key}"]`);
@@ -128,7 +130,7 @@ function findCommonKey(fromPage: HTMLElement, toPage: HTMLElement): string | nul
   return null;
 }
 
-function calculateInTransition(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, t: number) {
+function detailIn(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
   const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
@@ -160,7 +162,7 @@ function calculateInTransition(toRect: DOMRect, fromRect: DOMRect, rootRect: DOM
   `;
 }
 
-function calculateOutTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
+function detailOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
   const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
@@ -179,3 +181,57 @@ function calculateOutTransition(fromRect: DOMRect, toRect: DOMRect, t: number) {
     opacity: ${1 - t};
   `;
 }
+
+function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) {
+  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
+  const scale = Math.max(scaleX, scaleY);
+
+
+  // clip-path 계산
+  const startTop = (fromRect.top) / rootRect.height * 100;
+  const startRight = ((rootRect.width - (fromRect.left + fromRect.width)) / rootRect.width) * 100;
+  const startBottom = ((rootRect.height - (fromRect.top + fromRect.height)) / rootRect.height) * 100;
+  const startLeft = (fromRect.left) / rootRect.width * 100;
+
+  const currentTop = startTop * t;
+  const currentRight = startRight * t;
+  const currentBottom = startBottom * t;
+  const currentLeft = startLeft * t;
+
+  return `
+    ${out}
+    opacity: 1;
+    clip-path: inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%);
+    transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
+    transform: 
+      translate(${dx * t}px, ${dy * t}px)
+      scale(${1 + (scale - 1) * t});
+  `;
+}
+
+function galleryIn(galleryRect: DOMRect, detailRect: DOMRect, _: DOMRect, u: number) {
+  const t = 1 - u
+  const dx = galleryRect.left - detailRect.left + (galleryRect.width - detailRect.width) / 2;
+  const dy = galleryRect.top - detailRect.top + (galleryRect.height - detailRect.height) / 2;
+
+  // scale 계산
+  const scaleX = galleryRect.width / detailRect.width;
+  const scaleY = galleryRect.height / detailRect.height;
+  const scale = Math.max(scaleX, scaleY)
+
+  return `
+    transform-origin: ${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px;
+    transform: 
+      translate(${dx * t}px, ${dy * t}px)
+      scale(${1 + (scale - 1) * t});
+    opacity: ${u};
+  `;
+}
+
+type PinterestTranstion = (fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) => string;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PageTransition, Pinterest } from 'ssgoi';
+	import { PageTransition } from 'ssgoi';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { items } from '../images';
@@ -28,9 +28,13 @@
 
 <PageTransition>
 	<div class="root">
-		<Pinterest key={color}>
-			<div class="color-box" style="background-color: {color}; aspect-ratio: {ratio};"></div>
-		</Pinterest>
+		<a class="link" href="/demo/pinterest">
+			<div
+				data-pinterest-key={color}
+				class="color-box"
+				style="background-color: {color}; aspect-ratio: {ratio};"
+			></div>
+		</a>
 		<div class="content">
 			<div class="color-info">
 				<h1>{color}</h1>

@@ -1,8 +1,19 @@
 import { createTransitionConfig, transitions } from 'ssgoi';
-import pinterest from './temp';
+import { pinterestToDetail, pinterestToGallery } from './temp';
+import { none } from '../../../../ssgoi/dist/transitions';
 
 const config = createTransitionConfig({
   transitions: [
+    {
+      from: '/demo/pinterest/*',
+      to: '/demo/pinterest',
+      transitions: pinterestToGallery()
+    },
+    {
+      from: '/demo/pinterest',
+      to: '/demo/pinterest/*',
+      transitions: pinterestToDetail()
+    },
     {
       from: '/demo/blog',
       to: '/demo/image',
@@ -81,11 +92,6 @@ const config = createTransitionConfig({
       from: '/demo/image/*',
       to: '*',
       transitions: transitions.fade()
-    },
-    {
-      from: '/demo/pinterest',
-      to: '/demo/pinterest/*',
-      transitions: pinterest()
     }
   ],
   defaultTransition: transitions.fade()

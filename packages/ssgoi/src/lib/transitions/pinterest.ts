@@ -3,7 +3,7 @@ import out from './boilerplate/out.js';
 import type { Transition } from './type.js';
 
 
-const pinterest: Transition<{
+export const pinterestToDetail: Transition<{
   duration?: number;
   delay?: number;
   easing?: (t: number) => number;
@@ -82,8 +82,6 @@ const pinterest: Transition<{
       )
     };
   };
-
-export default pinterest;
 
 function getPinterestRect(page: HTMLElement, key: string): DOMRect | null {
   const element = page.querySelector(`[data-pinterest-key="${key}"]`);

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { PageTransition, Pinterest } from 'ssgoi';
+	import { PageTransition } from 'ssgoi';
 	import { items } from './images';
-	import Masonry from '$lib/components/masonry.svelte';
+	import Masonry from 'svelte-bricks';
+	let [minColWidth, maxColWidth, gap] = [200, 800, 20];
 </script>
 
 <PageTransition>
@@ -10,16 +11,14 @@
 		<p class="intro">
 			Explore our unique collection of colored boxes. Click on any box to see details!
 		</p>
-		<Masonry {items} gridGap="1rem" colWidth="calc(50% - 1rem)">
-			{#each items as item, index (item.color)}
-				<a
-					href="/demo/pinterest/{item.color}"
-					class="masonry-item"
-					style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
-					data-pinterest-key={item.color}
-				>
-				</a>
-			{/each}
+		<Masonry getId={(item) => item.color} {items} {minColWidth} {maxColWidth} {gap} let:item>
+			<a
+				href="/demo/pinterest/{item.color}"
+				class="masonry-item"
+				style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
+				data-pinterest-key={item.color}
+			>
+			</a>
 		</Masonry>
 	</div>
 </PageTransition>
