@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "npm run dev --workspace=docs",
+    "start": "npm run build && npm run dev --workspace=docs",
     "build": "npm run package --workspace=ssgoi",
     "docs:build": "npm run build --workspace=docs"
   },
@@ -20,8 +20,13 @@
   "bugs": {
     "url": "https://github.com/meursyphus/ssgoi/issues"
   },
-  "keywords": ["svelte", "sveltekit", "page-transition", "animation"],
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "page-transition",
+    "animation"
+  ],
   "dependencies": {
-
+    "ssgoi": "^1.0.1"
   }
 }
