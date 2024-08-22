@@ -1,6 +1,7 @@
 import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
 
-type GetTranstionConfig = (node: HTMLElement) => (SvelteTransitionConfig | (() => SvelteTransitionConfig));
+export type TransitionConfig = (SvelteTransitionConfig | (() => SvelteTransitionConfig));
+type GetTranstionConfig = (node: HTMLElement, params: { getScrollTop: () => number }) => TransitionConfig
 
 export type Transition<T = object> = (params?: T) => {
 	in: GetTranstionConfig;
@@ -36,4 +37,4 @@ export interface TransitionConfigInput {
 	defaultTransition: TransitionEffect | TransitionFunction;
 }
 
-export type TransitionConfig = (from: RouteInfo, to: RouteInfo) => TransitionEffect;
+export type TransitionRouteConfig = (from: RouteInfo, to: RouteInfo) => TransitionEffect;

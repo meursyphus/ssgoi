@@ -1,5 +1,5 @@
 import { out } from './boilerplate/index.js';
-import type { Transition } from './type.js';
+import type { Transition } from '$lib/types.js'
 
 function getOffset(node: Element) {
 	const totalHeight = node.clientHeight;

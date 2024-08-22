@@ -89,10 +89,11 @@ function corssfadeForHero({
 	dy += params.scrollTop || 0;
 	ready = true;
 
-	/*
-		todo: visible 영역을 벗어나면 transition을 하지 않습니다.
-	*/
-	const isTooFar = false; // dx ** 2 + dy ** 2 > 90000;
+	/**
+	 * @todo: visible 영역을 벗어나면 transition을 하지 않습니다.
+	 * ex) dx ** 2 + dy ** 2 > 90000;
+	 */
+	const isTooFar = false;
 
 	const dw = from.width / to.width;
 	const dh = from.height / to.height;
@@ -117,9 +118,8 @@ function corssfadeForHero({
 					`${currentStyle}
               position: relative; 
               transform-origin: top left;
-              transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${
-								t + (1 - t) * dw
-							}, ${t + (1 - t) * dh});`
+              transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${t + (1 - t) * dw
+					}, ${t + (1 - t) * dh});`
 				);
 			}
 		}

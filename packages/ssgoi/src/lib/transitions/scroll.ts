@@ -1,5 +1,5 @@
 import { out } from './boilerplate/index.js';
-import type { Transition } from './type.js';
+import type { Transition } from '$lib/types.js'
 
 const DEFAULT_VELOCITY = 1.2;
 
@@ -35,9 +35,8 @@ const scroll = ({
 			delay,
 			easing,
 			css(_: number, t: number) {
-				return `${out} z-index: ${reverse ? -1 : 1}; transform: translateY(${
-					(reverse ? -1 : 1) * t * height
-				}px);`;
+				return `${out} z-index: ${reverse ? -1 : 1}; transform: translateY(${(reverse ? -1 : 1) * t * height
+					}px);`;
 			}
 		};
 	}

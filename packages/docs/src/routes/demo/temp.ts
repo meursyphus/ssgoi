@@ -1,5 +1,7 @@
 import { cubicOut, linear } from 'svelte/easing';
-import type { TransitionConfig } from 'svelte/transition';
+import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
+
+export type TransitionConfig = (SvelteTransitionConfig | (() => SvelteTransitionConfig));
 const out = 'position: absolute; left: 0px; top: 0px; width: 100%;';
 function getRootRect() {
   const root = document.querySelector('[data-ssgoi]')
@@ -8,9 +10,9 @@ function getRootRect() {
 }
 
 
-type GetTranstionConfig = (node: HTMLElement) => (TransitionConfig | (() => TransitionConfig));
+type GetTranstionConfig = (node: HTMLElement, params: { getScrollTop: () => number }) => TransitionConfig
 
-export type Transition<T = object> = (params?: T) => {
+type Transition<T = object> = (params?: T) => {
   in: GetTranstionConfig;
   out: GetTranstionConfig;
 };
@@ -32,7 +34,7 @@ function pinterest(inTransition: PinterestTranstion, outTranstion: PinterestTran
     let to_send: HTMLElement | null = null;
 
     function transition(setItem: (node: HTMLElement) => void, getCounterpart: () => HTMLElement | null, clearCounterpart: () => void, intro: boolean) {
-      return (node: HTMLElement) => {
+      return (node: HTMLElement, { getScrollTop }: { getScrollTop: () => number }) => {
         setItem(node);
         return () => {
           const other_node = getCounterpart();
@@ -51,6 +53,7 @@ function pinterest(inTransition: PinterestTranstion, outTranstion: PinterestTran
             const page = node.getBoundingClientRect();
             const root = getRootRect()
             const root_rect = new DOMRect(root.left, root.top, page.width, page.height);
+            const scrollTopDiff = (document.documentElement.scrollTop ?? 0) - (getScrollTop() ?? 0)
 
             if (!from_rect || !to_rect) {
               clearCounterpart();
@@ -69,7 +72,7 @@ function pinterest(inTransition: PinterestTranstion, outTranstion: PinterestTran
               delay,
               easing,
               css: (t: number, u: number) => `
-                ${intro ? inTransition(from_rect, to_rect, root_rect, t) : outTranstion(from_rect, to_rect, root_rect, u)}
+                ${intro ? inTransition(from_rect, to_rect, root_rect, scrollTopDiff, t) : outTranstion(from_rect, to_rect, root_rect, scrollTopDiff, u)}
               `
             };
           }
@@ -130,10 +133,10 @@ function findCommonKey(fromPage: HTMLElement, toPage: HTMLElement): string | nul
   return null;
 }
 
-function detailIn(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, t: number) {
+function detailIn(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, scrollTopDiff: number, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -157,15 +160,16 @@ function detailIn(toRect: DOMRect, fromRect: DOMRect, rootRect: DOMRect, t: numb
     clip-path: inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%);
     transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
     transform: 
-      translate(${dx * u}px, ${dy * u}px)
+      translate(${dx * u}px, ${(dy + scrollTopDiff) * u}px)
       scale(${1 + (scale - 1) * u});
   `;
 }
 
-function detailOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) {
+function detailOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, scrollTopDiff: number, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2
+
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -174,18 +178,18 @@ function detailOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: num
 
   return `
     ${out}
-    transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
+    transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2 + scrollTopDiff}px;
     transform: 
-      translate(${dx * t}px, ${dy * t}px)
+      translate(${dx * t}px, ${dy * t + scrollTopDiff}px)
       scale(${1 + (scale - 1) * t});
     opacity: ${1 - t};
   `;
 }
 
-function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) {
+function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, scrollTopDiff: number, t: number) {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2 - scrollTopDiff;
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -206,7 +210,6 @@ function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: nu
 
   return `
     ${out}
-    opacity: 0;
     clip-path: inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%);
     transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
     transform: 
@@ -215,10 +218,10 @@ function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: nu
   `;
 }
 
-function galleryIn(galleryRect: DOMRect, detailRect: DOMRect, _: DOMRect, u: number) {
+function galleryIn(galleryRect: DOMRect, detailRect: DOMRect, _: DOMRect, scrollTopDiff: number, u: number) {
   const t = 1 - u
   const dx = galleryRect.left - detailRect.left + (galleryRect.width - detailRect.width) / 2;
-  const dy = galleryRect.top - detailRect.top + (galleryRect.height - detailRect.height) / 2;
+  const dy = galleryRect.top - detailRect.top + (galleryRect.height - detailRect.height) / 2 - scrollTopDiff;
 
   // scale 계산
   const scaleX = galleryRect.width / detailRect.width;
@@ -230,8 +233,8 @@ function galleryIn(galleryRect: DOMRect, detailRect: DOMRect, _: DOMRect, u: num
     transform: 
       translate(${dx * t}px, ${dy * t}px)
       scale(${1 + (scale - 1) * t});
-    opacity: 1;
+    opacity: ${u};
   `;
 }
 
-type PinterestTranstion = (fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: number) => string;
+type PinterestTranstion = (fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, scrollTopDiff: number, t: number) => string;

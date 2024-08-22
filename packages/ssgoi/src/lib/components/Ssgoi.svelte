@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { onNavigate as _onNavigate } from '$app/navigation';
-	import type { TransitionConfig } from '$lib/types.js';
+	import type { TransitionRouteConfig } from '$lib/types.js';
 	import context from '../context/index.js';
 
 	export let onNavigate: typeof _onNavigate;
-	export let config: TransitionConfig;
+	export let config: TransitionRouteConfig;
 
 	/**
 	 * Context init!!
