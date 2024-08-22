@@ -28,13 +28,11 @@
 
 <PageTransition>
 	<div class="root">
-		<a class="link" href="/demo/pinterest">
-			<div
-				data-pinterest-key={color}
-				class="color-box"
-				style="background-color: {color}; aspect-ratio: {ratio};"
-			></div>
-		</a>
+		<div
+			data-pinterest-key={color}
+			class="color-box"
+			style="background-color: {color}; aspect-ratio: {ratio};"
+		></div>
 		<div class="content">
 			<div class="color-info">
 				<h1>{color}</h1>
