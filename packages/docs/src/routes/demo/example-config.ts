@@ -1,17 +1,16 @@
-import { createTransitionConfig, linear, transitions } from 'ssgoi';
-import { pinterestToDetail, pinterestToGallery } from './temp';
+import { createTransitionConfig, transitions } from 'ssgoi';
 
 const config = createTransitionConfig({
   transitions: [
     {
       from: '/demo/pinterest/*',
       to: '/demo/pinterest',
-      transitions: pinterestToGallery({ duration: 0 })
+      transitions: transitions.pinterest.exit()
     },
     {
       from: '/demo/pinterest',
       to: '/demo/pinterest/*',
-      transitions: pinterestToDetail()
+      transitions: transitions.pinterest.enter()
     },
     {
       from: '/demo/blog',
