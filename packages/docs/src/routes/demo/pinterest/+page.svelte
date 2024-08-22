@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { PageTransition } from 'ssgoi';
 	import { items } from './images';
-	import Masonry from 'svelte-bricks';
+	import Masonry from '$lib/components/masonry.svelte';
 	let [minColWidth, maxColWidth, gap] = [200, 800, 20];
 </script>
 
@@ -11,7 +11,15 @@
 		<p class="intro">
 			Explore our unique collection of colored boxes. Click on any box to see details!
 		</p>
-		<Masonry getId={(item) => item.color} {items} {minColWidth} {maxColWidth} {gap} let:item>
+		<Masonry
+			calcCols={() => 2}
+			getId={(item) => item.color}
+			{items}
+			{minColWidth}
+			{maxColWidth}
+			{gap}
+			let:item
+		>
 			<a
 				href="/demo/pinterest/{item.color}"
 				class="masonry-item"

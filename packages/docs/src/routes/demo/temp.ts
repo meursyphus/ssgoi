@@ -206,7 +206,7 @@ function galleryOut(fromRect: DOMRect, toRect: DOMRect, rootRect: DOMRect, t: nu
 
   return `
     ${out}
-    opacity: 1;
+    opacity: 0;
     clip-path: inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%);
     transform-origin: ${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px;
     transform: 
@@ -230,7 +230,7 @@ function galleryIn(galleryRect: DOMRect, detailRect: DOMRect, _: DOMRect, u: num
     transform: 
       translate(${dx * t}px, ${dy * t}px)
       scale(${1 + (scale - 1) * t});
-    opacity: ${u};
+    opacity: 1;
   `;
 }
 

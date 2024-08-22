@@ -1,4 +1,4 @@
-import { createTransitionConfig, transitions } from 'ssgoi';
+import { createTransitionConfig, linear, transitions } from 'ssgoi';
 import { pinterestToDetail, pinterestToGallery } from './temp';
 import { none } from '../../../../ssgoi/dist/transitions';
 
@@ -7,7 +7,7 @@ const config = createTransitionConfig({
     {
       from: '/demo/pinterest/*',
       to: '/demo/pinterest',
-      transitions: pinterestToGallery()
+      transitions: pinterestToGallery({})
     },
     {
       from: '/demo/pinterest',
