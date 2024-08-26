@@ -130,7 +130,7 @@ const config = createTransitionConfig({
     {
       from: '/products',
       to: '/product/*',
-      transition: transitions.none()
+      transitions: transitions.none()
     },
     // ... other transitions
   ],

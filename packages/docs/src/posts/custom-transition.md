@@ -160,12 +160,12 @@ const config = createTransitionConfig({
     {
       from: '/home',
       to: '/about',
-      transition: wobble(0.2, 500),
+      transitions: wobble(0.2, 500),
     },
     {
       from: '/blog',
       to: '/blog/*',
-      transition: asymmetricTransition(),
+      transitions: asymmetricTransition(),
     }
   ],
   defaultTransition: transitions.fade()

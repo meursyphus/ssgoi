@@ -65,7 +65,7 @@ Your pages change, but there's no smooth transition between them.
        {
          from: '*',
          to: '*',
-         transition: transitions.fade()
+         transitions: transitions.fade()
        }
      ],
      defaultTransition: transitions.fade()
@@ -125,12 +125,12 @@ Transitions are working, but not the ones you expected.
        {
          from: '/blog/*',
          to: '/blog/*',
-         transition: transitions.slide()
+         transitions: transitions.slide()
        },
        {
          from: '*',
          to: '*',
-         transition: transitions.fade()
+         transitions: transitions.fade()
        }
      ],
      defaultTransition: transitions.fade()
@@ -147,7 +147,7 @@ Transitions are working, but not the ones you expected.
    {
      from: '/home',
      to: '/about',
-     transition: transitions.slide(),
+     transitions: transitions.slide(),
        // This will slide both ways
    }
    ```
@@ -195,7 +195,7 @@ Regular transitions work, but hero transitions aren't smooth or don't work at al
    {
      from: '/products',
      to: '/product/*',
-     transition: transitions.none()
+     transitions: transitions.none()
    }
    ```
 
