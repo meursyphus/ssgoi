@@ -19,7 +19,7 @@ const config = createTransitionConfig({
     {
       from: string | string[],
       to: string | string[],
-      transition: TransitionFunction | TransitionObject,
+      transitions: TransitionFunction | TransitionObject,
       symmetric?: boolean
     },
     // ... more transition rules
@@ -31,7 +31,7 @@ const config = createTransitionConfig({
 Let's break this down:
 
 - `from` and `to`: Define the routes for which this transition applies.
-- `transition`: The transition effect to use.
+- `transitions`: The transition effect to use.
 - `symmetric`: If true, the same transition is used in both directions.
 - `defaultTransition`: Applied when no specific rule matches.
 
@@ -49,7 +49,7 @@ Example:
 {
   from: '/blog',
   to: '/blog/:id',
-  transition: transitions.slide()
+  transitions: transitions.slide()
 }
 ```
 
@@ -63,7 +63,7 @@ Want your transitions to adapt on the fly? Use a function!
 {
   from: '*',
   to: '*',
-  transition: (from, to) => {
+  transitions: (from, to) => {
     return to.path.includes('error') ? transitions.shake() : transitions.fade();
   }
 }
@@ -95,13 +95,13 @@ const config = createTransitionConfig({
     {
       from: '/',
       to: '/about',
-      transition: transitions.fade({ duration: 500 }),
+      transitions: transitions.fade({ duration: 500 }),
       
     },
     {
       from: '/blog',
       to: '/blog/:id',
-      transition: (from, to) => {
+      transitions: (from, to) => {
         return from.path === '/blog' 
           ? transitions.slideRight() 
           : transitions.slideLeft();
@@ -110,7 +110,7 @@ const config = createTransitionConfig({
     {
       from: '*',
       to: '/error',
-      transition: transitions.shake()
+      transitions: transitions.shake()
     }
   ],
   defaultTransition: transitions.fade()

@@ -142,7 +142,7 @@ const snappyConfig = createTransitionConfig({
     {
       from: '*',
       to: '*',
-      transition: transitions.fade({ duration: 150 }) // Quick and smooth
+      transitions: transitions.fade({ duration: 150 }) // Quick and smooth
     }
   ]
 });

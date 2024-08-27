@@ -120,23 +120,23 @@ const config = createTransitionConfig({
     {
       from: '/',
       to: '/about',
-      transition: transitions.fade({ duration: 300 }),
+      transitions: transitions.fade({ duration: 300 }),
       
     },
     {
       from: '/blog',
       to: '/blog/*',
-      transition: transitions.slide({ direction: 'left' })
+      transitions: transitions.slide({ direction: 'left' })
     },
     {
       from: '/gallery',
       to: '/gallery/*',
-      transition: transitions.scale({ start: 0.8, opacity: true })
+      transitions: transitions.scale({ start: 0.8, opacity: true })
     },
     {
       from: '*',
       to: '/404',
-      transition: transitions.blur({ amount: 10 })
+      transitions: transitions.blur({ amount: 10 })
     }
   ],
   defaultTransition: transitions.fade()
