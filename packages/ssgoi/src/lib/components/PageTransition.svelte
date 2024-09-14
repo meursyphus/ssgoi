@@ -3,6 +3,9 @@
 	import { none } from '$lib/transitions/index.js';
 	import type { TransitionConfig } from '$lib/types.js';
 
+	let className: string = '';
+	export { className as class };
+
 	const config = context.config.get();
 	const scrollHistoryContext = context.scrollHistory.get();
 	const pageTransitionContext = context.pageTransition.get();
@@ -41,6 +44,8 @@
 </script>
 
 <div
+	data-page-transition
+	class={className}
 	in:transitionIn|global={{ getFromScrollTop: getFromScrollTop, getToScrollTop: getToScrollTop }}
 	out:transitionOut|global={{ getFromScrollTop: getFromScrollTop, getToScrollTop: getToScrollTop }}
 >
