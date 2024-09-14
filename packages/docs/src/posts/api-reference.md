@@ -1,198 +1,153 @@
 ---
-title: "SSGOI Performance Optimization"
-description: "Best practices for optimizing SSGOI transitions for smooth and efficient performance"
-order: 5
+title: "SSGOI API Reference"
+description: "Detailed API documentation for the SSGOI library"
+order: 4
 group: "Advanced"
 ---
 
-# SSGOI Performance Optimization: Smooth as Butter, Light as a Feather 🧈🪶
+# SSGOI API Reference
 
-Want your transitions to be smoother than a freshly waxed slide? Let's optimize SSGOI for peak performance!
+This document provides a comprehensive reference for the SSGOI (Svelte Smooth Go Transition Library) API.
 
-## The Performance Pillars 🏛️
+## Table of Contents
 
-1. Efficient animations
-2. Minimal DOM manipulation
-3. Smart asset management
-4. Proper configuration
+1. [Ssgoi Component](#ssgoi-component)
+2. [PageTransition Component](#pagetransition-component)
+3. [createTransitionConfig Function](#createtransitionconfig-function)
+4. [Built-in Transitions](#built-in-transitions)
 
-Let's dive into each of these!
+## Ssgoi Component
 
-## 1. Efficient Animations: The Need for Speed 🏎️
+The `Ssgoi` component is the main wrapper for your entire Svelte application.
 
-### Use GPU-accelerated properties
+### Props
 
-Stick to these properties for the smoothest animations:
+| Prop | Type | Description |
+|------|------|-------------|
+| onNavigate | Function | SvelteKit's navigation function |
+| config | TransitionConfig | Your transition configuration |
+| class | string | (Optional) Custom class for styling |
 
-- `transform`
-- `opacity`
+### Usage
 
-```typescript
-const smoothTransition = () => ({
-  in: (node, params) => ({
-    duration: 300,
-    css: (t) => `
-      transform: translateX(${100 - t * 100}%);
-      opacity: ${t};
-    `
-  })
-});
+```svelte
+<script lang="ts">
+  import { onNavigate } from '$app/navigation';
+  import { Ssgoi } from 'ssgoi';
+  import config from './transitionConfig';
+
+  let className = 'your-custom-class';
+</script>
+
+<Ssgoi {onNavigate} {config} class={className}>
+  <slot />
+</Ssgoi>
 ```
 
-Avoid properties that trigger layout recalculation like `width`, `height`, `top`, or `left`.
+## PageTransition Component
 
-### Keep it Simple
+The `PageTransition` component wraps the content of each individual page.
 
-Complex animations can be cool, but they can also be costly. Aim for simplicity:
+### Props
 
-```typescript
-// Good 👍
-const simpleTransition = transitions.fade({ duration: 300 });
+| Prop | Type | Description |
+|------|------|-------------|
+| class | string | (Optional) Custom class for styling |
 
-// Potentially Costly 👎
-const complexTransition = transitions.combine(
-  transitions.rotate({ duration: 500 }),
-  transitions.scale({ duration: 500 }),
-  transitions.blur({ duration: 500 })
-);
+### Usage
+
+```svelte
+<script lang="ts">
+  import { PageTransition } from 'ssgoi';
+
+  let className = 'your-custom-page-class';
+</script>
+
+<PageTransition class={className}>
+  <!-- Your page content here -->
+</PageTransition>
 ```
 
-## 2. Minimal DOM Manipulation: Less is More 🧘‍♀️
+### Additional Features
 
-### Use `will-change`
+The `PageTransition` component adds a `data-page-transition` attribute to its wrapper div, which can be used for CSS targeting:
 
-Tell the browser what's going to change:
-
-```typescript
-const optimizedTransition = () => ({
-  in: (node, params) => {
-    node.style.willChange = 'transform, opacity';
-    return {
-      duration: 300,
-      css: (t) => `
-        transform: translateX(${100 - t * 100}%);
-        opacity: ${t};
-      `,
-      tick: (t, u) => {
-        if (t === 1) node.style.willChange = 'auto';
-      }
-    };
-  }
-});
+```css
+[data-page-transition] {
+  /* Your styles here */
+}
 ```
 
-Remember to reset `will-change` after the transition to avoid unnecessary memory usage.
+## createTransitionConfig Function
 
-### Avoid Forced Synchronous Layouts
+This function creates a configuration object for your transitions.
 
-Don't read layout properties and then immediately change them:
+### Parameters
 
-```typescript
-// Bad 👎
-const badTransition = (node, params) => {
-  const height = node.offsetHeight; // Forces layout
-  node.style.height = `${height * 2}px`; // Triggers another layout
-};
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| config | TransitionConfigInput | An object containing your transition rules |
 
-// Good 👍
-const goodTransition = (node, params) => {
-  requestAnimationFrame(() => {
-    const height = node.offsetHeight;
-    node.style.height = `${height * 2}px`;
-  });
-};
-```
+### Returns
 
-## 3. Smart Asset Management: Lightening the Load 🏋️‍♂️
+| Type | Description |
+|------|-------------|
+| TransitionConfig | A configuration object for use with the Ssgoi component |
 
-### Preload Critical Resources
-
-Use the `preloadCode` function to load the next page's JavaScript:
+### Usage
 
 ```typescript
-import { preloadCode } from 'ssgoi';
+import { createTransitionConfig, transitions } from 'ssgoi';
 
-// In your component
-onMount(() => {
-  preloadCode('/next-page');
-});
-```
-
-### Optimize Images
-
-For hero transitions involving images, ensure they're optimized:
-
-1. Use appropriate sizes
-2. Choose the right format (WebP for broad support)
-3. Implement lazy loading for images below the fold
-
-```html
-<img src="optimized-image.webp" loading="lazy" alt="Description" />
-```
-
-## 4. Proper Configuration: The Right Tool for the Job 🔧
-
-### Use Appropriate Transition Duration
-
-Shorter durations often feel snappier:
-
-```typescript
-const snappyConfig = createTransitionConfig({
+const config = createTransitionConfig({
   transitions: [
     {
-      from: '*',
-      to: '*',
-      transitions: transitions.fade({ duration: 150 }) // Quick and smooth
-    }
-  ]
+      from: '/home',
+      to: '/about',
+      transitions: transitions.fade()
+    },
+    // More transition rules...
+  ],
+  defaultTransition: transitions.fade()
 });
 ```
 
-### Implement Progressive Enhancement
+## Built-in Transitions
 
-Provide a fallback for browsers that don't support certain features:
+SSGOI provides several built-in transition effects.
+
+### fade
 
 ```typescript
-const progressiveTransition = () => {
-  if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    return transitions.none(); // No transition for users who prefer reduced motion
-  }
-  return transitions.fade();
-};
+transitions.fade(options?: { duration?: number })
 ```
 
-## Performance Monitoring: Keeping Score 📊
+### slide
 
-### Use Browser DevTools
-
-1. Open your browser's DevTools
-2. Go to the Performance tab
-3. Record while performing transitions
-4. Analyze for long tasks, layout thrashing, or excessive style recalculations
-
-### Implement Real User Monitoring (RUM)
-
-Consider using tools like Google Analytics or custom timing APIs to measure real-world performance:
-
-```javascript
-// Measure transition duration
-const start = performance.now();
-// ... perform transition ...
-const duration = performance.now() - start;
-console.log(`Transition took ${duration}ms`);
+```typescript
+transitions.slide(options?: { duration?: number, direction?: 'left' | 'right' | 'up' | 'down' })
 ```
 
-## The Optimization Checklist ✅
+### scale
 
-Before shipping, ensure you've considered:
+```typescript
+transitions.scale(options?: { duration?: number, start?: number, opacity?: boolean })
+```
 
-- [ ] Using GPU-accelerated properties
-- [ ] Keeping animations simple and purposeful
-- [ ] Minimizing DOM manipulation
-- [ ] Preloading critical resources
-- [ ] Optimizing assets (especially images)
-- [ ] Configuring appropriate transition durations
-- [ ] Implementing progressive enhancement
-- [ ] Monitoring performance in real-world scenarios
+### flip
 
-Remember, performance optimization is an ongoing process. Keep testing, keep measuring, and keep refining. Your users will thank you with smooth, joyful interactions! 🚀✨
+```typescript
+transitions.flip(options?: { duration?: number, direction?: 'x' | 'y' })
+```
+
+### blur
+
+```typescript
+transitions.blur(options?: { duration?: number, amount?: number })
+```
+
+Each transition function returns a `TransitionFunction` that can be used in your transition configuration.
+
+---
+
+For more detailed usage examples and advanced features, please refer to our other documentation pages.
