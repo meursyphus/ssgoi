@@ -3,12 +3,12 @@
 	import type { TransitionRouteConfig } from '$lib/types.js';
 	import context from '../context/index.js';
 
+	let className: string = '';
+	export { className as class };
+
 	export let onNavigate: typeof _onNavigate;
 	export let config: TransitionRouteConfig;
 
-	/**
-	 * Context init!!
-	 */
 	context.config.init(config);
 	const pageTransitionContext = context.pageTransition.init();
 	const scrollHistoryContext = context.scrollHistory.init();
@@ -30,7 +30,7 @@
 	});
 </script>
 
-<div data-ssgoi class="page-transition-root">
+<div data-ssgoi class="page-transition-root {className}">
 	<slot />
 </div>
 
