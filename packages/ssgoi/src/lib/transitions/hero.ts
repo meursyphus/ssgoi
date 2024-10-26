@@ -91,7 +91,7 @@ function hero(): Transition<{
           const toRect = toEl.getBoundingClientRect();
           const scrollTopDiff = getToScrollTop() - getFromScrollTop();
 
-          console.log(fromEl, toEl, fromRect, toRect, commonKey);
+          console.log(from_node.getBoundingClientRect(), fromEl, toEl, fromRect, toRect, commonKey);
 
           clearCounterpart();
 
