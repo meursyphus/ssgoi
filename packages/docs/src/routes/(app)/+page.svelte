@@ -23,11 +23,11 @@
 		<h2>See It in Action</h2>
 		<div class="gif-container">
 			<div class="gif-wrapper">
-				<img src="/page-transition.gif" alt="Page Transition Example" class="example-gif" />
+				<img src="/page.gif" alt="Page Transition Example" class="example-gif" />
 				<p>Smooth Page Transitions</p>
 			</div>
 			<div class="gif-wrapper">
-				<img src="/hero-transition.gif" alt="Hero Transition Example" class="example-gif" />
+				<img src="/pinterest.gif" alt="Hero Transition Example" class="example-gif" />
 				<p>Seamless Hero Transitions</p>
 			</div>
 		</div>
