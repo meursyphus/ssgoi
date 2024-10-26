@@ -18,16 +18,18 @@
 			{minColWidth}
 			{maxColWidth}
 			{gap}
-			let:item
+			
 		>
-			<a
-				href="/demo/pinterest/{item.color}"
-				class="masonry-item"
-				style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
-				data-pinterest-key={item.color}
-			>
-			</a>
-		</Masonry>
+			{#snippet children({ item })}
+						<a
+					href="/demo/pinterest/{item.color}"
+					class="masonry-item"
+					style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
+					data-pinterest-key={item.color}
+				>
+				</a>
+								{/snippet}
+				</Masonry>
 	</div>
 </PageTransition>
 

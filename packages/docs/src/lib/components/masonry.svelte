@@ -1,45 +1,71 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 
-	export let animate: boolean = true;
-	export let calcCols = (masonryWidth: number, minColWidth: number, gap: number): number => {
-		return Math.min(items.length, Math.floor((masonryWidth + gap) / (minColWidth + gap)) || 1);
-	};
-	export { className as class };
-	export let columnClass: string = ``;
-	export let duration: number = 200;
-	export let gap: number = 20;
+	
 	// On non-primitive types, we need a property to tell masonry items apart. This component
-	// hard-codes the name of this property to 'id'. See https://svelte.dev/tutorial/keyed-each-blocks.
-	export let getId = (item: Item): string | number => {
+	
+
+
+	type Item = $$Generic;
+	interface Props {
+		animate?: boolean;
+		calcCols?: any;
+		columnClass?: string;
+		duration?: number;
+		gap?: number;
+		// hard-codes the name of this property to 'id'. See https://svelte.dev/tutorial/keyed-each-blocks.
+		getId?: any;
+		idKey?: string;
+		items: Item[];
+		masonryHeight?: number;
+		masonryWidth?: number;
+		maxColWidth?: number;
+		minColWidth?: number;
+		style?: string;
+		class?: any;
+		children?: import('svelte').Snippet<[any]>;
+	}
+
+	let {
+		animate = true,
+		calcCols = (masonryWidth: number, minColWidth: number, gap: number): number => {
+		return Math.min(items.length, Math.floor((masonryWidth + gap) / (minColWidth + gap)) || 1);
+	},
+		columnClass = ``,
+		duration = 200,
+		gap = 20,
+		getId = (item: Item): string | number => {
 		if (typeof item === `number`) return item;
 		if (typeof item === `string`) return item;
 		return (item as Record<string, string | number>)[idKey];
-	};
-	export let idKey: string = `id`;
-	export let items: Item[];
-	export let masonryHeight: number = 0;
-	export let masonryWidth: number = 0;
-	export let maxColWidth: number = 500;
-	export let minColWidth: number = 330;
-	export let style: string = ``;
+	},
+		idKey = `id`,
+		items,
+		masonryHeight = $bindable(0),
+		masonryWidth = $bindable(0),
+		maxColWidth = 500,
+		minColWidth = 330,
+		style = ``,
+		class: className = ``,
+		children
+	}: Props = $props();
 
-	$: if (maxColWidth < minColWidth) {
-		console.warn(`svelte-bricks: maxColWidth (${maxColWidth}) < minColWidth (${minColWidth}).`);
-	}
-
-	type Item = $$Generic;
-	let className = ``;
-
-	$: nCols = calcCols(masonryWidth, minColWidth, gap);
-	$: itemsToCols = items.reduce(
+	run(() => {
+		if (maxColWidth < minColWidth) {
+			console.warn(`svelte-bricks: maxColWidth (${maxColWidth}) < minColWidth (${minColWidth}).`);
+		}
+	});
+	let nCols = $derived(calcCols(masonryWidth, minColWidth, gap));
+	let itemsToCols = $derived(items.reduce(
 		(cols: [Item, number][][], item, idx) => {
 			cols[idx % cols.length].push([item, idx]);
 			return cols;
 		},
 		Array(nCols).fill(null).map(() => []) // prettier-ignore
-	);
+	));
 </script>
 
 <div
@@ -57,16 +83,16 @@
 						out:fade={{ delay: 0, duration }}
 						animate:flip={{ duration }}
 					>
-						<slot {idx} {item}>
+						{#if children}{@render children({ idx, item, })}{:else}
 							<span>{item}</span>
-						</slot>
+						{/if}
 					</div>
 				{/each}
 			{:else}
 				{#each col as [item, idx] (getId(item))}
-					<slot {idx} {item}>
+					{#if children}{@render children({ idx, item, })}{:else}
 						<span>{item}</span>
-					</slot>
+					{/if}
 				{/each}
 			{/if}
 		</div>

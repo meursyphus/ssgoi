@@ -4,8 +4,8 @@
 	import { onMount } from 'svelte';
 
 	const color = '#' + $page.params.color;
-	let textColor = 'white';
-	let copied = false;
+	let textColor = $state('white');
+	let copied = $state(false);
 
 	onMount(() => {
 		// Simple function to determine if text should be black or white based on background color
@@ -28,7 +28,7 @@
 		<div class="root" style="background-color: {color}; color: {textColor};">
 			<div class="color-info">
 				<h1>{color}</h1>
-				<button on:click={copyToClipboard} style="color: {textColor}; border-color: {textColor};">
+				<button onclick={copyToClipboard} style="color: {textColor}; border-color: {textColor};">
 					{copied ? 'Copied!' : 'Copy HEX'}
 				</button>
 			</div>

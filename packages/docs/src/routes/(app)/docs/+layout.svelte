@@ -1,12 +1,36 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { page } from '$app/stores';
 	import { normalizePath } from '$lib/utils';
 	import type { PageData } from './$types';
 	import { fly } from 'svelte/transition';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+		children?: import('svelte').Snippet;
+	}
 
-	$: navigation = data.posts.reduce(
+	let { data, children }: Props = $props();
+
+
+
+	function getGroupOrder(group: string) {
+		const groupOrder = {
+			'Getting Started': 1,
+			Advanced: 2,
+			Reference: 3,
+			Community: 4
+		};
+		return groupOrder[group as keyof typeof groupOrder] || 99;
+	}
+
+	let isSidebarOpen = $state(false);
+
+	function toggleSidebar() {
+		isSidebarOpen = !isSidebarOpen;
+	}
+	let navigation = $derived(data.posts.reduce(
 		(acc, post) => {
 			const group = acc.find((g) => g.name === post.group);
 			if (!group) {
@@ -31,34 +55,17 @@
 			return acc;
 		},
 		[] as { name: string; order: number; items: { url: string; title: string; order: number }[] }[]
-	);
-
-	$: {
+	));
+	run(() => {
 		navigation.sort((a, b) => a.order - b.order);
 		navigation.forEach((group) => {
 			group.items.sort((a, b) => a.order - b.order);
 		});
-	}
-
-	function getGroupOrder(group: string) {
-		const groupOrder = {
-			'Getting Started': 1,
-			Advanced: 2,
-			Reference: 3,
-			Community: 4
-		};
-		return groupOrder[group as keyof typeof groupOrder] || 99;
-	}
-
-	let isSidebarOpen = false;
-
-	function toggleSidebar() {
-		isSidebarOpen = !isSidebarOpen;
-	}
+	});
 </script>
 
 <div class="docs-layout">
-	<button class="sidebar-toggle" on:click={toggleSidebar} aria-label="Toggle sidebar">
+	<button class="sidebar-toggle" onclick={toggleSidebar} aria-label="Toggle sidebar">
 		{isSidebarOpen ? '✕' : '☰'}
 	</button>
 	<nav class:open={isSidebarOpen}>
@@ -81,7 +88,7 @@
 		{/each}
 	</nav>
 	<main in:fly={{ y: 20, duration: 300 }}>
-		<slot />
+		{@render children?.()}
 	</main>
 </div>
 

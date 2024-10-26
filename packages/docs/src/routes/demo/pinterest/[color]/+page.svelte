@@ -7,7 +7,7 @@
 	const color = $page.params.color;
 	const height = 300; // This should be dynamically fetched based on the color
 	let textColor = 'white';
-	let copied = false;
+	let copied = $state(false);
 	const ratio = items.find((item) => item.color === color)!.aspectRatio;
 
 	onMount(() => {
@@ -37,7 +37,7 @@
 			<div class="color-info">
 				<h1>{color}</h1>
 				<p>Height: {height}px</p>
-				<button on:click={copyToClipboard}>
+				<button onclick={copyToClipboard}>
 					{copied ? 'Copied!' : 'Copy Color'}
 				</button>
 			</div>
