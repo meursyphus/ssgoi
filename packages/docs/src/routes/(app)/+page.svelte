@@ -1,29 +1,8 @@
 <script lang="ts">
-	let intersecting = $state(false);
-
-	// Intersection Observer for animation
-	const observeIntersection = (node: HTMLElement) => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					intersecting = entry.isIntersecting;
-				});
-			},
-			{ threshold: 0.1 }
-		);
-
-		observer.observe(node);
-		return {
-			destroy() {
-				observer.disconnect();
-			}
-		};
-	};
 </script>
 
 <main class="landing">
-	<!-- Main Demo Section -->
-	<section class="demo-section" use:observeIntersection>
+	<section class="demo-section">
 		<div class="content-wrap">
 			<h1>Native App Experience for Your Svelte App</h1>
 			<p class="tagline">
@@ -39,17 +18,15 @@
 		</div>
 	</section>
 
-	<!-- Benefits Section -->
-	<section class="benefits" class:visible={intersecting}>
+	<section class="benefits visible">
 		<div class="benefit-card">
-			<div class="icon">🚀</div>
+			<div class="icon"></div>
 			<h3>Native-like Navigation</h3>
 			<p>
 				Smooth back/forward navigation that feels just like a native app. Perfect for mobile-first
 				experiences.
 			</p>
 		</div>
-
 		<div class="benefit-card">
 			<div class="icon">✨</div>
 			<h3>Pinterest-style Transitions</h3>
@@ -58,66 +35,12 @@
 				product showcases.
 			</p>
 		</div>
-
 		<div class="benefit-card">
-			<div class="icon">💡</div>
+			<div class="icon"></div>
 			<h3>Easy Implementation</h3>
 			<p>
 				Simple component wrapping without complex configurations. Get started in minutes, not hours.
 			</p>
-		</div>
-	</section>
-
-	<!-- View Transition API Comparison -->
-	<section class="why-ssgoi">
-		<h2>View Transitions API? Nah.</h2>
-		<div class="comparison">
-			<div class="pain-points">
-				<h3>Browser APIs are not enough</h3>
-				<ul class="problems">
-					<li>
-						<span class="emoji">🌍</span>
-						<strong>Limited browser support</strong>
-						<p>Chrome-only? Really? Your users deserve better</p>
-					</li>
-					<li>
-						<span class="emoji">🤖</span>
-						<strong>Incomplete implementation</strong>
-						<p>Buggy behaviors and edge cases everywhere</p>
-					</li>
-					<li>
-						<span class="emoji">😵</span>
-						<strong>Complex state handling</strong>
-						<p>Manual state management between pages is painful</p>
-					</li>
-				</ul>
-			</div>
-
-			<div class="solution">
-				<h3>SSGOI does it right</h3>
-				<ul class="benefits">
-					<li>
-						<span class="emoji">🌈</span>
-						<strong>Works everywhere</strong>
-						<p>All modern browsers supported out of the box</p>
-					</li>
-					<li>
-						<span class="emoji">🚀</span>
-						<strong>SSR Ready</strong>
-						<p>Seamless server-side rendering support</p>
-					</li>
-					<li>
-						<span class="emoji">🧩</span>
-						<strong>Web Native</strong>
-						<p>Built for the web, respecting web standards</p>
-					</li>
-					<li>
-						<span class="emoji">⚡️</span>
-						<strong>Always Smooth</strong>
-						<p>Consistent animations across all platforms</p>
-					</li>
-				</ul>
-			</div>
 		</div>
 	</section>
 </main>
@@ -130,7 +53,6 @@
 		padding: 2rem;
 	}
 
-	/* Demo Section */
 	.demo-section {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -145,6 +67,7 @@
 		font-weight: 800;
 		background: linear-gradient(45deg, #ff4d4d, #ff8c8c);
 		-webkit-background-clip: text;
+		background-clip: text;
 		color: transparent;
 		margin-bottom: 1.5rem;
 	}
@@ -195,7 +118,6 @@
 		object-fit: cover;
 	}
 
-	/* Benefits Section */
 	.benefits {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -226,61 +148,12 @@
 	.icon {
 		font-size: 2rem;
 		margin-bottom: 1rem;
+		display: block;
 	}
 
-	/* View Transition API Comparison Section */
-	.why-ssgoi {
-		padding: 4rem 0;
-	}
-
-	.why-ssgoi h2 {
-		font-size: clamp(2rem, 4vw, 3rem);
-		margin-bottom: 3rem;
-		text-align: center;
-	}
-
-	.comparison {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 4rem;
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	.pain-points,
-	.solution {
-		padding: 2rem;
-		border-radius: 16px;
-	}
-
-	.pain-points {
-		background: #fff1f1;
-		border: 2px solid #ffd1d1;
-	}
-
-	.solution {
-		background: #f1fff1;
-		border: 2px solid #d1ffd1;
-	}
-
-	.problems,
-	.benefits {
-		display: grid;
-		gap: 1.5rem;
-	}
-
-	li {
-		display: grid;
-		gap: 0.5rem;
-	}
-
-	.emoji {
-		font-size: 1.5rem;
-	}
-
-	strong {
+	h3 {
+		margin-bottom: 0.5rem;
 		font-weight: 600;
-		font-size: 1.1rem;
 	}
 
 	p {
@@ -288,20 +161,51 @@
 		line-height: 1.5;
 	}
 
-	/* Responsive Design */
 	@media (max-width: 768px) {
 		.demo-section {
 			grid-template-columns: 1fr;
 			gap: 2rem;
 		}
-
-		.comparison {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
-
 		.cta-group {
 			flex-direction: column;
 		}
+	}
+
+	/* 다크 모드 스타일 */
+	:global(html[color-scheme="dark"]) .landing {
+		background-color: #121212;
+	}
+
+	:global(html[color-scheme="dark"]) h1 {
+		background: linear-gradient(45deg, #ff6b6b, #ffa0a0);
+		-webkit-background-clip: text;
+		background-clip: text;
+	}
+
+	:global(html[color-scheme="dark"]) h3 {
+		color: #e0e0e0;
+	}
+
+	:global(html[color-scheme="dark"]) .tagline,
+	:global(html[color-scheme="dark"]) p {
+		color: #a0a0a0;
+	}
+
+	:global(html[color-scheme="dark"]) .benefit-card {
+		background: #1e1e1e;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	}
+
+	:global(html[color-scheme="dark"]) .demo-container {
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	:global(html[color-scheme="dark"]) .secondary {
+		border-color: #ff6b6b;
+		color: #ff6b6b;
+	}
+
+	:global(html[color-scheme="dark"]) .icon {
+		color: #e0e0e0;
 	}
 </style>
