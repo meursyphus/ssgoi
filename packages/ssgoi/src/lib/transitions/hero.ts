@@ -91,6 +91,8 @@ function hero(): Transition<{
           const toRect = toEl.getBoundingClientRect();
           const scrollTopDiff = getToScrollTop() - getFromScrollTop();
 
+          console.log(fromEl, toEl, fromRect, toRect, commonKey);
+
           clearCounterpart();
 
           if (!intro) {
@@ -117,16 +119,13 @@ function hero(): Transition<{
             tick: (t: number, u: number) => {
               if (!toEl) return;
 
-              // crossfade 스타일로 position/scale 계산
-
-
               toEl.setAttribute(
                 'style',
                 `${currentStyle}
                 position: relative;
                 transform-origin: top left;
                 transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${t + (1 - t) * dw}, ${t + (1 - t) * dh});
-                transition: none;`
+                `
               );
             }
           };

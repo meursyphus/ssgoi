@@ -17,7 +17,7 @@
 		<p class="intro">Explore our curated collection of colors. Click on any color to learn more!</p>
 		<div class="container">
 			{#each colors as color (color.hex)}
-				<div data-hero-key={'#' + color.hex}>
+				<div data-from data-hero-key={'#' + color.hex}>
 					<a href="/demo/image/{color.hex}" class="color-card">
 						<div style="background: #{color.hex};" class="color-box"></div>
 						<div class="color-info">

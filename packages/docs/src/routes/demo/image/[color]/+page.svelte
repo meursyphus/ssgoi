@@ -24,7 +24,7 @@
 </script>
 
 <PageTransition>
-	<div data-hero-key={color} class="root" style="background-color: {color}; color: {textColor};">
+	<div data-to data-hero-key={color} class="root" style="background-color: {color}; color: {textColor};">
 		<div class="color-info">
 			<h1>{color}</h1>
 			<button onclick={copyToClipboard} style="color: {textColor}; border-color: {textColor};">
