@@ -2,7 +2,7 @@ import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig as SvelteTransitionConfig } from 'svelte/transition';
 
 export type TransitionConfig = (SvelteTransitionConfig | (() => SvelteTransitionConfig));
-const out = 'position: absolute; left: 0px; top: 0px; width: 100%;';
+const out = 'position: absolute; left: 0px; top: 0px; width: 100%; opacity: 0;';
 
 type GetTransitionConfig = (node: HTMLElement, params: { getFromScrollTop: () => number; getToScrollTop: () => number }) => TransitionConfig;
 
@@ -87,27 +87,23 @@ function hero(): Transition<{
             };
           }
 
-          const fromRect = fromEl.getBoundingClientRect();
-          const toRect = toEl.getBoundingClientRect();
+          const fromRect = getRect(from_node, fromEl);
+          const toRect = getRect(to_node, toEl);
           const scrollTopDiff = getToScrollTop() - getFromScrollTop();
 
-          console.log(from_node.getBoundingClientRect(), fromEl, toEl, fromRect, toRect, commonKey);
 
           clearCounterpart();
 
           if (!intro) {
             return {
-              duration: 0,
+              duration,
               css: () => out
             };
           }
 
-          const style = getComputedStyle(toEl);
-          const transform = style.transform === 'none' ? '' : style.transform;
           const currentStyle = toEl.getAttribute('style') || '';
-          const dx = toRect.left - toRect.left;
-          let dy = fromRect.top - toRect.top;
-          dy += scrollTopDiff;
+          const dx = fromRect.left - toRect.left;
+          const dy = fromRect.top - toRect.top + scrollTopDiff;
 
           const dw = fromRect.width / toRect.width;
           const dh = fromRect.height / toRect.height;
@@ -116,7 +112,7 @@ function hero(): Transition<{
             duration,
             delay,
             easing,
-            tick: (t: number, u: number) => {
+            tick: (t: number) => {
               if (!toEl) return;
 
               toEl.setAttribute(
@@ -124,7 +120,7 @@ function hero(): Transition<{
                 `${currentStyle}
                 position: relative;
                 transform-origin: top left;
-                transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${t + (1 - t) * dw}, ${t + (1 - t) * dh});
+                transform: translate(${(1 - t) * dx}px,${(1 - t) * dy}px) scale(${t + (1 - t) * dw}, ${t + (1 - t) * dh});
                 `
               );
             }
@@ -148,6 +144,10 @@ function hero(): Transition<{
       )
     };
   };
+}
+
+function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
+  return new DOMRect(el.getBoundingClientRect().left - root.getBoundingClientRect().left, el.getBoundingClientRect().top - root.getBoundingClientRect().top, el.getBoundingClientRect().width, el.getBoundingClientRect().height);
 }
 
 export default hero();
