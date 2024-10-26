@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-	let currentFeature = 0;
+	let currentFeature = $state(0);
 	const features = [
 		{ title: 'Smooth Transitions', description: 'Create seamless page transitions with ease.' },
 		{ title: 'Flexible Configuration', description: 'Customize transitions for different routes.' },

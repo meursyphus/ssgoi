@@ -3,8 +3,13 @@
 	import { none } from '$lib/transitions/index.js';
 	import type { TransitionConfig } from '$lib/types.js';
 
-	let className: string = '';
-	export { className as class };
+	interface Props {
+		class?: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { class: className = '', children }: Props = $props();
+	
 
 	const config = context.config.get();
 	const scrollHistoryContext = context.scrollHistory.get();
@@ -49,5 +54,5 @@
 	in:transitionIn|global={{ getFromScrollTop: getFromScrollTop, getToScrollTop: getToScrollTop }}
 	out:transitionOut|global={{ getFromScrollTop: getFromScrollTop, getToScrollTop: getToScrollTop }}
 >
-	<slot />
+	{@render children?.()}
 </div>

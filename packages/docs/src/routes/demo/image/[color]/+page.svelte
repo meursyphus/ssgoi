@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { PageTransition, Hero } from 'ssgoi';
+	import { PageTransition } from 'ssgoi';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
 	const color = '#' + $page.params.color;
-	let textColor = 'white';
-	let copied = false;
+	let textColor = $state('white');
+	let copied = $state(false);
 
 	onMount(() => {
 		// Simple function to determine if text should be black or white based on background color
@@ -24,17 +24,15 @@
 </script>
 
 <PageTransition>
-	<Hero key={color}>
-		<div class="root" style="background-color: {color}; color: {textColor};">
-			<div class="color-info">
-				<h1>{color}</h1>
-				<button on:click={copyToClipboard} style="color: {textColor}; border-color: {textColor};">
-					{copied ? 'Copied!' : 'Copy HEX'}
-				</button>
-			</div>
-			<a href="/demo/image" class="back-link" style="color: {textColor};">Back to Gallery</a>
+	<div data-to data-hero-key={color} class="root" style="background-color: {color}; color: {textColor};">
+		<div class="color-info">
+			<h1>{color}</h1>
+			<button onclick={copyToClipboard} style="color: {textColor}; border-color: {textColor};">
+				{copied ? 'Copied!' : 'Copy HEX'}
+			</button>
 		</div>
-	</Hero>
+		<a href="/demo/image" class="back-link" style="color: {textColor};">Back to Gallery</a>
+	</div>
 </PageTransition>
 
 <style>

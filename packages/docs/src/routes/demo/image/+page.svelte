@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PageTransition, Hero } from 'ssgoi';
+	import { PageTransition } from 'ssgoi';
 	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 
@@ -17,7 +17,7 @@
 		<p class="intro">Explore our curated collection of colors. Click on any color to learn more!</p>
 		<div class="container">
 			{#each colors as color (color.hex)}
-				<Hero key={'#' + color.hex}>
+				<div data-from data-hero-key={'#' + color.hex}>
 					<a href="/demo/image/{color.hex}" class="color-card">
 						<div style="background: #{color.hex};" class="color-box"></div>
 						<div class="color-info">
@@ -25,7 +25,7 @@
 							<p>#{color.hex}</p>
 						</div>
 					</a>
-				</Hero>
+				</div>
 			{/each}
 		</div>
 	</div>

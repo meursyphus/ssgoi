@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { onNavigate } from '$app/navigation';
 	import { Ssgoi } from 'ssgoi';
-	import config from './example-config.js';
+	import config from './page-config.js';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
 <div class="root">
@@ -26,7 +31,7 @@
 	</header>
 	<main>
 		<Ssgoi {onNavigate} {config}>
-			<slot />
+			{@render children?.()}
 		</Ssgoi>
 	</main>
 	<footer>
