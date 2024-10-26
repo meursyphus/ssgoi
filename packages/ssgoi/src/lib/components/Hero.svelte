@@ -1,6 +1,11 @@
 <script lang="ts">
 	import context from '$lib/context/index.js';
-	export let key: string;
+	interface Props {
+		key: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { key, children }: Props = $props();
 
 	const pageTranstionContext = context.pageTransition.get();
 	const scrollHistoryContext = context.scrollHistory.get();
@@ -12,5 +17,5 @@
 </script>
 
 <div data-hero-transition in:receive|global={{ key, scrollTop }} out:send|global={{ key }}>
-	<slot />
+	{@render children?.()}
 </div>

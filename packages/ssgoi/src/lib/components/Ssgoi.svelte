@@ -3,11 +3,21 @@
 	import type { TransitionRouteConfig } from '$lib/types.js';
 	import context from '../context/index.js';
 
-	let className: string = '';
-	export { className as class };
+	
 
-	export let onNavigate: typeof _onNavigate;
-	export let config: TransitionRouteConfig;
+	interface Props {
+		class?: string;
+		onNavigate: typeof _onNavigate;
+		config: TransitionRouteConfig;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		class: className = '',
+		onNavigate,
+		config,
+		children
+	}: Props = $props();
 
 	context.config.init(config);
 	const pageTransitionContext = context.pageTransition.init();
@@ -31,7 +41,7 @@
 </script>
 
 <div data-ssgoi class="page-transition-root {className}">
-	<slot />
+	{@render children?.()}
 </div>
 
 <style>
