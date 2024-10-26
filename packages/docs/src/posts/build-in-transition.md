@@ -16,7 +16,11 @@ SSGOI comes packed with a variety of built-in transitions to make your pages mov
 The classic fade effect. Perfect for subtle, elegant transitions.
 
 ```typescript
-transitions.fade({ duration?: number, easing?: (t: number) => number })
+transitions.fade({ 
+  duration?: number,   // default: 300 
+  delay?: number,      // default: 0
+  easing?: Function    // default: linear
+})
 ```
 
 Example:
@@ -24,88 +28,158 @@ Example:
 transitions.fade({ duration: 300 })
 ```
 
-### 2. Slide Transition 🏂
+### 2. Scroll Transitions 📜
 
-Slides your page in and out. Great for implying directional navigation.
+Smooth scroll-based transitions for directional page changes.
 
 ```typescript
-transitions.slide({ duration?: number, direction?: 'left' | 'right' | 'up' | 'down' })
+// Scroll from bottom to top
+transitions.scrollUpToDown({ 
+  velocity?: number,   // default: 1.2
+  delay?: number,      // default: 0
+  easing?: Function    // default: linear
+})
+
+// Scroll from top to bottom
+transitions.scrollDownToUp({ 
+  velocity?: number,   // default: 1.2
+  delay?: number,      // default: 0
+  easing?: Function    // default: linear
+})
 ```
 
 Example:
 ```typescript
-transitions.slide({ duration: 400, direction: 'left' })
+transitions.scrollUpToDown({ velocity: 1.5 })
 ```
 
-### 3. Scale Transition 🔍
+### 3. Ripple Transition 🌊
 
-Scales your page in or out. Useful for zoom-like effects.
-
-```typescript
-transitions.scale({ duration?: number, start?: number, opacity?: boolean })
-```
-
-Example:
-```typescript
-transitions.scale({ duration: 500, start: 0.8, opacity: true })
-```
-
-### 4. Flip Transition 🔄
-
-Flips your page like a card. Adds a 3D feel to your transitions.
+Creates a circular reveal/hide effect, like a ripple in water.
 
 ```typescript
-transitions.flip({ duration?: number, direction?: 'x' | 'y' })
+transitions.ripple({ 
+  duration?: number,   // default: 500
+  delay?: number,      // default: 0
+  easing?: Function    // default: linear
+})
 ```
 
 Example:
 ```typescript
-transitions.flip({ duration: 600, direction: 'y' })
+transitions.ripple({ duration: 400 })
 ```
 
-### 5. Blur Transition 👁️
+### 4. Pinterest Transition 📌
 
-Blurs your page in and out. Creates a dreamy, soft transition effect.
+Perfect for image gallery transitions with elements that match between pages. Works in pairs using `data-pinterest-key` attributes.
 
 ```typescript
-transitions.blur({ duration?: number, amount?: number })
+// Gallery to detail view & detail to gallery view
+transitions.pinterest.enter({
+  duration?: number,   // default: 500
+  delay?: number,      // default: 0
+  easing?: Function    // default: cubicOut
+})
 ```
 
-Example:
-```typescript
-transitions.blur({ duration: 300, amount: 5 })
+Usage example:
+```svelte
+<!-- Gallery page -->
+<div class="gallery">
+  {#each images as image}
+    <div data-pinterest-key={image.id}>
+      <img src={image.thumbnail} alt={image.title} />
+    </div>
+  {/each}
+</div>
+
+<!-- Detail page -->
+<div data-pinterest-key={currentImage.id}>
+  <img src={currentImage.fullSize} alt={currentImage.title} />
+</div>
 ```
 
-## Combining Transitions: The Transition Mixologist 🍹
-
-Want to get fancy? You can combine transitions for more complex effects!
-
+Configuration:
 ```typescript
-transitions.combine(transitions.fade(), transitions.slide())
+{
+  from: '/gallery',
+  to: '/image/*',
+  transitions: transitions.pinterest.enter()
+},
+{
+  from: '/image/*',
+  to: '/gallery',
+  transitions: transitions.pinterest.enter()  // Same transition for both directions
+}
 ```
 
-This will create a transition that both fades and slides simultaneously.
+### 5. Hero Transition 🦸‍♂️
 
-## The "None" Transition: The Invisible Magician 🎩✨
-
-Sometimes, no transition is the best transition. Use the `none` transition when you want an instant change:
+Smooth transitions between related elements across pages using `data-hero-key` attributes.
 
 ```typescript
-transitions.none()
+transitions.hero({ 
+  duration?: number,   // default: 500
+  delay?: number,      // default: 0
+  easing?: Function    // default: cubicOut
+})
+```
+
+Usage example:
+```svelte
+<!-- List page -->
+<div class="product-list">
+  {#each products as product}
+    <div data-hero-key={product.id}>
+      <img src={product.thumbnail} alt={product.name} />
+    </div>
+  {/each}
+</div>
+
+<!-- Detail page -->
+<div data-hero-key={currentProduct.id}>
+  <img src={currentProduct.fullSize} alt={currentProduct.name} />
+</div>
+```
+
+Configuration:
+```typescript
+{
+  from: '/products',
+  to: '/product/*',
+  transitions: transitions.hero()
+}
+```
+
+### 6. None Transition 🎭
+
+Sometimes, no transition is the best transition. Use this when you want an instant change:
+
+```typescript
+transitions.none({
+  duration?: number,   // default: 0
+  delay?: number,      // default: 0
+  easing?: Function    // default: linear
+})
 ```
 
 ## Transition Parameters: Fine-tuning Your Effects 🎛️
 
 Most transitions accept these common parameters:
 
-- `duration`: Length of the transition in milliseconds.
-- `easing`: A function that defines the rate of change over time.
+- `duration`: Length of the transition in milliseconds
+- `delay`: Delay before the transition starts
+- `easing`: A function that defines the rate of change over time
 
 Example of custom easing:
 ```typescript
-import { cubicInOut } from 'svelte/easing';
+import { cubicOut } from 'svelte/easing';
 
-transitions.fade({ duration: 400, easing: cubicInOut })
+transitions.fade({ 
+  duration: 400, 
+  easing: cubicOut 
+})
 ```
 
 ## Putting It All Together: A Transition Symphony 🎭
@@ -120,29 +194,36 @@ const config = createTransitionConfig({
     {
       from: '/',
       to: '/about',
-      transitions: transitions.fade({ duration: 300 }),
-      
+      transitions: transitions.fade({ duration: 300 })
     },
     {
       from: '/blog',
       to: '/blog/*',
-      transitions: transitions.slide({ direction: 'left' })
+      transitions: transitions.scrollUpToDown()
     },
     {
       from: '/gallery',
-      to: '/gallery/*',
-      transitions: transitions.scale({ start: 0.8, opacity: true })
+      to: '/image/*',
+      transitions: transitions.pinterest.enter()
     },
     {
-      from: '*',
-      to: '/404',
-      transitions: transitions.blur({ amount: 10 })
+      from: '/image/*',
+      to: '/gallery',
+      transitions: transitions.pinterest.enter()  // Same transition for symmetry
+    },
+    {
+      from: '/products',
+      to: '/product/*',
+      transitions: transitions.hero()
     }
   ],
   defaultTransition: transitions.fade()
 });
 ```
 
-This configuration creates a rich, varied transition experience across your app.
+Remember, the key to great transitions is subtlety. When using hero or pinterest transitions, make sure to:
+1. Always include matching `data-hero-key` or `data-pinterest-key` attributes on both pages
+2. Keep the content within the matched elements similar for smooth transitions
+3. Consider using the same transition in both directions for consistent user experience
 
-Remember, the key to great transitions is subtlety. Use these effects to enhance your user's experience, not distract from it. Now go forth and transition responsibly! 🚀✨
+Choose the right transition for each navigation context, and your users will enjoy a smooth, intuitive journey through your app! 🚀✨
