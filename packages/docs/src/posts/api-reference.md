@@ -11,90 +11,15 @@ This document provides a comprehensive reference for the SSGOI (Svelte Smooth Go
 
 ## Table of Contents
 
-1. [Ssgoi Component](#ssgoi-component)
-2. [PageTransition Component](#pagetransition-component)
-3. [createTransitionConfig Function](#createtransitionconfig-function)
-4. [Built-in Transitions](#built-in-transitions)
+1. [Configuration](#configuration)
+2. [Built-in Transitions](#built-in-transitions)
+3. [Hero Transitions](#hero-transitions)
 
-## Ssgoi Component
+## Configuration
 
-The `Ssgoi` component is the main wrapper for your entire Svelte application.
+### createTransitionConfig Function
 
-### Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| onNavigate | Function | SvelteKit's navigation function |
-| config | TransitionConfig | Your transition configuration |
-| class | string | (Optional) Custom class for styling |
-
-### Usage
-
-```svelte
-<script lang="ts">
-  import { onNavigate } from '$app/navigation';
-  import { Ssgoi } from 'ssgoi';
-  import config from './transitionConfig';
-
-  let className = 'your-custom-class';
-</script>
-
-<Ssgoi {onNavigate} {config} class={className}>
-  <slot />
-</Ssgoi>
-```
-
-## PageTransition Component
-
-The `PageTransition` component wraps the content of each individual page.
-
-### Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| class | string | (Optional) Custom class for styling |
-
-### Usage
-
-```svelte
-<script lang="ts">
-  import { PageTransition } from 'ssgoi';
-
-  let className = 'your-custom-page-class';
-</script>
-
-<PageTransition class={className}>
-  <!-- Your page content here -->
-</PageTransition>
-```
-
-### Additional Features
-
-The `PageTransition` component adds a `data-page-transition` attribute to its wrapper div, which can be used for CSS targeting:
-
-```css
-[data-page-transition] {
-  /* Your styles here */
-}
-```
-
-## createTransitionConfig Function
-
-This function creates a configuration object for your transitions.
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| config | TransitionConfigInput | An object containing your transition rules |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| TransitionConfig | A configuration object for use with the Ssgoi component |
-
-### Usage
+Creates a configuration object for your transitions.
 
 ```typescript
 import { createTransitionConfig, transitions } from 'ssgoi';
@@ -105,12 +30,18 @@ const config = createTransitionConfig({
       from: '/home',
       to: '/about',
       transitions: transitions.fade()
-    },
-    // More transition rules...
+    }
   ],
   defaultTransition: transitions.fade()
 });
 ```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| transitions | TransitionRule[] | Array of transition rules |
+| defaultTransition | TransitionFunction | Default transition to use when no rules match |
 
 ## Built-in Transitions
 
@@ -118,36 +49,121 @@ SSGOI provides several built-in transition effects.
 
 ### fade
 
-```typescript
-transitions.fade(options?: { duration?: number })
-```
-
-### slide
+Simple opacity transition.
 
 ```typescript
-transitions.slide(options?: { duration?: number, direction?: 'left' | 'right' | 'up' | 'down' })
+transitions.fade({
+  duration?: number,  // default: 300
+  delay?: number,     // default: 0
+  easing?: Function   // default: linear
+})
 ```
 
-### scale
+### scroll
+
+Scroll-based transitions in two directions.
 
 ```typescript
-transitions.scale(options?: { duration?: number, start?: number, opacity?: boolean })
+transitions.scrollUpToDown({
+  velocity?: number,  // default: 1.2
+  delay?: number,     // default: 0
+  easing?: Function   // default: linear
+})
+
+transitions.scrollDownToUp({
+  velocity?: number,  // default: 1.2
+  delay?: number,     // default: 0
+  easing?: Function   // default: linear
+})
 ```
 
-### flip
+### ripple
+
+Circular reveal/hide transition.
 
 ```typescript
-transitions.flip(options?: { duration?: number, direction?: 'x' | 'y' })
+transitions.ripple({
+  duration?: number,  // default: 500
+  delay?: number,     // default: 0
+  easing?: Function   // default: linear
+})
 ```
 
-### blur
+### none
+
+No transition effect.
 
 ```typescript
-transitions.blur(options?: { duration?: number, amount?: number })
+transitions.none({
+  duration?: number,  // default: 0
+  delay?: number,     // default: 0
+  easing?: Function   // default: linear
+})
 ```
 
-Each transition function returns a `TransitionFunction` that can be used in your transition configuration.
+### pinterest
 
----
+Pinterest-style transitions for image galleries.
 
-For more detailed usage examples and advanced features, please refer to our other documentation pages.
+```typescript
+transitions.pinterest.enter({
+  duration?: number,  // default: 500
+  delay?: number,     // default: 0
+  easing?: Function   // default: cubicOut
+})
+
+transitions.pinterest.exit({
+  duration?: number,  // default: 500
+  delay?: number,     // default: 0
+  easing?: Function   // default: cubicOut
+})
+```
+
+### hero
+
+Hero transitions between elements.
+
+```typescript
+transitions.hero({
+  duration?: number,  // default: 500
+  delay?: number,     // default: 0
+  easing?: Function   // default: cubicOut
+})
+```
+
+## Hero Transitions
+
+Hero transitions allow smooth animations between related elements across different pages.
+
+### Usage
+
+Add the `data-hero-key` attribute to elements you want to transition between:
+
+```svelte
+<!-- Page 1 -->
+<div data-hero-key="product-1">
+  <img src="/product-thumb.jpg" alt="Product thumbnail" />
+</div>
+
+<!-- Page 2 -->
+<div data-hero-key="product-1">
+  <img src="/product-full.jpg" alt="Product full size" />
+</div>
+```
+
+Configure the transition in your config:
+
+```typescript
+const config = createTransitionConfig({
+  transitions: [
+    {
+      from: '/products',
+      to: '/product/*',
+      transitions: transitions.hero()
+    }
+  ],
+  defaultTransition: transitions.fade()
+});
+```
+
+Note: For best results with hero transitions, make sure the elements with matching `data-hero-key` attributes have similar content and proportions.

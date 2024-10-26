@@ -1,171 +1,254 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
-	import * as config from '$lib/config';
+	let visible = $state(false);
+	setTimeout(() => {
+		visible = true;
+	}, 1000);
 </script>
 
-<svelte:head>
-	<title>{config.title}</title>
-</svelte:head>
-
-<div class="landing-page" in:fade={{ duration: 300, delay: 300 }}>
-	<section class="hero" in:fly={{ y: 50, duration: 500, delay: 300 }}>
-		<h1>{config.title}</h1>
-		<p>Turning Your Site into Supermodels!</p>
-		<div class="cta-buttons">
-			<a href="/docs" class="btn btn-primary">Get Started</a>
-			<a href="/demo" class="btn btn-secondary" target="_blank" rel="noopener noreferrer"
-				>Watch Demo</a
-			>
+<main class="landing">
+	<section class="demo-section">
+		<div class="content-wrap">
+			<h1>Native App Experience for Your Svelte App</h1>
+			<p class="tagline">
+				Turn your Svelte app into an app-like experience with just a few lines of code
+			</p>
+			<div class="cta-group">
+				<a href="/docs" class="cta primary">Get Started</a>
+				<a href="https://github.com/your-repo" class="cta secondary">GitHub</a>
+			</div>
+		</div>
+		<div class="demo-container">
+			<img src="/pinterest.gif" alt="Pinterest-style transition demo" class="demo-gif" />
 		</div>
 	</section>
 
-	<section class="examples" in:fly={{ y: 50, duration: 500, delay: 400 }}>
-		<h2>See It in Action</h2>
-		<div class="gif-container">
-			<div class="gif-wrapper">
-				<img src="/page-transition.gif" alt="Page Transition Example" class="example-gif" />
-				<p>Smooth Page Transitions</p>
-			</div>
-			<div class="gif-wrapper">
-				<img src="/hero-transition.gif" alt="Hero Transition Example" class="example-gif" />
-				<p>Seamless Hero Transitions</p>
-			</div>
+	<section class="benefits" class:visible>
+		<div class="benefit-card">
+			<div class="icon">⚡</div>
+			<h3>Zero-Impact Performance</h3>
+			<p>
+				Built with performance in mind. No SSR conflicts, no hydration issues, and minimal runtime
+				overhead for buttery-smooth transitions.
+			</p>
+		</div>
+		<div class="benefit-card">
+			<div class="icon">🎨</div>
+			<h3>Beyond View Transitions</h3>
+			<p>
+				Powerful customization that goes beyond View Transitions API. Create complex, multi-stage
+				transitions with complete creative control.
+			</p>
+		</div>
+		<div class="benefit-card">
+			<div class="icon">🌐</div>
+			<h3>Browser Battle-Tested</h3>
+			<p>
+				Works reliably across all modern browsers with intelligent fallbacks. No need to worry about
+				compatibility or degraded experiences.
+			</p>
 		</div>
 	</section>
-
-	<section class="features" in:fly={{ y: 50, duration: 500, delay: 500 }}>
-		<h2>Key Features</h2>
-		<div class="feature-grid">
-			<div class="feature-card">
-				<h3>Smooth Transitions</h3>
-				<p>Effortless page transitions that captivate your audience.</p>
-			</div>
-			<div class="feature-card">
-				<h3>Easy Integration</h3>
-				<p>Seamlessly integrate with your existing Svelte projects.</p>
-			</div>
-			<div class="feature-card">
-				<h3>Customizable</h3>
-				<p>Tailor transitions to match your brand and design.</p>
-			</div>
-			<div class="feature-card">
-				<h3>Performance Optimized</h3>
-				<p>Smooth transitions without sacrificing load times.</p>
-			</div>
-		</div>
-	</section>
-</div>
+</main>
 
 <style>
-	.landing-page {
-		max-width: 1200px;
+	.landing {
+		max-width: 1440px;
 		margin: 0 auto;
-		padding: var(--spacing-8);
+		padding: 2rem;
 	}
-	.hero {
-		text-align: center;
-		margin-bottom: var(--spacing-16);
-	}
-	h1 {
-		font-size: var(--font-size-4xl);
-		margin-bottom: var(--spacing-4);
-	}
-	h2 {
-		font-size: var(--font-size-3xl);
-		margin-bottom: var(--spacing-8);
-		text-align: center;
-	}
-	.cta-buttons {
-		display: flex;
-		justify-content: center;
-		gap: var(--spacing-4);
-		margin-top: var(--spacing-8);
-	}
-	.btn {
-		padding: var(--spacing-3) var(--spacing-6);
-		border-radius: var(--radius-md);
-		font-weight: bold;
-		text-decoration: none;
-		transition:
-			background-color 0.3s,
-			color 0.3s;
-	}
-	.btn-primary {
-		background-color: var(--color-primary-light);
-		color: white;
-	}
-	.btn-secondary {
-		background-color: var(--color-secondary-light);
-		color: white;
-	}
-	.examples {
-		margin-bottom: var(--spacing-16);
-	}
-	.gif-container {
-		display: flex;
-		justify-content: center;
-		gap: var(--spacing-8);
-		flex-wrap: wrap;
-	}
-	.gif-wrapper {
-		text-align: center;
-		width: 100%;
-		max-width: 250px; /* Match the original width of the GIF */
-	}
-	.example-gif {
-		width: 100%;
-		aspect-ratio: 250 / 497; /* Set the aspect ratio based on original dimensions */
-		object-fit: cover; /* Ensure the image covers the container */
-		border-radius: var(--radius-lg);
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	}
-	/* Dark mode styles */
-	:global(html[color-scheme='dark']) .example-gif {
-		box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
-	}
-	@media (max-width: 768px) {
-		.cta-buttons {
-			flex-direction: column;
-		}
-		.gif-container {
-			flex-direction: column;
-			align-items: center;
-		}
-		.gif-wrapper {
-			max-width: 200px; /* Slightly smaller for mobile devices */
-		}
-	}
-	.features {
-		text-align: center;
-	}
-	.feature-grid {
+
+	.demo-section {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: var(--spacing-8);
-		margin-top: var(--spacing-8);
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		padding: 4rem 0;
+		align-items: center;
 	}
-	.feature-card {
-		background-color: var(--color-bg-light);
-		padding: var(--spacing-6);
-		border-radius: var(--radius-lg);
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		transition:
-			transform 0.3s,
-			box-shadow 0.3s;
+
+	h1 {
+		font-size: clamp(2.5rem, 5vw, 4rem);
+		line-height: 1.1;
+		font-weight: 800;
+		background: linear-gradient(45deg, #ff4d4d, #ff8c8c);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		margin-bottom: 1.5rem;
 	}
-	.feature-card:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+
+	.tagline {
+		font-size: 1.25rem;
+		color: #666;
+		margin-bottom: 2rem;
 	}
-	/* Dark mode styles */
-	:global(html[color-scheme='dark']) .btn-primary {
-		background-color: var(--color-primary-dark);
+
+	.cta-group {
+		display: flex;
+		gap: 1rem;
 	}
-	:global(html[color-scheme='dark']) .btn-secondary {
-		background-color: var(--color-secondary-dark);
+
+	.cta {
+		padding: 0.75rem 1.5rem;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: transform 0.2s;
 	}
-	:global(html[color-scheme='dark']) .feature-card {
-		background-color: var(--color-bg-dark);
-		box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+
+	.cta:hover {
+		transform: translateY(-2px);
+	}
+
+	.primary {
+		background: linear-gradient(45deg, #ff4d4d, #ff8c8c);
+		color: white;
+	}
+
+	.secondary {
+		border: 2px solid #ff4d4d;
+		color: #ff4d4d;
+	}
+
+	.demo-container {
+		width: 100%;
+		aspect-ratio: 16/9;
+		border-radius: 16px;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+	}
+
+	.demo-gif {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.benefits {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+		padding: 4rem 0;
+		opacity: 0;
+		transform: translateY(20px);
+		transition: all 0.6s ease-out;
+	}
+
+	.benefits.visible {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.benefit-card {
+		padding: 2rem;
+		border-radius: 16px;
+		background: white;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+		transition: transform 0.2s;
+	}
+
+	.benefit-card:hover {
+		transform: translateY(-4px);
+	}
+
+	.icon {
+		font-size: 2rem;
+		margin-bottom: 1rem;
+	}
+
+	h3 {
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+	}
+
+	p {
+		color: #666;
+		line-height: 1.5;
+	}
+
+	@media (max-width: 768px) {
+		.demo-section {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+		.cta-group {
+			flex-direction: column;
+		}
+	}
+
+	/* 다크 모드 스타일 */
+	:global(html[color-scheme='dark']) .landing {
+		background-color: #121212;
+	}
+
+	:global(html[color-scheme='dark']) h1 {
+		background: linear-gradient(45deg, #ff6b6b, #ffa0a0);
+		-webkit-background-clip: text;
+		background-clip: text;
+	}
+
+	:global(html[color-scheme='dark']) h3 {
+		color: #e0e0e0;
+	}
+
+	:global(html[color-scheme='dark']) .tagline,
+	:global(html[color-scheme='dark']) p {
+		color: #a0a0a0;
+	}
+
+	:global(html[color-scheme='dark']) .benefit-card {
+		background: #1e1e1e;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	}
+
+	:global(html[color-scheme='dark']) .demo-container {
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	:global(html[color-scheme='dark']) .secondary {
+		border-color: #ff6b6b;
+		color: #ff6b6b;
+	}
+
+	:global(html[color-scheme='dark']) .icon {
+		color: #e0e0e0;
+	}
+	.demo-section {
+		display: grid;
+		/* 좌측 컨텐츠가 더 넓게 차지하도록 비율 조정 */
+		grid-template-columns: 1.2fr 0.8fr;
+		gap: 4rem;
+		padding: 4rem 0;
+		align-items: start; /* center에서 start로 변경 */
+	}
+
+	.content-wrap {
+		position: sticky;
+		top: 4rem; /* 스크롤 시 고정 위치 */
+	}
+
+	.demo-container {
+		width: 100%;
+		/* 16:9 대신 2:3 비율로 변경 */
+		aspect-ratio: 2/3;
+		border-radius: 16px;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+	}
+
+	/* 모바일 대응도 수정 */
+	@media (max-width: 768px) {
+		.demo-section {
+			grid-template-columns: 1fr;
+			gap: 3rem;
+		}
+
+		.content-wrap {
+			position: static;
+		}
+
+		.demo-container {
+			/* 모바일에서는 좀 더 작게 */
+			max-width: 400px;
+			margin: 0 auto;
+		}
 	}
 </style>
