@@ -14,7 +14,7 @@
 			</p>
 			<div class="cta-group">
 				<a href="/docs" class="cta primary">Get Started</a>
-				<a href="https://github.com/your-repo" class="cta secondary">GitHub</a>
+				<a href="https://github.com/meursyphus/ssgoi" class="cta secondary">GitHub</a>
 			</div>
 		</div>
 		<div class="demo-container">
