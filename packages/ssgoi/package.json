@@ -7,7 +7,7 @@
 	"author": "meursyphus",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/meursyphus/ssgoi.git"
+		"url": "git+https://github.com/meursyphus/ssgoi.git"
 	},
 	"bugs": {
 		"url": "https://github.com/meursyphus/ssgoi/issues"
@@ -19,6 +19,9 @@
 		"animation"
 	],
 	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build && npm run package",
+		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
 		"lint": "prettier --check . && eslint .",
@@ -36,7 +39,8 @@
 		"!dist/**/*.spec.*"
 	],
 	"peerDependencies": {
-		"svelte": "^5.0.0"
+		"svelte": "^5.0.0",
+		"sveltekit": "^2.0.0"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -47,9 +51,10 @@
 		"eslint": "^9.7.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
-		"prettier": "^3.1.1",
+		"globals": "^15.0.0",
+		"prettier": "^3.3.2",
 		"prettier-plugin-svelte": "^3.2.6",
-		"publint": "^0.1.9",
+		"publint": "^0.2.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",
