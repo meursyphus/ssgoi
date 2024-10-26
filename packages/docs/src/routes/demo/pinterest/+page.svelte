@@ -13,29 +13,27 @@
 		</p>
 		<Masonry
 			calcCols={() => 2}
-			getId={(item) => item.color}
+			getId={(item: any) => item.color}
 			{items}
 			{minColWidth}
 			{maxColWidth}
 			{gap}
-			
 		>
 			{#snippet children({ item })}
-						<a
+				<a
+					aria-label={item.color}
 					href="/demo/pinterest/{item.color}"
 					class="masonry-item"
 					style="background-color: {item.color}; aspect-ratio: {item.aspectRatio};"
 					data-pinterest-key={item.color}
 				>
 				</a>
-								{/snippet}
-				</Masonry>
+			{/snippet}
+		</Masonry>
 	</div>
 </PageTransition>
 
 <style>
-	.masonry-gallery {
-	}
 	.h1 {
 		color: #2c3e50;
 		text-align: center;

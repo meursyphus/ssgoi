@@ -16,7 +16,7 @@ const none: Transition = ({
 			}
 		};
 	},
-	out() {
+	out(node) {
 		return {
 			duration,
 			delay,
