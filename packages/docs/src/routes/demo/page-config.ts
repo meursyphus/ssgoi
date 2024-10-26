@@ -73,12 +73,12 @@ const config = createTransitionConfig({
     {
       to: '/demo/image/*',
       from: '/demo/image',
-      transitions: transitions.none(),
+      transitions: transitions.hero()
     },
     {
       from: '/demo/image/*',
       to: '/demo/image',
-      transitions: transitions.none(),
+      transitions: transitions.hero()
     },
     // Catch-all rules for /demo/image
     {

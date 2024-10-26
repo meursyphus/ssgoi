@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onNavigate } from '$app/navigation';
 	import { Ssgoi } from 'ssgoi';
-	import config from './example-config.js';
+	import config from './page-config.js';
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
