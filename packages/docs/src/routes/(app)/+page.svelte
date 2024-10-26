@@ -1,4 +1,8 @@
 <script lang="ts">
+	let visible = $state(false);
+	setTimeout(() => {
+		visible = true;
+	}, 1000);
 </script>
 
 <main class="landing">
@@ -18,28 +22,29 @@
 		</div>
 	</section>
 
-	<section class="benefits visible">
+	<section class="benefits" class:visible>
 		<div class="benefit-card">
-			<div class="icon"></div>
-			<h3>Native-like Navigation</h3>
+			<div class="icon">⚡</div>
+			<h3>Zero-Impact Performance</h3>
 			<p>
-				Smooth back/forward navigation that feels just like a native app. Perfect for mobile-first
-				experiences.
+				Built with performance in mind. No SSR conflicts, no hydration issues, and minimal runtime
+				overhead for buttery-smooth transitions.
 			</p>
 		</div>
 		<div class="benefit-card">
-			<div class="icon">✨</div>
-			<h3>Pinterest-style Transitions</h3>
+			<div class="icon">🎨</div>
+			<h3>Beyond View Transitions</h3>
 			<p>
-				Create engaging image grid to detail transitions that users love. Ideal for galleries and
-				product showcases.
+				Powerful customization that goes beyond View Transitions API. Create complex, multi-stage
+				transitions with complete creative control.
 			</p>
 		</div>
 		<div class="benefit-card">
-			<div class="icon"></div>
-			<h3>Easy Implementation</h3>
+			<div class="icon">🌐</div>
+			<h3>Browser Battle-Tested</h3>
 			<p>
-				Simple component wrapping without complex configurations. Get started in minutes, not hours.
+				Works reliably across all modern browsers with intelligent fallbacks. No need to worry about
+				compatibility or degraded experiences.
 			</p>
 		</div>
 	</section>
@@ -47,7 +52,6 @@
 
 <style>
 	.landing {
-		width: 100%;
 		max-width: 1440px;
 		margin: 0 auto;
 		padding: 2rem;
@@ -148,7 +152,6 @@
 	.icon {
 		font-size: 2rem;
 		margin-bottom: 1rem;
-		display: block;
 	}
 
 	h3 {
@@ -172,40 +175,80 @@
 	}
 
 	/* 다크 모드 스타일 */
-	:global(html[color-scheme="dark"]) .landing {
+	:global(html[color-scheme='dark']) .landing {
 		background-color: #121212;
 	}
 
-	:global(html[color-scheme="dark"]) h1 {
+	:global(html[color-scheme='dark']) h1 {
 		background: linear-gradient(45deg, #ff6b6b, #ffa0a0);
 		-webkit-background-clip: text;
 		background-clip: text;
 	}
 
-	:global(html[color-scheme="dark"]) h3 {
+	:global(html[color-scheme='dark']) h3 {
 		color: #e0e0e0;
 	}
 
-	:global(html[color-scheme="dark"]) .tagline,
-	:global(html[color-scheme="dark"]) p {
+	:global(html[color-scheme='dark']) .tagline,
+	:global(html[color-scheme='dark']) p {
 		color: #a0a0a0;
 	}
 
-	:global(html[color-scheme="dark"]) .benefit-card {
+	:global(html[color-scheme='dark']) .benefit-card {
 		background: #1e1e1e;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 	}
 
-	:global(html[color-scheme="dark"]) .demo-container {
+	:global(html[color-scheme='dark']) .demo-container {
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 	}
 
-	:global(html[color-scheme="dark"]) .secondary {
+	:global(html[color-scheme='dark']) .secondary {
 		border-color: #ff6b6b;
 		color: #ff6b6b;
 	}
 
-	:global(html[color-scheme="dark"]) .icon {
+	:global(html[color-scheme='dark']) .icon {
 		color: #e0e0e0;
+	}
+	.demo-section {
+		display: grid;
+		/* 좌측 컨텐츠가 더 넓게 차지하도록 비율 조정 */
+		grid-template-columns: 1.2fr 0.8fr;
+		gap: 4rem;
+		padding: 4rem 0;
+		align-items: start; /* center에서 start로 변경 */
+	}
+
+	.content-wrap {
+		position: sticky;
+		top: 4rem; /* 스크롤 시 고정 위치 */
+	}
+
+	.demo-container {
+		width: 100%;
+		/* 16:9 대신 2:3 비율로 변경 */
+		aspect-ratio: 2/3;
+		border-radius: 16px;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+	}
+
+	/* 모바일 대응도 수정 */
+	@media (max-width: 768px) {
+		.demo-section {
+			grid-template-columns: 1fr;
+			gap: 3rem;
+		}
+
+		.content-wrap {
+			position: static;
+		}
+
+		.demo-container {
+			/* 모바일에서는 좀 더 작게 */
+			max-width: 400px;
+			margin: 0 auto;
+		}
 	}
 </style>
