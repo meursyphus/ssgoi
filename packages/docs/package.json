@@ -47,6 +47,7 @@
 		"@sveltejs/adapter-cloudflare": "^4.7.0",
 		"lucide-svelte": "^0.417.0",
 		"open-props": "^1.7.5",
-		"svelte-bricks": "^0.2.1"
+		"svelte-bricks": "^0.2.1",
+		"svelte-meta-tags": "^4.0.4"
 	}
 }

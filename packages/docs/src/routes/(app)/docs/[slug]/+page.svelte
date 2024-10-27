@@ -2,13 +2,6 @@
 	let { data } = $props();
 </script>
 
-<svelte:head>
-	<title>{data.meta.title} - SSGOI Documentation</title>
-	<meta property="og:type" content="article" />
-	<meta property="og:title" content={data.meta.title} />
-	<meta name="description" content={data.meta.description} />
-</svelte:head>
-
 <article class="doc-content">
 	<div class="content">
 		<data.content />
