@@ -70,14 +70,13 @@
 		position: absolute;
 		width: 60px;
 		height: 2px;
-		background: #1b315e;
+		background: black;
 		bottom: -1rem;
 		left: 50%;
 		transform: translateX(-50%);
 	}
 
 	h1 {
-		color: #1b315e;
 		font-size: 2.5rem;
 		font-weight: 300;
 		letter-spacing: -0.5px;
@@ -116,12 +115,10 @@
 	}
 
 	.dot {
-		color: #1b315e;
 		opacity: 0.5;
 	}
 
 	h2 {
-		color: #1b315e;
 		font-size: 1.5rem;
 		margin-bottom: 1rem;
 		font-weight: 500;
@@ -139,7 +136,6 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		color: #1b315e;
 		text-decoration: none;
 		font-weight: 500;
 		font-size: 0.875rem;

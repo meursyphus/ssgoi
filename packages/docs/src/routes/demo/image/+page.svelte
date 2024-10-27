@@ -11,7 +11,7 @@
 	})).createList(9);
 </script>
 
-<PageTransition>
+<PageTransition class="image-page">
 	<div class="color-gallery">
 		<h1>Color Gallery</h1>
 		<p class="intro">Explore our curated collection of colors. Click on any color to learn more!</p>
@@ -32,6 +32,10 @@
 </PageTransition>
 
 <style>
+	:global(.image-page) {
+		background: white;
+	}
+
 	.color-gallery {
 		text-align: center;
 		padding: 2rem;

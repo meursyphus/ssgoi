@@ -77,14 +77,13 @@
 		position: absolute;
 		width: 60px;
 		height: 2px;
-		background: #1b315e;
+		background: black;
 		bottom: -1rem;
 		left: 50%;
 		transform: translateX(-50%);
 	}
 
 	h1 {
-		color: #1b315e;
 		font-size: 2.5rem;
 		font-weight: 300;
 		letter-spacing: -0.5px;
@@ -118,7 +117,6 @@
 
 	.tag {
 		background-color: #f7f3ee;
-		color: #1b315e;
 		padding: 0.4rem 0.8rem;
 		border-radius: 6px;
 		font-size: 0.75rem;
@@ -127,7 +125,6 @@
 	}
 
 	h2 {
-		color: #1b315e;
 		font-size: 1.75rem;
 		margin-bottom: 1.5rem;
 		font-weight: 500;
