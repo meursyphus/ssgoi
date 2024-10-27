@@ -2,6 +2,7 @@
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 	import { faker } from '@faker-js/faker';
 	import { PageTransition } from 'ssgoi';
+	import { fade } from 'svelte/transition';
 
 	type Post = {
 		id: number;
@@ -13,7 +14,6 @@
 	};
 
 	faker.seed(123);
-
 	const postFactory = new FixtureFactory<Post>(() => ({
 		id: faker.number.int({ min: 0, max: 9999 }),
 		title: faker.lorem.sentence(),
@@ -22,84 +22,175 @@
 		date: faker.date.recent().toLocaleDateString(),
 		tags: faker.helpers.arrayElements(['Tech', 'Life', 'Food', 'Travel', 'Health'], 3)
 	}));
-
 	const posts: Post[] = postFactory.createList(5);
 </script>
 
-<PageTransition>
+<PageTransition class="post-page">
 	<div class="posts-container">
-		<h1>Featured Posts</h1>
-		{#each posts as post (post.id)}
-			<article class="post">
-				<h2>{post.title}</h2>
-				<div class="post-meta">
-					<span class="author">By {post.author}</span>
-					<span class="date">{post.date}</span>
-				</div>
-				<div class="tags">
-					{#each post.tags as tag}
-						<span class="tag">{tag}</span>
-					{/each}
-				</div>
-				<p class="content">{post.content}</p>
-			</article>
-		{/each}
+		<header>
+			<h1>Featured Posts</h1>
+			<div class="header-decoration"></div>
+		</header>
+
+		<div class="posts-grid">
+			{#each posts as post (post.id)}
+				<article class="post" in:fade={{ duration: 300, delay: 150 }}>
+					<div class="tags">
+						{#each post.tags as tag}
+							<span class="tag">{tag}</span>
+						{/each}
+					</div>
+
+					<h2>{post.title}</h2>
+
+					<div class="post-meta">
+						<div class="author-info">
+							<span class="author-avatar" />
+							<span class="author-name">{post.author}</span>
+						</div>
+						<time datetime={post.date}>{post.date}</time>
+					</div>
+
+					<div class="content">
+						<p>{post.content}</p>
+					</div>
+				</article>
+			{/each}
+		</div>
 	</div>
 </PageTransition>
 
 <style>
 	.posts-container {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
-		padding: 2rem;
+		padding: 4rem 2rem;
+	}
+
+	header {
+		text-align: center;
+		margin-bottom: 4rem;
+		position: relative;
+	}
+
+	.header-decoration {
+		position: absolute;
+		width: 60px;
+		height: 2px;
+		background: #1b315e;
+		bottom: -1rem;
+		left: 50%;
+		transform: translateX(-50%);
 	}
 
 	h1 {
-		color: #2c3e50;
-		text-align: center;
-		margin-bottom: 2rem;
+		color: #1b315e;
+		font-size: 2.5rem;
+		font-weight: 300;
+		letter-spacing: -0.5px;
+	}
+
+	.posts-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2rem;
 	}
 
 	.post {
 		background-color: white;
-		border-radius: 8px;
+		border-radius: 12px;
 		padding: 2rem;
-		margin-bottom: 2rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		transition: all 0.3s ease;
 	}
 
-	h2 {
-		color: #3498db;
-		margin-bottom: 0.5rem;
-	}
-
-	.post-meta {
-		font-size: 0.9rem;
-		color: #7f8c8d;
-		margin-bottom: 1rem;
-	}
-
-	.author,
-	.date {
-		margin-right: 1rem;
+	.post:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 	}
 
 	.tags {
-		margin-bottom: 1rem;
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin-bottom: 1.5rem;
 	}
 
 	.tag {
-		display: inline-block;
-		background-color: #ecf0f1;
-		color: #2c3e50;
-		padding: 0.2rem 0.5rem;
-		border-radius: 4px;
-		font-size: 0.8rem;
-		margin-right: 0.5rem;
+		background-color: #f7f3ee;
+		color: #1b315e;
+		padding: 0.4rem 0.8rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+	}
+
+	h2 {
+		color: #1b315e;
+		font-size: 1.75rem;
+		margin-bottom: 1.5rem;
+		font-weight: 500;
+		line-height: 1.3;
+	}
+
+	.post-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 2rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	}
+
+	.author-info {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.author-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: #f7f3ee;
+		display: block;
+	}
+
+	.author-name {
+		color: #1b315e;
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	time {
+		color: #666;
+		font-size: 0.875rem;
 	}
 
 	.content {
-		color: #34495e;
-		line-height: 1.6;
+		color: #2c2c2c;
+		line-height: 1.8;
+		opacity: 0.9;
+	}
+
+	.content p {
+		margin-bottom: 1rem;
+	}
+
+	@media (min-width: 768px) {
+		.posts-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.post {
+			padding: 3rem;
+		}
+	}
+
+	:global(.post-page) {
+		background: white;
 	}
 </style>
