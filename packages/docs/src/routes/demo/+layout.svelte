@@ -10,23 +10,42 @@
 
 <div class="demo-root">
 	<header>
-		<a aria-label="Home" class="home" href="/demo">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="24"
-				height="24"
-				fill="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z" />
-			</svg>
-		</a>
-		<nav>
-			<a href="/demo/blog">Blog</a>
-			<a href="/demo/post">Post</a>
-			<a href="/demo/image">Image</a>
-			<a href="/demo/pinterest">Pinterest</a>
-		</nav>
+		<div class="header-nav">
+			<a aria-label="Demo Home" class="home" href="/demo">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					fill="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z" />
+				</svg>
+			</a>
+			<nav>
+				<a href="/demo/blog">Blog</a>
+				<a href="/demo/post">Post</a>
+				<a href="/demo/image">Image</a>
+				<a href="/demo/pinterest">Pinterest</a>
+			</nav>
+			<a href="/" class="exit" aria-label="Back to main site">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					viewBox="0 0 24 24"
+				>
+					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+					<polyline points="16 17 21 12 16 7" />
+					<line x1="21" y1="12" x2="9" y2="12" />
+				</svg>
+			</a>
+		</div>
 	</header>
 	<main>
 		<Ssgoi {onNavigate} {config}>
@@ -57,7 +76,7 @@
 		--color-text: #1a1a1a;
 		--color-accent: #2a2a2a;
 		--color-subtle: #f5f5f5;
-		--header-bg: var(--color-subtle);
+		--header-bg: var(--color-bg);
 		--header-text: var(--color-text);
 		--footer-bg: var(--color-subtle);
 		--footer-text: var(--color-text);
@@ -69,10 +88,19 @@
 		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 	}
 
+	.header-nav {
+		position: relative;
+		display: flex;
+		align-items: center;
+		width: 100%;
+		gap: 2rem;
+	}
+
 	nav {
 		display: flex;
 		justify-content: center;
 		gap: 3rem;
+		margin-inline: auto;
 	}
 
 	header a {
@@ -94,7 +122,25 @@
 	}
 
 	.home svg {
-		opacity: 0.8;
+		opacity: 1;
+	}
+
+	.home:hover svg {
+		opacity: 1;
+	}
+
+	.exit {
+		color: var(--header-text);
+		transition: all 0.2s ease;
+		padding: 0.5rem;
+		border-radius: 0.25rem;
+		margin-right: 1rem;
+		position: absolute;
+		right: 32px;
+	}
+
+	.exit:hover {
+		background: rgba(0, 0, 0, 0.05);
 	}
 
 	main {
@@ -122,6 +168,10 @@
 
 		.home {
 			left: 16px;
+		}
+
+		.exit {
+			margin-right: 0.5rem;
 		}
 
 		main {

@@ -19,7 +19,7 @@
 		</a>
 		<nav class:open={isMenuOpen}>
 			<a href="/docs" class:active={$page.url.pathname.startsWith('/docs')}>Docs</a>
-			<a href="/demo" rel="noopener noreferrer" target="_blank">Demo</a>
+			<a href="/demo">Demo</a>
 			<a href="https://github.com/meursyphus/ssgoi" aria-label="GitHub">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
