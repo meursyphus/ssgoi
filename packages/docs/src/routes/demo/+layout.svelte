@@ -5,29 +5,47 @@
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
-
 	let { children }: Props = $props();
 </script>
 
-<div class="root">
+<div class="demo-root">
 	<header>
-		<a class="home" href="/demo">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="24"
-				height="24"
-				fill="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z" />
-			</svg>
-		</a>
-		<nav>
-			<a href="/demo/blog">Blog</a>
-			<a href="/demo/post">Post</a>
-			<a href="/demo/image">Image</a>
-			<a href="/demo/pinterest">Pinterest</a>
-		</nav>
+		<div class="header-nav">
+			<a aria-label="Demo Home" class="home" href="/demo">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					fill="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path d="M12 3l9 9h-3v9h-6v-6h-6v6H3v-9H0l12-9z" />
+				</svg>
+			</a>
+			<nav>
+				<a href="/demo/blog">Blog</a>
+				<a href="/demo/post">Post</a>
+				<a href="/demo/image">Image</a>
+				<a href="/demo/pinterest">Pinterest</a>
+			</nav>
+			<a href="/" class="exit" aria-label="Back to main site">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					viewBox="0 0 24 24"
+				>
+					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+					<polyline points="16 17 21 12 16 7" />
+					<line x1="21" y1="12" x2="9" y2="12" />
+				</svg>
+			</a>
+		</div>
 	</header>
 	<main>
 		<Ssgoi {onNavigate} {config}>
@@ -36,53 +54,66 @@
 	</main>
 	<footer>
 		<p>&copy; 2023 SSGOI Demo. All rights reserved.</p>
-		<div class="social-links">
-			<a href="#" aria-label="Facebook">FB</a>
-			<a href="#" aria-label="Twitter">TW</a>
-			<a href="#" aria-label="Instagram">IG</a>
-		</div>
 	</footer>
 </div>
 
 <style>
-	.root {
-		font-family: 'Roboto', sans-serif;
-		background-color: #f0f4f8;
-		color: #333;
+	.demo-root {
+		font-family: var(--font-sans);
+		color: var(--color-text);
 		margin: 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+		background: var(--color-bg);
 	}
 
-	main > :global(div > div) {
-		background-color: #f0f4f8;
+	:global(.demo-root) {
+		--font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+		--font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+		--color-bg: #ffffff;
+		--color-text: #1a1a1a;
+		--color-accent: #2a2a2a;
+		--color-subtle: #f5f5f5;
+		--header-bg: var(--color-bg);
+		--header-text: var(--color-text);
+		--footer-bg: var(--color-subtle);
+		--footer-text: var(--color-text);
 	}
 
 	header {
-		background-color: #3498db;
-		padding: 1rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		background-color: var(--header-bg);
+		padding: 1.5rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	}
+
+	.header-nav {
+		position: relative;
+		display: flex;
+		align-items: center;
+		width: 100%;
+		gap: 2rem;
 	}
 
 	nav {
 		display: flex;
 		justify-content: center;
-		gap: 2rem;
+		gap: 3rem;
+		margin-inline: auto;
 	}
 
 	header a {
-		color: white;
+		color: var(--header-text);
 		text-decoration: none;
-		font-weight: bold;
-		font-size: 1.1rem;
-		transition: color 0.3s ease;
-		position: relative;
+		font-family: var(--font-mono);
+		font-size: 0.9rem;
+		letter-spacing: 0.5px;
+		transition: opacity 0.2s ease;
 	}
 
 	header a:hover {
-		color: #ecf0f1;
+		opacity: 0.7;
 	}
 
 	.home {
@@ -90,25 +121,61 @@
 		left: 32px;
 	}
 
+	.home svg {
+		opacity: 1;
+	}
+
+	.home:hover svg {
+		opacity: 1;
+	}
+
+	.exit {
+		color: var(--header-text);
+		transition: all 0.2s ease;
+		padding: 0.5rem;
+		border-radius: 0.25rem;
+		margin-right: 1rem;
+		position: absolute;
+		right: 32px;
+	}
+
+	.exit:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
 	main {
 		flex-grow: 1;
-		padding: 2rem;
+		width: 100%;
+		max-width: 1400px;
+		margin: 0 auto;
+		box-sizing: border-box;
 	}
 
 	footer {
-		background-color: #34495e;
-		color: white;
-		padding: 1rem;
+		background-color: var(--footer-bg);
+		color: var(--footer-text);
+		padding: 1.5rem;
 		text-align: center;
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+		border-top: 1px solid rgba(0, 0, 0, 0.1);
 	}
 
-	.social-links {
-		margin-top: 0.5rem;
-	}
+	@media (max-width: 640px) {
+		nav {
+			gap: 1.5rem;
+		}
 
-	.social-links a {
-		color: white;
-		margin: 0 0.5rem;
-		text-decoration: none;
+		.home {
+			left: 16px;
+		}
+
+		.exit {
+			margin-right: 0.5rem;
+		}
+
+		main {
+			padding: 1rem;
+		}
 	}
 </style>

@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { items } from '../images';
+	import { goto } from '$app/navigation';
 
 	const color = $page.params.color;
 	const height = 300; // This should be dynamically fetched based on the color
@@ -24,15 +25,21 @@
 		copied = true;
 		setTimeout(() => (copied = false), 2000);
 	}
+
+	function goBack() {
+		window.history.back();
+	}
 </script>
 
-<PageTransition>
+<PageTransition class="pinterest-page-detail">
 	<div class="root">
-		<div
+		<button
+			aria-label="color box"
+			onclick={goBack}
 			data-pinterest-key={color}
 			class="color-box"
 			style="background-color: {color}; aspect-ratio: {ratio};"
-		></div>
+		></button>
 		<div class="content">
 			<div class="color-info">
 				<h1>{color}</h1>
@@ -45,13 +52,18 @@
 				This is a beautiful {color} box with a height of {height}px. It's part of our unique
 				collection of colored boxes in the masonry gallery.
 			</p>
-			<a href="/demo/pinterest" class="back-link">Back to Pinterest</a>
+			<button class="back-link" onclick={goBack}>Back to Pinterest</button>
 		</div>
 	</div>
 </PageTransition>
 
 <style>
+	:global(.pinterest-page-detail) {
+		background: white;
+	}
+
 	.root {
+		padding: 2rem;
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
@@ -114,6 +126,11 @@
 		font-weight: bold;
 		color: #3498db;
 		transition: color 0.3s ease;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+		font-size: 1rem;
 	}
 
 	.back-link:hover {
