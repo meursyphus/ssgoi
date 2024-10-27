@@ -5,7 +5,7 @@
 	let [minColWidth, maxColWidth, gap] = [200, 800, 20];
 </script>
 
-<PageTransition>
+<PageTransition class="pinterest-page">
 	<div class="masonry-gallery">
 		<div class="h1">Color Masonry Gallery</div>
 		<p class="intro">
@@ -34,6 +34,10 @@
 </PageTransition>
 
 <style>
+	:global(.pinterest-page) {
+		background: white;
+	}
+
 	.h1 {
 		color: #2c3e50;
 		text-align: center;
@@ -49,6 +53,9 @@
 	}
 	p {
 		margin: 0.5rem 0 0;
+	}
+	.masonry-gallery {
+		padding: 2rem;
 	}
 	.masonry-item {
 		display: flex;

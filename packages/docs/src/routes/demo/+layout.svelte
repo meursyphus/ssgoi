@@ -99,7 +99,6 @@
 
 	main {
 		flex-grow: 1;
-		padding: 2rem;
 		width: 100%;
 		max-width: 1400px;
 		margin: 0 auto;

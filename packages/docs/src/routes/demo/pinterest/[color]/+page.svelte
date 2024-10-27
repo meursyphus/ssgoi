@@ -26,7 +26,7 @@
 	}
 </script>
 
-<PageTransition>
+<PageTransition class="pinterest-page-detail">
 	<div class="root">
 		<div
 			data-pinterest-key={color}
@@ -51,7 +51,12 @@
 </PageTransition>
 
 <style>
+	:global(.pinterest-page-detail) {
+		background: white;
+	}
+
 	.root {
+		padding: 2rem;
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
