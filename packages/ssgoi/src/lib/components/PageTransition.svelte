@@ -9,7 +9,6 @@
 	}
 
 	let { class: className = '', children }: Props = $props();
-	
 
 	const config = context.config.get();
 	const scrollHistoryContext = context.scrollHistory.get();
@@ -21,9 +20,7 @@
 	const getToScrollTop = () =>
 		(pageTransitionContext.to == null
 			? undefined
-			: scrollHistoryContext[pageTransitionContext.to.url.pathname]) ??
-		document.documentElement.scrollTop ??
-		0;
+			: scrollHistoryContext[pageTransitionContext.to.url.pathname]) ?? 0;
 
 	function transitionIn(
 		node: HTMLElement,
