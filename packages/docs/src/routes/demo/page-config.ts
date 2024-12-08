@@ -52,6 +52,32 @@ const config = createTransitionConfig({
       }
     },
     {
+      from: '/demo/post/*',
+      to: '/demo/blog',
+      transitions: transitions.scrollUpToDown()
+    },
+    {
+      from: '/demo/blog',
+      to: '/demo/post/*',
+      transitions: transitions.scrollDownToUp()
+    },
+    {
+      from: '/demo/post/*',
+      to: '/demo/image',
+      transitions: {
+        in: transitions.ripple().in,
+        out: transitions.fade().out
+      }
+    },
+    {
+      from: '/demo/image',
+      to: '/demo/post/*',
+      transitions: {
+        in: transitions.none().in,
+        out: transitions.ripple().out
+      }
+    },
+    {
       from: '/demo/image',
       to: '/demo/post',
       transitions: {

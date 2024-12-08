@@ -38,7 +38,7 @@
 	const post = posts.find(p => p.id.toString() === slug.toString());
 </script>
 
-<PageTransition class="post-page">
+<PageTransition class="post-page=detail">
 	{#if post}
 	<div class="posts-container">
 		<header>
@@ -69,8 +69,12 @@
 </PageTransition>
 
 <style>
+	:global(.post-page-detail) {
+		background: white;
+	}
+
 	.posts-container {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
 		padding: 4rem 2rem;
 	}
