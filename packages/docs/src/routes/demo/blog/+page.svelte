@@ -4,22 +4,32 @@
 	import { PageTransition } from 'ssgoi';
 	import { fade } from 'svelte/transition';
 
-	type Blog = {
-		id: string;
+	type Post = {
+		id: number;
 		name: string;
+		content: string;
 		description: string;
+		author: string;
 		date: string;
+		tags: string[];
 		readTime: number;
 	};
 
 	faker.seed(123);
-	const blogs: Blog[] = new FixtureFactory(() => ({
-		id: faker.number.hex({ min: 0, max: 65535123 }),
+	const postFactory = new FixtureFactory<Post>(() => (
+		{
+		id: faker.number.int({ min: 0, max: 9999 }),
 		name: faker.lorem.sentence(),
+		content: faker.lorem.paragraphs(5),
 		description: faker.lorem.paragraph(),
+		author: faker.person.fullName(),
+		tags: faker.helpers.arrayElements(['Tech', 'Life', 'Food', 'Travel', 'Health'], 3),
 		date: faker.date.recent().toLocaleDateString(),
 		readTime: faker.number.int({ min: 2, max: 15 })
-	})).createList(10);
+	}
+	));
+
+	const posts: Post[] = postFactory.createList(5);
 </script>
 
 <PageTransition class="blog-page">
@@ -30,7 +40,7 @@
 		</header>
 
 		<div class="blog-grid">
-			{#each blogs as blog (blog.id)}
+			{#each posts as blog (blog.id)}
 				<article class="blog-card" in:fade={{ duration: 300, delay: 150 }}>
 					<div class="card-content">
 						<div class="blog-meta">

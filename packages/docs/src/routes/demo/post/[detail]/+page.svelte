@@ -4,16 +4,21 @@
 	import { PageTransition } from 'ssgoi';
 	import { fade } from 'svelte/transition';
 
+	import {page} from '$app/stores'
+	
+	const slug = $page.params.detail;
+
 	type Post = {
 		id: number;
 		name: string;
 		content: string;
-		description: string;
 		author: string;
 		date: string;
 		tags: string[];
+		description: string;
 		readTime: number;
 	};
+
 
 	faker.seed(123);
 	const postFactory = new FixtureFactory<Post>(() => (
@@ -28,46 +33,46 @@
 		readTime: faker.number.int({ min: 2, max: 15 })
 	}
 	));
-
 	const posts: Post[] = postFactory.createList(5);
+
+	const post = posts.find(p => p.id.toString() === slug.toString());
 </script>
 
-<PageTransition class="post-page">
+<PageTransition class="post-page=detail">
+	{#if post}
 	<div class="posts-container">
 		<header>
-			<h1>Featured Posts</h1>
-			<div class="header-decoration"></div>
+			<div class="tags">
+				{#each post.tags as tag}
+					<span class="tag">{tag}</span>
+				{/each}
+			</div>
+			<h1>{post.name}</h1>
+			<div class="post-meta">
+				<div class="author-info">
+					<span class="author-avatar" />
+					<span class="author-name">{post.author}</span>
+				</div>
+				<time datetime={post.date}>{post.date}</time>
+			</div>
 		</header>
 
-		<div class="posts-grid">
-			{#each posts as post (post.id)}
-				<article class="post" in:fade={{ duration: 300, delay: 150 }}>
-					<div class="tags">
-						{#each post.tags as tag}
-							<span class="tag">{tag}</span>
-						{/each}
-					</div>
-
-					<h2>{post.name}</h2>
-
-					<div class="post-meta">
-						<div class="author-info">
-							<span class="author-avatar" />
-							<span class="author-name">{post.author}</span>
-						</div>
-						<time datetime={post.date}>{post.date}</time>
-					</div>
-
-					<div class="content">
-						<p>{post.content}</p>
-					</div>
-				</article>
-			{/each}
-		</div>
+		<article class="post" in:fade={{ duration: 300, delay: 150 }}>
+			<div class="content">
+				<p>{post.content}</p>
+			</div>
+		</article>
 	</div>
+	{:else}
+	<div class="error">Post not found</div>
+	{/if}
 </PageTransition>
 
 <style>
+	:global(.post-page-detail) {
+		background: white;
+	}
+
 	.posts-container {
 		max-width: 1200px;
 		margin: 0 auto;
@@ -75,44 +80,16 @@
 	}
 
 	header {
-		text-align: center;
 		margin-bottom: 4rem;
 		position: relative;
 	}
 
-	.header-decoration {
-		position: absolute;
-		width: 60px;
-		height: 2px;
-		background: black;
-		bottom: -1rem;
-		left: 50%;
-		transform: translateX(-50%);
-	}
-
-	h1 {
-		font-size: 2.5rem;
-		font-weight: 300;
-		letter-spacing: -0.5px;
-	}
-
-	.posts-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 2rem;
-	}
 
 	.post {
 		background-color: white;
 		border-radius: 12px;
-		padding: 2rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 		transition: all 0.3s ease;
-	}
-
-	.post:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 	}
 
 	.tags {
@@ -131,7 +108,7 @@
 		letter-spacing: 0.02em;
 	}
 
-	h2 {
+	h1 {
 		font-size: 1.75rem;
 		margin-bottom: 1.5rem;
 		font-weight: 500;
@@ -180,18 +157,6 @@
 
 	.content p {
 		margin-bottom: 1rem;
-	}
-
-	@media (min-width: 768px) {
-		.posts-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.post {
-			padding: 3rem;
-		}
 	}
 
 	:global(.post-page) {
