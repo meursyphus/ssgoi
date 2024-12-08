@@ -1,17 +1,21 @@
 <script lang="ts">
-	import { faker } from '@faker-js/faker';
 	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
+	import { faker } from '@faker-js/faker';
 	import { PageTransition } from 'ssgoi';
 	import { fade } from 'svelte/transition';
+
+	import {page} from '$app/stores'
+	
+	const slug = $page.params.detail;
 
 	type Post = {
 		id: number;
 		name: string;
 		content: string;
-		description: string;
 		author: string;
 		date: string;
 		tags: string[];
+		description: string;
 		readTime: number;
 	};
 
@@ -28,43 +32,50 @@
 		readTime: faker.number.int({ min: 2, max: 15 })
 	}
 	));
-
 	const posts: Post[] = postFactory.createList(5);
+
+	const post = posts.find(p => p.id.toString() === slug.toString());
 </script>
 
-<PageTransition class="blog-page">
-	<div class="blog-container">
+<PageTransition class="post-page">
+	<div class="posts-container">
 		<header>
-			<h1>Latest Blog Posts</h1>
-			<div class="header-decoration" />
+			<h1>Featured Posts</h1>
+			<div class="header-decoration"></div>
 		</header>
 
-		<div class="blog-grid">
-			{#each posts as blog (blog.id)}
-				<article class="blog-card" in:fade={{ duration: 300, delay: 150 }}>
-					<div class="card-content">
-						<div class="blog-meta">
-							<time datetime={blog.date}>{blog.date}</time>
-							<span class="dot">·</span>
-							<span class="read-time">{blog.readTime} min read</span>
+		{#if post}
+		<div class="posts-grid">
+				<article class="post" in:fade={{ duration: 300, delay: 150 }}>
+					<div class="tags">
+						{#each post.tags as tag}
+							<span class="tag">{tag}</span>
+						{/each}
+					</div>
+
+					<h2>{post.name}</h2>
+
+					<div class="post-meta">
+						<div class="author-info">
+							<span class="author-avatar" />
+							<span class="author-name">{post.author}</span>
 						</div>
+						<time datetime={post.date}>{post.date}</time>
+					</div>
 
-						<h2>{blog.name}</h2>
-						<p class="description">{blog.description}</p>
-
-						<a href={`/demo/post/${blog.id}`} class="read-more">
-							Read Article
-							<span class="arrow">→</span>
-						</a>
+					<div class="content">
+						<p>{post.content}</p>
 					</div>
 				</article>
-			{/each}
 		</div>
+		{:else}
+		<div class="error">Post not found</div>
+		{/if}
 	</div>
 </PageTransition>
 
 <style>
-	.blog-container {
+	.posts-container {
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 4rem 2rem;
@@ -92,93 +103,105 @@
 		letter-spacing: -0.5px;
 	}
 
-	.blog-grid {
+	.posts-grid {
 		display: grid;
 		grid-template-columns: 1fr;
 		gap: 2rem;
 	}
 
-	.blog-card {
+	.post {
 		background-color: white;
 		border-radius: 12px;
-		overflow: hidden;
+		padding: 2rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 		transition: all 0.3s ease;
 	}
 
-	.blog-card:hover {
+	.post:hover {
 		transform: translateY(-4px);
 		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 	}
 
-	.card-content {
-		padding: 2rem;
-	}
-
-	.blog-meta {
-		font-size: 0.875rem;
-		color: #666;
-		margin-bottom: 1rem;
+	.tags {
 		display: flex;
-		align-items: center;
 		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin-bottom: 1.5rem;
 	}
 
-	.dot {
-		opacity: 0.5;
+	.tag {
+		background-color: #f7f3ee;
+		padding: 0.4rem 0.8rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		letter-spacing: 0.02em;
 	}
 
 	h2 {
-		font-size: 1.5rem;
-		margin-bottom: 1rem;
+		font-size: 1.75rem;
+		margin-bottom: 1.5rem;
 		font-weight: 500;
 		line-height: 1.3;
 	}
 
-	.description {
-		color: #2c2c2c;
-		line-height: 1.6;
-		margin-bottom: 1.5rem;
-		opacity: 0.8;
+	.post-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 2rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 	}
 
-	.read-more {
-		display: inline-flex;
+	.author-info {
+		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		text-decoration: none;
+		gap: 0.75rem;
+	}
+
+	.author-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: #f7f3ee;
+		display: block;
+	}
+
+	.author-name {
+		color: #1b315e;
 		font-weight: 500;
 		font-size: 0.875rem;
-		padding: 0.5rem 0;
-		border-bottom: 1px solid transparent;
-		transition: all 0.2s ease;
 	}
 
-	.arrow {
-		transition: transform 0.2s ease;
+	time {
+		color: #666;
+		font-size: 0.875rem;
 	}
 
-	.read-more:hover {
-		border-bottom-color: #1b315e;
+	.content {
+		color: #2c2c2c;
+		line-height: 1.8;
+		opacity: 0.9;
 	}
 
-	.read-more:hover .arrow {
-		transform: translateX(4px);
+	.content p {
+		margin-bottom: 1rem;
 	}
 
 	@media (min-width: 768px) {
-		.blog-grid {
+		.posts-grid {
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
 	@media (min-width: 1024px) {
-		.blog-grid {
-			grid-template-columns: repeat(3, 1fr);
+		.post {
+			padding: 3rem;
 		}
 	}
 
-	:global(.blog-page) {
+	:global(.post-page) {
 		background: white;
 	}
 </style>

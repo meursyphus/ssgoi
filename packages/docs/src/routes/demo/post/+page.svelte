@@ -6,22 +6,29 @@
 
 	type Post = {
 		id: number;
-		title: string;
+		name: string;
 		content: string;
+		description: string;
 		author: string;
 		date: string;
 		tags: string[];
+		readTime: number;
 	};
 
 	faker.seed(123);
-	const postFactory = new FixtureFactory<Post>(() => ({
+	const postFactory = new FixtureFactory<Post>(() => (
+		{
 		id: faker.number.int({ min: 0, max: 9999 }),
-		title: faker.lorem.sentence(),
+		name: faker.lorem.sentence(),
 		content: faker.lorem.paragraphs(5),
+		description: faker.lorem.paragraph(),
 		author: faker.person.fullName(),
+		tags: faker.helpers.arrayElements(['Tech', 'Life', 'Food', 'Travel', 'Health'], 3),
 		date: faker.date.recent().toLocaleDateString(),
-		tags: faker.helpers.arrayElements(['Tech', 'Life', 'Food', 'Travel', 'Health'], 3)
-	}));
+		readTime: faker.number.int({ min: 2, max: 15 })
+	}
+	));
+
 	const posts: Post[] = postFactory.createList(5);
 </script>
 
@@ -41,7 +48,7 @@
 						{/each}
 					</div>
 
-					<h2>{post.title}</h2>
+					<h2>{post.name}</h2>
 
 					<div class="post-meta">
 						<div class="author-info">
