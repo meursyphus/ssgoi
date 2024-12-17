@@ -170,13 +170,20 @@
 
 	@media (min-width: 768px) {
 		.blog-grid {
-			grid-template-columns: repeat(2, 1fr);
+			display: flex;
+			flex-direction: column;
 		}
-	}
 
-	@media (min-width: 1024px) {
-		.blog-grid {
-			grid-template-columns: repeat(3, 1fr);
+		.blog-card {
+			display: flex;
+			flex-direction: column;
+			height: fit-content;
+			width: 100%;
+		}
+
+		.card-cover-image {
+			width: 100%;
+			height: 300px;
 		}
 	}
 
