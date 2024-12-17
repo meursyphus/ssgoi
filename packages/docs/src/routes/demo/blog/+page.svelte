@@ -1,99 +1,94 @@
 <script lang="ts">
-	import { faker } from '@faker-js/faker';
-	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
 	import { PageTransition } from 'ssgoi';
 	import { fade } from 'svelte/transition';
-
-	type Blog = {
-		id: string;
-		name: string;
-		description: string;
-		date: string;
-		readTime: number;
-	};
-
-	faker.seed(123);
-	const blogs: Blog[] = new FixtureFactory(() => ({
-		id: faker.number.hex({ min: 0, max: 65535123 }),
-		name: faker.lorem.sentence(),
-		description: faker.lorem.paragraph(),
-		date: faker.date.recent().toLocaleDateString(),
-		readTime: faker.number.int({ min: 2, max: 15 })
-	})).createList(10);
+	import { POSTS } from './blog-mock';
 </script>
 
 <PageTransition class="blog-page">
 	<div class="blog-container">
-		<header>
-			<h1>Latest Blog Posts</h1>
-			<div class="header-decoration" />
-		</header>
+		<h1>Explore Blog Examples</h1>
+		<p class="intro">
+			Check Out Examples of Built-in Functions! Use the built-in functions to make your site more
+			dynamic and engaging.
+		</p>
 
-		<div class="blog-grid">
-			{#each blogs as blog (blog.id)}
-				<article class="blog-card" in:fade={{ duration: 300, delay: 150 }}>
+		{#each POSTS as blog (blog.id)}
+			<a href={`/demo/blog/${blog.name.toLocaleLowerCase()}`} class="read-more">
+				<article
+					class="blog-card"
+					in:fade={{ duration: 300, delay: 150 }}
+					data-hero-key={blog.name.toLocaleLowerCase()}
+					data-pinterest-key={blog.name.toLocaleLowerCase()}
+				>
+					<img class="card-cover-image" src={blog.coverImage} alt="POST_IMAGE" />
 					<div class="card-content">
-						<div class="blog-meta">
-							<time datetime={blog.date}>{blog.date}</time>
-							<span class="dot">·</span>
-							<span class="read-time">{blog.readTime} min read</span>
+						<div class="card-content-header">
+							<h2>{blog.name}</h2>
 						</div>
 
-						<h2>{blog.name}</h2>
+						<div class="tags">
+							{#each blog.tags as tag}
+								<span class="tag">{tag}</span>
+							{/each}
+						</div>
+
 						<p class="description">{blog.description}</p>
 
-						<a href={`/demo/post/${blog.id}`} class="read-more">
-							Read Article
-							<span class="arrow">→</span>
-						</a>
+						<div class="author">
+							<span class="author-avatar"></span>
+							<span>{blog.author}</span>
+						</div>
+
+						<div class="meta">
+							<div class="blog-meta">
+								<time datetime={blog.date}>{blog.date}</time>
+								<span class="dot">·</span>
+								<span class="read-time">{blog.readTime} min read</span>
+							</div>
+						</div>
 					</div>
 				</article>
-			{/each}
-		</div>
+			</a>
+		{/each}
 	</div>
 </PageTransition>
 
 <style>
 	.blog-container {
 		max-width: 1200px;
-		margin: 0 auto;
-		padding: 4rem 2rem;
-	}
-
-	header {
+		margin: auto;
+		padding: 2rem;
 		text-align: center;
-		margin-bottom: 4rem;
-		position: relative;
-	}
-
-	.header-decoration {
-		position: absolute;
-		width: 60px;
-		height: 2px;
-		background: black;
-		bottom: -1rem;
-		left: 50%;
-		transform: translateX(-50%);
 	}
 
 	h1 {
-		font-size: 2.5rem;
-		font-weight: 300;
-		letter-spacing: -0.5px;
+		color: #2c3e50;
+		margin-bottom: 1rem;
 	}
 
-	.blog-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 2rem;
+	.intro {
+		color: #7f8c8d;
+		max-width: 600px;
+		margin: 0 auto 2rem;
+	}
+
+	.read-more {
+		width: 100%;
+		height: 100%;
 	}
 
 	.blog-card {
+		display: grid;
+		grid-template-columns: 600px 1fr;
 		background-color: white;
 		border-radius: 12px;
 		overflow: hidden;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 		transition: all 0.3s ease;
+		margin-bottom: 2rem;
+		text-align: left;
+		width: 100%;
+		height: 325px;
 	}
 
 	.blog-card:hover {
@@ -101,17 +96,39 @@
 		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 	}
 
+	.card-cover-image {
+		width: 600px;
+		height: 100%;
+		object-fit: cover;
+		transition: all 0.3s ease;
+	}
+
 	.card-content {
-		padding: 2rem;
+		width: 100%;
+		padding: 0 3rem;
+	}
+	.card-content-header {
+		width: 100%;
+	}
+
+	.meta {
+		display: flex;
+		height: fit-content;
+		padding: 10px 0;
+		align-items: center;
+		gap: 35px;
 	}
 
 	.blog-meta {
-		font-size: 0.875rem;
-		color: #666;
-		margin-bottom: 1rem;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+		height: fit-content;
+		gap: 15px;
+		color: #797777;
+		font-family: Inter;
+		font-size: 0.8rem;
+		font-style: normal;
+		font-weight: 400;
+		line-height: normal;
+		letter-spacing: 1.6px;
 	}
 
 	.dot {
@@ -119,17 +136,25 @@
 	}
 
 	h2 {
-		font-size: 1.5rem;
-		margin-bottom: 1rem;
-		font-weight: 500;
-		line-height: 1.3;
+		color: #000;
+		font-family: Inter;
+		font-size: 30px;
+		font-style: normal;
+		font-weight: 700;
+		line-height: normal;
+		letter-spacing: 3px;
 	}
 
 	.description {
-		color: #2c2c2c;
-		line-height: 1.6;
-		margin-bottom: 1.5rem;
-		opacity: 0.8;
+		width: 90%;
+		padding: 0 auto;
+		color: #333;
+		font-family: Inter;
+		font-size: 0.8rem;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 30px;
+		letter-spacing: 1.6px;
 	}
 
 	.read-more {
@@ -139,36 +164,88 @@
 		text-decoration: none;
 		font-weight: 500;
 		font-size: 0.875rem;
-		padding: 0.5rem 0;
-		border-bottom: 1px solid transparent;
+		padding: 0 10px;
 		transition: all 0.2s ease;
-	}
-
-	.arrow {
-		transition: transform 0.2s ease;
 	}
 
 	.read-more:hover {
 		border-bottom-color: #1b315e;
 	}
 
-	.read-more:hover .arrow {
-		transform: translateX(4px);
-	}
-
-	@media (min-width: 768px) {
-		.blog-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.blog-grid {
-			grid-template-columns: repeat(3, 1fr);
-		}
-	}
-
 	:global(.blog-page) {
 		background: white;
+	}
+
+	.tags {
+		display: flex;
+		align-items: center;
+		gap: 35px;
+		flex-shrink: 0;
+	}
+
+	.tag {
+		display: flex;
+
+		padding: 0 1rem;
+		justify-content: center;
+		align-items: center;
+		flex-shrink: 0;
+		border-radius: 15px;
+		background: #e0f0ff;
+		color: #6c8aee;
+		font-family: Inter;
+		font-size: 1rem;
+		font-style: normal;
+		font-weight: 700;
+		line-height: normal;
+		letter-spacing: 1.6px;
+	}
+
+	.author {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		color: #111;
+	}
+
+	.author-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: #d1e0e6;
+		display: block;
+	}
+
+	@media (max-width: 1024px) {
+		.blog-card {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			width: 100%;
+		}
+
+		.card-cover-image {
+			width: 100%;
+			height: 300px;
+		}
+
+		.tags {
+			display: none;
+		}
+	}
+
+	@media (max-width: 425px) {
+		.blog-container {
+			padding: 0;
+		}
+
+		.card-content {
+			padding: 0.5rem;
+		}
+
+		.card-cover-image {
+			width: 100%;
+			height: 150px;
+		}
 	}
 </style>

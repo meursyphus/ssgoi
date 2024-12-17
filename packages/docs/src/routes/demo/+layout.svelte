@@ -2,6 +2,7 @@
 	import { onNavigate } from '$app/navigation';
 	import { Ssgoi } from 'ssgoi';
 	import config from './page-config.js';
+
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
@@ -24,7 +25,6 @@
 			</a>
 			<nav>
 				<a href="/demo/blog">Blog</a>
-				<a href="/demo/post">Post</a>
 				<a href="/demo/image">Image</a>
 				<a href="/demo/pinterest">Pinterest</a>
 			</nav>
@@ -161,9 +161,21 @@
 		border-top: 1px solid rgba(0, 0, 0, 0.1);
 	}
 
+	@media (max-width: 768px) {
+		nav {
+			gap: 0;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		header a {
+			font-size: 0.7rem;
+		}
+	}
+
 	@media (max-width: 640px) {
 		nav {
-			gap: 1.5rem;
+			gap: 1rem;
 		}
 
 		.home {
@@ -171,7 +183,7 @@
 		}
 
 		.exit {
-			margin-right: 0.5rem;
+			right: 16px;
 		}
 
 		main {
