@@ -24,7 +24,6 @@
 			</a>
 			<nav>
 				<a href="/demo/blog">Blog</a>
-				<a href="/demo/post">Post</a>
 				<a href="/demo/image">Image</a>
 				<a href="/demo/pinterest">Pinterest</a>
 			</nav>
