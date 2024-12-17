@@ -12,46 +12,44 @@
 			dynamic and engaging.
 		</p>
 
-		<div class="blog-grid">
-			{#each POSTS as blog (blog.id)}
-				<a href={`/demo/blog/${blog.name.toLocaleLowerCase()}`} class="read-more">
-					<article
-						class="blog-card"
-						in:fade={{ duration: 300, delay: 150 }}
-						data-hero-key={blog.name.toLocaleLowerCase()}
-						data-pinterest-key={blog.name.toLocaleLowerCase()}
-					>
-						<img class="card-cover-image" src={blog.coverImage} alt="POST_IMAGE" />
-						<div class="card-content">
-							<div class="card-content-header">
-								<h2>{blog.name}</h2>
-							</div>
+		{#each POSTS as blog (blog.id)}
+			<a href={`/demo/blog/${blog.name.toLocaleLowerCase()}`} class="read-more">
+				<article
+					class="blog-card"
+					in:fade={{ duration: 300, delay: 150 }}
+					data-hero-key={blog.name.toLocaleLowerCase()}
+					data-pinterest-key={blog.name.toLocaleLowerCase()}
+				>
+					<img class="card-cover-image" src={blog.coverImage} alt="POST_IMAGE" />
+					<div class="card-content">
+						<div class="card-content-header">
+							<h2>{blog.name}</h2>
+						</div>
 
-							<div class="tags">
-								{#each blog.tags as tag}
-									<span class="tag">{tag}</span>
-								{/each}
-							</div>
+						<div class="tags">
+							{#each blog.tags as tag}
+								<span class="tag">{tag}</span>
+							{/each}
+						</div>
 
-							<p class="description">{blog.description}</p>
+						<p class="description">{blog.description}</p>
 
-							<div class="author">
-								<span class="author-avatar"></span>
-								<span>{blog.author}</span>
-							</div>
+						<div class="author">
+							<span class="author-avatar"></span>
+							<span>{blog.author}</span>
+						</div>
 
-							<div class="meta">
-								<div class="blog-meta">
-									<time datetime={blog.date}>{blog.date}</time>
-									<span class="dot">·</span>
-									<span class="read-time">{blog.readTime} min read</span>
-								</div>
+						<div class="meta">
+							<div class="blog-meta">
+								<time datetime={blog.date}>{blog.date}</time>
+								<span class="dot">·</span>
+								<span class="read-time">{blog.readTime} min read</span>
 							</div>
 						</div>
-					</article>
-				</a>
-			{/each}
-		</div>
+					</div>
+				</article>
+			</a>
+		{/each}
 	</div>
 </PageTransition>
 
@@ -74,6 +72,11 @@
 		margin: 0 auto 2rem;
 	}
 
+	.read-more {
+		width: 100%;
+		height: 100%;
+	}
+
 	.blog-card {
 		display: grid;
 		grid-template-columns: 600px 1fr;
@@ -84,6 +87,7 @@
 		transition: all 0.3s ease;
 		margin-bottom: 2rem;
 		text-align: left;
+		width: 100%;
 		height: 325px;
 	}
 
@@ -120,7 +124,7 @@
 		gap: 15px;
 		color: #797777;
 		font-family: Inter;
-		font-size: 16px;
+		font-size: 0.8rem;
 		font-style: normal;
 		font-weight: 400;
 		line-height: normal;
@@ -146,7 +150,7 @@
 		padding: 0 auto;
 		color: #333;
 		font-family: Inter;
-		font-size: 16px;
+		font-size: 0.8rem;
 		font-style: normal;
 		font-weight: 400;
 		line-height: 30px;
@@ -168,32 +172,12 @@
 		border-bottom-color: #1b315e;
 	}
 
-	@media (min-width: 768px) {
-		.blog-grid {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.blog-card {
-			display: flex;
-			flex-direction: column;
-			height: fit-content;
-			width: 100%;
-		}
-
-		.card-cover-image {
-			width: 100%;
-			height: 300px;
-		}
-	}
-
 	:global(.blog-page) {
 		background: white;
 	}
 
 	.tags {
 		display: flex;
-		width: 100px;
 		align-items: center;
 		gap: 35px;
 		flex-shrink: 0;
@@ -201,18 +185,16 @@
 
 	.tag {
 		display: flex;
-		width: 100px;
-		height: 30px;
+
 		padding: 0 1rem;
 		justify-content: center;
 		align-items: center;
-		gap: 10px;
 		flex-shrink: 0;
 		border-radius: 15px;
 		background: #e0f0ff;
 		color: #6c8aee;
 		font-family: Inter;
-		font-size: 16px;
+		font-size: 1rem;
 		font-style: normal;
 		font-weight: 700;
 		line-height: normal;
@@ -232,5 +214,38 @@
 		border-radius: 50%;
 		background: #d1e0e6;
 		display: block;
+	}
+
+	@media (max-width: 1024px) {
+		.blog-card {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			width: 100%;
+		}
+
+		.card-cover-image {
+			width: 100%;
+			height: 300px;
+		}
+
+		.tags {
+			display: none;
+		}
+	}
+
+	@media (max-width: 425px) {
+		.blog-container {
+			padding: 0;
+		}
+
+		.card-content {
+			padding: 0.5rem;
+		}
+
+		.card-cover-image {
+			width: 100%;
+			height: 150px;
+		}
 	}
 </style>
