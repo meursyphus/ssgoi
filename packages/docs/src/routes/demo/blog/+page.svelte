@@ -12,39 +12,46 @@
 			dynamic and engaging.
 		</p>
 
-		{#each POSTS as blog (blog.id)}
-			<a href={`/demo/post/${blog.name.toLocaleLowerCase()}`} class="read-more">
-				<article class="blog-card" in:fade={{ duration: 300, delay: 150 }}>
-					<img class="card-cover-image" src={blog.coverImage} alt="POST_IMAGE" />
-					<div class="card-content">
-						<div class="card-content-header">
-							<h2>{blog.name}</h2>
-						</div>
+		<div class="blog-grid">
+			{#each POSTS as blog (blog.id)}
+				<a href={`/demo/blog/${blog.name.toLocaleLowerCase()}`} class="read-more">
+					<article
+						class="blog-card"
+						in:fade={{ duration: 300, delay: 150 }}
+						data-hero-key={blog.name.toLocaleLowerCase()}
+						data-pinterest-key={blog.name.toLocaleLowerCase()}
+					>
+						<img class="card-cover-image" src={blog.coverImage} alt="POST_IMAGE" />
+						<div class="card-content">
+							<div class="card-content-header">
+								<h2>{blog.name}</h2>
+							</div>
 
-						<div class="tags">
-							{#each blog.tags as tag}
-								<span class="tag">{tag}</span>
-							{/each}
-						</div>
+							<div class="tags">
+								{#each blog.tags as tag}
+									<span class="tag">{tag}</span>
+								{/each}
+							</div>
 
-						<p class="description">{blog.description}</p>
+							<p class="description">{blog.description}</p>
 
-						<div class="author">
-							<img src={blog.profileImage} alt="Profile_Image" />
-							<span>{blog.author}</span>
-						</div>
+							<div class="author">
+								<span class="author-avatar"></span>
+								<span>{blog.author}</span>
+							</div>
 
-						<div class="meta">
-							<div class="blog-meta">
-								<time datetime={blog.date}>{blog.date}</time>
-								<span class="dot">·</span>
-								<span class="read-time">{blog.readTime} min read</span>
+							<div class="meta">
+								<div class="blog-meta">
+									<time datetime={blog.date}>{blog.date}</time>
+									<span class="dot">·</span>
+									<span class="read-time">{blog.readTime} min read</span>
+								</div>
 							</div>
 						</div>
-					</div>
-				</article>
-			</a>
-		{/each}
+					</article>
+				</a>
+			{/each}
+		</div>
 	</div>
 </PageTransition>
 
@@ -78,7 +85,6 @@
 		margin-bottom: 2rem;
 		text-align: left;
 		height: 325px;
-		padding: 2rem;
 	}
 
 	.blog-card:hover {
@@ -95,7 +101,7 @@
 
 	.card-content {
 		width: 100%;
-		padding: 0 2rem;
+		padding: 0 3rem;
 	}
 	.card-content-header {
 		width: 100%;
@@ -104,15 +110,13 @@
 	.meta {
 		display: flex;
 		height: fit-content;
-		padding: 10px;
+		padding: 10px 0;
 		align-items: center;
 		gap: 35px;
 	}
 
 	.blog-meta {
-		display: flex;
 		height: fit-content;
-		align-items: center;
 		gap: 15px;
 		color: #797777;
 		font-family: Inter;
@@ -192,7 +196,7 @@
 		display: flex;
 		width: 100px;
 		height: 30px;
-		padding: 0 10px;
+		padding: 0 1rem;
 		justify-content: center;
 		align-items: center;
 		gap: 10px;
@@ -210,15 +214,16 @@
 
 	.author {
 		display: flex;
-		padding: 10px;
 		gap: 10px;
 		align-items: center;
+		color: #111;
 	}
 
-	.author img {
-		width: 50px;
-		height: 50px;
-		flex-shrink: 0;
-		border-radius: 9999px;
+	.author-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: #d1e0e6;
+		display: block;
 	}
 </style>
