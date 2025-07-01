@@ -8,6 +8,22 @@
 	let { children }: Props = $props();
 </script>
 
+<svelte:head>
+	<title>SSGOI Demo - Interactive Page Transition Examples</title>
+	<meta name="description" content="Explore interactive demos of SSGOI page transitions. See beautiful scroll, hero, pinterest, and ripple effects in action." />
+	
+	<!-- Open Graph -->
+	<meta property="og:title" content="SSGOI Demo - Interactive Page Transition Examples" />
+	<meta property="og:description" content="Explore interactive demos of SSGOI page transitions. See beautiful scroll, hero, pinterest, and ripple effects in action." />
+	<meta property="og:url" content="https://ssgoi.pages.dev/demo" />
+	<meta property="og:image" content="https://ssgoi.pages.dev/demo-og-image.png" />
+	
+	<!-- Twitter Card -->
+	<meta name="twitter:title" content="SSGOI Demo - Interactive Page Transition Examples" />
+	<meta name="twitter:description" content="Explore interactive demos of SSGOI page transitions. See beautiful scroll, hero, pinterest, and ripple effects in action." />
+	<meta name="twitter:image" content="https://ssgoi.pages.dev/demo-og-image.png" />
+</svelte:head>
+
 <div class="demo-root">
 	<header>
 		<div class="header-nav">
