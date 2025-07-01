@@ -66,7 +66,7 @@
 
 <div class="docs-layout">
 	<button class="sidebar-toggle" onclick={toggleSidebar} aria-label="Toggle sidebar">
-		{isSidebarOpen ? '✕' : '☰'}
+		{isSidebarOpen ? '×' : '☰'}
 	</button>
 	<nav class:open={isSidebarOpen}>
 		{#each navigation as group}
@@ -190,15 +190,16 @@
 			top: calc(var(--header-height) + var(--spacing-4));
 			left: var(--spacing-4);
 			z-index: 1001;
-			background-color: var(--color-primary-light);
-			color: white;
+			background-color: var(--color-text-light);
+			color: var(--color-bg-light);
 			border: none;
-			border-radius: var(--radius-full);
-			width: 40px;
-			height: 40px;
-			font-size: var(--font-size-xl);
+			border-radius: var(--radius-sm);
+			width: 36px;
+			height: 36px;
+			font-size: var(--font-size-base);
 			cursor: pointer;
-			transition: background-color 0.3s;
+			transition: opacity 0.15s;
+			opacity: 0.8;
 		}
 		:global(html[color-scheme='dark']) .sidebar-toggle {
 			background-color: var(--color-primary-dark);

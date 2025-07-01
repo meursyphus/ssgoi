@@ -45,7 +45,9 @@
 		"@fontsource/manrope": "^5.0.20",
 		"@reflow-work/test-fixture-factory": "^1.8.0",
 		"@sveltejs/adapter-cloudflare": "^4.7.0",
+		"@types/marked": "^5.0.2",
 		"lucide-svelte": "^0.417.0",
+		"marked": "^16.0.0",
 		"open-props": "^1.7.5",
 		"svelte-bricks": "^0.2.1",
 		"svelte-meta-tags": "^4.0.4"

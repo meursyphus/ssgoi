@@ -111,9 +111,9 @@
 	.demo-container {
 		width: 100%;
 		aspect-ratio: 16/9;
-		border-radius: 16px;
+		border-radius: 8px;
 		overflow: hidden;
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-border-light);
 	}
 
 	.demo-gif {
@@ -199,8 +199,17 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 	}
 
+	:global(html[color-scheme='dark']) .benefit-card:hover {
+		border-color: var(--color-text-dark);
+	}
+
 	:global(html[color-scheme='dark']) .demo-container {
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	:global(html[color-scheme='dark']) .primary {
+		background: var(--color-text-dark);
+		color: var(--color-bg-dark);
 	}
 
 	:global(html[color-scheme='dark']) .secondary {

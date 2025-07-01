@@ -1,60 +1,37 @@
 <script lang="ts">
-	import { FixtureFactory } from '@reflow-work/test-fixture-factory';
-	import { faker } from '@faker-js/faker';
 	import { PageTransition } from 'ssgoi';
-	import { fade } from 'svelte/transition';
-
-	type Post = {
-		id: number;
-		title: string;
-		content: string;
-		author: string;
-		date: string;
-		tags: string[];
-	};
-
-	faker.seed(123);
-	const postFactory = new FixtureFactory<Post>(() => ({
-		id: faker.number.int({ min: 0, max: 9999 }),
-		title: faker.lorem.sentence(),
-		content: faker.lorem.paragraphs(5),
-		author: faker.person.fullName(),
-		date: faker.date.recent().toLocaleDateString(),
-		tags: faker.helpers.arrayElements(['Tech', 'Life', 'Food', 'Travel', 'Health'], 3)
-	}));
-	const posts: Post[] = postFactory.createList(5);
+	import type { PageData } from './$types';
+	
+	export let data: PageData;
 </script>
 
-<PageTransition class="post-page">
+<PageTransition>
 	<div class="posts-container">
-		<header>
-			<h1>Featured Posts</h1>
-			<div class="header-decoration"></div>
-		</header>
-
+		<h1>Latest Posts</h1>
+		<p class="subtitle">Insights on Svelte, Flutter, and web development</p>
+		
 		<div class="posts-grid">
-			{#each posts as post (post.id)}
-				<article class="post" in:fade={{ duration: 300, delay: 150 }}>
-					<div class="tags">
-						{#each post.tags as tag}
-							<span class="tag">{tag}</span>
-						{/each}
-					</div>
-
-					<h2>{post.title}</h2>
-
-					<div class="post-meta">
-						<div class="author-info">
-							<span class="author-avatar" />
-							<span class="author-name">{post.author}</span>
+			{#each data.posts as post}
+				<a href="/demo/post/{post.id}" class="post-card">
+					<img class="post-image" src={post.coverImage} alt={post.title} />
+					<div class="post-content">
+						<div class="post-meta">
+							<span class="category">{post.category}</span>
+							<span class="read-time">{post.readTime} min read</span>
 						</div>
-						<time datetime={post.date}>{post.date}</time>
+						<h2>{post.title}</h2>
+						<p>{post.excerpt}</p>
+						<div class="post-footer">
+							<div class="author">
+								<img src={post.author.avatar} alt={post.author.name} />
+								<div>
+									<span class="author-name">{post.author.name}</span>
+									<span class="publish-date">{new Date(post.publishedAt).toLocaleDateString()}</span>
+								</div>
+							</div>
+						</div>
 					</div>
-
-					<div class="content">
-						<p>{post.content}</p>
-					</div>
-				</article>
+				</a>
 			{/each}
 		</div>
 	</div>
@@ -62,132 +39,122 @@
 
 <style>
 	.posts-container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 4rem 2rem;
-	}
-
-	header {
-		text-align: center;
-		margin-bottom: 4rem;
-		position: relative;
-	}
-
-	.header-decoration {
-		position: absolute;
-		width: 60px;
-		height: 2px;
-		background: black;
-		bottom: -1rem;
-		left: 50%;
-		transform: translateX(-50%);
+		padding: 2rem 0;
+		padding-inline: 16px;
+		min-height: calc(100vh - 200px);
+		background: white;
 	}
 
 	h1 {
-		font-size: 2.5rem;
-		font-weight: 300;
-		letter-spacing: -0.5px;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.subtitle {
+		color: #666;
+		margin-bottom: 2rem;
 	}
 
 	.posts-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 2rem;
-	}
-
-	.post {
-		background-color: white;
-		border-radius: 12px;
-		padding: 2rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-		transition: all 0.3s ease;
-	}
-
-	.post:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-	}
-
-	.tags {
 		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		margin-bottom: 1.5rem;
+		flex-direction: column;
+		gap: 1.5rem;
 	}
 
-	.tag {
-		background-color: #f7f3ee;
-		padding: 0.4rem 0.8rem;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 500;
-		letter-spacing: 0.02em;
+	.post-card {
+		display: block;
+		background: white;
+		border-radius: 12px;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		border: 1px solid #eee;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	}
 
-	h2 {
-		font-size: 1.75rem;
-		margin-bottom: 1.5rem;
-		font-weight: 500;
-		line-height: 1.3;
+	.post-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+		border-color: #ddd;
+	}
+
+	.post-image {
+		height: 160px;
+		width: 100%;
+		object-fit: cover;
+		background-color: #f0f0f0;
+	}
+
+	.post-content {
+		padding: 1.5rem;
 	}
 
 	.post-meta {
 		display: flex;
-		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 2rem;
-		padding-bottom: 1.5rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		align-items: center;
+		margin-bottom: 1rem;
+		font-size: 0.875rem;
 	}
 
-	.author-info {
+	.category {
+		background: #f5f5f5;
+		padding: 0.25rem 0.75rem;
+		border-radius: 16px;
+		font-weight: 500;
+	}
+
+	.read-time {
+		color: #666;
+	}
+
+	.post-card h2 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		line-height: 1.3;
+	}
+
+	.post-card p {
+		color: #666;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+		font-size: 0.95rem;
+	}
+
+	.post-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.author {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
 	}
 
-	.author-avatar {
-		width: 32px;
-		height: 32px;
+	.author img {
+		width: 40px;
+		height: 40px;
 		border-radius: 50%;
-		background: #f7f3ee;
-		display: block;
+		object-fit: cover;
+	}
+
+	.author div {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.author-name {
-		color: #1b315e;
 		font-weight: 500;
 		font-size: 0.875rem;
 	}
 
-	time {
-		color: #666;
-		font-size: 0.875rem;
-	}
-
-	.content {
-		color: #2c2c2c;
-		line-height: 1.8;
-		opacity: 0.9;
-	}
-
-	.content p {
-		margin-bottom: 1rem;
-	}
-
-	@media (min-width: 768px) {
-		.posts-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.post {
-			padding: 3rem;
-		}
-	}
-
-	:global(.post-page) {
-		background: white;
+	.publish-date {
+		font-size: 0.75rem;
+		color: #999;
 	}
 </style>
