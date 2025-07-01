@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onNavigate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Ssgoi } from 'ssgoi';
 	import config from './page-config.js';
 	interface Props {
@@ -16,14 +17,14 @@
 			</Ssgoi>
 		</main>
 		<nav class="bottom-nav">
-			<a href="/demo/post" class="nav-item">
+			<a href="/demo/post" class="nav-item" class:active={$page.url.pathname.startsWith('/demo/post')}>
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
 					<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
 				</svg>
 				<span>Posts</span>
 			</a>
-			<a href="/demo/products" class="nav-item">
+			<a href="/demo/products" class="nav-item" class:active={$page.url.pathname.startsWith('/demo/products')}>
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<circle cx="9" cy="21" r="1"></circle>
 					<circle cx="20" cy="21" r="1"></circle>
@@ -31,7 +32,7 @@
 				</svg>
 				<span>Shop</span>
 			</a>
-			<a href="/demo/pinterest" class="nav-item">
+			<a href="/demo/pinterest" class="nav-item" class:active={$page.url.pathname.startsWith('/demo/pinterest')}>
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<rect x="3" y="3" width="7" height="7"></rect>
 					<rect x="14" y="3" width="7" height="7"></rect>
@@ -40,7 +41,7 @@
 				</svg>
 				<span>Pinterest</span>
 			</a>
-			<a href="/demo/profile" class="nav-item">
+			<a href="/demo/profile" class="nav-item" class:active={$page.url.pathname.startsWith('/demo/profile')}>
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
 					<circle cx="12" cy="7" r="4"></circle>
@@ -132,6 +133,10 @@
 	.nav-item:hover,
 	.nav-item:focus {
 		color: var(--color-text);
+	}
+	
+	.nav-item.active {
+		color: #007AFF;
 	}
 	
 	.nav-item svg {
