@@ -141,7 +141,7 @@ Transitions are working, but not the ones you expected.
 
 2. **Symmetric transition misunderstanding**
    
-   If you're using ``, remember it applies the transition both ways:
+   If you're using `symmetric: true`, remember it applies the transition both ways:
 
    ```typescript
    {

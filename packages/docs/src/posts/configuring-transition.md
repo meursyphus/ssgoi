@@ -95,8 +95,7 @@ const config = createTransitionConfig({
     {
       from: '/',
       to: '/about',
-      transitions: transitions.fade({ duration: 500 }),
-      
+      transitions: transitions.fade({ duration: 500 })
     },
     {
       from: '/blog',

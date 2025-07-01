@@ -64,7 +64,8 @@
 	.project-info h2 {
 		font-size: var(--font-size-xl);
 		margin-bottom: var(--spacing-2);
-		color: var(--color-primary-light);
+		color: var(--color-text-light);
+		font-weight: 700;
 	}
 	.project-info p {
 		font-size: var(--font-size-sm);

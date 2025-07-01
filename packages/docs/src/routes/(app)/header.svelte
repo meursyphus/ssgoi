@@ -107,7 +107,7 @@
 		border: none;
 		cursor: pointer;
 		color: var(--color-text-light);
-		transition: color 0.3s;
+		transition: opacity 0.15s;
 	}
 
 	button:hover {
