@@ -14,7 +14,7 @@
 				<h3>Docs</h3>
 				<a href="/docs/getting-started">Getting Started</a>
 				<a href="/docs/api-reference">API Reference</a>
-				<a href="/docs/examples">Examples</a>
+				<a href="/demo">Examples</a>
 			</div>
 			<div class="link-group">
 				<h3>Community</h3>
