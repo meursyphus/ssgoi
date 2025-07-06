@@ -22,7 +22,7 @@ const fade: Transition = ({
 			delay,
 			easing,
 			css(t) {
-				return `${out}; opacity: ${t}`;
+				return `${out} opacity: ${t}`;
 			}
 		};
 	}
