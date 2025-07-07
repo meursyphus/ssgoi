@@ -22,7 +22,7 @@
 	context.config.init(config);
 	const pageTransitionContext = context.pageTransition.init();
 	const scrollHistoryContext = context.scrollHistory.init();
-	context.hero.init();
+	
 
 	onNavigate(({ from, to }) => {
 		pageTransitionContext.from = from;
