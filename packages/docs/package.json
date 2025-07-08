@@ -24,7 +24,7 @@
 		"eslint-plugin-svelte": "^2.45.1",
 		"globals": "^15.0.0",
 		"mdsvex": "^0.11.2",
-		"postc˚": "^8.4.40",
+		"postcss": "^8.4.40",
 		"prettier": "^3.3.2",
 		"prettier-plugin-svelte": "^3.2.6",
 		"rehype-slug": "^6.0.0",
