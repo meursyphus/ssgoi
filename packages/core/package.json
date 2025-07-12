@@ -1,0 +1,38 @@
+{
+  "name": "@ssgoi/core",
+  "version": "0.0.1",
+  "description": "A smooth page transition library",
+  "type": "module",
+  "main": "./dist/ssgoi.umd.cjs",
+  "module": "./dist/ssgoi.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/ssgoi.js",
+      "require": "./dist/ssgoi.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "page-transition",
+    "animation",
+    "typescript",
+    "vanilla"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.5.0"
+  }
+}
