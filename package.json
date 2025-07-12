@@ -23,6 +23,10 @@
     "svelte:build": "pnpm --filter @meursyphus/ssgoi-svelte build",
     "svelte-demo:dev": "pnpm --filter svelte-demo dev",
     "svelte-demo:build": "pnpm --filter svelte-demo build",
+    "qwik:dev": "pnpm --filter @meursyphus/ssgoi-qwik dev",
+    "qwik:build": "pnpm --filter @meursyphus/ssgoi-qwik build",
+    "qwik-demo:dev": "pnpm --filter qwik-demo dev",
+    "qwik-demo:build": "pnpm --filter qwik-demo build",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format"
   },
