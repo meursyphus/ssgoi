@@ -1,0 +1,39 @@
+{
+  "name": "@meursyphus/ssgoi-svelte",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/lib/index.ts",
+  "module": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/lib/index.ts",
+      "require": "./src/lib/index.ts",
+      "types": "./src/lib/index.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^24.0.13",
+    "svelte": "^5.35.5",
+    "svelte-check": "^4.2.2",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}
