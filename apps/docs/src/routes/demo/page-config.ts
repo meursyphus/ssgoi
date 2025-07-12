@@ -37,7 +37,8 @@ const config = createTransitionConfig({
 				}),
 				out: (node) => ({
 					duration: 400,
-					css: (u,t) => `position: absolute; left: 0; top: 0; width: 100%; transform: translateX(${-t * 20}%);`
+					css: (u, t) =>
+						`position: absolute; left: 0; top: 0; width: 100%; transform: translateX(${-t * 20}%);`
 				})
 			}
 		},
@@ -47,11 +48,12 @@ const config = createTransitionConfig({
 			transitions: {
 				in: (node) => ({
 					duration: 400,
-					css: (t,u) => `transform: translateX(${(-u) * 20}%);`
+					css: (t, u) => `transform: translateX(${-u * 20}%);`
 				}),
 				out: (node) => ({
 					duration: 400,
-					css: (u,t) => `z-index: 100; position: absolute; left: 0; top: 0; width: auto; transform: translateX(${t * 100}%);`
+					css: (u, t) =>
+						`z-index: 100; position: absolute; left: 0; top: 0; width: auto; transform: translateX(${t * 100}%);`
 				})
 			}
 		},
