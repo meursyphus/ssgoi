@@ -1,4 +1,14 @@
-{
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const packagePath = path.resolve(__dirname, '../package.json');
+
+// Original package.json configuration for development
+const devPackageJson = {
   "name": "@meursyphus/ssgoi-react",
   "version": "0.0.1",
   "type": "module",
@@ -43,4 +53,9 @@
     "vite": "^7.0.4",
     "vite-plugin-dts": "^4.5.4"
   }
-}
+};
+
+// Write the original package.json
+fs.writeFileSync(packagePath, JSON.stringify(devPackageJson, null, 2) + '\n');
+
+console.log('✅ package.json restored for development');

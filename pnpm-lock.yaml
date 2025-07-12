@@ -309,6 +309,33 @@ importers:
         specifier: ^4.5.4
         version: 4.5.4(@types/node@24.0.13)(rollup@4.44.2)(typescript@5.8.3)(vite@7.0.4(@types/node@24.0.13)(jiti@1.21.7)(yaml@2.8.0))
 
+  packages/svelte:
+    devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^6.0.0
+        version: 6.0.0(svelte@5.35.6)(vite@7.0.4(@types/node@24.0.13)(jiti@1.21.7)(yaml@2.8.0))
+      '@tsconfig/svelte':
+        specifier: ^5.0.4
+        version: 5.0.4
+      '@types/node':
+        specifier: ^24.0.13
+        version: 24.0.13
+      svelte:
+        specifier: ^5.35.5
+        version: 5.35.6
+      svelte-check:
+        specifier: ^4.2.2
+        version: 4.2.2(picomatch@4.0.2)(svelte@5.35.6)(typescript@5.8.3)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      vite:
+        specifier: ^7.0.4
+        version: 7.0.4(@types/node@24.0.13)(jiti@1.21.7)(yaml@2.8.0)
+      vite-plugin-dts:
+        specifier: ^4.5.4
+        version: 4.5.4(@types/node@24.0.13)(rollup@4.44.2)(typescript@5.8.3)(vite@7.0.4(@types/node@24.0.13)(jiti@1.21.7)(yaml@2.8.0))
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
@@ -1697,6 +1724,9 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tsconfig/svelte@5.0.4':
+    resolution: {integrity: sha512-BV9NplVgLmSi4mwKzD8BD/NQ8erOY/nUE/GpgWe2ckx+wIQF5RyRirn/QsSSCPeulVpc3RA/iJt6DpfTIZps0Q==}
 
   '@tybys/wasm-util@0.10.0':
     resolution: {integrity: sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==}
@@ -5349,6 +5379,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@tsconfig/svelte@5.0.4': {}
+
   '@tybys/wasm-util@0.10.0':
     dependencies:
       tslib: 2.8.1
@@ -5411,7 +5443,6 @@ snapshots:
   '@types/node@24.0.13':
     dependencies:
       undici-types: 7.8.0
-    optional: true
 
   '@types/react-dom@19.1.6(@types/react@19.1.8)':
     dependencies:
@@ -8061,8 +8092,7 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.8.0:
-    optional: true
+  undici-types@7.8.0: {}
 
   undici@5.29.0:
     dependencies:

@@ -1,29 +1,31 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from 'path'
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({
   plugins: [
-    react(),
+    svelte({
+      compilerOptions: {
+        runes: true
+      }
+    }),
     dts({
       insertTypesEntry: true,
-    }),
+    })
   ],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/lib/index.ts'),
-      name: 'SsgoiReact',
+      name: 'SsgoiSvelte',
       formats: ['es', 'umd'],
-      fileName: (format) => `ssgoi-react.${format}.js`,
+      fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ['svelte'],
       output: {
         globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          'react/jsx-runtime': 'react/jsx-runtime',
+          svelte: 'Svelte',
         },
       },
     },

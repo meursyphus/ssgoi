@@ -1,6 +1,6 @@
 {
-  "name": "ssgoi-workspace",
-  "homepage": "https://ssgoi.pages.dev",
+  "name": "ssgoi",
+  "homepage": "https://ssgoi.dev",
   "version": "1.0.0",
   "private": true,
   "description": "SSGOI is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications.",
@@ -19,6 +19,8 @@
     "react:build": "pnpm --filter @meursyphus/ssgoi-react build",
     "react-demo:dev": "pnpm --filter react-demo dev",
     "react-demo:build": "pnpm --filter react-demo build",
+    "svelte:dev": "pnpm --filter @meursyphus/ssgoi-svelte dev",
+    "svelte:build": "pnpm --filter @meursyphus/ssgoi-svelte build",
     "svelte-demo:dev": "pnpm --filter svelte-demo dev",
     "svelte-demo:build": "pnpm --filter svelte-demo build",
     "lint": "pnpm -r lint",
