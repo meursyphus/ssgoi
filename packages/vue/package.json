@@ -1,0 +1,38 @@
+{
+  "name": "@meursyphus/ssgoi-vue",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "main": "./src/lib/index.ts",
+  "module": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/lib/index.ts",
+      "require": "./src/lib/index.ts",
+      "types": "./src/lib/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "package": "vite build",
+    "prepublishOnly": "pnpm run build && node scripts/prepare-publish.js",
+    "postpublish": "node scripts/restore-package.js"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4",
+    "vite-plugin-dts": "^4.5.4",
+    "vue-tsc": "^2.2.12"
+  }
+}
