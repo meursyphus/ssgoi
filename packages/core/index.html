@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ssgoi - Development</title>
+  </head>
+  <body>
+    <div id="app">
+      <h1>Ssgoi Library Development</h1>
+      <p>Open the console to see the library in action.</p>
+    </div>
+    <script type="module">
+      import { createTransition } from './src/index.ts'
+      
+      // Test the library
+      const testTransition = {
+        from: document.querySelector('#app'),
+        to: document.querySelector('#app'),
+        options: {
+          duration: 1000,
+          easing: 'ease-in-out'
+        }
+      }
+      
+      createTransition(testTransition)
+    </script>
+  </body>
+</html>
