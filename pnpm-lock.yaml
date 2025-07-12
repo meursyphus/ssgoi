@@ -114,7 +114,7 @@ importers:
         specifier: ^5.0.11
         version: 5.4.19
 
-  packages/ssgoi:
+  packages/deprecated:
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0
