@@ -4,18 +4,19 @@
   "description": "A smooth page transition library",
   "private": true,
   "type": "module",
-  "main": "./dist/ssgoi.umd.cjs",
-  "module": "./dist/ssgoi.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/lib/index.ts",
+  "module": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/ssgoi.js",
-      "require": "./dist/ssgoi.umd.cjs"
+      "types": "./src/lib/index.ts",
+      "import": "./src/lib/index.ts",
+      "require": "./src/lib/index.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "dev": "vite",

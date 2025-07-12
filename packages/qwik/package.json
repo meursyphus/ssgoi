@@ -1,0 +1,57 @@
+{
+  "name": "@meursyphus/ssgoi-qwik",
+  "version": "0.0.1",
+  "description": "Qwik page transition library",
+  "main": "./src/index.ts",
+  "qwik": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "files": [
+    "lib",
+    "lib-types",
+    "src"
+  ],
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "build.lib": "vite build --mode lib",
+    "build.types": "tsc --emitDeclarationOnly",
+    "dev": "vite --mode ssr",
+    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
+    "fmt": "prettier --write .",
+    "fmt.check": "prettier --check .",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "release": "np",
+    "start": "vite --open --mode ssr",
+    "test": "echo \"No test specified\" && exit 0",
+    "qwik": "qwik"
+  },
+  "peerDependencies": {
+    "@builder.io/qwik": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "1.14.1",
+    "@eslint/js": "latest",
+    "@types/node": "20.14.11",
+    "eslint": "9.25.1",
+    "eslint-plugin-qwik": "1.14.1",
+    "globals": "16.0.0",
+    "np": "^8.0.4",
+    "prettier": "3.3.3",
+    "typescript": "5.4.5",
+    "typescript-eslint": "8.26.1",
+    "undici": "*",
+    "vite": "5.3.5",
+    "vite-tsconfig-paths": "^4.2.1"
+  }
+}
