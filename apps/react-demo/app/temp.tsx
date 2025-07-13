@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useDomTransition } from "@meursyphus/ssgoi-react";
+import { transition } from "@meursyphus/ssgoi-react";
 
 // Shape container component that maintains size
 interface ShapeContainerProps {
@@ -22,13 +22,6 @@ export default function TempDemo() {
   const [showShapes, setShowShapes] = useState(true);
   const [stiffness, setStiffness] = useState(1000);
   const [damping, setDamping] = useState(100);
-
-  const [t1, t2, t3, t4] = [
-    useDomTransition(),
-    useDomTransition(),
-    useDomTransition(),
-    useDomTransition(),
-  ];
 
   return (
     <>
@@ -281,7 +274,8 @@ export default function TempDemo() {
           <ShapeContainer label="fade">
             {showShapes && (
               <div
-                ref={t1({
+                ref={transition({
+                  key: "fade",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -303,7 +297,8 @@ export default function TempDemo() {
           <ShapeContainer label="Scale + Rotate">
             {showShapes && (
               <div
-                ref={t2({
+                ref={transition({
+                  key: "scale-rotate",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -331,7 +326,8 @@ export default function TempDemo() {
           <ShapeContainer label="Slide">
             {showShapes && (
               <div
-                ref={t3({
+                ref={transition({
+                  key: "slide",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -359,11 +355,12 @@ export default function TempDemo() {
           <ShapeContainer label="Scale + Fade">
             {showShapes && (
               <div
-                ref={t4({
+                ref={transition({
+                  key: "scale-fade",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
-                      const scale = 0.5 + (progress * 0.5);
+                      const scale = 0.5 + progress * 0.5;
                       element.style.transform = `scale(${scale})`;
                       element.style.opacity = progress.toString();
                     },
@@ -371,7 +368,7 @@ export default function TempDemo() {
                   out: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
-                      const scale = 0.5 + (progress * 0.5);
+                      const scale = 0.5 + progress * 0.5;
                       element.style.transform = `scale(${scale})`;
                       element.style.opacity = progress.toString();
                     },

@@ -1,1 +1,1 @@
-export { useDomTransition } from './use-dom-transition';
+export { transition } from "./transition";
