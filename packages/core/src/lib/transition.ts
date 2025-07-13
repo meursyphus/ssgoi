@@ -1,111 +1,90 @@
-import type { Transition } from "./types";
 import { createTransitionCallback } from "./create-transition-callback";
+import type { Transition, TransitionCallback } from "./types";
 
-// Global state management
-const activeTransitions = new WeakMap<HTMLElement, TransitionState>();
-const pendingCleanups = new Map<string, PendingCleanup<any>>();
+/**
+ * Key type for transitions - can be string or symbol
+ */
+export type TransitionKey = string | symbol;
 
-interface TransitionState {
-  key: string;
-  cleanup?: () => void;
-  type: 'in' | 'out';
-}
+/**
+ * Centralized transition management
+ * Uses string/symbol keys for all storage
+ */
 
-interface PendingCleanup<T extends HTMLElement = HTMLElement> {
-  timer: NodeJS.Timeout;
-  key: string;
-  transition: Transition<T>;
-}
+// Map to store transition definitions by key
+const transitionDefinitions = new Map<TransitionKey, Transition>();
 
-interface TransitionOptions<T extends HTMLElement = HTMLElement> extends Transition<T> {
-  key: string;
+// Map to store transition callbacks by key
+const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
+
+/**
+ * Registers a transition with a key
+ * Usage: registerTransition('fade', { in: fadeIn, out: fadeOut })
+ */
+export function registerTransition<T extends HTMLElement = HTMLElement>(
+  key: TransitionKey,
+  transition: Transition<T>
+): void {
+  transitionDefinitions.set(key, transition as Transition);
+
+  // Create callback only if it doesn't exist yet
+  if (!transitionCallbacks.has(key)) {
+    const callback = createTransitionCallback(
+      () => {
+        const trans = transitionDefinitions.get(key);
+        if (!trans) {
+          throw new Error(`Transition "${String(key)}" not found`);
+        }
+        return trans as Transition<T>;
+      },
+      {
+        onCleanupEnd() {
+          transitionCallbacks.delete(key);
+        },
+      }
+    );
+    transitionCallbacks.set(key, callback as TransitionCallback);
+  }
 }
 
 /**
- * Creates a ref callback for transitions with global state management
- * 
- * @param options - Transition configuration with required key
- * @returns Ref callback function for React/Svelte
- * 
- * Usage:
- * ```tsx
- * <div ref={transition({ key: 'modal', in: fadeIn, out: fadeOut })}>
- * ```
+ * Unregisters a transition and cleans up associated resources
  */
-export function transition<T extends HTMLElement = HTMLElement>(
-  options: TransitionOptions<T>
-) {
-  const { key, ...transitionConfig } = options;
-  
-  // Return ref callback
-  return (element: T | null) => {
-    if (!element) return;
-    
-    // Check for pending cleanup (quick re-entry)
-    if (pendingCleanups.has(key)) {
-      const pending = pendingCleanups.get(key)!;
-      clearTimeout(pending.timer);
-      pendingCleanups.delete(key);
-      
-      // Reuse the same transition config
-      const callback = createTransitionCallback(() => pending.transition);
-      const cleanup = callback(element);
-      
-      // Store state
-      activeTransitions.set(element, {
-        key,
-        cleanup: cleanup || undefined,
-        type: 'in'
-      });
-      
-      // Return cleanup for React 19
-      return () => {
-        cleanup?.();
-        handleExit(element, key, transitionConfig);
-      };
-    }
-    
-    // Create new transition
-    const callback = createTransitionCallback(() => transitionConfig);
-    const cleanup = callback(element);
-    
-    // Store state
-    activeTransitions.set(element, {
-      key,
-      cleanup,
-      type: 'in'
-    });
-    
-    // Return cleanup function for React 19
-    return () => {
-      cleanup?.();
-      handleExit(element, key, transitionConfig);
-    };
-  };
+export function unregisterTransition(key: TransitionKey): void {
+  transitionDefinitions.delete(key);
+  transitionCallbacks.delete(key);
 }
 
-function handleExit<T extends HTMLElement>(
-  element: T,
-  key: string,
-  transitionConfig: Transition<T>
-) {
-  const state = activeTransitions.get(element);
-  if (!state) return;
-  
-  // Mark as out transition
-  state.type = 'out';
-  
-  // Clean up from WeakMap immediately
-  activeTransitions.delete(element);
-  
-  // Keep in pending map for potential quick re-entry
-  const timer = setTimeout(() => {
-    pendingCleanups.delete(key);
-  }, 150); // 150ms grace period
-  
-  pendingCleanups.set(key, {
-    timer,
-    key,
-    transition: transitionConfig
-  });
+/**
+ * Framework-agnostic transition function that can be used as a ref
+ * Usage: <div ref={transition({ key: 'fade', in, out })} />
+ */
+export function transition<T extends HTMLElement = HTMLElement>(options: {
+  key: TransitionKey;
+  in?: Transition<T>["in"];
+  out?: Transition<T>["out"];
+}): (element: T | null) => void {
+  // Register transition if in/out provided
+  if (options.in || options.out) {
+    const existingTransition = transitionDefinitions.get(options.key);
+    registerTransition(options.key, {
+      in: options.in || existingTransition?.in,
+      out: options.out || existingTransition?.out,
+    });
+  }
+
+  return (element: T | null) => {
+    // Apply transition if element exists
+    if (element) {
+      const callback = transitionCallbacks.get(options.key);
+      if (!callback) {
+        throw new Error(
+          `Transition "${String(options.key)}" not registered. Call registerTransition first.`
+        );
+      }
+
+      // The callback handles its own cleanup when element unmounts
+      return callback(element as HTMLElement);
+    }
+  };
 }

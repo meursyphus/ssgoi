@@ -32,7 +32,10 @@ import { Animator } from "./animator";
  * - Cleanup callback: Handles exit transitions
  */
 export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
-  getTransition: () => Transition<T>
+  getTransition: () => Transition<T>,
+  options?: {
+    onCleanupEnd?: () => void;
+  }
 ): TransitionCallback<T> {
   let currentAnimation: Animator | null = null;
   let currentClone: T | null = null; // Track current clone element
@@ -55,7 +58,10 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
 
       // Start reversed OUT animation on original element (IN direction)
       isEntering = true;
-      const outConfig = await Promise.resolve(getTransition().out(element));
+      const transition = getTransition();
+      if (!transition.out) return;
+      
+      const outConfig = await Promise.resolve(transition.out(element));
 
       currentAnimation = Animator.fromState(currentState, {
         spring: outConfig.spring,
@@ -76,7 +82,10 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
     if (!currentAnimation || !currentAnimation.getIsAnimating()) {
       // Start new IN animation
       isEntering = true;
-      const inConfig = await Promise.resolve(getTransition().in(element));
+      const transition = getTransition();
+      if (!transition.in) return;
+      
+      const inConfig = await Promise.resolve(transition.in(element));
 
       currentAnimation = new Animator({
         from: 0,
@@ -96,7 +105,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
     // If IN is already running, just continue
   };
 
-  function runExitTransition(element: T) {
+  function runExitTransition(element: T, onComplete?: () => void) {
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
       // Stop current IN animation and create REVERSED IN animation (not OUT)
@@ -119,7 +128,16 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = false;
 
       // Get the IN config (not OUT) because we want to reverse the IN animation
-      Promise.resolve(getTransition().in(clone)).then((inConfig) => {
+      const transition = getTransition();
+      if (!transition.in) {
+        clone.remove();
+        currentClone = null;
+        onComplete?.();
+        options?.onCleanupEnd?.();
+        return;
+      }
+      
+      Promise.resolve(transition.in(clone)).then((inConfig) => {
         // Create REVERSED IN animation directly
         currentAnimation = Animator.fromState(currentState, {
           spring: inConfig.spring,
@@ -131,6 +149,8 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
             currentClone = null;
             currentAnimation = null;
             isEntering = false;
+            onComplete?.();
+            options?.onCleanupEnd?.();
           },
         });
 
@@ -162,7 +182,16 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       // Run exit transition on the clone
       isEntering = false;
 
-      Promise.resolve(getTransition().out(clone)).then((outConfig) => {
+      const transition = getTransition();
+      if (!transition.out) {
+        clone.remove();
+        currentClone = null;
+        onComplete?.();
+        options?.onCleanupEnd?.();
+        return;
+      }
+      
+      Promise.resolve(transition.out(clone)).then((outConfig) => {
         currentAnimation = new Animator({
           from: 1,
           to: 0,
@@ -175,6 +204,8 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
             currentClone = null;
             currentAnimation = null;
             isEntering = false;
+            onComplete?.();
+            options?.onCleanupEnd?.();
           },
         });
 
@@ -188,9 +219,14 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
 
-    runEntrance(element);
+    const transition = getTransition();
+    if (transition.in) {
+      runEntrance(element);
+    }
 
     // Return cleanup function for exit transition
-    return () => runExitTransition(element);
+    return (options?: { onComplete?: () => void }) => {
+      runExitTransition(element, options?.onComplete);
+    };
   };
 }
