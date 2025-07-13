@@ -4,15 +4,15 @@ export type TransitionConfig = {
   tick?: (t: number) => void;
 };
 
-export type GetTransitionConfig<T extends Element> = (
+export type GetTransitionConfig<T extends HTMLElement> = (
   node: T
 ) => TransitionConfig | Promise<TransitionConfig>;
 
-export type Transition<E extends Element = Element> = {
+export type Transition<E extends HTMLElement = HTMLElement> = {
   in: GetTransitionConfig<E>;
   out: GetTransitionConfig<E>;
 };
 
-export type TransitionCallback<T extends Element = Element> = (
+export type TransitionCallback<T extends HTMLElement = HTMLElement> = (
   element: T
 ) => void | (() => void);

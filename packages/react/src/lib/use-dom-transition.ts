@@ -1,37 +1,27 @@
 "use client";
 
-import { useRef, useCallback, useLayoutEffect } from "react";
+import { useRef, useCallback } from "react";
 import { createTransitionCallback, type Transition } from "@ssgoi/core";
-
-/**
- * useEvent - Stable callback reference that always has access to latest values
- * Similar to the proposed React useEvent hook
- */
-function useEvent<T extends (...args: any[]) => any>(callback: T): T {
-  const callbackRef = useRef<T>(callback);
-  
-  useLayoutEffect(() => {
-    callbackRef.current = callback;
-  });
-  
-  return useCallback((...args: Parameters<T>) => {
-    return callbackRef.current(...args);
-  }, []) as T;
-}
 
 /**
  * React hook for applying DOM transitions
  * Wraps the core transition logic with React-specific behavior
  */
 export function useDomTransition() {
+  const transitionRef = useRef<Transition | null>(null);
+
+  // Stable callback that React can use as a ref
+  const stableCallback = useCallback((element: HTMLElement | null) => {
+    if (!element || !transitionRef.current) return;
+    
+    // Create and call the transition callback with current transition
+    const callback = createTransitionCallback(transitionRef.current);
+    return callback(element);
+  }, []);
+
   // Return a function that accepts transition options and returns the ref callback
   return (transition: Transition) => {
-    // Use useEvent to create a stable callback that captures the transition
-    return useEvent((element: HTMLElement | null) => {
-      if (!element) return;
-      
-      const callback = createTransitionCallback(transition);
-      return callback(element);
-    });
+    transitionRef.current = transition;
+    return stableCallback;
   };
 }
