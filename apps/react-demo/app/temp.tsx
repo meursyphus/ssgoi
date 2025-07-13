@@ -19,9 +19,9 @@ function ShapeContainer({ label, children }: ShapeContainerProps) {
 }
 
 export default function TempDemo() {
-  const [showShapes, setShowShapes] = useState(false);
-  const [stiffness, setStiffness] = useState(100); // 매우 느린 값으로 시작
-  const [damping, setDamping] = useState(5); // 낮은 감쇠로 시작
+  const [showShapes, setShowShapes] = useState(true);
+  const [stiffness, setStiffness] = useState(1000);
+  const [damping, setDamping] = useState(100);
 
   const [t1, t2, t3, t4] = [
     useDomTransition(),
@@ -148,6 +148,45 @@ export default function TempDemo() {
           gap: 2rem;
           align-items: center;
           justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .speed-buttons {
+          display: flex;
+          gap: 0.5rem;
+          margin-right: 1rem;
+        }
+
+        .speed-button {
+          padding: 0.5rem 1rem;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          background-color: white;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .speed-button:hover {
+          border-color: #007bff;
+          background-color: #f8f9fa;
+        }
+
+        .speed-button.slow {
+          color: #dc3545;
+        }
+
+        .speed-button.normal {
+          color: #6c757d;
+        }
+
+        .speed-button.fast {
+          color: #28a745;
+        }
+
+        .speed-button:active {
+          transform: translateY(1px);
         }
         
         .control-group {
@@ -182,6 +221,27 @@ export default function TempDemo() {
         <h1 className="app-title">useDomTransition Examples</h1>
 
         <div className="controls">
+          <div className="speed-buttons">
+            <button
+              className="speed-button slow"
+              onClick={() => {
+                setStiffness(200);
+                setDamping(100);
+              }}
+            >
+              느리게
+            </button>
+            <button
+              className="speed-button fast"
+              onClick={() => {
+                setStiffness(1000);
+                setDamping(100);
+              }}
+            >
+              빠르게
+            </button>
+          </div>
+
           <div className="control-group">
             <label className="control-label">Stiffness</label>
             <input
@@ -285,7 +345,7 @@ export default function TempDemo() {
                     spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `translateX(${
-                        (1 - progress) * 100
+                        (1 - progress) * -100
                       }px)`;
                       element.style.opacity = progress.toString();
                     },
@@ -296,25 +356,23 @@ export default function TempDemo() {
             )}
           </ShapeContainer>
 
-          <ShapeContainer label="Bounce">
+          <ShapeContainer label="Scale + Fade">
             {showShapes && (
               <div
                 ref={t4({
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
-                      element.style.transform = `translateY(${
-                        (1 - progress) * -100
-                      }px)`;
+                      const scale = 0.5 + (progress * 0.5);
+                      element.style.transform = `scale(${scale})`;
                       element.style.opacity = progress.toString();
                     },
                   }),
                   out: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
-                      element.style.transform = `translateY(${
-                        (1 - progress) * 100
-                      }px)`;
+                      const scale = 0.5 + (progress * 0.5);
+                      element.style.transform = `scale(${scale})`;
                       element.style.opacity = progress.toString();
                     },
                   }),
