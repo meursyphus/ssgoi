@@ -1,7 +1,14 @@
+export type SpringConfig = {
+  stiffness: number; // 0-1000, default: 100
+  damping: number; // 0-100, default: 10
+};
+
 export type TransitionConfig = {
-  duration?: number;
-  easing?: (t: number) => number;
-  tick?: (t: number) => void;
+  // Spring physics configuration
+  spring: SpringConfig;
+
+  // Callback for each frame with progress value (0-1)
+  tick?: (progress: number) => void;
 };
 
 export type GetTransitionConfig<T extends HTMLElement> = (
