@@ -8,7 +8,7 @@ export * from "./transition-runner";
  * Creates a transition callback that can be used with framework-specific implementations
  * This is the core logic that frameworks can wrap with their own APIs
  */
-export function createTransitionCallback<T extends Element = Element>(
+export function   createTransitionCallback<T extends HTMLElement = HTMLElement>(
   transition: Transition<T>
 ): TransitionCallback<T> {
   let cleanup: (() => void) | null = null;
