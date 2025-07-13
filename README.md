@@ -154,6 +154,15 @@ spring: { stiffness: 200, damping: 40 }
 - [React 데모](./apps/react-demo)
 - [Svelte 데모](./apps/svelte-demo)
 
+## 주의사항
+
+### out 애니메이션의 progress 방향
+`out` 애니메이션에서 `progress`는 **1에서 0으로** 진행됩니다:
+- `in`: progress가 0 → 1 (요소가 나타날 때)
+- `out`: progress가 1 → 0 (요소가 사라질 때)
+
+이는 애니메이션 상태 전환 시 자연스러운 연속성을 보장하기 위함입니다.
+
 ## 라이선스
 
 MIT
