@@ -1,8 +1,8 @@
 import type { Transition, TransitionCallback } from "./types";
-import { Animation } from "./transition-runner";
+import { Animator } from "./animator";
 
 export * from "./types";
-export * from "./transition-runner";
+export * from "./animator";
 
 /**
  * Creates a transition callback that can be used with framework-specific implementations
@@ -38,14 +38,13 @@ export * from "./transition-runner";
 export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
   getTransition: () => Transition<T>
 ): TransitionCallback<T> {
-  let currentAnimation: Animation | null = null;
+  let currentAnimation: Animator | null = null;
   let currentClone: T | null = null; // Track current clone element
   let parentRef: Element | null = null;
   let nextSiblingRef: Element | null = null;
   let isEntering = false; // Track current transition direction
 
   const runEntrance = async (element: T) => {
-    
     // Scenario 4: OUT animation running + IN trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && !isEntering) {
       // Stop current OUT animation
@@ -62,7 +61,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = true;
       const outConfig = await Promise.resolve(getTransition().out(element));
 
-      currentAnimation = Animation.fromState(currentState, {
+      currentAnimation = Animator.fromState(currentState, {
         spring: outConfig.spring,
         onUpdate: (value) => {
           outConfig.tick?.(value);
@@ -83,7 +82,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = true;
       const inConfig = await Promise.resolve(getTransition().in(element));
 
-      currentAnimation = new Animation({
+      currentAnimation = new Animator({
         from: 0,
         to: 1,
         spring: inConfig.spring,
@@ -102,7 +101,6 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
   };
 
   function runExitTransition(element: T) {
-    
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
       // Stop current IN animation and create REVERSED IN animation (not OUT)
@@ -127,7 +125,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       // Get the IN config (not OUT) because we want to reverse the IN animation
       Promise.resolve(getTransition().in(clone)).then((inConfig) => {
         // Create REVERSED IN animation directly
-        currentAnimation = Animation.fromState(currentState, {
+        currentAnimation = Animator.fromState(currentState, {
           spring: inConfig.spring,
           onUpdate: (value) => {
             inConfig.tick?.(value);
@@ -169,7 +167,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = false;
 
       Promise.resolve(getTransition().out(clone)).then((outConfig) => {
-        currentAnimation = new Animation({
+        currentAnimation = new Animator({
           from: 1,
           to: 0,
           spring: outConfig.spring,
@@ -191,7 +189,6 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
   }
 
   return (element: T) => {
-
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
 

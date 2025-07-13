@@ -7,6 +7,9 @@ interface AnimationOptions {
   onUpdate: (value: number) => void;
   onComplete: () => void; // Now non-nullable with default
 }
+/**
+ * TODO: requestAnimationFrame() singleton pattern
+ */
 
 /**
  * Animation class that provides fine control over animations
@@ -17,7 +20,7 @@ interface AnimationOptions {
  * - getVelocity(): Get current velocity for smooth transitions
  * - getCurrentValue(): Get current progress value
  */
-export class Animation {
+export class Animator {
   private options: AnimationOptions;
   private currentValue: number;
   private velocity: number = 0;
@@ -275,8 +278,8 @@ export class Animation {
   static fromState(
     state: { position: number; velocity: number; from: number; to: number },
     newOptions: Partial<Omit<AnimationOptions, "from" | "to">>
-  ): Animation {
-    const animation = new Animation({
+  ): Animator {
+    const animation = new Animator({
       ...newOptions,
       from: state.position, // Start from current position
       to: state.from, // Go to opposite direction
