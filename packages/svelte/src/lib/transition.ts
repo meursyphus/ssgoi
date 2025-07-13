@@ -1,29 +1,31 @@
-import { createTransitionCallback, type Transition } from "@ssgoi/core";
+import {
+  transition as _transition,
+  type Transition,
+  type TransitionKey,
+} from "@ssgoi/core";
 
-/**
- * Svelte action for applying DOM transitions
- * Usage: <div use:transition={{in: fadeIn, out: fadeOut}}>
- */
-export function transition<T extends HTMLElement = HTMLElement>(
-  node: T,
-  params: Transition<T>
-) {
-  // Create transition callback with current params
-  const callback = createTransitionCallback(() => params);
-
-  // Start entrance transition
-  const cleanup = callback(node);
+export const transition = (
+  node: HTMLElement,
+  params: Transition<HTMLElement> & { key: TransitionKey }
+) => {
+  let callback = _transition({
+    key: params.key,
+    in: params.in,
+    out: params.out,
+  });
+  let cleanup = callback(node);
 
   return {
-    update(newParams: Transition<T>) {
-      // Update params for future transitions
-      params = newParams;
+    update(newParams: Transition<HTMLElement> & { key: TransitionKey }) {
+      callback = _transition({
+        key: newParams.key,
+        in: newParams.in,
+        out: newParams.out,
+      });
+      cleanup = callback(node);
     },
     destroy() {
-      // Run exit transition if cleanup exists
-      if (cleanup) {
-        cleanup();
-      }
+      cleanup?.();
     },
   };
-}
+};

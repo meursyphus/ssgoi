@@ -1,3 +1,5 @@
+export type TransitionKey = string | symbol;
+
 export type SpringConfig = {
   stiffness: number; // 0-1000, default: 100
   damping: number; // 0-100, default: 10

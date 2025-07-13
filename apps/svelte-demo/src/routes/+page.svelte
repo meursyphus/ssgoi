@@ -1,14 +1,9 @@
 <script>
-  import { useTransition } from '@meursyphus/ssgoi-svelte';
+  import { transition } from '@meursyphus/ssgoi-svelte';
   
   let showShapes = $state(true);
   let stiffness = $state(1000);
   let damping = $state(100);
-
-  const transition1 = useTransition();
-  const transition2 = useTransition();
-  const transition3 = useTransition();
-  const transition4 = useTransition();
 </script>
 
 <div class="app-container">
@@ -75,7 +70,8 @@
       <div class="shape-wrapper">
         {#if showShapes}
           <div
-            use:transition1={{
+            use:transition={{
+              key: "fade",
               in: (element) => ({
                 spring: { stiffness, damping },
                 tick: (progress) => {
@@ -100,7 +96,8 @@
       <div class="shape-wrapper">
         {#if showShapes}
           <div
-            use:transition2={{
+            use:transition={{
+              key: "scale-rotate",
               in: (element) => ({
                 spring: { stiffness, damping },
                 tick: (progress) => {
@@ -127,7 +124,8 @@
       <div class="shape-wrapper">
         {#if showShapes}
           <div
-            use:transition3={{
+            use:transition={{
+              key: "slide",
               in: (element) => ({
                 spring: { stiffness, damping },
                 tick: (progress) => {
@@ -154,7 +152,8 @@
       <div class="shape-wrapper">
         {#if showShapes}
           <div
-            use:transition4={{
+            use:transition={{
+              key: "scale-fade",
               in: (element) => ({
                 spring: { stiffness, damping },
                 tick: (progress) => {

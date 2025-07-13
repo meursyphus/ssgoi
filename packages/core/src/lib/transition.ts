@@ -4,7 +4,7 @@ import type { Transition, TransitionCallback } from "./types";
 /**
  * Key type for transitions - can be string or symbol
  */
-export type TransitionKey = string | symbol;
+type TransitionKey = string | symbol;
 
 /**
  * Centralized transition management
@@ -63,7 +63,7 @@ export function transition<T extends HTMLElement = HTMLElement>(options: {
   key: TransitionKey;
   in?: Transition<T>["in"];
   out?: Transition<T>["out"];
-}): (element: T | null) => void {
+}) {
   // Register transition if in/out provided
   if (options.in || options.out) {
     const existingTransition = transitionDefinitions.get(options.key);
