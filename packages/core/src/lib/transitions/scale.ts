@@ -1,4 +1,5 @@
-interface FadeOptions {
+interface ScaleOptions {
+  duration?: number;
   from?: number;
   to?: number;
   spring?: {
@@ -7,7 +8,7 @@ interface FadeOptions {
   };
 }
 
-export const fade = (options: FadeOptions = {}) => {
+export const scale = (options: ScaleOptions = {}) => {
   const {
     from = 0,
     to = 1,
@@ -18,15 +19,15 @@ export const fade = (options: FadeOptions = {}) => {
     in: (element: HTMLElement) => ({
       spring,
       tick: (progress: number) => {
-        const opacity = from + (to - from) * progress;
-        element.style.opacity = opacity.toString();
+        const value = from + (to - from) * progress;
+        element.style.transform = `scale(${value})`;
       }
     }),
     out: (element: HTMLElement) => ({
       spring,
       tick: (progress: number) => {
-        const opacity = from + (to - from) * progress;
-        element.style.opacity = opacity.toString();
+        const value = from + (to - from) * progress;
+        element.style.transform = `scale(${value})`;
       }
     })
   };
