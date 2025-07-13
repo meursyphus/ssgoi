@@ -45,24 +45,15 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
   let isEntering = false; // Track current transition direction
 
   const runEntrance = async (element: T) => {
-    console.log('runEntrance called', {
-      hasCurrentAnimation: !!currentAnimation,
-      isAnimating: currentAnimation?.getIsAnimating(),
-      isEntering,
-      element: element.className,
-      currentClone: currentClone?.className
-    });
     
     // Scenario 4: OUT animation running + IN trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && !isEntering) {
-      console.log('Scenario 4: OUT → IN');
       // Stop current OUT animation
       const currentState = currentAnimation.getCurrentState();
       currentAnimation.stop();
 
       // Remove clone immediately
       if (currentClone) {
-        console.log('Removing clone');
         currentClone.remove();
         currentClone = null;
       }
@@ -88,7 +79,6 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
 
     // Scenario 1: No animation running OR IN already running
     if (!currentAnimation || !currentAnimation.getIsAnimating()) {
-      console.log('Scenario 1: Fresh IN animation');
       // Start new IN animation
       isEntering = true;
       const inConfig = await Promise.resolve(getTransition().in(element));
@@ -107,24 +97,14 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       });
 
       currentAnimation.forward();
-    } else {
-      console.log('IN already running, continuing...');
     }
     // If IN is already running, just continue
   };
 
   function runExitTransition(element: T) {
-    console.log('runExitTransition called', {
-      hasCurrentAnimation: !!currentAnimation,
-      isAnimating: currentAnimation?.getIsAnimating(),
-      isEntering,
-      element: element.className,
-      currentClone: currentClone?.className
-    });
     
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
-      console.log('Scenario 3: IN → OUT');
       // Stop current IN animation and create REVERSED IN animation (not OUT)
       const currentState = currentAnimation.getCurrentState();
       currentAnimation.stop();
@@ -172,7 +152,6 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       !currentAnimation.getIsAnimating() ||
       !isEntering
     ) {
-      console.log('Scenario 2: Fresh OUT animation');
       if (!parentRef) return;
 
       // Clone the element for exit animation
