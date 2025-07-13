@@ -12,25 +12,25 @@ interface ShapeContainerProps {
 function ShapeContainer({ label, children }: ShapeContainerProps) {
   return (
     <div className="shape-container">
-      <div className="shape-wrapper">
-        {children}
-      </div>
+      <div className="shape-wrapper">{children}</div>
       <p className="shape-label">{label}</p>
     </div>
   );
 }
 
 export default function TempDemo() {
-  const [showShapes, setShowShapes] = useState(true);
-  const [stiffness, setStiffness] = useState(10); // 매우 느린 값으로 시작
+  const [showShapes, setShowShapes] = useState(false);
+  const [stiffness, setStiffness] = useState(1); // 매우 느린 값으로 시작
   const [damping, setDamping] = useState(5); // 낮은 감쇠로 시작
-  
-  const [t1, t2, t3, t4] = [
-    useDomTransition(),
-    useDomTransition(),
-    useDomTransition(),
-    useDomTransition(),
-  ];
+
+  // const [t1, t2, t3, t4] = [
+  //   useDomTransition(),
+  //   useDomTransition(),
+  //   useDomTransition(),
+  //   useDomTransition(),
+  // ];
+
+  const t1 = useDomTransition();
 
   return (
     <>
@@ -179,7 +179,7 @@ export default function TempDemo() {
           color: #888;
         }
       `}</style>
-      
+
       <div className="app-container">
         <h1 className="app-title">useDomTransition Examples</h1>
 
@@ -196,7 +196,7 @@ export default function TempDemo() {
             />
             <span className="control-value">(1-1000)</span>
           </div>
-          
+
           <div className="control-group">
             <label className="control-label">Damping</label>
             <input
@@ -243,7 +243,7 @@ export default function TempDemo() {
           </ShapeContainer>
 
           {/* Triangle with scale + rotate effect */}
-          <ShapeContainer label="Scale + Rotate">
+          {/* <ShapeContainer label="Scale + Rotate">
             {showShapes && (
               <div
                 ref={t2({
@@ -269,10 +269,10 @@ export default function TempDemo() {
                 className="shape triangle"
               />
             )}
-          </ShapeContainer>
+          </ShapeContainer> */}
 
           {/* Square with slide effect */}
-          <ShapeContainer label="Slide">
+          {/* <ShapeContainer label="Slide">
             {showShapes && (
               <div
                 ref={t3({
@@ -298,10 +298,10 @@ export default function TempDemo() {
                 className="shape square"
               />
             )}
-          </ShapeContainer>
+          </ShapeContainer> */}
 
           {/* Pentagon with bounce effect */}
-          <ShapeContainer label="Bounce">
+          {/* <ShapeContainer label="Bounce">
             {showShapes && (
               <div
                 ref={t4({
@@ -327,7 +327,7 @@ export default function TempDemo() {
                 className="shape pentagon"
               />
             )}
-          </ShapeContainer>
+          </ShapeContainer> */}
         </div>
       </div>
     </>
