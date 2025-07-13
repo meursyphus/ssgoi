@@ -2,14 +2,6 @@
 
 import { useState } from "react";
 import { useDomTransition } from "@meursyphus/ssgoi-react";
-import {
-  easeInOut,
-  easeOut,
-  easeOutBack,
-  easeOutElastic,
-  easeInCubic,
-  easeOutBounce,
-} from "@meursyphus/ssgoi-react/easing";
 
 // Shape container component that maintains size
 interface ShapeContainerProps {
@@ -30,6 +22,9 @@ function ShapeContainer({ label, children }: ShapeContainerProps) {
 
 export default function TempDemo() {
   const [showShapes, setShowShapes] = useState(true);
+  const [stiffness, setStiffness] = useState(10); // 매우 느린 값으로 시작
+  const [damping, setDamping] = useState(5); // 낮은 감쇠로 시작
+  
   const [t1, t2, t3, t4] = [
     useDomTransition(),
     useDomTransition(),
@@ -145,10 +140,76 @@ export default function TempDemo() {
           color: #555;
           margin: 0;
         }
+        
+        .controls {
+          background-color: #f5f5f5;
+          border-radius: 8px;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+          display: flex;
+          gap: 2rem;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .control-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: center;
+        }
+        
+        .control-label {
+          font-size: 0.9rem;
+          color: #666;
+          font-weight: 500;
+        }
+        
+        .control-input {
+          width: 80px;
+          padding: 0.25rem 0.5rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          text-align: center;
+          font-size: 1rem;
+        }
+        
+        .control-value {
+          font-size: 0.8rem;
+          color: #888;
+        }
       `}</style>
       
       <div className="app-container">
         <h1 className="app-title">useDomTransition Examples</h1>
+
+        <div className="controls">
+          <div className="control-group">
+            <label className="control-label">Stiffness</label>
+            <input
+              type="number"
+              className="control-input"
+              value={stiffness}
+              onChange={(e) => setStiffness(Number(e.target.value))}
+              min="1"
+              max="1000"
+            />
+            <span className="control-value">(1-1000)</span>
+          </div>
+          
+          <div className="control-group">
+            <label className="control-label">Damping</label>
+            <input
+              type="number"
+              className="control-input"
+              value={damping}
+              onChange={(e) => setDamping(Number(e.target.value))}
+              min="0"
+              max="100"
+            />
+            <span className="control-value">(0-100)</span>
+          </div>
+        </div>
 
         <button
           onClick={() => setShowShapes(!showShapes)}
@@ -164,15 +225,13 @@ export default function TempDemo() {
               <div
                 ref={t1({
                   in: (element) => ({
-                    duration: 600,
-                    easing: easeInOut,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.opacity = progress.toString();
                     },
                   }),
                   out: (element) => ({
-                    duration: 600,
-                    easing: easeOut,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.opacity = progress.toString();
                     },
@@ -189,8 +248,7 @@ export default function TempDemo() {
               <div
                 ref={t2({
                   in: (element) => ({
-                    duration: 600,
-                    easing: easeOutBack,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `scale(${progress}) rotate(${
                         progress * 360
@@ -199,8 +257,7 @@ export default function TempDemo() {
                     },
                   }),
                   out: (element) => ({
-                    duration: 600,
-                    easing: easeInCubic,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `scale(${progress}) rotate(${
                         progress * 360
@@ -220,8 +277,7 @@ export default function TempDemo() {
               <div
                 ref={t3({
                   in: (element) => ({
-                    duration: 600,
-                    easing: easeOutElastic,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `translateX(${
                         (1 - progress) * -100
@@ -230,8 +286,7 @@ export default function TempDemo() {
                     },
                   }),
                   out: (element) => ({
-                    duration: 600,
-                    easing: easeInOut,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `translateX(${
                         (1 - progress) * 100
@@ -251,8 +306,7 @@ export default function TempDemo() {
               <div
                 ref={t4({
                   in: (element) => ({
-                    duration: 600,
-                    easing: easeOutBounce,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `translateY(${
                         (1 - progress) * -100
@@ -261,8 +315,7 @@ export default function TempDemo() {
                     },
                   }),
                   out: (element) => ({
-                    duration: 600,
-                    easing: easeInOut,
+                    spring: { stiffness, damping },
                     tick: (progress) => {
                       element.style.transform = `translateY(${
                         (1 - progress) * 100
