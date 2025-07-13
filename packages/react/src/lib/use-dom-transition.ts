@@ -12,10 +12,15 @@ export function useDomTransition() {
 
   // Stable callback that React can use as a ref
   const stableCallback = useCallback((element: HTMLElement | null) => {
-    if (!element || !transitionRef.current) return;
-    
-    // Create and call the transition callback with current transition
-    const callback = createTransitionCallback(transitionRef.current);
+    if (!element) return;
+
+    // Create and call the transition callback with a getter function
+    const callback = createTransitionCallback(() => {
+      if (!transitionRef.current) {
+        throw new Error("Transition not set");
+      }
+      return transitionRef.current;
+    });
     return callback(element);
   }, []);
 

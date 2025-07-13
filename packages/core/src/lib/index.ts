@@ -8,8 +8,8 @@ export * from "./transition-runner";
  * Creates a transition callback that can be used with framework-specific implementations
  * This is the core logic that frameworks can wrap with their own APIs
  */
-export function   createTransitionCallback<T extends HTMLElement = HTMLElement>(
-  transition: Transition<T>
+export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
+  getTransition: () => Transition<T>
 ): TransitionCallback<T> {
   let cleanup: (() => void) | null = null;
   let elementRef: T | null = null;
@@ -27,12 +27,15 @@ export function   createTransitionCallback<T extends HTMLElement = HTMLElement>(
     // Get transition options
 
     // Run entrance transition
-    const runEntrance = async () => {
+    const runEntrance = () => {
       if (!elementRef) return;
 
-      const config = await Promise.resolve(transition.in(elementRef));
+      const element = elementRef;
       cleanup = runTransition({
-        config,
+        getConfig: () => {
+          const transition = getTransition();
+          return transition.in(element);
+        },
         direction: "forward",
         onComplete: () => {
           cleanup = null;
@@ -63,10 +66,12 @@ export function   createTransitionCallback<T extends HTMLElement = HTMLElement>(
       }
 
       // Run exit transition on the clone
-      const runExit = async () => {
-        const config = await Promise.resolve(transition.out(clone));
+      const runExit = () => {
         runTransition({
-          config,
+          getConfig: () => {
+            const transition = getTransition();
+            return transition.out(clone);
+          },
           direction: "backward",
           onComplete: () => {
             clone.remove();
