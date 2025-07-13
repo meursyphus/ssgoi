@@ -23,11 +23,6 @@
       "import": "./src/lib/view-transitions/index.ts",
       "require": "./src/lib/view-transitions/index.ts"
     },
-    "./easing": {
-      "types": "./src/lib/easing/index.ts",
-      "import": "./src/lib/easing/index.ts",
-      "require": "./src/lib/easing/index.ts"
-    },
     "./types": {
       "types": "./src/lib/types.ts",
       "import": "./src/lib/types.ts",
