@@ -7,9 +7,29 @@
   "types": "./src/lib/index.ts",
   "exports": {
     ".": {
+      "types": "./src/lib/index.ts",
       "import": "./src/lib/index.ts",
-      "require": "./src/lib/index.ts",
-      "types": "./src/lib/index.ts"
+      "require": "./src/lib/index.ts"
+    },
+    "./transitions": {
+      "types": "./src/lib/transitions/index.ts",
+      "import": "./src/lib/transitions/index.ts",
+      "require": "./src/lib/transitions/index.ts"
+    },
+    "./view-transitions": {
+      "types": "./src/lib/view-transitions/index.ts",
+      "import": "./src/lib/view-transitions/index.ts",
+      "require": "./src/lib/view-transitions/index.ts"
+    },
+    "./easing": {
+      "types": "./src/lib/easing/index.ts",
+      "import": "./src/lib/easing/index.ts",
+      "require": "./src/lib/easing/index.ts"
+    },
+    "./types": {
+      "types": "./src/lib/types.ts",
+      "import": "./src/lib/types.ts",
+      "require": "./src/lib/types.ts"
     }
   },
   "files": [
@@ -22,6 +42,9 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
