@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback } from "react";
 import { createTransitionCallback, type Transition } from "@ssgoi/core";
 
 /**
