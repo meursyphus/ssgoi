@@ -1,5 +1,1 @@
-export * from '@ssgoi/core/types';
-
-export const Ssgoi = () => {
-  return null;
-};
+export { useDomTransition } from './use-dom-transition';
