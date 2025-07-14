@@ -12,21 +12,18 @@ export const SsgoiTransition = ({
   id: string;
 }) => {
   const { getTransition } = useSsgoi();
+  
   return (
     <div
       ref={transition({
         key: id,
-        in: async () => {
-          return {
-            spring: { stiffness: 100, damping: 10 },
-            tick: (value) => {},
-          };
+        in: async (element) => {
+          const transitionConfig = await getTransition(id, 'in', id);
+          return transitionConfig(element);
         },
-        out: async () => {
-          return {
-            spring: { stiffness: 100, damping: 10 },
-            tick: (value) => {},
-          };
+        out: async (element) => {
+          const transitionConfig = await getTransition(id, 'out', id);
+          return transitionConfig(element);
         },
       })}
       data-ssgoi-transition={id}
