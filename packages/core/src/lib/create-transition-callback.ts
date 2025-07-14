@@ -216,7 +216,8 @@ export function createTransitionCallback(
     // If OUT is already running, just continue
   }
 
-  return (element: HTMLElement) => {
+  return (element: HTMLElement | null) => {
+    if (!element) return;
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
 
