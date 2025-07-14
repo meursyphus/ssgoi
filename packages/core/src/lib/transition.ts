@@ -43,9 +43,7 @@ function registerTransition(
       return trans;
     },
     {
-      onCleanupEnd() {
-        unregisterTransition(key);
-      },
+      onCleanupEnd: () => unregisterTransition(key),
     }
   );
   transitionCallbacks.set(key, callback);

@@ -20,6 +20,7 @@ export type GetTransitionConfig = (
 export type Transition = {
   in?: GetTransitionConfig;
   out?: GetTransitionConfig;
+  prepareOutgoing?: (element: HTMLElement) => void;
 };
 
 export type TransitionCallback = (

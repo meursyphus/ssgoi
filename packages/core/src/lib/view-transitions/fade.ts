@@ -1,5 +1,5 @@
-import type { Transition, SpringConfig } from '../types';
-import { withOutgoingStyles } from './utils';
+import type { Transition, SpringConfig } from "../types";
+import { prepareOutgoing } from "./utils";
 
 interface FadeOptions {
   spring?: Partial<SpringConfig>;
@@ -8,7 +8,7 @@ interface FadeOptions {
 export const fade = (options: FadeOptions = {}): Transition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
-    damping: options.spring?.damping ?? 30
+    damping: options.spring?.damping ?? 30,
   };
 
   return {
@@ -16,13 +16,14 @@ export const fade = (options: FadeOptions = {}): Transition => {
       spring,
       tick: (progress) => {
         element.style.opacity = progress.toString();
-      }
+      },
     }),
-    out: withOutgoingStyles((element) => ({
+    out: (element) => ({
       spring,
       tick: (progress) => {
         element.style.opacity = progress.toString();
-      }
-    }))
+      },
+    }),
+    prepareOutgoing: prepareOutgoing,
   };
 };
