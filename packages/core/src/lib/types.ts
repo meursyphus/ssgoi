@@ -32,4 +32,4 @@ export type SsgoiConfig = {
   defaultTransition?: Transition;
 };
 
-export type SsgoiContext = (key: string) => Transition & { key: TransitionKey };
+export type SsgoiContext = (path: string) => Transition & { key: TransitionKey };
