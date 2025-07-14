@@ -1,5 +1,16 @@
 import type { Transition, TransitionCallback } from "./types";
 import { Animator } from "./animator";
+
+/**
+ * Get from/to values based on transition type
+ */
+function getFromTo(type: "in" | "out"): { from: number; to: number } {
+  if (type === "in") {
+    return { from: 0, to: 1 };
+  } else {
+    return { from: 1, to: 0 };
+  }
+}
 /**
  * Creates a transition callback that can be used with framework-specific implementations
  * This is the core logic that frameworks can wrap with their own APIs
@@ -63,7 +74,11 @@ export function createTransitionCallback(
 
       const outConfig = await Promise.resolve(transition.out(element));
 
+      // Use OUT config but reverse direction (backward)
+      const { from, to } = getFromTo("out");
       currentAnimation = Animator.fromState(currentState, {
+        from,
+        to,
         spring: outConfig.spring,
         onUpdate: (value) => {
           outConfig.tick?.(value);
@@ -74,7 +89,7 @@ export function createTransitionCallback(
         },
       });
 
-      currentAnimation.forward();
+      currentAnimation.backward();
       return;
     }
 
@@ -87,9 +102,10 @@ export function createTransitionCallback(
 
       const inConfig = await Promise.resolve(transition.in(element));
 
+      const { from, to } = getFromTo("in");
       currentAnimation = new Animator({
-        from: 0,
-        to: 1,
+        from,
+        to,
         spring: inConfig.spring,
         onUpdate: (value) => {
           inConfig.tick?.(value);
@@ -137,8 +153,11 @@ export function createTransitionCallback(
       }
 
       Promise.resolve(transition.in(clone)).then((inConfig) => {
-        // Create REVERSED IN animation directly
+        // Use IN config but reverse direction (backward)
+        const { from, to } = getFromTo("in");
         currentAnimation = Animator.fromState(currentState, {
+          from,
+          to,
           spring: inConfig.spring,
           onUpdate: (value) => {
             inConfig.tick?.(value);
@@ -152,7 +171,7 @@ export function createTransitionCallback(
           },
         });
 
-        currentAnimation.forward();
+        currentAnimation.backward();
       });
 
       return;
@@ -189,9 +208,10 @@ export function createTransitionCallback(
       }
 
       Promise.resolve(transition.out(clone)).then((outConfig) => {
+        const { from, to } = getFromTo("out");
         currentAnimation = new Animator({
-          from: 1,
-          to: 0,
+          from,
+          to,
           spring: outConfig.spring,
           onUpdate: (value) => {
             outConfig.tick?.(value);
