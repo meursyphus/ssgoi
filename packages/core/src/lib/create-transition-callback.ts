@@ -130,9 +130,13 @@ export function createTransitionCallback(
       isEntering = false;
       options?.onCleanupEnd?.();
     };
-
+    // Get transition to access prepareOutgoing
+    const transition = getTransition();
     // Clone the element upfront
     currentClone = element.cloneNode(true) as HTMLElement;
+    if (transition.prepareOutgoing) {
+      transition.prepareOutgoing(currentClone);
+    }
 
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
@@ -142,7 +146,6 @@ export function createTransitionCallback(
       isEntering = false;
 
       // Get the IN config (not OUT) because we want to reverse the IN animation
-      const transition = getTransition();
       if (!transition.in) {
         currentClone = null;
         cleanup();
@@ -178,7 +181,6 @@ export function createTransitionCallback(
     ) {
       isEntering = false;
 
-      const transition = getTransition();
       if (!transition.out) {
         currentClone = null;
         cleanup();
