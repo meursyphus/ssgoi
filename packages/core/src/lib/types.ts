@@ -1,8 +1,8 @@
 export type TransitionKey = string | symbol;
 
 export type SpringConfig = {
-  stiffness: number; // 0-1000, default: 100
-  damping: number; // 0-100, default: 10
+  stiffness: number; 
+  damping: number; 
 };
 
 export type TransitionConfig = {
@@ -13,15 +13,15 @@ export type TransitionConfig = {
   tick?: (progress: number) => void;
 };
 
-export type GetTransitionConfig<T extends HTMLElement> = (
-  node: T
+export type GetTransitionConfig = (
+  node: HTMLElement
 ) => TransitionConfig | Promise<TransitionConfig>;
 
-export type Transition<E extends HTMLElement = HTMLElement> = {
-  in?: GetTransitionConfig<E>;
-  out?: GetTransitionConfig<E>;
+export type Transition = {
+  in?: GetTransitionConfig;
+  out?: GetTransitionConfig;
 };
 
-export type TransitionCallback<T extends HTMLElement = HTMLElement> = (
-  element: T
+export type TransitionCallback = (
+  element: HTMLElement
 ) => void | (() => void);
