@@ -254,14 +254,10 @@ export class Animator {
   getCurrentState(): {
     position: number;
     velocity: number;
-    from: number;
-    to: number;
   } {
     return {
       position: this.currentValue,
       velocity: this.velocity,
-      from: this.options.from,
-      to: this.options.to,
     };
   }
 
@@ -273,19 +269,25 @@ export class Animator {
   }
 
   /**
+   * Set current value/position (for transferring state between animations)
+   */
+  setValue(value: number): void {
+    this.currentValue = value;
+  }
+
+  /**
    * Create new animation from current state with reversed direction
    */
   static fromState(
-    state: { position: number; velocity: number; from: number; to: number },
-    newOptions: Partial<Omit<AnimationOptions, "from" | "to">>
+    state: { position: number; velocity: number },
+    newOptions: Partial<AnimationOptions>
   ): Animator {
     const animation = new Animator({
       ...newOptions,
-      from: state.position, // Start from current position
-      to: state.from, // Go to opposite direction
     });
 
-    // Set the velocity from previous animation
+    // Set the state from previous animation
+    animation.setValue(state.position);
     animation.setVelocity(state.velocity);
 
     return animation;
