@@ -6,7 +6,7 @@ import {
 
 export const transition = (
   node: HTMLElement,
-  params: Transition<HTMLElement> & { key: TransitionKey }
+  params: Transition & { key: TransitionKey }
 ) => {
   let callback = _transition({
     key: params.key,
@@ -16,7 +16,7 @@ export const transition = (
   let cleanup = callback(node);
 
   return {
-    update(newParams: Transition<HTMLElement> & { key: TransitionKey }) {
+    update(newParams: Transition & { key: TransitionKey }) {
       callback = _transition({
         key: newParams.key,
         in: newParams.in,
