@@ -18,39 +18,44 @@ const transitionDefinitions = new Map<TransitionKey, Transition>();
 const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
 
 /**
- * Registers a transition with a key
+ * Registers a transition with a key and returns the callback
  * Usage: registerTransition('fade', { in: fadeIn, out: fadeOut })
  */
-export function registerTransition(
+function registerTransition(
   key: TransitionKey,
   transition: Transition
-): void {
+): TransitionCallback {
   transitionDefinitions.set(key, transition);
 
-  // Create callback only if it doesn't exist yet
-  if (!transitionCallbacks.has(key)) {
-    const callback = createTransitionCallback(
-      () => {
-        const trans = transitionDefinitions.get(key);
-        if (!trans) {
-          throw new Error(`Transition "${String(key)}" not found`);
-        }
-        return trans;
-      },
-      {
-        onCleanupEnd() {
-          transitionCallbacks.delete(key);
-        },
-      }
-    );
-    transitionCallbacks.set(key, callback);
+  // Return existing callback if it exists
+  let callback = transitionCallbacks.get(key);
+  if (callback) {
+    return callback;
   }
+
+  // Create new callback
+  callback = createTransitionCallback(
+    () => {
+      const trans = transitionDefinitions.get(key);
+      if (!trans) {
+        throw new Error(`Transition "${String(key)}" not found`);
+      }
+      return trans;
+    },
+    {
+      onCleanupEnd() {
+        unregisterTransition(key);
+      },
+    }
+  );
+  transitionCallbacks.set(key, callback);
+  return callback;
 }
 
 /**
  * Unregisters a transition and cleans up associated resources
  */
-export function unregisterTransition(key: TransitionKey): void {
+function unregisterTransition(key: TransitionKey): void {
   transitionDefinitions.delete(key);
   transitionCallbacks.delete(key);
 }
@@ -63,28 +68,10 @@ export function transition(options: {
   key: TransitionKey;
   in?: Transition["in"];
   out?: Transition["out"];
-}) {
-  // Register transition if in/out provided
-  if (options.in || options.out) {
-    const existingTransition = transitionDefinitions.get(options.key);
-    registerTransition(options.key, {
-      in: options.in || existingTransition?.in,
-      out: options.out || existingTransition?.out,
-    });
-  }
-
-  return (element: HTMLElement | null) => {
-    // Apply transition if element exists
-    if (element) {
-      const callback = transitionCallbacks.get(options.key);
-      if (!callback) {
-        throw new Error(
-          `Transition "${String(options.key)}" not registered. Call registerTransition first.`
-        );
-      }
-
-      // The callback handles its own cleanup when element unmounts
-      return callback(element);
-    }
-  };
+}): TransitionCallback {
+  // Register transition and get callback
+  return registerTransition(options.key, {
+    in: options.in,
+    out: options.out,
+  });
 }

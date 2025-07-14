@@ -22,6 +22,7 @@ export default function TempDemo() {
   const [showShapes, setShowShapes] = useState(true);
   const [stiffness, setStiffness] = useState(1000);
   const [damping, setDamping] = useState(100);
+  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -208,6 +209,36 @@ export default function TempDemo() {
           font-size: 0.8rem;
           color: #888;
         }
+        
+        .count-button {
+          padding: 0.75rem 1.5rem;
+          font-size: 1rem;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+          margin: 0 1rem;
+        }
+        
+        .count-button:hover {
+          background-color: #218838;
+        }
+        
+        .button-group {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 3rem;
+        }
+        
+        .count-display {
+          font-size: 1.2rem;
+          color: #333;
+          font-weight: 600;
+          margin: 0 1rem;
+        }
       `}</style>
 
       <div className="app-container">
@@ -262,12 +293,21 @@ export default function TempDemo() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowShapes(!showShapes)}
-          className="toggle-button"
-        >
-          {showShapes ? "Hide All Shapes" : "Show All Shapes"}
-        </button>
+        <div className="button-group">
+          <button
+            onClick={() => setShowShapes(!showShapes)}
+            className="toggle-button"
+          >
+            {showShapes ? "Hide All Shapes" : "Show All Shapes"}
+          </button>
+          <button
+            onClick={() => setCount(count + 1)}
+            className="count-button"
+          >
+            Count Up
+          </button>
+          <span className="count-display">Count: {count}</span>
+        </div>
 
         <div className="shapes-grid">
           {/* Original t1 test */}
