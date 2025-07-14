@@ -25,10 +25,10 @@ export type Transition = {
 export type TransitionCallback = (element: HTMLElement) => void | (() => void);
 
 export type SsgoiConfig = {
-  transitions: { from: string; to: string; transition: GetTransitionConfig }[];
-  defaultTransition?: GetTransitionConfig;
+  transitions: { from: string; to: string; transition: Transition }[];
+  defaultTransition?: Transition;
 };
 
 export type SsgoiContext = {
-  getTransition: (from: string, to: string) => GetTransitionConfig | null | undefined;
+  getTransition: (id: string, type: 'out' | 'in', path: string) => Promise<GetTransitionConfig>;
 }

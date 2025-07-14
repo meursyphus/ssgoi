@@ -1,4 +1,11 @@
-import type { SsgoiConfig, SsgoiContext } from "./types";
+import type { SsgoiConfig, SsgoiContext, GetTransitionConfig, Transition } from "./types";
+
+type PendingTransition = {
+  from?: string;
+  to?: string;
+  outResolve?: (transition: GetTransitionConfig) => void;
+  inResolve?: (transition: GetTransitionConfig) => void;
+};
 
 /**
  * Creates a transition configuration
@@ -15,11 +22,50 @@ import type { SsgoiConfig, SsgoiContext } from "./types";
 export function createSggoiTransitionContext(
   options: SsgoiConfig
 ): SsgoiContext {
+  const pendingTransitions = new Map<string, PendingTransition>();
+
+  function checkAndResolve(id: string) {
+    const pending = pendingTransitions.get(id);
+    if (pending?.from && pending?.to) {
+      const transition = findMatchingTransition(pending.from, pending.to, options.transitions);
+      const result = transition || options.defaultTransition;
+      
+      if (result) {
+        if (result.out && pending.outResolve) {
+          pending.outResolve(result.out);
+        }
+        if (result.in && pending.inResolve) {
+          pending.inResolve(result.in);
+        }
+      }
+      
+      pendingTransitions.delete(id);
+    }
+  }
+
   return {
-    getTransition: (from: string, to: string) => {
-      const transition = findMatchingTransition(from, to, options.transitions);
-      return transition || options.defaultTransition;
-    },
+    getTransition: async (id: string, type: 'out' | 'in', path: string) => {
+      let pending = pendingTransitions.get(id);
+      
+      if (!pending) {
+        pending = {};
+        pendingTransitions.set(id, pending);
+      }
+
+      if (type === 'out') {
+        pending.from = path;
+        return new Promise<GetTransitionConfig>((resolve) => {
+          pending!.outResolve = resolve;
+          checkAndResolve(id);
+        });
+      } else {
+        pending.to = path;
+        return new Promise<GetTransitionConfig>((resolve) => {
+          pending!.inResolve = resolve;
+          checkAndResolve(id);
+        });
+      }
+    }
   };
 }
 
@@ -33,11 +79,11 @@ export function createSggoiTransitionContext(
  * matchPath('/products/123', '/products') // false
  * matchPath('/anything', '*') // true
  */
-function findMatchingTransition<T>(
+function findMatchingTransition(
   from: string,
   to: string,
-  transitions: Array<{ from: string; to: string; transition: T }>
-): T | null {
+  transitions: Array<{ from: string; to: string; transition: Transition }>
+): Transition | null {
   // First try to find exact match
   for (const config of transitions) {
     if (matchPath(from, config.from) && matchPath(to, config.to)) {
