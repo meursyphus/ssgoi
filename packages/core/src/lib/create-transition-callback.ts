@@ -109,37 +109,50 @@ export function createTransitionCallback(
   };
 
   function runExitTransition(element: HTMLElement) {
+    // Helper function to insert clone into DOM
+    const insertClone = () => {
+      if (!parentRef || !currentClone) return;
+
+      if (nextSiblingRef && parentRef.contains(nextSiblingRef)) {
+        parentRef.insertBefore(currentClone, nextSiblingRef);
+      } else {
+        parentRef.appendChild(currentClone);
+      }
+    };
+
+    // Helper function to handle cleanup
+    const cleanup = () => {
+      if (currentClone) {
+        currentClone.remove();
+        currentClone = null;
+      }
+      currentAnimation = null;
+      isEntering = false;
+      options?.onCleanupEnd?.();
+    };
+
+    // Clone the element upfront
+    currentClone = element.cloneNode(true) as HTMLElement;
+
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
       // Stop current IN animation and create REVERSED IN animation (not OUT)
       const currentState = currentAnimation.getCurrentState();
       currentAnimation.stop();
-
-      if (!parentRef) return;
-
-      // Clone the element for exit animation
-      const clone = element.cloneNode(true) as HTMLElement;
-      currentClone = clone;
-
-      // Insert clone at the original position
-      if (nextSiblingRef && parentRef.contains(nextSiblingRef)) {
-        parentRef.insertBefore(clone, nextSiblingRef);
-      } else {
-        parentRef.appendChild(clone);
-      }
-
       isEntering = false;
 
       // Get the IN config (not OUT) because we want to reverse the IN animation
       const transition = getTransition();
       if (!transition.in) {
-        clone.remove();
         currentClone = null;
-        options?.onCleanupEnd?.();
+        cleanup();
         return;
       }
 
-      Promise.resolve(transition.in(clone)).then((inConfig) => {
+      Promise.resolve(transition.in(currentClone)).then((inConfig) => {
+        // Insert clone only after we have the transition config
+        insertClone();
+
         // Use IN config but reverse direction (backward)
         currentAnimation = Animator.fromState(currentState, {
           from: 0,
@@ -148,13 +161,7 @@ export function createTransitionCallback(
           onUpdate: (value) => {
             inConfig.tick?.(value);
           },
-          onComplete: () => {
-            clone.remove();
-            currentClone = null;
-            currentAnimation = null;
-            isEntering = false;
-            options?.onCleanupEnd?.();
-          },
+          onComplete: cleanup,
         });
 
         currentAnimation.backward();
@@ -169,31 +176,19 @@ export function createTransitionCallback(
       !currentAnimation.getIsAnimating() ||
       !isEntering
     ) {
-      if (!parentRef) return;
-
-      // Clone the element for exit animation
-      const clone = element.cloneNode(true) as HTMLElement;
-      currentClone = clone;
-
-      // Insert clone at the original position
-      if (nextSiblingRef && parentRef.contains(nextSiblingRef)) {
-        parentRef.insertBefore(clone, nextSiblingRef);
-      } else {
-        parentRef.appendChild(clone);
-      }
-
-      // Run exit transition on the clone
       isEntering = false;
 
       const transition = getTransition();
       if (!transition.out) {
-        clone.remove();
         currentClone = null;
-        options?.onCleanupEnd?.();
+        cleanup();
         return;
       }
 
-      Promise.resolve(transition.out(clone)).then((outConfig) => {
+      Promise.resolve(transition.out(currentClone)).then((outConfig) => {
+        // Insert clone only after we have the transition config
+        insertClone();
+
         currentAnimation = new Animator({
           from: 1,
           to: 0,
@@ -201,13 +196,7 @@ export function createTransitionCallback(
           onUpdate: (value) => {
             outConfig.tick?.(value);
           },
-          onComplete: () => {
-            clone.remove();
-            currentClone = null;
-            currentAnimation = null;
-            isEntering = false;
-            options?.onCleanupEnd?.();
-          },
+          onComplete: cleanup,
         });
 
         currentAnimation.forward();

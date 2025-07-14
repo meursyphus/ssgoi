@@ -12,26 +12,26 @@ const ssgoiConfig: SsgoiConfig = {
     in: async (element) => {
       return {
         spring: { stiffness: 300, damping: 150 },
-        // tick: (progress) => {
-        //   element.style.opacity = progress.toString();
-        //   element.style.transform = `translateY(${(1 - progress) * 20}px) scale(${0.98 + progress * 0.02})`;
-        // },
+        tick: (progress) => {
+          element.style.opacity = progress.toString();
+          element.style.transform = `translateY(${(1 - progress) * 20}px) scale(${0.98 + progress * 0.02})`;
+        },
       };
     },
     out: async (element) => {
-      // element.style.position = "absolute";
-      // element.style.width = "100%";
-      // element.style.top = "0";
-      // element.style.left = "0";
-      // element.style.margin = "0";
-      // element.style.padding = "0";
-      // element.style.boxSizing = "border-box";
+      element.style.position = "absolute";
+      element.style.width = "100%";
+      element.style.top = "0";
+      element.style.left = "0";
+      element.style.margin = "0";
+      element.style.padding = "0";
+      element.style.boxSizing = "border-box";
       return {
         spring: { stiffness: 300, damping: 150 },
-        // tick: (progress) => {
-        //   element.style.opacity = progress.toString();
-        //   element.style.transform = `translateY(${(1 - progress) * -20}px) scale(${0.98 + progress * 0.02})`;
-        // },
+        tick: (progress) => {
+          element.style.opacity = progress.toString();
+          element.style.transform = `translateY(${(1 - progress) * -20}px) scale(${0.98 + progress * 0.02})`;
+        },
       };
     },
   },
