@@ -130,13 +130,10 @@ export function createTransitionCallback(
       isEntering = false;
       options?.onCleanupEnd?.();
     };
-    // Get transition to access prepareOutgoing
+    // Get transition
     const transition = getTransition();
     // Clone the element upfront
     currentClone = element.cloneNode(true) as HTMLElement;
-    if (transition.prepareOutgoing) {
-      transition.prepareOutgoing(currentClone);
-    }
 
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
@@ -152,7 +149,12 @@ export function createTransitionCallback(
         return;
       }
 
-      Promise.resolve(transition.in(currentClone)).then((inConfig) => {
+      Promise.resolve(transition.in(currentClone)).then(async (inConfig) => {
+        const outConfig =
+          currentClone && (await transition.out?.(currentClone));
+        if (outConfig?.prepare) {
+          currentClone && outConfig.prepare(currentClone);
+        }
         // Insert clone only after we have the transition config
         insertClone();
 
@@ -188,7 +190,11 @@ export function createTransitionCallback(
       }
 
       Promise.resolve(transition.out(currentClone)).then((outConfig) => {
-        // Insert clone only after we have the transition config
+        // Apply prepare function if provided
+        if (outConfig.prepare) {
+          currentClone && outConfig.prepare(currentClone);
+        }
+        // Insert clone after preparation
         insertClone();
 
         currentAnimation = new Animator({
