@@ -31,19 +31,19 @@ import { Animator } from "./animator";
  * - Inner function (entrance callback): Returns cleanup callback (exit)
  * - Cleanup callback: Handles exit transitions
  */
-export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
-  getTransition: () => Transition<T>,
+export function createTransitionCallback(
+  getTransition: () => Transition,
   options?: {
     onCleanupEnd?: () => void;
   }
-): TransitionCallback<T> {
+): TransitionCallback {
   let currentAnimation: Animator | null = null;
-  let currentClone: T | null = null; // Track current clone element
+  let currentClone: HTMLElement | null = null; // Track current clone element
   let parentRef: Element | null = null;
   let nextSiblingRef: Element | null = null;
   let isEntering = false; // Track current transition direction
 
-  const runEntrance = async (element: T) => {
+  const runEntrance = async (element: HTMLElement) => {
     // Scenario 4: OUT animation running + IN trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && !isEntering) {
       // Stop current OUT animation
@@ -60,7 +60,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = true;
       const transition = getTransition();
       if (!transition.out) return;
-      
+
       const outConfig = await Promise.resolve(transition.out(element));
 
       currentAnimation = Animator.fromState(currentState, {
@@ -84,7 +84,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       isEntering = true;
       const transition = getTransition();
       if (!transition.in) return;
-      
+
       const inConfig = await Promise.resolve(transition.in(element));
 
       currentAnimation = new Animator({
@@ -105,7 +105,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
     // If IN is already running, just continue
   };
 
-  function runExitTransition(element: T, onComplete?: () => void) {
+  function runExitTransition(element: HTMLElement, onComplete?: () => void) {
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
       // Stop current IN animation and create REVERSED IN animation (not OUT)
@@ -115,7 +115,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       if (!parentRef) return;
 
       // Clone the element for exit animation
-      const clone = element.cloneNode(true) as T;
+      const clone = element.cloneNode(true) as HTMLElement;
       currentClone = clone;
 
       // Insert clone at the original position
@@ -136,7 +136,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
         options?.onCleanupEnd?.();
         return;
       }
-      
+
       Promise.resolve(transition.in(clone)).then((inConfig) => {
         // Create REVERSED IN animation directly
         currentAnimation = Animator.fromState(currentState, {
@@ -169,7 +169,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
       if (!parentRef) return;
 
       // Clone the element for exit animation
-      const clone = element.cloneNode(true) as T;
+      const clone = element.cloneNode(true) as HTMLElement;
       currentClone = clone;
 
       // Insert clone at the original position
@@ -190,7 +190,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
         options?.onCleanupEnd?.();
         return;
       }
-      
+
       Promise.resolve(transition.out(clone)).then((outConfig) => {
         currentAnimation = new Animator({
           from: 1,
@@ -215,7 +215,7 @@ export function createTransitionCallback<T extends HTMLElement = HTMLElement>(
     // If OUT is already running, just continue
   }
 
-  return (element: T) => {
+  return (element: HTMLElement) => {
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
 

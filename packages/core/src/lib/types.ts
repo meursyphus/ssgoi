@@ -1,8 +1,8 @@
 export type TransitionKey = string | symbol;
 
 export type SpringConfig = {
-  stiffness: number; 
-  damping: number; 
+  stiffness: number;
+  damping: number;
 };
 
 export type TransitionConfig = {
@@ -22,6 +22,13 @@ export type Transition = {
   out?: GetTransitionConfig;
 };
 
-export type TransitionCallback = (
-  element: HTMLElement
-) => void | (() => void);
+export type TransitionCallback = (element: HTMLElement) => void | (() => void);
+
+export type SsgoiConfig = {
+  transitions: { from: string; to: string; transition: GetTransitionConfig }[];
+  defaultTransition?: GetTransitionConfig;
+};
+
+export type SsgoiContext = {
+  getTransition: (from: string, to: string) => GetTransitionConfig | null | undefined;
+}
