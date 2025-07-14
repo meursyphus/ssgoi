@@ -58,63 +58,59 @@ type PendingTransition = {
 export function createSggoiTransitionContext(
   options: SsgoiConfig
 ): SsgoiContext {
-  const pendingTransitions = new Map<string, PendingTransition>();
+  let pendingTransition: PendingTransition | null = null;
 
-  function checkAndResolve(id: string) {
-    const pending = pendingTransitions.get(id);
-    if (pending?.from && pending?.to) {
+  function checkAndResolve() {
+    if (pendingTransition?.from && pendingTransition?.to) {
       const transition = findMatchingTransition(
-        pending.from,
-        pending.to,
+        pendingTransition.from,
+        pendingTransition.to,
         options.transitions
       );
       const result = transition || options.defaultTransition;
 
       if (result) {
-        if (result.out && pending.outResolve) {
-          pending.outResolve(result.out);
+        if (result.out && pendingTransition.outResolve) {
+          pendingTransition.outResolve(result.out);
         }
-        if (result.in && pending.inResolve) {
-          pending.inResolve(result.in);
+        if (result.in && pendingTransition.inResolve) {
+          pendingTransition.inResolve(result.in);
         }
       }
 
-      pendingTransitions.delete(id);
+      pendingTransition = null;
     }
   }
 
-  const getTransition = async (key: string, type: "out" | "in") => {
-    let pending = pendingTransitions.get(key);
-
-    if (!pending) {
-      pending = {};
-      pendingTransitions.set(key, pending);
+  const getTransition = async (path: string, type: "out" | "in") => {
+    if (!pendingTransition) {
+      pendingTransition = {};
     }
 
     if (type === "out") {
-      pending.from = key;
+      pendingTransition.from = path;
       return new Promise<GetTransitionConfig>((resolve) => {
-        pending!.outResolve = resolve;
-        checkAndResolve(key);
+        pendingTransition!.outResolve = resolve;
+        checkAndResolve();
       });
     } else {
-      pending.to = key;
+      pendingTransition.to = path;
       return new Promise<GetTransitionConfig>((resolve) => {
-        pending!.inResolve = resolve;
-        checkAndResolve(key);
+        pendingTransition!.inResolve = resolve;
+        checkAndResolve();
       });
     }
   };
 
-  return (key: string) => {
+  return (path: string) => {
     return {
-      key,
+      key: path,
       in: async (element: HTMLElement) => {
-        const transitionConfig = await getTransition(key, "in");
+        const transitionConfig = await getTransition(path, "in");
         return transitionConfig(element);
       },
       out: async (element: HTMLElement) => {
-        const transitionConfig = await getTransition(key, "out");
+        const transitionConfig = await getTransition(path, "out");
         return transitionConfig(element);
       },
     };
