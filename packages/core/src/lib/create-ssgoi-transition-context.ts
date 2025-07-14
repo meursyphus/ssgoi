@@ -39,7 +39,10 @@ import type {
 type PendingTransition = {
   from?: string;
   to?: string;
-  outResolve?: (transition: GetTransitionConfig) => void;
+  outResolve?: (
+    transition: GetTransitionConfig,
+    prepareOutgoing?: (element: HTMLElement) => void
+  ) => void;
   inResolve?: (transition: GetTransitionConfig) => void;
 };
 
@@ -71,7 +74,7 @@ export function createSggoiTransitionContext(
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
-          pendingTransition.outResolve(result.out);
+          pendingTransition.outResolve(result.out, result.prepareOutgoing);
         }
         if (result.in && pendingTransition.inResolve) {
           pendingTransition.inResolve(result.in);
@@ -90,7 +93,10 @@ export function createSggoiTransitionContext(
     if (type === "out") {
       pendingTransition.from = path;
       return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.outResolve = resolve;
+        pendingTransition!.outResolve = (config, prepareOutgoing) => {
+          // prepareOutgoing을 어떻게 전달할지 고민 필요
+          resolve(config);
+        };
         checkAndResolve();
       });
     } else {
@@ -113,6 +119,7 @@ export function createSggoiTransitionContext(
         const transitionConfig = await getTransition(path, "out");
         return transitionConfig(element);
       },
+      prepareOutgoing,
     };
   };
 }
@@ -167,3 +174,14 @@ function matchPath(path: string, pattern: string): boolean {
   // Exact match
   return path === pattern;
 }
+
+/**
+ * Applies common styles for outgoing page elements
+ * Makes the element absolute positioned to allow the incoming page to take its place
+ */
+const prepareOutgoing = (element: HTMLElement): void => {
+  element.style.position = "absolute";
+  element.style.width = "100%";
+  element.style.top = "0";
+  element.style.left = "0";
+};
