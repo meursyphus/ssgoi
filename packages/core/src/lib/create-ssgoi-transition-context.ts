@@ -39,10 +39,7 @@ import type {
 type PendingTransition = {
   from?: string;
   to?: string;
-  outResolve?: (
-    transition: GetTransitionConfig,
-    prepareOutgoing?: (element: HTMLElement) => void
-  ) => void;
+  outResolve?: (transition: GetTransitionConfig) => void;
   inResolve?: (transition: GetTransitionConfig) => void;
 };
 
@@ -74,7 +71,7 @@ export function createSggoiTransitionContext(
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
-          pendingTransition.outResolve(result.out, result.prepareOutgoing);
+          pendingTransition.outResolve(result.out);
         }
         if (result.in && pendingTransition.inResolve) {
           pendingTransition.inResolve(result.in);
@@ -93,10 +90,7 @@ export function createSggoiTransitionContext(
     if (type === "out") {
       pendingTransition.from = path;
       return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.outResolve = (config, prepareOutgoing) => {
-          // prepareOutgoing을 어떻게 전달할지 고민 필요
-          resolve(config);
-        };
+        pendingTransition!.outResolve = resolve;
         checkAndResolve();
       });
     } else {
@@ -117,9 +111,12 @@ export function createSggoiTransitionContext(
       },
       out: async (element: HTMLElement) => {
         const transitionConfig = await getTransition(path, "out");
-        return transitionConfig(element);
+        const config = await transitionConfig(element);
+        return {
+          ...config,
+          prepare: prepareOutgoing,
+        };
       },
-      prepareOutgoing,
     };
   };
 }

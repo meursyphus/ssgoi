@@ -11,6 +11,9 @@ export type TransitionConfig = {
 
   // Callback for each frame with progress value (0-1)
   tick?: (progress: number) => void;
+  
+  // Prepare element before animation (typically for out transitions)
+  prepare?: (element: HTMLElement) => void;
 };
 
 export type GetTransitionConfig = (
@@ -20,7 +23,6 @@ export type GetTransitionConfig = (
 export type Transition = {
   in?: GetTransitionConfig;
   out?: GetTransitionConfig;
-  prepareOutgoing?: (element: HTMLElement) => void;
 };
 
 export type TransitionCallback = (

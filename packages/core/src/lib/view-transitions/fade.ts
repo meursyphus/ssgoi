@@ -23,7 +23,7 @@ export const fade = (options: FadeOptions = {}): Transition => {
       tick: (progress) => {
         element.style.opacity = progress.toString();
       },
+      prepare: prepareOutgoing,
     }),
-    prepareOutgoing: prepareOutgoing,
   };
 };
