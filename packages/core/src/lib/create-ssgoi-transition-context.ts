@@ -1,10 +1,10 @@
-import { GetTransitionConfig } from "./types";
+import type { SsgoiConfig, SsgoiContext } from "./types";
 
 /**
  * Creates a transition configuration
- * 
+ *
  * @example
- * const config = createTransitionConfig({
+ * const config = createSggoiTransitionConfig({
  *   transitions: [
  *     { from: '/home', to: '/about', transition: fade() },
  *     { from: '/products', to: '/products/*', transition: slide() }
@@ -12,10 +12,9 @@ import { GetTransitionConfig } from "./types";
  *   defaultTransition: fade()
  * });
  */
-export function createViewTransitionConfig(options: {
-  transitions: { from: string; to: string; transition: GetTransitionConfig }[];
-  defaultTransition?: GetTransitionConfig;
-}) {
+export function createSggoiTransitionContext(
+  options: SsgoiConfig
+): SsgoiContext {
   return {
     getTransition: (from: string, to: string) => {
       const transition = findMatchingTransition(from, to, options.transitions);

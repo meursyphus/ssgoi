@@ -21,11 +21,11 @@ const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
  * Registers a transition with a key
  * Usage: registerTransition('fade', { in: fadeIn, out: fadeOut })
  */
-export function registerTransition<T extends HTMLElement = HTMLElement>(
+export function registerTransition(
   key: TransitionKey,
-  transition: Transition<T>
+  transition: Transition
 ): void {
-  transitionDefinitions.set(key, transition as Transition);
+  transitionDefinitions.set(key, transition);
 
   // Create callback only if it doesn't exist yet
   if (!transitionCallbacks.has(key)) {
@@ -35,7 +35,7 @@ export function registerTransition<T extends HTMLElement = HTMLElement>(
         if (!trans) {
           throw new Error(`Transition "${String(key)}" not found`);
         }
-        return trans as Transition<T>;
+        return trans;
       },
       {
         onCleanupEnd() {
@@ -43,7 +43,7 @@ export function registerTransition<T extends HTMLElement = HTMLElement>(
         },
       }
     );
-    transitionCallbacks.set(key, callback as TransitionCallback);
+    transitionCallbacks.set(key, callback);
   }
 }
 
@@ -59,10 +59,10 @@ export function unregisterTransition(key: TransitionKey): void {
  * Framework-agnostic transition function that can be used as a ref
  * Usage: <div ref={transition({ key: 'fade', in, out })} />
  */
-export function transition<T extends HTMLElement = HTMLElement>(options: {
+export function transition(options: {
   key: TransitionKey;
-  in?: Transition<T>["in"];
-  out?: Transition<T>["out"];
+  in?: Transition["in"];
+  out?: Transition["out"];
 }) {
   // Register transition if in/out provided
   if (options.in || options.out) {
@@ -73,7 +73,7 @@ export function transition<T extends HTMLElement = HTMLElement>(options: {
     });
   }
 
-  return (element: T | null) => {
+  return (element: HTMLElement | null) => {
     // Apply transition if element exists
     if (element) {
       const callback = transitionCallbacks.get(options.key);
@@ -84,7 +84,7 @@ export function transition<T extends HTMLElement = HTMLElement>(options: {
       }
 
       // The callback handles its own cleanup when element unmounts
-      return callback(element as HTMLElement);
+      return callback(element);
     }
   };
 }
