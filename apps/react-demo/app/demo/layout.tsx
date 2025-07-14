@@ -25,16 +25,16 @@ const ssgoiConfig: SsgoiConfig = {
           element.style.opacity = progress.toString();
           element.style.transform = `translateY(${(1 - progress) * -20}px) scale(${0.98 + progress * 0.02})`;
         },
+        prepare: (element) => {
+          element.style.position = "absolute";
+          element.style.width = "100%";
+          element.style.top = "0";
+          element.style.left = "0";
+          element.style.margin = "0";
+          element.style.padding = "0";
+          element.style.boxSizing = "border-box";
+        },
       };
-    },
-    prepareOutgoing: (element) => {
-      element.style.position = "absolute";
-      element.style.width = "100%";
-      element.style.top = "0";
-      element.style.left = "0";
-      element.style.margin = "0";
-      element.style.padding = "0";
-      element.style.boxSizing = "border-box";
     },
   },
 };

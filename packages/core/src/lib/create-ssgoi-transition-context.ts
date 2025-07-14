@@ -111,11 +111,7 @@ export function createSggoiTransitionContext(
       },
       out: async (element: HTMLElement) => {
         const transitionConfig = await getTransition(path, "out");
-        const config = await transitionConfig(element);
-        return {
-          ...config,
-          prepare: prepareOutgoing,
-        };
+        return transitionConfig(element);
       },
     };
   };
@@ -171,14 +167,3 @@ function matchPath(path: string, pattern: string): boolean {
   // Exact match
   return path === pattern;
 }
-
-/**
- * Applies common styles for outgoing page elements
- * Makes the element absolute positioned to allow the incoming page to take its place
- */
-const prepareOutgoing = (element: HTMLElement): void => {
-  element.style.position = "absolute";
-  element.style.width = "100%";
-  element.style.top = "0";
-  element.style.left = "0";
-};
