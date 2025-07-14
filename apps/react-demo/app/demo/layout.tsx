@@ -6,7 +6,31 @@ import { fade } from "./transitions";
 
 const ssgoiConfig: SsgoiConfig = {
   transitions: [],
-  defaultTransition: fade(),
+  defaultTransition: {
+    in: async (element) => {
+      return {
+        spring: { stiffness: 300, damping: 150 },
+        tick: (progress) => {
+          element.style.opacity = progress.toString();
+        },
+      };
+    },
+    out: async (element) => {
+      element.style.position = "absolute";
+      element.style.width = "100%";
+      element.style.top = "0";
+      element.style.left = "0";
+      element.style.margin = "0";
+      element.style.padding = "0";
+      element.style.boxSizing = "border-box";
+      return {
+        spring: { stiffness: 300, damping: 150 },
+        tick: (progress) => {
+          element.style.opacity = progress.toString();
+        },
+      };
+    },
+  },
 };
 
 export default function DemoLayout({
@@ -25,7 +49,14 @@ export default function DemoLayout({
         </Link>
         <Link href="/demo/contact">Contact</Link>
       </nav>
-      <div style={{ position: "relative" }}>
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          minHeight: "100vh",
+          background: "red",
+        }}
+      >
         <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
       </div>
     </div>
