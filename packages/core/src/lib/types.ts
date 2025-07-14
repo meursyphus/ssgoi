@@ -32,10 +32,4 @@ export type SsgoiConfig = {
   defaultTransition?: Transition;
 };
 
-export type SsgoiContext = {
-  getTransition: (
-    id: string,
-    type: "out" | "in",
-    path: string
-  ) => Promise<GetTransitionConfig>;
-};
+export type SsgoiContext = (key: string) => Transition & { key: TransitionKey };

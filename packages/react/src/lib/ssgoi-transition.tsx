@@ -11,23 +11,10 @@ export const SsgoiTransition = ({
   children: ReactNode;
   id: string;
 }) => {
-  const { getTransition } = useSsgoi();
-  
+  const getTransition = useSsgoi();
+
   return (
-    <div
-      ref={transition({
-        key: id,
-        in: async (element) => {
-          const transitionConfig = await getTransition(id, 'in', id);
-          return transitionConfig(element);
-        },
-        out: async (element) => {
-          const transitionConfig = await getTransition(id, 'out', id);
-          return transitionConfig(element);
-        },
-      })}
-      data-ssgoi-transition={id}
-    >
+    <div ref={transition(getTransition(id))} data-ssgoi-transition={id}>
       {children}
     </div>
   );
