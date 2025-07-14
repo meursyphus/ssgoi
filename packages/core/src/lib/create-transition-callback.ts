@@ -105,7 +105,7 @@ export function createTransitionCallback(
     // If IN is already running, just continue
   };
 
-  function runExitTransition(element: HTMLElement, onComplete?: () => void) {
+  function runExitTransition(element: HTMLElement) {
     // Scenario 3: IN animation running + OUT trigger
     if (currentAnimation && currentAnimation.getIsAnimating() && isEntering) {
       // Stop current IN animation and create REVERSED IN animation (not OUT)
@@ -132,7 +132,6 @@ export function createTransitionCallback(
       if (!transition.in) {
         clone.remove();
         currentClone = null;
-        onComplete?.();
         options?.onCleanupEnd?.();
         return;
       }
@@ -149,7 +148,6 @@ export function createTransitionCallback(
             currentClone = null;
             currentAnimation = null;
             isEntering = false;
-            onComplete?.();
             options?.onCleanupEnd?.();
           },
         });
@@ -186,7 +184,6 @@ export function createTransitionCallback(
       if (!transition.out) {
         clone.remove();
         currentClone = null;
-        onComplete?.();
         options?.onCleanupEnd?.();
         return;
       }
@@ -204,7 +201,6 @@ export function createTransitionCallback(
             currentClone = null;
             currentAnimation = null;
             isEntering = false;
-            onComplete?.();
             options?.onCleanupEnd?.();
           },
         });
@@ -225,8 +221,8 @@ export function createTransitionCallback(
     }
 
     // Return cleanup function for exit transition
-    return (options?: { onComplete?: () => void }) => {
-      runExitTransition(element, options?.onComplete);
+    return () => {
+      runExitTransition(element);
     };
   };
 }
