@@ -21,6 +21,6 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@ssgoi/svelte": "workspace:*"
+		"@meursyphus/ssgoi-svelte": "workspace:*"
 	}
 }
