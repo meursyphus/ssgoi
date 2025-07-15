@@ -10,6 +10,10 @@
 <div class="app-container">
   <h1 class="app-title">use:transition Examples</h1>
   
+  <div class="demo-link">
+    <a href="/demo">View Page Transition Demo →</a>
+  </div>
+  
   <div class="controls">
     <div class="speed-buttons">
       <button
@@ -403,5 +407,23 @@
     color: #333;
     font-weight: 600;
     margin: 0 1rem;
+  }
+  
+  .demo-link {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .demo-link a {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  
+  .demo-link a:hover {
+    color: #0052a3;
+    text-decoration: underline;
   }
 </style>
