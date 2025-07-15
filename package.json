@@ -24,7 +24,11 @@
     "svelte-demo:dev": "pnpm --filter svelte-demo dev",
     "svelte-demo:build": "pnpm --filter svelte-demo build",
     "lint": "pnpm -r lint",
-    "format": "pnpm -r format"
+    "format": "pnpm -r format",
+    "legacy-docs:build": "pnpm --filter legacy-docs build",
+    "deprecated:build": "pnpm --filter deprecated build",
+    "prelegacy-docs:build": "pnpm run deprecated:build",
+    "legacy-docs:dev": "pnpm --filter legacy-docs dev"
   },
   "author": "meursyphus",
   "license": "MIT",
