@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SsgoiConfig } from './types';
+  import type { SsgoiConfig } from '@ssgoi/core/types';
   import { setSsgoiContext } from './context';
   import { createSggoiTransitionContext } from '@ssgoi/core';
 
