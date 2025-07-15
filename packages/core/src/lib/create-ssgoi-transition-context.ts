@@ -83,6 +83,13 @@ export function createSggoiTransitionContext(
   }
 
   const getTransition = async (path: string, type: "out" | "in") => {
+    if (type === "in") {
+      // IN이 호출됐는데 OUT이 대기 중이 아니면 트랜지션 없음
+      if (!pendingTransition || !pendingTransition.from) {
+        return () => ({}); // 빈 트랜지션 반환
+      }
+    }
+
     if (!pendingTransition) {
       pendingTransition = {};
     }
