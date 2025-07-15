@@ -1,26 +1,201 @@
 <script lang="ts">
-  import { SsgoiTransition } from '@meursyphus/ssgoi-svelte';
+  import { transition } from '@meursyphus/ssgoi-svelte';
+  
+  let showShapes = $state(true);
+  let stiffness = $state(1000);
+  let damping = $state(100);
+  let count = $state(0);
 </script>
 
-<div class="container">
-  <h1>Welcome to Ssgoi Demo</h1>
+<div class="app-container">
+  <h1 class="app-title">use:transition Examples</h1>
   
-  <SsgoiTransition id="hero">
-    <div class="hero">
-      <h2>Page Transitions Made Easy</h2>
-      <p>Navigate between pages to see smooth transitions</p>
+  <div class="controls">
+    <div class="speed-buttons">
+      <button
+        class="speed-button slow"
+        onclick={() => {
+          stiffness = 200;
+          damping = 100;
+        }}
+      >
+        느리게
+      </button>
+      <button
+        class="speed-button fast"
+        onclick={() => {
+          stiffness = 1000;
+          damping = 100;
+        }}
+      >
+        빠르게
+      </button>
     </div>
-  </SsgoiTransition>
+    
+    <div class="control-group">
+      <label class="control-label" for="stiffness">Stiffness</label>
+      <input
+        id="stiffness"
+        type="number"
+        class="control-input"
+        bind:value={stiffness}
+        min="1"
+        max="1000"
+      />
+      <span class="control-value">(1-1000)</span>
+    </div>
+    
+    <div class="control-group">
+      <label class="control-label" for="damping">Damping</label>
+      <input
+        id="damping"
+        type="number"
+        class="control-input"
+        bind:value={damping}
+        min="0"
+        max="100"
+      />
+      <span class="control-value">(0-100)</span>
+    </div>
+  </div>
   
-  <SsgoiTransition id="fade">
-    <div class="content">
-      <p>This content fades in and out when navigating</p>
+  <div class="button-group">
+    <button
+      onclick={() => showShapes = !showShapes}
+      class="toggle-button"
+    >
+      {showShapes ? "Hide All Shapes" : "Show All Shapes"}
+    </button>
+    <button
+      onclick={() => count = count + 1}
+      class="count-button"
+    >
+      Count Up
+    </button>
+    <span class="count-display">Count: {count}</span>
+  </div>
+  
+  <div class="shapes-grid">
+    <!-- Fade transition -->
+    <div class="shape-container">
+      <div class="shape-wrapper">
+        {#if showShapes}
+          <div
+            use:transition={{
+              key: 'fade',
+              in: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.opacity = progress.toString();
+                }
+              }),
+              out: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.opacity = progress.toString();
+                }
+              })
+            }}
+            class="shape circle"
+          ></div>
+        {/if}
+      </div>
+      <p class="shape-label">Fade</p>
     </div>
-  </SsgoiTransition>
+    
+    <!-- Scale + Rotate transition -->
+    <div class="shape-container">
+      <div class="shape-wrapper">
+        {#if showShapes}
+          <div
+            use:transition={{
+              key: 'scale-rotate',
+              in: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
+                  element.style.opacity = progress.toString();
+                }
+              }),
+              out: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
+                  element.style.opacity = progress.toString();
+                }
+              })
+            }}
+            class="shape triangle"
+          ></div>
+        {/if}
+      </div>
+      <p class="shape-label">Scale + Rotate</p>
+    </div>
+    
+    <!-- Slide transition -->
+    <div class="shape-container">
+      <div class="shape-wrapper">
+        {#if showShapes}
+          <div
+            use:transition={{
+              key: 'slide',
+              in: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
+                  element.style.opacity = progress.toString();
+                }
+              }),
+              out: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
+                  element.style.opacity = progress.toString();
+                }
+              })
+            }}
+            class="shape square"
+          ></div>
+        {/if}
+      </div>
+      <p class="shape-label">Slide</p>
+    </div>
+    
+    <!-- Scale + Fade transition -->
+    <div class="shape-container">
+      <div class="shape-wrapper">
+        {#if showShapes}
+          <div
+            use:transition={{
+              key: 'scale-fade',
+              in: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  const scale = 0.5 + progress * 0.5;
+                  element.style.transform = `scale(${scale})`;
+                  element.style.opacity = progress.toString();
+                }
+              }),
+              out: (element) => ({
+                spring: { stiffness, damping },
+                tick: (progress) => {
+                  const scale = 0.5 + progress * 0.5;
+                  element.style.transform = `scale(${scale})`;
+                  element.style.opacity = progress.toString();
+                }
+              })
+            }}
+            class="shape pentagon"
+          ></div>
+        {/if}
+      </div>
+      <p class="shape-label">Scale + Fade</p>
+    </div>
+  </div>
 </div>
 
 <style>
-  .container {
+  .app-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
@@ -198,5 +373,35 @@
   .control-value {
     font-size: 0.8rem;
     color: #888;
+  }
+  
+  .count-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0 1rem;
+  }
+  
+  .count-button:hover {
+    background-color: #218838;
+  }
+  
+  .button-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+  
+  .count-display {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 600;
+    margin: 0 1rem;
   }
 </style>
