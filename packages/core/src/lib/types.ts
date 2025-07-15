@@ -29,11 +29,6 @@ export type GetTransitionConfig = (
 export type Transition = {
   in?: GetTransitionConfig;
   out?: GetTransitionConfig;
-  
-  // When true, transitions run independently of parent element removal
-  // Similar to Svelte's transition:fade|global modifier
-  // Default: false (local scope - transition skipped if parent is removed)
-  global?: boolean;
 };
 
 export type TransitionCallback = (
