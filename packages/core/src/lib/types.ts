@@ -14,6 +14,12 @@ export type TransitionConfig = {
   
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
+  
+  // Called when animation starts
+  onStart?: () => void;
+  
+  // Called when animation ends
+  onEnd?: () => void;
 };
 
 export type GetTransitionConfig = (

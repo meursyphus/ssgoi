@@ -68,12 +68,14 @@ export function createTransitionCallback(
         from: 1,
         to: 0,
         spring: outConfig.spring,
+        onStart: outConfig.onStart,
         onUpdate: (value) => {
           outConfig.tick?.(value);
         },
         onComplete: () => {
           currentAnimation = null;
           isEntering = false;
+          outConfig.onEnd?.();
         },
       });
 
@@ -94,12 +96,14 @@ export function createTransitionCallback(
         from: 0,
         to: 1,
         spring: inConfig.spring,
+        onStart: inConfig.onStart,
         onUpdate: (value) => {
           inConfig.tick?.(value);
         },
         onComplete: () => {
           currentAnimation = null;
           isEntering = false;
+          inConfig.onEnd?.();
         },
       });
 
@@ -163,10 +167,14 @@ export function createTransitionCallback(
           from: 0,
           to: 1,
           spring: inConfig.spring,
+          onStart: inConfig.onStart,
           onUpdate: (value) => {
             inConfig.tick?.(value);
           },
-          onComplete: cleanup,
+          onComplete: () => {
+            inConfig.onEnd?.();
+            cleanup();
+          },
         });
 
         currentAnimation.backward();
@@ -201,10 +209,14 @@ export function createTransitionCallback(
           from: 1,
           to: 0,
           spring: outConfig.spring,
+          onStart: outConfig.onStart,
           onUpdate: (value) => {
             outConfig.tick?.(value);
           },
-          onComplete: cleanup,
+          onComplete: () => {
+            outConfig.onEnd?.();
+            cleanup();
+          },
         });
 
         currentAnimation.forward();

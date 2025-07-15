@@ -6,6 +6,7 @@ interface AnimationOptions {
   spring: SpringConfig;
   onUpdate: (value: number) => void;
   onComplete: () => void; // Now non-nullable with default
+  onStart?: () => void;
 }
 /**
  * TODO: requestAnimationFrame() singleton pattern
@@ -36,12 +37,18 @@ export class Animator {
       spring: options.spring ?? { stiffness: 100, damping: 10 },
       onUpdate: options.onUpdate ?? (() => {}),
       onComplete: options.onComplete ?? (() => {}),
+      onStart: options.onStart,
     };
     this.currentValue = this.options.from;
     this.lastTime = null; // Will be set when animation starts
   }
 
   private animate = async (reverse: boolean = false) => {
+    // Call onStart on first frame
+    if (!this.isAnimating && this.options.onStart) {
+      this.options.onStart();
+    }
+    
     this.isAnimating = true;
     const now = performance.now();
 
