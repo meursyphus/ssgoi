@@ -111,7 +111,6 @@ export function createTransitionCallback(
     }
     // If IN is already running, just continue
   };
-
   function runExitTransition(element: HTMLElement) {
     // Helper function to insert clone into DOM
     const insertClone = () => {

@@ -48,7 +48,7 @@ export class Animator {
     if (!this.isAnimating && this.options.onStart) {
       this.options.onStart();
     }
-    
+
     this.isAnimating = true;
     const now = performance.now();
 

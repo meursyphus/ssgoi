@@ -7,17 +7,17 @@ export type SpringConfig = {
 
 export type TransitionConfig = {
   // Spring physics configuration
-  spring: SpringConfig;
+  spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
   // Callback for each frame with progress value (0-1)
   tick?: (progress: number) => void;
-  
+
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
-  
+
   // Called when animation starts
   onStart?: () => void;
-  
+
   // Called when animation ends
   onEnd?: () => void;
 };
@@ -40,4 +40,6 @@ export type SsgoiConfig = {
   defaultTransition?: Transition;
 };
 
-export type SsgoiContext = (path: string) => Transition & { key: TransitionKey };
+export type SsgoiContext = (
+  path: string
+) => Transition & { key: TransitionKey };

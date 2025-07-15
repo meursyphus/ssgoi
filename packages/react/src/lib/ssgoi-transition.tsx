@@ -13,8 +13,23 @@ export const SsgoiTransition = ({
 }) => {
   const getTransition = useSsgoi();
 
+  const transitionCallback = getTransition(id);
+
   return (
-    <div ref={transition(getTransition(id))} data-ssgoi-transition={id}>
+    <div
+      ref={transition({
+        key: id,
+        in: (element) => {
+          console.log(`[${id}] in triggered`);
+          return transitionCallback?.in?.(element) ?? {};
+        },
+        out: (element) => {
+          console.log(`[${id}] out triggered`);
+          return transitionCallback?.out?.(element) ?? {};
+        },
+      })}
+      data-ssgoi-transition={id}
+    >
       {children}
     </div>
   );
