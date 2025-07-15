@@ -1,187 +1,26 @@
-<script>
-  import { transition } from '@meursyphus/ssgoi-svelte';
-  
-  let showShapes = $state(true);
-  let stiffness = $state(1000);
-  let damping = $state(100);
+<script lang="ts">
+  import { SsgoiTransition } from '@meursyphus/ssgoi-svelte';
 </script>
 
-<div class="app-container">
-  <h1 class="app-title">Svelte Transition Action Examples</h1>
+<div class="container">
+  <h1>Welcome to Ssgoi Demo</h1>
   
-  <div class="controls">
-    <div class="speed-buttons">
-      <button
-        class="speed-button slow"
-        onclick={() => {
-          stiffness = 200;
-          damping = 100;
-        }}
-      >
-        느리게
-      </button>
-      <button
-        class="speed-button fast"
-        onclick={() => {
-          stiffness = 1000;
-          damping = 100;
-        }}
-      >
-        빠르게
-      </button>
+  <SsgoiTransition id="hero">
+    <div class="hero">
+      <h2>Page Transitions Made Easy</h2>
+      <p>Navigate between pages to see smooth transitions</p>
     </div>
-    
-    <div class="control-group">
-      <label class="control-label" for="stiffness-input">Stiffness</label>
-      <input
-        id="stiffness-input"
-        type="number"
-        class="control-input"
-        bind:value={stiffness}
-        min="1"
-        max="1000"
-      />
-      <span class="control-value">(1-1000)</span>
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label" for="damping-input">Damping</label>
-      <input
-        id="damping-input"
-        type="number"
-        class="control-input"
-        bind:value={damping}
-        min="0"
-        max="100"
-      />
-      <span class="control-value">(0-100)</span>
-    </div>
-  </div>
+  </SsgoiTransition>
   
-  <button
-    onclick={() => showShapes = !showShapes}
-    class="toggle-button"
-  >
-    {showShapes ? "Hide All Shapes" : "Show All Shapes"}
-  </button>
-  
-  <div class="shapes-grid">
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: "fade",
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.opacity = progress.toString();
-                },
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.opacity = progress.toString();
-                },
-              }),
-            }}
-            class="shape circle"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Fade</p>
+  <SsgoiTransition id="fade">
+    <div class="content">
+      <p>This content fades in and out when navigating</p>
     </div>
-    
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: "scale-rotate",
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-            }}
-            class="shape triangle"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Scale + Rotate</p>
-    </div>
-    
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: "slide",
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-            }}
-            class="shape square"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Slide</p>
-    </div>
-    
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: "scale-fade",
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  const scale = 0.5 + (progress * 0.5);
-                  element.style.transform = `scale(${scale})`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  const scale = 0.5 + (progress * 0.5);
-                  element.style.transform = `scale(${scale})`;
-                  element.style.opacity = progress.toString();
-                },
-              }),
-            }}
-            class="shape pentagon"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Scale + Fade</p>
-    </div>
-  </div>
+  </SsgoiTransition>
 </div>
 
 <style>
-  .app-container {
+  .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
