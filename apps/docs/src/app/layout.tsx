@@ -1,16 +1,37 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/header";
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
-  title: "SSGOI - Next Generation Animation Framework",
-  description: "A powerful animation framework for modern web applications",
+  metadataBase: new URL("https://ssgoi.meursyphus.dev"),
+  title: "SSGOI Documentation",
+  description: "A powerful spring-based animation framework for modern web applications with state preservation",
+  keywords: "react, svelte, animation, spring, transition, documentation",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    title: "SSGOI Documentation",
+    description: "Learn how to use SSGOI for smooth, spring-based animations in your web apps.",
+    type: "website",
+    url: "https://ssgoi.meursyphus.dev",
+    siteName: "SSGOI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SSGOI Documentation",
+    description: "Learn how to use SSGOI for smooth, spring-based animations in your web apps.",
+  },
 };
 
 export default function RootLayout({
@@ -18,14 +39,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="ko">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <div className="relative min-h-screen">
-          <Header />
-          {children}
-        </div>
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }
