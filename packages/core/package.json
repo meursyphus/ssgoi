@@ -1,0 +1,55 @@
+{
+  "name": "@ssgoi/core",
+  "version": "0.0.1",
+  "description": "A smooth page transition library",
+  "private": true,
+  "type": "module",
+  "main": "./src/lib/index.ts",
+  "module": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/lib/index.ts",
+      "import": "./src/lib/index.ts",
+      "require": "./src/lib/index.ts"
+    },
+    "./transitions": {
+      "types": "./src/lib/transitions/index.ts",
+      "import": "./src/lib/transitions/index.ts",
+      "require": "./src/lib/transitions/index.ts"
+    },
+    "./view-transitions": {
+      "types": "./src/lib/view-transitions/index.ts",
+      "import": "./src/lib/view-transitions/index.ts",
+      "require": "./src/lib/view-transitions/index.ts"
+    },
+    "./types": {
+      "types": "./src/lib/types.ts",
+      "import": "./src/lib/types.ts",
+      "require": "./src/lib/types.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "page-transition",
+    "animation",
+    "typescript",
+    "vanilla"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.5.0"
+  }
+}

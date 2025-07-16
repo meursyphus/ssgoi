@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(222.2 84% 4.9%);
+  --color-foreground: hsl(210 40% 98%);
+  --color-card: hsl(222.2 84% 4.9%);
+  --color-card-foreground: hsl(210 40% 98%);
+  --color-popover: hsl(222.2 84% 4.9%);
+  --color-popover-foreground: hsl(210 40% 98%);
+  --color-primary: hsl(191 94% 43%);
+  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
+  --color-secondary: hsl(270 66% 47%);
+  --color-secondary-foreground: hsl(210 40% 98%);
+  --color-muted: hsl(217.2 32.6% 17.5%);
+  --color-muted-foreground: hsl(215 20.2% 65.1%);
+  --color-accent: hsl(329 86% 56%);
+  --color-accent-foreground: hsl(210 40% 98%);
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  --color-border: hsl(217.2 32.6% 17.5%);
+  --color-input: hsl(217.2 32.6% 17.5%);
+  --color-ring: hsl(191 94% 43%);
+  
+  --color-vivid-blue: #00B4D8;
+  --color-vivid-purple: #7C3AED;
+  --color-vivid-pink: #EC4899;
+  --color-vivid-orange: #F97316;
+  --color-vivid-green: #10B981;
+  --color-vivid-yellow: #F59E0B;
+  
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.gradient-text {
+  background: linear-gradient(to right, var(--color-vivid-blue), var(--color-vivid-purple), var(--color-vivid-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    145deg,
+    hsl(222.2 84% 4.9% / 0.8),
+    hsl(222.2 84% 8% / 0.8)
+  );
+}
+
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  opacity: 0;
+  transition: opacity 0.5s;
+  background: radial-gradient(
+    600px circle at var(--x) var(--y),
+    hsl(191 94% 43% / 0.1),
+    transparent 40%
+  );
+}
+
+.glow-card:hover::before {
+  opacity: 1;
+}
+
+.code-block {
+  border-radius: var(--radius-lg);
+  background-color: rgb(24 24 27 / 0.5);
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  border: 1px solid hsl(217.2 32.6% 17.5% / 0.5);
+}

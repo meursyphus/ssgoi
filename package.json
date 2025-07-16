@@ -1,15 +1,34 @@
 {
-  "name": "ssgoi-workspace",
-  "homepage": "https://ssgoi.pages.dev",
+  "name": "ssgoi",
+  "homepage": "https://ssgoi.dev",
   "version": "1.0.0",
+  "private": true,
   "description": "SSGOI is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications.",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "start": "npm run build && npm run dev --workspace=docs",
-    "build": "npm run package --workspace=ssgoi",
-    "docs:build": "npm run build --workspace=docs"
+    "start": "pnpm --filter ssgoi build && pnpm --filter docs dev",
+    "build": "pnpm --filter ssgoi package",
+    "build:all": "pnpm -r build",
+    "dev:all": "pnpm -r --parallel dev",
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build",
+    "ssgoi:dev": "pnpm --filter ssgoi dev",
+    "ssgoi:build": "pnpm --filter ssgoi build",
+    "core:dev": "pnpm --filter @ssgoi/core dev",
+    "core:build": "pnpm --filter @ssgoi/core build",
+    "react:dev": "pnpm --filter @meursyphus/ssgoi-react dev",
+    "react:build": "pnpm --filter @meursyphus/ssgoi-react build",
+    "react-demo:dev": "pnpm --filter react-demo dev",
+    "react-demo:build": "pnpm --filter react-demo build",
+    "svelte:dev": "pnpm --filter @meursyphus/ssgoi-svelte dev",
+    "svelte:build": "pnpm --filter @meursyphus/ssgoi-svelte build",
+    "svelte-demo:dev": "pnpm --filter svelte-demo dev",
+    "svelte-demo:build": "pnpm --filter svelte-demo build",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "legacy-docs:build": "pnpm --filter legacy-docs build",
+    "prelegacy-docs:build": "pnpm run deprecated:build",
+    "deprecated:build": "pnpm --filter ssgoi build",
+    "legacy-docs:dev": "pnpm --filter legacy-docs dev"
   },
   "author": "meursyphus",
   "license": "MIT",
@@ -25,5 +44,6 @@
     "sveltekit",
     "page-transition",
     "animation"
-  ]
+  ],
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }
