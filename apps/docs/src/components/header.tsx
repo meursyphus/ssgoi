@@ -4,15 +4,31 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Github, Menu, X } from "lucide-react"
 import { useState } from "react"
+import { usePathname } from "next/navigation"
+import { useSidebarStore } from "@/store/sidebar"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const { toggle: toggleSidebar } = useSidebarStore()
+  const isDocsPage = pathname.includes('/docs')
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-8">
         <div className="flex flex-1 items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4">
+            {/* Mobile Sidebar Toggle for Docs */}
+            {isDocsPage && (
+              <button
+                className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                onClick={toggleSidebar}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle sidebar</span>
+              </button>
+            )}
+            
             <Link href="/" className="flex items-center space-x-2">
               <span className="text-2xl font-bold gradient-text">SSGOI</span>
             </Link>

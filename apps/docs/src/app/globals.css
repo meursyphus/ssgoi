@@ -1,32 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(222.2 84% 4.9%);
-  --color-foreground: hsl(210 40% 98%);
-  --color-card: hsl(222.2 84% 4.9%);
-  --color-card-foreground: hsl(210 40% 98%);
-  --color-popover: hsl(222.2 84% 4.9%);
-  --color-popover-foreground: hsl(210 40% 98%);
-  --color-primary: hsl(191 94% 43%);
-  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-secondary: hsl(270 66% 47%);
-  --color-secondary-foreground: hsl(210 40% 98%);
-  --color-muted: hsl(217.2 32.6% 17.5%);
-  --color-muted-foreground: hsl(215 20.2% 65.1%);
-  --color-accent: hsl(329 86% 56%);
-  --color-accent-foreground: hsl(210 40% 98%);
-  --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(217.2 32.6% 17.5%);
-  --color-input: hsl(217.2 32.6% 17.5%);
-  --color-ring: hsl(191 94% 43%);
+  /* 다크 테마 기본 색상 */
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+  --color-card: #141414;
+  --color-card-foreground: #ffffff;
+  --color-popover: #141414;
+  --color-popover-foreground: #ffffff;
+  --color-primary: #ff6b35; /* 비비드한 주황색 */
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #3b82f6; /* 밝은 파란색 */
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
+  --color-accent: #8b5cf6; /* 보라색 */
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #27272a;
+  --color-input: #27272a;
+  --color-ring: #ff6b35;
   
-  --color-vivid-blue: #00B4D8;
-  --color-vivid-purple: #7C3AED;
-  --color-vivid-pink: #EC4899;
-  --color-vivid-orange: #F97316;
-  --color-vivid-green: #10B981;
-  --color-vivid-yellow: #F59E0B;
+  /* 비비드한 색상 팔레트 */
+  --color-vivid-orange: #ff6b35;
+  --color-vivid-blue: #3b82f6;
+  --color-vivid-purple: #8b5cf6;
+  --color-vivid-pink: #ec4899;
+  --color-vivid-green: #10b981;
+  --color-vivid-yellow: #eab308;
+  --color-vivid-cyan: #06b6d4;
+  --color-vivid-red: #ef4444;
   
   --radius-lg: 0.5rem;
   --radius-md: calc(0.5rem - 2px);
@@ -38,8 +42,30 @@ body {
   color: var(--color-foreground);
 }
 
+/* 그라데이션 텍스트 효과 */
 .gradient-text {
-  background: linear-gradient(to right, var(--color-vivid-blue), var(--color-vivid-purple), var(--color-vivid-pink));
+  background: linear-gradient(135deg, var(--color-vivid-orange), var(--color-vivid-pink), var(--color-vivid-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, var(--color-vivid-orange), var(--color-vivid-yellow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, var(--color-vivid-blue), var(--color-vivid-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, var(--color-vivid-purple), var(--color-vivid-pink));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -66,7 +92,7 @@ body {
   transition: opacity 0.5s;
   background: radial-gradient(
     600px circle at var(--x) var(--y),
-    hsl(191 94% 43% / 0.1),
+    rgba(255, 107, 53, 0.15),
     transparent 40%
   );
 }
@@ -77,9 +103,86 @@ body {
 
 .code-block {
   border-radius: var(--radius-lg);
-  background-color: rgb(24 24 27 / 0.5);
+  background-color: rgb(20 20 20 / 0.8);
   padding: 1rem;
   font-family: monospace;
   font-size: 0.875rem;
-  border: 1px solid hsl(217.2 32.6% 17.5% / 0.5);
+  border: 1px solid var(--color-border);
+}
+
+/* 애니메이션 효과 */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* 버튼 효과 */
+.btn-primary {
+  background: var(--color-vivid-orange);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  background: var(--color-vivid-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(255, 107, 53, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-foreground);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-vivid-orange);
+  color: var(--color-vivid-orange);
+}
+
+/* 카드 효과 */
+.feature-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s;
+}
+
+.feature-card:hover {
+  border-color: var(--color-vivid-orange);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -15px rgba(255, 107, 53, 0.2);
 }
