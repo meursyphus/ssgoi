@@ -26,8 +26,8 @@
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs:build": "pnpm --filter legacy-docs build",
-    "deprecated:build": "pnpm --filter deprecated build",
     "prelegacy-docs:build": "pnpm run deprecated:build",
+    "deprecated:build": "pnpm --filter ssgoi build",
     "legacy-docs:dev": "pnpm --filter legacy-docs dev"
   },
   "author": "meursyphus",
