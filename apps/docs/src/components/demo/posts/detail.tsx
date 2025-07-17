@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
 import { getPost, getRelatedPosts } from "./mock-data";
 import { useDemoRouter } from "../router-provider";
-import { MDXRemote } from "next-mdx-remote/rsc";
+import { MDXRemote } from "next-mdx-remote-client/rsc";
 
 interface PostDetailProps {
   onBack?: () => void;
@@ -12,10 +12,10 @@ interface PostDetailProps {
 
 export default function PostDetail({ onBack }: PostDetailProps) {
   const router = useDemoRouter();
-  const currentPath = router.currentPath || '';
+  const currentPath = router.currentPath || "";
   // Extract postId from path: /demo/posts/[id]
-  const postId = currentPath.split('/').pop() || '';
-  
+  const postId = currentPath.split("/").pop() || "";
+
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
 
@@ -60,11 +60,18 @@ export default function PostDetail({ onBack }: PostDetailProps) {
         {/* Back button */}
         <div className="px-4 py-4">
           <button
-            onClick={onBack || (() => router.goto('/demo/posts'))}
+            onClick={onBack || (() => router.goto("/demo/posts"))}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             <span>Back</span>
           </button>
@@ -78,10 +85,10 @@ export default function PostDetail({ onBack }: PostDetailProps) {
             </span>
             <span className="text-gray-500">{post.readTime} min read</span>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-white mb-4">{post.title}</h1>
           <p className="text-lg text-gray-400 mb-6">{post.excerpt}</p>
-          
+
           {/* Author info */}
           <div className="flex items-center gap-3">
             <img
@@ -93,10 +100,10 @@ export default function PostDetail({ onBack }: PostDetailProps) {
               <div className="font-medium text-white">{post.author.name}</div>
               <div className="text-sm text-gray-400">{post.author.role}</div>
               <div className="text-xs text-gray-500">
-                {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </div>
             </div>
@@ -112,10 +119,12 @@ export default function PostDetail({ onBack }: PostDetailProps) {
 
         {/* Post content */}
         <article className="px-4 py-8 prose prose-invert max-w-none">
-          <MDXRemote 
-            source={post.content} 
-            components={mdxComponents}
-          />
+          <Suspense fallback={<div className="text-gray-400">Loading content...</div>}>
+            <MDXRemote 
+              source={post.content} 
+              components={mdxComponents}
+            />
+          </Suspense>
         </article>
 
         {/* Tags */}
@@ -135,7 +144,9 @@ export default function PostDetail({ onBack }: PostDetailProps) {
         {/* Related posts */}
         {relatedPosts.length > 0 && (
           <div className="border-t border-gray-800 px-4 py-8">
-            <h3 className="text-xl font-semibold text-white mb-4">More to Read</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              More to Read
+            </h3>
             <div className="space-y-3">
               {relatedPosts.map((relatedPost) => (
                 <button
