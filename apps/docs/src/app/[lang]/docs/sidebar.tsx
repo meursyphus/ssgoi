@@ -49,18 +49,18 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
             <button
               onClick={() => toggleExpanded(item.path)}
               className={`
-                w-full text-left px-4 py-2 flex items-center justify-between
+                w-full text-left px-3 py-2 flex items-center justify-between rounded-md
                 text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors
-                ${level > 0 ? "pl-" + (level * 4 + 4) : ""}
+                ${level > 0 ? "ml-" + (level * 4) : ""}
               `}
             >
-              <span className="font-medium">{item.navTitle}</span>
+              <span className="font-medium text-sm">{item.navTitle}</span>
               <ChevronRight 
                 className={`w-4 h-4 transition-transform text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
               />
             </button>
             {isExpanded && (
-              <ul>
+              <ul className="mt-1">
                 {item.children?.map((child) => renderNavItem(child, level + 1))}
               </ul>
             )}
@@ -70,11 +70,11 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
             href={itemPath}
             onClick={() => close()}
             className={`
-              block px-4 py-2 transition-colors
-              ${level > 0 ? "pl-" + (level * 4 + 4) : ""}
+              block px-3 py-2 rounded-md transition-colors text-sm
+              ${level > 0 ? "ml-" + (level * 4) : ""}
               ${isActive 
-                ? "bg-orange-500/20 text-orange-400 border-l-4 border-orange-500 hover:bg-orange-500/30" 
-                : "text-gray-300 hover:text-white hover:bg-zinc-800 border-l-4 border-transparent"
+                ? "bg-orange-500/20 text-orange-400 font-medium" 
+                : "text-gray-300 hover:text-white hover:bg-zinc-800"
               }
             `}
           >
@@ -90,7 +90,20 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
     close();
   }, [pathname, close]);
 
-  return (
+  // Desktop sidebar (inside layout)
+  const DesktopSidebar = () => (
+    <nav className="space-y-1">
+      <div className="mb-4 pb-4 border-b border-zinc-800">
+        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          Documentation
+        </h2>
+      </div>
+      <ul className="space-y-1">{navigation.map((item) => renderNavItem(item))}</ul>
+    </nav>
+  );
+
+  // Mobile sidebar (overlay)
+  const MobileSidebar = () => (
     <>
       {/* Mobile overlay */}
       {isOpen && (
@@ -100,29 +113,40 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
         />
       )}
       
-      {/* Sidebar */}
+      {/* Mobile sidebar panel */}
       <aside
         className={`
           fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-zinc-900 border-r border-zinc-800 overflow-y-auto z-40
-          transition-transform duration-300 ease-in-out
+          transition-transform duration-300 ease-in-out md:hidden
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0
         `}
       >
-        <div className="p-4 md:hidden flex items-center justify-between border-b border-zinc-800">
-          <span className="text-sm font-medium text-gray-400">Navigation</span>
-          <button
-            onClick={close}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-8 w-8 text-gray-400 hover:text-white"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close sidebar</span>
-          </button>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-gray-400">Navigation</span>
+            <button
+              onClick={close}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-8 w-8 text-gray-400 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close sidebar</span>
+            </button>
+          </div>
+          <nav>
+            <ul className="space-y-1">{navigation.map((item) => renderNavItem(item))}</ul>
+          </nav>
         </div>
-        <nav className="py-4 md:pt-6">
-          <ul>{navigation.map((item) => renderNavItem(item))}</ul>
-        </nav>
       </aside>
+    </>
+  );
+
+  // Show both, CSS will handle visibility
+  return (
+    <>
+      <div className="hidden md:block">
+        <DesktopSidebar />
+      </div>
+      <MobileSidebar />
     </>
   );
 }
