@@ -50,19 +50,24 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           to: "/demo/posts/*",
           transition: {
             in: (node) => ({
-              duration: 400,
+              prepare: (node) => {
+                node.style.zIndex = "100";
+              },
               tick: (t) => {
+                node.style.zIndex = "100";
                 node.style.transform = `translateX(${(1 - t) * 100}%)`;
               },
             }),
             out: (node) => ({
-              duration: 400,
+              prepare: (node) => {
+                node.style.position = "absolute";
+                node.style.left = "0";
+                node.style.top = "0";
+                node.style.width = "100%";
+                node.style.zIndex = "-1";
+              },
               tick: (t) => {
-                node.style.position = 'absolute';
-                node.style.left = '0';
-                node.style.top = '0';
-                node.style.width = '100%';
-                node.style.transform = `translateX(${-t * 20}%)`;
+                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
               },
             }),
           },
@@ -72,19 +77,19 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           to: "/demo/posts",
           transition: {
             in: (node) => ({
-              duration: 400,
               tick: (t) => {
                 node.style.transform = `translateX(${-(1 - t) * 20}%)`;
               },
             }),
             out: (node) => ({
-              duration: 400,
+              prepare: (node) => {
+                node.style.position = "absolute";
+                node.style.left = "0";
+                node.style.top = "0";
+                node.style.width = "auto";
+                node.style.zIndex = "100";
+              },
               tick: (t) => {
-                node.style.zIndex = '100';
-                node.style.position = 'absolute';
-                node.style.left = '0';
-                node.style.top = '0';
-                node.style.width = 'auto';
                 node.style.transform = `translateX(${(1 - t) * 100}%)`;
               },
             }),
@@ -114,7 +119,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {/* Main Content Area */}
         <main
           id="demo-content"
-          className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950"
+          className="flex-1 w-full overflow-y-auto overflow-x-hidden relative z-0 bg-gray-950"
         >
           <Ssgoi config={config}>{children}</Ssgoi>
         </main>
