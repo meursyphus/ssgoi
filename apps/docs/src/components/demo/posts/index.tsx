@@ -20,8 +20,8 @@ export default function PostsDemo() {
           </p>
         </div>
 
-        {/* Posts Grid */}
-        <div className="flex flex-col gap-4">
+        {/* Posts List */}
+        <div className="space-y-3">
           {posts.map((post) => (
             <article
               key={post.id}
@@ -29,53 +29,42 @@ export default function PostsDemo() {
                 // Navigate to post detail
                 router.goto(`/demo/posts/${post.id}`);
               }}
-              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 cursor-pointer"
+              className="bg-gray-900 rounded-lg overflow-hidden transition-all duration-200 hover:bg-gray-800 cursor-pointer"
             >
-              {/* Post Image */}
-              <div className="relative h-40 overflow-hidden">
-                <img
-                  src={post.coverImage}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent" />
-              </div>
-
-              {/* Post Content */}
-              <div className="p-6">
-                {/* Meta Information */}
-                <div className="flex justify-between items-center mb-4 text-sm">
-                  <span className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full font-medium">
-                    {post.category}
-                  </span>
-                  <span className="text-gray-500">{post.readTime} min read</span>
+              <div className="flex gap-3 p-3">
+                {/* Left: Cover Image */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={post.coverImage}
+                    alt={post.title}
+                    className="w-20 h-20 rounded-md object-cover bg-gray-800"
+                  />
                 </div>
 
-                {/* Title and Excerpt */}
-                <h2 className="text-xl font-semibold text-white mb-3 line-clamp-2">
-                  {post.title}
-                </h2>
-                <p className="text-gray-400 line-clamp-3 mb-6">
-                  {post.excerpt}
-                </p>
+                {/* Right: Content */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                  {/* Title and excerpt */}
+                  <div>
+                    <h2 className="text-base font-semibold text-white mb-1 line-clamp-2">
+                      {post.title}
+                    </h2>
+                    <p className="text-xs text-gray-400 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  </div>
 
-                {/* Author Information */}
-                <div className="flex items-center gap-3">
-                  <img
-                    src={post.author.avatar}
-                    alt={post.author.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white">
-                      {post.author.name}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
+                  {/* Author and meta info */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <img
+                      src={post.author.avatar}
+                      alt={post.author.name}
+                      className="w-4 h-4 rounded-full"
+                    />
+                    <span className="text-xs text-gray-300">{post.author.name}</span>
+                    <span className="text-xs text-gray-500">•</span>
+                    <span className="text-xs text-gray-500">{post.readTime}m</span>
+                    <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-400 rounded-full ml-auto">
+                      {post.category}
                     </span>
                   </div>
                 </div>
