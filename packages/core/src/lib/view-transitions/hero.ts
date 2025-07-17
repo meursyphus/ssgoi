@@ -51,6 +51,35 @@ function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
   );
 }
 
+function registerHeroElements(node: HTMLElement, direction: 'from' | 'to') {
+  const heroEls = Array.from(node.querySelectorAll('[data-hero-key]'));
+  
+  heroEls.forEach((heroEl) => {
+    const key = heroEl.getAttribute('data-hero-key');
+    if (!key) return;
+
+    const state = getOrCreateHeroState(key);
+    
+    if (direction === 'from') {
+      state.fromNode = node;
+      
+      // Resolve if there's a waiting promise
+      if (state.resolver) {
+        state.resolver(node);
+        state.resolver = null;
+        if (state.timeoutId) {
+          clearTimeout(state.timeoutId);
+          state.timeoutId = null;
+        }
+      }
+    } else {
+      state.toNode = node;
+    }
+  });
+  
+  return heroEls;
+}
+
 export const hero = (options: HeroOptions = {}): Transition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
@@ -62,8 +91,8 @@ export const hero = (options: HeroOptions = {}): Transition => {
     in: async (element) => {
       const toNode = element;
       
-      // Find all hero elements in the incoming page
-      const heroEls = Array.from(toNode.querySelectorAll('[data-hero-key]'));
+      // Register all hero elements in the incoming page
+      const heroEls = registerHeroElements(toNode, 'to');
       if (heroEls.length === 0) {
         return {
           spring,
@@ -78,7 +107,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
           if (!key) return null;
 
           const state = getOrCreateHeroState(key);
-          state.toNode = toNode;
 
           // Create promise for this hero element
           const fromNodePromise = new Promise<HTMLElement | null>((resolve) => {
@@ -173,32 +201,10 @@ export const hero = (options: HeroOptions = {}): Transition => {
       };
     },
     out: async (element) => {
-      const fromNode = element;
-      
-      // Find all hero elements in the outgoing page
-      const heroEls = Array.from(fromNode.querySelectorAll('[data-hero-key]'));
-      
-      // Trigger resolvers for each hero element
-      heroEls.forEach((heroEl) => {
-        const key = heroEl.getAttribute('data-hero-key');
-        if (!key) return;
-
-        const state = getOrCreateHeroState(key);
-        state.fromNode = fromNode;
-        
-        // Resolve if there's a waiting promise
-        if (state.resolver) {
-          state.resolver(fromNode);
-          state.resolver = null;
-          if (state.timeoutId) {
-            clearTimeout(state.timeoutId);
-            state.timeoutId = null;
-          }
-        }
-      });
+      // Register all hero elements in the outgoing page
+      registerHeroElements(element, 'from');
       
       return {
-        tick: () => {}, // Do nothing - let prepareOutgoing handle visibility
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.opacity = '0'; // Make it invisible immediately
