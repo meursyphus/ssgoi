@@ -23,7 +23,11 @@ export default function PostsDemo() {
           {posts.map((post) => (
             <article
               key={post.id}
-              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800"
+              onClick={() => {
+                // Navigate to post detail
+                window.location.href = `/demo/posts/${post.id}`;
+              }}
+              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 cursor-pointer"
             >
               {/* Post Image */}
               <div className="relative h-40 overflow-hidden">

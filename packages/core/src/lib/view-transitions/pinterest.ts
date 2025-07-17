@@ -216,44 +216,51 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
   };
   const timeout = options.timeout ?? 300;
 
-  // Promise-based state sharing between in/out
-  let outResolver: ((element: HTMLElement) => void) | null = null;
-  let inResolver: ((element: HTMLElement) => void) | null = null;
-  
-  const outPromise = new Promise<HTMLElement>((resolve) => {
-    outResolver = resolve;
-  });
-  
-  const inPromise = new Promise<HTMLElement>((resolve) => {
-    inResolver = resolve;
-  });
+  // Shared state between in/out
+  let currentFromNode: HTMLElement | null = null;
+  let currentToNode: HTMLElement | null = null;
+  let fromNodeResolver: ((value: boolean) => void) | null = null;
+  let toNodeResolver: ((value: boolean) => void) | null = null;
 
   // Shared animation data
   let animationData: AnimationData | null = null;
 
   return {
     in: async (element) => {
-      const toNode = element;
+      currentToNode = element;
       
-      // Notify that in transition has started
-      if (inResolver) {
-        inResolver(toNode);
+      // Notify out transition that toNode is ready
+      if (toNodeResolver) {
+        toNodeResolver(true);
+        toNodeResolver = null;
       }
 
       // Wait for out transition to provide fromNode
-      const fromNode = await Promise.race([
-        outPromise,
-        new Promise<HTMLElement | null>((resolve) => 
-          setTimeout(() => resolve(null), timeout)
-        ),
-      ]);
+      const hasFromNode = await new Promise<boolean>((resolve) => {
+        if (currentFromNode) {
+          // fromNode already set by out transition
+          resolve(true);
+        } else {
+          // Store resolver for out transition to call
+          fromNodeResolver = resolve;
+          // Timeout fallback
+          setTimeout(() => {
+            fromNodeResolver = null;
+            resolve(false);
+          }, timeout);
+        }
+      });
 
-      if (!fromNode) {
+      if (!hasFromNode || !currentFromNode) {
+        currentFromNode = null;
         return {
           spring,
           tick: () => {},
         };
       }
+
+      const fromNode = currentFromNode;
+      const toNode = currentToNode;
 
       // Detect mode and key
       const detection = detectModeAndKey(fromNode, toNode);
@@ -302,6 +309,9 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
         opacity: toNode.style.opacity,
       };
 
+      // Reset for next transition
+      currentFromNode = null;
+
       return {
         spring,
         tick: (progress) => {
@@ -329,25 +339,29 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
       };
     },
     out: async (element) => {
-      const fromNode = element;
+      currentFromNode = element;
       
-      // Notify that out transition has started
-      if (outResolver) {
-        outResolver(fromNode);
+      // Notify in transition that fromNode is ready
+      if (fromNodeResolver) {
+        fromNodeResolver(true);
+        fromNodeResolver = null;
       }
 
-      // Wait for in transition to detect mode and calculate rects
-      const toNode = await Promise.race([
-        inPromise,
-        new Promise<HTMLElement | null>((resolve) => 
-          setTimeout(() => resolve(null), timeout)
-        ),
-      ]);
-
-      // Wait a bit for animation data to be calculated
-      if (toNode) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
+      // Wait for in transition to be ready (optional, for animation data)
+      await new Promise<boolean>((resolve) => {
+        if (currentToNode) {
+          // toNode already set by in transition
+          resolve(true);
+        } else {
+          // Store resolver for in transition to call
+          toNodeResolver = resolve;
+          // Don't wait too long since out needs to start quickly
+          setTimeout(() => {
+            toNodeResolver = null;
+            resolve(false);
+          }, 50);
+        }
+      });
 
       return {
         prepare: (element) => {
@@ -378,6 +392,7 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
         },
         onEnd: () => {
           // Clean up for next transition
+          currentToNode = null;
           animationData = null;
         },
       };

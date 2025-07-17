@@ -45,7 +45,12 @@ interface PinCardProps {
 
 function PinCard({ item }: PinCardProps) {
   return (
-    <article className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 group">
+    <article 
+      onClick={() => {
+        // Navigate to pin detail
+        window.location.href = `/demo/pinterest/${item.id}`;
+      }}
+      className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 group cursor-pointer">
       {/* Image with dynamic aspect ratio */}
       <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
         <img

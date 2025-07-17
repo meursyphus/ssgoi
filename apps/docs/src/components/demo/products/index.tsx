@@ -19,7 +19,11 @@ export default function ProductsDemo() {
           {products.map((product) => (
             <article
               key={product.id}
-              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800"
+              onClick={() => {
+                // Navigate to product detail
+                window.location.href = `/demo/products/${product.id}`;
+              }}
+              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 cursor-pointer"
             >
               {/* Product Image */}
               <div className="relative aspect-square">
