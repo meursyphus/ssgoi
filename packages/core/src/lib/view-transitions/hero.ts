@@ -13,6 +13,7 @@ function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
 function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
   const rootRect = root.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
+
   return new DOMRect(
     elRect.left - rootRect.left,
     elRect.top - rootRect.top,
@@ -35,9 +36,9 @@ export const hero = (options: HeroOptions = {}): Transition => {
   return {
     in: async (element) => {
       const toNode = element;
-      
+
       // Find all hero elements in the incoming page
-      const heroEls = Array.from(toNode.querySelectorAll('[data-hero-key]'));
+      const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
       if (heroEls.length === 0) {
         return {
           spring,
@@ -72,7 +73,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
       // Calculate animations for matching hero elements
       const heroAnimations = heroEls
         .map((heroEl) => {
-          const key = heroEl.getAttribute('data-hero-key');
+          const key = heroEl.getAttribute("data-hero-key");
           if (!key) return null;
 
           const fromEl = getHeroEl(fromNode!, key);
@@ -83,7 +84,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
           // Calculate animation parameters
           const fromRect = getRect(fromNode!, fromEl);
           const toRect = getRect(toNode, toEl);
-          
+
           const dx = fromRect.left - toRect.left;
           const dy = fromRect.top - toRect.top;
           const dw = fromRect.width / toRect.width;
@@ -102,19 +103,19 @@ export const hero = (options: HeroOptions = {}): Transition => {
             dh,
             originalTransform,
             originalPosition,
-            originalTransformOrigin
+            originalTransformOrigin,
           };
         })
         .filter(Boolean) as Array<{
-          toEl: HTMLElement;
-          dx: number;
-          dy: number;
-          dw: number;
-          dh: number;
-          originalTransform: string;
-          originalPosition: string;
-          originalTransformOrigin: string;
-        }>;
+        toEl: HTMLElement;
+        dx: number;
+        dy: number;
+        dw: number;
+        dh: number;
+        originalTransform: string;
+        originalPosition: string;
+        originalTransformOrigin: string;
+      }>;
 
       // Reset fromNode for next transition
       fromNode = null;
@@ -126,40 +127,51 @@ export const hero = (options: HeroOptions = {}): Transition => {
         };
       }
 
+      console.log(heroAnimations);
+
       return {
         spring,
         tick: (progress) => {
           // Animate all hero elements
           heroAnimations.forEach(({ toEl, dx, dy, dw, dh }) => {
-            toEl.style.position = 'relative';
-            toEl.style.transformOrigin = 'top left';
+            toEl.style.zIndex = "100";
+            toEl.style.position = "relative";
+            toEl.style.transformOrigin = "top left";
             toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           });
         },
         onEnd: () => {
           // Reset all hero elements
-          heroAnimations.forEach(({ toEl, originalTransform, originalPosition, originalTransformOrigin }) => {
-            toEl.style.transform = originalTransform;
-            toEl.style.position = originalPosition;
-            toEl.style.transformOrigin = originalTransformOrigin;
-          });
-        }
+          heroAnimations.forEach(
+            ({
+              toEl,
+              originalTransform,
+              originalPosition,
+              originalTransformOrigin,
+            }) => {
+              toEl.style.transform = originalTransform;
+              toEl.style.position = originalPosition;
+              toEl.style.transformOrigin = originalTransformOrigin;
+            }
+          );
+        },
       };
     },
     out: async (element) => {
-      // Store fromNode
-      fromNode = element;
-      
-      // If there's a waiting resolver, resolve it
-      if (resolver) {
-        resolver(true);
-        resolver = null;
-      }
-      
       return {
+        onStart: () => {
+          // Store fromNode
+          fromNode = element;
+
+          // If there's a waiting resolver, resolve it
+          if (resolver) {
+            resolver(true);
+            resolver = null;
+          }
+        },
         prepare: (element) => {
           prepareOutgoing(element);
-          element.style.opacity = '0'; // Make it invisible immediately
+          element.style.opacity = "0"; // Make it invisible immediately
         },
       };
     },
