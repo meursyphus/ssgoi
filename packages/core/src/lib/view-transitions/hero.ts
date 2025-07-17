@@ -3,6 +3,7 @@ import { prepareOutgoing } from "./utils";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
+  timeout?: number; // timeout for waiting fromNode
 }
 
 function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
@@ -45,87 +46,103 @@ export const hero = (options: HeroOptions = {}): Transition => {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,
   };
+  const timeout = options.timeout ?? 300;
 
   let fromNode: HTMLElement | null = null;
   let toNode: HTMLElement | null = null;
 
   return {
-    in: (element) => {
+    in: async (element) => {
       toNode = element;
       
+      // Wait for fromNode with timeout
+      const fromNodePromise = new Promise<HTMLElement | null>((resolve) => {
+        const startTime = Date.now();
+        const checkFromNode = () => {
+          if (fromNode) {
+            resolve(fromNode);
+          } else if (Date.now() - startTime > timeout) {
+            resolve(null);
+          } else {
+            requestAnimationFrame(checkFromNode);
+          }
+        };
+        checkFromNode();
+      });
+
+      const resolvedFromNode = await fromNodePromise;
+      
+      // If no fromNode, just skip animation
+      if (!resolvedFromNode || !toNode) {
+        return {
+          spring,
+          tick: () => {}, // Do nothing
+        };
+      }
+
+      const commonKey = findCommonKey(resolvedFromNode, toNode);
+      if (!commonKey) {
+        return {
+          spring,
+          tick: () => {}, // Do nothing
+        };
+      }
+
+      const fromEl = getHeroEl(resolvedFromNode, commonKey);
+      const toEl = getHeroEl(toNode, commonKey);
+
+      if (!fromEl || !toEl) {
+        return {
+          spring,
+          tick: () => {}, // Do nothing
+        };
+      }
+
+      // Calculate positions once, outside of tick
+      const fromRect = getRect(resolvedFromNode, fromEl);
+      const toRect = getRect(toNode, toEl);
+      
+      const dx = fromRect.left - toRect.left;
+      const dy = fromRect.top - toRect.top;
+      const dw = fromRect.width / toRect.width;
+      const dh = fromRect.height / toRect.height;
+
+      // Store original styles
+      const originalTransform = toEl.style.transform;
+      const originalPosition = toEl.style.position;
+      const originalTransformOrigin = toEl.style.transformOrigin;
+
       return {
         spring,
         tick: (progress) => {
-          if (!fromNode || !toNode) {
-            // Default fade in if no matching hero element
-            element.style.opacity = progress.toString();
-            return;
-          }
-
-          const commonKey = findCommonKey(fromNode, toNode);
-          if (!commonKey) {
-            element.style.opacity = progress.toString();
-            return;
-          }
-
-          const fromEl = getHeroEl(fromNode, commonKey);
-          const toEl = getHeroEl(toNode, commonKey);
-
-          if (!fromEl || !toEl) {
-            element.style.opacity = progress.toString();
-            return;
-          }
-
-          // Apply hero animation to the matched element
-          const fromRect = getRect(fromNode, fromEl);
-          const toRect = getRect(toNode, toEl);
+          if (!toEl) return;
           
-          const dx = fromRect.left - toRect.left;
-          const dy = fromRect.top - toRect.top;
-          const dw = fromRect.width / toRect.width;
-          const dh = fromRect.height / toRect.height;
-
-          // Animate the hero element
-          const currentStyle = toEl.getAttribute('style') || '';
-          toEl.setAttribute(
-            'style',
-            `${currentStyle}
-            position: relative;
-            transform-origin: top left;
-            transform: translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh});
-            `
-          );
-
-          // Fade in the rest of the page
-          element.style.opacity = progress.toString();
+          // Animate the hero element only
+          toEl.style.position = 'relative';
+          toEl.style.transformOrigin = 'top left';
+          toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
         },
         onEnd: () => {
           fromNode = null;
           // Reset hero element styles
-          if (toNode) {
-            const commonKey = findCommonKey(fromNode || toNode, toNode);
-            if (commonKey) {
-              const toEl = getHeroEl(toNode, commonKey);
-              if (toEl) {
-                toEl.style.transform = '';
-                toEl.style.position = '';
-                toEl.style.transformOrigin = '';
-              }
-            }
+          if (toEl) {
+            toEl.style.transform = originalTransform;
+            toEl.style.position = originalPosition;
+            toEl.style.transformOrigin = originalTransformOrigin;
           }
         }
       };
     },
-    out: (element) => {
+    out: async (element) => {
       fromNode = element;
       
       return {
-        spring,
-        tick: (progress) => {
-          // Just fade out for the outgoing page
-          element.style.opacity = progress.toString();
+        // No spring needed for out
+        tick: () => {}, // Do nothing - let prepareOutgoing handle visibility
+        prepare: (element) => {
+          prepareOutgoing(element);
+          element.style.opacity = '0'; // Make it invisible immediately
         },
-        prepare: prepareOutgoing,
       };
     },
   };
