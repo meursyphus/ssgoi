@@ -3,9 +3,11 @@
 import React from "react";
 import { getAllPosts } from "./mock-data";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { useDemoRouter } from "../router-provider";
 
 export default function PostsDemo() {
   const posts = getAllPosts();
+  const router = useDemoRouter();
 
   return (
     <SsgoiTransition id="/demo/posts">
@@ -25,7 +27,7 @@ export default function PostsDemo() {
               key={post.id}
               onClick={() => {
                 // Navigate to post detail
-                window.location.href = `/demo/posts/${post.id}`;
+                router.goto(`/demo/posts/${post.id}`);
               }}
               className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 cursor-pointer"
             >

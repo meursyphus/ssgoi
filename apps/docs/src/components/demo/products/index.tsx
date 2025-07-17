@@ -3,8 +3,10 @@
 import React from "react";
 import { products } from "./mock-data";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { useDemoRouter } from "../router-provider";
 
 export default function ProductsDemo() {
+  const router = useDemoRouter();
   return (
     <SsgoiTransition id="/demo/products">
       <div className="min-h-screen bg-gray-950 px-4 py-8">
@@ -21,7 +23,7 @@ export default function ProductsDemo() {
               key={product.id}
               onClick={() => {
                 // Navigate to product detail
-                window.location.href = `/demo/products/${product.id}`;
+                router.goto(`/demo/products/${product.id}`);
               }}
               className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 cursor-pointer"
             >

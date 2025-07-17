@@ -1,26 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { useDemoRouter } from "./router-provider";
+import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DemoLayout({ children }: DemoLayoutProps) {
+  const router = useDemoRouter();
+  const currentPath = router.currentPath || "";
+  const config: SsgoiConfig = useMemo(
+    () => ({
+      transitions: [],
+    }),
+    []
+  );
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-0 md:p-8">
       {/* Mobile Frame */}
       <div className="w-full max-w-[440px] h-screen md:h-[844px] bg-black flex flex-col overflow-hidden relative md:rounded-3xl shadow-2xl">
         {/* Main Content Area */}
-        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden bg-gray-950">
-          {children}
+        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950">
+          <Ssgoi config={config}>{children}</Ssgoi>
         </main>
 
         {/* Bottom Navigation */}
         <nav className="flex justify-around items-center bg-gray-950 border-t border-gray-800 py-2 flex-shrink-0">
           <NavItem
-            href="/demo/posts"
             label="Posts"
+            onClick={() => router.goto("/demo/posts")}
+            isActive={currentPath.startsWith("/demo/posts")}
             icon={
               <svg
                 width="24"
@@ -36,8 +47,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }
           />
           <NavItem
-            href="/demo/products"
             label="Shop"
+            onClick={() => router.goto("/demo/products")}
+            isActive={currentPath.startsWith("/demo/products")}
             icon={
               <svg
                 width="24"
@@ -54,8 +66,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }
           />
           <NavItem
-            href="/demo/pinterest"
             label="Gallery"
+            onClick={() => router.goto("/demo/pinterest")}
+            isActive={currentPath.startsWith("/demo/pinterest")}
             icon={
               <svg
                 width="24"
@@ -73,8 +86,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }
           />
           <NavItem
-            href="/demo/profile"
             label="Profile"
+            onClick={() => router.goto("/demo/profile")}
+            isActive={currentPath.startsWith("/demo/profile")}
             icon={
               <svg
                 width="24"
@@ -96,23 +110,21 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 }
 
 interface NavItemProps {
-  href: string;
   label: string;
   icon: React.ReactNode;
+  onClick: () => void;
+  isActive?: boolean;
 }
 
-function NavItem({ href, label, icon }: NavItemProps) {
+function NavItem({ label, icon, onClick, isActive }: NavItemProps) {
   return (
     <button
-      onClick={() => {
-        // Navigation will be handled by parent component
-        window.location.href = href;
-      }}
-      className="flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 text-gray-500 hover:text-gray-300"
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 ${
+        isActive ? "text-blue-500" : "text-gray-500 hover:text-gray-300"
+      }`}
     >
-      <div className="w-6 h-6">
-        {icon}
-      </div>
+      <div className="w-6 h-6">{icon}</div>
       <span>{label}</span>
     </button>
   );

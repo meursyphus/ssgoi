@@ -3,8 +3,10 @@
 import React from "react";
 import { pinterestItems } from "./mock-data";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { useDemoRouter } from "../router-provider";
 
 export default function PinterestDemo() {
+  const router = useDemoRouter();
   // Split items into two columns for masonry effect
   const leftColumnItems = pinterestItems.filter((_, index) => index % 2 === 0);
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
@@ -23,14 +25,14 @@ export default function PinterestDemo() {
           {/* Left Column */}
           <div className="flex flex-col gap-3">
             {leftColumnItems.map((item) => (
-              <PinCard key={item.id} item={item} />
+              <PinCard key={item.id} item={item} router={router} />
             ))}
           </div>
 
           {/* Right Column */}
           <div className="flex flex-col gap-3">
             {rightColumnItems.map((item) => (
-              <PinCard key={item.id} item={item} />
+              <PinCard key={item.id} item={item} router={router} />
             ))}
           </div>
         </div>
@@ -41,14 +43,15 @@ export default function PinterestDemo() {
 
 interface PinCardProps {
   item: any;
+  router: ReturnType<typeof useDemoRouter>;
 }
 
-function PinCard({ item }: PinCardProps) {
+function PinCard({ item, router }: PinCardProps) {
   return (
     <article 
       onClick={() => {
         // Navigate to pin detail
-        window.location.href = `/demo/pinterest/${item.id}`;
+        router.goto(`/demo/pinterest/${item.id}`);
       }}
       className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 group cursor-pointer">
       {/* Image with dynamic aspect ratio */}

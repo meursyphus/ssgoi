@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from "react";
-import { useRouter as useNextRouter } from "next/navigation";
 
 interface RouterContextType {
   goto: (path: string) => void;
@@ -13,7 +12,7 @@ const RouterContext = createContext<RouterContextType | undefined>(undefined);
 interface RouterProviderProps {
   children: ReactNode;
   currentPath: string;
-  customRouter?: {
+  customRouter: {
     goto: (path: string) => void;
   };
 }
@@ -23,14 +22,7 @@ export function RouterProvider({
   currentPath,
   customRouter,
 }: RouterProviderProps) {
-  const nextRouter = useNextRouter();
-
-  const router: RouterContextType = customRouter || {
-    goto: (path: string) => {
-      nextRouter.push(path);
-    },
-    currentPath,
-  };
+  const router: RouterContextType = customRouter;
 
   return (
     <RouterContext.Provider value={{ ...router, currentPath }}>
@@ -39,10 +31,10 @@ export function RouterProvider({
   );
 }
 
-export function useRouter() {
+export function useDemoRouter() {
   const context = useContext(RouterContext);
   if (!context) {
-    throw new Error("useRouter must be used within a RouterProvider");
+    throw new Error("useDemoRouter must be used within a RouterProvider");
   }
   return context;
 }

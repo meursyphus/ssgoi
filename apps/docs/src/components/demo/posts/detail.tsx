@@ -3,13 +3,19 @@
 import React from "react";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
 import { getPost, getRelatedPosts } from "./mock-data";
+import { useDemoRouter } from "../router-provider";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 interface PostDetailProps {
-  postId: string;
   onBack?: () => void;
 }
 
-export default function PostDetail({ postId, onBack }: PostDetailProps) {
+export default function PostDetail({ onBack }: PostDetailProps) {
+  const router = useDemoRouter();
+  const currentPath = router.currentPath || '';
+  // Extract postId from path: /demo/posts/[id]
+  const postId = currentPath.split('/').pop() || '';
+  
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
 
@@ -23,51 +29,29 @@ export default function PostDetail({ postId, onBack }: PostDetailProps) {
     );
   }
 
-  // Simple markdown-like rendering (for demo purposes)
-  const renderContent = (content: string) => {
-    return content.split('\n\n').map((paragraph, index) => {
-      if (paragraph.startsWith('#')) {
-        const level = paragraph.match(/^#+/)?.[0].length || 1;
-        const text = paragraph.replace(/^#+\s/, '');
-        const HeadingTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
-        return (
-          <HeadingTag 
-            key={index} 
-            className={`font-bold text-white mb-4 ${
-              level === 1 ? 'text-2xl' : level === 2 ? 'text-xl' : 'text-lg'
-            }`}
-          >
-            {text}
-          </HeadingTag>
-        );
+  // MDX components with dark theme styles
+  const mdxComponents = {
+    h1: (props: any) => <h1 className="text-3xl font-bold text-white mb-6 mt-8" {...props} />,
+    h2: (props: any) => <h2 className="text-2xl font-bold text-white mb-4 mt-6" {...props} />,
+    h3: (props: any) => <h3 className="text-xl font-bold text-white mb-3 mt-4" {...props} />,
+    p: (props: any) => <p className="text-gray-300 mb-6 leading-relaxed" {...props} />,
+    ul: (props: any) => <ul className="list-disc list-inside text-gray-300 mb-6 space-y-2 pl-4" {...props} />,
+    ol: (props: any) => <ol className="list-decimal list-inside text-gray-300 mb-6 space-y-2 pl-4" {...props} />,
+    li: (props: any) => <li className="text-gray-300" {...props} />,
+    pre: (props: any) => <pre className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6" {...props} />,
+    code: (props: any) => {
+      // Inline code vs code block
+      if (props.className) {
+        return <code className="text-gray-300" {...props} />;
       }
-      
-      if (paragraph.startsWith('```')) {
-        const code = paragraph.replace(/```\w*\n?/g, '');
-        return (
-          <pre key={index} className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6">
-            <code>{code}</code>
-          </pre>
-        );
-      }
-
-      if (paragraph.startsWith('- ')) {
-        const items = paragraph.split('\n').filter(line => line.startsWith('- '));
-        return (
-          <ul key={index} className="list-disc list-inside text-gray-300 mb-6 space-y-2">
-            {items.map((item, i) => (
-              <li key={i}>{item.replace(/^- /, '')}</li>
-            ))}
-          </ul>
-        );
-      }
-
-      return (
-        <p key={index} className="text-gray-300 mb-6 leading-relaxed">
-          {paragraph}
-        </p>
-      );
-    });
+      return <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props} />;
+    },
+    blockquote: (props: any) => (
+      <blockquote className="border-l-4 border-gray-600 pl-4 my-6 text-gray-400 italic" {...props} />
+    ),
+    strong: (props: any) => <strong className="font-bold text-white" {...props} />,
+    em: (props: any) => <em className="italic text-gray-300" {...props} />,
+    hr: () => <hr className="border-gray-700 my-8" />,
   };
 
   return (
@@ -76,7 +60,7 @@ export default function PostDetail({ postId, onBack }: PostDetailProps) {
         {/* Back button */}
         <div className="px-4 py-4">
           <button
-            onClick={onBack || (() => window.history.back())}
+            onClick={onBack || (() => router.goto('/demo/posts'))}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -127,8 +111,11 @@ export default function PostDetail({ postId, onBack }: PostDetailProps) {
         />
 
         {/* Post content */}
-        <article className="px-4 py-8">
-          {renderContent(post.content)}
+        <article className="px-4 py-8 prose prose-invert max-w-none">
+          <MDXRemote 
+            source={post.content} 
+            components={mdxComponents}
+          />
         </article>
 
         {/* Tags */}
@@ -155,7 +142,7 @@ export default function PostDetail({ postId, onBack }: PostDetailProps) {
                   key={relatedPost.id}
                   onClick={() => {
                     // Handle navigation to related post
-                    window.location.href = `/demo/posts/${relatedPost.id}`;
+                    router.goto(`/demo/posts/${relatedPost.id}`);
                   }}
                   className="w-full flex gap-3 p-3 bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors text-left"
                 >

@@ -3,13 +3,18 @@
 import React, { useState } from "react";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
 import { getProduct } from "./mock-data";
+import { useDemoRouter } from "../router-provider";
 
 interface ProductDetailProps {
-  productId: string;
   onBack?: () => void;
 }
 
-export default function ProductDetail({ productId, onBack }: ProductDetailProps) {
+export default function ProductDetail({ onBack }: ProductDetailProps) {
+  const router = useDemoRouter();
+  const currentPath = router.currentPath || '';
+  // Extract productId from path: /demo/products/[id]
+  const productId = currentPath.split('/').pop() || '';
+  
   const product = getProduct(productId);
   const [quantity, setQuantity] = useState(1);
 
@@ -33,7 +38,7 @@ export default function ProductDetail({ productId, onBack }: ProductDetailProps)
         {/* Back button */}
         <div className="px-4 py-4">
           <button
-            onClick={onBack || (() => window.history.back())}
+            onClick={onBack || (() => router.goto('/demo/products'))}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
