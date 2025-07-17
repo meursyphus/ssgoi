@@ -186,3 +186,88 @@ body {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px -15px rgba(255, 107, 53, 0.2);
 }
+
+/* Custom Syntax Highlighting for Dark Theme */
+.hljs {
+  background: #18181b !important;
+  color: #e4e4e7 !important;
+}
+
+/* Keywords, types */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type {
+  color: #ff6b35 !important;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-addition {
+  color: #10b981 !important;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: #71717a !important;
+  font-style: italic;
+}
+
+/* Functions, methods */
+.hljs-title,
+.hljs-section {
+  color: #3b82f6 !important;
+}
+
+/* Variables, parameters */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: #8b5cf6 !important;
+}
+
+/* Numbers, constants */
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: #06b6d4 !important;
+}
+
+/* Attributes, properties */
+.hljs-attr,
+.hljs-attribute,
+.hljs-property {
+  color: #eab308 !important;
+}
+
+/* Tags, components */
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #ec4899 !important;
+}
+
+/* Built-in, meta */
+.hljs-built_in,
+.hljs-meta {
+  color: #f59e0b !important;
+}
+
+/* Deletion */
+.hljs-deletion {
+  color: #ef4444 !important;
+}
+
+/* Bold */
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}

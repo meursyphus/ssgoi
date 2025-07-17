@@ -1,5 +1,3 @@
-"use server"
-
 import { readdir, readFile } from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
@@ -10,11 +8,11 @@ import matter from 'gray-matter'
  * Usage examples:
  * 
  * 1. Get navigation structure:
- *    const nav = await getNavigationData('@apps/docs/content/ko')
+ *    const nav = await getNavigationData('ko')
  * 
  * 2. Get specific post by path:
- *    const post = await getPost('@apps/docs/content/ko', 'getting-started/what-is-ssgoi')
- *    const post = await getPost('@apps/docs/content/ko', 'core-concepts/dom-lifecycle')
+ *    const post = await getPost('ko', 'getting-started/what-is-ssgoi')
+ *    const post = await getPost('ko', 'core-concepts/dom-lifecycle')
  * 
  * Note: Numeric prefixes in folder/file names (e.g., "01.getting-started") are automatically removed
  *       File extensions (.md, .mdx) are also handled automatically
@@ -37,6 +35,11 @@ interface PostContent {
 
 function removeNumberPrefix(name: string): string {
   return name.replace(/^\d+\./, '')
+}
+
+// Get the content directory path relative to the project root
+function getContentPath(lang: string): string {
+  return path.join(process.cwd(), 'content', lang)
 }
 
 async function processDirectory(dirPath: string, basePath: string = ''): Promise<NavigationItem[]> {
@@ -80,17 +83,14 @@ async function processDirectory(dirPath: string, basePath: string = ''): Promise
 }
 
 /**
- * Get navigation structure from a content directory
- * @param folderPath - Path to content folder (e.g., '@apps/docs/content/ko')
+ * Get navigation structure for a specific language
+ * @param lang - Language code (e.g., 'ko', 'en')
  * @returns Array of navigation items with hierarchical structure
  */
-export async function getNavigationData(folderPath: string): Promise<NavigationItem[]> {
+export async function getNavigationData(lang: string): Promise<NavigationItem[]> {
   try {
-    const absolutePath = path.isAbsolute(folderPath) 
-      ? folderPath 
-      : path.join(process.cwd(), folderPath)
-    
-    return await processDirectory(absolutePath)
+    const contentPath = getContentPath(lang)
+    return await processDirectory(contentPath)
   } catch (error) {
     console.error('Error processing navigation data:', error)
     return []
@@ -140,21 +140,18 @@ async function findFileByPath(basePath: string, targetPath: string): Promise<str
 
 /**
  * Get post content by path
- * @param contentPath - Base content folder path (e.g., '@apps/docs/content/ko')
+ * @param lang - Language code (e.g., 'ko', 'en')
  * @param postPath - Path to post without numeric prefixes or extensions (e.g., 'getting-started/what-is-ssgoi')
  * @returns Post content with metadata or null if not found
  * 
  * Example:
  *   // File structure: content/ko/01.getting-started/01.what-is-ssgoi.md
- *   const post = await getPost('@apps/docs/content/ko', 'getting-started/what-is-ssgoi')
+ *   const post = await getPost('ko', 'getting-started/what-is-ssgoi')
  */
-export async function getPost(contentPath: string, postPath: string): Promise<PostContent | null> {
+export async function getPost(lang: string, postPath: string): Promise<PostContent | null> {
   try {
-    const basePath = path.isAbsolute(contentPath)
-      ? contentPath
-      : path.join(process.cwd(), contentPath)
-    
-    const filePath = await findFileByPath(basePath, postPath)
+    const contentPath = getContentPath(lang)
+    const filePath = await findFileByPath(contentPath, postPath)
     
     if (!filePath) {
       console.error(`Post not found: ${postPath}`)

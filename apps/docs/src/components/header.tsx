@@ -1,57 +1,57 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { cn } from "@/lib/utils"
-import { Github, Menu, X, Star } from "lucide-react"
-import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
-import { useSidebarStore } from "@/store/sidebar"
-import { useCurrentLanguage } from "@/i18n/use-current-language"
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Github, Menu, X, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useSidebarStore } from "@/store/sidebar";
+import { useCurrentLanguage } from "@/i18n/use-current-language";
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [stars, setStars] = useState<number | null>(null)
-  const pathname = usePathname()
-  const { toggle: toggleSidebar } = useSidebarStore()
-  const isDocsPage = pathname.includes('/docs')
-  const currentLang = useCurrentLanguage()
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stars, setStars] = useState<number | null>(null);
+  const pathname = usePathname();
+  const { toggle: toggleSidebar } = useSidebarStore();
+  const isDocsPage = pathname.includes("/docs");
+  const currentLang = useCurrentLanguage();
+
   useEffect(() => {
-    fetch('https://api.github.com/repos/meursyphus/ssgoi')
-      .then(res => res.json())
-      .then(data => setStars(data.stargazers_count))
-      .catch(() => setStars(null))
-  }, [])
+    fetch("https://api.github.com/repos/meursyphus/ssgoi")
+      .then((res) => res.json())
+      .then((data) => setStars(data.stargazers_count))
+      .catch(() => setStars(null));
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center px-4 sm:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/60">
+      <div className="mx-auto max-w-7xl flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
           {/* Mobile Sidebar Toggle for Docs */}
           {isDocsPage && (
             <button
-              className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9"
+              className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
               onClick={toggleSidebar}
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle sidebar</span>
             </button>
           )}
-          
+
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-orange-500">SSGOI</span>
           </Link>
-          
+
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href={`/${currentLang}/docs`}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
             >
               문서
             </Link>
           </nav>
         </div>
-          
+
         <div className="ml-auto flex items-center gap-4">
           <Link
             href="https://github.com/meursyphus/ssgoi"
@@ -59,9 +59,9 @@ export function Header() {
             rel="noopener noreferrer"
             className={cn(
               "inline-flex items-center gap-2 rounded-md text-sm font-medium transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
+              "hover:bg-zinc-800 hover:text-white text-gray-300",
               "h-9 px-3",
-              "border border-border"
+              "border border-zinc-800"
             )}
           >
             <Github className="h-4 w-4" />
@@ -73,9 +73,9 @@ export function Header() {
             )}
             <span className="sr-only">GitHub</span>
           </Link>
-          
+
           <button
-            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9"
+            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -86,14 +86,14 @@ export function Header() {
           </button>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border">
+        <div className="md:hidden border-t border-zinc-800">
           <nav className="flex flex-col space-y-2 p-4">
             <Link
               href={`/${currentLang}/docs`}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
               onClick={() => setMobileMenuOpen(false)}
             >
               문서
@@ -102,5 +102,5 @@ export function Header() {
         </div>
       )}
     </header>
-  )
+  );
 }

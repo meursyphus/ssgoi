@@ -7,7 +7,7 @@ interface DocsIndexPageProps {
 
 export default async function DocsIndexPage({ params }: DocsIndexPageProps) {
   const { lang } = await params
-  const navigation = await getNavigationData(`@apps/docs/content/${lang}`)
+  const navigation = await getNavigationData(lang)
   
   // Redirect to the first available document
   if (navigation.length > 0) {

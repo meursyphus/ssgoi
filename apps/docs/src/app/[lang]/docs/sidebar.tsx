@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSidebarStore } from "@/store/sidebar";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 interface NavigationItem {
   title: string;
@@ -49,24 +49,15 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
             <button
               onClick={() => toggleExpanded(item.path)}
               className={`
-                w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between
+                w-full text-left px-4 py-2 flex items-center justify-between
+                text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors
                 ${level > 0 ? "pl-" + (level * 4 + 4) : ""}
               `}
             >
               <span className="font-medium">{item.navTitle}</span>
-              <svg
-                className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-90" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRight 
+                className={`w-4 h-4 transition-transform text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
+              />
             </button>
             {isExpanded && (
               <ul>
@@ -79,9 +70,12 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
             href={itemPath}
             onClick={() => close()}
             className={`
-              block px-4 py-2 hover:bg-gray-100
+              block px-4 py-2 transition-colors
               ${level > 0 ? "pl-" + (level * 4 + 4) : ""}
-              ${isActive ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600" : ""}
+              ${isActive 
+                ? "bg-orange-500/20 text-orange-400 border-l-4 border-orange-500 hover:bg-orange-500/30" 
+                : "text-gray-300 hover:text-white hover:bg-zinc-800 border-l-4 border-transparent"
+              }
             `}
           >
             {item.navTitle}
@@ -101,7 +95,7 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
           onClick={close}
         />
       )}
@@ -109,25 +103,23 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 overflow-y-auto z-50
+          fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-zinc-900 border-r border-zinc-800 overflow-y-auto z-40
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
         `}
       >
-        <div className="p-4 flex items-center justify-between">
-          <Link href={`/${lang}`} className="text-xl font-bold">
-            SSGOI Docs
-          </Link>
+        <div className="p-4 md:hidden flex items-center justify-between border-b border-zinc-800">
+          <span className="text-sm font-medium text-gray-400">Navigation</span>
           <button
             onClick={close}
-            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-8 w-8"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-8 w-8 text-gray-400 hover:text-white"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close sidebar</span>
           </button>
         </div>
-        <nav className="py-4">
+        <nav className="py-4 md:pt-6">
           <ul>{navigation.map((item) => renderNavItem(item))}</ul>
         </nav>
       </aside>

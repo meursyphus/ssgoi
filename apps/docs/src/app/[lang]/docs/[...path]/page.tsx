@@ -13,19 +13,19 @@ export default async function DocsPage({ params }: DocsPageProps) {
   const { lang, path } = await params
   const postPath = path.join('/')
   
-  const post = await getPost(`@apps/docs/content/${lang}`, postPath)
+  const post = await getPost(lang, postPath)
   
   if (!post) {
     notFound()
   }
   
   return (
-    <article className="prose prose-lg max-w-none">
-      <h1>{post.title}</h1>
+    <article className="max-w-none">
+      <h1 className="text-4xl font-bold mb-4 text-white">{post.title}</h1>
       {post.description && (
-        <p className="text-xl text-gray-600">{post.description}</p>
+        <p className="text-xl text-gray-400 mb-8">{post.description}</p>
       )}
-      <MDXContent content={post.content} />
+      {await MDXContent({ content: post.content })}
     </article>
   )
 }
