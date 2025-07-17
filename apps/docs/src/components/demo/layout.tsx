@@ -3,6 +3,12 @@
 import React, { useMemo } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
+import {
+  fade,
+  hero,
+  pinterest,
+  ripple,
+} from "@meursyphus/ssgoi-react/view-transitions";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -13,7 +19,91 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   const currentPath = router.currentPath || "";
   const config: SsgoiConfig = useMemo(
     () => ({
-      transitions: [],
+      transitions: [
+        // Pinterest transitions
+        {
+          from: "/demo/pinterest/*",
+          to: "/demo/pinterest",
+          transition: pinterest(),
+        },
+        {
+          from: "/demo/pinterest",
+          to: "/demo/pinterest/*",
+          transition: pinterest(),
+        },
+
+        // Products transitions - hero
+        {
+          from: "/demo/products",
+          to: "/demo/products/*",
+          transition: hero(),
+        },
+        {
+          from: "/demo/products/*",
+          to: "/demo/products",
+          transition: hero(),
+        },
+
+        // Posts transitions - slide with parallax effect
+        {
+          from: "/demo/posts",
+          to: "/demo/posts/*",
+          transition: {
+            in: (node) => ({
+              duration: 400,
+              tick: (t) => {
+                node.style.transform = `translateX(${(1 - t) * 100}%)`;
+              },
+            }),
+            out: (node) => ({
+              duration: 400,
+              tick: (t) => {
+                node.style.position = 'absolute';
+                node.style.left = '0';
+                node.style.top = '0';
+                node.style.width = '100%';
+                node.style.transform = `translateX(${-t * 20}%)`;
+              },
+            }),
+          },
+        },
+        {
+          from: "/demo/posts/*",
+          to: "/demo/posts",
+          transition: {
+            in: (node) => ({
+              duration: 400,
+              tick: (t) => {
+                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
+              },
+            }),
+            out: (node) => ({
+              duration: 400,
+              tick: (t) => {
+                node.style.zIndex = '100';
+                node.style.position = 'absolute';
+                node.style.left = '0';
+                node.style.top = '0';
+                node.style.width = 'auto';
+                node.style.transform = `translateX(${(1 - t) * 100}%)`;
+              },
+            }),
+          },
+        },
+
+        // Profile transitions - ripple effect
+        {
+          from: "/demo/*",
+          to: "/demo/profile",
+          transition: ripple(),
+        },
+        {
+          from: "/demo/profile",
+          to: "/demo/*",
+          transition: ripple(),
+        },
+      ],
+      defaultTransition: fade(),
     }),
     []
   );
