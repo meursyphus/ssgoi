@@ -1,10 +1,11 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React from "react";
 import { SsgoiTransition } from "@meursyphus/ssgoi-react";
 import { getPost, getRelatedPosts } from "./mock-data";
 import { useDemoRouter } from "../router-provider";
-import { MDXRemote } from "next-mdx-remote-client/rsc";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface PostDetailProps {
   onBack?: () => void;
@@ -29,28 +30,28 @@ export default function PostDetail({ onBack }: PostDetailProps) {
     );
   }
 
-  // MDX components with dark theme styles
-  const mdxComponents = {
-    h1: (props: any) => <h1 className="text-3xl font-bold text-white mb-6 mt-8" {...props} />,
-    h2: (props: any) => <h2 className="text-2xl font-bold text-white mb-4 mt-6" {...props} />,
-    h3: (props: any) => <h3 className="text-xl font-bold text-white mb-3 mt-4" {...props} />,
-    p: (props: any) => <p className="text-gray-300 mb-6 leading-relaxed" {...props} />,
-    ul: (props: any) => <ul className="list-disc list-inside text-gray-300 mb-6 space-y-2 pl-4" {...props} />,
-    ol: (props: any) => <ol className="list-decimal list-inside text-gray-300 mb-6 space-y-2 pl-4" {...props} />,
-    li: (props: any) => <li className="text-gray-300" {...props} />,
-    pre: (props: any) => <pre className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6" {...props} />,
-    code: (props: any) => {
+  // Markdown components with dark theme styles
+  const markdownComponents = {
+    h1: ({ children }: any) => <h1 className="text-3xl font-bold text-white mb-6 mt-8">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="text-2xl font-bold text-white mb-4 mt-6">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-xl font-bold text-white mb-3 mt-4">{children}</h3>,
+    p: ({ children }: any) => <p className="text-gray-300 mb-6 leading-relaxed">{children}</p>,
+    ul: ({ children }: any) => <ul className="list-disc list-inside text-gray-300 mb-6 space-y-2 pl-4">{children}</ul>,
+    ol: ({ children }: any) => <ol className="list-decimal list-inside text-gray-300 mb-6 space-y-2 pl-4">{children}</ol>,
+    li: ({ children }: any) => <li className="text-gray-300">{children}</li>,
+    pre: ({ children }: any) => <pre className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6">{children}</pre>,
+    code: ({ node, inline, className, children, ...props }: any) => {
       // Inline code vs code block
-      if (props.className) {
-        return <code className="text-gray-300" {...props} />;
+      if (!inline && className) {
+        return <code className="text-gray-300" {...props}>{children}</code>;
       }
-      return <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props} />;
+      return <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props}>{children}</code>;
     },
-    blockquote: (props: any) => (
-      <blockquote className="border-l-4 border-gray-600 pl-4 my-6 text-gray-400 italic" {...props} />
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-gray-600 pl-4 my-6 text-gray-400 italic">{children}</blockquote>
     ),
-    strong: (props: any) => <strong className="font-bold text-white" {...props} />,
-    em: (props: any) => <em className="italic text-gray-300" {...props} />,
+    strong: ({ children }: any) => <strong className="font-bold text-white">{children}</strong>,
+    em: ({ children }: any) => <em className="italic text-gray-300">{children}</em>,
     hr: () => <hr className="border-gray-700 my-8" />,
   };
 
@@ -119,12 +120,12 @@ export default function PostDetail({ onBack }: PostDetailProps) {
 
         {/* Post content */}
         <article className="px-4 py-8 prose prose-invert max-w-none">
-          <Suspense fallback={<div className="text-gray-400">Loading content...</div>}>
-            <MDXRemote 
-              source={post.content} 
-              components={mdxComponents}
-            />
-          </Suspense>
+          <Markdown 
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
+            {post.content}
+          </Markdown>
         </article>
 
         {/* Tags */}
