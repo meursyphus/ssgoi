@@ -51,7 +51,7 @@ export default function PinterestDetail({ onBack }: PinterestDetailProps) {
             src={item.image}
             alt={item.title}
             style={{ aspectRatio: item.aspectRatio }}
-            data-pinterest-key={item.id}
+            data-pinterest-enter-key={item.id}
           />
           
           <div>
