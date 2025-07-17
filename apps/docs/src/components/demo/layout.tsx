@@ -18,9 +18,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     []
   );
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-0 md:p-8">
+    <div className="h-full bg-gray-900 flex">
       {/* Mobile Frame */}
-      <div className="w-full max-w-[440px] h-screen md:h-[844px] bg-black flex flex-col overflow-hidden relative md:rounded-3xl shadow-2xl">
+      <div className="w-full bg-black flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950">
           <Ssgoi config={config}>{children}</Ssgoi>
