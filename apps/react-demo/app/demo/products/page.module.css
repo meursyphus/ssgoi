@@ -22,7 +22,7 @@
   display: block;
   background: white;
   border-radius: 1rem;
-  overflow: hidden;
+  /* overflow: hidden; */ /* Removed to allow hero animation */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   text-decoration: none;
@@ -40,7 +40,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */ /* Removed to allow hero animation */
+  border-radius: 1rem 1rem 0 0; /* Add border radius directly to image */
 }
 
 .productEmoji {

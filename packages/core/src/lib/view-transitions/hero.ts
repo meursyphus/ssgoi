@@ -134,7 +134,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
         tick: (progress) => {
           // Animate all hero elements
           heroAnimations.forEach(({ toEl, dx, dy, dw, dh }) => {
-            toEl.style.zIndex = "100";
             toEl.style.position = "relative";
             toEl.style.transformOrigin = "top left";
             toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
