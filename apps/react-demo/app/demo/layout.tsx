@@ -2,12 +2,16 @@
 
 import { Ssgoi, type SsgoiConfig } from "@meursyphus/ssgoi-react";
 import Link from "next/link";
-import { fade } from "./transitions";
+import { fade, hero } from "./transitions";
 import styles from "./layout.module.css";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
-  transitions: [],
+  transitions: [
+    // Use hero transition between products list and detail pages
+    { from: "/demo/products", to: "/demo/products/*", transition: hero() },
+    { from: "/demo/products/*", to: "/demo/products", transition: hero() }
+  ],
   defaultTransition: {
     in: async (element) => {
       return {
@@ -70,6 +74,12 @@ export default function DemoLayout({
               <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
             </svg>
             Contact
+          </Link>
+          <Link href="/demo/products" className={styles.navLink}>
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+            </svg>
+            Products
           </Link>
         </div>
       </nav>

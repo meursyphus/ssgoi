@@ -1,0 +1,144 @@
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6B7280;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  transition: color 0.2s;
+}
+
+.backButton:hover {
+  color: #4F46E5;
+}
+
+.productDetail {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.productDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .productDetailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.productHeroImage {
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .productHeroImage {
+    height: 300px;
+  }
+}
+
+.productHeroEmoji {
+  font-size: 8rem;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+.productDetailInfo {
+  padding: 3rem;
+}
+
+.productDetailName {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.productDetailPrice {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #4F46E5;
+  margin-bottom: 1.5rem;
+}
+
+.productDetailDescription {
+  font-size: 1.125rem;
+  color: #6B7280;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+.productFeatures {
+  margin-bottom: 2.5rem;
+}
+
+.featuresTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  color: #4B5563;
+}
+
+.featureItem svg {
+  color: #10B981;
+  flex-shrink: 0;
+}
+
+.productActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.addToCartButton {
+  flex: 1;
+  padding: 1rem 2rem;
+  background: #4F46E5;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addToCartButton:hover {
+  background: #4338CA;
+}
+
+.wishlistButton {
+  padding: 1rem;
+  background: white;
+  color: #6B7280;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wishlistButton:hover {
+  color: #EF4444;
+  border-color: #EF4444;
+}
