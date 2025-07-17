@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { RouterProvider } from "./router-provider";
 import DemoLayout from "./layout";
 import PostsList from "./posts";
@@ -13,11 +13,43 @@ import Profile from "./profile";
 
 export default function Demo() {
   const [currentPath, setCurrentPath] = useState("/demo/posts");
+  const scrollPositions = useRef<Record<string, number>>({});
+
+  // Find scrollable element by ID
+  const findScrollableElement = () => {
+    return document.getElementById("demo-content");
+  };
+
+  // Save scroll position for current path
+  const saveScrollPosition = () => {
+    const scrollableEl = findScrollableElement();
+    if (scrollableEl) {
+      scrollPositions.current[currentPath] = scrollableEl.scrollTop;
+    }
+  };
+
+  // Restore scroll position for a given path
+  const restoreScrollPosition = (path: string) => {
+    const scrollableEl = findScrollableElement();
+    if (scrollableEl) {
+      const savedPosition = scrollPositions.current[path] || 0;
+      // Use requestAnimationFrame to ensure DOM is updated
+      scrollableEl.scrollTop = savedPosition;
+    }
+  };
 
   // Custom router implementation
   const customRouter = {
     goto: (path: string) => {
+      // Save current scroll position before navigation
+      saveScrollPosition();
+
+      // Update path
       setCurrentPath(path);
+
+      // Restore scroll position after navigation
+      // Use setTimeout to ensure React has updated the DOM
+      restoreScrollPosition(path);
     },
     currentPath,
   };

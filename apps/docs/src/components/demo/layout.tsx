@@ -22,7 +22,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       {/* Mobile Frame */}
       <div className="w-full bg-black flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
-        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950">
+        <main
+          id="demo-content"
+          className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950"
+        >
           <Ssgoi config={config}>{children}</Ssgoi>
         </main>
 
