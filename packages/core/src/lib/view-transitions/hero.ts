@@ -50,6 +50,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
 
   let fromNode: HTMLElement | null = null;
   let toNode: HTMLElement | null = null;
+  let fromNodeResolver: ((node: HTMLElement) => void) | null = null;
 
   return {
     in: async (element) => {
@@ -57,17 +58,16 @@ export const hero = (options: HeroOptions = {}): Transition => {
       
       // Wait for fromNode with timeout
       const fromNodePromise = new Promise<HTMLElement | null>((resolve) => {
-        const startTime = Date.now();
-        const checkFromNode = () => {
-          if (fromNode) {
-            resolve(fromNode);
-          } else if (Date.now() - startTime > timeout) {
+        // Store the resolver so out transition can trigger it
+        fromNodeResolver = resolve;
+        
+        // Set up timeout fallback
+        setTimeout(() => {
+          if (fromNodeResolver) {
+            fromNodeResolver = null;
             resolve(null);
-          } else {
-            requestAnimationFrame(checkFromNode);
           }
-        };
-        checkFromNode();
+        }, timeout);
       });
 
       const resolvedFromNode = await fromNodePromise;
@@ -135,6 +135,12 @@ export const hero = (options: HeroOptions = {}): Transition => {
     },
     out: async (element) => {
       fromNode = element;
+      
+      // Trigger the promise resolver if in transition is waiting
+      if (fromNodeResolver) {
+        fromNodeResolver(element);
+        fromNodeResolver = null;
+      }
       
       return {
         // No spring needed for out
