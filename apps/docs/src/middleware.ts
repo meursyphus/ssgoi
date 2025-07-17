@@ -3,19 +3,16 @@ import type { NextRequest } from "next/server";
 import { SUPPORTED_LANGUAGES } from "@/i18n/supported-languages";
 import { getPreferredLanguage } from "@/i18n/get-preferred-language";
 
-export function middleware(
-  request: NextRequest,
-  _response?: NextResponse,
-): NextResponse {
+export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-  const response = NextResponse.next();
+  console.log("Middleware running for path:", pathname);
 
   if (
     SUPPORTED_LANGUAGES.some(
-      (lang) => pathname.startsWith(`/${lang}/`) || pathname === `/${lang}`,
+      (lang) => pathname.startsWith(`/${lang}/`) || pathname === `/${lang}`
     )
   ) {
-    return response;
+    return NextResponse.next();
   }
 
   const lang = getPreferredLanguage(request);
@@ -28,6 +25,13 @@ export function middleware(
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|css|js|map|json|txt|xml|woff|woff2|eot|ttf|otf|txt)$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

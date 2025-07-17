@@ -9,8 +9,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export async function generateMetadata({ params }: { params: { lang: string } }): Promise<Metadata> {
-  const t = await getServerTranslations("metadata", params.lang);
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const t = await getServerTranslations("metadata", lang);
   return {
     title: t("title"),
     description: t("description"),
@@ -27,17 +28,18 @@ export async function generateMetadata({ params }: { params: { lang: string } })
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }>) {
+  const { lang } = await params;
   return (
-    <html lang={params.lang} suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <TranslationsProvider lang={params.lang}>
+        <TranslationsProvider lang={lang}>
           <div className="relative min-h-screen">
             <Header />
             <main>{children}</main>
