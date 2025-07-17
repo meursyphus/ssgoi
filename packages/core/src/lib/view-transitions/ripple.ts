@@ -16,8 +16,8 @@ function getOffset(element: Element) {
 
 export const ripple = (options: RippleOptions = {}): Transition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 500,
-    damping: options.spring?.damping ?? 30,
+    stiffness: options.spring?.stiffness ?? 300,
+    damping: options.spring?.damping ?? 200,
   };
 
   return {
@@ -36,7 +36,7 @@ export const ripple = (options: RippleOptions = {}): Transition => {
         spring,
         tick: (progress) => {
           element.style.clipPath = `circle(${progress * 100}% at 50% ${offset}%)`;
-          element.style.zIndex = '100';
+          element.style.zIndex = "100";
         },
         prepare: prepareOutgoing,
       };
