@@ -997,6 +997,1090 @@ As your application grows, SvelteKit grows with you, providing the tools and pat
     publishedAt: '2024-01-20',
     tags: ['SvelteKit', 'Architecture', 'Scalability', 'Web Development', 'Best Practices'],
     coverImage: 'https://picsum.photos/id/180/400/300'
+  },
+  {
+    id: 'react-server-components',
+    title: 'React Server Components: A Deep Dive',
+    excerpt: 'Understanding the revolutionary React Server Components and how they change the way we build React applications.',
+    content: `# React Server Components: A Deep Dive
+
+React Server Components (RSC) represent a paradigm shift in how we build React applications. They enable components to render on the server, reducing bundle sizes and improving performance. Let's explore this game-changing technology.
+
+## What Are React Server Components?
+
+React Server Components are components that render exclusively on the server. They never re-render on the client and don't add to your JavaScript bundle size. This fundamental difference opens up new possibilities for performance optimization.
+
+## Key Benefits
+
+### 1. Zero Bundle Size Impact
+Server Components don't send any JavaScript to the client. Your interactive components remain client-side, but data-fetching and static content can stay on the server.
+
+### 2. Direct Backend Access
+Access databases, file systems, and internal services directly without building APIs:
+
+\`\`\`jsx
+async function BlogPost({ id }) {
+  // Direct database access - this runs on the server!
+  const post = await db.query('SELECT * FROM posts WHERE id = ?', [id]);
+  
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+    </article>
+  );
+}
+\`\`\`
+
+### 3. Automatic Code Splitting
+Dependencies used only in Server Components are automatically excluded from client bundles.
+
+## Server vs Client Components
+
+Understanding when to use each type is crucial:
+
+### Server Components (Default)
+- Fetch data
+- Access backend resources
+- Keep sensitive data on the server
+- Use heavy dependencies
+
+### Client Components ('use client')
+- Add interactivity
+- Use browser APIs
+- Handle user events
+- Manage local state
+
+## Practical Examples
+
+### Data Fetching Pattern
+
+\`\`\`jsx
+// app/posts/page.js - Server Component
+async function PostsPage() {
+  const posts = await fetch('https://api.example.com/posts').then(r => r.json());
+  
+  return (
+    <div>
+      <h1>Blog Posts</h1>
+      {posts.map(post => (
+        <PostCard key={post.id} post={post} />
+      ))}
+    </div>
+  );
+}
+
+// components/PostCard.js - Client Component
+'use client';
+
+import { useState } from 'react';
+
+export function PostCard({ post }) {
+  const [likes, setLikes] = useState(post.likes);
+  
+  return (
+    <div>
+      <h2>{post.title}</h2>
+      <p>{post.excerpt}</p>
+      <button onClick={() => setLikes(likes + 1)}>
+        ❤️ {likes}
+      </button>
+    </div>
+  );
+}
+\`\`\`
+
+## Best Practices
+
+1. **Start with Server Components**: Make components server-side by default
+2. **Use Client Components for Interactivity**: Only add 'use client' when needed
+3. **Compose Wisely**: Server Components can import Client Components, but not vice versa
+4. **Leverage Streaming**: Use Suspense for better loading states
+
+## Common Patterns
+
+### Streaming with Suspense
+
+\`\`\`jsx
+export default function Page() {
+  return (
+    <>
+      <Header />
+      <Suspense fallback={<PostsSkeleton />}>
+        <Posts />
+      </Suspense>
+    </>
+  );
+}
+
+async function Posts() {
+  const posts = await fetchPosts(); // This can be slow
+  return <PostsList posts={posts} />;
+}
+\`\`\`
+
+### Error Boundaries
+
+\`\`\`jsx
+'use client';
+
+export function ErrorBoundary({ error, reset }) {
+  return (
+    <div>
+      <h2>Something went wrong!</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+\`\`\`
+
+## Conclusion
+
+React Server Components are not just an incremental improvement—they're a fundamental rethinking of how React applications work. By moving appropriate logic to the server, we can build faster, more efficient applications while maintaining the developer experience we love.
+
+The future of React is here, and it's running on the server!`,
+    author: {
+      name: 'Alex Johnson',
+      avatar: 'https://i.pravatar.cc/150?img=3',
+      role: 'React Core Team Alumni'
+    },
+    category: 'React',
+    readTime: 10,
+    publishedAt: '2024-01-18',
+    tags: ['React', 'Server Components', 'Next.js', 'Performance', 'Web Development'],
+    coverImage: 'https://picsum.photos/id/225/400/300'
+  },
+  {
+    id: 'modern-css-techniques',
+    title: 'Modern CSS Techniques You Should Know in 2024',
+    excerpt: 'Explore the latest CSS features including Container Queries, Cascade Layers, and the :has() selector that are revolutionizing web styling.',
+    content: `# Modern CSS Techniques You Should Know in 2024
+
+CSS has evolved dramatically over the past few years. Features that once required JavaScript or complex workarounds are now possible with pure CSS. Let's explore the cutting-edge techniques that are changing how we style the web.
+
+## Container Queries: The Game Changer
+
+Container Queries allow elements to respond to their container's size rather than the viewport:
+
+\`\`\`css
+.card-container {
+  container-type: inline-size;
+}
+
+@container (min-width: 400px) {
+  .card {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+  }
+}
+\`\`\`
+
+## The Powerful :has() Selector
+
+The :has() pseudo-class lets you style parent elements based on their children:
+
+\`\`\`css
+/* Style articles that contain images */
+article:has(img) {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+}
+
+/* Style forms with invalid inputs */
+form:has(input:invalid) {
+  border: 2px solid red;
+}
+\`\`\`
+
+## Cascade Layers for Better Organization
+
+@layer helps manage CSS specificity in large projects:
+
+\`\`\`css
+@layer reset, base, components, utilities;
+
+@layer reset {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+  }
+}
+
+@layer utilities {
+  .mt-4 {
+    margin-top: 1rem;
+  }
+}
+\`\`\`
+
+## CSS Nesting: Finally Native
+
+Native CSS nesting is here, making your styles more maintainable:
+
+\`\`\`css
+.card {
+  padding: 1rem;
+  background: white;
+  
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}
+\`\`\`
+
+## Advanced Grid Techniques
+
+### Subgrid for Aligned Layouts
+
+\`\`\`css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.grid-item {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
+}
+\`\`\`
+
+### Dynamic Grid with min() and clamp()
+
+\`\`\`css
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit, 
+    minmax(min(100%, 300px), 1fr)
+  );
+  gap: clamp(1rem, 2vw, 2rem);
+}
+\`\`\`
+
+## Modern Color Functions
+
+### Oklahoma LCH for Better Gradients
+
+\`\`\`css
+.gradient {
+  background: linear-gradient(
+    to right,
+    oklch(70% 0.3 0),
+    oklch(70% 0.3 270)
+  );
+}
+\`\`\`
+
+### Dynamic Color Themes with color-mix()
+
+\`\`\`css
+:root {
+  --primary: #3b82f6;
+  --primary-light: color-mix(in srgb, var(--primary) 80%, white);
+  --primary-dark: color-mix(in srgb, var(--primary) 80%, black);
+}
+\`\`\`
+
+## Scroll-Driven Animations
+
+Create animations tied to scroll position without JavaScript:
+
+\`\`\`css
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.element {
+  animation: reveal linear;
+  animation-timeline: view();
+  animation-range: entry 0% cover 30%;
+}
+\`\`\`
+
+## Logical Properties for Better Internationalization
+
+\`\`\`css
+/* Instead of margin-left/right */
+.element {
+  margin-inline: 2rem;
+  padding-block: 1rem;
+  border-start-start-radius: 0.5rem;
+}
+\`\`\`
+
+## Performance Optimization Techniques
+
+### content-visibility for Faster Rendering
+
+\`\`\`css
+.article {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+\`\`\`
+
+### @property for Animatable Custom Properties
+
+\`\`\`css
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  --gradient-angle: 0deg;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #3b82f6,
+    #8b5cf6,
+    #3b82f6
+  );
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+\`\`\`
+
+## Accessibility Improvements
+
+### Preference Queries
+
+\`\`\`css
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --text-color: black;
+    --bg-color: white;
+  }
+}
+\`\`\`
+
+## Conclusion
+
+Modern CSS is incredibly powerful. Features like Container Queries, :has(), and native nesting are transforming how we approach web styling. By leveraging these techniques, you can create more maintainable, performant, and accessible stylesheets.
+
+The key is to stay curious and keep experimenting. CSS continues to evolve, and the best is yet to come!`,
+    author: {
+      name: 'Maria Garcia',
+      avatar: 'https://i.pravatar.cc/150?img=1',
+      role: 'CSS Specialist'
+    },
+    category: 'CSS',
+    readTime: 8,
+    publishedAt: '2024-01-16',
+    tags: ['CSS', 'Web Design', 'Frontend', 'Modern CSS', 'Styling'],
+    coverImage: 'https://picsum.photos/id/104/400/300'
+  },
+  {
+    id: 'web-performance-2024',
+    title: 'Web Performance Optimization: A Comprehensive Guide',
+    excerpt: 'Master the art of web performance with modern techniques including Core Web Vitals optimization, resource hints, and cutting-edge loading strategies.',
+    content: `# Web Performance Optimization: A Comprehensive Guide
+
+Web performance is no longer optional—it's a critical factor for user experience, SEO, and business success. This guide covers everything you need to know about modern web performance optimization.
+
+## Understanding Core Web Vitals
+
+### Largest Contentful Paint (LCP)
+Measures loading performance. Aim for LCP within 2.5 seconds.
+
+### First Input Delay (FID) → Interaction to Next Paint (INP)
+Measures interactivity. INP is replacing FID as it better captures overall responsiveness.
+
+### Cumulative Layout Shift (CLS)
+Measures visual stability. Aim for CLS less than 0.1.
+
+## Critical Rendering Path Optimization
+
+### 1. Minimize Critical Resources
+
+\`\`\`html
+<!-- Preload critical fonts -->
+<link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Inline critical CSS -->
+<style>
+  /* Critical above-the-fold styles */
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .hero { height: 100vh; display: flex; align-items: center; }
+</style>
+
+<!-- Defer non-critical CSS -->
+<link rel="preload" href="/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+\`\`\`
+
+### 2. Optimize JavaScript Loading
+
+\`\`\`javascript
+// Use dynamic imports for code splitting
+const loadHeavyComponent = async () => {
+  const { HeavyComponent } = await import('./HeavyComponent');
+  return HeavyComponent;
+};
+
+// Implement progressive enhancement
+if ('IntersectionObserver' in window) {
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        imageObserver.unobserve(img);
+      }
+    });
+  });
+  
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+}
+\`\`\`
+
+## Advanced Loading Strategies
+
+### Resource Hints
+
+\`\`\`html
+<!-- DNS Prefetch for external domains -->
+<link rel="dns-prefetch" href="//api.example.com">
+
+<!-- Preconnect for critical third-party origins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<!-- Prefetch for likely next navigation -->
+<link rel="prefetch" href="/products" as="document">
+
+<!-- Prerender for very likely next page -->
+<link rel="prerender" href="/checkout">
+\`\`\`
+
+### Modern Image Optimization
+
+\`\`\`html
+<picture>
+  <source 
+    srcset="/image.avif" 
+    type="image/avif"
+  >
+  <source 
+    srcset="/image.webp" 
+    type="image/webp"
+  >
+  <img 
+    src="/image.jpg" 
+    alt="Description"
+    loading="lazy"
+    decoding="async"
+    width="800"
+    height="600"
+  >
+</picture>
+\`\`\`
+
+## Performance Monitoring
+
+### Real User Monitoring (RUM)
+
+\`\`\`javascript
+// Track Web Vitals
+import { getCLS, getFID, getLCP, getTTFB, getFCP } from 'web-vitals';
+
+function sendToAnalytics({ name, delta, id }) {
+  // Send to your analytics endpoint
+  fetch('/analytics', {
+    method: 'POST',
+    body: JSON.stringify({ name, delta, id }),
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+getCLS(sendToAnalytics);
+getFID(sendToAnalytics);
+getLCP(sendToAnalytics);
+getTTFB(sendToAnalytics);
+getFCP(sendToAnalytics);
+\`\`\`
+
+### Performance Observer API
+
+\`\`\`javascript
+// Monitor long tasks
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    console.log('Long task detected:', entry);
+    // Send to monitoring service
+  }
+});
+
+observer.observe({ entryTypes: ['longtask'] });
+\`\`\`
+
+## Caching Strategies
+
+### Service Worker Caching
+
+\`\`\`javascript
+// Implement cache-first strategy
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).then((response) => {
+        return caches.open('v1').then((cache) => {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      });
+    })
+  );
+});
+\`\`\`
+
+### HTTP Caching Headers
+
+\`\`\`javascript
+// Express.js example
+app.use('/static', (req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  next();
+});
+
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  next();
+});
+\`\`\`
+
+## Bundle Size Optimization
+
+### Tree Shaking and Dead Code Elimination
+
+\`\`\`javascript
+// webpack.config.js
+module.exports = {
+  optimization: {
+    usedExports: true,
+    sideEffects: false,
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          priority: 10
+        }
+      }
+    }
+  }
+};
+\`\`\`
+
+### Analyze and Optimize Dependencies
+
+\`\`\`bash
+# Analyze bundle size
+npm run build -- --analyze
+
+# Find duplicate dependencies
+npm ls --depth=0 | grep deduped
+
+# Use lighter alternatives
+# moment.js (67kb) → dayjs (7kb)
+# lodash (71kb) → lodash-es with tree shaking
+\`\`\`
+
+## Runtime Performance
+
+### Optimize React Rendering
+
+\`\`\`javascript
+// Use React.memo for expensive components
+const ExpensiveComponent = React.memo(({ data }) => {
+  return <ComplexVisualization data={data} />;
+}, (prevProps, nextProps) => {
+  return prevProps.data.id === nextProps.data.id;
+});
+
+// Use useMemo for expensive computations
+const processedData = useMemo(() => {
+  return heavyDataProcessing(rawData);
+}, [rawData]);
+
+// Use useCallback for stable references
+const handleClick = useCallback((id) => {
+  dispatch({ type: 'SELECT_ITEM', id });
+}, [dispatch]);
+\`\`\`
+
+### Web Workers for Heavy Computation
+
+\`\`\`javascript
+// main.js
+const worker = new Worker('worker.js');
+
+worker.postMessage({ cmd: 'process', data: largeDataset });
+
+worker.onmessage = (e) => {
+  console.log('Processed result:', e.data);
+};
+
+// worker.js
+self.onmessage = (e) => {
+  if (e.data.cmd === 'process') {
+    const result = expensiveOperation(e.data.data);
+    self.postMessage(result);
+  }
+};
+\`\`\`
+
+## Network Optimization
+
+### HTTP/2 and HTTP/3
+
+\`\`\`nginx
+# Enable HTTP/2
+server {
+  listen 443 ssl http2;
+  
+  # HTTP/3 (QUIC)
+  listen 443 quic reuseport;
+  add_header Alt-Svc 'h3=":443"; ma=86400';
+}
+\`\`\`
+
+### Compression
+
+\`\`\`javascript
+// Enable Brotli compression in Node.js
+const compression = require('compression');
+const express = require('express');
+const app = express();
+
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6
+}));
+\`\`\`
+
+## Conclusion
+
+Web performance is a continuous journey, not a destination. Regular monitoring, iterative improvements, and staying updated with new techniques are key to maintaining fast, responsive web applications.
+
+Remember: every millisecond counts. Your users will thank you for the effort you put into performance optimization!`,
+    author: {
+      name: 'David Kim',
+      avatar: 'https://i.pravatar.cc/150?img=12',
+      role: 'Performance Engineer'
+    },
+    category: 'Performance',
+    readTime: 14,
+    publishedAt: '2024-01-14',
+    tags: ['Performance', 'Web Vitals', 'Optimization', 'JavaScript', 'Best Practices'],
+    coverImage: 'https://picsum.photos/id/367/400/300'
+  },
+  {
+    id: 'typescript-advanced-patterns',
+    title: 'Advanced TypeScript Patterns for Production',
+    excerpt: 'Level up your TypeScript skills with advanced patterns including type guards, conditional types, and template literal types.',
+    content: `# Advanced TypeScript Patterns for Production
+
+TypeScript has evolved from a simple type checker to a powerful type system that can express complex relationships in your code. Let's explore advanced patterns that will make your production code more robust and maintainable.
+
+## Type Guards and Narrowing
+
+### Custom Type Guards
+
+\`\`\`typescript
+interface User {
+  type: 'user';
+  name: string;
+  email: string;
+}
+
+interface Admin {
+  type: 'admin';
+  name: string;
+  permissions: string[];
+}
+
+type Person = User | Admin;
+
+// Type guard function
+function isAdmin(person: Person): person is Admin {
+  return person.type === 'admin';
+}
+
+function processUser(person: Person) {
+  if (isAdmin(person)) {
+    // TypeScript knows this is Admin
+    console.log('Permissions:', person.permissions);
+  } else {
+    // TypeScript knows this is User
+    console.log('Email:', person.email);
+  }
+}
+\`\`\`
+
+### Discriminated Unions for State Management
+
+\`\`\`typescript
+type LoadingState = {
+  status: 'loading';
+};
+
+type SuccessState<T> = {
+  status: 'success';
+  data: T;
+};
+
+type ErrorState = {
+  status: 'error';
+  error: Error;
+};
+
+type AsyncState<T> = LoadingState | SuccessState<T> | ErrorState;
+
+function useAsyncData<T>(): AsyncState<T> {
+  // Implementation
+  return { status: 'loading' };
+}
+
+// Usage with exhaustive checks
+function renderData<T>(state: AsyncState<T>) {
+  switch (state.status) {
+    case 'loading':
+      return <Spinner />;
+    case 'success':
+      return <DataDisplay data={state.data} />;
+    case 'error':
+      return <ErrorMessage error={state.error} />;
+    default:
+      // This ensures we handle all cases
+      const _exhaustive: never = state;
+      return _exhaustive;
+  }
+}
+\`\`\`
+
+## Advanced Generic Patterns
+
+### Conditional Types
+
+\`\`\`typescript
+// Extract array element type
+type ArrayElement<T> = T extends (infer E)[] ? E : never;
+
+type StringArray = ArrayElement<string[]>; // string
+type NumberArray = ArrayElement<number[]>; // number
+
+// Deep readonly
+type DeepReadonly<T> = {
+  readonly [K in keyof T]: T[K] extends object 
+    ? DeepReadonly<T[K]> 
+    : T[K];
+};
+
+// Conditional function return types
+type AsyncReturnType<T extends (...args: any) => Promise<any>> = 
+  T extends (...args: any) => Promise<infer R> ? R : never;
+
+async function fetchUser() {
+  return { id: 1, name: 'John' };
+}
+
+type User = AsyncReturnType<typeof fetchUser>; // { id: number; name: string }
+\`\`\`
+
+### Template Literal Types
+
+\`\`\`typescript
+// API Route Builder
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type Route = \`/api/\${string}\`;
+
+type APIEndpoint<M extends HTTPMethod, R extends Route> = \`\${M} \${R}\`;
+
+type UserEndpoints = 
+  | APIEndpoint<'GET', '/api/users'>
+  | APIEndpoint<'POST', '/api/users'>
+  | APIEndpoint<'PUT', \`/api/users/\${string}\`>
+  | APIEndpoint<'DELETE', \`/api/users/\${string}\`>;
+
+// CSS-in-JS Type Safety
+type CSSProperty = 'margin' | 'padding';
+type CSSUnit = 'px' | 'rem' | 'em' | '%';
+type CSSValue = \`\${number}\${CSSUnit}\`;
+
+type CSSProperties = {
+  [K in CSSProperty]?: CSSValue;
+};
+
+const styles: CSSProperties = {
+  margin: '10px',
+  padding: '2rem',
+  // margin: '10foo', // Error!
+};
+\`\`\`
+
+## Mapped Types and Key Remapping
+
+\`\`\`typescript
+// Getters type
+type Getters<T> = {
+  [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K];
+};
+
+interface Person {
+  name: string;
+  age: number;
+}
+
+type PersonGetters = Getters<Person>;
+// { getName: () => string; getAge: () => number; }
+
+// Remove specific properties
+type Omit<T, K extends keyof T> = {
+  [P in keyof T as P extends K ? never : P]: T[P];
+};
+
+// Make specific properties optional
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+type UserUpdate = PartialBy<User, 'email' | 'name'>;
+// { id: string; email?: string; name?: string; }
+\`\`\`
+
+## Builder Pattern with TypeScript
+
+\`\`\`typescript
+class QueryBuilder<T = {}> {
+  private query: T;
+
+  constructor(query: T = {} as T) {
+    this.query = query;
+  }
+
+  where<K extends string, V>(
+    key: K, 
+    value: V
+  ): QueryBuilder<T & Record<K, V>> {
+    return new QueryBuilder({
+      ...this.query,
+      [key]: value
+    } as T & Record<K, V>);
+  }
+
+  orderBy<K extends string>(
+    key: K, 
+    direction: 'asc' | 'desc' = 'asc'
+  ): QueryBuilder<T & { orderBy: K; direction: typeof direction }> {
+    return new QueryBuilder({
+      ...this.query,
+      orderBy: key,
+      direction
+    } as any);
+  }
+
+  build(): T {
+    return this.query;
+  }
+}
+
+// Type-safe query building
+const query = new QueryBuilder()
+  .where('status', 'active')
+  .where('age', 25)
+  .orderBy('createdAt', 'desc')
+  .build();
+
+// query is typed as:
+// {
+//   status: string;
+//   age: number;
+//   orderBy: "createdAt";
+//   direction: "desc";
+// }
+\`\`\`
+
+## Branded Types for Runtime Safety
+
+\`\`\`typescript
+// Prevent mixing different ID types
+type Brand<K, T> = K & { __brand: T };
+
+type UserID = Brand<string, 'UserID'>;
+type PostID = Brand<string, 'PostID'>;
+
+function getUserByID(id: UserID) {
+  // Implementation
+}
+
+function getPostByID(id: PostID) {
+  // Implementation
+}
+
+// Type-safe ID creation
+function createUserID(id: string): UserID {
+  return id as UserID;
+}
+
+function createPostID(id: string): PostID {
+  return id as PostID;
+}
+
+const userId = createUserID('user123');
+const postId = createPostID('post456');
+
+getUserByID(userId); // ✓ OK
+// getUserByID(postId); // ✗ Error!
+\`\`\`
+
+## Function Overloading and Type Inference
+
+\`\`\`typescript
+// Overloaded function signatures
+function createElement(tag: 'img'): HTMLImageElement;
+function createElement(tag: 'input'): HTMLInputElement;
+function createElement(tag: 'div'): HTMLDivElement;
+function createElement(tag: string): HTMLElement;
+function createElement(tag: string): HTMLElement {
+  return document.createElement(tag);
+}
+
+const img = createElement('img'); // HTMLImageElement
+const input = createElement('input'); // HTMLInputElement
+const div = createElement('div'); // HTMLDivElement
+
+// Generic constraints with conditional types
+type EventMap = {
+  click: MouseEvent;
+  change: Event;
+  focus: FocusEvent;
+};
+
+function addEventListener<K extends keyof EventMap>(
+  element: HTMLElement,
+  event: K,
+  handler: (event: EventMap[K]) => void
+): void {
+  element.addEventListener(event, handler as any);
+}
+
+addEventListener(button, 'click', (e) => {
+  // e is MouseEvent
+  console.log(e.clientX, e.clientY);
+});
+\`\`\`
+
+## Type-Safe Error Handling
+
+\`\`\`typescript
+// Result type for error handling
+type Ok<T> = { ok: true; value: T };
+type Err<E> = { ok: false; error: E };
+type Result<T, E = Error> = Ok<T> | Err<E>;
+
+function divide(a: number, b: number): Result<number, string> {
+  if (b === 0) {
+    return { ok: false, error: 'Division by zero' };
+  }
+  return { ok: true, value: a / b };
+}
+
+// Type-safe error handling
+const result = divide(10, 2);
+if (result.ok) {
+  console.log('Result:', result.value);
+} else {
+  console.log('Error:', result.error);
+}
+
+// Async version
+async function fetchUserSafe(id: string): Promise<Result<User>> {
+  try {
+    const response = await fetch(\`/api/users/\${id}\`);
+    if (!response.ok) {
+      return { ok: false, error: new Error('Failed to fetch user') };
+    }
+    const user = await response.json();
+    return { ok: true, value: user };
+  } catch (error) {
+    return { ok: false, error: error as Error };
+  }
+}
+\`\`\`
+
+## Conclusion
+
+Advanced TypeScript patterns enable you to write safer, more expressive code. The key is to leverage TypeScript's type system to encode business logic and constraints at the type level, catching errors at compile time rather than runtime.
+
+Remember:
+- Use discriminated unions for state management
+- Leverage conditional types for flexible generic programming
+- Apply branded types to prevent primitive obsession
+- Embrace the builder pattern for fluent APIs
+- Always strive for type safety without sacrificing developer experience
+
+TypeScript is not just about adding types—it's about designing better APIs and creating self-documenting code that helps your team move faster with confidence.`,
+    author: {
+      name: 'James Chen',
+      avatar: 'https://i.pravatar.cc/150?img=7',
+      role: 'TypeScript Expert'
+    },
+    category: 'TypeScript',
+    readTime: 12,
+    publishedAt: '2024-01-12',
+    tags: ['TypeScript', 'Advanced Patterns', 'Type Safety', 'Best Practices', 'JavaScript'],
+    coverImage: 'https://picsum.photos/id/160/400/300'
   }
 ];
 
