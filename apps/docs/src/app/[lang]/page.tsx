@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, Zap, CheckCircle, Smartphone, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Demo from "@/components/demo";
 
 export default function Home() {
   return (
@@ -70,17 +71,9 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-[3rem] border-8 border-white/10 bg-black shadow-2xl">
                   <div className="absolute left-1/2 top-4 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
                   
-                  {/* GIF 플레이스홀더 */}
-                  <div className="aspect-[9/19.5] bg-gradient-to-br from-card to-muted">
-                    <div className="flex h-full items-center justify-center p-8">
-                      <div className="text-center">
-                        <Smartphone className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                        <p className="text-sm font-medium text-muted-foreground">
-                          페이지 전환 애니메이션
-                          <br />데모 GIF
-                        </p>
-                      </div>
-                    </div>
+                  {/* Demo Component */}
+                  <div className="aspect-[9/19.5]">
+                    <Demo />
                   </div>
                 </div>
                 
