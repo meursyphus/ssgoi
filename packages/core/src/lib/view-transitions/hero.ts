@@ -48,7 +48,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
   };
   const timeout = options.timeout ?? 300;
 
-  let fromNode: HTMLElement | null = null;
   let toNode: HTMLElement | null = null;
   let fromNodeResolver: ((node: HTMLElement) => void) | null = null;
 
@@ -123,7 +122,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
           toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
         },
         onEnd: () => {
-          fromNode = null;
           // Reset hero element styles
           if (toEl) {
             toEl.style.transform = originalTransform;
@@ -134,8 +132,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
       };
     },
     out: async (element) => {
-      fromNode = element;
-      
       // Trigger the promise resolver if in transition is waiting
       if (fromNodeResolver) {
         fromNodeResolver(element);
