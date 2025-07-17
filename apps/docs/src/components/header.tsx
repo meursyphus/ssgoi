@@ -39,7 +39,7 @@ export function Header() {
           )}
           
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold gradient-text">SSGOI</span>
+            <span className="text-2xl font-bold text-orange-500">SSGOI</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">
