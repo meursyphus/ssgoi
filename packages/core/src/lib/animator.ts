@@ -1,4 +1,5 @@
 import type { SpringConfig } from "./types";
+import { VSync } from "./vsync";
 
 interface AnimationOptions {
   from: number;
@@ -97,7 +98,7 @@ export class Animator {
       Math.abs(displacement) < 0.01 && Math.abs(this.velocity) < 0.01;
 
     if (!isComplete) {
-      this.animationId = requestAnimationFrame(() => this.animate(reverse));
+      this.animationId = VSync.requestAnimationFrame(() => this.animate(reverse));
     } else {
       // Snap to final value
       this.currentValue = target;
