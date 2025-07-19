@@ -84,14 +84,8 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
           // Calculate animation parameters
           const fromRect = getRect(fromNode!, fromEl);
           const toRect = getRect(toNode, toEl);
-
-          const fromScroll = context.getScrollFrom();
-          const toScroll = context.getScrollTo();
-          const scrollOffsetX = toScroll.x - fromScroll.x;
-          const scrollOffsetY = toScroll.y - fromScroll.y;
-
-          const dx = fromRect.left - toRect.left - scrollOffsetX;
-          const dy = fromRect.top - toRect.top - scrollOffsetY;
+          const dx = fromRect.left - toRect.left - context.scrollOffset.x;
+          const dy = fromRect.top - toRect.top - context.scrollOffset.y;
           const dw = fromRect.width / toRect.width;
           const dh = fromRect.height / toRect.height;
 

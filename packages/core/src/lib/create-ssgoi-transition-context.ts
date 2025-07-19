@@ -92,26 +92,23 @@ export function createSggoiTransitionContext(
     currentPath = path;
   };
 
-  // Create scroll context
-  const scrollContext = {
-    getScrollFrom: () => {
-      const from = pendingTransition?.from;
-      console.log("getScrollFrom", from);
-      const result =
-        from && scrollPositions.has(from)
-          ? scrollPositions.get(from)!
-          : { x: 0, y: 0 };
+  // Calculate scroll offset
+  const calculateScrollOffset = (): { x: number; y: number } => {
+    const from = pendingTransition?.from;
+    const to = pendingTransition?.to;
 
-      return result;
-    },
-    getScrollTo: () => {
-      const to = pendingTransition?.to;
-      const result =
-        to && scrollPositions.has(to)
-          ? scrollPositions.get(to)!
-          : { x: 0, y: 0 };
-      return result;
-    },
+    const fromScroll =
+      from && scrollPositions.has(from)
+        ? scrollPositions.get(from)!
+        : { x: 0, y: 0 };
+
+    const toScroll =
+      to && scrollPositions.has(to) ? scrollPositions.get(to)! : { x: 0, y: 0 };
+
+    return {
+      x: -toScroll.x + fromScroll.x,
+      y: -toScroll.y + fromScroll.y,
+    };
   };
 
   function checkAndResolve() {
@@ -122,16 +119,18 @@ export function createSggoiTransitionContext(
         options.transitions
       );
       const result = transition || options.defaultTransition;
+      const scrollOffset = calculateScrollOffset();
+      const context = { scrollOffset };
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
           pendingTransition.outResolve((element) =>
-            result.out!(element, scrollContext)
+            result.out!(element, context)
           );
         }
         if (result.in && pendingTransition.inResolve) {
           pendingTransition.inResolve((element) =>
-            result.in!(element, scrollContext)
+            result.in!(element, context)
           );
         }
       }

@@ -42,11 +42,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   useEffect(() => {
     if (!mainRef.current) return;
     const savedPosition = scrollPositions.current[currentPath] || 0;
-    setTimeout(() => {
-      if (mainRef.current) {
-        mainRef.current.scrollTop = savedPosition;
-      }
-    }, 0);
+
+    if (mainRef.current) {
+      mainRef.current.scrollTop = savedPosition;
+    }
 
     previousPath.current = currentPath;
   }, [currentPath]);

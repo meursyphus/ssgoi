@@ -36,8 +36,7 @@ export type TransitionCallback = (
 ) => void | (() => void);
 
 export type SggoiTransitionContext = {
-  getScrollFrom: () => { x: number; y: number };
-  getScrollTo: () => { x: number; y: number };
+  scrollOffset: { x: number; y: number };
 };
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;
