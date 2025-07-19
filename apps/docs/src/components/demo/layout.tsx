@@ -18,48 +18,39 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const router = useDemoRouter();
   const currentPath = router.currentPath || "";
+  const pathRef = useRef(currentPath);
+  pathRef.current = currentPath;
   const mainRef = useRef<HTMLElement>(null);
   const scrollPositions = useRef<Record<string, number>>({});
   const previousPath = useRef(currentPath);
 
-  // Handle scroll position saving on scroll event
   useEffect(() => {
+    if (!mainRef.current) return;
+
     const handleScroll = () => {
-      if (mainRef.current && currentPath) {
-        scrollPositions.current[currentPath] = mainRef.current.scrollTop;
-      }
+      if (!mainRef.current) return;
+      scrollPositions.current[pathRef.current] = mainRef.current.scrollTop;
     };
-    
-    const mainElement = mainRef.current;
-    if (mainElement) {
-      mainElement.addEventListener('scroll', handleScroll);
-      return () => mainElement.removeEventListener('scroll', handleScroll);
-    }
-  }, [currentPath]);
+
+    mainRef.current.addEventListener("scroll", handleScroll);
+    return () => {
+      mainRef.current?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // Restore scroll position when path changes
   useEffect(() => {
-    if (previousPath.current !== currentPath) {
-      // Save final scroll position of previous path
-      if (mainRef.current && previousPath.current) {
-        scrollPositions.current[previousPath.current] = mainRef.current.scrollTop;
-      }
-
-      // Restore scroll position for current path
+    if (!mainRef.current) return;
+    const savedPosition = scrollPositions.current[currentPath] || 0;
+    setTimeout(() => {
       if (mainRef.current) {
-        const savedPosition = scrollPositions.current[currentPath] || 0;
-        // Use setTimeout to ensure DOM is updated
-        setTimeout(() => {
-          if (mainRef.current) {
-            mainRef.current.scrollTop = savedPosition;
-          }
-        }, 0);
+        mainRef.current.scrollTop = savedPosition;
       }
+    }, 0);
 
-      previousPath.current = currentPath;
-    }
+    previousPath.current = currentPath;
   }, [currentPath]);
-  
+
   const config: SsgoiConfig = useMemo(
     () => ({
       transitions: [
