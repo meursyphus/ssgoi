@@ -1,5 +1,5 @@
 import type { Transition, SpringConfig } from "../types";
-import { prepareOutgoing } from "./utils";
+import { prepareOutgoing, getScrollingElement } from "./utils";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
@@ -32,10 +32,38 @@ export const hero = (options: HeroOptions = {}): Transition => {
   // Closure variables to share state between in/out
   let fromNode: HTMLElement | null = null;
   let resolver: ((value: boolean) => void) | null = null;
+  let scrollContainer: HTMLElement | null = null;
+  const fromScroll = { top: 0, left: 0 };
+  let scrollListener: (() => void) | null = null;
+  let isListening = false;
 
   return {
     in: async (element) => {
       const toNode = element;
+
+      // Initialize scroll container and listener once (lazy initialization)
+      if (!scrollContainer) {
+        scrollContainer = getScrollingElement(toNode);
+
+        // Create scroll listener
+        scrollListener = () => {
+          if (scrollContainer) {
+            fromScroll.top = scrollContainer.scrollTop;
+            fromScroll.left = scrollContainer.scrollLeft;
+          }
+        };
+      }
+
+      // Start listening if not already
+      if (!isListening && scrollContainer && scrollListener) {
+        scrollContainer.addEventListener("scroll", scrollListener, {
+          passive: true,
+        });
+        isListening = true;
+        // Initialize current scroll position
+        fromScroll.top = scrollContainer.scrollTop;
+        fromScroll.left = scrollContainer.scrollLeft;
+      }
 
       // Find all hero elements in the incoming page
       const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
@@ -85,8 +113,19 @@ export const hero = (options: HeroOptions = {}): Transition => {
           const fromRect = getRect(fromNode!, fromEl);
           const toRect = getRect(toNode, toEl);
 
-          const dx = fromRect.left - toRect.left;
-          const dy = fromRect.top - toRect.top;
+          // Calculate scroll offset difference if scroll container exists
+          let scrollOffsetX = 0;
+          let scrollOffsetY = 0;
+
+          if (scrollContainer) {
+            const currentScrollTop = scrollContainer.scrollTop;
+            const currentScrollLeft = scrollContainer.scrollLeft;
+            scrollOffsetX = currentScrollLeft - fromScroll.left;
+            scrollOffsetY = currentScrollTop - fromScroll.top;
+          }
+
+          const dx = fromRect.left - toRect.left + scrollOffsetX;
+          const dy = fromRect.top - toRect.top + scrollOffsetY;
           const dw = fromRect.width / toRect.width;
           const dh = fromRect.height / toRect.height;
 
@@ -127,15 +166,17 @@ export const hero = (options: HeroOptions = {}): Transition => {
         };
       }
 
-      console.log(heroAnimations);
-
       return {
         spring,
+        prepare: () => {
+          heroAnimations.forEach(({ toEl }) => {
+            toEl.style.position = "relative";
+            toEl.style.transformOrigin = "top left";
+          });
+        },
         tick: (progress) => {
           // Animate all hero elements
           heroAnimations.forEach(({ toEl, dx, dy, dw, dh }) => {
-            toEl.style.position = "relative";
-            toEl.style.transformOrigin = "top left";
             toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           });
         },
@@ -157,6 +198,15 @@ export const hero = (options: HeroOptions = {}): Transition => {
       };
     },
     out: async (element) => {
+      if (isListening) {
+        setTimeout(() => {
+          if (scrollContainer && scrollListener) {
+            scrollContainer.removeEventListener("scroll", scrollListener);
+            isListening = false;
+          }
+        }, 0);
+      }
+
       return {
         onStart: () => {
           // Store fromNode
@@ -170,7 +220,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
-          element.style.opacity = "0"; // Make it invisible immediately
+          element.style.opacity = "0";
         },
       };
     },
