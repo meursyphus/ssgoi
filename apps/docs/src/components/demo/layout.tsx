@@ -50,6 +50,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           to: "/demo/posts/*",
           transition: {
             in: (node) => ({
+              spring: {
+                stiffness: 500,
+                damping: 50,
+              },
               prepare: (node) => {
                 node.style.zIndex = "100";
               },
@@ -59,6 +63,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
               },
             }),
             out: (node) => ({
+              spring: {
+                stiffness: 500,
+                damping: 50,
+              },
               prepare: (node) => {
                 node.style.position = "absolute";
                 node.style.left = "0";
@@ -77,11 +85,19 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           to: "/demo/posts",
           transition: {
             in: (node) => ({
+              spring: {
+                stiffness: 300,
+                damping: 50,
+              },
               tick: (t) => {
                 node.style.transform = `translateX(${-(1 - t) * 20}%)`;
               },
             }),
             out: (node) => ({
+              spring: {
+                stiffness: 300,
+                damping: 50,
+              },
               prepare: (node) => {
                 node.style.position = "absolute";
                 node.style.left = "0";
