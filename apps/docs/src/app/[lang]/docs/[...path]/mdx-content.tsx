@@ -74,5 +74,5 @@ const mdxOptions = {
 }
 
 export async function MDXContent({ content }: MDXContentProps) {
-  return <MDXRemote source={content} components={components} options={mdxOptions} />
+  return <MDXRemote source={content} components={components} {...mdxOptions} />
 }
