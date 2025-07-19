@@ -9,6 +9,7 @@ import {
   pinterest,
   ripple,
 } from "@meursyphus/ssgoi-react/view-transitions";
+import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -135,7 +136,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {/* Main Content Area */}
         <main
           id="demo-content"
-          className="flex-1 w-full overflow-y-auto overflow-x-hidden relative z-0 bg-gray-950"
+          className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-gray-950 ${styles.scrollContainer}`}
         >
           <Ssgoi config={config}>{children}</Ssgoi>
         </main>
