@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
 import {
@@ -20,6 +20,45 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   const currentPath = router.currentPath || "";
   const mainRef = useRef<HTMLElement>(null);
   const scrollPositions = useRef<Record<string, number>>({});
+  const previousPath = useRef(currentPath);
+
+  // Handle scroll position saving on scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mainRef.current && currentPath) {
+        scrollPositions.current[currentPath] = mainRef.current.scrollTop;
+      }
+    };
+    
+    const mainElement = mainRef.current;
+    if (mainElement) {
+      mainElement.addEventListener('scroll', handleScroll);
+      return () => mainElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [currentPath]);
+
+  // Restore scroll position when path changes
+  useEffect(() => {
+    if (previousPath.current !== currentPath) {
+      // Save final scroll position of previous path
+      if (mainRef.current && previousPath.current) {
+        scrollPositions.current[previousPath.current] = mainRef.current.scrollTop;
+      }
+
+      // Restore scroll position for current path
+      if (mainRef.current) {
+        const savedPosition = scrollPositions.current[currentPath] || 0;
+        // Use setTimeout to ensure DOM is updated
+        setTimeout(() => {
+          if (mainRef.current) {
+            mainRef.current.scrollTop = savedPosition;
+          }
+        }, 0);
+      }
+
+      previousPath.current = currentPath;
+    }
+  }, [currentPath]);
   
   const config: SsgoiConfig = useMemo(
     () => ({
