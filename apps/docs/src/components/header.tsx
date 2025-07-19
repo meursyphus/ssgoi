@@ -24,8 +24,8 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/60">
-      <div className="mx-auto max-w-7xl flex h-16 items-center px-4 sm:px-6 lg:px-0">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-800  px-4 sm:px-6 lg:px-8 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/60">
+      <div className="mx-auto max-w-7xl flex h-16 items-center">
         <div className="flex items-center gap-4">
           {/* Mobile Sidebar Toggle for Docs */}
           {isDocsPage && (

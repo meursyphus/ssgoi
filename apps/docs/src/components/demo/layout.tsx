@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
+import {
+  fade,
+  hero,
+  pinterest,
+  ripple,
+} from "@meursyphus/ssgoi-react/view-transitions";
+import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -11,9 +18,145 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const router = useDemoRouter();
   const currentPath = router.currentPath || "";
+  const pathRef = useRef(currentPath);
+  pathRef.current = currentPath;
+  const mainRef = useRef<HTMLElement>(null);
+  const scrollPositions = useRef<Record<string, number>>({});
+  const previousPath = useRef(currentPath);
+
+  useEffect(() => {
+    if (!mainRef.current) return;
+
+    const handleScroll = () => {
+      if (!mainRef.current) return;
+      scrollPositions.current[pathRef.current] = mainRef.current.scrollTop;
+    };
+
+    mainRef.current.addEventListener("scroll", handleScroll);
+    return () => {
+      mainRef.current?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Restore scroll position when path changes
+  useEffect(() => {
+    if (!mainRef.current) return;
+    const savedPosition = scrollPositions.current[currentPath] || 0;
+
+    if (mainRef.current) {
+      mainRef.current.scrollTop = savedPosition;
+    }
+
+    previousPath.current = currentPath;
+  }, [currentPath]);
+
   const config: SsgoiConfig = useMemo(
     () => ({
-      transitions: [],
+      transitions: [
+        // Pinterest transitions
+        {
+          from: "/demo/pinterest/*",
+          to: "/demo/pinterest",
+          transition: pinterest(),
+        },
+        {
+          from: "/demo/pinterest",
+          to: "/demo/pinterest/*",
+          transition: pinterest(),
+        },
+
+        // Products transitions - hero
+        {
+          from: "/demo/products",
+          to: "/demo/products/*",
+          transition: hero(),
+        },
+        {
+          from: "/demo/products/*",
+          to: "/demo/products",
+          transition: hero(),
+        },
+
+        // Posts transitions - slide with parallax effect
+        {
+          from: "/demo/posts",
+          to: "/demo/posts/*",
+          transition: {
+            in: (node) => ({
+              spring: {
+                stiffness: 500,
+                damping: 50,
+              },
+              prepare: (node) => {
+                node.style.zIndex = "100";
+              },
+              tick: (t) => {
+                node.style.zIndex = "100";
+                node.style.transform = `translateX(${(1 - t) * 100}%)`;
+              },
+            }),
+            out: (node) => ({
+              spring: {
+                stiffness: 500,
+                damping: 50,
+              },
+              prepare: (node) => {
+                node.style.position = "absolute";
+                node.style.left = "0";
+                node.style.top = "0";
+                node.style.width = "100%";
+                node.style.zIndex = "-1";
+              },
+              tick: (t) => {
+                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
+              },
+            }),
+          },
+        },
+        {
+          from: "/demo/posts/*",
+          to: "/demo/posts",
+          transition: {
+            in: (node) => ({
+              spring: {
+                stiffness: 300,
+                damping: 50,
+              },
+              tick: (t) => {
+                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
+              },
+            }),
+            out: (node) => ({
+              spring: {
+                stiffness: 300,
+                damping: 50,
+              },
+              prepare: (node) => {
+                node.style.position = "absolute";
+                node.style.left = "0";
+                node.style.top = "0";
+                node.style.width = "auto";
+                node.style.zIndex = "100";
+              },
+              tick: (t) => {
+                node.style.transform = `translateX(${(1 - t) * 100}%)`;
+              },
+            }),
+          },
+        },
+
+        // Profile transitions - ripple effect
+        //   {
+        //     from: "/demo/*",
+        //     to: "/demo/profile",
+        //     transition: ripple(),
+        //   },
+        //   {
+        //     from: "/demo/profile",
+        //     to: "/demo/*",
+        //     transition: ripple(),
+        //   },
+      ],
     }),
     []
   );
@@ -23,8 +166,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       <div className="w-full bg-black flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main
+          ref={mainRef}
           id="demo-content"
-          className="flex-1 w-full overflow-y-auto overflow-x-hidden relative bg-gray-950"
+          className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-gray-950 ${styles.scrollContainer}`}
         >
           <Ssgoi config={config}>{children}</Ssgoi>
         </main>

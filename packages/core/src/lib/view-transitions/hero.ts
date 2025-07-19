@@ -1,5 +1,5 @@
-import type { Transition, SpringConfig } from "../types";
-import { prepareOutgoing } from "./utils";
+import type { SpringConfig, SggoiTransition } from "../types";
+import { prepareOutgoing } from "../utils";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
@@ -22,7 +22,7 @@ function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
   );
 }
 
-export const hero = (options: HeroOptions = {}): Transition => {
+export const hero = (options: HeroOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,
@@ -34,7 +34,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
   let resolver: ((value: boolean) => void) | null = null;
 
   return {
-    in: async (element) => {
+    in: async (element, context) => {
       const toNode = element;
 
       // Find all hero elements in the incoming page
@@ -84,9 +84,8 @@ export const hero = (options: HeroOptions = {}): Transition => {
           // Calculate animation parameters
           const fromRect = getRect(fromNode!, fromEl);
           const toRect = getRect(toNode, toEl);
-
-          const dx = fromRect.left - toRect.left;
-          const dy = fromRect.top - toRect.top;
+          const dx = fromRect.left - toRect.left - context.scrollOffset.x;
+          const dy = fromRect.top - toRect.top - context.scrollOffset.y;
           const dw = fromRect.width / toRect.width;
           const dh = fromRect.height / toRect.height;
 
@@ -127,15 +126,17 @@ export const hero = (options: HeroOptions = {}): Transition => {
         };
       }
 
-      console.log(heroAnimations);
-
       return {
         spring,
+        prepare: () => {
+          heroAnimations.forEach(({ toEl }) => {
+            toEl.style.position = "relative";
+            toEl.style.transformOrigin = "top left";
+          });
+        },
         tick: (progress) => {
           // Animate all hero elements
           heroAnimations.forEach(({ toEl, dx, dy, dw, dh }) => {
-            toEl.style.position = "relative";
-            toEl.style.transformOrigin = "top left";
             toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           });
         },
@@ -170,7 +171,7 @@ export const hero = (options: HeroOptions = {}): Transition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
-          element.style.opacity = "0"; // Make it invisible immediately
+          element.style.opacity = "0";
         },
       };
     },

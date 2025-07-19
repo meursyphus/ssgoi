@@ -1,5 +1,5 @@
-import type { Transition, SpringConfig } from "../types";
-import { prepareOutgoing } from "./utils";
+import type { SpringConfig, SggoiTransition } from "../types";
+import { prepareOutgoing } from "../utils";
 
 interface PinterestOptions {
   spring?: Partial<SpringConfig>;
@@ -209,7 +209,7 @@ interface AnimationData {
   toPageRect: DOMRect;
 }
 
-export const pinterest = (options: PinterestOptions = {}): Transition => {
+export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,
@@ -228,7 +228,7 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
   return {
     in: async (element) => {
       currentToNode = element;
-      
+
       // Notify out transition that toNode is ready
       if (toNodeResolver) {
         toNodeResolver(true);
@@ -274,8 +274,13 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
       const { mode, key } = detection;
 
       // Get elements based on detected mode
-      const attr = mode === "enter" ? "data-pinterest-enter-key" : "data-pinterest-exit-key";
-      const fromEl = fromNode.querySelector(`[${attr}="${key}"]`) as HTMLElement;
+      const attr =
+        mode === "enter"
+          ? "data-pinterest-enter-key"
+          : "data-pinterest-exit-key";
+      const fromEl = fromNode.querySelector(
+        `[${attr}="${key}"]`
+      ) as HTMLElement;
       const toEl = toNode.querySelector(`[${attr}="${key}"]`) as HTMLElement;
 
       if (!fromEl || !toEl) {
@@ -340,7 +345,7 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
     },
     out: async (element) => {
       currentFromNode = element;
-      
+
       // Notify in transition that fromNode is ready
       if (fromNodeResolver) {
         fromNodeResolver(true);
@@ -371,10 +376,15 @@ export const pinterest = (options: PinterestOptions = {}): Transition => {
         tick: (progress) => {
           if (animationData) {
             const { mode, fromRect, toRect, fromPageRect } = animationData;
-            
+
             if (mode === "enter") {
               // Gallery view exiting (when detail enters)
-              const styles = galleryOut(fromRect, toRect, fromPageRect, progress);
+              const styles = galleryOut(
+                fromRect,
+                toRect,
+                fromPageRect,
+                progress
+              );
               element.style.clipPath = styles.clipPath;
               element.style.transformOrigin = styles.transformOrigin;
               element.style.transform = styles.transform;
