@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
 import {
@@ -18,6 +18,9 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const router = useDemoRouter();
   const currentPath = router.currentPath || "";
+  const mainRef = useRef<HTMLElement>(null);
+  const scrollPositions = useRef<Record<string, number>>({});
+  
   const config: SsgoiConfig = useMemo(
     () => ({
       transitions: [
@@ -114,18 +117,17 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         },
 
         // Profile transitions - ripple effect
-        {
-          from: "/demo/*",
-          to: "/demo/profile",
-          transition: ripple(),
-        },
-        {
-          from: "/demo/profile",
-          to: "/demo/*",
-          transition: ripple(),
-        },
+        //   {
+        //     from: "/demo/*",
+        //     to: "/demo/profile",
+        //     transition: ripple(),
+        //   },
+        //   {
+        //     from: "/demo/profile",
+        //     to: "/demo/*",
+        //     transition: ripple(),
+        //   },
       ],
-      defaultTransition: fade(),
     }),
     []
   );
@@ -135,6 +137,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       <div className="w-full bg-black flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main
+          ref={mainRef}
           id="demo-content"
           className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-gray-950 ${styles.scrollContainer}`}
         >
