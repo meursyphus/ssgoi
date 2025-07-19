@@ -1,5 +1,5 @@
-import type { Transition, SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "./utils";
+import type { SpringConfig, SggoiTransition } from "../types";
+import { prepareOutgoing } from "../utils";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;

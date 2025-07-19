@@ -1,5 +1,5 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "./utils";
+import { prepareOutgoing } from "../utils";
 
 interface RippleOptions {
   spring?: Partial<SpringConfig>;

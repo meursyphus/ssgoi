@@ -3,10 +3,8 @@ import type {
   SsgoiContext,
   GetTransitionConfig,
   Transition,
-  SggoiTransition,
-  SggoiTransitionContext,
 } from "./types";
-import { getScrollingElement } from "./view-transitions/utils";
+import { getScrollingElement } from "./utils";
 
 /**
  * SSGOI Transition Context 동작 원리
