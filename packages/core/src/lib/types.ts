@@ -22,24 +22,35 @@ export type TransitionConfig = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig = (
-  node: HTMLElement
-) => TransitionConfig | Promise<TransitionConfig>;
+export type GetTransitionConfig<TContext = undefined> = TContext extends undefined
+  ? (node: HTMLElement) => TransitionConfig | Promise<TransitionConfig>
+  : (node: HTMLElement, context: TContext) => TransitionConfig | Promise<TransitionConfig>;
 
-export type Transition = {
-  in?: GetTransitionConfig;
-  out?: GetTransitionConfig;
+export type Transition<TContext = undefined> = {
+  in?: GetTransitionConfig<TContext>;
+  out?: GetTransitionConfig<TContext>;
 };
 
 export type TransitionCallback = (
   element: HTMLElement | null
 ) => void | (() => void);
 
+export type SggoiTransitionContext = {
+  getScrollFrom: () => { x: number; y: number };
+  getScrollTo: () => { x: number; y: number };
+};
+
+export type SggoiTransition = Transition<SggoiTransitionContext>;
+
 export type SsgoiConfig = {
-  transitions: { from: string; to: string; transition: Transition }[];
-  defaultTransition?: Transition;
+  transitions: {
+    from: string;
+    to: string;
+    transition: SggoiTransition;
+  }[];
+  defaultTransition?: SggoiTransition;
 };
 
 export type SsgoiContext = (
   path: string
-) => Transition & { key: TransitionKey };
+) => SggoiTransition & { key: TransitionKey };

@@ -1,5 +1,5 @@
-import type { Transition, SpringConfig } from "../types";
-import { prepareOutgoing, getScrollingElement } from "./utils";
+import type { Transition, SpringConfig, SggoiTransition } from "../types";
+import { prepareOutgoing } from "./utils";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
@@ -22,7 +22,7 @@ function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
   );
 }
 
-export const hero = (options: HeroOptions = {}): Transition => {
+export const hero = (options: HeroOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,
@@ -32,38 +32,10 @@ export const hero = (options: HeroOptions = {}): Transition => {
   // Closure variables to share state between in/out
   let fromNode: HTMLElement | null = null;
   let resolver: ((value: boolean) => void) | null = null;
-  let scrollContainer: HTMLElement | null = null;
-  const fromScroll = { top: 0, left: 0 };
-  let scrollListener: (() => void) | null = null;
-  let isListening = false;
 
   return {
-    in: async (element) => {
+    in: async (element, context) => {
       const toNode = element;
-
-      // Initialize scroll container and listener once (lazy initialization)
-      if (!scrollContainer) {
-        scrollContainer = getScrollingElement(toNode);
-
-        // Create scroll listener
-        scrollListener = () => {
-          if (scrollContainer) {
-            fromScroll.top = scrollContainer.scrollTop;
-            fromScroll.left = scrollContainer.scrollLeft;
-          }
-        };
-      }
-
-      // Start listening if not already
-      if (!isListening && scrollContainer && scrollListener) {
-        scrollContainer.addEventListener("scroll", scrollListener, {
-          passive: true,
-        });
-        isListening = true;
-        // Initialize current scroll position
-        fromScroll.top = scrollContainer.scrollTop;
-        fromScroll.left = scrollContainer.scrollLeft;
-      }
 
       // Find all hero elements in the incoming page
       const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
@@ -113,19 +85,13 @@ export const hero = (options: HeroOptions = {}): Transition => {
           const fromRect = getRect(fromNode!, fromEl);
           const toRect = getRect(toNode, toEl);
 
-          // Calculate scroll offset difference if scroll container exists
-          let scrollOffsetX = 0;
-          let scrollOffsetY = 0;
+          const fromScroll = context.getScrollFrom();
+          const toScroll = context.getScrollTo();
+          const scrollOffsetX = toScroll.x - fromScroll.x;
+          const scrollOffsetY = toScroll.y - fromScroll.y;
 
-          if (scrollContainer) {
-            const currentScrollTop = scrollContainer.scrollTop;
-            const currentScrollLeft = scrollContainer.scrollLeft;
-            scrollOffsetX = currentScrollLeft - fromScroll.left;
-            scrollOffsetY = currentScrollTop - fromScroll.top;
-          }
-
-          const dx = fromRect.left - toRect.left + scrollOffsetX;
-          const dy = fromRect.top - toRect.top + scrollOffsetY;
+          const dx = fromRect.left - toRect.left - scrollOffsetX;
+          const dy = fromRect.top - toRect.top - scrollOffsetY;
           const dw = fromRect.width / toRect.width;
           const dh = fromRect.height / toRect.height;
 
@@ -198,15 +164,6 @@ export const hero = (options: HeroOptions = {}): Transition => {
       };
     },
     out: async (element) => {
-      if (isListening) {
-        setTimeout(() => {
-          if (scrollContainer && scrollListener) {
-            scrollContainer.removeEventListener("scroll", scrollListener);
-            isListening = false;
-          }
-        }, 0);
-      }
-
       return {
         onStart: () => {
           // Store fromNode

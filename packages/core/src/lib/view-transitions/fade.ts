@@ -1,11 +1,11 @@
-import type { Transition, SpringConfig } from "../types";
+import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "./utils";
 
 interface FadeOptions {
   spring?: Partial<SpringConfig>;
 }
 
-export const fade = (options: FadeOptions = {}): Transition => {
+export const fade = (options: FadeOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,

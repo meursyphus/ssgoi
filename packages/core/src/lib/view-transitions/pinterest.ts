@@ -1,4 +1,4 @@
-import type { Transition, SpringConfig } from "../types";
+import type { Transition, SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "./utils";
 
 interface PinterestOptions {
@@ -209,7 +209,7 @@ interface AnimationData {
   toPageRect: DOMRect;
 }
 
-export const pinterest = (options: PinterestOptions = {}): Transition => {
+export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,

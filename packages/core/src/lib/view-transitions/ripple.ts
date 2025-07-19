@@ -1,4 +1,4 @@
-import type { Transition, SpringConfig } from "../types";
+import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "./utils";
 
 interface RippleOptions {
@@ -14,7 +14,7 @@ function getOffset(element: Element) {
   return Math.min(Math.max(offset, 0), 100);
 }
 
-export const ripple = (options: RippleOptions = {}): Transition => {
+export const ripple = (options: RippleOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 200,

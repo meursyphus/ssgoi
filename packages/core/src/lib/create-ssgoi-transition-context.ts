@@ -3,7 +3,10 @@ import type {
   SsgoiContext,
   GetTransitionConfig,
   Transition,
+  SggoiTransition,
+  SggoiTransitionContext,
 } from "./types";
+import { getScrollingElement } from "./view-transitions/utils";
 
 /**
  * SSGOI Transition Context 동작 원리
@@ -60,6 +63,57 @@ export function createSggoiTransitionContext(
 ): SsgoiContext {
   let pendingTransition: PendingTransition | null = null;
 
+  // Scroll tracking
+  let scrollContainer: HTMLElement | null = null;
+  const scrollPositions: Map<string, { x: number; y: number }> = new Map();
+  let currentPath: string | null = null;
+
+  // Scroll listener
+  const scrollListener = () => {
+    if (scrollContainer && currentPath) {
+      scrollPositions.set(currentPath, {
+        x: scrollContainer.scrollLeft,
+        y: scrollContainer.scrollTop,
+      });
+    }
+  };
+
+  // Start tracking scroll for a path
+  const startScrollTracking = (element: HTMLElement, path: string) => {
+    // Initialize scroll container once
+    if (!scrollContainer) {
+      scrollContainer = getScrollingElement(element);
+      scrollContainer.addEventListener("scroll", scrollListener, {
+        passive: true,
+      });
+    }
+
+    // Update current path
+    currentPath = path;
+  };
+
+  // Create scroll context
+  const scrollContext = {
+    getScrollFrom: () => {
+      const from = pendingTransition?.from;
+      console.log("getScrollFrom", from);
+      const result =
+        from && scrollPositions.has(from)
+          ? scrollPositions.get(from)!
+          : { x: 0, y: 0 };
+
+      return result;
+    },
+    getScrollTo: () => {
+      const to = pendingTransition?.to;
+      const result =
+        to && scrollPositions.has(to)
+          ? scrollPositions.get(to)!
+          : { x: 0, y: 0 };
+      return result;
+    },
+  };
+
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
       const transition = findMatchingTransition(
@@ -71,10 +125,14 @@ export function createSggoiTransitionContext(
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
-          pendingTransition.outResolve(result.out);
+          pendingTransition.outResolve((element) =>
+            result.out!(element, scrollContext)
+          );
         }
         if (result.in && pendingTransition.inResolve) {
-          pendingTransition.inResolve(result.in);
+          pendingTransition.inResolve((element) =>
+            result.in!(element, scrollContext)
+          );
         }
       }
 
@@ -113,6 +171,9 @@ export function createSggoiTransitionContext(
     return {
       key: path,
       in: async (element: HTMLElement) => {
+        // Start scroll tracking for this path
+        startScrollTracking(element, path);
+
         const transitionConfig = await getTransition(path, "in");
         return transitionConfig(element);
       },
@@ -134,11 +195,15 @@ export function createSggoiTransitionContext(
  * matchPath('/products/123', '/products') // false
  * matchPath('/anything', '*') // true
  */
-function findMatchingTransition(
+function findMatchingTransition<TContext>(
   from: string,
   to: string,
-  transitions: Array<{ from: string; to: string; transition: Transition }>
-): Transition | null {
+  transitions: Array<{
+    from: string;
+    to: string;
+    transition: Transition<TContext>;
+  }>
+): Transition<TContext> | null {
   // First try to find exact match
   for (const config of transitions) {
     if (matchPath(from, config.from) && matchPath(to, config.to)) {
