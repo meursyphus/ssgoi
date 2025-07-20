@@ -40,87 +40,13 @@ function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
 
 type AnimationFunc = (progress: number) => void;
 
-interface AnimationHandlers {
-  inAnimation: AnimationFunc;
-  outAnimation: AnimationFunc;
-}
-
-function detectAndPrepare(
-  fromPage: HTMLElement,
-  toPage: HTMLElement,
-  toNode: HTMLElement,
-  fromNode: HTMLElement
-): AnimationHandlers | null {
-  // Collect all elements
-  const fromGalleryEls = Array.from(
-    fromPage.querySelectorAll("[data-pinterest-gallery-key]")
-  ) as HTMLElement[];
-  const fromDetailEls = Array.from(
-    fromPage.querySelectorAll("[data-pinterest-detail-key]")
-  ) as HTMLElement[];
-  const toGalleryEls = Array.from(
-    toPage.querySelectorAll("[data-pinterest-gallery-key]")
-  ) as HTMLElement[];
-  const toDetailEls = Array.from(
-    toPage.querySelectorAll("[data-pinterest-detail-key]")
-  ) as HTMLElement[];
-
-  // Early return if multiple details on either page
-  if (fromDetailEls.length > 1 || toDetailEls.length > 1) {
-    return null;
-  }
-
-  // Find matching gallery-detail pair and determine direction
-  let galleryEl: HTMLElement | null = null;
-  let detailEl: HTMLElement | null = null;
-  let isEnterMode = false;
-
-  // Check gallery → detail (enter mode)
-  for (const fromGallery of fromGalleryEls) {
-    const key = fromGallery.getAttribute("data-pinterest-gallery-key");
-    if (!key) continue;
-
-    const matchingDetail = toDetailEls.find(
-      (el) => el.getAttribute("data-pinterest-detail-key") === key
-    );
-
-    if (matchingDetail) {
-      galleryEl = fromGallery;
-      detailEl = matchingDetail;
-      isEnterMode = true;
-      break;
-    }
-  }
-
-  // Check detail → gallery (exit mode)
-  if (!galleryEl && !detailEl) {
-    for (const fromDetail of fromDetailEls) {
-      const key = fromDetail.getAttribute("data-pinterest-detail-key");
-      if (!key) continue;
-
-      const matchingGallery = toGalleryEls.find(
-        (el) => el.getAttribute("data-pinterest-gallery-key") === key
-      );
-
-      if (matchingGallery) {
-        detailEl = fromDetail;
-        galleryEl = matchingGallery;
-        isEnterMode = false;
-        break;
-      }
-    }
-  }
-
-  if (!galleryEl || !detailEl) {
-    return null;
-  }
-
-  // Calculate all animation parameters once
-  const galleryRect = getRect(isEnterMode ? fromPage : toPage, galleryEl);
-  const detailRect = getRect(isEnterMode ? toPage : fromPage, detailEl);
-  const pageRect = toPage.getBoundingClientRect();
-
-  // Pre-calculate animation values
+// Animation creators for each transition type
+function createDetailIn(
+  galleryRect: DOMRect,
+  detailRect: DOMRect,
+  pageRect: DOMRect,
+  toNode: HTMLElement
+): AnimationFunc {
   const dx =
     detailRect.left -
     galleryRect.left +
@@ -133,7 +59,6 @@ function detectAndPrepare(
   const scaleY = detailRect.height / galleryRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  // Clip-path bounds (percentage)
   const clipBounds = {
     top: (galleryRect.top / pageRect.height) * 100,
     right:
@@ -147,42 +72,195 @@ function detectAndPrepare(
     left: (galleryRect.left / pageRect.width) * 100,
   };
 
-  // Create animation functions based on mode
+  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+
+  return (progress: number) => {
+    const u = 1 - progress;
+    toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
+    toNode.style.transformOrigin = transformOrigin;
+    toNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+  };
+}
+
+function createGalleryOut(
+  galleryRect: DOMRect,
+  detailRect: DOMRect,
+  pageRect: DOMRect,
+  fromNode: HTMLElement
+): AnimationFunc {
+  const dx =
+    detailRect.left -
+    galleryRect.left +
+    (detailRect.width - galleryRect.width) / 2;
+  const dy =
+    detailRect.top -
+    galleryRect.top +
+    (detailRect.height - galleryRect.height) / 2;
+  const scaleX = detailRect.width / galleryRect.width;
+  const scaleY = detailRect.height / galleryRect.height;
+  const scale = Math.max(scaleX, scaleY);
+
+  const clipBounds = {
+    top: (galleryRect.top / pageRect.height) * 100,
+    right:
+      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
+        pageRect.width) *
+      100,
+    bottom:
+      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
+        pageRect.height) *
+      100,
+    left: (galleryRect.left / pageRect.width) * 100,
+  };
+
+  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+
+  return (progress: number) => {
+    fromNode.style.clipPath = `inset(${clipBounds.top * progress}% ${clipBounds.right * progress}% ${clipBounds.bottom * progress}% ${clipBounds.left * progress}%)`;
+    fromNode.style.transformOrigin = transformOrigin;
+    fromNode.style.transform = `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`;
+  };
+}
+
+function createGalleryIn(
+  galleryRect: DOMRect,
+  detailRect: DOMRect,
+  toNode: HTMLElement
+): AnimationFunc {
+  const dx =
+    galleryRect.left -
+    detailRect.left +
+    (galleryRect.width - detailRect.width) / 2;
+  const dy =
+    galleryRect.top -
+    detailRect.top +
+    (galleryRect.height - detailRect.height) / 2;
+  const scaleX = galleryRect.width / detailRect.width;
+  const scaleY = galleryRect.height / detailRect.height;
+  const scale = Math.max(scaleX, scaleY);
+  const inverseScale = 1 / scale;
+
+  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+
+  return (progress: number) => {
+    const t = 1 - progress;
+    toNode.style.transformOrigin = transformOrigin;
+    toNode.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
+    toNode.style.opacity = `${progress}`;
+  };
+}
+
+function createDetailOut(
+  detailRect: DOMRect,
+  galleryRect: DOMRect,
+  fromNode: HTMLElement
+): AnimationFunc {
+  const dx =
+    galleryRect.left -
+    detailRect.left +
+    (galleryRect.width - detailRect.width) / 2;
+  const dy =
+    galleryRect.top -
+    detailRect.top +
+    (galleryRect.height - detailRect.height) / 2;
+  const scaleX = galleryRect.width / detailRect.width;
+  const scaleY = galleryRect.height / detailRect.height;
+  const scale = Math.max(scaleX, scaleY);
+  const inverseScale = 1 / scale;
+
+  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+
+  return (progress: number) => {
+    fromNode.style.transformOrigin = transformOrigin;
+    fromNode.style.transform = `translate(${-dx * progress}px, ${-dy * progress}px) scale(${1 + (inverseScale - 1) * progress})`;
+    fromNode.style.opacity = `${1 - progress}`;
+  };
+}
+
+interface AnimationHandlers {
+  inAnimation: AnimationFunc;
+  outAnimation: AnimationFunc;
+}
+
+function detectAndPrepare(
+  fromNode: HTMLElement,
+  toNode: HTMLElement
+): AnimationHandlers | null {
+  // Find detail element first (only one per page)
+  const fromDetail = fromNode.querySelector(
+    "[data-pinterest-detail-key]"
+  ) as HTMLElement | null;
+  const toDetail = toNode.querySelector(
+    "[data-pinterest-detail-key]"
+  ) as HTMLElement | null;
+
+  // Early return if multiple details on either page
+  if (
+    fromNode.querySelectorAll("[data-pinterest-detail-key]").length > 1 ||
+    toNode.querySelectorAll("[data-pinterest-detail-key]").length > 1
+  ) {
+    return null;
+  }
+
+  let galleryEl: HTMLElement | null = null;
+  let detailEl: HTMLElement | null = null;
+  let isEnterMode = false;
+
+  // Case 1: Gallery → Detail (enter mode)
+  if (!fromDetail && toDetail) {
+    detailEl = toDetail;
+    const key = detailEl.getAttribute("data-pinterest-detail-key");
+    if (!key) return null;
+
+    // Find matching gallery in from page
+    galleryEl = fromNode.querySelector(
+      `[data-pinterest-gallery-key="${key}"]`
+    ) as HTMLElement | null;
+
+    if (galleryEl) {
+      isEnterMode = true;
+    }
+  }
+  // Case 2: Detail → Gallery (exit mode)
+  else if (fromDetail && !toDetail) {
+    detailEl = fromDetail;
+    const key = detailEl.getAttribute("data-pinterest-detail-key");
+    if (!key) return null;
+
+    // Find matching gallery in to page
+    galleryEl = toNode.querySelector(
+      `[data-pinterest-gallery-key="${key}"]`
+    ) as HTMLElement | null;
+
+    if (galleryEl) {
+      isEnterMode = false;
+    }
+  }
+
+  if (!galleryEl || !detailEl) {
+    return null;
+  }
+
+  // Calculate rects based on mode
+  const galleryRect = getRect(isEnterMode ? fromNode : toNode, galleryEl);
+  const detailRect = getRect(isEnterMode ? toNode : fromNode, detailEl);
+  const pageRect = toNode.getBoundingClientRect();
+
+  // Return appropriate animation functions based on mode
   if (isEnterMode) {
-    // Gallery → Detail
     return {
-      inAnimation: (progress: number) => {
-        // Detail entering (expanding from gallery)
-        const u = 1 - progress;
-        toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
-        toNode.style.transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
-        toNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
-      },
-      outAnimation: (progress: number) => {
-        // Gallery exiting (fading with clip)
-        fromNode.style.clipPath = `inset(${clipBounds.top * progress}% ${clipBounds.right * progress}% ${clipBounds.bottom * progress}% ${clipBounds.left * progress}%)`;
-        fromNode.style.transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
-        fromNode.style.transform = `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`;
-      },
+      inAnimation: createDetailIn(galleryRect, detailRect, pageRect, toNode),
+      outAnimation: createGalleryOut(
+        galleryRect,
+        detailRect,
+        pageRect,
+        fromNode
+      ),
     };
   } else {
-    // Detail → Gallery
     return {
-      inAnimation: (progress: number) => {
-        // Gallery entering (shrinking from detail)
-        const t = 1 - progress;
-        const inverseScale = 1 / scale;
-        toNode.style.transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
-        toNode.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
-        toNode.style.opacity = `${progress}`;
-      },
-      outAnimation: (progress: number) => {
-        // Detail exiting (shrinking to gallery)
-        const inverseScale = 1 / scale;
-        fromNode.style.transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
-        fromNode.style.transform = `translate(${-dx * progress}px, ${-dy * progress}px) scale(${1 + (inverseScale - 1) * progress})`;
-        fromNode.style.opacity = `${1 - progress}`;
-      },
+      inAnimation: createGalleryIn(galleryRect, detailRect, toNode),
+      outAnimation: createDetailOut(detailRect, galleryRect, fromNode),
     };
   }
 }
@@ -241,7 +319,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       const toNode = currentToNode;
 
       // Detect and prepare animation handlers
-      const handlers = detectAndPrepare(fromNode, toNode, toNode, fromNode);
+      const handlers = detectAndPrepare(fromNode, toNode);
       if (!handlers) {
         return {
           spring,
@@ -279,11 +357,6 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
           if (animationHandlers) {
             animationHandlers.outAnimation(progress);
           }
-        },
-        onEnd: () => {
-          // Clean up for next transition
-          currentToNode = null;
-          animationHandlers = null;
         },
       };
     },
