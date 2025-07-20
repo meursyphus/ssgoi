@@ -229,7 +229,7 @@ export class Animator {
   stop() {
     this.isAnimating = false;
     if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
+      VSync.cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
     this.lastTime = null; // Reset for next animation

@@ -12,7 +12,7 @@ export class VSync {
 	private callbacks: VSyncCallback[] = [];
 	private reservedCallbacks: VSyncCallback[] = [];
 	private requestAnimationFrameId: number | null = null;
-	// public referenceCount = 0;
+	public referenceCount = 0;
 
 	constructor() {
 		this.isRunning = false;
@@ -28,7 +28,7 @@ export class VSync {
 			globalContext[INSTANCE_SYMBOL] = new VSync();
 		}
 
-		// globalContext[INSTANCE_SYMBOL].referenceCount++;
+		globalContext[INSTANCE_SYMBOL].referenceCount++;
 
 		return globalContext[INSTANCE_SYMBOL];
 	}
@@ -37,7 +37,7 @@ export class VSync {
 		const globalContext = getGlobalContext();
 
 		if (globalContext[INSTANCE_SYMBOL] !== undefined) {
-			// globalContext[INSTANCE_SYMBOL].referenceCount--;
+			globalContext[INSTANCE_SYMBOL].referenceCount--;
 
 			if (globalContext[INSTANCE_SYMBOL].referenceCount === 0) {
 				globalContext[INSTANCE_SYMBOL] = undefined;
@@ -52,18 +52,26 @@ export class VSync {
 		} else {
 			this.reservedCallbacks.push({ id: Date.now(), callback });
 		}
+
+		return this.referenceCount;
 	}
 
 	public cancel(id: number) {
 		if (!this.isRunning) {
 			this.callbacks = [...this.callbacks.filter((cb) => cb.id !== id)];
+			if (this.callbacks.length === 0 && this.requestAnimationFrameId !== null) {
+				cancelAnimationFrame(this.requestAnimationFrameId);
+				this.requestAnimationFrameId = null;
+				this.isRunning = false;
+			}
 		} else {
 			this.reservedCallbacks = [...this.reservedCallbacks.filter((cb) => cb.id !== id)];
 		}
 	}
 
 	public static requestAnimationFrame(callback: () => void): number {
-		return VSync.getInstance().request(callback);
+		const id = VSync.getInstance().request(callback);
+		return id;
 	}
 
 	public static cancelAnimationFrame(id: number): void {
