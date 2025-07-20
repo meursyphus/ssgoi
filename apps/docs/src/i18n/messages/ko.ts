@@ -11,25 +11,25 @@ const ko: Messages = {
     showcase: "쇼케이스",
   },
   home: {
-    title: "커피 한 잔과\n노션프레소",
+    title: "아름다운 페이지 전환\n모던 웹을 위한",
     getStarted: "시작하기",
     readMore: "문서보기",
   },
   metadata: {
-    title: "노션프레소 문서",
+    title: "SSGOI - 모던 웹을 위한 아름다운 페이지 전환 라이브러리",
     description:
-      "React 애플리케이션에서 Notion 페이지를 렌더링하기 위한 강력한 도구인 노션프레소 라이브러리의 종합 문서입니다.",
-    keywords: ["리액트", "노션", "커스텀", "문서", "라이브러리", "렌더링"],
+      "SSGOI는 네이티브 앱과 같은 애니메이션을 웹에 구현하는 강력한 페이지 전환 라이브러리입니다. 상태 보존과 함께 부드러운 스프링 기반 전환을 모든 프레임워크에서 사용하세요.",
+    keywords: ["페이지 전환", "애니메이션 라이브러리", "리액트 전환", "뷰 전환", "스벨트 전환", "스프링 애니메이션", "뷰 트랜지션", "웹 애니메이션", "ssgoi"],
     og: {
-      title: "노션프레소 문서",
-      description: "React 앱에서 Notion 페이지를 렌더링하는 방법을 배워보세요.",
-      siteName: "노션프레소",
-      imageAlt: "노션프레소 문서",
+      title: "SSGOI - 모던 웹을 위한 아름다운 페이지 전환 라이브러리",
+      description: "SSGOI로 멋진 페이지 전환을 만드세요. 네이티브 앱과 같은 애니메이션, 상태 보존, 프레임워크 독립적인 설계. React, Vue, Svelte 등 모든 프레임워크에서 작동합니다.",
+      siteName: "SSGOI",
+      imageAlt: "SSGOI - 페이지 전환 라이브러리",
     },
     twitter: {
-      title: "노션프레소 문서",
-      description: "React 앱에서 Notion 페이지를 렌더링하는 방법을 배워보세요.",
-      imageAlt: "노션프레소 문서",
+      title: "SSGOI - 모던 웹을 위한 아름다운 페이지 전환 라이브러리",
+      description: "SSGOI로 멋진 페이지 전환을 만드세요. 네이티브 앱과 같은 애니메이션, 상태 보존, 프레임워크 독립적인 설계.",
+      imageAlt: "SSGOI - 페이지 전환 라이브러리",
     },
   },
 };
