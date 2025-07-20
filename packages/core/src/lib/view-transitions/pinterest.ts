@@ -46,10 +46,12 @@ function createDetailIn(
     detailRect: fromRect,
     galleryRect: toRect,
     pageRect,
+    scrollOffset,
   }: {
     detailRect: DOMRect;
     galleryRect: DOMRect;
     pageRect: DOMRect;
+    scrollOffset: { x: number; y: number };
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -89,9 +91,11 @@ function createGalleryOut(
   {
     galleryRect: fromRect,
     detailRect: toRect,
+    scrollOffset,
   }: {
     galleryRect: DOMRect;
     detailRect: DOMRect;
+    scrollOffset: { x: number; y: number };
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -116,9 +120,11 @@ function createGalleryIn(
   {
     galleryRect: fromRect,
     detailRect: toRect,
+    scrollOffset,
   }: {
     galleryRect: DOMRect;
     detailRect: DOMRect;
+    scrollOffset: { x: number; y: number };
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -144,10 +150,12 @@ function createDetailOut(
     detailRect: fromRect,
     galleryRect: toRect,
     pageRect,
+    scrollOffset,
   }: {
     detailRect: DOMRect;
     galleryRect: DOMRect;
     pageRect: DOMRect;
+    scrollOffset: { x: number; y: number };
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -189,7 +197,8 @@ interface AnimationHandlers {
 
 function createAnimationConfig(
   fromNode: HTMLElement,
-  toNode: HTMLElement
+  toNode: HTMLElement,
+  scrollOffset: { x: number; y: number }
 ): AnimationHandlers | null {
   // Find detail element first (only one per page)
   const fromDetail = fromNode.querySelector(
@@ -255,16 +264,22 @@ function createAnimationConfig(
   if (isEnterMode) {
     return {
       inAnimation: createDetailIn(
-        { detailRect, galleryRect, pageRect },
+        { detailRect, galleryRect, pageRect, scrollOffset },
         toNode
       ),
-      outAnimation: createGalleryOut({ galleryRect, detailRect }, fromNode),
+      outAnimation: createGalleryOut(
+        { galleryRect, detailRect, scrollOffset },
+        fromNode
+      ),
     };
   } else {
     return {
-      inAnimation: createGalleryIn({ galleryRect, detailRect }, toNode),
+      inAnimation: createGalleryIn(
+        { galleryRect, detailRect, scrollOffset },
+        toNode
+      ),
       outAnimation: createDetailOut(
-        { detailRect, galleryRect, pageRect },
+        { detailRect, galleryRect, pageRect, scrollOffset },
         fromNode
       ),
     };
@@ -311,8 +326,8 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         };
       }
 
-      // Detect and prepare animation handlers
-      handlers = createAnimationConfig(fromNode, toNode);
+      // Detect and prepare animation handlers with saved scrollOffset
+      handlers = createAnimationConfig(fromNode, toNode, scrollOffset);
       if (!handlers) {
         return {
           spring,
@@ -330,7 +345,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: async (element, { scrollOffset }) => {
+    out: async (element) => {
       return {
         spring,
         onStart: () => {
