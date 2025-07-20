@@ -66,7 +66,7 @@ function createDetailIn(
     fromRect.top +
     (toRect.height - fromRect.height) / 2 -
     scrollOffset.y;
-  console.log(dx, dy, scrollOffset);
+
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
@@ -144,8 +144,16 @@ function createGalleryIn(
   },
   node: HTMLElement
 ): AnimationFunc {
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dx =
+    toRect.left -
+    fromRect.left +
+    (toRect.width - fromRect.width) / 2 -
+    scrollOffset.x;
+  const dy =
+    toRect.top -
+    fromRect.top +
+    (toRect.height - fromRect.height) / 2 -
+    scrollOffset.y;
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -153,8 +161,8 @@ function createGalleryIn(
   const scale = Math.max(scaleX, scaleY);
 
   return (progress: number) => {
-    const t = 1 - progress;
-    const u = progress;
+    const t = 1 - progress; // 1 -> 0;
+    const u = progress; // 0 -> 1;
     node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
     node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
     node.style.opacity = `${u}`;
@@ -176,8 +184,16 @@ function createDetailOut(
   node: HTMLElement
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dx =
+    toRect.left -
+    fromRect.left +
+    (toRect.width - fromRect.width) / 2 +
+    scrollOffset.x;
+  const dy =
+    toRect.top -
+    fromRect.top +
+    (toRect.height - fromRect.height) / 2 +
+    scrollOffset.y;
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -195,14 +211,14 @@ function createDetailOut(
   const startLeft = (fromRect.left / pageRect.width) * 100;
   node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
   return (progress: number) => {
-    const t = 1 - progress; // 1 → 0 for out transitions
+    const t = 1 - progress; // 0 -> 1 for out transitions
     const currentTop = startTop * t;
     const currentRight = startRight * t;
     const currentBottom = startBottom * t;
     const currentLeft = startLeft * t;
 
     node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
+    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
   };
 }
 
