@@ -12,10 +12,10 @@ export class VSync {
 	private callbacks: VSyncCallback[] = [];
 	private reservedCallbacks: VSyncCallback[] = [];
 	private requestAnimationFrameId: number | null = null;
-	public referenceCount = 0;
 	private idCounter = 0;
 
 	constructor() {
+		this.idCounter = 0;
 		this.isRunning = false;
 		this.callbacks = [];
 		this.reservedCallbacks = []; // callbacks that are waiting to be executed after the current frame
@@ -29,8 +29,6 @@ export class VSync {
 			globalContext[INSTANCE_SYMBOL] = new VSync();
 		}
 
-		globalContext[INSTANCE_SYMBOL].referenceCount++;
-
 		return globalContext[INSTANCE_SYMBOL];
 	}
 
@@ -38,16 +36,12 @@ export class VSync {
 		const globalContext = getGlobalContext();
 
 		if (globalContext[INSTANCE_SYMBOL] !== undefined) {
-			globalContext[INSTANCE_SYMBOL].referenceCount--;
-
-			if (globalContext[INSTANCE_SYMBOL].referenceCount === 0) {
-				globalContext[INSTANCE_SYMBOL] = undefined;
-			}
+			globalContext[INSTANCE_SYMBOL] = undefined;
 		}
 	}
 
 	public request(callback: () => void) {
-		const id:number = (this.idCounter++ % Number.MAX_SAFE_INTEGER);
+		const id:number = this.getNextId();
 
 		if (!this.isRunning) {
 			this.callbacks.push({ id, callback });
@@ -73,8 +67,11 @@ export class VSync {
 	}
 
 	public static requestAnimationFrame(callback: () => void): number {
-		const id = VSync.getInstance().request(callback);
-		return id;
+		return VSync.getInstance().request(callback);
+	}
+
+	private getNextId(): number {
+		return (this.idCounter++ % Number.MAX_SAFE_INTEGER);
 	}
 
 	public static cancelAnimationFrame(id: number): void {
@@ -105,7 +102,6 @@ export class VSync {
 				} else {
 					// 모든 callbacks이 실행되어 더 이상 실행될 내용이 없다면 메모리 해제
 					this.destroy();
-					this.idCounter = 0;
 				}
 			});
 		}
