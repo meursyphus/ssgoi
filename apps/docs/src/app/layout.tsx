@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ssgoi.meursyphus.dev"),
   title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
   description:
     "SSGOI is a powerful page transition library that brings native app-like animations to the web. Create smooth, spring-based transitions with state preservation across all frameworks.",
-  keywords: "page transitions, animation library, react transitions, vue transitions, svelte transitions, spring animations, view transitions, web animations, ssgoi",
+  keywords:
+    "page transitions, animation library, react transitions, vue transitions, svelte transitions, spring animations, view transitions, web animations, ssgoi",
   icons: {
     icon: "/favicon.ico",
   },
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     description:
       "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design. Works with React, Vue, Svelte, and more.",
     type: "website",
-    url: "https://ssgoi.meursyphus.dev",
+    url: "https://ssgoi.dev",
     siteName: "SSGOI",
     images: [
       {

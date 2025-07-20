@@ -9,7 +9,11 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
   const { lang } = await params;
   const t = await getServerTranslations("metadata", lang);
   return {
@@ -20,10 +24,19 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       title: t("og.title"),
       description: t("og.description"),
       siteName: t("og.siteName"),
+      images: [
+        {
+          url: "/og.png",
+          width: 1200,
+          height: 630,
+          alt: "SSGOI - Page Transition Library",
+        },
+      ],
     },
     twitter: {
       title: t("twitter.title"),
       description: t("twitter.description"),
+      images: ["/og.png"],
     },
   };
 }
