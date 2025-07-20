@@ -11,34 +11,37 @@ const en: Messages = {
     showcase: "Showcase",
   },
   home: {
-    title: "Just a cup of coffee\nwith NotionPresso",
+    title: "Beautiful page transitions\nfor modern web apps",
     getStarted: "Get Started",
     readMore: "Read the Docs",
   },
   metadata: {
-    title: "Notionpresso Docs",
+    title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
     description:
-      "Comprehensive documentation for Notionpresso library, a powerful tool for rendering Notion pages in React applications.",
+      "SSGOI is a powerful page transition library that brings native app-like animations to the web. Create smooth, spring-based transitions with state preservation across all frameworks.",
     keywords: [
-      "react",
-      "notion",
-      "custom",
-      "documentation",
-      "library",
-      "rendering",
+      "page transitions",
+      "animation library",
+      "react transitions",
+      "vue transitions",
+      "svelte transitions",
+      "spring animations",
+      "view transitions",
+      "web animations",
+      "ssgoi",
     ],
     og: {
-      title: "Notionpresso Documentation",
+      title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
       description:
-        "Learn how to use Notionpresso to render Notion pages in your React apps.",
-      siteName: "Notionpresso",
-      imageAlt: "Notionpresso Documentation",
+        "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design. Works with React, Vue, Svelte, and more.",
+      siteName: "SSGOI",
+      imageAlt: "SSGOI - Page Transition Library",
     },
     twitter: {
-      title: "Notionpresso Documentation",
+      title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
       description:
-        "Learn how to use Notionpresso to render Notion pages in your React apps.",
-      imageAlt: "Notionpresso Documentation",
+        "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design.",
+      imageAlt: "SSGOI - Page Transition Library",
     },
   },
 };

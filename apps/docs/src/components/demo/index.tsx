@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RouterProvider } from "./router-provider";
 import DemoLayout from "./layout";
 import PostsList from "./posts";
@@ -13,6 +13,54 @@ import Profile from "./profile";
 
 export default function Demo() {
   const [currentPath, setCurrentPath] = useState("/demo/posts");
+  const [isHovered, setIsHovered] = useState(false);
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  // Define routing paths
+  const routingPaths = [
+    "/demo/posts",
+    "/demo/posts/svelte-5-runes",
+    "/demo/posts",
+    "/demo/products",
+    "/demo/products/prod-2",
+    "/demo/products",
+    "/demo/pinterest",
+    "/demo/pinterest/pin-1",
+    "/demo/pinterest",
+    "/demo/profile",
+  ];
+  const currentRouteIndex = useRef(0);
+
+  // Auto-routing effect
+  useEffect(() => {
+    if (isHovered) return;
+
+    const intervalId = setInterval(() => {
+      // Move to next route
+      currentRouteIndex.current =
+        (currentRouteIndex.current + 1) % routingPaths.length;
+      setCurrentPath(routingPaths[currentRouteIndex.current]);
+    }, 3000); // 3 seconds interval
+
+    return () => clearInterval(intervalId);
+  }, [isHovered]);
+
+  // Mouse event handlers
+  useEffect(() => {
+    if (!layoutRef.current) return;
+
+    const handleMouseEnter = () => setIsHovered(true);
+    const handleMouseLeave = () => setIsHovered(false);
+
+    const element = layoutRef.current;
+    element.addEventListener("mouseenter", handleMouseEnter);
+    element.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      element.removeEventListener("mouseenter", handleMouseEnter);
+      element.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
 
   // Custom router implementation
   const customRouter = {
@@ -63,8 +111,10 @@ export default function Demo() {
   };
 
   return (
-    <RouterProvider currentPath={currentPath} customRouter={customRouter}>
-      <DemoLayout>{renderContent()}</DemoLayout>
-    </RouterProvider>
+    <div ref={layoutRef} className="h-full">
+      <RouterProvider currentPath={currentPath} customRouter={customRouter}>
+        <DemoLayout>{renderContent()}</DemoLayout>
+      </RouterProvider>
+    </div>
   );
 }

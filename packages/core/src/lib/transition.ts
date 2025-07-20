@@ -38,7 +38,8 @@ function registerTransition(
     () => {
       const trans = transitionDefinitions.get(key);
       if (!trans) {
-        throw new Error(`Transition "${String(key)}" not found`);
+        console.warn(`Transition "${String(key)}" not found`);
+        return {};
       }
       return trans;
     },

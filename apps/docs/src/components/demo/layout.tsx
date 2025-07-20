@@ -3,12 +3,7 @@
 import React, { useMemo, useRef, useEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
-import {
-  fade,
-  hero,
-  pinterest,
-  ripple,
-} from "@meursyphus/ssgoi-react/view-transitions";
+import { hero, pinterest } from "@meursyphus/ssgoi-react/view-transitions";
 import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
@@ -134,19 +129,19 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }),
           },
         },
-
-        // Profile transitions - ripple effect
-        //   {
-        //     from: "/demo/*",
-        //     to: "/demo/profile",
-        //     transition: ripple(),
-        //   },
-        //   {
-        //     from: "/demo/profile",
-        //     to: "/demo/*",
-        //     transition: ripple(),
-        //   },
       ],
+      // Default slide transition - subtle slide from right
+      defaultTransition: {
+        in: (node: HTMLElement) => ({
+          spring: {
+            stiffness: 300,
+            damping: 30,
+          },
+          tick: (t: number) => {
+            node.style.transform = `translateX(${20 * (1 - t)}px)`;
+          },
+        }),
+      },
     }),
     []
   );
