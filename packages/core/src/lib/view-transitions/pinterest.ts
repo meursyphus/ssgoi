@@ -21,8 +21,8 @@ interface PinterestOptions {
  *    - To: Small gallery item position
  *
  * Usage:
- * - Gallery page: Use both data-pinterest-enter-key and data-pinterest-exit-key
- * - Detail page: Use both data-pinterest-enter-key and data-pinterest-exit-key
+ * - Gallery page: Use data-pinterest-gallery-key="unique-id"
+ * - Detail page: Use data-pinterest-detail-key="unique-id"
  * - The transition auto-detects the mode based on which keys match between pages
  */
 
@@ -38,175 +38,153 @@ function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
   );
 }
 
-function detectModeAndKey(
+type AnimationFunc = (progress: number) => void;
+
+interface AnimationHandlers {
+  inAnimation: AnimationFunc;
+  outAnimation: AnimationFunc;
+}
+
+function detectAndPrepare(
   fromPage: HTMLElement,
-  toPage: HTMLElement
-): { mode: "enter" | "exit"; key: string } | null {
-  // Check for enter mode: from has enter-key, to has both keys
-  const fromEnterEls = fromPage.querySelectorAll("[data-pinterest-enter-key]");
-  const toEnterEls = toPage.querySelectorAll("[data-pinterest-enter-key]");
+  toPage: HTMLElement,
+  toNode: HTMLElement,
+  fromNode: HTMLElement
+): AnimationHandlers | null {
+  // Collect all elements
+  const fromGalleryEls = Array.from(
+    fromPage.querySelectorAll("[data-pinterest-gallery-key]")
+  ) as HTMLElement[];
+  const fromDetailEls = Array.from(
+    fromPage.querySelectorAll("[data-pinterest-detail-key]")
+  ) as HTMLElement[];
+  const toGalleryEls = Array.from(
+    toPage.querySelectorAll("[data-pinterest-gallery-key]")
+  ) as HTMLElement[];
+  const toDetailEls = Array.from(
+    toPage.querySelectorAll("[data-pinterest-detail-key]")
+  ) as HTMLElement[];
 
-  // Try enter mode first
-  for (const fromEl of fromEnterEls) {
-    const key = fromEl.getAttribute("data-pinterest-enter-key");
+  // Early return if multiple details on either page
+  if (fromDetailEls.length > 1 || toDetailEls.length > 1) {
+    return null;
+  }
+
+  // Find matching gallery-detail pair and determine direction
+  let galleryEl: HTMLElement | null = null;
+  let detailEl: HTMLElement | null = null;
+  let isEnterMode = false;
+
+  // Check gallery → detail (enter mode)
+  for (const fromGallery of fromGalleryEls) {
+    const key = fromGallery.getAttribute("data-pinterest-gallery-key");
     if (!key) continue;
 
-    // Check if to page has matching enter key
-    const hasEnterKey = Array.from(toEnterEls).some(
-      (el) => el.getAttribute("data-pinterest-enter-key") === key
+    const matchingDetail = toDetailEls.find(
+      (el) => el.getAttribute("data-pinterest-detail-key") === key
     );
 
-    if (hasEnterKey) {
-      return { mode: "enter", key };
+    if (matchingDetail) {
+      galleryEl = fromGallery;
+      detailEl = matchingDetail;
+      isEnterMode = true;
+      break;
     }
   }
 
-  // Check for exit mode: from has exit-key, to has exit-key
-  const fromExitEls = fromPage.querySelectorAll("[data-pinterest-exit-key]");
-  const toExitEls = toPage.querySelectorAll("[data-pinterest-exit-key]");
+  // Check detail → gallery (exit mode)
+  if (!galleryEl && !detailEl) {
+    for (const fromDetail of fromDetailEls) {
+      const key = fromDetail.getAttribute("data-pinterest-detail-key");
+      if (!key) continue;
 
-  for (const fromEl of fromExitEls) {
-    const key = fromEl.getAttribute("data-pinterest-exit-key");
-    if (!key) continue;
+      const matchingGallery = toGalleryEls.find(
+        (el) => el.getAttribute("data-pinterest-gallery-key") === key
+      );
 
-    // Check if to page has matching exit key
-    const hasExitKey = Array.from(toExitEls).some(
-      (el) => el.getAttribute("data-pinterest-exit-key") === key
-    );
-
-    if (hasExitKey) {
-      return { mode: "exit", key };
+      if (matchingGallery) {
+        detailEl = fromDetail;
+        galleryEl = matchingGallery;
+        isEnterMode = false;
+        break;
+      }
     }
   }
 
-  return null;
-}
+  if (!galleryEl || !detailEl) {
+    return null;
+  }
 
-// Animation functions for each transition type
-function detailIn(
-  fromRect: DOMRect,
-  toRect: DOMRect,
-  pageRect: DOMRect,
-  progress: number
-) {
-  // Gallery → Detail: Expanding from small to full
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  // Calculate all animation parameters once
+  const galleryRect = getRect(isEnterMode ? fromPage : toPage, galleryEl);
+  const detailRect = getRect(isEnterMode ? toPage : fromPage, detailEl);
+  const pageRect = toPage.getBoundingClientRect();
 
-  const scaleX = toRect.width / fromRect.width;
-  const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  // Clip-path animation
-  const startTop = (fromRect.top / pageRect.height) * 100;
-  const startRight =
-    ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
-    100;
-  const startBottom =
-    ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
-    100;
-  const startLeft = (fromRect.left / pageRect.width) * 100;
-
-  const u = 1 - progress;
-  const currentTop = startTop * u;
-  const currentRight = startRight * u;
-  const currentBottom = startBottom * u;
-  const currentLeft = startLeft * u;
-
-  return {
-    clipPath: `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`,
-    transformOrigin: `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`,
-    transform: `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`,
-  };
-}
-
-function detailOut(fromRect: DOMRect, toRect: DOMRect, progress: number) {
-  // Detail → Gallery: Gallery view is entering, detail is exiting
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
-
-  const scaleX = toRect.width / fromRect.width;
-  const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  return {
-    transformOrigin: `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`,
-    transform: `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`,
-    opacity: `${1 - progress}`,
-  };
-}
-
-function galleryIn(
-  galleryRect: DOMRect,
-  detailRect: DOMRect,
-  progress: number
-) {
-  // Detail → Gallery: Gallery is entering
+  // Pre-calculate animation values
   const dx =
-    galleryRect.left -
-    detailRect.left +
-    (galleryRect.width - detailRect.width) / 2;
+    detailRect.left -
+    galleryRect.left +
+    (detailRect.width - galleryRect.width) / 2;
   const dy =
-    galleryRect.top -
-    detailRect.top +
-    (galleryRect.height - detailRect.height) / 2;
-
-  const scaleX = galleryRect.width / detailRect.width;
-  const scaleY = galleryRect.height / detailRect.height;
+    detailRect.top -
+    galleryRect.top +
+    (detailRect.height - galleryRect.height) / 2;
+  const scaleX = detailRect.width / galleryRect.width;
+  const scaleY = detailRect.height / galleryRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  const t = 1 - progress;
-
-  return {
-    transformOrigin: `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`,
-    transform: `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
-    opacity: `${progress}`,
+  // Clip-path bounds (percentage)
+  const clipBounds = {
+    top: (galleryRect.top / pageRect.height) * 100,
+    right:
+      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
+        pageRect.width) *
+      100,
+    bottom:
+      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
+        pageRect.height) *
+      100,
+    left: (galleryRect.left / pageRect.width) * 100,
   };
-}
 
-function galleryOut(
-  fromRect: DOMRect,
-  toRect: DOMRect,
-  pageRect: DOMRect,
-  progress: number
-) {
-  // Gallery → Detail: Gallery is exiting
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
-
-  const scaleX = toRect.width / fromRect.width;
-  const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  // Clip-path animation
-  const startTop = (fromRect.top / pageRect.height) * 100;
-  const startRight =
-    ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
-    100;
-  const startBottom =
-    ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
-    100;
-  const startLeft = (fromRect.left / pageRect.width) * 100;
-
-  const currentTop = startTop * progress;
-  const currentRight = startRight * progress;
-  const currentBottom = startBottom * progress;
-  const currentLeft = startLeft * progress;
-
-  return {
-    clipPath: `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`,
-    transformOrigin: `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`,
-    transform: `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`,
-  };
-}
-
-interface AnimationData {
-  mode: "enter" | "exit";
-  key: string;
-  fromRect: DOMRect;
-  toRect: DOMRect;
-  fromPageRect: DOMRect;
-  toPageRect: DOMRect;
+  // Create animation functions based on mode
+  if (isEnterMode) {
+    // Gallery → Detail
+    return {
+      inAnimation: (progress: number) => {
+        // Detail entering (expanding from gallery)
+        const u = 1 - progress;
+        toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
+        toNode.style.transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+        toNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+      },
+      outAnimation: (progress: number) => {
+        // Gallery exiting (fading with clip)
+        fromNode.style.clipPath = `inset(${clipBounds.top * progress}% ${clipBounds.right * progress}% ${clipBounds.bottom * progress}% ${clipBounds.left * progress}%)`;
+        fromNode.style.transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+        fromNode.style.transform = `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`;
+      },
+    };
+  } else {
+    // Detail → Gallery
+    return {
+      inAnimation: (progress: number) => {
+        // Gallery entering (shrinking from detail)
+        const t = 1 - progress;
+        const inverseScale = 1 / scale;
+        toNode.style.transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+        toNode.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
+        toNode.style.opacity = `${progress}`;
+      },
+      outAnimation: (progress: number) => {
+        // Detail exiting (shrinking to gallery)
+        const inverseScale = 1 / scale;
+        fromNode.style.transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+        fromNode.style.transform = `translate(${-dx * progress}px, ${-dy * progress}px) scale(${1 + (inverseScale - 1) * progress})`;
+        fromNode.style.opacity = `${1 - progress}`;
+      },
+    };
+  }
 }
 
 export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
@@ -222,8 +200,8 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   let fromNodeResolver: ((value: boolean) => void) | null = null;
   let toNodeResolver: ((value: boolean) => void) | null = null;
 
-  // Shared animation data
-  let animationData: AnimationData | null = null;
+  // Shared animation handlers
+  let animationHandlers: AnimationHandlers | null = null;
 
   return {
     in: async (element) => {
@@ -262,148 +240,50 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       const fromNode = currentFromNode;
       const toNode = currentToNode;
 
-      // Detect mode and key
-      const detection = detectModeAndKey(fromNode, toNode);
-      if (!detection) {
+      // Detect and prepare animation handlers
+      const handlers = detectAndPrepare(fromNode, toNode, toNode, fromNode);
+      if (!handlers) {
         return {
           spring,
           tick: () => {},
         };
       }
 
-      const { mode, key } = detection;
-
-      // Get elements based on detected mode
-      const attr =
-        mode === "enter"
-          ? "data-pinterest-enter-key"
-          : "data-pinterest-exit-key";
-      const fromEl = fromNode.querySelector(
-        `[${attr}="${key}"]`
-      ) as HTMLElement;
-      const toEl = toNode.querySelector(`[${attr}="${key}"]`) as HTMLElement;
-
-      if (!fromEl || !toEl) {
-        return {
-          spring,
-          tick: () => {},
-        };
-      }
-
-      // Calculate animation parameters
-      const fromRect = getRect(fromNode, fromEl);
-      const toRect = getRect(toNode, toEl);
-      const fromPageRect = fromNode.getBoundingClientRect();
-      const toPageRect = toNode.getBoundingClientRect();
-
-      // Store animation data for out transition
-      animationData = {
-        mode,
-        key,
-        fromRect,
-        toRect,
-        fromPageRect,
-        toPageRect,
-      };
-
-      // Store original styles
-      const originalStyles = {
-        clipPath: toNode.style.clipPath,
-        transform: toNode.style.transform,
-        transformOrigin: toNode.style.transformOrigin,
-        opacity: toNode.style.opacity,
-      };
-
-      // Reset for next transition
-      currentFromNode = null;
+      // Store animation handlers for out transition
+      animationHandlers = handlers;
 
       return {
         spring,
         tick: (progress) => {
-          if (mode === "enter") {
-            // Detail view entering (expanding from gallery)
-            const styles = detailIn(fromRect, toRect, toPageRect, progress);
-            toNode.style.clipPath = styles.clipPath;
-            toNode.style.transformOrigin = styles.transformOrigin;
-            toNode.style.transform = styles.transform;
-          } else {
-            // Gallery view entering (shrinking from detail)
-            const styles = galleryIn(toRect, fromRect, progress);
-            toNode.style.transformOrigin = styles.transformOrigin;
-            toNode.style.transform = styles.transform;
-            toNode.style.opacity = styles.opacity;
-          }
-        },
-        onEnd: () => {
-          // Restore original styles
-          toNode.style.clipPath = originalStyles.clipPath;
-          toNode.style.transform = originalStyles.transform;
-          toNode.style.transformOrigin = originalStyles.transformOrigin;
-          toNode.style.opacity = originalStyles.opacity;
+          animationHandlers!.inAnimation(progress);
         },
       };
     },
     out: async (element) => {
-      currentFromNode = element;
-
-      // Notify in transition that fromNode is ready
-      if (fromNodeResolver) {
-        fromNodeResolver(true);
-        fromNodeResolver = null;
-      }
-
-      // Wait for in transition to be ready (optional, for animation data)
-      await new Promise<boolean>((resolve) => {
-        if (currentToNode) {
-          // toNode already set by in transition
-          resolve(true);
-        } else {
-          // Store resolver for in transition to call
-          toNodeResolver = resolve;
-          // Don't wait too long since out needs to start quickly
-          setTimeout(() => {
-            toNodeResolver = null;
-            resolve(false);
-          }, 50);
-        }
-      });
-
       return {
+        onStart: () => {
+          // Store fromNode
+          currentFromNode = element;
+
+          // Notify in transition that fromNode is ready
+          if (fromNodeResolver) {
+            fromNodeResolver(true);
+            fromNodeResolver = null;
+          }
+        },
         prepare: (element) => {
           prepareOutgoing(element);
         },
         spring,
         tick: (progress) => {
-          if (animationData) {
-            const { mode, fromRect, toRect, fromPageRect } = animationData;
-
-            if (mode === "enter") {
-              // Gallery view exiting (when detail enters)
-              const styles = galleryOut(
-                fromRect,
-                toRect,
-                fromPageRect,
-                progress
-              );
-              element.style.clipPath = styles.clipPath;
-              element.style.transformOrigin = styles.transformOrigin;
-              element.style.transform = styles.transform;
-            } else {
-              // Detail view exiting (when gallery enters)
-              const styles = detailOut(fromRect, toRect, progress);
-              element.style.transformOrigin = styles.transformOrigin;
-              element.style.transform = styles.transform;
-              element.style.opacity = styles.opacity;
-            }
-          } else {
-            // Fallback: simple fade out
-            element.style.opacity = `${1 - progress}`;
+          if (animationHandlers) {
+            animationHandlers.outAnimation(progress);
           }
         },
         onEnd: () => {
           // Clean up for next transition
           currentToNode = null;
-          animationData = null;
+          animationHandlers = null;
         },
       };
     },
