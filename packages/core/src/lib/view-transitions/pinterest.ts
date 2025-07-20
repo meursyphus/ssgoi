@@ -160,7 +160,7 @@ function createGalleryOut(
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
+  const scale = Math.min(scaleX, scaleY);
 
   // clip-path 계산
   const startTop = (fromRect.top / pageRect.height) * 100;
@@ -171,18 +171,16 @@ function createGalleryOut(
     ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
-
+  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
   return (progress: number) => {
-    const t = progress; // 1 → 0 for out transitions
+    const t = 1 - progress; // 1 → 0 for out transitions
     const currentTop = startTop * t;
     const currentRight = startRight * t;
     const currentBottom = startBottom * t;
     const currentLeft = startLeft * t;
 
     node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
     node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
-    node.style.opacity = "1";
   };
 }
 
@@ -274,7 +272,7 @@ function createAnimationConfig(
         toNode
       ),
       outAnimation: createGalleryOut(
-        { fromRect: galleryRect, toRect: detailRect, pageRect },
+        { fromRect: detailRect, toRect: galleryRect, pageRect },
         fromNode
       ),
     };
