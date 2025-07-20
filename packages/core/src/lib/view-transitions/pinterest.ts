@@ -47,37 +47,35 @@ function createDetailIn(
   pageRect: DOMRect,
   toNode: HTMLElement
 ): AnimationFunc {
-  const dx =
-    detailRect.left -
-    galleryRect.left +
-    (detailRect.width - galleryRect.width) / 2;
-  const dy =
-    detailRect.top -
-    galleryRect.top +
-    (detailRect.height - galleryRect.height) / 2;
+  // Legacy: detailIn(toRect, fromRect) where to=detail, from=gallery
+  // Calculate movement from detail position to gallery position
+  const dx = detailRect.left - galleryRect.left + (detailRect.width - galleryRect.width) / 2;
+  const dy = detailRect.top - galleryRect.top + (detailRect.height - galleryRect.height) / 2;
+  
+  // Scale from gallery size to detail size
   const scaleX = detailRect.width / galleryRect.width;
   const scaleY = detailRect.height / galleryRect.height;
   const scale = Math.max(scaleX, scaleY);
 
+  // Clip bounds based on gallery position (starting small)
   const clipBounds = {
     top: (galleryRect.top / pageRect.height) * 100,
-    right:
-      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
-        pageRect.width) *
-      100,
-    bottom:
-      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
-        pageRect.height) *
-      100,
+    right: ((pageRect.width - (galleryRect.left + galleryRect.width)) / pageRect.width) * 100,
+    bottom: ((pageRect.height - (galleryRect.top + galleryRect.height)) / pageRect.height) * 100,
     left: (galleryRect.left / pageRect.width) * 100,
   };
 
+  // Transform origin at gallery center
   const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
 
   return (progress: number) => {
-    const u = 1 - progress;
+    const t = progress; // 0 → 1 (for in transitions)
+    const u = 1 - progress; // 1 → 0
+    
+    // Clip expands from gallery bounds to full (inset goes from gallery to 0)
     toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
     toNode.style.transformOrigin = transformOrigin;
+    // Transform moves and scales from gallery position/size to detail position/size
     toNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
   };
 }
@@ -116,9 +114,12 @@ function createGalleryOut(
   const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
 
   return (progress: number) => {
-    fromNode.style.clipPath = `inset(${clipBounds.top * progress}% ${clipBounds.right * progress}% ${clipBounds.bottom * progress}% ${clipBounds.left * progress}%)`;
+    // progress goes from 1 to 0 for out transitions
+    const t = progress; // 1 → 0
+    const u = 1 - progress; // 0 → 1
+    fromNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
     fromNode.style.transformOrigin = transformOrigin;
-    fromNode.style.transform = `translate(${dx * progress}px, ${dy * progress}px) scale(${1 + (scale - 1) * progress})`;
+    fromNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
   };
 }
 
@@ -171,9 +172,12 @@ function createDetailOut(
   const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
 
   return (progress: number) => {
+    // progress goes from 1 to 0 for out transitions
+    const t = progress; // 1 → 0
+    const u = 1 - progress; // 0 → 1
     fromNode.style.transformOrigin = transformOrigin;
-    fromNode.style.transform = `translate(${-dx * progress}px, ${-dy * progress}px) scale(${1 + (inverseScale - 1) * progress})`;
-    fromNode.style.opacity = `${1 - progress}`;
+    fromNode.style.transform = `translate(${-dx * u}px, ${-dy * u}px) scale(${1 + (inverseScale - 1) * u})`;
+    fromNode.style.opacity = `${t}`;
   };
 }
 
@@ -272,54 +276,41 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   };
   const timeout = options.timeout ?? 300;
 
-  // Shared state between in/out
-  let currentFromNode: HTMLElement | null = null;
-  let currentToNode: HTMLElement | null = null;
-  let fromNodeResolver: ((value: boolean) => void) | null = null;
-  let toNodeResolver: ((value: boolean) => void) | null = null;
-
-  // Shared animation handlers
-  let animationHandlers: AnimationHandlers | null = null;
+  // Closure variables to share state between in/out
+  let fromNode: HTMLElement | null = null;
+  let resolver: ((value: boolean) => void) | null = null;
+  let handlers: AnimationHandlers | null = null;
 
   return {
     in: async (element) => {
-      currentToNode = element;
+      const toNode = element;
 
-      // Notify out transition that toNode is ready
-      if (toNodeResolver) {
-        toNodeResolver(true);
-        toNodeResolver = null;
-      }
-
-      // Wait for out transition to provide fromNode
+      // Wait for fromNode to be set by out transition
       const hasFromNode = await new Promise<boolean>((resolve) => {
-        if (currentFromNode) {
+        if (fromNode) {
           // fromNode already set by out transition
           resolve(true);
         } else {
           // Store resolver for out transition to call
-          fromNodeResolver = resolve;
+          resolver = resolve;
           // Timeout fallback
           setTimeout(() => {
-            fromNodeResolver = null;
+            resolver = null;
             resolve(false);
           }, timeout);
         }
       });
 
-      if (!hasFromNode || !currentFromNode) {
-        currentFromNode = null;
+      if (!hasFromNode || !fromNode) {
+        fromNode = null;
         return {
           spring,
           tick: () => {},
         };
       }
 
-      const fromNode = currentFromNode;
-      const toNode = currentToNode;
-
       // Detect and prepare animation handlers
-      const handlers = detectAndPrepare(fromNode, toNode);
+      handlers = detectAndPrepare(fromNode, toNode);
       if (!handlers) {
         return {
           spring,
@@ -327,13 +318,13 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         };
       }
 
-      // Store animation handlers for out transition
-      animationHandlers = handlers;
+      // Reset fromNode for next transition
+      fromNode = null;
 
       return {
         spring,
         tick: (progress) => {
-          animationHandlers!.inAnimation(progress);
+          if (handlers) handlers.inAnimation(progress);
         },
       };
     },
@@ -341,22 +332,19 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       return {
         onStart: () => {
           // Store fromNode
-          currentFromNode = element;
+          fromNode = element;
 
-          // Notify in transition that fromNode is ready
-          if (fromNodeResolver) {
-            fromNodeResolver(true);
-            fromNodeResolver = null;
+          // If there's a waiting resolver, resolve it
+          if (resolver) {
+            resolver(true);
+            resolver = null;
           }
         },
         prepare: (element) => {
           prepareOutgoing(element);
         },
-        spring,
         tick: (progress) => {
-          if (animationHandlers) {
-            animationHandlers.outAnimation(progress);
-          }
+          if (handlers) handlers.outAnimation(progress);
         },
       };
     },
