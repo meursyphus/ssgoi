@@ -43,172 +43,146 @@ type AnimationFunc = (progress: number) => void;
 // Animation creators for each transition type
 function createDetailIn(
   {
-    galleryRect,
-    detailRect,
+    fromRect,
+    toRect,
     pageRect,
   }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
+    fromRect: DOMRect;
+    toRect: DOMRect;
     pageRect: DOMRect;
   },
   node: HTMLElement
 ): AnimationFunc {
-  const dx =
-    detailRect.left -
-    galleryRect.left +
-    (detailRect.width - galleryRect.width) / 2;
-  const dy =
-    detailRect.top -
-    galleryRect.top +
-    (detailRect.height - galleryRect.height) / 2;
+  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
 
-  // Scale from gallery size to detail size
-  const scaleX = detailRect.width / galleryRect.width;
-  const scaleY = detailRect.height / galleryRect.height;
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  // Clip bounds based on gallery position (starting small)
-  const clipBounds = {
-    top: (galleryRect.top / pageRect.height) * 100,
-    right:
-      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
-        pageRect.width) *
-      100,
-    bottom:
-      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
-        pageRect.height) *
-      100,
-    left: (galleryRect.left / pageRect.width) * 100,
-  };
-
-  // Transform origin at gallery center
-  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+  // clip-path 계산
+  const startTop = (fromRect.top / pageRect.height) * 100;
+  const startRight =
+    ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
+    100;
+  const startBottom =
+    ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
+    100;
+  const startLeft = (fromRect.left / pageRect.width) * 100;
 
   return (progress: number) => {
-    const u = 1 - progress; // 1 → 0
+    const u = 1 - progress;
+    const currentTop = startTop * u;
+    const currentRight = startRight * u;
+    const currentBottom = startBottom * u;
+    const currentLeft = startLeft * u;
 
-    // Clip expands from gallery bounds to full (inset goes from gallery to 0)
-    node.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
-    node.style.transformOrigin = transformOrigin;
-    // Transform moves and scales from gallery position/size to detail position/size
+    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
+    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
     node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
-  };
-}
-
-function createGalleryOut(
-  {
-    galleryRect,
-    detailRect,
-    pageRect,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-    pageRect: DOMRect;
-  },
-  node: HTMLElement
-): AnimationFunc {
-  const dx =
-    detailRect.left -
-    galleryRect.left +
-    (detailRect.width - galleryRect.width) / 2;
-  const dy =
-    detailRect.top -
-    galleryRect.top +
-    (detailRect.height - galleryRect.height) / 2;
-  const scaleX = detailRect.width / galleryRect.width;
-  const scaleY = detailRect.height / galleryRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  const clipBounds = {
-    top: (galleryRect.top / pageRect.height) * 100,
-    right:
-      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
-        pageRect.width) *
-      100,
-    bottom:
-      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
-        pageRect.height) *
-      100,
-    left: (galleryRect.left / pageRect.width) * 100,
-  };
-
-  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
-
-  return (progress: number) => {
-    // progress goes from 1 to 0 for out transitions
-
-    const u = 1 - progress; // 0 → 1
-    node.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
-    node.style.transformOrigin = transformOrigin;
-    node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
-  };
-}
-
-function createGalleryIn(
-  {
-    galleryRect,
-    detailRect,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-  },
-  node: HTMLElement
-): AnimationFunc {
-  const dx =
-    galleryRect.left -
-    detailRect.left +
-    (galleryRect.width - detailRect.width) / 2;
-  const dy =
-    galleryRect.top -
-    detailRect.top +
-    (galleryRect.height - detailRect.height) / 2;
-  const scaleX = galleryRect.width / detailRect.width;
-  const scaleY = galleryRect.height / detailRect.height;
-  const scale = Math.max(scaleX, scaleY);
-  const inverseScale = 1 / scale;
-
-  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
-
-  return (progress: number) => {
-    const t = 1 - progress;
-    node.style.transformOrigin = transformOrigin;
-    node.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
-    node.style.opacity = `${progress}`;
   };
 }
 
 function createDetailOut(
   {
-    detailRect,
-    galleryRect,
+    fromRect,
+    toRect,
+    pageRect,
   }: {
-    detailRect: DOMRect;
-    galleryRect: DOMRect;
+    fromRect: DOMRect;
+    toRect: DOMRect;
+    pageRect: DOMRect;
   },
   node: HTMLElement
 ): AnimationFunc {
-  const dx =
-    detailRect.left -
-    galleryRect.left +
-    (detailRect.width - galleryRect.width) / 2;
-  const dy =
-    detailRect.top -
-    galleryRect.top +
-    (detailRect.height - galleryRect.height) / 2;
-  const scaleX = detailRect.width / galleryRect.width;
-  const scaleY = detailRect.height / galleryRect.height;
-  const scale = Math.max(scaleX, scaleY);
-  const inverseScale = 1 / scale;
+  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
 
-  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
+  const scale = Math.max(scaleX, scaleY);
 
   return (progress: number) => {
-    // progress goes from 1 to 0 for out transitions
-    const t = progress; // 1 → 0
-    const u = 1 - progress; // 0 → 1
-    node.style.transformOrigin = transformOrigin;
-    node.style.transform = `translate(${-dx * u}px, ${-dy * u}px) scale(${1 + (inverseScale - 1) * u})`;
-    node.style.opacity = `${t}`;
+    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+    const t = 1 - progress; // 0 -> 1
+    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
+    node.style.opacity = `${1 - t}`;
+  };
+}
+
+function createGalleryIn(
+  {
+    fromRect,
+    toRect,
+  }: {
+    fromRect: DOMRect;
+    toRect: DOMRect;
+  },
+  node: HTMLElement
+): AnimationFunc {
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
+  const scale = Math.max(scaleX, scaleY);
+
+  return (progress: number) => {
+    const t = 1 - progress;
+    const u = progress;
+    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
+    node.style.opacity = `${u}`;
+  };
+}
+
+function createGalleryOut(
+  {
+    fromRect,
+    toRect,
+    pageRect,
+  }: {
+    fromRect: DOMRect;
+    toRect: DOMRect;
+    pageRect: DOMRect;
+  },
+  node: HTMLElement
+): AnimationFunc {
+  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
+  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+
+  // scale 계산
+  const scaleX = toRect.width / fromRect.width;
+  const scaleY = toRect.height / fromRect.height;
+  const scale = Math.max(scaleX, scaleY);
+
+  // clip-path 계산
+  const startTop = (fromRect.top / pageRect.height) * 100;
+  const startRight =
+    ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
+    100;
+  const startBottom =
+    ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
+    100;
+  const startLeft = (fromRect.left / pageRect.width) * 100;
+
+  return (progress: number) => {
+    const t = progress; // 1 → 0 for out transitions
+    const currentTop = startTop * t;
+    const currentRight = startRight * t;
+    const currentBottom = startBottom * t;
+    const currentLeft = startLeft * t;
+
+    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
+    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
+    node.style.opacity = "1";
   };
 }
 
@@ -284,16 +258,25 @@ function createAnimationConfig(
   // Return appropriate animation functions based on mode
   if (isEnterMode) {
     return {
-      inAnimation: createDetailIn({ galleryRect, detailRect, pageRect }, toNode),
-      outAnimation: createGalleryOut(
-        { galleryRect, detailRect, pageRect },
+      inAnimation: createDetailIn(
+        { fromRect: detailRect, toRect: galleryRect, pageRect },
+        toNode
+      ),
+      outAnimation: createDetailOut(
+        { fromRect: galleryRect, toRect: detailRect, pageRect },
         fromNode
       ),
     };
   } else {
     return {
-      inAnimation: createGalleryIn({ galleryRect, detailRect }, toNode),
-      outAnimation: createDetailOut({ detailRect, galleryRect }, fromNode),
+      inAnimation: createGalleryIn(
+        { fromRect: galleryRect, toRect: detailRect },
+        toNode
+      ),
+      outAnimation: createGalleryOut(
+        { fromRect: galleryRect, toRect: detailRect, pageRect },
+        fromNode
+      ),
     };
   }
 }
@@ -372,6 +355,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
+          element.style.zIndex = "-1";
         },
         tick: (progress) => {
           if (handlers) handlers.outAnimation(progress);
