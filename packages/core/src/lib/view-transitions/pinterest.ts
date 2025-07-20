@@ -43,12 +43,12 @@ type AnimationFunc = (progress: number) => void;
 // Animation creators for each transition type
 function createDetailIn(
   {
-    fromRect,
-    toRect,
+    detailRect: fromRect,
+    galleryRect: toRect,
     pageRect,
   }: {
-    fromRect: DOMRect;
-    toRect: DOMRect;
+    detailRect: DOMRect;
+    galleryRect: DOMRect;
     pageRect: DOMRect;
   },
   node: HTMLElement
@@ -85,15 +85,13 @@ function createDetailIn(
   };
 }
 
-function createDetailOut(
+function createGalleryOut(
   {
-    fromRect,
-    toRect,
-    pageRect,
+    galleryRect: fromRect,
+    detailRect: toRect,
   }: {
-    fromRect: DOMRect;
-    toRect: DOMRect;
-    pageRect: DOMRect;
+    galleryRect: DOMRect;
+    detailRect: DOMRect;
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -116,11 +114,11 @@ function createDetailOut(
 
 function createGalleryIn(
   {
-    fromRect,
-    toRect,
+    galleryRect: fromRect,
+    detailRect: toRect,
   }: {
-    fromRect: DOMRect;
-    toRect: DOMRect;
+    galleryRect: DOMRect;
+    detailRect: DOMRect;
   },
   node: HTMLElement
 ): AnimationFunc {
@@ -141,14 +139,14 @@ function createGalleryIn(
   };
 }
 
-function createGalleryOut(
+function createDetailOut(
   {
-    fromRect,
-    toRect,
+    detailRect: fromRect,
+    galleryRect: toRect,
     pageRect,
   }: {
-    fromRect: DOMRect;
-    toRect: DOMRect;
+    detailRect: DOMRect;
+    galleryRect: DOMRect;
     pageRect: DOMRect;
   },
   node: HTMLElement
@@ -257,22 +255,16 @@ function createAnimationConfig(
   if (isEnterMode) {
     return {
       inAnimation: createDetailIn(
-        { fromRect: detailRect, toRect: galleryRect, pageRect },
+        { detailRect, galleryRect, pageRect },
         toNode
       ),
-      outAnimation: createDetailOut(
-        { fromRect: galleryRect, toRect: detailRect, pageRect },
-        fromNode
-      ),
+      outAnimation: createGalleryOut({ galleryRect, detailRect }, fromNode),
     };
   } else {
     return {
-      inAnimation: createGalleryIn(
-        { fromRect: galleryRect, toRect: detailRect },
-        toNode
-      ),
-      outAnimation: createGalleryOut(
-        { fromRect: detailRect, toRect: galleryRect, pageRect },
+      inAnimation: createGalleryIn({ galleryRect, detailRect }, toNode),
+      outAnimation: createDetailOut(
+        { detailRect, galleryRect, pageRect },
         fromNode
       ),
     };
@@ -292,7 +284,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   let handlers: AnimationHandlers | null = null;
 
   return {
-    in: async (element) => {
+    in: async (element, { scrollOffset }) => {
       const toNode = element;
 
       // Wait for fromNode to be set by out transition
@@ -338,7 +330,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: async (element) => {
+    out: async (element, { scrollOffset }) => {
       return {
         spring,
         onStart: () => {
