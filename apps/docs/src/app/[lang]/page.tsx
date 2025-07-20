@@ -1,7 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
-  Sparkles,
   Zap,
   CheckCircle,
   Code2,
@@ -155,8 +155,14 @@ export default function Home() {
           <div className="mt-12 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             {/* JavaScript */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-yellow to-vivid-orange p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">JS</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/javascript.svg"
+                  alt="JavaScript"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 JavaScript
@@ -165,8 +171,14 @@ export default function Home() {
 
             {/* React */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-blue to-vivid-cyan p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">R</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/react.svg"
+                  alt="React"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 React
@@ -175,8 +187,14 @@ export default function Home() {
 
             {/* Svelte */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-orange to-vivid-red p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">S</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/svelte.svg"
+                  alt="Svelte"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Svelte
@@ -185,8 +203,14 @@ export default function Home() {
 
             {/* Vue */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-green to-vivid-cyan p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">V</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/vue.svg"
+                  alt="Vue"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Vue
@@ -195,8 +219,14 @@ export default function Home() {
 
             {/* SolidJS */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-purple to-vivid-blue p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">So</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/solidjs.svg"
+                  alt="SolidJS"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 SolidJS
@@ -205,8 +235,14 @@ export default function Home() {
 
             {/* Qwik */}
             <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-pink to-vivid-purple p-4 transition-transform group-hover:scale-110">
-                <span className="text-2xl font-black text-white">Q</span>
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+                <Image
+                  src="/icons/qwik.svg"
+                  alt="Qwik"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Qwik
@@ -223,11 +259,11 @@ export default function Home() {
               왜 <span className="gradient-orange">SSGOI</span>인가?
             </h2>
             <p className="mt-6 text-xl text-muted-foreground">
-              단 4가지만 기억하세요
+              단 3가지만 기억하세요
             </p>
           </div>
 
-          <div className="mt-20 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-20 grid gap-8 md:grid-cols-3">
             {/* SSR/SSG 완벽 지원 */}
             <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all hover:border-vivid-green">
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-green to-vivid-cyan">
@@ -241,17 +277,17 @@ export default function Home() {
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-green/10 blur-2xl" />
             </div>
 
-            {/* 상태 기억 애니메이션 */}
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all hover:border-vivid-orange">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-orange to-vivid-yellow">
-                <Sparkles className="h-8 w-8 text-white" />
+            {/* 모든 브라우저 호환 */}
+            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all hover:border-vivid-cyan">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-cyan to-vivid-blue">
+                <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">상태 기억 애니메이션</h3>
+              <h3 className="mb-4 text-2xl font-bold">모든 브라우저 호환</h3>
               <p className="text-lg text-muted-foreground">
-                토글을 아무리 빠르게 클릭해도 끊김이 없습니다. 현재 위치와
-                속도를 기억해 자연스럽게 이어갑니다.
+                Chrome, Firefox, Safari 모든 브라우저에서 일관된 경험을
+                제공합니다.
               </p>
-              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-orange/10 blur-2xl" />
+              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-cyan/10 blur-2xl" />
             </div>
 
             {/* 제로 설정 */}
@@ -265,19 +301,6 @@ export default function Home() {
                 시작할 수 있습니다.
               </p>
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-purple/10 blur-2xl" />
-            </div>
-
-            {/* 모든 브라우저 호환 */}
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all hover:border-vivid-cyan">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-cyan to-vivid-blue">
-                <Globe className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="mb-4 text-2xl font-bold">모든 브라우저 호환</h3>
-              <p className="text-lg text-muted-foreground">
-                Chrome, Firefox, Safari 모든 브라우저에서 일관된 경험을
-                제공합니다.
-              </p>
-              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-cyan/10 blur-2xl" />
             </div>
           </div>
         </div>
