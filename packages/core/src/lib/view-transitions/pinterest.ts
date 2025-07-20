@@ -56,9 +56,17 @@ function createDetailIn(
   node: HTMLElement
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
-
+  const dx =
+    toRect.left -
+    fromRect.left +
+    (toRect.width - fromRect.width) / 2 -
+    scrollOffset.x;
+  const dy =
+    toRect.top -
+    fromRect.top +
+    (toRect.height - fromRect.height) / 2 -
+    scrollOffset.y;
+  console.log(dx, dy, scrollOffset);
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
@@ -74,6 +82,7 @@ function createDetailIn(
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
 
+  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
   return (progress: number) => {
     const u = 1 - progress;
     const currentTop = startTop * u;
@@ -82,7 +91,6 @@ function createDetailIn(
     const currentLeft = startLeft * u;
 
     node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
     node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
   };
 }
@@ -100,8 +108,16 @@ function createGalleryOut(
   node: HTMLElement
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
-  const dx = toRect.left - fromRect.left + (toRect.width - fromRect.width) / 2;
-  const dy = toRect.top - fromRect.top + (toRect.height - fromRect.height) / 2;
+  const dx =
+    toRect.left -
+    fromRect.left +
+    (toRect.width - fromRect.width) / 2 +
+    scrollOffset.x;
+  const dy =
+    toRect.top -
+    fromRect.top +
+    (toRect.height - fromRect.height) / 2 +
+    scrollOffset.y;
 
   // scale 계산
   const scaleX = toRect.width / fromRect.width;
@@ -111,7 +127,7 @@ function createGalleryOut(
   return (progress: number) => {
     node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
     const t = 1 - progress; // 0 -> 1
-    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
+    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
     node.style.opacity = `${1 - t}`;
   };
 }
