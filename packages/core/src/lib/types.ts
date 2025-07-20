@@ -46,6 +46,7 @@ export type SsgoiConfig = {
     from: string;
     to: string;
     transition: SggoiTransition;
+    symmetric?: boolean;
   }[];
   defaultTransition?: SggoiTransition;
 };

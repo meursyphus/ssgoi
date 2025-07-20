@@ -7,34 +7,35 @@ import type {
 import { getScrollingElement } from "./utils";
 
 /**
- * SSGOI Transition Context 동작 원리
+ * SSGOI Transition Context Operation Principles
  *
- * 페이지 전환 시나리오: /home → /about
+ * Page transition scenario: /home → /about
  *
- * 1. OUT 애니메이션 시작 (/home 페이지가 사라질 때)
- *    - getTransition('unique-id', 'out', '/home') 호출
- *    - pendingTransitions에 { from: '/home' } 저장
- *    - Promise 생성하고 outResolve 저장 (아직 resolve 안됨)
- *    - checkAndResolve 호출 → to가 없어서 대기
+ * 1. OUT animation starts (when /home page disappears)
+ *    - getTransition('unique-id', 'out', '/home') is called
+ *    - Stores { from: '/home' } in pendingTransitions
+ *    - Creates Promise and stores outResolve (not resolved yet)
+ *    - Calls checkAndResolve → waits because 'to' is missing
  *
- * 2. IN 애니메이션 시작 (/about 페이지가 나타날 때)
- *    - getTransition('unique-id', 'in', '/about') 호출
- *    - 기존 pending에 { to: '/about' } 추가
- *    - Promise 생성하고 inResolve 저장
- *    - checkAndResolve 호출 → from과 to가 모두 있음!
+ * 2. IN animation starts (when /about page appears)
+ *    - getTransition('unique-id', 'in', '/about') is called
+ *    - Adds { to: '/about' } to existing pending
+ *    - Creates Promise and stores inResolve
+ *    - Calls checkAndResolve → both 'from' and 'to' are present!
  *
- * 3. 트랜지션 매칭 및 해결
- *    - from: '/home', to: '/about'로 적절한 transition 찾기
- *    - 찾은 transition의 out과 in 설정으로 각각 resolve
- *    - pendingTransitions에서 해당 id 삭제
+ * 3. Transition matching and resolution
+ *    - Finds appropriate transition with from: '/home', to: '/about'
+ *    - Resolves both out and in with the found transition's settings
+ *    - Removes the id from pendingTransitions
  *
- * 핵심: OUT과 IN이 서로를 기다리며, 둘 다 준비되면 from/to 정보로
- *      적절한 transition을 찾아 동시에 resolve합니다.
+ * Key point: OUT and IN wait for each other. When both are ready,
+ *           they find the appropriate transition using from/to info
+ *           and resolve simultaneously.
  *
- * 문제 상황:
- * - 새로고침이나 첫 진입 시 OUT 애니메이션이 없음
- * - IN만 호출되면 from이 없어서 checkAndResolve가 동작하지 않음
- * - Promise가 resolve되지 않아 애니메이션이 시작되지 않음
+ * Edge cases:
+ * - No OUT animation on page refresh or initial entry
+ * - When only IN is called, checkAndResolve doesn't work without 'from'
+ * - Promise isn't resolved, so animation doesn't start
  */
 
 type PendingTransition = {
@@ -61,12 +62,38 @@ export function createSggoiTransitionContext(
 ): SsgoiContext {
   let pendingTransition: PendingTransition | null = null;
 
-  // Scroll tracking
+  // Process symmetric transitions - creates bidirectional transitions automatically
+  const processedTransitions = [...options.transitions];
+  const symmetricTransitions: typeof options.transitions = [];
+  
+  for (const transitionDef of options.transitions) {
+    if (transitionDef.symmetric) {
+      // Check if reverse transition already exists to avoid duplicates
+      const reverseExists = processedTransitions.some(
+        t => t.from === transitionDef.to && t.to === transitionDef.from
+      );
+      
+      if (!reverseExists) {
+        // Create reverse transition for symmetric navigation
+        symmetricTransitions.push({
+          from: transitionDef.to,
+          to: transitionDef.from,
+          transition: transitionDef.transition,
+          // Don't add symmetric flag to the reverse to avoid infinite loop
+        });
+      }
+    }
+  }
+  
+  // Add symmetric transitions to the processed list for matching
+  processedTransitions.push(...symmetricTransitions);
+
+  // Scroll tracking - preserves scroll positions between page transitions
   let scrollContainer: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
 
-  // Scroll listener
+  // Scroll listener - captures current scroll position
   const scrollListener = () => {
     if (scrollContainer && currentPath) {
       scrollPositions.set(currentPath, {
@@ -76,9 +103,9 @@ export function createSggoiTransitionContext(
     }
   };
 
-  // Start tracking scroll for a path
+  // Start tracking scroll for a path - initializes scroll container and updates current path
   const startScrollTracking = (element: HTMLElement, path: string) => {
-    // Initialize scroll container once
+    // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
       scrollContainer.addEventListener("scroll", scrollListener, {
@@ -86,11 +113,11 @@ export function createSggoiTransitionContext(
       });
     }
 
-    // Update current path
+    // Update current path for scroll position tracking
     currentPath = path;
   };
 
-  // Calculate scroll offset
+  // Calculate scroll offset - computes difference between pages' scroll positions
   const calculateScrollOffset = (): { x: number; y: number } => {
     const from = pendingTransition?.from;
     const to = pendingTransition?.to;
@@ -114,7 +141,7 @@ export function createSggoiTransitionContext(
       const transition = findMatchingTransition(
         pendingTransition.from,
         pendingTransition.to,
-        options.transitions
+        processedTransitions
       );
       const result = transition || options.defaultTransition;
       const scrollOffset = calculateScrollOffset();
@@ -139,9 +166,9 @@ export function createSggoiTransitionContext(
 
   const getTransition = async (path: string, type: "out" | "in") => {
     if (type === "in") {
-      // IN이 호출됐는데 OUT이 대기 중이 아니면 트랜지션 없음
+      // If IN is called but no OUT is pending, no transition occurs (e.g., page refresh)
       if (!pendingTransition || !pendingTransition.from) {
-        return () => ({}); // 빈 트랜지션 반환
+        return () => ({}); // Return empty transition
       }
     }
 
@@ -168,7 +195,7 @@ export function createSggoiTransitionContext(
     return {
       key: path,
       in: async (element: HTMLElement) => {
-        // Start scroll tracking for this path
+        // Start scroll tracking for this path when element enters
         startScrollTracking(element, path);
 
         const transitionConfig = await getTransition(path, "in");
@@ -201,14 +228,14 @@ function findMatchingTransition<TContext>(
     transition: Transition<TContext>;
   }>
 ): Transition<TContext> | null {
-  // First try to find exact match
+  // First try to find exact match for both from and to paths
   for (const config of transitions) {
     if (matchPath(from, config.from) && matchPath(to, config.to)) {
       return config.transition;
     }
   }
 
-  // Then try wildcard matches
+  // Then try wildcard matches if no exact match found
   for (const config of transitions) {
     if (
       (config.from === "*" || matchPath(from, config.from)) &&
@@ -222,17 +249,17 @@ function findMatchingTransition<TContext>(
 }
 
 function matchPath(path: string, pattern: string): boolean {
-  // Universal match
+  // Universal match - asterisk matches any path
   if (pattern === "*") {
     return true;
   }
 
-  // Wildcard match
+  // Wildcard match - pattern ending with /* matches path and subpaths
   if (pattern.endsWith("/*")) {
     const prefix = pattern.slice(0, -2);
     return path === prefix || path.startsWith(prefix + "/");
   }
 
-  // Exact match
+  // Exact match - paths must be identical
   return path === pattern;
 }
