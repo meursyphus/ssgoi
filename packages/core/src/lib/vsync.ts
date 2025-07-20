@@ -13,6 +13,7 @@ export class VSync {
 	private reservedCallbacks: VSyncCallback[] = [];
 	private requestAnimationFrameId: number | null = null;
 	public referenceCount = 0;
+	private idCounter = 0;
 
 	constructor() {
 		this.isRunning = false;
@@ -46,14 +47,16 @@ export class VSync {
 	}
 
 	public request(callback: () => void) {
+		const id:number = (this.idCounter++ % Number.MAX_SAFE_INTEGER);
+
 		if (!this.isRunning) {
-			this.callbacks.push({ id: Date.now(), callback });
+			this.callbacks.push({ id, callback });
 			this.run();
 		} else {
-			this.reservedCallbacks.push({ id: Date.now(), callback });
+			this.reservedCallbacks.push({ id, callback });
 		}
 
-		return this.referenceCount;
+		return id;
 	}
 
 	public cancel(id: number) {
@@ -102,6 +105,7 @@ export class VSync {
 				} else {
 					// 모든 callbacks이 실행되어 더 이상 실행될 내용이 없다면 메모리 해제
 					this.destroy();
+					this.idCounter = 0;
 				}
 			});
 		}
