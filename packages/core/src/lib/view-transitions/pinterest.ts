@@ -47,31 +47,41 @@ function createDetailIn(
   pageRect: DOMRect,
   toNode: HTMLElement
 ): AnimationFunc {
-  // Legacy: detailIn(toRect, fromRect) where to=detail, from=gallery
-  // Calculate movement from detail position to gallery position
-  const dx = detailRect.left - galleryRect.left + (detailRect.width - galleryRect.width) / 2;
-  const dy = detailRect.top - galleryRect.top + (detailRect.height - galleryRect.height) / 2;
-  
+  const dx =
+    galleryRect.left -
+    detailRect.left +
+    (galleryRect.width - detailRect.width) / 2;
+  const dy =
+    galleryRect.top -
+    detailRect.top +
+    (galleryRect.height - detailRect.height) / 2;
+
   // Scale from gallery size to detail size
-  const scaleX = detailRect.width / galleryRect.width;
-  const scaleY = detailRect.height / galleryRect.height;
+  const scaleX = galleryRect.width / detailRect.width;
+  const scaleY = galleryRect.height / detailRect.height;
   const scale = Math.max(scaleX, scaleY);
 
   // Clip bounds based on gallery position (starting small)
   const clipBounds = {
-    top: (galleryRect.top / pageRect.height) * 100,
-    right: ((pageRect.width - (galleryRect.left + galleryRect.width)) / pageRect.width) * 100,
-    bottom: ((pageRect.height - (galleryRect.top + galleryRect.height)) / pageRect.height) * 100,
-    left: (galleryRect.left / pageRect.width) * 100,
+    top: (detailRect.top / pageRect.height) * 100,
+    right:
+      ((pageRect.width - (detailRect.left + detailRect.width)) /
+        pageRect.width) *
+      100,
+    bottom:
+      ((pageRect.height - (detailRect.top + detailRect.height)) /
+        pageRect.height) *
+      100,
+    left: (detailRect.left / pageRect.width) * 100,
   };
 
   // Transform origin at gallery center
-  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
+  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
 
   return (progress: number) => {
     const t = progress; // 0 → 1 (for in transitions)
     const u = 1 - progress; // 1 → 0
-    
+
     // Clip expands from gallery bounds to full (inset goes from gallery to 0)
     toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
     toNode.style.transformOrigin = transformOrigin;
@@ -115,7 +125,7 @@ function createGalleryOut(
 
   return (progress: number) => {
     // progress goes from 1 to 0 for out transitions
-    const t = progress; // 1 → 0
+
     const u = 1 - progress; // 0 → 1
     fromNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
     fromNode.style.transformOrigin = transformOrigin;
@@ -157,19 +167,19 @@ function createDetailOut(
   fromNode: HTMLElement
 ): AnimationFunc {
   const dx =
-    galleryRect.left -
-    detailRect.left +
-    (galleryRect.width - detailRect.width) / 2;
+    detailRect.left -
+    galleryRect.left +
+    (detailRect.width - galleryRect.width) / 2;
   const dy =
-    galleryRect.top -
-    detailRect.top +
-    (galleryRect.height - detailRect.height) / 2;
-  const scaleX = galleryRect.width / detailRect.width;
-  const scaleY = galleryRect.height / detailRect.height;
+    detailRect.top -
+    galleryRect.top +
+    (detailRect.height - galleryRect.height) / 2;
+  const scaleX = detailRect.width / galleryRect.width;
+  const scaleY = detailRect.height / galleryRect.height;
   const scale = Math.max(scaleX, scaleY);
   const inverseScale = 1 / scale;
 
-  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
 
   return (progress: number) => {
     // progress goes from 1 to 0 for out transitions
@@ -330,6 +340,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
     },
     out: async (element) => {
       return {
+        spring,
         onStart: () => {
           // Store fromNode
           fromNode = element;
