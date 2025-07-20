@@ -58,25 +58,15 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
           transition: pinterest({ spring: { stiffness: 200, damping: 50 } }),
+          symmetric: true,
         },
-        {
-          from: "/demo/pinterest",
-          to: "/demo/pinterest/*",
-          transition: pinterest({ spring: { stiffness: 200, damping: 50 } }),
-        },
-
         // Products transitions - hero
         {
           from: "/demo/products",
           to: "/demo/products/*",
           transition: hero(),
+          symmetric: true,
         },
-        {
-          from: "/demo/products/*",
-          to: "/demo/products",
-          transition: hero(),
-        },
-
         // Posts transitions - slide with parallax effect
         {
           from: "/demo/posts",
