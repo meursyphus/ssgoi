@@ -42,59 +42,70 @@ type AnimationFunc = (progress: number) => void;
 
 // Animation creators for each transition type
 function createDetailIn(
-  galleryRect: DOMRect,
-  detailRect: DOMRect,
-  pageRect: DOMRect,
-  toNode: HTMLElement
+  {
+    galleryRect,
+    detailRect,
+    pageRect,
+  }: {
+    galleryRect: DOMRect;
+    detailRect: DOMRect;
+    pageRect: DOMRect;
+  },
+  node: HTMLElement
 ): AnimationFunc {
   const dx =
-    galleryRect.left -
-    detailRect.left +
-    (galleryRect.width - detailRect.width) / 2;
+    detailRect.left -
+    galleryRect.left +
+    (detailRect.width - galleryRect.width) / 2;
   const dy =
-    galleryRect.top -
-    detailRect.top +
-    (galleryRect.height - detailRect.height) / 2;
+    detailRect.top -
+    galleryRect.top +
+    (detailRect.height - galleryRect.height) / 2;
 
   // Scale from gallery size to detail size
-  const scaleX = galleryRect.width / detailRect.width;
-  const scaleY = galleryRect.height / detailRect.height;
+  const scaleX = detailRect.width / galleryRect.width;
+  const scaleY = detailRect.height / galleryRect.height;
   const scale = Math.max(scaleX, scaleY);
 
   // Clip bounds based on gallery position (starting small)
   const clipBounds = {
-    top: (detailRect.top / pageRect.height) * 100,
+    top: (galleryRect.top / pageRect.height) * 100,
     right:
-      ((pageRect.width - (detailRect.left + detailRect.width)) /
+      ((pageRect.width - (galleryRect.left + galleryRect.width)) /
         pageRect.width) *
       100,
     bottom:
-      ((pageRect.height - (detailRect.top + detailRect.height)) /
+      ((pageRect.height - (galleryRect.top + galleryRect.height)) /
         pageRect.height) *
       100,
-    left: (detailRect.left / pageRect.width) * 100,
+    left: (galleryRect.left / pageRect.width) * 100,
   };
 
   // Transform origin at gallery center
-  const transformOrigin = `${detailRect.left + detailRect.width / 2}px ${detailRect.top + detailRect.height / 2}px`;
+  const transformOrigin = `${galleryRect.left + galleryRect.width / 2}px ${galleryRect.top + galleryRect.height / 2}px`;
 
   return (progress: number) => {
-    const t = progress; // 0 → 1 (for in transitions)
     const u = 1 - progress; // 1 → 0
 
     // Clip expands from gallery bounds to full (inset goes from gallery to 0)
-    toNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
-    toNode.style.transformOrigin = transformOrigin;
+    node.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
+    node.style.transformOrigin = transformOrigin;
     // Transform moves and scales from gallery position/size to detail position/size
-    toNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+    node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
   };
 }
 
 function createGalleryOut(
-  galleryRect: DOMRect,
-  detailRect: DOMRect,
-  pageRect: DOMRect,
-  fromNode: HTMLElement
+  {
+    galleryRect,
+    detailRect,
+    pageRect,
+  }: {
+    galleryRect: DOMRect;
+    detailRect: DOMRect;
+    pageRect: DOMRect;
+  },
+  node: HTMLElement
 ): AnimationFunc {
   const dx =
     detailRect.left -
@@ -127,16 +138,21 @@ function createGalleryOut(
     // progress goes from 1 to 0 for out transitions
 
     const u = 1 - progress; // 0 → 1
-    fromNode.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
-    fromNode.style.transformOrigin = transformOrigin;
-    fromNode.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+    node.style.clipPath = `inset(${clipBounds.top * u}% ${clipBounds.right * u}% ${clipBounds.bottom * u}% ${clipBounds.left * u}%)`;
+    node.style.transformOrigin = transformOrigin;
+    node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
   };
 }
 
 function createGalleryIn(
-  galleryRect: DOMRect,
-  detailRect: DOMRect,
-  toNode: HTMLElement
+  {
+    galleryRect,
+    detailRect,
+  }: {
+    galleryRect: DOMRect;
+    detailRect: DOMRect;
+  },
+  node: HTMLElement
 ): AnimationFunc {
   const dx =
     galleryRect.left -
@@ -155,16 +171,21 @@ function createGalleryIn(
 
   return (progress: number) => {
     const t = 1 - progress;
-    toNode.style.transformOrigin = transformOrigin;
-    toNode.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
-    toNode.style.opacity = `${progress}`;
+    node.style.transformOrigin = transformOrigin;
+    node.style.transform = `translate(${-dx * t}px, ${-dy * t}px) scale(${1 + (inverseScale - 1) * t})`;
+    node.style.opacity = `${progress}`;
   };
 }
 
 function createDetailOut(
-  detailRect: DOMRect,
-  galleryRect: DOMRect,
-  fromNode: HTMLElement
+  {
+    detailRect,
+    galleryRect,
+  }: {
+    detailRect: DOMRect;
+    galleryRect: DOMRect;
+  },
+  node: HTMLElement
 ): AnimationFunc {
   const dx =
     detailRect.left -
@@ -185,9 +206,9 @@ function createDetailOut(
     // progress goes from 1 to 0 for out transitions
     const t = progress; // 1 → 0
     const u = 1 - progress; // 0 → 1
-    fromNode.style.transformOrigin = transformOrigin;
-    fromNode.style.transform = `translate(${-dx * u}px, ${-dy * u}px) scale(${1 + (inverseScale - 1) * u})`;
-    fromNode.style.opacity = `${t}`;
+    node.style.transformOrigin = transformOrigin;
+    node.style.transform = `translate(${-dx * u}px, ${-dy * u}px) scale(${1 + (inverseScale - 1) * u})`;
+    node.style.opacity = `${t}`;
   };
 }
 
@@ -196,7 +217,7 @@ interface AnimationHandlers {
   outAnimation: AnimationFunc;
 }
 
-function detectAndPrepare(
+function createAnimationConfig(
   fromNode: HTMLElement,
   toNode: HTMLElement
 ): AnimationHandlers | null {
@@ -263,18 +284,16 @@ function detectAndPrepare(
   // Return appropriate animation functions based on mode
   if (isEnterMode) {
     return {
-      inAnimation: createDetailIn(galleryRect, detailRect, pageRect, toNode),
+      inAnimation: createDetailIn({ galleryRect, detailRect, pageRect }, toNode),
       outAnimation: createGalleryOut(
-        galleryRect,
-        detailRect,
-        pageRect,
+        { galleryRect, detailRect, pageRect },
         fromNode
       ),
     };
   } else {
     return {
-      inAnimation: createGalleryIn(galleryRect, detailRect, toNode),
-      outAnimation: createDetailOut(detailRect, galleryRect, fromNode),
+      inAnimation: createGalleryIn({ galleryRect, detailRect }, toNode),
+      outAnimation: createDetailOut({ detailRect, galleryRect }, fromNode),
     };
   }
 }
@@ -320,7 +339,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       }
 
       // Detect and prepare animation handlers
-      handlers = detectAndPrepare(fromNode, toNode);
+      handlers = createAnimationConfig(fromNode, toNode);
       if (!handlers) {
         return {
           spring,
