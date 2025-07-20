@@ -180,14 +180,14 @@ Svelte 5 runes represent a significant evolution in how we write reactive code. 
 The future of Svelte is bright, and runes are lighting the way forward. Happy coding!`,
     author: {
       name: 'Sarah Chen',
-      avatar: 'https://i.pravatar.cc/150?img=5',
+      avatar: '/demo/posts/avatar-5.jpg',
       role: 'Senior Frontend Developer'
     },
     category: 'Svelte',
     readTime: 12,
     publishedAt: '2024-01-25',
     tags: ['Svelte 5', 'Runes', 'Reactivity', 'JavaScript', 'Web Development'],
-    coverImage: 'https://picsum.photos/id/0/400/300'
+    coverImage: '/demo/posts/0-400x300.jpg'
   },
   {
     id: 'flutter-animations',
@@ -549,14 +549,14 @@ Flutter's animation system is incredibly powerful and flexible. Start with impli
 The key to mastering Flutter animations is practice. Start small, experiment with different curves and durations, and gradually work your way up to more complex animations. Your users will appreciate the polished, professional feel that well-crafted animations bring to your apps.`,
     author: {
       name: 'Michael Park',
-      avatar: 'https://i.pravatar.cc/150?img=8',
+      avatar: '/demo/posts/avatar-8.jpg',
       role: 'Mobile App Developer'
     },
     category: 'Flutter',
     readTime: 15,
     publishedAt: '2024-01-22',
     tags: ['Flutter', 'Animations', 'Mobile Development', 'Dart', 'UI/UX'],
-    coverImage: 'https://picsum.photos/id/48/400/300'
+    coverImage: '/demo/posts/48-400x300.jpg'
   },
   {
     id: 'sveltekit-architecture',
@@ -989,14 +989,14 @@ Key takeaways:
 As your application grows, SvelteKit grows with you, providing the tools and patterns needed to maintain a clean, performant codebase. The combination of Svelte's simplicity and SvelteKit's power creates a development experience that's both enjoyable and productive.`,
     author: {
       name: 'Emma Wilson',
-      avatar: 'https://i.pravatar.cc/150?img=9',
+      avatar: '/demo/posts/avatar-9.jpg',
       role: 'Full-stack Developer'
     },
     category: 'SvelteKit',
     readTime: 18,
     publishedAt: '2024-01-20',
     tags: ['SvelteKit', 'Architecture', 'Scalability', 'Web Development', 'Best Practices'],
-    coverImage: 'https://picsum.photos/id/180/400/300'
+    coverImage: '/demo/posts/180-400x300.jpg'
   },
   {
     id: 'react-server-components',
@@ -1141,14 +1141,14 @@ React Server Components are not just an incremental improvement—they're a fund
 The future of React is here, and it's running on the server!`,
     author: {
       name: 'Alex Johnson',
-      avatar: 'https://i.pravatar.cc/150?img=3',
+      avatar: '/demo/posts/avatar-3.jpg',
       role: 'React Core Team Alumni'
     },
     category: 'React',
     readTime: 10,
     publishedAt: '2024-01-18',
     tags: ['React', 'Server Components', 'Next.js', 'Performance', 'Web Development'],
-    coverImage: 'https://picsum.photos/id/225/400/300'
+    coverImage: '/demo/posts/225-400x300.jpg'
   },
   {
     id: 'modern-css-techniques',
@@ -1401,14 +1401,14 @@ Modern CSS is incredibly powerful. Features like Container Queries, :has(), and 
 The key is to stay curious and keep experimenting. CSS continues to evolve, and the best is yet to come!`,
     author: {
       name: 'Maria Garcia',
-      avatar: 'https://i.pravatar.cc/150?img=1',
+      avatar: '/demo/posts/avatar-1.jpg',
       role: 'CSS Specialist'
     },
     category: 'CSS',
     readTime: 8,
     publishedAt: '2024-01-16',
     tags: ['CSS', 'Web Design', 'Frontend', 'Modern CSS', 'Styling'],
-    coverImage: 'https://picsum.photos/id/104/400/300'
+    coverImage: '/demo/posts/104-400x300.jpg'
   },
   {
     id: 'web-performance-2024',
@@ -1712,14 +1712,14 @@ Web performance is a continuous journey, not a destination. Regular monitoring, 
 Remember: every millisecond counts. Your users will thank you for the effort you put into performance optimization!`,
     author: {
       name: 'David Kim',
-      avatar: 'https://i.pravatar.cc/150?img=12',
+      avatar: '/demo/posts/avatar-12.jpg',
       role: 'Performance Engineer'
     },
     category: 'Performance',
     readTime: 14,
     publishedAt: '2024-01-14',
     tags: ['Performance', 'Web Vitals', 'Optimization', 'JavaScript', 'Best Practices'],
-    coverImage: 'https://picsum.photos/id/367/400/300'
+    coverImage: '/demo/posts/367-400x300.jpg'
   },
   {
     id: 'typescript-advanced-patterns',
@@ -2073,14 +2073,14 @@ Remember:
 TypeScript is not just about adding types—it's about designing better APIs and creating self-documenting code that helps your team move faster with confidence.`,
     author: {
       name: 'James Chen',
-      avatar: 'https://i.pravatar.cc/150?img=7',
+      avatar: '/demo/posts/avatar-7.jpg',
       role: 'TypeScript Expert'
     },
     category: 'TypeScript',
     readTime: 12,
     publishedAt: '2024-01-12',
     tags: ['TypeScript', 'Advanced Patterns', 'Type Safety', 'Best Practices', 'JavaScript'],
-    coverImage: 'https://picsum.photos/id/160/400/300'
+    coverImage: '/demo/posts/160-400x300.jpg'
   }
 ];
 
