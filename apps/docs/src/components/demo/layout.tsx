@@ -57,12 +57,12 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest(),
+          transition: pinterest({ spring: { stiffness: 200, damping: 50 } }),
         },
         {
           from: "/demo/pinterest",
           to: "/demo/pinterest/*",
-          transition: pinterest(),
+          transition: pinterest({ spring: { stiffness: 200, damping: 50 } }),
         },
 
         // Products transitions - hero
