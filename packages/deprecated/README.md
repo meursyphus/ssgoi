@@ -1,3 +1,94 @@
+# SSGOI - Legacy Svelte Package (Deprecated)
+
+> ⚠️ **This package is deprecated and no longer maintained.** Please use the new framework-specific packages instead.
+
+## 🚀 New Packages Available
+
+SSGOI has evolved! We now offer dedicated packages for multiple frameworks with improved APIs and better performance:
+
+### React
+```bash
+npm install @ssgoi/react
+```
+
+### Svelte
+```bash
+npm install @ssgoi/svelte
+```
+
+### Coming Soon
+- `@ssgoi/vue` - Vue.js support
+- `@ssgoi/solid` - SolidJS support  
+- `@ssgoi/qwik` - Qwik support
+
+## Why Upgrade?
+
+The new packages offer:
+- ✨ **Better Performance** - Powered by a new spring physics engine
+- 🎯 **Framework-Specific APIs** - Optimized for each framework's best practices
+- 🌍 **Universal Browser Support** - Works in Chrome, Firefox, Safari
+- 🚀 **SSR Ready** - Perfect for Next.js, Nuxt, SvelteKit
+- 💾 **State Persistence** - Remembers animation state during navigation
+- 📦 **Smaller Bundle Size** - More efficient code splitting
+
+## Migration Guide
+
+### For Svelte Users
+
+Old (deprecated):
+```svelte
+<script>
+import { Ssgoi, PageTransition } from 'ssgoi';
+import { createTransitionConfig, transitions } from 'ssgoi';
+
+const config = createTransitionConfig({
+    transitions: [
+        {
+            from: '/home',
+            to: '/about',
+            transitions: transitions.fade()
+        }
+    ],
+    defaultTransition: transitions.fade()
+});
+</script>
+
+<Ssgoi {onNavigate} {config}>
+    <PageTransition>
+        <!-- Your content -->
+    </PageTransition>
+</Ssgoi>
+```
+
+New (@ssgoi/svelte):
+```svelte
+<script>
+import { Ssgoi, SsgoiTransition } from '@ssgoi/svelte';
+import { fade } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi config={{ defaultTransition: fade() }}>
+    <SsgoiTransition id={$page.url.pathname}>
+        <!-- Your content -->
+    </SsgoiTransition>
+</Ssgoi>
+```
+
+## Learn More
+
+- 📖 [Documentation](https://ssgoi.dev)
+- 🎮 [Live Demos](https://github.com/meursyphus/ssgoi#live-demos)
+- 💻 [GitHub Repository](https://github.com/meursyphus/ssgoi)
+
+## Legacy Documentation
+
+If you need to reference the old API while migrating, the original documentation is preserved below.
+
+---
+
+<details>
+<summary>Click to view legacy documentation</summary>
+
 # SSGOI - Svelte Smooth Go Transition Library
 
 SSGOI (쓱고이) is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications. Make your pages go "쓱!" (swoosh) like a model on a digital catwalk!
@@ -174,3 +265,5 @@ We welcome bug reports, feature requests, and pull requests! Before contributing
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+</details>
