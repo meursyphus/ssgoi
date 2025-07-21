@@ -1,8 +1,8 @@
 export type TransitionKey = string | symbol;
 
 export type SpringConfig = {
-  stiffness: number;
-  damping: number;
+  stiffness?: number;
+  damping?: number;
 };
 
 export type TransitionConfig = {
@@ -22,9 +22,13 @@ export type TransitionConfig = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig<TContext = undefined> = TContext extends undefined
-  ? (node: HTMLElement) => TransitionConfig | Promise<TransitionConfig>
-  : (node: HTMLElement, context: TContext) => TransitionConfig | Promise<TransitionConfig>;
+export type GetTransitionConfig<TContext = undefined> =
+  TContext extends undefined
+    ? (node: HTMLElement) => TransitionConfig | Promise<TransitionConfig>
+    : (
+        node: HTMLElement,
+        context: TContext
+      ) => TransitionConfig | Promise<TransitionConfig>;
 
 export type Transition<TContext = undefined> = {
   in?: GetTransitionConfig<TContext>;

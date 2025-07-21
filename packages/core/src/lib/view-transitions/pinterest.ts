@@ -320,8 +320,8 @@ function createAnimationConfig(
 
 export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 300,
-    damping: options.spring?.damping ?? 30,
+    stiffness: options.spring?.stiffness ?? 50,
+    damping: options.spring?.damping ?? 10,
   };
   const timeout = options.timeout ?? 300;
 

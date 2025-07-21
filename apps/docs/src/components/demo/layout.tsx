@@ -52,7 +52,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest({ spring: { stiffness: 200, damping: 50 } }),
+          transition: pinterest(),
           symmetric: true,
         },
         // Products transitions - hero
@@ -69,8 +69,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           transition: {
             in: (node) => ({
               spring: {
-                stiffness: 500,
-                damping: 50,
+                stiffness: 50,
+                damping: 10,
               },
               prepare: (node) => {
                 node.style.zIndex = "100";
@@ -82,8 +82,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }),
             out: (node) => ({
               spring: {
-                stiffness: 500,
-                damping: 50,
+                stiffness: 50,
+                damping: 10,
               },
               prepare: (node) => {
                 node.style.position = "absolute";
@@ -104,8 +104,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           transition: {
             in: (node) => ({
               spring: {
-                stiffness: 300,
-                damping: 50,
+                stiffness: 50,
+                damping: 10,
               },
               tick: (t) => {
                 node.style.transform = `translateX(${-(1 - t) * 20}%)`;
@@ -113,8 +113,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }),
             out: (node) => ({
               spring: {
-                stiffness: 300,
-                damping: 50,
+                stiffness: 50,
+                damping: 10,
               },
               prepare: (node) => {
                 node.style.position = "absolute";
@@ -134,8 +134,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       defaultTransition: {
         in: (node: HTMLElement) => ({
           spring: {
-            stiffness: 300,
-            damping: 30,
+            stiffness: 100,
+            damping: 15,
           },
           tick: (t: number) => {
             node.style.transform = `translateX(${20 * (1 - t)}px)`;

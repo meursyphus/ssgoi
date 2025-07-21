@@ -1,4 +1,4 @@
-import { animate, spring } from "popmotion";
+import { animate } from "popmotion";
 
 import { SpringConfig } from "./types";
 
