@@ -1,13 +1,5 @@
-import type { SpringConfig } from "./types";
+import type { AnimationOptions, AnimatorInterface } from "./types";
 
-interface AnimationOptions {
-  from: number;
-  to: number;
-  spring: SpringConfig;
-  onUpdate: (value: number) => void;
-  onComplete: () => void; // Now non-nullable with default
-  onStart?: () => void;
-}
 /**
  * TODO: requestAnimationFrame() singleton pattern
  */
@@ -21,7 +13,7 @@ interface AnimationOptions {
  * - getVelocity(): Get current velocity for smooth transitions
  * - getCurrentValue(): Get current progress value
  */
-export class Animator {
+export class Animator implements AnimatorInterface {
   private options: AnimationOptions;
   private currentValue: number;
   private velocity: number = 0;
