@@ -1,12 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Zap,
-  CheckCircle,
-  Code2,
-  Globe,
-} from "lucide-react";
+import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
 import { CodeExample } from "@/components/code-example";
 
@@ -78,33 +72,36 @@ export default function Home() {
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Vue
-                  </p>
-                  <code className="font-mono text-sm text-white">
-                    npm install @ssgoi/vue
-                  </code>
-                </div>
-                <div className="rounded-lg bg-card/50 p-4">
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">
                     Svelte
                   </p>
                   <code className="font-mono text-sm text-white">
                     npm install @ssgoi/svelte
                   </code>
                 </div>
-                <div className="rounded-lg bg-card/50 p-4">
+                {/* Vue - 추가 예정 */}
+                <div className="rounded-lg bg-card/50 p-4 opacity-50">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    SolidJS
+                    Vue (지원 예정)
                   </p>
-                  <code className="font-mono text-sm text-white">
+                  <code className="font-mono text-sm text-white/50">
+                    npm install @ssgoi/vue
+                  </code>
+                </div>
+                {/* SolidJS - 추가 예정 */}
+                <div className="rounded-lg bg-card/50 p-4 opacity-50">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
+                    SolidJS (지원 예정)
+                  </p>
+                  <code className="font-mono text-sm text-white/50">
                     npm install @ssgoi/solid
                   </code>
                 </div>
-                <div className="rounded-lg bg-card/50 p-4">
+                {/* Qwik - 추가 예정 */}
+                <div className="rounded-lg bg-card/50 p-4 opacity-50">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Qwik
+                    Qwik (지원 예정)
                   </p>
-                  <code className="font-mono text-sm text-white">
+                  <code className="font-mono text-sm text-white/50">
                     npm install @ssgoi/qwik
                   </code>
                 </div>
@@ -201,51 +198,54 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Vue */}
-            <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+            {/* Vue - 지원 예정 */}
+            <div className="group flex flex-col items-center gap-3 opacity-50">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4">
                 <Image
                   src="/icons/vue.svg"
                   alt="Vue"
                   width={48}
                   height={48}
-                  className="h-12 w-12"
+                  className="h-12 w-12 opacity-50"
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Vue
+                <span className="block text-xs">(지원 예정)</span>
               </span>
             </div>
 
-            {/* SolidJS */}
-            <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+            {/* SolidJS - 지원 예정 */}
+            <div className="group flex flex-col items-center gap-3 opacity-50">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4">
                 <Image
                   src="/icons/solidjs.svg"
                   alt="SolidJS"
                   width={48}
                   height={48}
-                  className="h-12 w-12"
+                  className="h-12 w-12 opacity-50"
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 SolidJS
+                <span className="block text-xs">(지원 예정)</span>
               </span>
             </div>
 
-            {/* Qwik */}
-            <div className="group flex flex-col items-center gap-3">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
+            {/* Qwik - 지원 예정 */}
+            <div className="group flex flex-col items-center gap-3 opacity-50">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4">
                 <Image
                   src="/icons/qwik.svg"
                   alt="Qwik"
                   width={48}
                   height={48}
-                  className="h-12 w-12"
+                  className="h-12 w-12 opacity-50"
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Qwik
+                <span className="block text-xs">(지원 예정)</span>
               </span>
             </div>
           </div>
