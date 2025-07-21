@@ -222,6 +222,26 @@ SSGOI intercepts DOM lifecycle events to create smooth transitions:
 
 All powered by a spring physics engine for natural, smooth motion.
 
+## Live Demos
+
+Try out SSGOI with our framework-specific demo applications:
+
+### React Demo
+```bash
+pnpm react-demo:dev
+# Opens at http://localhost:3001
+```
+Explore Next.js App Router integration with various transition effects.
+
+### Svelte Demo
+```bash
+pnpm svelte-demo:dev
+# Opens at http://localhost:5174
+```
+See SvelteKit integration with smooth page transitions.
+
+Visit the `/apps` directory to explore the demo source code and learn how to implement SSGOI in your own projects.
+
 ## Documentation
 
 Visit our [documentation site](https://ssgoi.dev) for:
