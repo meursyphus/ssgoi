@@ -189,7 +189,7 @@
   height: 0;
   border-left: 40px solid transparent;
   border-right: 40px solid transparent;
-  border-bottom: 70px solid #4ECDC4;
+  border-bottom: 70px solid #4ecdc4;
 }
 
 .square {
@@ -209,7 +209,7 @@
 }
 
 .pentagon::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -70px;
   left: -40px;
@@ -256,7 +256,6 @@
   justify-content: center;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s;
   text-decoration: none;
   position: relative;
   overflow: hidden;
@@ -264,7 +263,6 @@
 }
 
 .colorBox:hover {
-  transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -279,7 +277,7 @@
   .appTitle {
     font-size: 2.5rem;
   }
-  
+
   .shapesGrid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2rem;

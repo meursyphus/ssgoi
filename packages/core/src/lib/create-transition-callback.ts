@@ -92,6 +92,9 @@ export function createTransitionCallback(
 
       const inConfig = await Promise.resolve(transition.in(element));
 
+      // Apply prepare function if provided
+      inConfig.prepare?.(element);
+
       currentAnimation = new Animator({
         from: 0,
         to: 1,
@@ -155,6 +158,7 @@ export function createTransitionCallback(
       Promise.resolve(transition.in(currentClone)).then(async (inConfig) => {
         const outConfig =
           currentClone && (await transition.out?.(currentClone));
+
         if (outConfig?.prepare) {
           currentClone && outConfig.prepare(currentClone);
         }
@@ -198,9 +202,9 @@ export function createTransitionCallback(
 
       Promise.resolve(transition.out(currentClone)).then((outConfig) => {
         // Apply prepare function if provided
-        if (outConfig.prepare) {
-          currentClone && outConfig.prepare(currentClone);
-        }
+
+        currentClone && outConfig.prepare?.(currentClone);
+
         // Insert clone after preparation
         insertClone();
 
