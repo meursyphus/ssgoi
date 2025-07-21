@@ -1,11 +1,21 @@
 import { animate, spring } from "popmotion";
-import type { AnimationOptions, AnimatorInterface } from "./types";
+
+import { SpringConfig } from "./types";
+
+export interface AnimationOptions {
+  from: number;
+  to: number;
+  spring: SpringConfig;
+  onUpdate: (value: number) => void;
+  onComplete: () => void;
+  onStart?: () => void;
+}
 
 /**
  * New Animator implementation using Popmotion
  * Provides spring-based animations with fine control
  */
-export class Animator implements AnimatorInterface {
+export class Animator {
   private options: AnimationOptions;
   private currentValue: number;
   private velocity: number = 0;
