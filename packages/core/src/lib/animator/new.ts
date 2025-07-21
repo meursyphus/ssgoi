@@ -43,13 +43,30 @@ export class Animator implements AnimatorInterface {
       velocity: this.velocity * 1000, // Convert to px/s from normalized
     });
 
+    // Track previous value for velocity calculation
+    let previousValue = this.currentValue;
+    let previousTime = performance.now();
+
     // Create animation
     this.controls = animate({
       from: this.currentValue,
       to: target,
       velocity: this.velocity * 1000, // Convert to px/s
       ...springConfig,
+
       onUpdate: (value: number) => {
+        const currentTime = performance.now();
+        const timeDelta = (currentTime - previousTime) / 1000; // Convert to seconds
+
+        if (timeDelta > 0) {
+          // Calculate velocity in units per second, then normalize
+          const rawVelocity = (value - previousValue) / timeDelta;
+          this.velocity = rawVelocity / 1000; // Normalize to 0-1 range
+
+          previousValue = value;
+          previousTime = currentTime;
+        }
+
         this.currentValue = value;
         this.options.onUpdate(value);
       },
@@ -59,26 +76,6 @@ export class Animator implements AnimatorInterface {
         this.controls = null;
         this.velocity = 0;
         this.options.onComplete();
-      },
-      onPlay: () => {
-        // Track velocity during animation
-        let lastValue = this.currentValue;
-        let lastTime = performance.now();
-
-        const velocityTracker = setInterval(() => {
-          if (!this.isAnimating) {
-            clearInterval(velocityTracker);
-            return;
-          }
-
-          const now = performance.now();
-          const deltaTime = (now - lastTime) / 1000;
-          if (deltaTime > 0) {
-            this.velocity = (this.currentValue - lastValue) / deltaTime / 1000; // Normalize
-            lastValue = this.currentValue;
-            lastTime = now;
-          }
-        }, 16); // ~60fps
       },
     });
   };
@@ -115,6 +112,7 @@ export class Animator implements AnimatorInterface {
       this.controls.stop();
       this.controls = null;
     }
+    // Preserve velocity when stopping
   }
 
   // State getters
