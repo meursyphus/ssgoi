@@ -1,17 +1,250 @@
-import TempDemo from "./temp";
+"use client";
+
+import { useState } from "react";
+import { SsgoiTransition, transition } from "@ssgoi/react";
+import Link from "next/link";
+import styles from "./page.module.css";
+
+// Shape container component that maintains size
+interface ShapeContainerProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+function ShapeContainer({ label, children }: ShapeContainerProps) {
+  return (
+    <div className={styles.shapeContainer}>
+      <div className={styles.shapeWrapper}>{children}</div>
+      <p className={styles.shapeLabel}>{label}</p>
+    </div>
+  );
+}
+
+const colors = [
+  { id: 1, color: "#FF6B6B", name: "Coral" },
+  { id: 2, color: "#4ECDC4", name: "Turquoise" },
+  { id: 3, color: "#45B7D1", name: "Sky Blue" },
+  { id: 4, color: "#96CEB4", name: "Sage" },
+  { id: 5, color: "#FECA57", name: "Sunflower" },
+  { id: 6, color: "#DDA0DD", name: "Plum" },
+];
 
 export default function Home() {
+  const [showShapes, setShowShapes] = useState(true);
+  const [stiffness, setStiffness] = useState(300);
+  const [damping, setDamping] = useState(30);
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Hello world!
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-          Tailwind CSS is working properly!
-        </p>
-        <TempDemo />
+    <SsgoiTransition id="/">
+      <div className={styles.appContainer}>
+        <div className={styles.heroSection}>
+          <h1 className={styles.appTitle}>SSGOI React Demo</h1>
+        </div>
+
+        {/* Hero Transition Section */}
+        <div className={styles.heroTransitionSection}>
+          <h2 className={styles.sectionTitle}>Hero Transition</h2>
+          <div className={styles.colorGrid}>
+            {colors.map((item) => (
+              <Link
+                key={item.id}
+                href={`/item/${item.id}`}
+                className={styles.colorBox}
+                style={{ backgroundColor: item.color }}
+                data-hero-key={`color-${item.id}`}
+              >
+                <span className={styles.colorName}>{item.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* DOM Transition Section */}
+        <div className={styles.controlsSection}>
+          <div className={styles.controls}>
+            <div className={styles.speedButtons}>
+              <button
+                className={`${styles.speedButton} ${stiffness === 100 ? styles.active : ""}`}
+                onClick={() => {
+                  setStiffness(100);
+                  setDamping(20);
+                }}
+              >
+                Smooth
+              </button>
+              <button
+                className={`${styles.speedButton} ${stiffness === 300 ? styles.active : ""}`}
+                onClick={() => {
+                  setStiffness(300);
+                  setDamping(30);
+                }}
+              >
+                Normal
+              </button>
+              <button
+                className={`${styles.speedButton} ${stiffness === 500 ? styles.active : ""}`}
+                onClick={() => {
+                  setStiffness(500);
+                  setDamping(40);
+                }}
+              >
+                Fast
+              </button>
+            </div>
+
+            <div className={styles.controlGroup}>
+              <label className={styles.controlLabel}>Stiffness</label>
+              <input
+                type="number"
+                className={styles.controlInput}
+                value={stiffness}
+                onChange={(e) => setStiffness(Number(e.target.value))}
+                min="1"
+                max="1000"
+              />
+              <span className={styles.controlValue}>(1-1000)</span>
+            </div>
+
+            <div className={styles.controlGroup}>
+              <label className={styles.controlLabel}>Damping</label>
+              <input
+                type="number"
+                className={styles.controlInput}
+                value={damping}
+                onChange={(e) => setDamping(Number(e.target.value))}
+                min="0"
+                max="100"
+              />
+              <span className={styles.controlValue}>(0-100)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.toggleSection}>
+          <button
+            onClick={() => setShowShapes(!showShapes)}
+            className={styles.toggleButton}
+          >
+            {showShapes ? "Hide Elements" : "Show Elements"}
+          </button>
+        </div>
+
+        <div className={styles.examplesSection}>
+          <h2 className={styles.sectionTitle}>DOM Transition</h2>
+          <div className={styles.shapesGrid}>
+            <ShapeContainer label="Fade">
+              {showShapes && (
+                <div
+                  ref={transition({
+                    key: "fade",
+                    in: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  className={`${styles.shape} ${styles.circle}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Scale + Rotate">
+              {showShapes && (
+                <div
+                  ref={transition({
+                    key: "scale-rotate",
+                    in: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.transform = `scale(${progress}) rotate(${
+                          progress * 360
+                        }deg)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.transform = `scale(${progress}) rotate(${
+                          progress * 360
+                        }deg)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  className={`${styles.shape} ${styles.triangle}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Slide In">
+              {showShapes && (
+                <div
+                  ref={transition({
+                    key: "slide",
+                    in: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.transform = `translateX(${
+                          (1 - progress) * -100
+                        }px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        element.style.transform = `translateX(${
+                          (1 - progress) * -100
+                        }px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  className={`${styles.shape} ${styles.square}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Bounce Scale">
+              {showShapes && (
+                <div
+                  ref={transition({
+                    key: "bounce-scale",
+                    in: (element) => ({
+                      spring: {
+                        stiffness: stiffness * 0.8,
+                        damping: damping * 0.7,
+                      },
+                      tick: (progress) => {
+                        const scale = 0.5 + progress * 0.5;
+                        element.style.transform = `scale(${scale})`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness, damping },
+                      tick: (progress) => {
+                        const scale = 0.5 + progress * 0.5;
+                        element.style.transform = `scale(${scale})`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  className={`${styles.shape} ${styles.pentagon}`}
+                />
+              )}
+            </ShapeContainer>
+          </div>
+        </div>
       </div>
-    </div>
+    </SsgoiTransition>
   );
 }

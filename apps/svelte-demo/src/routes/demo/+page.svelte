@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SsgoiTransition } from '@meursyphus/ssgoi-svelte';
+  import { SsgoiTransition } from '@ssgoi/svelte';
 </script>
 
 <SsgoiTransition id="/demo">

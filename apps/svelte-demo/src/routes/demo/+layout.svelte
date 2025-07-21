@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Ssgoi, type SsgoiConfig } from '@meursyphus/ssgoi-svelte';
+  import { Ssgoi, type SsgoiConfig } from '@ssgoi/svelte';
   
   const ssgoiConfig: SsgoiConfig = {
     transitions: [],

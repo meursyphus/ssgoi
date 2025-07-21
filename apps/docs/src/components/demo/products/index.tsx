@@ -2,7 +2,7 @@
 
 import React from "react";
 import { products } from "./mock-data";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { useDemoRouter } from "../router-provider";
 
 export default function ProductsDemo() {

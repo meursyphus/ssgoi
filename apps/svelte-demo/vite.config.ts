@@ -4,6 +4,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit()],
 	ssr: {
-		noExternal: ['@ssgoi/core', '@meursyphus/ssgoi-svelte']
+		noExternal: ['@ssgoi/core', '@ssgoi/svelte']
 	}
 });

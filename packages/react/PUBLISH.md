@@ -1,4 +1,4 @@
-# Publishing @meursyphus/ssgoi-react
+# Publishing @ssgoi/react
 
 ## Development Setup
 

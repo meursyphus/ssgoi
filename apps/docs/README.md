@@ -61,20 +61,20 @@ SSGOI는 프레임워크 독립적으로 설계되어 다음 프레임워크들�
 
 ### React
 ```bash
-npm install @meursyphus/ssgoi-react
+npm install @ssgoi/react
 ```
 
 ### Svelte
 ```bash
-npm install @meursyphus/ssgoi-svelte
+npm install @ssgoi/svelte
 ```
 
 ### 기본 사용법
 
 #### 1. Provider 설정
 ```jsx
-import { Ssgoi } from '@meursyphus/ssgoi-react';
-import { fade } from '@meursyphus/ssgoi-react/view-transitions';
+import { Ssgoi } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/view-transitions';
 
 function App() {
   return (
@@ -91,7 +91,7 @@ function App() {
 
 #### 2. 페이지 전환 적용
 ```jsx
-import { SsgoiTransition } from '@meursyphus/ssgoi-react';
+import { SsgoiTransition } from '@ssgoi/react';
 
 function HomePage() {
   return (
@@ -116,22 +116,22 @@ SSGOI는 용도에 따라 구분된 모듈을 제공합니다:
 
 ### `/view-transitions` - 페이지 전환 프리셋
 ```jsx
-import { fade, slide, scale } from '@meursyphus/ssgoi-react/view-transitions';
+import { fade, slide, scale } from '@ssgoi/react/view-transitions';
 ```
 
 ### `/transitions` - DOM 요소 애니메이션
 ```jsx
-import { fadeIn, slideUp } from '@meursyphus/ssgoi-react/transitions';
+import { fadeIn, slideUp } from '@ssgoi/react/transitions';
 ```
 
 ### `/easing` - 이징 함수
 ```jsx
-import { easeInOut, spring } from '@meursyphus/ssgoi-react/easing';
+import { easeInOut, spring } from '@ssgoi/react/easing';
 ```
 
 ### `/types` - TypeScript 타입 정의
 ```typescript
-import type { TransitionConfig, SpringConfig } from '@meursyphus/ssgoi-react/types';
+import type { TransitionConfig, SpringConfig } from '@ssgoi/react/types';
 ```
 
 ## 🎨 다양한 전환 효과
@@ -170,7 +170,7 @@ const customTransition = {
 개별 DOM 요소에도 애니메이션을 적용할 수 있습니다:
 
 ```jsx
-import { transition } from '@meursyphus/ssgoi-react';
+import { transition } from '@ssgoi/react';
 
 function Component() {
   const [show, setShow] = useState(true);

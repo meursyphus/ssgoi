@@ -1,11 +1,21 @@
-import { animate, spring } from "popmotion";
-import type { AnimationOptions, AnimatorInterface } from "./types";
+import { animate } from "popmotion";
+
+import { SpringConfig } from "./types";
+
+export interface AnimationOptions {
+  from: number;
+  to: number;
+  spring: SpringConfig;
+  onUpdate: (value: number) => void;
+  onComplete: () => void;
+  onStart?: () => void;
+}
 
 /**
  * New Animator implementation using Popmotion
  * Provides spring-based animations with fine control
  */
-export class Animator implements AnimatorInterface {
+export class Animator {
   private options: AnimationOptions;
   private currentValue: number;
   private velocity: number = 0;
@@ -34,15 +44,6 @@ export class Animator implements AnimatorInterface {
 
     const target = reverse ? this.options.from : this.options.to;
 
-    // Convert spring config to Popmotion format
-    // Popmotion uses mass/stiffness/damping, we need to normalize
-    const springConfig = spring({
-      stiffness: this.options.spring.stiffness,
-      damping: this.options.spring.damping,
-      mass: 1,
-      velocity: this.velocity * 1000, // Convert to px/s from normalized
-    });
-
     // Track previous value for velocity calculation
     let previousValue = this.currentValue;
     let previousTime = performance.now();
@@ -52,7 +53,9 @@ export class Animator implements AnimatorInterface {
       from: this.currentValue,
       to: target,
       velocity: this.velocity * 1000, // Convert to px/s
-      ...springConfig,
+      stiffness: this.options.spring.stiffness,
+      damping: this.options.spring.damping,
+      mass: 1,
 
       onUpdate: (value: number) => {
         const currentTime = performance.now();
