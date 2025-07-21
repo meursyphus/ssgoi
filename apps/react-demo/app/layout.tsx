@@ -1,4 +1,20 @@
+"use client";
+
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { hero, fade } from "@ssgoi/react/view-transitions";
 import "./globals.css";
+
+const ssgoiConfig: SsgoiConfig = {
+  transitions: [
+    // Use hero transition between main and item detail pages
+    {
+      from: "/",
+      to: "/item/*",
+      transition: hero({ spring: { stiffness: 1, damping: 1 } }),
+      symmetric: true,
+    },
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -7,7 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Ssgoi config={ssgoiConfig}>
+          <div style={{ position: "relative", minHeight: "100vh" }}>
+            {children}
+          </div>
+        </Ssgoi>
+      </body>
     </html>
   );
 }

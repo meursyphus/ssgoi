@@ -44,15 +44,6 @@ export class Animator {
 
     const target = reverse ? this.options.from : this.options.to;
 
-    // Convert spring config to Popmotion format
-    // Popmotion uses mass/stiffness/damping, we need to normalize
-    const springConfig = spring({
-      stiffness: this.options.spring.stiffness,
-      damping: this.options.spring.damping,
-      mass: 1,
-      velocity: this.velocity * 1000, // Convert to px/s from normalized
-    });
-
     // Track previous value for velocity calculation
     let previousValue = this.currentValue;
     let previousTime = performance.now();
@@ -62,7 +53,9 @@ export class Animator {
       from: this.currentValue,
       to: target,
       velocity: this.velocity * 1000, // Convert to px/s
-      ...springConfig,
+      stiffness: this.options.spring.stiffness,
+      damping: this.options.spring.damping,
+      mass: 1,
 
       onUpdate: (value: number) => {
         const currentTime = performance.now();
