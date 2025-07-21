@@ -8,14 +8,26 @@ export default defineConfig({
     react(),
     dts({
       insertTypesEntry: true,
+      outDir: 'dist',
+      include: ['src/lib/**/*'],
+      exclude: ['src/vite-env.d.ts'],
+      tsconfigPath: './tsconfig.app.json',
+      beforeWriteFile: (filePath, content) => ({
+        filePath: filePath.replace('/src/lib', ''),
+        content,
+      }),
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/lib/index.ts'),
-      name: 'SsgoiReact',
-      formats: ['es', 'umd'],
-      fileName: (format) => `ssgoi-react.${format}.js`,
+      entry: {
+        'index': resolve(__dirname, 'src/lib/index.ts'),
+        'transitions/index': resolve(__dirname, 'src/lib/transitions/index.ts'),
+        'view-transitions/index': resolve(__dirname, 'src/lib/view-transitions/index.ts'),
+        'easing/index': resolve(__dirname, 'src/lib/easing/index.ts'),
+        'types': resolve(__dirname, 'src/lib/types.ts'),
+      },
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],

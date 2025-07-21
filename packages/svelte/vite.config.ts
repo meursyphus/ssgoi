@@ -12,14 +12,20 @@ export default defineConfig({
     }),
     dts({
       insertTypesEntry: true,
+      outDir: 'dist',
+      include: ['src/lib/**/*'],
+      exclude: ['src/vite-env.d.ts'],
     })
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/lib/index.ts'),
-      name: 'SsgoiSvelte',
-      formats: ['es', 'umd'],
-      fileName: (format) => `index.${format}.js`,
+      entry: {
+        'index': resolve(__dirname, 'src/lib/index.ts'),
+        'transitions/index': resolve(__dirname, 'src/lib/transitions/index.ts'),
+        'view-transitions/index': resolve(__dirname, 'src/lib/view-transitions/index.ts'),
+        'types': resolve(__dirname, 'src/lib/types.ts'),
+      },
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       external: ['svelte'],
