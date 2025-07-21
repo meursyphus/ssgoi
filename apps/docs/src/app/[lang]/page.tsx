@@ -73,7 +73,7 @@ export default function Home() {
                     React
                   </p>
                   <code className="font-mono text-sm text-white">
-                    npm install @meursyphus/ssgoi-react
+                    npm install @ssgoi/react
                   </code>
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
@@ -81,7 +81,7 @@ export default function Home() {
                     Vue
                   </p>
                   <code className="font-mono text-sm text-white">
-                    npm install @meursyphus/ssgoi-vue
+                    npm install @ssgoi/vue
                   </code>
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
@@ -89,7 +89,7 @@ export default function Home() {
                     Svelte
                   </p>
                   <code className="font-mono text-sm text-white">
-                    npm install @meursyphus/ssgoi-svelte
+                    npm install @ssgoi/svelte
                   </code>
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
@@ -97,7 +97,7 @@ export default function Home() {
                     SolidJS
                   </p>
                   <code className="font-mono text-sm text-white">
-                    npm install @meursyphus/ssgoi-solid
+                    npm install @ssgoi/solid
                   </code>
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
@@ -105,7 +105,7 @@ export default function Home() {
                     Qwik
                   </p>
                   <code className="font-mono text-sm text-white">
-                    npm install @meursyphus/ssgoi-qwik
+                    npm install @ssgoi/qwik
                   </code>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { useState } from "react";
 import styles from "./page.module.css";
 

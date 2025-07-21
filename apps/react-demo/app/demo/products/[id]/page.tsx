@@ -1,6 +1,6 @@
 "use client";
 
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import styles from "./page.module.css";

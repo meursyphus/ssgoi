@@ -82,8 +82,8 @@ pnpm build
 
 # 특정 패키지 빌드
 pnpm --filter @ssgoi/core build
-pnpm --filter @meursyphus/ssgoi-react build
-pnpm --filter @meursyphus/ssgoi-svelte build
+pnpm --filter @ssgoi/react build
+pnpm --filter @ssgoi/svelte build
 
 # 데모 앱 실행
 pnpm --filter react-demo dev
@@ -616,7 +616,7 @@ export default function DemoLayout({ children }) {
 ```svelte
 <!-- apps/svelte-demo/src/routes/demo/+layout.svelte -->
 <script lang="ts">
-  import { Ssgoi } from '@meursyphus/ssgoi-svelte';
+  import { Ssgoi } from '@ssgoi/svelte';
   
   const ssgoiConfig = {
     // 위와 동일한 설정

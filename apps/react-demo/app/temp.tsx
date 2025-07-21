@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { transition } from "@meursyphus/ssgoi-react";
+import { transition } from "@ssgoi/react";
 
 // Shape container component that maintains size
 interface ShapeContainerProps {

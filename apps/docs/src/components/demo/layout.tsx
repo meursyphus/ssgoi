@@ -2,8 +2,8 @@
 
 import React, { useMemo, useRef, useEffect } from "react";
 import { useDemoRouter } from "./router-provider";
-import { Ssgoi, SsgoiConfig } from "@meursyphus/ssgoi-react";
-import { hero, pinterest } from "@meursyphus/ssgoi-react/view-transitions";
+import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
+import { hero, pinterest } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
 
 interface DemoLayoutProps {

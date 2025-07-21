@@ -217,7 +217,7 @@ importers:
 
   apps/react-demo:
     dependencies:
-      '@meursyphus/ssgoi-react':
+      '@ssgoi/react':
         specifier: workspace:*
         version: link:../../packages/react
       '@tailwindcss/postcss':
@@ -269,7 +269,7 @@ importers:
 
   apps/svelte-demo:
     dependencies:
-      '@meursyphus/ssgoi-svelte':
+      '@ssgoi/svelte':
         specifier: workspace:*
         version: link:../../packages/svelte
     devDependencies:

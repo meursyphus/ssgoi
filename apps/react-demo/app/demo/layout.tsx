@@ -1,6 +1,6 @@
 "use client";
 
-import { Ssgoi, type SsgoiConfig } from "@meursyphus/ssgoi-react";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import Link from "next/link";
 import { fade, hero } from "./transitions";
 import styles from "./layout.module.css";

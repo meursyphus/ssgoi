@@ -3,8 +3,8 @@ import { MdxRemote } from "@/components/mdx-remote";
 const codeExample = `
 \`\`\`tsx
 // app/layout.tsx
-import { Ssgoi, SsgoiConfig } from '@meursyphus/ssgoi-react'
-import { fade, hero } from '@meursyphus/ssgoi-react/view-transitions'
+import { Ssgoi, SsgoiConfig } from '@ssgoi/react'
+import { fade, hero } from '@ssgoi/react/view-transitions'
 
 const config: SsgoiConfig = {
   transitions: [
@@ -32,7 +32,7 @@ export default function RootLayout({
 
 \`\`\`tsx
 // app/posts/page.tsx
-import { SsgoiTransition } from '@meursyphus/ssgoi-react'
+import { SsgoiTransition } from '@ssgoi/react'
 
 export default function PostsPage() {
   return (

@@ -29,8 +29,8 @@ SSGOI(상태를 기억하는 스프링 트랜지션) 라이브러리의 공식 �
 ## 🚀 빠른 링크
 
 - [GitHub 저장소](https://github.com/meursyphus/ssgoi)
-- [npm - React](https://www.npmjs.com/package/@meursyphus/ssgoi-react)
-- [npm - Svelte](https://www.npmjs.com/package/@meursyphus/ssgoi-svelte)
+- [npm - React](https://www.npmjs.com/package/@ssgoi/react)
+- [npm - Svelte](https://www.npmjs.com/package/@ssgoi/svelte)
 - [React 데모](../../react-demo)
 - [Svelte 데모](../../svelte-demo)
 

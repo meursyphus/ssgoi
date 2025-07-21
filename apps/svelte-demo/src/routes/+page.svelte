@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { transition } from '@meursyphus/ssgoi-svelte';
+  import { transition } from '@ssgoi/svelte';
   
   let showShapes = $state(true);
   let stiffness = $state(1000);

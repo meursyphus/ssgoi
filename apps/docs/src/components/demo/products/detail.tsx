@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { getProduct } from "./mock-data";
 import { useDemoRouter } from "../router-provider";
 

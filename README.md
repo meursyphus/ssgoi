@@ -8,10 +8,10 @@ SSGOI는 DOM 요소의 생명주기에 맞춰 자연스러운 애니메이션을
 
 ```bash
 # React
-npm install @meursyphus/ssgoi-react
+npm install @ssgoi/react
 
 # Svelte  
-npm install @meursyphus/ssgoi-svelte
+npm install @ssgoi/svelte
 ```
 
 ## 핵심 아키텍처
@@ -29,8 +29,8 @@ SSGOI는 `create-ssgoi-transition-context`를 통해 중앙화된 트랜지션 �
 ### 1. Provider 설정 (Ssgoi 컴포넌트)
 
 ```jsx
-import { Ssgoi, type SsgoiConfig } from '@meursyphus/ssgoi-react';
-import { fade } from '@meursyphus/ssgoi-react/view-transitions';
+import { Ssgoi, type SsgoiConfig } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/view-transitions';
 
 const ssgoiConfig: SsgoiConfig = {
   transitions: [
@@ -56,7 +56,7 @@ function App() {
 ### 2. 페이지 트랜지션 (SsgoiTransition 컴포넌트)
 
 ```jsx
-import { SsgoiTransition } from '@meursyphus/ssgoi-react';
+import { SsgoiTransition } from '@ssgoi/react';
 
 function HomePage() {
   return (
@@ -73,7 +73,7 @@ function HomePage() {
 ### 3. 개별 요소 트랜지션
 
 ```jsx
-import { transition } from '@meursyphus/ssgoi-react';
+import { transition } from '@ssgoi/react';
 
 function App() {
   const [show, setShow] = useState(true);
@@ -126,7 +126,7 @@ function App() {
 
 ```svelte
 <script>
-  import { transition } from '@meursyphus/ssgoi-svelte';
+  import { transition } from '@ssgoi/svelte';
   
   let show = true;
 </script>
@@ -160,7 +160,7 @@ React 데모 앱에서는 Next.js와 함께 다음과 같이 사용합니다:
 
 ### Layout 설정 (app/demo/layout.tsx)
 ```jsx
-import { Ssgoi, type SsgoiConfig } from "@meursyphus/ssgoi-react";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 
 const ssgoiConfig: SsgoiConfig = {
   transitions: [], // 특정 경로 트랜지션 없음
@@ -198,7 +198,7 @@ export default function DemoLayout({ children }) {
 
 ### 페이지 구현 (app/demo/page.tsx)
 ```jsx
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 
 export default function DemoPage() {
   return (
