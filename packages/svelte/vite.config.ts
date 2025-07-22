@@ -8,13 +8,19 @@ export default defineConfig({
     svelte({
       compilerOptions: {
         runes: true
-      }
+      },
+      prebundleSvelteLibraries: true,
     }),
     dts({
       insertTypesEntry: true,
       outDir: 'dist',
       include: ['src/lib/**/*'],
       exclude: ['src/vite-env.d.ts'],
+      tsconfigPath: './tsconfig.app.json',
+      beforeWriteFile: (filePath, content) => ({
+        filePath: filePath.replace('/src/lib', ''),
+        content,
+      }),
     })
   ],
   build: {
@@ -33,7 +39,10 @@ export default defineConfig({
         globals: {
           svelte: 'Svelte',
         },
+        interop: 'auto',
       },
     },
+    ssr: true,
+    ssrEmitAssets: true,
   },
 })
