@@ -32,12 +32,15 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime"],
+      external: ["react", "react-dom", "react/jsx-runtime", "@ssgoi/core"],
       output: {
+        preserveModules: false,
+        exports: 'named',
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
           "react/jsx-runtime": "react/jsx-runtime",
+          "@ssgoi/core": "@ssgoi/core",
         },
       },
     },

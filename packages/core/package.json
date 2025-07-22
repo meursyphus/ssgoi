@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A smooth page transition library",
   "private": false,
   "type": "module",
@@ -15,13 +15,13 @@
     },
     "./transitions": {
       "types": "./dist/transitions/index.d.ts",
-      "import": "./dist/transitions.js",
-      "require": "./dist/transitions.cjs"
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs"
     },
     "./view-transitions": {
       "types": "./dist/view-transitions/index.d.ts",
-      "import": "./dist/view-transitions.js",
-      "require": "./dist/view-transitions.cjs"
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs"
     },
     "./types": {
       "types": "./dist/types.d.ts",
@@ -31,7 +31,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
   ],
   "scripts": {
     "dev": "vite",
@@ -42,10 +43,17 @@
     "page-transition",
     "animation",
     "typescript",
-    "vanilla"
+    "vanilla",
+    "spring-physics",
+    "ssgoi"
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ssgoi.git",
+    "directory": "packages/core"
+  },
   "devDependencies": {
     "@types/node": "^22.10.6",
     "typescript": "^5.7.3",

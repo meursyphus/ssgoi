@@ -1,14 +1,20 @@
 {
 	"name": "@ssgoi/svelte",
 	"version": "0.0.7",
+	"description": "Svelte bindings for SSGOI page transition library",
+	"private": false,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"scripts": {
+		"dev": "svelte-package --watch",
 		"build": "svelte-package",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint ."
 	},
 	"files": [
 		"dist",
-		"src"
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
 	],
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -40,8 +46,19 @@
 		"vite": "^6.2.6"
 	},
 	"keywords": [
-		"svelte"
+		"svelte",
+		"page-transition",
+		"animation",
+		"ssgoi",
+		"spring-physics"
 	],
+	"author": "",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/yourusername/ssgoi.git",
+		"directory": "packages/svelte"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",

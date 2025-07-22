@@ -7,27 +7,32 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'src/lib/index.ts'),
-        transitions: resolve(__dirname, 'src/lib/transitions/index.ts'),
-        "view-transitions": resolve(__dirname, 'src/lib/view-transitions/index.ts'),
+        'transitions/index': resolve(__dirname, 'src/lib/transitions/index.ts'),
+        'view-transitions/index': resolve(__dirname, 'src/lib/view-transitions/index.ts'),
         types: resolve(__dirname, 'src/lib/types.ts'),
       },
-
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-      // Make sure to externalize deps that shouldn't be bundled
-      // into your library
-      external: [],
+      external: ['popmotion'],
       output: {
-        // Provide global variables to use in the UMD build
-        // for externalized deps
-        globals: {}
+        preserveModules: false,
+        exports: 'named',
+        globals: {
+          popmotion: 'popmotion'
+        }
       }
     }
   },
   plugins: [
     dts({
       insertTypesEntry: true,
+      outDir: 'dist',
+      include: ['src/lib/**/*'],
+      beforeWriteFile: (filePath, content) => ({
+        filePath: filePath.replace('/src/lib', ''),
+        content,
+      }),
     })
   ]
 })
