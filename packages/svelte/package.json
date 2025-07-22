@@ -18,31 +18,31 @@
     "vite": "^7.0.4",
     "@ssgoi/core": "workspace:*"
   },
-  	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js",
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
-		},
-		"./transitions": {
-			"types": "./dist/transitions.d.ts",
-			"import": "./dist/transitions.js",
-			"require": "./dist/transitions.cjs"
-		},
-		"./view-transitions": {
-			"types": "./dist/view-transitions.d.ts",
-			"import": "./dist/view-transitions.js",
-			"require": "./dist/view-transitions.cjs"
-		},
-		"./types": {
-			"types": "./dist/types.d.ts",
-			"import": "./dist/types.js",
-			"require": "./dist/types.cjs"
-		}
-	}
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./transitions": {
+      "types": "./dist/transitions.d.ts",
+      "import": "./dist/transitions.js",
+      "require": "./dist/transitions.cjs"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions.d.ts",
+      "import": "./dist/view-transitions.js",
+      "require": "./dist/view-transitions.cjs"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs"
+    }
+  }
 }
