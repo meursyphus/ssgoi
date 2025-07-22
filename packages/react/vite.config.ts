@@ -18,11 +18,6 @@ export default defineConfig({
       }),
     }),
   ],
-  resolve: {
-    alias: {
-      "@ssgoi/core/*": "../core/src/lib/*",
-    },
-  },
   build: {
     lib: {
       entry: {

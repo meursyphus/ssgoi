@@ -5,10 +5,15 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/lib/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/lib/index.ts'),
+        transitions: resolve(__dirname, 'src/lib/transitions/index.ts'),
+        "view-transitions": resolve(__dirname, 'src/lib/view-transitions/index.ts'),
+        types: resolve(__dirname, 'src/lib/types.ts'),
+      },
       name: 'Ssgoi',
       fileName: 'ssgoi',
-      formats: ['es', 'umd']
+      formats: ['es', 'cjs']
     },
     rollupOptions: {
       // Make sure to externalize deps that shouldn't be bundled

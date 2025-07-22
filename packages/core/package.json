@@ -4,29 +4,29 @@
   "description": "A smooth page transition library",
   "private": true,
   "type": "module",
-  "main": "./src/lib/index.ts",
-  "module": "./src/lib/index.ts",
-  "types": "./src/lib/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/lib/index.ts",
-      "import": "./src/lib/index.ts",
-      "require": "./src/lib/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./transitions": {
-      "types": "./src/lib/transitions/index.ts",
-      "import": "./src/lib/transitions/index.ts",
-      "require": "./src/lib/transitions/index.ts"
+      "types": "./dist/transitions/index.d.ts",
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs"
     },
     "./view-transitions": {
-      "types": "./src/lib/view-transitions/index.ts",
-      "import": "./src/lib/view-transitions/index.ts",
-      "require": "./src/lib/view-transitions/index.ts"
+      "types": "./dist/view-transitions/index.d.ts",
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs"
     },
     "./types": {
-      "types": "./src/lib/types.ts",
-      "import": "./src/lib/types.ts",
-      "require": "./src/lib/types.ts"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs"
     }
   },
   "files": [
