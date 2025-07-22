@@ -11,8 +11,7 @@ export default defineConfig({
         "view-transitions": resolve(__dirname, 'src/lib/view-transitions/index.ts'),
         types: resolve(__dirname, 'src/lib/types.ts'),
       },
-      name: 'Ssgoi',
-      fileName: 'ssgoi',
+
       formats: ['es', 'cjs']
     },
     rollupOptions: {

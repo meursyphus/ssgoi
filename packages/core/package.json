@@ -15,13 +15,13 @@
     },
     "./transitions": {
       "types": "./dist/transitions/index.d.ts",
-      "import": "./dist/transitions/index.js",
-      "require": "./dist/transitions/index.cjs"
+      "import": "./dist/transitions.js",
+      "require": "./dist/transitions.cjs"
     },
     "./view-transitions": {
       "types": "./dist/view-transitions/index.d.ts",
-      "import": "./dist/view-transitions/index.js",
-      "require": "./dist/view-transitions/index.cjs"
+      "import": "./dist/view-transitions.js",
+      "require": "./dist/view-transitions.cjs"
     },
     "./types": {
       "types": "./dist/types.d.ts",
