@@ -1,65 +1,73 @@
 {
-  "name": "@ssgoi/svelte",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    },
-    "./transitions": {
-      "types": "./dist/transitions/index.d.ts",
-      "svelte": "./dist/transitions/index.js",
-      "import": "./dist/transitions/index.js",
-      "require": "./dist/transitions/index.cjs",
-      "default": "./dist/transitions/index.js"
-    },
-    "./view-transitions": {
-      "types": "./dist/view-transitions/index.d.ts",
-      "svelte": "./dist/view-transitions/index.js",
-      "import": "./dist/view-transitions/index.js",
-      "require": "./dist/view-transitions/index.cjs",
-      "default": "./dist/view-transitions/index.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "svelte": "./dist/types.js",
-      "import": "./dist/types.js",
-      "require": "./dist/types.cjs",
-      "default": "./dist/types.js"
-    }
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
-  "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
-    "prepublishOnly": "pnpm build"
-  },
-  "dependencies": {
-    "@ssgoi/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
-  "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.0.0",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^24.0.13",
-    "svelte": "^5.35.5",
-    "svelte-check": "^4.2.2",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.4",
-    "vite-plugin-dts": "^4.5.4"
-  }
+	"name": "@ssgoi/svelte",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build && npm run prepack",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"prepack": "svelte-kit sync && svelte-package && publint",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint ."
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		},
+		"./transitions": {
+			"types": "./dist/transitions/index.d.ts",
+			"svelte": "./dist/transitions/index.js"
+		},
+		"./view-transitions": {
+			"types": "./dist/view-transitions/index.d.ts",
+			"svelte": "./dist/view-transitions/index.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"svelte": "./dist/types.js"
+		}
+	},
+	"dependencies": {
+		"@ssgoi/core": "workspace:*"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.5",
+		"@eslint/js": "^9.18.0",
+		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/package": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-svelte": "^3.0.0",
+		"globals": "^16.0.0",
+		"prettier": "^3.4.2",
+		"prettier-plugin-svelte": "^3.3.3",
+		"publint": "^0.3.2",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.0.0",
+		"typescript-eslint": "^8.20.0",
+		"vite": "^6.2.6"
+	},
+	"keywords": [
+		"svelte"
+	]
 }
