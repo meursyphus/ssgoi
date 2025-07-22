@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ssgoi/react": "workspace:*",
+    "@ssgoi/react": "^0.0.5",
     "@tailwindcss/postcss": "^4.1.11",
     "next": "15.3.5",
     "react": "^19.0.0",
