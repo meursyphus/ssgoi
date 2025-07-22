@@ -1,19 +1,14 @@
 {
 	"name": "@ssgoi/svelte",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"scripts": {
-		"build2": "svelte-kit sync && svelte-package && publint",
-		"build": "vite build",
+		"build": "svelte-package",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint ."
 	},
 	"files": [
 		"dist",
-		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
-	],
-	"sideEffects": [
-		"**/*.css"
+		"src"
 	],
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -21,9 +16,6 @@
 	"dependencies": {
 		"@ssgoi/core": "workspace:*"
 	},
-	"bundledDependencies": [
-		"@ssgoi/core"
-	],
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},
