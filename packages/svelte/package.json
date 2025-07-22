@@ -23,6 +23,9 @@
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"type": "module",
+	"dependencies": {
+		"@ssgoi/core": "workspace:*"
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},
@@ -44,8 +47,7 @@
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
-		"vite": "^6.2.6",
-		"@ssgoi/core": "workspace:*"
+		"vite": "^6.2.6"
 	},
 	"keywords": [
 		"svelte"
