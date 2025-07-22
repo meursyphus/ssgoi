@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "type": "module",
   "files": [
     "dist",
@@ -20,9 +20,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package": "vite build",
-    "prepublishOnly": "pnpm run build && node scripts/prepare-publish.js",
-    "postpublish": "node scripts/restore-package.js"
+    "package": "vite build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
