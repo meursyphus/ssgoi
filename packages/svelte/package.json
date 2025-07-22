@@ -1,6 +1,6 @@
 {
 	"name": "@ssgoi/svelte",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"description": "Svelte bindings for SSGOI page transition library",
 	"private": false,
 	"main": "./dist/index.js",
