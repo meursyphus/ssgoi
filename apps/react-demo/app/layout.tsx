@@ -10,7 +10,7 @@ const ssgoiConfig: SsgoiConfig = {
     {
       from: "/",
       to: "/item/*",
-      transition: hero(),
+      transition: hero({ spring: { stiffness: 5, damping: 1 } }),
       symmetric: true,
     },
   ],
@@ -25,7 +25,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Ssgoi config={ssgoiConfig}>
-          <div style={{ position: "relative", minHeight: "100vh" }}>
+          <div
+            style={{ position: "relative", minHeight: "100vh", width: "100%" }}
+          >
             {children}
           </div>
         </Ssgoi>

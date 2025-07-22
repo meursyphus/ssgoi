@@ -11,15 +11,15 @@ export const none = (options: NoneOptions = {}) => {
   } = options;
 
   return {
-    in: (element: HTMLElement) => ({
+    in: (_element: HTMLElement) => ({
       spring,
-      tick: (progress: number) => {
+      tick: (_progress: number) => {
         // No animation, just instantly show
       }
     }),
-    out: (element: HTMLElement) => ({
+    out: (_element: HTMLElement) => ({
       spring,
-      tick: (progress: number) => {
+      tick: (_progress: number) => {
         // No animation, just instantly hide
       }
     })

@@ -1,429 +1,518 @@
 <script lang="ts">
-  import { transition } from '@ssgoi/svelte';
+  import { SsgoiTransition, transition } from '@ssgoi/svelte';
   
   let showShapes = $state(true);
-  let stiffness = $state(1000);
-  let damping = $state(100);
-  let count = $state(0);
+  let stiffness = $state(300);
+  let damping = $state(30);
+
+  interface ShapeContainerProps {
+    label: string;
+    children: () => any;
+  }
+
+  const colors = [
+    { id: 1, color: '#FF6B6B', name: 'Coral' },
+    { id: 2, color: '#4ECDC4', name: 'Turquoise' },
+    { id: 3, color: '#45B7D1', name: 'Sky Blue' },
+    { id: 4, color: '#96CEB4', name: 'Sage' },
+    { id: 5, color: '#FECA57', name: 'Sunflower' },
+    { id: 6, color: '#DDA0DD', name: 'Plum' },
+  ];
 </script>
 
-<div class="app-container">
-  <h1 class="app-title">use:transition Examples</h1>
-  
-  <div class="demo-link">
-    <a href="/demo">View Page Transition Demo →</a>
-  </div>
-  
-  <div class="controls">
-    <div class="speed-buttons">
+<SsgoiTransition id="/">
+  <div class="app-container">
+    <div class="hero-section">
+      <h1 class="app-title">SSGOI Svelte Demo</h1>
+    </div>
+
+    <!-- Hero Transition Section -->
+    <div class="hero-transition-section">
+      <h2 class="section-title">Hero Transition</h2>
+      <div class="color-grid">
+        {#each colors as item}
+          <a
+            href={`/item/${item.id}`}
+            class="color-box"
+            style="background-color: {item.color}"
+            data-hero-key={`color-${item.id}`}
+          >
+            <span class="color-name">{item.name}</span>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- DOM Transition Section -->
+    <div class="controls-section">
+      <div class="controls">
+        <div class="speed-buttons">
+          <button
+            class="speed-button {stiffness === 100 ? 'active' : ''}"
+            onclick={() => {
+              stiffness = 100;
+              damping = 20;
+            }}
+          >
+            Smooth
+          </button>
+          <button
+            class="speed-button {stiffness === 300 ? 'active' : ''}"
+            onclick={() => {
+              stiffness = 300;
+              damping = 30;
+            }}
+          >
+            Normal
+          </button>
+          <button
+            class="speed-button {stiffness === 500 ? 'active' : ''}"
+            onclick={() => {
+              stiffness = 500;
+              damping = 40;
+            }}
+          >
+            Fast
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Stiffness</label>
+          <input
+            type="number"
+            class="control-input"
+            bind:value={stiffness}
+            min="1"
+            max="1000"
+          />
+          <span class="control-value">(1-1000)</span>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Damping</label>
+          <input
+            type="number"
+            class="control-input"
+            bind:value={damping}
+            min="0"
+            max="100"
+          />
+          <span class="control-value">(0-100)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-section">
       <button
-        class="speed-button slow"
-        onclick={() => {
-          stiffness = 200;
-          damping = 100;
-        }}
+        onclick={() => showShapes = !showShapes}
+        class="toggle-button"
       >
-        느리게
-      </button>
-      <button
-        class="speed-button fast"
-        onclick={() => {
-          stiffness = 1000;
-          damping = 100;
-        }}
-      >
-        빠르게
+        {showShapes ? 'Hide Elements' : 'Show Elements'}
       </button>
     </div>
-    
-    <div class="control-group">
-      <label class="control-label" for="stiffness">Stiffness</label>
-      <input
-        id="stiffness"
-        type="number"
-        class="control-input"
-        bind:value={stiffness}
-        min="1"
-        max="1000"
-      />
-      <span class="control-value">(1-1000)</span>
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label" for="damping">Damping</label>
-      <input
-        id="damping"
-        type="number"
-        class="control-input"
-        bind:value={damping}
-        min="0"
-        max="100"
-      />
-      <span class="control-value">(0-100)</span>
+
+    <div class="examples-section">
+      <h2 class="section-title">DOM Transition</h2>
+      <div class="shapes-grid">
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            {#if showShapes}
+              <div
+                use:transition={{
+                  key: 'fade',
+                  in: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                }}
+                class="shape circle"
+              ></div>
+            {/if}
+          </div>
+          <p class="shape-label">Fade</p>
+        </div>
+
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            {#if showShapes}
+              <div
+                use:transition={{
+                  key: 'scale-rotate',
+                  in: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.transform = `scale(${progress}) rotate(${
+                        progress * 360
+                      }deg)`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.transform = `scale(${progress}) rotate(${
+                        progress * 360
+                      }deg)`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                }}
+                class="shape triangle"
+              ></div>
+            {/if}
+          </div>
+          <p class="shape-label">Scale + Rotate</p>
+        </div>
+
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            {#if showShapes}
+              <div
+                use:transition={{
+                  key: 'slide',
+                  in: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.transform = `translateX(${
+                        (1 - progress) * -100
+                      }px)`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      element.style.transform = `translateX(${
+                        (1 - progress) * -100
+                      }px)`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                }}
+                class="shape square"
+              ></div>
+            {/if}
+          </div>
+          <p class="shape-label">Slide In</p>
+        </div>
+
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            {#if showShapes}
+              <div
+                use:transition={{
+                  key: 'bounce-scale',
+                  in: (element) => ({
+                    spring: {
+                      stiffness: stiffness * 0.8,
+                      damping: damping * 0.7,
+                    },
+                    tick: (progress) => {
+                      const scale = 0.5 + progress * 0.5;
+                      element.style.transform = `scale(${scale})`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress) => {
+                      const scale = 0.5 + progress * 0.5;
+                      element.style.transform = `scale(${scale})`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                }}
+                class="shape pentagon"
+              ></div>
+            {/if}
+          </div>
+          <p class="shape-label">Bounce Scale</p>
+        </div>
+      </div>
     </div>
   </div>
-  
-  <div class="button-group">
-    <button
-      onclick={() => showShapes = !showShapes}
-      class="toggle-button"
-    >
-      {showShapes ? "Hide All Shapes" : "Show All Shapes"}
-    </button>
-    <button
-      onclick={() => count = count + 1}
-      class="count-button"
-    >
-      Count Up
-    </button>
-    <span class="count-display">Count: {count}</span>
-  </div>
-  
-  <div class="shapes-grid">
-    <!-- Fade transition -->
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: 'fade',
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.opacity = progress.toString();
-                }
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.opacity = progress.toString();
-                }
-              })
-            }}
-            class="shape circle"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Fade</p>
-    </div>
-    
-    <!-- Scale + Rotate transition -->
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: 'scale-rotate',
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                  element.style.opacity = progress.toString();
-                }
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                  element.style.opacity = progress.toString();
-                }
-              })
-            }}
-            class="shape triangle"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Scale + Rotate</p>
-    </div>
-    
-    <!-- Slide transition -->
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: 'slide',
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                  element.style.opacity = progress.toString();
-                }
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                  element.style.opacity = progress.toString();
-                }
-              })
-            }}
-            class="shape square"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Slide</p>
-    </div>
-    
-    <!-- Scale + Fade transition -->
-    <div class="shape-container">
-      <div class="shape-wrapper">
-        {#if showShapes}
-          <div
-            use:transition={{
-              key: 'scale-fade',
-              in: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  const scale = 0.5 + progress * 0.5;
-                  element.style.transform = `scale(${scale})`;
-                  element.style.opacity = progress.toString();
-                }
-              }),
-              out: (element) => ({
-                spring: { stiffness, damping },
-                tick: (progress) => {
-                  const scale = 0.5 + progress * 0.5;
-                  element.style.transform = `scale(${scale})`;
-                  element.style.opacity = progress.toString();
-                }
-              })
-            }}
-            class="shape pentagon"
-          ></div>
-        {/if}
-      </div>
-      <p class="shape-label">Scale + Fade</p>
-    </div>
-  </div>
-</div>
+</SsgoiTransition>
 
 <style>
   .app-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    padding: 3rem 2rem;
   }
-  
-  .app-title {
+
+  .hero-section {
     text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .app-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    letter-spacing: -0.02em;
     color: #333;
   }
-  
-  .toggle-button {
-    display: block;
-    margin: 0 auto 3rem;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .toggle-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .shapes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 3rem;
+
+  /* Controls Section */
+  .controls-section {
+    background: white;
+    border-radius: 16px;
     padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 3rem;
   }
-  
-  .shape-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .shape-wrapper {
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  
-  .shape {
-    width: 100px;
-    height: 100px;
-    position: relative;
-  }
-  
-  .circle {
-    background-color: #ff6b6b;
-    border-radius: 50%;
-  }
-  
-  .triangle {
-    width: 0;
-    height: 0;
-    border-left: 50px solid transparent;
-    border-right: 50px solid transparent;
-    border-bottom: 87px solid #4ecdc4;
-  }
-  
-  .square {
-    background-color: #45b7d1;
-  }
-  
-  .pentagon {
-    position: relative;
-    width: 100px;
-    background-color: #ffd93d;
-    height: 0;
-    border-left: 50px solid transparent;
-    border-right: 50px solid transparent;
-    border-top: 38px solid #ffd93d;
-  }
-  
-  .pentagon::before {
-    content: '';
-    position: absolute;
-    top: -88px;
-    left: -50px;
-    width: 0;
-    height: 0;
-    border-left: 50px solid transparent;
-    border-right: 50px solid transparent;
-    border-bottom: 50px solid #ffd93d;
-  }
-  
-  .shape-label {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #555;
-    margin: 0;
-  }
-  
+
   .controls {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
     display: flex;
-    gap: 2rem;
+    gap: 3rem;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
   }
-  
+
   .speed-buttons {
     display: flex;
-    gap: 0.5rem;
-    margin-right: 1rem;
+    gap: 0.75rem;
   }
-  
+
   .speed-button {
-    padding: 0.5rem 1rem;
-    border: 2px solid #ddd;
-    border-radius: 5px;
+    padding: 0.625rem 1.25rem;
+    border: 2px solid #e1e4e8;
+    border-radius: 8px;
     background-color: white;
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.2s;
+    color: #333;
   }
-  
+
   .speed-button:hover {
-    border-color: #007bff;
-    background-color: #f8f9fa;
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
   }
-  
-  .speed-button.slow {
-    color: #dc3545;
+
+  .speed-button.active {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
   }
-  
-  
-  .speed-button.fast {
-    color: #28a745;
-  }
-  
-  .speed-button:active {
-    transform: translateY(1px);
-  }
-  
+
   .control-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
   }
-  
+
   .control-label {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: #666;
     font-weight: 500;
   }
-  
+
   .control-input {
     width: 80px;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.375rem 0.75rem;
+    border: 2px solid #e1e4e8;
+    border-radius: 6px;
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
   }
-  
+
+  .control-input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
   .control-value {
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.75rem;
+    color: #999;
   }
-  
-  .count-button {
-    padding: 0.75rem 1.5rem;
+
+  /* Toggle Button */
+  .toggle-section {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .toggle-button {
+    padding: 0.875rem 2.5rem;
     font-size: 1rem;
-    background-color: #28a745;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin: 0 1rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   }
-  
-  .count-button:hover {
-    background-color: #218838;
+
+  .toggle-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
   }
-  
-  .button-group {
+
+  /* Transition Examples Section */
+  .examples-section {
+    margin-bottom: 5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #333;
+  }
+
+  .shapes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    padding: 2rem;
+  }
+
+  .shape-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+  }
+
+  .shape-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .shape-wrapper {
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+  }
+
+  .shape {
+    width: 80px;
+    height: 80px;
+    position: relative;
+  }
+
+  .circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+  }
+
+  .triangle {
+    width: 0;
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 70px solid #4ecdc4;
+  }
+
+  .square {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    border-radius: 8px;
+  }
+
+  .pentagon {
+    position: relative;
+    width: 80px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-top: 30px solid;
+    border-image: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) 1;
+  }
+
+  .pentagon::before {
+    content: '';
+    position: absolute;
+    top: -70px;
+    left: -40px;
+    width: 0;
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 40px solid #f093fb;
+  }
+
+  .shape-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Hero Transition Section */
+  .hero-transition-section {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 3rem;
   }
-  
-  .count-display {
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: 600;
-    margin: 0 1rem;
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
   }
-  
-  .demo-link {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .demo-link a {
-    color: #0066cc;
+
+  .color-box {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    cursor: pointer;
     text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: 500;
-    transition: color 0.2s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
   }
-  
-  .demo-link a:hover {
-    color: #0052a3;
-    text-decoration: underline;
+
+  .color-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .color-name {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .app-title {
+      font-size: 2.5rem;
+    }
+
+    .shapes-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
   }
 </style>
