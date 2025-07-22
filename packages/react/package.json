@@ -1,19 +1,39 @@
 {
   "name": "@ssgoi/react",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "type": "module",
   "files": [
     "dist",
     "src"
   ],
-  "main": "./src/lib/index.ts",
-  "module": "./src/lib/index.ts",
-  "types": "./src/lib/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/lib/index.ts",
-    "./transitions": "./src/lib/transitions/index.ts",
-    "./view-transitions": "./src/lib/view-transitions/index.ts",
-    "./types": "./src/lib/types.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./transitions": {
+      "types": "./dist/transitions/index.d.ts",
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs",
+      "default": "./dist/transitions/index.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs",
+      "default": "./dist/view-transitions/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "default": "./dist/types.js"
+    }
   },
   "scripts": {
     "dev": "vite build --watch",
@@ -21,6 +41,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -39,8 +62,5 @@
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
     "vite-plugin-dts": "^4.5.4"
-  },
-  "dependencies": {
-    "@ssgoi/core": "workspace:*"
   }
 }
