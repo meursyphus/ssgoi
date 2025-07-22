@@ -2,7 +2,7 @@
   "name": "@ssgoi/core",
   "version": "0.0.1",
   "description": "A smooth page transition library",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
