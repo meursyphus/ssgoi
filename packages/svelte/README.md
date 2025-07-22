@@ -1,58 +1,147 @@
-# Svelte library
+# @ssgoi/svelte
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Installation
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+npm install @ssgoi/svelte
+# or
+yarn add @ssgoi/svelte
+# or
+pnpm add @ssgoi/svelte
 ```
 
-## Developing
+## Quick Start
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+### 1. Wrap your app layout
 
-```bash
-npm run dev
+```svelte
+<!-- +layout.svelte -->
+<script>
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { fade } from '@ssgoi/svelte/view-transitions';
+</script>
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+<Ssgoi config={{ defaultTransition: fade() }}>
+  <!-- ⚠️ Important: position: relative is required! -->
+  <div style="position: relative; min-height: 100vh;">
+    <slot />
+  </div>
+</Ssgoi>
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+### 2. Wrap your pages
 
-## Building
+```svelte
+<!-- +page.svelte -->
+<script>
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { page } from '$app/stores';
+</script>
 
-To build your library:
-
-```bash
-npm run package
+<SsgoiTransition id={$page.url.pathname}>
+  <h1>Welcome</h1>
+  <!-- Page content -->
+</SsgoiTransition>
 ```
 
-To create a production version of your showcase app:
+## Route-based Transitions
 
-```bash
-npm run build
+```svelte
+<script>
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { slide, fade } from '@ssgoi/svelte/view-transitions';
+
+  const config = {
+    transitions: [
+      { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
+      { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
+      { from: '/products', to: '/products/*', transition: fade() }
+    ],
+    defaultTransition: fade()
+  };
+</script>
+
+<Ssgoi {config}>
+  <slot />
+</Ssgoi>
 ```
 
-You can preview the production build with `npm run preview`.
+## Individual Element Transitions
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```svelte
+<script>
+  import { transition } from '@ssgoi/svelte';
+  import { fadeIn, slideUp } from '@ssgoi/svelte/transitions';
+</script>
 
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
+<div use:transition={{
+  key: 'unique-key',
+  in: fadeIn(),
+  out: slideUp()
+}}>
+  Content
+</div>
 ```
+
+## API Reference
+
+### Components
+
+- `<Ssgoi>` - Provider component for transition context
+- `<SsgoiTransition>` - Wrapper for pages that should transition
+
+### Actions
+
+- `use:transition` - Apply transitions to individual elements
+
+### Configuration
+
+```typescript
+interface SsgoiConfig {
+  transitions: Array<{
+    from: string;
+    to: string;
+    transition: Transition;
+    symmetric?: boolean;
+  }>;
+  defaultTransition?: Transition;
+}
+```
+
+## Built-in Transitions
+
+### View Transitions (`/view-transitions`)
+- `fade()`, `slide()`, `scale()`
+- `hero()`, `pinterest()`, `ripple()`
+
+### Element Transitions (`/transitions`)
+- `fadeIn()`, `fadeOut()`
+- `slideUp()`, `slideDown()`, `slideLeft()`, `slideRight()`
+- `scaleIn()`, `scaleOut()`
+- `bounce()`, `blur()`, `rotate()`
+
+## Spring Configuration
+
+```javascript
+slide({
+  direction: 'left',
+  spring: {
+    stiffness: 300,  // 1-1000
+    damping: 30      // 0-100
+  }
+})
+```
+
+## Documentation
+
+Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+- Complete API reference
+- Interactive examples
+- Advanced patterns
+- Migration guides
+
+## License
+
+MIT © [MeurSyphus](https://github.com/meursyphus)

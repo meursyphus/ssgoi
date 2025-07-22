@@ -244,7 +244,7 @@ Visit the `/apps` directory to explore the demo source code and learn how to imp
 
 ## Documentation
 
-Visit our [documentation site](https://ssgoi.dev) for:
+Visit [https://ssgoi.dev](https://ssgoi.dev) for:
 - Detailed API reference
 - Interactive examples
 - Framework integration guides

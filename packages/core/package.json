@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/core",
-  "version": "0.0.3",
-  "description": "A smooth page transition library",
+  "version": "2.0.0",
+  "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -41,7 +41,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "pnpm run build"
   },
   "keywords": [
     "page-transition",
@@ -51,12 +52,22 @@
     "spring-physics",
     "ssgoi"
   ],
-  "author": "",
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ssgoi.git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
     "directory": "packages/core"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.6",

@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/react",
-  "version": "0.0.7",
-  "description": "React bindings for SSGOI page transition library",
+  "version": "2.0.0",
+  "description": "React bindings for SSGOI - Native app-like page transitions for React applications",
   "private": false,
   "type": "module",
   "files": [
@@ -43,7 +43,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package": "vite build"
+    "package": "vite build",
+    "prepare": "pnpm run build"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:*"
@@ -73,11 +74,21 @@
     "ssgoi",
     "spring-physics"
   ],
-  "author": "",
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ssgoi.git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
     "directory": "packages/react"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

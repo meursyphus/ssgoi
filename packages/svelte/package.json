@@ -1,7 +1,7 @@
 {
 	"name": "@ssgoi/svelte",
-	"version": "0.0.8",
-	"description": "Svelte bindings for SSGOI page transition library",
+	"version": "2.0.0",
+	"description": "Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit applications",
 	"private": false,
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -9,7 +9,8 @@
 		"dev": "svelte-package --watch",
 		"build": "svelte-package",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"prepare": "pnpm run build"
 	},
 	"files": [
 		"dist",
@@ -52,12 +53,22 @@
 		"ssgoi",
 		"spring-physics"
 	],
-	"author": "",
+	"author": "MeurSyphus <tmdeoans@snu.ac.kr>",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/yourusername/ssgoi.git",
+		"url": "git+https://github.com/meursyphus/ssgoi.git",
 		"directory": "packages/svelte"
+	},
+	"homepage": "https://ssgoi.dev",
+	"bugs": {
+		"url": "https://github.com/meursyphus/ssgoi/issues"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.0.0"
 	},
 	"exports": {
 		".": {

@@ -256,6 +256,14 @@ const config: SsgoiConfig = {
 - Automatic cleanup and memory management
 - Smart preloading for instant transitions
 
+## Documentation
+
+Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+- Complete API reference
+- Interactive examples
+- Advanced patterns
+- Migration guides
+
 ## Contributing
 
 We welcome contributions! Please see our [contributing guide](https://github.com/meursyphus/ssgoi/blob/main/CONTRIBUTING.md) for details.
