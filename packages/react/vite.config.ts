@@ -24,7 +24,6 @@ export default defineConfig({
         'index': resolve(__dirname, 'src/lib/index.ts'),
         'transitions/index': resolve(__dirname, 'src/lib/transitions/index.ts'),
         'view-transitions/index': resolve(__dirname, 'src/lib/view-transitions/index.ts'),
-        'easing/index': resolve(__dirname, 'src/lib/easing/index.ts'),
         'types': resolve(__dirname, 'src/lib/types.ts'),
       },
       formats: ['es', 'cjs'],

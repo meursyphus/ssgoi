@@ -28,12 +28,6 @@
       "require": "./dist/view-transitions/index.cjs",
       "default": "./dist/view-transitions/index.js"
     },
-    "./easing": {
-      "types": "./dist/easing/index.d.ts",
-      "import": "./dist/easing/index.js",
-      "require": "./dist/easing/index.cjs",
-      "default": "./dist/easing/index.js"
-    },
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
