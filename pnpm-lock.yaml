@@ -184,10 +184,10 @@ importers:
         version: 8.5.6
       prettier:
         specifier: ^3.3.2
-        version: 3.3.3
+        version: 3.6.2
       prettier-plugin-svelte:
         specifier: ^3.2.6
-        version: 3.4.0(prettier@3.3.3)(svelte@5.36.0)
+        version: 3.4.0(prettier@3.6.2)(svelte@5.36.0)
       rehype-slug:
         specifier: ^6.0.0
         version: 6.0.0
@@ -349,10 +349,10 @@ importers:
         version: 15.15.0
       prettier:
         specifier: ^3.3.2
-        version: 3.3.3
+        version: 3.6.2
       prettier-plugin-svelte:
         specifier: ^3.2.6
-        version: 3.4.0(prettier@3.3.3)(svelte@5.36.0)
+        version: 3.4.0(prettier@3.6.2)(svelte@5.36.0)
       publint:
         specifier: ^0.2.0
         version: 0.2.12
@@ -378,10 +378,10 @@ importers:
         specifier: workspace:*
         version: link:../core
       react:
-        specifier: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+        specifier: ^19.0.0
         version: 19.1.0
       react-dom:
-        specifier: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+        specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
       '@eslint/js':
@@ -422,6 +422,10 @@ importers:
         version: 4.5.4(@types/node@24.0.14)(rollup@4.45.0)(typescript@5.8.3)(vite@7.0.4(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(yaml@2.8.0))
 
   packages/svelte:
+    dependencies:
+      '@ssgoi/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -429,9 +433,6 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.31.0
-      '@ssgoi/core':
-        specifier: workspace:*
-        version: link:../core
       '@sveltejs/adapter-auto':
         specifier: ^6.0.0
         version: 6.0.1(@sveltejs/kit@2.23.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.36.0)(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(yaml@2.8.0)))(svelte@5.36.0)(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(yaml@2.8.0)))
@@ -4509,11 +4510,6 @@ packages:
     peerDependencies:
       prettier: ^3.0.0
       svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
-
-  prettier@3.3.3:
-    resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
@@ -9835,17 +9831,10 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.36.0):
-    dependencies:
-      prettier: 3.3.3
-      svelte: 5.36.0
-
   prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.36.0):
     dependencies:
       prettier: 3.6.2
       svelte: 5.36.0
-
-  prettier@3.3.3: {}
 
   prettier@3.6.2: {}
 
