@@ -274,8 +274,8 @@ importers:
   apps/svelte-demo:
     dependencies:
       '@ssgoi/svelte':
-        specifier: ^0.0.5
-        version: 0.0.5(svelte@5.36.0)
+        specifier: ^0.0.6
+        version: 0.0.6(svelte@5.36.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^6.0.0
@@ -2112,8 +2112,8 @@ packages:
   '@ssgoi/core@0.0.1':
     resolution: {integrity: sha512-P6m+laE5vXBETGPiGUKjS6ZAHbvmOjo9bP+QMgPokUaK7jbI5+GethvJ0ZnhqcKvdaEPEpKJAWLQhMBGjHXVyQ==}
 
-  '@ssgoi/svelte@0.0.5':
-    resolution: {integrity: sha512-g3PgUMsbvPgAyzTJiaSRxbJVOXUWs70zpIE8NVfVIE/it0IvgxDrBK1raCXvNeyV1jQUZ+F/RjyPLuJ8JNeSfg==}
+  '@ssgoi/svelte@0.0.6':
+    resolution: {integrity: sha512-JLH5q5ekV3viYZe/+PEwamBzBfDHMfg1r6cIydUNzqUXWuOCtkvm0MStxREj+PkRzdXVndJucV7DfmiuqP2cdQ==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -6769,7 +6769,7 @@ snapshots:
     dependencies:
       popmotion: 11.0.5
 
-  '@ssgoi/svelte@0.0.5(svelte@5.36.0)':
+  '@ssgoi/svelte@0.0.6(svelte@5.36.0)':
     dependencies:
       '@ssgoi/core': 0.0.1
       svelte: 5.36.0
