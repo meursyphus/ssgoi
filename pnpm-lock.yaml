@@ -274,8 +274,8 @@ importers:
   apps/svelte-demo:
     dependencies:
       '@ssgoi/svelte':
-        specifier: workspace:*
-        version: link:../../packages/svelte
+        specifier: ^0.0.5
+        version: 0.0.5(svelte@5.36.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^6.0.0
@@ -2108,6 +2108,14 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+
+  '@ssgoi/core@0.0.1':
+    resolution: {integrity: sha512-P6m+laE5vXBETGPiGUKjS6ZAHbvmOjo9bP+QMgPokUaK7jbI5+GethvJ0ZnhqcKvdaEPEpKJAWLQhMBGjHXVyQ==}
+
+  '@ssgoi/svelte@0.0.5':
+    resolution: {integrity: sha512-g3PgUMsbvPgAyzTJiaSRxbJVOXUWs70zpIE8NVfVIE/it0IvgxDrBK1raCXvNeyV1jQUZ+F/RjyPLuJ8JNeSfg==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   '@sveltejs/acorn-typescript@1.0.5':
     resolution: {integrity: sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==}
@@ -6756,6 +6764,15 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
+
+  '@ssgoi/core@0.0.1':
+    dependencies:
+      popmotion: 11.0.5
+
+  '@ssgoi/svelte@0.0.5(svelte@5.36.0)':
+    dependencies:
+      '@ssgoi/core': 0.0.1
+      svelte: 5.36.0
 
   '@sveltejs/acorn-typescript@1.0.5(acorn@8.15.0)':
     dependencies:
