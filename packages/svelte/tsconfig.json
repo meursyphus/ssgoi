@@ -1,5 +1,4 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
@@ -11,5 +10,11 @@
 		"strict": true,
 		"module": "es2020",
 		"moduleResolution": "bundler"
-	}
+	},
+	"exclude": [
+		"dist",
+		"node_modules",
+		"*.config.js",
+		"*.config.cjs"
+	]
 }
