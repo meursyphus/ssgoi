@@ -336,7 +336,7 @@ export default function Home() {
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
-                    href="/ko/docs/getting-started/installation"
+                    href="/ko/docs/getting-started/introduction"
                     className="btn-primary text-lg"
                   >
                     <Zap className="h-5 w-5" />
