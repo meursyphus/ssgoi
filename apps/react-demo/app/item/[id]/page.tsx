@@ -1,8 +1,6 @@
-"use client";
-
-import { SsgoiTransition } from "@ssgoi/react";
-import { useParams, useRouter } from "next/navigation";
+import SsgoiTransition from "@/lib/ssgoi-transition";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 const colors = [
   { id: 1, color: "#FF6B6B", name: "Coral" },
@@ -13,9 +11,7 @@ const colors = [
   { id: 6, color: "#DDA0DD", name: "Plum" },
 ];
 
-export default function ItemDetailPage() {
-  const params = useParams();
-  const router = useRouter();
+export default function ItemDetailPage({ params }: { params: { id: string } }) {
   const id = Number(params.id);
   const item = colors.find((c) => c.id === id);
 
@@ -30,7 +26,7 @@ export default function ItemDetailPage() {
         style={{ backgroundColor: item.color }}
         data-hero-key={`color-${item.id}`}
       >
-        <button onClick={() => router.back()} className={styles.backButton}>
+        <Link href="/" className={styles.backButton}>
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -39,7 +35,7 @@ export default function ItemDetailPage() {
             />
           </svg>
           Back
-        </button>
+        </Link>
 
         <div className={styles.content}>
           <div

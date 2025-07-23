@@ -4,7 +4,9 @@ import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
 import { CodeExample } from "@/components/code-example";
 
-export default function Home() {
+export default async function Home({ params }: { params: { lang: string } }) {
+  const { lang } = await params;
+
   return (
     <div className="relative">
       {/* Hero Section - 좌우 분할 */}
@@ -42,10 +44,7 @@ export default function Home() {
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Link
-                  href="/ko/docs/getting-started/introduction"
-                  className="btn-primary text-lg"
-                >
+                <Link href={`${lang}/docs`} className="btn-primary text-lg">
                   시작하기
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -335,10 +334,7 @@ export default function Home() {
                   5분이면 충분합니다. SSGOI로 웹에 네이티브 앱 경험을 더하세요.
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                  <Link
-                    href="/ko/docs/getting-started/installation"
-                    className="btn-primary text-lg"
-                  >
+                  <Link href={`${lang}/docs`} className="btn-primary text-lg">
                     <Zap className="h-5 w-5" />
                     문서 보기
                   </Link>

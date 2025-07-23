@@ -4,6 +4,10 @@
 
 SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
 
+try this: [ssgoi.dev](https://ssgoi.dev)
+
+![https://ssgoi.dev](./ssgoi.gif)
+
 ### ✨ Key Features
 
 - **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
