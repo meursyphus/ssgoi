@@ -14,6 +14,7 @@ import Profile from "./profile";
 export default function Demo() {
   const [currentPath, setCurrentPath] = useState("/demo/posts");
   const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useMobile();
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Define routing paths
@@ -33,7 +34,7 @@ export default function Demo() {
 
   // Auto-routing effect
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || isMobile) return;
 
     const intervalId = setInterval(() => {
       // Move to next route
@@ -43,7 +44,7 @@ export default function Demo() {
     }, 3000); // 3 seconds interval
 
     return () => clearInterval(intervalId);
-  }, [isHovered]);
+  }, [isHovered, isMobile]);
 
   // Mouse event handlers
   useEffect(() => {
@@ -117,4 +118,28 @@ export default function Demo() {
       </RouterProvider>
     </div>
   );
+}
+
+function useMobile() {
+  const [isMobile, setIsMobile] = useState(true); // Default to true for SSR
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    
+    // Set initial value
+    setIsMobile(mediaQuery.matches);
+
+    // Listen for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  return isMobile;
 }
