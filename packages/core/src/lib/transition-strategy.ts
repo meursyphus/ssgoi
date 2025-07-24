@@ -9,7 +9,7 @@ export interface StrategyContext {
 }
 
 export interface AnimationSetup {
-  config: TransitionConfig;
+  config?: TransitionConfig;
   state: { position: number; velocity: number; from: number; to: number };
   direction: "forward" | "backward";
 }
@@ -23,6 +23,38 @@ export interface TransitionStrategy {
   runIn: (configs: TransitionConfigs) => Promise<AnimationSetup>;
   runOut: (configs: TransitionConfigs) => Promise<AnimationSetup>;
 }
+
+/**
+ * Creates a transition callback that can be used with framework-specific implementations
+ * This is the core logic that frameworks can wrap with their own APIs
+ *
+ * UX Animation Behavior - 4 Main Scenarios:
+ *
+ * 1. No animation running + IN trigger:
+ *    - Start entrance animation (0 → 1)
+ *    - Return cleanup function for exit
+ *
+ * 2. No animation running + OUT trigger:
+ *    - Clone element, start exit animation (1 → 0)
+ *    - Remove clone when complete
+ *
+ * 3. IN animation running + OUT trigger:
+ *    - Stop current IN animation (DOM is disappearing)
+ *    - Clone element for exit animation
+ *    - Create REVERSED IN animation (not OUT animation) with current state
+ *    - This gives natural backward motion instead of jumping to OUT definition
+ *
+ * 4. OUT animation running + IN trigger:
+ *    - Stop current OUT animation (cleanup any cloned elements)
+ *    - Create REVERSED OUT animation (not IN animation) with current state
+ *    - This gives natural backward motion instead of jumping to IN definition
+ *    - Switch to entrance mode
+ *
+ * Closure Structure:
+ * - Outer function: Returns entrance callback
+ * - Inner function (entrance callback): Returns cleanup callback (exit)
+ * - Cleanup callback: Handles exit transitions
+ */
 
 export const createDefaultStrategy = (
   context: StrategyContext
@@ -53,20 +85,9 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 1: No animation running OR IN already running
-      if (!currentAnimation || !currentAnimation.animator.getIsAnimating()) {
-        if (configs.in) {
-          const config = await configs.in;
-          return {
-            config,
-            state: { position: 0, velocity: 0, from: 0, to: 1 },
-            direction: "forward",
-          };
-        }
-      }
-
-      // If IN is already running, just continue - return dummy setup
+      const config = await configs.in;
       return {
-        config: {},
+        config,
         state: { position: 0, velocity: 0, from: 0, to: 1 },
         direction: "forward",
       };
@@ -97,24 +118,10 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 2: No animation running OR OUT already running
-      if (
-        !currentAnimation ||
-        !currentAnimation.animator.getIsAnimating() ||
-        currentAnimation.direction === "out"
-      ) {
-        if (configs.out) {
-          const config = await configs.out;
-          return {
-            config,
-            state: { position: 1, velocity: 0, from: 1, to: 0 },
-            direction: "forward",
-          };
-        }
-      }
 
-      // Fallback
+      const config = await configs.out;
       return {
-        config: {},
+        config,
         state: { position: 1, velocity: 0, from: 1, to: 0 },
         direction: "forward",
       };

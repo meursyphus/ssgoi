@@ -7,38 +7,6 @@ import {
   type TransitionConfigs,
 } from "./transition-strategy";
 
-/**
- * Creates a transition callback that can be used with framework-specific implementations
- * This is the core logic that frameworks can wrap with their own APIs
- *
- * UX Animation Behavior - 4 Main Scenarios:
- *
- * 1. No animation running + IN trigger:
- *    - Start entrance animation (0 → 1)
- *    - Return cleanup function for exit
- *
- * 2. No animation running + OUT trigger:
- *    - Clone element, start exit animation (1 → 0)
- *    - Remove clone when complete
- *
- * 3. IN animation running + OUT trigger:
- *    - Stop current IN animation (DOM is disappearing)
- *    - Clone element for exit animation
- *    - Create REVERSED IN animation (not OUT animation) with current state
- *    - This gives natural backward motion instead of jumping to OUT definition
- *
- * 4. OUT animation running + IN trigger:
- *    - Stop current OUT animation (cleanup any cloned elements)
- *    - Create REVERSED OUT animation (not IN animation) with current state
- *    - This gives natural backward motion instead of jumping to IN definition
- *    - Switch to entrance mode
- *
- * Closure Structure:
- * - Outer function: Returns entrance callback
- * - Inner function (entrance callback): Returns cleanup callback (exit)
- * - Cleanup callback: Handles exit transitions
- */
-
 export function createTransitionCallback(
   getTransition: () => Transition,
   options?: {
@@ -76,30 +44,29 @@ export function createTransitionCallback(
     };
 
     const setup = await strategy.runIn(configs);
-
-    if (!setup.config.tick && !setup.config.onStart && !setup.config.onEnd) {
+    if (!setup.config) {
       return;
     }
-    if (setup.config.prepare) {
-      setup.config.prepare(element);
-    }
+
+    setup.config.prepare?.(element);
+
     const animator = Animator.fromState(setup.state, {
       spring: setup.config.spring,
       onStart: setup.config.onStart,
       onUpdate: setup.config.tick,
       onComplete: () => {
         currentAnimation = null;
-        setup.config.onEnd?.();
+        setup.config?.onEnd?.();
       },
     });
+
+    currentAnimation = { animator, direction: "in" };
 
     if (setup.direction === "forward") {
       animator.forward();
     } else {
       animator.backward();
     }
-
-    currentAnimation = { animator, direction: "in" };
   };
 
   const runExitTransition = async (element: HTMLElement) => {
@@ -113,6 +80,9 @@ export function createTransitionCallback(
     };
 
     const setup = await strategy.runOut(configs);
+    if (!setup.config) {
+      return;
+    }
 
     setup.config.prepare?.(element);
 
@@ -123,7 +93,7 @@ export function createTransitionCallback(
       onStart: setup.config.onStart,
       onUpdate: setup.config.tick,
       onComplete: () => {
-        setup.config.onEnd?.();
+        setup.config?.onEnd?.();
         if (currentClone) {
           currentClone.remove();
           currentClone = null;
@@ -133,13 +103,13 @@ export function createTransitionCallback(
       },
     });
 
+    currentAnimation = { animator, direction: "out" };
+
     if (setup.direction === "forward") {
       animator.forward();
     } else {
       animator.backward();
     }
-
-    currentAnimation = { animator, direction: "out" };
 
     function insertClone() {
       if (!parentRef || !currentClone) return;
