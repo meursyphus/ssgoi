@@ -41,6 +41,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "tsc -b && vite build",
+    "watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build",
