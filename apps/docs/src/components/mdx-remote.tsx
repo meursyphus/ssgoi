@@ -14,10 +14,13 @@ interface MdxRemoteProps {
 const defaultComponents = {
   // Custom components for MDX content can be added here
   h1: (props: any) => (
-    <h1 className="text-3xl font-bold mt-8 mb-4 text-white" {...props} />
+    <h1 className="text-3xl font-bold mt-8 mb-4 text-orange-400" {...props} />
   ),
   h2: (props: any) => (
-    <h2 className="text-2xl font-semibold mt-6 mb-3 text-white" {...props} />
+    <h2
+      className="text-2xl font-semibold mt-6 mb-3 text-orange-400"
+      {...props}
+    />
   ),
   h3: (props: any) => (
     <h3 className="text-xl font-semibold mt-4 mb-2 text-white" {...props} />
@@ -72,12 +75,7 @@ const defaultComponents = {
       {...props}
     />
   ),
-  a: (props: any) => (
-    <a
-      className="text-orange-400 hover:text-orange-300 underline transition-colors"
-      {...props}
-    />
-  ),
+  a: (props: any) => <a className="underline transition-colors" {...props} />,
   strong: (props: any) => (
     <strong className="font-bold text-white" {...props} />
   ),

@@ -41,7 +41,6 @@ export function findNavigationLinks(
   lang: string
 ): NavigationLinks {
   const flattened = flattenNavigation(navigation);
-  console.log(navigation, flattened);
 
   // Remove the language prefix from the current path for comparison
   const normalizedCurrentPath = currentPath.replace(`/${lang}/docs/`, "");

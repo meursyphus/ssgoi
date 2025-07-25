@@ -19,13 +19,13 @@ const transitionOptions: TransitionOption[] = [
     in: (element) => ({
       tick: (progress: number) => {
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Scale",
@@ -33,14 +33,14 @@ const transitionOptions: TransitionOption[] = [
       tick: (progress: number) => {
         element.style.transform = `scale(${progress})`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.transform = `scale(${progress})`;
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Slide Left",
@@ -48,14 +48,14 @@ const transitionOptions: TransitionOption[] = [
       tick: (progress: number) => {
         element.style.transform = `translateX(${(1 - progress) * -100}px)`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.transform = `translateX(${(1 - progress) * -100}px)`;
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Slide Right",
@@ -63,14 +63,14 @@ const transitionOptions: TransitionOption[] = [
       tick: (progress: number) => {
         element.style.transform = `translateX(${(1 - progress) * 100}px)`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.transform = `translateX(${(1 - progress) * 100}px)`;
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Slide Up",
@@ -78,14 +78,14 @@ const transitionOptions: TransitionOption[] = [
       tick: (progress: number) => {
         element.style.transform = `translateY(${(1 - progress) * 50}px)`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.transform = `translateY(${(1 - progress) * 50}px)`;
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Rotate",
@@ -93,14 +93,14 @@ const transitionOptions: TransitionOption[] = [
       tick: (progress: number) => {
         element.style.transform = `rotate(${progress * 360}deg)`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         element.style.transform = `rotate(${progress * 360}deg)`;
         element.style.opacity = progress.toString();
-      }
-    })
+      },
+    }),
   },
   {
     label: "Bounce Scale",
@@ -109,21 +109,22 @@ const transitionOptions: TransitionOption[] = [
         const scale = 0.5 + progress * 0.5;
         element.style.transform = `scale(${scale})`;
         element.style.opacity = progress.toString();
-      }
+      },
     }),
     out: (element) => ({
       tick: (progress: number) => {
         const scale = 0.5 + progress * 0.5;
         element.style.transform = `scale(${scale})`;
         element.style.opacity = progress.toString();
-      }
-    })
-  }
+      },
+    }),
+  },
 ];
 
 export function TransitionPlayground() {
   const [isVisible, setIsVisible] = useState(true);
-  const [selectedTransition, setSelectedTransition] = useState<TransitionOption>(transitionOptions[0]);
+  const [selectedTransition, setSelectedTransition] =
+    useState<TransitionOption>(transitionOptions[0]);
   const [stiffness, setStiffness] = useState(300);
   const [damping, setDamping] = useState(30);
   const [transitionKey, setTransitionKey] = useState("playground-element");
@@ -139,15 +140,16 @@ import { transition } from '@ssgoi/react';
     in: (element) => ({
       spring: { stiffness: ${stiffness}, damping: ${damping} },
       tick: (progress) => {
-        ${selectedTransition.label === "Fade" ? 
-          `element.style.opacity = progress.toString();` :
-          selectedTransition.label === "Scale" ?
-          `element.style.transform = \`scale(\${progress})\`;
-        element.style.opacity = progress.toString();` :
-          selectedTransition.label === "Rotate" ?
-          `element.style.transform = \`rotate(\${progress * 360}deg)\`;
-        element.style.opacity = progress.toString();` :
-          `// Custom transition logic here`
+        ${
+          selectedTransition.label === "Fade"
+            ? `element.style.opacity = progress.toString();`
+            : selectedTransition.label === "Scale"
+              ? `element.style.transform = \`scale(\${progress})\`;
+        element.style.opacity = progress.toString();`
+              : selectedTransition.label === "Rotate"
+                ? `element.style.transform = \`rotate(\${progress * 360}deg)\`;
+        element.style.opacity = progress.toString();`
+                : `// Custom transition logic here`
         }
       }
     }),
@@ -174,12 +176,12 @@ import { transition } from '@ssgoi/react';
               key: transitionKey,
               in: (element) => ({
                 spring: { stiffness, damping },
-                ...selectedTransition.in(element)
+                ...selectedTransition.in(element),
               }),
               out: (element) => ({
                 spring: { stiffness, damping },
-                ...selectedTransition.out(element)
-              })
+                ...selectedTransition.out(element),
+              }),
             })}
             className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg"
           />
@@ -190,11 +192,15 @@ import { transition } from '@ssgoi/react';
       <div className="space-y-4">
         {/* Transition Type */}
         <div>
-          <label className="block text-sm font-medium mb-2">Transition Type</label>
+          <label className="block text-sm font-medium mb-2">
+            Transition Type
+          </label>
           <select
             value={selectedTransition.label}
             onChange={(e) => {
-              const option = transitionOptions.find(opt => opt.label === e.target.value);
+              const option = transitionOptions.find(
+                (opt) => opt.label === e.target.value
+              );
               if (option) setSelectedTransition(option);
             }}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
@@ -210,25 +216,40 @@ import { transition } from '@ssgoi/react';
         {/* Preset Speed Buttons */}
         <div className="flex gap-2 justify-center">
           <button
-            onClick={() => { setStiffness(100); setDamping(20); }}
+            onClick={() => {
+              setStiffness(100);
+              setDamping(20);
+            }}
             className={`px-4 py-2 rounded-md transition-colors ${
-              stiffness === 100 ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'
+              stiffness === 100
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-700"
             }`}
           >
             Smooth
           </button>
           <button
-            onClick={() => { setStiffness(300); setDamping(30); }}
+            onClick={() => {
+              setStiffness(300);
+              setDamping(30);
+            }}
             className={`px-4 py-2 rounded-md transition-colors ${
-              stiffness === 300 ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'
+              stiffness === 300
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-700"
             }`}
           >
             Normal
           </button>
           <button
-            onClick={() => { setStiffness(500); setDamping(40); }}
+            onClick={() => {
+              setStiffness(500);
+              setDamping(40);
+            }}
             className={`px-4 py-2 rounded-md transition-colors ${
-              stiffness === 500 ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'
+              stiffness === 500
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-700"
             }`}
           >
             Fast
@@ -272,7 +293,7 @@ import { transition } from '@ssgoi/react';
           onClick={() => setIsVisible(!isVisible)}
           className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
-          {isVisible ? 'Hide' : 'Show'} Element
+          {isVisible ? "Hide" : "Show"} Element
         </button>
       </div>
 
@@ -285,16 +306,26 @@ import { transition } from '@ssgoi/react';
             rehypePlugins={[rehypeHighlight]}
             components={{
               pre: ({ children, ...props }) => (
-                <pre className="hljs p-4 bg-gray-900 rounded-md overflow-x-auto" {...props}>
+                <pre
+                  className="hljs p-4 bg-gray-900 rounded-md overflow-x-auto"
+                  {...props}
+                >
                   {children}
                 </pre>
               ),
-              code: ({ node, inline, className, children, ...props }) => {
-                if (!inline && className?.includes('language-')) {
-                  return <code className={className} {...props}>{children}</code>;
+              code: ({ node, className, children, ...props }) => {
+                if (className?.includes("language-")) {
+                  return (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  );
                 }
                 return (
-                  <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props}>
+                  <code
+                    className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm"
+                    {...props}
+                  >
                     {children}
                   </code>
                 );
