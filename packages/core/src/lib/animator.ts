@@ -131,10 +131,17 @@ export class Animator {
     return this.isAnimating;
   }
 
-  getCurrentState(): { position: number; velocity: number } {
+  getCurrentState(): {
+    position: number;
+    velocity: number;
+    from: number;
+    to: number;
+  } {
     return {
       position: this.currentValue,
       velocity: this.velocity,
+      from: this.options.from,
+      to: this.options.to,
     };
   }
 

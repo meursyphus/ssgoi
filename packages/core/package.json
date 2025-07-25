@@ -40,6 +40,7 @@
   ],
   "scripts": {
     "dev": "vite",
+    "watch": "vite build --watch",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepare": "pnpm run build"

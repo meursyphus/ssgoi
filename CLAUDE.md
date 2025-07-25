@@ -58,6 +58,51 @@ packages/[framework]/
 │       └── view-transitions/        # Re-exports from core
 ```
 
+## Core Package File Descriptions
+
+### `/packages/core/src/lib/animator.ts`
+The animation engine that powers all transitions. Key features:
+- Uses Popmotion for spring-based physics animations
+- Manages animation state (position, velocity, direction)
+- Provides control methods: `forward()`, `backward()`, `stop()`, `reverse()`
+- Tracks velocity for smooth transitions when animations are interrupted
+- Factory method `fromState()` allows creating animations from a specific state
+
+### `/packages/core/src/lib/transition.ts`
+Centralized transition management system:
+- Stores transition definitions using string/symbol keys
+- Creates and manages transition callbacks
+- Provides the `transition()` function used by framework implementations
+- Handles automatic cleanup when transitions complete
+- Maps transitions to their respective callback functions
+
+### `/packages/core/src/lib/create-transition-callback.ts`
+Core transition logic that handles 4 main animation scenarios:
+1. **No animation + IN trigger**: Start entrance animation (0 → 1)
+2. **No animation + OUT trigger**: Clone element, start exit animation (1 → 0)
+3. **IN animation running + OUT trigger**: Reverse current IN animation naturally
+4. **OUT animation running + IN trigger**: Reverse current OUT animation naturally
+
+Key behaviors:
+- Manages element cloning for exit animations
+- Tracks animation direction (entering/exiting)
+- Provides natural reversal instead of jumping between IN/OUT states
+- Handles cleanup of cloned elements
+
+### `/packages/core/src/lib/create-ssgoi-transition-context.ts`
+Page-level transition orchestration:
+- Manages transition configuration for entire application
+- Handles route matching with wildcard support
+- Coordinates OUT and IN animations between pages
+- Manages scroll position preservation across transitions
+- Processes symmetric transitions (automatic bidirectional)
+- Waits for both OUT (departing page) and IN (arriving page) before resolving
+
+Key concepts:
+- Pending transitions wait for both pages to be ready
+- Scroll offsets are calculated between page transitions
+- Symmetric transitions automatically create reverse animations
+
 ## Key Components
 
 ### 1. **Ssgoi Provider**

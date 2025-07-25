@@ -11,8 +11,13 @@ const colors = [
   { id: 6, color: "#DDA0DD", name: "Plum" },
 ];
 
-export default function ItemDetailPage({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export default async function ItemDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const resolved = await params;
+  const id = Number(resolved.id);
   const item = colors.find((c) => c.id === id);
 
   if (!item) {

@@ -1,4 +1,9 @@
 import { createTransitionCallback } from "./create-transition-callback";
+import {
+  StrategyContext,
+  TRANSITION_STRATEGY,
+  TransitionStrategy,
+} from "./transition-strategy";
 import type { Transition, TransitionCallback } from "./types";
 
 /**
@@ -23,7 +28,8 @@ const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
  */
 function registerTransition(
   key: TransitionKey,
-  transition: Transition
+  transition: Transition,
+  strategy?: (context: StrategyContext) => TransitionStrategy
 ): TransitionCallback {
   transitionDefinitions.set(key, transition);
 
@@ -44,6 +50,7 @@ function registerTransition(
       return trans;
     },
     {
+      strategy,
       onCleanupEnd: () => unregisterTransition(key),
     }
   );
@@ -67,6 +74,7 @@ export function transition(options: {
   key: TransitionKey;
   in?: Transition["in"];
   out?: Transition["out"];
+  [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
 }): TransitionCallback {
   // Register transition and get callback
   return registerTransition(options.key, {
