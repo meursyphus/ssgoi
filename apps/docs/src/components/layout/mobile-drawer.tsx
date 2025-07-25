@@ -7,7 +7,7 @@ import { useSidebarStore } from "@/store/sidebar";
 import { useEffect, useState } from "react";
 import { useOutsideClick } from "@/lib/use-click-outside";
 import { LANGUAGE_LIST } from "@/i18n/supported-languages";
-import { SidebarContent } from "@/components/sidebar-content";
+import { SidebarContent } from "@/components/docs/sidebar-content";
 import { useNavigationStore } from "@/store/navigation";
 
 interface MobileDrawerProps {

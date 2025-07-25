@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Header } from "@/components/header";
+import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
 

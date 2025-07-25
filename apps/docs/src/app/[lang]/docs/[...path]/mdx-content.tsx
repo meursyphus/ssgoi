@@ -1,9 +1,9 @@
-import { MdxRemote } from '@/components/mdx-remote'
+import { MdxRemote } from "@/components/docs/mdx-remote";
 
 interface MDXContentProps {
-  content: string
+  content: string;
 }
 
 export async function MDXContent({ content }: MDXContentProps) {
-  return <MdxRemote source={content} />
+  return <MdxRemote source={content} />;
 }

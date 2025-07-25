@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar";
-import { SidebarContent } from "@/components/sidebar-content";
+import { SidebarContent } from "@/components/docs/sidebar-content";
 
 export interface NavigationItem {
   title: string;

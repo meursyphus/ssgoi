@@ -1,6 +1,6 @@
 import { getNavigationData } from "@/lib/post";
 import { Sidebar } from "./sidebar";
-import { NavigationSetter } from "@/components/navigation-setter";
+import { NavigationSetter } from "@/components/layout/navigation-setter";
 
 interface DocsLayoutProps {
   children: React.ReactNode;

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPost, getNavigationData } from '@/lib/post'
 import { MDXContent } from './mdx-content'
-import { DocsNavigation } from '@/components/docs-navigation'
+import { DocsNavigation } from '@/components/docs/docs-navigation'
 import { findNavigationLinks } from '@/lib/navigation-utils'
 
 interface DocsPageProps {
