@@ -3,9 +3,11 @@ import Image from "next/image";
 import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
 import { CodeExample } from "@/components/code-example";
+import { getServerTranslations } from "@/i18n";
 
 export default async function Home({ params }: { params: { lang: string } }) {
   const { lang } = await params;
+  const t = await getServerTranslations("home", lang);
 
   return (
     <div className="relative">
@@ -24,28 +26,24 @@ export default async function Home({ params }: { params: { lang: string } }) {
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-vivid-green/30 bg-vivid-green/10 px-4 py-2">
                 <CheckCircle className="h-4 w-4 text-vivid-green" />
                 <span className="text-sm font-medium text-vivid-green">
-                  SSR Ready
+                  {t("badge.text")}
                 </span>
               </div>
 
               <h1 className="text-5xl font-black tracking-tight sm:text-6xl lg:text-7xl">
-                <span className="block text-white">View</span>
-                <span className="gradient-orange">Transitions</span>
+                <span className="block text-white">{t("heroTitle.line1")}</span>
+                <span className="gradient-orange">{t("heroTitle.line2")}</span>
               </h1>
               <p className="mt-6 text-xl text-muted-foreground sm:text-2xl">
-                <span className="font-semibold text-white">
-                  네이티브 앱 같은 페이지 전환
-                </span>
-                을 웹에서 구현하세요.
+                {t("subtitle")}
               </p>
               <p className="mt-4 text-lg text-muted-foreground">
-                Next.js, Nuxt, SvelteKit 등 모든 SSR 프레임워크와 완벽 호환.
-                SEO를 포기하지 않고도 멋진 애니메이션을 만들 수 있습니다.
+                {t("description")}
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <Link href={`${lang}/docs`} className="btn-primary text-lg">
-                  시작하기
+                  {t("buttons.getStarted")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a
@@ -55,7 +53,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                   className="btn-secondary text-lg"
                 >
                   <Code2 className="h-5 w-5" />
-                  GitHub
+                  {t("buttons.github")}
                 </a>
               </div>
 
@@ -63,7 +61,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
               <div className="mt-12 space-y-3">
                 <div className="rounded-lg bg-card/50 p-4">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    React
+                    {t("quickInstall.react")}
                   </p>
                   <code className="font-mono text-sm text-white">
                     npm install @ssgoi/react
@@ -71,7 +69,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 </div>
                 <div className="rounded-lg bg-card/50 p-4">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Svelte
+                    {t("quickInstall.svelte")}
                   </p>
                   <code className="font-mono text-sm text-white">
                     npm install @ssgoi/svelte
@@ -80,7 +78,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 {/* Vue - 추가 예정 */}
                 <div className="rounded-lg bg-card/50 p-4 opacity-50">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Vue (지원 예정)
+                    {t("quickInstall.vue")}
                   </p>
                   <code className="font-mono text-sm text-white/50">
                     npm install @ssgoi/vue
@@ -89,7 +87,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 {/* SolidJS - 추가 예정 */}
                 <div className="rounded-lg bg-card/50 p-4 opacity-50">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    SolidJS (지원 예정)
+                    {t("quickInstall.solidjs")}
                   </p>
                   <code className="font-mono text-sm text-white/50">
                     npm install @ssgoi/solid
@@ -98,7 +96,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 {/* Qwik - 추가 예정 */}
                 <div className="rounded-lg bg-card/50 p-4 opacity-50">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Qwik (지원 예정)
+                    {t("quickInstall.qwik")}
                   </p>
                   <code className="font-mono text-sm text-white/50">
                     npm install @ssgoi/qwik
@@ -122,13 +120,13 @@ export default async function Home({ params }: { params: { lang: string } }) {
 
                 {/* 플로팅 배지 */}
                 <div className="absolute -left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 text-sm font-medium text-white shadow-lg">
-                  60fps 유지
+                  {t("floatingBadges.performance")}
                 </div>
                 <div
                   className="absolute -right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-3 py-2 text-sm font-medium text-white shadow-lg"
                   style={{ animationDelay: "1s" }}
                 >
-                  상태 기억
+                  {t("floatingBadges.stateMemory")}
                 </div>
               </div>
             </div>
@@ -141,10 +139,10 @@ export default async function Home({ params }: { params: { lang: string } }) {
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              모든 환경에서 <span className="gradient-orange">동일한 경험</span>
+              {t("frameworks.title")}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              프레임워크에 관계없이 일관된 API로 사용하세요
+              {t("frameworks.subtitle")}
             </p>
           </div>
 
@@ -177,7 +175,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
-                React
+                {t("quickInstall.react")}
               </span>
             </div>
 
@@ -193,7 +191,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
-                Svelte
+                {t("quickInstall.svelte")}
               </span>
             </div>
 
@@ -210,7 +208,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Vue
-                <span className="block text-xs">(지원 예정)</span>
+                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
               </span>
             </div>
 
@@ -227,7 +225,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 SolidJS
-                <span className="block text-xs">(지원 예정)</span>
+                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
               </span>
             </div>
 
@@ -244,7 +242,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Qwik
-                <span className="block text-xs">(지원 예정)</span>
+                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
               </span>
             </div>
           </div>
@@ -255,10 +253,10 @@ export default async function Home({ params }: { params: { lang: string } }) {
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              왜 <span className="gradient-orange">SSGOI</span>인가?
+              {t("whySSGOI.title")}
             </h2>
             <p className="mt-6 text-xl text-muted-foreground">
-              단 3가지만 기억하세요
+              {t("whySSGOI.subtitle")}
             </p>
           </div>
 
@@ -268,10 +266,9 @@ export default async function Home({ params }: { params: { lang: string } }) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-green to-vivid-cyan">
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">SSR 완벽 지원</h3>
+              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.ssr.title")}</h3>
               <p className="text-lg text-muted-foreground">
-                Next.js, Nuxt, SvelteKit 같은 SSR 프레임워크에서 완벽하게 작동.
-                SEO를 포기하지 않고도 멋진 페이지 전환을 구현하세요.
+                {t("whySSGOI.features.ssr.description")}
               </p>
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-green/10 blur-2xl" />
             </div>
@@ -281,10 +278,9 @@ export default async function Home({ params }: { params: { lang: string } }) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-cyan to-vivid-blue">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">모든 브라우저 호환</h3>
+              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.browserCompat.title")}</h3>
               <p className="text-lg text-muted-foreground">
-                Chrome, Firefox, Safari 모든 브라우저에서 일관된 경험을
-                제공합니다.
+                {t("whySSGOI.features.browserCompat.description")}
               </p>
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-cyan/10 blur-2xl" />
             </div>
@@ -294,10 +290,9 @@ export default async function Home({ params }: { params: { lang: string } }) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-purple to-vivid-pink">
                 <Zap className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">제로 설정</h3>
+              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.zeroConfig.title")}</h3>
               <p className="text-lg text-muted-foreground">
-                프레임워크의 라우팅을 그대로 이용하세요. 복잡한 설정 없이 바로
-                시작할 수 있습니다.
+                {t("whySSGOI.features.zeroConfig.description")}
               </p>
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-vivid-purple/10 blur-2xl" />
             </div>
@@ -310,10 +305,10 @@ export default async function Home({ params }: { params: { lang: string } }) {
         <div className="mx-auto max-w-5xl">
           <div className="text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              놀랍도록 <span className="gradient-orange">간단한 코드</span>
+              {t("codeExample.title")}
             </h2>
             <p className="mt-6 text-xl text-muted-foreground">
-              단 몇 줄로 페이지 전환 애니메이션을 구현하세요
+              {t("codeExample.subtitle")}
             </p>
           </div>
 
@@ -328,15 +323,15 @@ export default async function Home({ params }: { params: { lang: string } }) {
             <div className="rounded-[calc(1.5rem-1px)] bg-background p-12 sm:p-16">
               <div className="mx-auto max-w-3xl text-center">
                 <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                  지금 바로 시작하세요
+                  {t("cta.title")}
                 </h2>
                 <p className="mt-6 text-xl text-muted-foreground">
-                  5분이면 충분합니다. SSGOI로 웹에 네이티브 앱 경험을 더하세요.
+                  {t("cta.subtitle")}
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link href={`${lang}/docs`} className="btn-primary text-lg">
                     <Zap className="h-5 w-5" />
-                    문서 보기
+                    {t("cta.buttons.viewDocs")}
                   </Link>
                   <a
                     href="https://github.com/meursyphus/ssgoi"
@@ -345,7 +340,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
                     className="btn-secondary text-lg"
                   >
                     <Code2 className="h-5 w-5" />
-                    GitHub
+                    {t("cta.buttons.github")}
                   </a>
                 </div>
               </div>

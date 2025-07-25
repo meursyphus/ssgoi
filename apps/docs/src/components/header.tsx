@@ -7,9 +7,10 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar";
 import { useCurrentLanguage } from "@/i18n/use-current-language";
+import { MobileDrawer } from "./mobile-drawer";
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [stars, setStars] = useState<number | null>(null);
   const pathname = usePathname();
   const { toggle: toggleSidebar } = useSidebarStore();
@@ -27,16 +28,17 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800  px-4 sm:px-6 lg:px-8 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/60">
       <div className="mx-auto max-w-7xl flex h-16 items-center">
         <div className="flex items-center gap-4">
-          {/* Mobile Sidebar Toggle for Docs */}
-          {isDocsPage && (
-            <button
-              className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
-              onClick={toggleSidebar}
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle sidebar</span>
-            </button>
-          )}
+          {/* Mobile menu button - now on the left */}
+          <button
+            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
+            onClick={() => {
+              console.log('Mobile drawer button clicked');
+              setMobileDrawerOpen(!mobileDrawerOpen);
+            }}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Open menu</span>
+          </button>
 
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-orange-500">SSGOI</span>
@@ -82,34 +84,14 @@ export function Header() {
             )}
             <span className="sr-only">GitHub Repository</span>
           </Link>
-
-          <button
-            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-800">
-          <nav className="flex flex-col space-y-2 p-4">
-            <Link
-              href={`/${currentLang}/docs`}
-              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              문서
-            </Link>
-          </nav>
-        </div>
-      )}
+      <MobileDrawer
+        isOpen={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        lang={currentLang}
+      />
     </header>
   );
 }

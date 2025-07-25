@@ -1,0 +1,89 @@
+---
+title: "SSGOI 소개"
+description: "SSGOI는 웹에서 네이티브 앱과 같은 자연스러운 페이지 전환 애니메이션을 구현할 수 있게 해주는 라이브러리입니다."
+nav-title: "소개"
+---
+
+<Note type="tip">
+SSGOI는 "쓱오이"라고 읽으며, 빠르고 신선한 페이지 전환을 의미합니다!
+</Note>
+
+## 왜 SSGOI인가?
+
+### 1. 모든 브라우저에서 동작
+
+브라우저 기본 View Transition API와 달리, SSGOI는 모든 모던 브라우저에서 일관된 경험을 제공합니다. Chrome, Firefox, Safari 어디서든 동일한 애니메이션을 보장합니다.
+
+<Grid cols={3}>
+  <Card title="Chrome">
+    <Badge variant="success">✓ 완벽 지원</Badge>
+  </Card>
+  <Card title="Firefox">
+    <Badge variant="success">✓ 완벽 지원</Badge>
+  </Card>
+  <Card title="Safari">
+    <Badge variant="success">✓ 완벽 지원</Badge>
+  </Card>
+</Grid>
+
+### 2. 서버사이드 렌더링 완벽 지원
+
+- **SSR/SSG 호환**: Next.js, Nuxt, SvelteKit 등에서 하이드레이션 문제 없이 작동
+- **SEO 친화적**: 애니메이션이 검색 엔진 최적화에 영향을 주지 않음
+- **초기 로딩 최적화**: 서버에서 렌더링된 HTML을 그대로 활용
+
+### 3. 프레임워크 라우팅 그대로 사용
+
+<Note>
+SSGOI는 기존 라우팅 시스템과 완벽하게 호환됩니다. 라우터를 변경할 필요가 없습니다!
+</Note>
+
+기존 프레임워크의 라우팅을 그대로 사용하면서 애니메이션만 추가할 수 있습니다. Next.js의 `Link`, SvelteKit의 `goto`, Vue Router 등 모든 라우팅 방식과 호환됩니다.
+
+## 주요 특징
+
+<CodeDemo>
+```typescript
+// 단 몇 줄의 코드로 시작
+const config = {
+  defaultTransition: fade(),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ direction: 'left' })
+    }
+  ]
+}
+```
+</CodeDemo>
+
+### 🎨 다양한 전환 효과
+
+- **Fade**: 부드러운 페이드 인/아웃
+- **Slide**: 방향성 있는 슬라이드
+- **Scale**: 확대/축소 효과
+- **Hero**: 공유 요소 애니메이션
+- **Pinterest**: Pinterest 스타일 확장
+- **Ripple**: Material Design 리플 효과
+
+### ⚡ 최적화된 성능
+
+- 스프링 기반 물리 애니메이션으로 자연스러운 움직임
+- 작은 번들 사이즈 (< 20KB gzipped)
+- Tree-shaking 지원으로 사용하는 기능만 포함
+
+### 🛠️ 개발자 친화적
+
+- TypeScript 완벽 지원
+- 직관적인 API 설계
+- 풍부한 문서와 예제
+- React, Svelte, Vue 등 모든 주요 프레임워크 지원
+
+## 시작하기
+
+<Note type="info">
+SSGOI는 현재 React와 Svelte를 공식 지원하며, Vue 지원은 곧 추가될 예정입니다.
+</Note>
+
+다음 섹션에서 빠른 시작 가이드를 통해 SSGOI를 프로젝트에 적용하는 방법을 알아보세요!
