@@ -95,4 +95,12 @@ export type Messages = {
       imageAlt: string;
     };
   };
+  sidebar: {
+    categories: {
+      "getting-started": string;
+      "core-concepts": string;
+      "view-transitions": string;
+      "transitions": string;
+    };
+  };
 };

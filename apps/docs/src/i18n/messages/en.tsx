@@ -124,6 +124,14 @@ const en: Messages = {
       imageAlt: "SSGOI - Page Transition Library",
     },
   },
+  sidebar: {
+    categories: {
+      "getting-started": "Getting Started",
+      "core-concepts": "Core Concepts",
+      "view-transitions": "View Transitions",
+      "transitions": "Transitions",
+    },
+  },
 };
 
 export default en;
