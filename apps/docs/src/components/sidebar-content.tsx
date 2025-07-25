@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import type { NavigationItem } from "@/app/[lang]/docs/sidebar";
 
@@ -15,6 +15,32 @@ interface SidebarContentProps {
 export function SidebarContent({ navigation, lang, onLinkClick }: SidebarContentProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  // Auto-expand the group containing the active page
+  useEffect(() => {
+    const findActiveParent = (items: NavigationItem[], parentPath?: string): string | null => {
+      for (const item of items) {
+        const itemPath = `/${lang}/docs/${item.path}`;
+        
+        if (pathname === itemPath && parentPath) {
+          return parentPath;
+        }
+        
+        if (item.children) {
+          const activeParent = findActiveParent(item.children, item.path);
+          if (activeParent) {
+            return activeParent;
+          }
+        }
+      }
+      return null;
+    };
+
+    const activeParent = findActiveParent(navigation);
+    if (activeParent) {
+      setExpandedItems(new Set([activeParent]));
+    }
+  }, [pathname, lang, navigation]);
 
   const toggleExpanded = (path: string) => {
     setExpandedItems((prev) => {
@@ -48,14 +74,18 @@ export function SidebarContent({ navigation, lang, onLinkClick }: SidebarContent
             >
               <span className="font-medium text-sm">{item.navTitle}</span>
               <ChevronRight 
-                className={`w-4 h-4 transition-transform text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
+                className={`w-4 h-4 transition-transform duration-300 text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
               />
             </button>
-            {isExpanded && (
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
               <ul className="mt-1">
                 {item.children?.map((child) => renderNavItem(child, level + 1))}
               </ul>
-            )}
+            </div>
           </div>
         ) : (
           <Link
