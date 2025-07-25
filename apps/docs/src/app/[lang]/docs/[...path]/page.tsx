@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
-import { getPost } from '@/lib/post'
+import { getPost, getNavigationData } from '@/lib/post'
 import { MDXContent } from './mdx-content'
+import { DocsNavigation } from '@/components/docs/docs-navigation'
+import { findNavigationLinks } from '@/lib/navigation-utils'
 
 interface DocsPageProps {
   params: Promise<{
@@ -13,11 +15,18 @@ export default async function DocsPage({ params }: DocsPageProps) {
   const { lang, path } = await params
   const postPath = path.join('/')
   
-  const post = await getPost(lang, postPath)
+  const [post, navigation] = await Promise.all([
+    getPost(lang, postPath),
+    getNavigationData(lang)
+  ])
   
   if (!post) {
     notFound()
   }
+  
+  // Find previous and next navigation links
+  const currentPath = `/${lang}/docs/${postPath}`
+  const { prev, next } = findNavigationLinks(navigation, currentPath, lang)
   
   return (
     <article className="max-w-none">
@@ -26,6 +35,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
         <p className="text-xl text-gray-400 mb-8">{post.description}</p>
       )}
       {await MDXContent({ content: post.content })}
+      <DocsNavigation prev={prev} next={next} lang={lang} />
     </article>
   )
 }

@@ -15,6 +15,12 @@ importers:
       concurrently:
         specifier: ^9.2.0
         version: 9.2.0
+      highlight.js:
+        specifier: ^11.11.1
+        version: 11.11.1
+      highlightjs-svelte:
+        specifier: ^1.0.6
+        version: 1.0.6
 
   apps/docs:
     dependencies:
@@ -45,6 +51,12 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      highlight.js:
+        specifier: ^11.11.1
+        version: 11.11.1
+      highlightjs-svelte:
+        specifier: ^1.0.6
+        version: 1.0.6
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.1.0)
@@ -2531,6 +2543,9 @@ packages:
   highlight.js@11.11.1:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
     engines: {node: '>=12.0.0'}
+
+  highlightjs-svelte@1.0.6:
+    resolution: {integrity: sha512-aXuBPz8df3sOXg90q8rRcBLyxIR8ozPU39a6tJ2rpJUjjd9brRIr55aC0IccW4gsPhQxZ+B3rFugdXsg9/ckDw==}
 
   html-url-attributes@3.0.1:
     resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
@@ -6519,6 +6534,8 @@ snapshots:
   hey-listen@1.0.8: {}
 
   highlight.js@11.11.1: {}
+
+  highlightjs-svelte@1.0.6: {}
 
   html-url-attributes@3.0.1: {}
 

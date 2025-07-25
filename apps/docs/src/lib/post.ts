@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
+import { getServerTranslations } from '@/i18n/get-server-translations'
 
 /**
  * Navigation data and post content utilities for documentation
@@ -90,7 +91,32 @@ async function processDirectory(dirPath: string, basePath: string = ''): Promise
 export async function getNavigationData(lang: string): Promise<NavigationItem[]> {
   try {
     const contentPath = getContentPath(lang)
-    return await processDirectory(contentPath)
+    const navigation = await processDirectory(contentPath)
+    
+    // Apply translations to category titles
+    const t = await getServerTranslations('sidebar', lang)
+    
+    function applyTranslations(items: NavigationItem[]): NavigationItem[] {
+      return items.map(item => {
+        if (item.children && item.children.length > 0) {
+          // This is a category - apply translation
+          const categoryKey = item.title as keyof typeof t
+          const translatedTitle = t(`categories.${categoryKey}` as any)
+          // Ensure we get a string
+          const titleString = typeof translatedTitle === 'string' ? translatedTitle : item.title
+          
+          return {
+            ...item,
+            title: titleString,
+            navTitle: titleString,
+            children: applyTranslations(item.children)
+          }
+        }
+        return item
+      })
+    }
+    
+    return applyTranslations(navigation)
   } catch (error) {
     console.error('Error processing navigation data:', error)
     return []

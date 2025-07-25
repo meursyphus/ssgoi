@@ -1,0 +1,231 @@
+---
+title: "Quick Start"
+description: "Create your first page transition animation with SSGOI in 5 minutes"
+nav-title: "Quick Start"
+---
+
+import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
+
+## Package Installation
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```bash 
+    npm install @ssgoi/react 
+    # or yarn add @ssgoi/react 
+    # or pnpm add @ssgoi/react 
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```bash 
+    npm install @ssgoi/svelte 
+    # or yarn add @ssgoi/svelte 
+    # or pnpm add @ssgoi/svelte 
+    ```
+  </TabPanel>
+</Tabs>
+
+## Basic Setup (2 minutes)
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ### 1. Root Layout Setup (Next.js App Router)
+
+    ```tsx
+    // app/layout.tsx
+    import { Ssgoi } from "@ssgoi/react";
+    import { fade } from "@ssgoi/react/view-transitions";
+
+    export default function RootLayout({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={{ defaultTransition: fade() }}>
+              {/* ⚠️ Important: position: relative is required! */}
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
+
+    ### 2. Page Wrapping
+
+    ```tsx
+    // app/page.tsx
+    import { SsgoiTransition } from "@ssgoi/react";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>Home Page</h1>
+            {/* Page content */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // app/about/page.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>About Page</h1>
+            {/* Page content */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ### 1. Root Layout Setup (SvelteKit)
+
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { fade } from "@ssgoi/svelte/view-transitions";
+    </script>
+
+    <Ssgoi config={{ defaultTransition: fade() }}>
+      <!-- ⚠️ Important: position: relative is required! -->
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
+
+    ### 2. Page Wrapping
+
+    ```svelte
+    <!-- src/routes/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/">
+      <main>
+        <h1>Home Page</h1>
+        <!-- Page content -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+    ```svelte
+    <!-- src/routes/about/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/about">
+      <main>
+        <h1>About Page</h1>
+        <!-- Page content -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## Applying Various Transitions
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```tsx
+    // app/layout.tsx
+    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // Home → About: slide left
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // About → Home: slide right
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // List → Detail: scale
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={ssgoiConfig}>
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+
+      const ssgoiConfig = {
+        transitions: [
+          // Home → About: slide left
+          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+          // About → Home: slide right
+          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+          // List → Detail: scale
+          { from: "/list", to: "/detail/*", transition: scale() },
+        ],
+      };
+    </script>
+
+    <Ssgoi config={ssgoiConfig}>
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## Complete! 🎉
+
+Congratulations! Your website now has native app-like page transitions applied.

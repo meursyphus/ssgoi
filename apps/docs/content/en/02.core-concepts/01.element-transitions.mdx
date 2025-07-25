@@ -1,0 +1,164 @@
+---
+title: "Element Animations"
+description: "Apply animations to individual DOM elements"
+nav-title: "Element Animations"
+---
+
+import { TransitionPlayground } from '@/components/transition-playground';
+import { Tabs, TabPanel } from '@/components/mdx-components';
+
+## Transition Playground
+
+Experience various transition effects directly:
+
+<TransitionPlayground />
+
+## Basic Structure
+
+### TransitionConfig Interface
+
+```typescript
+interface TransitionConfig {
+  spring?: {
+    stiffness: number; // Spring stiffness (default: 300)
+    damping: number; // Damping coefficient (default: 30)
+  };
+  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  prepare?: (element: HTMLElement) => void; // Initial setup before animation starts
+  onStart?: () => void;
+  onEnd?: () => void;
+}
+```
+
+### Transition Definition
+
+```typescript
+interface Transition {
+  in?: (element: HTMLElement) => TransitionConfig;
+  out?: (element: HTMLElement) => TransitionConfig;
+}
+```
+
+### How it Works
+
+1. **On Mount**: Execute `in` function when element is added to DOM
+2. **On Unmount**: Execute `out` function before element is removed
+3. **Animation**: Spring physics engine generates progress
+   - in: 0 → 1
+   - out: 1 → 0
+4. **tick Callback**: Called every frame to update styles
+
+### Transition Presets
+
+```typescript
+import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
+```
+
+## Framework-specific Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```jsx
+    import { transition } from "@ssgoi/react";
+
+    <div
+      ref={transition({
+        key: "unique-key",
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          },
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          },
+        }),
+      })}
+    >
+      Content
+    </div>
+    ```
+  </TabPanel>
+  
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+    </script>
+
+    <div use:transition={{
+      key: 'unique-key',
+      in: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = progress;
+          element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+        }
+      }),
+      out: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = 1 - progress;
+        }
+      })
+    }}>
+      Content
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Progress Behavior
+
+### in Animation
+
+- progress: 0 → 1
+- Executes when element appears
+- Opacity from 0 to 1, from small size to original size
+
+### out Animation
+
+- progress: 1 → 0
+- Executes when element disappears
+- Opacity from 1 to 0, from original size to small size
+
+```jsx
+// Example: difference between in and out
+{
+  in: (element) => ({
+    tick: (progress) => {
+      // progress: 0 → 1
+      element.style.opacity = progress;  // 0 → 1
+    }
+  }),
+  out: (element) => ({
+    tick: (progress) => {
+      // progress: 1 → 0
+      element.style.opacity = progress;  // 1 → 0
+    }
+  })
+}
+```
+
+## prepare Callback
+
+The stage where DOM elements are prepared before animation starts:
+
+```jsx
+{
+  in: {
+    prepare: (element) => {
+      // Set initial state before tick is executed
+      element.style.willChange = 'opacity, transform';
+    },
+    tick: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${20 * (1 - progress)}px)`
+    })
+  }
+}
+```
+
+## Important Notes
+
+- `key` must be unique within the page (so animation state can be tracked even when DOM is created then deleted or deleted then created)

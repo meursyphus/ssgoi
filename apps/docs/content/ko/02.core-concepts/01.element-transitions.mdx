@@ -4,6 +4,15 @@ description: "개별 DOM 요소에 애니메이션 적용하기"
 nav-title: "요소 애니메이션"
 ---
 
+import { TransitionPlayground } from '@/components/transition-playground';
+import { Tabs, TabPanel } from '@/components/mdx-components';
+
+## Transition Playground
+
+다양한 transition 효과를 직접 체험해보세요:
+
+<TransitionPlayground />
+
 ## 기본 구조
 
 ### TransitionConfig 인터페이스
@@ -45,55 +54,59 @@ interface Transition {
 import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 ```
 
-## React에서 사용하기
+## 프레임워크별 사용법
 
-```jsx
-import { transition } from "@ssgoi/react";
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```jsx
+    import { transition } from "@ssgoi/react";
 
-<div
-  ref={transition({
-    key: "unique-key",
-    in: (element) => ({
-      tick: (progress) => {
-        element.style.opacity = progress;
-        element.style.transform = `translateY(${20 * (1 - progress)}px)`;
-      },
-    }),
-    out: (element) => ({
-      tick: (progress) => {
-        element.style.opacity = 1 - progress;
-      },
-    }),
-  })}
->
-  Content
-</div>;
-```
+    <div
+      ref={transition({
+        key: "unique-key",
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          },
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          },
+        }),
+      })}
+    >
+      Content
+    </div>
+    ```
+  </TabPanel>
+  
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+    </script>
 
-## Svelte에서 사용하기
-
-```svelte
-<script>
-  import { transition } from '@ssgoi/svelte';
-</script>
-
-<div use:transition={{
-  key: 'unique-key',
-  in: (element) => ({
-    tick: (progress) => {
-      element.style.opacity = progress;
-      element.style.transform = `translateY(${20 * (1 - progress)}px)`;
-    }
-  }),
-  out: (element) => ({
-    tick: (progress) => {
-      element.style.opacity = 1 - progress;
-    }
-  })
-}}>
-  Content
-</div>
-```
+    <div use:transition={{
+      key: 'unique-key',
+      in: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = progress;
+          element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+        }
+      }),
+      out: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = 1 - progress;
+        }
+      })
+    }}>
+      Content
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
 ## Progress 동작 방식
 

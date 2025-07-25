@@ -1,0 +1,89 @@
+---
+title: "Introduction to SSGOI"
+description: "SSGOI is a library that enables native app-like smooth page transition animations on the web."
+nav-title: "Introduction"
+---
+
+<Note type="tip">SSGOI is pronounced "ssu-goi" and it means awesome!</Note>
+
+<Demo autoPlay={false} />
+
+## Why SSGOI?
+
+### 1. Works in All Browsers
+
+Unlike the browser's Chrome View Transition API, SSGOI provides a consistent experience across all modern browsers. It ensures the same animations work in Chrome, Firefox, and Safari.
+
+<Grid cols={3}>
+  <Card title="Chrome">
+    <Badge variant="success">✓ Full Support</Badge>
+  </Card>
+  <Card title="Firefox">
+    <Badge variant="success">✓ Full Support</Badge>
+  </Card>
+  <Card title="Safari">
+    <Badge variant="success">✓ Full Support</Badge>
+  </Card>
+</Grid>
+
+### 2. Perfect Server-Side Rendering Support
+
+- **SSR/SSG Compatible**: Works flawlessly with Next.js, Nuxt, SvelteKit without hydration issues
+- **SEO Friendly**: Animations don't affect search engine optimization
+- **Optimized Initial Load**: Leverages server-rendered HTML as-is
+
+### 3. Use Your Framework's Routing As-Is
+
+<Note>
+  SSGOI is perfectly compatible with existing routing systems. No need to change your router!
+</Note>
+
+You can add animations while using your framework's routing as-is. Compatible with all routing approaches including Next.js `Link`, SvelteKit's `goto`, Vue Router, and more.
+
+## Key Features
+
+<CodeDemo>
+```typescript
+// Get started with just a few lines of code
+const config = {
+  defaultTransition: fade(),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ direction: 'left' })
+    }
+  ]
+}
+```
+</CodeDemo>
+
+### 🎨 Rich Transition Effects
+
+- **Fade**: Smooth fade in/out
+- **Slide**: Directional sliding
+- **Scale**: Zoom in/out effects
+- **Hero**: Shared element animations
+- **Pinterest**: Pinterest-style expansion
+- **Ripple**: Material Design ripple effect
+
+### ⚡ Optimized Performance
+
+- Natural motion with spring-based physics animations
+- Small bundle size (< 20KB gzipped)
+- Tree-shaking support to include only what you use
+
+### 🛠️ Developer Friendly
+
+- Full TypeScript support
+- Intuitive API design
+- Rich documentation and examples
+- Support for all major frameworks including React, Svelte, Vue
+
+## Getting Started
+
+<Note type="info">
+  SSGOI currently officially supports React and Svelte, with Vue support coming soon.
+</Note>
+
+Learn how to apply SSGOI to your project through the quick start guide in the next section!
