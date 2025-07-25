@@ -1,0 +1,231 @@
+---
+title: "クイックスタート"
+description: "5分でSSGOIを使った初めてのページ遷移アニメーションを作成"
+nav-title: "クイックスタート"
+---
+
+import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
+
+## パッケージのインストール
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```bash 
+    npm install @ssgoi/react 
+    # or yarn add @ssgoi/react 
+    # or pnpm add @ssgoi/react 
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```bash 
+    npm install @ssgoi/svelte 
+    # or yarn add @ssgoi/svelte 
+    # or pnpm add @ssgoi/svelte 
+    ```
+  </TabPanel>
+</Tabs>
+
+## 基本セットアップ（2分）
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ### 1. ルートレイアウトの設定 (Next.js App Router)
+
+    ```tsx
+    // app/layout.tsx
+    import { Ssgoi } from "@ssgoi/react";
+    import { fade } from "@ssgoi/react/view-transitions";
+
+    export default function RootLayout({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={{ defaultTransition: fade() }}>
+              {/* ⚠️ 重要: position: relativeが必要です！ */}
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+    > **なぜposition: relativeが必要なのか？**
+    > ページがアニメーションで出ていくとき、`position: absolute`が適用されます。親要素に`position: relative`がないと、ページが間違った位置に移動する可能性があります。
+
+    ### 2. ページのラップ
+
+    ```tsx
+    // app/page.tsx
+    import { SsgoiTransition } from "@ssgoi/react";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>ホームページ</h1>
+            {/* ページコンテンツ */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // app/about/page.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>紹介ページ</h1>
+            {/* ページコンテンツ */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ### 1. ルートレイアウトの設定 (SvelteKit)
+
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { fade } from "@ssgoi/svelte/view-transitions";
+    </script>
+
+    <Ssgoi config={{ defaultTransition: fade() }}>
+      <!-- ⚠️ 重要: position: relativeが必要です！ -->
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+    > **なぜposition: relativeが必要なのか？**
+    > ページがアニメーションで出ていくとき、`position: absolute`が適用されます。親要素に`position: relative`がないと、ページが間違った位置に移動する可能性があります。
+
+    ### 2. ページのラップ
+
+    ```svelte
+    <!-- src/routes/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/">
+      <main>
+        <h1>ホームページ</h1>
+        <!-- ページコンテンツ -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+    ```svelte
+    <!-- src/routes/about/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/about">
+      <main>
+        <h1>紹介ページ</h1>
+        <!-- ページコンテンツ -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 様々なトランジションの適用
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```tsx
+    // app/layout.tsx
+    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // ホーム → 紹介: 左にスライド
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // 紹介 → ホーム: 右にスライド
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // リスト → 詳細: スケール
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={ssgoiConfig}>
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+
+      const ssgoiConfig = {
+        transitions: [
+          // ホーム → 紹介: 左にスライド
+          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+          // 紹介 → ホーム: 右にスライド
+          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+          // リスト → 詳細: スケール
+          { from: "/list", to: "/detail/*", transition: scale() },
+        ],
+      };
+    </script>
+
+    <Ssgoi config={ssgoiConfig}>
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 完成！ 🎉
+
+おめでとうございます！あなたのウェブサイトにネイティブアプリのようなページ遷移が適用されました。

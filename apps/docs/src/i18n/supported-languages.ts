@@ -15,6 +15,10 @@ export const LANGUAGE_LIST = [
     title: "中文",
     locale: "zh",
   },
+  {
+    title: "日本語",
+    locale: "ja",
+  },
 ];
 
 export const SUPPORTED_LANGUAGES = LANGUAGE_LIST.map(
