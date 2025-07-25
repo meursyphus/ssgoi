@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Menu, X, Star } from "lucide-react";
+import { Menu, Star } from "lucide-react";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { useSidebarStore } from "@/store/sidebar";
 import { useCurrentLanguage } from "@/i18n/use-current-language";
 import { MobileDrawer } from "./mobile-drawer";
 import { LanguageSwitcher } from "./language-switcher";
@@ -54,7 +52,7 @@ export function Header() {
         <div className="ml-auto flex items-center gap-4">
           {/* Language Switcher */}
           <LanguageSwitcher />
-          
+
           <Link
             href="https://github.com/meursyphus/ssgoi"
             target="_blank"

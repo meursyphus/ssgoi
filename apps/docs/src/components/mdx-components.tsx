@@ -1,5 +1,6 @@
 import { ComponentProps } from "react";
 import _Demo from "./demo";
+import { TransitionPlayground } from "./transition-playground";
 
 // Example custom components for MDX
 export const CodeDemo = ({ children }: { children: React.ReactNode }) => {
@@ -108,7 +109,7 @@ export function Demo({ autoPlay = false }: { autoPlay?: boolean }) {
         {/* 모바일 프레임 */}
         <div className="relative overflow-hidden rounded-[3rem] border-8 border-white/10 bg-black shadow-2xl">
           <div className="absolute left-1/2 top-4 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
-          
+
           {/* Demo Component */}
           <div className="aspect-[9/19.5]">
             <_Demo autoPlay={autoPlay} />
@@ -128,4 +129,5 @@ export const mdxComponents = {
   Grid,
   Card,
   Demo,
+  TransitionPlayground,
 };

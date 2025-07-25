@@ -7,6 +7,8 @@ import { useSidebarStore } from "@/store/sidebar";
 import { useEffect, useState } from "react";
 import { useOutsideClick } from "@/lib/use-click-outside";
 import { LANGUAGE_LIST } from "@/i18n/supported-languages";
+import { SidebarContent } from "@/components/sidebar-content";
+import { useNavigation } from "@/contexts/navigation-context";
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -20,14 +22,17 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
   const isDocsPage = pathname.includes("/docs");
   const { toggle: toggleSidebar } = useSidebarStore();
   const onOutsideClick = useOutsideClick();
+  const { navigation } = useNavigation();
   
   // 탭 상태 관리 - 문서 페이지에서는 'docs'가 기본값
   const [activeTab, setActiveTab] = useState<'menu' | 'docs'>(isDocsPage ? 'docs' : 'menu');
 
   // Close drawer when route changes
   useEffect(() => {
-    onClose();
-  }, [pathname, onClose]);
+    if (isOpen) {
+      onClose();
+    }
+  }, [pathname]); // onClose를 dependency에서 제거
   
   // 문서 페이지 여부에 따라 기본 탭 설정
   useEffect(() => {
@@ -105,21 +110,22 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto p-4">
             {/* 문서 탭 콘텐츠 */}
-            {activeTab === 'docs' && isDocsPage && (
+            {activeTab === 'docs' && isDocsPage && navigation && (
               <div>
-                <p className="text-sm text-gray-400 mb-4">
-                  문서의 전체 목차를 보려면 아래 버튼을 클릭하세요.
+                <SidebarContent 
+                  navigation={navigation} 
+                  lang={lang} 
+                  onLinkClick={onClose}
+                />
+              </div>
+            )}
+            
+            {/* 문서 탭이지만 navigation이 없는 경우 (문서 페이지가 아닐 때) */}
+            {activeTab === 'docs' && !navigation && (
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-400">
+                  문서 페이지로 이동해주세요.
                 </p>
-                <button
-                  onClick={() => {
-                    onClose();
-                    toggleSidebar();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md text-sm bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors font-medium"
-                >
-                  <BookOpen className="h-5 w-5" />
-                  문서 목차 열기
-                </button>
               </div>
             )}
             
