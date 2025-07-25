@@ -43,7 +43,9 @@
     "next-mdx-remote-client": "^2.1.2"
   },
   "devDependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "highlight.js": "^11.11.1",
+    "highlightjs-svelte": "^1.0.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
