@@ -10,7 +10,9 @@ export interface StrategyContext {
 
 export interface AnimationSetup {
   config?: TransitionConfig;
-  state: { position: number; velocity: number; from: number; to: number };
+  state: { position: number; velocity: number };
+  from: number;
+  to: number;
   direction: "forward" | "backward";
 }
 
@@ -64,11 +66,7 @@ export const createDefaultStrategy = (
       const { currentAnimation } = context;
 
       // Scenario 4: OUT animation running + IN trigger
-      if (
-        currentAnimation &&
-        currentAnimation.animator.getIsAnimating() &&
-        currentAnimation.direction === "out"
-      ) {
+      if (currentAnimation && currentAnimation.direction === "out") {
         // Stop current OUT animation
         const currentState = currentAnimation.animator.getCurrentState();
         currentAnimation.animator.stop();
@@ -79,7 +77,9 @@ export const createDefaultStrategy = (
           return {
             config: outConfig,
             state: currentState,
-            direction: "backward",
+            from: 1, // OUT animation's from
+            to: 0, // OUT animation's to
+            direction: "backward", // Will actually go 0→1
           };
         }
       }
@@ -88,7 +88,9 @@ export const createDefaultStrategy = (
       const config = await configs.in;
       return {
         config,
-        state: { position: 0, velocity: 0, from: 0, to: 1 },
+        state: { position: 0, velocity: 0 },
+        from: 0,
+        to: 1,
         direction: "forward",
       };
     },
@@ -97,11 +99,7 @@ export const createDefaultStrategy = (
       const { currentAnimation } = context;
 
       // Scenario 3: IN animation running + OUT trigger
-      if (
-        currentAnimation &&
-        currentAnimation.animator.getIsAnimating() &&
-        currentAnimation.direction === "in"
-      ) {
+      if (currentAnimation && currentAnimation.direction === "in") {
         // Stop current IN animation
         const currentState = currentAnimation.animator.getCurrentState();
         currentAnimation.animator.stop();
@@ -111,18 +109,24 @@ export const createDefaultStrategy = (
           const config = await configs.in;
           return {
             config,
-            state: currentState,
-            direction: "backward",
+            state: {
+              position: currentState.position,
+              velocity: currentState.velocity,
+            },
+            from: 0, // IN animation's from
+            to: 1, // IN animation's to
+            direction: "backward", // Will actually go 1→0
           };
         }
       }
 
       // Scenario 2: No animation running OR OUT already running
-
       const config = await configs.out;
       return {
         config,
-        state: { position: 1, velocity: 0, from: 1, to: 0 },
+        state: { position: 1, velocity: 0 },
+        from: 1,
+        to: 0,
         direction: "forward",
       };
     },

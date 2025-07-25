@@ -51,6 +51,8 @@ export function createTransitionCallback(
     setup.config.prepare?.(element);
 
     const animator = Animator.fromState(setup.state, {
+      from: setup.from,
+      to: setup.to,
       spring: setup.config.spring,
       onStart: setup.config.onStart,
       onUpdate: setup.config.tick,
@@ -89,6 +91,8 @@ export function createTransitionCallback(
     insertClone();
 
     const animator = Animator.fromState(setup.state, {
+      from: setup.from,
+      to: setup.to,
       spring: setup.config.spring,
       onStart: setup.config.onStart,
       onUpdate: setup.config.tick,

@@ -131,7 +131,12 @@ export class Animator {
     return this.isAnimating;
   }
 
-  getCurrentState(): { position: number; velocity: number; from: number; to: number } {
+  getCurrentState(): {
+    position: number;
+    velocity: number;
+    from: number;
+    to: number;
+  } {
     return {
       position: this.currentValue,
       velocity: this.velocity,
@@ -163,14 +168,10 @@ export class Animator {
 
   // Static factory method
   static fromState(
-    state: { position: number; velocity: number; from: number; to: number },
+    state: { position: number; velocity: number },
     newOptions: Partial<AnimationOptions>
   ): Animator {
-    const animation = new Animator({
-      ...newOptions,
-      from: state.from,
-      to: state.to,
-    });
+    const animation = new Animator(newOptions);
     animation.setValue(state.position);
     animation.setVelocity(state.velocity);
     return animation;
