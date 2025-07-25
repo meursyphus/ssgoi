@@ -2,6 +2,10 @@
 
 import React, { useState } from "react";
 import { transition } from "@ssgoi/react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
 
 interface TransitionOption {
   label: string;
@@ -125,7 +129,8 @@ export function TransitionPlayground() {
   const [transitionKey, setTransitionKey] = useState("playground-element");
 
   const generateCode = () => {
-    return `import { transition } from '@ssgoi/react';
+    return `\`\`\`tsx
+import { transition } from '@ssgoi/react';
 
 // Using transition hook
 <div
@@ -155,7 +160,8 @@ export function TransitionPlayground() {
   })}
 >
   Your content here
-</div>`;
+</div>
+\`\`\``;
   };
 
   return (
@@ -273,9 +279,31 @@ export function TransitionPlayground() {
       {/* Code Preview */}
       <div className="mt-6">
         <h3 className="text-sm font-medium mb-2">Generated Code:</h3>
-        <pre className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md overflow-x-auto">
-          <code className="text-sm">{generateCode()}</code>
-        </pre>
+        <div className="prose prose-invert max-w-none">
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+            components={{
+              pre: ({ children, ...props }) => (
+                <pre className="hljs p-4 bg-gray-900 rounded-md overflow-x-auto" {...props}>
+                  {children}
+                </pre>
+              ),
+              code: ({ node, inline, className, children, ...props }) => {
+                if (!inline && className?.includes('language-')) {
+                  return <code className={className} {...props}>{children}</code>;
+                }
+                return (
+                  <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props}>
+                    {children}
+                  </code>
+                );
+              },
+            }}
+          >
+            {generateCode()}
+          </Markdown>
+        </div>
       </div>
     </div>
   );
