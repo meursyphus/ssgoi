@@ -11,6 +11,10 @@ export const LANGUAGE_LIST = [
     title: "한국어",
     locale: "ko",
   },
+  {
+    title: "中文",
+    locale: "zh",
+  },
 ];
 
 export const SUPPORTED_LANGUAGES = LANGUAGE_LIST.map(
