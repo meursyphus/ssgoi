@@ -2,6 +2,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import svelte from "highlight.js/lib/languages/svelte";
 import { mdxComponents } from "./mdx-components";
 
 // Syntax highlighting styles are in globals.css
@@ -110,7 +111,7 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
       options={{
         mdxOptions: {
           rehypePlugins: [
-            rehypeHighlight,
+            [rehypeHighlight, { ignoreMissing: true, languages: { svelte } }],
             rehypeSlug,
             [rehypeAutolinkHeadings, { behavior: "wrap" }],
           ],
