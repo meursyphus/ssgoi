@@ -9,6 +9,8 @@ const ko: Messages = {
     tutorial: "튜토리얼",
     contributing: "기여하기",
     showcase: "쇼케이스",
+    openMenu: "메뉴 열기",
+    githubRepository: "GitHub 저장소",
   },
   home: {
     title: "아름다운 페이지 전환\n모던 웹을 위한",

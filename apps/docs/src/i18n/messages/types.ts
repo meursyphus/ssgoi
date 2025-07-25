@@ -9,6 +9,8 @@ export type Messages = {
     tutorial: string;
     contributing: string;
     showcase: string;
+    openMenu: string;
+    githubRepository: string;
   };
   home: {
     title: string;

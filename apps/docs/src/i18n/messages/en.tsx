@@ -9,6 +9,8 @@ const en: Messages = {
     tutorial: "Tutorial",
     contributing: "Contributing",
     showcase: "Showcase",
+    openMenu: "Open menu",
+    githubRepository: "GitHub Repository",
   },
   home: {
     title: "Beautiful page transitions\nfor modern web apps",

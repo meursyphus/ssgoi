@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Menu, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCurrentLanguage } from "@/i18n/use-current-language";
+import { useTranslations } from "@/i18n/use-translations";
 import { MobileDrawer } from "./mobile-drawer";
 import { LanguageSwitcher } from "./language-switcher";
 
@@ -13,6 +14,7 @@ export function Header() {
   const [stars, setStars] = useState<number | null>(null);
   const [isLoadingStars, setIsLoadingStars] = useState(true);
   const currentLang = useCurrentLanguage();
+  const t = useTranslations("header");
 
   useEffect(() => {
     fetch("https://api.github.com/repos/meursyphus/ssgoi")
@@ -39,7 +41,7 @@ export function Header() {
             }}
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t("openMenu")}</span>
           </button>
 
           <Link href="/" className="flex items-center space-x-2">
@@ -51,7 +53,7 @@ export function Header() {
               href={`/${currentLang}/docs`}
               className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
             >
-              문서
+              {t("docs")}
             </Link>
           </nav>
         </div>
@@ -91,7 +93,7 @@ export function Header() {
                 <span className="text-zinc-400">—</span>
               )}
             </div>
-            <span className="sr-only">GitHub Repository</span>
+            <span className="sr-only">{t("githubRepository")}</span>
           </Link>
         </div>
       </div>
