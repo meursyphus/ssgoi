@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import { Header } from "@/components/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
-import { NavigationProvider } from "@/contexts/navigation-context";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,12 +52,10 @@ export default async function RootLayout({
     <html lang={lang} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <TranslationsProvider lang={lang}>
-          <NavigationProvider navigation={null}>
-            <div className="relative min-h-screen">
-              <Header />
-              <main>{children}</main>
-            </div>
-          </NavigationProvider>
+          <div className="relative min-h-screen">
+            <Header />
+            <main>{children}</main>
+          </div>
         </TranslationsProvider>
       </body>
     </html>

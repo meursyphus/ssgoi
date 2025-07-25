@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useOutsideClick } from "@/lib/use-click-outside";
 import { LANGUAGE_LIST } from "@/i18n/supported-languages";
 import { SidebarContent } from "@/components/sidebar-content";
-import { useNavigation } from "@/contexts/navigation-context";
+import { useNavigationStore } from "@/store/navigation";
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -22,29 +22,30 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
   const isDocsPage = pathname.includes("/docs");
   const { toggle: toggleSidebar } = useSidebarStore();
   const onOutsideClick = useOutsideClick();
-  const { navigation } = useNavigation();
-  
+  const navigation = useNavigationStore((state) => state.navigation);
+
   // 탭 상태 관리 - 문서 페이지에서는 'docs'가 기본값
-  const [activeTab, setActiveTab] = useState<'menu' | 'docs'>(isDocsPage ? 'docs' : 'menu');
+  const [activeTab, setActiveTab] = useState<"menu" | "docs">(
+    isDocsPage ? "docs" : "menu"
+  );
 
   // Close drawer when route changes
   useEffect(() => {
     if (isOpen) {
       onClose();
     }
-  }, [pathname]); // onClose를 dependency에서 제거
-  
+  }, [pathname]);
+
   // 문서 페이지 여부에 따라 기본 탭 설정
   useEffect(() => {
-    setActiveTab(isDocsPage ? 'docs' : 'menu');
+    setActiveTab(isDocsPage ? "docs" : "menu");
   }, [isDocsPage]);
 
   const handleLanguageChange = (locale: string) => {
-    // 현재 경로에서 언어 부분만 교체
     const pathSegments = pathname.split("/");
     pathSegments[1] = locale;
     const newPath = pathSegments.join("/");
-    
+
     router.push(newPath);
     onClose();
   };
@@ -73,11 +74,11 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                 {/* 문서 페이지에서만 문서 탭 표시 */}
                 {isDocsPage && (
                   <button
-                    onClick={() => setActiveTab('docs')}
+                    onClick={() => setActiveTab("docs")}
                     className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                      activeTab === 'docs'
-                        ? 'text-white border-b-2 border-orange-500 pb-2'
-                        : 'text-gray-400 hover:text-white pb-2'
+                      activeTab === "docs"
+                        ? "text-white border-b-2 border-orange-500 pb-2"
+                        : "text-gray-400 hover:text-white pb-2"
                     }`}
                   >
                     <BookOpen className="h-4 w-4" />
@@ -85,11 +86,11 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                   </button>
                 )}
                 <button
-                  onClick={() => setActiveTab('menu')}
+                  onClick={() => setActiveTab("menu")}
                   className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                    activeTab === 'menu'
-                      ? 'text-white border-b-2 border-orange-500 pb-2'
-                      : 'text-gray-400 hover:text-white pb-2'
+                    activeTab === "menu"
+                      ? "text-white border-b-2 border-orange-500 pb-2"
+                      : "text-gray-400 hover:text-white pb-2"
                   }`}
                 >
                   <Menu className="h-4 w-4" />
@@ -110,27 +111,27 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto p-4">
             {/* 문서 탭 콘텐츠 */}
-            {activeTab === 'docs' && isDocsPage && navigation && (
+            {activeTab === "docs" && isDocsPage && navigation && (
               <div>
-                <SidebarContent 
-                  navigation={navigation} 
-                  lang={lang} 
+                <SidebarContent
+                  navigation={navigation}
+                  lang={lang}
                   onLinkClick={onClose}
                 />
               </div>
             )}
-            
+
             {/* 문서 탭이지만 navigation이 없는 경우 (문서 페이지가 아닐 때) */}
-            {activeTab === 'docs' && !navigation && (
+            {activeTab === "docs" && !navigation && (
               <div className="text-center py-8">
                 <p className="text-sm text-gray-400">
                   문서 페이지로 이동해주세요.
                 </p>
               </div>
             )}
-            
+
             {/* 메뉴 탭 콘텐츠 */}
-            {activeTab === 'menu' && (
+            {activeTab === "menu" && (
               <div className="space-y-6">
                 {/* Navigation Section */}
                 <div>
