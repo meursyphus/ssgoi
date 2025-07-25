@@ -1,9 +1,9 @@
 ---
-title: "준비 중"
-description: "요소 애니메이션 프리셋 문서 준비 중"
-nav-title: "준비 중"
+title: "Coming Soon"
+description: "Element animation preset documentation coming soon"
+nav-title: "Coming Soon"
 ---
 
-# 준비 중
+# Coming Soon
 
-요소 애니메이션 프리셋에 대한 상세 문서를 준비 중입니다.
+Detailed documentation for element animation presets is being prepared.

@@ -1,12 +1,12 @@
 ---
-title: "빠른 시작"
-description: "5분 안에 SSGOI로 첫 번째 페이지 전환 애니메이션 만들기"
-nav-title: "빠른 시작"
+title: "Quick Start"
+description: "Create your first page transition animation with SSGOI in 5 minutes"
+nav-title: "Quick Start"
 ---
 
 import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
-## 패키지 설치
+## Package Installation
 
 <Tabs
   items={[
@@ -18,20 +18,20 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
   <TabPanel value="react">
     ```bash 
     npm install @ssgoi/react 
-    # 또는 yarn add @ssgoi/react 
-    # 또는 pnpm add @ssgoi/react 
+    # or yarn add @ssgoi/react 
+    # or pnpm add @ssgoi/react 
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```bash 
     npm install @ssgoi/svelte 
-    # 또는 yarn add @ssgoi/svelte 
-    # 또는 pnpm add @ssgoi/svelte 
+    # or yarn add @ssgoi/svelte 
+    # or pnpm add @ssgoi/svelte 
     ```
   </TabPanel>
 </Tabs>
 
-## 기본 설정 (2분)
+## Basic Setup (2 minutes)
 
 <Tabs
   items={[
@@ -41,7 +41,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
   defaultValue="react"
 >
   <TabPanel value="react">
-    ### 1. 루트 레이아웃 설정 (Next.js App Router)
+    ### 1. Root Layout Setup (Next.js App Router)
 
     ```tsx
     // app/layout.tsx
@@ -57,7 +57,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
         <html>
           <body>
             <Ssgoi config={{ defaultTransition: fade() }}>
-              {/* ⚠️ 중요: position: relative 필수! */}
+              {/* ⚠️ Important: position: relative is required! */}
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
               </div>
@@ -68,10 +68,10 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
     }
     ```
 
-    > **왜 position: relative가 필요한가요?**
-    > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
 
-    ### 2. 페이지 래핑
+    ### 2. Page Wrapping
 
     ```tsx
     // app/page.tsx
@@ -81,8 +81,8 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       return (
         <SsgoiTransition id="/">
           <main>
-            <h1>홈 페이지</h1>
-            {/* 페이지 내용 */}
+            <h1>Home Page</h1>
+            {/* Page content */}
           </main>
         </SsgoiTransition>
       );
@@ -93,8 +93,8 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       return (
         <SsgoiTransition id="/about">
           <main>
-            <h1>소개 페이지</h1>
-            {/* 페이지 내용 */}
+            <h1>About Page</h1>
+            {/* Page content */}
           </main>
         </SsgoiTransition>
       );
@@ -103,7 +103,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
   </TabPanel>
   <TabPanel value="svelte">
-    ### 1. 루트 레이아웃 설정 (SvelteKit)
+    ### 1. Root Layout Setup (SvelteKit)
 
     ```svelte
     <!-- src/routes/+layout.svelte -->
@@ -113,17 +113,17 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
     </script>
 
     <Ssgoi config={{ defaultTransition: fade() }}>
-      <!-- ⚠️ 중요: position: relative 필수! -->
+      <!-- ⚠️ Important: position: relative is required! -->
       <div style="position: relative; min-height: 100vh;">
         <slot />
       </div>
     </Ssgoi>
     ```
 
-    > **왜 position: relative가 필요한가요?**
-    > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
 
-    ### 2. 페이지 래핑
+    ### 2. Page Wrapping
 
     ```svelte
     <!-- src/routes/+page.svelte -->
@@ -133,8 +133,8 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
     <SsgoiTransition id="/">
       <main>
-        <h1>홈 페이지</h1>
-        <!-- 페이지 내용 -->
+        <h1>Home Page</h1>
+        <!-- Page content -->
       </main>
     </SsgoiTransition>
     ```
@@ -147,8 +147,8 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
     <SsgoiTransition id="/about">
       <main>
-        <h1>소개 페이지</h1>
-        <!-- 페이지 내용 -->
+        <h1>About Page</h1>
+        <!-- Page content -->
       </main>
     </SsgoiTransition>
     ```
@@ -156,7 +156,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
   </TabPanel>
 </Tabs>
 
-## 다양한 트랜지션 적용
+## Applying Various Transitions
 
 <Tabs
   items={[
@@ -172,11 +172,11 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
     const ssgoiConfig = {
       transitions: [
-        // 홈 → 소개: 왼쪽으로 슬라이드
+        // Home → About: slide left
         { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 소개 → 홈: 오른쪽으로 슬라이드
+        // About → Home: slide right
         { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // 목록 → 상세: 확대
+        // List → Detail: scale
         { from: "/list", to: "/detail/*", transition: scale() },
       ],
     };
@@ -206,11 +206,11 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
       const ssgoiConfig = {
         transitions: [
-          // 홈 → 소개: 왼쪽으로 슬라이드
+          // Home → About: slide left
           { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-          // 소개 → 홈: 오른쪽으로 슬라이드
+          // About → Home: slide right
           { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-          // 목록 → 상세: 확대
+          // List → Detail: scale
           { from: "/list", to: "/detail/*", transition: scale() },
         ],
       };
@@ -226,6 +226,6 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
   </TabPanel>
 </Tabs>
 
-## 완성! 🎉
+## Complete! 🎉
 
-축하합니다! 이제 웹사이트에 네이티브 앱 같은 페이지 전환이 적용되었습니다.
+Congratulations! Your website now has native app-like page transitions applied.

@@ -1,9 +1,9 @@
 ---
-title: "준비 중"
-description: "페이지 전환 프리셋 문서 준비 중"
-nav-title: "준비 중"
+title: "Coming Soon"
+description: "Page transition preset documentation coming soon"
+nav-title: "Coming Soon"
 ---
 
-# 준비 중
+# Coming Soon
 
-페이지 전환 프리셋에 대한 상세 문서를 준비 중입니다.
+Detailed documentation for page transition presets is being prepared.

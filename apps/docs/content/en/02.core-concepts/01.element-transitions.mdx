@@ -1,7 +1,7 @@
 ---
-title: "요소 애니메이션"
-description: "개별 DOM 요소에 애니메이션 적용하기"
-nav-title: "요소 애니메이션"
+title: "Element Animations"
+description: "Apply animations to individual DOM elements"
+nav-title: "Element Animations"
 ---
 
 import { TransitionPlayground } from '@/components/transition-playground';
@@ -9,28 +9,28 @@ import { Tabs, TabPanel } from '@/components/mdx-components';
 
 ## Transition Playground
 
-다양한 transition 효과를 직접 체험해보세요:
+Experience various transition effects directly:
 
 <TransitionPlayground />
 
-## 기본 구조
+## Basic Structure
 
-### TransitionConfig 인터페이스
+### TransitionConfig Interface
 
 ```typescript
 interface TransitionConfig {
   spring?: {
-    stiffness: number; // 스프링 강성 (기본: 300)
-    damping: number; // 감쇠 계수 (기본: 30)
+    stiffness: number; // Spring stiffness (default: 300)
+    damping: number; // Damping coefficient (default: 30)
   };
   tick?: (progress: number) => void; // in: 0→1, out: 1→0
-  prepare?: (element: HTMLElement) => void; // 애니메이션 시작 전 초기 설정
+  prepare?: (element: HTMLElement) => void; // Initial setup before animation starts
   onStart?: () => void;
   onEnd?: () => void;
 }
 ```
 
-### 트랜지션 정의
+### Transition Definition
 
 ```typescript
 interface Transition {
@@ -39,22 +39,22 @@ interface Transition {
 }
 ```
 
-### 동작 원리
+### How it Works
 
-1. **마운트 시**: 요소가 DOM에 추가될 때 `in` 함수 실행
-2. **언마운트 시**: 요소가 제거되기 전 `out` 함수 실행
-3. **애니메이션**: 스프링 물리 엔진이 progress 생성
+1. **On Mount**: Execute `in` function when element is added to DOM
+2. **On Unmount**: Execute `out` function before element is removed
+3. **Animation**: Spring physics engine generates progress
    - in: 0 → 1
    - out: 1 → 0
-4. **tick 콜백**: 매 프레임마다 호출되어 스타일 업데이트
+4. **tick Callback**: Called every frame to update styles
 
-### 트랜지션 프리셋
+### Transition Presets
 
 ```typescript
-import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
+import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 ```
 
-## 프레임워크별 사용법
+## Framework-specific Usage
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -108,22 +108,22 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
   </TabPanel>
 </Tabs>
 
-## Progress 동작 방식
+## Progress Behavior
 
-### in 애니메이션
+### in Animation
 
 - progress: 0 → 1
-- 요소가 나타날 때 실행
-- 투명도 0에서 1로, 작은 크기에서 원래 크기로
+- Executes when element appears
+- Opacity from 0 to 1, from small size to original size
 
-### out 애니메이션
+### out Animation
 
 - progress: 1 → 0
-- 요소가 사라질 때 실행
-- 투명도 1에서 0으로, 원래 크기에서 작은 크기로
+- Executes when element disappears
+- Opacity from 1 to 0, from original size to small size
 
 ```jsx
-// 예시: in과 out의 차이
+// Example: difference between in and out
 {
   in: (element) => ({
     tick: (progress) => {
@@ -140,15 +140,15 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 }
 ```
 
-## prepare 콜백
+## prepare Callback
 
-애니메이션이 시작되기 전에 DOM 요소를 준비하는 단계입니다:
+The stage where DOM elements are prepared before animation starts:
 
 ```jsx
 {
   in: {
     prepare: (element) => {
-      // tick이 실행되기 전에 초기 상태 설정
+      // Set initial state before tick is executed
       element.style.willChange = 'opacity, transform';
     },
     tick: (progress) => ({
@@ -159,6 +159,6 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 }
 ```
 
-## 주의사항
+## Important Notes
 
-- `key`는 페이지 내에서 고유해야 함 (돔이 생성되다가 삭제 혹은 삭제되다가 생성되어도 애니메이션 상태를 추적할 수 있도록)
+- `key` must be unique within the page (so animation state can be tracked even when DOM is created then deleted or deleted then created)

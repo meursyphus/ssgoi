@@ -1,51 +1,50 @@
 ---
-title: "SSGOI 소개"
-description: "SSGOI는 웹에서 네이티브 앱과 같은 자연스러운 페이지 전환 애니메이션을 구현할 수 있게 해주는 라이브러리입니다."
-nav-title: "소개"
+title: "Introduction to SSGOI"
+description: "SSGOI is a library that enables native app-like smooth page transition animations on the web."
+nav-title: "Introduction"
 ---
 
-<Note type="tip">SSGOI는 "쓰고이"라고 읽으며, 하여튼 좋다는 뜻입니다!</Note>
+<Note type="tip">SSGOI is pronounced "ssu-goi" and it means awesome!</Note>
 
 <Demo autoPlay={false} />
 
-## 왜 SSGOI인가?
+## Why SSGOI?
 
-### 1. 모든 브라우저에서 동작
+### 1. Works in All Browsers
 
-브라우저 크롬 View Transition API와 달리, SSGOI는 모든 모던 브라우저에서 일관된 경험을 제공합니다. Chrome, Firefox, Safari 어디서든 동일한 애니메이션을 보장합니다.
+Unlike the browser's Chrome View Transition API, SSGOI provides a consistent experience across all modern browsers. It ensures the same animations work in Chrome, Firefox, and Safari.
 
 <Grid cols={3}>
   <Card title="Chrome">
-    <Badge variant="success">✓ 완벽 지원</Badge>
+    <Badge variant="success">✓ Full Support</Badge>
   </Card>
   <Card title="Firefox">
-    <Badge variant="success">✓ 완벽 지원</Badge>
+    <Badge variant="success">✓ Full Support</Badge>
   </Card>
   <Card title="Safari">
-    <Badge variant="success">✓ 완벽 지원</Badge>
+    <Badge variant="success">✓ Full Support</Badge>
   </Card>
 </Grid>
 
-### 2. 서버사이드 렌더링 완벽 지원
+### 2. Perfect Server-Side Rendering Support
 
-- **SSR/SSG 호환**: Next.js, Nuxt, SvelteKit 등에서 하이드레이션 문제 없이 작동
-- **SEO 친화적**: 애니메이션이 검색 엔진 최적화에 영향을 주지 않음
-- **초기 로딩 최적화**: 서버에서 렌더링된 HTML을 그대로 활용
+- **SSR/SSG Compatible**: Works flawlessly with Next.js, Nuxt, SvelteKit without hydration issues
+- **SEO Friendly**: Animations don't affect search engine optimization
+- **Optimized Initial Load**: Leverages server-rendered HTML as-is
 
-### 3. 프레임워크 라우팅 그대로 사용
+### 3. Use Your Framework's Routing As-Is
 
 <Note>
-  SSGOI는 기존 라우팅 시스템과 완벽하게 호환됩니다. 라우터를 변경할 필요가
-  없습니다!
+  SSGOI is perfectly compatible with existing routing systems. No need to change your router!
 </Note>
 
-기존 프레임워크의 라우팅을 그대로 사용하면서 애니메이션만 추가할 수 있습니다. Next.js의 `Link`, SvelteKit의 `goto`, Vue Router 등 모든 라우팅 방식과 호환됩니다.
+You can add animations while using your framework's routing as-is. Compatible with all routing approaches including Next.js `Link`, SvelteKit's `goto`, Vue Router, and more.
 
-## 주요 특징
+## Key Features
 
 <CodeDemo>
 ```typescript
-// 단 몇 줄의 코드로 시작
+// Get started with just a few lines of code
 const config = {
   defaultTransition: fade(),
   transitions: [
@@ -59,32 +58,32 @@ const config = {
 ```
 </CodeDemo>
 
-### 🎨 다양한 전환 효과
+### 🎨 Rich Transition Effects
 
-- **Fade**: 부드러운 페이드 인/아웃
-- **Slide**: 방향성 있는 슬라이드
-- **Scale**: 확대/축소 효과
-- **Hero**: 공유 요소 애니메이션
-- **Pinterest**: Pinterest 스타일 확장
-- **Ripple**: Material Design 리플 효과
+- **Fade**: Smooth fade in/out
+- **Slide**: Directional sliding
+- **Scale**: Zoom in/out effects
+- **Hero**: Shared element animations
+- **Pinterest**: Pinterest-style expansion
+- **Ripple**: Material Design ripple effect
 
-### ⚡ 최적화된 성능
+### ⚡ Optimized Performance
 
-- 스프링 기반 물리 애니메이션으로 자연스러운 움직임
-- 작은 번들 사이즈 (< 20KB gzipped)
-- Tree-shaking 지원으로 사용하는 기능만 포함
+- Natural motion with spring-based physics animations
+- Small bundle size (< 20KB gzipped)
+- Tree-shaking support to include only what you use
 
-### 🛠️ 개발자 친화적
+### 🛠️ Developer Friendly
 
-- TypeScript 완벽 지원
-- 직관적인 API 설계
-- 풍부한 문서와 예제
-- React, Svelte, Vue 등 모든 주요 프레임워크 지원
+- Full TypeScript support
+- Intuitive API design
+- Rich documentation and examples
+- Support for all major frameworks including React, Svelte, Vue
 
-## 시작하기
+## Getting Started
 
 <Note type="info">
-  SSGOI는 현재 React와 Svelte를 공식 지원하며, Vue 지원은 곧 추가될 예정입니다.
+  SSGOI currently officially supports React and Svelte, with Vue support coming soon.
 </Note>
 
-다음 섹션에서 빠른 시작 가이드를 통해 SSGOI를 프로젝트에 적용하는 방법을 알아보세요!
+Learn how to apply SSGOI to your project through the quick start guide in the next section!
