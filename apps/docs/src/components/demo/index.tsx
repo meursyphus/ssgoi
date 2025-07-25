@@ -11,7 +11,11 @@ import PinterestList from "./pinterest";
 import PinterestDetail from "./pinterest/detail";
 import Profile from "./profile";
 
-export default function Demo() {
+interface DemoProps {
+  autoPlay?: boolean;
+}
+
+export default function Demo({ autoPlay = true }: DemoProps) {
   const [currentPath, setCurrentPath] = useState("/demo/posts");
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useMobile();
@@ -34,7 +38,7 @@ export default function Demo() {
 
   // Auto-routing effect
   useEffect(() => {
-    if (isHovered || isMobile) return;
+    if (!autoPlay || isHovered || isMobile) return;
 
     const intervalId = setInterval(() => {
       // Move to next route
@@ -44,7 +48,7 @@ export default function Demo() {
     }, 3000); // 3 seconds interval
 
     return () => clearInterval(intervalId);
-  }, [isHovered, isMobile]);
+  }, [autoPlay, isHovered, isMobile]);
 
   // Mouse event handlers
   useEffect(() => {

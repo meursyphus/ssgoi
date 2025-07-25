@@ -1,10 +1,12 @@
 "use client";
 
-import { X, FileText } from "lucide-react";
+import { X, FileText, Globe, Menu, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useOutsideClick } from "@/lib/use-click-outside";
+import { LANGUAGE_LIST } from "@/i18n/supported-languages";
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -14,84 +16,162 @@ interface MobileDrawerProps {
 
 export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const isDocsPage = pathname.includes("/docs");
   const { toggle: toggleSidebar } = useSidebarStore();
+  const onOutsideClick = useOutsideClick();
+  
+  // 탭 상태 관리 - 문서 페이지에서는 'docs'가 기본값
+  const [activeTab, setActiveTab] = useState<'menu' | 'docs'>(isDocsPage ? 'docs' : 'menu');
 
   // Close drawer when route changes
   useEffect(() => {
     onClose();
   }, [pathname, onClose]);
+  
+  // 문서 페이지 여부에 따라 기본 탭 설정
+  useEffect(() => {
+    setActiveTab(isDocsPage ? 'docs' : 'menu');
+  }, [isDocsPage]);
+
+  const handleLanguageChange = (locale: string) => {
+    // 현재 경로에서 언어 부분만 교체
+    const pathSegments = pathname.split("/");
+    pathSegments[1] = locale;
+    const newPath = pathSegments.join("/");
+    
+    router.push(newPath);
+    onClose();
+  };
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay - 시각적 효과만, 클릭 이벤트 없음 */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] md:hidden" />
       )}
-      
+
       {/* Drawer */}
       <aside
+        ref={isOpen ? onOutsideClick(onClose) : undefined}
         className={`
-          fixed right-0 top-0 h-full w-72 bg-zinc-900 border-l border-zinc-800 overflow-y-auto z-50
+          fixed left-0 top-0 h-screen w-72 bg-zinc-900 border-r border-zinc-800 overflow-y-auto z-[70]
           transition-transform duration-300 ease-in-out md:hidden
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div className="p-4">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-lg font-semibold text-white">메뉴</span>
-            <button
-              onClick={onClose}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-9 w-9 text-gray-400 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-              <span className="sr-only">Close drawer</span>
-            </button>
-          </div>
-
-          {/* Navigation Section */}
-          <div className="mb-8">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              네비게이션
-            </h3>
-            <nav>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href={`/${lang}/docs`}
-                    onClick={onClose}
-                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
+        <div className="flex flex-col h-full">
+          {/* Header with Tabs */}
+          <div className="p-4 pb-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-4">
+                {/* 문서 페이지에서만 문서 탭 표시 */}
+                {isDocsPage && (
+                  <button
+                    onClick={() => setActiveTab('docs')}
+                    className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                      activeTab === 'docs'
+                        ? 'text-white border-b-2 border-orange-500 pb-2'
+                        : 'text-gray-400 hover:text-white pb-2'
+                    }`}
                   >
-                    <FileText className="h-4 w-4" />
-                    문서
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
-
-          {/* Documentation Quick Access (only on docs pages) */}
-          {isDocsPage && (
-            <div>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                문서 사이드바
-              </h3>
+                    <BookOpen className="h-4 w-4" />
+                    문서 목차
+                  </button>
+                )}
+                <button
+                  onClick={() => setActiveTab('menu')}
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                    activeTab === 'menu'
+                      ? 'text-white border-b-2 border-orange-500 pb-2'
+                      : 'text-gray-400 hover:text-white pb-2'
+                  }`}
+                >
+                  <Menu className="h-4 w-4" />
+                  메뉴
+                </button>
+              </div>
               <button
-                onClick={() => {
-                  onClose();
-                  toggleSidebar();
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
+                onClick={onClose}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-9 w-9 text-gray-400 hover:text-white"
               >
-                <FileText className="h-4 w-4" />
-                문서 목차 보기
+                <X className="h-5 w-5" />
+                <span className="sr-only">Close drawer</span>
               </button>
             </div>
-          )}
+            <div className="border-b border-zinc-800" />
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {/* 문서 탭 콘텐츠 */}
+            {activeTab === 'docs' && isDocsPage && (
+              <div>
+                <p className="text-sm text-gray-400 mb-4">
+                  문서의 전체 목차를 보려면 아래 버튼을 클릭하세요.
+                </p>
+                <button
+                  onClick={() => {
+                    onClose();
+                    toggleSidebar();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md text-sm bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors font-medium"
+                >
+                  <BookOpen className="h-5 w-5" />
+                  문서 목차 열기
+                </button>
+              </div>
+            )}
+            
+            {/* 메뉴 탭 콘텐츠 */}
+            {activeTab === 'menu' && (
+              <div className="space-y-6">
+                {/* Navigation Section */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    네비게이션
+                  </h3>
+                  <nav>
+                    <ul className="space-y-2">
+                      <li>
+                        <Link
+                          href={`/${lang}/docs`}
+                          onClick={onClose}
+                          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
+                        >
+                          <FileText className="h-4 w-4" />
+                          문서
+                        </Link>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                {/* Language Section */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    언어 / Language
+                  </h3>
+                  <div className="space-y-2">
+                    {LANGUAGE_LIST.map((language) => (
+                      <button
+                        key={language.locale}
+                        onClick={() => handleLanguageChange(language.locale)}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                          lang === language.locale
+                            ? "bg-zinc-800 text-white"
+                            : "text-gray-300 hover:text-white hover:bg-zinc-800"
+                        }`}
+                      >
+                        <Globe className="h-4 w-4" />
+                        {language.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </>

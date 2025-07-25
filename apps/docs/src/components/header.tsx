@@ -8,13 +8,11 @@ import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar";
 import { useCurrentLanguage } from "@/i18n/use-current-language";
 import { MobileDrawer } from "./mobile-drawer";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function Header() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [stars, setStars] = useState<number | null>(null);
-  const pathname = usePathname();
-  const { toggle: toggleSidebar } = useSidebarStore();
-  const isDocsPage = pathname.includes("/docs");
   const currentLang = useCurrentLanguage();
 
   useEffect(() => {
@@ -32,7 +30,6 @@ export function Header() {
           <button
             className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
             onClick={() => {
-              console.log('Mobile drawer button clicked');
               setMobileDrawerOpen(!mobileDrawerOpen);
             }}
           >
@@ -55,6 +52,9 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-4">
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+          
           <Link
             href="https://github.com/meursyphus/ssgoi"
             target="_blank"
