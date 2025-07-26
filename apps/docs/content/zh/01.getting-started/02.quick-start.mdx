@@ -1,0 +1,231 @@
+---
+title: "快速入门"
+description: "5分钟内使用SSGOI创建您的第一个页面过渡动画"
+nav-title: "快速入门"
+---
+
+import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
+
+## 安装包
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```bash 
+    npm install @ssgoi/react 
+    # or yarn add @ssgoi/react 
+    # or pnpm add @ssgoi/react 
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```bash 
+    npm install @ssgoi/svelte 
+    # or yarn add @ssgoi/svelte 
+    # or pnpm add @ssgoi/svelte 
+    ```
+  </TabPanel>
+</Tabs>
+
+## 基本设置（2分钟）
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ### 1. 根布局设置 (Next.js App Router)
+
+    ```tsx
+    // app/layout.tsx
+    import { Ssgoi } from "@ssgoi/react";
+    import { fade } from "@ssgoi/react/view-transitions";
+
+    export default function RootLayout({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={{ defaultTransition: fade() }}>
+              {/* ⚠️ 重要：必须设置position: relative！ */}
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+    > **为什么需要position: relative？**
+    > 当页面动画退出时，会应用`position: absolute`。如果父元素没有`position: relative`，页面可能会移动到错误的位置。
+
+    ### 2. 页面包装
+
+    ```tsx
+    // app/page.tsx
+    import { SsgoiTransition } from "@ssgoi/react";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>首页</h1>
+            {/* 页面内容 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // app/about/page.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>关于页面</h1>
+            {/* 页面内容 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ### 1. 根布局设置 (SvelteKit)
+
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { fade } from "@ssgoi/svelte/view-transitions";
+    </script>
+
+    <Ssgoi config={{ defaultTransition: fade() }}>
+      <!-- ⚠️ 重要：必须设置position: relative！ -->
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+    > **为什么需要position: relative？**
+    > 当页面动画退出时，会应用`position: absolute`。如果父元素没有`position: relative`，页面可能会移动到错误的位置。
+
+    ### 2. 页面包装
+
+    ```svelte
+    <!-- src/routes/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/">
+      <main>
+        <h1>首页</h1>
+        <!-- 页面内容 -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+    ```svelte
+    <!-- src/routes/about/+page.svelte -->
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/about">
+      <main>
+        <h1>关于页面</h1>
+        <!-- 页面内容 -->
+      </main>
+    </SsgoiTransition>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 应用各种过渡效果
+
+<Tabs
+  items={[
+    { label: "React", value: "react" },
+    { label: "Svelte", value: "svelte" },
+  ]}
+  defaultValue="react"
+>
+  <TabPanel value="react">
+    ```tsx
+    // app/layout.tsx
+    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // 首页 → 关于：向左滑动
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // 关于 → 首页：向右滑动
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // 列表 → 详情：缩放
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={ssgoiConfig}>
+              <div style={{ position: "relative", minHeight: "100vh" }}>
+                {children}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- src/routes/+layout.svelte -->
+    <script>
+      import { Ssgoi } from "@ssgoi/svelte";
+      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+
+      const ssgoiConfig = {
+        transitions: [
+          // 首页 → 关于：向左滑动
+          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+          // 关于 → 首页：向右滑动
+          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+          // 列表 → 详情：缩放
+          { from: "/list", to: "/detail/*", transition: scale() },
+        ],
+      };
+    </script>
+
+    <Ssgoi config={ssgoiConfig}>
+      <div style="position: relative; min-height: 100vh;">
+        <slot />
+      </div>
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 完成！ 🎉
+
+恭喜！您的网站现在已经应用了原生应用般的页面过渡效果。

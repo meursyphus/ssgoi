@@ -1,0 +1,89 @@
+---
+title: "SSGOI介绍"
+description: "SSGOI是一个在网页上实现原生应用般流畅页面过渡动画的库。"
+nav-title: "介绍"
+---
+
+<Note type="tip">SSGOI发音为“ssu-goi”，意思是太棒了！</Note>
+
+<Demo autoPlay={false} />
+
+## 为什么选择SSGOI？
+
+### 1. 在所有浏览器中工作
+
+与浏览器的Chrome View Transition API不同，SSGOI在所有现代浏览器中提供一致的体验。它确保相同的动画在Chrome、Firefox和Safari中都能正常工作。
+
+<Grid cols={3}>
+  <Card title="Chrome">
+    <Badge variant="success">✓ 完全支持</Badge>
+  </Card>
+  <Card title="Firefox">
+    <Badge variant="success">✓ 完全支持</Badge>
+  </Card>
+  <Card title="Safari">
+    <Badge variant="success">✓ 完全支持</Badge>
+  </Card>
+</Grid>
+
+### 2. 完美的服务器端渲染支持
+
+- **SSR/SSG兼容**: 与Next.js、Nuxt、SvelteKit完美配合，无水合问题
+- **SEO友好**: 动画不会影响搜索引擎优化
+- **优化初始加载**: 直接利用服务器渲染的HTML
+
+### 3. 直接使用框架的路由
+
+<Note>
+  SSGOI与现有路由系统完美兼容。无需更改您的路由器！
+</Note>
+
+您可以在直接使用框架路由的同时添加动画。兼容所有路由方法，包括Next.js的`Link`、SvelteKit的`goto`、Vue Router等。
+
+## 核心特性
+
+<CodeDemo>
+```typescript
+// 只需几行代码即可开始
+const config = {
+  defaultTransition: fade(),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ direction: 'left' })
+    }
+  ]
+}
+```
+</CodeDemo>
+
+### 🎨 丰富的过渡效果
+
+- **淡入淡出**: 平滑的淡入/淡出
+- **滑动**: 方向性滑动
+- **缩放**: 放大/缩小效果
+- **Hero**: 共享元素动画
+- **Pinterest**: Pinterest风格展开
+- **波纹**: Material Design波纹效果
+
+### ⚡ 优化的性能
+
+- 基于弹簧物理的自然运动
+- 小巧的打包体积（< 20KB gzipped）
+- 支持Tree-shaking，只包含您使用的部分
+
+### 🛠️ 对开发者友好
+
+- 完整的TypeScript支持
+- 直观的API设计
+- 丰富的文档和示例
+- 支持所有主流框架，包括React、Svelte、Vue
+
+## 开始使用
+
+<Note type="info">
+  SSGOI目前官方支持React和Svelte，Vue支持即将推出。
+</Note>
+
+通过下一节的快速入门指南，了解如何将SSGOI应用到您的项目中！

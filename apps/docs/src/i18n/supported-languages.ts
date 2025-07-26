@@ -12,6 +12,10 @@ export const LANGUAGE_LIST = [
     locale: "ko",
   },
   {
+    title: "中文",
+    locale: "zh",
+  },
+  {
     title: "日本語",
     locale: "ja",
   },
