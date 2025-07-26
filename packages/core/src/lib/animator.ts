@@ -1,7 +1,6 @@
 import { animate } from "popmotion";
 
 import type { SpringConfig } from "./types";
-import { VSync } from "./vsync";
 
 export interface AnimationOptions {
   from: number;
