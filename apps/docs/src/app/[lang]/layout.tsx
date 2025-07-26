@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
+import { StructuredData } from "@/components/structured-data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default async function RootLayout({
     <html lang={lang} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <TranslationsProvider lang={lang}>
+          <StructuredData />
           <div className="relative min-h-screen">
             <Header />
             <main>{children}</main>
