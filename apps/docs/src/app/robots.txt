@@ -1,0 +1,13 @@
+# https://ssgoi.dev/robots.txt
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ssgoi.dev/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 0
+
+# Disallow temporary or private paths if any
+# (none currently)

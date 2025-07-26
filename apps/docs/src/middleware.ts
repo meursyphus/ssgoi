@@ -5,7 +5,12 @@ import { getPreferredLanguage } from "@/i18n/get-preferred-language";
 
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-  console.log("Middleware running for path:", pathname);
+
+  // Skip static files
+  const staticFileExtensions = /\.(svg|png|jpg|jpeg|gif|ico|webp|txt|xml|pdf|json|csv)$/i;
+  if (staticFileExtensions.test(pathname)) {
+    return NextResponse.next();
+  }
 
   if (
     SUPPORTED_LANGUAGES.some(

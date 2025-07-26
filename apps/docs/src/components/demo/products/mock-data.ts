@@ -14,20 +14,20 @@ export interface Product {
   images: string[];
 }
 
-// Using picsum.photos for product images
+// Using local product images
 const productImages = [
-  'https://picsum.photos/id/1/400/400', // Laptop
-  'https://picsum.photos/id/119/400/400', // Backpack
-  'https://picsum.photos/id/96/400/400', // Tech device
-  'https://picsum.photos/id/214/400/400', // Beauty product
-  'https://picsum.photos/id/21/400/400', // Nature/Sports
-  'https://picsum.photos/id/225/400/400', // Coffee
-  'https://picsum.photos/id/160/400/400', // Tech
-  'https://picsum.photos/id/139/400/400', // Bottle
-  'https://picsum.photos/id/250/400/400', // Camera/sunglasses
-  'https://picsum.photos/id/431/400/400', // Home decor
-  'https://picsum.photos/id/256/400/400', // Watch/tracker
-  'https://picsum.photos/id/292/400/400' // Candles
+  '/demo/products/1-400x400.jpg', // Laptop
+  '/demo/products/119-400x400.jpg', // Backpack
+  '/demo/products/96-400x400.jpg', // Tech device
+  '/demo/products/214-400x400.jpg', // Beauty product
+  '/demo/products/21-400x400.jpg', // Nature/Sports
+  '/demo/products/225-400x400.jpg', // Coffee
+  '/demo/products/160-400x400.jpg', // Tech
+  '/demo/products/139-400x400.jpg', // Bottle
+  '/demo/products/250-400x400.jpg', // Camera/sunglasses
+  '/demo/products/431-400x400.jpg', // Home decor
+  '/demo/products/256-400x400.jpg', // Watch/tracker
+  '/demo/products/292-400x400.jpg' // Candles
 ];
 
 const categories = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Sports'];

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { getPost, getRelatedPosts } from "./mock-data";
 import { useDemoRouter } from "../router-provider";
 import Markdown from "react-markdown";

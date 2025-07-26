@@ -2,7 +2,7 @@
 
 import React from "react";
 import { products } from "./mock-data";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { useDemoRouter } from "../router-provider";
 
 export default function ProductsDemo() {
@@ -25,10 +25,10 @@ export default function ProductsDemo() {
                 // Navigate to product detail
                 router.goto(`/demo/products/${product.id}`);
               }}
-              className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+              className="bg-gray-900 rounded-xl transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl cursor-pointer"
             >
               {/* Product Image */}
-              <div className="relative aspect-[4/3]">
+              <div data-hero-key={product.id} className="relative aspect-[4/3] rounded-t-xl overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -37,11 +37,11 @@ export default function ProductsDemo() {
                 {product.badge && (
                   <span
                     className={`absolute top-4 left-4 px-3 py-1.5 rounded-md text-sm font-semibold uppercase ${
-                      product.badge === 'new'
-                        ? 'bg-teal-500 text-white'
-                        : product.badge === 'sale'
-                        ? 'bg-red-500 text-white'
-                        : 'bg-yellow-400 text-gray-900'
+                      product.badge === "new"
+                        ? "bg-teal-500 text-white"
+                        : product.badge === "sale"
+                          ? "bg-red-500 text-white"
+                          : "bg-yellow-400 text-gray-900"
                     }`}
                   >
                     {product.badge}
@@ -63,7 +63,7 @@ export default function ProductsDemo() {
               </div>
 
               {/* Product Info */}
-              <div className="p-5">
+              <div className="p-5 rounded-b-xl">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <span className="text-xs text-gray-500 uppercase tracking-wider">
@@ -81,7 +81,7 @@ export default function ProductsDemo() {
                     </span>
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-gray-400 line-clamp-2 mb-3">
                   {product.description}
                 </p>

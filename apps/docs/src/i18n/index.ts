@@ -5,7 +5,6 @@ import { useCurrentLanguage } from "./use-current-language";
 import { ClientTranslationsProvider } from "./internal/client-translations-provider";
 import TranslationsProvider from "./translations-provider";
 import { getPreferredLanguage } from "./get-preferred-language";
-import { getServerCurrentLanguage } from "./get-server-current-language";
 import { generateStaticParams } from "./generate-static-params";
 
 export {
@@ -17,6 +16,5 @@ export {
   ClientTranslationsProvider,
   TranslationsProvider,
   getPreferredLanguage,
-  getServerCurrentLanguage,
   generateStaticParams,
 };

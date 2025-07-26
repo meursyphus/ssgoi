@@ -1,55 +1,82 @@
 {
   "name": "@ssgoi/core",
-  "version": "0.0.1",
-  "description": "A smooth page transition library",
-  "private": true,
+  "version": "2.0.0",
+  "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
+  "private": false,
   "type": "module",
-  "main": "./src/lib/index.ts",
-  "module": "./src/lib/index.ts",
-  "types": "./src/lib/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/lib/index.ts",
-      "import": "./src/lib/index.ts",
-      "require": "./src/lib/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
     "./transitions": {
-      "types": "./src/lib/transitions/index.ts",
-      "import": "./src/lib/transitions/index.ts",
-      "require": "./src/lib/transitions/index.ts"
+      "types": "./dist/transitions/index.d.ts",
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs",
+      "default": "./dist/transitions/index.js"
     },
     "./view-transitions": {
-      "types": "./src/lib/view-transitions/index.ts",
-      "import": "./src/lib/view-transitions/index.ts",
-      "require": "./src/lib/view-transitions/index.ts"
+      "types": "./dist/view-transitions/index.d.ts",
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs",
+      "default": "./dist/view-transitions/index.js"
     },
     "./types": {
-      "types": "./src/lib/types.ts",
-      "import": "./src/lib/types.ts",
-      "require": "./src/lib/types.ts"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "default": "./dist/types.js"
     }
   },
   "files": [
     "dist",
-    "src"
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
   ],
   "scripts": {
     "dev": "vite",
+    "watch": "vite build --watch",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "pnpm run build"
   },
   "keywords": [
     "page-transition",
     "animation",
     "typescript",
-    "vanilla"
+    "vanilla",
+    "spring-physics",
+    "ssgoi"
   ],
-  "author": "",
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "@types/node": "^22.10.6",
     "typescript": "^5.7.3",
     "vite": "^6.0.7",
     "vite-plugin-dts": "^4.5.0"
+  },
+  "dependencies": {
+    "popmotion": "^11.0.5"
   }
 }

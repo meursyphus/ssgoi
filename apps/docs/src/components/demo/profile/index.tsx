@@ -2,7 +2,7 @@
 
 import React from "react";
 import { profile, posts } from "./mock-data";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 
 export default function ProfileDemo() {
   return (

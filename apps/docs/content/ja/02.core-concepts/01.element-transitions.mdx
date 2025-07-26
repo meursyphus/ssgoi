@@ -1,0 +1,164 @@
+---
+title: "要素アニメーション"
+description: "個々のDOM要素にアニメーションを適用"
+nav-title: "要素アニメーション"
+---
+
+import { TransitionPlayground } from '@/components/transition-playground';
+import { Tabs, TabPanel } from '@/components/mdx-components';
+
+## トランジションプレイグラウンド
+
+様々なトランジション効果を直接体験してください：
+
+<TransitionPlayground />
+
+## 基本構造
+
+### TransitionConfigインターフェース
+
+```typescript
+interface TransitionConfig {
+  spring?: {
+    stiffness: number; // スプリングの硅さ (デフォルト: 300)
+    damping: number; // 減衰係数 (デフォルト: 30)
+  };
+  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  prepare?: (element: HTMLElement) => void; // アニメーション開始前の初期設定
+  onStart?: () => void;
+  onEnd?: () => void;
+}
+```
+
+### トランジションの定義
+
+```typescript
+interface Transition {
+  in?: (element: HTMLElement) => TransitionConfig;
+  out?: (element: HTMLElement) => TransitionConfig;
+}
+```
+
+### 動作の仕組み
+
+1. **マウント時**: 要素がDOMに追加されたとき`in`関数を実行
+2. **アンマウント時**: 要素が削除される前に`out`関数を実行
+3. **アニメーション**: スプリング物理エンジンがprogressを生成
+   - in: 0 → 1
+   - out: 1 → 0
+4. **tickコールバック**: 毎フレーム呼び出されてスタイルを更新
+
+### トランジションプリセット
+
+```typescript
+import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
+```
+
+## フレームワーク別の使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```jsx
+    import { transition } from "@ssgoi/react";
+
+    <div
+      ref={transition({
+        key: "unique-key",
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          },
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          },
+        }),
+      })}
+    >
+      コンテンツ
+    </div>
+    ```
+  </TabPanel>
+  
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+    </script>
+
+    <div use:transition={{
+      key: 'unique-key',
+      in: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = progress;
+          element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+        }
+      }),
+      out: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = 1 - progress;
+        }
+      })
+    }}>
+      コンテンツ
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Progressの動作
+
+### inアニメーション
+
+- progress: 0 → 1
+- 要素が表示されるときに実行
+- 不透明度が0から1へ、小さいサイズから元のサイズへ
+
+### outアニメーション
+
+- progress: 1 → 0
+- 要素が消えるときに実行
+- 不透明度が1から0へ、元のサイズから小さいサイズへ
+
+```jsx
+// 例： inとoutの違い
+{
+  in: (element) => ({
+    tick: (progress) => {
+      // progress: 0 → 1
+      element.style.opacity = progress;  // 0 → 1
+    }
+  }),
+  out: (element) => ({
+    tick: (progress) => {
+      // progress: 1 → 0
+      element.style.opacity = progress;  // 1 → 0
+    }
+  })
+}
+```
+
+## prepareコールバック
+
+アニメーション開始前にDOM要素を準備する段階：
+
+```jsx
+{
+  in: {
+    prepare: (element) => {
+      // tick実行前に初期状態を設定
+      element.style.willChange = 'opacity, transform';
+    },
+    tick: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${20 * (1 - progress)}px)`
+    })
+  }
+}
+```
+
+## 重要な注意事項
+
+- `key`はページ内で一意である必要があります（DOMが作成された後削除されたり、削除された後作成されたりしてもアニメーション状態を追跡できるようにするため）

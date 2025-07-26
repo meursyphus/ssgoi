@@ -1,0 +1,164 @@
+---
+title: "元素动画"
+description: "为单个DOM元素应用动画"
+nav-title: "元素动画"
+---
+
+import { TransitionPlayground } from '@/components/transition-playground';
+import { Tabs, TabPanel } from '@/components/mdx-components';
+
+## 过渡效果演示
+
+直接体验各种过渡效果：
+
+<TransitionPlayground />
+
+## 基本结构
+
+### TransitionConfig接口
+
+```typescript
+interface TransitionConfig {
+  spring?: {
+    stiffness: number; // 弹簧刚度 (默认: 300)
+    damping: number; // 阻尼系数 (默认: 30)
+  };
+  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  prepare?: (element: HTMLElement) => void; // 动画开始前的初始设置
+  onStart?: () => void;
+  onEnd?: () => void;
+}
+```
+
+### 过渡定义
+
+```typescript
+interface Transition {
+  in?: (element: HTMLElement) => TransitionConfig;
+  out?: (element: HTMLElement) => TransitionConfig;
+}
+```
+
+### 工作原理
+
+1. **挂载时**: 当元素添加到DOM时执行`in`函数
+2. **卸载时**: 在元素被移除前执行`out`函数
+3. **动画**: 弹簧物理引擎生成进度
+   - in: 0 → 1
+   - out: 1 → 0
+4. **tick回调**: 每帧调用以更新样式
+
+### 过渡预设
+
+```typescript
+import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
+```
+
+## 框架特定用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```jsx
+    import { transition } from "@ssgoi/react";
+
+    <div
+      ref={transition({
+        key: "unique-key",
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          },
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          },
+        }),
+      })}
+    >
+      内容
+    </div>
+    ```
+  </TabPanel>
+  
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+    </script>
+
+    <div use:transition={{
+      key: 'unique-key',
+      in: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = progress;
+          element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+        }
+      }),
+      out: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = 1 - progress;
+        }
+      })
+    }}>
+      内容
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 进度行为
+
+### in动画
+
+- progress: 0 → 1
+- 当元素出现时执行
+- 不透明度从0到1，从小尺寸到原始尺寸
+
+### out动画
+
+- progress: 1 → 0
+- 当元素消失时执行
+- 不透明度从1到0，从原始尺寸到小尺寸
+
+```jsx
+// 示例：in和out的区别
+{
+  in: (element) => ({
+    tick: (progress) => {
+      // progress: 0 → 1
+      element.style.opacity = progress;  // 0 → 1
+    }
+  }),
+  out: (element) => ({
+    tick: (progress) => {
+      // progress: 1 → 0
+      element.style.opacity = progress;  // 1 → 0
+    }
+  })
+}
+```
+
+## prepare回调
+
+动画开始前准备DOM元素的阶段：
+
+```jsx
+{
+  in: {
+    prepare: (element) => {
+      // 在tick执行前设置初始状态
+      element.style.willChange = 'opacity, transform';
+    },
+    tick: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${20 * (1 - progress)}px)`
+    })
+  }
+}
+```
+
+## 重要说明
+
+- `key`必须在页面内唯一（这样即使DOM被创建后删除或删除后创建，动画状态也可以被跟踪）

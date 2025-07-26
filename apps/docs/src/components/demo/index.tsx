@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RouterProvider } from "./router-provider";
 import DemoLayout from "./layout";
 import PostsList from "./posts";
@@ -11,45 +11,66 @@ import PinterestList from "./pinterest";
 import PinterestDetail from "./pinterest/detail";
 import Profile from "./profile";
 
-export default function Demo() {
+interface DemoProps {
+  autoPlay?: boolean;
+}
+
+export default function Demo({ autoPlay = true }: DemoProps) {
   const [currentPath, setCurrentPath] = useState("/demo/posts");
-  const scrollPositions = useRef<Record<string, number>>({});
+  const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useMobile();
+  const layoutRef = useRef<HTMLDivElement>(null);
 
-  // Find scrollable element by ID
-  const findScrollableElement = () => {
-    return document.getElementById("demo-content");
-  };
+  // Define routing paths
+  const routingPaths = [
+    "/demo/posts",
+    "/demo/posts/svelte-5-runes",
+    "/demo/posts",
+    "/demo/products",
+    "/demo/products/prod-2",
+    "/demo/products",
+    "/demo/pinterest",
+    "/demo/pinterest/pin-1",
+    "/demo/pinterest",
+    "/demo/profile",
+  ];
+  const currentRouteIndex = useRef(0);
 
-  // Save scroll position for current path
-  const saveScrollPosition = () => {
-    const scrollableEl = findScrollableElement();
-    if (scrollableEl) {
-      scrollPositions.current[currentPath] = scrollableEl.scrollTop;
-    }
-  };
+  // Auto-routing effect
+  useEffect(() => {
+    if (!autoPlay || isHovered || isMobile) return;
 
-  // Restore scroll position for a given path
-  const restoreScrollPosition = (path: string) => {
-    const scrollableEl = findScrollableElement();
-    if (scrollableEl) {
-      const savedPosition = scrollPositions.current[path] || 0;
-      // Use requestAnimationFrame to ensure DOM is updated
-      scrollableEl.scrollTop = savedPosition;
-    }
-  };
+    const intervalId = setInterval(() => {
+      // Move to next route
+      currentRouteIndex.current =
+        (currentRouteIndex.current + 1) % routingPaths.length;
+      setCurrentPath(routingPaths[currentRouteIndex.current]);
+    }, 3000); // 3 seconds interval
+
+    return () => clearInterval(intervalId);
+  }, [autoPlay, isHovered, isMobile]);
+
+  // Mouse event handlers
+  useEffect(() => {
+    if (!layoutRef.current) return;
+
+    const handleMouseEnter = () => setIsHovered(true);
+    const handleMouseLeave = () => setIsHovered(false);
+
+    const element = layoutRef.current;
+    element.addEventListener("mouseenter", handleMouseEnter);
+    element.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      element.removeEventListener("mouseenter", handleMouseEnter);
+      element.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
 
   // Custom router implementation
   const customRouter = {
     goto: (path: string) => {
-      // Save current scroll position before navigation
-      saveScrollPosition();
-
-      // Update path
       setCurrentPath(path);
-
-      // Restore scroll position after navigation
-      // Use setTimeout to ensure React has updated the DOM
-      restoreScrollPosition(path);
     },
     currentPath,
   };
@@ -95,8 +116,34 @@ export default function Demo() {
   };
 
   return (
-    <RouterProvider currentPath={currentPath} customRouter={customRouter}>
-      <DemoLayout>{renderContent()}</DemoLayout>
-    </RouterProvider>
+    <div ref={layoutRef} className="h-full">
+      <RouterProvider currentPath={currentPath} customRouter={customRouter}>
+        <DemoLayout>{renderContent()}</DemoLayout>
+      </RouterProvider>
+    </div>
   );
+}
+
+function useMobile() {
+  const [isMobile, setIsMobile] = useState(true); // Default to true for SSR
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    
+    // Set initial value
+    setIsMobile(mediaQuery.matches);
+
+    // Listen for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  return isMobile;
 }

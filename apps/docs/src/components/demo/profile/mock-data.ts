@@ -33,7 +33,7 @@ export interface Profile {
   };
 }
 
-// Using picsum.photos with specific IDs for consistent images
+// Using local images
 const postImageIds = [
   35, 36, 37, 38, 39,
   40, 41, 42, 43, 44
@@ -44,8 +44,8 @@ export const profile: Profile = {
   name: 'Alex Chen',
   username: '@alexchen',
   bio: 'Creative developer & designer. Building beautiful digital experiences. Coffee enthusiast ☕',
-  avatar: 'https://i.pravatar.cc/300?img=7',
-  coverImage: 'https://picsum.photos/id/45/800/240',
+  avatar: '/demo/profiles/avatar-7.jpg',
+  coverImage: '/demo/profiles/45-800x240.jpg',
   followers: 12543,
   following: 892,
   posts: 156,
@@ -80,7 +80,7 @@ Page transitions serve several important purposes:
 ## Implementation Strategies
 
 There are several ways to implement page transitions, each with its own advantages...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[0]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[0]}-400x240.jpg`,
     category: 'Development',
     readTime: 8,
     publishedAt: '2024-01-28',
@@ -102,7 +102,7 @@ There are several ways to implement page transitions, each with its own advantag
 4. **Color with purpose**: Use color to guide, not distract
 
 When done right, minimalist design creates interfaces that are both beautiful and functional...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[1]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[1]}-400x240.jpg`,
     category: 'Design',
     readTime: 6,
     publishedAt: '2024-01-25',
@@ -129,7 +129,7 @@ For long lists, render only visible items to improve performance.
 
 ### 4. Image Optimization
 Lazy load images and use appropriate formats and sizes...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[2]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[2]}-400x240.jpg`,
     category: 'Development',
     readTime: 10,
     publishedAt: '2024-01-22',
@@ -153,7 +153,7 @@ The Web Content Accessibility Guidelines (WCAG) provide specific contrast ratios
 ## Tools for Testing
 
 Several tools can help you create accessible color palettes...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[3]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[3]}-400x240.jpg`,
     category: 'Design',
     readTime: 7,
     publishedAt: '2024-01-19',
@@ -180,7 +180,7 @@ Opening new possibilities for high-performance web applications.
 
 ### 4. Progressive Web Apps
 Blurring the line between web and native applications...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[4]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[4]}-400x240.jpg`,
     category: 'Technology',
     readTime: 12,
     publishedAt: '2024-01-16',
@@ -201,7 +201,7 @@ Grid allows you to work with both rows and columns simultaneously, giving you un
 ## Practical Examples
 
 Let's explore common layout patterns and how to implement them with Grid...`,
-    coverImage: `https://picsum.photos/id/${postImageIds[5]}/400/240`,
+    coverImage: `/demo/profiles/${postImageIds[5]}-400x240.jpg`,
     category: 'Development',
     readTime: 9,
     publishedAt: '2024-01-13',

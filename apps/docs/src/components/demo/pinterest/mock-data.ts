@@ -154,6 +154,25 @@ const authorBios = [
   'Fashion stylist curating looks for every occasion'
 ];
 
+// Pre-calculated dimensions for local images
+const localImageData = [
+  { id: 10, width: 400, height: 400 },
+  { id: 11, width: 400, height: 667 },
+  { id: 12, width: 400, height: 800 },
+  { id: 13, width: 400, height: 533 },
+  { id: 14, width: 400, height: 1000 },
+  { id: 15, width: 400, height: 800 },
+  { id: 16, width: 400, height: 600 },
+  { id: 17, width: 400, height: 667 },
+  { id: 18, width: 400, height: 400 },
+  { id: 19, width: 400, height: 667 },
+  { id: 20, width: 400, height: 800 },
+  { id: 21, width: 400, height: 533 },
+  { id: 22, width: 400, height: 1000 },
+  { id: 23, width: 400, height: 800 },
+  { id: 24, width: 400, height: 600 }
+];
+
 export const pinterestItems: PinterestItem[] = imageIds.map((imageId, index) => {
   const category = categories[index % categories.length];
   const categoryContents = pinContents[category as keyof typeof pinContents] || [];
@@ -162,21 +181,21 @@ export const pinterestItems: PinterestItem[] = imageIds.map((imageId, index) => 
     content: `Discover amazing ${category.toLowerCase()} ideas and tips.`
   };
   
-  // Calculate dimensions based on aspect ratio
-  const width = 400;
-  const aspectRatioParts = aspectRatios[index % aspectRatios.length].split(' / ');
-  const height = Math.round(width * parseInt(aspectRatioParts[1]) / parseInt(aspectRatioParts[0]));
+  // Use pre-calculated dimensions
+  const imageData = localImageData[index];
+  const width = imageData.width;
+  const height = imageData.height;
   
   return {
     id: `pin-${index + 1}`,
     description: `Discover amazing ideas and inspiration for your next project. This pin showcases beautiful ${category.toLowerCase()} concepts.`,
-    image: `https://picsum.photos/id/${imageId}/${width}/${height}`,
+    image: `/demo/pinterest/${imageData.id}-${width}x${height}.jpg`,
     aspectRatio: aspectRatios[index % aspectRatios.length],
     category,
     saves: Math.floor(Math.random() * 5000) + 100,
     author: {
       name: ['Emma Wilson', 'Alex Chen', 'Sarah Kim', 'Mike Davis', 'Lisa Park'][index % 5],
-      avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
+      avatar: `/demo/pinterest/avatar-${(index % 5) + 1}.jpg`,
       followers: Math.floor(Math.random() * 10000) + 1000,
       bio: authorBios[index % authorBios.length]
     },

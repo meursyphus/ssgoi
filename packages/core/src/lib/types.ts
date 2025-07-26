@@ -1,8 +1,8 @@
 export type TransitionKey = string | symbol;
 
 export type SpringConfig = {
-  stiffness: number;
-  damping: number;
+  stiffness?: number;
+  damping?: number;
 };
 
 export type TransitionConfig = {
@@ -22,22 +22,37 @@ export type TransitionConfig = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig = (
-  node: HTMLElement
-) => TransitionConfig | Promise<TransitionConfig>;
+export type GetTransitionConfig<TContext = undefined> =
+  TContext extends undefined
+    ? (node: HTMLElement) => TransitionConfig | Promise<TransitionConfig>
+    : (
+        node: HTMLElement,
+        context: TContext
+      ) => TransitionConfig | Promise<TransitionConfig>;
 
-export type Transition = {
-  in?: GetTransitionConfig;
-  out?: GetTransitionConfig;
+export type Transition<TContext = undefined> = {
+  in?: GetTransitionConfig<TContext>;
+  out?: GetTransitionConfig<TContext>;
 };
 
 export type TransitionCallback = (
   element: HTMLElement | null
 ) => void | (() => void);
 
+export type SggoiTransitionContext = {
+  scrollOffset: { x: number; y: number };
+};
+
+export type SggoiTransition = Transition<SggoiTransitionContext>;
+
 export type SsgoiConfig = {
-  transitions: { from: string; to: string; transition: Transition }[];
-  defaultTransition?: Transition;
+  transitions: {
+    from: string;
+    to: string;
+    transition: SggoiTransition;
+    symmetric?: boolean;
+  }[];
+  defaultTransition?: SggoiTransition;
 };
 
 export type SsgoiContext = (

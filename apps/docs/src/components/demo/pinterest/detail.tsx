@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SsgoiTransition } from "@meursyphus/ssgoi-react";
+import { SsgoiTransition } from "@ssgoi/react";
 import { getPinterestItem } from "./mock-data";
 import { useDemoRouter } from "../router-provider";
 
@@ -51,7 +51,7 @@ export default function PinterestDetail({ onBack }: PinterestDetailProps) {
             src={item.image}
             alt={item.title}
             style={{ aspectRatio: item.aspectRatio }}
-            data-pinterest-key={item.id}
+            data-pinterest-detail-key={item.id}
           />
           
           <div>

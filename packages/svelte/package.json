@@ -1,62 +1,91 @@
 {
-  "name": "@meursyphus/ssgoi-svelte",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./src/lib/index.ts",
-  "module": "./src/lib/index.ts",
-  "types": "./src/lib/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/lib/index.ts",
-      "import": "./src/lib/index.ts",
-      "require": "./src/lib/index.ts"
-    },
-    "./transitions": {
-      "types": "./src/lib/transitions/index.ts",
-      "import": "./src/lib/transitions/index.ts",
-      "require": "./src/lib/transitions/index.ts"
-    },
-    "./view-transitions": {
-      "types": "./src/lib/view-transitions/index.ts",
-      "import": "./src/lib/view-transitions/index.ts",
-      "require": "./src/lib/view-transitions/index.ts"
-    },
-    "./easing": {
-      "types": "./src/lib/easing/index.ts",
-      "import": "./src/lib/easing/index.ts",
-      "require": "./src/lib/easing/index.ts"
-    },
-    "./types": {
-      "types": "./src/lib/types.ts",
-      "import": "./src/lib/types.ts",
-      "require": "./src/lib/types.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
-    "prepublishOnly": "pnpm build"
-  },
-  "dependencies": {
-    "@ssgoi/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
-  "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.0.0",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^24.0.13",
-    "svelte": "^5.35.5",
-    "svelte-check": "^4.2.2",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.4",
-    "vite-plugin-dts": "^4.5.4"
-  }
+	"name": "@ssgoi/svelte",
+	"version": "2.0.0",
+	"description": "Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit applications",
+	"private": false,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"scripts": {
+		"dev": "svelte-package --watch",
+		"build": "svelte-package",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"prepare": "pnpm run build"
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module",
+	"dependencies": {
+		"@ssgoi/core": "workspace:*"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.5",
+		"@eslint/js": "^9.18.0",
+		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/package": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-svelte": "^3.0.0",
+		"globals": "^16.0.0",
+		"prettier": "^3.4.2",
+		"prettier-plugin-svelte": "^3.3.3",
+		"publint": "^0.3.2",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.0.0",
+		"typescript-eslint": "^8.20.0",
+		"vite": "^6.2.6"
+	},
+	"keywords": [
+		"svelte",
+		"page-transition",
+		"animation",
+		"ssgoi",
+		"spring-physics"
+	],
+	"author": "MeurSyphus <tmdeoans@snu.ac.kr>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/meursyphus/ssgoi.git",
+		"directory": "packages/svelte"
+	},
+	"homepage": "https://ssgoi.dev",
+	"bugs": {
+		"url": "https://github.com/meursyphus/ssgoi/issues"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./transitions": {
+			"types": "./dist/transitions/index.d.ts",
+			"import": "./dist/transitions/index.js"
+		},
+		"./view-transitions": {
+			"types": "./dist/view-transitions/index.d.ts",
+			"import": "./dist/view-transitions/index.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/types.js"
+		}
+	}
 }
