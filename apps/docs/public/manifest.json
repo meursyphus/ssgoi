@@ -1,0 +1,18 @@
+{
+  "name": "SSGOI - Page Transition Library",
+  "short_name": "SSGOI",
+  "description": "Beautiful page transitions for modern web apps",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
