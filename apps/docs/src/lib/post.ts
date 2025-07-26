@@ -19,7 +19,7 @@ import { getServerTranslations } from '@/i18n/get-server-translations'
  *       File extensions (.md, .mdx) are also handled automatically
  */
 
-interface NavigationItem {
+export interface NavigationItem {
   title: string
   navTitle: string
   description?: string
