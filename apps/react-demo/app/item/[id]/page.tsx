@@ -1,4 +1,4 @@
-import SsgoiTransition from "@/lib/ssgoi-transition";
+import { SsgoiTransition } from "@ssgoi/react";
 import styles from "./page.module.css";
 import Link from "next/link";
 
