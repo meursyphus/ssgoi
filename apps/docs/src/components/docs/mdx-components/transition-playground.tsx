@@ -2,6 +2,15 @@
 
 import React, { useState } from "react";
 import { transition } from "@ssgoi/react";
+import {
+  fade,
+  scale,
+  blur,
+  slide,
+  fly,
+  rotate,
+  bounce,
+} from "@ssgoi/react/transitions";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -9,194 +18,106 @@ import "highlight.js/styles/github-dark.css";
 
 interface TransitionOption {
   label: string;
-  in: (element: HTMLElement) => any;
-  out: (element: HTMLElement) => any;
+  transition: ReturnType<typeof fade>;
+  getCode?: (stiffness: number, damping: number) => string;
 }
 
 const transitionOptions: TransitionOption[] = [
   {
     label: "Fade",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: fade(),
+    getCode: (stiffness, damping) =>
+      `fade({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Fade (Custom Range)",
+    transition: fade({ from: 0.2, to: 0.8 }),
+    getCode: (stiffness, damping) =>
+      `fade({ from: 0.2, to: 0.8, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Scale",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `scale(${progress})`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `scale(${progress})`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: scale(),
+    getCode: (stiffness, damping) =>
+      `scale({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Scale X",
+    transition: scale({ axis: "x" }),
+    getCode: (stiffness, damping) =>
+      `scale({ axis: 'x', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Scale Y",
+    transition: scale({ axis: "y" }),
+    getCode: (stiffness, damping) =>
+      `scale({ axis: 'y', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Blur",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.filter = `blur(${(1 - progress) * 10}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.filter = `blur(${(1 - progress) * 10}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: blur(),
+    getCode: (stiffness, damping) =>
+      `blur({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
-    label: "Flip X",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `perspective(800px) rotateX(${(1 - progress) * 90}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `perspective(800px) rotateX(${(1 - progress) * 90}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    label: "Blur (Heavy)",
+    transition: blur({ amount: 20 }),
+    getCode: (stiffness, damping) =>
+      `blur({ amount: 20, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
-    label: "Flip Y",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `perspective(800px) rotateY(${(1 - progress) * 180}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `perspective(800px) rotateY(${(1 - progress) * 180}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    label: "Blur + Scale",
+    transition: blur({ scale: true }),
+    getCode: (stiffness, damping) =>
+      `blur({ scale: true, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Left",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: slide({ direction: "left" }),
+    getCode: (stiffness, damping) =>
+      `slide({ direction: 'left', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Slide Right",
+    transition: slide({ direction: "right" }),
+    getCode: (stiffness, damping) =>
+      `slide({ direction: 'right', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Up",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `translateY(${(1 - progress) * 50}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `translateY(${(1 - progress) * 50}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: slide({ direction: "up" }),
+    getCode: (stiffness, damping) =>
+      `slide({ direction: 'up', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Slide Down",
+    transition: slide({ direction: "down" }),
+    getCode: (stiffness, damping) =>
+      `slide({ direction: 'down', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Fly",
+    transition: fly(),
+    getCode: (stiffness, damping) =>
+      `fly({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
+  },
+  {
+    label: "Fly (Custom)",
+    transition: fly({ x: 200, y: -50, opacity: 0.2 }),
+    getCode: (stiffness, damping) =>
+      `fly({ x: 200, y: -50, opacity: 0.2, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Rotate",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `rotate(${(1 - progress) * -360}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `rotate(${(1 - progress) * -360}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: rotate(),
+    getCode: (stiffness, damping) =>
+      `rotate({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Bounce",
-    in: (element) => ({
-      tick: (progress: number) => {
-        const bounce = Math.sin(progress * Math.PI * 2) * 0.1 * (1 - progress);
-        element.style.transform = `translateY(${(1 - progress) * 100 - bounce * 100}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        const bounce = Math.sin(progress * Math.PI * 2) * 0.1 * (1 - progress);
-        element.style.transform = `translateY(${(1 - progress) * 100 - bounce * 100}px)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-  },
-  {
-    label: "Zoom & Spin",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `scale(${0.5 + progress * 0.5}) rotate(${(1 - progress) * 720}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `scale(${0.5 + progress * 0.5}) rotate(${(1 - progress) * 720}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-  },
-  {
-    label: "Skew",
-    in: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `skew(${(1 - progress) * 20}deg, ${(1 - progress) * 10}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        element.style.transform = `skew(${(1 - progress) * 20}deg, ${(1 - progress) * 10}deg)`;
-        element.style.opacity = progress.toString();
-      },
-    }),
-  },
-  {
-    label: "Swing",
-    in: (element) => ({
-      tick: (progress: number) => {
-        const swing = Math.sin(progress * Math.PI) * 30;
-        element.style.transform = `rotate(${swing * (1 - progress)}deg)`;
-        element.style.transformOrigin = "top center";
-        element.style.opacity = progress.toString();
-      },
-    }),
-    out: (element) => ({
-      tick: (progress: number) => {
-        const swing = Math.sin(progress * Math.PI) * 30;
-        element.style.transform = `rotate(${swing * (1 - progress)}deg)`;
-        element.style.transformOrigin = "top center";
-        element.style.opacity = progress.toString();
-      },
-    }),
+    transition: bounce(),
+    getCode: (stiffness, damping) =>
+      `bounce({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
 ];
 
@@ -209,38 +130,20 @@ export function TransitionPlayground() {
   const [transitionKey, setTransitionKey] = useState("playground-element");
 
   const generateCode = () => {
+    const transitionCode =
+      selectedTransition.getCode?.(stiffness, damping) ||
+      selectedTransition.label.toLowerCase();
     return `\`\`\`tsx
 import { transition } from '@ssgoi/react';
+import { ${selectedTransition.label.toLowerCase().replace(/[^a-z]/g, "")} } from '@ssgoi/react/transitions';
 
-// Using transition hook
+// Using the transition
+const animatedTransition = ${transitionCode};
+
 <div
   ref={transition({
     key: "${transitionKey}",
-    in: (element) => ({
-      spring: { stiffness: ${stiffness}, damping: ${damping} },
-      tick: (progress) => {
-        ${
-          selectedTransition.label === "Fade"
-            ? `element.style.opacity = progress.toString();`
-            : selectedTransition.label === "Scale"
-              ? `element.style.transform = \`scale(\${progress})\`;
-        element.style.opacity = progress.toString();`
-              : selectedTransition.label === "Blur"
-                ? `element.style.filter = \`blur(\${(1 - progress) * 10}px)\`;
-        element.style.opacity = progress.toString();`
-                : selectedTransition.label === "Rotate"
-                  ? `element.style.transform = \`rotate(\${(1 - progress) * -360}deg)\`;
-        element.style.opacity = progress.toString();`
-                  : `// Custom transition logic here`
-        }
-      }
-    }),
-    out: (element) => ({
-      spring: { stiffness: ${stiffness}, damping: ${damping} },
-      tick: (progress) => {
-        // Same as 'in' but progress goes from 1 to 0
-      }
-    })
+    ...animatedTransition
   })}
 >
   Your content here
@@ -252,19 +155,19 @@ import { transition } from '@ssgoi/react';
     <div className="w-full space-y-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg">
       {/* Preview Area */}
       <div className="flex flex-col items-center space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Preview</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Preview
+        </h2>
         <div className="flex justify-center items-center h-64 w-full bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
           {isVisible && (
             <div
               ref={transition({
                 key: transitionKey,
                 in: (element) => ({
-                  spring: { stiffness, damping },
-                  ...selectedTransition.in(element),
+                  ...selectedTransition.transition.in(element),
                 }),
                 out: (element) => ({
-                  spring: { stiffness, damping },
-                  ...selectedTransition.out(element),
+                  ...selectedTransition.transition.out(element),
                 }),
               })}
               className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center text-white font-bold text-xl"
