@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
+import preserveDirectives from "rollup-plugin-preserve-directives";
 
 export default defineConfig({
   plugins: [
@@ -41,7 +42,7 @@ export default defineConfig({
         "@ssgoi/core/transitions",
       ],
       output: {
-        preserveModules: false,
+        preserveModules: true,
         exports: "named",
         globals: {
           react: "React",
@@ -50,6 +51,7 @@ export default defineConfig({
           "@ssgoi/core": "@ssgoi/core",
         },
       },
+      plugins: [preserveDirectives()],
     },
   },
 });

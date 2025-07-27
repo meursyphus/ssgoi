@@ -260,6 +260,9 @@ importers:
       globals:
         specifier: ^16.3.0
         version: 16.3.0
+      rollup-plugin-preserve-directives:
+        specifier: ^0.4.0
+        version: 0.4.0(rollup@4.45.0)
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
@@ -3487,6 +3490,11 @@ packages:
   reusify@1.1.0:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
+
+  rollup-plugin-preserve-directives@0.4.0:
+    resolution: {integrity: sha512-gx4nBxYm5BysmEQS+e2tAMrtFxrGvk+Pe5ppafRibQi0zlW7VYAbEGk6IKDw9sJGPdFWgVTE0o4BU4cdG0Fylg==}
+    peerDependencies:
+      rollup: 2.x || 3.x || 4.x
 
   rollup@4.45.0:
     resolution: {integrity: sha512-WLjEcJRIo7i3WDDgOIJqVI2d+lAC3EwvOGy+Xfq6hs+GQuAA4Di/H72xmXkOhrIWFg2PFYSKZYfH0f4vfKXN4A==}
@@ -7813,6 +7821,12 @@ snapshots:
       supports-preserve-symlinks-flag: 1.0.0
 
   reusify@1.1.0: {}
+
+  rollup-plugin-preserve-directives@0.4.0(rollup@4.45.0):
+    dependencies:
+      '@rollup/pluginutils': 5.2.0(rollup@4.45.0)
+      magic-string: 0.30.17
+      rollup: 4.45.0
 
   rollup@4.45.0:
     dependencies:
