@@ -4,6 +4,9 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { mdxComponents } from "./mdx-components";
 
+import svelte from "@/lib/highlights/svelte";
+import { common } from "lowlight";
+
 // Syntax highlighting styles are in globals.css
 
 interface MdxRemoteProps {
@@ -111,10 +114,10 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
         mdxOptions: {
           rehypePlugins: [
             [
-              (args) =>
-                rehypeHighlight({
-                  ...args,
-                }),
+              rehypeHighlight,
+              {
+                languages: { ...common, svelte },
+              },
             ],
             rehypeSlug,
             [rehypeAutolinkHeadings, { behavior: "wrap" }],
