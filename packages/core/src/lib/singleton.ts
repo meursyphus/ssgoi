@@ -15,9 +15,21 @@ export class Singleton {
     return global[WORKSPACE_SYMBOL];
   }
 
+  private static getKey(keyOrObject: Object|string): symbol {
+    let key: symbol;
+    if (typeof keyOrObject === 'string') {
+      key = Symbol.for(keyOrObject);
+    } else if (typeof keyOrObject === 'function') {
+      key = Symbol.for(keyOrObject.name);
+    } else {
+      key = Symbol.for(keyOrObject.constructor.name);
+    }
+
+    return key;
+  }
+
   public static create<T extends new (...args: any[]) => any>(
     Constructor: T,
-    isOverwrite: boolean = false,
     customKey?: string
   ): T {
     return new Proxy(Constructor, {
@@ -25,9 +37,11 @@ export class Singleton {
         const workspace = Singleton.ensureWorkspace();
         const key = Symbol.for(customKey || target.name);
 
-        if (!workspace.has(key) || isOverwrite) {
+        if (!workspace.has(key)) {
           const instance = Reflect.construct(target, argumentList, newTarget);
           workspace.set(key, instance);
+        } else {
+          throw new Error(`Singleton: ${customKey || target.name} already exists.`);
         }
 
         return workspace.get(key);
@@ -35,26 +49,23 @@ export class Singleton {
     });
   }
 
-  public static get(keyOrObject: Object|string): Object|undefined {
+  public static get<T>(keyOrObject: Object|string): T|undefined {
     const workspace = Singleton.ensureWorkspace();
-    const isKey = typeof keyOrObject === 'string';
-    const key = isKey ? Symbol.for(keyOrObject) : Symbol.for(keyOrObject.constructor.name);
+    const key = Singleton.getKey(keyOrObject);
 
-    return workspace.get(key);
+    return workspace.get(key) as T;
   }
 
   public static has(keyOrObject: Object|string): boolean {
     const workspace = Singleton.ensureWorkspace();
-    const isKey = typeof keyOrObject === 'string';
-    const key = isKey ? Symbol.for(keyOrObject) : Symbol.for(keyOrObject.constructor.name);
+    const key = Singleton.getKey(keyOrObject);
 
     return workspace.has(key);
   }
 
   public static remove(keyOrObject: Object|string): boolean {
     const workspace = Singleton.ensureWorkspace();
-    const isKey = typeof keyOrObject === 'string';
-    const key = isKey ? Symbol.for(keyOrObject) : Symbol.for(keyOrObject.constructor.name);
+    const key = Singleton.getKey(keyOrObject);
 
     return workspace.delete(key);
   }
