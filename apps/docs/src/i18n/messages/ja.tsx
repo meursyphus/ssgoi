@@ -12,6 +12,15 @@ const ja: Messages = {
     openMenu: "メニューを開く",
     githubRepository: "GitHubリポジトリ",
   },
+  mobileMenu: {
+    documentToc: "目次",
+    menu: "メニュー",
+    closeDrawer: "閉じる",
+    noDocumentPage: "ドキュメントページに移動してください。",
+    navigation: "ナビゲーション",
+    documents: "ドキュメント",
+    language: "言語 / Language",
+  },
   home: {
     title: "モダンウェブアプリのための\n美しいページトランジション",
     getStarted: "はじめる",

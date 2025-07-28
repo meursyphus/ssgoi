@@ -12,6 +12,15 @@ const zh: Messages = {
     openMenu: "打开菜单",
     githubRepository: "GitHub仓库",
   },
+  mobileMenu: {
+    documentToc: "文档目录",
+    menu: "菜单",
+    closeDrawer: "关闭",
+    noDocumentPage: "请导航到文档页面。",
+    navigation: "导航",
+    documents: "文档",
+    language: "语言 / Language",
+  },
   home: {
     title: "为现代网页应用打造\n优美的页面过渡效果",
     getStarted: "开始使用",

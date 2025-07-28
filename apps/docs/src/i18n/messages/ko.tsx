@@ -12,6 +12,15 @@ const ko: Messages = {
     openMenu: "메뉴 열기",
     githubRepository: "GitHub 저장소",
   },
+  mobileMenu: {
+    documentToc: "문서 목차",
+    menu: "메뉴",
+    closeDrawer: "닫기",
+    noDocumentPage: "문서 페이지로 이동해주세요.",
+    navigation: "네비게이션",
+    documents: "문서",
+    language: "언어 / Language",
+  },
   home: {
     title: "아름다운 페이지 전환\n모던 웹을 위한",
     getStarted: "시작하기",
