@@ -18,104 +18,104 @@ import "highlight.js/styles/github-dark.css";
 
 interface TransitionOption {
   label: string;
-  transition: ReturnType<typeof fade>;
+  getTransition: (stiffness: number, damping: number) => ReturnType<typeof fade>;
   getCode?: (stiffness: number, damping: number) => string;
 }
 
 const transitionOptions: TransitionOption[] = [
   {
     label: "Fade",
-    transition: fade(),
+    getTransition: (stiffness, damping) => fade({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `fade({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Fade (Custom Range)",
-    transition: fade({ from: 0.2, to: 0.8 }),
+    getTransition: (stiffness, damping) => fade({ from: 0.2, to: 0.8, spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `fade({ from: 0.2, to: 0.8, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Scale",
-    transition: scale(),
+    getTransition: (stiffness, damping) => scale({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `scale({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Scale X",
-    transition: scale({ axis: "x" }),
+    getTransition: (stiffness, damping) => scale({ axis: "x", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `scale({ axis: 'x', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Scale Y",
-    transition: scale({ axis: "y" }),
+    getTransition: (stiffness, damping) => scale({ axis: "y", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `scale({ axis: 'y', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Blur",
-    transition: blur(),
+    getTransition: (stiffness, damping) => blur({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `blur({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Blur (Heavy)",
-    transition: blur({ amount: 20 }),
+    getTransition: (stiffness, damping) => blur({ amount: 20, spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `blur({ amount: 20, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Blur + Scale",
-    transition: blur({ scale: true }),
+    getTransition: (stiffness, damping) => blur({ scale: true, spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `blur({ scale: true, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Left",
-    transition: slide({ direction: "left" }),
+    getTransition: (stiffness, damping) => slide({ direction: "left", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `slide({ direction: 'left', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Right",
-    transition: slide({ direction: "right" }),
+    getTransition: (stiffness, damping) => slide({ direction: "right", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `slide({ direction: 'right', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Up",
-    transition: slide({ direction: "up" }),
+    getTransition: (stiffness, damping) => slide({ direction: "up", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `slide({ direction: 'up', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Slide Down",
-    transition: slide({ direction: "down" }),
+    getTransition: (stiffness, damping) => slide({ direction: "down", spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `slide({ direction: 'down', spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Fly",
-    transition: fly(),
+    getTransition: (stiffness, damping) => fly({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `fly({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Fly (Custom)",
-    transition: fly({ x: 200, y: -50, opacity: 0.2 }),
+    getTransition: (stiffness, damping) => fly({ x: 200, y: -50, opacity: 0.2, spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `fly({ x: 200, y: -50, opacity: 0.2, spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Rotate",
-    transition: rotate(),
+    getTransition: (stiffness, damping) => rotate({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `rotate({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
   {
     label: "Bounce",
-    transition: bounce(),
+    getTransition: (stiffness, damping) => bounce({ spring: { stiffness, damping } }),
     getCode: (stiffness, damping) =>
       `bounce({ spring: { stiffness: ${stiffness}, damping: ${damping} } })`,
   },
@@ -127,7 +127,6 @@ export function TransitionPlayground() {
     useState<TransitionOption>(transitionOptions[0]);
   const [stiffness, setStiffness] = useState(300);
   const [damping, setDamping] = useState(30);
-  const [transitionKey, setTransitionKey] = useState("playground-element");
 
   const generateCode = () => {
     const transitionCode =
@@ -142,7 +141,7 @@ const animatedTransition = ${transitionCode};
 
 <div
   ref={transition({
-    key: "${transitionKey}",
+    key: "playground-element",
     ...animatedTransition
   })}
 >
@@ -162,13 +161,8 @@ const animatedTransition = ${transitionCode};
           {isVisible && (
             <div
               ref={transition({
-                key: transitionKey,
-                in: (element) => ({
-                  ...selectedTransition.transition.in(element),
-                }),
-                out: (element) => ({
-                  ...selectedTransition.transition.out(element),
-                }),
+                key: "playground-element",
+                ...selectedTransition.getTransition(stiffness, damping),
               })}
               className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center text-white font-bold text-xl"
             >
