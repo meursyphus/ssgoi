@@ -5,16 +5,16 @@ export type SpringConfig = {
   damping?: number;
 };
 
-export type TransitionConfig<T = number> = {
+export type TransitionConfig<TAnimationValue = number> = {
   // Spring physics configuration
   spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
   // Animation range values
-  from?: T; // Default: 0 for in, 1 for out
-  to?: T; // Default: 1 for in, 0 for out
+  from?: TAnimationValue; // Default: 0 for in, 1 for out
+  to?: TAnimationValue; // Default: 1 for in, 0 for out
 
   // Callback for each frame with progress value
-  tick?: (progress: T) => void;
+  tick?: (progress: TAnimationValue) => void;
 
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
@@ -26,17 +26,17 @@ export type TransitionConfig<T = number> = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig<TContext = undefined, T = number> =
+export type GetTransitionConfig<TContext = undefined, TAnimationValue = number> =
   TContext extends undefined
-    ? (node: HTMLElement) => TransitionConfig<T> | Promise<TransitionConfig<T>>
+    ? (node: HTMLElement) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>
     : (
         node: HTMLElement,
         context: TContext
-      ) => TransitionConfig<T> | Promise<TransitionConfig<T>>;
+      ) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>;
 
-export type Transition<TContext = undefined, T = number> = {
-  in?: GetTransitionConfig<TContext, T>;
-  out?: GetTransitionConfig<TContext, T>;
+export type Transition<TContext = undefined, TAnimationValue = number> = {
+  in?: GetTransitionConfig<TContext, TAnimationValue>;
+  out?: GetTransitionConfig<TContext, TAnimationValue>;
 };
 
 export type TransitionCallback = (

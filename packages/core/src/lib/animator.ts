@@ -2,11 +2,11 @@ import { animate } from "popmotion";
 
 import type { SpringConfig } from "./types";
 
-export interface AnimationOptions<T = number> {
-  from: T;
-  to: T;
+export interface AnimationOptions<TAnimationValue = number> {
+  from: TAnimationValue;
+  to: TAnimationValue;
   spring: SpringConfig;
-  onUpdate: (value: T) => void;
+  onUpdate: (value: TAnimationValue) => void;
   onComplete: () => void;
   onStart?: () => void;
 }
@@ -15,18 +15,20 @@ export interface AnimationOptions<T = number> {
  * New Animator implementation using Popmotion
  * Provides spring-based animations with fine control
  * Supports both number and object animations
+ * 
+ * @template TAnimationValue - The type of value being animated (number | object)
  */
-export class Animator<T = number> {
-  private options: AnimationOptions<T>;
-  private currentValue: T;
-  private velocity: T extends number ? number : Record<string, number>;
+export class Animator<TAnimationValue = number> {
+  private options: AnimationOptions<TAnimationValue>;
+  private currentValue: TAnimationValue;
+  private velocity: TAnimationValue extends number ? number : Record<string, number>;
   private isAnimating = false;
   private controls: { stop: () => void } | null = null;
 
-  constructor(options: Partial<AnimationOptions<T>>) {
+  constructor(options: Partial<AnimationOptions<TAnimationValue>>) {
     this.options = {
-      from: options.from ?? (0 as T),
-      to: options.to ?? (1 as T),
+      from: options.from ?? (0 as TAnimationValue),
+      to: options.to ?? (1 as TAnimationValue),
       spring: options.spring ?? { stiffness: 100, damping: 10 },
       onUpdate: options.onUpdate ?? (() => {}),
       onComplete: options.onComplete ?? (() => {}),
@@ -40,11 +42,11 @@ export class Animator<T = number> {
       Object.keys(this.options.from).forEach((key) => {
         velocityObj[key] = 0;
       });
-      this.velocity = velocityObj as T extends number
+      this.velocity = velocityObj as TAnimationValue extends number
         ? number
         : Record<string, number>;
     } else {
-      this.velocity = 0 as T extends number ? number : Record<string, number>;
+      this.velocity = 0 as TAnimationValue extends number ? number : Record<string, number>;
     }
   }
 
@@ -79,7 +81,7 @@ export class Animator<T = number> {
     this.controls = animate({
       ...animateOptions,
 
-      onUpdate: (value: T) => {
+      onUpdate: (value: TAnimationValue) => {
         const currentTime = performance.now();
         const timeDelta = (currentTime - previousTime) / 1000; // Convert to seconds
 
@@ -88,7 +90,7 @@ export class Animator<T = number> {
           if (typeof value === "number" && typeof previousValue === "number") {
             // For numbers, calculate velocity in units per second, then normalize
             const rawVelocity = (value - previousValue) / timeDelta;
-            this.velocity = (rawVelocity / 1000) as T extends number
+            this.velocity = (rawVelocity / 1000) as TAnimationValue extends number
               ? number
               : Record<string, number>; // Normalize to 0-1 range
           } else if (typeof value === "object" && value !== null) {
@@ -105,7 +107,7 @@ export class Animator<T = number> {
                 velocityObj[key] = rawVelocity / 1000; // Normalize to 0-1 range
               }
             });
-            this.velocity = velocityObj as T extends number
+            this.velocity = velocityObj as TAnimationValue extends number
               ? number
               : Record<string, number>;
           }
@@ -128,7 +130,7 @@ export class Animator<T = number> {
             (this.velocity as Record<string, number>)[key] = 0;
           });
         } else {
-          this.velocity = 0 as T extends number
+          this.velocity = 0 as TAnimationValue extends number
             ? number
             : Record<string, number>;
         }
@@ -185,11 +187,11 @@ export class Animator<T = number> {
   }
 
   // State getters
-  getVelocity(): T extends number ? number : Record<string, number> {
+  getVelocity(): TAnimationValue extends number ? number : Record<string, number> {
     return this.velocity;
   }
 
-  getCurrentValue(): T {
+  getCurrentValue(): TAnimationValue {
     return this.currentValue;
   }
 
@@ -198,10 +200,10 @@ export class Animator<T = number> {
   }
 
   getCurrentState(): {
-    position: T;
-    velocity: T extends number ? number : Record<string, number>;
-    from: T;
-    to: T;
+    position: TAnimationValue;
+    velocity: TAnimationValue extends number ? number : Record<string, number>;
+    from: TAnimationValue;
+    to: TAnimationValue;
   } {
     return {
       position: this.currentValue,
@@ -213,17 +215,17 @@ export class Animator<T = number> {
 
   // State setters
   setVelocity(
-    velocity: T extends number ? number : Record<string, number>
+    velocity: TAnimationValue extends number ? number : Record<string, number>
   ): void {
     this.velocity = velocity;
   }
 
-  setValue(value: T): void {
+  setValue(value: TAnimationValue): void {
     this.currentValue = value;
   }
 
   // Configuration
-  updateOptions(newOptions: Partial<AnimationOptions<T>>): void {
+  updateOptions(newOptions: Partial<AnimationOptions<TAnimationValue>>): void {
     this.options = { ...this.options, ...newOptions };
 
     // If animating, restart with new options
@@ -235,14 +237,14 @@ export class Animator<T = number> {
   }
 
   // Static factory method
-  static fromState<T = number>(
+  static fromState<TAnimationValue = number>(
     state: {
-      position: T;
-      velocity: T extends number ? number : Record<string, number>;
+      position: TAnimationValue;
+      velocity: TAnimationValue extends number ? number : Record<string, number>;
     },
-    newOptions: Partial<AnimationOptions<T>>
-  ): Animator<T> {
-    const animation = new Animator<T>(newOptions);
+    newOptions: Partial<AnimationOptions<TAnimationValue>>
+  ): Animator<TAnimationValue> {
+    const animation = new Animator<TAnimationValue>(newOptions);
     animation.setValue(state.position);
     animation.setVelocity(state.velocity);
     return animation;

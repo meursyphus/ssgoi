@@ -3,27 +3,27 @@ import type { Animator } from "./animator";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
-export interface StrategyContext {
+export interface StrategyContext<TAnimationValue = number> {
   // Current animation state
-  currentAnimation: { animator: Animator; direction: "in" | "out" } | null;
+  currentAnimation: { animator: Animator<TAnimationValue>; direction: "in" | "out" } | null;
 }
 
-export interface AnimationSetup<T = number> {
-  config?: TransitionConfig<T>;
-  state: { position: T; velocity: T extends number ? number : Record<string, number> };
-  from: T;
-  to: T;
+export interface AnimationSetup<TAnimationValue = number> {
+  config?: TransitionConfig<TAnimationValue>;
+  state: { position: TAnimationValue; velocity: TAnimationValue extends number ? number : Record<string, number> };
+  from: TAnimationValue;
+  to: TAnimationValue;
   direction: "forward" | "backward";
 }
 
-export interface TransitionConfigs {
-  in?: Promise<TransitionConfig>;
-  out?: Promise<TransitionConfig>;
+export interface TransitionConfigs<TAnimationValue = number> {
+  in?: Promise<TransitionConfig<TAnimationValue>>;
+  out?: Promise<TransitionConfig<TAnimationValue>>;
 }
 
-export interface TransitionStrategy<T = number> {
-  runIn: (configs: TransitionConfigs) => Promise<AnimationSetup<T>>;
-  runOut: (configs: TransitionConfigs) => Promise<AnimationSetup<T>>;
+export interface TransitionStrategy<TAnimationValue = number> {
+  runIn: (configs: TransitionConfigs<TAnimationValue>) => Promise<AnimationSetup<TAnimationValue>>;
+  runOut: (configs: TransitionConfigs<TAnimationValue>) => Promise<AnimationSetup<TAnimationValue>>;
 }
 
 /**
@@ -58,11 +58,11 @@ export interface TransitionStrategy<T = number> {
  * - Cleanup callback: Handles exit transitions
  */
 
-export const createDefaultStrategy = (
-  context: StrategyContext
-): TransitionStrategy => {
+export const createDefaultStrategy = <TAnimationValue = number>(
+  context: StrategyContext<TAnimationValue>
+): TransitionStrategy<TAnimationValue> => {
   return {
-    runIn: async (configs: TransitionConfigs) => {
+    runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
       const { currentAnimation } = context;
 
       // Scenario 4: OUT animation running + IN trigger
@@ -75,7 +75,7 @@ export const createDefaultStrategy = (
         if (configs.out) {
           const outConfig = await configs.out;
           // Extract from/to with defaults for out transition
-          const { from = 1, to = 0 } = outConfig;
+          const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = outConfig;
           return {
             config: outConfig,
             state: currentState,
@@ -91,25 +91,25 @@ export const createDefaultStrategy = (
       if (!config) {
         // No config, return minimal setup
         return {
-          state: { position: 0, velocity: 0 },
-          from: 0,
-          to: 1,
+          state: { position: 0 as TAnimationValue, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
           direction: "forward",
         };
       }
       
       // Extract from/to with defaults for in transition
-      const { from = 0, to = 1 } = config;
+      const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
-        state: { position: from, velocity: 0 },
+        state: { position: from, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
         from,
         to,
         direction: "forward",
       };
     },
 
-    runOut: async (configs: TransitionConfigs) => {
+    runOut: async (configs: TransitionConfigs<TAnimationValue>) => {
       const { currentAnimation } = context;
 
       // Scenario 3: IN animation running + OUT trigger
@@ -122,7 +122,7 @@ export const createDefaultStrategy = (
         if (configs.in) {
           const inConfig = await configs.in;
           // Extract from/to with defaults for in transition
-          const { from = 0, to = 1 } = inConfig;
+          const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = inConfig;
           return {
             config: inConfig,
             state: {
@@ -141,18 +141,18 @@ export const createDefaultStrategy = (
       if (!config) {
         // No config, return minimal setup
         return {
-          state: { position: 1, velocity: 0 },
-          from: 1,
-          to: 0,
+          state: { position: 1 as TAnimationValue, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
           direction: "forward",
         };
       }
       
       // Extract from/to with defaults for out transition
-      const { from = 1, to = 0 } = config;
+      const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,
-        state: { position: from, velocity: 0 },
+        state: { position: from, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
         from,
         to,
         direction: "forward",

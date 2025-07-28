@@ -4,11 +4,11 @@ import {
   type TransitionKey,
 } from "@ssgoi/core";
 
-export const transition = (
+export const transition = <TAnimationValue = number>(
   node: HTMLElement,
-  params: Transition & { key: TransitionKey }
+  params: Transition<undefined, TAnimationValue> & { key: TransitionKey }
 ) => {
-  let callback = _transition({
+  let callback = _transition<TAnimationValue>({
     key: params.key,
     in: params.in,
     out: params.out,
@@ -16,8 +16,8 @@ export const transition = (
   let cleanup = callback(node);
 
   return {
-    update(newParams: Transition & { key: TransitionKey }) {
-      callback = _transition({
+    update(newParams: Transition<undefined, TAnimationValue> & { key: TransitionKey }) {
+      callback = _transition<TAnimationValue>({
         key: newParams.key,
         in: newParams.in,
         out: newParams.out,
