@@ -6,7 +6,6 @@ Description: Components of Svelte Framework
 */
 
 export default function hljsDefineSvelte(hljs: any) {
-  console.log("hljs", hljs.COMMENT);
   return {
     subLanguage: "xml",
     contains: [

@@ -1,6 +1,6 @@
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
-export const DEFAULT_LANGUAGE = "ko";
+export const DEFAULT_LANGUAGE = "en";
 
 export const LANGUAGE_LIST = [
   {

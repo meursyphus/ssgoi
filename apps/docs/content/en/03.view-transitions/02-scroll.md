@@ -1,0 +1,148 @@
+---
+title: "Scroll Transition"
+description: "Page transitions with vertical scrolling effects"
+nav-title: "Scroll"
+---
+
+# Scroll Transition
+
+The Scroll transition creates a sliding effect where pages transition by scrolling up or down. This brings the familiar mobile app navigation experience to the web.
+
+## Basic Usage
+
+```tsx
+import { Ssgoi } from '@ssgoi/react';
+import { scroll } from '@ssgoi/react/view-transitions';
+
+const config = {
+  defaultTransition: scroll()
+};
+
+export default function App() {
+  return (
+    <Ssgoi config={config}>
+      {/* App content */}
+    </Ssgoi>
+  );
+}
+```
+
+## Options
+
+### Direction Setting
+
+```tsx
+scroll({
+  direction: 'up',    // 'up' | 'down' (default: 'up')
+  spring: {
+    stiffness: 300,   // Spring stiffness (default: 300)
+    damping: 30       // Damping ratio (default: 30)
+  }
+})
+```
+
+### Direction Behaviors
+
+- **`direction: 'up'`** (default)
+  - Incoming page: Slides up from bottom
+  - Outgoing page: Slides up and out
+  
+- **`direction: 'down'`**
+  - Incoming page: Slides down from top
+  - Outgoing page: Slides down and out
+
+## Usage Examples
+
+### Scroll Up (Default)
+
+```tsx
+const config = {
+  defaultTransition: scroll()
+};
+```
+
+### Scroll Down
+
+```tsx
+const config = {
+  defaultTransition: scroll({ direction: 'down' })
+};
+```
+
+### Smooth Scroll
+
+```tsx
+const config = {
+  defaultTransition: scroll({
+    spring: {
+      stiffness: 150,
+      damping: 25
+    }
+  })
+};
+```
+
+## Route-Specific Directions
+
+Set different directions based on hierarchy:
+
+```tsx
+const config = {
+  transitions: [
+    {
+      from: '/list',
+      to: '/detail/*',
+      transition: scroll({ direction: 'up' }),
+      symmetric: true  // Automatically uses 'down' for reverse
+    },
+    {
+      from: '/parent',
+      to: '/child',
+      transition: scroll({ direction: 'down' })
+    }
+  ]
+};
+
+<Ssgoi config={config}>
+  {/* App content */}
+</Ssgoi>
+```
+
+## How It Works
+
+```
+Direction: UP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Outgoing page  →  Moves up (translateY: 0 → -100%)
+Incoming page  →  Slides up from bottom (translateY: 100% → 0)
+
+Direction: DOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Outgoing page  →  Moves down (translateY: 0 → 100%)
+Incoming page  →  Slides down from top (translateY: -100% → 0)
+```
+
+## Advantages
+
+- Intuitive directional flow representing page hierarchy
+- Natural UX similar to mobile apps
+- Smooth performance using GPU acceleration
+- Consistent with scroll gesture behavior
+
+## Recommended Use Cases
+
+### UP Direction
+- List → Detail pages
+- Home → Subpages
+- General forward navigation
+
+### DOWN Direction
+- Parent → Child relationships
+- Menu → Submenu navigation
+- Modal or overlay presentations
+
+## Considerations
+
+- For pages longer than viewport, the transition starting position matters
+- Scroll position is automatically preserved, no additional handling needed
+- Use `symmetric: true` for bidirectional navigation

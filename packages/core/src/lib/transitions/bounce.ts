@@ -1,7 +1,9 @@
 interface BounceOptions {
   height?: number;
+  intensity?: number;
   scale?: boolean;
   fade?: boolean;
+  direction?: 'up' | 'down';
   spring?: {
     stiffness?: number;
     damping?: number;
@@ -11,8 +13,10 @@ interface BounceOptions {
 export const bounce = (options: BounceOptions = {}) => {
   const {
     height = 20,
+    intensity = 1,
     scale = true,
     fade = false,
+    direction = 'up',
     spring = { stiffness: 800, damping: 15 }
   } = options;
 
@@ -22,12 +26,20 @@ export const bounce = (options: BounceOptions = {}) => {
       tick: (progress: number) => {
         const transforms = [];
         
-        // Bounce effect using sine wave
-        const bounceOffset = Math.sin(progress * Math.PI) * height * (1 - progress);
-        transforms.push(`translateY(${-bounceOffset}px)`);
+        // Enhanced bounce effect with intensity control
+        const bounceWave = Math.sin(progress * Math.PI * (1 + intensity));
+        const dampening = 1 - progress;
+        const bounceOffset = bounceWave * height * dampening;
+        
+        if (direction === 'up') {
+          transforms.push(`translateY(${-Math.abs(bounceOffset)}px)`);
+        } else {
+          transforms.push(`translateY(${Math.abs(bounceOffset)}px)`);
+        }
         
         if (scale) {
-          transforms.push(`scale(${0.8 + progress * 0.2})`);
+          const scaleValue = 0.8 + progress * 0.2 + bounceWave * 0.05 * dampening;
+          transforms.push(`scale(${scaleValue})`);
         }
         
         element.style.transform = transforms.join(' ');
@@ -42,12 +54,20 @@ export const bounce = (options: BounceOptions = {}) => {
       tick: (progress: number) => {
         const transforms = [];
         
-        // Bounce effect using sine wave
-        const bounceOffset = Math.sin(progress * Math.PI) * height * (1 - progress);
-        transforms.push(`translateY(${-bounceOffset}px)`);
+        // Enhanced bounce effect with intensity control
+        const bounceWave = Math.sin(progress * Math.PI * (1 + intensity));
+        const dampening = 1 - progress;
+        const bounceOffset = bounceWave * height * dampening;
+        
+        if (direction === 'up') {
+          transforms.push(`translateY(${-Math.abs(bounceOffset)}px)`);
+        } else {
+          transforms.push(`translateY(${Math.abs(bounceOffset)}px)`);
+        }
         
         if (scale) {
-          transforms.push(`scale(${0.8 + progress * 0.2})`);
+          const scaleValue = 0.8 + progress * 0.2 + bounceWave * 0.05 * dampening;
+          transforms.push(`scale(${scaleValue})`);
         }
         
         element.style.transform = transforms.join(' ');
