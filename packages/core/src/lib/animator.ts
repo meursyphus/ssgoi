@@ -2,11 +2,11 @@ import { animate } from "popmotion";
 
 import type { SpringConfig } from "./types";
 
-export interface AnimationOptions {
-  from: number;
-  to: number;
+export interface AnimationOptions<T = number> {
+  from: T;
+  to: T;
   spring: SpringConfig;
-  onUpdate: (value: number) => void;
+  onUpdate: (value: T) => void;
   onComplete: () => void;
   onStart?: () => void;
 }
@@ -14,24 +14,36 @@ export interface AnimationOptions {
 /**
  * New Animator implementation using Popmotion
  * Provides spring-based animations with fine control
+ * Supports both number and object animations
  */
-export class Animator {
-  private options: AnimationOptions;
-  private currentValue: number;
-  private velocity: number = 0;
+export class Animator<T = number> {
+  private options: AnimationOptions<T>;
+  private currentValue: T;
+  private velocity: T extends number ? number : Record<string, number>;
   private isAnimating = false;
   private controls: { stop: () => void } | null = null;
 
-  constructor(options: Partial<AnimationOptions>) {
+  constructor(options: Partial<AnimationOptions<T>>) {
     this.options = {
-      from: options.from ?? 0,
-      to: options.to ?? 1,
+      from: options.from ?? (0 as T),
+      to: options.to ?? (1 as T),
       spring: options.spring ?? { stiffness: 100, damping: 10 },
       onUpdate: options.onUpdate ?? (() => {}),
       onComplete: options.onComplete ?? (() => {}),
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
+    
+    // Initialize velocity based on type
+    if (typeof this.options.from === 'object' && this.options.from !== null) {
+      const velocityObj: Record<string, number> = {};
+      Object.keys(this.options.from).forEach(key => {
+        velocityObj[key] = 0;
+      });
+      this.velocity = velocityObj as T extends number ? number : Record<string, number>;
+    } else {
+      this.velocity = 0 as T extends number ? number : Record<string, number>;
+    }
   }
 
   private animate = (reverse: boolean = false) => {
@@ -49,22 +61,45 @@ export class Animator {
     let previousTime = performance.now();
 
     // Create animation
-    this.controls = animate({
+    const animateOptions: any = {
       from: this.currentValue,
       to: target,
-      velocity: this.velocity * 1000, // Convert to px/s
       stiffness: this.options.spring.stiffness,
       damping: this.options.spring.damping,
       mass: 1,
+    };
 
-      onUpdate: (value: number) => {
+    // Add velocity only for number animations
+    if (typeof this.velocity === 'number') {
+      animateOptions.velocity = this.velocity * 1000; // Convert to px/s
+    }
+
+    this.controls = animate({
+      ...animateOptions,
+
+      onUpdate: (value: T) => {
         const currentTime = performance.now();
         const timeDelta = (currentTime - previousTime) / 1000; // Convert to seconds
 
         if (timeDelta > 0) {
-          // Calculate velocity in units per second, then normalize
-          const rawVelocity = (value - previousValue) / timeDelta;
-          this.velocity = rawVelocity / 1000; // Normalize to 0-1 range
+          // Calculate velocity based on type
+          if (typeof value === 'number' && typeof previousValue === 'number') {
+            // For numbers, calculate velocity in units per second, then normalize
+            const rawVelocity = (value - previousValue) / timeDelta;
+            this.velocity = (rawVelocity / 1000) as T extends number ? number : Record<string, number>; // Normalize to 0-1 range
+          } else if (typeof value === 'object' && value !== null) {
+            // For objects, calculate velocity for each property
+            const velocityObj: Record<string, number> = {};
+            Object.keys(value).forEach(key => {
+              const currentVal = (value as any)[key];
+              const prevVal = (previousValue as any)[key];
+              if (typeof currentVal === 'number' && typeof prevVal === 'number') {
+                const rawVelocity = (currentVal - prevVal) / timeDelta;
+                velocityObj[key] = rawVelocity / 1000; // Normalize to 0-1 range
+              }
+            });
+            this.velocity = velocityObj as T extends number ? number : Record<string, number>;
+          }
 
           previousValue = value;
           previousTime = currentTime;
@@ -77,7 +112,16 @@ export class Animator {
         this.currentValue = target;
         this.isAnimating = false;
         this.controls = null;
-        this.velocity = 0;
+        
+        // Reset velocity
+        if (typeof this.velocity === 'object' && this.velocity !== null) {
+          Object.keys(this.velocity).forEach(key => {
+            (this.velocity as Record<string, number>)[key] = 0;
+          });
+        } else {
+          this.velocity = 0 as T extends number ? number : Record<string, number>;
+        }
+        
         this.options.onComplete();
       },
     });
@@ -102,11 +146,20 @@ export class Animator {
 
     // If currently animating, restart with new direction
     if (this.isAnimating) {
-      const wasReversed =
-        this.currentValue > (this.options.from + this.options.to) / 2;
+      const wasReversed = this.shouldReverse();
       this.stop();
       this.animate(!wasReversed);
     }
+  }
+
+  private shouldReverse(): boolean {
+    if (typeof this.currentValue === 'number' && 
+        typeof this.options.from === 'number' && 
+        typeof this.options.to === 'number') {
+      return this.currentValue > (this.options.from + this.options.to) / 2;
+    }
+    // For objects, we can't easily determine midpoint, so default to false
+    return false;
   }
 
   stop(): void {
@@ -119,11 +172,11 @@ export class Animator {
   }
 
   // State getters
-  getVelocity(): number {
+  getVelocity(): T extends number ? number : Record<string, number> {
     return this.velocity;
   }
 
-  getCurrentValue(): number {
+  getCurrentValue(): T {
     return this.currentValue;
   }
 
@@ -132,10 +185,10 @@ export class Animator {
   }
 
   getCurrentState(): {
-    position: number;
-    velocity: number;
-    from: number;
-    to: number;
+    position: T;
+    velocity: T extends number ? number : Record<string, number>;
+    from: T;
+    to: T;
   } {
     return {
       position: this.currentValue,
@@ -146,32 +199,32 @@ export class Animator {
   }
 
   // State setters
-  setVelocity(velocity: number): void {
+  setVelocity(velocity: T extends number ? number : Record<string, number>): void {
     this.velocity = velocity;
   }
 
-  setValue(value: number): void {
+  setValue(value: T): void {
     this.currentValue = value;
   }
 
   // Configuration
-  updateOptions(newOptions: Partial<AnimationOptions>): void {
+  updateOptions(newOptions: Partial<AnimationOptions<T>>): void {
     this.options = { ...this.options, ...newOptions };
 
     // If animating, restart with new options
     if (this.isAnimating && this.controls) {
-      const currentDirection = this.currentValue < this.options.to;
+      const currentDirection = this.shouldReverse();
       this.stop();
       this.animate(!currentDirection);
     }
   }
 
   // Static factory method
-  static fromState(
-    state: { position: number; velocity: number },
-    newOptions: Partial<AnimationOptions>
-  ): Animator {
-    const animation = new Animator(newOptions);
+  static fromState<T = number>(
+    state: { position: T; velocity: T extends number ? number : Record<string, number> },
+    newOptions: Partial<AnimationOptions<T>>
+  ): Animator<T> {
+    const animation = new Animator<T>(newOptions);
     animation.setValue(state.position);
     animation.setVelocity(state.velocity);
     return animation;
