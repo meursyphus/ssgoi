@@ -12,6 +12,15 @@ const en: Messages = {
     openMenu: "Open menu",
     githubRepository: "GitHub Repository",
   },
+  mobileMenu: {
+    documentToc: "Table of Contents",
+    menu: "Menu",
+    closeDrawer: "Close drawer",
+    noDocumentPage: "Please navigate to a documentation page.",
+    navigation: "Navigation",
+    documents: "Documentation",
+    language: "Language",
+  },
   home: {
     title: "Beautiful page transitions\nfor modern web apps",
     getStarted: "Get Started",
