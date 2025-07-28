@@ -86,6 +86,10 @@
 		"./types": {
 			"types": "./dist/types.d.ts",
 			"import": "./dist/types.js"
+		},
+		"./presets": {
+			"types": "./dist/presets/index.d.ts",
+			"import": "./dist/presets/index.js"
 		}
 	}
 }
