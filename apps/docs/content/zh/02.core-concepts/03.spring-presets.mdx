@@ -1,0 +1,130 @@
+---
+title: 弹簧预设
+description: 为不同动画效果预定义的弹簧设置
+---
+
+# 弹簧预设
+
+SSGOI 提供预定义的弹簧设置，让您无需手动调整物理值即可轻松创建不同的动画效果。
+
+## 使用方法
+
+您可以从 `presets` 模块导入弹簧预设：
+
+```typescript
+import { config } from '@ssgoi/react/presets';
+// 或
+import { config } from '@ssgoi/svelte/presets';
+
+// 在过渡中使用
+transition({
+  spring: config.gentle,
+  tick: (progress) => {
+    // 您的动画逻辑
+  }
+})
+```
+
+您也可以导入单独的预设：
+
+```typescript
+import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
+
+transition({
+  spring: gentle,
+  // ...
+})
+```
+
+## 可用预设
+
+### default
+适合大多数用例的平衡动画。
+- **stiffness**: 170
+- **damping**: 26
+- **用例**: 通用过渡
+
+### gentle
+具有细微动作的平滑、平静的过渡。
+- **stiffness**: 120
+- **damping**: 14
+- **用例**: 优雅、专业的界面
+
+### wobbly
+具有明显弹簧效果的弹性、活泼的动画。
+- **stiffness**: 180
+- **damping**: 12
+- **用例**: 有趣、互动的元素
+
+### stiff
+超调最小的快速响应动画。
+- **stiffness**: 210
+- **damping**: 20
+- **用例**: 快速 UI 响应、工具提示
+
+### slow
+谨慎而有节制的动画。
+- **stiffness**: 280
+- **damping**: 60
+- **用例**: 重要状态更改、展示效果
+
+### molasses
+非常缓慢和粘稠的运动。
+- **stiffness**: 280
+- **damping**: 120
+- **用例**: 戏剧性效果、加载状态
+
+## 自定义弹簧配置
+
+您随时可以创建自己的弹簧配置：
+
+```typescript
+transition({
+  spring: {
+    stiffness: 150,
+    damping: 15
+  },
+  // ...
+})
+```
+
+## 物理值说明
+
+- **stiffness**: 控制弹簧的张力。值越高，动画速度越快。
+- **damping**: 控制阻力。值越高，振荡越少，停止越平滑。
+
+## 示例
+
+### 在视图过渡中使用预设
+
+```typescript
+import { Ssgoi } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+import { fade } from '@ssgoi/react/view-transitions';
+
+const config = {
+  defaultTransition: fade({ spring: config.gentle }),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ spring: config.wobbly })
+    }
+  ]
+};
+```
+
+### 在元素过渡中使用预设
+
+```typescript
+import { transition } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+
+const fadeIn = transition({
+  spring: config.slow,
+  tick: (progress) => ({
+    opacity: progress,
+    transform: `translateY(${(1 - progress) * 20}px)`
+  })
+});
+```

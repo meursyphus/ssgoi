@@ -29,6 +29,7 @@ export default defineConfig({
           "src/lib/view-transitions/index.ts"
         ),
         types: resolve(__dirname, "src/lib/types.ts"),
+        "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),
       },
       formats: ["es", "cjs"],
     },
@@ -40,6 +41,7 @@ export default defineConfig({
         "@ssgoi/core",
         "@ssgoi/core/view-transitions",
         "@ssgoi/core/transitions",
+        "@ssgoi/core/presets",
       ],
       output: {
         preserveModules: true,

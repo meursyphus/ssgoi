@@ -1,0 +1,130 @@
+---
+title: Spring Presets
+description: Pre-configured spring settings for different animation feels
+---
+
+# Spring Presets
+
+SSGOI provides pre-configured spring settings to easily create different animation feels without manually tuning physics values.
+
+## Usage
+
+You can import spring presets from the `presets` module:
+
+```typescript
+import { config } from '@ssgoi/react/presets';
+// or
+import { config } from '@ssgoi/svelte/presets';
+
+// Use in transitions
+transition({
+  spring: config.gentle,
+  tick: (progress) => {
+    // Your animation logic
+  }
+})
+```
+
+You can also import individual presets:
+
+```typescript
+import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
+
+transition({
+  spring: gentle,
+  // ...
+})
+```
+
+## Available Presets
+
+### default
+A balanced animation suitable for most use cases.
+- **stiffness**: 170
+- **damping**: 26
+- **Use case**: General purpose transitions
+
+### gentle
+Smooth and calm transitions with subtle movement.
+- **stiffness**: 120
+- **damping**: 14
+- **Use case**: Elegant, professional interfaces
+
+### wobbly
+Bouncy and playful animations with noticeable spring effect.
+- **stiffness**: 180
+- **damping**: 12
+- **Use case**: Fun, interactive elements
+
+### stiff
+Quick and responsive animations with minimal overshoot.
+- **stiffness**: 210
+- **damping**: 20
+- **Use case**: Snappy UI responses, tooltips
+
+### slow
+Deliberate and measured animations.
+- **stiffness**: 280
+- **damping**: 60
+- **Use case**: Important state changes, reveals
+
+### molasses
+Very slow and viscous movement.
+- **stiffness**: 280
+- **damping**: 120
+- **Use case**: Dramatic effects, loading states
+
+## Custom Spring Configuration
+
+You can always create your own spring configuration:
+
+```typescript
+transition({
+  spring: {
+    stiffness: 150,
+    damping: 15
+  },
+  // ...
+})
+```
+
+## Physics Values Explained
+
+- **stiffness**: Controls the spring's tension. Higher values create faster animations.
+- **damping**: Controls the resistance. Higher values reduce oscillation and create smoother stops.
+
+## Examples
+
+### Using presets in view transitions
+
+```typescript
+import { Ssgoi } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+import { fade } from '@ssgoi/react/view-transitions';
+
+const config = {
+  defaultTransition: fade({ spring: config.gentle }),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ spring: config.wobbly })
+    }
+  ]
+};
+```
+
+### Using presets in element transitions
+
+```typescript
+import { transition } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+
+const fadeIn = transition({
+  spring: config.slow,
+  tick: (progress) => ({
+    opacity: progress,
+    transform: `translateY(${(1 - progress) * 20}px)`
+  })
+});
+```
