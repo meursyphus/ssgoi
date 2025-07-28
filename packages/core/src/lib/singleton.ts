@@ -41,7 +41,7 @@ export class Singleton {
           const instance = Reflect.construct(target, argumentList, newTarget);
           workspace.set(key, instance);
         } else {
-          throw new Error(`Singleton: ${customKey || target.name} already exists.`);
+          console.warn(`Singleton: ${customKey || target.name} already exists but called constructor again. it will return the existing instance and ignore the new instance.`);
         }
 
         return workspace.get(key);
