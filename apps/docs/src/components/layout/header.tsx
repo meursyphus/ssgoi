@@ -18,7 +18,11 @@ export function Header() {
 
   useEffect(() => {
     fetch("https://api.github.com/repos/meursyphus/ssgoi")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        return res.json();
+      })
       .then((data) => {
         setStars(data.stargazers_count);
         setIsLoadingStars(false);
