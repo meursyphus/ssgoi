@@ -49,6 +49,11 @@ export function Header() {
           </button>
 
           <Link href="/" className="flex items-center space-x-2">
+            <img 
+              src="/ssgoi-logo.png" 
+              alt="SSGOI Logo" 
+              className="h-8 w-8 rounded-full object-cover"
+            />
             <span className="text-2xl font-bold text-orange-500">SSGOI</span>
           </Link>
 
