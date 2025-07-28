@@ -1,0 +1,130 @@
+---
+title: スプリングプリセット
+description: 様々なアニメーション効果のための事前定義されたスプリング設定
+---
+
+# スプリングプリセット
+
+SSGOIは、物理値を手動で調整することなく、様々なアニメーション効果を簡単に作成できるよう、事前定義されたスプリング設定を提供しています。
+
+## 使用方法
+
+`presets`モジュールからスプリングプリセットをインポートできます：
+
+```typescript
+import { config } from '@ssgoi/react/presets';
+// または
+import { config } from '@ssgoi/svelte/presets';
+
+// トランジションで使用
+transition({
+  spring: config.gentle,
+  tick: (progress) => {
+    // アニメーションロジック
+  }
+})
+```
+
+個別のプリセットをインポートすることもできます：
+
+```typescript
+import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
+
+transition({
+  spring: gentle,
+  // ...
+})
+```
+
+## 利用可能なプリセット
+
+### default
+ほとんどのユースケースに適したバランスの取れたアニメーション。
+- **stiffness**: 170
+- **damping**: 26
+- **ユースケース**: 汎用的なトランジション
+
+### gentle
+微妙な動きを持つ滑らかで落ち着いたトランジション。
+- **stiffness**: 120
+- **damping**: 14
+- **ユースケース**: エレガントでプロフェッショナルなインターフェース
+
+### wobbly
+顕著なスプリング効果を持つ弾力的で遊び心のあるアニメーション。
+- **stiffness**: 180
+- **damping**: 12
+- **ユースケース**: 楽しくインタラクティブな要素
+
+### stiff
+最小限のオーバーシュートで素早く反応するアニメーション。
+- **stiffness**: 210
+- **damping**: 20
+- **ユースケース**: 素早いUIレスポンス、ツールチップ
+
+### slow
+慎重で計測されたアニメーション。
+- **stiffness**: 280
+- **damping**: 60
+- **ユースケース**: 重要な状態変更、リビール効果
+
+### molasses
+非常に遅く粘性のある動き。
+- **stiffness**: 280
+- **damping**: 120
+- **ユースケース**: ドラマチックな効果、ローディング状態
+
+## カスタムスプリング設定
+
+独自のスプリング設定を作成することも可能です：
+
+```typescript
+transition({
+  spring: {
+    stiffness: 150,
+    damping: 15
+  },
+  // ...
+})
+```
+
+## 物理値の説明
+
+- **stiffness**: スプリングの張力を制御します。値が高いほど速いアニメーションになります。
+- **damping**: 抵抗を制御します。値が高いほど振動が減少し、より滑らかに停止します。
+
+## 例
+
+### ビュートランジションでのプリセット使用
+
+```typescript
+import { Ssgoi } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+import { fade } from '@ssgoi/react/view-transitions';
+
+const config = {
+  defaultTransition: fade({ spring: config.gentle }),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ spring: config.wobbly })
+    }
+  ]
+};
+```
+
+### 要素トランジションでのプリセット使用
+
+```typescript
+import { transition } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+
+const fadeIn = transition({
+  spring: config.slow,
+  tick: (progress) => ({
+    opacity: progress,
+    transform: `translateY(${(1 - progress) * 20}px)`
+  })
+});
+```

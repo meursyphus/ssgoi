@@ -1,0 +1,130 @@
+---
+title: 스프링 프리셋
+description: 다양한 애니메이션 느낌을 위한 사전 정의된 스프링 설정
+---
+
+# 스프링 프리셋
+
+SSGOI는 물리 값을 수동으로 조정하지 않고도 다양한 애니메이션 느낌을 쉽게 만들 수 있도록 사전 정의된 스프링 설정을 제공합니다.
+
+## 사용법
+
+`presets` 모듈에서 스프링 프리셋을 가져올 수 있습니다:
+
+```typescript
+import { config } from '@ssgoi/react/presets';
+// 또는
+import { config } from '@ssgoi/svelte/presets';
+
+// 트랜지션에서 사용
+transition({
+  spring: config.gentle,
+  tick: (progress) => {
+    // 애니메이션 로직
+  }
+})
+```
+
+개별 프리셋을 가져올 수도 있습니다:
+
+```typescript
+import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
+
+transition({
+  spring: gentle,
+  // ...
+})
+```
+
+## 사용 가능한 프리셋
+
+### default
+대부분의 사용 사례에 적합한 균형 잡힌 애니메이션입니다.
+- **stiffness**: 170
+- **damping**: 26
+- **사용 사례**: 범용 트랜지션
+
+### gentle
+미묘한 움직임을 가진 부드럽고 차분한 전환입니다.
+- **stiffness**: 120
+- **damping**: 14
+- **사용 사례**: 우아하고 전문적인 인터페이스
+
+### wobbly
+눈에 띄는 스프링 효과를 가진 탄력 있고 재미있는 애니메이션입니다.
+- **stiffness**: 180
+- **damping**: 12
+- **사용 사례**: 재미있고 인터랙티브한 요소
+
+### stiff
+최소한의 오버슛으로 빠르고 반응이 빠른 애니메이션입니다.
+- **stiffness**: 210
+- **damping**: 20
+- **사용 사례**: 빠른 UI 응답, 툴팁
+
+### slow
+신중하고 측정된 애니메이션입니다.
+- **stiffness**: 280
+- **damping**: 60
+- **사용 사례**: 중요한 상태 변경, 공개 효과
+
+### molasses
+매우 느리고 점성이 있는 움직임입니다.
+- **stiffness**: 280
+- **damping**: 120
+- **사용 사례**: 극적인 효과, 로딩 상태
+
+## 커스텀 스프링 설정
+
+언제든지 자신만의 스프링 구성을 만들 수 있습니다:
+
+```typescript
+transition({
+  spring: {
+    stiffness: 150,
+    damping: 15
+  },
+  // ...
+})
+```
+
+## 물리 값 설명
+
+- **stiffness**: 스프링의 장력을 제어합니다. 값이 높을수록 더 빠른 애니메이션이 생성됩니다.
+- **damping**: 저항을 제어합니다. 값이 높을수록 진동이 줄어들고 더 부드럽게 멈춥니다.
+
+## 예제
+
+### 뷰 트랜지션에서 프리셋 사용
+
+```typescript
+import { Ssgoi } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+import { fade } from '@ssgoi/react/view-transitions';
+
+const config = {
+  defaultTransition: fade({ spring: config.gentle }),
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ spring: config.wobbly })
+    }
+  ]
+};
+```
+
+### 요소 트랜지션에서 프리셋 사용
+
+```typescript
+import { transition } from '@ssgoi/react';
+import { config } from '@ssgoi/react/presets';
+
+const fadeIn = transition({
+  spring: config.slow,
+  tick: (progress) => ({
+    opacity: progress,
+    transform: `translateY(${(1 - progress) * 20}px)`
+  })
+});
+```
