@@ -19,10 +19,10 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    apple: "/ssgoi-logo.png",
     other: {
       rel: "apple-touch-icon-precomposed",
-      url: "/apple-touch-icon-precomposed.png",
+      url: "/ssgoi-logo.png",
     },
   },
   manifest: "/manifest.json",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "https://ssgoi.dev/og.png",
+        url: "https://ssgoi.dev/ssgoi-logo.png",
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: "SSGOI - Page Transition Library",
       },
     ],
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
     description:
       "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design.",
-    images: ["https://ssgoi.dev/og.png"],
+    images: ["https://ssgoi.dev/ssgoi-logo.png"],
     creator: "@ssgoi",
   },
   alternates: {
