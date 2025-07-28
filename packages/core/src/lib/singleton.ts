@@ -6,73 +6,47 @@ const getGlobalContext = (): any => {
   return window;
 }
 
-export class Singleton {
-  private static ensureWorkspace(): Map<any, any> {
-    const global = getGlobalContext();
-    if (!global[WORKSPACE_SYMBOL]) {
-      global[WORKSPACE_SYMBOL] = new Map();
-    }
-    return global[WORKSPACE_SYMBOL];
+const ensureWorkspace = (): Map<symbol, unknown> => {
+  const global = getGlobalContext();
+  if (!global[WORKSPACE_SYMBOL]) {
+    global[WORKSPACE_SYMBOL] = new Map();
+  }
+  return global[WORKSPACE_SYMBOL];
+}
+
+export const registSingleton = <T>(key: string, target: T) => {
+  const workspace = ensureWorkspace();
+  const symbol = Symbol.for(key);
+
+  if (!workspace.has(symbol)) {
+    workspace.set(symbol, target);
   }
 
-  private static getKey(keyOrObject: Object|string): symbol {
-    let key: symbol;
-    if (typeof keyOrObject === 'string') {
-      key = Symbol.for(keyOrObject);
-    } else if (typeof keyOrObject === 'function') {
-      key = Symbol.for(keyOrObject.name);
-    } else {
-      key = Symbol.for(keyOrObject.constructor.name);
-    }
+  return workspace.get(symbol);
+}
 
-    return key;
-  }
+export const getSingleton = <T>(key: string) => {
+  const workspace = ensureWorkspace();
+  const symbol = Symbol.for(key);
 
-  public static create<T extends new (...args: any[]) => any>(
-    Constructor: T,
-    customKey?: string
-  ): T {
-    return new Proxy(Constructor, {
-      construct(target, argumentList, newTarget) {
-        const workspace = Singleton.ensureWorkspace();
-        const key = Symbol.for(customKey || target.name);
+  return workspace.get(symbol) as T;
+}
 
-        if (!workspace.has(key)) {
-          const instance = Reflect.construct(target, argumentList, newTarget);
-          workspace.set(key, instance);
-        } else {
-          console.warn(`Singleton: ${customKey || target.name} already exists but called constructor again. it will return the existing instance and ignore the new instance.`);
-        }
+export const hasSingleton = (key: string) => {
+  const workspace = ensureWorkspace();
+  const symbol = Symbol.for(key);
 
-        return workspace.get(key);
-      }
-    });
-  }
+  return workspace.has(symbol);
+}
 
-  public static get<T>(keyOrObject: Object|string): T|undefined {
-    const workspace = Singleton.ensureWorkspace();
-    const key = Singleton.getKey(keyOrObject);
+export const removeSingleton = (key: string) => {
+  const workspace = ensureWorkspace();
+  const symbol = Symbol.for(key);
 
-    return workspace.get(key) as T;
-  }
+  return workspace.delete(symbol);
+}
 
-  public static has(keyOrObject: Object|string): boolean {
-    const workspace = Singleton.ensureWorkspace();
-    const key = Singleton.getKey(keyOrObject);
-
-    return workspace.has(key);
-  }
-
-  public static remove(keyOrObject: Object|string): boolean {
-    const workspace = Singleton.ensureWorkspace();
-    const key = Singleton.getKey(keyOrObject);
-
-    return workspace.delete(key);
-  }
-
-  public static clear(): void {
-    const workspace = Singleton.ensureWorkspace();
-
-    workspace.clear();
-  }
+export const clearSingleton = () => {
+  const workspace = ensureWorkspace();
+  workspace.clear();
 }
