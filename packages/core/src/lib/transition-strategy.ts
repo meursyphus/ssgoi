@@ -8,11 +8,11 @@ export interface StrategyContext {
   currentAnimation: { animator: Animator; direction: "in" | "out" } | null;
 }
 
-export interface AnimationSetup {
-  config?: TransitionConfig;
-  state: { position: number; velocity: number };
-  from: number;
-  to: number;
+export interface AnimationSetup<T = number> {
+  config?: TransitionConfig<T>;
+  state: { position: T; velocity: T extends number ? number : Record<string, number> };
+  from: T;
+  to: T;
   direction: "forward" | "backward";
 }
 
@@ -21,9 +21,9 @@ export interface TransitionConfigs {
   out?: Promise<TransitionConfig>;
 }
 
-export interface TransitionStrategy {
-  runIn: (configs: TransitionConfigs) => Promise<AnimationSetup>;
-  runOut: (configs: TransitionConfigs) => Promise<AnimationSetup>;
+export interface TransitionStrategy<T = number> {
+  runIn: (configs: TransitionConfigs) => Promise<AnimationSetup<T>>;
+  runOut: (configs: TransitionConfigs) => Promise<AnimationSetup<T>>;
 }
 
 /**
@@ -74,11 +74,13 @@ export const createDefaultStrategy = (
         // Use OUT config but reverse direction
         if (configs.out) {
           const outConfig = await configs.out;
+          // Extract from/to with defaults for out transition
+          const { from = 1, to = 0 } = outConfig;
           return {
             config: outConfig,
             state: currentState,
-            from: 1, // OUT animation's from
-            to: 0, // OUT animation's to
+            from, // OUT animation's from
+            to, // OUT animation's to
             direction: "backward", // Will actually go 0→1
           };
         }
@@ -86,11 +88,23 @@ export const createDefaultStrategy = (
 
       // Scenario 1: No animation running OR IN already running
       const config = await configs.in;
+      if (!config) {
+        // No config, return minimal setup
+        return {
+          state: { position: 0, velocity: 0 },
+          from: 0,
+          to: 1,
+          direction: "forward",
+        };
+      }
+      
+      // Extract from/to with defaults for in transition
+      const { from = 0, to = 1 } = config;
       return {
         config,
-        state: { position: 0, velocity: 0 },
-        from: 0,
-        to: 1,
+        state: { position: from, velocity: 0 },
+        from,
+        to,
         direction: "forward",
       };
     },
@@ -106,15 +120,17 @@ export const createDefaultStrategy = (
 
         // Use IN config but reverse direction
         if (configs.in) {
-          const config = await configs.in;
+          const inConfig = await configs.in;
+          // Extract from/to with defaults for in transition
+          const { from = 0, to = 1 } = inConfig;
           return {
-            config,
+            config: inConfig,
             state: {
               position: currentState.position,
               velocity: currentState.velocity,
             },
-            from: 0, // IN animation's from
-            to: 1, // IN animation's to
+            from, // IN animation's from
+            to, // IN animation's to
             direction: "backward", // Will actually go 1→0
           };
         }
@@ -122,11 +138,23 @@ export const createDefaultStrategy = (
 
       // Scenario 2: No animation running OR OUT already running
       const config = await configs.out;
+      if (!config) {
+        // No config, return minimal setup
+        return {
+          state: { position: 1, velocity: 0 },
+          from: 1,
+          to: 0,
+          direction: "forward",
+        };
+      }
+      
+      // Extract from/to with defaults for out transition
+      const { from = 1, to = 0 } = config;
       return {
         config,
-        state: { position: 1, velocity: 0 },
-        from: 1,
-        to: 0,
+        state: { position: from, velocity: 0 },
+        from,
+        to,
         direction: "forward",
       };
     },

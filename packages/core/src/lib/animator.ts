@@ -33,14 +33,16 @@ export class Animator<T = number> {
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
-    
+
     // Initialize velocity based on type
-    if (typeof this.options.from === 'object' && this.options.from !== null) {
+    if (typeof this.options.from === "object" && this.options.from !== null) {
       const velocityObj: Record<string, number> = {};
-      Object.keys(this.options.from).forEach(key => {
+      Object.keys(this.options.from).forEach((key) => {
         velocityObj[key] = 0;
       });
-      this.velocity = velocityObj as T extends number ? number : Record<string, number>;
+      this.velocity = velocityObj as T extends number
+        ? number
+        : Record<string, number>;
     } else {
       this.velocity = 0 as T extends number ? number : Record<string, number>;
     }
@@ -70,7 +72,7 @@ export class Animator<T = number> {
     };
 
     // Add velocity only for number animations
-    if (typeof this.velocity === 'number') {
+    if (typeof this.velocity === "number") {
       animateOptions.velocity = this.velocity * 1000; // Convert to px/s
     }
 
@@ -83,22 +85,29 @@ export class Animator<T = number> {
 
         if (timeDelta > 0) {
           // Calculate velocity based on type
-          if (typeof value === 'number' && typeof previousValue === 'number') {
+          if (typeof value === "number" && typeof previousValue === "number") {
             // For numbers, calculate velocity in units per second, then normalize
             const rawVelocity = (value - previousValue) / timeDelta;
-            this.velocity = (rawVelocity / 1000) as T extends number ? number : Record<string, number>; // Normalize to 0-1 range
-          } else if (typeof value === 'object' && value !== null) {
+            this.velocity = (rawVelocity / 1000) as T extends number
+              ? number
+              : Record<string, number>; // Normalize to 0-1 range
+          } else if (typeof value === "object" && value !== null) {
             // For objects, calculate velocity for each property
             const velocityObj: Record<string, number> = {};
-            Object.keys(value).forEach(key => {
+            Object.keys(value).forEach((key) => {
               const currentVal = (value as any)[key];
               const prevVal = (previousValue as any)[key];
-              if (typeof currentVal === 'number' && typeof prevVal === 'number') {
+              if (
+                typeof currentVal === "number" &&
+                typeof prevVal === "number"
+              ) {
                 const rawVelocity = (currentVal - prevVal) / timeDelta;
                 velocityObj[key] = rawVelocity / 1000; // Normalize to 0-1 range
               }
             });
-            this.velocity = velocityObj as T extends number ? number : Record<string, number>;
+            this.velocity = velocityObj as T extends number
+              ? number
+              : Record<string, number>;
           }
 
           previousValue = value;
@@ -112,16 +121,18 @@ export class Animator<T = number> {
         this.currentValue = target;
         this.isAnimating = false;
         this.controls = null;
-        
+
         // Reset velocity
-        if (typeof this.velocity === 'object' && this.velocity !== null) {
-          Object.keys(this.velocity).forEach(key => {
+        if (typeof this.velocity === "object" && this.velocity !== null) {
+          Object.keys(this.velocity).forEach((key) => {
             (this.velocity as Record<string, number>)[key] = 0;
           });
         } else {
-          this.velocity = 0 as T extends number ? number : Record<string, number>;
+          this.velocity = 0 as T extends number
+            ? number
+            : Record<string, number>;
         }
-        
+
         this.options.onComplete();
       },
     });
@@ -153,9 +164,11 @@ export class Animator<T = number> {
   }
 
   private shouldReverse(): boolean {
-    if (typeof this.currentValue === 'number' && 
-        typeof this.options.from === 'number' && 
-        typeof this.options.to === 'number') {
+    if (
+      typeof this.currentValue === "number" &&
+      typeof this.options.from === "number" &&
+      typeof this.options.to === "number"
+    ) {
       return this.currentValue > (this.options.from + this.options.to) / 2;
     }
     // For objects, we can't easily determine midpoint, so default to false
@@ -199,7 +212,9 @@ export class Animator<T = number> {
   }
 
   // State setters
-  setVelocity(velocity: T extends number ? number : Record<string, number>): void {
+  setVelocity(
+    velocity: T extends number ? number : Record<string, number>
+  ): void {
     this.velocity = velocity;
   }
 
@@ -221,7 +236,10 @@ export class Animator<T = number> {
 
   // Static factory method
   static fromState<T = number>(
-    state: { position: T; velocity: T extends number ? number : Record<string, number> },
+    state: {
+      position: T;
+      velocity: T extends number ? number : Record<string, number>;
+    },
     newOptions: Partial<AnimationOptions<T>>
   ): Animator<T> {
     const animation = new Animator<T>(newOptions);
