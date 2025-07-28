@@ -12,6 +12,15 @@ export type Messages = {
     openMenu: string;
     githubRepository: string;
   };
+  mobileMenu: {
+    documentToc: string;
+    menu: string;
+    closeDrawer: string;
+    noDocumentPage: string;
+    navigation: string;
+    documents: string;
+    language: string;
+  };
   home: {
     title: string;
     getStarted: string;
