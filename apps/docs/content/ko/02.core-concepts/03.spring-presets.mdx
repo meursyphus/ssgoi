@@ -97,34 +97,8 @@ transition({
 
 ### 뷰 트랜지션에서 프리셋 사용
 
-```typescript
-import { Ssgoi } from '@ssgoi/react';
-import { config } from '@ssgoi/react/presets';
-import { fade } from '@ssgoi/react/view-transitions';
-
-const config = {
-  defaultTransition: fade({ spring: config.gentle }),
-  transitions: [
-    {
-      from: '/home',
-      to: '/about',
-      transition: slide({ spring: config.wobbly })
-    }
-  ]
-};
-```
+<ViewTransitionPresets />
 
 ### 요소 트랜지션에서 프리셋 사용
 
-```typescript
-import { transition } from '@ssgoi/react';
-import { config } from '@ssgoi/react/presets';
-
-const fadeIn = transition({
-  spring: config.slow,
-  tick: (progress) => ({
-    opacity: progress,
-    transform: `translateY(${(1 - progress) * 20}px)`
-  })
-});
-```
+<ElementTransitionPresets />

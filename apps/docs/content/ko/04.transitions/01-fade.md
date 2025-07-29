@@ -10,24 +10,7 @@ nav-title: "페이드"
 
 ## 기본 사용법
 
-```tsx
-import { transition } from '@ssgoi/react';
-import { fade } from '@ssgoi/react/transitions';
-
-function Component() {
-  const [isVisible, setIsVisible] = useState(true);
-  
-  return (
-    <div>
-      {isVisible && (
-        <div ref={transition({ key: 'fade-element', ...fade() })}>
-          페이드 애니메이션이 적용된 요소
-        </div>
-      )}
-    </div>
-  );
-}
-```
+<FadeBasic />
 
 ## 옵션
 
@@ -56,75 +39,25 @@ interface FadeOptions {
 
 반투명에서 시작하여 약간 투명한 상태로 끝나는 페이드:
 
-```tsx
-const partialFade = fade({
-  from: 0.2,  // 20% 투명도에서 시작
-  to: 0.8,    // 80% 투명도로 종료
-  spring: { stiffness: 300, damping: 30 }
-});
-
-<div ref={transition({ key: 'partial-fade', ...partialFade })}>
-  부분 페이드 효과
-</div>
-```
+<PartialFade />
 
 ### 느린 페이드
 
 천천히 부드럽게 나타나는 효과:
 
-```tsx
-const slowFade = fade({
-  spring: { 
-    stiffness: 100,  // 낮은 강도
-    damping: 20      // 낮은 감쇠
-  }
-});
-
-<div ref={transition({ key: 'slow-fade', ...slowFade })}>
-  느린 페이드 효과
-</div>
-```
+<SlowFade />
 
 ### 빠른 페이드
 
 빠르게 나타나는 효과:
 
-```tsx
-const fastFade = fade({
-  spring: { 
-    stiffness: 500,  // 높은 강도
-    damping: 40      // 높은 감쇠
-  }
-});
-
-<div ref={transition({ key: 'fast-fade', ...fastFade })}>
-  빠른 페이드 효과
-</div>
-```
+<FastFade />
 
 ## 다른 애니메이션과 조합
 
 페이드는 다른 애니메이션과 함께 사용하면 더욱 풍부한 효과를 만들 수 있습니다:
 
-```tsx
-// 커스텀 조합 애니메이션
-const fadeAndScale = {
-  in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
-    tick: (progress) => {
-      element.style.opacity = progress.toString();
-      element.style.transform = `scale(${0.8 + progress * 0.2})`;
-    }
-  }),
-  out: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
-    tick: (progress) => {
-      element.style.opacity = progress.toString();
-      element.style.transform = `scale(${0.8 + progress * 0.2})`;
-    }
-  })
-};
-```
+<FadeAndScale />
 
 ## 성능 고려사항
 
@@ -136,15 +69,7 @@ const fadeAndScale = {
 
 페이드 애니메이션 사용 시 접근성을 고려하세요:
 
-```tsx
-<div 
-  ref={transition({ key: 'accessible-fade', ...fade() })}
-  role="status"
-  aria-live="polite"
->
-  스크린 리더에 알림이 전달되는 페이드 요소
-</div>
-```
+<AccessibleFade />
 
 ## 권장 사용 사례
 
