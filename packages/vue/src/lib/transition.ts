@@ -1,13 +1,13 @@
 import { transition as _transition } from "@ssgoi/core";
 import type { Directive } from "vue";
-import type { TransitionConfig, TransitionKey } from "@ssgoi/core/types";
+import type { Transition, TransitionKey } from "@ssgoi/core/types";
 
 export const transition = _transition;
 
 // Vue directive for element transitions
 export const vTransition: Directive<
   HTMLElement,
-  TransitionConfig & { key: TransitionKey }
+  Transition & { key: TransitionKey }
 > = {
   mounted(el, binding) {
     if (!binding.value) {

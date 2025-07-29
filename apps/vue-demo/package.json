@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "vue-demo",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@ssgoi/vue": "workspace:*",
     "nuxt": "^4.0.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
