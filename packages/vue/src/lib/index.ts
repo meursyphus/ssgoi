@@ -1,4 +1,4 @@
 export { transition, vTransition } from "./transition";
 export * from "./types";
-export { Ssgoi } from "./ssgoi";
-export { SsgoiTransition } from "./ssgoi-transition";
+export { default as Ssgoi } from "./ssgoi.vue";
+export { default as SsgoiTransition } from "./ssgoi-transition.vue";
