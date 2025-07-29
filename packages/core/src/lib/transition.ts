@@ -1,4 +1,5 @@
 import { createTransitionCallback } from "./create-transition-callback";
+import { singletonFactory } from "./singleton";
 import {
   StrategyContext,
   TRANSITION_STRATEGY,
@@ -10,17 +11,10 @@ import type { Transition, TransitionCallback } from "./types";
  * Key type for transitions - can be string or symbol
  */
 type TransitionKey = string | symbol;
-
-/**
- * Centralized transition management
- * Uses string/symbol keys for all storage
- */
-
-// Map to store transition definitions by key
-const transitionDefinitions = new Map<TransitionKey, Transition>();
-
-// Map to store transition callbacks by key
-const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
+type TransitionAndCallback = {
+  transition?: Transition;
+  callback?: TransitionCallback;
+}
 
 /**
  * Registers a transition with a key and returns the callback
@@ -31,10 +25,11 @@ function registerTransition(
   transition: Transition,
   strategy?: (context: StrategyContext) => TransitionStrategy
 ): TransitionCallback {
-  transitionDefinitions.set(key, transition);
+  const [getTransitionAndCallback, removeTransitionAndCallback] = singletonFactory<TransitionKey, TransitionAndCallback>(key, { transition });
 
   // Return existing callback if it exists
-  let callback = transitionCallbacks.get(key);
+  const transitionAndCallback = getTransitionAndCallback();
+  let callback = transitionAndCallback?.callback;
   if (callback) {
     return callback;
   }
@@ -42,7 +37,7 @@ function registerTransition(
   // Create new callback
   callback = createTransitionCallback(
     () => {
-      const trans = transitionDefinitions.get(key);
+      const trans = getTransitionAndCallback()?.transition;
       if (!trans) {
         console.warn(`Transition "${String(key)}" not found`);
         return {};
@@ -51,19 +46,15 @@ function registerTransition(
     },
     {
       strategy,
-      onCleanupEnd: () => unregisterTransition(key),
+      onCleanupEnd: () => removeTransitionAndCallback(),
     }
   );
-  transitionCallbacks.set(key, callback);
-  return callback;
-}
 
-/**
- * Unregisters a transition and cleans up associated resources
- */
-function unregisterTransition(key: TransitionKey): void {
-  transitionDefinitions.delete(key);
-  transitionCallbacks.delete(key);
+  if (transitionAndCallback) {
+    transitionAndCallback.callback = callback;
+  }
+  
+  return callback;
 }
 
 /**

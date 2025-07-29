@@ -6,47 +6,52 @@ const getGlobalContext = (): any => {
   return window;
 }
 
-const ensureWorkspace = (): Map<symbol, unknown> => {
+const ensureWorkspace = <K>(): Map<K, any> => {
   const global = getGlobalContext();
   if (!global[WORKSPACE_SYMBOL]) {
-    global[WORKSPACE_SYMBOL] = new Map();
+    global[WORKSPACE_SYMBOL] = new Map<K, any>();
   }
   return global[WORKSPACE_SYMBOL];
 }
 
-export const registSingleton = <T>(key: string, target: T) => {
-  const workspace = ensureWorkspace();
-  const symbol = Symbol.for(key);
+export const singletonFactory = <K, T>(key: K, target: T): [() => T | undefined, () => void] => {
+  const workspace = ensureWorkspace<K>();
 
-  if (!workspace.has(symbol)) {
-    workspace.set(symbol, target);
+  if (!workspace.has(key)) {
+    workspace.set(key, target);
   }
 
-  return workspace.get(symbol);
+  console.log('singletonFactory', key);
+
+  return [
+    () => getSingleton<K, T>(key),
+    () => removeSingleton<K>(key),
+  ];
 }
 
-export const getSingleton = <T>(key: string) => {
-  const workspace = ensureWorkspace();
-  const symbol = Symbol.for(key);
+export const getSingleton = <K, T>(key: K) => {
+  const workspace = ensureWorkspace<K>();
 
-  return workspace.get(symbol) as T;
+  console.log('getSingleton', key);
+
+  return workspace.get(key) as T | undefined;
 }
 
-export const hasSingleton = (key: string) => {
-  const workspace = ensureWorkspace();
-  const symbol = Symbol.for(key);
+export const hasSingleton = <K>(key: K) => {
+  const workspace = ensureWorkspace<K>();
 
-  return workspace.has(symbol);
+  return workspace.has(key);
 }
 
-export const removeSingleton = (key: string) => {
-  const workspace = ensureWorkspace();
-  const symbol = Symbol.for(key);
+export const removeSingleton = <K>(key: K) => {
+  const workspace = ensureWorkspace<K>();
 
-  return workspace.delete(symbol);
+  console.log('removeSingleton', key);
+
+  return workspace.delete(key);
 }
 
-export const clearSingleton = () => {
-  const workspace = ensureWorkspace();
+export const clearSingleton = <K>() => {
+  const workspace = ensureWorkspace<K>();
   workspace.clear();
 }
