@@ -16,6 +16,7 @@
             class="color-box"
             :style="{ backgroundColor: item.color }"
             :data-hero-key="`color-${item.id}`"
+            @click="goToItem(item.id)"
           >
             <span class="color-name">{{ item.name }}</span>
           </NuxtLink>
@@ -158,6 +159,17 @@ import {
 
 // Local directive registration
 const vTransition = vTransitionDirective;
+
+// Navigation function
+const goToItem = async (itemId: number) => {
+  console.log('goToItem called with id:', itemId);
+  try {
+    await navigateTo(`/item/${itemId}`);
+    console.log('Navigation completed');
+  } catch (error) {
+    console.error('Navigation error:', error);
+  }
+};
 
 const colors = [
   { id: 1, color: "#FF6B6B", name: "Coral" },

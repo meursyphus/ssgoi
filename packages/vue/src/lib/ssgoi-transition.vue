@@ -1,12 +1,6 @@
-<template>
-  <div ref="transitionEl" :data-ssgoi-transition="id">
-    <slot />
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { transition } from "./transition";
+import { computed, h, withDirectives, useSlots } from "vue";
+import { vTransition } from "./transition";
 import { useSsgoi } from "./context";
 
 interface Props {
@@ -14,21 +8,29 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
-const transitionEl = ref<HTMLElement>();
+const slots = useSlots();
 const getTransition = useSsgoi();
 
-let cleanup: (() => void) | void;
-
-onMounted(() => {
-  if (transitionEl.value) {
-    cleanup = transition(getTransition(props.id))(transitionEl.value);
-  }
+// Compute transition config for the directive
+const transitionConfig = computed(() => {
+  const transition = getTransition(props.id);
+  return {
+    ...transition,
+    key: props.id,
+  };
 });
 
-onUnmounted(() => {
-  if (cleanup) {
-    cleanup();
-  }
-});
+// Create render function
+const renderWithTransition = () => {
+  return withDirectives(
+    h('div', {
+      'data-ssgoi-transition': props.id
+    }, slots.default?.()),
+    [[vTransition, transitionConfig.value]]
+  );
+};
 </script>
+
+<template>
+  <component :is="renderWithTransition" />
+</template>
