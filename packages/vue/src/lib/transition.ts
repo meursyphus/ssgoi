@@ -1,0 +1,34 @@
+import { transition as _transition } from "@ssgoi/core";
+import type { Directive } from "vue";
+import type { TransitionConfig, TransitionKey } from "@ssgoi/core/types";
+
+export const transition = _transition;
+
+// Vue directive for element transitions
+export const vTransition: Directive<
+  HTMLElement,
+  TransitionConfig & { key: TransitionKey }
+> = {
+  mounted(el, binding) {
+    if (!binding.value) {
+      console.warn(
+        "[SSGOI] v-transition directive requires a configuration object"
+      );
+      return;
+    }
+
+    const transitionConfig = binding.value;
+    const cleanup = transition(transitionConfig)(el);
+
+    // Store cleanup function on element for unmounted hook
+    (el as any)._ssgoiCleanup = cleanup;
+  },
+  unmounted(el) {
+    // Call cleanup if it exists
+    const cleanup = (el as any)._ssgoiCleanup;
+    if (cleanup) {
+      cleanup();
+      delete (el as any)._ssgoiCleanup;
+    }
+  },
+};
