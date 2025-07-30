@@ -1,0 +1,77 @@
+---
+title: "슬라이드 애니메이션"
+description: "방향성 있는 슬라이드 애니메이션"
+nav-title: "슬라이드"
+---
+
+# 슬라이드 애니메이션
+
+슬라이드(Slide) 애니메이션은 요소를 특정 방향으로 밀어내거나 끌어오는 효과를 만듭니다. 메뉴, 알림, 카드 등의 UI 요소에 자주 사용됩니다.
+
+## 기본 사용법
+
+<TransitionDemo type="slide" />
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { slide } from '@ssgoi/react/transitions';
+
+function Component() {
+  return (
+    <div ref={transition({
+      key: 'my-element',
+      ...slide()
+    })}>
+      Slide me!
+    </div>
+  );
+}
+```
+
+## 옵션
+
+```typescript
+interface SlideOptions {
+  direction?: 'left' | 'right' | 'up' | 'down'; // 슬라이드 방향 (기본값: 'left')
+  distance?: number; // 이동 거리 (기본값: 100)
+  opacity?: boolean; // 투명도 효과 포함 여부 (기본값: true)
+  spring?: {
+    stiffness?: number; // 스프링 강도 (기본값: 300)
+    damping?: number; // 감쇠 계수 (기본값: 30)
+  };
+}
+```
+
+## 사용 예시
+
+### 오른쪽으로 슬라이드
+
+<TransitionDemo type="slide" options={{ direction: 'right' }} />
+
+```tsx
+slide({ direction: 'right' })
+```
+
+### 위로 슬라이드
+
+<TransitionDemo type="slide" options={{ direction: 'up' }} />
+
+```tsx
+slide({ direction: 'up' })
+```
+
+### 아래로 슬라이드
+
+<TransitionDemo type="slide" options={{ direction: 'down' }} />
+
+```tsx
+slide({ direction: 'down' })
+```
+
+### 긴 거리 슬라이드
+
+더 먼 거리에서 슬라이드:
+
+```tsx
+slide({ distance: 200 })
+```

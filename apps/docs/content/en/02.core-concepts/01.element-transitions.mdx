@@ -4,14 +4,138 @@ description: "Apply animations to individual DOM elements"
 nav-title: "Element Animations"
 ---
 
-import { TransitionPlayground } from '@/components/transition-playground';
-import { Tabs, TabPanel } from '@/components/mdx-components';
+## Transition Examples
 
-## Transition Playground
+How to use various transition effects:
 
-Experience various transition effects directly:
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```jsx
+    import { transition } from '@ssgoi/react';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/react/transitions';
 
-<TransitionPlayground />
+    // Fade transition
+    <div ref={transition({
+      key: "fade-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fade effect
+    </div>
+
+    // Scale transition
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Scale effect
+    </div>
+
+    // Blur transition
+    <div ref={transition({
+      key: "blur-element",
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Blur effect
+    </div>
+
+    // Slide transition (with direction)
+    <div ref={transition({
+      key: "slide-element",
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Slide effect
+    </div>
+
+    // Fly transition (custom position)
+    <div ref={transition({
+      key: "fly-element",
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fly effect
+    </div>
+
+    // Rotate transition
+    <div ref={transition({
+      key: "rotate-element",
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Rotate effect
+    </div>
+
+    // Bounce transition
+    <div ref={transition({
+      key: "bounce-element",
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Bounce effect
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <!-- Fade transition -->
+    <div use:transition={{
+      key: 'fade-element',
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Fade effect
+    </div>
+
+    <!-- Scale transition -->
+    <div use:transition={{
+      key: 'scale-element',
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Scale effect
+    </div>
+
+    <!-- Blur transition -->
+    <div use:transition={{
+      key: 'blur-element',
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Blur effect
+    </div>
+
+    <!-- Slide transition (with direction) -->
+    <div use:transition={{
+      key: 'slide-element',
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Slide effect
+    </div>
+
+    <!-- Fly transition (custom position) -->
+    <div use:transition={{
+      key: 'fly-element',
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Fly effect
+    </div>
+
+    <!-- Rotate transition -->
+    <div use:transition={{
+      key: 'rotate-element',
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Rotate effect
+    </div>
+
+    <!-- Bounce transition -->
+    <div use:transition={{
+      key: 'bounce-element',
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    }}>
+      Bounce effect
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
 ## Basic Structure
 

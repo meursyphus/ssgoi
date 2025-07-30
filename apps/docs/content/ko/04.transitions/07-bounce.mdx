@@ -1,0 +1,77 @@
+---
+title: "바운스 애니메이션"
+description: "튀는 듯한 경쾌한 애니메이션"
+nav-title: "바운스"
+---
+
+# 바운스 애니메이션
+
+바운스(Bounce) 애니메이션은 요소가 통통 튀는 듯한 생동감 있는 효과를 만듭니다. 주목을 끌거나 재미있는 인터랙션을 만들 때 효과적입니다.
+
+## 기본 사용법
+
+<TransitionDemo type="bounce" />
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { bounce } from '@ssgoi/react/transitions';
+
+function Component() {
+  return (
+    <div ref={transition({
+      key: 'my-element',
+      ...bounce()
+    })}>
+      Bounce me!
+    </div>
+  );
+}
+```
+
+## 옵션
+
+```typescript
+interface BounceOptions {
+  times?: number; // 바운스 횟수 (기본값: 2)
+  scale?: number; // 바운스 시 크기 변화 (기본값: 1.2)
+  opacity?: boolean; // 투명도 효과 포함 여부 (기본값: true)
+  spring?: {
+    stiffness?: number; // 스프링 강도 (기본값: 500)
+    damping?: number; // 감쇠 계수 (기본값: 15)
+  };
+}
+```
+
+## 사용 예시
+
+### 여러 번 바운스
+
+더 많은 바운스:
+
+```tsx
+bounce({ times: 3 })
+```
+
+### 큰 바운스
+
+더 큰 크기 변화:
+
+```tsx
+bounce({ scale: 1.5 })
+```
+
+### 바운스만 적용
+
+투명도 변화 없이 바운스만:
+
+```tsx
+bounce({ opacity: false })
+```
+
+### 부드러운 바운스
+
+스프링 설정으로 부드럽게:
+
+```tsx
+bounce({ spring: { stiffness: 300, damping: 20 } })
+```

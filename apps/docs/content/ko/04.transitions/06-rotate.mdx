@@ -1,0 +1,77 @@
+---
+title: "회전 애니메이션"
+description: "회전 효과를 이용한 독특한 애니메이션"
+nav-title: "회전"
+---
+
+# 회전 애니메이션
+
+회전(Rotate) 애니메이션은 요소를 회전시키면서 나타내거나 사라지게 하는 효과를 만듭니다. 로딩 스피너, 아이콘 전환 등에 효과적입니다.
+
+## 기본 사용법
+
+<TransitionDemo type="rotate" />
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { rotate } from '@ssgoi/react/transitions';
+
+function Component() {
+  return (
+    <div ref={transition({
+      key: 'my-element',
+      ...rotate()
+    })}>
+      Rotate me!
+    </div>
+  );
+}
+```
+
+## 옵션
+
+```typescript
+interface RotateOptions {
+  degrees?: number; // 회전 각도 (기본값: 180)
+  opacity?: boolean; // 투명도 효과 포함 여부 (기본값: true)
+  scale?: boolean; // 스케일 효과 포함 여부 (기본값: true)
+  spring?: {
+    stiffness?: number; // 스프링 강도 (기본값: 300)
+    damping?: number; // 감쇠 계수 (기본값: 30)
+  };
+}
+```
+
+## 사용 예시
+
+### 전체 회전
+
+360도 완전 회전:
+
+```tsx
+rotate({ degrees: 360 })
+```
+
+### 회전만 적용
+
+투명도와 크기 변화 없이 회전만:
+
+```tsx
+rotate({ opacity: false, scale: false })
+```
+
+### 작은 회전
+
+90도 회전:
+
+```tsx
+rotate({ degrees: 90 })
+```
+
+### 역방향 회전
+
+반시계 방향 회전:
+
+```tsx
+rotate({ degrees: -180 })
+```

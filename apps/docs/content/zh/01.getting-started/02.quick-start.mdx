@@ -4,17 +4,9 @@ description: "5分钟内使用SSGOI创建您的第一个页面过渡动画"
 nav-title: "快速入门"
 ---
 
-import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
-
 ## 安装包
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```bash 
     npm install @ssgoi/react 
@@ -33,13 +25,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
 ## 基本设置（2分钟）
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ### 1. 根布局设置 (Next.js App Router)
 
@@ -137,9 +123,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
         <!-- 页面内容 -->
       </main>
     </SsgoiTransition>
-    ```
 
-    ```svelte
     <!-- src/routes/about/+page.svelte -->
     <script>
       import { SsgoiTransition } from "@ssgoi/svelte";
@@ -158,13 +142,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
 ## 应用各种过渡效果
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx

@@ -4,17 +4,9 @@ description: "5分でSSGOIを使った初めてのページ遷移アニメーシ
 nav-title: "クイックスタート"
 ---
 
-import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
-
 ## パッケージのインストール
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```bash 
     npm install @ssgoi/react 
@@ -33,13 +25,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
 ## 基本セットアップ（2分）
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ### 1. ルートレイアウトの設定 (Next.js App Router)
 
@@ -137,9 +123,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
         <!-- ページコンテンツ -->
       </main>
     </SsgoiTransition>
-    ```
 
-    ```svelte
     <!-- src/routes/about/+page.svelte -->
     <script>
       import { SsgoiTransition } from "@ssgoi/svelte";
@@ -158,13 +142,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
 
 ## 様々なトランジションの適用
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx

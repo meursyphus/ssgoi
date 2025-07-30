@@ -10,7 +10,23 @@ nav-title: "페이드"
 
 ## 기본 사용법
 
-<FadeBasic />
+<TransitionDemo type="fade" />
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/transitions';
+
+function Component() {
+  return (
+    <div ref={transition({
+      key: 'my-element',
+      ...fade()
+    })}>
+      Fade me!
+    </div>
+  );
+}
+```
 
 ## 옵션
 
@@ -25,16 +41,22 @@ interface FadeOptions {
 }
 ```
 
-### 옵션 설명
-
-- **from**: 애니메이션 시작 시 투명도 값 (0-1)
-- **to**: 애니메이션 종료 시 투명도 값 (0-1)
-- **spring**: 스프링 물리 설정
-  - `stiffness`: 값이 클수록 빠른 애니메이션
-  - `damping`: 값이 클수록 부드러운 애니메이션
-
 ## 사용 예시
 
 ### 부분 페이드
 
 반투명에서 시작하여 약간 투명한 상태로 끝나는 페이드:
+
+<TransitionDemo type="fade" options={{ from: 0.2, to: 0.8 }} />
+
+```tsx
+fade({ from: 0.2, to: 0.8 })
+```
+
+### 빠른 페이드
+
+스프링 설정을 조정하여 더 빠른 애니메이션:
+
+```tsx
+fade({ spring: { stiffness: 500, damping: 40 } })
+```
