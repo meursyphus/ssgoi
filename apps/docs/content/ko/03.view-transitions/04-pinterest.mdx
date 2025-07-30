@@ -31,72 +31,143 @@ Pinterest 전환은 두 가지 key 속성을 사용합니다:
 
 ### 1. 전환 설정
 
-```tsx
-import { Ssgoi } from '@ssgoi/react';
-import { pinterest } from '@ssgoi/react/view-transitions';
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { pinterest } from '@ssgoi/react/view-transitions';
 
-const config = {
-  transitions: [
-    {
-      from: '/gallery',
-      to: '/gallery/*',
-      transition: pinterest(),
-      symmetric: true
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: pinterest(),
+          symmetric: true
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
     }
-  ]
-};
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { pinterest } from '@ssgoi/svelte/view-transitions';
 
-export default function App() {
-  return (
-    <Ssgoi config={config}>
-      {/* 앱 내용 */}
+      const config = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: pinterest(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
     </Ssgoi>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ### 2. 갤러리 페이지
 
-```tsx
-export function Gallery() {
-  return (
-    <div className="masonry-grid">
-      {items.map(item => (
-        <Link 
-          key={item.id} 
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    export function Gallery() {
+      return (
+        <div className="masonry-grid">
+          {items.map(item => (
+            <Link 
+              key={item.id} 
+              href={`/gallery/${item.id}`}
+              data-pinterest-gallery-key={item.id}
+              className="gallery-item"
+            >
+              <img src={item.thumbnail} alt={item.title} />
+              <h3>{item.title}</h3>
+            </Link>
+          ))}
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let items;
+    </script>
+
+    <div class="masonry-grid">
+      {#each items as item}
+        <a 
           href={`/gallery/${item.id}`}
           data-pinterest-gallery-key={item.id}
-          className="gallery-item"
+          class="gallery-item"
         >
           <img src={item.thumbnail} alt={item.title} />
           <h3>{item.title}</h3>
-        </Link>
-      ))}
+        </a>
+      {/each}
     </div>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ### 3. 상세 페이지
 
-```tsx
-export function GalleryDetail({ item }) {
-  return (
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    export function GalleryDetail({ item }) {
+      return (
+        <div 
+          data-pinterest-detail-key={item.id}
+          className="detail-container"
+        >
+          <img src={item.fullImage} alt={item.title} />
+          <h1>{item.title}</h1>
+          <p>{item.description}</p>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let item;
+    </script>
+
     <div 
       data-pinterest-detail-key={item.id}
-      className="detail-container"
+      class="detail-container"
     >
       <img src={item.fullImage} alt={item.title} />
       <h1>{item.title}</h1>
       <p>{item.description}</p>
     </div>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ## 옵션
 
-```tsx
+```typescript
 pinterest({
   spring: {
     stiffness: 50,   // 스프링 강도 (기본값: 50)
@@ -134,45 +205,90 @@ pinterest({
 
 ### Masonry 레이아웃과 함께
 
-```tsx
-// 갤러리 페이지
-<div className="masonry-grid">
-  {items.map((item, index) => (
-    <div 
-      key={item.id}
-      data-pinterest-gallery-key={item.id}
-      className="masonry-item"
-      style={{ 
-        gridRowEnd: `span ${item.height}`,
-        animationDelay: `${index * 50}ms` 
-      }}
-    >
-      <Link href={`/gallery/${item.id}`}>
-        <img src={item.thumbnail} alt={item.title} />
-      </Link>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 갤러리 페이지
+    <div className="masonry-grid">
+      {items.map((item, index) => (
+        <div 
+          key={item.id}
+          data-pinterest-gallery-key={item.id}
+          className="masonry-item"
+          style={{ 
+            gridRowEnd: `span ${item.height}`,
+            animationDelay: `${index * 50}ms` 
+          }}
+        >
+          <Link href={`/gallery/${item.id}`}>
+            <img src={item.thumbnail} alt={item.title} />
+          </Link>
+        </div>
+      ))}
     </div>
-  ))}
-</div>
-```
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 갤러리 페이지 -->
+    <div class="masonry-grid">
+      {#each items as item, index}
+        <div 
+          data-pinterest-gallery-key={item.id}
+          class="masonry-item"
+          style="grid-row-end: span {item.height}; animation-delay: {index * 50}ms"
+        >
+          <a href={`/gallery/${item.id}`}>
+            <img src={item.thumbnail} alt={item.title} />
+          </a>
+        </div>
+      {/each}
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
 ### 이미지 프리로딩
 
-```tsx
-// 상세 페이지 - 부드러운 전환을 위한 이미지 프리로딩
-export function GalleryDetail({ item }) {
-  useEffect(() => {
-    // 고해상도 이미지 프리로드
-    const img = new Image();
-    img.src = item.fullImage;
-  }, [item.fullImage]);
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 상세 페이지 - 부드러운 전환을 위한 이미지 프리로딩
+    export function GalleryDetail({ item }) {
+      useEffect(() => {
+        // 고해상도 이미지 프리로드
+        const img = new Image();
+        img.src = item.fullImage;
+      }, [item.fullImage]);
 
-  return (
+      return (
+        <div data-pinterest-detail-key={item.id}>
+          {/* 내용 */}
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { onMount } from 'svelte';
+      
+      export let item;
+      
+      onMount(() => {
+        // 고해상도 이미지 프리로드
+        const img = new Image();
+        img.src = item.fullImage;
+      });
+    </script>
+
     <div data-pinterest-detail-key={item.id}>
-      {/* 내용 */}
+      <!-- 내용 -->
     </div>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ## 스타일링 고려사항
 

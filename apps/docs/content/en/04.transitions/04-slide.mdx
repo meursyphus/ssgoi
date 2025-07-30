@@ -1,0 +1,79 @@
+---
+title: "Slide Animation"
+description: "Create dynamic movement effects by sliding elements in specific directions"
+nav-title: "Slide"
+---
+
+# Slide Animation
+
+The Slide animation creates effects where elements are pushed out or pulled in from a specific direction.
+
+<TransitionDemo type="slide" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...slide()
+        })}>
+          Slide me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...slide()
+    }}>
+      Slide me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface SlideOptions {
+  direction?: 'left' | 'right' | 'up' | 'down';  // Slide direction (default: 'left')
+  distance?: number;      // Travel distance (default: 100)
+  opacity?: boolean;      // Include opacity effect (default: true)
+  spring?: {
+    stiffness?: number;   // Spring stiffness (default: 300)
+    damping?: number;     // Damping coefficient (default: 30)
+  };
+}
+```
+
+### Usage Examples
+
+```tsx
+// Slide right
+slide({ direction: 'right' })
+
+// Slide up
+slide({ direction: 'up' })
+
+// Long distance slide
+slide({ distance: 200 })
+
+// Slide only (no opacity change)
+slide({ opacity: false })
+```
+
