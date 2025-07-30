@@ -6,68 +6,73 @@ nav-title: "블러"
 
 # 블러 애니메이션
 
-블러(Blur) 애니메이션은 요소에 흐림 효과를 적용하여 초점이 맞지 않는 듯한 전환 효과를 만듭니다. 배경 전환이나 모달 표시 등에 효과적입니다.
-
-## 기본 사용법
+블러(Blur) 애니메이션은 요소에 흐림 효과를 적용하여 초점이 맞지 않는 듯한 전환 효과를 만듭니다.
 
 <TransitionDemo type="blur" />
 
-```tsx
-import { transition } from '@ssgoi/react';
-import { blur } from '@ssgoi/react/transitions';
+## 사용법
 
-function Component() {
-  return (
-    <div ref={transition({
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { blur } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...blur()
+        })}>
+          Blur me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { blur } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
       key: 'my-element',
       ...blur()
-    })}>
+    }}>
       Blur me!
     </div>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ## 옵션
 
 ```typescript
 interface BlurOptions {
-  amount?: number; // 블러 강도 (기본값: 10)
-  scale?: boolean; // 스케일 효과 포함 여부 (기본값: false)
-  opacity?: boolean; // 투명도 효과 포함 여부 (기본값: true)
+  amount?: number;      // 블러 강도 (기본값: 10)
+  scale?: boolean;      // 스케일 효과 포함 여부 (기본값: false)
+  opacity?: boolean;    // 투명도 효과 포함 여부 (기본값: true)
   spring?: {
     stiffness?: number; // 스프링 강도 (기본값: 300)
-    damping?: number; // 감쇠 계수 (기본값: 30)
+    damping?: number;   // 감쇠 계수 (기본값: 30)
   };
 }
 ```
 
-## 사용 예시
-
-### 강한 블러
-
-더 강한 흐림 효과:
-
-<TransitionDemo type="blur" options={{ amount: 20 }} />
+### 사용 예시
 
 ```tsx
+// 강한 블러
 blur({ amount: 20 })
-```
 
-### 블러 + 스케일
-
-흐림 효과와 함께 크기 변화:
-
-<TransitionDemo type="blur" options={{ scale: true }} />
-
-```tsx
+// 블러 + 스케일
 blur({ scale: true })
-```
 
-### 블러만 적용
-
-투명도 변화 없이 블러만:
-
-```tsx
+// 블러만 (투명도 변화 없음)
 blur({ opacity: false })
+
+// 부드러운 블러
+blur({ spring: { stiffness: 100, damping: 20 } })
 ```

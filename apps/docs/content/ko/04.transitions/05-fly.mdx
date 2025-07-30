@@ -6,74 +6,73 @@ nav-title: "플라이"
 
 # 플라이 애니메이션
 
-플라이(Fly) 애니메이션은 요소가 3차원 공간에서 날아오는 듯한 효과를 만듭니다. X, Y 축의 움직임과 투명도를 조합하여 역동적인 애니메이션을 구현합니다.
-
-## 기본 사용법
+플라이(Fly) 애니메이션은 요소가 3차원 공간에서 날아오는 듯한 효과를 만듭니다.
 
 <TransitionDemo type="fly" />
 
-```tsx
-import { transition } from '@ssgoi/react';
-import { fly } from '@ssgoi/react/transitions';
+## 사용법
 
-function Component() {
-  return (
-    <div ref={transition({
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fly } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fly()
+        })}>
+          Fly me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fly } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
       key: 'my-element',
       ...fly()
-    })}>
+    }}>
       Fly me!
     </div>
-  );
-}
-```
+    ```
+  </TabPanel>
+</Tabs>
 
 ## 옵션
 
 ```typescript
 interface FlyOptions {
-  x?: number; // X축 이동 거리 (기본값: -100)
-  y?: number; // Y축 이동 거리 (기본값: -100)
-  opacity?: number; // 시작 투명도 (기본값: 0)
+  x?: number;        // X축 이동 거리 (기본값: -100)
+  y?: number;        // Y축 이동 거리 (기본값: -100)
+  opacity?: number;  // 시작 투명도 (기본값: 0)
   spring?: {
-    stiffness?: number; // 스프링 강도 (기본값: 300)
-    damping?: number; // 감쇠 계수 (기본값: 30)
+    stiffness?: number;  // 스프링 강도 (기본값: 300)
+    damping?: number;    // 감쇠 계수 (기본값: 30)
   };
 }
 ```
 
-## 사용 예시
-
-### 대각선 플라이
-
-다른 각도에서 날아오기:
-
-<TransitionDemo type="fly" options={{ x: 200, y: -50 }} />
+### 사용 예시
 
 ```tsx
+// 대각선 플라이
 fly({ x: 200, y: -50 })
-```
 
-### 수평 플라이
-
-Y축 움직임 없이 수평으로만:
-
-```tsx
+// 수평 플라이
 fly({ x: -200, y: 0 })
-```
 
-### 수직 플라이
-
-X축 움직임 없이 수직으로만:
-
-```tsx
+// 수직 플라이
 fly({ x: 0, y: -200 })
-```
 
-### 반투명 시작
-
-높은 투명도에서 시작:
-
-```tsx
+// 반투명 시작
 fly({ opacity: 0.2 })
 ```
