@@ -21,8 +21,6 @@ export const singletonFactory = <K, T>(key: K, target: T): [() => T | undefined,
     workspace.set(key, target);
   }
 
-  console.log('singletonFactory', key);
-
   return [
     () => getSingleton<K, T>(key),
     () => removeSingleton<K>(key),
@@ -31,8 +29,6 @@ export const singletonFactory = <K, T>(key: K, target: T): [() => T | undefined,
 
 export const getSingleton = <K, T>(key: K) => {
   const workspace = ensureWorkspace<K>();
-
-  console.log('getSingleton', key);
 
   return workspace.get(key) as T | undefined;
 }
@@ -45,8 +41,6 @@ export const hasSingleton = <K>(key: K) => {
 
 export const removeSingleton = <K>(key: K) => {
   const workspace = ensureWorkspace<K>();
-
-  console.log('removeSingleton', key);
 
   return workspace.delete(key);
 }
