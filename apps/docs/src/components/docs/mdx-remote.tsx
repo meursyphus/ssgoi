@@ -3,8 +3,6 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { mdxComponents } from "./mdx-components";
-import * as examples from "./examples";
-
 import svelte from "@/lib/highlights/svelte";
 import { common } from "lowlight";
 
@@ -110,7 +108,11 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
   return (
     <MDXRemote
       source={source}
-      components={{ ...defaultComponents, ...mdxComponents, ...examples, ...components }}
+      components={{
+        ...defaultComponents,
+        ...mdxComponents,
+        ...components,
+      }}
       options={{
         mdxOptions: {
           rehypePlugins: [
