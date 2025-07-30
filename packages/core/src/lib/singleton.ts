@@ -27,25 +27,25 @@ export const singletonFactory = <K, T>(key: K, target: T): [() => T | undefined,
   ];
 }
 
-export const getSingleton = <K, T>(key: K) => {
+export const getSingleton = <K, T>(key: K): T | undefined => {
   const workspace = ensureWorkspace<K>();
 
   return workspace.get(key) as T | undefined;
 }
 
-export const hasSingleton = <K>(key: K) => {
+export const hasSingleton = <K>(key: K): boolean => {
   const workspace = ensureWorkspace<K>();
 
   return workspace.has(key);
 }
 
-export const removeSingleton = <K>(key: K) => {
+export const removeSingleton = <K>(key: K): boolean => {
   const workspace = ensureWorkspace<K>();
 
   return workspace.delete(key);
 }
 
-export const clearSingleton = <K>() => {
+export const clearSingleton = <K>(): void => {
   const workspace = ensureWorkspace<K>();
   workspace.clear();
 }
