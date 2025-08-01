@@ -7,22 +7,22 @@ import {
   type TransitionConfigs,
 } from "./transition-strategy";
 
-export function createTransitionCallback(
-  getTransition: () => Transition,
+export function createTransitionCallback<TAnimationValue = number>(
+  getTransition: () => Transition<undefined, TAnimationValue>,
   options?: {
     onCleanupEnd?: () => void;
-    strategy?: (context: StrategyContext) => TransitionStrategy;
+    strategy?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
   }
 ): TransitionCallback {
   // Combined state: tracks both animation instance and direction
-  let currentAnimation: { animator: Animator; direction: "in" | "out" } | null =
+  let currentAnimation: { animator: Animator<TAnimationValue>; direction: "in" | "out" } | null =
     null;
   let currentClone: HTMLElement | null = null; // Track current clone element
   let parentRef: Element | null = null;
   let nextSiblingRef: Element | null = null;
 
   // Create context for strategy
-  const context: StrategyContext = {
+  const context: StrategyContext<TAnimationValue> = {
     get currentAnimation() {
       return currentAnimation;
     },
@@ -30,7 +30,7 @@ export function createTransitionCallback(
 
   // Create strategy upfront for closure
   const strategy =
-    options?.strategy?.(context) || createDefaultStrategy(context);
+    options?.strategy?.(context) || createDefaultStrategy<TAnimationValue>(context);
 
   const runEntrance = async (element: HTMLElement) => {
     if (currentClone) {
@@ -38,7 +38,7 @@ export function createTransitionCallback(
       currentClone = null;
     }
     const transition = getTransition();
-    const configs: TransitionConfigs = {
+    const configs: TransitionConfigs<TAnimationValue> = {
       in: transition.in && Promise.resolve(transition.in(element)),
       out: transition.out && Promise.resolve(transition.out(element)),
     };
@@ -76,7 +76,7 @@ export function createTransitionCallback(
 
     const transition = getTransition();
 
-    const configs: TransitionConfigs = {
+    const configs: TransitionConfigs<TAnimationValue> = {
       in: transition.in && Promise.resolve(transition.in(element)),
       out: transition.out && Promise.resolve(transition.out(element)),
     };
