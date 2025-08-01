@@ -11,24 +11,10 @@ import type { Transition, TransitionCallback } from "./types";
  * Key type for transitions - can be string or symbol
  */
 type TransitionKey = string | symbol;
-<<<<<<< HEAD
-type TransitionAndCallback = {
-  transition?: Transition;
+type TransitionAndCallback<TAnimationValue> = {
+  transition?: Transition<undefined, TAnimationValue>;
   callback?: TransitionCallback;
 }
-=======
-
-/**
- * Centralized transition management
- * Uses string/symbol keys for all storage
- */
-
-// Map to store transition definitions by key
-const transitionDefinitions = new Map<TransitionKey, Transition<any, any>>();
-
-// Map to store transition callbacks by key
-const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
->>>>>>> main
 
 /**
  * Registers a transition with a key and returns the callback
@@ -39,7 +25,7 @@ function registerTransition<TAnimationValue = number>(
   transition: Transition<undefined, TAnimationValue>,
   strategy?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>
 ): TransitionCallback {
-  const [getTransitionAndCallback, removeTransitionAndCallback] = singletonFactory<TransitionKey, TransitionAndCallback>(key, { transition });
+  const [getTransitionAndCallback, removeTransitionAndCallback] = singletonFactory<TransitionKey, TransitionAndCallback<TAnimationValue>>(key, { transition });
 
   // Return existing callback if it exists
   const transitionAndCallback = getTransitionAndCallback();
