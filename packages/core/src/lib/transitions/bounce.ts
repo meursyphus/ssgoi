@@ -15,7 +15,7 @@ export const bounce = (options: BounceOptions = {}) => {
     height = 20,
     intensity = 1,
     scale = true,
-    fade = false,
+    fade = true,
     direction = 'up',
     spring = { stiffness: 800, damping: 15 }
   } = options;
