@@ -1,0 +1,78 @@
+---
+title: "フライアニメーション"
+description: "空中から飛んでくるような3次元アニメーション"
+nav-title: "フライ"
+---
+
+# フライアニメーション
+
+フライ（Fly）アニメーションは、要素が3次元空間で飛んでくるような効果を作ります。
+
+<TransitionDemo type="fly" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fly } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fly()
+        })}>
+          Fly me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fly } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...fly()
+    }}>
+      Fly me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface FlyOptions {
+  x?: number;        // X軸移動距離（デフォルト：-100）
+  y?: number;        // Y軸移動距離（デフォルト：-100）
+  opacity?: number;  // 開始透明度（デフォルト：0）
+  spring?: {
+    stiffness?: number;  // スプリング強度（デフォルト：300）
+    damping?: number;    // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// 対角線フライ
+fly({ x: 200, y: -50 })
+
+// 水平フライ
+fly({ x: -200, y: 0 })
+
+// 垂直フライ
+fly({ x: 0, y: -200 })
+
+// 半透明開始
+fly({ opacity: 0.2 })
+```

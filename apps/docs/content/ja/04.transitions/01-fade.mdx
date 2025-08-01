@@ -1,0 +1,74 @@
+---
+title: "フェードアニメーション"
+description: "滑らかなフェードイン/アウト効果で要素をアニメーションします"
+nav-title: "フェード"
+---
+
+# フェードアニメーション
+
+フェード（Fade）アニメーションは、要素の透明度を調整して滑らかに表示/非表示にする効果を作ります。
+
+<TransitionDemo type="fade" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fade } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fade()
+        })}>
+          Fade me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fade } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...fade()
+    }}>
+      Fade me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface FadeOptions {
+  from?: number;    // 開始透明度（デフォルト：0）
+  to?: number;      // 終了透明度（デフォルト：1）
+  spring?: {
+    stiffness?: number;  // スプリング強度（デフォルト：300）
+    damping?: number;    // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// 部分フェード
+fade({ from: 0.2, to: 0.8 })
+
+// 高速フェード
+fade({ spring: { stiffness: 500, damping: 40 } })
+
+// 滑らかなフェード
+fade({ spring: { stiffness: 100, damping: 20 } })
+```

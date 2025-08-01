@@ -1,0 +1,81 @@
+---
+title: "缩放动画"
+description: "通过调整元素大小来创建放大/缩小效果"
+nav-title: "缩放"
+---
+
+# 缩放动画
+
+缩放（Scale）动画通过改变元素的大小来创建放大或缩小的效果。
+
+<TransitionDemo type="scale" />
+
+## 使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { scale } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...scale()
+        })}>
+          Scale me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { scale } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...scale()
+    }}>
+      Scale me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface ScaleOptions {
+  start?: number;         // 起始缩放比例（默认：0）
+  fade?: boolean;         // 是否包含淡入淡出（默认：true）
+  axis?: 'x' | 'y' | 'both'; // 缩放轴（默认：'both'）
+  spring?: {
+    stiffness?: number;   // 弹簧刚度（默认：300）
+    damping?: number;     // 阻尼系数（默认：30）
+  };
+}
+```
+
+### 使用示例
+
+```tsx
+// 从一半大小开始
+scale({ start: 0.5 })
+
+// 仅水平缩放
+scale({ axis: 'x' })
+
+// 仅垂直缩放
+scale({ axis: 'y' })
+
+// 不包含透明度动画
+scale({ fade: false })
+
+// 弹跳效果
+scale({ spring: { stiffness: 200, damping: 15 } })
+```

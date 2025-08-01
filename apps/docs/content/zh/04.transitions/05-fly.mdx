@@ -1,0 +1,80 @@
+---
+title: "飞入动画"
+description: "创建元素从特定位置飞入的效果"
+nav-title: "飞入"
+---
+
+# 飞入动画
+
+飞入（Fly）动画创建元素从特定坐标飞入的效果。
+
+<TransitionDemo type="fly" />
+
+## 使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fly } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fly()
+        })}>
+          Fly me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fly } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...fly()
+    }}>
+      Fly me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface FlyOptions {
+  x?: number | string;    // X轴移动距离（默认：0）
+  y?: number | string;    // Y轴移动距离（默认：-100）
+  spring?: {
+    stiffness?: number;   // 弹簧刚度（默认：400）
+    damping?: number;     // 阻尼系数（默认：35）
+  };
+}
+```
+
+### 使用示例
+
+```tsx
+// 从上方飞入（默认）
+fly()
+
+// 从下方飞入
+fly({ y: 100 })
+
+// 从左侧飞入
+fly({ x: -200, y: 0 })
+
+// 对角线飞入
+fly({ x: -150, y: -150 })
+
+// 使用CSS单位
+fly({ x: '50vw', y: '-100vh' })
+```
