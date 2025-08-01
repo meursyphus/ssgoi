@@ -1,0 +1,78 @@
+---
+title: "스케일 애니메이션"
+description: "요소의 크기를 조절하는 스케일 애니메이션"
+nav-title: "스케일"
+---
+
+# 스케일 애니메이션
+
+스케일(Scale) 애니메이션은 요소의 크기를 확대하거나 축소하는 효과를 만듭니다.
+
+<TransitionDemo type="scale" />
+
+## 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { scale } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...scale()
+        })}>
+          Scale me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { scale } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...scale()
+    }}>
+      Scale me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 옵션
+
+```typescript
+interface ScaleOptions {
+  from?: number;           // 시작 크기 (기본값: 0)
+  to?: number;             // 종료 크기 (기본값: 1)
+  axis?: 'x' | 'y' | 'both';  // 스케일 축 (기본값: 'both')
+  spring?: {
+    stiffness?: number;    // 스프링 강도 (기본값: 300)
+    damping?: number;      // 감쇠 계수 (기본값: 30)
+  };
+}
+```
+
+### 사용 예시
+
+```tsx
+// X축만 스케일
+scale({ axis: 'x' })
+
+// Y축만 스케일
+scale({ axis: 'y' })
+
+// 작은 크기에서 시작
+scale({ from: 0.5, to: 1 })
+
+// 빠른 스케일
+scale({ spring: { stiffness: 500, damping: 40 } })
+```

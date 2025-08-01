@@ -1,0 +1,82 @@
+---
+title: "Fly Animation"
+description: "Create effects where elements fly in from specific positions"
+nav-title: "Fly"
+---
+
+# Fly Animation
+
+The Fly animation creates effects where elements fly in from specific coordinates. You can control both X and Y coordinates, enabling diagonal movements and complex entrance effects.
+
+<TransitionDemo type="fly" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fly } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fly()
+        })}>
+          Fly me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fly } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...fly()
+    }}>
+      Fly me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface FlyOptions {
+  x?: number;            // X-axis travel distance (default: 0)
+  y?: number;            // Y-axis travel distance (default: -100)
+  opacity?: boolean;     // Include opacity effect (default: true)
+  spring?: {
+    stiffness?: number;  // Spring stiffness (default: 400)
+    damping?: number;    // Damping coefficient (default: 35)
+  };
+}
+```
+
+### Usage Examples
+
+```tsx
+// Fly from bottom
+fly({ y: 100 })
+
+// Fly from left
+fly({ x: -200, y: 0 })
+
+// Fly from right
+fly({ x: 200, y: 0 })
+
+// Diagonal fly (top-left)
+fly({ x: -150, y: -150 })
+
+// Fly without opacity effect
+fly({ x: 0, y: -100, opacity: false })
+```
+

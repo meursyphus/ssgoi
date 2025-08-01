@@ -1,0 +1,78 @@
+---
+title: "スライドアニメーション"
+description: "方向性のあるスライドアニメーション"
+nav-title: "スライド"
+---
+
+# スライドアニメーション
+
+スライド（Slide）アニメーションは、要素を特定の方向に押し出したり引き寄せたりする効果を作ります。
+
+<TransitionDemo type="slide" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...slide()
+        })}>
+          Slide me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...slide()
+    }}>
+      Slide me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface SlideOptions {
+  direction?: 'left' | 'right' | 'up' | 'down';  // スライド方向（デフォルト：'left'）
+  distance?: number;      // 移動距離（デフォルト：100）
+  opacity?: boolean;      // 透明度効果の有無（デフォルト：true）
+  spring?: {
+    stiffness?: number;   // スプリング強度（デフォルト：300）
+    damping?: number;     // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// 右へスライド
+slide({ direction: 'right' })
+
+// 上へスライド
+slide({ direction: 'up' })
+
+// 長距離スライド
+slide({ distance: 200 })
+
+// スライドのみ（透明度変化なし）
+slide({ opacity: false })
+```

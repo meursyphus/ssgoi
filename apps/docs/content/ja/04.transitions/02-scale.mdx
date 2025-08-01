@@ -1,0 +1,78 @@
+---
+title: "スケールアニメーション"
+description: "要素のサイズを調整するスケールアニメーション"
+nav-title: "スケール"
+---
+
+# スケールアニメーション
+
+スケール（Scale）アニメーションは、要素のサイズを拡大・縮小する効果を作ります。
+
+<TransitionDemo type="scale" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { scale } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...scale()
+        })}>
+          Scale me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { scale } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...scale()
+    }}>
+      Scale me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface ScaleOptions {
+  from?: number;           // 開始サイズ（デフォルト：0）
+  to?: number;             // 終了サイズ（デフォルト：1）
+  axis?: 'x' | 'y' | 'both';  // スケール軸（デフォルト：'both'）
+  spring?: {
+    stiffness?: number;    // スプリング強度（デフォルト：300）
+    damping?: number;      // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// X軸のみスケール
+scale({ axis: 'x' })
+
+// Y軸のみスケール
+scale({ axis: 'y' })
+
+// 小さいサイズから開始
+scale({ from: 0.5, to: 1 })
+
+// 高速スケール
+scale({ spring: { stiffness: 500, damping: 40 } })
+```

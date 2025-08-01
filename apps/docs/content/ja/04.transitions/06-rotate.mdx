@@ -1,0 +1,78 @@
+---
+title: "回転アニメーション"
+description: "回転効果を使ったユニークなアニメーション"
+nav-title: "回転"
+---
+
+# 回転アニメーション
+
+回転（Rotate）アニメーションは、要素を回転させながら表示・非表示にする効果を作ります。
+
+<TransitionDemo type="rotate" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...rotate()
+        })}>
+          Rotate me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...rotate()
+    }}>
+      Rotate me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface RotateOptions {
+  degrees?: number;     // 回転角度（デフォルト：180）
+  opacity?: boolean;    // 透明度効果の有無（デフォルト：true）
+  scale?: boolean;      // スケール効果の有無（デフォルト：true）
+  spring?: {
+    stiffness?: number; // スプリング強度（デフォルト：300）
+    damping?: number;   // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// 完全回転
+rotate({ degrees: 360 })
+
+// 回転のみ（透明度・スケール変化なし）
+rotate({ opacity: false, scale: false })
+
+// 小さい回転
+rotate({ degrees: 90 })
+
+// 逆方向回転
+rotate({ degrees: -180 })
+```

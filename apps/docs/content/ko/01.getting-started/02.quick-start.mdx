@@ -4,45 +4,30 @@ description: "5분 안에 SSGOI로 첫 번째 페이지 전환 애니메이션 �
 nav-title: "빠른 시작"
 ---
 
-import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
-
 ## 패키지 설치
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
-    ```bash 
+    ```bash
     npm install @ssgoi/react 
     # 또는 yarn add @ssgoi/react 
-    # 또는 pnpm add @ssgoi/react 
+    # 또는 pnpm add @ssgoi/react
     ```
   </TabPanel>
   <TabPanel value="svelte">
-    ```bash 
+    ```bash
     npm install @ssgoi/svelte 
     # 또는 yarn add @ssgoi/svelte 
-    # 또는 pnpm add @ssgoi/svelte 
+    # 또는 pnpm add @ssgoi/svelte
     ```
   </TabPanel>
 </Tabs>
 
 ## 기본 설정 (2분)
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ### 1. 루트 레이아웃 설정 (Next.js App Router)
-
     ```tsx
     // app/layout.tsx
     import { Ssgoi } from "@ssgoi/react";
@@ -67,12 +52,11 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       );
     }
     ```
-
+    
     > **왜 position: relative가 필요한가요?**
     > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
-
+    
     ### 2. 페이지 래핑
-
     ```tsx
     // app/page.tsx
     import { SsgoiTransition } from "@ssgoi/react";
@@ -100,11 +84,10 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       );
     }
     ```
-
   </TabPanel>
+  
   <TabPanel value="svelte">
     ### 1. 루트 레이아웃 설정 (SvelteKit)
-
     ```svelte
     <!-- src/routes/+layout.svelte -->
     <script>
@@ -119,12 +102,11 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       </div>
     </Ssgoi>
     ```
-
+    
     > **왜 position: relative가 필요한가요?**
     > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
-
+    
     ### 2. 페이지 래핑
-
     ```svelte
     <!-- src/routes/+page.svelte -->
     <script>
@@ -137,9 +119,7 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
         <!-- 페이지 내용 -->
       </main>
     </SsgoiTransition>
-    ```
 
-    ```svelte
     <!-- src/routes/about/+page.svelte -->
     <script>
       import { SsgoiTransition } from "@ssgoi/svelte";
@@ -152,19 +132,12 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       </main>
     </SsgoiTransition>
     ```
-
   </TabPanel>
 </Tabs>
 
 ## 다양한 트랜지션 적용
 
-<Tabs
-  items={[
-    { label: "React", value: "react" },
-    { label: "Svelte", value: "svelte" },
-  ]}
-  defaultValue="react"
->
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -195,7 +168,6 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       );
     }
     ```
-
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -222,7 +194,6 @@ import { Tabs, TabPanel } from "@/components/docs/mdx-components/tabs";
       </div>
     </Ssgoi>
     ```
-
   </TabPanel>
 </Tabs>
 

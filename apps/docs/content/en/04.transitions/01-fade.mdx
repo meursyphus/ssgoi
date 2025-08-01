@@ -1,0 +1,74 @@
+---
+title: "Fade Animation"
+description: "Smooth fade in/out animation for elements"
+nav-title: "Fade"
+---
+
+# Fade Animation
+
+The Fade animation adjusts the opacity of elements to create smooth appearing and disappearing effects.
+
+<TransitionDemo type="fade" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { fade } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fade()
+        })}>
+          Fade me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { fade } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...fade()
+    }}>
+      Fade me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface FadeOptions {
+  from?: number;    // Starting opacity (default: 0)
+  to?: number;      // Ending opacity (default: 1)
+  spring?: {
+    stiffness?: number;  // Spring stiffness (default: 300)
+    damping?: number;    // Damping ratio (default: 30)
+  };
+}
+```
+
+### Examples
+
+```tsx
+// Partial fade
+fade({ from: 0.2, to: 0.8 })
+
+// Fast fade
+fade({ spring: { stiffness: 500, damping: 40 } })
+
+// Smooth fade
+fade({ spring: { stiffness: 100, damping: 20 } })
+```

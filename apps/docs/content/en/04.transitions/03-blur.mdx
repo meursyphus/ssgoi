@@ -1,0 +1,78 @@
+---
+title: "Blur Animation"
+description: "Smooth transition with blur effects"
+nav-title: "Blur"
+---
+
+# Blur Animation
+
+The Blur animation applies a blur filter to create out-of-focus transition effects.
+
+<TransitionDemo type="blur" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { blur } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...blur()
+        })}>
+          Blur me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { blur } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...blur()
+    }}>
+      Blur me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface BlurOptions {
+  amount?: number;      // Blur intensity (default: 10)
+  scale?: boolean;      // Include scale effect (default: false)
+  opacity?: boolean;    // Include opacity effect (default: true)
+  spring?: {
+    stiffness?: number; // Spring stiffness (default: 300)
+    damping?: number;   // Damping ratio (default: 30)
+  };
+}
+```
+
+### Examples
+
+```tsx
+// Strong blur
+blur({ amount: 20 })
+
+// Blur with scale
+blur({ scale: true })
+
+// Blur only (no opacity change)
+blur({ opacity: false })
+
+// Smooth blur
+blur({ spring: { stiffness: 100, damping: 20 } })
+```

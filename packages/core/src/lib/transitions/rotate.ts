@@ -17,7 +17,7 @@ export const rotate = (options: RotateOptions = {}) => {
     degrees = 360,
     clockwise = true,
     scale = false,
-    fade = false,
+    fade = true,
     origin = 'center',
     axis = '2d',
     perspective = 800,

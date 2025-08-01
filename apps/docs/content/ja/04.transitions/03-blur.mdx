@@ -1,0 +1,78 @@
+---
+title: "ブラーアニメーション"
+description: "ぼかし効果を使った滑らかな遷移アニメーション"
+nav-title: "ブラー"
+---
+
+# ブラーアニメーション
+
+ブラー（Blur）アニメーションは、要素にぼかし効果を適用してフォーカスが合っていないような遷移効果を作ります。
+
+<TransitionDemo type="blur" />
+
+## 使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { blur } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...blur()
+        })}>
+          Blur me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { blur } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...blur()
+    }}>
+      Blur me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface BlurOptions {
+  amount?: number;      // ブラー強度（デフォルト：10）
+  scale?: boolean;      // スケール効果の有無（デフォルト：false）
+  opacity?: boolean;    // 透明度効果の有無（デフォルト：true）
+  spring?: {
+    stiffness?: number; // スプリング強度（デフォルト：300）
+    damping?: number;   // 減衰係数（デフォルト：30）
+  };
+}
+```
+
+### 使用例
+
+```tsx
+// 強いブラー
+blur({ amount: 20 })
+
+// ブラー + スケール
+blur({ scale: true })
+
+// ブラーのみ（透明度変化なし）
+blur({ opacity: false })
+
+// 滑らかなブラー
+blur({ spring: { stiffness: 100, damping: 20 } })
+```

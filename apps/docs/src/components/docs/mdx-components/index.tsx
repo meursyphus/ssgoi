@@ -6,7 +6,7 @@ import { Grid } from "./grid";
 import { Card } from "./card";
 import { Demo } from "./demo";
 import { Tabs, TabPanel } from "./tabs";
-import { TransitionPlayground } from "./transition-playground";
+import { TransitionDemo } from "./transition-demo";
 
 // Export all components that will be available in MDX
 export const mdxComponents = {
@@ -17,7 +17,7 @@ export const mdxComponents = {
   Grid,
   Card,
   Demo,
-  TransitionPlayground,
+  TransitionDemo,
   Tabs,
   TabPanel,
 };

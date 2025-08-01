@@ -1,0 +1,209 @@
+---
+title: "フェードトランジション"
+description: "フェードイン/アウト効果でページをスムーズに切り替える"
+nav-title: "フェード"
+---
+
+# フェードトランジション
+
+フェードトランジションは、最も基本的でありながらエレガントなページ遷移効果です。現在のページが徐々に消えていき、新しいページが現れるスムーズな遷移を提供します。
+
+## 基本的な使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { fade } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリケーションコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { fade } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: fade()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <!-- アプリケーションコンテンツ -->
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+フェードトランジションはスプリングアニメーション設定をカスタマイズできます：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    fade({
+      spring: {
+        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
+        damping: 30      // 減衰係数（デフォルト：30）
+      }
+    })
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```javascript
+    fade({
+      spring: {
+        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
+        damping: 30      // 減衰係数（デフォルト：30）
+      }
+    })
+    ```
+  </TabPanel>
+</Tabs>
+
+### スプリングオプションの説明
+
+- **stiffness**: アニメーションの速度を制御します。値が大きいほど速い遷移
+- **damping**: アニメーションのバウンスを制御します。値が大きいほどスムーズな遷移
+
+## 使用例
+
+### ゆっくりしたフェード
+
+スムーズでゆっくりとしたフェード効果：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 100,
+          damping: 20
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```javascript
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 100,
+          damping: 20
+        }
+      })
+    };
+    ```
+  </TabPanel>
+</Tabs>
+
+### 速いフェード
+
+素早くキレのあるフェード効果：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 500,
+          damping: 40
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```javascript
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 500,
+          damping: 40
+        }
+      })
+    };
+    ```
+  </TabPanel>
+</Tabs>
+
+## 特定のルートへの適用
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about', 
+          transition: fade(),
+          symmetric: true  // /about → /home も自動的にフェードを適用
+        }
+      ]
+    };
+
+    <Ssgoi config={config}>
+      {/* アプリケーションコンテンツ */}
+    </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about', 
+            transition: fade(),
+            symmetric: true  // /about → /home も自動的にフェードを適用
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <!-- アプリケーションコンテンツ -->
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 動作原理
+
+フェードトランジションは次のように動作します：
+
+1. **出ていくページ**: 不透明度が1から0へ減少
+2. **入ってくるページ**: 不透明度が0から1へ増加
+3. 両方のアニメーションが同時に実行され、自然なクロスフェード効果を作成
+
+## 利点
+
+- すべてのコンテンツタイプに適した汎用的なトランジション
+- CPU/GPU負荷が少ない軽量なアニメーション
+- 視覚的にスムーズでプロフェッショナルな外観
+- 方向性がなく、どのナビゲーションパターンでも自然に動作
+
+## 推奨される使用ケース
+
+- デフォルトのページ遷移
+- 関連性のないコンテンツページ間のナビゲーション
+- 落ち着いたエレガントなユーザー体験が必要な場合
+- パフォーマンスが重要なモバイル環境

@@ -1,0 +1,85 @@
+---
+title: "滑动动画"
+description: "通过向特定方向滑动元素来创建动态移动效果"
+nav-title: "滑动"
+---
+
+# 滑动动画
+
+滑动（Slide）动画使元素从特定方向平滑地出现或消失。
+
+<TransitionDemo type="slide" />
+
+## 使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...slide()
+        })}>
+          Slide me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...slide()
+    }}>
+      Slide me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface SlideOptions {
+  direction?: 'left' | 'right' | 'up' | 'down'; // 滑动方向（默认：'left'）
+  distance?: number | string;  // 移动距离（默认：100）
+  fade?: boolean;              // 淡入淡出效果（默认：true）
+  axis?: 'x' | 'y';           // 移动轴（direction的替代）
+  spring?: {
+    stiffness?: number;        // 弹簧刚度（默认：400）
+    damping?: number;          // 阻尼系数（默认：35）
+  };
+}
+```
+
+### 使用示例
+
+```tsx
+// 从右侧滑入
+slide({ direction: 'right' })
+
+// 从上方滑入
+slide({ direction: 'up' })
+
+// 长距离滑动
+slide({ distance: 200 })
+
+// 使用CSS单位
+slide({ distance: '100vw' })
+
+// 仅滑动（无淡入淡出）
+slide({ fade: false })
+
+// 使用轴向
+slide({ axis: 'y' })
+```

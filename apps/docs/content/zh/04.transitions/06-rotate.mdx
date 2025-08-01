@@ -1,0 +1,78 @@
+---
+title: "旋转动画"
+description: "使用旋转效果的独特动画"
+nav-title: "旋转"
+---
+
+# 旋转动画
+
+旋转（Rotate）动画创建旋转元素时显示和隐藏的效果。
+
+<TransitionDemo type="rotate" />
+
+## 使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...rotate()
+        })}>
+          Rotate me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...rotate()
+    }}>
+      Rotate me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface RotateOptions {
+  degrees?: number;     // 旋转角度（默认：180）
+  opacity?: boolean;    // 包含透明度效果（默认：true）
+  scale?: boolean;      // 包含缩放效果（默认：true）
+  spring?: {
+    stiffness?: number; // 弹簧刚度（默认：300）
+    damping?: number;   // 阻尼系数（默认：30）
+  };
+}
+```
+
+### 使用示例
+
+```tsx
+// 完整旋转
+rotate({ degrees: 360 })
+
+// 仅旋转（无透明度/缩放）
+rotate({ opacity: false, scale: false })
+
+// 小幅旋转
+rotate({ degrees: 90 })
+
+// 反向旋转
+rotate({ degrees: -180 })
+```

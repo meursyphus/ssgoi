@@ -1,0 +1,78 @@
+---
+title: "Rotate Animation"
+description: "Create unique animations with rotation effects"
+nav-title: "Rotate"
+---
+
+# Rotate Animation
+
+The Rotate animation creates effects by rotating elements as they appear or disappear.
+
+<TransitionDemo type="rotate" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...rotate()
+        })}>
+          Rotate me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...rotate()
+    }}>
+      Rotate me!
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface RotateOptions {
+  degrees?: number;     // Rotation angle (default: 180)
+  opacity?: boolean;    // Include opacity effect (default: true)
+  scale?: boolean;      // Include scale effect (default: true)
+  spring?: {
+    stiffness?: number; // Spring stiffness (default: 300)
+    damping?: number;   // Damping coefficient (default: 30)
+  };
+}
+```
+
+### Usage Examples
+
+```tsx
+// Full rotation
+rotate({ degrees: 360 })
+
+// Rotation only (no opacity/scale)
+rotate({ opacity: false, scale: false })
+
+// Small rotation
+rotate({ degrees: 90 })
+
+// Reverse rotation
+rotate({ degrees: -180 })
+```
