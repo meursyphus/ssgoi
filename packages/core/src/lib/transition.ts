@@ -11,19 +11,33 @@ import type { Transition, TransitionCallback } from "./types";
  * Key type for transitions - can be string or symbol
  */
 type TransitionKey = string | symbol;
+<<<<<<< HEAD
 type TransitionAndCallback = {
   transition?: Transition;
   callback?: TransitionCallback;
 }
+=======
+
+/**
+ * Centralized transition management
+ * Uses string/symbol keys for all storage
+ */
+
+// Map to store transition definitions by key
+const transitionDefinitions = new Map<TransitionKey, Transition<any, any>>();
+
+// Map to store transition callbacks by key
+const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
+>>>>>>> main
 
 /**
  * Registers a transition with a key and returns the callback
  * Usage: registerTransition('fade', { in: fadeIn, out: fadeOut })
  */
-function registerTransition(
+function registerTransition<TAnimationValue = number>(
   key: TransitionKey,
-  transition: Transition,
-  strategy?: (context: StrategyContext) => TransitionStrategy
+  transition: Transition<undefined, TAnimationValue>,
+  strategy?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>
 ): TransitionCallback {
   const [getTransitionAndCallback, removeTransitionAndCallback] = singletonFactory<TransitionKey, TransitionAndCallback>(key, { transition });
 
@@ -60,16 +74,18 @@ function registerTransition(
 /**
  * Framework-agnostic transition function that can be used as a ref
  * Usage: <div ref={transition({ key: 'fade', in, out })} />
+ * 
+ * @template TAnimationValue - The type of value being animated (number | object)
  */
-export function transition(options: {
+export function transition<TAnimationValue = number>(options: {
   key: TransitionKey;
-  in?: Transition["in"];
-  out?: Transition["out"];
-  [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
+  in?: Transition<undefined, TAnimationValue>["in"];
+  out?: Transition<undefined, TAnimationValue>["out"];
+  [TRANSITION_STRATEGY]?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
 }): TransitionCallback {
   // Register transition and get callback
   return registerTransition(options.key, {
     in: options.in,
     out: options.out,
-  });
+  }, options[TRANSITION_STRATEGY]);
 }
