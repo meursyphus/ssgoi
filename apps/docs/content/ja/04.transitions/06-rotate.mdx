@@ -1,16 +1,16 @@
 ---
-title: "Rotate Animation"
-description: "Create unique animations with rotation effects"
-nav-title: "Rotate"
+title: "回転アニメーション"
+description: "回転効果を使ったユニークなアニメーション"
+nav-title: "回転"
 ---
 
-# Rotate Animation
+# 回転アニメーション
 
-The Rotate animation creates effects by rotating elements as they appear or disappear.
+回転（Rotate）アニメーションは、要素を回転させながら表示・非表示にする効果を作ります。
 
 <TransitionDemo type="rotate" />
 
-## Usage
+## 使い方
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -47,32 +47,32 @@ The Rotate animation creates effects by rotating elements as they appear or disa
   </TabPanel>
 </Tabs>
 
-## Options
+## オプション
 
 ```typescript
 interface RotateOptions {
-  degrees?: number;     // Rotation angle (default: 180)
-  opacity?: boolean;    // Include opacity effect (default: true)
-  scale?: boolean;      // Include scale effect (default: true)
+  degrees?: number;     // 回転角度（デフォルト：180）
+  opacity?: boolean;    // 透明度効果の有無（デフォルト：true）
+  scale?: boolean;      // スケール効果の有無（デフォルト：true）
   spring?: {
-    stiffness?: number; // Spring stiffness (default: 300)
-    damping?: number;   // Damping coefficient (default: 30)
+    stiffness?: number; // スプリング強度（デフォルト：300）
+    damping?: number;   // 減衰係数（デフォルト：30）
   };
 }
 ```
 
-### Usage Examples
+### 使用例
 
 ```tsx
-// Full rotation
+// 完全回転
 rotate({ degrees: 360 })
 
-// Rotation only (no opacity/scale)
+// 回転のみ（透明度・スケール変化なし）
 rotate({ opacity: false, scale: false })
 
-// Small rotation
+// 小さい回転
 rotate({ degrees: 90 })
 
-// Reverse rotation
+// 逆方向回転
 rotate({ degrees: -180 })
 ```

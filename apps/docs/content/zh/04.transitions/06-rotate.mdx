@@ -1,16 +1,16 @@
 ---
-title: "Rotate Animation"
-description: "Create unique animations with rotation effects"
-nav-title: "Rotate"
+title: "旋转动画"
+description: "使用旋转效果的独特动画"
+nav-title: "旋转"
 ---
 
-# Rotate Animation
+# 旋转动画
 
-The Rotate animation creates effects by rotating elements as they appear or disappear.
+旋转（Rotate）动画创建旋转元素时显示和隐藏的效果。
 
 <TransitionDemo type="rotate" />
 
-## Usage
+## 使用方法
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -47,32 +47,32 @@ The Rotate animation creates effects by rotating elements as they appear or disa
   </TabPanel>
 </Tabs>
 
-## Options
+## 选项
 
 ```typescript
 interface RotateOptions {
-  degrees?: number;     // Rotation angle (default: 180)
-  opacity?: boolean;    // Include opacity effect (default: true)
-  scale?: boolean;      // Include scale effect (default: true)
+  degrees?: number;     // 旋转角度（默认：180）
+  opacity?: boolean;    // 包含透明度效果（默认：true）
+  scale?: boolean;      // 包含缩放效果（默认：true）
   spring?: {
-    stiffness?: number; // Spring stiffness (default: 300)
-    damping?: number;   // Damping coefficient (default: 30)
+    stiffness?: number; // 弹簧刚度（默认：300）
+    damping?: number;   // 阻尼系数（默认：30）
   };
 }
 ```
 
-### Usage Examples
+### 使用示例
 
 ```tsx
-// Full rotation
+// 完整旋转
 rotate({ degrees: 360 })
 
-// Rotation only (no opacity/scale)
+// 仅旋转（无透明度/缩放）
 rotate({ opacity: false, scale: false })
 
-// Small rotation
+// 小幅旋转
 rotate({ degrees: 90 })
 
-// Reverse rotation
+// 反向旋转
 rotate({ degrees: -180 })
 ```

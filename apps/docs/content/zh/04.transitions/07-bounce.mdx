@@ -1,16 +1,16 @@
 ---
-title: "Bounce Animation"
-description: "Create lively and playful animations"
-nav-title: "Bounce"
+title: "弹跳动画"
+description: "弹跳的活泼动画"
+nav-title: "弹跳"
 ---
 
-# Bounce Animation
+# 弹跳动画
 
-The Bounce animation creates a lively bouncing effect that adds playfulness to elements.
+弹跳（Bounce）动画为元素添加弹跳的生动效果。
 
 <TransitionDemo type="bounce" />
 
-## Usage
+## 使用方法
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -47,32 +47,32 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
   </TabPanel>
 </Tabs>
 
-## Options
+## 选项
 
 ```typescript
 interface BounceOptions {
-  times?: number;       // Bounce count (default: 2)
-  scale?: number;       // Scale on bounce (default: 1.2)
-  opacity?: boolean;    // Include opacity effect (default: true)
+  times?: number;       // 弹跳次数（默认：2）
+  scale?: number;       // 弹跳时的缩放（默认：1.2）
+  opacity?: boolean;    // 包含透明度效果（默认：true）
   spring?: {
-    stiffness?: number; // Spring stiffness (default: 500)
-    damping?: number;   // Damping coefficient (default: 15)
+    stiffness?: number; // 弹簧刚度（默认：500）
+    damping?: number;   // 阻尼系数（默认：15）
   };
 }
 ```
 
-### Usage Examples
+### 使用示例
 
 ```tsx
-// Multiple bounces
+// 多次弹跳
 bounce({ times: 3 })
 
-// Larger bounce
+// 更大弹跳
 bounce({ scale: 1.5 })
 
-// Bounce only (no opacity)
+// 仅弹跳（无透明度）
 bounce({ opacity: false })
 
-// Soft bounce
+// 柔和弹跳
 bounce({ spring: { stiffness: 300, damping: 20 } })
 ```

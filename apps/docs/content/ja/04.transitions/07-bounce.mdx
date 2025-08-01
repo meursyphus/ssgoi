@@ -1,16 +1,16 @@
 ---
-title: "Bounce Animation"
-description: "Create lively and playful animations"
-nav-title: "Bounce"
+title: "バウンスアニメーション"
+description: "弾むような楽しいアニメーション"
+nav-title: "バウンス"
 ---
 
-# Bounce Animation
+# バウンスアニメーション
 
-The Bounce animation creates a lively bouncing effect that adds playfulness to elements.
+バウンス（Bounce）アニメーションは、要素が弾むような生き生きとした効果を加えます。
 
 <TransitionDemo type="bounce" />
 
-## Usage
+## 使い方
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -47,32 +47,32 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
   </TabPanel>
 </Tabs>
 
-## Options
+## オプション
 
 ```typescript
 interface BounceOptions {
-  times?: number;       // Bounce count (default: 2)
-  scale?: number;       // Scale on bounce (default: 1.2)
-  opacity?: boolean;    // Include opacity effect (default: true)
+  times?: number;       // バウンス回数（デフォルト：2）
+  scale?: number;       // バウンス時のスケール（デフォルト：1.2）
+  opacity?: boolean;    // 透明度効果の有無（デフォルト：true）
   spring?: {
-    stiffness?: number; // Spring stiffness (default: 500)
-    damping?: number;   // Damping coefficient (default: 15)
+    stiffness?: number; // スプリング強度（デフォルト：500）
+    damping?: number;   // 減衰係数（デフォルト：15）
   };
 }
 ```
 
-### Usage Examples
+### 使用例
 
 ```tsx
-// Multiple bounces
+// 複数回バウンス
 bounce({ times: 3 })
 
-// Larger bounce
+// 大きなバウンス
 bounce({ scale: 1.5 })
 
-// Bounce only (no opacity)
+// バウンスのみ（透明度なし）
 bounce({ opacity: false })
 
-// Soft bounce
+// ソフトなバウンス
 bounce({ spring: { stiffness: 300, damping: 20 } })
 ```
