@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
 import { StructuredData } from "@/components/structured-data";
+import { ConsoleWelcome } from "@/components/console-welcome";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,6 +55,7 @@ export default async function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <TranslationsProvider lang={lang}>
           <StructuredData />
+          <ConsoleWelcome />
           <div className="relative min-h-screen">
             <Header />
             <main>{children}</main>

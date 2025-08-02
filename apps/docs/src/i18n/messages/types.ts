@@ -114,4 +114,10 @@ export type Messages = {
       "transitions": string;
     };
   };
+  console: {
+    welcome: string;
+    subtitle: string;
+    supports: string;
+    visit: string;
+  };
 };
