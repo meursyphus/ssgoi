@@ -2,6 +2,22 @@
 
 Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit.
 
+try this: [ssgoi.dev](https://ssgoi.dev)
+
+![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
+
+## What is SSGOI?
+
+SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
+
+### ✨ Key Features
+
+- **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
+- **🚀 SSR Ready** - Perfect compatibility with SvelteKit. No hydration issues, SEO-friendly
+- **🎯 Use Your Router** - Keep your existing routing. SvelteKit's built-in router works seamlessly
+- **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
+- **🧩 Svelte Native** - Built specifically for Svelte with actions and stores
+
 ## Installation
 
 ```bash
@@ -46,18 +62,30 @@ pnpm add @ssgoi/svelte
 </SsgoiTransition>
 ```
 
-## Route-based Transitions
+**That's it!** Your pages now transition smoothly with a fade effect.
+
+## Advanced Transitions
+
+### Route-based Transitions
+
+Define different transitions for different routes:
 
 ```svelte
 <script>
   import { Ssgoi } from '@ssgoi/svelte';
-  import { slide, fade } from '@ssgoi/svelte/view-transitions';
+  import { slide, fade, scale, pinterest } from '@ssgoi/svelte/view-transitions';
 
   const config = {
     transitions: [
+      // Slide between tabs
       { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
       { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
-      { from: '/products', to: '/products/*', transition: fade() }
+      
+      // Scale up when entering details
+      { from: '/products', to: '/products/*', transition: scale() },
+      
+      // Pinterest-style image transitions
+      { from: '/gallery', to: '/photo/*', transition: pinterest() }
     ],
     defaultTransition: fade()
   };
@@ -68,7 +96,22 @@ pnpm add @ssgoi/svelte
 </Ssgoi>
 ```
 
-## Individual Element Transitions
+### Symmetric Transitions
+
+Automatically create bidirectional transitions:
+
+```svelte
+{
+  from: '/home',
+  to: '/about', 
+  transition: slide({ direction: 'left' }),
+  symmetric: true  // Automatically creates reverse transition
+}
+```
+
+### Individual Element Animations
+
+Animate specific elements during mount/unmount:
 
 ```svelte
 <script>
@@ -77,62 +120,156 @@ pnpm add @ssgoi/svelte
 </script>
 
 <div use:transition={{
-  key: 'unique-key',
+  key: 'card',
   in: fadeIn(),
   out: slideUp()
 }}>
-  Content
+  <h2>Animated Card</h2>
 </div>
+```
+
+## SvelteKit App Example
+
+```svelte
+<!-- +layout.svelte -->
+<script>
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { slide } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi config={{
+  defaultTransition: slide({ direction: 'left' })
+}}>
+  <div style="position: relative; min-height: 100vh;">
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/products">Products</a>
+    </nav>
+    <slot />
+  </div>
+</Ssgoi>
+
+<!-- +page.svelte -->
+<script>
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { page } from '$app/stores';
+</script>
+
+<SsgoiTransition id={$page.url.pathname}>
+  <!-- Your page content -->
+</SsgoiTransition>
 ```
 
 ## API Reference
 
 ### Components
 
-- `<Ssgoi>` - Provider component for transition context
-- `<SsgoiTransition>` - Wrapper for pages that should transition
+#### `<Ssgoi>`
+The provider component that manages transition context.
+
+```svelte
+<Ssgoi config={ssgoiConfig}>
+  <slot />
+</Ssgoi>
+```
+
+#### `<SsgoiTransition>`
+Wrapper component for pages that should transition.
+
+```svelte
+<SsgoiTransition id="/page-id">
+  <slot />
+</SsgoiTransition>
+```
 
 ### Actions
 
-- `use:transition` - Apply transitions to individual elements
+#### `use:transition`
+Apply transitions to individual elements.
 
-### Configuration
+```svelte
+<div use:transition={{
+  key: 'unique-key',
+  in: fadeIn(),
+  out: fadeOut()
+}}>
+  Content
+</div>
+```
 
-```typescript
-interface SsgoiConfig {
-  transitions: Array<{
-    from: string;
-    to: string;
-    transition: Transition;
-    symmetric?: boolean;
-  }>;
-  defaultTransition?: Transition;
-}
+### Stores
+
+#### `transitioning`
+Access transition state.
+
+```svelte
+<script>
+  import { transitioning } from '@ssgoi/svelte';
+</script>
+
+{#if $transitioning}
+  <p>Transitioning...</p>
+{/if}
 ```
 
 ## Built-in Transitions
 
-### View Transitions (`/view-transitions`)
-- `fade()`, `slide()`, `scale()`
-- `hero()`, `pinterest()`, `ripple()`
+### Page Transitions (`@ssgoi/svelte/view-transitions`)
+- `fade()` - Smooth opacity transition
+- `slide()` - Directional sliding (left/right/up/down)
+- `scale()` - Zoom in/out effect
+- `hero()` - Shared element transitions
+- `pinterest()` - Pinterest-style expand effect
+- `ripple()` - Material Design ripple effect
 
-### Element Transitions (`/transitions`)
-- `fadeIn()`, `fadeOut()`
-- `slideUp()`, `slideDown()`, `slideLeft()`, `slideRight()`
-- `scaleIn()`, `scaleOut()`
-- `bounce()`, `blur()`, `rotate()`
+### Element Transitions (`@ssgoi/svelte/transitions`)
+- `fadeIn()` / `fadeOut()`
+- `slideUp()` / `slideDown()` / `slideLeft()` / `slideRight()`
+- `scaleIn()` / `scaleOut()`
+- `bounce()`
+- `blur()`
+- `rotate()`
 
-## Spring Configuration
+## Spring Physics Configuration
+
+All transitions use spring physics for natural motion:
 
 ```javascript
 slide({
   direction: 'left',
   spring: {
-    stiffness: 300,  // 1-1000
-    damping: 30      // 0-100
+    stiffness: 300,  // 1-1000, higher = faster
+    damping: 30      // 0-100, higher = less oscillation
   }
 })
 ```
+
+## TypeScript Support
+
+SSGOI is written in TypeScript and provides full type definitions:
+
+```typescript
+import type { SsgoiConfig, TransitionConfig } from '@ssgoi/svelte';
+
+const config: SsgoiConfig = {
+  // Full type safety
+};
+```
+
+## Browser Support
+
+- Chrome/Edge 88+
+- Firefox 78+
+- Safari 14+
+- All modern mobile browsers
+
+## Performance
+
+- Minimal bundle size (~8kb gzipped)
+- Hardware-accelerated animations
+- Automatic cleanup and memory management
+- Smart preloading for instant transitions
 
 ## Documentation
 
@@ -141,6 +278,10 @@ Visit [https://ssgoi.dev](https://ssgoi.dev) for:
 - Interactive examples
 - Advanced patterns
 - Migration guides
+
+## Contributing
+
+We welcome contributions! Please see our [contributing guide](https://github.com/meursyphus/ssgoi/blob/main/CONTRIBUTING.md) for details.
 
 ## License
 
