@@ -19,6 +19,7 @@ const ja: Messages = {
     noDocumentPage: "ドキュメントページに移動してください。",
     navigation: "ナビゲーション",
     documents: "ドキュメント",
+    blog: "ブログ",
     language: "言語 / Language",
   },
   home: {
@@ -148,6 +149,18 @@ const ja: Messages = {
     subtitle: "モダンウェブアプリのための美しいページトランジション",
     supports: "React、Svelteなど多様なフレームワークをサポート！",
     visit: "訪問: https://github.com/meursyphus/ssgoi",
+  },
+  blog: {
+    title: "SSGOIブログ",
+    description: "SSGOIの最新ニュース、開発ストーリー、チュートリアルをご覧ください。",
+    pageTitle: "SSGOIブログ",
+    pageDescription: "最新ニュースと開発ストーリー",
+    noPostsYet: "まだ投稿がありません。",
+    backToBlog: "← ブログに戻る",
+    metadata: {
+      title: "SSGOIブログ - ウェブページトランジションの新しい体験",
+      description: "SSGOIの最新ニュース、開発ストーリー、チュートリアルをご覧ください。",
+    },
   },
 };
 

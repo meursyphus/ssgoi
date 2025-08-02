@@ -19,6 +19,7 @@ const zh: Messages = {
     noDocumentPage: "请导航到文档页面。",
     navigation: "导航",
     documents: "文档",
+    blog: "博客",
     language: "语言 / Language",
   },
   home: {
@@ -148,6 +149,18 @@ const zh: Messages = {
     subtitle: "为现代网页应用打造优美的页面过渡效果",
     supports: "支持React、Svelte等多种框架！",
     visit: "访问: https://github.com/meursyphus/ssgoi",
+  },
+  blog: {
+    title: "SSGOI博客",
+    description: "查看SSGOI的最新消息、开发故事和教程。",
+    pageTitle: "SSGOI博客",
+    pageDescription: "最新消息和开发故事",
+    noPostsYet: "暂无文章。",
+    backToBlog: "← 返回博客",
+    metadata: {
+      title: "SSGOI博客 - 网页过渡的全新体验",
+      description: "查看SSGOI的最新消息、开发故事和教程。",
+    },
   },
 };
 

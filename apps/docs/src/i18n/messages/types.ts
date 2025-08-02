@@ -19,6 +19,7 @@ export type Messages = {
     noDocumentPage: string;
     navigation: string;
     documents: string;
+    blog: string;
     language: string;
   };
   home: {
@@ -119,5 +120,17 @@ export type Messages = {
     subtitle: string;
     supports: string;
     visit: string;
+  };
+  blog: {
+    title: string;
+    description: string;
+    pageTitle: string;
+    pageDescription: string;
+    noPostsYet: string;
+    backToBlog: string;
+    metadata: {
+      title: string;
+      description: string;
+    };
   };
 };

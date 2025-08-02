@@ -19,6 +19,7 @@ const ko: Messages = {
     noDocumentPage: "문서 페이지로 이동해주세요.",
     navigation: "네비게이션",
     documents: "문서",
+    blog: "블로그",
     language: "언어 / Language",
   },
   home: {
@@ -136,6 +137,18 @@ const ko: Messages = {
     subtitle: "모던 웹을 위한 아름다운 페이지 전환",
     supports: "React, Svelte 등 다양한 프레임워크 지원!",
     visit: "방문: https://github.com/meursyphus/ssgoi",
+  },
+  blog: {
+    title: "SSGOI 블로그",
+    description: "SSGOI의 최신 소식, 개발 스토리, 튜토리얼을 확인하세요.",
+    pageTitle: "SSGOI 블로그",
+    pageDescription: "최신 소식과 개발 스토리",
+    noPostsYet: "아직 게시물이 없습니다.",
+    backToBlog: "← 블로그로 돌아가기",
+    metadata: {
+      title: "SSGOI 블로그 - 웹 페이지 전환의 새로운 경험",
+      description: "SSGOI의 최신 소식, 개발 스토리, 튜토리얼을 확인하세요.",
+    },
   },
 };
 
