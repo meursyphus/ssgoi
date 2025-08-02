@@ -6,7 +6,7 @@ SSGOI brings native app-like page transitions to the web. Transform your static 
 
 try this: [ssgoi.dev](https://ssgoi.dev)
 
-![https://ssgoi.dev](./ssgoi.gif)
+![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
 
 ### ✨ Key Features
 
