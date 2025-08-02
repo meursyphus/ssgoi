@@ -1,101 +1,262 @@
-# @ssgoi/core
+# SSGOI
 
-Core animation engine for SSGOI - Spring physics-based page transitions.
+## What is SSGOI?
 
-## Installation
+SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
+
+try this: [ssgoi.dev](https://ssgoi.dev)
+
+![SSGOI Demo](https://ssgoi.dev/ssgoi.gif)
+
+### ✨ Key Features
+
+- **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
+- **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit. No hydration issues, SEO-friendly
+- **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit - all work seamlessly
+- **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
+- **🎨 Framework Agnostic** - One consistent API for React, Svelte, Vue, SolidJS, and more
+
+## Quick Start
+
+### Installation
 
 ```bash
-npm install @ssgoi/core
-# or
-yarn add @ssgoi/core
-# or
-pnpm add @ssgoi/core
+# React
+npm install @ssgoi/react
+
+# Svelte
+npm install @ssgoi/svelte
 ```
 
-## What is @ssgoi/core?
+### Add Transitions in 30 Seconds
 
-The core package provides the foundational animation engine that powers SSGOI's spring physics-based transitions. It includes:
+#### 1. Wrap your app
 
-- Spring physics animation engine
-- Transition configuration types
-- Transition context management
-- Built-in transition presets
+```tsx
+import { Ssgoi } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/view-transitions';
 
-## Basic Usage
-
-```typescript
-import { createSsgoiTransitionContext } from '@ssgoi/core';
-import { fade, slide } from '@ssgoi/core/view-transitions';
-
-// Create transition context
-const context = createSsgoiTransitionContext({
-  defaultTransition: fade(),
-  transitions: [
-    { from: '/home', to: '/about', transition: slide({ direction: 'left' }) }
-  ]
-});
-```
-
-## Transition Structure
-
-```typescript
-interface TransitionConfig {
-  spring?: {
-    stiffness: number; // Spring stiffness (default: 300)
-    damping: number;   // Damping ratio (default: 30)
-  };
-  tick?: (progress: number) => void;
-  prepare?: (element: HTMLElement) => void;
-  onStart?: () => void;
-  onEnd?: () => void;
+export default function App() {
+  return (
+    <Ssgoi config={{ defaultTransition: fade() }}>
+      <div style={{ position: 'relative' }}>
+        {/* Your app */}
+      </div>
+    </Ssgoi>
+  );
 }
+```
 
-interface Transition {
-  in?: (element: HTMLElement) => TransitionConfig;
-  out?: (element: HTMLElement) => TransitionConfig;
+#### 2. Wrap your pages
+
+```tsx
+import { SsgoiTransition } from '@ssgoi/react';
+
+export default function HomePage() {
+  return (
+    <SsgoiTransition id="/">
+      <h1>Welcome</h1>
+      {/* Page content */}
+    </SsgoiTransition>
+  );
+}
+```
+
+**That's it!** Your pages now transition smoothly with a fade effect.
+
+## Advanced Transitions
+
+### Route-based Transitions
+
+Define different transitions for different routes:
+
+```tsx
+const config = {
+  transitions: [
+    // Slide between tabs
+    { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
+    { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
+    
+    // Scale up when entering details
+    { from: '/products', to: '/products/*', transition: scale() },
+    
+    // Pinterest-style image transitions
+    { from: '/gallery', to: '/photo/*', transition: pinterest() }
+  ],
+  defaultTransition: fade()
+};
+```
+
+### Symmetric Transitions
+
+Automatically create bidirectional transitions:
+
+```tsx
+{
+  from: '/home',
+  to: '/about', 
+  transition: slide({ direction: 'left' }),
+  symmetric: true  // Automatically creates reverse transition
+}
+```
+
+### Individual Element Animations
+
+Animate specific elements during mount/unmount:
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { fadeIn, slideUp } from '@ssgoi/react/transitions';
+
+function Card() {
+  return (
+    <div ref={transition({
+      key: 'card',
+      in: fadeIn(),
+      out: slideUp()
+    })}>
+      <h2>Animated Card</h2>
+    </div>
+  );
 }
 ```
 
 ## Built-in Transitions
 
-### View Transitions (`/view-transitions`)
-- `fade()` - Opacity transition
-- `slide()` - Directional slide (left/right/up/down)
-- `scale()` - Scale transition
-- `hero()` - Shared element transition
-- `pinterest()` - Pinterest-style expansion
-- `ripple()` - Material ripple effect
+### Page Transitions
+- `fade` - Smooth opacity transition
+- `slide` - Directional sliding (left/right/up/down)
+- `scale` - Zoom in/out effect
+- `hero` - Shared element transitions
+- `pinterest` - Pinterest-style expand effect
+- `ripple` - Material Design ripple effect
 
-### Element Transitions (`/transitions`)
-- `fade`, `fadeIn`, `fadeOut`
-- `slide`, `slideUp`, `slideDown`, `slideLeft`, `slideRight`
-- `scale`, `scaleIn`, `scaleOut`
-- `bounce`, `blur`, `rotate`
+### Element Transitions
+- `fadeIn` / `fadeOut`
+- `slideUp` / `slideDown` / `slideLeft` / `slideRight`
+- `scaleIn` / `scaleOut`
+- `bounce`
+- `blur`
+- `rotate`
 
-## Spring Physics
+## Framework Examples
 
-All animations use spring physics for natural motion:
+### Next.js App Router
 
-```typescript
-// Customize spring behavior
-slide({
-  direction: 'left',
-  spring: {
-    stiffness: 300,  // 1-1000
-    damping: 30      // 0-100
-  }
-})
+```tsx
+// app/layout.tsx
+import { Ssgoi } from '@ssgoi/react';
+import { slide } from '@ssgoi/react/view-transitions';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <Ssgoi config={{
+          defaultTransition: slide({ direction: 'left' })
+        }}>
+          <div style={{ position: 'relative', minHeight: '100vh' }}>
+            {children}
+          </div>
+        </Ssgoi>
+      </body>
+    </html>
+  );
+}
+
+// app/page.tsx
+import { SsgoiTransition } from '@ssgoi/react';
+
+export default function Page() {
+  return (
+    <SsgoiTransition id="/">
+      {/* Your page content */}
+    </SsgoiTransition>
+  );
+}
 ```
 
-## Framework Bindings
+### SvelteKit
 
-This is the core engine. For framework integration, use:
-- React: `@ssgoi/react`
-- Svelte: `@ssgoi/svelte`
+```svelte
+<!-- +layout.svelte -->
+<script>
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { fade } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi config={{ defaultTransition: fade() }}>
+  <div style="position: relative; min-height: 100vh;">
+    <slot />
+  </div>
+</Ssgoi>
+
+<!-- +page.svelte -->
+<script>
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { page } from '$app/stores';
+</script>
+
+<SsgoiTransition id={$page.url.pathname}>
+  <!-- Your page content -->
+</SsgoiTransition>
+```
+
+## Why SSGOI?
+
+### vs View Transition API
+- ✅ Works in all browsers, not just Chrome
+- ✅ More animation options with spring physics
+- ✅ Better developer experience
+
+### vs Other Animation Libraries
+- ✅ Built specifically for page transitions
+- ✅ SSR-first design
+- ✅ No router lock-in
+- ✅ Minimal bundle size
+
+## How It Works
+
+SSGOI intercepts DOM lifecycle events to create smooth transitions:
+
+1. **Route Change**: Your router changes the URL
+2. **Exit Animation**: Current page animates out
+3. **Enter Animation**: New page animates in
+4. **State Sync**: Animation state persists across navigation
+
+All powered by a spring physics engine for natural, smooth motion.
+
+## Live Demos
+
+Try out SSGOI with our framework-specific demo applications:
+
+### React Demo
+```bash
+pnpm react-demo:dev
+# Opens at http://localhost:3001
+```
+Explore Next.js App Router integration with various transition effects.
+
+### Svelte Demo
+```bash
+pnpm svelte-demo:dev
+# Opens at http://localhost:5174
+```
+See SvelteKit integration with smooth page transitions.
+
+Visit the `/apps` directory to explore the demo source code and learn how to implement SSGOI in your own projects.
 
 ## Documentation
 
-Visit [https://ssgoi.dev](https://ssgoi.dev) for complete documentation.
+Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+- Detailed API reference
+- Interactive examples
+- Framework integration guides
+- Custom transition recipes
+
+## Contributing
+
+We welcome contributions! Please see our [contributing guide](CONTRIBUTING.md) for details.
 
 ## License
 
