@@ -66,7 +66,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
               <article className="bg-gray-900 rounded-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-2xl">
                 {post.thumbnail && (
                   <div
-                    data-hero-key={post.slug}
+                    data-hero-key={`/${lang}/blog/${post.slug}`}
                     className="relative aspect-video bg-gray-800 overflow-hidden rounded-t-lg"
                   >
                     <Image

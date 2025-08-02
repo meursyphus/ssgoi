@@ -88,7 +88,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="flex justify-center mb-8">
             {post.thumbnailWidth && post.thumbnailHeight ? (
               <Image
-                data-hero-key={post.slug}
+                data-hero-key={`/${lang}/blog/${post.slug}`}
                 src={post.thumbnail}
                 alt={post.title}
                 width={post.thumbnailWidth}
@@ -98,7 +98,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               />
             ) : (
               <img
-                data-hero-key={post.slug}
+                data-hero-key={`/${lang}/blog/${post.slug}`}
                 src={post.thumbnail}
                 alt={post.title}
                 className="rounded-lg"
