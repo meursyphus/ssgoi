@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "@/i18n/use-translations";
 
 export function ConsoleWelcome() {
+  const t = useTranslations("console");
+  
   useEffect(() => {
     // ASCII art with color styling
     console.log(
@@ -17,25 +20,25 @@ export function ConsoleWelcome() {
     );
     
     console.log(
-      "%c🥒 Welcome to SSGOI - 쓱오이!",
+      "%c🥒 " + t("welcome"),
       "color: #10b981; font-size: 20px; font-weight: bold; margin-top: 10px;"
     );
     
     console.log(
-      "%c✨ Beautiful page transitions for modern web apps",
+      "%c✨ " + t("subtitle"),
       "color: #6b7280; font-size: 14px; margin-top: 5px;"
     );
     
     console.log(
-      "%c🚀 Supports React, Svelte, and more!",
+      "%c🚀 " + t("supports"),
       "color: #6b7280; font-size: 14px;"
     );
     
     console.log(
-      "%c📚 Visit: https://github.com/meursyphus/ssgoi",
+      "%c📚 " + t("visit"),
       "color: #3b82f6; font-size: 14px; margin-top: 5px;"
     );
-  }, []);
+  }, [t]);
 
   return null;
 }

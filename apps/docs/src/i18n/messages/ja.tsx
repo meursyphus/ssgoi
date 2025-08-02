@@ -143,6 +143,12 @@ const ja: Messages = {
       "transitions": "トランジション",
     },
   },
+  console: {
+    welcome: "SSGOIへようこそ！",
+    subtitle: "モダンウェブアプリのための美しいページトランジション",
+    supports: "React、Svelteなど多様なフレームワークをサポート！",
+    visit: "訪問: https://github.com/meursyphus/ssgoi",
+  },
 };
 
 export default ja;
