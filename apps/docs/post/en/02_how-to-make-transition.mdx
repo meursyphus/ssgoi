@@ -1,0 +1,75 @@
+---
+title: "How to Implement Transitions?"
+description: "Elements on the screen don't always remain static. They can disappear or appear based on user actions. However, adding animations isn't easy."
+thumbnail: "/post/how-to-make-transition/thumbnail.jpeg"
+date: "2025-08-03"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["transition", "animation", "react", "svelte"]
+---
+
+Elements on the screen don't always remain static. They can disappear or appear based on user actions.
+In declarative frameworks, this can be easily implemented with conditional statements.
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+  ```tsx
+  function App() {
+  // {...omitted}
+  const [show, setShow] = useState(false)
+
+return (
+
+<>
+  <button onClick={() => setShow(!show)}>Toggle</button>
+  {show && <div>content</div>}
+</>
+) }
+
+```
+</TabPanel>
+<TabPanel value="svelte">
+  ```svelte
+  <script>
+    let show = false;
+  </script>
+
+  <button onclick={() => (show = !show)}>Toggle</button>
+  {#if show}
+    <div>content</div>
+  {/if}
+  ```
+</TabPanel>
+</Tabs>
+
+But how do we add animations to this?
+
+Adding animations when a DOM element appears is easy with CSS. CSS animations run as soon as the DOM appears. However, adding animations when a DOM element disappears is difficult. Paradoxically, disappearing animations require the DOM to not disappear.
+
+We want transitions for creation and destruction. Sudden appearance, sudden disappearance. Users easily forget their previous actions when not focused, making it difficult to perceive situational changes. UX that requires focused attention makes users feel fatigued. Transitions reduce users' cognitive load. By adding asymmetric animations to creation and destruction, users can more clearly recognize their actions. Even with less focus.
+
+To implement disappearing animations, we need to capture the moment when the DOM disappears. Then we need to clone the disappeared DOM and put it back in place. To put it back in place, we reference the parent element when the DOM is created, then insert it back into the parent when it disappears. Then we run the animation, and when the animation ends, we delete the DOM again.
+
+This creates the following process:
+
+```
+┌─────────┐     ┌─────────────┐     ┌───────────────┐     ┌──────────────┐
+│   DOM   │ ──> │    Clone    │ ──> │   Animation   │ ──> │    Final     │
+│ Removed │     │   Restore   │     │   Running...  │     │   Cleanup    │
+│         │     │             │     │               │     │              │
+└─────────┘     └─────────────┘     └───────────────┘     └──────────────┘
+     ↓                 ↓                     ↓                    ↓
+  [Gone]         [Reappear]          [Fade Out]          [Destroyed]
+                                        ⚡⚡⚡
+```
+In React, the `motion` library enables creation and destruction animations. In Svelte, the transition: directive natively supports creation and destruction animations. But what about other libraries? Do they have libraries like motion? Or should they support creation and destruction animations within the library like Svelte?
+
+This is where the entry barrier for new frameworks begins. No matter how excellent the performance optimization and beautiful DX, it's difficult to adopt if it can't meet the requirements of the screens I need to build. Among them, I think transition animations are an essential feature when building production products.
+
+That's why I'm creating a framework-agnostic library that allows transitions to work regardless of framework. As long as we can know when DOM elements are created and destroyed, we can implement the same animations with the same code in any framework. Without relying on React-specific libraries like motion.
+
+ssgoi aims to support all frameworks. And it targets page transition animations. But the principle is the same. ssgoi's transition can also be applied to individual DOM elements. Like this:
+
+<TransitionDemo type="scale" />
+```

@@ -93,6 +93,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
           const originalTransform = toEl.style.transform;
           const originalPosition = toEl.style.position;
           const originalTransformOrigin = toEl.style.transformOrigin;
+          const originalZIndex = toEl.style.zIndex;
 
           return {
             toEl,
@@ -103,6 +104,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             originalTransform,
             originalPosition,
             originalTransformOrigin,
+            originalZIndex,
           };
         })
         .filter(Boolean) as Array<{
@@ -114,6 +116,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
         originalTransform: string;
         originalPosition: string;
         originalTransformOrigin: string;
+        originalZIndex: string;
       }>;
 
       // Reset fromNode for next transition
@@ -132,6 +135,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
           heroAnimations.forEach(({ toEl }) => {
             toEl.style.position = "relative";
             toEl.style.transformOrigin = "top left";
+            toEl.style.zIndex = "1000";
           });
         },
         tick: (progress) => {
@@ -148,10 +152,12 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
               originalTransform,
               originalPosition,
               originalTransformOrigin,
+              originalZIndex,
             }) => {
               toEl.style.transform = originalTransform;
               toEl.style.position = originalPosition;
               toEl.style.transformOrigin = originalTransformOrigin;
+              toEl.style.zIndex = originalZIndex;
             }
           );
         },

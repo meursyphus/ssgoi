@@ -1,0 +1,75 @@
+---
+title: "如何实现过渡效果？"
+description: "屏幕上的元素并不总是保持静态。它们可能会根据用户的操作消失或出现。然而，添加动画并不容易。"
+thumbnail: "/post/how-to-make-transition/thumbnail.jpeg"
+date: "2025-08-03"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "文大昇"
+tags: ["transition", "animation", "react", "svelte"]
+---
+
+屏幕上的元素并不总是保持静态。它们可能会根据用户的操作消失或出现。
+在声明式框架中，这可以通过条件语句轻松实现。
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+  ```tsx
+  function App() {
+  // {...省略}
+  const [show, setShow] = useState(false)
+
+return (
+
+<>
+  <button onClick={() => setShow(!show)}>Toggle</button>
+  {show && <div>content</div>}
+</>
+) }
+
+```
+</TabPanel>
+<TabPanel value="svelte">
+  ```svelte
+  <script>
+    let show = false;
+  </script>
+
+  <button onclick={() => (show = !show)}>Toggle</button>
+  {#if show}
+    <div>content</div>
+  {/if}
+  ```
+</TabPanel>
+</Tabs>
+
+那么我们如何为此添加动画呢？
+
+使用CSS在DOM元素出现时添加动画很容易。CSS动画在DOM出现时立即运行。但是，在DOM元素消失时添加动画很困难。矛盾的是，消失动画需要DOM不消失。
+
+我们想要创建和销毁的过渡效果。突然出现，突然消失。用户在不专注时很容易忘记他们之前的操作，使得难以感知情况的变化。需要集中注意力的UX会让用户感到疲劳。过渡效果减少了用户的认知负担。通过为创建和销毁添加非对称动画，用户可以更清楚地识别他们的操作。即使注意力较少。
+
+要实现消失动画，我们需要捕获DOM消失的时刻。然后我们需要克隆消失的DOM并将其放回原位。为了放回原位，我们在DOM创建时引用父元素，然后在它消失时将其插回父元素。然后我们运行动画，当动画结束时，我们再次删除DOM。
+
+这创建了以下过程：
+
+```
+┌─────────┐     ┌─────────────┐     ┌───────────────┐     ┌──────────────┐
+│   DOM   │ ──> │    Clone    │ ──> │   Animation   │ ──> │    Final     │
+│ Removed │     │   Restore   │     │   Running...  │     │   Cleanup    │
+│         │     │             │     │               │     │              │
+└─────────┘     └─────────────┘     └───────────────┘     └──────────────┘
+     ↓                 ↓                     ↓                    ↓
+  [Gone]         [Reappear]          [Fade Out]          [Destroyed]
+                                        ⚡⚡⚡
+```
+在React中，`motion`库支持创建和销毁动画。在Svelte中，transition:指令原生支持创建和销毁动画。但其他库呢？它们有像motion这样的库吗？还是应该像Svelte一样在库内支持创建和销毁动画？
+
+这就是新框架的进入壁垒开始的地方。无论性能优化多么出色，DX多么漂亮，如果无法满足我需要构建的屏幕的要求，就很难采用。其中，我认为过渡动画是构建生产产品时必不可少的功能。
+
+这就是为什么我正在创建一个与框架无关的库，允许过渡效果在任何框架中工作。只要我们能知道DOM元素何时创建和销毁，我们就可以在任何框架中使用相同的代码实现相同的动画。而不依赖于React特定的库，如motion。
+
+ssgoi旨在支持所有框架。并且它以页面过渡动画为目标。但原理是相同的。ssgoi的过渡也可以应用于单个DOM元素。像这样：
+
+<TransitionDemo type="scale" />
+```
