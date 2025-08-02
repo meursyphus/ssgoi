@@ -7,6 +7,8 @@ export interface BlogPost {
   title: string
   description?: string
   thumbnail?: string
+  thumbnailWidth?: number
+  thumbnailHeight?: number
   date?: string
   author?: string
   tags?: string[]
@@ -18,9 +20,15 @@ export interface BlogMetadata {
   title: string
   description?: string
   thumbnail?: string
+  thumbnailWidth?: number
+  thumbnailHeight?: number
   date?: string
   author?: string
   tags?: string[]
+}
+
+function removeNumberPrefix(name: string): string {
+  return name.replace(/^\d+[._-]/, '')
 }
 
 // Get the post directory path
@@ -46,13 +54,16 @@ export async function getAllBlogPosts(lang: string): Promise<BlogMetadata[]> {
         const content = await readFile(filePath, 'utf-8')
         const { data } = matter(content)
         
-        const slug = file.replace(/\.(mdx|md)$/, '')
+        const fileName = removeNumberPrefix(file)
+        const slug = fileName.replace(/\.(mdx|md)$/, '')
         
         posts.push({
           slug,
           title: data.title || slug,
           description: data.description,
           thumbnail: data.thumbnail,
+          thumbnailWidth: data.thumbnailWidth,
+          thumbnailHeight: data.thumbnailHeight,
           date: data.date,
           author: data.author,
           tags: data.tags,
@@ -80,23 +91,22 @@ export async function getAllBlogPosts(lang: string): Promise<BlogMetadata[]> {
 export async function getBlogPost(lang: string, slug: string): Promise<BlogPost | null> {
   try {
     const postPath = getPostPath(lang)
+    const files = await readdir(postPath)
     
-    // Try .mdx first, then .md
-    let filePath = path.join(postPath, `${slug}.mdx`)
-    let content: string
+    // Find the file with matching slug (ignoring number prefix)
+    const matchingFile = files.find(file => {
+      if (!file.endsWith('.mdx') && !file.endsWith('.md')) return false
+      const fileName = removeNumberPrefix(file)
+      const fileSlug = fileName.replace(/\.(mdx|md)$/, '')
+      return fileSlug === slug
+    })
     
-    try {
-      content = await readFile(filePath, 'utf-8')
-    } catch {
-      // Try .md if .mdx doesn't exist
-      filePath = path.join(postPath, `${slug}.md`)
-      try {
-        content = await readFile(filePath, 'utf-8')
-      } catch {
-        return null
-      }
+    if (!matchingFile) {
+      return null
     }
     
+    const filePath = path.join(postPath, matchingFile)
+    const content = await readFile(filePath, 'utf-8')
     const { data, content: markdownContent } = matter(content)
     
     return {
@@ -104,6 +114,8 @@ export async function getBlogPost(lang: string, slug: string): Promise<BlogPost 
       title: data.title || slug,
       description: data.description,
       thumbnail: data.thumbnail,
+      thumbnailWidth: data.thumbnailWidth,
+      thumbnailHeight: data.thumbnailHeight,
       date: data.date,
       author: data.author,
       tags: data.tags,

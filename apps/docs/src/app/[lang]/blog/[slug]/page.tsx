@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { getBlogPost, getAllBlogPosts } from "@/lib/blog";
 import { MDXContent } from "./mdx-content";
-import { SsgoiTransition } from "@/components/blog/ssgoi";
-import Image from "next/image";
+import { SsgoiTransition } from "@ssgoi/react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
+import Image from "next/image";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -85,24 +85,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </Link>
 
         {post.thumbnail && (
-          <div className="relative aspect-video mb-8 rounded-lg overflow-hidden">
-            <Image
-              src={post.thumbnail}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 1024px"
-            />
+          <div className="flex justify-center mb-8">
+            {post.thumbnailWidth && post.thumbnailHeight ? (
+              <Image
+                data-hero-key={post.slug}
+                src={post.thumbnail}
+                alt={post.title}
+                width={post.thumbnailWidth}
+                height={post.thumbnailHeight}
+                className="rounded-lg"
+                priority
+              />
+            ) : (
+              <img
+                data-hero-key={post.slug}
+                src={post.thumbnail}
+                alt={post.title}
+                className="rounded-lg"
+              />
+            )}
           </div>
         )}
 
         <header className="mb-8">
           <h1 className="text-5xl font-bold text-white mb-4">{post.title}</h1>
-
-          {post.description && (
-            <p className="text-xl text-gray-400 mb-6">{post.description}</p>
-          )}
 
           <div className="flex items-center gap-4 text-sm text-gray-500">
             {post.date && (
