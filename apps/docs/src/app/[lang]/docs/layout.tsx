@@ -31,7 +31,7 @@ export default async function DocsLayout({
             {/* Main content */}
             <main className="flex-1 min-w-0">
               <div className="py-8">
-                <div className="mx-auto max-w-4xl relative overflow-hidden">
+                <div className="mx-auto max-w-4xl relative overflow-hidden z-0">
                   <DocsSsgoi navigation={navigation}>{children}</DocsSsgoi>
                 </div>
               </div>

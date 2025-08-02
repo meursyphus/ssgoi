@@ -22,7 +22,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         const translateY = isUp
           ? (1 - progress) * 100 // 100 → 0
           : (1 - progress) * -100; // -100 → 0
-        element.style.transform = `translateY(${translateY}%)`;
+        element.style.transform = `translateY(${translateY}vh)`;
       },
     }),
     out: (element) => ({
@@ -31,9 +31,13 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         const translateY = isUp
           ? (1 - progress) * -100 // 0 → -100
           : (1 - progress) * 100; // 0 → 100
-        element.style.transform = `translateY(${translateY}%)`;
+        element.style.transform = `translateY(${translateY}vh)`;
       },
-      prepare: prepareOutgoing,
+      prepare: (element) => {
+        prepareOutgoing(element);
+
+        element.style.zIndex = isUp ? "-1" : "1";
+      },
     }),
   };
 };

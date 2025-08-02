@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { lang, path } = await params;
   const postPath = path.join("/");
   const post = await getPost(lang, postPath);
-  
+
   if (!post) {
     return {
       title: "Page Not Found - SSGOI",
@@ -29,7 +29,7 @@ export async function generateMetadata({
 
   const baseUrl = "https://ssgoi.dev";
   const currentUrl = `${baseUrl}/${lang}/docs/${postPath}`;
-  
+
   // Language-specific metadata
   const langMetadata = {
     en: {
@@ -50,11 +50,13 @@ export async function generateMetadata({
     },
   };
 
-  const currentLangMetadata = langMetadata[lang as keyof typeof langMetadata] || langMetadata.en;
+  const currentLangMetadata =
+    langMetadata[lang as keyof typeof langMetadata] || langMetadata.en;
 
   return {
     title: `${post.title} - SSGOI`,
-    description: post.description || `Learn about ${post.title} in SSGOI documentation`,
+    description:
+      post.description || `Learn about ${post.title} in SSGOI documentation`,
     alternates: {
       canonical: currentUrl,
       languages: {
@@ -66,7 +68,8 @@ export async function generateMetadata({
     },
     openGraph: {
       title: `${post.title} - SSGOI`,
-      description: post.description || `Learn about ${post.title} in SSGOI documentation`,
+      description:
+        post.description || `Learn about ${post.title} in SSGOI documentation`,
       url: currentUrl,
       siteName: currentLangMetadata.siteName,
       locale: currentLangMetadata.locale,
@@ -83,7 +86,8 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: `${post.title} - SSGOI`,
-      description: post.description || `Learn about ${post.title} in SSGOI documentation`,
+      description:
+        post.description || `Learn about ${post.title} in SSGOI documentation`,
       images: ["https://ssgoi.dev/og.png"],
     },
   };
@@ -117,7 +121,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
         lang={lang}
       />
       <SsgoiTransition id={postPath}>
-        <article className="max-w-none">
+        <article className="max-w-none bg-black">
           <h1 className="text-4xl font-bold mb-4 text-white">{post.title}</h1>
           {post.description && (
             <p className="text-xl text-gray-400 mb-8">{post.description}</p>
