@@ -1,4 +1,4 @@
-import { MdxRemote } from "@/components/docs/mdx-remote";
+import { MdxRemote } from "@/components/mdx/mdx-remote";
 
 const codeExample = `
 \`\`\`tsx

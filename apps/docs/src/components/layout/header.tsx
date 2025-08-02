@@ -64,6 +64,12 @@ export function Header() {
             >
               {t("docs")}
             </Link>
+            <Link
+              href={`/${currentLang}/blog`}
+              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
+            >
+              {t("blog")}
+            </Link>
           </nav>
         </div>
 

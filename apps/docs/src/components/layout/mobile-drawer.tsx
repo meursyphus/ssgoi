@@ -152,6 +152,16 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                           {t("documents")}
                         </Link>
                       </li>
+                      <li>
+                        <Link
+                          href={`/${lang}/blog`}
+                          onClick={onClose}
+                          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
+                        >
+                          <BookOpen className="h-4 w-4" />
+                          {t("blog")}
+                        </Link>
+                      </li>
                     </ul>
                   </nav>
                 </div>
