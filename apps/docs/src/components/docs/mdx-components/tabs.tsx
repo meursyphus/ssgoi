@@ -69,13 +69,6 @@ export const TabPanel = ({ value, children }: TabPanelProps) => {
   }
 
   return (
-    <div
-      className="transition-opacity duration-200"
-      style={{
-        animation: "fadeIn 0.2s ease-in-out",
-      }}
-    >
-      {children}
-    </div>
+    <div>{children}</div>
   );
 };

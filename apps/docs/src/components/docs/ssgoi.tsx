@@ -39,7 +39,7 @@ function createAdjacentTransitions(
       to: next.path,
       transition: scroll({
         direction: "up",
-        spring: { stiffness: 20, damping: 7 },
+        spring: { stiffness: 30, damping: 7 },
       }),
     });
 
@@ -49,7 +49,7 @@ function createAdjacentTransitions(
       to: current.path,
       transition: scroll({
         direction: "down",
-        spring: { stiffness: 20, damping: 7 },
+        spring: { stiffness: 30, damping: 7 },
       }),
     });
   }
