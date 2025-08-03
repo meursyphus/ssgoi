@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useImagePrefetch } from "@/lib/use-image-prefetch";
@@ -25,24 +25,13 @@ interface BlogListProps {
 
 export function BlogList({ posts, lang, translations }: BlogListProps) {
   const [hoveredPost, setHoveredPost] = useState<string | null>(null);
-  
+
   // Prefetch all blog post thumbnails
   const thumbnailUrls = posts
-    .map(post => post.thumbnail)
+    .map((post) => post.thumbnail)
     .filter((url): url is string => !!url);
-  
-  useImagePrefetch(thumbnailUrls);
 
-  // Preload image when hovering over a post
-  useEffect(() => {
-    if (hoveredPost) {
-      const post = posts.find(p => p.slug === hoveredPost);
-      if (post?.thumbnail) {
-        const img = new Image();
-        img.src = post.thumbnail;
-      }
-    }
-  }, [hoveredPost, posts]);
+  useImagePrefetch(thumbnailUrls);
 
   if (posts.length === 0) {
     return (
@@ -74,7 +63,6 @@ export function BlogList({ posts, lang, translations }: BlogListProps) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  loading="lazy"
                   quality={85}
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
