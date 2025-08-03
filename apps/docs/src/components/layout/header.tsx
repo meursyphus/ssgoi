@@ -48,7 +48,7 @@ export function Header() {
             <span className="sr-only">{t("openMenu")}</span>
           </button>
 
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href={`/${currentLang}/`} className="flex items-center space-x-2">
             <img
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"
