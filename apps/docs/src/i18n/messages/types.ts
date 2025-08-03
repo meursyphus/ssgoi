@@ -11,6 +11,7 @@ export type Messages = {
     showcase: string;
     openMenu: string;
     githubRepository: string;
+    demo: string;
   };
   mobileMenu: {
     documentToc: string;
@@ -21,6 +22,7 @@ export type Messages = {
     documents: string;
     blog: string;
     language: string;
+    demo: string;
   };
   home: {
     title: string;
