@@ -4,6 +4,7 @@ const en: Messages = {
   header: {
     home: "Home",
     blog: "Blog",
+    demo: "Demo",
     github: "Github",
     docs: "Docs",
     tutorial: "Tutorial",
@@ -20,6 +21,7 @@ const en: Messages = {
     navigation: "Navigation",
     documents: "Documentation",
     blog: "Blog",
+    demo: "Demo",
     language: "Language",
   },
   home: {

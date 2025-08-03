@@ -130,18 +130,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           },
         },
       ],
-      // Default slide transition - subtle slide from right
-      defaultTransition: {
-        in: (node: HTMLElement) => ({
-          spring: {
-            stiffness: 100,
-            damping: 15,
-          },
-          tick: (t: number) => {
-            node.style.transform = `translateX(${20 * (1 - t)}px)`;
-          },
-        }),
-      },
     }),
     []
   );

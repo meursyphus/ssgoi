@@ -4,6 +4,7 @@ const zh: Messages = {
   header: {
     home: "首页",
     blog: "博客",
+    demo: "演示",
     github: "Github",
     docs: "文档",
     tutorial: "教程",
@@ -20,6 +21,7 @@ const zh: Messages = {
     navigation: "导航",
     documents: "文档",
     blog: "博客",
+    demo: "演示",
     language: "语言 / Language",
   },
   home: {
