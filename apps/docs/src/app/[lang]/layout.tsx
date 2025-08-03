@@ -56,7 +56,7 @@ export default async function RootLayout({
         <TranslationsProvider lang={lang}>
           <StructuredData />
           <ConsoleWelcome />
-          <div className="relative min-h-screen">
+          <div className="relative">
             <Header />
             <main>{children}</main>
           </div>
