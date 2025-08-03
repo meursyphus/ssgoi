@@ -108,7 +108,13 @@ export function createSggoiTransitionContext(
     // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
-      scrollContainer.addEventListener("scroll", scrollListener, {
+      
+      // IMPORTANT: When the scrolling element is document.documentElement (html element),
+      // scroll events must be attached to window, not the element itself.
+      // This is because document.documentElement doesn't fire scroll events directly.
+      // For all other scrollable containers, we attach the listener to the element.
+      const target = scrollContainer === document.documentElement ? window : scrollContainer;
+      target.addEventListener("scroll", scrollListener, {
         passive: true,
       });
     }
