@@ -5,6 +5,7 @@ import { SsgoiTransition } from "@ssgoi/react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
+import { BlogPostLink } from "@/components/blog/blog-post-link";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -76,12 +77,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <SsgoiTransition id={`blog-${slug}`}>
       <article className="max-w-4xl mx-auto px-4 py-16">
-        <Link
+        <BlogPostLink
           href={`/${lang}/blog`}
+          fallbackHref={`/${lang}/blog`}
           className="inline-flex items-center text-gray-400 hover:text-white transition-colors mb-8"
         >
           {t("backToBlog")}
-        </Link>
+        </BlogPostLink>
 
         {post.thumbnail && (
           <div className="flex justify-center mb-8">
@@ -139,12 +141,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         <footer className="mt-16 pt-8 border-t border-gray-800">
-          <Link
+          <BlogPostLink
             href={`/${lang}/blog`}
-            className="inline-flex items-center text-green-400 hover:text-green-300 transition-colors"
+            fallbackHref={`/${lang}/blog`}
+            className="inline-flex items-center text-orange-400 hover:text-orange-300 transition-colors"
           >
             {t("backToBlog")}
-          </Link>
+          </BlogPostLink>
         </footer>
       </article>
     </SsgoiTransition>
