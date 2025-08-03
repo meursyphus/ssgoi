@@ -1,0 +1,33 @@
+---
+title: "Physics and Animation"
+description: "How can we define the motion of objects? One way is to express it through equations of motion."
+thumbnail: "/post/physics-animation/thumbnail.png"
+date: "2025-08-03"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["physics", "animation"]
+---
+
+How can we define the motion of objects? One way is to express it through equations of motion.
+`F = ma` is a famous formula. It states that force causes acceleration in an object.
+
+In spring motion, the force is proportional to the distance from the equilibrium point. That's `F = -kx`. Force is generated in the opposite direction of displacement, and the greater the spring constant, the stronger the pulling force.
+
+In the real physical world, we must also consider air resistance in spring motion. Generally, air resistance acts in the opposite direction and increases with velocity.
+
+Air resistance occurs through collisions with countless particles in the air. Imagine this: the harder we collide with particles, the faster they fly away. Conversely, as particles fly away faster, we lose momentum to them. That's why air resistance increases with our velocity.
+
+So the final force becomes `F = -kx-bv`. Connecting this with Newton's equation of motion gives us `F = ma = -kx-bv`, where a, v, and x are all variables related to x. (v is the rate of change of x with respect to time, a is the rate of change of v with respect to time)
+
+We can express this as a differential equation. And all differential equations can be solved through numerical analysis. Think of an object moving at constant velocity for a short time.
+
+- During dt, the object moves by v * dt.
+- During dt, the velocity changes by a * dt.
+- Acceleration is determined by the current distance and velocity.
+
+By accumulating the changing x, v, and a over short time intervals, we can describe how an object moves over time.
+
+All objects in the real world move between continuous velocities and continuous accelerations. Think about an object changing direction while moving. When a force pulling an object to the right now changes to the left, the object doesn't immediately move left. The rightward velocity gradually decreases to zero before moving left.
+
+This is where the difference between CSS animations and spring animations emerges. CSS abruptly changes direction. Spring continuously changes velocity while transitioning direction. The latter is more realistic. This is why ssgoi pursues spring animations.
