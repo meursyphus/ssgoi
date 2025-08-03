@@ -81,9 +81,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      {children}
-      <Analytics />
-    </>
+    <html>
+      <head>
+        <link rel="preconnect" href="https://ssgoi.dev" />
+        <link rel="dns-prefetch" href="https://ssgoi.dev" />
+      </head>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
   );
 }
