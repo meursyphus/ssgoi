@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
 import { hero, pinterest } from "@ssgoi/react/view-transitions";
@@ -34,7 +34,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   }, []);
 
   // Restore scroll position when path changes
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!mainRef.current) return;
     const savedPosition = scrollPositions.current[currentPath] || 0;
 
