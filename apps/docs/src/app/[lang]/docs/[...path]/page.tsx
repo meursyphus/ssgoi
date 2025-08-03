@@ -121,7 +121,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
         lang={lang}
       />
       <SsgoiTransition id={postPath}>
-        <article className="max-w-none bg-black">
+        <article className="max-w-none bg-[var(--color-background)]">
           <h1 className="text-4xl font-bold mb-4 text-white">{post.title}</h1>
           {post.description && (
             <p className="text-xl text-gray-400 mb-8">{post.description}</p>

@@ -18,7 +18,7 @@ export default async function DocsLayout({
   return (
     <>
       <NavigationSetter navigation={navigation} />
-      <div className="min-h-[calc(100vh-4rem)] bg-zinc-950 pt-16">
+      <div className="min-h-[calc(100vh-4rem)] pt-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             {/* Sidebar */}
