@@ -1,26 +1,23 @@
-
-"use client";
 import React from "react";
-import DemoLayout from "@/components/demo/layout";
-import { useCurrentLanguage } from "@/i18n";
-import { usePathname, useRouter } from "next/navigation";
-import { RouterProvider } from '@/components/demo/router-provider'
+import DemoWrapper from "./demo-wrapper";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Demo - SSGOI",
+  description: "Experience beautiful page transitions with SSGOI. Interactive demo showcasing smooth animations and native app-like transitions for modern web applications.",
+  openGraph: {
+    title: "SSGOI Demo - Beautiful Page Transitions",
+    description: "Try out SSGOI's smooth page transitions with our interactive demo. See hero animations, slide effects, and more.",
+    images: ["/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SSGOI Demo - Beautiful Page Transitions",
+    description: "Try out SSGOI's smooth page transitions with our interactive demo. See hero animations, slide effects, and more.",
+    images: ["/og.png"],
+  },
+}
 
 export default function Layout({children}: {children: React.ReactNode}) {
-    const lang = useCurrentLanguage()
-    const router = useRouter()
-    const pathname = usePathname()
-    const customRouter = {
-        goto: (path: string) => {
-            router.push(`/${lang}/${path}`)
-        },
-    }
-    return (
-    <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-100">
-       <div className="w-full h-full lg:w-[390px] lg:h-[844px] lg:rounded-[3rem] lg:overflow-hidden lg:border-8 lg:border-gray-900 lg:shadow-2xl">
-         <RouterProvider currentPath={pathname.replace(`/${lang}`, '')} customRouter={customRouter}>
-           <DemoLayout>{children}</DemoLayout>
-         </RouterProvider>
-       </div>
-    </div>)
+    return <DemoWrapper>{children}</DemoWrapper>
 }
