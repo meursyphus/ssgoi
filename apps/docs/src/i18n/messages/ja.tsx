@@ -4,6 +4,7 @@ const ja: Messages = {
   header: {
     home: "ホーム",
     blog: "ブログ",
+    demo: "デモ",
     github: "Github",
     docs: "ドキュメント",
     tutorial: "チュートリアル",
@@ -20,6 +21,7 @@ const ja: Messages = {
     navigation: "ナビゲーション",
     documents: "ドキュメント",
     blog: "ブログ",
+    demo: "デモ",
     language: "言語 / Language",
   },
   home: {

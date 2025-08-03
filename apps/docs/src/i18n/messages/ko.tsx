@@ -4,6 +4,7 @@ const ko: Messages = {
   header: {
     home: "홈",
     blog: "블로그",
+    demo: "데모",
     github: "깃허브",
     docs: "문서",
     tutorial: "튜토리얼",
@@ -20,6 +21,7 @@ const ko: Messages = {
     navigation: "네비게이션",
     documents: "문서",
     blog: "블로그",
+    demo: "데모",
     language: "언어 / Language",
   },
   home: {
