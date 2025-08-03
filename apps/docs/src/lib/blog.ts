@@ -7,11 +7,11 @@ export interface BlogPost {
   title: string;
   description?: string;
   thumbnail?: string;
-  thumbnailWidth?: number;
-  thumbnailHeight?: number;
-  date?: string;
-  author?: string;
-  tags?: string[];
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  date: string;
+  author: string;
+  tags: string[];
   content: string;
 }
 
@@ -20,11 +20,11 @@ export interface BlogMetadata {
   title: string;
   description?: string;
   thumbnail?: string;
-  thumbnailWidth?: number;
-  thumbnailHeight?: number;
-  date?: string;
-  author?: string;
-  tags?: string[];
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  date: string;
+  author: string;
+  tags: string[];
 }
 
 function removeNumberPrefix(name: string): string {
