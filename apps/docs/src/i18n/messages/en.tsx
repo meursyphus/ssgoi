@@ -45,6 +45,7 @@ const en: Messages = {
     buttons: {
       getStarted: "Get Started",
       github: "GitHub",
+      demo: "Try Demo",
     },
     quickInstall: {
       react: "React",
@@ -106,6 +107,7 @@ const en: Messages = {
       buttons: {
         viewDocs: "View Documentation",
         github: "GitHub",
+        demo: "Try Demo",
       },
     },
   },

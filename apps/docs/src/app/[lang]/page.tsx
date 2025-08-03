@@ -46,15 +46,13 @@ export default async function Home({ params }: { params: { lang: string } }) {
                   {t("buttons.getStarted")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <a
-                  href="https://github.com/meursyphus/ssgoi"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/${lang}/demo`}
                   className="btn-secondary text-lg"
                 >
-                  <Code2 className="h-5 w-5" />
-                  {t("buttons.github")}
-                </a>
+                  <Zap className="h-5 w-5" />
+                  {t("buttons.demo")}
+                </Link>
               </div>
 
               {/* 빠른 설치 */}
@@ -333,15 +331,13 @@ export default async function Home({ params }: { params: { lang: string } }) {
                     <Zap className="h-5 w-5" />
                     {t("cta.buttons.viewDocs")}
                   </Link>
-                  <a
-                    href="https://github.com/meursyphus/ssgoi"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={`/${lang}/demo`}
                     className="btn-secondary text-lg"
                   >
-                    <Code2 className="h-5 w-5" />
-                    {t("cta.buttons.github")}
-                  </a>
+                    <Zap className="h-5 w-5" />
+                    {t("cta.buttons.demo")}
+                  </Link>
                 </div>
               </div>
             </div>

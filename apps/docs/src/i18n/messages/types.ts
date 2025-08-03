@@ -41,6 +41,7 @@ export type Messages = {
     buttons: {
       getStarted: string;
       github: string;
+      demo: string;
     };
     quickInstall: {
       react: string;
@@ -90,6 +91,7 @@ export type Messages = {
       buttons: {
         viewDocs: string;
         github: string;
+        demo: string;
       };
     };
   };

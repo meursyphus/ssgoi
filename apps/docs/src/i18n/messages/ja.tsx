@@ -45,6 +45,7 @@ const ja: Messages = {
     buttons: {
       getStarted: "はじめる",
       github: "GitHub",
+      demo: "デモを試す",
     },
     quickInstall: {
       react: "React",
@@ -106,6 +107,7 @@ const ja: Messages = {
       buttons: {
         viewDocs: "ドキュメントを見る",
         github: "GitHub",
+        demo: "デモを試す",
       },
     },
   },

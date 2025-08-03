@@ -45,6 +45,7 @@ const zh: Messages = {
     buttons: {
       getStarted: "开始使用",
       github: "GitHub",
+      demo: "试用演示",
     },
     quickInstall: {
       react: "React",
@@ -106,6 +107,7 @@ const zh: Messages = {
       buttons: {
         viewDocs: "查看文档",
         github: "GitHub",
+        demo: "试用演示",
       },
     },
   },

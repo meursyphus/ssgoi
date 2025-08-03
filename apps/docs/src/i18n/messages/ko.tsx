@@ -45,6 +45,7 @@ const ko: Messages = {
     buttons: {
       getStarted: "시작하기",
       github: "GitHub",
+      demo: "데모 체험",
     },
     quickInstall: {
       react: "React",
@@ -106,6 +107,7 @@ const ko: Messages = {
       buttons: {
         viewDocs: "문서 보기",
         github: "GitHub",
+        demo: "데모 체험",
       },
     },
   },
