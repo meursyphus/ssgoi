@@ -50,13 +50,14 @@ export type SggoiTransitionContext = {
 export type SggoiTransition = Transition<SggoiTransitionContext>;
 
 export type SsgoiConfig = {
-  transitions: {
+  transitions?: {
     from: string;
     to: string;
     transition: SggoiTransition;
     symmetric?: boolean;
   }[];
   defaultTransition?: SggoiTransition;
+  middleware?: (from: string, to: string) => { from: string; to: string };
 };
 
 export type SsgoiContext = (
