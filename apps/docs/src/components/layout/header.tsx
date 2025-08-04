@@ -39,7 +39,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           {/* Mobile menu button - now on the left */}
           <button
-            className="md:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
+            className="md:hidden inline-flex items-center justify-center  rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white text-gray-300 h-9 w-9"
             onClick={() => {
               setMobileDrawerOpen(!mobileDrawerOpen);
             }}
@@ -48,7 +48,7 @@ export function Header() {
             <span className="sr-only">{t("openMenu")}</span>
           </button>
 
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href={`/${currentLang}/`} className="flex items-center space-x-2">
             <img
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"

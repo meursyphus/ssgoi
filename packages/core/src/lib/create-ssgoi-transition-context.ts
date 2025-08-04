@@ -46,49 +46,27 @@ type PendingTransition = {
 };
 
 /**
- * Creates a transition configuration
- *
- * @example
- * const config = createSggoiTransitionConfig({
- *   transitions: [
- *     { from: '/home', to: '/about', transition: fade() },
- *     { from: '/products', to: '/products/*', transition: slide() }
- *   ],
- *   defaultTransition: fade()
- * });
+ * Processes symmetric transitions to create bidirectional navigation
+ * For each symmetric transition, creates a reverse transition automatically
  */
-export function createSggoiTransitionContext(
-  options: SsgoiConfig
-): SsgoiContext {
-  let pendingTransition: PendingTransition | null = null;
-
-  // Process symmetric transitions - creates bidirectional transitions automatically
-  const processedTransitions = [...options.transitions];
-  const symmetricTransitions: typeof options.transitions = [];
+function processSymmetricTransitions(
+  transitions: NonNullable<SsgoiConfig['transitions']>
+): Omit<NonNullable<SsgoiConfig['transitions']>[number], 'symmetric'>[] {
+  const reversedTransitions = transitions
+    .filter(t => t.symmetric)
+    .map(t => ({
+      from: t.to,
+      to: t.from,
+      transition: t.transition,
+    }));
   
-  for (const transitionDef of options.transitions) {
-    if (transitionDef.symmetric) {
-      // Check if reverse transition already exists to avoid duplicates
-      const reverseExists = processedTransitions.some(
-        t => t.from === transitionDef.to && t.to === transitionDef.from
-      );
-      
-      if (!reverseExists) {
-        // Create reverse transition for symmetric navigation
-        symmetricTransitions.push({
-          from: transitionDef.to,
-          to: transitionDef.from,
-          transition: transitionDef.transition,
-          // Don't add symmetric flag to the reverse to avoid infinite loop
-        });
-      }
-    }
-  }
-  
-  // Add symmetric transitions to the processed list for matching
-  processedTransitions.push(...symmetricTransitions);
+  return [...transitions, ...reversedTransitions];
+}
 
-  // Scroll tracking - preserves scroll positions between page transitions
+/**
+ * Creates a scroll tracking manager for preserving scroll positions between page transitions
+ */
+function createScrollManager() {
   let scrollContainer: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
@@ -124,10 +102,7 @@ export function createSggoiTransitionContext(
   };
 
   // Calculate scroll offset - computes difference between pages' scroll positions
-  const calculateScrollOffset = (): { x: number; y: number } => {
-    const from = pendingTransition?.from;
-    const to = pendingTransition?.to;
-
+  const calculateScrollOffset = (from?: string, to?: string): { x: number; y: number } => {
     const fromScroll =
       from && scrollPositions.has(from)
         ? scrollPositions.get(from)!
@@ -142,15 +117,57 @@ export function createSggoiTransitionContext(
     };
   };
 
+  return {
+    startScrollTracking,
+    calculateScrollOffset,
+  };
+}
+
+/**
+ * Creates a transition configuration
+ *
+ * @example
+ * const config = createSggoiTransitionConfig({
+ *   transitions: [
+ *     { from: '/home', to: '/about', transition: fade() },
+ *     { from: '/products', to: '/products/*', transition: slide() }
+ *   ],
+ *   defaultTransition: fade()
+ * });
+ */
+export function createSggoiTransitionContext(
+  options: SsgoiConfig
+): SsgoiContext {
+  // Destructure options with defaults
+  const {
+    transitions = [],
+    defaultTransition,
+    middleware = (from, to) => ({ from, to }), // Identity function as default
+  } = options;
+
+  let pendingTransition: PendingTransition | null = null;
+
+  // Process symmetric transitions - creates bidirectional transitions automatically
+  const processedTransitions = processSymmetricTransitions(transitions);
+
+  // Initialize scroll manager
+  const { startScrollTracking, calculateScrollOffset } = createScrollManager();
+
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
-      const transition = findMatchingTransition(
+      // Apply middleware transformation
+      const { from: transformedFrom, to: transformedTo } = middleware(
         pendingTransition.from,
-        pendingTransition.to,
+        pendingTransition.to
+      );
+
+      const transition = findMatchingTransition(
+        transformedFrom,
+        transformedTo,
         processedTransitions
       );
-      const result = transition || options.defaultTransition;
-      const scrollOffset = calculateScrollOffset();
+      const result = transition || defaultTransition;
+      const scrollOffset = calculateScrollOffset(pendingTransition.from, pendingTransition.to);
       const context = { scrollOffset };
 
       if (result) {

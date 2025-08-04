@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
 import { hero, pinterest } from "@ssgoi/react/view-transitions";
@@ -34,7 +34,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   }, []);
 
   // Restore scroll position when path changes
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!mainRef.current) return;
     const savedPosition = scrollPositions.current[currentPath] || 0;
 
@@ -52,7 +52,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest(),
+          transition: pinterest({spring: {stiffness: 150, damping: 20}}),
           symmetric: true,
         },
         // Products transitions - hero
@@ -69,8 +69,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           transition: {
             in: (node) => ({
               spring: {
-                stiffness: 50,
-                damping: 10,
+                stiffness: 150,
+                damping: 20,
               },
               prepare: (node) => {
                 node.style.zIndex = "100";
@@ -82,8 +82,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             }),
             out: (node) => ({
               spring: {
-                stiffness: 50,
-                damping: 10,
+                stiffness: 150,
+                damping: 20,
               },
               prepare: (node) => {
                 node.style.position = "absolute";
@@ -104,8 +104,8 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           transition: {
             in: (node) => ({
               spring: {
-                stiffness: 50,
-                damping: 10,
+                stiffness: 100,
+                damping: 20,
               },
               tick: (t) => {
                 node.style.transform = `translateX(${-(1 - t) * 20}%)`;
@@ -114,7 +114,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
             out: (node) => ({
               spring: {
                 stiffness: 50,
-                damping: 10,
+                damping: 20,
               },
               prepare: (node) => {
                 node.style.position = "absolute";
