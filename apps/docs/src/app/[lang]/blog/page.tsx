@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
+import { createSEOMetadata } from "@/lib/seo-metadata";
 
 interface BlogPageProps {
   params: Promise<{ lang: string }>;
@@ -15,30 +16,12 @@ export async function generateMetadata({
   const { lang } = await params;
   const t = await getServerTranslations("blog", lang);
 
-  return {
+  return createSEOMetadata({
     title: t("metadata.title"),
     description: t("metadata.description"),
-    openGraph: {
-      title: t("metadata.title"),
-      description: t("metadata.description"),
-      type: "website",
-      url: `https://ssgoi.dev/${lang}/blog`,
-      images: [
-        {
-          url: "https://ssgoi.dev/og.png",
-          width: 1200,
-          height: 630,
-          alt: "SSGOI - Page Transition Library",
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: t("metadata.title"),
-      description: t("metadata.description"),
-      images: ["https://ssgoi.dev/og.png"],
-    },
-  };
+    type: "website",
+    url: `/${lang}/blog`,
+  }, lang);
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {

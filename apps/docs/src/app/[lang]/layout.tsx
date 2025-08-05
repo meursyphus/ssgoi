@@ -5,6 +5,7 @@ import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
 import { StructuredData } from "@/components/structured-data";
 import { ConsoleWelcome } from "@/components/console-welcome";
+import { createSEOMetadata } from "@/lib/seo-metadata";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,29 +18,8 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const t = await getServerTranslations("metadata", lang);
-  return {
-    title: t("title"),
-    description: t("description"),
-    openGraph: {
-      title: t("og.title"),
-      description: t("og.description"),
-      siteName: t("og.siteName"),
-      images: [
-        {
-          url: "/og.png",
-          width: 1200,
-          height: 630,
-          alt: "SSGOI - Page Transition Library",
-        },
-      ],
-    },
-    twitter: {
-      title: t("twitter.title"),
-      description: t("twitter.description"),
-      images: ["/og.png"],
-    },
-  };
+  
+  return createSEOMetadata({}, lang);
 }
 
 export default async function RootLayout({
