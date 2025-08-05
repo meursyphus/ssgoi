@@ -25,7 +25,7 @@ export async function generateMetadata({
     return createSEOMetadata({
       title: "Post Not Found - SSGOI Blog",
       description: "The requested blog post could not be found.",
-    });
+    }, lang);
   }
 
   return createSEOMetadata({
@@ -33,7 +33,6 @@ export async function generateMetadata({
     description: post.description || `Read about ${post.title} on SSGOI Blog`,
     type: "article",
     url: `/${lang}/blog/${slug}`,
-    locale: lang === "ko" ? "ko_KR" : lang === "ja" ? "ja_JP" : lang === "zh" ? "zh_CN" : "en_US",
     image: post.thumbnail 
       ? {
           url: post.thumbnail,
@@ -47,7 +46,7 @@ export async function generateMetadata({
       authors: post.author ? [post.author] : undefined,
       tags: post.tags,
     },
-  });
+  }, lang);
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {

@@ -18,14 +18,8 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const t = await getServerTranslations("metadata", lang);
   
-  return createSEOMetadata({
-    title: t("title"),
-    description: t("description"),
-    siteName: t("og.siteName"),
-    locale: lang === "ko" ? "ko_KR" : lang === "ja" ? "ja_JP" : lang === "zh" ? "zh_CN" : "en_US",
-  });
+  return createSEOMetadata({}, lang);
 }
 
 export default async function RootLayout({

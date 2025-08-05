@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getServerTranslations } from "@/i18n/get-server-translations";
 
 interface SEOMetadataOptions {
   title?: string;
@@ -39,15 +40,15 @@ const DEFAULT_METADATA = {
   baseUrl: "https://ssgoi.dev",
 };
 
-export function createSEOMetadata(options: SEOMetadataOptions): Metadata {
+export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: string = "en"): Promise<Metadata> {
   const {
-    title = "SSGOI - Universal Page Transition Library",
-    description = "Bring native app-like transitions to your web applications with SSGOI. Works across all modern browsers.",
+    title,
+    description,
     image = DEFAULT_METADATA.image,
     type = "website",
     url,
-    locale = "en_US",
-    siteName = DEFAULT_METADATA.siteName,
+    locale,
+    siteName,
     publishedTime,
     modifiedTime,
     authors,
@@ -55,20 +56,29 @@ export function createSEOMetadata(options: SEOMetadataOptions): Metadata {
     article,
   } = options;
 
+  // Get translations for default values
+  const t = await getServerTranslations("metadata", lang);
+  
+  // Use provided values or fall back to translated defaults
+  const finalTitle = title || t("title");
+  const finalDescription = description || t("description");
+  const finalSiteName = siteName || t("og.siteName");
+  const finalLocale = locale || getLocaleFromLang(lang);
+
   // Ensure image URL is absolute
   const imageUrl = image.url.startsWith("http") 
     ? image.url 
     : `${DEFAULT_METADATA.baseUrl}${image.url}`;
 
   const metadata: Metadata = {
-    title,
-    description,
+    title: finalTitle,
+    description: finalDescription,
     openGraph: {
-      title,
-      description,
+      title: finalTitle,
+      description: finalDescription,
       type,
-      siteName,
-      locale,
+      siteName: finalSiteName,
+      locale: finalLocale,
       images: [
         {
           url: imageUrl,
@@ -80,8 +90,8 @@ export function createSEOMetadata(options: SEOMetadataOptions): Metadata {
     },
     twitter: {
       card: DEFAULT_METADATA.twitterCard,
-      title,
-      description,
+      title: finalTitle,
+      description: finalDescription,
       images: [imageUrl],
     },
     // LinkedIn uses Open Graph tags, but we can add extra metadata
@@ -133,6 +143,17 @@ export function createSEOMetadata(options: SEOMetadataOptions): Metadata {
   }
 
   return metadata;
+}
+
+// Helper function to get locale from language
+function getLocaleFromLang(lang: string): string {
+  const localeMap: Record<string, string> = {
+    en: "en_US",
+    ko: "ko_KR",
+    ja: "ja_JP",
+    zh: "zh_CN",
+  };
+  return localeMap[lang] || "en_US";
 }
 
 // Language-specific metadata helpers

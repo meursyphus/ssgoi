@@ -21,8 +21,7 @@ export async function generateMetadata({
     description: t("metadata.description"),
     type: "website",
     url: `/${lang}/blog`,
-    locale: lang === "ko" ? "ko_KR" : lang === "ja" ? "ja_JP" : lang === "zh" ? "zh_CN" : "en_US",
-  });
+  }, lang);
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {

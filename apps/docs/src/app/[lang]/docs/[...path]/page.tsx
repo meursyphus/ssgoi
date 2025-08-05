@@ -26,21 +26,20 @@ export async function generateMetadata({
     return createSEOMetadata({
       title: "Page Not Found - SSGOI",
       description: "The requested documentation page could not be found.",
-    });
+    }, lang);
   }
 
   const baseUrl = "https://ssgoi.dev";
   const currentUrl = `/${lang}/docs/${postPath}`;
   const localeMetadata = getLocaleMetadata(lang);
 
-  const metadata = createSEOMetadata({
+  const metadata = await createSEOMetadata({
     title: `${post.title} - SSGOI`,
     description: post.description || `Learn about ${post.title} in SSGOI documentation`,
     type: "article",
     url: currentUrl,
-    locale: localeMetadata.locale,
     siteName: localeMetadata.siteName,
-  });
+  }, lang);
 
   // Add language alternates
   metadata.alternates = {
