@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { BlogPostLink } from "@/components/blog/blog-post-link";
+import { createSEOMetadata } from "@/lib/seo-metadata";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -21,47 +22,32 @@ export async function generateMetadata({
   const post = await getBlogPost(lang, slug);
 
   if (!post) {
-    return {
+    return createSEOMetadata({
       title: "Post Not Found - SSGOI Blog",
-    };
+      description: "The requested blog post could not be found.",
+    });
   }
 
-  return {
+  return createSEOMetadata({
     title: `${post.title} - SSGOI Blog`,
     description: post.description || `Read about ${post.title} on SSGOI Blog`,
-    openGraph: {
-      title: `${post.title} - SSGOI Blog`,
-      description: post.description || `Read about ${post.title} on SSGOI Blog`,
-      type: "article",
-      url: `/${lang}/blog/${slug}`,
-      images: post.thumbnail
-        ? [
-            {
-              url: `${post.thumbnail}`,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : [
-            {
-              url: `/og.png`,
-              width: 1200,
-              height: 630,
-              alt: "SSGOI - Page Transition Library",
-            },
-          ],
+    type: "article",
+    url: `/${lang}/blog/${slug}`,
+    locale: lang === "ko" ? "ko_KR" : lang === "ja" ? "ja_JP" : lang === "zh" ? "zh_CN" : "en_US",
+    image: post.thumbnail 
+      ? {
+          url: post.thumbnail,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        }
+      : undefined,
+    article: {
       publishedTime: post.date,
       authors: post.author ? [post.author] : undefined,
       tags: post.tags,
     },
-    twitter: {
-      card: "summary_large_image",
-      title: `${post.title} - SSGOI Blog`,
-      description: post.description || `Read about ${post.title} on SSGOI Blog`,
-      images: post.thumbnail ? [post.thumbnail] : ["/og.png"],
-    },
-  };
+  });
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {

@@ -6,6 +6,7 @@ import { findNavigationLinks } from "@/lib/navigation-utils";
 import { SsgoiTransition } from "@/components/docs/ssgoi";
 import { Metadata } from "next";
 import { DocsStructuredData } from "@/components/structured-data";
+import { createSEOMetadata, getLocaleMetadata } from "@/lib/seo-metadata";
 
 interface DocsPageProps {
   params: Promise<{
@@ -22,75 +23,37 @@ export async function generateMetadata({
   const post = await getPost(lang, postPath);
 
   if (!post) {
-    return {
+    return createSEOMetadata({
       title: "Page Not Found - SSGOI",
-    };
+      description: "The requested documentation page could not be found.",
+    });
   }
 
   const baseUrl = "https://ssgoi.dev";
-  const currentUrl = `${baseUrl}/${lang}/docs/${postPath}`;
+  const currentUrl = `/${lang}/docs/${postPath}`;
+  const localeMetadata = getLocaleMetadata(lang);
 
-  // Language-specific metadata
-  const langMetadata = {
-    en: {
-      locale: "en_US",
-      siteName: "SSGOI Documentation",
-    },
-    ko: {
-      locale: "ko_KR",
-      siteName: "SSGOI 문서",
-    },
-    ja: {
-      locale: "ja_JP",
-      siteName: "SSGOIドキュメント",
-    },
-    zh: {
-      locale: "zh_CN",
-      siteName: "SSGOI 文档",
-    },
-  };
-
-  const currentLangMetadata =
-    langMetadata[lang as keyof typeof langMetadata] || langMetadata.en;
-
-  return {
+  const metadata = createSEOMetadata({
     title: `${post.title} - SSGOI`,
-    description:
-      post.description || `Learn about ${post.title} in SSGOI documentation`,
-    alternates: {
-      canonical: currentUrl,
-      languages: {
-        "en-US": `${baseUrl}/en/docs/${postPath}`,
-        "ko-KR": `${baseUrl}/ko/docs/${postPath}`,
-        "ja-JP": `${baseUrl}/ja/docs/${postPath}`,
-        "zh-CN": `${baseUrl}/zh/docs/${postPath}`,
-      },
-    },
-    openGraph: {
-      title: `${post.title} - SSGOI`,
-      description:
-        post.description || `Learn about ${post.title} in SSGOI documentation`,
-      url: currentUrl,
-      siteName: currentLangMetadata.siteName,
-      locale: currentLangMetadata.locale,
-      type: "article",
-      images: [
-        {
-          url: "https://ssgoi.dev/og.png",
-          width: 1200,
-          height: 630,
-          alt: "SSGOI - Page Transition Library",
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${post.title} - SSGOI`,
-      description:
-        post.description || `Learn about ${post.title} in SSGOI documentation`,
-      images: ["https://ssgoi.dev/og.png"],
+    description: post.description || `Learn about ${post.title} in SSGOI documentation`,
+    type: "article",
+    url: currentUrl,
+    locale: localeMetadata.locale,
+    siteName: localeMetadata.siteName,
+  });
+
+  // Add language alternates
+  metadata.alternates = {
+    canonical: `${baseUrl}${currentUrl}`,
+    languages: {
+      "en-US": `${baseUrl}/en/docs/${postPath}`,
+      "ko-KR": `${baseUrl}/ko/docs/${postPath}`,
+      "ja-JP": `${baseUrl}/ja/docs/${postPath}`,
+      "zh-CN": `${baseUrl}/zh/docs/${postPath}`,
     },
   };
+
+  return metadata;
 }
 
 export default async function DocsPage({ params }: DocsPageProps) {
