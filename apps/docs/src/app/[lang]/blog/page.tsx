@@ -61,7 +61,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
                 )}
 
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                  <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition-colors h-14 flex items-center line-clamp-2">
                     {post.title}
                   </h2>
 
