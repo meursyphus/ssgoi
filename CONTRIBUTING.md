@@ -22,12 +22,7 @@ cd ssgoi
 
 # Install dependencies
 pnpm install
-
-# Initial build (Required!)
-pnpm init
 ```
-
-> **Important**: After `pnpm install`, you must run `pnpm init` to build all packages. This is necessary to properly set up workspace dependencies.
 
 ## 2. Project Structure
 
@@ -100,12 +95,14 @@ pnpm svelte:watch
 ### Running Demo Apps
 
 #### React Demo
+
 ```bash
 pnpm react-demo
 # Available at http://localhost:3000
 ```
 
 #### Svelte Demo
+
 ```bash
 pnpm svelte-demo
 # Available at http://localhost:5174
