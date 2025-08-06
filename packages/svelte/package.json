@@ -10,7 +10,7 @@
 		"build": "svelte-package",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"prepare": "pnpm run build"
+		"prepublishOnly": "pnpm run build"
 	},
 	"files": [
 		"dist",

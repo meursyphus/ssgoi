@@ -5,6 +5,7 @@
   "private": true,
   "description": "SSGOI is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications.",
   "scripts": {
+    "init": "pnpm core:build && pnpm react:build && pnpm svelte:build",
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",
     "core:build": "pnpm --filter @ssgoi/core build",

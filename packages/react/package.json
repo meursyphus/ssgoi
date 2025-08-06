@@ -51,7 +51,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build",
-    "prepare": "pnpm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:*"
