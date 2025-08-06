@@ -1,0 +1,22 @@
+---
+title: "服务端渲染优化"
+description: "ssgoi通过简单的配置，可以直接利用Next.js的路由功能。SvelteKit也是如此。甚至在Next.js的服务器组件环境中也能正常工作。"
+thumbnail: "/post/ssr-optimization/thumbnail.png"
+date: "2025-08-06"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "文大昇"
+tags: ["ssr", "nextjs", "sveltekit"]
+---
+
+页面过渡动画库是如何工作的？在原生应用中，页面导航时会即时定义要导航到哪个页面以及使用什么效果。可以像`router.push(<NextPage />, "slide")`这样管理。
+
+某些库可能需要为此单独实现路由。它们有一个包含组件的数组，每当发生过渡效果时，就像堆栈一样堆叠。
+
+然而，Web需要以不同的方式工作。服务端渲染已成为现代Web框架的必需品。每个框架都实现了自己优化的路由系统。为了享受prefetch、preload和dynamic import的效果，需要按照框架指定的方式进行页面导航。
+
+ssgoi通过简单的配置，可以直接利用Next.js的路由功能。SvelteKit也是如此。甚至在Next.js的服务器组件环境中也能正常工作。
+
+ssgoi是一个Web页面过渡动画库。它是为Web而创建的，并针对Web环境进行了优化。享受URL改变的同时带有动画效果的体验。
+
+demo: https://ssgoi.dev/demo

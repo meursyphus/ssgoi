@@ -1,0 +1,22 @@
+---
+title: "Server-Side Rendering Optimization"
+description: "ssgoi is designed to seamlessly leverage Next.js routing with simple configuration. The same goes for SvelteKit. It even works flawlessly in Next.js server component environments."
+thumbnail: "/post/ssr-optimization/thumbnail.png"
+date: "2025-08-06"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["ssr", "nextjs", "sveltekit"]
+---
+
+How do page transition animation libraries work? In native apps, when navigating between pages, you define which page to navigate to and what effect to use on the fly. You can manage it like `router.push(<NextPage />, "slide")`.
+
+Some libraries might require implementing routing separately for this. They have an array holding components and stack them like a stack whenever a transition effect occurs.
+
+However, the web needs to work differently. Server-side rendering has become essential for modern web frameworks. And each framework implements its own optimized routing. To benefit from prefetch, preload, and dynamic import effects, you need to navigate pages the way the framework specifies.
+
+ssgoi is designed to seamlessly leverage Next.js routing with simple configuration. The same goes for SvelteKit. It even works flawlessly in Next.js server component environments.
+
+ssgoi is a web page transition animation library. It was made for the web and optimized for web environments. Enjoy the experience of animations while the URL changes.
+
+demo: https://ssgoi.dev/demo
