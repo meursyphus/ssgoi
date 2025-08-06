@@ -96,6 +96,15 @@ pnpm svelte:watch
 
 #### React Demo
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 9284f8c (add contributing)
+
+=======
+>>>>>>> 8b7821f (good)
 ```bash
 pnpm react-demo
 # Available at http://localhost:3000
@@ -103,6 +112,15 @@ pnpm react-demo
 
 #### Svelte Demo
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 9284f8c (add contributing)
+
+=======
+>>>>>>> 8b7821f (good)
 ```bash
 pnpm svelte-demo
 # Available at http://localhost:5174
@@ -135,4 +153,13 @@ pnpm format
 - **Blog**: Check out more information at [ssgoi.dev/blog](https://ssgoi.dev/blog)
 - **Author**: Contact meursyphus directly on Discord
 
+<<<<<<< HEAD
+<<<<<<< HEAD
 Thank you for contributing to the project! 🚀
+=======
+Thank you for contributing to the project! 🚀
+
+> > > > > > > 9284f8c (add contributing)
+=======
+Thank you for contributing to the project! 🚀
+>>>>>>> 8b7821f (good)

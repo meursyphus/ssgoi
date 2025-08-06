@@ -1,0 +1,22 @@
+---
+title: "서버사이드 랜더링 최적화"
+description: "ssgoi는 단순한 설정으로, nextjs의 라우팅을 그대로 활용하게끔 설계되었습니다. sveltekit도 마찬가지죠. 심지어 nextjs의 서버컴포넌트 환경에서도 문제없이 동작합니다."
+thumbnail: "/post/ssr-optimization/thumbnail.png"
+date: "2025-08-06"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "문대승"
+tags: ["ssr", "nextjs", "sveltekit"]
+---
+
+페이지 이동 애니메이션 라이브러리는 어떻게 동작할까요? 네이티브 앱에서는 페이지를 이동할때 어떤 페이지를 어떤 효과로 이동할 것인지를 그때그때 정의합니다. `router.push(<NextPage />, "slide" )` 이렇게 관리할 수 있죠.
+
+어떤 라이브러리는 이를 위해, 라우팅을 따로 구현해야할지도 모릅니다. 컴포넌트들을 가지고 있는 배열이 있고, 전환 효과가 발생할때마다 스택처럼 쌓는 것이죠.
+
+그러나 웹에서는 다르게 동작해야 합니다. 모던 웹 프레임워크는 이제 서버사이드 랜더링이 필수가 되었습니다. 그리고 각각의 프레임워크는 저마다 최적화된 라우팅을 구현하고 있죠. prefetch, preload, 그리고 dynamic import의 효과를 누리기 위해서는 프레임워크가 지정한 방식으로 페이지를 이동해야 합니다.
+
+ssgoi는 단순한 설정으로, nextjs의 라우팅을 그대로 활용하게끔 설계되었습니다. sveltekit도 마찬가지죠. 심지어 nextjs의 서버컴포넌트 환경에서도 문제없이 동작합니다.
+
+ssgoi는 웹 페이지 이동 애니메이션 라이브러리입니다. 웹을 위해 만들었고, 웹의 환경에 최적화 했습니다. url이 바뀌면서도 애니메이션이 부여되는 경험을 누리세요.
+
+demo: https://ssgoi.dev/demo
