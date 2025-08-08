@@ -3,39 +3,44 @@
   "version": "2.0.0",
   "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "qwik": "./dist/index.js",
+  "module": "./dist/index.qwik.mjs",
+  "qwik": "./dist/index.qwik.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "qwik": "./dist/index.qwik.mjs",
+      "import": "./dist/index.qwik.mjs",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "default": "./dist/index.qwik.mjs"
     },
     "./transitions": {
       "types": "./dist/transitions/index.d.ts",
-      "import": "./dist/transitions/index.js",
+      "qwik": "./dist/transitions/index.qwik.mjs",
+      "import": "./dist/transitions/index.qwik.mjs",
       "require": "./dist/transitions/index.cjs",
-      "default": "./dist/transitions/index.js"
+      "default": "./dist/transitions/index.qwik.mjs"
     },
     "./view-transitions": {
       "types": "./dist/view-transitions/index.d.ts",
-      "import": "./dist/view-transitions/index.js",
+      "qwik": "./dist/view-transitions/index.qwik.mjs",
+      "import": "./dist/view-transitions/index.qwik.mjs",
       "require": "./dist/view-transitions/index.cjs",
-      "default": "./dist/view-transitions/index.js"
+      "default": "./dist/view-transitions/index.qwik.mjs"
     },
     "./types": {
       "types": "./dist/types.d.ts",
-      "import": "./dist/types.js",
+      "qwik": "./dist/types.qwik.mjs",
+      "import": "./dist/types.qwik.mjs",
       "require": "./dist/types.cjs",
-      "default": "./dist/types.js"
+      "default": "./dist/types.qwik.mjs"
     },
     "./presets": {
       "types": "./dist/presets/index.d.ts",
-      "import": "./dist/presets/index.js",
+      "qwik": "./dist/presets/index.qwik.mjs",
+      "import": "./dist/presets/index.qwik.mjs",
       "require": "./dist/presets/index.cjs",
-      "default": "./dist/presets/index.js"
+      "default": "./dist/presets/index.qwik.mjs"
     }
   },
   "files": [

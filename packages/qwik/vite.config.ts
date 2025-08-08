@@ -24,14 +24,16 @@ export default defineConfig(({ mode }) => {
             types: "./src/lib/types.ts",
           },
           formats: ["es", "cjs"],
-          fileName: (format) => {
-            if (format === "es") return "[name].js";
-            return "[name].cjs";
+          fileName: (format, entryName) => {
+            // Use .qwik.mjs for ES modules to enable Qwik optimizer
+            if (format === "es") return `${entryName}.qwik.mjs`;
+            return `${entryName}.cjs`;
           },
         },
         rollupOptions: {
           output: {
             preserveModules: false,
+            chunkFileNames: "[name]-[hash].qwik.mjs",
           },
           // externalize deps that shouldn't be bundled into the library
           external: [
@@ -45,8 +47,9 @@ export default defineConfig(({ mode }) => {
         qwikVite({
           srcDir: "./src/lib",
           entryStrategy: {
-            type: "component",
+            type: "smart",
           },
+          optimizerOptions: {},
         }),
         tsconfigPaths({ root: "." }),
         dts({
@@ -68,15 +71,28 @@ export default defineConfig(({ mode }) => {
     build: {
       target: "es2020",
       outDir: "dist",
+      lib: {
+        entry: "./src/lib/index.ts",
+        formats: ["es", "cjs"],
+        fileName: (format) => {
+          if (format === "es") return "index.qwik.mjs";
+          return "index.cjs";
+        },
+      },
       rollupOptions: {
-        input: ["src/lib/index.ts"],
+        // externalize deps that shouldn't be bundled into the library
+        external: [
+          /^node:.*/,
+          ...excludeAll(dependencies),
+          ...excludeAll(peerDependencies),
+        ],
       },
     },
     plugins: [
       qwikVite({
         srcDir: "./src/lib",
         entryStrategy: {
-          type: "component",
+          type: "smart",
         },
       }),
       tsconfigPaths({ root: "." }),
