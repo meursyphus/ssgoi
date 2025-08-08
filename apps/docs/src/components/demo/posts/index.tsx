@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { getAllPosts } from "./mock-data";
 import { SsgoiTransition } from "@ssgoi/react";
 import { useDemoRouter } from "../router-provider";
@@ -8,6 +8,13 @@ import { useDemoRouter } from "../router-provider";
 export default function PostsDemo() {
   const posts = getAllPosts();
   const router = useDemoRouter();
+
+  // Prefetch all post detail pages on mount
+  useEffect(() => {
+    posts.forEach(post => {
+      router.prefetch(`/demo/posts/${post.id}`);
+    });
+  }, []);
 
   return (
     <SsgoiTransition id="/demo/posts">

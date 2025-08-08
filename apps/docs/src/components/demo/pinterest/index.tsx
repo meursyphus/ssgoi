@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { pinterestItems } from "./mock-data";
 import { SsgoiTransition } from "@ssgoi/react";
 import { useDemoRouter } from "../router-provider";
@@ -10,6 +10,13 @@ export default function PinterestDemo() {
   // Split items into two columns for masonry effect
   const leftColumnItems = pinterestItems.filter((_, index) => index % 2 === 0);
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
+
+  // Prefetch all pinterest detail pages on mount
+  useEffect(() => {
+    pinterestItems.forEach(item => {
+      router.prefetch(`/demo/pinterest/${item.id}`);
+    });
+  }, []);
 
   return (
     <SsgoiTransition id="/demo/pinterest">

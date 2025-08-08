@@ -19,6 +19,14 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   const scrollPositions = useRef<Record<string, number>>({});
   const previousPath = useRef(currentPath);
 
+  // Prefetch main pages on mount
+  useEffect(() => {
+    router.prefetch("/demo/posts");
+    router.prefetch("/demo/products");
+    router.prefetch("/demo/pinterest");
+    router.prefetch("/demo/profile");
+  }, []);
+
   useEffect(() => {
     if (!mainRef.current) return;
 

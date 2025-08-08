@@ -1,12 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { products } from "./mock-data";
 import { SsgoiTransition } from "@ssgoi/react";
 import { useDemoRouter } from "../router-provider";
 
 export default function ProductsDemo() {
   const router = useDemoRouter();
+
+  // Prefetch all product detail pages on mount
+  useEffect(() => {
+    products.forEach(product => {
+      router.prefetch(`/demo/products/${product.id}`);
+    });
+  }, []);
   return (
     <SsgoiTransition id="/demo/products">
       <div className="min-h-screen bg-gray-950 px-4 py-8">
