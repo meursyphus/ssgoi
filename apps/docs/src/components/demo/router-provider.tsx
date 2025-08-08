@@ -4,6 +4,7 @@ import React, { createContext, useContext, ReactNode } from "react";
 
 interface RouterContextType {
   goto: (path: string) => void;
+  prefetch: (path: string) => void;
   currentPath?: string;
 }
 
@@ -14,6 +15,7 @@ interface RouterProviderProps {
   currentPath: string;
   customRouter: {
     goto: (path: string) => void;
+    prefetch?: (path: string) => void;
   };
 }
 
@@ -22,10 +24,14 @@ export function RouterProvider({
   currentPath,
   customRouter,
 }: RouterProviderProps) {
-  const router: RouterContextType = customRouter;
+  const router: RouterContextType = {
+    goto: customRouter.goto,
+    prefetch: customRouter.prefetch || (() => {}), // No-op if prefetch not provided
+    currentPath,
+  };
 
   return (
-    <RouterContext.Provider value={{ ...router, currentPath }}>
+    <RouterContext.Provider value={router}>
       {children}
     </RouterContext.Provider>
   );

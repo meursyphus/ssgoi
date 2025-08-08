@@ -13,6 +13,9 @@ export default function DemoWrapper({children}: {children: React.ReactNode}) {
         goto: (path: string) => {
             router.push(`/${lang}/${path}`)
         },
+        prefetch: (path: string) => {
+            router.prefetch(`/${lang}/${path}`)
+        },
     }
     return (
     <div className="h-[calc(100svh-4rem)] flex items-center justify-center bg-gray-100">
