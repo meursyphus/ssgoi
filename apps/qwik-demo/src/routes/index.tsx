@@ -1,6 +1,6 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { Link, type DocumentHead } from "@builder.io/qwik-city";
-import { SsgoiTransition, useTransition } from "@ssgoi/qwik";
+import { SsgoiTransition, transition } from "@ssgoi/qwik";
 import styles from "./index.module.css";
 
 // Shape container component that maintains size
@@ -16,140 +16,6 @@ const ShapeContainer = component$<ShapeContainerProps>(({ label }) => {
       </div>
       <p class={styles.shapeLabel}>{label}</p>
     </div>
-  );
-});
-
-// Individual shape components with transitions
-interface AnimatedShapeProps {
-  type: 'fade' | 'scale' | 'slide' | 'rotate' | 'blur' | 'bounce';
-  stiffness: number;
-  damping: number;
-}
-
-const AnimatedShape = component$<AnimatedShapeProps>(({ type, stiffness, damping }) => {
-  let elementRef;
-  
-  if (type === 'fade') {
-    elementRef = useTransition({
-      key: "fade",
-      in: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.opacity = progress.toString();
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.opacity = (1 - progress).toString();
-        }
-      })
-    });
-  } else if (type === 'scale') {
-    elementRef = useTransition({
-      key: "scale",
-      in: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `scale(${progress})`;
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `scale(${1 - progress})`;
-        }
-      })
-    });
-  } else if (type === 'slide') {
-    elementRef = useTransition({
-      key: "slide",
-      in: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `translateY(${100 - progress * 100}%)`;
-          element.style.opacity = progress.toString();
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `translateY(${progress * 100}%)`;
-          element.style.opacity = (1 - progress).toString();
-        }
-      })
-    });
-  } else if (type === 'rotate') {
-    elementRef = useTransition({
-      key: "rotate",
-      in: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `rotate(${360 - progress * 360}deg) scale(${progress})`;
-          element.style.opacity = progress.toString();
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.transform = `rotate(${progress * 360}deg) scale(${1 - progress})`;
-          element.style.opacity = (1 - progress).toString();
-        }
-      })
-    });
-  } else if (type === 'blur') {
-    elementRef = useTransition({
-      key: "blur",
-      in: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.filter = `blur(${10 - progress * 10}px)`;
-          element.style.opacity = progress.toString();
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness, damping },
-        tick: (progress) => {
-          element.style.filter = `blur(${progress * 10}px)`;
-          element.style.opacity = (1 - progress).toString();
-        }
-      })
-    });
-  } else {
-    // bounce
-    elementRef = useTransition({
-      key: "bounce",
-      in: (element) => ({
-        spring: { stiffness: 200, damping: 10 },
-        tick: (progress) => {
-          const bounce = 1 + Math.sin(progress * Math.PI) * 0.3;
-          element.style.transform = `scale(${progress * bounce})`;
-        }
-      }),
-      out: (element) => ({
-        spring: { stiffness: 200, damping: 10 },
-        tick: (progress) => {
-          element.style.transform = `scale(${1 - progress})`;
-        }
-      })
-    });
-  }
-  
-  // Map transition types to shape styles
-  const shapeClass = {
-    fade: styles.circle,
-    scale: styles.square,
-    slide: styles.triangle,
-    rotate: styles.hexagon,
-    blur: styles.star,
-    bounce: styles.diamond
-  }[type] || styles.circle;
-  
-  return (
-    <div
-      ref={elementRef}
-      class={[styles.shape, shapeClass].join(' ')}
-    />
   );
 });
 
@@ -197,7 +63,10 @@ export default component$(() => {
           <div class={styles.controls}>
             <div class={styles.speedButtons}>
               <button
-                class={[styles.speedButton, stiffness.value === 100 ? styles.active : ""]}
+                class={[
+                  styles.speedButton,
+                  stiffness.value === 100 ? styles.active : "",
+                ]}
                 onClick$={() => {
                   stiffness.value = 100;
                   damping.value = 20;
@@ -206,7 +75,10 @@ export default component$(() => {
                 Smooth
               </button>
               <button
-                class={[styles.speedButton, stiffness.value === 300 ? styles.active : ""]}
+                class={[
+                  styles.speedButton,
+                  stiffness.value === 300 ? styles.active : "",
+                ]}
                 onClick$={() => {
                   stiffness.value = 300;
                   damping.value = 30;
@@ -215,7 +87,10 @@ export default component$(() => {
                 Normal
               </button>
               <button
-                class={[styles.speedButton, stiffness.value === 500 ? styles.active : ""]}
+                class={[
+                  styles.speedButton,
+                  stiffness.value === 500 ? styles.active : "",
+                ]}
                 onClick$={() => {
                   stiffness.value = 500;
                   damping.value = 40;
@@ -231,7 +106,11 @@ export default component$(() => {
                 type="number"
                 class={styles.controlInput}
                 value={stiffness.value}
-                onInput$={(e) => stiffness.value = Number((e.target as HTMLInputElement).value)}
+                onInput$={(e) =>
+                  (stiffness.value = Number(
+                    (e.target as HTMLInputElement).value
+                  ))
+                }
                 min="1"
                 max="1000"
               />
@@ -244,7 +123,9 @@ export default component$(() => {
                 type="number"
                 class={styles.controlInput}
                 value={damping.value}
-                onInput$={(e) => damping.value = Number((e.target as HTMLInputElement).value)}
+                onInput$={(e) =>
+                  (damping.value = Number((e.target as HTMLInputElement).value))
+                }
                 min="0"
                 max="100"
               />
@@ -255,7 +136,7 @@ export default component$(() => {
 
         <div class={styles.toggleSection}>
           <button
-            onClick$={() => showShapes.value = !showShapes.value}
+            onClick$={() => (showShapes.value = !showShapes.value)}
             class={styles.toggleButton}
           >
             {showShapes.value ? "Hide Elements" : "Show Elements"}
@@ -267,66 +148,160 @@ export default component$(() => {
           <div class={styles.shapesGrid}>
             <ShapeContainer label="Fade">
               {showShapes.value && (
-                <AnimatedShape type="fade" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Scale">
-              {showShapes.value && (
-                <AnimatedShape type="scale" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Slide">
-              {showShapes.value && (
-                <AnimatedShape type="slide" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-            
-            <ShapeContainer label="Rotate">
-              {showShapes.value && (
-                <AnimatedShape type="rotate" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-            
-            <ShapeContainer label="Blur">
-              {showShapes.value && (
-                <AnimatedShape type="blur" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-            
-            <ShapeContainer label="Bounce">
-              {showShapes.value && (
-                <AnimatedShape type="bounce" stiffness={stiffness.value} damping={damping.value} />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Bounce Scale">
-              {showShapes.value && (
                 <div
                   ref={transition({
-                    key: "bounce-scale",
+                    key: "fade",
                     in: (element) => ({
-                      spring: {
-                        stiffness: stiffness.value * 0.8,
-                        damping: damping.value * 0.7,
-                      },
+                      spring: { stiffness: stiffness.value, damping: damping.value },
                       tick: (progress) => {
-                        const scale = 0.5 + progress * 0.5;
-                        element.style.transform = `scale(${scale})`;
                         element.style.opacity = progress.toString();
                       },
                     }),
                     out: (element) => ({
                       spring: { stiffness: stiffness.value, damping: damping.value },
                       tick: (progress) => {
-                        const scale = 0.5 + progress * 0.5;
-                        element.style.transform = `scale(${scale})`;
                         element.style.opacity = progress.toString();
                       },
                     }),
                   })}
-                  class={[styles.shape, styles.pentagon]}
+                  class={`${styles.shape} ${styles.circle}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Scale + Rotate">
+              {showShapes.value && (
+                <div
+                  ref={transition<{ scale: number; rotate: number }>({
+                    key: "scale-rotate",
+                    in: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      from: { scale: 0, rotate: 0 },
+                      to: { scale: 1, rotate: 360 },
+                      tick: (progress) => {
+                        element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
+                        element.style.opacity = progress.scale.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      from: { scale: 1, rotate: 360 },
+                      to: { scale: 0, rotate: 0 },
+                      tick: (progress) => {
+                        element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
+                        element.style.opacity = progress.scale.toString();
+                      },
+                    }),
+                  })}
+                  class={`${styles.shape} ${styles.triangle}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Slide In">
+              {showShapes.value && (
+                <div
+                  ref={transition({
+                    key: "slide",
+                    in: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      tick: (progress) => {
+                        element.style.transform = `translateX(${
+                          (1 - progress) * -100
+                        }px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      tick: (progress) => {
+                        element.style.transform = `translateX(${
+                          (1 - progress) * 100
+                        }px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  class={`${styles.shape} ${styles.square}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Blur">
+              {showShapes.value && (
+                <div
+                  ref={transition({
+                    key: "blur",
+                    in: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      tick: (progress) => {
+                        element.style.filter = `blur(${10 - progress * 10}px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      tick: (progress) => {
+                        element.style.filter = `blur(${progress * 10}px)`;
+                        element.style.opacity = progress.toString();
+                      },
+                    }),
+                  })}
+                  class={`${styles.shape} ${styles.hexagon}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Bounce">
+              {showShapes.value && (
+                <div
+                  ref={transition({
+                    key: "bounce",
+                    in: (element) => ({
+                      spring: { stiffness: 200, damping: 10 },
+                      tick: (progress) => {
+                        const bounce = 1 + Math.sin(progress * Math.PI) * 0.3;
+                        element.style.transform = `scale(${progress * bounce})`;
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness: 200, damping: 10 },
+                      tick: (progress) => {
+                        const bounce = 1 + Math.sin(progress * Math.PI) * 0.3;
+                        element.style.transform = `scale(${progress * bounce})`;
+                      },
+                    }),
+                  })}
+                  class={`${styles.shape} ${styles.diamond}`}
+                />
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Fly">
+              {showShapes.value && (
+                <div
+                  ref={transition<{ x: number; y: number; scale: number }>({
+                    key: "fly",
+                    in: (element) => ({
+                      spring: { stiffness: stiffness.value * 0.8, damping: damping.value * 0.7 },
+                      from: { x: -100, y: -100, scale: 0 },
+                      to: { x: 0, y: 0, scale: 1 },
+                      tick: (progress) => {
+                        element.style.transform = `translate(${progress.x}px, ${progress.y}px) scale(${progress.scale})`;
+                        element.style.opacity = progress.scale.toString();
+                      },
+                    }),
+                    out: (element) => ({
+                      spring: { stiffness: stiffness.value, damping: damping.value },
+                      from: { x: 0, y: 0, scale: 1 },
+                      to: { x: 100, y: -100, scale: 0 },
+                      tick: (progress) => {
+                        element.style.transform = `translate(${progress.x}px, ${progress.y}px) scale(${progress.scale})`;
+                        element.style.opacity = progress.scale.toString();
+                      },
+                    }),
+                  })}
+                  class={`${styles.shape} ${styles.star}`}
                 />
               )}
             </ShapeContainer>
