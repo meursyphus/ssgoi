@@ -12,6 +12,8 @@
     "react:watch": "pnpm --filter @ssgoi/react watch",
     "svelte:build": "pnpm --filter @ssgoi/svelte build",
     "svelte:watch": "pnpm --filter @ssgoi/svelte watch",
+    "qwik:build": "pnpm --filter @ssgoi/qwik build",
+    "qwik:watch": "pnpm --filter @ssgoi/qwik watch",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
     "react-demo": "pnpm --filter react-demo dev",

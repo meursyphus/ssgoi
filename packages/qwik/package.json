@@ -1,0 +1,93 @@
+{
+  "name": "@ssgoi/qwik",
+  "version": "2.0.0",
+  "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
+  "private": false,
+  "type": "module",
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./transitions": {
+      "types": "./dist/transitions/index.d.ts",
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs",
+      "default": "./dist/transitions/index.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs",
+      "default": "./dist/view-transitions/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "default": "./dist/types.js"
+    },
+    "./presets": {
+      "types": "./dist/presets/index.d.ts",
+      "import": "./dist/presets/index.js",
+      "require": "./dist/presets/index.cjs",
+      "default": "./dist/presets/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc -b && vite build",
+    "watch": "vite build --watch",
+    "preview": "vite preview",
+    "package": "vite build",
+    "prepare": "pnpm run build"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@builder.io/qwik": "^1.15.0"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "^1.15.0",
+    "@types/node": "^20.0.0",
+    "rollup-plugin-preserve-directives": "^0.4.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.0",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": [
+    "qwik",
+    "page-transition",
+    "animation",
+    "ssgoi",
+    "spring-physics"
+  ],
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
+    "directory": "packages/qwik"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
