@@ -1,15 +1,17 @@
 import { 
   createContextId, 
-  useContext,
-  type Signal
+  useContext
 } from "@builder.io/qwik";
-import type { SsgoiContext } from "./types";
+import type { SsgoiContext, SsgoiConfig } from "./types";
 
-export const SsgoiContextId = createContextId<Signal<SsgoiContext | undefined>>("ssgoi-context");
+export const SsgoiContextId = createContextId<{ 
+  context?: SsgoiContext,
+  config?: SsgoiConfig 
+}>("ssgoi-context");
 
 export const useSsgoi = () => {
-  const contextSignal = useContext(SsgoiContextId);
-  const context = contextSignal.value;
+  const contextStore = useContext(SsgoiContextId);
+  const context = contextStore.context;
   
   if (!context) {
     throw new Error("useSsgoi must be used within a Ssgoi component");

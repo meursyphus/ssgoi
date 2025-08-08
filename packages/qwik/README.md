@@ -1,135 +1,47 @@
-# @ssgoi/qwik
+# Qwik Library ⚡️
 
-Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications.
+- [Qwik Docs](https://qwik.dev/)
+- [Discord](https://qwik.dev/chat)
+- [Qwik on GitHub](https://github.com/QwikDev/qwik)
+- [@QwikDev](https://twitter.com/QwikDev)
+- [Vite](https://vitejs.dev/)
+- [Partytown](https://partytown.qwik.dev/)
+- [Mitosis](https://github.com/BuilderIO/mitosis)
+- [Builder.io](https://www.builder.io/)
 
-## Installation
+---
 
-```bash
-npm install @ssgoi/qwik
+## Project Structure
+
+Inside your project, you'll see the following directories and files:
+
+```
+├── public/
+│   └── ...
+└── src/
+    ├── components/
+    │   └── ...
+    └── index.ts
 ```
 
-## Quick Start
+- `src/components`: Recommended directory for components.
 
-### 1. Wrap your app with Ssgoi
+- `index.ts`: The entry point of your component library, make sure all the public components are exported from this file.
 
-```tsx
-import { component$ } from '@builder.io/qwik';
-import { Ssgoi } from '@ssgoi/qwik';
-import { fade } from '@ssgoi/qwik/view-transitions';
+## Development
 
-export default component$(() => {
-  return (
-    <Ssgoi config={{ defaultTransition: fade() }}>
-      <div style={{ position: 'relative', minHeight: '100vh' }}>
-        {/* Your app content */}
-      </div>
-    </Ssgoi>
-  );
-});
+Development mode uses [Vite's development server](https://vitejs.dev/). For Qwik during development, the `dev` command will also server-side render (SSR) the output. The client-side development modules are loaded by the browser.
+
+```
+pnpm dev
 ```
 
-### 2. Wrap your pages with SsgoiTransition
+> Note: during dev mode, Vite will request many JS files, which does not represent a Qwik production build.
 
-```tsx
-import { component$ } from '@builder.io/qwik';
-import { SsgoiTransition } from '@ssgoi/qwik';
+## Production
 
-export const HomePage = component$(() => {
-  return (
-    <SsgoiTransition id="/">
-      <h1>Welcome to Home Page</h1>
-      {/* Page content */}
-    </SsgoiTransition>
-  );
-});
+The production build should generate the production build of your component library in (./lib) and the typescript type definitions in (./lib-types).
+
 ```
-
-## Advanced Usage
-
-### Route-based Transitions
-
-```tsx
-import { slide, scale, pinterest } from '@ssgoi/qwik/view-transitions';
-
-const config = {
-  transitions: [
-    { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
-    { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
-    { from: '/products', to: '/products/*', transition: scale() },
-    { from: '/gallery', to: '/photo/*', transition: pinterest() }
-  ],
-  defaultTransition: fade()
-};
+pnpm build
 ```
-
-### Individual Element Animations
-
-```tsx
-import { component$, useVisibleTask$ } from '@builder.io/qwik';
-import { transition } from '@ssgoi/qwik';
-import { fadeIn, slideUp } from '@ssgoi/qwik/transitions';
-
-export const AnimatedCard = component$(() => {
-  return (
-    <div ref={transition({
-      key: 'card',
-      in: fadeIn(),
-      out: slideUp()
-    })}>
-      <h2>Animated Card</h2>
-    </div>
-  );
-});
-```
-
-## Available Transitions
-
-### Page Transitions
-- `fade()` - Smooth opacity transition
-- `slide()` - Directional sliding
-- `scale()` - Zoom in/out effect
-- `hero()` - Shared element transitions
-- `pinterest()` - Pinterest-style expand
-- `ripple()` - Material Design ripple
-
-### Element Transitions
-- `fadeIn()` / `fadeOut()`
-- `slideUp()` / `slideDown()` / `slideLeft()` / `slideRight()`
-- `scaleIn()` / `scaleOut()`
-- `bounce()`
-- `blur()`
-- `rotate()`
-
-## API Reference
-
-### Ssgoi Component
-
-The main provider component that manages page transitions.
-
-```tsx
-interface SsgoiProps {
-  config: SsgoiConfig;
-}
-```
-
-### SsgoiTransition Component
-
-Wraps pages or sections that should animate during navigation.
-
-```tsx
-interface SsgoiTransitionProps {
-  id: string; // Unique identifier, typically the route path
-}
-```
-
-### transition Hook
-
-Used to animate individual elements on mount/unmount.
-
-```tsx
-function transition(config: TransitionConfig): (element: Element) => void
-```
-
-## License
-
-MIT

@@ -1,0 +1,225 @@
+.appContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heroSection {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.appTitle {
+  font-size: 3rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.heroTransitionSection {
+  margin-bottom: 4rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.colorBox {
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.125rem;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.colorBox:hover {
+  transform: scale(1.05);
+}
+
+.colorName {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.controlsSection {
+  background: #f8f9fa;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.speedButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.speedButton {
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.speedButton.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+}
+
+.speedButton:hover:not(.active) {
+  border-color: #667eea;
+  background: #f0f0ff;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.controlLabel {
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.controlInput {
+  width: 100px;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.controlValue {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.toggleSection {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.toggleButton {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.toggleButton:hover {
+  transform: translateY(-2px);
+}
+
+.examplesSection {
+  margin-bottom: 4rem;
+}
+
+.shapesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.shapeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shapeWrapper {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shapeLabel {
+  font-weight: 500;
+  color: #666;
+}
+
+.shape {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.circle {
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 86px solid #4facfe;
+  background: transparent;
+  box-shadow: none;
+}
+
+.square {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.pentagon {
+  position: relative;
+  width: 90px;
+  border-width: 50px 30px 0;
+  border-style: solid;
+  border-color: #30cfd0 transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pentagon:before {
+  content: "";
+  position: absolute;
+  height: 0;
+  width: 0;
+  top: -85px;
+  left: -30px;
+  border-width: 0 45px 35px;
+  border-style: solid;
+  border-color: transparent transparent #30cfd0;
+}
