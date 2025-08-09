@@ -9,25 +9,21 @@ interface SsgoiTransitionProps {
 export const SsgoiTransition = component$<SsgoiTransitionProps>(({ id }) => {
   const elementRef = useSignal<HTMLDivElement>();
 
-  useVisibleTask$(({ track }) => {
-    const element = track(() => elementRef.value);
+  useVisibleTask$(() => {
+    // No need to track - the ref value won't change after mount
+    const element = elementRef.value;
     if (!element) return;
 
-    try {
-      const getTransition = useSsgoi();
-      const transitionConfig = getTransition(id);
-      
-      if (transitionConfig) {
-        const transitionFn = coreTransition({
-          key: transitionConfig.key,
-          in: transitionConfig.in,
-          out: transitionConfig.out,
-        });
-        transitionFn(element);
-      }
-    } catch (error) {
-      // Context not available yet
-      console.warn("SsgoiTransition: Context not available yet", error);
+    const getTransition = useSsgoi();
+    const transitionConfig = getTransition(id);
+    
+    if (transitionConfig) {
+      const transitionFn = coreTransition({
+        key: transitionConfig.key,
+        in: transitionConfig.in,
+        out: transitionConfig.out,
+      });
+      transitionFn(element);
     }
   });
 

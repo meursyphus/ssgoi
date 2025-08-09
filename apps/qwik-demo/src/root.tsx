@@ -1,11 +1,11 @@
 import { component$, isDev } from "@builder.io/qwik";
 import { QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
 import { RouterHead } from "./components/router-head/router-head";
-import { Ssgoi, type SsgoiSerializableConfig } from "@ssgoi/qwik";
+import { useSsgoiProvider, type SsgoiSerializableConfig } from "@ssgoi/qwik";
 
 import "./global.css";
 
-// Use serializable config that can be passed as props
+// Use serializable config that can be passed to the hook
 const ssgoiConfig: SsgoiSerializableConfig = {
   transitions: [
     // Use hero transition between main and item detail pages
@@ -29,6 +29,9 @@ export default component$(() => {
    * Don't remove the `<head>` and `<body>` elements.
    */
 
+  // Initialize SSGOI provider with config
+  useSsgoiProvider(ssgoiConfig);
+
   return (
     <QwikCityProvider>
       <head>
@@ -42,11 +45,9 @@ export default component$(() => {
         <RouterHead />
       </head>
       <body lang="en">
-        <Ssgoi config={ssgoiConfig}>
-          <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
-            <RouterOutlet />
-          </div>
-        </Ssgoi>
+        <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
+          <RouterOutlet />
+        </div>
       </body>
     </QwikCityProvider>
   );

@@ -1,3 +1,4 @@
+import { isBrowser } from "@builder.io/qwik/build";
 import type { Transition, TransitionKey } from "@ssgoi/core";
 import { transition as coreTransition } from "@ssgoi/core";
 
@@ -23,17 +24,17 @@ export function transition<TAnimationValue = number>(options: {
   // Return a function that accepts an element and returns a cleanup function
   return (element: HTMLElement) => {
     // Skip if not in browser environment (SSR)
-    if (typeof window === "undefined") return;
+    if (!isBrowser) return;
 
-    // // Get the transition function from core
-    // const transitionFn = coreTransition<TAnimationValue>({
-    //   key: options.key,
-    //   in: options.in,
-    //   out: options.out,
-    // });
+    // Get the transition function from core
+    const transitionFn = coreTransition<TAnimationValue>({
+      key: options.key,
+      in: options.in,
+      out: options.out,
+    });
 
-    // // Apply the transition to the element and return cleanup
-    // const result = transitionFn(element);
-    // return typeof result === "function" ? result : undefined;
+    // Apply the transition to the element and return cleanup
+    const result = transitionFn(element);
+    return typeof result === "function" ? result : undefined;
   };
 }

@@ -2,45 +2,45 @@
   "name": "@ssgoi/qwik",
   "version": "2.0.0",
   "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.qwik.mjs",
-  "qwik": "./dist/index.qwik.mjs",
+  "main": "./dist/index.qwik.cjs",
+  "module": "./dist/index.qwik.js",
+  "qwik": "./dist/index.qwik.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "qwik": "./dist/index.qwik.mjs",
-      "import": "./dist/index.qwik.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.qwik.mjs"
+      "qwik": "./dist/index.qwik.js",
+      "import": "./dist/index.qwik.js",
+      "require": "./dist/index.qwik.cjs",
+      "default": "./dist/index.qwik.js"
     },
     "./transitions": {
       "types": "./dist/transitions/index.d.ts",
-      "qwik": "./dist/transitions/index.qwik.mjs",
-      "import": "./dist/transitions/index.qwik.mjs",
-      "require": "./dist/transitions/index.cjs",
-      "default": "./dist/transitions/index.qwik.mjs"
+      "qwik": "./dist/transitions/index.qwik.js",
+      "import": "./dist/transitions/index.qwik.js",
+      "require": "./dist/transitions/index.qwik.cjs",
+      "default": "./dist/transitions/index.qwik.js"
     },
     "./view-transitions": {
       "types": "./dist/view-transitions/index.d.ts",
-      "qwik": "./dist/view-transitions/index.qwik.mjs",
-      "import": "./dist/view-transitions/index.qwik.mjs",
-      "require": "./dist/view-transitions/index.cjs",
-      "default": "./dist/view-transitions/index.qwik.mjs"
+      "qwik": "./dist/view-transitions/index.qwik.js",
+      "import": "./dist/view-transitions/index.qwik.js",
+      "require": "./dist/view-transitions/index.qwik.cjs",
+      "default": "./dist/view-transitions/index.qwik.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
-      "qwik": "./dist/types.qwik.mjs",
-      "import": "./dist/types.qwik.mjs",
-      "require": "./dist/types.cjs",
-      "default": "./dist/types.qwik.mjs"
+      "qwik": "./dist/types.qwik.js",
+      "import": "./dist/types.qwik.js",
+      "require": "./dist/types.qwik.cjs",
+      "default": "./dist/types.qwik.js"
     },
     "./presets": {
       "types": "./dist/presets/index.d.ts",
-      "qwik": "./dist/presets/index.qwik.mjs",
-      "import": "./dist/presets/index.qwik.mjs",
-      "require": "./dist/presets/index.cjs",
-      "default": "./dist/presets/index.qwik.mjs"
+      "qwik": "./dist/presets/index.qwik.js",
+      "import": "./dist/presets/index.qwik.js",
+      "require": "./dist/presets/index.qwik.cjs",
+      "default": "./dist/presets/index.qwik.js"
     }
   },
   "files": [

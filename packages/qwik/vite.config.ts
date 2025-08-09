@@ -25,15 +25,15 @@ export default defineConfig(({ mode }) => {
           },
           formats: ["es", "cjs"],
           fileName: (format, entryName) => {
-            // Use .qwik.mjs for ES modules to enable Qwik optimizer
-            if (format === "es") return `${entryName}.qwik.mjs`;
-            return `${entryName}.cjs`;
+            // Use .qwik.js for ES modules to enable Qwik optimizer
+            if (format === "es") return `${entryName}.qwik.js`;
+            return `${entryName}.qwik.cjs`;
           },
         },
         rollupOptions: {
           output: {
             preserveModules: false,
-            chunkFileNames: "[name]-[hash].qwik.mjs",
+            chunkFileNames: "[name]-[hash].qwik.js",
           },
           // externalize deps that shouldn't be bundled into the library
           external: [
@@ -75,8 +75,8 @@ export default defineConfig(({ mode }) => {
         entry: "./src/lib/index.ts",
         formats: ["es", "cjs"],
         fileName: (format) => {
-          if (format === "es") return "index.qwik.mjs";
-          return "index.cjs";
+          if (format === "es") return "index.qwik.js";
+          return "index.qwik.cjs";
         },
       },
       rollupOptions: {
