@@ -1,0 +1,92 @@
+{
+  "name": "@ssgoi/qwik",
+  "version": "2.0.0",
+  "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
+  "main": "./dist/index.qwik.cjs",
+  "module": "./dist/index.qwik.js",
+  "qwik": "./dist/index.qwik.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "qwik": "./dist/index.qwik.js",
+      "import": "./dist/index.qwik.js",
+      "require": "./dist/index.qwik.cjs",
+      "default": "./dist/index.qwik.js"
+    },
+    "./transitions": {
+      "types": "./dist/transitions/index.d.ts",
+      "qwik": "./dist/transitions/index.qwik.js",
+      "import": "./dist/transitions/index.qwik.js",
+      "require": "./dist/transitions/index.qwik.cjs",
+      "default": "./dist/transitions/index.qwik.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "qwik": "./dist/view-transitions/index.qwik.js",
+      "import": "./dist/view-transitions/index.qwik.js",
+      "require": "./dist/view-transitions/index.qwik.cjs",
+      "default": "./dist/view-transitions/index.qwik.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "qwik": "./dist/types.qwik.js",
+      "import": "./dist/types.qwik.js",
+      "require": "./dist/types.qwik.cjs",
+      "default": "./dist/types.qwik.js"
+    },
+    "./presets": {
+      "types": "./dist/presets/index.d.ts",
+      "qwik": "./dist/presets/index.qwik.js",
+      "import": "./dist/presets/index.qwik.js",
+      "require": "./dist/presets/index.qwik.cjs",
+      "default": "./dist/presets/index.qwik.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "build.lib": "vite build --mode lib",
+    "build.types": "tsc --emitDeclarationOnly --outDir dist-types",
+    "dev": "vite --mode ssr",
+    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
+    "fmt": "prettier --write .",
+    "fmt.check": "prettier --check .",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "release": "np",
+    "start": "vite --open --mode ssr",
+    "test": "echo \"No test specified\" && exit 0",
+    "qwik": "qwik"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@builder.io/qwik": "^1.15.0"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "1.15.0",
+    "@eslint/js": "latest",
+    "@types/node": "20.14.11",
+    "eslint": "9.25.1",
+    "eslint-plugin-qwik": "1.15.0",
+    "globals": "16.0.0",
+    "np": "^8.0.4",
+    "prettier": "3.3.3",
+    "typescript": "5.4.5",
+    "typescript-eslint": "8.26.1",
+    "undici": "*",
+    "vite": "5.3.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-tsconfig-paths": "^4.2.1"
+  }
+}

@@ -1,0 +1,91 @@
+.detailContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.backButton {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.backButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.content {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.colorDisplay {
+  width: 200px;
+  height: 200px;
+  border-radius: 1rem;
+  margin: 0 auto 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.colorTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.colorValue {
+  font-size: 1.25rem;
+  color: #666;
+  font-family: monospace;
+  margin-bottom: 2rem;
+}
+
+.colorInfo {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.infoCard {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  flex: 1;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: #999;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: #333;
+  font-family: monospace;
+}
