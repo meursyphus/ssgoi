@@ -18,10 +18,13 @@ export const vTransition: Directive<
     }
 
     const transitionConfig = binding.value;
-    const cleanup = transition(transitionConfig)(el);
 
-    // Store cleanup function on element for unmounted hook
-    (el as any)._ssgoiCleanup = cleanup;
+    setTimeout(() => {
+      const cleanup = transition(transitionConfig)(el);
+
+      // Store cleanup function on element for unmounted hook
+      (el as any)._ssgoiCleanup = cleanup;
+    }, 0);
   },
   unmounted(el) {
     // Call cleanup if it exists
