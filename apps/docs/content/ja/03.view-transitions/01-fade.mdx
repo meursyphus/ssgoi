@@ -10,7 +10,7 @@ nav-title: "フェード"
 
 ## 基本的な使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -45,13 +45,31 @@ nav-title: "フェード"
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- アプリケーションコンテンツ -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { fade } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## オプション
 
 フェードトランジションはスプリングアニメーション設定をカスタマイズできます：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     fade({
@@ -70,6 +88,21 @@ nav-title: "フェード"
         damping: 30      // 減衰係数（デフォルト：30）
       }
     })
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { fade } from '@ssgoi/vue/view-transitions';
+
+    // オプション設定
+    const fadeTransition = fade({
+      spring: {
+        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
+        damping: 30      // 減衰係数（デフォルト：30）
+      }
+    });
+    </script>
     ```
   </TabPanel>
 </Tabs>
@@ -85,7 +118,7 @@ nav-title: "フェード"
 
 スムーズでゆっくりとしたフェード効果：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -108,6 +141,20 @@ nav-title: "フェード"
         }
       })
     };
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 100,
+          damping: 20
+        }
+      })
+    };
+    </script>
     ```
   </TabPanel>
 </Tabs>
@@ -116,7 +163,7 @@ nav-title: "フェード"
 
 素早くキレのあるフェード効果：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -141,11 +188,25 @@ nav-title: "フェード"
     };
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 500,
+          damping: 40
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 特定のルートへの適用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -182,6 +243,28 @@ nav-title: "フェード"
     <Ssgoi {config}>
       <!-- アプリケーションコンテンツ -->
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- アプリケーションコンテンツ -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about', 
+          transition: fade(),
+          symmetric: true  // /about → /home も自動的にフェードを適用
+        }
+      ]
+    };
+    </script>
     ```
   </TabPanel>
 </Tabs>

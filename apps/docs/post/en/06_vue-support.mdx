@@ -1,0 +1,171 @@
+---
+title: "Vue 3 Support is Here!"
+description: "SSGOI now officially supports Vue 3! Bring native app-like page transitions to your Vue and Nuxt applications with the same smooth, delightful experience you love."
+thumbnail: "/post/vue-support/thumbnail.png"
+date: "2025-08-10"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["vue", "nuxt", "release", "transitions"]
+---
+
+We're thrilled to announce that **SSGOI now officially supports Vue 3**! After React and Svelte, Vue developers can now enjoy the same buttery-smooth, native app-like page transitions that make web apps feel delightful.
+
+## What is SSGOI?
+
+SSGOI (쓱오이) is a universal page transition library that transforms static page navigations into smooth, delightful experiences. Unlike the browser's View Transition API which only works in Chrome, SSGOI works across all modern browsers - Chrome, Firefox, Safari, and more.
+
+## Why Vue Support Matters
+
+Vue is one of the most loved frontend frameworks with a vibrant ecosystem. With Vue 3's Composition API and improved performance, it was the perfect time to bring SSGOI's magic to the Vue community. Whether you're building with Vue Router or Nuxt 3, SSGOI integrates seamlessly without changing your existing routing logic.
+
+## Getting Started is Dead Simple
+
+Install the Vue package:
+
+```bash
+npm install @ssgoi/vue
+```
+
+Wrap your app with the `Ssgoi` provider:
+
+```vue
+<template>
+  <Ssgoi :config="config">
+    <RouterView />
+  </Ssgoi>
+</template>
+
+<script setup>
+import { Ssgoi } from '@ssgoi/vue';
+import { fade } from '@ssgoi/vue/view-transitions';
+
+const config = {
+  defaultTransition: fade()
+};
+</script>
+```
+
+Wrap your pages with `SsgoiTransition`:
+
+```vue
+<template>
+  <SsgoiTransition id="/home">
+    <h1>Welcome to Vue + SSGOI!</h1>
+  </SsgoiTransition>
+</template>
+
+<script setup>
+import { SsgoiTransition } from '@ssgoi/vue';
+</script>
+```
+
+That's it! Your Vue app now has smooth page transitions.
+
+## Vue-Specific Features
+
+### 1. Custom Directive Support
+
+Vue developers love directives, so we created `v-transition` for animating individual elements:
+
+```vue
+<div v-transition="{
+  key: 'hero',
+  in: fadeIn(),
+  out: scaleOut()
+}">
+  <img src="hero.jpg" alt="Hero" />
+</div>
+```
+
+### 2. Composition API Integration
+
+For those who prefer the Composition API:
+
+```javascript
+import { useSsgoi } from '@ssgoi/vue';
+
+const ssgoi = useSsgoi();
+// Access transition context and state
+```
+
+### 3. Perfect Nuxt 3 Compatibility
+
+SSGOI works flawlessly with Nuxt 3's SSR and hybrid rendering:
+
+```vue
+<!-- app.vue -->
+<template>
+  <Ssgoi :config="config">
+    <NuxtPage />
+  </Ssgoi>
+</template>
+```
+
+No hydration issues, SEO-friendly, and works with Nuxt's powerful routing system.
+
+## The Same Transitions You Love
+
+All the beautiful transitions from React and Svelte are available:
+
+- **fade()** - Smooth opacity transitions
+- **slide()** - Directional sliding effects
+- **scale()** - Zoom in/out animations
+- **hero()** - Shared element transitions
+- **pinterest()** - Pinterest-style expand effect
+- **ripple()** - Material Design ripple
+
+Plus element-level animations like `fadeIn()`, `slideUp()`, `bounce()`, `blur()`, and more!
+
+## Spring Physics for Natural Motion
+
+Every animation uses spring physics for that natural, responsive feel:
+
+```javascript
+slide({
+  direction: 'left',
+  spring: {
+    stiffness: 300,
+    damping: 30
+  }
+})
+```
+
+## Try the Vue Demo
+
+Want to see it in action? Check out our Vue demo app:
+
+```bash
+git clone https://github.com/meursyphus/ssgoi
+cd ssgoi
+pnpm install
+pnpm vue-demo:dev
+```
+
+Or visit our [interactive documentation](https://ssgoi.dev) to see live examples and experiment with different transitions.
+
+## What's Next?
+
+Vue support is just the beginning. We're working on:
+- More preset transitions
+- Advanced gesture support
+- Performance optimizations
+- Better DevTools integration
+
+## Join the Community
+
+SSGOI is open source and we'd love your contributions! Whether it's bug reports, feature requests, or pull requests, visit our [GitHub repository](https://github.com/meursyphus/ssgoi).
+
+## Start Building Beautiful Vue Apps
+
+The `@ssgoi/vue` package is available on npm today. Transform your Vue applications with smooth, delightful page transitions that your users will love.
+
+```bash
+npm install @ssgoi/vue
+```
+
+Happy transitioning! 🚀
+
+---
+
+*SSGOI is MIT licensed and maintained by [MeurSyphus](https://github.com/meursyphus). Special thanks to the Vue community for their feedback and support during development.*

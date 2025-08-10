@@ -12,7 +12,7 @@ nav-title: "페이드"
 
 ## 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -43,6 +43,22 @@ nav-title: "페이드"
     }}>
       Fade me!
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { fade } from '@ssgoi/vue/transitions';
+    </script>
+
+    <template>
+      <div v-transition="{
+        key: 'my-element',
+        ...fade()
+      }">
+        Fade me!
+      </div>
+    </template>
     ```
   </TabPanel>
 </Tabs>

@@ -12,7 +12,7 @@ nav-title: "バウンス"
 
 ## 使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -43,6 +43,22 @@ nav-title: "バウンス"
     }}>
       Bounce me!
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { bounce } from '@ssgoi/vue/transitions';
+    </script>
+
+    <template>
+      <div v-transition="{
+        key: 'my-element',
+        ...bounce()
+      }">
+        Bounce me!
+      </div>
+    </template>
     ```
   </TabPanel>
 </Tabs>

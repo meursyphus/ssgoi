@@ -4,6 +4,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { mdxComponents } from "./mdx-components";
 import svelte from "@/lib/highlights/svelte";
+import vue from "@/lib/highlights/vue";
 import { common } from "lowlight";
 
 // Syntax highlighting styles are in globals.css
@@ -119,7 +120,7 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
             [
               rehypeHighlight,
               {
-                languages: { ...common, svelte },
+                languages: { ...common, svelte, vue },
               },
             ],
             rehypeSlug,

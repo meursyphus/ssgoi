@@ -6,7 +6,7 @@ nav-title: "빠른 시작"
 
 ## 패키지 설치
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```bash
     npm install @ssgoi/react 
@@ -21,11 +21,18 @@ nav-title: "빠른 시작"
     # 또는 pnpm add @ssgoi/svelte
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```bash
+    npm install @ssgoi/vue 
+    # 또는 yarn add @ssgoi/vue 
+    # 또는 pnpm add @ssgoi/vue
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 기본 설정 (2분)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ### 1. 루트 레이아웃 설정 (Next.js App Router)
     ```tsx
@@ -133,11 +140,73 @@ nav-title: "빠른 시작"
     </SsgoiTransition>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ### 1. 루트 레이아웃 설정 (Nuxt 3)
+
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="config">
+        <!-- ⚠️ 중요: position: relative가 필수입니다! -->
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { fade } from "@ssgoi/vue/view-transitions";
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+    ```
+
+    > **왜 position: relative가 필요한가요?**
+    > 페이지가 애니메이션 아웃할 때 `position: absolute`가 적용됩니다. 부모 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
+
+    ### 2. 페이지 래핑
+
+    ```vue
+    <!-- pages/index.vue -->
+    <template>
+      <SsgoiTransition id="/">
+        <main>
+          <h1>홈 페이지</h1>
+          <!-- 페이지 콘텐츠 -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+    ```vue
+    <!-- pages/about.vue -->
+    <template>
+      <SsgoiTransition id="/about">
+        <main>
+          <h1>소개 페이지</h1>
+          <!-- 페이지 콘텐츠 -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 다양한 트랜지션 적용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -194,6 +263,35 @@ nav-title: "빠른 시작"
       </div>
     </Ssgoi>
     ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="ssgoiConfig">
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // 홈 → 소개: 왼쪽으로 슬라이드
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // 소개 → 홈: 오른쪽으로 슬라이드
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // 리스트 → 상세: 스케일
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+    </script>
+    ```
+
   </TabPanel>
 </Tabs>
 

@@ -6,7 +6,7 @@ nav-title: "Quick Start"
 
 ## Package Installation
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```bash 
     npm install @ssgoi/react 
@@ -21,11 +21,18 @@ nav-title: "Quick Start"
     # or pnpm add @ssgoi/svelte 
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```bash 
+    npm install @ssgoi/vue 
+    # or yarn add @ssgoi/vue 
+    # or pnpm add @ssgoi/vue 
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Basic Setup (2 minutes)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ### 1. Root Layout Setup (Next.js App Router)
 
@@ -140,11 +147,73 @@ nav-title: "Quick Start"
     ```
 
   </TabPanel>
+  <TabPanel value="vue">
+    ### 1. Root Layout Setup (Nuxt 3)
+
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="config">
+        <!-- ⚠️ Important: position: relative is required! -->
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { fade } from "@ssgoi/vue/view-transitions";
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+    ```
+
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
+
+    ### 2. Page Wrapping
+
+    ```vue
+    <!-- pages/index.vue -->
+    <template>
+      <SsgoiTransition id="/">
+        <main>
+          <h1>Home Page</h1>
+          <!-- Page content -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+    ```vue
+    <!-- pages/about.vue -->
+    <template>
+      <SsgoiTransition id="/about">
+        <main>
+          <h1>About Page</h1>
+          <!-- Page content -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## Applying Various Transitions
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -201,6 +270,35 @@ nav-title: "Quick Start"
         <slot />
       </div>
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="ssgoiConfig">
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // Home → About: slide left
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // About → Home: slide right
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // List → Detail: scale
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+    </script>
     ```
 
   </TabPanel>

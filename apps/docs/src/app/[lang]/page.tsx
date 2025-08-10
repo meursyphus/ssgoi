@@ -73,12 +73,11 @@ export default async function Home({ params }: { params: { lang: string } }) {
                     npm install @ssgoi/svelte
                   </code>
                 </div>
-                {/* Vue - 추가 예정 */}
-                <div className="rounded-lg bg-card/50 p-4 opacity-50">
+                <div className="rounded-lg bg-card/50 p-4">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
                     {t("quickInstall.vue")}
                   </p>
-                  <code className="font-mono text-sm text-white/50">
+                  <code className="font-mono text-sm text-white">
                     npm install @ssgoi/vue
                   </code>
                 </div>
@@ -193,20 +192,19 @@ export default async function Home({ params }: { params: { lang: string } }) {
               </span>
             </div>
 
-            {/* Vue - 지원 예정 */}
-            <div className="group flex flex-col items-center gap-3 opacity-50">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4">
+            {/* Vue */}
+            <div className="group flex flex-col items-center gap-3">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
                 <Image
                   src="/icons/vue.svg"
                   alt="Vue"
                   width={48}
                   height={48}
-                  className="h-12 w-12 opacity-50"
+                  className="h-12 w-12"
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
-                Vue
-                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
+                {t("quickInstall.vue")}
               </span>
             </div>
 

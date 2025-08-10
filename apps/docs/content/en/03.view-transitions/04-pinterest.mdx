@@ -31,7 +31,7 @@ Gallery Page                    Detail Page
 
 ### 1. Transition Setup
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -80,11 +80,36 @@ Gallery Page                    Detail Page
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- App content -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { pinterest } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: pinterest(),
+          symmetric: true
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Gallery Page
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     export function Gallery() {
@@ -126,11 +151,33 @@ Gallery Page                    Detail Page
     </div>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <div class="masonry-grid">
+        <RouterLink 
+          v-for="item in items"
+          :key="item.id" 
+          :to="`/gallery/${item.id}`"
+          :data-pinterest-gallery-key="item.id"
+          class="gallery-item"
+        >
+          <img :src="item.thumbnail" :alt="item.title" />
+          <h3>{{ item.title }}</h3>
+        </RouterLink>
+      </div>
+    </template>
+
+    <script setup>
+    defineProps(['items']);
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. Detail Page
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     export function GalleryDetail({ item }) {
@@ -161,6 +208,24 @@ Gallery Page                    Detail Page
       <h1>{item.title}</h1>
       <p>{item.description}</p>
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <div 
+        :data-pinterest-detail-key="item.id"
+        class="detail-container"
+      >
+        <img :src="item.fullImage" :alt="item.title" />
+        <h1>{{ item.title }}</h1>
+        <p>{{ item.description }}</p>
+      </div>
+    </template>
+
+    <script setup>
+    defineProps(['item']);
+    </script>
     ```
   </TabPanel>
 </Tabs>
@@ -205,7 +270,7 @@ Start: Small card      Mid: Expanding        End: Full screen
 
 ### With Masonry Layout
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // Gallery page
@@ -250,7 +315,7 @@ Start: Small card      Mid: Expanding        End: Full screen
 
 ### Image Preloading
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // Detail page - preload images for smooth transitions

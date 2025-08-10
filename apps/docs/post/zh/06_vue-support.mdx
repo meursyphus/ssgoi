@@ -1,0 +1,171 @@
+---
+title: "Vue 3 支持现已推出！"
+description: "SSGOI 现已正式支持 Vue 3！为您的 Vue 和 Nuxt 应用带来原生应用般流畅、令人愉悦的页面过渡效果。"
+thumbnail: "/post/vue-support/thumbnail.png"
+date: "2025-08-10"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["vue", "nuxt", "release", "transitions"]
+---
+
+我们非常激动地宣布，**SSGOI 现已正式支持 Vue 3**！继 React 和 Svelte 之后，Vue 开发者现在也可以享受让 Web 应用感觉愉悦的、如黄油般顺滑的原生应用般页面过渡效果了。
+
+## 什么是 SSGOI？
+
+SSGOI（쓱오이）是一个通用页面过渡库，它将静态页面导航转变为流畅、令人愉悦的体验。与仅在 Chrome 中工作的浏览器 View Transition API 不同，SSGOI 可在所有现代浏览器中运行 - Chrome、Firefox、Safari 等等。
+
+## 为什么 Vue 支持很重要
+
+Vue 是最受欢迎的前端框架之一，拥有充满活力的生态系统。随着 Vue 3 的 Composition API 和性能改进，现在是将 SSGOI 的魔力带给 Vue 社区的完美时机。无论您是使用 Vue Router 还是 Nuxt 3，SSGOI 都能无缝集成，无需更改现有的路由逻辑。
+
+## 开始使用极其简单
+
+安装 Vue 包：
+
+```bash
+npm install @ssgoi/vue
+```
+
+用 `Ssgoi` provider 包装您的应用：
+
+```vue
+<template>
+  <Ssgoi :config="config">
+    <RouterView />
+  </Ssgoi>
+</template>
+
+<script setup>
+import { Ssgoi } from '@ssgoi/vue';
+import { fade } from '@ssgoi/vue/view-transitions';
+
+const config = {
+  defaultTransition: fade()
+};
+</script>
+```
+
+用 `SsgoiTransition` 包装您的页面：
+
+```vue
+<template>
+  <SsgoiTransition id="/home">
+    <h1>欢迎使用 Vue + SSGOI！</h1>
+  </SsgoiTransition>
+</template>
+
+<script setup>
+import { SsgoiTransition } from '@ssgoi/vue';
+</script>
+```
+
+就是这样！您的 Vue 应用现在拥有流畅的页面过渡效果了。
+
+## Vue 特定功能
+
+### 1. 自定义指令支持
+
+Vue 开发者喜欢指令，所以我们创建了 `v-transition` 来为单个元素添加动画：
+
+```vue
+<div v-transition="{
+  key: 'hero',
+  in: fadeIn(),
+  out: scaleOut()
+}">
+  <img src="hero.jpg" alt="Hero" />
+</div>
+```
+
+### 2. Composition API 集成
+
+对于喜欢 Composition API 的开发者：
+
+```javascript
+import { useSsgoi } from '@ssgoi/vue';
+
+const ssgoi = useSsgoi();
+// 访问过渡上下文和状态
+```
+
+### 3. 完美的 Nuxt 3 兼容性
+
+SSGOI 与 Nuxt 3 的 SSR 和混合渲染完美配合：
+
+```vue
+<!-- app.vue -->
+<template>
+  <Ssgoi :config="config">
+    <NuxtPage />
+  </Ssgoi>
+</template>
+```
+
+没有水合问题，SEO 友好，并且与 Nuxt 强大的路由系统协同工作。
+
+## 您喜爱的相同过渡效果
+
+React 和 Svelte 中所有美丽的过渡效果都可用：
+
+- **fade()** - 流畅的透明度过渡
+- **slide()** - 方向性滑动效果
+- **scale()** - 缩放动画
+- **hero()** - 共享元素过渡
+- **pinterest()** - Pinterest 风格扩展效果
+- **ripple()** - Material Design 涟漪效果
+
+还有元素级动画，如 `fadeIn()`、`slideUp()`、`bounce()`、`blur()` 等等！
+
+## 自然运动的弹簧物理学
+
+每个动画都使用弹簧物理学，带来自然、响应的感觉：
+
+```javascript
+slide({
+  direction: 'left',
+  spring: {
+    stiffness: 300,
+    damping: 30
+  }
+})
+```
+
+## 试用 Vue 演示
+
+想要看看实际效果？查看我们的 Vue 演示应用：
+
+```bash
+git clone https://github.com/meursyphus/ssgoi
+cd ssgoi
+pnpm install
+pnpm vue-demo:dev
+```
+
+或访问我们的[交互式文档](https://ssgoi.dev)查看实时示例并尝试不同的过渡效果。
+
+## 下一步计划
+
+Vue 支持只是开始。我们正在开发：
+- 更多预设过渡效果
+- 高级手势支持
+- 性能优化
+- 更好的 DevTools 集成
+
+## 加入社区
+
+SSGOI 是开源的，我们欢迎您的贡献！无论是错误报告、功能请求还是拉取请求，请访问我们的 [GitHub 仓库](https://github.com/meursyphus/ssgoi)。
+
+## 开始构建美丽的 Vue 应用
+
+`@ssgoi/vue` 包今天已在 npm 上可用。使用用户会喜爱的流畅、令人愉悦的页面过渡效果来改造您的 Vue 应用程序。
+
+```bash
+npm install @ssgoi/vue
+```
+
+祝过渡愉快！ 🚀
+
+---
+
+*SSGOI 采用 MIT 许可证，由 [MeurSyphus](https://github.com/meursyphus) 维护。特别感谢 Vue 社区在开发期间提供的反馈和支持。*

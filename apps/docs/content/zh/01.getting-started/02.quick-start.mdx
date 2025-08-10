@@ -6,7 +6,7 @@ nav-title: "快速入门"
 
 ## 安装包
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```bash 
     npm install @ssgoi/react 
@@ -21,11 +21,18 @@ nav-title: "快速入门"
     # or pnpm add @ssgoi/svelte 
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```bash 
+    npm install @ssgoi/vue 
+    # or yarn add @ssgoi/vue 
+    # or pnpm add @ssgoi/vue 
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 基本设置（2分钟）
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ### 1. 根布局设置 (Next.js App Router)
 
@@ -138,11 +145,73 @@ nav-title: "快速入门"
     ```
 
   </TabPanel>
+  <TabPanel value="vue">
+    ### 1. 根布局设置 (Nuxt 3)
+
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="config">
+        <!-- ⚠️ 重要：必须设置position: relative！ -->
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { fade } from "@ssgoi/vue/view-transitions";
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+    ```
+
+    > **为什么需要position: relative？**
+    > 当页面动画退出时，会应用`position: absolute`。如果父元素没有`position: relative`，页面可能会移动到错误的位置。
+
+    ### 2. 页面包装
+
+    ```vue
+    <!-- pages/index.vue -->
+    <template>
+      <SsgoiTransition id="/">
+        <main>
+          <h1>首页</h1>
+          <!-- 页面内容 -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+    ```vue
+    <!-- pages/about.vue -->
+    <template>
+      <SsgoiTransition id="/about">
+        <main>
+          <h1>关于页面</h1>
+          <!-- 页面内容 -->
+        </main>
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 应用各种过渡效果
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -199,6 +268,35 @@ nav-title: "快速入门"
         <slot />
       </div>
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="ssgoiConfig">
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+
+    const ssgoiConfig = {
+      transitions: [
+        // 首页 → 关于：向左滑动
+        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
+        // 关于 → 首页：向右滑动
+        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
+        // 列表 → 详情：缩放
+        { from: "/list", to: "/detail/*", transition: scale() },
+      ],
+    };
+    </script>
     ```
 
   </TabPanel>

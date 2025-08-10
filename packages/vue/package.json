@@ -1,0 +1,100 @@
+{
+  "name": "@ssgoi/vue",
+  "version": "2.0.0",
+  "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
+  "private": false,
+  "type": "module",
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./transitions": {
+      "types": "./dist/transitions/index.d.ts",
+      "import": "./dist/transitions/index.js",
+      "require": "./dist/transitions/index.cjs",
+      "default": "./dist/transitions/index.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "import": "./dist/view-transitions/index.js",
+      "require": "./dist/view-transitions/index.cjs",
+      "default": "./dist/view-transitions/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "default": "./dist/types.js"
+    },
+    "./presets": {
+      "types": "./dist/presets/index.d.ts",
+      "import": "./dist/presets/index.js",
+      "require": "./dist/presets/index.cjs",
+      "default": "./dist/presets/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vue-tsc -b && vite build",
+    "watch": "vite build --watch",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "package": "vite build",
+    "prepare": "pnpm run build"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.30.1",
+    "eslint-plugin-vue": "^9.33.0",
+    "globals": "^16.3.0",
+    "rollup-plugin-preserve-directives": "^0.4.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.1",
+    "vite": "^7.0.4",
+    "vite-plugin-dts": "^4.5.4",
+    "vue-tsc": "^2.2.12"
+  },
+  "keywords": [
+    "vue",
+    "page-transition",
+    "animation",
+    "ssgoi",
+    "spring-physics"
+  ],
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
+    "directory": "packages/vue"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

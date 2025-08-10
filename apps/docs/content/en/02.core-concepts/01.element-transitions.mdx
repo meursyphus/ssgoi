@@ -8,7 +8,7 @@ nav-title: "Element Animations"
 
 How to use various transition effects:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -135,6 +135,72 @@ How to use various transition effects:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <!-- Fade transition -->
+      <div v-transition="{
+        key: 'fade-element',
+        ...fade({ spring: { stiffness: 300, damping: 30 } })
+      }">
+        Fade effect
+      </div>
+
+      <!-- Scale transition -->
+      <div v-transition="{
+        key: 'scale-element',
+        ...scale({ spring: { stiffness: 300, damping: 30 } })
+      }">
+        Scale effect
+      </div>
+
+      <!-- Blur transition -->
+      <div v-transition="{
+        key: 'blur-element',
+        ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+      }">
+        Blur effect
+      </div>
+
+      <!-- Slide transition (with direction) -->
+      <div v-transition="{
+        key: 'slide-element',
+        ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+      }">
+        Slide effect
+      </div>
+
+      <!-- Fly transition (custom position) -->
+      <div v-transition="{
+        key: 'fly-element',
+        ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+      }">
+        Fly effect
+      </div>
+
+      <!-- Rotate transition -->
+      <div v-transition="{
+        key: 'rotate-element',
+        ...rotate({ spring: { stiffness: 300, damping: 30 } })
+      }">
+        Rotate effect
+      </div>
+
+      <!-- Bounce transition -->
+      <div v-transition="{
+        key: 'bounce-element',
+        ...bounce({ spring: { stiffness: 300, damping: 30 } })
+      }">
+        Bounce effect
+      </div>
+    </template>
+
+    <script setup>
+    import { transition } from '@ssgoi/vue';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/vue/transitions';
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Basic Structure
@@ -180,7 +246,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## Framework-specific Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -228,6 +294,33 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     }}>
       Content
     </div>
+    ```
+  </TabPanel>
+  
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <div v-transition="{
+        key: 'unique-key',
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          }
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          }
+        })
+      }">
+        Content
+      </div>
+    </template>
+
+    <script setup>
+    import { transition } from '@ssgoi/vue';
+    </script>
     ```
   </TabPanel>
 </Tabs>

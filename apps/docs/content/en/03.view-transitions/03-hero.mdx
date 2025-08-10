@@ -25,7 +25,7 @@ Page A                      Page B
 
 ### 1. Transition Setup
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -74,13 +74,38 @@ Page A                      Page B
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- App content -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { hero } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: hero(),
+          symmetric: true
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Adding Keys to Elements
 
 **List Page:**
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     export function ProductList() {
@@ -125,11 +150,37 @@ Page A                      Page B
     </div>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <div class="grid">
+        <RouterLink
+          v-for="product in products"
+          :key="product.id"
+          :to="`/products/${product.id}`"
+        >
+          <img 
+            :data-hero-key="`product-image-${product.id}`"
+            :src="product.thumbnail"
+            :alt="product.name"
+          />
+          <h3 :data-hero-key="`product-title-${product.id}`">
+            {{ product.name }}
+          </h3>
+        </RouterLink>
+      </div>
+    </template>
+
+    <script setup>
+    defineProps(['products']);
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 **Detail Page:**
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     export function ProductDetail({ product }) {
@@ -168,6 +219,27 @@ Page A                      Page B
     </div>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <div>
+        <img 
+          :data-hero-key="`product-image-${product.id}`"
+          :src="product.fullImage"
+          :alt="product.name"
+        />
+        <h1 :data-hero-key="`product-title-${product.id}`">
+          {{ product.name }}
+        </h1>
+        <p>{{ product.description }}</p>
+      </div>
+    </template>
+
+    <script setup>
+    defineProps(['product']);
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Options
@@ -186,7 +258,7 @@ hero({
 
 ### Multiple Elements Transitioning
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // Image, title, and price all hero transition
@@ -211,7 +283,7 @@ hero({
 
 ### Dynamic Key Generation
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     // Different hero groups by category
