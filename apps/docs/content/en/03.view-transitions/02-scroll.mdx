@@ -10,7 +10,7 @@ The Scroll transition creates a sliding effect where pages transition by scrolli
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -45,6 +45,24 @@ The Scroll transition creates a sliding effect where pages transition by scrolli
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- App content -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: scroll()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Options
@@ -75,7 +93,7 @@ scroll({
 
 ### Scroll Up (Default)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -92,11 +110,20 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### Scroll Down
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -113,11 +140,20 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll({ direction: 'down' })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### Smooth Scroll
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -144,13 +180,27 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll({
+        spring: {
+          stiffness: 150,
+          damping: 25
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Route-Specific Directions
 
 Set different directions based on hierarchy:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -197,6 +247,33 @@ Set different directions based on hierarchy:
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- App content -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    const config = {
+      transitions: [
+        {
+          from: '/list',
+          to: '/detail/*',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true  // Automatically uses 'down' for reverse
+        },
+        {
+          from: '/parent',
+          to: '/child',
+          transition: scroll({ direction: 'down' })
+        }
+      ]
+    };
+    </script>
     ```
   </TabPanel>
 </Tabs>

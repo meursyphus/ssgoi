@@ -97,7 +97,7 @@ transition({
 
 ### ビュートランジションでのプリセット使用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -140,11 +140,37 @@ transition({
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { config } from '@ssgoi/vue/presets';
+    import { fade, slide } from '@ssgoi/vue/view-transitions';
+
+    const transitionConfig = {
+      defaultTransition: fade({ spring: config.gentle }),
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: slide({ spring: config.wobbly })
+        }
+      ]
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="transitionConfig">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 要素トランジションでのプリセット使用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -177,6 +203,28 @@ transition({
     <div use:transition={{ key: 'fade-in', ...fadeIn }}>
       コンテンツ
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { config } from '@ssgoi/vue/presets';
+    import { fadeIn } from '@ssgoi/vue/transitions';
+
+    const fadeTransition = {
+      spring: config.slow,
+      tick: (progress) => ({
+        opacity: progress,
+        transform: `translateY(${(1 - progress) * 20}px)`
+      })
+    };
+    </script>
+
+    <template>
+      <div v-transition="{ key: 'fade-in', ...fadeTransition }">
+        コンテンツ
+      </div>
+    </template>
     ```
   </TabPanel>
 </Tabs>

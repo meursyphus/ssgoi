@@ -12,7 +12,7 @@ The Scale animation enlarges or shrinks elements to create zoom effects.
 
 ## Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -43,6 +43,22 @@ The Scale animation enlarges or shrinks elements to create zoom effects.
     }}>
       Scale me!
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { scale } from '@ssgoi/vue/transitions';
+    </script>
+
+    <template>
+      <div v-transition="{
+        key: 'my-element',
+        ...scale()
+      }">
+        Scale me!
+      </div>
+    </template>
     ```
   </TabPanel>
 </Tabs>

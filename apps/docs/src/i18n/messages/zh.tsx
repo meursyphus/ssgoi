@@ -50,7 +50,7 @@ const zh: Messages = {
     quickInstall: {
       react: "React",
       svelte: "Svelte",
-      vue: "Vue (即将推出)",
+      vue: "Vue",
       solidjs: "SolidJS (即将推出)",
       qwik: "Qwik (即将推出)",
     },

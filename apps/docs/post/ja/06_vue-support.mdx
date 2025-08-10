@@ -1,0 +1,171 @@
+---
+title: "Vue 3サポートを開始しました！"
+description: "SSGOIがついにVue 3を公式サポート！VueやNuxtアプリケーションにネイティブアプリのような滑らかで魅力的なページトランジションを実装できます。"
+thumbnail: "/post/vue-support/thumbnail.png"
+date: "2025-08-10"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["vue", "nuxt", "release", "transitions"]
+---
+
+**SSGOIがついにVue 3を公式サポートしました！** ReactとSvelteに続き、Vue開発者もWebアプリをより魅力的にする、バターのように滑らかでネイティブアプリのようなページトランジションを楽しめるようになりました。
+
+## SSGOIとは？
+
+SSGOI（スゴイ）は、静的なページナビゲーションを滑らかで魅力的な体験に変換するユニバーサルページトランジションライブラリです。Chromeでのみ動作するブラウザのView Transition APIとは異なり、SSGOIはChrome、Firefox、Safariなど、すべての最新ブラウザで動作します。
+
+## Vueサポートが重要な理由
+
+Vueは活発なエコシステムを持つ、最も愛されているフロントエンドフレームワークの1つです。Vue 3のComposition APIとパフォーマンスの向上により、SSGOIの魔法をVueコミュニティに提供する絶好のタイミングでした。Vue RouterでもNuxt 3でも、SSGOIは既存のルーティングロジックを変更することなくシームレスに統合できます。
+
+## 導入は驚くほど簡単
+
+Vueパッケージをインストール：
+
+```bash
+npm install @ssgoi/vue
+```
+
+アプリを`Ssgoi`プロバイダーでラップ：
+
+```vue
+<template>
+  <Ssgoi :config="config">
+    <RouterView />
+  </Ssgoi>
+</template>
+
+<script setup>
+import { Ssgoi } from '@ssgoi/vue';
+import { fade } from '@ssgoi/vue/view-transitions';
+
+const config = {
+  defaultTransition: fade()
+};
+</script>
+```
+
+ページを`SsgoiTransition`でラップ：
+
+```vue
+<template>
+  <SsgoiTransition id="/home">
+    <h1>Vue + SSGOIへようこそ！</h1>
+  </SsgoiTransition>
+</template>
+
+<script setup>
+import { SsgoiTransition } from '@ssgoi/vue';
+</script>
+```
+
+これだけです！Vueアプリに滑らかなページトランジションが実装されました。
+
+## Vue専用機能
+
+### 1. カスタムディレクティブサポート
+
+Vue開発者はディレクティブが大好きです。そこで、個々の要素にアニメーションを適用する`v-transition`を作成しました：
+
+```vue
+<div v-transition="{
+  key: 'hero',
+  in: fadeIn(),
+  out: scaleOut()
+}">
+  <img src="hero.jpg" alt="Hero" />
+</div>
+```
+
+### 2. Composition API統合
+
+Composition APIを好む方のために：
+
+```javascript
+import { useSsgoi } from '@ssgoi/vue';
+
+const ssgoi = useSsgoi();
+// トランジションコンテキストと状態にアクセス
+```
+
+### 3. 完璧なNuxt 3互換性
+
+SSGOIはNuxt 3のSSRとハイブリッドレンダリングで完璧に動作します：
+
+```vue
+<!-- app.vue -->
+<template>
+  <Ssgoi :config="config">
+    <NuxtPage />
+  </Ssgoi>
+</template>
+```
+
+ハイドレーション問題なし、SEOフレンドリー、そしてNuxtの強力なルーティングシステムと連携します。
+
+## お馴染みのトランジション効果
+
+ReactやSvelteで利用可能なすべての美しいトランジションが使えます：
+
+- **fade()** - 滑らかな透明度トランジション
+- **slide()** - 方向性のあるスライド効果
+- **scale()** - ズームイン/アウトアニメーション
+- **hero()** - 共有要素トランジション
+- **pinterest()** - Pinterestスタイルの展開効果
+- **ripple()** - Material Designリップル
+
+さらに`fadeIn()`、`slideUp()`、`bounce()`、`blur()`などの要素レベルのアニメーションも！
+
+## 自然な動きのためのスプリング物理学
+
+すべてのアニメーションは、自然で反応的な感覚のためにスプリング物理学を使用します：
+
+```javascript
+slide({
+  direction: 'left',
+  spring: {
+    stiffness: 300,
+    damping: 30
+  }
+})
+```
+
+## Vueデモを試す
+
+実際に見てみたいですか？Vueデモアプリをチェックしてください：
+
+```bash
+git clone https://github.com/meursyphus/ssgoi
+cd ssgoi
+pnpm install
+pnpm vue-demo:dev
+```
+
+または[インタラクティブドキュメント](https://ssgoi.dev)にアクセスして、ライブ例を見て、さまざまなトランジションを試してみてください。
+
+## 今後の予定
+
+Vueサポートは始まりに過ぎません。現在取り組んでいること：
+- より多くのプリセットトランジション
+- 高度なジェスチャーサポート
+- パフォーマンス最適化
+- より良いDevTools統合
+
+## コミュニティに参加
+
+SSGOIはオープンソースで、皆様の貢献を歓迎します！バグレポート、機能リクエスト、プルリクエストなど、[GitHubリポジトリ](https://github.com/meursyphus/ssgoi)をご覧ください。
+
+## 美しいVueアプリの構築を始めましょう
+
+`@ssgoi/vue`パッケージは本日からnpmで利用可能です。ユーザーが気に入る滑らかで魅力的なページトランジションでVueアプリケーションを変革しましょう。
+
+```bash
+npm install @ssgoi/vue
+```
+
+楽しいトランジションを！ 🚀
+
+---
+
+*SSGOIはMITライセンスで提供され、[MeurSyphus](https://github.com/meursyphus)によって管理されています。開発中のフィードバックとサポートをいただいたVueコミュニティに特別な感謝を申し上げます。*

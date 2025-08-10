@@ -16,7 +16,7 @@ SSGOI brings native app-like page transitions to the web. Transform your static 
 - **🚀 SSR Ready** - Perfect compatibility with Nuxt. No hydration issues, SEO-friendly
 - **🎯 Use Your Router** - Keep your existing routing. Vue Router, Nuxt - all work seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **⚛️ Vue Optimized** - Built specifically for Vue 3 with Composition API
+- **🖖 Vue Optimized** - Built specifically for Vue 3 with Composition API and custom directives
 
 ## Installation
 
@@ -123,7 +123,11 @@ Animate specific elements during mount/unmount:
 </template>
 
 <script setup>
+import { vTransition as vTransitionDirective } from '@ssgoi/vue';
 import { fadeIn, slideUp } from '@ssgoi/vue/transitions';
+
+// Local directive registration
+const vTransition = vTransitionDirective;
 </script>
 ```
 
@@ -139,17 +143,6 @@ const app = createApp(App);
 app.directive('transition', vTransition);
 
 app.mount('#app');
-```
-
-**Local Registration (in a component):**
-```vue
-<script setup>
-import { vTransition as vTransitionDirective } from '@ssgoi/vue';
-import { fadeIn, slideUp } from '@ssgoi/vue/transitions';
-
-// Local directive registration
-const vTransition = vTransitionDirective;
-</script>
 ```
 
 #### Method 2: Using Composition API
@@ -229,6 +222,9 @@ The provider component that manages transition context.
 </Ssgoi>
 ```
 
+Props:
+- `config` - Transition configuration object
+
 #### `<SsgoiTransition>`
 Wrapper component for pages that should transition.
 
@@ -238,13 +234,18 @@ Wrapper component for pages that should transition.
 </SsgoiTransition>
 ```
 
+Props:
+- `id` - Unique identifier for the page (required)
+
 ### Composables
 
 #### `useSsgoi()`
-Access transition context.
+Access transition context and state.
 
 ```javascript
-const getTransition = useSsgoi();
+import { useSsgoi } from '@ssgoi/vue';
+
+const ssgoi = useSsgoi();
 ```
 
 ### Directives

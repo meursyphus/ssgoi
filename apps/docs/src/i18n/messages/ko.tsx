@@ -50,7 +50,7 @@ const ko: Messages = {
     quickInstall: {
       react: "React",
       svelte: "Svelte",
-      vue: "Vue (지원 예정)",
+      vue: "Vue",
       solidjs: "SolidJS (지원 예정)",
       qwik: "Qwik (지원 예정)",
     },

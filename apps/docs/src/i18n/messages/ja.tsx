@@ -50,7 +50,7 @@ const ja: Messages = {
     quickInstall: {
       react: "React",
       svelte: "Svelte",
-      vue: "Vue (近日公開)",
+      vue: "Vue",
       solidjs: "SolidJS (近日公開)",
       qwik: "Qwik (近日公開)",
     },

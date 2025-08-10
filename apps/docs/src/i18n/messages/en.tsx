@@ -50,7 +50,7 @@ const en: Messages = {
     quickInstall: {
       react: "React",
       svelte: "Svelte",
-      vue: "Vue (Coming Soon)",
+      vue: "Vue",
       solidjs: "SolidJS (Coming Soon)",
       qwik: "Qwik (Coming Soon)",
     },

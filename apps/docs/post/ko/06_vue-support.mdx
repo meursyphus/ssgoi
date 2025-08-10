@@ -1,0 +1,171 @@
+---
+title: "Vue 3 지원 시작!"
+description: "SSGOI가 드디어 Vue 3를 공식 지원합니다! Vue와 Nuxt 애플리케이션에 네이티브 앱같은 부드럽고 매력적인 페이지 전환 효과를 적용해보세요."
+thumbnail: "/post/vue-support/thumbnail.png"
+date: "2025-08-10"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "문대승"
+tags: ["vue", "nuxt", "release", "transitions"]
+---
+
+**SSGOI가 드디어 Vue 3를 공식 지원합니다!** React와 Svelte에 이어, 이제 Vue 개발자들도 웹 앱을 더욱 매력적으로 만들어주는 부드럽고 네이티브 앱같은 페이지 전환 효과를 즐길 수 있습니다.
+
+## SSGOI란?
+
+SSGOI(쓱오이)는 정적인 페이지 네비게이션을 부드럽고 매력적인 경험으로 변환하는 범용 페이지 전환 라이브러리입니다. Chrome에서만 작동하는 브라우저의 View Transition API와 달리, SSGOI는 Chrome, Firefox, Safari 등 모든 최신 브라우저에서 작동합니다.
+
+## Vue 지원이 중요한 이유
+
+Vue는 활발한 생태계를 가진 가장 사랑받는 프론트엔드 프레임워크 중 하나입니다. Vue 3의 Composition API와 향상된 성능 덕분에, SSGOI의 마법을 Vue 커뮤니티에 제공하기에 완벽한 시기였습니다. Vue Router나 Nuxt 3를 사용하든, SSGOI는 기존 라우팅 로직을 변경하지 않고 매끄럽게 통합됩니다.
+
+## 시작하기는 정말 간단합니다
+
+Vue 패키지 설치:
+
+```bash
+npm install @ssgoi/vue
+```
+
+앱을 `Ssgoi` 프로바이더로 감싸기:
+
+```vue
+<template>
+  <Ssgoi :config="config">
+    <RouterView />
+  </Ssgoi>
+</template>
+
+<script setup>
+import { Ssgoi } from '@ssgoi/vue';
+import { fade } from '@ssgoi/vue/view-transitions';
+
+const config = {
+  defaultTransition: fade()
+};
+</script>
+```
+
+페이지를 `SsgoiTransition`으로 감싸기:
+
+```vue
+<template>
+  <SsgoiTransition id="/home">
+    <h1>Vue + SSGOI에 오신 것을 환영합니다!</h1>
+  </SsgoiTransition>
+</template>
+
+<script setup>
+import { SsgoiTransition } from '@ssgoi/vue';
+</script>
+```
+
+끝입니다! 이제 Vue 앱에 부드러운 페이지 전환 효과가 적용됩니다.
+
+## Vue 전용 기능
+
+### 1. 커스텀 디렉티브 지원
+
+Vue 개발자들은 디렉티브를 좋아하죠. 그래서 개별 요소에 애니메이션을 적용할 수 있는 `v-transition`을 만들었습니다:
+
+```vue
+<div v-transition="{
+  key: 'hero',
+  in: fadeIn(),
+  out: scaleOut()
+}">
+  <img src="hero.jpg" alt="Hero" />
+</div>
+```
+
+### 2. Composition API 통합
+
+Composition API를 선호하는 분들을 위해:
+
+```javascript
+import { useSsgoi } from '@ssgoi/vue';
+
+const ssgoi = useSsgoi();
+// 전환 컨텍스트와 상태에 접근
+```
+
+### 3. 완벽한 Nuxt 3 호환성
+
+SSGOI는 Nuxt 3의 SSR과 하이브리드 렌더링과 완벽하게 작동합니다:
+
+```vue
+<!-- app.vue -->
+<template>
+  <Ssgoi :config="config">
+    <NuxtPage />
+  </Ssgoi>
+</template>
+```
+
+하이드레이션 문제 없고, SEO 친화적이며, Nuxt의 강력한 라우팅 시스템과 함께 작동합니다.
+
+## 여러분이 좋아하는 그 전환 효과들
+
+React와 Svelte에서 제공하는 모든 아름다운 전환 효과를 사용할 수 있습니다:
+
+- **fade()** - 부드러운 투명도 전환
+- **slide()** - 방향성 있는 슬라이드 효과
+- **scale()** - 확대/축소 애니메이션
+- **hero()** - 공유 요소 전환
+- **pinterest()** - Pinterest 스타일 확장 효과
+- **ripple()** - Material Design 리플 효과
+
+그리고 `fadeIn()`, `slideUp()`, `bounce()`, `blur()` 등의 요소 단위 애니메이션도 있습니다!
+
+## 자연스러운 움직임을 위한 스프링 물리학
+
+모든 애니메이션은 자연스럽고 반응적인 느낌을 위해 스프링 물리학을 사용합니다:
+
+```javascript
+slide({
+  direction: 'left',
+  spring: {
+    stiffness: 300,
+    damping: 30
+  }
+})
+```
+
+## Vue 데모 체험하기
+
+실제로 보고 싶으신가요? Vue 데모 앱을 확인해보세요:
+
+```bash
+git clone https://github.com/meursyphus/ssgoi
+cd ssgoi
+pnpm install
+pnpm vue-demo:dev
+```
+
+또는 [인터랙티브 문서](https://ssgoi.dev)를 방문하여 라이브 예제를 보고 다양한 전환 효과를 실험해보세요.
+
+## 다음 계획
+
+Vue 지원은 시작에 불과합니다. 우리는 다음을 작업 중입니다:
+- 더 많은 프리셋 전환 효과
+- 고급 제스처 지원
+- 성능 최적화
+- 더 나은 DevTools 통합
+
+## 커뮤니티에 참여하세요
+
+SSGOI는 오픈소스이며 여러분의 기여를 환영합니다! 버그 리포트, 기능 요청, 풀 리퀘스트 등 무엇이든 [GitHub 저장소](https://github.com/meursyphus/ssgoi)를 방문해주세요.
+
+## 아름다운 Vue 앱 만들기 시작하기
+
+`@ssgoi/vue` 패키지는 오늘부터 npm에서 사용 가능합니다. 사용자들이 좋아할 부드럽고 매력적인 페이지 전환 효과로 Vue 애플리케이션을 변화시켜보세요.
+
+```bash
+npm install @ssgoi/vue
+```
+
+즐거운 전환 효과 구현되길 바랍니다! 🚀
+
+---
+
+*SSGOI는 MIT 라이선스로 제공되며 [MeurSyphus](https://github.com/meursyphus)가 관리합니다. 개발 기간 동안 피드백과 지원을 제공해주신 Vue 커뮤니티에 특별히 감사드립니다.*

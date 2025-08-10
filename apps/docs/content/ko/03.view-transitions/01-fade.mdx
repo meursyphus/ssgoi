@@ -10,7 +10,7 @@ nav-title: "페이드"
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -45,6 +45,24 @@ nav-title: "페이드"
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- 앱 내용 -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { fade } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 옵션
@@ -71,7 +89,7 @@ fade({
 
 부드럽고 느린 페이드 효과:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -98,13 +116,27 @@ fade({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 100,
+          damping: 20
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 빠른 페이드
 
 빠르고 즉각적인 페이드 효과:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -131,11 +163,25 @@ fade({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 500,
+          damping: 40
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 특정 경로에만 적용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -172,6 +218,28 @@ fade({
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- 앱 내용 -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about', 
+          transition: fade(),
+          symmetric: true  // /about → /home도 자동으로 fade 적용
+        }
+      ]
+    };
+    </script>
     ```
   </TabPanel>
 </Tabs>

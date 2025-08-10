@@ -10,7 +10,7 @@ nav-title: "스크롤"
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -45,6 +45,24 @@ nav-title: "스크롤"
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- 앱 내용 -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: scroll()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 옵션
@@ -75,7 +93,7 @@ scroll({
 
 ### 위로 스크롤 (기본)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -92,11 +110,20 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll()
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 아래로 스크롤
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -113,11 +140,20 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll({ direction: 'down' })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 부드러운 스크롤
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -144,13 +180,27 @@ scroll({
     </script>
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: scroll({
+        spring: {
+          stiffness: 150,
+          damping: 25
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 경로별 방향 설정
 
 계층 구조에 따라 다른 방향으로 전환:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -197,6 +247,33 @@ scroll({
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <!-- 앱 내용 -->
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    const config = {
+      transitions: [
+        {
+          from: '/list',
+          to: '/detail/*',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true  // 반대로 갈 때는 자동으로 down
+        },
+        {
+          from: '/parent',
+          to: '/child',
+          transition: scroll({ direction: 'down' })
+        }
+      ]
+    };
+    </script>
     ```
   </TabPanel>
 </Tabs>
