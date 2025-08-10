@@ -2,6 +2,10 @@
 
 Vue bindings for SSGOI - Native app-like page transitions for Vue applications.
 
+try this: [ssgoi.dev](https://ssgoi.dev)
+
+![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
+
 ## What is SSGOI?
 
 SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
