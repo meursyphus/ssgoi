@@ -253,6 +253,7 @@ Visit [https://ssgoi.dev](https://ssgoi.dev) for:
 - Interactive examples
 - Framework integration guides
 - Custom transition recipes
+- LLM Context: [ssgoi.dev/llm.txt](https://ssgoi.dev/llm.txt) for AI assistants
 
 ## Contributing
 

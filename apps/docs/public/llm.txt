@@ -1,0 +1,157 @@
+# SSGOI (쓱오이)
+
+> Universal page transition library bringing native app-like transitions to web applications. Works across all modern browsers, unlike browser's View Transition API (Chrome-only). Check out ssgoi.dev for full documentation.
+
+- [SSGOI Home](https://ssgoi.dev)
+
+## search
+
+- [Search the documentation](https://ssgoi.dev/search)
+
+## docs
+
+### getting-started
+
+- [Introduction](https://ssgoi.dev/en/docs/getting-started/introduction): Learn about SSGOI, a universal page transition library that brings native app-like transitions to web applications
+- [Quick Start](https://ssgoi.dev/en/docs/getting-started/quick-start): Get started with SSGOI in your React, Next.js, Svelte, or Vue application
+
+### core-concepts
+
+- [Element Transitions](https://ssgoi.dev/en/docs/core-concepts/element-transitions): Understand how to animate individual elements with mount/unmount transitions
+- [View Transitions](https://ssgoi.dev/en/docs/core-concepts/view-transitions): Learn about page-level transitions that create smooth navigation experiences
+- [Spring Presets](https://ssgoi.dev/en/docs/core-concepts/spring-presets): Explore physics-based spring animations for natural motion
+
+### view-transitions
+
+Page-level transitions for smooth navigation:
+
+- [Fade Transition](https://ssgoi.dev/en/docs/view-transitions/fade): Smooth opacity transitions between pages
+- [Scroll Transition](https://ssgoi.dev/en/docs/view-transitions/scroll): Directional scrolling transitions with automatic direction detection
+- [Hero Transition](https://ssgoi.dev/en/docs/view-transitions/hero): Shared element transitions for seamless content morphing
+- [Pinterest Transition](https://ssgoi.dev/en/docs/view-transitions/pinterest): Pinterest-style expanding card transitions
+
+### transitions
+
+Element-level transitions for components:
+
+- [Fade](https://ssgoi.dev/en/docs/transitions/fade): Fade in/out animations with opacity control
+- [Scale](https://ssgoi.dev/en/docs/transitions/scale): Scale animations for zoom effects
+- [Blur](https://ssgoi.dev/en/docs/transitions/blur): Blur effects combined with opacity transitions
+- [Slide](https://ssgoi.dev/en/docs/transitions/slide): Directional sliding animations (up, down, left, right)
+- [Fly](https://ssgoi.dev/en/docs/transitions/fly): Fly-in/out animations with position and opacity
+- [Rotate](https://ssgoi.dev/en/docs/transitions/rotate): Rotation animations with customizable angles
+- [Bounce](https://ssgoi.dev/en/docs/transitions/bounce): Bouncy spring animations for playful interactions
+
+## blog
+
+Recent blog posts about SSGOI:
+
+- [What is SSGOI?](https://ssgoi.dev/en/blog/what-is-ssgoi): Introduction to SSGOI and its core concepts
+- [How to Make Transitions](https://ssgoi.dev/en/blog/how-to-make-transition): Deep dive into creating custom transitions
+- [Physics Animation](https://ssgoi.dev/en/blog/physics-animation): Understanding spring-based physics animations
+- [Why Need Animation](https://ssgoi.dev/en/blog/why-need-animation): The importance of animations in modern web applications
+- [SSR Optimization](https://ssgoi.dev/en/blog/ssr-optimization): How SSGOI handles server-side rendering
+- [Vue Support](https://ssgoi.dev/en/blog/vue-support): Complete Vue.js integration guide
+
+## demo
+
+Interactive demos showcasing SSGOI capabilities:
+
+- [Demo Home](https://ssgoi.dev/en/demo): Main demo showcase page
+- [Pinterest Demo](https://ssgoi.dev/en/demo/pinterest): Pinterest-style expanding cards with hero transitions
+- [Posts Demo](https://ssgoi.dev/en/demo/posts): Blog post transitions with various effects
+- [Products Demo](https://ssgoi.dev/en/demo/products): E-commerce product gallery with smooth transitions
+- [Profile Demo](https://ssgoi.dev/en/demo/profile): User profile page with animated elements
+
+## packages
+
+NPM packages available:
+
+- [@ssgoi/core](https://www.npmjs.com/package/@ssgoi/core): Core transition engine and animations
+- [@ssgoi/react](https://www.npmjs.com/package/@ssgoi/react): React/Next.js integration
+- [@ssgoi/svelte](https://www.npmjs.com/package/@ssgoi/svelte): Svelte/SvelteKit integration
+- [@ssgoi/vue](https://www.npmjs.com/package/@ssgoi/vue): Vue.js integration
+
+## installation
+
+### React/Next.js
+
+```bash
+npm install @ssgoi/react
+# or
+pnpm add @ssgoi/react
+```
+
+### Svelte/SvelteKit
+
+```bash
+npm install @ssgoi/svelte
+# or
+pnpm add @ssgoi/svelte
+```
+
+### Vue
+
+```bash
+npm install @ssgoi/vue
+# or
+pnpm add @ssgoi/vue
+```
+
+## key-features
+
+- **Universal Browser Support**: Works on Chrome, Firefox, Safari, Edge (unlike View Transition API)
+- **Framework Agnostic**: Supports React, Next.js, Svelte, SvelteKit, Vue
+- **SSR-First Design**: No hydration issues, SEO-friendly
+- **Physics-Based Animations**: Natural spring animations using Popmotion
+- **Router Agnostic**: Works with any routing solution
+- **TypeScript Support**: Full TypeScript definitions included
+- **Tree-Shakeable**: Only bundle the transitions you use
+- **Minimal Bundle Size**: Optimized for production
+
+## configuration
+
+Basic configuration example:
+
+```typescript
+import { Ssgoi } from '@ssgoi/react';
+import { fade, slide, scale } from '@ssgoi/react/transitions';
+
+const config = {
+  // Default transition for all routes
+  defaultTransition: fade(),
+  
+  // Route-specific transitions
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: slide({ direction: 'left' }),
+      symmetric: true  // Auto-creates reverse transition
+    },
+    {
+      from: '/products',
+      to: '/products/*',  // Wildcard support
+      transition: scale()
+    }
+  ]
+};
+```
+
+## languages
+
+Documentation available in:
+- [English](https://ssgoi.dev/en)
+- [한국어 (Korean)](https://ssgoi.dev/ko)
+- [日本語 (Japanese)](https://ssgoi.dev/ja)
+- [中文 (Chinese)](https://ssgoi.dev/zh)
+
+## github
+
+- [GitHub Repository](https://github.com/meursyphus/ssgoi)
+- [Report Issues](https://github.com/meursyphus/ssgoi/issues)
+- [Discussions](https://github.com/meursyphus/ssgoi/discussions)
+
+## license
+
+MIT © MeurSyphus
