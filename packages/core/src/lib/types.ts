@@ -26,13 +26,21 @@ export type TransitionConfig<TAnimationValue = number> = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig<TContext = undefined, TAnimationValue = number> =
-  TContext extends undefined
-    ? (node: HTMLElement) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>
-    : (
-        node: HTMLElement,
-        context: TContext
-      ) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>;
+export type GetTransitionConfig<
+  TContext = undefined,
+  TAnimationValue = number,
+> = TContext extends undefined
+  ? (
+      node: HTMLElement
+    ) =>
+      | TransitionConfig<TAnimationValue>
+      | Promise<TransitionConfig<TAnimationValue>>
+  : (
+      node: HTMLElement,
+      context: TContext
+    ) =>
+      | TransitionConfig<TAnimationValue>
+      | Promise<TransitionConfig<TAnimationValue>>;
 
 export type Transition<TContext = undefined, TAnimationValue = number> = {
   in?: GetTransitionConfig<TContext, TAnimationValue>;

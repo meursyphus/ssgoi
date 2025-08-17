@@ -1,15 +1,15 @@
 import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing, timeToSpring, sleep } from "../utils";
 
+// Default spring configurations for fade transitions
+export const defaultOutSpring = timeToSpring(0.1); // 100ms
+export const defaultInSpring = timeToSpring(0.2); // 200ms
+
 interface FadeOptions {
   spring?: Partial<SpringConfig>;
 }
 
 export const fade = (options: FadeOptions = {}): SggoiTransition => {
-  // Out animation: 100ms (0.1s)
-  const outSpring = timeToSpring(0.1);
-  // In animation: 200ms (0.2s)
-  const inSpring = timeToSpring(0.2);
   
   // Shared promise for coordinating OUT and IN animations
   let outAnimationComplete: Promise<void>;
@@ -29,8 +29,8 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
       
       return {
         spring: {
-          stiffness: options.spring?.stiffness ?? inSpring.stiffness,
-          damping: options.spring?.damping ?? inSpring.damping,
+          stiffness: options.spring?.stiffness ?? defaultInSpring.stiffness,
+          damping: options.spring?.damping ?? defaultInSpring.damping,
         },
         tick: (progress) => {
           element.style.opacity = progress.toString();
@@ -45,8 +45,8 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
       
       return {
         spring: {
-          stiffness: options.spring?.stiffness ?? outSpring.stiffness,
-          damping: options.spring?.damping ?? outSpring.damping,
+          stiffness: options.spring?.stiffness ?? defaultOutSpring.stiffness,
+          damping: options.spring?.damping ?? defaultOutSpring.damping,
         },
         tick: (progress) => {
           element.style.opacity = progress.toString();
