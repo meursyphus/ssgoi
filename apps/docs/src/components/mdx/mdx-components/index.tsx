@@ -7,6 +7,7 @@ import { Card } from "./card";
 import { Demo } from "./demo";
 import { Tabs, TabPanel } from "./tabs";
 import { TransitionDemo } from "./transition-demo";
+import { BrowserMockup, ResponsiveBrowserMockup } from "./browser-mockup";
 
 // Export all components that will be available in MDX
 export const mdxComponents = {
@@ -20,4 +21,6 @@ export const mdxComponents = {
   TransitionDemo,
   Tabs,
   TabPanel,
+  BrowserMockup,
+  ResponsiveBrowserMockup,
 };
