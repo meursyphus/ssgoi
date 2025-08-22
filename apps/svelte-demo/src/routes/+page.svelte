@@ -177,7 +177,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: 'slide',
+                  debug: true,
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
