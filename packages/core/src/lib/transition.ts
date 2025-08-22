@@ -1,11 +1,8 @@
 import { createTransitionCallback } from "./create-transition-callback";
 import { StrategyContext, TRANSITION_STRATEGY, TransitionStrategy } from "./transition-strategy";
-import type { Transition, TransitionCallback } from "./types";
+import type { Transition, TransitionCallback, TransitionOptions } from "./types";
 import type { TransitionKey } from "./types";
 import { parseCallerLocation } from "./utils";
-
-// Development env check
-const __DEV__ = typeof process !== "undefined" && process.env && process.env.NODE_ENV !== "production";
 
 /**
  * Centralized transition management
@@ -69,12 +66,12 @@ function unregisterTransition(key: TransitionKey): void {
 let __autoKeyCounter = 0;
 const __objectToKey = new WeakMap<object, TransitionKey>();
 
-export function generateAutoKey(ref?: object | null): TransitionKey {
+export function generateAutoKey(ref?: object | null, debug = false): TransitionKey {
   if (ref && __objectToKey.has(ref)) {
     return __objectToKey.get(ref)!;
   }
 
-  if (__DEV__) {
+  if (debug) {
     const location = parseCallerLocation(new Error().stack);
     if (location) {
       const key = `auto_${location.file}_${location.line}_${location.column}` as const;
@@ -108,17 +105,14 @@ const __cleanupRegistry = FinalizationRegistryCtor
  *
  * @template TAnimationValue - The type of value being animated (number | object)
  */
-export function transition<TAnimationValue = number>(options: {
-  in?: Transition<undefined, TAnimationValue>["in"];
-  out?: Transition<undefined, TAnimationValue>["out"];
-  key?: TransitionKey;
-  // Optional ref to stabilize auto key across the same instance (frameworks can pass DOM node)
-  ref?: object;
-  [TRANSITION_STRATEGY]?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
-}): TransitionCallback {
-  const resolvedKey = options.key ?? generateAutoKey(options.ref ?? undefined);
+export function transition<TAnimationValue = number>(
+  options: TransitionOptions<undefined, TAnimationValue> & {
+    [TRANSITION_STRATEGY]?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
+  }
+): TransitionCallback {
+  const resolvedKey = options.key ?? generateAutoKey(options.ref ?? undefined, options.debug);
 
-  if (__DEV__ && !options.key) {
+  if (!options.key && options.debug) {
     // Basic guidance for devs when using auto-keys
     // eslint-disable-next-line no-console
     console.warn(
