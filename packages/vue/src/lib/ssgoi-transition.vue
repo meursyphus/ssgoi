@@ -5,9 +5,14 @@ import { useSsgoi } from "./context";
 
 interface Props {
   id: string;
+  as?: keyof HTMLElementTagNameMap;
+  class?: string;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  as: 'div'
+});
+
 const getTransition = useSsgoi();
 
 // Compute transition config for the directive
@@ -21,7 +26,12 @@ const transitionConfig = computed(() => {
 </script>
 
 <template>
-  <div v-transition="transitionConfig" :data-ssgoi-transition="id">
+  <component 
+    :is="as" 
+    v-transition="transitionConfig" 
+    :data-ssgoi-transition="id"
+    :class="props.class"
+  >
     <slot />
-  </div>
+  </component>
 </template>
