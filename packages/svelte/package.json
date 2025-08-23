@@ -21,7 +21,7 @@
 	"types": "./dist/index.d.ts",
 	"type": "module",
 	"dependencies": {
-		"@ssgoi/core": "workspace:*"
+		"@ssgoi/core": "^2.0.0"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
