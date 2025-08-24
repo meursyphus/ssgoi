@@ -59,7 +59,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
       }),
       out: (element) => ({
         spring: {
-          stiffness: 50,
+          stiffness: 100,
           damping: 20,
         },
         prepare: (element) => {

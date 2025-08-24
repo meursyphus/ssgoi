@@ -19,6 +19,9 @@ export type TransitionConfig<TAnimationValue = number> = {
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
 
+  // Wait before starting the animation
+  wait?: () => Promise<void>;
+
   // Called when animation starts
   onStart?: () => void;
 
