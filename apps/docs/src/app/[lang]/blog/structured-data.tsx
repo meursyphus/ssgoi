@@ -55,6 +55,7 @@ export async function BlogListStructuredData({
 
 export async function BlogPostStructuredData({
   post,
+  relatedPosts,
   lang,
 }: {
   post: {
@@ -66,6 +67,13 @@ export async function BlogPostStructuredData({
     thumbnail?: string;
     tags?: string[];
   };
+  relatedPosts?: Array<{
+    slug: string;
+    title: string;
+    description?: string;
+    date?: string;
+    thumbnail?: string;
+  }>;
   lang: string;
 }) {
   const t = await getServerTranslations("blogStructuredData", lang);
@@ -103,10 +111,37 @@ export async function BlogPostStructuredData({
     },
   };
 
+  // Add related articles if available
+  const relatedArticles = relatedPosts?.length ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Related Articles",
+    itemListElement: relatedPosts.map((relatedPost, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "BlogPosting",
+        headline: relatedPost.title,
+        description: relatedPost.description,
+        url: `https://ssgoi.dev/${lang}/blog/${relatedPost.slug}`,
+        datePublished: relatedPost.date,
+        image: relatedPost.thumbnail
+      }
+    }))
+  } : null;
+
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      {relatedArticles && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(relatedArticles) }}
+        />
+      )}
+    </>
   );
 }
