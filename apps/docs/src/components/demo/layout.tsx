@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
-import { hero, pinterest } from "@ssgoi/react/view-transitions";
+import { hero, pinterest, fade } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
@@ -55,6 +55,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config: SsgoiConfig = useMemo(
     () => ({
+      defaultTransition: fade(),
       transitions: [
         // Pinterest transitions
         {
