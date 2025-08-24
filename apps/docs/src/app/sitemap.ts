@@ -24,15 +24,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Add language homepage
     sitemapEntries.push({
       url: `${baseUrl}/${lang}`,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    });
-
-    // Add docs landing page
-    sitemapEntries.push({
-      url: `${baseUrl}/${lang}/docs`,
       changeFrequency: "monthly",
-      priority: 0.9,
+      priority: 1,
     });
 
     // Add all documentation pages
@@ -48,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sitemapEntries.push({
       url: `${baseUrl}/${lang}/blog`,
       changeFrequency: "weekly",
-      priority: 0.9,
+      priority: 0.7,
     });
 
     // Dynamically add all blog posts with their actual dates
@@ -57,8 +50,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       sitemapEntries.push({
         url: `${baseUrl}/${lang}/blog/${post.slug}`,
         lastModified: post.date ? new Date(post.date) : undefined,
-        changeFrequency: "weekly",
-        priority: 0.7,
+        changeFrequency: "never",
+        priority: 0.9,
       });
     });
   }
