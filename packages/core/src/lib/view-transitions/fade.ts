@@ -1,9 +1,9 @@
 import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing, sleep } from "../utils";
 
-const DEFAULT_OUT_SPRING = { stiffness: 360, damping: 20 }; // approximately 100ms
-const DEFAULT_IN_SPRING = { stiffness: 40, damping: 8 }; // approximately 200ms
-const DEFAULT_TRANSITION_DELAY = 100; // Default delay between transitions in ms
+const DEFAULT_OUT_SPRING = { stiffness: 360, damping: 20 };
+const DEFAULT_IN_SPRING = { stiffness: 40, damping: 8 };
+const DEFAULT_TRANSITION_DELAY = 100;
 
 interface FadeOptions {
   inSpring?: SpringConfig;
