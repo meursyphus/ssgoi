@@ -15,51 +15,29 @@ export const prepareOutgoing = (element: HTMLElement): void => {
  */
 export const getScrollingElement = (element: HTMLElement): HTMLElement => {
   let current = element.parentElement;
-  
+
   while (current && current !== document.body) {
     const style = window.getComputedStyle(current);
     const overflow = style.overflow + style.overflowY + style.overflowX;
-    
+
     // Check if element is scrollable
-    if (overflow.includes('auto') || overflow.includes('scroll')) {
+    if (overflow.includes("auto") || overflow.includes("scroll")) {
       return current;
     }
-    
+
     // Also check if element has scroll even without explicit overflow
-    if (current.scrollHeight > current.clientHeight || 
-        current.scrollWidth > current.clientWidth) {
+    if (
+      current.scrollHeight > current.clientHeight ||
+      current.scrollWidth > current.clientWidth
+    ) {
       return current;
     }
-    
+
     current = current.parentElement;
   }
-  
+
   // Return document element as fallback (handles body/html scrolling)
   return document.documentElement;
-};
-
-/**
- * Calculates optimal spring animation parameters for a desired settling time
- * @param settlingTime - Desired settling time in seconds (e.g., 0.1 for 100ms)
- * @returns Spring parameters with stiffness and damping values for critically damped motion
- */
-export const timeToSpring = (settlingTime: number): { stiffness: number; damping: number } => {
-  // Using mass = 1 internally for calculations
-  const mass = 1;
-  
-  // Calculate stiffness from settling time
-  // Formula: settling_time ≈ 3 / sqrt(stiffness) for critically damped spring
-  // Therefore: stiffness = (3 / settling_time)²
-  const stiffness = Math.pow(3 / settlingTime, 2);
-  
-  // Calculate damping for critically damped condition
-  // Formula: damping = 2 * sqrt(stiffness * mass)
-  const damping = 2 * Math.sqrt(stiffness * mass);
-  
-  return {
-    stiffness,
-    damping
-  };
 };
 
 /**
@@ -68,5 +46,5 @@ export const timeToSpring = (settlingTime: number): { stiffness: number; damping
  * @returns Promise that resolves after the specified delay
  */
 export const sleep = (ms: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };

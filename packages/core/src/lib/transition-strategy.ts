@@ -5,12 +5,18 @@ export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext<TAnimationValue = number> {
   // Current animation state
-  currentAnimation: { animator: Animator<TAnimationValue>; direction: "in" | "out" } | null;
+  currentAnimation: {
+    animator: Animator<TAnimationValue>;
+    direction: "in" | "out";
+  } | null;
 }
 
 export interface AnimationSetup<TAnimationValue = number> {
   config?: TransitionConfig<TAnimationValue>;
-  state: { position: TAnimationValue; velocity: TAnimationValue extends number ? number : Record<string, number> };
+  state: {
+    position: TAnimationValue;
+    velocity: TAnimationValue extends number ? number : Record<string, number>;
+  };
   from: TAnimationValue;
   to: TAnimationValue;
   direction: "forward" | "backward";
@@ -22,8 +28,12 @@ export interface TransitionConfigs<TAnimationValue = number> {
 }
 
 export interface TransitionStrategy<TAnimationValue = number> {
-  runIn: (configs: TransitionConfigs<TAnimationValue>) => Promise<AnimationSetup<TAnimationValue>>;
-  runOut: (configs: TransitionConfigs<TAnimationValue>) => Promise<AnimationSetup<TAnimationValue>>;
+  runIn: (
+    configs: TransitionConfigs<TAnimationValue>
+  ) => Promise<AnimationSetup<TAnimationValue>>;
+  runOut: (
+    configs: TransitionConfigs<TAnimationValue>
+  ) => Promise<AnimationSetup<TAnimationValue>>;
 }
 
 /**
@@ -75,7 +85,8 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         if (configs.out) {
           const outConfig = await configs.out;
           // Extract from/to with defaults for out transition
-          const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = outConfig;
+          const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } =
+            outConfig;
           return {
             config: outConfig,
             state: currentState,
@@ -91,18 +102,28 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       if (!config) {
         // No config, return minimal setup
         return {
-          state: { position: 0 as TAnimationValue, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
           from: 0 as TAnimationValue,
           to: 1 as TAnimationValue,
           direction: "forward",
         };
       }
-      
+
       // Extract from/to with defaults for in transition
       const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
-        state: { position: from, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+        state: {
+          position: from,
+          velocity: 0 as TAnimationValue extends number
+            ? number
+            : Record<string, number>,
+        },
         from,
         to,
         direction: "forward",
@@ -121,8 +142,10 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         // Use IN config but reverse direction
         if (configs.in) {
           const inConfig = await configs.in;
+
           // Extract from/to with defaults for in transition
-          const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = inConfig;
+          const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } =
+            inConfig;
           return {
             config: inConfig,
             state: {
@@ -141,18 +164,28 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       if (!config) {
         // No config, return minimal setup
         return {
-          state: { position: 1 as TAnimationValue, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
           from: 1 as TAnimationValue,
           to: 0 as TAnimationValue,
           direction: "forward",
         };
       }
-      
+
       // Extract from/to with defaults for out transition
       const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,
-        state: { position: from, velocity: 0 as TAnimationValue extends number ? number : Record<string, number> },
+        state: {
+          position: from,
+          velocity: 0 as TAnimationValue extends number
+            ? number
+            : Record<string, number>,
+        },
         from,
         to,
         direction: "forward",

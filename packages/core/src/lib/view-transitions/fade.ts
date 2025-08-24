@@ -1,16 +1,22 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing, timeToSpring, sleep } from "../utils";
+import { prepareOutgoing, sleep } from "../utils";
 
-// Default spring configurations for fade transitions
-export const defaultOutSpring = timeToSpring(0.1); // 100ms
-export const defaultInSpring = timeToSpring(0.2); // 200ms
+const DEFAULT_OUT_SPRING = { stiffness: 360, damping: 20 }; // approximately 100ms
+const DEFAULT_IN_SPRING = { stiffness: 40, damping: 8 }; // approximately 200ms
+const DEFAULT_TRANSITION_DELAY = 100; // Default delay between transitions in ms
 
 interface FadeOptions {
-  spring?: Partial<SpringConfig>;
+  inSpring?: SpringConfig;
+  outSpring?: SpringConfig;
+  transitionDelay?: number;
 }
 
 export const fade = (options: FadeOptions = {}): SggoiTransition => {
-  
+  const {
+    inSpring = DEFAULT_IN_SPRING,
+    outSpring = DEFAULT_OUT_SPRING,
+    transitionDelay = DEFAULT_TRANSITION_DELAY,
+  } = options;
   // Shared promise for coordinating OUT and IN animations
   let outAnimationComplete: Promise<void>;
   let resolveOutAnimation: (() => void) | null = null;
@@ -19,19 +25,16 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     in: async (element) => {
       // Set initial opacity to 0
       element.style.opacity = "0";
-      
+
       // Wait for OUT animation to complete if it exists
       if (outAnimationComplete) {
         await outAnimationComplete;
-        // Additional 200ms delay after OUT completes
-        await sleep(200);
+        // Configurable delay after OUT completes
+        await sleep(transitionDelay);
       }
-      
+
       return {
-        spring: {
-          stiffness: options.spring?.stiffness ?? defaultInSpring.stiffness,
-          damping: options.spring?.damping ?? defaultInSpring.damping,
-        },
+        spring: inSpring,
         tick: (progress) => {
           element.style.opacity = progress.toString();
         },
@@ -42,12 +45,9 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
       outAnimationComplete = new Promise((resolve) => {
         resolveOutAnimation = resolve;
       });
-      
+
       return {
-        spring: {
-          stiffness: options.spring?.stiffness ?? defaultOutSpring.stiffness,
-          damping: options.spring?.damping ?? defaultOutSpring.damping,
-        },
+        spring: outSpring,
         tick: (progress) => {
           element.style.opacity = progress.toString();
         },
