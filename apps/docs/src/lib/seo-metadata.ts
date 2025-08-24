@@ -10,6 +10,12 @@ interface SEOMetadataOptions {
     height?: number;
     alt?: string;
   };
+  images?: Array<{
+    url: string;
+    width?: number;
+    height?: number;
+    alt?: string;
+  }>;
   type?: "website" | "article";
   url?: string;
   locale?: string;
@@ -18,6 +24,7 @@ interface SEOMetadataOptions {
   modifiedTime?: string;
   authors?: string[];
   tags?: string[];
+  keywords?: string[];
   article?: {
     publishedTime?: string;
     modifiedTime?: string;
@@ -25,6 +32,19 @@ interface SEOMetadataOptions {
     authors?: string[];
     section?: string;
     tags?: string[];
+  };
+  robots?: {
+    index?: boolean;
+    follow?: boolean;
+    googleBot?: {
+      index?: boolean;
+      follow?: boolean;
+    };
+  };
+  canonical?: string;
+  alternates?: {
+    canonical?: string;
+    languages?: Record<string, string>;
   };
 }
 
@@ -45,6 +65,7 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
     title,
     description,
     image = DEFAULT_METADATA.image,
+    images,
     type = "website",
     url,
     locale,
@@ -53,7 +74,11 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
     modifiedTime,
     authors,
     tags,
+    keywords,
     article,
+    robots,
+    canonical,
+    alternates,
   } = options;
 
   // Get translations for default values
@@ -64,44 +89,55 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
   const finalDescription = description || t("description");
   const finalSiteName = siteName || t("og.siteName");
   const finalLocale = locale || getLocaleFromLang(lang);
+  const finalKeywords = keywords || (t("keywords") as unknown as string[]);
 
-  // Ensure image URL is absolute
-  const imageUrl = image.url.startsWith("http") 
-    ? image.url 
-    : `${DEFAULT_METADATA.baseUrl}${image.url}`;
+  // Prepare images array
+  const ogImages = images || [image];
+  const processedImages = ogImages.map(img => ({
+    url: img.url.startsWith("http") ? img.url : `${DEFAULT_METADATA.baseUrl}${img.url}`,
+    width: img.width || DEFAULT_METADATA.image.width,
+    height: img.height || DEFAULT_METADATA.image.height,
+    alt: img.alt || DEFAULT_METADATA.image.alt,
+  }));
 
   const metadata: Metadata = {
     title: finalTitle,
     description: finalDescription,
+    keywords: finalKeywords,
     openGraph: {
       title: finalTitle,
       description: finalDescription,
       type,
       siteName: finalSiteName,
       locale: finalLocale,
-      images: [
-        {
-          url: imageUrl,
-          width: image.width || DEFAULT_METADATA.image.width,
-          height: image.height || DEFAULT_METADATA.image.height,
-          alt: image.alt || DEFAULT_METADATA.image.alt,
-        },
-      ],
+      images: processedImages,
     },
     twitter: {
       card: DEFAULT_METADATA.twitterCard,
       title: finalTitle,
       description: finalDescription,
-      images: [imageUrl],
+      images: processedImages.map(img => img.url),
     },
     // LinkedIn uses Open Graph tags, but we can add extra metadata
     other: {
-      "og:image:width": String(image.width || DEFAULT_METADATA.image.width),
-      "og:image:height": String(image.height || DEFAULT_METADATA.image.height),
+      "og:image:width": String(processedImages[0].width),
+      "og:image:height": String(processedImages[0].height),
       "og:image:type": "image/png",
       "article:publisher": DEFAULT_METADATA.siteName,
     },
   };
+
+  // Add robots metadata if provided
+  if (robots) {
+    metadata.robots = robots;
+  }
+
+  // Add alternates if provided
+  if (alternates) {
+    metadata.alternates = alternates;
+  } else if (canonical) {
+    metadata.alternates = { canonical };
+  }
 
   // Add URL if provided
   if (url) {

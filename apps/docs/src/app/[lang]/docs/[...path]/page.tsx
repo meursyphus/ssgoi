@@ -5,7 +5,7 @@ import { DocsNavigation } from "@/components/docs/docs-navigation";
 import { findNavigationLinks } from "@/lib/navigation-utils";
 import { SsgoiTransition } from "@/components/docs/ssgoi";
 import { Metadata } from "next";
-import { DocsStructuredData } from "@/components/structured-data";
+import { DocsStructuredData } from "../structured-data";
 import { createSEOMetadata, getLocaleMetadata } from "@/lib/seo-metadata";
 
 interface DocsPageProps {
@@ -74,6 +74,16 @@ export default async function DocsPage({ params }: DocsPageProps) {
 
   const currentUrl = `https://ssgoi.dev/${lang}/docs/${postPath}`;
 
+  // Create breadcrumb data
+  const breadcrumbs = [
+    { name: "Home", url: `https://ssgoi.dev/${lang}` },
+    { name: "Docs", url: `https://ssgoi.dev/${lang}/docs` },
+    ...path.map((segment, index) => ({
+      name: segment.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
+      url: `https://ssgoi.dev/${lang}/docs/${path.slice(0, index + 1).join("/")}`
+    }))
+  ];
+
   return (
     <>
       <DocsStructuredData
@@ -81,6 +91,9 @@ export default async function DocsPage({ params }: DocsPageProps) {
         description={post.description}
         url={currentUrl}
         lang={lang}
+        breadcrumbs={breadcrumbs}
+        prevDoc={prev}
+        nextDoc={next}
       />
       <SsgoiTransition id={postPath}>
         <article className="max-w-none bg-[var(--color-background)]">

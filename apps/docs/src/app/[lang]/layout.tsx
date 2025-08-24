@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { getServerTranslations } from "@/i18n";
-import { StructuredData } from "@/components/structured-data";
+import { StructuredData } from "./structured-data";
 import { ConsoleWelcome } from "@/components/console-welcome";
 import { createSEOMetadata } from "@/lib/seo-metadata";
 
@@ -34,7 +34,7 @@ export default async function RootLayout({
     <html lang={lang} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <TranslationsProvider lang={lang}>
-          <StructuredData />
+          <StructuredData lang={lang} />
           <ConsoleWelcome />
           <div className="relative">
             <Header />
