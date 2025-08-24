@@ -76,7 +76,11 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           from: "/demo/posts",
           to: "/demo/posts/*",
           transition: drill({ direction: "enter" }),
-          symmetric: true,
+        },
+        {
+          from: "/demo/posts/*",
+          to: "/demo/posts",
+          transition: drill({ direction: "exit" }),
         },
       ],
     }),

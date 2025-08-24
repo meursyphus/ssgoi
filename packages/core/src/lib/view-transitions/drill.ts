@@ -18,11 +18,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
     return {
       in: (element) => ({
         spring,
-        prepare: (element) => {
-          element.style.zIndex = "100";
-        },
         tick: (progress) => {
-          element.style.zIndex = "100";
           element.style.transform = `translateX(${(1 - progress) * 100}%)`;
           if (opacity) {
             // TODO: Apply opacity only to content, not the whole element
@@ -72,6 +68,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         },
         tick: (progress) => {
           element.style.transform = `translateX(${(1 - progress) * 100}%)`;
+
           if (opacity) {
             // TODO: Apply opacity only to content, not the whole element
             element.style.opacity = progress.toString();
