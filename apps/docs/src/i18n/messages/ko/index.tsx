@@ -6,6 +6,9 @@ import { metadata } from "./metadata";
 import { sidebar } from "./sidebar";
 import { console } from "./console";
 import { blog } from "./blog";
+import { homeStructuredData } from "./home-structured-data";
+import { blogStructuredData } from "./blog-structured-data";
+import { docsStructuredData } from "./docs-structured-data";
 
 const ko: Messages = {
   header,
@@ -15,6 +18,9 @@ const ko: Messages = {
   sidebar,
   console,
   blog,
+  homeStructuredData,
+  blogStructuredData,
+  docsStructuredData,
 };
 
 export default ko;

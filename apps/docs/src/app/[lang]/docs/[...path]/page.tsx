@@ -5,7 +5,7 @@ import { DocsNavigation } from "@/components/docs/docs-navigation";
 import { findNavigationLinks } from "@/lib/navigation-utils";
 import { SsgoiTransition } from "@/components/docs/ssgoi";
 import { Metadata } from "next";
-import { DocsStructuredData } from "@/components/structured-data";
+import { DocsStructuredData } from "../structured-data";
 import { createSEOMetadata, getLocaleMetadata } from "@/lib/seo-metadata";
 
 interface DocsPageProps {

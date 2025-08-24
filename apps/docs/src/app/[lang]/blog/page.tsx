@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { createSEOMetadata } from "@/lib/seo-metadata";
-import { BlogListStructuredData } from "@/components/structured-data";
+import { BlogListStructuredData } from "./structured-data";
 
 interface BlogPageProps {
   params: Promise<{ lang: string }>;

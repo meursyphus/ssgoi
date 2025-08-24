@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { BlogPostLink } from "@/components/blog/blog-post-link";
 import { createSEOMetadata } from "@/lib/seo-metadata";
-import { BlogPostStructuredData } from "@/components/structured-data";
+import { BlogPostStructuredData } from "../structured-data";
 
 interface BlogPostPageProps {
   params: Promise<{
