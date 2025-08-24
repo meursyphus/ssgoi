@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { BlogPostLink } from "@/components/blog/blog-post-link";
 import { createSEOMetadata } from "@/lib/seo-metadata";
+import { BlogPostStructuredData } from "@/components/structured-data";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -60,8 +61,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const t = await getServerTranslations("blog", lang);
 
   return (
-    <SsgoiTransition id={`blog-${slug}`}>
-      <article className="max-w-4xl mx-auto px-4 py-16">
+    <>
+      <BlogPostStructuredData post={post} lang={lang} />
+      <SsgoiTransition id={`blog-${slug}`}>
+        <article className="max-w-4xl mx-auto px-4 py-16">
         <BlogPostLink
           href={`/${lang}/blog`}
           fallbackHref={`/${lang}/blog`}
@@ -136,6 +139,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </footer>
       </article>
     </SsgoiTransition>
+    </>
   );
 }
 
