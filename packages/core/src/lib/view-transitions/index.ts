@@ -1,3 +1,4 @@
+export * from "./drill";
 export * from "./fade";
 export * from "./hero";
 export * from "./pinterest";

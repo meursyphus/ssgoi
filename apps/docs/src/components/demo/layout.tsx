@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
-import { hero, pinterest, fade } from "@ssgoi/react/view-transitions";
+import { drill, hero, pinterest, fade } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
@@ -61,7 +61,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest({spring: {stiffness: 150, damping: 20}}),
+          transition: pinterest({ spring: { stiffness: 150, damping: 20 } }),
           symmetric: true,
         },
         // Products transitions - hero
@@ -71,72 +71,16 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           transition: hero(),
           symmetric: true,
         },
-        // Posts transitions - slide with parallax effect
+        // Posts transitions - drill effect
         {
           from: "/demo/posts",
           to: "/demo/posts/*",
-          transition: {
-            in: (node) => ({
-              spring: {
-                stiffness: 150,
-                damping: 20,
-              },
-              prepare: (node) => {
-                node.style.zIndex = "100";
-              },
-              tick: (t) => {
-                node.style.zIndex = "100";
-                node.style.transform = `translateX(${(1 - t) * 100}%)`;
-              },
-            }),
-            out: (node) => ({
-              spring: {
-                stiffness: 150,
-                damping: 20,
-              },
-              prepare: (node) => {
-                node.style.position = "absolute";
-                node.style.left = "0";
-                node.style.top = "0";
-                node.style.width = "100%";
-                node.style.zIndex = "-1";
-              },
-              tick: (t) => {
-                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
-              },
-            }),
-          },
+          transition: drill({ direction: "enter" }),
         },
         {
           from: "/demo/posts/*",
           to: "/demo/posts",
-          transition: {
-            in: (node) => ({
-              spring: {
-                stiffness: 100,
-                damping: 20,
-              },
-              tick: (t) => {
-                node.style.transform = `translateX(${-(1 - t) * 20}%)`;
-              },
-            }),
-            out: (node) => ({
-              spring: {
-                stiffness: 50,
-                damping: 20,
-              },
-              prepare: (node) => {
-                node.style.position = "absolute";
-                node.style.left = "0";
-                node.style.top = "0";
-                node.style.width = "auto";
-                node.style.zIndex = "100";
-              },
-              tick: (t) => {
-                node.style.transform = `translateX(${(1 - t) * 100}%)`;
-              },
-            }),
-          },
+          transition: drill({ direction: "exit" }),
         },
       ],
     }),
