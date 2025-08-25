@@ -50,6 +50,11 @@ export type Transition<TContext = undefined, TAnimationValue = number> = {
   out?: GetTransitionConfig<TContext, TAnimationValue>;
 };
 
+export type TransitionOptions<TContext = undefined, TAnimationValue = number> = Transition<TContext, TAnimationValue> & {
+  key?: TransitionKey;
+  ref?: object;
+};
+
 export type TransitionCallback = (
   element: HTMLElement | null
 ) => void | (() => void);

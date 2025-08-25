@@ -14,7 +14,7 @@ const colors = [
 export default async function ItemDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const resolved = await params;
   const id = Number(resolved.id);
