@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface BounceOptions {
   height?: number;
   intensity?: number;
@@ -8,6 +10,7 @@ interface BounceOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const bounce = (options: BounceOptions = {}) => {
@@ -17,7 +20,8 @@ export const bounce = (options: BounceOptions = {}) => {
     scale = true,
     fade = true,
     direction = 'up',
-    spring = { stiffness: 800, damping: 15 }
+    spring = { stiffness: 800, damping: 15 },
+    key
   } = options;
 
   return {
@@ -76,6 +80,7 @@ export const bounce = (options: BounceOptions = {}) => {
           element.style.opacity = progress.toString();
         }
       }
-    })
+    }),
+    ...(key && { key })
   };
 };

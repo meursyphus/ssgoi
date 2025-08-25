@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
 import { cn } from "../../../lib/utils";
-import { Ssgoi } from "@ssgoi/react";
+import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
 
 // Route configuration
@@ -155,7 +155,12 @@ interface RouteContentProps {
 const RouteContent = memo(({ route }: RouteContentProps) => {
   if (!route) return null;
   const Component = route.component;
-  return <Component {...(route.props || {})} />;
+
+  return (
+    <SsgoiTransition id={route?.path}>
+      <Component {...(route.props || {})} />
+    </SsgoiTransition>
+  );
 });
 
 RouteContent.displayName = "RouteContent";
@@ -226,14 +231,16 @@ export interface DemoPageProps {
   className?: string;
 }
 
-export const DemoPage = memo(({ title, children, className }: DemoPageProps) => {
-  return (
-    <div className={cn("min-h-full p-8", className)}>
-      <h1 className="text-3xl font-bold mb-6">{title}</h1>
-      {children}
-    </div>
-  );
-});
+export const DemoPage = memo(
+  ({ title, children, className }: DemoPageProps) => {
+    return (
+      <div className={cn("min-h-full p-8", className)}>
+        <h1 className="text-3xl font-bold mb-6">{title}</h1>
+        {children}
+      </div>
+    );
+  }
+);
 
 DemoPage.displayName = "DemoPage";
 
@@ -245,22 +252,24 @@ export interface DemoLinkProps {
   [key: string]: any; // For data-* attributes
 }
 
-export const DemoLink = memo(({ to, children, className, ...props }: DemoLinkProps) => {
-  const { navigate } = useBrowserNavigation();
+export const DemoLink = memo(
+  ({ to, children, className, ...props }: DemoLinkProps) => {
+    const { navigate } = useBrowserNavigation();
 
-  return (
-    <button
-      onClick={() => navigate(to)}
-      className={cn(
-        "text-blue-500 hover:text-blue-600 underline cursor-pointer",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-});
+    return (
+      <button
+        onClick={() => navigate(to)}
+        className={cn(
+          "text-blue-500 hover:text-blue-600 underline cursor-pointer",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+);
 
 DemoLink.displayName = "DemoLink";
 
@@ -272,25 +281,22 @@ export interface DemoCardProps {
   [key: string]: any; // For data-* attributes
 }
 
-export const DemoCard = memo(({
-  children,
-  onClick,
-  className,
-  ...props
-}: DemoCardProps) => {
-  return (
-    <div
-      onClick={onClick}
-      className={cn(
-        "p-4 border border-gray-200 dark:border-gray-700 rounded-lg",
-        "hover:shadow-lg transition-shadow cursor-pointer",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-});
+export const DemoCard = memo(
+  ({ children, onClick, className, ...props }: DemoCardProps) => {
+    return (
+      <div
+        onClick={onClick}
+        className={cn(
+          "p-4 border border-gray-200 dark:border-gray-700 rounded-lg",
+          "hover:shadow-lg transition-shadow cursor-pointer",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 DemoCard.displayName = "DemoCard";

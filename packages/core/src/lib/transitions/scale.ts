@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface ScaleOptions {
   start?: number;
   opacity?: number;
@@ -6,6 +8,7 @@ interface ScaleOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const scale = (options: ScaleOptions = {}) => {
@@ -13,7 +16,8 @@ export const scale = (options: ScaleOptions = {}) => {
     start = 0,
     opacity = 0,
     axis = 'both',
-    spring = { stiffness: 300, damping: 30 }
+    spring = { stiffness: 300, damping: 30 },
+    key
   } = options;
 
   const getScaleTransform = (value: number): string => {
@@ -44,6 +48,7 @@ export const scale = (options: ScaleOptions = {}) => {
         element.style.transform = getScaleTransform(scaleValue);
         element.style.opacity = (opacity + (1 - opacity) * progress).toString();
       }
-    })
+    }),
+    ...(key && { key })
   };
 };

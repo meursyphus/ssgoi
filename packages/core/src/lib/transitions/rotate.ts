@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface RotateOptions {
   degrees?: number;
   clockwise?: boolean;
@@ -10,6 +12,7 @@ interface RotateOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const rotate = (options: RotateOptions = {}) => {
@@ -21,7 +24,8 @@ export const rotate = (options: RotateOptions = {}) => {
     origin = 'center',
     axis = '2d',
     perspective = 800,
-    spring = { stiffness: 500, damping: 25 }
+    spring = { stiffness: 500, damping: 25 },
+    key
   } = options;
 
   const rotation = clockwise ? degrees : -degrees;
@@ -75,6 +79,7 @@ export const rotate = (options: RotateOptions = {}) => {
           element.style.opacity = progress.toString();
         }
       }
-    })
+    }),
+    ...(key && { key })
   };
 };

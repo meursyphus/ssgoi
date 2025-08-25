@@ -48,6 +48,7 @@ export type GetTransitionConfig<
 export type Transition<TContext = undefined, TAnimationValue = number> = {
   in?: GetTransitionConfig<TContext, TAnimationValue>;
   out?: GetTransitionConfig<TContext, TAnimationValue>;
+  key?: TransitionKey;
 };
 
 export type TransitionOptions<TContext = undefined, TAnimationValue = number> = Transition<TContext, TAnimationValue> & {
