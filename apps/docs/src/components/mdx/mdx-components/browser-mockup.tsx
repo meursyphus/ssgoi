@@ -1,191 +1,296 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
 import { cn } from "../../../lib/utils";
+import { Ssgoi } from "@ssgoi/react";
+import type { SsgoiConfig } from "@ssgoi/react";
 
-interface BrowserMockupProps {
-  children: ReactNode;
-  url?: string;
-  className?: string;
-  height?: string;
-  isMobile?: boolean;
+// Route configuration
+export interface RouteConfig {
+  path: string;
+  component: React.ComponentType<any>;
+  label?: string;
+  props?: Record<string, any>;
 }
 
-export function BrowserMockup({ 
-  children, 
-  url = "ssgoi.dev/demo",
-  className,
-  height = "600px",
-  isMobile = false
-}: BrowserMockupProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+// Browser mockup props
+export interface BrowserMockupProps {
+  routes: RouteConfig[];
+  config: SsgoiConfig;
+  initialPath?: string;
+  className?: string;
+  showNavigation?: boolean;
+  navigationPosition?: "top" | "bottom";
+  onNavigate?: (path: string) => void;
+}
 
-  if (isMobile) {
-    return (
-      <div className={cn("relative mx-auto my-8", className)}>
-        <div className="relative max-w-sm mx-auto">
-          {/* Mobile Frame */}
-          <div className="relative overflow-hidden rounded-[3rem] border-8 border-white/10 bg-black shadow-2xl">
-            {/* Notch */}
-            <div className="absolute left-1/2 top-4 h-6 w-24 -translate-x-1/2 rounded-full bg-black z-10" />
-            
-            {/* Status Bar */}
-            <div className="absolute top-0 left-0 right-0 h-12 bg-black/80 backdrop-blur-sm z-10 flex items-center justify-between px-6 text-white text-xs">
-              <span>9:41</span>
-              <div className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                </svg>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1v0a1 1 0 011 1v0a1 1 0 01-1 1v0a1 1 0 01-1-1v0z" clipRule="evenodd" />
-                </svg>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-                  <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-                </svg>
-              </div>
-            </div>
+// Browser context for nested components
+interface BrowserContext {
+  currentPath: string;
+  navigate: (path: string) => void;
+  routes: RouteConfig[];
+}
 
-            {/* Content */}
-            <div className="aspect-[9/19.5] pt-12">
-              {children}
-            </div>
+const BrowserContext = React.createContext<BrowserContext | null>(null);
+
+export function useBrowserNavigation() {
+  const context = React.useContext(BrowserContext);
+  if (!context) {
+    throw new Error("useBrowserNavigation must be used within BrowserMockup");
+  }
+  return context;
+}
+
+// Navigation button component
+interface NavigationButtonProps {
+  route: RouteConfig;
+}
+
+const NavigationButton = memo(({ route }: NavigationButtonProps) => {
+  const { currentPath, navigate } = useBrowserNavigation();
+  const isActive = currentPath === route.path;
+
+  return (
+    <button
+      onClick={() => navigate(route.path)}
+      disabled={isActive}
+      className={cn(
+        "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
+        isActive
+          ? "bg-blue-500 text-white"
+          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+      )}
+    >
+      {route.label || route.path}
+    </button>
+  );
+});
+
+NavigationButton.displayName = "NavigationButton";
+
+// Navigation component
+const Navigation = memo(() => {
+  const { routes } = useBrowserNavigation();
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      {routes.map((route) => (
+        <NavigationButton key={route.path} route={route} />
+      ))}
+    </div>
+  );
+});
+
+Navigation.displayName = "Navigation";
+
+// Browser header component
+const BrowserHeader = memo(() => {
+  const { currentPath } = useBrowserNavigation();
+
+  return (
+    <div className="browser-header bg-gray-200 dark:bg-gray-800 px-4 py-3 flex items-center gap-3">
+      {/* Traffic lights */}
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-red-500" />
+        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+        <div className="w-3 h-3 rounded-full bg-green-500" />
+      </div>
+
+      {/* Address bar */}
+      <div className="flex-1 flex items-center">
+        <div className="flex-1 max-w-md mx-auto">
+          <div className="bg-white dark:bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+            <span className="text-gray-500 dark:text-gray-400">
+              localhost:3000
+            </span>
+            <span className="text-gray-700 dark:text-gray-200">
+              {currentPath}
+            </span>
           </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Browser actions */}
+      <div className="flex items-center gap-2">
+        <button className="p-1 hover:bg-gray-300 dark:hover:bg-gray-700 rounded">
+          <svg
+            className="w-4 h-4 text-gray-600 dark:text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+});
+
+BrowserHeader.displayName = "BrowserHeader";
+
+// Route content component
+interface RouteContentProps {
+  route: RouteConfig | undefined;
+}
+
+const RouteContent = memo(({ route }: RouteContentProps) => {
+  if (!route) return null;
+  const Component = route.component;
+  return <Component {...(route.props || {})} />;
+});
+
+RouteContent.displayName = "RouteContent";
+
+export function BrowserMockup({
+  routes,
+  config,
+  initialPath,
+  className,
+  showNavigation = true,
+  navigationPosition = "bottom",
+  onNavigate,
+}: BrowserMockupProps) {
+  const [currentPath, setCurrentPath] = useState(
+    initialPath || routes[0]?.path || "/"
+  );
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Handle navigation
+  const navigate = (path: string) => {
+    if (path === currentPath) return;
+
+    setCurrentPath(path);
+    onNavigate?.(path);
+  };
+
+  // Find current route
+  const currentRoute =
+    routes.find((route) => route.path === currentPath) || routes[0];
 
   return (
-    <div className={cn("relative mx-auto my-8", className)}>
-      {/* Desktop Browser Frame */}
-      <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
+    <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
+      <div
+        className={cn(
+          "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700",
+          "aspect-[9/16] sm:aspect-[16/10]", // Mobile: 9:16, Desktop: 16:10
+          className
+        )}
+      >
         {/* Browser Header */}
-        <div className="flex items-center justify-between bg-gray-900 px-4 py-3 border-b border-gray-800">
-          {/* Traffic Lights (macOS style) */}
-          <div className="flex items-center gap-2">
-            <button 
-              className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"
-              aria-label="Close"
-            />
-            <button 
-              className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"
-              aria-label="Minimize"
-            />
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"
-              aria-label="Expand"
-            />
-          </div>
+        <BrowserHeader />
 
-          {/* URL Bar */}
-          <div className="flex-1 max-w-2xl mx-4">
-            <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-1.5">
-              {/* Lock Icon */}
-              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span className="text-gray-300 text-sm flex-1 truncate">{url}</span>
-              {/* Refresh Icon */}
-              <svg className="w-3.5 h-3.5 text-gray-400 hover:text-gray-300 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Browser Controls */}
-          <div className="flex items-center gap-3">
-            {/* Extension Icon */}
-            <svg className="w-4 h-4 text-gray-400 hover:text-gray-300 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-            </svg>
-            {/* Profile Icon */}
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600" />
-            {/* Menu Icon */}
-            <svg className="w-4 h-4 text-gray-400 hover:text-gray-300 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </div>
-        </div>
+        {/* Top navigation */}
+        {showNavigation && navigationPosition === "top" && <Navigation />}
 
         {/* Browser Content */}
-        <div 
-          className={cn(
-            "bg-white overflow-hidden transition-all duration-300",
-            isExpanded ? "h-screen" : ""
-          )}
-          style={{ height: isExpanded ? "calc(100vh - 100px)" : height }}
+        <div
+          ref={contentRef}
+          className="browser-content relative z-0 bg-white dark:bg-gray-900 flex-1 overflow-auto h-full"
         >
-          {children}
+          <Ssgoi config={config}>
+            <RouteContent route={currentRoute} />
+          </Ssgoi>
         </div>
+
+        {/* Bottom navigation */}
+        {showNavigation && navigationPosition === "bottom" && <Navigation />}
       </div>
-    </div>
+    </BrowserContext.Provider>
   );
 }
 
-// Responsive Browser Mockup that switches between desktop and mobile
-export function ResponsiveBrowserMockup({ 
-  children, 
-  url = "ssgoi.dev/demo",
-  className,
-  desktopHeight = "600px",
-}: Omit<BrowserMockupProps, 'isMobile'>) {
-  const [isMobileView, setIsMobileView] = useState(false);
+// Helper component for creating simple demo pages
+export interface DemoPageProps {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}
 
-  React.useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobileView(window.innerWidth < 768);
-    };
+export const DemoPage = memo(({ title, children, className }: DemoPageProps) => {
+  return (
+    <div className={cn("min-h-full p-8", className)}>
+      <h1 className="text-3xl font-bold mb-6">{title}</h1>
+      {children}
+    </div>
+  );
+});
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+DemoPage.displayName = "DemoPage";
+
+// Helper component for navigation links within demo pages
+export interface DemoLinkProps {
+  to: string;
+  children: ReactNode;
+  className?: string;
+  [key: string]: any; // For data-* attributes
+}
+
+export const DemoLink = memo(({ to, children, className, ...props }: DemoLinkProps) => {
+  const { navigate } = useBrowserNavigation();
 
   return (
-    <div className={cn("relative", className)}>
-      {/* Toggle Button */}
-      <div className="flex justify-center mb-4 gap-2">
-        <button
-          onClick={() => setIsMobileView(false)}
-          className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-            !isMobileView 
-              ? "bg-orange-500 text-white shadow-lg" 
-              : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-          )}
-        >
-          <svg className="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          Desktop
-        </button>
-        <button
-          onClick={() => setIsMobileView(true)}
-          className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-            isMobileView 
-              ? "bg-orange-500 text-white shadow-lg" 
-              : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-          )}
-        >
-          <svg className="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          Mobile
-        </button>
-      </div>
+    <button
+      onClick={() => navigate(to)}
+      className={cn(
+        "text-blue-500 hover:text-blue-600 underline cursor-pointer",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+});
 
-      {/* Mockup */}
-      <BrowserMockup 
-        url={url}
-        className={className}
-        height={desktopHeight}
-        isMobile={isMobileView}
-      >
-        {children}
-      </BrowserMockup>
+DemoLink.displayName = "DemoLink";
+
+// Helper component for demo cards
+export interface DemoCardProps {
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  [key: string]: any; // For data-* attributes
+}
+
+export const DemoCard = memo(({
+  children,
+  onClick,
+  className,
+  ...props
+}: DemoCardProps) => {
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        "p-4 border border-gray-200 dark:border-gray-700 rounded-lg",
+        "hover:shadow-lg transition-shadow cursor-pointer",
+        className
+      )}
+      {...props}
+    >
+      {children}
     </div>
   );
-}
+});
+
+DemoCard.displayName = "DemoCard";
