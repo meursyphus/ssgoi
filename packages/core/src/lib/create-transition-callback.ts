@@ -50,6 +50,11 @@ export function createTransitionCallback<TAnimationValue = number>(
 
     setup.config.prepare?.(element);
 
+    // Wait if configured
+    if (setup.config.wait) {
+      await setup.config.wait();
+    }
+
     const animator = Animator.fromState(setup.state, {
       from: setup.from,
       to: setup.to,
@@ -89,6 +94,11 @@ export function createTransitionCallback<TAnimationValue = number>(
     setup.config.prepare?.(element);
 
     insertClone();
+
+    // Wait if configured
+    if (setup.config.wait) {
+      await setup.config.wait();
+    }
 
     const animator = Animator.fromState(setup.state, {
       from: setup.from,

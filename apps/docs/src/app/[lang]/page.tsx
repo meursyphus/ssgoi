@@ -4,8 +4,28 @@ import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
 import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
+import { Metadata } from "next";
+import { createSEOMetadata } from "@/lib/seo-metadata";
 
-export default async function Home({ params }: { params: { lang: string } }) {
+interface HomePageProps {
+  params: Promise<{ lang: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: HomePageProps): Promise<Metadata> {
+  const { lang } = await params;
+  const t = await getServerTranslations("metadata", lang);
+
+  return createSEOMetadata({
+    title: t("title"),
+    description: t("description"),
+    type: "website",
+    url: `/${lang}`,
+  }, lang);
+}
+
+export default async function Home({ params }: HomePageProps) {
   const { lang } = await params;
   const t = await getServerTranslations("home", lang);
 

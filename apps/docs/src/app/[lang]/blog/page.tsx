@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { createSEOMetadata } from "@/lib/seo-metadata";
+import { BlogListStructuredData } from "./structured-data";
 
 interface BlogPageProps {
   params: Promise<{ lang: string }>;
@@ -30,8 +31,10 @@ export default async function BlogPage({ params }: BlogPageProps) {
   const t = await getServerTranslations("blog", lang);
 
   return (
-    <SsgoiTransition id="blog">
-      <div className="max-w-6xl mx-auto px-4 py-16">
+    <>
+      <BlogListStructuredData posts={posts} lang={lang} />
+      <SsgoiTransition id="blog">
+        <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-white mb-4">
             {t("pageTitle")}
@@ -110,5 +113,6 @@ export default async function BlogPage({ params }: BlogPageProps) {
         )}
       </div>
     </SsgoiTransition>
+    </>
   );
 }

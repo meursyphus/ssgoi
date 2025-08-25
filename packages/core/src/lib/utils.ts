@@ -26,7 +26,10 @@ export const getScrollingElement = (element: HTMLElement): HTMLElement => {
     }
 
     // Also check if element has scroll even without explicit overflow
-    if (current.scrollHeight > current.clientHeight || current.scrollWidth > current.clientWidth) {
+    if (
+      current.scrollHeight > current.clientHeight ||
+      current.scrollWidth > current.clientWidth
+    ) {
       return current;
     }
 
@@ -36,7 +39,6 @@ export const getScrollingElement = (element: HTMLElement): HTMLElement => {
   // Return document element as fallback (handles body/html scrolling)
   return document.documentElement;
 };
-
 
 const START_STACK_INDEX_IN_FRAMEWORKS = 3;
 
@@ -67,4 +69,13 @@ export const parseCallerLocation = (stack?: string): { file: string; line: strin
   }
 
   return null;
+}
+
+/**
+ * Delays execution for a specified amount of milliseconds
+ * @param ms - Milliseconds to wait
+ * @returns Promise that resolves after the specified delay
+ */
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };

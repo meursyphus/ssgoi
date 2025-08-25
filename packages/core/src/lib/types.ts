@@ -19,6 +19,9 @@ export type TransitionConfig<TAnimationValue = number> = {
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
 
+  // Wait before starting the animation
+  wait?: () => Promise<void>;
+
   // Called when animation starts
   onStart?: () => void;
 
@@ -26,13 +29,21 @@ export type TransitionConfig<TAnimationValue = number> = {
   onEnd?: () => void;
 };
 
-export type GetTransitionConfig<TContext = undefined, TAnimationValue = number> =
-  TContext extends undefined
-    ? (node: HTMLElement) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>
-    : (
-        node: HTMLElement,
-        context: TContext
-      ) => TransitionConfig<TAnimationValue> | Promise<TransitionConfig<TAnimationValue>>;
+export type GetTransitionConfig<
+  TContext = undefined,
+  TAnimationValue = number,
+> = TContext extends undefined
+  ? (
+      node: HTMLElement
+    ) =>
+      | TransitionConfig<TAnimationValue>
+      | Promise<TransitionConfig<TAnimationValue>>
+  : (
+      node: HTMLElement,
+      context: TContext
+    ) =>
+      | TransitionConfig<TAnimationValue>
+      | Promise<TransitionConfig<TAnimationValue>>;
 
 export type Transition<TContext = undefined, TAnimationValue = number> = {
   in?: GetTransitionConfig<TContext, TAnimationValue>;

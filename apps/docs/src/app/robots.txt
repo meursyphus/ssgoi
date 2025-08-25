@@ -9,5 +9,6 @@ Sitemap: https://ssgoi.dev/sitemap.xml
 # Crawl-delay
 Crawl-delay: 0
 
-# Disallow temporary or private paths if any
-# (none currently)
+# Disallow temporary or private paths
+Disallow: /*/demo
+Disallow: /*/demo/
