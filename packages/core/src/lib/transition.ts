@@ -63,25 +63,18 @@ function unregisterTransition(key: TransitionKey): void {
 // Auto key generation
 // ---------------------------------------------
 
-let __autoKeyCounter = 0;
-const __objectToKey = new WeakMap<object, TransitionKey>();
 
-export function generateAutoKey(ref?: object | null, debug = false): TransitionKey {
-  if (ref && __objectToKey.has(ref)) {
-    return __objectToKey.get(ref)!;
+export function generateAutoKey(): TransitionKey {
+
+  // Fallback to a stable key from the callsite when available
+  const location = parseCallerLocation(new Error().stack);
+  if (location) {
+    const key = `auto_${location.file}_${location.line}_${location.column}` as const;
+    return key;
   }
 
-  if (debug) {
-    const location = parseCallerLocation(new Error().stack);
-    if (location) {
-      const key = `auto_${location.file}_${location.line}_${location.column}` as const;
-      if (ref) __objectToKey.set(ref, key);
-      return key;
-    }
-  }
-
-  const key = Symbol(`ssgoi_auto_${Date.now()}_${++__autoKeyCounter}`);
-  if (ref) __objectToKey.set(ref, key);
+  // Fallback to a unique symbol when callsite is unavailable
+  const key = Symbol(`ssgoi_auto_${Date.now()}`);
   return key;
 }
 
@@ -92,8 +85,6 @@ const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
 const __cleanupRegistry = FinalizationRegistryCtor
   ? (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
       try {
-        console.log("unregisterTransition", key);
-        // When the associated ref object is collected, unregister the transition
         unregisterTransition(key);
       } catch {}
     }) as { register: (target: object, heldValue: TransitionKey) => void })
@@ -110,15 +101,8 @@ export function transition<TAnimationValue = number>(
     [TRANSITION_STRATEGY]?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
   }
 ): TransitionCallback {
-  const resolvedKey = options.key ?? generateAutoKey(options.ref ?? undefined, options.debug);
+  const resolvedKey = options.key ?? generateAutoKey();
 
-  if (!options.key && options.debug) {
-    // Basic guidance for devs when using auto-keys
-    // eslint-disable-next-line no-console
-    console.warn(
-      "[SSGOI] transition(): No key provided, generating auto key. Consider using explicit keys for dynamic lists or persistent behavior to avoid unexpected results."
-    );
-  }
 
   // Register GC cleanup for auto-generated keys bound to a ref
   if (options.ref && __cleanupRegistry) {

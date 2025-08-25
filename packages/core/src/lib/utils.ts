@@ -37,6 +37,9 @@ export const getScrollingElement = (element: HTMLElement): HTMLElement => {
   return document.documentElement;
 };
 
+
+const START_STACK_INDEX_IN_FRAMEWORKS = 3;
+
 export const parseCallerLocation = (stack?: string): { file: string; line: string; column: string } | null => {
   if (!stack) return null;
 
@@ -50,7 +53,7 @@ export const parseCallerLocation = (stack?: string): { file: string; line: strin
   // We look for the first line matching /\(?([^):]+):(\d+):(\d+)\)?$/,
   // which captures the file path, line, and column numbers in the stack trace.
 
-  for (let i = 3; i < Math.min(lines.length, 6); i++) {
+  for (let i = START_STACK_INDEX_IN_FRAMEWORKS; i < Math.min(lines.length, 6); i++) {
     const line = lines[i];
     const match = line?.match(/\(?([^):]+):(\d+):(\d+)\)?$/);
     if (!match) {

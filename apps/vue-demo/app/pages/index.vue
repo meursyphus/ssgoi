@@ -92,7 +92,6 @@
                 v-transition="{
                   in: fadeTransition,
                   out: fadeTransition,
-                  debug: true,
                 }"
                 class="shape circle"
               />

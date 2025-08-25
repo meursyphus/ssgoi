@@ -41,7 +41,6 @@ export type Transition<TContext = undefined, TAnimationValue = number> = {
 
 export type TransitionOptions<TContext = undefined, TAnimationValue = number> = Transition<TContext, TAnimationValue> & {
   key?: TransitionKey;
-  debug?: boolean;
   ref?: object;
 };
 

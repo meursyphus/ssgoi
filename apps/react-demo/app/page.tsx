@@ -121,7 +121,7 @@ export default function Home() {
         </div>
 
         <div className={styles.toggleSection}>
-        <button
+          <button
             onClick={() => setShowShapes(!showShapes)}
             className={styles.toggleButton}
           >
@@ -136,7 +136,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    debug: true,
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
@@ -190,18 +189,14 @@ export default function Home() {
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
-                        element.style.transform = `translateX(${
-                          (1 - progress) * -100
-                        }px)`;
+                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
                         element.style.opacity = progress.toString();
                       },
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
-                        element.style.transform = `translateX(${
-                          (1 - progress) * -100
-                        }px)`;
+                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
                         element.style.opacity = progress.toString();
                       },
                     }),
