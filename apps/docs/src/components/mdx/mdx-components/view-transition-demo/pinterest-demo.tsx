@@ -107,13 +107,11 @@ const pinterestItems = [
 // Pinterest Grid Page Component
 function PinterestGridPage() {
   return (
-    <DemoPage path="/pinterest" title="Pinterest Gallery">
+    <DemoPage path="/pinterest">
       <div className="min-h-screen p-4">
         {/* Header */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Discover Ideas
-          </h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Discover Ideas</h1>
           <p className="text-gray-400 text-sm">
             Click any pin to see the Pinterest-style expand effect
           </p>
@@ -121,57 +119,58 @@ function PinterestGridPage() {
 
         {/* Pinterest Masonry Grid */}
         <div className="columns-2 gap-3 space-y-3">
-            {pinterestItems.map((item) => (
-              <DemoLink
-                key={item.id}
-                to={`/pinterest/${item.id}`}
-                className="break-inside-avoid block no-underline"
-              >
-                <article className="relative group cursor-pointer">
-                  {/* Pin container with Pinterest transition */}
-                  <div className="relative bg-gray-800 rounded-lg overflow-hidden transition-transform duration-200 hover:scale-[1.02]">
-                    {/* Image */}
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-auto object-cover"
-                      data-pinterest-gallery-key={item.id}
+          {pinterestItems.map((item) => (
+            <DemoLink
+              key={item.id}
+              to={`/pinterest/${item.id}`}
+              className="break-inside-avoid block no-underline"
+            >
+              <article className="relative group cursor-pointer">
+                {/* Pin container with Pinterest transition */}
+                <div className="relative bg-gray-800 rounded-lg overflow-hidden transition-transform duration-200 hover:scale-[1.02]">
+                  {/* Image */}
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-auto object-cover"
+                    data-pinterest-gallery-key={item.id}
+                  />
 
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {/* Save button */}
-                      <button className="absolute top-2 right-2 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-full opacity-0 group-hover:opacity-100 transform -translate-y-2 group-hover:translate-y-0 transition-all duration-200">
-                        Save
-                      </button>
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {/* Save button visual (not clickable since parent is a link) */}
+                    <div className="absolute top-2 right-2 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-full opacity-0 group-hover:opacity-100 transform -translate-y-2 group-hover:translate-y-0 transition-all duration-200">
+                      Save
+                    </div>
 
-                      {/* Bottom info */}
-                      <div className="absolute bottom-0 left-0 right-0 p-2">
-                        <h3 className="text-white font-semibold text-xs mb-1 line-clamp-1">
-                          {item.title}
-                        </h3>
-                        <div className="flex items-center gap-1">
-                          <img
-                            src={item.authorAvatar}
-                            alt={item.author}
-                            className="w-4 h-4 rounded-full"
-                          />
-                          <span className="text-gray-300 text-[10px]">
-                            {item.author}
-                          </span>
-                        </div>
+                    {/* Bottom info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-2">
+                      <h3 className="text-white font-semibold text-xs mb-1 line-clamp-1">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={item.authorAvatar}
+                          alt={item.author}
+                          className="w-4 h-4 rounded-full"
+                        />
+                        <span className="text-gray-300 text-[10px]">
+                          {item.author}
+                        </span>
                       </div>
                     </div>
-
-                    {/* Like count (always visible) */}
-                    <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/50 backdrop-blur-sm rounded">
-                      <span className="text-white text-[10px] font-medium">
-                        ❤️ {item.likes}
-                      </span>
-                    </div>
                   </div>
-                </article>
-              </DemoLink>
-            ))}
+
+                  {/* Like count (always visible) */}
+                  <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/50 backdrop-blur-sm rounded">
+                    <span className="text-white text-[10px] font-medium">
+                      ❤️ {item.likes}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </DemoLink>
+          ))}
         </div>
       </div>
     </DemoPage>
@@ -195,14 +194,23 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
   }, [navigate]);
 
   return (
-    <DemoPage path={`/pinterest/${item.id}`} title={item.title}>
+    <DemoPage path={`/pinterest/${item.id}`}>
       <div className="min-h-screen">
-        {/* Header */}
-        <div className="sticky top-0 z-20 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800 p-4">
-          <div className="flex items-center justify-between">
+        {/* Content */}
+        <div>
+          {/* Image with overlays */}
+          <div className="relative bg-gray-800">
+            <img
+              src={item.image}
+              alt={item.title}
+              className="w-full h-auto"
+              data-pinterest-detail-key={item.id}
+            />
+            
+            {/* Back button overlay */}
             <DemoLink
               to="/pinterest"
-              className="p-2 hover:bg-gray-800 rounded-full transition-colors no-underline"
+              className="absolute top-3 left-3 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors no-underline"
             >
               <svg
                 width="20"
@@ -216,21 +224,12 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
             </DemoLink>
-            <button className="px-4 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-full">
+
+            {/* Save button overlay */}
+            <button className="absolute top-3 right-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-full transition-colors">
               Save
             </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div data-pinterest-detail-key={item.id}>
-          {/* Image */}
-          <div className="relative bg-gray-800">
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-full h-auto"
-            />
+            
             {/* Like count overlay */}
             <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
               <span className="text-white text-sm font-medium">
@@ -238,13 +237,11 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
               </span>
             </div>
           </div>
-          
+
           {/* Details below image */}
           <div className="p-4">
-            <h1 className="text-xl font-bold text-white mb-3">
-              {item.title}
-            </h1>
-            
+            <h1 className="text-xl font-bold text-white mb-3">{item.title}</h1>
+
             {/* Author section */}
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-800">
               <img
@@ -280,8 +277,8 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
                   />
                   <div className="flex-1">
                     <p className="text-white text-sm">
-                      <span className="font-semibold">Sarah M.</span>{" "}
-                      Beautiful composition! Love the colors 🎨
+                      <span className="font-semibold">Sarah M.</span> Beautiful
+                      composition! Love the colors 🎨
                     </p>
                     <p className="text-gray-500 text-xs mt-1">2h ago</p>
                   </div>
@@ -294,8 +291,8 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
                   />
                   <div className="flex-1">
                     <p className="text-white text-sm">
-                      <span className="font-semibold">Mike J.</span> Where
-                      was this taken? Stunning view!
+                      <span className="font-semibold">Mike J.</span> Where was
+                      this taken? Stunning view!
                     </p>
                     <p className="text-gray-500 text-xs mt-1">5h ago</p>
                   </div>
@@ -305,9 +302,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
 
             {/* Related pins */}
             <div>
-              <h3 className="text-white font-semibold mb-4">
-                More like this
-              </h3>
+              <h3 className="text-white font-semibold mb-4">More like this</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
                 <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
@@ -340,11 +335,10 @@ function PinterestLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-gray-950 min-h-full">
       {/* Constrain width at layout level */}
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto overflow-hidden">
         {/* Critical: relative z-0 wrapper for proper transition layering */}
-        <div className="relative z-0">
-          {children}
-        </div>
+
+        <div className="relative z-0 w-full">{children}</div>
       </div>
     </div>
   );

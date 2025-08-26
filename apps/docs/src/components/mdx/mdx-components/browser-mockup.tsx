@@ -176,17 +176,15 @@ export function BrowserMockup({
 
 // Helper component for creating simple demo pages
 export interface DemoPageProps {
-  title: string;
   children: ReactNode;
   className?: string;
   path: string;
 }
 
 export const DemoPage = memo(
-  ({ title, children, className, path }: DemoPageProps) => {
+  ({ children, className, path }: DemoPageProps) => {
     return (
-      <SsgoiTransition id={path} className={cn("min-h-full p-8", className)}>
-        <h1 className="text-3xl font-bold mb-6">{title}</h1>
+      <SsgoiTransition id={path} className={cn("min-h-full", className)}>
         {children}
       </SsgoiTransition>
     );

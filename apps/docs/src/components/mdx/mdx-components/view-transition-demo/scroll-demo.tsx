@@ -13,7 +13,7 @@ import type { RouteConfig } from "../browser-mockup";
 // Intro Section Page
 function IntroPage() {
   return (
-    <DemoPage path="/intro" title="Introduction">
+    <DemoPage path="/intro">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">📝</div>
 
@@ -83,7 +83,7 @@ function IntroPage() {
 // Features Section Page
 function FeaturesPage() {
   return (
-    <DemoPage path="/features" title="Features">
+    <DemoPage path="/features">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">✨</div>
 
@@ -151,7 +151,7 @@ function FeaturesPage() {
 // Usage Section Page
 function UsagePage() {
   return (
-    <DemoPage path="/usage" title="Usage">
+    <DemoPage path="/usage">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">🚀</div>
 
@@ -219,7 +219,7 @@ function UsagePage() {
 // Examples Section Page
 function ExamplesPage() {
   return (
-    <DemoPage path="/examples" title="Examples">
+    <DemoPage path="/examples">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">💡</div>
 

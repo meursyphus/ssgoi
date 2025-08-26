@@ -84,7 +84,7 @@ const galleryItems = [
 // Gallery List Page Component
 function GalleryListPage() {
   return (
-    <DemoPage path="/gallery" title="Photo Gallery">
+    <DemoPage path="/gallery">
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 p-6">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -153,7 +153,7 @@ function GalleryDetailPage({ item }: { item: typeof galleryItems[0] }) {
   }, [navigate]);
 
   return (
-    <DemoPage path={`/gallery/${item.id}`} title={item.title}>
+    <DemoPage path={`/gallery/${item.id}`}>
       <div className="min-h-screen bg-black relative">
         {/* Top navigation bar with back button */}
         <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4">

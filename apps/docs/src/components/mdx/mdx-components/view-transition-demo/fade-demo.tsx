@@ -14,7 +14,6 @@ function HomePage() {
   return (
     <DemoPage
       path="/"
-      title=""
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -98,7 +97,6 @@ function FeaturesPage() {
   return (
     <DemoPage
       path="/features"
-      title=""
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -204,7 +202,6 @@ function ExamplesPage() {
   return (
     <DemoPage
       path="/examples"
-      title=""
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -262,7 +259,6 @@ function GettingStartedPage() {
   return (
     <DemoPage
       path="/start"
-      title=""
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
