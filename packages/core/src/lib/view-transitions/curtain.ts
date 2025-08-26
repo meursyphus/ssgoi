@@ -29,21 +29,28 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
     curtainColor = DEFAULT_CURTAIN_COLOR,
   } = options;
 
+  // Convert staggerDelay from ms to normalized value (0-1)
+  const staggerFactor = staggerDelay / 1000;
+
   let outAnimationComplete: Promise<void>;
   let resolveOutAnimation: (() => void) | null = null;
   let curtainContainer: HTMLElement | null = null;
   let blinds: HTMLElement[] = [];
 
-  const createCurtainBlinds = (element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
+  const createCurtainBlinds = (element: HTMLElement, initiallyHidden = false) => {
+    // Ensure parent has position relative/absolute for absolute positioning
+    const parentStyle = window.getComputedStyle(element);
+    if (parentStyle.position === 'static') {
+      element.style.position = 'relative';
+    }
     
     curtainContainer = document.createElement('div');
     curtainContainer.style.cssText = `
-      position: fixed;
-      top: ${rect.top}px;
-      left: ${rect.left}px;
-      width: ${rect.width}px;
-      height: ${rect.height}px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       z-index: 9999;
       overflow: hidden;
@@ -54,28 +61,30 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
       const blind = document.createElement('div');
       
       if (direction === 'horizontal') {
-        const blindHeight = rect.height / blindCount;
+        const blindHeight = 100 / blindCount;
         blind.style.cssText = `
           position: absolute;
-          top: ${blindHeight * i}px;
+          top: ${blindHeight * i}%;
           left: 0;
           width: 100%;
-          height: ${blindHeight}px;
+          height: ${blindHeight}%;
           background: ${curtainColor};
-          transform: scaleX(0);
+          transform: scaleX(${initiallyHidden ? 0 : 1});
           transform-origin: left center;
+          transition: none;
         `;
       } else {
-        const blindWidth = rect.width / blindCount;
+        const blindWidth = 100 / blindCount;
         blind.style.cssText = `
           position: absolute;
           top: 0;
-          left: ${blindWidth * i}px;
-          width: ${blindWidth}px;
+          left: ${blindWidth * i}%;
+          width: ${blindWidth}%;
           height: 100%;
           background: ${curtainColor};
-          transform: scaleY(0);
+          transform: scaleY(${initiallyHidden ? 0 : 1});
           transform-origin: top center;
+          transition: none;
         `;
       }
       
@@ -83,7 +92,7 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
       curtainContainer.appendChild(blind);
     }
     
-    document.body.appendChild(curtainContainer);
+    element.appendChild(curtainContainer);
   };
 
   const removeCurtainBlinds = () => {
@@ -100,31 +109,34 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
         resolveOutAnimation = resolve;
       });
 
-      createCurtainBlinds(element);
+      createCurtainBlinds(element, true); // Start with hidden blinds
 
       return {
         spring: outSpring,
         prepare: prepareOutgoing,
         tick: (progress) => {
           blinds.forEach((blind, index) => {
-            const staggeredProgress = Math.max(0, Math.min(1, 
-              (progress * (1 + staggerDelay * blindCount / 1000) - (index * staggerDelay / 1000))
+            // Calculate when each blind should start appearing
+            const blindDelay = (index / blindCount) * (1 - staggerFactor);
+            const blindDuration = (1 / blindCount) + staggerFactor;
+            
+            // Calculate individual blind progress
+            const blindProgress = Math.max(0, Math.min(1, 
+              (progress - blindDelay) / blindDuration
             ));
             
             if (direction === 'horizontal') {
-              blind.style.transform = `scaleX(${staggeredProgress})`;
+              blind.style.transform = `scaleX(${blindProgress})`;
             } else {
-              blind.style.transform = `scaleY(${staggeredProgress})`;
+              blind.style.transform = `scaleY(${blindProgress})`;
             }
           });
 
-          element.style.opacity = (1 - progress).toString();
+          // Don't change opacity during curtain close
         },
         onEnd: () => {
-          setTimeout(() => {
-            removeCurtainBlinds();
-          }, 100);
-          
+          // Keep curtain in place after OUT completes
+          // It will be removed when IN animation ends
           if (resolveOutAnimation) {
             resolveOutAnimation();
           }
@@ -132,21 +144,26 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
       };
     },
     in: (element) => {
-      createCurtainBlinds(element);
+      // Don't create new blinds, use existing ones from OUT animation if they exist
+      if (!curtainContainer) {
+        createCurtainBlinds(element, false); // Create fully visible curtain if no OUT animation
+      }
 
       return {
         spring: inSpring,
         prepare: (element) => {
-          element.style.opacity = "0";
+          element.style.opacity = "1"; // Content is already visible but hidden by curtain
           
-          // Start with blinds fully closed
-          blinds.forEach((blind) => {
-            if (direction === 'horizontal') {
-              blind.style.transform = 'scaleX(1)';
-            } else {
-              blind.style.transform = 'scaleY(1)';
-            }
-          });
+          // Ensure all blinds are fully visible at start
+          if (blinds.length > 0) {
+            blinds.forEach((blind) => {
+              if (direction === 'horizontal') {
+                blind.style.transform = 'scaleX(1)';
+              } else {
+                blind.style.transform = 'scaleY(1)';
+              }
+            });
+          }
         },
         wait: async () => {
           if (outAnimationComplete) {
@@ -156,20 +173,25 @@ export const curtain = (options: CurtainOptions = {}): SggoiTransition => {
         },
         tick: (progress) => {
           blinds.forEach((blind, index) => {
+            // Blinds disappear from last to first (right to left)
             const reverseIndex = blinds.length - 1 - index;
-            const staggeredProgress = Math.max(0, Math.min(1, 
-              (progress * (1 + staggerDelay * blindCount / 1000) - (reverseIndex * staggerDelay / 1000))
+            const blindDelay = (reverseIndex / blindCount) * (1 - staggerFactor);
+            const blindDuration = (1 / blindCount) + staggerFactor;
+            
+            // Calculate individual blind progress for opening
+            const blindProgress = Math.max(0, Math.min(1, 
+              (progress - blindDelay) / blindDuration
             ));
             
-            // Blinds open from right to left (or bottom to top)
+            // Blinds shrink away (opening the curtain)
             if (direction === 'horizontal') {
-              blind.style.transform = `scaleX(${1 - staggeredProgress})`;
+              blind.style.transform = `scaleX(${1 - blindProgress})`;
+              blind.style.transformOrigin = 'right center'; // Open from right
             } else {
-              blind.style.transform = `scaleY(${1 - staggeredProgress})`;
+              blind.style.transform = `scaleY(${1 - blindProgress})`;
+              blind.style.transformOrigin = 'bottom center'; // Open from bottom
             }
           });
-
-          element.style.opacity = progress.toString();
         },
         onEnd: () => {
           removeCurtainBlinds();
