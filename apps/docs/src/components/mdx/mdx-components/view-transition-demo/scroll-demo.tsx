@@ -2,7 +2,7 @@
 
 import React from "react";
 import { scroll } from "@ssgoi/react/view-transitions";
-import { BrowserMockup, DemoPage } from "../browser-mockup";
+import { BrowserMockup, DemoPage, DemoLink } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 
 // Intro Section Page
@@ -299,33 +299,66 @@ function ScrollLayout({ children }: { children: React.ReactNode }) {
         <ul className="space-y-1">
           {scrollRoutes.map((route) => (
             <li key={route.path}>
-              <a
-                href={route.path}
+              <DemoLink
+                to={route.path}
                 className="w-full rounded-lg px-3 py-2 text-left text-sm transition-colors block
-                  text-gray-700 hover:bg-gray-100
+                  text-gray-700 hover:bg-gray-100 underline-none
                   data-[active=true]:bg-blue-500 data-[active=true]:text-white"
               >
                 {route.label}
-              </a>
+              </DemoLink>
             </li>
           ))}
         </ul>
       </nav>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">{children}</div>
+      <div className="flex-1 overflow-hidden relative z-0">{children}</div>
     </div>
   );
 }
 
 export function ScrollDemo() {
+  // Create middleware to determine scroll direction based on route order
+  const createScrollMiddleware = () => {
+    const routeOrder = scrollRoutes.map((r) => r.path);
+
+    return (from: string, to: string) => {
+      const fromIndex = routeOrder.indexOf(from);
+      const toIndex = routeOrder.indexOf(to);
+
+      if (fromIndex !== -1 && toIndex !== -1) {
+        if (fromIndex < toIndex) {
+          // Going forward (down the list)
+          return { from: "/nav/previous", to: "/nav/next" };
+        } else {
+          // Going backward (up the list)
+          return { from: "/nav/next", to: "/nav/previous" };
+        }
+      }
+
+      return { from, to };
+    };
+  };
+
   const config = {
-    defaultTransition: scroll({
-      spring: {
-        stiffness: 300,
-        damping: 30,
+    transitions: [
+      {
+        from: "/nav/previous",
+        to: "/nav/next",
+        transition: scroll({
+          direction: "up",
+        }),
       },
-    }),
+      {
+        from: "/nav/next",
+        to: "/nav/previous",
+        transition: scroll({
+          direction: "down",
+        }),
+      },
+    ],
+    middleware: createScrollMiddleware(),
   };
 
   return (

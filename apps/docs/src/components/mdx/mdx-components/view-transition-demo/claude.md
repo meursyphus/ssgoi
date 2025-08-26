@@ -17,11 +17,11 @@ export function TransitionDemo() {
   };
 
   return (
-    <BrowserMockup 
-      routes={routes}        // Route configuration
-      config={config}        // SSGOI config
-      layout={CustomLayout}  // Optional custom layout
-      initialRoute="/path"   // Starting route
+    <BrowserMockup
+      routes={routes} // Route configuration
+      config={config} // SSGOI config
+      layout={CustomLayout} // Optional custom layout
+      initialRoute="/path" // Starting route
     />
   );
 }
@@ -69,9 +69,9 @@ const config = {
     {
       from: "/list",
       to: "/detail/*",
-      transition: slide({ direction: 'left' }),
-    }
-  ]
+      transition: slide({ direction: "left" }),
+    },
+  ],
 };
 ```
 
@@ -138,11 +138,7 @@ export function NewTransitionDemo() {
   };
 
   return (
-    <BrowserMockup 
-      routes={routes}
-      config={config}
-      initialRoute="/page1"
-    />
+    <BrowserMockup routes={routes} config={config} initialRoute="/page1" />
   );
 }
 ```
@@ -165,117 +161,3 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
   }
 }
 ```
-
-## Examples
-
-### Basic Demo (fade-demo.tsx)
-
-Simple multi-page demo with fade transitions:
-- Multiple pages with different content
-- Custom layout with branding
-- Navigation between pages
-
-### Sidebar Navigation (scroll-demo.tsx)
-
-Demo with sidebar navigation:
-- Custom layout with left sidebar
-- Scroll transitions between sections
-- Active state highlighting
-
-### Dynamic Routes (hero-demo.tsx)
-
-Gallery demo with dynamic detail pages:
-- List page with grid layout
-- Dynamic detail pages for each item
-- Hero transitions with data-hero-key
-
-## Important Notes
-
-### DO NOT:
-- Import and use `Ssgoi` or `SsgoiTransition` directly - BrowserMockup handles this
-- Manage routing state manually - use the routes configuration
-- Create complex state management - keep demos simple and focused
-
-### DO:
-- Use `DemoPage` wrapper for all page components
-- Use `<a href="/path">` for navigation - BrowserMockup intercepts these
-- Keep demos focused on showcasing the specific transition
-- Use realistic content that demonstrates the transition well
-
-## Common Patterns
-
-### Navigation Links
-
-Use standard anchor tags - BrowserMockup will handle them:
-
-```tsx
-<a href="/about">Go to About</a>
-```
-
-### Active State
-
-For custom navigation, you can access the current route:
-
-```tsx
-function CustomNav({ children }: { children: React.ReactNode }) {
-  return (
-    <nav>
-      {routes.map(route => (
-        <a 
-          href={route.path}
-          data-active={currentRoute === route.path}
-          className="data-[active=true]:bg-blue-500"
-        >
-          {route.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-```
-
-### Hero Transitions
-
-For hero transitions, use `data-hero-key` attributes:
-
-```tsx
-// List page
-<div data-hero-key="item-1">
-  <img src="..." />
-</div>
-
-// Detail page
-<div data-hero-key="item-1">
-  <img src="..." />
-</div>
-```
-
-## Testing
-
-When creating or modifying demos:
-
-1. Test all navigation paths
-2. Verify transitions work smoothly
-3. Check responsive behavior
-4. Ensure content is appropriate and realistic
-5. Test in documentation context using `<ViewTransitionDemo type="your-type" />`
-
-## File Naming Convention
-
-- Use lowercase with hyphens: `transition-name-demo.tsx`
-- Export named function: `export function TransitionNameDemo()`
-- Keep related assets in the same directory
-
-## Tips
-
-1. **Keep it Simple**: Demos should focus on the transition, not complex functionality
-2. **Use Real Content**: Realistic content helps users understand use cases
-3. **Consider Mobile**: Ensure demos work well on mobile screens
-4. **Performance**: Keep images optimized and content lightweight
-5. **Accessibility**: Include proper ARIA labels and semantic HTML
-
-## Need Help?
-
-- Check existing demos for patterns and examples
-- The `browser-mockup.tsx` file contains all available props and options
-- Keep demos consistent with the established patterns for maintainability

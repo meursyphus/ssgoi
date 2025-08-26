@@ -4,7 +4,6 @@ import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
 import { cn } from "../../../lib/utils";
 import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
-import { useMobile } from "../../../lib/use-mobile";
 
 // Route configuration
 export interface RouteConfig {
