@@ -1,37 +1,79 @@
 ---
 title: "핀터레스트 전환"
-description: "갤러리에서 상세 화면으로 확장되는 Pinterest 스타일 전환"
+description: "카드가 화면을 가득 채우며 확장되는 몰입형 전환"
 nav-title: "핀터레스트"
 ---
 
 # 핀터레스트 전환
 
-핀터레스트(Pinterest) 전환은 갤러리의 작은 아이템이 전체 화면으로 확장되는 효과입니다. Pinterest 앱의 시그니처 전환 효과를 웹에서 구현하여, 시각적으로 매력적이고 직관적인 사용자 경험을 제공합니다.
+핀터레스트 전환은 갤러리의 작은 아이템이 전체 화면으로 확장되는 **확장형 전환(Expansion Transition)**입니다. 사용자가 선택한 콘텐츠가 화면을 가득 채우며 확대되어, 강력한 몰입감과 시각적 연속성을 제공합니다.
 
-## 핵심 개념
+## 데모
 
-Pinterest 전환은 두 가지 key 속성을 사용합니다:
+<ViewTransitionDemo type="pinterest" />
 
-- **`data-pinterest-gallery-key`**: 갤러리 페이지의 아이템
-- **`data-pinterest-detail-key`**: 상세 페이지의 컨테이너
+## UX 원칙
 
-같은 key 값을 가진 요소끼리 연결되어 확장/축소 애니메이션이 발생합니다.
+### 언제 사용하나요?
+
+핀터레스트 전환은 **시각적 콘텐츠의 확대 탐색** 시 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "no",
+      description: "확장할 연결점이 없어 부적합"
+    },
+    {
+      label: "형제 관계",
+      suitable: "maybe",
+      description: "갤러리 내 아이템 간 이동 시 고려 가능"
+    },
+    {
+      label: "계층 관계",
+      suitable: "yes",
+      description: "썸네일→풀뷰처럼 같은 콘텐츠의 확대 뷰에 최적"
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **이미지 갤러리**: 썸네일에서 고해상도 이미지로 확대
+- **제품 카탈로그**: 제품 그리드에서 상세 정보로 확장
+- **미디어 브라우징**: 비디오 썸네일에서 플레이어로 전환
+- **포트폴리오**: 작품 목록에서 전체 화면 프레젠테이션으로
+
+### 왜 이렇게 동작하나요?
+
+1. **공간 확장 메타포**: 작은 창문을 통해 큰 세계로 들어가는 느낌
+2. **자연스러운 초점 이동**: 사용자의 시선이 자연스럽게 확장되는 요소를 따라감
+3. **컨텍스트 보존**: 어디서 왔는지 명확하여 방향감각 유지
+4. **드라마틱한 효과**: 확장 애니메이션이 콘텐츠의 중요성 강조
+
+### 모션 디자인
 
 ```
-갤러리 페이지                    상세 페이지
-┌─────────────────┐            ┌─────────────────┐
-│ ┌──┐ ┌──┐ ┌──┐ │            │                 │
-│ │▣ │ │  │ │  │ │ ═════════> │       ▣         │
-│ └──┘ └──┘ └──┘ │            │                 │
-│ gallery-key="1" │            │ detail-key="1"  │
-└─────────────────┘            └─────────────────┘
+확장 과정:
+1. 선택된 카드의 위치와 크기 캡처
+2. 카드가 화면 중앙으로 이동하며 확대
+3. 동시에 배경 페이드와 스케일 변화
+4. 최종적으로 전체 화면 채움
+
+축소 과정:
+1. 상세 화면이 축소되며 원래 위치로
+2. 배경이 다시 나타나며 갤러리 복원
+3. 자연스러운 스프링 애니메이션으로 정착
 ```
 
 ## 기본 사용법
 
 ### 1. 전환 설정
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -82,188 +124,140 @@ Pinterest 전환은 두 가지 key 속성을 사용합니다:
   </TabPanel>
 </Tabs>
 
-### 2. 갤러리 페이지
+### 2. 요소 마킹
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+갤러리와 상세 페이지에 각각 다른 data 속성 사용:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    export function Gallery() {
+    // 갤러리 페이지
+    function Gallery() {
       return (
         <div className="masonry-grid">
           {items.map(item => (
             <Link 
               key={item.id} 
-              href={`/gallery/${item.id}`}
+              to={`/gallery/${item.id}`}
               data-pinterest-gallery-key={item.id}
               className="gallery-item"
             >
-              <img src={item.thumbnail} alt={item.title} />
+              <img src={item.image} alt={item.title} />
               <h3>{item.title}</h3>
             </Link>
           ))}
         </div>
       );
     }
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      export let items;
-    </script>
 
-    <div class="masonry-grid">
-      {#each items as item}
-        <a 
-          href={`/gallery/${item.id}`}
-          data-pinterest-gallery-key={item.id}
-          class="gallery-item"
-        >
-          <img src={item.thumbnail} alt={item.title} />
-          <h3>{item.title}</h3>
-        </a>
-      {/each}
-    </div>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 3. 상세 페이지
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    export function GalleryDetail({ item }) {
+    // 상세 페이지
+    function ItemDetail({ item }) {
       return (
         <div 
           data-pinterest-detail-key={item.id}
           className="detail-container"
         >
-          <img src={item.fullImage} alt={item.title} />
-          <h1>{item.title}</h1>
-          <p>{item.description}</p>
+          <button onClick={() => navigate('/gallery')}>
+            ✕ Close
+          </button>
+          <img src={item.image} alt={item.title} />
+          <article>
+            <h1>{item.title}</h1>
+            <p>{item.description}</p>
+          </article>
         </div>
       );
     }
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      export let item;
-    </script>
-
-    <div 
-      data-pinterest-detail-key={item.id}
-      class="detail-container"
-    >
-      <img src={item.fullImage} alt={item.title} />
-      <h1>{item.title}</h1>
-      <p>{item.description}</p>
-    </div>
-    ```
-  </TabPanel>
-</Tabs>
-
-## 옵션
-
-```typescript
-pinterest({
-  spring: {
-    stiffness: 50,   // 스프링 강도 (기본값: 50)
-    damping: 10      // 감쇠 계수 (기본값: 10)
-  },
-  timeout: 300       // 페이지 매칭 대기 시간 (기본값: 300ms)
-})
-```
-
-## 작동 원리
-
-### 갤러리 → 상세 (Enter Mode)
-
-1. 갤러리 아이템의 위치와 크기 계산
-2. clip-path를 사용해 아이템 영역에서 시작
-3. 전체 화면으로 확장하며 clip-path 애니메이션
-4. 동시에 scale과 translate 적용
-
-```
-시작: 작은 카드          중간: 확장 중           완료: 전체 화면
-┌─────────────┐        ┌─────────────┐        ┌─────────────┐
-│┌──┐         │        │ ┌────────┐  │        │             │
-││▣ │         │   =>   │ │   ▣    │  │   =>   │      ▣      │
-│└──┘         │        │ └────────┘  │        │             │
-└─────────────┘        └─────────────┘        └─────────────┘
-```
-
-### 상세 → 갤러리 (Exit Mode)
-
-1. 상세 화면에서 갤러리 아이템 위치 계산
-2. clip-path로 갤러리 아이템 크기로 축소
-3. 원래 위치로 이동하며 페이드 아웃
-
-## 고급 사용 예시
-
-### Masonry 레이아웃과 함께
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    // 갤러리 페이지
-    <div className="masonry-grid">
-      {items.map((item, index) => (
-        <div 
-          key={item.id}
-          data-pinterest-gallery-key={item.id}
-          className="masonry-item"
-          style={{ 
-            gridRowEnd: `span ${item.height}`,
-            animationDelay: `${index * 50}ms` 
-          }}
-        >
-          <Link href={`/gallery/${item.id}`}>
-            <img src={item.thumbnail} alt={item.title} />
-          </Link>
-        </div>
-      ))}
-    </div>
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
     <!-- 갤러리 페이지 -->
     <div class="masonry-grid">
-      {#each items as item, index}
-        <div 
+      {#each items as item}
+        <a 
+          href="/gallery/{item.id}"
           data-pinterest-gallery-key={item.id}
-          class="masonry-item"
-          style="grid-row-end: span {item.height}; animation-delay: {index * 50}ms"
+          class="gallery-item"
         >
-          <a href={`/gallery/${item.id}`}>
-            <img src={item.thumbnail} alt={item.title} />
-          </a>
-        </div>
+          <img src={item.image} alt={item.title} />
+          <h3>{item.title}</h3>
+        </a>
       {/each}
+    </div>
+
+    <!-- 상세 페이지 -->
+    <div 
+      data-pinterest-detail-key={item.id}
+      class="detail-container"
+    >
+      <button on:click={() => goto('/gallery')}>
+        ✕ Close
+      </button>
+      <img src={item.image} alt={item.title} />
+      <article>
+        <h1>{item.title}</h1>
+        <p>{item.description}</p>
+      </article>
     </div>
     ```
   </TabPanel>
 </Tabs>
 
-### 이미지 프리로딩
+## 실전 활용 예시
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+### 1. 메이슨리 갤러리
+
+Pinterest 스타일 메이슨리 레이아웃:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 상세 페이지 - 부드러운 전환을 위한 이미지 프리로딩
-    export function GalleryDetail({ item }) {
-      useEffect(() => {
-        // 고해상도 이미지 프리로드
-        const img = new Image();
-        img.src = item.fullImage;
-      }, [item.fullImage]);
-
+    // 메이슨리 그리드
+    function MasonryGallery() {
       return (
-        <div data-pinterest-detail-key={item.id}>
-          {/* 내용 */}
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+          {images.map((img, index) => (
+            <div
+              key={img.id}
+              data-pinterest-gallery-key={img.id}
+              onClick={() => navigate(`/image/${img.id}`)}
+              className="break-inside-avoid mb-4 cursor-pointer 
+                         hover:scale-105 transition-transform"
+            >
+              <img 
+                src={img.url} 
+                alt={img.title}
+                className="w-full rounded-lg"
+              />
+              <div className="p-2">
+                <p className="text-sm font-medium">{img.title}</p>
+                <p className="text-xs text-gray-500">{img.author}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // 확장된 뷰
+    function ImageView({ image }) {
+      return (
+        <div 
+          data-pinterest-detail-key={image.id}
+          className="fixed inset-0 bg-white z-50 overflow-auto"
+        >
+          <div className="max-w-4xl mx-auto p-4">
+            <img 
+              src={image.url} 
+              alt={image.title}
+              className="w-full rounded-lg shadow-xl"
+            />
+            <div className="mt-4">
+              <h1 className="text-2xl font-bold">{image.title}</h1>
+              <p className="text-gray-600 mt-2">{image.description}</p>
+            </div>
+          </div>
         </div>
       );
     }
@@ -271,88 +265,206 @@ pinterest({
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <script>
-      import { onMount } from 'svelte';
-      
-      export let item;
-      
-      onMount(() => {
-        // 고해상도 이미지 프리로드
-        const img = new Image();
-        img.src = item.fullImage;
-      });
-    </script>
+    <!-- 메이슨리 그리드 -->
+    <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
+      {#each images as img}
+        <div
+          data-pinterest-gallery-key={img.id}
+          on:click={() => goto(`/image/${img.id}`)}
+          class="break-inside-avoid mb-4 cursor-pointer 
+                 hover:scale-105 transition-transform"
+        >
+          <img 
+            src={img.url} 
+            alt={img.title}
+            class="w-full rounded-lg"
+          />
+          <div class="p-2">
+            <p class="text-sm font-medium">{img.title}</p>
+            <p class="text-xs text-gray-500">{img.author}</p>
+          </div>
+        </div>
+      {/each}
+    </div>
 
-    <div data-pinterest-detail-key={item.id}>
-      <!-- 내용 -->
+    <!-- 확장된 뷰 -->
+    <div 
+      data-pinterest-detail-key={image.id}
+      class="fixed inset-0 bg-white z-50 overflow-auto"
+    >
+      <div class="max-w-4xl mx-auto p-4">
+        <img 
+          src={image.url} 
+          alt={image.title}
+          class="w-full rounded-lg shadow-xl"
+        />
+        <div class="mt-4">
+          <h1 class="text-2xl font-bold">{image.title}</h1>
+          <p class="text-gray-600 mt-2">{image.description}</p>
+        </div>
+      </div>
     </div>
     ```
   </TabPanel>
 </Tabs>
 
-## 스타일링 고려사항
+### 2. 제품 카탈로그
 
-### 갤러리 아이템
+제품 카드가 상세 페이지로 확장:
 
-```css
-.gallery-item {
-  /* Pinterest 효과를 위한 기본 스타일 */
-  overflow: hidden;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 제품 그리드
+    function ProductGrid() {
+      return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map(product => (
+            <article
+              key={product.id}
+              data-pinterest-gallery-key={product.id}
+              onClick={() => navigate(`/product/${product.id}`)}
+              className="bg-white rounded-xl shadow-lg overflow-hidden
+                         cursor-pointer hover:shadow-xl transition-shadow"
+            >
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-lg font-bold mt-2">${product.price}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
 
-.gallery-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-```
+    // 제품 상세
+    function ProductDetail({ product }) {
+      return (
+        <div 
+          data-pinterest-detail-key={product.id}
+          className="min-h-screen bg-white"
+        >
+          <div className="grid md:grid-cols-2 gap-8 p-8">
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full rounded-lg"
+            />
+            <div>
+              <h1 className="text-3xl font-bold">{product.name}</h1>
+              <p className="text-2xl font-bold mt-4">${product.price}</p>
+              <p className="mt-4 text-gray-600">{product.description}</p>
+              <button className="mt-6 bg-black text-white px-8 py-3 rounded-lg">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 제품 그리드 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {#each products as product}
+        <article
+          data-pinterest-gallery-key={product.id}
+          on:click={() => goto(`/product/${product.id}`)}
+          class="bg-white rounded-xl shadow-lg overflow-hidden
+                 cursor-pointer hover:shadow-xl transition-shadow"
+        >
+          <img 
+            src={product.image} 
+            alt={product.name}
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h3 class="font-semibold">{product.name}</h3>
+            <p class="text-lg font-bold mt-2">${product.price}</p>
+          </div>
+        </article>
+      {/each}
+    </div>
 
-### 상세 컨테이너
+    <!-- 제품 상세 -->
+    <div 
+      data-pinterest-detail-key={product.id}
+      class="min-h-screen bg-white"
+    >
+      <div class="grid md:grid-cols-2 gap-8 p-8">
+        <img 
+          src={product.image} 
+          alt={product.name}
+          class="w-full rounded-lg"
+        />
+        <div>
+          <h1 class="text-3xl font-bold">{product.name}</h1>
+          <p class="text-2xl font-bold mt-4">${product.price}</p>
+          <p class="mt-4 text-gray-600">{product.description}</p>
+          <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
-```css
-.detail-container {
-  /* 전체 화면 활용 */
-  min-height: 100vh;
-  width: 100%;
-  
-  /* 컨텐츠 정렬 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+## 커스터마이징
+
+### 스프링 설정
+
+애니메이션의 탄성과 속도 조절:
+
+```typescript
+pinterest({
+  spring: {
+    stiffness: 200,  // 낮을수록 부드러움
+    damping: 25      // 높을수록 빠른 정착
+  }
+})
 ```
 
 ## 주의사항
 
-### 1. Key 규칙
-- 한 페이지당 하나의 `data-pinterest-detail-key`만 사용
-- 갤러리 key와 상세 key는 정확히 일치해야 함
-- 숫자나 문자열 모두 key로 사용 가능
+### 키 속성 구분
 
-### 2. 레이아웃 요구사항
-- 갤러리 아이템은 명확한 경계가 있어야 함
-- 상세 페이지는 전체 화면을 활용하는 것이 효과적
-- 반응형 디자인 고려 필요
+- **갤러리**: `data-pinterest-gallery-key`
+- **상세**: `data-pinterest-detail-key`
+- 반드시 다른 속성명 사용 (히어로와 차별화)
 
-### 3. 성능 최적화
-- 이미지는 적절한 크기로 최적화
-- 썸네일과 전체 이미지 분리 사용
-- lazy loading 적용 권장
+### 레이아웃 고려사항
 
-## 권장 사용 사례
+- 갤러리 아이템은 position이 static이어야 함
+- 상세 페이지는 충분한 여백 필요
+- 메이슨리 레이아웃과 특히 잘 어울림
 
-- 📷 이미지 갤러리
-- 🛍️ 이커머스 상품 목록
-- 📌 핀보드 스타일 레이아웃
-- 🎨 포트폴리오 갤러리
-- 📰 카드 기반 콘텐츠 목록
+## 접근성
 
-## Hero vs Pinterest
+- ESC 키로 상세 페이지 닫기 지원
+- 포커스 트랩으로 키보드 네비게이션 개선
+- 모션 감소 설정 시 즉시 전환
 
-| 특징 | Hero 전환 | Pinterest 전환 |
-|------|-----------|----------------|
-| 용도 | 개별 요소 이동 | 전체 화면 확장 |
-| 애니메이션 | 위치와 크기 변형 | Clip-path 확장 |
-| 복잡도 | 여러 요소 가능 | 단일 컨테이너 |
-| 효과 | 요소 간 연결성 | 몰입감 있는 확장 |
+## 모범 사례
+
+### ✅ DO
+
+- 이미지 중심 콘텐츠에 사용
+- 갤러리나 카탈로그 형태에 적용
+- 닫기 버튼을 명확하게 제공
+- 모바일에서도 잘 작동하도록 반응형 디자인
+
+### ❌ DON'T
+
+- 텍스트 중심 콘텐츠에는 부적합
+- 너무 많은 요소가 동시에 확장되지 않도록
+- 상세 페이지 로딩이 느린 경우 사용 자제
+- 복잡한 레이아웃에서는 예상치 못한 동작 가능

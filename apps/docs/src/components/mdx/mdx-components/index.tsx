@@ -8,6 +8,7 @@ import { Demo } from "./demo";
 import { Tabs, TabPanel } from "./tabs";
 import { TransitionDemo } from "./transition-demo";
 import { ViewTransitionDemo } from "./view-transition-demo";
+import { SuitabilityTable } from "./suitability-table";
 
 // Export all components that will be available in MDX
 export const mdxComponents = {
@@ -22,4 +23,5 @@ export const mdxComponents = {
   ViewTransitionDemo,
   Tabs,
   TabPanel,
+  SuitabilityTable,
 };
