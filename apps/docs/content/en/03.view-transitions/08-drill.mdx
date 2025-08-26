@@ -1,0 +1,498 @@
+---
+title: "Drill Transition"
+description: "Drill forward/back transition for hierarchical navigation"
+nav-title: "Drill"
+---
+
+# Drill Transition
+
+The drill transition clearly expresses **navigation between levels** of information hierarchy. It creates an effect where screens slide sideways as users enter or exit new levels, intuitively conveying their current position and movement direction.
+
+## Demo
+
+<ViewTransitionDemo type="drill" />
+
+## UX Principles
+
+### When to Use
+
+Drill transition is optimized for **parent-child relationships** and **hierarchical navigation**.
+
+#### Suitability by Content Relationship
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated content",
+      suitable: "no",
+      description: "Not suitable for independent sections"
+    },
+    {
+      label: "Sibling content",
+      suitable: "no",
+      description: "Unnatural between same-level content"
+    },
+    {
+      label: "Hierarchical content",
+      suitable: "yes",
+      description: "Optimal for list→sublist, overview→detail"
+    }
+  ]}
+/>
+
+#### Primary Use Cases
+
+- **List → Sublist**: Moving from category to subcategory
+- **Overview → Detail**: Entering detailed analysis from dashboard
+- **Settings → Sub-settings**: Moving from main settings to specific options
+- **File Explorer**: Navigating folder structures
+
+### Why Does It Work This Way?
+
+1. **Spatial Metaphor**: Sliding motion represents "entering" and "exiting"
+2. **Hierarchy Recognition**: Overlapping screens visualize information depth
+3. **Gesture-Friendly**: Naturally integrates with mobile edge-swipe gestures
+4. **Context Preservation**: Previous screen partially visible for path awareness
+
+### Motion Design
+
+```
+Drill Forward (Enter):
+1. New screen → Starts at 100% position from right
+2. During motion → New screen enters, pushing existing screen
+3. Complete → New screen takes full space, existing at -20%
+
+Drill Back (Exit):
+1. Current screen → Starts at 0% position
+2. During motion → Slides right, revealing previous screen
+3. Complete → Previous screen restored, current at 100% out
+```
+
+## Basic Usage
+
+### 1. Transition Configuration
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { drill } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { drill } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/categories',
+            to: '/categories/*',
+            transition: drill({ direction: 'enter' }),
+            symmetric: false
+          },
+          {
+            from: '/categories/*',
+            to: '/categories',
+            transition: drill({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Options Configuration
+
+```typescript
+interface DrillOptions {
+  opacity?: boolean;           // Opacity effect (default: false)
+  direction?: 'enter' | 'exit'; // Drill direction (default: 'enter')
+  spring?: {
+    stiffness?: number;         // Spring stiffness (default: 150)
+    damping?: number;           // Damping coefficient (default: 20)
+  };
+}
+```
+
+## Practical Examples
+
+### 1. Category Navigation
+
+Navigating nested category structures:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Main Categories
+    function Categories() {
+      return (
+        <div className="p-4">
+          <h1 className="text-2xl mb-4">Categories</h1>
+          <div className="space-y-2">
+            {categories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/categories/${cat.slug}`}
+                className="block p-4 bg-white rounded-lg shadow"
+              >
+                <h3 className="font-semibold">{cat.name}</h3>
+                <p className="text-gray-600">{cat.itemCount} items</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Subcategory
+    function SubCategory({ category }) {
+      return (
+        <div className="p-4">
+          <button onClick={() => navigate('/categories')} className="mb-4">
+            ← Back
+          </button>
+          <h1 className="text-2xl mb-4">{category.name}</h1>
+          <div className="grid gap-4">
+            {category.items.map(item => (
+              <div key={item.id} className="p-4 bg-white rounded-lg">
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Main Categories -->
+    <div class="p-4">
+      <h1 class="text-2xl mb-4">Categories</h1>
+      <div class="space-y-2">
+        {#each categories as cat}
+          <a
+            href="/categories/{cat.slug}"
+            class="block p-4 bg-white rounded-lg shadow"
+          >
+            <h3 class="font-semibold">{cat.name}</h3>
+            <p class="text-gray-600">{cat.itemCount} items</p>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- Subcategory -->
+    <div class="p-4">
+      <button on:click={() => goto('/categories')} class="mb-4">
+        ← Back
+      </button>
+      <h1 class="text-2xl mb-4">{category.name}</h1>
+      <div class="grid gap-4">
+        {#each category.items as item}
+          <div class="p-4 bg-white rounded-lg">
+            {item.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Settings Menu
+
+From settings to detailed options:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Main Settings
+    function Settings() {
+      const menuItems = [
+        { id: 'profile', label: 'Profile Settings', icon: '👤' },
+        { id: 'privacy', label: 'Privacy & Security', icon: '🔒' },
+        { id: 'notifications', label: 'Notifications', icon: '🔔' },
+        { id: 'display', label: 'Display Settings', icon: '🎨' }
+      ];
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <h1 className="text-2xl p-4 border-b">Settings</h1>
+          <div className="divide-y">
+            {menuItems.map(item => (
+              <Link
+                key={item.id}
+                to={`/settings/${item.id}`}
+                className="flex items-center p-4 hover:bg-gray-50"
+              >
+                <span className="text-2xl mr-4">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                <span>→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Setting Detail
+    function SettingDetail({ type }) {
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center p-4 border-b">
+            <button onClick={() => navigate('/settings')}>←</button>
+            <h1 className="text-xl ml-4">{getSettingTitle(type)}</h1>
+          </div>
+          <div className="p-4">
+            {/* Detailed setting options */}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Main Settings -->
+    <script>
+      const menuItems = [
+        { id: 'profile', label: 'Profile Settings', icon: '👤' },
+        { id: 'privacy', label: 'Privacy & Security', icon: '🔒' },
+        { id: 'notifications', label: 'Notifications', icon: '🔔' },
+        { id: 'display', label: 'Display Settings', icon: '🎨' }
+      ];
+    </script>
+
+    <div class="max-w-lg mx-auto">
+      <h1 class="text-2xl p-4 border-b">Settings</h1>
+      <div class="divide-y">
+        {#each menuItems as item}
+          <a
+            href="/settings/{item.id}"
+            class="flex items-center p-4 hover:bg-gray-50"
+          >
+            <span class="text-2xl mr-4">{item.icon}</span>
+            <span class="flex-1">{item.label}</span>
+            <span>→</span>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- Setting Detail -->
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center p-4 border-b">
+        <button on:click={() => goto('/settings')}>←</button>
+        <h1 class="text-xl ml-4">{getSettingTitle(type)}</h1>
+      </div>
+      <div class="p-4">
+        <!-- Detailed setting options -->
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. File Explorer
+
+Folder structure navigation:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    function FileExplorer({ path }) {
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+
+      return (
+        <div className="h-screen flex flex-col">
+          <div className="p-3 bg-gray-100 text-sm">
+            {path.split('/').map((segment, i) => (
+              <span key={i}>
+                {i > 0 && ' / '}
+                <button onClick={() => navigateToLevel(i)}>
+                  {segment}
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {files.map(file => (
+              <div
+                key={file.id}
+                onClick={() => file.isFolder && navigate(file.path)}
+                className="flex items-center p-2 hover:bg-gray-50"
+              >
+                <span className="mr-2">
+                  {file.isFolder ? '📁' : '📄'}
+                </span>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let path;
+      
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+    </script>
+
+    <div class="h-screen flex flex-col">
+      <div class="p-3 bg-gray-100 text-sm">
+        {#each path.split('/') as segment, i}
+          {#if i > 0} / {/if}
+          <button on:click={() => navigateToLevel(i)}>
+            {segment}
+          </button>
+        {/each}
+      </div>
+      <div class="flex-1 overflow-auto p-4">
+        {#each files as file}
+          <div
+            on:click={() => file.isFolder && goto(file.path)}
+            class="flex items-center p-2 hover:bg-gray-50"
+          >
+            <span class="mr-2">
+              {file.isFolder ? '📁' : '📄'}
+            </span>
+            {file.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Advanced Configuration
+
+### Adding Opacity Effect
+
+```typescript
+// Content fades while drilling
+drill({ 
+  opacity: true,
+  spring: { stiffness: 120, damping: 18 }
+})
+```
+
+### Direction Customization
+
+```typescript
+// Drill in (default)
+drill({ direction: 'enter' })
+
+// Drill out (going back)
+drill({ direction: 'exit' })
+```
+
+### Spring Physics Adjustment
+
+```typescript
+// Fast drill
+drill({ 
+  spring: { stiffness: 200, damping: 25 }
+})
+
+// Smooth drill
+drill({ 
+  spring: { stiffness: 100, damping: 15 }
+})
+```
+
+## Considerations
+
+### Hierarchy Consistency
+
+- Use drill transition only with clear hierarchical structures
+- Use slide or fade for same-level navigation
+- Apply reverse drill direction when going back
+
+### Performance Considerations
+
+- Optimize transforms for large images or complex layouts
+- Use will-change property on mobile
+- Avoid animating too many elements simultaneously
+
+## Accessibility
+
+- Instant transition with reduced motion preference
+- Full keyboard navigation support
+- Recognized as standard page transition by screen readers
+- Focus automatically moves to new page
+
+## Best Practices
+
+### ✅ DO
+
+- Use for clear parent-child relationships
+- Integrate with back gestures
+- Display path with breadcrumbs
+- Maintain consistent directionality
+
+### ❌ DON'T
+
+- Don't use between sibling or independent sections
+- Don't set speed too fast
+- Don't use bidirectional drill simultaneously
+- Don't overuse in deep hierarchies (>5 levels)
