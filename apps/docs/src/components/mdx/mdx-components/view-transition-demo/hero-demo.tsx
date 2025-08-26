@@ -168,7 +168,7 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
             className="w-full h-full object-cover"
           />
 
-          {/* Top navigation bar overlaying the image */}
+          {/* Top navigation bar ovÒerlaying the image */}
           <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
               <DemoLink

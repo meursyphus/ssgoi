@@ -306,7 +306,7 @@ function ScrollLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="relative bg-gray-900 min-h-[400px] overflow-hidden">
+    <div className="relative bg-gray-900 h-full overflow-hidden">
       {/* Toggle Button - Mobile only */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -383,8 +383,8 @@ function ScrollLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Content Area */}
-        <div className="flex-1 bg-gray-900 overflow-auto">
-          <div className="md:ml-0 pt-10 md:pt-0 relative z-0">{children}</div>
+        <div className="flex-1 bg-gray-900 overflow-x-hidden overflow-y-hidden">
+          <div className="md:ml-0 pt-10 md:pt-0 relative z-0 h-full overflow-hidden">{children}</div>
         </div>
       </div>
     </div>

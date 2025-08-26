@@ -3,13 +3,25 @@
 import React, { lazy, Suspense } from "react";
 
 // Dynamic imports for code splitting
-const FadeDemo = lazy(() => import("./fade-demo").then(m => ({ default: m.FadeDemo })));
-const ScrollDemo = lazy(() => import("./scroll-demo").then(m => ({ default: m.ScrollDemo })));
-const HeroDemo = lazy(() => import("./hero-demo").then(m => ({ default: m.HeroDemo })));
-const PinterestDemo = lazy(() => import("./pinterest-demo").then(m => ({ default: m.PinterestDemo })));
+const FadeDemo = lazy(() =>
+  import("./fade-demo").then((m) => ({ default: m.FadeDemo }))
+);
+const ScrollDemo = lazy(() =>
+  import("./scroll-demo").then((m) => ({ default: m.ScrollDemo }))
+);
+const HeroDemo = lazy(() =>
+  import("./hero-demo").then((m) => ({ default: m.HeroDemo }))
+);
+const PinterestDemo = lazy(() =>
+  import("./pinterest-demo").then((m) => ({ default: m.PinterestDemo }))
+);
+
+const DrillDemo = lazy(() =>
+  import("./drill-demo").then((m) => ({ default: m.DrillDemo }))
+);
 
 export interface ViewTransitionDemoProps {
-  type: "fade" | "hero" | "pinterest" | "slide" | "scale" | "blur" | "scroll";
+  type: "fade" | "hero" | "pinterest" | "scroll" | "drill";
 }
 
 // Loading component
@@ -35,25 +47,12 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <HeroDemo />;
       case "pinterest":
         return <PinterestDemo />;
-      // TODO: Add other transition types
-      case "slide":
-      case "scale":
-      case "blur":
-        return (
-          <div className="p-8 text-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">
-              {type} transition demo coming soon...
-            </p>
-          </div>
-        );
+      case "drill":
+        return <DrillDemo />;
       default:
         return null;
     }
   };
 
-  return (
-    <Suspense fallback={<DemoLoading />}>
-      {renderDemo()}
-    </Suspense>
-  );
+  return <Suspense fallback={<DemoLoading />}>{renderDemo()}</Suspense>;
 }
