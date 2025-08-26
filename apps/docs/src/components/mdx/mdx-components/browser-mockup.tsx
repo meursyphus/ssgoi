@@ -4,6 +4,7 @@ import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
 import { cn } from "../../../lib/utils";
 import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
+import { useMobile } from "../../../lib/use-mobile";
 
 // Route configuration
 export interface RouteConfig {
@@ -19,9 +20,8 @@ export interface BrowserMockupProps {
   config: SsgoiConfig;
   initialPath?: string;
   className?: string;
-  showNavigation?: boolean;
-  navigationPosition?: "top" | "bottom";
   onNavigate?: (path: string) => void;
+  layout?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 // Browser context for nested components
@@ -41,54 +41,14 @@ export function useBrowserNavigation() {
   return context;
 }
 
-// Navigation button component
-interface NavigationButtonProps {
-  route: RouteConfig;
-}
-
-const NavigationButton = memo(({ route }: NavigationButtonProps) => {
-  const { currentPath, navigate } = useBrowserNavigation();
-  const isActive = currentPath === route.path;
-
-  return (
-    <button
-      onClick={() => navigate(route.path)}
-      disabled={isActive}
-      className={cn(
-        "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
-        isActive
-          ? "bg-blue-500 text-white"
-          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-      )}
-    >
-      {route.label || route.path}
-    </button>
-  );
-});
-
-NavigationButton.displayName = "NavigationButton";
-
-// Navigation component
-const Navigation = memo(() => {
-  const { routes } = useBrowserNavigation();
-
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-      {routes.map((route) => (
-        <NavigationButton key={route.path} route={route} />
-      ))}
-    </div>
-  );
-});
-
-Navigation.displayName = "Navigation";
+export { BrowserContext };
 
 // Browser header component
 const BrowserHeader = memo(() => {
   const { currentPath } = useBrowserNavigation();
 
   return (
-    <div className="browser-header bg-gray-200 dark:bg-gray-800 px-4 py-3 flex items-center gap-3">
+    <div className="browser-header bg-gray-800 px-4 py-3 flex items-center gap-3">
       {/* Traffic lights */}
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -99,7 +59,7 @@ const BrowserHeader = memo(() => {
       {/* Address bar */}
       <div className="flex-1 flex items-center">
         <div className="flex-1 max-w-md mx-auto">
-          <div className="bg-white dark:bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+          <div className="bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 flex items-center gap-2">
             <svg
               className="w-4 h-4 text-gray-400"
               fill="none"
@@ -113,21 +73,17 @@ const BrowserHeader = memo(() => {
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
               />
             </svg>
-            <span className="text-gray-500 dark:text-gray-400">
-              localhost:3000
-            </span>
-            <span className="text-gray-700 dark:text-gray-200">
-              {currentPath}
-            </span>
+            <span className="text-gray-400">localhost:3000</span>
+            <span className="text-gray-200">{currentPath}</span>
           </div>
         </div>
       </div>
 
       {/* Browser actions */}
       <div className="flex items-center gap-2">
-        <button className="p-1 hover:bg-gray-300 dark:hover:bg-gray-700 rounded">
+        <button className="p-1 hover:bg-gray-700 rounded">
           <svg
-            className="w-4 h-4 text-gray-600 dark:text-gray-400"
+            className="w-4 h-4 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -156,11 +112,7 @@ const RouteContent = memo(({ route }: RouteContentProps) => {
   if (!route) return null;
   const Component = route.component;
 
-  return (
-    <SsgoiTransition id={route?.path}>
-      <Component {...(route.props || {})} />
-    </SsgoiTransition>
-  );
+  return <Component {...(route.props || {})} />;
 });
 
 RouteContent.displayName = "RouteContent";
@@ -170,9 +122,8 @@ export function BrowserMockup({
   config,
   initialPath,
   className,
-  showNavigation = true,
-  navigationPosition = "bottom",
   onNavigate,
+  layout: Layout,
 }: BrowserMockupProps) {
   const [currentPath, setCurrentPath] = useState(
     initialPath || routes[0]?.path || "/"
@@ -196,29 +147,30 @@ export function BrowserMockup({
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         className={cn(
-          "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700",
-          "aspect-[9/16] sm:aspect-[16/10]", // Mobile: 9:16, Desktop: 16:10
+          "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
+          "md:aspect-[16/10]",
+          "aspect-[9/12]", // Consistent aspect ratio for both mobile and desktop
           className
         )}
       >
         {/* Browser Header */}
         <BrowserHeader />
 
-        {/* Top navigation */}
-        {showNavigation && navigationPosition === "top" && <Navigation />}
-
         {/* Browser Content */}
         <div
           ref={contentRef}
-          className="browser-content relative z-0 bg-white dark:bg-gray-900 flex-1 overflow-auto h-full"
+          className="browser-content bg-gray-900 flex-1 overflow-auto h-full"
         >
           <Ssgoi config={config}>
-            <RouteContent route={currentRoute} />
+            {Layout ? (
+              <Layout>
+                <RouteContent route={currentRoute} />
+              </Layout>
+            ) : (
+              <RouteContent route={currentRoute} />
+            )}
           </Ssgoi>
         </div>
-
-        {/* Bottom navigation */}
-        {showNavigation && navigationPosition === "bottom" && <Navigation />}
       </div>
     </BrowserContext.Provider>
   );
@@ -229,15 +181,16 @@ export interface DemoPageProps {
   title: string;
   children: ReactNode;
   className?: string;
+  path: string;
 }
 
 export const DemoPage = memo(
-  ({ title, children, className }: DemoPageProps) => {
+  ({ title, children, className, path }: DemoPageProps) => {
     return (
-      <div className={cn("min-h-full p-8", className)}>
+      <SsgoiTransition id={path} className={cn("min-h-full p-8", className)}>
         <h1 className="text-3xl font-bold mb-6">{title}</h1>
         {children}
-      </div>
+      </SsgoiTransition>
     );
   }
 );
@@ -287,7 +240,7 @@ export const DemoCard = memo(
       <div
         onClick={onClick}
         className={cn(
-          "p-4 border border-gray-200 dark:border-gray-700 rounded-lg",
+          "p-4 border border-gray-700 rounded-lg",
           "hover:shadow-lg transition-shadow cursor-pointer",
           className
         )}
@@ -300,3 +253,76 @@ export const DemoCard = memo(
 );
 
 DemoCard.displayName = "DemoCard";
+
+// Default Demo Layout Component
+export interface DemoLayoutProps {
+  children: React.ReactNode;
+  logo?: string;
+  title?: string;
+  headerActions?: React.ReactNode;
+}
+
+export const DemoLayout = memo(({ 
+  children, 
+  logo = "⚡", 
+  title = "SSGOI Demo",
+  headerActions 
+}: DemoLayoutProps) => {
+  const context = React.useContext(BrowserContext);
+  const isMobile = useMobile();
+  
+  if (!context) return <>{children}</>;
+  
+  const { currentPath, navigate, routes } = context;
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <header className="bg-gray-800 border-b border-gray-700">
+        <div className={cn(
+          "mx-auto",
+          isMobile ? "px-3" : "max-w-6xl px-4"
+        )}>
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-4">
+              <h1 className={cn(
+                "font-bold text-white flex items-center gap-2",
+                isMobile ? "text-base" : "text-xl"
+              )}>
+                <span>{logo}</span>
+                <span>{title}</span>
+              </h1>
+              <nav className="flex items-center gap-1">
+                {routes.map((route) => (
+                  <button
+                    key={route.path}
+                    onClick={() => navigate(route.path)}
+                    className={cn(
+                      "rounded-md font-medium transition-all",
+                      isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
+                      currentPath === route.path
+                        ? "bg-gray-700 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    )}
+                  >
+                    {route.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+            {!isMobile && headerActions && (
+              <div className="flex items-center gap-4">
+                {headerActions}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto relative z-0">{children}</main>
+    </div>
+  );
+});
+
+DemoLayout.displayName = "DemoLayout";
