@@ -90,7 +90,6 @@
               <div
                 v-if="showShapes"
                 v-transition="{
-                  key: 'fade',
                   in: fadeTransition,
                   out: fadeTransition,
                 }"

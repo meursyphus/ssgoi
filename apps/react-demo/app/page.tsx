@@ -136,7 +136,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "fade",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
@@ -159,7 +158,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition<{ scale: number; rotate: number }>({
-                    key: "scale-rotate",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       from: { scale: 0, rotate: 0 },
@@ -188,22 +186,17 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "slide",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
-                        element.style.transform = `translateX(${
-                          (1 - progress) * -100
-                        }px)`;
+                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
                         element.style.opacity = progress.toString();
                       },
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
-                        element.style.transform = `translateX(${
-                          (1 - progress) * -100
-                        }px)`;
+                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
                         element.style.opacity = progress.toString();
                       },
                     }),
@@ -217,7 +210,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "bounce-scale",
                     in: (element) => ({
                       spring: {
                         stiffness: stiffness * 0.8,
