@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+/* Custom Scrollbar Styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Browser mockup specific scrollbar */
+.browser-content.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.browser-content.custom-scrollbar::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.browser-content.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 5px;
+}
+
+.browser-content.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
 @theme {
   /* 다크 테마 기본 색상 */
   --color-background: #0a0a0a;

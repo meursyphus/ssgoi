@@ -1,0 +1,498 @@
+---
+title: "钻取过渡"
+description: "用于层次导航的前进/后退钻取过渡"
+nav-title: "钻取"
+---
+
+# 钻取过渡
+
+钻取过渡清晰地表达了信息层次结构中的**层级间导航**。屏幕横向滑动的效果让用户进入或退出新层级，直观地传达当前位置和移动方向。
+
+## 演示
+
+<ViewTransitionDemo type="drill" />
+
+## UX 原则
+
+### 何时使用
+
+钻取过渡为**父子关系**和**层次导航**而优化。
+
+#### 内容关系适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "no",
+      description: "不适合独立部分之间"
+    },
+    {
+      label: "同级内容",
+      suitable: "no",
+      description: "同层级内容之间不自然"
+    },
+    {
+      label: "层次内容",
+      suitable: "yes",
+      description: "最适合列表→子列表、概览→详情"
+    }
+  ]}
+/>
+
+#### 主要用例
+
+- **列表 → 子列表**：从分类到子分类的移动
+- **概览 → 详情**：从仪表板进入详细分析
+- **设置 → 子设置**：从主设置到具体选项
+- **文件浏览器**：导航文件夹结构
+
+### 为什么这样工作
+
+1. **空间隐喻**：横向滑动表达"进入"和"退出"
+2. **层次感知**：重叠的屏幕可视化信息深度
+3. **手势友好**：与移动端边缘滑动手势自然集成
+4. **上下文保持**：部分可见的前一屏保持路径认知
+
+### 动效设计
+
+```
+钻取前进（Enter）：
+1. 新屏幕 → 从右侧100%位置开始
+2. 运动中 → 新屏幕进入，推出现有屏幕
+3. 完成 → 新屏幕占满全屏，现有屏幕在-20%
+
+钻取后退（Exit）：
+1. 当前屏幕 → 从0%位置开始
+2. 运动中 → 向右滑出，露出前一屏
+3. 完成 → 前一屏恢复，当前屏幕在100%外
+```
+
+## 基本用法
+
+### 1. 过渡配置
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { drill } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { drill } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/categories',
+            to: '/categories/*',
+            transition: drill({ direction: 'enter' }),
+            symmetric: false
+          },
+          {
+            from: '/categories/*',
+            to: '/categories',
+            transition: drill({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 选项配置
+
+```typescript
+interface DrillOptions {
+  opacity?: boolean;           // 透明度效果（默认：false）
+  direction?: 'enter' | 'exit'; // 钻取方向（默认：'enter'）
+  spring?: {
+    stiffness?: number;         // 弹簧刚度（默认：150）
+    damping?: number;           // 阻尼系数（默认：20）
+  };
+}
+```
+
+## 实际示例
+
+### 1. 分类导航
+
+导航嵌套的分类结构：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 主分类
+    function Categories() {
+      return (
+        <div className="p-4">
+          <h1 className="text-2xl mb-4">分类</h1>
+          <div className="space-y-2">
+            {categories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/categories/${cat.slug}`}
+                className="block p-4 bg-white rounded-lg shadow"
+              >
+                <h3 className="font-semibold">{cat.name}</h3>
+                <p className="text-gray-600">{cat.itemCount} 项</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 子分类
+    function SubCategory({ category }) {
+      return (
+        <div className="p-4">
+          <button onClick={() => navigate('/categories')} className="mb-4">
+            ← 返回
+          </button>
+          <h1 className="text-2xl mb-4">{category.name}</h1>
+          <div className="grid gap-4">
+            {category.items.map(item => (
+              <div key={item.id} className="p-4 bg-white rounded-lg">
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 主分类 -->
+    <div class="p-4">
+      <h1 class="text-2xl mb-4">分类</h1>
+      <div class="space-y-2">
+        {#each categories as cat}
+          <a
+            href="/categories/{cat.slug}"
+            class="block p-4 bg-white rounded-lg shadow"
+          >
+            <h3 class="font-semibold">{cat.name}</h3>
+            <p class="text-gray-600">{cat.itemCount} 项</p>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- 子分类 -->
+    <div class="p-4">
+      <button on:click={() => goto('/categories')} class="mb-4">
+        ← 返回
+      </button>
+      <h1 class="text-2xl mb-4">{category.name}</h1>
+      <div class="grid gap-4">
+        {#each category.items as item}
+          <div class="p-4 bg-white rounded-lg">
+            {item.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 设置菜单
+
+从设置到详细选项：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 主设置
+    function Settings() {
+      const menuItems = [
+        { id: 'profile', label: '个人资料设置', icon: '👤' },
+        { id: 'privacy', label: '隐私与安全', icon: '🔒' },
+        { id: 'notifications', label: '通知设置', icon: '🔔' },
+        { id: 'display', label: '显示设置', icon: '🎨' }
+      ];
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <h1 className="text-2xl p-4 border-b">设置</h1>
+          <div className="divide-y">
+            {menuItems.map(item => (
+              <Link
+                key={item.id}
+                to={`/settings/${item.id}`}
+                className="flex items-center p-4 hover:bg-gray-50"
+              >
+                <span className="text-2xl mr-4">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                <span>→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 设置详情
+    function SettingDetail({ type }) {
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center p-4 border-b">
+            <button onClick={() => navigate('/settings')}>←</button>
+            <h1 className="text-xl ml-4">{getSettingTitle(type)}</h1>
+          </div>
+          <div className="p-4">
+            {/* 详细设置选项 */}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 主设置 -->
+    <script>
+      const menuItems = [
+        { id: 'profile', label: '个人资料设置', icon: '👤' },
+        { id: 'privacy', label: '隐私与安全', icon: '🔒' },
+        { id: 'notifications', label: '通知设置', icon: '🔔' },
+        { id: 'display', label: '显示设置', icon: '🎨' }
+      ];
+    </script>
+
+    <div class="max-w-lg mx-auto">
+      <h1 class="text-2xl p-4 border-b">设置</h1>
+      <div class="divide-y">
+        {#each menuItems as item}
+          <a
+            href="/settings/{item.id}"
+            class="flex items-center p-4 hover:bg-gray-50"
+          >
+            <span class="text-2xl mr-4">{item.icon}</span>
+            <span class="flex-1">{item.label}</span>
+            <span>→</span>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- 设置详情 -->
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center p-4 border-b">
+        <button on:click={() => goto('/settings')}>←</button>
+        <h1 class="text-xl ml-4">{getSettingTitle(type)}</h1>
+      </div>
+      <div class="p-4">
+        <!-- 详细设置选项 -->
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 文件浏览器
+
+文件夹结构导航：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    function FileExplorer({ path }) {
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+
+      return (
+        <div className="h-screen flex flex-col">
+          <div className="p-3 bg-gray-100 text-sm">
+            {path.split('/').map((segment, i) => (
+              <span key={i}>
+                {i > 0 && ' / '}
+                <button onClick={() => navigateToLevel(i)}>
+                  {segment}
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {files.map(file => (
+              <div
+                key={file.id}
+                onClick={() => file.isFolder && navigate(file.path)}
+                className="flex items-center p-2 hover:bg-gray-50"
+              >
+                <span className="mr-2">
+                  {file.isFolder ? '📁' : '📄'}
+                </span>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let path;
+      
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+    </script>
+
+    <div class="h-screen flex flex-col">
+      <div class="p-3 bg-gray-100 text-sm">
+        {#each path.split('/') as segment, i}
+          {#if i > 0} / {/if}
+          <button on:click={() => navigateToLevel(i)}>
+            {segment}
+          </button>
+        {/each}
+      </div>
+      <div class="flex-1 overflow-auto p-4">
+        {#each files as file}
+          <div
+            on:click={() => file.isFolder && goto(file.path)}
+            class="flex items-center p-2 hover:bg-gray-50"
+          >
+            <span class="mr-2">
+              {file.isFolder ? '📁' : '📄'}
+            </span>
+            {file.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 高级配置
+
+### 添加透明度效果
+
+```typescript
+// 内容淡入淡出钻取
+drill({ 
+  opacity: true,
+  spring: { stiffness: 120, damping: 18 }
+})
+```
+
+### 方向自定义
+
+```typescript
+// 钻取进入（默认）
+drill({ direction: 'enter' })
+
+// 钻取退出（返回）
+drill({ direction: 'exit' })
+```
+
+### 弹簧物理调整
+
+```typescript
+// 快速钻取
+drill({ 
+  spring: { stiffness: 200, damping: 25 }
+})
+
+// 平滑钻取
+drill({ 
+  spring: { stiffness: 100, damping: 15 }
+})
+```
+
+## 注意事项
+
+### 层次一致性
+
+- 仅在有明确层次结构时使用钻取过渡
+- 同级导航使用滑动或淡入淡出
+- 返回时必须应用反向钻取
+
+### 性能考虑
+
+- 大图或复杂布局使用transform优化
+- 移动端利用will-change属性
+- 避免太多元素同时动画
+
+## 无障碍
+
+- 减少动效偏好时立即过渡
+- 完整键盘导航支持
+- 屏幕阅读器识别为标准页面过渡
+- 焦点自动移至新页面
+
+## 最佳实践
+
+### ✅ 应该做
+
+- 用于明确的父子关系
+- 与返回手势集成
+- 配合面包屑显示路径
+- 保持一致的方向性
+
+### ❌ 不应该做
+
+- 不要在同级或独立部分间使用
+- 不要设置太快的速度
+- 不要同时使用双向钻取
+- 不要在深层次（>5级）过度使用

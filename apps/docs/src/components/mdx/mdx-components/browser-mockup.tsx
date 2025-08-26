@@ -136,6 +136,11 @@ export function BrowserMockup({
 
     setCurrentPath(path);
     onNavigate?.(path);
+
+    // Force scroll to top on navigation
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
   };
 
   // Find current route
@@ -147,7 +152,7 @@ export function BrowserMockup({
       <div
         className={cn(
           "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
-          "h-[600px] md:h-[500px]", // Fixed heights for mobile and desktop
+          "h-[800px] md:h-[500px]", // Fixed heights for mobile and desktop
           className
         )}
       >
@@ -157,7 +162,7 @@ export function BrowserMockup({
         {/* Browser Content */}
         <div
           ref={contentRef}
-          className="browser-content bg-gray-900 flex-1 overflow-auto h-full"
+          className="browser-content bg-gray-900 flex-1 overflow-auto h-full custom-scrollbar"
         >
           <Ssgoi config={config}>
             {Layout ? (
@@ -181,15 +186,13 @@ export interface DemoPageProps {
   path: string;
 }
 
-export const DemoPage = memo(
-  ({ children, className, path }: DemoPageProps) => {
-    return (
-      <SsgoiTransition id={path} className={cn("min-h-full", className)}>
-        {children}
-      </SsgoiTransition>
-    );
-  }
-);
+export const DemoPage = memo(({ children, className, path }: DemoPageProps) => {
+  return (
+    <SsgoiTransition id={path} className={cn("min-h-full", className)}>
+      {children}
+    </SsgoiTransition>
+  );
+});
 
 DemoPage.displayName = "DemoPage";
 

@@ -1,0 +1,498 @@
+---
+title: "ドリルトランジション"
+description: "階層ナビゲーション用のドリルフォワード/バックトランジション"
+nav-title: "ドリル"
+---
+
+# ドリルトランジション
+
+ドリルトランジションは、情報階層の**レベル間のナビゲーション**を明確に表現します。新しいレベルに入ったり出たりする際に画面が横にスライドする効果により、ユーザーに現在の位置と移動方向を直感的に伝えます。
+
+## デモ
+
+<ViewTransitionDemo type="drill" />
+
+## UX原則
+
+### いつ使うか
+
+ドリルトランジションは**親子関係**と**階層的ナビゲーション**に最適化されています。
+
+#### コンテンツ関係による適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "無関係なコンテンツ",
+      suitable: "no",
+      description: "独立したセクション間では不適切"
+    },
+    {
+      label: "兄弟コンテンツ",
+      suitable: "no",
+      description: "同レベルのコンテンツ間では不自然"
+    },
+    {
+      label: "階層的コンテンツ",
+      suitable: "yes",
+      description: "リスト→サブリスト、概要→詳細に最適"
+    }
+  ]}
+/>
+
+#### 主な使用例
+
+- **リスト → サブリスト**: カテゴリーからサブカテゴリーへの移動
+- **概要 → 詳細**: ダッシュボードから詳細分析への進入
+- **設定 → サブ設定**: メイン設定から特定オプションへの移動
+- **ファイルエクスプローラー**: フォルダー構造のナビゲーション
+
+### なぜこのように動作するのか
+
+1. **空間的メタファー**: スライド動作で「入る」と「出る」を表現
+2. **階層認識**: 重なる画面で情報の深さを視覚化
+3. **ジェスチャー対応**: モバイルのエッジスワイプジェスチャーと自然に統合
+4. **コンテキスト保持**: 前の画面が部分的に見えてパス認識を維持
+
+### モーションデザイン
+
+```
+ドリルフォワード（Enter）:
+1. 新画面 → 右から100%位置でスタート
+2. モーション中 → 新画面が入り、既存画面を押し出す
+3. 完了 → 新画面が全体を占有、既存画面は-20%
+
+ドリルバック（Exit）:
+1. 現在画面 → 0%位置でスタート
+2. モーション中 → 右へスライド、前画面が露出
+3. 完了 → 前画面が復帰、現在画面は100%外へ
+```
+
+## 基本的な使い方
+
+### 1. トランジション設定
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { drill } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { drill } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/categories',
+            to: '/categories/*',
+            transition: drill({ direction: 'enter' }),
+            symmetric: false
+          },
+          {
+            from: '/categories/*',
+            to: '/categories',
+            transition: drill({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. オプション設定
+
+```typescript
+interface DrillOptions {
+  opacity?: boolean;           // 透明度効果（デフォルト: false）
+  direction?: 'enter' | 'exit'; // ドリル方向（デフォルト: 'enter'）
+  spring?: {
+    stiffness?: number;         // スプリング剛性（デフォルト: 150）
+    damping?: number;           // 減衰係数（デフォルト: 20）
+  };
+}
+```
+
+## 実用例
+
+### 1. カテゴリーナビゲーション
+
+ネストされたカテゴリー構造のナビゲーション:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // メインカテゴリー
+    function Categories() {
+      return (
+        <div className="p-4">
+          <h1 className="text-2xl mb-4">カテゴリー</h1>
+          <div className="space-y-2">
+            {categories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/categories/${cat.slug}`}
+                className="block p-4 bg-white rounded-lg shadow"
+              >
+                <h3 className="font-semibold">{cat.name}</h3>
+                <p className="text-gray-600">{cat.itemCount} 項目</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // サブカテゴリー
+    function SubCategory({ category }) {
+      return (
+        <div className="p-4">
+          <button onClick={() => navigate('/categories')} className="mb-4">
+            ← 戻る
+          </button>
+          <h1 className="text-2xl mb-4">{category.name}</h1>
+          <div className="grid gap-4">
+            {category.items.map(item => (
+              <div key={item.id} className="p-4 bg-white rounded-lg">
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- メインカテゴリー -->
+    <div class="p-4">
+      <h1 class="text-2xl mb-4">カテゴリー</h1>
+      <div class="space-y-2">
+        {#each categories as cat}
+          <a
+            href="/categories/{cat.slug}"
+            class="block p-4 bg-white rounded-lg shadow"
+          >
+            <h3 class="font-semibold">{cat.name}</h3>
+            <p class="text-gray-600">{cat.itemCount} 項目</p>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- サブカテゴリー -->
+    <div class="p-4">
+      <button on:click={() => goto('/categories')} class="mb-4">
+        ← 戻る
+      </button>
+      <h1 class="text-2xl mb-4">{category.name}</h1>
+      <div class="grid gap-4">
+        {#each category.items as item}
+          <div class="p-4 bg-white rounded-lg">
+            {item.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 設定メニュー
+
+設定から詳細オプションへ:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // メイン設定
+    function Settings() {
+      const menuItems = [
+        { id: 'profile', label: 'プロフィール設定', icon: '👤' },
+        { id: 'privacy', label: 'プライバシーとセキュリティ', icon: '🔒' },
+        { id: 'notifications', label: '通知設定', icon: '🔔' },
+        { id: 'display', label: '表示設定', icon: '🎨' }
+      ];
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <h1 className="text-2xl p-4 border-b">設定</h1>
+          <div className="divide-y">
+            {menuItems.map(item => (
+              <Link
+                key={item.id}
+                to={`/settings/${item.id}`}
+                className="flex items-center p-4 hover:bg-gray-50"
+              >
+                <span className="text-2xl mr-4">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                <span>→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 設定詳細
+    function SettingDetail({ type }) {
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center p-4 border-b">
+            <button onClick={() => navigate('/settings')}>←</button>
+            <h1 className="text-xl ml-4">{getSettingTitle(type)}</h1>
+          </div>
+          <div className="p-4">
+            {/* 詳細設定オプション */}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- メイン設定 -->
+    <script>
+      const menuItems = [
+        { id: 'profile', label: 'プロフィール設定', icon: '👤' },
+        { id: 'privacy', label: 'プライバシーとセキュリティ', icon: '🔒' },
+        { id: 'notifications', label: '通知設定', icon: '🔔' },
+        { id: 'display', label: '表示設定', icon: '🎨' }
+      ];
+    </script>
+
+    <div class="max-w-lg mx-auto">
+      <h1 class="text-2xl p-4 border-b">設定</h1>
+      <div class="divide-y">
+        {#each menuItems as item}
+          <a
+            href="/settings/{item.id}"
+            class="flex items-center p-4 hover:bg-gray-50"
+          >
+            <span class="text-2xl mr-4">{item.icon}</span>
+            <span class="flex-1">{item.label}</span>
+            <span>→</span>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- 設定詳細 -->
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center p-4 border-b">
+        <button on:click={() => goto('/settings')}>←</button>
+        <h1 class="text-xl ml-4">{getSettingTitle(type)}</h1>
+      </div>
+      <div class="p-4">
+        <!-- 詳細設定オプション -->
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. ファイルエクスプローラー
+
+フォルダー構造のナビゲーション:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    function FileExplorer({ path }) {
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+
+      return (
+        <div className="h-screen flex flex-col">
+          <div className="p-3 bg-gray-100 text-sm">
+            {path.split('/').map((segment, i) => (
+              <span key={i}>
+                {i > 0 && ' / '}
+                <button onClick={() => navigateToLevel(i)}>
+                  {segment}
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {files.map(file => (
+              <div
+                key={file.id}
+                onClick={() => file.isFolder && navigate(file.path)}
+                className="flex items-center p-2 hover:bg-gray-50"
+              >
+                <span className="mr-2">
+                  {file.isFolder ? '📁' : '📄'}
+                </span>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let path;
+      
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+    </script>
+
+    <div class="h-screen flex flex-col">
+      <div class="p-3 bg-gray-100 text-sm">
+        {#each path.split('/') as segment, i}
+          {#if i > 0} / {/if}
+          <button on:click={() => navigateToLevel(i)}>
+            {segment}
+          </button>
+        {/each}
+      </div>
+      <div class="flex-1 overflow-auto p-4">
+        {#each files as file}
+          <div
+            on:click={() => file.isFolder && goto(file.path)}
+            class="flex items-center p-2 hover:bg-gray-50"
+          >
+            <span class="mr-2">
+              {file.isFolder ? '📁' : '📄'}
+            </span>
+            {file.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 高度な設定
+
+### 透明度効果の追加
+
+```typescript
+// コンテンツがフェードしながらドリル
+drill({ 
+  opacity: true,
+  spring: { stiffness: 120, damping: 18 }
+})
+```
+
+### 方向のカスタマイズ
+
+```typescript
+// ドリルイン（デフォルト）
+drill({ direction: 'enter' })
+
+// ドリルアウト（戻る）
+drill({ direction: 'exit' })
+```
+
+### スプリング物理の調整
+
+```typescript
+// 高速ドリル
+drill({ 
+  spring: { stiffness: 200, damping: 25 }
+})
+
+// スムーズドリル
+drill({ 
+  spring: { stiffness: 100, damping: 15 }
+})
+```
+
+## 注意事項
+
+### 階層の一貫性
+
+- 明確な階層構造がある場合のみドリルトランジションを使用
+- 同レベルのナビゲーションにはスライドまたはフェードを使用
+- 戻る時は逆方向のドリルを必ず適用
+
+### パフォーマンスの考慮事項
+
+- 大きな画像や複雑なレイアウトはtransformで最適化
+- モバイルではwill-changeプロパティを活用
+- 多数の要素の同時アニメーションは避ける
+
+## アクセシビリティ
+
+- 減少モーション設定で即座に遷移
+- 完全なキーボードナビゲーションサポート
+- スクリーンリーダーでは標準的なページ遷移として認識
+- フォーカスは新しいページに自動移動
+
+## ベストプラクティス
+
+### ✅ すべきこと
+
+- 明確な親子関係で使用
+- バックジェスチャーと統合
+- パンくずリストと併用してパスを表示
+- 一貫した方向性を維持
+
+### ❌ してはいけないこと
+
+- 兄弟関係や独立したセクション間で使用しない
+- 速度を速すぎる設定にしない
+- 双方向ドリルを同時に使用しない
+- 深い階層（5レベル以上）で過度に使用しない

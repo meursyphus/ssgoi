@@ -1,0 +1,498 @@
+---
+title: "드릴 전환"
+description: "계층 구조 탐색을 위한 드릴 포워드/백 전환"
+nav-title: "드릴"
+---
+
+# 드릴 전환
+
+드릴 전환은 정보 구조의 **계층 간 이동**을 명확하게 표현하는 전환입니다. 화면이 옆으로 밀리며 새로운 레벨로 들어가거나 나가는 효과로, 사용자에게 현재 위치와 이동 방향을 직관적으로 전달합니다.
+
+## 데모
+
+<ViewTransitionDemo type="drill" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+드릴 전환은 **부모-자식 관계**와 **계층적 탐색**에 최적화되어 있습니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "no",
+      description: "독립적인 섹션 간 이동에는 부적합"
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "같은 레벨의 콘텐츠 간에는 부자연스러움"
+    },
+    {
+      label: "계층 관계",
+      suitable: "yes",
+      description: "리스트→서브리스트, 개요→상세에 최적"
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **리스트 → 서브리스트**: 카테고리에서 하위 카테고리로 이동
+- **개요 → 상세**: 대시보드에서 상세 분석 페이지로 진입
+- **설정 → 세부 설정**: 메인 설정에서 세부 옵션으로 이동
+- **파일 탐색기**: 폴더 구조를 탐색할 때
+
+### 왜 이렇게 동작하나요?
+
+1. **공간적 메타포**: 옆으로 밀리는 동작으로 "들어가기"와 "나가기" 표현
+2. **계층 인식**: 화면이 겹치면서 정보의 깊이를 시각화
+3. **제스처 친화적**: 모바일의 edge-swipe 제스처와 자연스럽게 연동
+4. **컨텍스트 유지**: 이전 화면이 부분적으로 보여 경로 인지
+
+### 모션 디자인
+
+```
+드릴 포워드 (Enter):
+1. 새 화면 → 오른쪽에서 100% 위치에서 시작
+2. 이동 중 → 새 화면이 들어오며 기존 화면을 밀어냄
+3. 완료 → 새 화면이 전체를 차지, 기존 화면은 -20% 위치
+
+드릴 백 (Exit):
+1. 현재 화면 → 0% 위치에서 시작
+2. 이동 중 → 오른쪽으로 밀려나며 이전 화면 노출
+3. 완료 → 이전 화면 복귀, 현재 화면은 100% 밖으로
+```
+
+## 기본 사용법
+
+### 1. 전환 설정
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { drill } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { drill } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/categories',
+            to: '/categories/*',
+            transition: drill({ direction: 'enter' }),
+            symmetric: false
+          },
+          {
+            from: '/categories/*',
+            to: '/categories',
+            transition: drill({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 옵션 설정
+
+```typescript
+interface DrillOptions {
+  opacity?: boolean;           // 투명도 효과 (기본값: false)
+  direction?: 'enter' | 'exit'; // 드릴 방향 (기본값: 'enter')
+  spring?: {
+    stiffness?: number;         // 스프링 강도 (기본값: 150)
+    damping?: number;           // 감쇠 계수 (기본값: 20)
+  };
+}
+```
+
+## 실전 활용 예시
+
+### 1. 카테고리 네비게이션
+
+중첩된 카테고리 구조 탐색:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 메인 카테고리
+    function Categories() {
+      return (
+        <div className="p-4">
+          <h1 className="text-2xl mb-4">카테고리</h1>
+          <div className="space-y-2">
+            {categories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/categories/${cat.slug}`}
+                className="block p-4 bg-white rounded-lg shadow"
+              >
+                <h3 className="font-semibold">{cat.name}</h3>
+                <p className="text-gray-600">{cat.itemCount} 항목</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 서브 카테고리
+    function SubCategory({ category }) {
+      return (
+        <div className="p-4">
+          <button onClick={() => navigate('/categories')} className="mb-4">
+            ← 뒤로
+          </button>
+          <h1 className="text-2xl mb-4">{category.name}</h1>
+          <div className="grid gap-4">
+            {category.items.map(item => (
+              <div key={item.id} className="p-4 bg-white rounded-lg">
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 메인 카테고리 -->
+    <div class="p-4">
+      <h1 class="text-2xl mb-4">카테고리</h1>
+      <div class="space-y-2">
+        {#each categories as cat}
+          <a
+            href="/categories/{cat.slug}"
+            class="block p-4 bg-white rounded-lg shadow"
+          >
+            <h3 class="font-semibold">{cat.name}</h3>
+            <p class="text-gray-600">{cat.itemCount} 항목</p>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- 서브 카테고리 -->
+    <div class="p-4">
+      <button on:click={() => goto('/categories')} class="mb-4">
+        ← 뒤로
+      </button>
+      <h1 class="text-2xl mb-4">{category.name}</h1>
+      <div class="grid gap-4">
+        {#each category.items as item}
+          <div class="p-4 bg-white rounded-lg">
+            {item.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 설정 메뉴
+
+설정에서 세부 옵션으로:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 설정 메인
+    function Settings() {
+      const menuItems = [
+        { id: 'profile', label: '프로필 설정', icon: '👤' },
+        { id: 'privacy', label: '개인정보 보호', icon: '🔒' },
+        { id: 'notifications', label: '알림 설정', icon: '🔔' },
+        { id: 'display', label: '화면 설정', icon: '🎨' }
+      ];
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <h1 className="text-2xl p-4 border-b">설정</h1>
+          <div className="divide-y">
+            {menuItems.map(item => (
+              <Link
+                key={item.id}
+                to={`/settings/${item.id}`}
+                className="flex items-center p-4 hover:bg-gray-50"
+              >
+                <span className="text-2xl mr-4">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                <span>→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 세부 설정
+    function SettingDetail({ type }) {
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center p-4 border-b">
+            <button onClick={() => navigate('/settings')}>←</button>
+            <h1 className="text-xl ml-4">{getSettingTitle(type)}</h1>
+          </div>
+          <div className="p-4">
+            {/* 세부 설정 옵션들 */}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 설정 메인 -->
+    <script>
+      const menuItems = [
+        { id: 'profile', label: '프로필 설정', icon: '👤' },
+        { id: 'privacy', label: '개인정보 보호', icon: '🔒' },
+        { id: 'notifications', label: '알림 설정', icon: '🔔' },
+        { id: 'display', label: '화면 설정', icon: '🎨' }
+      ];
+    </script>
+
+    <div class="max-w-lg mx-auto">
+      <h1 class="text-2xl p-4 border-b">설정</h1>
+      <div class="divide-y">
+        {#each menuItems as item}
+          <a
+            href="/settings/{item.id}"
+            class="flex items-center p-4 hover:bg-gray-50"
+          >
+            <span class="text-2xl mr-4">{item.icon}</span>
+            <span class="flex-1">{item.label}</span>
+            <span>→</span>
+          </a>
+        {/each}
+      </div>
+    </div>
+
+    <!-- 세부 설정 -->
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center p-4 border-b">
+        <button on:click={() => goto('/settings')}>←</button>
+        <h1 class="text-xl ml-4">{getSettingTitle(type)}</h1>
+      </div>
+      <div class="p-4">
+        <!-- 세부 설정 옵션들 -->
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 파일 탐색기
+
+폴더 구조 네비게이션:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    function FileExplorer({ path }) {
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+
+      return (
+        <div className="h-screen flex flex-col">
+          <div className="p-3 bg-gray-100 text-sm">
+            {path.split('/').map((segment, i) => (
+              <span key={i}>
+                {i > 0 && ' / '}
+                <button onClick={() => navigateToLevel(i)}>
+                  {segment}
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {files.map(file => (
+              <div
+                key={file.id}
+                onClick={() => file.isFolder && navigate(file.path)}
+                className="flex items-center p-2 hover:bg-gray-50"
+              >
+                <span className="mr-2">
+                  {file.isFolder ? '📁' : '📄'}
+                </span>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      export let path;
+      
+      const config = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({ 
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+    </script>
+
+    <div class="h-screen flex flex-col">
+      <div class="p-3 bg-gray-100 text-sm">
+        {#each path.split('/') as segment, i}
+          {#if i > 0} / {/if}
+          <button on:click={() => navigateToLevel(i)}>
+            {segment}
+          </button>
+        {/each}
+      </div>
+      <div class="flex-1 overflow-auto p-4">
+        {#each files as file}
+          <div
+            on:click={() => file.isFolder && goto(file.path)}
+            class="flex items-center p-2 hover:bg-gray-50"
+          >
+            <span class="mr-2">
+              {file.isFolder ? '📁' : '📄'}
+            </span>
+            {file.name}
+          </div>
+        {/each}
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 고급 설정
+
+### 투명도 효과 추가
+
+```typescript
+// 콘텐츠가 페이드되며 드릴
+drill({ 
+  opacity: true,
+  spring: { stiffness: 120, damping: 18 }
+})
+```
+
+### 방향 커스터마이징
+
+```typescript
+// 드릴 인 (기본)
+drill({ direction: 'enter' })
+
+// 드릴 아웃 (뒤로가기)
+drill({ direction: 'exit' })
+```
+
+### 스프링 물리 조정
+
+```typescript
+// 빠른 드릴
+drill({ 
+  spring: { stiffness: 200, damping: 25 }
+})
+
+// 부드러운 드릴
+drill({ 
+  spring: { stiffness: 100, damping: 15 }
+})
+```
+
+## 주의사항
+
+### 계층 구조 일관성
+
+- 드릴 전환은 명확한 계층 구조가 있을 때만 사용
+- 같은 레벨 간 이동에는 슬라이드나 페이드 사용
+- 뒤로가기 시 반대 방향 드릴 적용 필수
+
+### 성능 고려사항
+
+- 큰 이미지나 복잡한 레이아웃은 transform 최적화
+- 모바일에서는 will-change 속성 활용
+- 너무 많은 요소의 동시 애니메이션 피하기
+
+## 접근성
+
+- 모션 감소 설정 시 즉시 전환
+- 키보드 네비게이션 완벽 지원
+- 스크린 리더에서 일반 페이지 전환으로 인식
+- 포커스가 새 페이지로 자동 이동
+
+## 모범 사례
+
+### ✅ DO
+
+- 명확한 부모-자식 관계에 사용
+- 뒤로가기 제스처와 연동
+- 브레드크럼과 함께 사용하여 경로 표시
+- 일관된 방향성 유지
+
+### ❌ DON'T
+
+- 형제 관계나 독립적인 섹션 간에 사용하지 마세요
+- 너무 빠른 속도로 설정하지 마세요
+- 양방향 드릴을 동시에 사용하지 마세요
+- 깊은 계층(5단계 이상)에서 과도하게 사용하지 마세요
