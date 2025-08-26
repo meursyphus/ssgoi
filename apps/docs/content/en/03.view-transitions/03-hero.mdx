@@ -1,31 +1,77 @@
 ---
 title: "Hero Transition"
-description: "Shared elements that smoothly animate between pages"
+description: "Transitions maintaining context through shared element continuity"
 nav-title: "Hero"
 ---
 
 # Hero Transition
 
-The Hero transition creates an effect where shared elements between two pages naturally move and transform. It provides an immersive transition experience, like images or cards expanding from a list into a detail view.
+The hero transition is a **continuity transition** where shared elements between two screens naturally move and transform. Elements "travel" from one screen to another, providing users with strong visual connectivity and context.
 
-## Core Concept
+## Demo
 
-To use hero transitions, add the `data-hero-key` attribute to elements that should animate. Elements with matching keys are connected and animated between pages.
+<ViewTransitionDemo type="hero" />
+
+## UX Principles
+
+### When to Use?
+
+Hero transitions are used when **continuity and context preservation** are important.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "no",
+      description: "Unsuitable when there are no shared elements"
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "maybe",
+      description: "Effective in specific situations like galleries"
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "yes",
+      description: "Optimal for different views of the same object (list→detail)"
+    }
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Gallery → Fullscreen**: Image expands to detailed view
+- **Product List → Detail**: Product card expands to detail page
+- **Profile → Edit**: Profile photo maintains while transitioning to edit mode
+- **Media Player**: Mini player expands to full player
+
+### Why Does It Work This Way?
+
+1. **Visual Continuity**: Track element movement to maintain spatial orientation
+2. **Spatial Relationship**: From small to large, summary to detail
+3. **Minimize Cognitive Load**: Natural transformation instead of abrupt changes
+4. **Interest and Delight**: Dynamic motion increases user engagement
+
+### Motion Design
 
 ```
-Page A                      Page B
-┌─────────────┐            ┌─────────────┐
-│ ┌─────────┐ │            │             │
-│ │ key="1" │ │ ══════════>│   key="1"   │
-│ └─────────┘ │            │             │
-└─────────────┘            └─────────────┘
+Hero Element Journey:
+1. Starting Point → Record position, size, shape
+2. During Transform → Smooth interpolation animation
+3. Destination → Settle into new position and size
+
+Other Elements:
+- Outgoing Page: Fade out
+- Incoming Page: Fade in after hero element settles
 ```
 
 ## Basic Usage
 
 ### 1. Transition Setup
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -34,8 +80,8 @@ Page A                      Page B
     const config = {
       transitions: [
         {
-          from: '/products',
-          to: '/products/*',
+          from: '/gallery',
+          to: '/gallery/*',
           transition: hero(),
           symmetric: true
         }
@@ -60,8 +106,8 @@ Page A                      Page B
       const config = {
         transitions: [
           {
-            from: '/products',
-            to: '/products/*',
+            from: '/gallery',
+            to: '/gallery/*',
             transition: hero(),
             symmetric: true
           }
@@ -74,126 +120,44 @@ Page A                      Page B
     </Ssgoi>
     ```
   </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { hero } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      transitions: [
-        {
-          from: '/products',
-          to: '/products/*',
-          transition: hero(),
-          symmetric: true
-        }
-      ]
-    };
-    </script>
-    ```
-  </TabPanel>
 </Tabs>
 
-### 2. Adding Keys to Elements
+### 2. Marking Elements
 
-**List Page:**
+Add `data-hero-key` attribute to shared elements:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    export function ProductList() {
+    // List Page
+    function ProductList() {
       return (
         <div className="grid">
           {products.map(product => (
-            <Link key={product.id} href={`/products/${product.id}`}>
+            <Link key={product.id} to={`/product/${product.id}`}>
               <img 
-                data-hero-key={`product-image-${product.id}`}
-                src={product.thumbnail}
+                data-hero-key={`product-${product.id}`}
+                src={product.image}
                 alt={product.name}
               />
-              <h3 data-hero-key={`product-title-${product.id}`}>
-                {product.name}
-              </h3>
+              <h3>{product.name}</h3>
             </Link>
           ))}
         </div>
       );
     }
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      export let products;
-    </script>
 
-    <div class="grid">
-      {#each products as product}
-        <a href={`/products/${product.id}`}>
-          <img 
-            data-hero-key={`product-image-${product.id}`}
-            src={product.thumbnail}
-            alt={product.name}
-          />
-          <h3 data-hero-key={`product-title-${product.id}`}>
-            {product.name}
-          </h3>
-        </a>
-      {/each}
-    </div>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <div class="grid">
-        <RouterLink
-          v-for="product in products"
-          :key="product.id"
-          :to="`/products/${product.id}`"
-        >
-          <img 
-            :data-hero-key="`product-image-${product.id}`"
-            :src="product.thumbnail"
-            :alt="product.name"
-          />
-          <h3 :data-hero-key="`product-title-${product.id}`">
-            {{ product.name }}
-          </h3>
-        </RouterLink>
-      </div>
-    </template>
-
-    <script setup>
-    defineProps(['products']);
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-**Detail Page:**
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    export function ProductDetail({ product }) {
+    // Detail Page
+    function ProductDetail({ product }) {
       return (
         <div>
           <img 
-            data-hero-key={`product-image-${product.id}`}
-            src={product.fullImage}
+            data-hero-key={`product-${product.id}`}
+            src={product.image}
             alt={product.name}
+            className="w-full"
           />
-          <h1 data-hero-key={`product-title-${product.id}`}>
-            {product.name}
-          </h1>
+          <h1>{product.name}</h1>
           <p>{product.description}</p>
         </div>
       );
@@ -202,148 +166,271 @@ Page A                      Page B
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <script>
-      export let product;
-    </script>
+    <!-- List Page -->
+    <div class="grid">
+      {#each products as product}
+        <a href="/product/{product.id}">
+          <img 
+            data-hero-key="product-{product.id}"
+            src={product.image}
+            alt={product.name}
+          />
+          <h3>{product.name}</h3>
+        </a>
+      {/each}
+    </div>
 
+    <!-- Detail Page -->
     <div>
       <img 
-        data-hero-key={`product-image-${product.id}`}
-        src={product.fullImage}
+        data-hero-key="product-{product.id}"
+        src={product.image}
         alt={product.name}
+        class="w-full"
       />
-      <h1 data-hero-key={`product-title-${product.id}`}>
-        {product.name}
-      </h1>
+      <h1>{product.name}</h1>
       <p>{product.description}</p>
     </div>
     ```
   </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <div>
-        <img 
-          :data-hero-key="`product-image-${product.id}`"
-          :src="product.fullImage"
-          :alt="product.name"
-        />
-        <h1 :data-hero-key="`product-title-${product.id}`">
-          {{ product.name }}
-        </h1>
-        <p>{{ product.description }}</p>
-      </div>
-    </template>
-
-    <script setup>
-    defineProps(['product']);
-    </script>
-    ```
-  </TabPanel>
 </Tabs>
 
-## Options
+## Practical Examples
 
-```typescript
-hero({
-  spring: {
-    stiffness: 300,  // Spring stiffness (default: 300)
-    damping: 30      // Damping ratio (default: 30)
-  },
-  timeout: 300       // Page matching timeout (default: 300ms)
-})
-```
+### 1. Image Gallery
 
-## Advanced Examples
+Thumbnail to fullscreen expansion:
 
-### Multiple Elements Transitioning
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Image, title, and price all hero transition
-    <article>
-      <img data-hero-key={`hero-img-${id}`} src={image} />
-      <h2 data-hero-key={`hero-title-${id}`}>{title}</h2>
-      <span data-hero-key={`hero-price-${id}`}>${price}</span>
-    </article>
+    // Gallery Grid
+    function Gallery() {
+      return (
+        <div className="grid grid-cols-3 gap-4">
+          {images.map(img => (
+            <Link to={`/photo/${img.id}`} key={img.id}>
+              <div 
+                data-hero-key={`photo-${img.id}`}
+                className="aspect-square overflow-hidden"
+              >
+                <img src={img.thumb} className="object-cover w-full h-full" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      );
+    }
+
+    // Fullscreen View
+    function PhotoView({ id }) {
+      return (
+        <div 
+          data-hero-key={`photo-${id}`}
+          className="fixed inset-0 bg-black"
+        >
+          <img src={image.full} className="w-full h-full object-contain" />
+        </div>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Image, title, and price all hero transition -->
-    <article>
-      <img data-hero-key={`hero-img-${id}`} src={image} />
-      <h2 data-hero-key={`hero-title-${id}`}>{title}</h2>
-      <span data-hero-key={`hero-price-${id}`}>${price}</span>
-    </article>
-    ```
-  </TabPanel>
-</Tabs>
-
-### Dynamic Key Generation
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    // Different hero groups by category
-    <div data-hero-key={`${category}-item-${id}`}>
-      {content}
+    <!-- Gallery Grid -->
+    <div class="grid grid-cols-3 gap-4">
+      {#each images as img}
+        <a href="/photo/{img.id}">
+          <div 
+            data-hero-key="photo-{img.id}"
+            class="aspect-square overflow-hidden"
+          >
+            <img src={img.thumb} class="object-cover w-full h-full" />
+          </div>
+        </a>
+      {/each}
     </div>
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <!-- Different hero groups by category -->
-    <div data-hero-key={`${category}-item-${id}`}>
-      {content}
+
+    <!-- Fullscreen View -->
+    <div 
+      data-hero-key="photo-{id}"
+      class="fixed inset-0 bg-black"
+    >
+      <img src={image.full} class="w-full h-full object-contain" />
     </div>
     ```
   </TabPanel>
 </Tabs>
 
-## How It Works
+### 2. Card Expansion
 
-1. **Matching**: Find matching `data-hero-key` in outgoing and incoming pages
-2. **Calculation**: Calculate start/end positions and size differences
-3. **Transform**: Animate position (translate) and size (scale) simultaneously
-4. **Cleanup**: Reset styles after animation completes
+Small card to fullscreen detail:
 
-```
-Start State        Mid Animation      Final State
-┌──┐              ┌────┐            ┌──────┐
-│  │ ──────────> │    │ ────────> │      │
-└──┘              └────┘            └──────┘
-Position A        Moving            Position B
-Size S            Transforming      Size L
-```
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Card List
+    function CardGrid() {
+      return (
+        <div className="grid gap-6">
+          {items.map(item => (
+            <article 
+              key={item.id}
+              data-hero-key={`card-${item.id}`}
+              onClick={() => navigate(`/item/${item.id}`)}
+              className="bg-white rounded-lg shadow-lg p-4 cursor-pointer"
+            >
+              <h3>{item.title}</h3>
+              <p>{item.summary}</p>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    // Expanded Detail
+    function ItemDetail({ item }) {
+      return (
+        <article 
+          data-hero-key={`card-${item.id}`}
+          className="min-h-screen bg-white p-8"
+        >
+          <h1 className="text-4xl">{item.title}</h1>
+          <p className="text-lg">{item.fullContent}</p>
+        </article>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Card List -->
+    <div class="grid gap-6">
+      {#each items as item}
+        <article 
+          data-hero-key="card-{item.id}"
+          on:click={() => goto(`/item/${item.id}`)}
+          class="bg-white rounded-lg shadow-lg p-4 cursor-pointer"
+        >
+          <h3>{item.title}</h3>
+          <p>{item.summary}</p>
+        </article>
+      {/each}
+    </div>
+
+    <!-- Expanded Detail -->
+    <article 
+      data-hero-key="card-{item.id}"
+      class="min-h-screen bg-white p-8"
+    >
+      <h1 class="text-4xl">{item.title}</h1>
+      <p class="text-lg">{item.fullContent}</p>
+    </article>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. Multiple Hero Elements
+
+Multiple elements transitioning simultaneously:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Profile Card
+    function ProfileCard({ user }) {
+      return (
+        <div onClick={() => navigate(`/profile/${user.id}`)}>
+          <img 
+            data-hero-key={`avatar-${user.id}`}
+            src={user.avatar}
+            className="w-16 h-16 rounded-full"
+          />
+          <h3 data-hero-key={`name-${user.id}`}>
+            {user.name}
+          </h3>
+        </div>
+      );
+    }
+
+    // Profile Detail
+    function ProfileDetail({ user }) {
+      return (
+        <div>
+          <img 
+            data-hero-key={`avatar-${user.id}`}
+            src={user.avatar}
+            className="w-32 h-32 rounded-full"
+          />
+          <h1 data-hero-key={`name-${user.id}`}>
+            {user.name}
+          </h1>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Profile Card -->
+    <div on:click={() => goto(`/profile/${user.id}`)}>
+      <img 
+        data-hero-key="avatar-{user.id}"
+        src={user.avatar}
+        class="w-16 h-16 rounded-full"
+      />
+      <h3 data-hero-key="name-{user.id}">
+        {user.name}
+      </h3>
+    </div>
+
+    <!-- Profile Detail -->
+    <div>
+      <img 
+        data-hero-key="avatar-{user.id}"
+        src={user.avatar}
+        class="w-32 h-32 rounded-full"
+      />
+      <h1 data-hero-key="name-{user.id}">
+        {user.name}
+      </h1>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
 ## Important Notes
 
-### 1. Key Uniqueness
-- `data-hero-key` must be unique within a page
-- For dynamic data, include IDs in keys
+### Hero Key Rules
 
-### 2. Element Matching
-- Falls back to regular transition if no matching key found
-- Only first element animates if multiple have same key
+- `data-hero-key` must be **unique** on each page
+- Keys are strings and can be generated dynamically
+- Only elements with the same key are connected
 
-### 3. Style Considerations
-- `position: relative` temporarily applied during transition
-- `transform-origin` set to `top left`
-- Original styles restored after animation
+### Performance Considerations
 
-## Recommended Use Cases
+- Hero elements are cloned in the DOM for animation
+- Too many hero elements impact performance
+- Preload images to prevent flickering
 
-- 📸 Image gallery → Image detail view
-- 🛍️ Product list → Product detail page
-- 📝 Card layout → Full screen view
-- 👤 Profile thumbnail → Profile page
-- 🎵 Album cover → Player screen
+## Accessibility
 
-## Performance Optimization
+- Instant transition when motion is reduced
+- Focus management supports keyboard navigation
+- Screen readers perceive as normal page transition
 
-- Don't use hero keys on too many elements
-- Apply to simple elements rather than complex DOM structures
-- Optimize images to appropriate sizes
-- `will-change: transform` is handled automatically by Ssgoi
+## Best Practices
+
+### ✅ DO
+
+- Use for visually important elements
+- Apply to different representations of the same object
+- Maintain natural size/position changes
+- Use to guide user attention
+
+### ❌ DON'T
+
+- Don't apply to too many elements simultaneously
+- Don't connect unrelated elements
+- Avoid extreme size changes (more than 10x)
+- Use cautiously with text content

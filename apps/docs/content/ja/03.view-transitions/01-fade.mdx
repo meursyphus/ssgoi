@@ -1,16 +1,70 @@
 ---
 title: "フェードトランジション"
-description: "フェードイン/アウト効果でページをスムーズに切り替える"
+description: "コンテンツ間のコンテキスト変更のための滑らかなトランジション効果"
 nav-title: "フェード"
 ---
 
 # フェードトランジション
 
-フェードトランジションは、最も基本的でありながらエレガントなページ遷移効果です。現在のページが徐々に消えていき、新しいページが現れるスムーズな遷移を提供します。
+フェードトランジションは、互いに関連のない、または離れたコンテンツ間の移動時に使用される基本的なトランジションパターンです。画面が完全に消えた後、新しい画面が現れ、ユーザーが1つの領域を離れて完全に新しい領域に入ることを明確に伝えます。
+
+## デモ
+
+<ViewTransitionDemo type="fade" />
+
+## UXの原則
+
+### いつ使用するか？
+
+フェードトランジションは**コンテキストの変更（Context Change）**時に使用されます。
+
+#### コンテンツの関係別適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "関連のないコンテンツ",
+      suitable: "yes",
+      description: "完全に独立したセクション間の移動（ホーム → 設定）",
+    },
+    {
+      label: "兄弟関係",
+      suitable: "no",
+      description: "同一レベルのコンテンツはスクロール使用を推奨",
+    },
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "親子構造はヒーローのような拡張トランジション使用を推奨",
+    },
+  ]}
+/>
+
+#### 主な使用ケース
+
+- **トップレベルナビゲーション**: 下部タブやサイドバーメニューでセクション間を移動
+- **コンテキストの切り替え**: 接続点のない画面間の遷移
+- **新しいタスクの開始**: 完全に異なる作業フローへの進入
+
+### なぜこのように動作するのか？
+
+1. **明確な区切り**: 前の画面が完全に消えた後、新しい画面が現れて明確な境界を作ります
+2. **認知負荷の削減**: 突然の画面遷移よりも滑らかなフェードで視覚的衝撃を減らします
+3. **汎用性**: 方向性がなく、どのナビゲーションパターンにも自然に適用できます
+
+### モーションデザイン
+
+```
+出ていく画面: 100% → 0% opacity (素早いフェードアウト)
+短い空白: 完全なコンテキスト分離
+入ってくる画面: 0% → 100% opacity (滑らかなフェードイン)
+```
+
+このシーケンスは、ユーザーに「以前の空間を離れて新しい空間に入る」というメンタルモデルを提供します。
 
 ## 基本的な使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -23,11 +77,12 @@ nav-title: "フェード"
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* アプリケーションコンテンツ */}
+          {/* アプリの内容 */}
         </Ssgoi>
       );
     }
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -41,188 +96,38 @@ nav-title: "フェード"
     </script>
 
     <Ssgoi {config}>
-      <!-- アプリケーションコンテンツ -->
+      <slot />
     </Ssgoi>
     ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- アプリケーションコンテンツ -->
-      </Ssgoi>
-    </template>
 
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { fade } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      defaultTransition: fade()
-    };
-    </script>
-    ```
   </TabPanel>
 </Tabs>
 
-## オプション
+## 実践的な活用例
 
-フェードトランジションはスプリングアニメーション設定をカスタマイズできます：
+### 1. タブナビゲーション
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    fade({
-      spring: {
-        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
-        damping: 30      // 減衰係数（デフォルト：30）
-      }
-    })
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```javascript
-    fade({
-      spring: {
-        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
-        damping: 30      // 減衰係数（デフォルト：30）
-      }
-    })
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    import { fade } from '@ssgoi/vue/view-transitions';
+下部タブバーや上部タブでの主要セクション間の移動:
 
-    // オプション設定
-    const fadeTransition = fade({
-      spring: {
-        stiffness: 300,  // スプリングの硬さ（デフォルト：300）
-        damping: 30      // 減衰係数（デフォルト：30）
-      }
-    });
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### スプリングオプションの説明
-
-- **stiffness**: アニメーションの速度を制御します。値が大きいほど速い遷移
-- **damping**: アニメーションのバウンスを制御します。値が大きいほどスムーズな遷移
-
-## 使用例
-
-### ゆっくりしたフェード
-
-スムーズでゆっくりとしたフェード効果：
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```javascript
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 速いフェード
-
-素早くキレのあるフェード効果：
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```javascript
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## 特定のルートへの適用
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
       transitions: [
         {
           from: '/home',
-          to: '/about', 
+          to: '/profile',
           transition: fade(),
-          symmetric: true  // /about → /home も自動的にフェードを適用
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
         }
       ]
     };
-
-    <Ssgoi config={config}>
-      {/* アプリケーションコンテンツ */}
-    </Ssgoi>
     ```
   </TabPanel>
   <TabPanel value="svelte">
@@ -232,61 +137,105 @@ nav-title: "フェード"
         transitions: [
           {
             from: '/home',
-            to: '/about', 
+            to: '/profile',
             transition: fade(),
-            symmetric: true  // /about → /home も自動的にフェードを適用
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: fade(),
+            symmetric: true
           }
         ]
       };
-    </script>
-
-    <Ssgoi {config}>
-      <!-- アプリケーションコンテンツ -->
-    </Ssgoi>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- アプリケーションコンテンツ -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    const config = {
-      transitions: [
-        {
-          from: '/home',
-          to: '/about', 
-          transition: fade(),
-          symmetric: true  // /about → /home も自動的にフェードを適用
-        }
-      ]
-    };
     </script>
     ```
   </TabPanel>
 </Tabs>
 
-## 動作原理
+### 2. 高速トランジション（即座の応答）
 
-フェードトランジションは次のように動作します：
+ユーザーアクションに素早く反応する必要がある場合:
 
-1. **出ていくページ**: 不透明度が1から0へ減少
-2. **入ってくるページ**: 不透明度が0から1へ増加
-3. 両方のアニメーションが同時に実行され、自然なクロスフェード効果を作成
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 400,  // 高速トランジション
+          damping: 35      // 滑らかな仕上がり
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 400,  // 高速トランジション
+            damping: 35      // 滑らかな仕上がり
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-## 利点
+### 3. エレガントなトランジション（プレミアム感）
 
-- すべてのコンテンツタイプに適した汎用的なトランジション
-- CPU/GPU負荷が少ない軽量なアニメーション
-- 視覚的にスムーズでプロフェッショナルな外観
-- 方向性がなく、どのナビゲーションパターンでも自然に動作
+ブランド体験が重要なページ:
 
-## 推奨される使用ケース
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 150,  // ゆっくりとしたトランジション
+          damping: 25      // 滑らかな減速
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 150,  // ゆっくりとしたトランジション
+            damping: 25      // 滑らかな減速
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-- デフォルトのページ遷移
-- 関連性のないコンテンツページ間のナビゲーション
-- 落ち着いたエレガントなユーザー体験が必要な場合
-- パフォーマンスが重要なモバイル環境
+## アクセシビリティ
+
+- `prefers-reduced-motion`設定時に自動的にアニメーションを無効化
+- スクリーンリーダーはトランジション中でもコンテンツ変更を正しく認識
+- キーボードナビゲーションと完全互換
+
+## ベストプラクティス
+
+### ✅ DO
+
+- トップレベルナビゲーションにデフォルトで使用
+- コンテンツが完全に変わる時に使用
+- モバイルアプリと類似した体験を提供する時
+
+### ❌ DON'T
+
+- 関連コンテンツ間の移動には使用しない（スライドやスクロールを使用）
+- 遅すぎるフェードは避ける（ユーザーがイライラする）
+- 部分的なUI変更には使用しない

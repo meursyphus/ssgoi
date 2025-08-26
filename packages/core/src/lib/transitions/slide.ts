@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface SlideOptions {
   direction?: 'left' | 'right' | 'up' | 'down';
   distance?: number | string;
@@ -8,6 +10,7 @@ interface SlideOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const slide = (options: SlideOptions = {}) => {
@@ -17,7 +20,8 @@ export const slide = (options: SlideOptions = {}) => {
     opacity = 0,
     fade = true,
     axis,
-    spring = { stiffness: 400, damping: 35 }
+    spring = { stiffness: 400, damping: 35 },
+    key
   } = options;
 
   // Determine actual direction based on axis parameter
@@ -78,6 +82,7 @@ export const slide = (options: SlideOptions = {}) => {
           element.style.opacity = (opacity + (1 - opacity) * progress).toString();
         }
       }
-    })
+    }),
+    ...(key && { key })
   };
 };

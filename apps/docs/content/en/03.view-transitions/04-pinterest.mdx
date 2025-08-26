@@ -1,37 +1,79 @@
 ---
 title: "Pinterest Transition"
-description: "Pinterest-style expansion from gallery to detail view"
+description: "Immersive transition with cards expanding to fill the screen"
 nav-title: "Pinterest"
 ---
 
 # Pinterest Transition
 
-The Pinterest transition creates an effect where small gallery items expand to full screen. It brings Pinterest's signature transition effect to the web, providing a visually appealing and intuitive user experience.
+The Pinterest transition is an **expansion transition** where small gallery items expand to full screen. The selected content enlarges to fill the entire screen, providing powerful immersion and visual continuity.
 
-## Core Concept
+## Demo
 
-Pinterest transition uses two key attributes:
+<ViewTransitionDemo type="pinterest" />
 
-- **`data-pinterest-gallery-key`**: Gallery page items
-- **`data-pinterest-detail-key`**: Detail page container
+## UX Principles
 
-Elements with matching key values are connected to create expand/collapse animations.
+### When to Use?
+
+Pinterest transitions are used for **visual content exploration with expansion**.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "no",
+      description: "Unsuitable without expansion connection point"
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "maybe",
+      description: "Considerable for navigation within gallery items"
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "yes",
+      description: "Optimal for expanded views like thumbnail→fullview"
+    }
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Image Gallery**: Expanding from thumbnails to high-resolution images
+- **Product Catalog**: Expanding from product grid to detail information
+- **Media Browsing**: Transitioning from video thumbnails to player
+- **Portfolio**: From work list to fullscreen presentation
+
+### Why Does It Work This Way?
+
+1. **Spatial Expansion Metaphor**: Feeling of entering a larger world through a small window
+2. **Natural Focus Shift**: User's gaze naturally follows the expanding element
+3. **Context Preservation**: Clear origin maintains spatial orientation
+4. **Dramatic Effect**: Expansion animation emphasizes content importance
+
+### Motion Design
 
 ```
-Gallery Page                    Detail Page
-┌─────────────────┐            ┌─────────────────┐
-│ ┌──┐ ┌──┐ ┌──┐ │            │                 │
-│ │▣ │ │  │ │  │ │ ═════════> │       ▣         │
-│ └──┘ └──┘ └──┘ │            │                 │
-│ gallery-key="1" │            │ detail-key="1"  │
-└─────────────────┘            └─────────────────┘
+Expansion Process:
+1. Capture selected card position and size
+2. Card moves to center while scaling up
+3. Background fades and scales simultaneously
+4. Finally fills entire screen
+
+Contraction Process:
+1. Detail screen shrinks back to original position
+2. Background reappears restoring gallery
+3. Settles with natural spring animation
 ```
 
 ## Basic Usage
 
 ### 1. Transition Setup
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -80,115 +122,49 @@ Gallery Page                    Detail Page
     </Ssgoi>
     ```
   </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { pinterest } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      transitions: [
-        {
-          from: '/gallery',
-          to: '/gallery/*',
-          transition: pinterest(),
-          symmetric: true
-        }
-      ]
-    };
-    </script>
-    ```
-  </TabPanel>
 </Tabs>
 
-### 2. Gallery Page
+### 2. Element Marking
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+Use different data attributes for gallery and detail pages:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    export function Gallery() {
+    // Gallery Page
+    function Gallery() {
       return (
         <div className="masonry-grid">
           {items.map(item => (
             <Link 
               key={item.id} 
-              href={`/gallery/${item.id}`}
+              to={`/gallery/${item.id}`}
               data-pinterest-gallery-key={item.id}
               className="gallery-item"
             >
-              <img src={item.thumbnail} alt={item.title} />
+              <img src={item.image} alt={item.title} />
               <h3>{item.title}</h3>
             </Link>
           ))}
         </div>
       );
     }
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      export let items;
-    </script>
 
-    <div class="masonry-grid">
-      {#each items as item}
-        <a 
-          href={`/gallery/${item.id}`}
-          data-pinterest-gallery-key={item.id}
-          class="gallery-item"
-        >
-          <img src={item.thumbnail} alt={item.title} />
-          <h3>{item.title}</h3>
-        </a>
-      {/each}
-    </div>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <div class="masonry-grid">
-        <RouterLink 
-          v-for="item in items"
-          :key="item.id" 
-          :to="`/gallery/${item.id}`"
-          :data-pinterest-gallery-key="item.id"
-          class="gallery-item"
-        >
-          <img :src="item.thumbnail" :alt="item.title" />
-          <h3>{{ item.title }}</h3>
-        </RouterLink>
-      </div>
-    </template>
-
-    <script setup>
-    defineProps(['items']);
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 3. Detail Page
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    export function GalleryDetail({ item }) {
+    // Detail Page
+    function ItemDetail({ item }) {
       return (
         <div 
           data-pinterest-detail-key={item.id}
           className="detail-container"
         >
-          <img src={item.fullImage} alt={item.title} />
-          <h1>{item.title}</h1>
-          <p>{item.description}</p>
+          <button onClick={() => navigate('/gallery')}>
+            ✕ Close
+          </button>
+          <img src={item.image} alt={item.title} />
+          <article>
+            <h1>{item.title}</h1>
+            <p>{item.description}</p>
+          </article>
         </div>
       );
     }
@@ -196,139 +172,92 @@ Gallery Page                    Detail Page
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <script>
-      export let item;
-    </script>
+    <!-- Gallery Page -->
+    <div class="masonry-grid">
+      {#each items as item}
+        <a 
+          href="/gallery/{item.id}"
+          data-pinterest-gallery-key={item.id}
+          class="gallery-item"
+        >
+          <img src={item.image} alt={item.title} />
+          <h3>{item.title}</h3>
+        </a>
+      {/each}
+    </div>
 
+    <!-- Detail Page -->
     <div 
       data-pinterest-detail-key={item.id}
       class="detail-container"
     >
-      <img src={item.fullImage} alt={item.title} />
-      <h1>{item.title}</h1>
-      <p>{item.description}</p>
-    </div>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <div 
-        :data-pinterest-detail-key="item.id"
-        class="detail-container"
-      >
-        <img :src="item.fullImage" :alt="item.title" />
-        <h1>{{ item.title }}</h1>
-        <p>{{ item.description }}</p>
-      </div>
-    </template>
-
-    <script setup>
-    defineProps(['item']);
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## Options
-
-```typescript
-pinterest({
-  spring: {
-    stiffness: 50,   // Spring stiffness (default: 50)
-    damping: 10      // Damping ratio (default: 10)
-  },
-  timeout: 300       // Page matching timeout (default: 300ms)
-})
-```
-
-## How It Works
-
-### Gallery → Detail (Enter Mode)
-
-1. Calculate gallery item position and size
-2. Start from item area using clip-path
-3. Expand to full screen with clip-path animation
-4. Apply scale and translate simultaneously
-
-```
-Start: Small card      Mid: Expanding        End: Full screen
-┌─────────────┐        ┌─────────────┐        ┌─────────────┐
-│┌──┐         │        │ ┌────────┐  │        │             │
-││▣ │         │   =>   │ │   ▣    │  │   =>   │      ▣      │
-│└──┘         │        │ └────────┘  │        │             │
-└─────────────┘        └─────────────┘        └─────────────┘
-```
-
-### Detail → Gallery (Exit Mode)
-
-1. Calculate gallery item position from detail view
-2. Shrink to gallery item size using clip-path
-3. Move to original position with fade out
-
-## Advanced Examples
-
-### With Masonry Layout
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    // Gallery page
-    <div className="masonry-grid">
-      {items.map((item, index) => (
-        <div 
-          key={item.id}
-          data-pinterest-gallery-key={item.id}
-          className="masonry-item"
-          style={{ 
-            gridRowEnd: `span ${item.height}`,
-            animationDelay: `${index * 50}ms` 
-          }}
-        >
-          <Link href={`/gallery/${item.id}`}>
-            <img src={item.thumbnail} alt={item.title} />
-          </Link>
-        </div>
-      ))}
-    </div>
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <!-- Gallery page -->
-    <div class="masonry-grid">
-      {#each items as item, index}
-        <div 
-          data-pinterest-gallery-key={item.id}
-          class="masonry-item"
-          style="grid-row-end: span {item.height}; animation-delay: {index * 50}ms"
-        >
-          <a href={`/gallery/${item.id}`}>
-            <img src={item.thumbnail} alt={item.title} />
-          </a>
-        </div>
-      {/each}
+      <button on:click={() => goto('/gallery')}>
+        ✕ Close
+      </button>
+      <img src={item.image} alt={item.title} />
+      <article>
+        <h1>{item.title}</h1>
+        <p>{item.description}</p>
+      </article>
     </div>
     ```
   </TabPanel>
 </Tabs>
 
-### Image Preloading
+## Practical Examples
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+### 1. Masonry Gallery
+
+Pinterest-style masonry layout:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Detail page - preload images for smooth transitions
-    export function GalleryDetail({ item }) {
-      useEffect(() => {
-        // Preload high-resolution image
-        const img = new Image();
-        img.src = item.fullImage;
-      }, [item.fullImage]);
-
+    // Masonry Grid
+    function MasonryGallery() {
       return (
-        <div data-pinterest-detail-key={item.id}>
-          {/* Content */}
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+          {images.map((img, index) => (
+            <div
+              key={img.id}
+              data-pinterest-gallery-key={img.id}
+              onClick={() => navigate(`/image/${img.id}`)}
+              className="break-inside-avoid mb-4 cursor-pointer 
+                         hover:scale-105 transition-transform"
+            >
+              <img 
+                src={img.url} 
+                alt={img.title}
+                className="w-full rounded-lg"
+              />
+              <div className="p-2">
+                <p className="text-sm font-medium">{img.title}</p>
+                <p className="text-xs text-gray-500">{img.author}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Expanded View
+    function ImageView({ image }) {
+      return (
+        <div 
+          data-pinterest-detail-key={image.id}
+          className="fixed inset-0 bg-white z-50 overflow-auto"
+        >
+          <div className="max-w-4xl mx-auto p-4">
+            <img 
+              src={image.url} 
+              alt={image.title}
+              className="w-full rounded-lg shadow-xl"
+            />
+            <div className="mt-4">
+              <h1 className="text-2xl font-bold">{image.title}</h1>
+              <p className="text-gray-600 mt-2">{image.description}</p>
+            </div>
+          </div>
         </div>
       );
     }
@@ -336,88 +265,206 @@ Start: Small card      Mid: Expanding        End: Full screen
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <script>
-      import { onMount } from 'svelte';
-      
-      export let item;
-      
-      onMount(() => {
-        // Preload high-resolution image
-        const img = new Image();
-        img.src = item.fullImage;
-      });
-    </script>
+    <!-- Masonry Grid -->
+    <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
+      {#each images as img}
+        <div
+          data-pinterest-gallery-key={img.id}
+          on:click={() => goto(`/image/${img.id}`)}
+          class="break-inside-avoid mb-4 cursor-pointer 
+                 hover:scale-105 transition-transform"
+        >
+          <img 
+            src={img.url} 
+            alt={img.title}
+            class="w-full rounded-lg"
+          />
+          <div class="p-2">
+            <p class="text-sm font-medium">{img.title}</p>
+            <p class="text-xs text-gray-500">{img.author}</p>
+          </div>
+        </div>
+      {/each}
+    </div>
 
-    <div data-pinterest-detail-key={item.id}>
-      <!-- Content -->
+    <!-- Expanded View -->
+    <div 
+      data-pinterest-detail-key={image.id}
+      class="fixed inset-0 bg-white z-50 overflow-auto"
+    >
+      <div class="max-w-4xl mx-auto p-4">
+        <img 
+          src={image.url} 
+          alt={image.title}
+          class="w-full rounded-lg shadow-xl"
+        />
+        <div class="mt-4">
+          <h1 class="text-2xl font-bold">{image.title}</h1>
+          <p class="text-gray-600 mt-2">{image.description}</p>
+        </div>
+      </div>
     </div>
     ```
   </TabPanel>
 </Tabs>
 
-## Styling Considerations
+### 2. Product Catalog
 
-### Gallery Items
+Product card expanding to detail page:
 
-```css
-.gallery-item {
-  /* Base styles for Pinterest effect */
-  overflow: hidden;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Product Grid
+    function ProductGrid() {
+      return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map(product => (
+            <article
+              key={product.id}
+              data-pinterest-gallery-key={product.id}
+              onClick={() => navigate(`/product/${product.id}`)}
+              className="bg-white rounded-xl shadow-lg overflow-hidden
+                         cursor-pointer hover:shadow-xl transition-shadow"
+            >
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-lg font-bold mt-2">${product.price}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
 
-.gallery-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-```
+    // Product Detail
+    function ProductDetail({ product }) {
+      return (
+        <div 
+          data-pinterest-detail-key={product.id}
+          className="min-h-screen bg-white"
+        >
+          <div className="grid md:grid-cols-2 gap-8 p-8">
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full rounded-lg"
+            />
+            <div>
+              <h1 className="text-3xl font-bold">{product.name}</h1>
+              <p className="text-2xl font-bold mt-4">${product.price}</p>
+              <p className="mt-4 text-gray-600">{product.description}</p>
+              <button className="mt-6 bg-black text-white px-8 py-3 rounded-lg">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Product Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {#each products as product}
+        <article
+          data-pinterest-gallery-key={product.id}
+          on:click={() => goto(`/product/${product.id}`)}
+          class="bg-white rounded-xl shadow-lg overflow-hidden
+                 cursor-pointer hover:shadow-xl transition-shadow"
+        >
+          <img 
+            src={product.image} 
+            alt={product.name}
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h3 class="font-semibold">{product.name}</h3>
+            <p class="text-lg font-bold mt-2">${product.price}</p>
+          </div>
+        </article>
+      {/each}
+    </div>
 
-### Detail Container
+    <!-- Product Detail -->
+    <div 
+      data-pinterest-detail-key={product.id}
+      class="min-h-screen bg-white"
+    >
+      <div class="grid md:grid-cols-2 gap-8 p-8">
+        <img 
+          src={product.image} 
+          alt={product.name}
+          class="w-full rounded-lg"
+        />
+        <div>
+          <h1 class="text-3xl font-bold">{product.name}</h1>
+          <p class="text-2xl font-bold mt-4">${product.price}</p>
+          <p class="mt-4 text-gray-600">{product.description}</p>
+          <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+</Tabs>
 
-```css
-.detail-container {
-  /* Full screen utilization */
-  min-height: 100vh;
-  width: 100%;
-  
-  /* Content alignment */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+## Customization
+
+### Spring Settings
+
+Adjust animation elasticity and speed:
+
+```typescript
+pinterest({
+  spring: {
+    stiffness: 200,  // Lower for smoother motion
+    damping: 25      // Higher for faster settling
+  }
+})
 ```
 
 ## Important Notes
 
-### 1. Key Rules
-- Only one `data-pinterest-detail-key` per page
-- Gallery and detail keys must match exactly
-- Both numbers and strings work as keys
+### Key Attribute Distinction
 
-### 2. Layout Requirements
-- Gallery items need clear boundaries
-- Detail pages work best with full screen layout
-- Consider responsive design
+- **Gallery**: `data-pinterest-gallery-key`
+- **Detail**: `data-pinterest-detail-key`
+- Must use different attribute names (to differentiate from hero)
 
-### 3. Performance Optimization
-- Optimize images to appropriate sizes
-- Use separate thumbnails and full images
-- Apply lazy loading
+### Layout Considerations
 
-## Recommended Use Cases
+- Gallery items should have static position
+- Detail pages need sufficient padding
+- Works especially well with masonry layouts
 
-- 📷 Image galleries
-- 🛍️ E-commerce product lists
-- 📌 Pinterest-style layouts
-- 🎨 Portfolio galleries
-- 📰 Card-based content lists
+## Accessibility
 
-## Hero vs Pinterest
+- ESC key support to close detail page
+- Focus trap for improved keyboard navigation
+- Instant transition when motion is reduced
 
-| Feature | Hero Transition | Pinterest Transition |
-|---------|----------------|---------------------|
-| Purpose | Individual element movement | Full screen expansion |
-| Animation | Position and size transform | Clip-path expansion |
-| Complexity | Multiple elements possible | Single container |
-| Effect | Element connectivity | Immersive expansion |
+## Best Practices
+
+### ✅ DO
+
+- Use for image-centric content
+- Apply to gallery or catalog formats
+- Provide clear close button
+- Ensure responsive design for mobile
+
+### ❌ DON'T
+
+- Unsuitable for text-heavy content
+- Avoid too many elements expanding simultaneously
+- Avoid use when detail page loading is slow
+- May cause unexpected behavior in complex layouts

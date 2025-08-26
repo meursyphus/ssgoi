@@ -1,0 +1,241 @@
+---
+title: "淡入淡出过渡"
+description: "用于内容之间上下文切换的平滑过渡效果"
+nav-title: "淡入淡出"
+---
+
+# 淡入淡出过渡
+
+淡入淡出过渡是在不相关或距离较远的内容之间移动时使用的基本过渡模式。屏幕完全消失后出现新屏幕，明确传达用户离开一个区域并完全进入新区域。
+
+## 演示
+
+<ViewTransitionDemo type="fade" />
+
+## UX 原则
+
+### 何时使用？
+
+淡入淡出过渡用于**上下文切换（Context Change）**。
+
+#### 内容关系适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "yes",
+      description: "完全独立的部分之间移动（主页 → 设置）",
+    },
+    {
+      label: "兄弟关系",
+      suitable: "no",
+      description: "同级内容建议使用滚动",
+    },
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "父子结构建议使用 Hero 等扩展过渡",
+    },
+  ]}
+/>
+
+#### 主要用例
+
+- **顶级导航**：底部标签或侧边栏菜单之间的部分切换
+- **上下文切换**：没有连接点的屏幕之间的过渡
+- **开始新任务**：进入完全不同的任务流程
+
+### 为什么这样工作？
+
+1. **清晰分隔**：前一屏幕完全消失后出现新屏幕，创建明确边界
+2. **减少认知负担**：通过平滑淡入淡出减少突然屏幕切换的视觉冲击
+3. **通用性**：无方向性，自然适用于任何导航模式
+
+### 动效设计
+
+```
+离开屏幕：100% → 0% 不透明度（快速淡出）
+短暂空白：完全的上下文分离
+进入屏幕：0% → 100% 不透明度（平滑淡入）
+```
+
+此序列为用户提供"离开之前空间并进入新空间"的心理模型。
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { fade } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { fade } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: fade()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 实践示例
+
+### 1. 标签导航
+
+底部标签栏或顶部标签中主要部分之间的移动：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/profile',
+          transition: fade(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/profile',
+            transition: fade(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: fade(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 快速过渡（即时响应）
+
+需要快速响应用户操作时：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 400,  // 快速过渡
+          damping: 35      // 平滑结束
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 400,  // 快速过渡
+            damping: 35      // 平滑结束
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 优雅过渡（高级体验）
+
+品牌体验重要的页面：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 150,  // 缓慢过渡
+          damping: 25      // 平滑减速
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 150,  // 缓慢过渡
+            damping: 25      // 平滑减速
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 无障碍性
+
+- `prefers-reduced-motion` 设置时自动禁用动画
+- 屏幕阅读器在过渡期间正确识别内容更改
+- 与键盘导航完全兼容
+
+## 最佳实践
+
+### ✅ 应该
+
+- 默认用于顶级导航
+- 内容完全更改时使用
+- 提供类似移动应用的体验时使用
+
+### ❌ 不应该
+
+- 不要在相关内容之间移动时使用（使用滑动或滚动）
+- 避免过慢的淡入淡出（用户会感到沮丧）
+- 不要用于部分 UI 更改

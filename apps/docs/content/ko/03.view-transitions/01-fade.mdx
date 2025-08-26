@@ -1,16 +1,70 @@
 ---
 title: "페이드 전환"
-description: "부드러운 페이드 인/아웃 효과로 페이지를 전환합니다"
+description: "콘텐츠 간 컨텍스트 변경을 위한 부드러운 전환 효과"
 nav-title: "페이드"
 ---
 
 # 페이드 전환
 
-페이드(Fade) 전환은 가장 기본적이면서도 세련된 페이지 전환 효과입니다. 현재 페이지가 서서히 사라지면서 새로운 페이지가 나타나는 부드러운 전환을 제공합니다.
+페이드 전환은 서로 관련이 없거나 거리가 먼 콘텐츠 간 이동 시 사용되는 기본적인 전환 패턴입니다. 화면이 완전히 사라진 후 새 화면이 나타나며, 사용자가 한 영역을 떠나 완전히 새로운 영역으로 진입한다는 것을 명확하게 전달합니다.
+
+## 데모
+
+<ViewTransitionDemo type="fade" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+페이드 전환은 **컨텍스트 변경(Context Change)** 시 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "yes",
+      description: "완전히 독립적인 섹션 간 이동 (홈 → 설정)",
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "동일 레벨의 콘텐츠는 스크롤 사용 권장",
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "부모-자식 구조는 히어로와 같은 확장 전환 사용 권장",
+    },
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **최상위 네비게이션**: 하단 탭이나 사이드바 메뉴에서 섹션 간 이동
+- **컨텍스트 전환**: 서로 연결점이 없는 화면 간 전환
+- **새로운 작업 시작**: 완전히 다른 작업 흐름으로 진입
+
+### 왜 이렇게 동작하나요?
+
+1. **깔끔한 구분**: 이전 화면이 완전히 사라진 후 새 화면이 나타나 명확한 경계를 만듭니다
+2. **인지 부담 감소**: 갑작스러운 화면 전환보다 부드러운 페이드로 시각적 충격을 줄입니다
+3. **범용성**: 방향성이 없어 어떤 네비게이션 패턴에도 자연스럽게 적용됩니다
+
+### 모션 디자인
+
+```
+나가는 화면: 100% → 0% opacity (빠른 페이드 아웃)
+짧은 공백: 완전한 컨텍스트 분리
+들어오는 화면: 0% → 100% opacity (부드러운 페이드 인)
+```
+
+이 시퀀스는 사용자에게 "이전 공간을 떠나 새로운 공간으로 진입한다"는 멘탈 모델을 제공합니다.
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -28,6 +82,7 @@ nav-title: "페이드"
       );
     }
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -44,160 +99,35 @@ nav-title: "페이드"
       <slot />
     </Ssgoi>
     ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- 앱 내용 -->
-      </Ssgoi>
-    </template>
 
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { fade } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      defaultTransition: fade()
-    };
-    </script>
-    ```
   </TabPanel>
 </Tabs>
 
-## 옵션
+## 실전 활용 예시
 
-페이드 전환은 스프링 애니메이션 설정을 커스터마이즈할 수 있습니다:
+### 1. 탭 네비게이션
 
-```typescript
-fade({
-  spring: {
-    stiffness: 300,  // 스프링 강도 (기본값: 300)
-    damping: 30      // 감쇠 계수 (기본값: 30)
-  }
-})
-```
+하단 탭바나 상단 탭에서 주요 섹션 간 이동:
 
-### 스프링 옵션 설명
-
-- **stiffness**: 애니메이션의 속도를 제어합니다. 값이 클수록 빠른 전환
-- **damping**: 애니메이션의 바운스를 제어합니다. 값이 클수록 부드러운 전환
-
-## 사용 예시
-
-### 느린 페이드
-
-부드럽고 느린 페이드 효과:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 100,
-            damping: 20
-          }
-        })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 빠른 페이드
-
-빠르고 즉각적인 페이드 효과:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 500,
-            damping: 40
-          }
-        })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## 특정 경로에만 적용
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
       transitions: [
         {
           from: '/home',
-          to: '/about', 
+          to: '/profile',
           transition: fade(),
-          symmetric: true  // /about → /home도 자동으로 fade 적용
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
         }
       ]
     };
-
-    <Ssgoi config={config}>
-      {/* 앱 내용 */}
-    </Ssgoi>
     ```
   </TabPanel>
   <TabPanel value="svelte">
@@ -207,61 +137,105 @@ fade({
         transitions: [
           {
             from: '/home',
-            to: '/about', 
+            to: '/profile',
             transition: fade(),
-            symmetric: true  // /about → /home도 자동으로 fade 적용
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: fade(),
+            symmetric: true
           }
         ]
       };
-    </script>
-
-    <Ssgoi {config}>
-      <slot />
-    </Ssgoi>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- 앱 내용 -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    const config = {
-      transitions: [
-        {
-          from: '/home',
-          to: '/about', 
-          transition: fade(),
-          symmetric: true  // /about → /home도 자동으로 fade 적용
-        }
-      ]
-    };
     </script>
     ```
   </TabPanel>
 </Tabs>
 
-## 작동 원리
+### 2. 빠른 전환 (즉각적인 응답)
 
-페이드 전환은 다음과 같이 작동합니다:
+사용자 액션에 빠르게 반응해야 할 때:
 
-1. **나가는 페이지**: opacity가 1에서 0으로 감소
-2. **들어오는 페이지**: opacity가 0에서 1로 증가
-3. 두 애니메이션이 동시에 진행되어 자연스러운 크로스페이드 효과 생성
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 400,  // 빠른 전환
+          damping: 35      // 부드러운 마무리
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 400,  // 빠른 전환
+            damping: 35      // 부드러운 마무리
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-## 장점
+### 3. 우아한 전환 (프리미엄 느낌)
 
-- 모든 콘텐츠 유형에 적합한 범용적인 전환
-- CPU/GPU 부담이 적은 가벼운 애니메이션
-- 시각적으로 부드럽고 프로페셔널한 느낌
-- 방향성이 없어 모든 네비게이션에 자연스럽게 적용
+브랜드 경험이 중요한 페이지:
 
-## 권장 사용 사례
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 150,  // 느린 전환
+          damping: 25      // 부드러운 감속
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 150,  // 느린 전환
+            damping: 25      // 부드러운 감속
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-- 기본 페이지 전환
-- 콘텐츠가 서로 관련이 없는 페이지 간 이동
-- 차분하고 우아한 사용자 경험이 필요한 경우
-- 모바일 환경에서 성능이 중요한 경우
+## 접근성
+
+- `prefers-reduced-motion` 설정 시 자동으로 애니메이션 비활성화
+- 스크린 리더는 전환 중에도 콘텐츠 변경을 올바르게 인식
+- 키보드 네비게이션과 완벽하게 호환
+
+## 모범 사례
+
+### ✅ DO
+
+- 최상위 네비게이션에 기본으로 사용
+- 콘텐츠가 완전히 바뀔 때 사용
+- 모바일 앱과 유사한 경험 제공 시
+
+### ❌ DON'T
+
+- 관련 콘텐츠 간 이동에는 사용하지 마세요 (슬라이드나 스크롤 사용)
+- 너무 느린 페이드는 피하세요 (사용자가 답답함을 느낌)
+- 부분적인 UI 변경에는 사용하지 마세요

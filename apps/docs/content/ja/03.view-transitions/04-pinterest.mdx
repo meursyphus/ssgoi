@@ -1,77 +1,77 @@
 ---
-title: "핀터레스트 전환"
-description: "카드가 화면을 가득 채우며 확장되는 몰입형 전환"
-nav-title: "핀터레스트"
+title: "Pinterestトランジション"
+description: "カードが画面全体を満たしながら拡張する没入型トランジション"
+nav-title: "Pinterest"
 ---
 
-# 핀터레스트 전환
+# Pinterestトランジション
 
-핀터레스트 전환은 갤러리의 작은 아이템이 전체 화면으로 확장되는 **확장형 전환(Expansion Transition)**입니다. 사용자가 선택한 콘텐츠가 화면을 가득 채우며 확대되어, 강력한 몰입감과 시각적 연속성을 제공합니다.
+Pinterestトランジションは、ギャラリーの小さなアイテムが全画面に拡張する**拡張型トランジション（Expansion Transition）**です。ユーザーが選択したコンテンツが画面を満たしながら拡大され、強力な没入感と視覚的連続性を提供します。
 
-## 데모
+## デモ
 
 <ViewTransitionDemo type="pinterest" />
 
-## UX 원칙
+## UXの原則
 
-### 언제 사용하나요?
+### いつ使用するか？
 
-핀터레스트 전환은 **시각적 콘텐츠의 확대 탐색** 시 사용됩니다.
+Pinterestトランジションは**視覚的コンテンツの拡大探索**時に使用されます。
 
-#### 콘텐츠 관계별 적합성
+#### コンテンツの関係別適合性
 
 <SuitabilityTable
   items={[
     {
-      label: "관련 없는 콘텐츠",
+      label: "関連のないコンテンツ",
       suitable: "no",
-      description: "확장할 연결점이 없어 부적합"
+      description: "拡張する接続点がなく不適切"
     },
     {
-      label: "형제 관계",
+      label: "兄弟関係",
       suitable: "maybe",
-      description: "갤러리 내 아이템 간 이동 시 고려 가능"
+      description: "ギャラリー内のアイテム間移動時に検討可能"
     },
     {
-      label: "계층 관계",
+      label: "階層関係",
       suitable: "yes",
-      description: "썸네일→풀뷰처럼 같은 콘텐츠의 확대 뷰에 최적"
+      description: "サムネイル→フルビューのような同じコンテンツの拡大ビューに最適"
     }
   ]}
 />
 
-#### 주요 사용 케이스
+#### 主な使用ケース
 
-- **이미지 갤러리**: 썸네일에서 고해상도 이미지로 확대
-- **제품 카탈로그**: 제품 그리드에서 상세 정보로 확장
-- **미디어 브라우징**: 비디오 썸네일에서 플레이어로 전환
-- **포트폴리오**: 작품 목록에서 전체 화면 프레젠테이션으로
+- **画像ギャラリー**: サムネイルから高解像度画像へ拡大
+- **製品カタログ**: 製品グリッドから詳細情報へ拡張
+- **メディアブラウジング**: ビデオサムネイルからプレーヤーへ遷移
+- **ポートフォリオ**: 作品リストから全画面プレゼンテーションへ
 
-### 왜 이렇게 동작하나요?
+### なぜこのように動作するのか？
 
-1. **공간 확장 메타포**: 작은 창문을 통해 큰 세계로 들어가는 느낌
-2. **자연스러운 초점 이동**: 사용자의 시선이 자연스럽게 확장되는 요소를 따라감
-3. **컨텍스트 보존**: 어디서 왔는지 명확하여 방향감각 유지
-4. **드라마틱한 효과**: 확장 애니메이션이 콘텐츠의 중요성 강조
+1. **空間拡張メタファー**: 小さな窓を通して大きな世界に入る感覚
+2. **自然なフォーカス移動**: ユーザーの視線が自然に拡張する要素を追う
+3. **コンテキスト保存**: どこから来たかが明確で方向感覚を維持
+4. **ドラマチックな効果**: 拡張アニメーションがコンテンツの重要性を強調
 
-### 모션 디자인
+### モーションデザイン
 
 ```
-확장 과정:
-1. 선택된 카드의 위치와 크기 캡처
-2. 카드가 화면 중앙으로 이동하며 확대
-3. 동시에 배경 페이드와 스케일 변화
-4. 최종적으로 전체 화면 채움
+拡張プロセス:
+1. 選択されたカードの位置とサイズをキャプチャ
+2. カードが画面中央へ移動しながら拡大
+3. 同時に背景のフェードとスケール変化
+4. 最終的に全画面を満たす
 
-축소 과정:
-1. 상세 화면이 축소되며 원래 위치로
-2. 배경이 다시 나타나며 갤러리 복원
-3. 자연스러운 스프링 애니메이션으로 정착
+縮小プロセス:
+1. 詳細画面が縮小しながら元の位置へ
+2. 背景が再び現れてギャラリーが復元
+3. 自然なスプリングアニメーションで定着
 ```
 
-## 기본 사용법
+## 基本的な使い方
 
-### 1. 전환 설정
+### 1. トランジション設定
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -93,7 +93,7 @@ nav-title: "핀터레스트"
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* 앱 내용 */}
+          {/* アプリの内容 */}
         </Ssgoi>
       );
     }
@@ -124,14 +124,14 @@ nav-title: "핀터레스트"
   </TabPanel>
 </Tabs>
 
-### 2. 요소 마킹
+### 2. 要素のマーキング
 
-갤러리와 상세 페이지에 각각 다른 data 속성 사용:
+ギャラリーと詳細ページにそれぞれ異なるdata属性を使用:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 갤러리 페이지
+    // ギャラリーページ
     function Gallery() {
       return (
         <div className="masonry-grid">
@@ -150,7 +150,7 @@ nav-title: "핀터레스트"
       );
     }
 
-    // 상세 페이지
+    // 詳細ページ
     function ItemDetail({ item }) {
       return (
         <div 
@@ -158,7 +158,7 @@ nav-title: "핀터레스트"
           className="detail-container"
         >
           <button onClick={() => navigate('/gallery')}>
-            ✕ Close
+            ✕ 閉じる
           </button>
           <img src={item.image} alt={item.title} />
           <article>
@@ -172,7 +172,7 @@ nav-title: "핀터레스트"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 갤러리 페이지 -->
+    <!-- ギャラリーページ -->
     <div class="masonry-grid">
       {#each items as item}
         <a 
@@ -186,13 +186,13 @@ nav-title: "핀터레스트"
       {/each}
     </div>
 
-    <!-- 상세 페이지 -->
+    <!-- 詳細ページ -->
     <div 
       data-pinterest-detail-key={item.id}
       class="detail-container"
     >
       <button on:click={() => goto('/gallery')}>
-        ✕ Close
+        ✕ 閉じる
       </button>
       <img src={item.image} alt={item.title} />
       <article>
@@ -204,16 +204,16 @@ nav-title: "핀터레스트"
   </TabPanel>
 </Tabs>
 
-## 실전 활용 예시
+## 実践的な活用例
 
-### 1. 메이슨리 갤러리
+### 1. メイソンリーギャラリー
 
-Pinterest 스타일 메이슨리 레이아웃:
+Pinterestスタイルのメイソンリーレイアウト:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 메이슨리 그리드
+    // メイソンリーグリッド
     function MasonryGallery() {
       return (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
@@ -240,7 +240,7 @@ Pinterest 스타일 메이슨리 레이아웃:
       );
     }
 
-    // 확장된 뷰
+    // 拡張ビュー
     function ImageView({ image }) {
       return (
         <div 
@@ -265,7 +265,7 @@ Pinterest 스타일 메이슨리 레이아웃:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 메이슨리 그리드 -->
+    <!-- メイソンリーグリッド -->
     <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
       {#each images as img}
         <div
@@ -287,7 +287,7 @@ Pinterest 스타일 메이슨리 레이아웃:
       {/each}
     </div>
 
-    <!-- 확장된 뷰 -->
+    <!-- 拡張ビュー -->
     <div 
       data-pinterest-detail-key={image.id}
       class="fixed inset-0 bg-white z-50 overflow-auto"
@@ -308,14 +308,14 @@ Pinterest 스타일 메이슨리 레이아웃:
   </TabPanel>
 </Tabs>
 
-### 2. 제품 카탈로그
+### 2. 製品カタログ
 
-제품 카드가 상세 페이지로 확장:
+製品カードが詳細ページへ拡張:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 제품 그리드
+    // 製品グリッド
     function ProductGrid() {
       return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -334,7 +334,7 @@ Pinterest 스타일 메이슨리 레이아웃:
               />
               <div className="p-4">
                 <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-lg font-bold mt-2">${product.price}</p>
+                <p className="text-lg font-bold mt-2">¥{product.price}</p>
               </div>
             </article>
           ))}
@@ -342,7 +342,7 @@ Pinterest 스타일 메이슨리 레이아웃:
       );
     }
 
-    // 제품 상세
+    // 製品詳細
     function ProductDetail({ product }) {
       return (
         <div 
@@ -357,10 +357,10 @@ Pinterest 스타일 메이슨리 레이아웃:
             />
             <div>
               <h1 className="text-3xl font-bold">{product.name}</h1>
-              <p className="text-2xl font-bold mt-4">${product.price}</p>
+              <p className="text-2xl font-bold mt-4">¥{product.price}</p>
               <p className="mt-4 text-gray-600">{product.description}</p>
               <button className="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-                Add to Cart
+                カートに追加
               </button>
             </div>
           </div>
@@ -371,7 +371,7 @@ Pinterest 스타일 메이슨리 레이아웃:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 제품 그리드 -->
+    <!-- 製品グリッド -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
       {#each products as product}
         <article
@@ -387,13 +387,13 @@ Pinterest 스타일 메이슨리 레이아웃:
           />
           <div class="p-4">
             <h3 class="font-semibold">{product.name}</h3>
-            <p class="text-lg font-bold mt-2">${product.price}</p>
+            <p class="text-lg font-bold mt-2">¥{product.price}</p>
           </div>
         </article>
       {/each}
     </div>
 
-    <!-- 제품 상세 -->
+    <!-- 製品詳細 -->
     <div 
       data-pinterest-detail-key={product.id}
       class="min-h-screen bg-white"
@@ -406,10 +406,10 @@ Pinterest 스타일 메이슨리 레이아웃:
         />
         <div>
           <h1 class="text-3xl font-bold">{product.name}</h1>
-          <p class="text-2xl font-bold mt-4">${product.price}</p>
+          <p class="text-2xl font-bold mt-4">¥{product.price}</p>
           <p class="mt-4 text-gray-600">{product.description}</p>
           <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-            Add to Cart
+            カートに追加
           </button>
         </div>
       </div>
@@ -418,53 +418,53 @@ Pinterest 스타일 메이슨리 레이아웃:
   </TabPanel>
 </Tabs>
 
-## 커스터마이징
+## カスタマイズ
 
-### 스프링 설정
+### スプリング設定
 
-애니메이션의 탄성과 속도 조절:
+アニメーションの弾性と速度の調整:
 
 ```typescript
 pinterest({
   spring: {
-    stiffness: 200,  // 낮을수록 부드러움
-    damping: 25      // 높을수록 빠른 정착
+    stiffness: 200,  // 低いほど滑らか
+    damping: 25      // 高いほど速い定着
   }
 })
 ```
 
-## 주의사항
+## 注意事項
 
-### 키 속성 구분
+### キー属性の区別
 
-- **갤러리**: `data-pinterest-gallery-key`
-- **상세**: `data-pinterest-detail-key`
-- 반드시 다른 속성명 사용 (히어로와 차별화)
+- **ギャラリー**: `data-pinterest-gallery-key`
+- **詳細**: `data-pinterest-detail-key`
+- 必ず異なる属性名を使用（ヒーローと差別化）
 
-### 레이아웃 고려사항
+### レイアウトの考慮事項
 
-- 갤러리 아이템은 position이 static이어야 함
-- 상세 페이지는 충분한 여백 필요
-- 메이슨리 레이아웃과 특히 잘 어울림
+- ギャラリーアイテムはpositionがstaticである必要があります
+- 詳細ページには十分な余白が必要
+- メイソンリーレイアウトと特に相性が良い
 
-## 접근성
+## アクセシビリティ
 
-- ESC 키로 상세 페이지 닫기 지원
-- 포커스 트랩으로 키보드 네비게이션 개선
-- 모션 감소 설정 시 즉시 전환
+- ESCキーで詳細ページを閉じるサポート
+- フォーカストラップによるキーボードナビゲーションの改善
+- モーション削減設定時は即座に遷移
 
-## 모범 사례
+## ベストプラクティス
 
 ### ✅ DO
 
-- 이미지 중심 콘텐츠에 사용
-- 갤러리나 카탈로그 형태에 적용
-- 닫기 버튼을 명확하게 제공
-- 모바일에서도 잘 작동하도록 반응형 디자인
+- 画像中心のコンテンツに使用
+- ギャラリーやカタログ形式に適用
+- 閉じるボタンを明確に提供
+- モバイルでも動作するようレスポンシブデザイン
 
 ### ❌ DON'T
 
-- 텍스트 중심 콘텐츠에는 부적합
-- 너무 많은 요소가 동시에 확장되지 않도록
-- 상세 페이지 로딩이 느린 경우 사용 자제
-- 복잡한 레이아웃에서는 예상치 못한 동작 가능
+- テキスト中心のコンテンツには不適切
+- 多くの要素が同時に拡張されないように
+- 詳細ページのロードが遅い場合は使用を控える
+- 複雑なレイアウトでは予期しない動作の可能性

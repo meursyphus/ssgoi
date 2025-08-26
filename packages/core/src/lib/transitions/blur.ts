@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface BlurOptions {
   amount?: number | string;
   opacity?: number;
@@ -7,6 +9,7 @@ interface BlurOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const blur = (options: BlurOptions = {}) => {
@@ -15,7 +18,8 @@ export const blur = (options: BlurOptions = {}) => {
     opacity = 0,
     scale = false,
     fade = true,
-    spring = { stiffness: 300, damping: 30 }
+    spring = { stiffness: 300, damping: 30 },
+    key
   } = options;
 
   const getBlurAmount = (value: number | string): string => {
@@ -64,6 +68,7 @@ export const blur = (options: BlurOptions = {}) => {
           element.style.opacity = (opacity + (1 - opacity) * progress).toString();
         }
       }
-    })
+    }),
+    ...(key && { key })
   };
 };

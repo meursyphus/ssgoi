@@ -1,75 +1,75 @@
 ---
-title: "히어로 전환"
-description: "공유 요소의 연속성으로 컨텍스트를 유지하는 전환"
-nav-title: "히어로"
+title: "ヒーロートランジション"
+description: "共有要素の連続性でコンテキストを維持するトランジション"
+nav-title: "ヒーロー"
 ---
 
-# 히어로 전환
+# ヒーロートランジション
 
-히어로 전환은 두 화면 간 공유되는 요소가 자연스럽게 이동하고 변형되는 **연속성 전환(Continuity Transition)**입니다. 요소가 한 화면에서 다른 화면으로 "여행"하며, 사용자에게 강력한 시각적 연결성과 컨텍스트를 제공합니다.
+ヒーロートランジションは、2つの画面間で共有される要素が自然に移動し変形する**連続性トランジション（Continuity Transition）**です。要素が1つの画面から別の画面へ「旅」し、ユーザーに強力な視覚的つながりとコンテキストを提供します。
 
-## 데모
+## デモ
 
 <ViewTransitionDemo type="hero" />
 
-## UX 원칙
+## UXの原則
 
-### 언제 사용하나요?
+### いつ使用するか？
 
-히어로 전환은 **연속성과 컨텍스트 유지**가 중요할 때 사용됩니다.
+ヒーロートランジションは**連続性とコンテキストの維持**が重要な場合に使用されます。
 
-#### 콘텐츠 관계별 적합성
+#### コンテンツの関係別適合性
 
 <SuitabilityTable
   items={[
     {
-      label: "관련 없는 콘텐츠",
+      label: "関連のないコンテンツ",
       suitable: "no",
-      description: "공유 요소가 없는 경우 부적합"
+      description: "共有要素がない場合は不適切"
     },
     {
-      label: "형제 관계",
+      label: "兄弟関係",
       suitable: "maybe",
-      description: "갤러리 등 특정 상황에서 효과적"
+      description: "ギャラリーなど特定の状況で効果的"
     },
     {
-      label: "계층 관계",
+      label: "階層関係",
       suitable: "yes",
-      description: "목록→상세처럼 같은 객체의 다른 뷰에 최적"
+      description: "リスト→詳細のように同じオブジェクトの異なるビューに最適"
     }
   ]}
 />
 
-#### 주요 사용 케이스
+#### 主な使用ケース
 
-- **갤러리 → 풀스크린**: 이미지가 확대되며 상세 보기로 전환
-- **제품 목록 → 상세**: 제품 카드가 상세 페이지로 확장
-- **프로필 → 편집**: 프로필 사진이 유지되며 편집 모드로 전환
-- **미디어 플레이어**: 미니 플레이어에서 전체 플레이어로 확장
+- **ギャラリー → フルスクリーン**: 画像が拡大して詳細ビューへ遷移
+- **製品リスト → 詳細**: 製品カードが詳細ページに拡張
+- **プロフィール → 編集**: プロフィール写真を維持したまま編集モードへ遷移
+- **メディアプレーヤー**: ミニプレーヤーからフルプレーヤーへ拡張
 
-### 왜 이렇게 동작하나요?
+### なぜこのように動作するのか？
 
-1. **시각적 연속성**: 요소의 이동을 추적하여 방향감각 유지
-2. **공간적 관계 표현**: 작은 것에서 큰 것으로, 요약에서 상세로
-3. **인지 부담 최소화**: 갑작스러운 변화 대신 자연스러운 변형
-4. **흥미와 즐거움**: 역동적인 모션으로 사용자 참여도 증가
+1. **視覚的連続性**: 要素の移動を追跡して方向感覚を維持
+2. **空間的関係の表現**: 小さいものから大きいものへ、要約から詳細へ
+3. **認知負荷の最小化**: 突然の変化ではなく自然な変形
+4. **興味と楽しさ**: ダイナミックなモーションでユーザーエンゲージメントを向上
 
-### 모션 디자인
+### モーションデザイン
 
 ```
-히어로 요소의 여정:
-1. 출발점 → 위치, 크기, 모양 기록
-2. 변형 중 → 부드러운 보간 애니메이션
-3. 도착점 → 새로운 위치와 크기로 정착
+ヒーロー要素の旅:
+1. 出発点 → 位置、サイズ、形状を記録
+2. 変形中 → スムーズな補間アニメーション
+3. 到着点 → 新しい位置とサイズに定着
 
-다른 요소들:
-- 나가는 페이지: 페이드 아웃
-- 들어오는 페이지: 히어로 요소 정착 후 페이드 인
+他の要素:
+- 出ていくページ: フェードアウト
+- 入ってくるページ: ヒーロー要素が定着した後フェードイン
 ```
 
-## 기본 사용법
+## 基本的な使い方
 
-### 1. 전환 설정
+### 1. トランジションの設定
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -91,7 +91,7 @@ nav-title: "히어로"
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* 앱 내용 */}
+          {/* アプリの内容 */}
         </Ssgoi>
       );
     }
@@ -122,14 +122,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 2. 요소 마킹
+### 2. 要素のマーキング
 
-공유될 요소에 `data-hero-key` 속성 추가:
+共有される要素に`data-hero-key`属性を追加:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 목록 페이지
+    // リストページ
     function ProductList() {
       return (
         <div className="grid">
@@ -147,7 +147,7 @@ nav-title: "히어로"
       );
     }
 
-    // 상세 페이지
+    // 詳細ページ
     function ProductDetail({ product }) {
       return (
         <div>
@@ -166,7 +166,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 목록 페이지 -->
+    <!-- リストページ -->
     <div class="grid">
       {#each products as product}
         <a href="/product/{product.id}">
@@ -180,7 +180,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 상세 페이지 -->
+    <!-- 詳細ページ -->
     <div>
       <img 
         data-hero-key="product-{product.id}"
@@ -195,16 +195,16 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-## 실전 활용 예시
+## 実践的な活用例
 
-### 1. 이미지 갤러리
+### 1. 画像ギャラリー
 
-썸네일에서 풀스크린으로 확장:
+サムネイルからフルスクリーンへの拡張:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 갤러리 그리드
+    // ギャラリーグリッド
     function Gallery() {
       return (
         <div className="grid grid-cols-3 gap-4">
@@ -222,7 +222,7 @@ nav-title: "히어로"
       );
     }
 
-    // 풀스크린 뷰
+    // フルスクリーンビュー
     function PhotoView({ id }) {
       return (
         <div 
@@ -237,7 +237,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 갤러리 그리드 -->
+    <!-- ギャラリーグリッド -->
     <div class="grid grid-cols-3 gap-4">
       {#each images as img}
         <a href="/photo/{img.id}">
@@ -251,7 +251,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 풀스크린 뷰 -->
+    <!-- フルスクリーンビュー -->
     <div 
       data-hero-key="photo-{id}"
       class="fixed inset-0 bg-black"
@@ -262,14 +262,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 2. 카드 확장
+### 2. カード拡張
 
-작은 카드에서 전체 화면 상세로:
+小さなカードからフルスクリーン詳細へ:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 카드 목록
+    // カードリスト
     function CardGrid() {
       return (
         <div className="grid gap-6">
@@ -288,7 +288,7 @@ nav-title: "히어로"
       );
     }
 
-    // 확장된 상세
+    // 拡張された詳細
     function ItemDetail({ item }) {
       return (
         <article 
@@ -304,7 +304,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 카드 목록 -->
+    <!-- カードリスト -->
     <div class="grid gap-6">
       {#each items as item}
         <article 
@@ -318,7 +318,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 확장된 상세 -->
+    <!-- 拡張された詳細 -->
     <article 
       data-hero-key="card-{item.id}"
       class="min-h-screen bg-white p-8"
@@ -330,14 +330,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 3. 다중 히어로 요소
+### 3. 複数のヒーロー要素
 
-여러 요소가 동시에 전환:
+複数の要素が同時に遷移:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 프로필 카드
+    // プロフィールカード
     function ProfileCard({ user }) {
       return (
         <div onClick={() => navigate(`/profile/${user.id}`)}>
@@ -353,7 +353,7 @@ nav-title: "히어로"
       );
     }
 
-    // 프로필 상세
+    // プロフィール詳細
     function ProfileDetail({ user }) {
       return (
         <div>
@@ -372,7 +372,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 프로필 카드 -->
+    <!-- プロフィールカード -->
     <div on:click={() => goto(`/profile/${user.id}`)}>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -384,7 +384,7 @@ nav-title: "히어로"
       </h3>
     </div>
 
-    <!-- 프로필 상세 -->
+    <!-- プロフィール詳細 -->
     <div>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -399,38 +399,38 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-## 주의사항
+## 注意事項
 
-### 히어로 키 규칙
+### ヒーローキーのルール
 
-- 각 페이지에서 `data-hero-key`는 **고유해야** 함
-- 키는 문자열이며, 동적으로 생성 가능
-- 같은 키를 가진 요소끼리만 연결됨
+- 各ページで`data-hero-key`は**一意である必要があります**
+- キーは文字列で、動的に生成可能
+- 同じキーを持つ要素同士のみが接続されます
 
-### 성능 고려사항
+### パフォーマンスの考慮事項
 
-- 히어로 요소는 DOM에서 복제되어 애니메이션됨
-- 너무 많은 히어로 요소는 성능에 영향
-- 이미지는 미리 로드하여 깜빡임 방지
+- ヒーロー要素はDOMでクローンされてアニメーションされます
+- ヒーロー要素が多すぎるとパフォーマンスに影響します
+- 画像は事前にロードしてちらつきを防ぎます
 
-## 접근성
+## アクセシビリティ
 
-- 모션 감소 설정 시 즉시 전환
-- 포커스 관리로 키보드 네비게이션 지원
-- 스크린 리더는 일반 페이지 전환으로 인식
+- モーション削減設定時は即座に遷移
+- フォーカス管理によるキーボードナビゲーションのサポート
+- スクリーンリーダーは通常のページ遷移として認識
 
-## 모범 사례
+## ベストプラクティス
 
 ### ✅ DO
 
-- 시각적으로 중요한 요소에 사용
-- 동일한 객체의 다른 표현에 적용
-- 자연스러운 크기/위치 변화 유지
-- 사용자의 시선을 이끌 때 활용
+- 視覚的に重要な要素に使用
+- 同じオブジェクトの異なる表現に適用
+- 自然なサイズ/位置変化を維持
+- ユーザーの視線を導く際に活用
 
 ### ❌ DON'T
 
-- 너무 많은 요소에 동시 적용하지 마세요
-- 관련 없는 요소끼리 연결하지 마세요
-- 극단적인 크기 변화는 피하세요 (10배 이상)
-- 텍스트 콘텐츠에는 신중하게 사용
+- あまりに多くの要素に同時適用しない
+- 関連のない要素同士を接続しない
+- 極端なサイズ変化は避ける（10倍以上）
+- テキストコンテンツには慎重に使用

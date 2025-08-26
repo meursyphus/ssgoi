@@ -212,6 +212,16 @@ const config = {
 - Svelte components: `.svelte`
 - Keep consistent naming across packages
 
+## UI Theme Guidelines
+
+- **Always design UI components for dark theme**: Use dark backgrounds (gray-800, gray-900) and light text (gray-100, gray-200)
+- Follow dark mode color patterns:
+  - Backgrounds: gray-800/900, slate-800/900
+  - Text: gray-100/200/300
+  - Borders: gray-700/600
+  - Hover states: gray-700
+  - Accents: blue-500, indigo-500
+
 ## Testing Approach
 
 When implementing new features:

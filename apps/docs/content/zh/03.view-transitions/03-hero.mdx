@@ -1,75 +1,75 @@
 ---
-title: "히어로 전환"
-description: "공유 요소의 연속성으로 컨텍스트를 유지하는 전환"
-nav-title: "히어로"
+title: "Hero 过渡"
+description: "通过共享元素的连续性保持上下文的过渡"
+nav-title: "Hero"
 ---
 
-# 히어로 전환
+# Hero 过渡
 
-히어로 전환은 두 화면 간 공유되는 요소가 자연스럽게 이동하고 변형되는 **연속성 전환(Continuity Transition)**입니다. 요소가 한 화면에서 다른 화면으로 "여행"하며, 사용자에게 강력한 시각적 연결성과 컨텍스트를 제공합니다.
+Hero 过渡是两个屏幕之间共享元素自然移动和变形的**连续性过渡（Continuity Transition）**。元素从一个屏幕"旅行"到另一个屏幕，为用户提供强大的视觉连接和上下文。
 
-## 데모
+## 演示
 
 <ViewTransitionDemo type="hero" />
 
-## UX 원칙
+## UX 原则
 
-### 언제 사용하나요?
+### 何时使用？
 
-히어로 전환은 **연속성과 컨텍스트 유지**가 중요할 때 사용됩니다.
+Hero 过渡用于**连续性和上下文保持**重要的场景。
 
-#### 콘텐츠 관계별 적합성
+#### 内容关系适用性
 
 <SuitabilityTable
   items={[
     {
-      label: "관련 없는 콘텐츠",
+      label: "无关内容",
       suitable: "no",
-      description: "공유 요소가 없는 경우 부적합"
+      description: "没有共享元素时不适用"
     },
     {
-      label: "형제 관계",
+      label: "兄弟关系",
       suitable: "maybe",
-      description: "갤러리 등 특정 상황에서 효과적"
+      description: "在画廊等特定情况下有效"
     },
     {
-      label: "계층 관계",
+      label: "层级关系",
       suitable: "yes",
-      description: "목록→상세처럼 같은 객체의 다른 뷰에 최적"
+      description: "最适合列表→详情等同一对象的不同视图"
     }
   ]}
 />
 
-#### 주요 사용 케이스
+#### 主要用例
 
-- **갤러리 → 풀스크린**: 이미지가 확대되며 상세 보기로 전환
-- **제품 목록 → 상세**: 제품 카드가 상세 페이지로 확장
-- **프로필 → 편집**: 프로필 사진이 유지되며 편집 모드로 전환
-- **미디어 플레이어**: 미니 플레이어에서 전체 플레이어로 확장
+- **画廊 → 全屏**：图片放大并切换到详细视图
+- **产品列表 → 详情**：产品卡片扩展为详情页面
+- **个人资料 → 编辑**：保持个人资料照片并切换到编辑模式
+- **媒体播放器**：从迷你播放器扩展到完整播放器
 
-### 왜 이렇게 동작하나요?
+### 为什么这样工作？
 
-1. **시각적 연속성**: 요소의 이동을 추적하여 방향감각 유지
-2. **공간적 관계 표현**: 작은 것에서 큰 것으로, 요약에서 상세로
-3. **인지 부담 최소화**: 갑작스러운 변화 대신 자연스러운 변형
-4. **흥미와 즐거움**: 역동적인 모션으로 사용자 참여도 증가
+1. **视觉连续性**：跟踪元素移动以保持方向感
+2. **表达空间关系**：从小到大，从摘要到详细
+3. **最小化认知负担**：自然变形代替突然变化
+4. **兴趣和愉悦**：动态动效增加用户参与度
 
-### 모션 디자인
+### 动效设计
 
 ```
-히어로 요소의 여정:
-1. 출발점 → 위치, 크기, 모양 기록
-2. 변형 중 → 부드러운 보간 애니메이션
-3. 도착점 → 새로운 위치와 크기로 정착
+Hero 元素的旅程：
+1. 起点 → 记录位置、大小、形状
+2. 变形中 → 平滑插值动画
+3. 终点 → 定位到新位置和大小
 
-다른 요소들:
-- 나가는 페이지: 페이드 아웃
-- 들어오는 페이지: 히어로 요소 정착 후 페이드 인
+其他元素：
+- 离开页面：淡出
+- 进入页面：Hero 元素定位后淡入
 ```
 
-## 기본 사용법
+## 基本用法
 
-### 1. 전환 설정
+### 1. 过渡设置
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -91,7 +91,7 @@ nav-title: "히어로"
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* 앱 내용 */}
+          {/* 应用内容 */}
         </Ssgoi>
       );
     }
@@ -122,14 +122,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 2. 요소 마킹
+### 2. 元素标记
 
-공유될 요소에 `data-hero-key` 속성 추가:
+为共享元素添加 `data-hero-key` 属性：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 목록 페이지
+    // 列表页面
     function ProductList() {
       return (
         <div className="grid">
@@ -147,7 +147,7 @@ nav-title: "히어로"
       );
     }
 
-    // 상세 페이지
+    // 详情页面
     function ProductDetail({ product }) {
       return (
         <div>
@@ -166,7 +166,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 목록 페이지 -->
+    <!-- 列表页面 -->
     <div class="grid">
       {#each products as product}
         <a href="/product/{product.id}">
@@ -180,7 +180,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 상세 페이지 -->
+    <!-- 详情页面 -->
     <div>
       <img 
         data-hero-key="product-{product.id}"
@@ -195,16 +195,16 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-## 실전 활용 예시
+## 实践示例
 
-### 1. 이미지 갤러리
+### 1. 图片画廊
 
-썸네일에서 풀스크린으로 확장:
+从缩略图扩展到全屏：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 갤러리 그리드
+    // 画廊网格
     function Gallery() {
       return (
         <div className="grid grid-cols-3 gap-4">
@@ -222,7 +222,7 @@ nav-title: "히어로"
       );
     }
 
-    // 풀스크린 뷰
+    // 全屏视图
     function PhotoView({ id }) {
       return (
         <div 
@@ -237,7 +237,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 갤러리 그리드 -->
+    <!-- 画廊网格 -->
     <div class="grid grid-cols-3 gap-4">
       {#each images as img}
         <a href="/photo/{img.id}">
@@ -251,7 +251,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 풀스크린 뷰 -->
+    <!-- 全屏视图 -->
     <div 
       data-hero-key="photo-{id}"
       class="fixed inset-0 bg-black"
@@ -262,14 +262,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 2. 카드 확장
+### 2. 卡片扩展
 
-작은 카드에서 전체 화면 상세로:
+从小卡片到全屏详情：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 카드 목록
+    // 卡片列表
     function CardGrid() {
       return (
         <div className="grid gap-6">
@@ -288,7 +288,7 @@ nav-title: "히어로"
       );
     }
 
-    // 확장된 상세
+    // 扩展详情
     function ItemDetail({ item }) {
       return (
         <article 
@@ -304,7 +304,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 카드 목록 -->
+    <!-- 卡片列表 -->
     <div class="grid gap-6">
       {#each items as item}
         <article 
@@ -318,7 +318,7 @@ nav-title: "히어로"
       {/each}
     </div>
 
-    <!-- 확장된 상세 -->
+    <!-- 扩展详情 -->
     <article 
       data-hero-key="card-{item.id}"
       class="min-h-screen bg-white p-8"
@@ -330,14 +330,14 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-### 3. 다중 히어로 요소
+### 3. 多个 Hero 元素
 
-여러 요소가 동시에 전환:
+多个元素同时过渡：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // 프로필 카드
+    // 个人资料卡片
     function ProfileCard({ user }) {
       return (
         <div onClick={() => navigate(`/profile/${user.id}`)}>
@@ -353,7 +353,7 @@ nav-title: "히어로"
       );
     }
 
-    // 프로필 상세
+    // 个人资料详情
     function ProfileDetail({ user }) {
       return (
         <div>
@@ -372,7 +372,7 @@ nav-title: "히어로"
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- 프로필 카드 -->
+    <!-- 个人资料卡片 -->
     <div on:click={() => goto(`/profile/${user.id}`)}>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -384,7 +384,7 @@ nav-title: "히어로"
       </h3>
     </div>
 
-    <!-- 프로필 상세 -->
+    <!-- 个人资料详情 -->
     <div>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -399,38 +399,38 @@ nav-title: "히어로"
   </TabPanel>
 </Tabs>
 
-## 주의사항
+## 注意事项
 
-### 히어로 키 규칙
+### Hero 键规则
 
-- 각 페이지에서 `data-hero-key`는 **고유해야** 함
-- 키는 문자열이며, 동적으로 생성 가능
-- 같은 키를 가진 요소끼리만 연결됨
+- 每个页面中 `data-hero-key` 必须**唯一**
+- 键是字符串，可以动态生成
+- 只有具有相同键的元素才会连接
 
-### 성능 고려사항
+### 性能考虑
 
-- 히어로 요소는 DOM에서 복제되어 애니메이션됨
-- 너무 많은 히어로 요소는 성능에 영향
-- 이미지는 미리 로드하여 깜빡임 방지
+- Hero 元素在 DOM 中被克隆并动画化
+- 过多的 Hero 元素会影响性能
+- 预加载图片以防止闪烁
 
-## 접근성
+## 无障碍性
 
-- 모션 감소 설정 시 즉시 전환
-- 포커스 관리로 키보드 네비게이션 지원
-- 스크린 리더는 일반 페이지 전환으로 인식
+- 减少动画设置时立即过渡
+- 焦点管理支持键盘导航
+- 屏幕阅读器将其识别为普通页面过渡
 
-## 모범 사례
+## 最佳实践
 
-### ✅ DO
+### ✅ 应该
 
-- 시각적으로 중요한 요소에 사용
-- 동일한 객체의 다른 표현에 적용
-- 자연스러운 크기/위치 변화 유지
-- 사용자의 시선을 이끌 때 활용
+- 用于视觉上重要的元素
+- 应用于同一对象的不同表示
+- 保持自然的大小/位置变化
+- 用于引导用户视线
 
-### ❌ DON'T
+### ❌ 不应该
 
-- 너무 많은 요소에 동시 적용하지 마세요
-- 관련 없는 요소끼리 연결하지 마세요
-- 극단적인 크기 변화는 피하세요 (10배 이상)
-- 텍스트 콘텐츠에는 신중하게 사용
+- 不要同时应用于太多元素
+- 不要连接无关元素
+- 避免极端的大小变化（超过 10 倍）
+- 对文本内容谨慎使用

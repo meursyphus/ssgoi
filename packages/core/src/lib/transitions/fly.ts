@@ -1,3 +1,5 @@
+import type { TransitionKey } from '../types';
+
 interface FlyOptions {
   x?: number | string;
   y?: number | string;
@@ -6,6 +8,7 @@ interface FlyOptions {
     stiffness?: number;
     damping?: number;
   };
+  key?: TransitionKey;
 }
 
 export const fly = (options: FlyOptions = {}) => {
@@ -13,7 +16,8 @@ export const fly = (options: FlyOptions = {}) => {
     x = 0,
     y = -100,
     opacity = 0,
-    spring = { stiffness: 400, damping: 35 }
+    spring = { stiffness: 400, damping: 35 },
+    key
   } = options;
 
   const getX = (value: number | string): string => {
@@ -44,6 +48,7 @@ export const fly = (options: FlyOptions = {}) => {
         element.style.transform = `translate(${typeof x === 'number' ? xOffset + 'px' : xOffset}, ${typeof y === 'number' ? yOffset + 'px' : yOffset})`;
         element.style.opacity = (opacity + (1 - opacity) * progress).toString();
       }
-    })
+    }),
+    ...(key && { key })
   };
 };
