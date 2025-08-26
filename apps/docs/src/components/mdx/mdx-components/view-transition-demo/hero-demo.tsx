@@ -2,7 +2,12 @@
 
 import React, { useEffect } from "react";
 import { hero } from "@ssgoi/react/view-transitions";
-import { BrowserMockup, DemoPage, DemoLink, useBrowserNavigation } from "../browser-mockup";
+import {
+  BrowserMockup,
+  DemoPage,
+  DemoLink,
+  useBrowserNavigation,
+} from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 
 // Mock data for gallery
@@ -137,74 +142,76 @@ function GalleryListPage() {
 }
 
 // Gallery Detail Page Component
-function GalleryDetailPage({ item }: { item: typeof galleryItems[0] }) {
+function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
   const { navigate } = useBrowserNavigation();
 
   // Add keyboard navigation (ESC to go back)
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        navigate('/gallery');
+      if (e.key === "Escape") {
+        navigate("/gallery");
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [navigate]);
 
   return (
     <DemoPage path={`/gallery/${item.id}`}>
       <div className="min-h-screen bg-black relative">
-        {/* Top navigation bar with back button */}
-        <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
-            <DemoLink
-              to="/gallery"
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              <span className="font-medium">Back to Gallery</span>
-            </DemoLink>
-            
-            {/* Close button with ESC hint */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 hidden md:block">Press ESC</span>
-              <DemoLink
-                to="/gallery"
-                className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
-                aria-label="Close"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </DemoLink>
-            </div>
-          </div>
-        </div>
-
         {/* Full screen image with hero transition */}
         <div data-hero-key={item.id} className="relative h-screen">
           <img
             src={item.image}
             alt={item.title}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
+
+          {/* Top navigation bar overlaying the image */}
+          <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
+            <div className="flex items-center justify-between max-w-6xl mx-auto">
+              <DemoLink
+                to="/gallery"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium">Back to Gallery</span>
+              </DemoLink>
+
+              {/* Close button with ESC hint */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 hidden md:block">
+                  Press ESC
+                </span>
+                <DemoLink
+                  to="/gallery"
+                  className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
+                  aria-label="Close"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </DemoLink>
+              </div>
+            </div>
+          </div>
 
           {/* Image info overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent p-8">
