@@ -327,6 +327,11 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## 进度行为
 
+### key
+
+- `key`必须在页面内唯一（这样即使DOM被创建后删除或删除后创建，动画状态也可以被跟踪）
+- 如果`key`未设置，则根据调用位置生成默认的自动键
+
 ### in动画
 
 - progress: 0 → 1
@@ -375,7 +380,3 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
   }
 }
 ```
-
-## 重要说明
-
-- `key`必须在页面内唯一（这样即使DOM被创建后删除或删除后创建，动画状态也可以被跟踪）
