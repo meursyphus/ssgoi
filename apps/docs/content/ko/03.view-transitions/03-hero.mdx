@@ -8,6 +8,12 @@ nav-title: "히어로"
 
 히어로(Hero) 전환은 두 페이지 간 공유되는 요소가 자연스럽게 이동하며 변형되는 효과입니다. 이미지나 카드가 목록에서 상세 페이지로 확대되는 듯한 몰입감 있는 전환을 제공합니다.
 
+## 라이브 데모
+
+아래 데모에서 왼쪽 목차를 클릭하여 스크롤 전환 효과를 직접 체험해보세요:
+
+<ViewTransitionDemo type="hero" />
+
 ## 핵심 개념
 
 히어로 전환을 사용하려면 전환될 요소에 `data-hero-key` 속성을 추가해야 합니다. 같은 key를 가진 요소끼리 연결되어 애니메이션됩니다.
@@ -46,6 +52,7 @@ nav-title: "히어로"
       return <Ssgoi config={config}>{/* 앱 내용 */}</Ssgoi>;
     }
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -69,6 +76,7 @@ nav-title: "히어로"
       <slot />
     </Ssgoi>
     ```
+
   </TabPanel>
 </Tabs>
 
@@ -116,6 +124,7 @@ nav-title: "히어로"
       {/each}
     </div>
     ```
+
   </TabPanel>
 </Tabs>
 
@@ -155,6 +164,7 @@ nav-title: "히어로"
       <p>{product.description}</p>
     </div>
     ```
+
   </TabPanel>
 </Tabs>
 
