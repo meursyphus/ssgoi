@@ -152,7 +152,7 @@ export function BrowserMockup({
       <div
         className={cn(
           "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
-          "h-[800px] md:h-[500px]", // Fixed heights for mobile and desktop
+          "h-[500px] md:h-[800px]", // Fixed heights for mobile and desktop
           className
         )}
       >
