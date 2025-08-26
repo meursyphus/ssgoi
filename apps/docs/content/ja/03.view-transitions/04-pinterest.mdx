@@ -1,77 +1,77 @@
 ---
-title: "Pinterest Transition"
-description: "Immersive transition with cards expanding to fill the screen"
+title: "Pinterestトランジション"
+description: "カードが画面全体を満たしながら拡張する没入型トランジション"
 nav-title: "Pinterest"
 ---
 
-# Pinterest Transition
+# Pinterestトランジション
 
-The Pinterest transition is an **expansion transition** where small gallery items expand to full screen. The selected content enlarges to fill the entire screen, providing powerful immersion and visual continuity.
+Pinterestトランジションは、ギャラリーの小さなアイテムが全画面に拡張する**拡張型トランジション（Expansion Transition）**です。ユーザーが選択したコンテンツが画面を満たしながら拡大され、強力な没入感と視覚的連続性を提供します。
 
-## Demo
+## デモ
 
 <ViewTransitionDemo type="pinterest" />
 
-## UX Principles
+## UXの原則
 
-### When to Use?
+### いつ使用するか？
 
-Pinterest transitions are used for **visual content exploration with expansion**.
+Pinterestトランジションは**視覚的コンテンツの拡大探索**時に使用されます。
 
-#### Content Relationship Suitability
+#### コンテンツの関係別適合性
 
 <SuitabilityTable
   items={[
     {
-      label: "Unrelated Content",
+      label: "関連のないコンテンツ",
       suitable: "no",
-      description: "Unsuitable without expansion connection point"
+      description: "拡張する接続点がなく不適切"
     },
     {
-      label: "Sibling Relationship",
+      label: "兄弟関係",
       suitable: "maybe",
-      description: "Considerable for navigation within gallery items"
+      description: "ギャラリー内のアイテム間移動時に検討可能"
     },
     {
-      label: "Hierarchical Relationship",
+      label: "階層関係",
       suitable: "yes",
-      description: "Optimal for expanded views like thumbnail→fullview"
+      description: "サムネイル→フルビューのような同じコンテンツの拡大ビューに最適"
     }
   ]}
 />
 
-#### Key Use Cases
+#### 主な使用ケース
 
-- **Image Gallery**: Expanding from thumbnails to high-resolution images
-- **Product Catalog**: Expanding from product grid to detail information
-- **Media Browsing**: Transitioning from video thumbnails to player
-- **Portfolio**: From work list to fullscreen presentation
+- **画像ギャラリー**: サムネイルから高解像度画像へ拡大
+- **製品カタログ**: 製品グリッドから詳細情報へ拡張
+- **メディアブラウジング**: ビデオサムネイルからプレーヤーへ遷移
+- **ポートフォリオ**: 作品リストから全画面プレゼンテーションへ
 
-### Why Does It Work This Way?
+### なぜこのように動作するのか？
 
-1. **Spatial Expansion Metaphor**: Feeling of entering a larger world through a small window
-2. **Natural Focus Shift**: User's gaze naturally follows the expanding element
-3. **Context Preservation**: Clear origin maintains spatial orientation
-4. **Dramatic Effect**: Expansion animation emphasizes content importance
+1. **空間拡張メタファー**: 小さな窓を通して大きな世界に入る感覚
+2. **自然なフォーカス移動**: ユーザーの視線が自然に拡張する要素を追う
+3. **コンテキスト保存**: どこから来たかが明確で方向感覚を維持
+4. **ドラマチックな効果**: 拡張アニメーションがコンテンツの重要性を強調
 
-### Motion Design
+### モーションデザイン
 
 ```
-Expansion Process:
-1. Capture selected card position and size
-2. Card moves to center while scaling up
-3. Background fades and scales simultaneously
-4. Finally fills entire screen
+拡張プロセス:
+1. 選択されたカードの位置とサイズをキャプチャ
+2. カードが画面中央へ移動しながら拡大
+3. 同時に背景のフェードとスケール変化
+4. 最終的に全画面を満たす
 
-Contraction Process:
-1. Detail screen shrinks back to original position
-2. Background reappears restoring gallery
-3. Settles with natural spring animation
+縮小プロセス:
+1. 詳細画面が縮小しながら元の位置へ
+2. 背景が再び現れてギャラリーが復元
+3. 自然なスプリングアニメーションで定着
 ```
 
-## Basic Usage
+## 基本的な使い方
 
-### 1. Transition Setup
+### 1. トランジション設定
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -93,7 +93,7 @@ Contraction Process:
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* App content */}
+          {/* アプリの内容 */}
         </Ssgoi>
       );
     }
@@ -124,14 +124,14 @@ Contraction Process:
   </TabPanel>
 </Tabs>
 
-### 2. Element Marking
+### 2. 要素のマーキング
 
-Use different data attributes for gallery and detail pages:
+ギャラリーと詳細ページにそれぞれ異なるdata属性を使用:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Gallery Page
+    // ギャラリーページ
     function Gallery() {
       return (
         <div className="masonry-grid">
@@ -150,7 +150,7 @@ Use different data attributes for gallery and detail pages:
       );
     }
 
-    // Detail Page
+    // 詳細ページ
     function ItemDetail({ item }) {
       return (
         <div 
@@ -158,7 +158,7 @@ Use different data attributes for gallery and detail pages:
           className="detail-container"
         >
           <button onClick={() => navigate('/gallery')}>
-            ✕ Close
+            ✕ 閉じる
           </button>
           <img src={item.image} alt={item.title} />
           <article>
@@ -172,7 +172,7 @@ Use different data attributes for gallery and detail pages:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Gallery Page -->
+    <!-- ギャラリーページ -->
     <div class="masonry-grid">
       {#each items as item}
         <a 
@@ -186,13 +186,13 @@ Use different data attributes for gallery and detail pages:
       {/each}
     </div>
 
-    <!-- Detail Page -->
+    <!-- 詳細ページ -->
     <div 
       data-pinterest-detail-key={item.id}
       class="detail-container"
     >
       <button on:click={() => goto('/gallery')}>
-        ✕ Close
+        ✕ 閉じる
       </button>
       <img src={item.image} alt={item.title} />
       <article>
@@ -204,16 +204,16 @@ Use different data attributes for gallery and detail pages:
   </TabPanel>
 </Tabs>
 
-## Practical Examples
+## 実践的な活用例
 
-### 1. Masonry Gallery
+### 1. メイソンリーギャラリー
 
-Pinterest-style masonry layout:
+Pinterestスタイルのメイソンリーレイアウト:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Masonry Grid
+    // メイソンリーグリッド
     function MasonryGallery() {
       return (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
@@ -240,7 +240,7 @@ Pinterest-style masonry layout:
       );
     }
 
-    // Expanded View
+    // 拡張ビュー
     function ImageView({ image }) {
       return (
         <div 
@@ -265,7 +265,7 @@ Pinterest-style masonry layout:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Masonry Grid -->
+    <!-- メイソンリーグリッド -->
     <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
       {#each images as img}
         <div
@@ -287,7 +287,7 @@ Pinterest-style masonry layout:
       {/each}
     </div>
 
-    <!-- Expanded View -->
+    <!-- 拡張ビュー -->
     <div 
       data-pinterest-detail-key={image.id}
       class="fixed inset-0 bg-white z-50 overflow-auto"
@@ -308,14 +308,14 @@ Pinterest-style masonry layout:
   </TabPanel>
 </Tabs>
 
-### 2. Product Catalog
+### 2. 製品カタログ
 
-Product card expanding to detail page:
+製品カードが詳細ページへ拡張:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Product Grid
+    // 製品グリッド
     function ProductGrid() {
       return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -334,7 +334,7 @@ Product card expanding to detail page:
               />
               <div className="p-4">
                 <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-lg font-bold mt-2">${product.price}</p>
+                <p className="text-lg font-bold mt-2">¥{product.price}</p>
               </div>
             </article>
           ))}
@@ -342,7 +342,7 @@ Product card expanding to detail page:
       );
     }
 
-    // Product Detail
+    // 製品詳細
     function ProductDetail({ product }) {
       return (
         <div 
@@ -357,10 +357,10 @@ Product card expanding to detail page:
             />
             <div>
               <h1 className="text-3xl font-bold">{product.name}</h1>
-              <p className="text-2xl font-bold mt-4">${product.price}</p>
+              <p className="text-2xl font-bold mt-4">¥{product.price}</p>
               <p className="mt-4 text-gray-600">{product.description}</p>
               <button className="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-                Add to Cart
+                カートに追加
               </button>
             </div>
           </div>
@@ -371,7 +371,7 @@ Product card expanding to detail page:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Product Grid -->
+    <!-- 製品グリッド -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
       {#each products as product}
         <article
@@ -387,13 +387,13 @@ Product card expanding to detail page:
           />
           <div class="p-4">
             <h3 class="font-semibold">{product.name}</h3>
-            <p class="text-lg font-bold mt-2">${product.price}</p>
+            <p class="text-lg font-bold mt-2">¥{product.price}</p>
           </div>
         </article>
       {/each}
     </div>
 
-    <!-- Product Detail -->
+    <!-- 製品詳細 -->
     <div 
       data-pinterest-detail-key={product.id}
       class="min-h-screen bg-white"
@@ -406,10 +406,10 @@ Product card expanding to detail page:
         />
         <div>
           <h1 class="text-3xl font-bold">{product.name}</h1>
-          <p class="text-2xl font-bold mt-4">${product.price}</p>
+          <p class="text-2xl font-bold mt-4">¥{product.price}</p>
           <p class="mt-4 text-gray-600">{product.description}</p>
           <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-            Add to Cart
+            カートに追加
           </button>
         </div>
       </div>
@@ -418,53 +418,53 @@ Product card expanding to detail page:
   </TabPanel>
 </Tabs>
 
-## Customization
+## カスタマイズ
 
-### Spring Settings
+### スプリング設定
 
-Adjust animation elasticity and speed:
+アニメーションの弾性と速度の調整:
 
 ```typescript
 pinterest({
   spring: {
-    stiffness: 200,  // Lower for smoother motion
-    damping: 25      // Higher for faster settling
+    stiffness: 200,  // 低いほど滑らか
+    damping: 25      // 高いほど速い定着
   }
 })
 ```
 
-## Important Notes
+## 注意事項
 
-### Key Attribute Distinction
+### キー属性の区別
 
-- **Gallery**: `data-pinterest-gallery-key`
-- **Detail**: `data-pinterest-detail-key`
-- Must use different attribute names (to differentiate from hero)
+- **ギャラリー**: `data-pinterest-gallery-key`
+- **詳細**: `data-pinterest-detail-key`
+- 必ず異なる属性名を使用（ヒーローと差別化）
 
-### Layout Considerations
+### レイアウトの考慮事項
 
-- Gallery items should have static position
-- Detail pages need sufficient padding
-- Works especially well with masonry layouts
+- ギャラリーアイテムはpositionがstaticである必要があります
+- 詳細ページには十分な余白が必要
+- メイソンリーレイアウトと特に相性が良い
 
-## Accessibility
+## アクセシビリティ
 
-- ESC key support to close detail page
-- Focus trap for improved keyboard navigation
-- Instant transition when motion is reduced
+- ESCキーで詳細ページを閉じるサポート
+- フォーカストラップによるキーボードナビゲーションの改善
+- モーション削減設定時は即座に遷移
 
-## Best Practices
+## ベストプラクティス
 
 ### ✅ DO
 
-- Use for image-centric content
-- Apply to gallery or catalog formats
-- Provide clear close button
-- Ensure responsive design for mobile
+- 画像中心のコンテンツに使用
+- ギャラリーやカタログ形式に適用
+- 閉じるボタンを明確に提供
+- モバイルでも動作するようレスポンシブデザイン
 
 ### ❌ DON'T
 
-- Unsuitable for text-heavy content
-- Avoid too many elements expanding simultaneously
-- Avoid use when detail page loading is slow
-- May cause unexpected behavior in complex layouts
+- テキスト中心のコンテンツには不適切
+- 多くの要素が同時に拡張されないように
+- 詳細ページのロードが遅い場合は使用を控える
+- 複雑なレイアウトでは予期しない動作の可能性

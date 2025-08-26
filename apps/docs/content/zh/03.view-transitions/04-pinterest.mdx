@@ -1,77 +1,77 @@
 ---
-title: "Pinterest Transition"
-description: "Immersive transition with cards expanding to fill the screen"
+title: "Pinterest 过渡"
+description: "卡片充满屏幕并扩展的沉浸式过渡"
 nav-title: "Pinterest"
 ---
 
-# Pinterest Transition
+# Pinterest 过渡
 
-The Pinterest transition is an **expansion transition** where small gallery items expand to full screen. The selected content enlarges to fill the entire screen, providing powerful immersion and visual continuity.
+Pinterest 过渡是画廊中的小项目扩展到全屏的**扩展过渡（Expansion Transition）**。用户选择的内容充满屏幕并放大，提供强大的沉浸感和视觉连续性。
 
-## Demo
+## 演示
 
 <ViewTransitionDemo type="pinterest" />
 
-## UX Principles
+## UX 原则
 
-### When to Use?
+### 何时使用？
 
-Pinterest transitions are used for **visual content exploration with expansion**.
+Pinterest 过渡用于**视觉内容的放大浏览**。
 
-#### Content Relationship Suitability
+#### 内容关系适用性
 
 <SuitabilityTable
   items={[
     {
-      label: "Unrelated Content",
+      label: "无关内容",
       suitable: "no",
-      description: "Unsuitable without expansion connection point"
+      description: "没有扩展连接点时不适用"
     },
     {
-      label: "Sibling Relationship",
+      label: "兄弟关系",
       suitable: "maybe",
-      description: "Considerable for navigation within gallery items"
+      description: "画廊内项目之间移动时可考虑"
     },
     {
-      label: "Hierarchical Relationship",
+      label: "层级关系",
       suitable: "yes",
-      description: "Optimal for expanded views like thumbnail→fullview"
+      description: "最适合缩略图→全视图等同一内容的放大视图"
     }
   ]}
 />
 
-#### Key Use Cases
+#### 主要用例
 
-- **Image Gallery**: Expanding from thumbnails to high-resolution images
-- **Product Catalog**: Expanding from product grid to detail information
-- **Media Browsing**: Transitioning from video thumbnails to player
-- **Portfolio**: From work list to fullscreen presentation
+- **图片画廊**：从缩略图放大到高分辨率图片
+- **产品目录**：从产品网格扩展到详细信息
+- **媒体浏览**：从视频缩略图切换到播放器
+- **作品集**：从作品列表到全屏演示
 
-### Why Does It Work This Way?
+### 为什么这样工作？
 
-1. **Spatial Expansion Metaphor**: Feeling of entering a larger world through a small window
-2. **Natural Focus Shift**: User's gaze naturally follows the expanding element
-3. **Context Preservation**: Clear origin maintains spatial orientation
-4. **Dramatic Effect**: Expansion animation emphasizes content importance
+1. **空间扩展隐喻**：通过小窗口进入大世界的感觉
+2. **自然焦点移动**：用户视线自然跟随扩展元素
+3. **上下文保留**：明确来源，保持方向感
+4. **戏剧效果**：扩展动画强调内容的重要性
 
-### Motion Design
+### 动效设计
 
 ```
-Expansion Process:
-1. Capture selected card position and size
-2. Card moves to center while scaling up
-3. Background fades and scales simultaneously
-4. Finally fills entire screen
+扩展过程：
+1. 捕获选定卡片的位置和大小
+2. 卡片移动到屏幕中心并放大
+3. 同时背景淡化和缩放变化
+4. 最终填充整个屏幕
 
-Contraction Process:
-1. Detail screen shrinks back to original position
-2. Background reappears restoring gallery
-3. Settles with natural spring animation
+收缩过程：
+1. 详情屏幕缩小并返回原位
+2. 背景重新出现，画廊恢复
+3. 自然的弹簧动画定位
 ```
 
-## Basic Usage
+## 基本用法
 
-### 1. Transition Setup
+### 1. 过渡设置
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -93,7 +93,7 @@ Contraction Process:
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* App content */}
+          {/* 应用内容 */}
         </Ssgoi>
       );
     }
@@ -124,14 +124,14 @@ Contraction Process:
   </TabPanel>
 </Tabs>
 
-### 2. Element Marking
+### 2. 元素标记
 
-Use different data attributes for gallery and detail pages:
+画廊和详情页面分别使用不同的 data 属性：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Gallery Page
+    // 画廊页面
     function Gallery() {
       return (
         <div className="masonry-grid">
@@ -150,7 +150,7 @@ Use different data attributes for gallery and detail pages:
       );
     }
 
-    // Detail Page
+    // 详情页面
     function ItemDetail({ item }) {
       return (
         <div 
@@ -158,7 +158,7 @@ Use different data attributes for gallery and detail pages:
           className="detail-container"
         >
           <button onClick={() => navigate('/gallery')}>
-            ✕ Close
+            ✕ 关闭
           </button>
           <img src={item.image} alt={item.title} />
           <article>
@@ -172,7 +172,7 @@ Use different data attributes for gallery and detail pages:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Gallery Page -->
+    <!-- 画廊页面 -->
     <div class="masonry-grid">
       {#each items as item}
         <a 
@@ -186,13 +186,13 @@ Use different data attributes for gallery and detail pages:
       {/each}
     </div>
 
-    <!-- Detail Page -->
+    <!-- 详情页面 -->
     <div 
       data-pinterest-detail-key={item.id}
       class="detail-container"
     >
       <button on:click={() => goto('/gallery')}>
-        ✕ Close
+        ✕ 关闭
       </button>
       <img src={item.image} alt={item.title} />
       <article>
@@ -204,16 +204,16 @@ Use different data attributes for gallery and detail pages:
   </TabPanel>
 </Tabs>
 
-## Practical Examples
+## 实践示例
 
-### 1. Masonry Gallery
+### 1. 瀑布流画廊
 
-Pinterest-style masonry layout:
+Pinterest 风格瀑布流布局：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Masonry Grid
+    // 瀑布流网格
     function MasonryGallery() {
       return (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
@@ -240,7 +240,7 @@ Pinterest-style masonry layout:
       );
     }
 
-    // Expanded View
+    // 扩展视图
     function ImageView({ image }) {
       return (
         <div 
@@ -265,7 +265,7 @@ Pinterest-style masonry layout:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Masonry Grid -->
+    <!-- 瀑布流网格 -->
     <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
       {#each images as img}
         <div
@@ -287,7 +287,7 @@ Pinterest-style masonry layout:
       {/each}
     </div>
 
-    <!-- Expanded View -->
+    <!-- 扩展视图 -->
     <div 
       data-pinterest-detail-key={image.id}
       class="fixed inset-0 bg-white z-50 overflow-auto"
@@ -308,14 +308,14 @@ Pinterest-style masonry layout:
   </TabPanel>
 </Tabs>
 
-### 2. Product Catalog
+### 2. 产品目录
 
-Product card expanding to detail page:
+产品卡片扩展到详情页面：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Product Grid
+    // 产品网格
     function ProductGrid() {
       return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -342,7 +342,7 @@ Product card expanding to detail page:
       );
     }
 
-    // Product Detail
+    // 产品详情
     function ProductDetail({ product }) {
       return (
         <div 
@@ -360,7 +360,7 @@ Product card expanding to detail page:
               <p className="text-2xl font-bold mt-4">${product.price}</p>
               <p className="mt-4 text-gray-600">{product.description}</p>
               <button className="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-                Add to Cart
+                加入购物车
               </button>
             </div>
           </div>
@@ -371,7 +371,7 @@ Product card expanding to detail page:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Product Grid -->
+    <!-- 产品网格 -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
       {#each products as product}
         <article
@@ -393,7 +393,7 @@ Product card expanding to detail page:
       {/each}
     </div>
 
-    <!-- Product Detail -->
+    <!-- 产品详情 -->
     <div 
       data-pinterest-detail-key={product.id}
       class="min-h-screen bg-white"
@@ -409,7 +409,7 @@ Product card expanding to detail page:
           <p class="text-2xl font-bold mt-4">${product.price}</p>
           <p class="mt-4 text-gray-600">{product.description}</p>
           <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
-            Add to Cart
+            加入购物车
           </button>
         </div>
       </div>
@@ -418,53 +418,53 @@ Product card expanding to detail page:
   </TabPanel>
 </Tabs>
 
-## Customization
+## 自定义
 
-### Spring Settings
+### 弹簧设置
 
-Adjust animation elasticity and speed:
+调整动画的弹性和速度：
 
 ```typescript
 pinterest({
   spring: {
-    stiffness: 200,  // Lower for smoother motion
-    damping: 25      // Higher for faster settling
+    stiffness: 200,  // 越低越平滑
+    damping: 25      // 越高越快稳定
   }
 })
 ```
 
-## Important Notes
+## 注意事项
 
-### Key Attribute Distinction
+### 键属性区分
 
-- **Gallery**: `data-pinterest-gallery-key`
-- **Detail**: `data-pinterest-detail-key`
-- Must use different attribute names (to differentiate from hero)
+- **画廊**：`data-pinterest-gallery-key`
+- **详情**：`data-pinterest-detail-key`
+- 必须使用不同的属性名（与 Hero 区分）
 
-### Layout Considerations
+### 布局考虑
 
-- Gallery items should have static position
-- Detail pages need sufficient padding
-- Works especially well with masonry layouts
+- 画廊项目必须是 position: static
+- 详情页面需要足够的边距
+- 与瀑布流布局特别匹配
 
-## Accessibility
+## 无障碍性
 
-- ESC key support to close detail page
-- Focus trap for improved keyboard navigation
-- Instant transition when motion is reduced
+- 支持 ESC 键关闭详情页面
+- 焦点陷阱改善键盘导航
+- 减少动画设置时立即过渡
 
-## Best Practices
+## 最佳实践
 
-### ✅ DO
+### ✅ 应该
 
-- Use for image-centric content
-- Apply to gallery or catalog formats
-- Provide clear close button
-- Ensure responsive design for mobile
+- 用于以图片为中心的内容
+- 应用于画廊或目录形式
+- 清晰提供关闭按钮
+- 在移动设备上也能良好工作的响应式设计
 
-### ❌ DON'T
+### ❌ 不应该
 
-- Unsuitable for text-heavy content
-- Avoid too many elements expanding simultaneously
-- Avoid use when detail page loading is slow
-- May cause unexpected behavior in complex layouts
+- 不适合以文本为中心的内容
+- 避免太多元素同时扩展
+- 详情页面加载缓慢时避免使用
+- 复杂布局中可能出现意外行为

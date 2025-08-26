@@ -1,16 +1,73 @@
 ---
 title: "Scroll Transition"
-description: "Page transitions with vertical scrolling effects"
+description: "Vertical scroll transition between same-level content"
 nav-title: "Scroll"
 ---
 
 # Scroll Transition
 
-The Scroll transition creates a sliding effect where pages transition by scrolling up or down. This brings the familiar mobile app navigation experience to the web.
+The scroll transition creates a page sliding effect up and down, used when navigating between related content at the same level. It provides users with a natural scrolling experience of "moving to the next section" or "returning to the previous section."
+
+## Demo
+
+<ViewTransitionDemo type="scroll" />
+
+## UX Principles
+
+### When to Use?
+
+Scroll transitions are used for **Sequential Navigation**.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "no",
+      description: "Fade recommended for independent sections"
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "yes",
+      description: "Optimal for sequential content at the same level"
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "Hero or Pinterest recommended for parent-child structures"
+    }
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Chapter Navigation**: Moving between sections in documents or guides
+- **Onboarding Flows**: Step-by-step tutorials or setup processes
+- **Timeline**: Content arranged in chronological order
+- **Storytelling**: Sequential narrative content
+
+### Why Does It Work This Way?
+
+1. **Natural Reading Flow**: Matches the natural top-to-bottom reading pattern
+2. **Consistent with Scroll Gestures**: Extension of familiar scroll behavior
+3. **Order Recognition**: Intuitively understand before/after relationships
+
+### Motion Design
+
+```
+UP Direction (Next):
+Outgoing Screen: Pushed upward (previous content goes up)
+Incoming Screen: Rises from below (next content appears)
+
+DOWN Direction (Previous):
+Outgoing Screen: Moves downward (current content goes down)
+Incoming Screen: Descends from above (previous content returns)
+```
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -45,183 +102,33 @@ The Scroll transition creates a sliding effect where pages transition by scrolli
     </Ssgoi>
     ```
   </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { scroll } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      defaultTransition: scroll()
-    };
-    </script>
-    ```
-  </TabPanel>
 </Tabs>
 
-## Options
+## Practical Examples
 
-### Direction Setting
+### 1. Document Navigation
 
-```typescript
-scroll({
-  direction: 'up',    // 'up' | 'down' (default: 'up')
-  spring: {
-    stiffness: 300,   // Spring stiffness (default: 300)
-    damping: 30       // Damping ratio (default: 30)
-  }
-})
-```
+Moving between chapters or sections:
 
-### Direction Behaviors
-
-- **`direction: 'up'`** (default)
-  - Incoming page: Slides up from bottom
-  - Outgoing page: Slides up and out
-  
-- **`direction: 'down'`**
-  - Incoming page: Slides down from top
-  - Outgoing page: Slides down and out
-
-## Usage Examples
-
-### Scroll Up (Default)
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: scroll()
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: scroll()
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: scroll()
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### Scroll Down
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: scroll({ direction: 'down' })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: scroll({ direction: 'down' })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: scroll({ direction: 'down' })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### Smooth Scroll
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: scroll({
-        spring: {
-          stiffness: 150,
-          damping: 25
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: scroll({
-          spring: {
-            stiffness: 150,
-            damping: 25
-          }
-        })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: scroll({
-        spring: {
-          stiffness: 150,
-          damping: 25
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## Route-Specific Directions
-
-Set different directions based on hierarchy:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
       transitions: [
         {
-          from: '/list',
-          to: '/detail/*',
+          from: '/docs/intro',
+          to: '/docs/getting-started',
           transition: scroll({ direction: 'up' }),
-          symmetric: true  // Automatically uses 'down' for reverse
+          symmetric: true  // Automatically down on back navigation
         },
         {
-          from: '/parent',
-          to: '/child',
-          transition: scroll({ direction: 'down' })
+          from: '/docs/getting-started',
+          to: '/docs/api',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true
         }
       ]
     };
-
-    <Ssgoi config={config}>
-      {/* App content */}
-    </Ssgoi>
     ```
   </TabPanel>
   <TabPanel value="svelte">
@@ -230,89 +137,162 @@ Set different directions based on hierarchy:
       const config = {
         transitions: [
           {
-            from: '/list',
-            to: '/detail/*',
+            from: '/docs/intro',
+            to: '/docs/getting-started',
             transition: scroll({ direction: 'up' }),
-            symmetric: true  // Automatically uses 'down' for reverse
+            symmetric: true  // Automatically down on back navigation
           },
           {
-            from: '/parent',
-            to: '/child',
-            transition: scroll({ direction: 'down' })
+            from: '/docs/getting-started',
+            to: '/docs/api',
+            transition: scroll({ direction: 'up' }),
+            symmetric: true
           }
         ]
       };
-    </script>
-
-    <Ssgoi {config}>
-      <slot />
-    </Ssgoi>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    const config = {
-      transitions: [
-        {
-          from: '/list',
-          to: '/detail/*',
-          transition: scroll({ direction: 'up' }),
-          symmetric: true  // Automatically uses 'down' for reverse
-        },
-        {
-          from: '/parent',
-          to: '/child',
-          transition: scroll({ direction: 'down' })
-        }
-      ]
-    };
     </script>
     ```
   </TabPanel>
 </Tabs>
 
-## How It Works
+### 2. Onboarding Flow
 
-```
-Direction: UP
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Outgoing page  →  Moves up (translateY: 0 → -100%)
-Incoming page  →  Slides up from bottom (translateY: 100% → 0)
+Step-by-step tutorial:
 
-Direction: DOWN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Outgoing page  →  Moves down (translateY: 0 → 100%)
-Incoming page  →  Slides down from top (translateY: -100% → 0)
-```
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/onboarding/step-*',
+          to: '/onboarding/step-*',
+          transition: scroll({ 
+            direction: 'up',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/onboarding/step-*',
+            to: '/onboarding/step-*',
+            transition: scroll({ 
+              direction: 'up',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-## Advantages
+### 3. Dynamic Direction with Middleware
 
-- Intuitive directional flow representing page hierarchy
-- Natural UX similar to mobile apps
-- Smooth performance using GPU acceleration
-- Consistent with scroll gesture behavior
+Automatically determine direction based on navigation order:
 
-## Recommended Use Cases
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const createMiddleware = (routes) => {
+      return (from, to) => {
+        const fromIndex = routes.indexOf(from);
+        const toIndex = routes.indexOf(to);
+        
+        if (fromIndex < toIndex) {
+          return { from: "/nav/prev", to: "/nav/next" };
+        } else {
+          return { from: "/nav/next", to: "/nav/prev" };
+        }
+      };
+    };
 
-### UP Direction
-- List → Detail pages
-- Home → Subpages
-- General forward navigation
+    const config = {
+      transitions: [
+        {
+          from: "/nav/prev",
+          to: "/nav/next",
+          transition: scroll({ direction: "up" })
+        },
+        {
+          from: "/nav/next",
+          to: "/nav/prev",
+          transition: scroll({ direction: "down" })
+        }
+      ],
+      middleware: createMiddleware(routeOrder)
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const createMiddleware = (routes) => {
+        return (from, to) => {
+          const fromIndex = routes.indexOf(from);
+          const toIndex = routes.indexOf(to);
+          
+          if (fromIndex < toIndex) {
+            return { from: "/nav/prev", to: "/nav/next" };
+          } else {
+            return { from: "/nav/next", to: "/nav/prev" };
+          }
+        };
+      };
 
-### DOWN Direction
-- Parent → Child relationships
-- Menu → Submenu navigation
-- Modal or overlay presentations
+      const config = {
+        transitions: [
+          {
+            from: "/nav/prev",
+            to: "/nav/next",
+            transition: scroll({ direction: "up" })
+          },
+          {
+            from: "/nav/next",
+            to: "/nav/prev",
+            transition: scroll({ direction: "down" })
+          }
+        ],
+        middleware: createMiddleware(routeOrder)
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-## Considerations
+## Performance Optimization
 
-- For pages longer than viewport, the transition starting position matters
-- Scroll position is automatically preserved, no additional handling needed
-- Use `symmetric: true` for bidirectional navigation
+- Uses only `transform: translateY()` for GPU acceleration
+- Maintains smooth 60fps without layout recalculation
+- Automatic scroll position preservation eliminates extra computation
+
+## Accessibility
+
+- Transitions disabled when `prefers-reduced-motion` is set
+- Full keyboard navigation support
+- Hierarchy correctly communicated to screen readers
+
+## Best Practices
+
+### ✅ DO
+
+- Use for sequential section navigation in documents or guides
+- Apply to onboarding or tutorial steps
+- Utilize for timeline-based content
+- Maintain bidirectional consistency with symmetric option
+- Connect with natural scroll gestures on mobile
+
+### ❌ DON'T
+
+- Don't use for unrelated section navigation (use fade)
+- Don't use for hierarchical navigation (use hero or pinterest)
+- Don't mix with left/right swipe gestures (maintain consistency)

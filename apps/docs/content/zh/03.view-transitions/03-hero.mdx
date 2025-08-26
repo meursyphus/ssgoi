@@ -1,75 +1,75 @@
 ---
-title: "Hero Transition"
-description: "Transitions maintaining context through shared element continuity"
+title: "Hero 过渡"
+description: "通过共享元素的连续性保持上下文的过渡"
 nav-title: "Hero"
 ---
 
-# Hero Transition
+# Hero 过渡
 
-The hero transition is a **continuity transition** where shared elements between two screens naturally move and transform. Elements "travel" from one screen to another, providing users with strong visual connectivity and context.
+Hero 过渡是两个屏幕之间共享元素自然移动和变形的**连续性过渡（Continuity Transition）**。元素从一个屏幕"旅行"到另一个屏幕，为用户提供强大的视觉连接和上下文。
 
-## Demo
+## 演示
 
 <ViewTransitionDemo type="hero" />
 
-## UX Principles
+## UX 原则
 
-### When to Use?
+### 何时使用？
 
-Hero transitions are used when **continuity and context preservation** are important.
+Hero 过渡用于**连续性和上下文保持**重要的场景。
 
-#### Content Relationship Suitability
+#### 内容关系适用性
 
 <SuitabilityTable
   items={[
     {
-      label: "Unrelated Content",
+      label: "无关内容",
       suitable: "no",
-      description: "Unsuitable when there are no shared elements"
+      description: "没有共享元素时不适用"
     },
     {
-      label: "Sibling Relationship",
+      label: "兄弟关系",
       suitable: "maybe",
-      description: "Effective in specific situations like galleries"
+      description: "在画廊等特定情况下有效"
     },
     {
-      label: "Hierarchical Relationship",
+      label: "层级关系",
       suitable: "yes",
-      description: "Optimal for different views of the same object (list→detail)"
+      description: "最适合列表→详情等同一对象的不同视图"
     }
   ]}
 />
 
-#### Key Use Cases
+#### 主要用例
 
-- **Gallery → Fullscreen**: Image expands to detailed view
-- **Product List → Detail**: Product card expands to detail page
-- **Profile → Edit**: Profile photo maintains while transitioning to edit mode
-- **Media Player**: Mini player expands to full player
+- **画廊 → 全屏**：图片放大并切换到详细视图
+- **产品列表 → 详情**：产品卡片扩展为详情页面
+- **个人资料 → 编辑**：保持个人资料照片并切换到编辑模式
+- **媒体播放器**：从迷你播放器扩展到完整播放器
 
-### Why Does It Work This Way?
+### 为什么这样工作？
 
-1. **Visual Continuity**: Track element movement to maintain spatial orientation
-2. **Spatial Relationship**: From small to large, summary to detail
-3. **Minimize Cognitive Load**: Natural transformation instead of abrupt changes
-4. **Interest and Delight**: Dynamic motion increases user engagement
+1. **视觉连续性**：跟踪元素移动以保持方向感
+2. **表达空间关系**：从小到大，从摘要到详细
+3. **最小化认知负担**：自然变形代替突然变化
+4. **兴趣和愉悦**：动态动效增加用户参与度
 
-### Motion Design
+### 动效设计
 
 ```
-Hero Element Journey:
-1. Starting Point → Record position, size, shape
-2. During Transform → Smooth interpolation animation
-3. Destination → Settle into new position and size
+Hero 元素的旅程：
+1. 起点 → 记录位置、大小、形状
+2. 变形中 → 平滑插值动画
+3. 终点 → 定位到新位置和大小
 
-Other Elements:
-- Outgoing Page: Fade out
-- Incoming Page: Fade in after hero element settles
+其他元素：
+- 离开页面：淡出
+- 进入页面：Hero 元素定位后淡入
 ```
 
-## Basic Usage
+## 基本用法
 
-### 1. Transition Setup
+### 1. 过渡设置
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -91,7 +91,7 @@ Other Elements:
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* App content */}
+          {/* 应用内容 */}
         </Ssgoi>
       );
     }
@@ -122,14 +122,14 @@ Other Elements:
   </TabPanel>
 </Tabs>
 
-### 2. Marking Elements
+### 2. 元素标记
 
-Add `data-hero-key` attribute to shared elements:
+为共享元素添加 `data-hero-key` 属性：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // List Page
+    // 列表页面
     function ProductList() {
       return (
         <div className="grid">
@@ -147,7 +147,7 @@ Add `data-hero-key` attribute to shared elements:
       );
     }
 
-    // Detail Page
+    // 详情页面
     function ProductDetail({ product }) {
       return (
         <div>
@@ -166,7 +166,7 @@ Add `data-hero-key` attribute to shared elements:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- List Page -->
+    <!-- 列表页面 -->
     <div class="grid">
       {#each products as product}
         <a href="/product/{product.id}">
@@ -180,7 +180,7 @@ Add `data-hero-key` attribute to shared elements:
       {/each}
     </div>
 
-    <!-- Detail Page -->
+    <!-- 详情页面 -->
     <div>
       <img 
         data-hero-key="product-{product.id}"
@@ -195,16 +195,16 @@ Add `data-hero-key` attribute to shared elements:
   </TabPanel>
 </Tabs>
 
-## Practical Examples
+## 实践示例
 
-### 1. Image Gallery
+### 1. 图片画廊
 
-Thumbnail to fullscreen expansion:
+从缩略图扩展到全屏：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Gallery Grid
+    // 画廊网格
     function Gallery() {
       return (
         <div className="grid grid-cols-3 gap-4">
@@ -222,7 +222,7 @@ Thumbnail to fullscreen expansion:
       );
     }
 
-    // Fullscreen View
+    // 全屏视图
     function PhotoView({ id }) {
       return (
         <div 
@@ -237,7 +237,7 @@ Thumbnail to fullscreen expansion:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Gallery Grid -->
+    <!-- 画廊网格 -->
     <div class="grid grid-cols-3 gap-4">
       {#each images as img}
         <a href="/photo/{img.id}">
@@ -251,7 +251,7 @@ Thumbnail to fullscreen expansion:
       {/each}
     </div>
 
-    <!-- Fullscreen View -->
+    <!-- 全屏视图 -->
     <div 
       data-hero-key="photo-{id}"
       class="fixed inset-0 bg-black"
@@ -262,14 +262,14 @@ Thumbnail to fullscreen expansion:
   </TabPanel>
 </Tabs>
 
-### 2. Card Expansion
+### 2. 卡片扩展
 
-Small card to fullscreen detail:
+从小卡片到全屏详情：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Card List
+    // 卡片列表
     function CardGrid() {
       return (
         <div className="grid gap-6">
@@ -288,7 +288,7 @@ Small card to fullscreen detail:
       );
     }
 
-    // Expanded Detail
+    // 扩展详情
     function ItemDetail({ item }) {
       return (
         <article 
@@ -304,7 +304,7 @@ Small card to fullscreen detail:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Card List -->
+    <!-- 卡片列表 -->
     <div class="grid gap-6">
       {#each items as item}
         <article 
@@ -318,7 +318,7 @@ Small card to fullscreen detail:
       {/each}
     </div>
 
-    <!-- Expanded Detail -->
+    <!-- 扩展详情 -->
     <article 
       data-hero-key="card-{item.id}"
       class="min-h-screen bg-white p-8"
@@ -330,14 +330,14 @@ Small card to fullscreen detail:
   </TabPanel>
 </Tabs>
 
-### 3. Multiple Hero Elements
+### 3. 多个 Hero 元素
 
-Multiple elements transitioning simultaneously:
+多个元素同时过渡：
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Profile Card
+    // 个人资料卡片
     function ProfileCard({ user }) {
       return (
         <div onClick={() => navigate(`/profile/${user.id}`)}>
@@ -353,7 +353,7 @@ Multiple elements transitioning simultaneously:
       );
     }
 
-    // Profile Detail
+    // 个人资料详情
     function ProfileDetail({ user }) {
       return (
         <div>
@@ -372,7 +372,7 @@ Multiple elements transitioning simultaneously:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Profile Card -->
+    <!-- 个人资料卡片 -->
     <div on:click={() => goto(`/profile/${user.id}`)}>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -384,7 +384,7 @@ Multiple elements transitioning simultaneously:
       </h3>
     </div>
 
-    <!-- Profile Detail -->
+    <!-- 个人资料详情 -->
     <div>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -399,38 +399,38 @@ Multiple elements transitioning simultaneously:
   </TabPanel>
 </Tabs>
 
-## Important Notes
+## 注意事项
 
-### Hero Key Rules
+### Hero 键规则
 
-- `data-hero-key` must be **unique** on each page
-- Keys are strings and can be generated dynamically
-- Only elements with the same key are connected
+- 每个页面中 `data-hero-key` 必须**唯一**
+- 键是字符串，可以动态生成
+- 只有具有相同键的元素才会连接
 
-### Performance Considerations
+### 性能考虑
 
-- Hero elements are cloned in the DOM for animation
-- Too many hero elements impact performance
-- Preload images to prevent flickering
+- Hero 元素在 DOM 中被克隆并动画化
+- 过多的 Hero 元素会影响性能
+- 预加载图片以防止闪烁
 
-## Accessibility
+## 无障碍性
 
-- Instant transition when motion is reduced
-- Focus management supports keyboard navigation
-- Screen readers perceive as normal page transition
+- 减少动画设置时立即过渡
+- 焦点管理支持键盘导航
+- 屏幕阅读器将其识别为普通页面过渡
 
-## Best Practices
+## 最佳实践
 
-### ✅ DO
+### ✅ 应该
 
-- Use for visually important elements
-- Apply to different representations of the same object
-- Maintain natural size/position changes
-- Use to guide user attention
+- 用于视觉上重要的元素
+- 应用于同一对象的不同表示
+- 保持自然的大小/位置变化
+- 用于引导用户视线
 
-### ❌ DON'T
+### ❌ 不应该
 
-- Don't apply to too many elements simultaneously
-- Don't connect unrelated elements
-- Avoid extreme size changes (more than 10x)
-- Use cautiously with text content
+- 不要同时应用于太多元素
+- 不要连接无关元素
+- 避免极端的大小变化（超过 10 倍）
+- 对文本内容谨慎使用

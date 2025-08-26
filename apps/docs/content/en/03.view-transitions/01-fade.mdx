@@ -1,16 +1,70 @@
 ---
 title: "Fade Transition"
-description: "Smoothly transition pages with fade in/out effects"
+description: "Smooth transition effect for context changes between content"
 nav-title: "Fade"
 ---
 
 # Fade Transition
 
-The Fade transition is the most basic yet elegant page transition effect. It provides a smooth transition where the current page gradually fades out while the new page fades in.
+The fade transition is a fundamental transition pattern used when navigating between unrelated or distant content. The screen completely fades out before the new screen appears, clearly communicating that the user is leaving one area and entering a completely new one.
+
+## Demo
+
+<ViewTransitionDemo type="fade" />
+
+## UX Principles
+
+### When to Use?
+
+Fade transitions are used for **Context Changes**.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "yes",
+      description: "Moving between completely independent sections (Home → Settings)",
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "no",
+      description: "Scroll transition recommended for same-level content",
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "Expansion transitions like hero recommended for parent-child structures",
+    },
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Top-level Navigation**: Moving between sections in bottom tabs or sidebar menus
+- **Context Switching**: Transitions between screens with no connection points
+- **Starting New Tasks**: Entering completely different task flows
+
+### Why Does It Work This Way?
+
+1. **Clean Separation**: Previous screen completely disappears before new screen appears, creating clear boundaries
+2. **Reduced Cognitive Load**: Smooth fade reduces visual shock compared to abrupt screen changes
+3. **Universality**: Direction-agnostic, naturally applies to any navigation pattern
+
+### Motion Design
+
+```
+Outgoing Screen: 100% → 0% opacity (quick fade out)
+Brief Gap: Complete context separation
+Incoming Screen: 0% → 100% opacity (smooth fade in)
+```
+
+This sequence provides users with the mental model of "leaving the previous space and entering a new space."
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -28,6 +82,7 @@ The Fade transition is the most basic yet elegant page transition effect. It pro
       );
     }
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -44,160 +99,35 @@ The Fade transition is the most basic yet elegant page transition effect. It pro
       <slot />
     </Ssgoi>
     ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
 
-    <script setup>
-    import { Ssgoi } from '@ssgoi/vue';
-    import { fade } from '@ssgoi/vue/view-transitions';
-
-    const config = {
-      defaultTransition: fade()
-    };
-    </script>
-    ```
   </TabPanel>
 </Tabs>
 
-## Options
+## Practical Examples
 
-The fade transition allows customization of spring animation settings:
+### 1. Tab Navigation
 
-```typescript
-fade({
-  spring: {
-    stiffness: 300,  // Spring stiffness (default: 300)
-    damping: 30      // Damping ratio (default: 30)
-  }
-})
-```
+Moving between major sections in bottom tabs or top tabs:
 
-### Spring Options Explained
-
-- **stiffness**: Controls the speed of the animation. Higher values result in faster transitions
-- **damping**: Controls the bounce of the animation. Higher values result in smoother transitions
-
-## Usage Examples
-
-### Slow Fade
-
-Smooth and slow fade effect:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 100,
-            damping: 20
-          }
-        })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 100,
-          damping: 20
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### Fast Fade
-
-Quick and snappy fade effect:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 500,
-            damping: 40
-          }
-        })
-      };
-    </script>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <script setup>
-    const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 500,
-          damping: 40
-        }
-      })
-    };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## Route-Specific Application
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
       transitions: [
         {
           from: '/home',
-          to: '/about', 
+          to: '/profile',
           transition: fade(),
-          symmetric: true  // Automatically applies fade for /about → /home
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
         }
       ]
     };
-
-    <Ssgoi config={config}>
-      {/* App content */}
-    </Ssgoi>
     ```
   </TabPanel>
   <TabPanel value="svelte">
@@ -207,61 +137,105 @@ Quick and snappy fade effect:
         transitions: [
           {
             from: '/home',
-            to: '/about', 
+            to: '/profile',
             transition: fade(),
-            symmetric: true  // Automatically applies fade for /about → /home
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: fade(),
+            symmetric: true
           }
         ]
       };
-    </script>
-
-    <Ssgoi {config}>
-      <slot />
-    </Ssgoi>
-    ```
-  </TabPanel>
-  <TabPanel value="vue">
-    ```vue
-    <template>
-      <Ssgoi :config="config">
-        <!-- App content -->
-      </Ssgoi>
-    </template>
-
-    <script setup>
-    const config = {
-      transitions: [
-        {
-          from: '/home',
-          to: '/about', 
-          transition: fade(),
-          symmetric: true  // Automatically applies fade for /about → /home
-        }
-      ]
-    };
     </script>
     ```
   </TabPanel>
 </Tabs>
 
-## How It Works
+### 2. Quick Transitions (Immediate Response)
 
-The fade transition works as follows:
+When quick response to user actions is needed:
 
-1. **Outgoing page**: Opacity decreases from 1 to 0
-2. **Incoming page**: Opacity increases from 0 to 1
-3. Both animations run simultaneously creating a natural crossfade effect
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 400,  // Fast transition
+          damping: 35      // Smooth finish
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 400,  // Fast transition
+            damping: 35      // Smooth finish
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-## Advantages
+### 3. Elegant Transitions (Premium Feel)
 
-- Universal transition suitable for all content types
-- Lightweight animation with minimal CPU/GPU impact
-- Visually smooth and professional appearance
-- Direction-agnostic, works naturally with any navigation pattern
+For pages where brand experience is important:
 
-## Recommended Use Cases
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+        spring: {
+          stiffness: 150,  // Slow transition
+          damping: 25      // Smooth deceleration
+        }
+      })
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: fade({
+          spring: {
+            stiffness: 150,  // Slow transition
+            damping: 25      // Smooth deceleration
+          }
+        })
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
 
-- Default page transitions
-- Navigation between unrelated content pages
-- When a calm and elegant user experience is needed
-- Performance-critical mobile environments
+## Accessibility
+
+- Automatically disables animations when `prefers-reduced-motion` is set
+- Screen readers correctly recognize content changes during transitions
+- Fully compatible with keyboard navigation
+
+## Best Practices
+
+### ✅ DO
+
+- Use as default for top-level navigation
+- Use when content completely changes
+- When providing a mobile app-like experience
+
+### ❌ DON'T
+
+- Don't use for related content navigation (use slide or scroll instead)
+- Avoid overly slow fades (users feel frustrated)
+- Don't use for partial UI changes

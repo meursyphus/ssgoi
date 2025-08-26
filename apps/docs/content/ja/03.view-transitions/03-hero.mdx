@@ -1,75 +1,75 @@
 ---
-title: "Hero Transition"
-description: "Transitions maintaining context through shared element continuity"
-nav-title: "Hero"
+title: "ヒーロートランジション"
+description: "共有要素の連続性でコンテキストを維持するトランジション"
+nav-title: "ヒーロー"
 ---
 
-# Hero Transition
+# ヒーロートランジション
 
-The hero transition is a **continuity transition** where shared elements between two screens naturally move and transform. Elements "travel" from one screen to another, providing users with strong visual connectivity and context.
+ヒーロートランジションは、2つの画面間で共有される要素が自然に移動し変形する**連続性トランジション（Continuity Transition）**です。要素が1つの画面から別の画面へ「旅」し、ユーザーに強力な視覚的つながりとコンテキストを提供します。
 
-## Demo
+## デモ
 
 <ViewTransitionDemo type="hero" />
 
-## UX Principles
+## UXの原則
 
-### When to Use?
+### いつ使用するか？
 
-Hero transitions are used when **continuity and context preservation** are important.
+ヒーロートランジションは**連続性とコンテキストの維持**が重要な場合に使用されます。
 
-#### Content Relationship Suitability
+#### コンテンツの関係別適合性
 
 <SuitabilityTable
   items={[
     {
-      label: "Unrelated Content",
+      label: "関連のないコンテンツ",
       suitable: "no",
-      description: "Unsuitable when there are no shared elements"
+      description: "共有要素がない場合は不適切"
     },
     {
-      label: "Sibling Relationship",
+      label: "兄弟関係",
       suitable: "maybe",
-      description: "Effective in specific situations like galleries"
+      description: "ギャラリーなど特定の状況で効果的"
     },
     {
-      label: "Hierarchical Relationship",
+      label: "階層関係",
       suitable: "yes",
-      description: "Optimal for different views of the same object (list→detail)"
+      description: "リスト→詳細のように同じオブジェクトの異なるビューに最適"
     }
   ]}
 />
 
-#### Key Use Cases
+#### 主な使用ケース
 
-- **Gallery → Fullscreen**: Image expands to detailed view
-- **Product List → Detail**: Product card expands to detail page
-- **Profile → Edit**: Profile photo maintains while transitioning to edit mode
-- **Media Player**: Mini player expands to full player
+- **ギャラリー → フルスクリーン**: 画像が拡大して詳細ビューへ遷移
+- **製品リスト → 詳細**: 製品カードが詳細ページに拡張
+- **プロフィール → 編集**: プロフィール写真を維持したまま編集モードへ遷移
+- **メディアプレーヤー**: ミニプレーヤーからフルプレーヤーへ拡張
 
-### Why Does It Work This Way?
+### なぜこのように動作するのか？
 
-1. **Visual Continuity**: Track element movement to maintain spatial orientation
-2. **Spatial Relationship**: From small to large, summary to detail
-3. **Minimize Cognitive Load**: Natural transformation instead of abrupt changes
-4. **Interest and Delight**: Dynamic motion increases user engagement
+1. **視覚的連続性**: 要素の移動を追跡して方向感覚を維持
+2. **空間的関係の表現**: 小さいものから大きいものへ、要約から詳細へ
+3. **認知負荷の最小化**: 突然の変化ではなく自然な変形
+4. **興味と楽しさ**: ダイナミックなモーションでユーザーエンゲージメントを向上
 
-### Motion Design
+### モーションデザイン
 
 ```
-Hero Element Journey:
-1. Starting Point → Record position, size, shape
-2. During Transform → Smooth interpolation animation
-3. Destination → Settle into new position and size
+ヒーロー要素の旅:
+1. 出発点 → 位置、サイズ、形状を記録
+2. 変形中 → スムーズな補間アニメーション
+3. 到着点 → 新しい位置とサイズに定着
 
-Other Elements:
-- Outgoing Page: Fade out
-- Incoming Page: Fade in after hero element settles
+他の要素:
+- 出ていくページ: フェードアウト
+- 入ってくるページ: ヒーロー要素が定着した後フェードイン
 ```
 
-## Basic Usage
+## 基本的な使い方
 
-### 1. Transition Setup
+### 1. トランジションの設定
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
@@ -91,7 +91,7 @@ Other Elements:
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* App content */}
+          {/* アプリの内容 */}
         </Ssgoi>
       );
     }
@@ -122,14 +122,14 @@ Other Elements:
   </TabPanel>
 </Tabs>
 
-### 2. Marking Elements
+### 2. 要素のマーキング
 
-Add `data-hero-key` attribute to shared elements:
+共有される要素に`data-hero-key`属性を追加:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // List Page
+    // リストページ
     function ProductList() {
       return (
         <div className="grid">
@@ -147,7 +147,7 @@ Add `data-hero-key` attribute to shared elements:
       );
     }
 
-    // Detail Page
+    // 詳細ページ
     function ProductDetail({ product }) {
       return (
         <div>
@@ -166,7 +166,7 @@ Add `data-hero-key` attribute to shared elements:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- List Page -->
+    <!-- リストページ -->
     <div class="grid">
       {#each products as product}
         <a href="/product/{product.id}">
@@ -180,7 +180,7 @@ Add `data-hero-key` attribute to shared elements:
       {/each}
     </div>
 
-    <!-- Detail Page -->
+    <!-- 詳細ページ -->
     <div>
       <img 
         data-hero-key="product-{product.id}"
@@ -195,16 +195,16 @@ Add `data-hero-key` attribute to shared elements:
   </TabPanel>
 </Tabs>
 
-## Practical Examples
+## 実践的な活用例
 
-### 1. Image Gallery
+### 1. 画像ギャラリー
 
-Thumbnail to fullscreen expansion:
+サムネイルからフルスクリーンへの拡張:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Gallery Grid
+    // ギャラリーグリッド
     function Gallery() {
       return (
         <div className="grid grid-cols-3 gap-4">
@@ -222,7 +222,7 @@ Thumbnail to fullscreen expansion:
       );
     }
 
-    // Fullscreen View
+    // フルスクリーンビュー
     function PhotoView({ id }) {
       return (
         <div 
@@ -237,7 +237,7 @@ Thumbnail to fullscreen expansion:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Gallery Grid -->
+    <!-- ギャラリーグリッド -->
     <div class="grid grid-cols-3 gap-4">
       {#each images as img}
         <a href="/photo/{img.id}">
@@ -251,7 +251,7 @@ Thumbnail to fullscreen expansion:
       {/each}
     </div>
 
-    <!-- Fullscreen View -->
+    <!-- フルスクリーンビュー -->
     <div 
       data-hero-key="photo-{id}"
       class="fixed inset-0 bg-black"
@@ -262,14 +262,14 @@ Thumbnail to fullscreen expansion:
   </TabPanel>
 </Tabs>
 
-### 2. Card Expansion
+### 2. カード拡張
 
-Small card to fullscreen detail:
+小さなカードからフルスクリーン詳細へ:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Card List
+    // カードリスト
     function CardGrid() {
       return (
         <div className="grid gap-6">
@@ -288,7 +288,7 @@ Small card to fullscreen detail:
       );
     }
 
-    // Expanded Detail
+    // 拡張された詳細
     function ItemDetail({ item }) {
       return (
         <article 
@@ -304,7 +304,7 @@ Small card to fullscreen detail:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Card List -->
+    <!-- カードリスト -->
     <div class="grid gap-6">
       {#each items as item}
         <article 
@@ -318,7 +318,7 @@ Small card to fullscreen detail:
       {/each}
     </div>
 
-    <!-- Expanded Detail -->
+    <!-- 拡張された詳細 -->
     <article 
       data-hero-key="card-{item.id}"
       class="min-h-screen bg-white p-8"
@@ -330,14 +330,14 @@ Small card to fullscreen detail:
   </TabPanel>
 </Tabs>
 
-### 3. Multiple Hero Elements
+### 3. 複数のヒーロー要素
 
-Multiple elements transitioning simultaneously:
+複数の要素が同時に遷移:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
   <TabPanel value="react">
     ```tsx
-    // Profile Card
+    // プロフィールカード
     function ProfileCard({ user }) {
       return (
         <div onClick={() => navigate(`/profile/${user.id}`)}>
@@ -353,7 +353,7 @@ Multiple elements transitioning simultaneously:
       );
     }
 
-    // Profile Detail
+    // プロフィール詳細
     function ProfileDetail({ user }) {
       return (
         <div>
@@ -372,7 +372,7 @@ Multiple elements transitioning simultaneously:
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
-    <!-- Profile Card -->
+    <!-- プロフィールカード -->
     <div on:click={() => goto(`/profile/${user.id}`)}>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -384,7 +384,7 @@ Multiple elements transitioning simultaneously:
       </h3>
     </div>
 
-    <!-- Profile Detail -->
+    <!-- プロフィール詳細 -->
     <div>
       <img 
         data-hero-key="avatar-{user.id}"
@@ -399,38 +399,38 @@ Multiple elements transitioning simultaneously:
   </TabPanel>
 </Tabs>
 
-## Important Notes
+## 注意事項
 
-### Hero Key Rules
+### ヒーローキーのルール
 
-- `data-hero-key` must be **unique** on each page
-- Keys are strings and can be generated dynamically
-- Only elements with the same key are connected
+- 各ページで`data-hero-key`は**一意である必要があります**
+- キーは文字列で、動的に生成可能
+- 同じキーを持つ要素同士のみが接続されます
 
-### Performance Considerations
+### パフォーマンスの考慮事項
 
-- Hero elements are cloned in the DOM for animation
-- Too many hero elements impact performance
-- Preload images to prevent flickering
+- ヒーロー要素はDOMでクローンされてアニメーションされます
+- ヒーロー要素が多すぎるとパフォーマンスに影響します
+- 画像は事前にロードしてちらつきを防ぎます
 
-## Accessibility
+## アクセシビリティ
 
-- Instant transition when motion is reduced
-- Focus management supports keyboard navigation
-- Screen readers perceive as normal page transition
+- モーション削減設定時は即座に遷移
+- フォーカス管理によるキーボードナビゲーションのサポート
+- スクリーンリーダーは通常のページ遷移として認識
 
-## Best Practices
+## ベストプラクティス
 
 ### ✅ DO
 
-- Use for visually important elements
-- Apply to different representations of the same object
-- Maintain natural size/position changes
-- Use to guide user attention
+- 視覚的に重要な要素に使用
+- 同じオブジェクトの異なる表現に適用
+- 自然なサイズ/位置変化を維持
+- ユーザーの視線を導く際に活用
 
 ### ❌ DON'T
 
-- Don't apply to too many elements simultaneously
-- Don't connect unrelated elements
-- Avoid extreme size changes (more than 10x)
-- Use cautiously with text content
+- あまりに多くの要素に同時適用しない
+- 関連のない要素同士を接続しない
+- 極端なサイズ変化は避ける（10倍以上）
+- テキストコンテンツには慎重に使用
