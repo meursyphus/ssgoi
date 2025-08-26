@@ -1,35 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { scroll } from "@ssgoi/react/view-transitions";
-import { BrowserMockup, DemoPage, DemoLink } from "../browser-mockup";
+import {
+  BrowserMockup,
+  DemoPage,
+  DemoLink,
+  useBrowserNavigation,
+} from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 
 // Intro Section Page
 function IntroPage() {
   return (
-    <DemoPage path="/intro" title="소개">
-      <div className="p-8 max-w-3xl mx-auto">
-        <div className="mb-6 text-4xl">📝</div>
+    <DemoPage path="/intro" title="Introduction">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="mb-3 md:mb-6 text-2xl md:text-4xl">📝</div>
 
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">
-          스크롤 전환 소개
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">
+          Scroll Transitions
         </h1>
 
-        <p className="mb-6 text-lg text-gray-600">
-          페이지가 위아래로 자연스럽게 스크롤되며 전환되는 효과입니다.
+        <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
+          Experience smooth, natural scrolling transitions between pages.
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           {[
-            "부드러운 스크롤 애니메이션",
-            "모바일 앱과 유사한 UX",
-            "직관적인 페이지 이동",
+            "Smooth scroll animations",
+            "Mobile app-like UX",
+            "Intuitive page navigation",
           ].map((item, index) => (
-            <div key={index} className="flex items-start space-x-3">
-              <div className="mt-1">
+            <div key={index} className="flex items-start space-x-2 md:space-x-3">
+              <div className="mt-0.5 md:mt-1">
                 <svg
-                  className="h-5 w-5 text-blue-500"
+                  className="h-4 w-4 md:h-5 md:w-5 text-blue-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -40,16 +45,16 @@ function IntroPage() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-700">{item}</p>
+              <p className="text-xs md:text-base text-gray-300">{item}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full bg-blue-500 p-2">
+        <div className="mt-4 md:mt-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 p-4 md:p-6 border border-gray-600">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="rounded-full bg-blue-600 p-1.5 md:p-2">
               <svg
-                className="h-5 w-5 text-white"
+                className="h-4 w-4 md:h-5 md:w-5 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -63,9 +68,9 @@ function IntroPage() {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">시작하기</p>
-              <p className="text-sm text-gray-600">
-                왼쪽 메뉴를 클릭하여 다른 섹션으로 이동하세요
+              <p className="text-sm md:text-base font-medium text-gray-100">Get Started</p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Click the menu items to navigate between sections
               </p>
             </div>
           </div>
@@ -78,21 +83,21 @@ function IntroPage() {
 // Features Section Page
 function FeaturesPage() {
   return (
-    <DemoPage path="/features" title="기능">
-      <div className="p-8 max-w-3xl mx-auto">
-        <div className="mb-6 text-4xl">✨</div>
+    <DemoPage path="/features" title="Features">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="mb-3 md:mb-6 text-2xl md:text-4xl">✨</div>
 
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">주요 기능</h1>
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">Key Features</h1>
 
-        <p className="mb-6 text-lg text-gray-600">
-          스크롤 전환이 제공하는 다양한 기능들을 확인해보세요.
+        <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
+          Discover the powerful features of scroll transitions.
         </p>
 
         <div className="space-y-3">
           {[
-            "방향 설정 (up/down)",
-            "스프링 애니메이션 커스터마이징",
-            "GPU 가속 지원",
+            "Direction control (up/down)",
+            "Spring animation customization",
+            "GPU acceleration support",
           ].map((item, index) => (
             <div key={index} className="flex items-start space-x-3">
               <div className="mt-1">
@@ -108,16 +113,16 @@ function FeaturesPage() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-700">{item}</p>
+              <p className="text-gray-300">{item}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full bg-blue-500 p-2">
+        <div className="mt-4 md:mt-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 p-4 md:p-6 border border-gray-600">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="rounded-full bg-blue-600 p-1.5 md:p-2">
               <svg
-                className="h-5 w-5 text-white"
+                className="h-4 w-4 md:h-5 md:w-5 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -131,9 +136,9 @@ function FeaturesPage() {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">더 알아보기</p>
-              <p className="text-sm text-gray-600">
-                왼쪽 메뉴를 클릭하여 다른 섹션으로 이동하세요
+              <p className="text-sm md:text-base font-medium text-gray-100">Learn More</p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Navigate through the menu to explore more
               </p>
             </div>
           </div>
@@ -146,21 +151,21 @@ function FeaturesPage() {
 // Usage Section Page
 function UsagePage() {
   return (
-    <DemoPage path="/usage" title="사용법">
-      <div className="p-8 max-w-3xl mx-auto">
-        <div className="mb-6 text-4xl">🚀</div>
+    <DemoPage path="/usage" title="Usage">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="mb-3 md:mb-6 text-2xl md:text-4xl">🚀</div>
 
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">사용 방법</h1>
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">How to Use</h1>
 
-        <p className="mb-6 text-lg text-gray-600">
-          간단한 설정으로 스크롤 전환을 적용할 수 있습니다.
+        <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
+          Apply scroll transitions with simple configuration.
         </p>
 
         <div className="space-y-3">
           {[
-            "defaultTransition 설정",
-            "경로별 커스터마이징",
-            "symmetric 옵션 활용",
+            "Set defaultTransition",
+            "Per-route customization",
+            "Utilize symmetric option",
           ].map((item, index) => (
             <div key={index} className="flex items-start space-x-3">
               <div className="mt-1">
@@ -176,16 +181,16 @@ function UsagePage() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-700">{item}</p>
+              <p className="text-gray-300">{item}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full bg-blue-500 p-2">
+        <div className="mt-4 md:mt-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 p-4 md:p-6 border border-gray-600">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="rounded-full bg-blue-600 p-1.5 md:p-2">
               <svg
-                className="h-5 w-5 text-white"
+                className="h-4 w-4 md:h-5 md:w-5 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -199,9 +204,9 @@ function UsagePage() {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">바로 적용하기</p>
-              <p className="text-sm text-gray-600">
-                왼쪽 메뉴를 클릭하여 다른 섹션으로 이동하세요
+              <p className="text-sm md:text-base font-medium text-gray-100">Apply Now</p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Use the navigation menu to continue
               </p>
             </div>
           </div>
@@ -214,23 +219,23 @@ function UsagePage() {
 // Examples Section Page
 function ExamplesPage() {
   return (
-    <DemoPage path="/examples" title="예시">
-      <div className="p-8 max-w-3xl mx-auto">
-        <div className="mb-6 text-4xl">💡</div>
+    <DemoPage path="/examples" title="Examples">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="mb-3 md:mb-6 text-2xl md:text-4xl">💡</div>
 
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">
-          실제 사용 예시
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">
+          Real-world Examples
         </h1>
 
-        <p className="mb-6 text-lg text-gray-600">
-          다양한 상황에서 스크롤 전환을 활용하는 방법입니다.
+        <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
+          See how scroll transitions work in various scenarios.
         </p>
 
         <div className="space-y-3">
           {[
-            "목록 → 상세 페이지",
-            "계층 구조 네비게이션",
-            "모달 및 오버레이",
+            "List → Detail pages",
+            "Hierarchical navigation",
+            "Modals and overlays",
           ].map((item, index) => (
             <div key={index} className="flex items-start space-x-3">
               <div className="mt-1">
@@ -246,16 +251,16 @@ function ExamplesPage() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-700">{item}</p>
+              <p className="text-gray-300">{item}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full bg-blue-500 p-2">
+        <div className="mt-4 md:mt-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 p-4 md:p-6 border border-gray-600">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="rounded-full bg-blue-600 p-1.5 md:p-2">
               <svg
-                className="h-5 w-5 text-white"
+                className="h-4 w-4 md:h-5 md:w-5 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -269,9 +274,9 @@ function ExamplesPage() {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">참고 자료</p>
-              <p className="text-sm text-gray-600">
-                왼쪽 메뉴를 클릭하여 다른 섹션으로 이동하세요
+              <p className="text-sm md:text-base font-medium text-gray-100">Resources</p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Continue exploring with the navigation menu
               </p>
             </div>
           </div>
@@ -283,37 +288,105 @@ function ExamplesPage() {
 
 // Route configuration with sidebar navigation
 const scrollRoutes: RouteConfig[] = [
-  { path: "/intro", component: IntroPage, label: "📝 소개" },
-  { path: "/features", component: FeaturesPage, label: "✨ 기능" },
-  { path: "/usage", component: UsagePage, label: "🚀 사용법" },
-  { path: "/examples", component: ExamplesPage, label: "💡 예시" },
+  { path: "/intro", component: IntroPage, label: "📝 Introduction" },
+  { path: "/features", component: FeaturesPage, label: "✨ Features" },
+  { path: "/usage", component: UsagePage, label: "🚀 Usage" },
+  { path: "/examples", component: ExamplesPage, label: "💡 Examples" },
 ];
 
 // Custom layout with sidebar navigation
 function ScrollLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex h-[500px] bg-white">
-      {/* Left Navigation */}
-      <nav className="w-48 border-r border-gray-200 bg-gray-50 p-4">
-        <h3 className="mb-4 text-sm font-semibold text-gray-500">목차</h3>
-        <ul className="space-y-1">
-          {scrollRoutes.map((route) => (
-            <li key={route.path}>
-              <DemoLink
-                to={route.path}
-                className="w-full rounded-lg px-3 py-2 text-left text-sm transition-colors block
-                  text-gray-700 hover:bg-gray-100 underline-none
-                  data-[active=true]:bg-blue-500 data-[active=true]:text-white"
-              >
-                {route.label}
-              </DemoLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { currentPath, navigate } = useBrowserNavigation();
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-hidden relative z-0">{children}</div>
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    // Close sidebar on mobile after navigation
+    setIsSidebarOpen(false);
+  };
+
+  return (
+    <div className="relative bg-gray-900 min-h-[400px] overflow-hidden">
+      {/* Toggle Button - Mobile only */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="md:hidden absolute top-2 left-2 z-50 p-1.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {isSidebarOpen ? (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          ) : (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          )}
+        </svg>
+      </button>
+
+      {/* Overlay for mobile when sidebar is open */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden absolute inset-0 bg-black bg-opacity-30 z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex h-full">
+        {/* Sidebar Navigation */}
+        <nav
+          className={`
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            md:translate-x-0 absolute md:relative top-0 left-0 h-full z-40
+            w-48 bg-gray-800 border-r border-gray-700 p-2 md:p-4
+            transform transition-transform duration-300 ease-in-out
+            md:h-screen overflow-y-auto flex-shrink-0
+          `}
+        >
+          <h3 className="mb-3 text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider px-2">
+            Contents
+          </h3>
+          <ul className="space-y-0.5 md:space-y-1">
+            {scrollRoutes.map((route) => {
+              const isActive = currentPath === route.path;
+              return (
+                <li key={route.path}>
+                  <button
+                    onClick={() => handleNavigation(route.path)}
+                    className={`
+                      w-full rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-left text-xs md:text-sm transition-all
+                      ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }
+                    `}
+                  >
+                    {route.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Content Area */}
+        <div className="flex-1 bg-gray-900 overflow-auto">
+          <div className="md:ml-0 pt-10 md:pt-0 relative z-0">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }

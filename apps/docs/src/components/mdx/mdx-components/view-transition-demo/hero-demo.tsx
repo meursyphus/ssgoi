@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { hero } from "@ssgoi/react/view-transitions";
-import { BrowserMockup, DemoPage } from "../browser-mockup";
+import { BrowserMockup, DemoPage, DemoLink, useBrowserNavigation } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 
 // Mock data for gallery
@@ -97,14 +97,14 @@ function GalleryListPage() {
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
           {galleryItems.map((item) => (
-            <a
+            <DemoLink
               key={item.id}
-              href={`/gallery/${item.id}`}
-              className="group cursor-pointer block"
+              to={`/gallery/${item.id}`}
+              className="group cursor-pointer block no-underline"
             >
               <article>
-                <div className="relative overflow-hidden rounded-lg bg-gray-800 transition-transform duration-300 hover:scale-105">
-                  {/* Hero transition element */}
+                <div className="relative bg-gray-800 rounded-lg transition-transform duration-300 hover:scale-105">
+                  {/* Hero transition element - no overflow hidden here */}
                   <div
                     data-hero-key={item.id}
                     className="relative aspect-[4/3]"
@@ -112,10 +112,10 @@ function GalleryListPage() {
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-lg" // Border radius on image itself
                     />
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* Overlay on hover with rounded corners */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute bottom-0 left-0 right-0 p-4">
                         <span className="text-xs text-teal-400 font-medium uppercase tracking-wider">
                           {item.category}
@@ -128,7 +128,7 @@ function GalleryListPage() {
                   </div>
                 </div>
               </article>
-            </a>
+            </DemoLink>
           ))}
         </div>
       </div>
@@ -136,30 +136,66 @@ function GalleryListPage() {
   );
 }
 
-// Gallery Detail Page Components
-const detailPages = galleryItems.map((item) => ({
-  path: `/gallery/${item.id}`,
-  component: () => (
+// Gallery Detail Page Component
+function GalleryDetailPage({ item }: { item: typeof galleryItems[0] }) {
+  const { navigate } = useBrowserNavigation();
+
+  // Add keyboard navigation (ESC to go back)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        navigate('/gallery');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [navigate]);
+
+  return (
     <DemoPage path={`/gallery/${item.id}`} title={item.title}>
-      <div className="min-h-screen bg-black">
-        {/* Back button */}
-        <div className="absolute top-4 left-4 z-10">
-          <a
-            href="/gallery"
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-colors"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+      <div className="min-h-screen bg-black relative">
+        {/* Top navigation bar with back button */}
+        <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4">
+          <div className="flex items-center justify-between max-w-6xl mx-auto">
+            <DemoLink
+              to="/gallery"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
             >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            <span>Back</span>
-          </a>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span className="font-medium">Back to Gallery</span>
+            </DemoLink>
+            
+            {/* Close button with ESC hint */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 hidden md:block">Press ESC</span>
+              <DemoLink
+                to="/gallery"
+                className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
+                aria-label="Close"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </DemoLink>
+            </div>
+          </div>
         </div>
 
         {/* Full screen image with hero transition */}
@@ -212,7 +248,13 @@ const detailPages = galleryItems.map((item) => ({
         </div>
       </div>
     </DemoPage>
-  ),
+  );
+}
+
+// Create route configuration for detail pages
+const detailPages = galleryItems.map((item) => ({
+  path: `/gallery/${item.id}`,
+  component: () => <GalleryDetailPage item={item} />,
   label: item.title,
 }));
 

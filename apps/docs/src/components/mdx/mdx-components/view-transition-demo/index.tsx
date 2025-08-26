@@ -3,6 +3,7 @@
 import React from "react";
 import { FadeDemo } from "./fade-demo";
 import { ScrollDemo } from "./scroll-demo";
+import { HeroDemo } from "./hero-demo";
 
 export interface ViewTransitionDemoProps {
   type: "fade" | "hero" | "pinterest" | "slide" | "scale" | "blur" | "scroll";
@@ -14,8 +15,9 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
       return <FadeDemo />;
     case "scroll":
       return <ScrollDemo />;
-    // TODO: Add other transition types
     case "hero":
+      return <HeroDemo />;
+    // TODO: Add other transition types
     case "pinterest":
     case "slide":
     case "scale":

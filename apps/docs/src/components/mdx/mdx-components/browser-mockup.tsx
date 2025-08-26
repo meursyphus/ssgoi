@@ -147,8 +147,7 @@ export function BrowserMockup({
       <div
         className={cn(
           "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
-          "md:aspect-[16/10]",
-          "aspect-[9/12]", // Consistent aspect ratio for both mobile and desktop
+          "h-[600px] md:h-[500px]", // Fixed heights for mobile and desktop
           className
         )}
       >
