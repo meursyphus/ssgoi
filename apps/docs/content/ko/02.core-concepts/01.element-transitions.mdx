@@ -70,6 +70,7 @@ nav-title: "요소 애니메이션"
       Bounce 효과
     </div>
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -327,6 +328,11 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 
 ## Progress 동작 방식
 
+### key
+
+- `key`는 페이지 내에서 고유해야 함 (DOM이 생성되거나 삭제될 때도 애니메이션 상태를 추적할 수 있도록)
+- `key`를 설정하지 않으면 기본적으로 호출 위치 기반의 자동 키가 생성됨
+
 ### in 애니메이션
 
 - progress: 0 → 1
@@ -375,7 +381,3 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
   }
 }
 ```
-
-## 주의사항
-
-- `key`는 페이지 내에서 고유해야 함 (돔이 생성되다가 삭제 혹은 삭제되다가 생성되어도 애니메이션 상태를 추적할 수 있도록)

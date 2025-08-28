@@ -327,6 +327,11 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## Progress Behavior
 
+### key
+
+- `key` must be unique within the page (to track animation state even when DOM is created/deleted)
+- If `key` is not set, a default auto-key based on the call location is generated
+
 ### in Animation
 
 - progress: 0 → 1
@@ -375,7 +380,3 @@ The stage where DOM elements are prepared before animation starts:
   }
 }
 ```
-
-## Important Notes
-
-- `key` must be unique within the page (so animation state can be tracked even when DOM is created then deleted or deleted then created)
