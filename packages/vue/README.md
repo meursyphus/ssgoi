@@ -78,12 +78,12 @@ Define different transitions for different routes:
 ```javascript
 const config = {
   transitions: [
-    // Slide between tabs
-    { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
-    { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
+    // Scroll between tabs
+    { from: '/home', to: '/about', transition: scroll({ direction: 'up' }) },
+    { from: '/about', to: '/home', transition: scroll({ direction: 'down' }) },
     
-    // Scale up when entering details
-    { from: '/products', to: '/products/*', transition: scale() },
+    // Drill in when entering details
+    { from: '/products', to: '/products/*', transition: drill({ direction: 'enter' }) },
     
     // Pinterest-style image transitions
     { from: '/gallery', to: '/photo/*', transition: pinterest() }
@@ -100,7 +100,7 @@ Automatically create bidirectional transitions:
 {
   from: '/home',
   to: '/about', 
-  transition: slide({ direction: 'left' }),
+  transition: scroll({ direction: 'up' }),
   symmetric: true  // Automatically creates reverse transition
 }
 ```
@@ -190,10 +190,10 @@ onUnmounted(() => {
 
 <script setup>
 import { Ssgoi } from '@ssgoi/vue';
-import { slide } from '@ssgoi/vue/view-transitions';
+import { scroll } from '@ssgoi/vue/view-transitions';
 
 const config = {
-  defaultTransition: slide({ direction: 'left' })
+  defaultTransition: scroll({ direction: 'up' })
 };
 </script>
 
@@ -280,11 +280,10 @@ const cleanup = transition({
 
 ### Page Transitions (`@ssgoi/vue/view-transitions`)
 - `fade()` - Smooth opacity transition
-- `slide()` - Directional sliding (left/right/up/down)
-- `scale()` - Zoom in/out effect
+- `scroll()` - Vertical scrolling (up/down)
+- `drill()` - Drill in/out effect (enter/exit)
 - `hero()` - Shared element transitions
 - `pinterest()` - Pinterest-style expand effect
-- `ripple()` - Material Design ripple effect
 
 ### Element Transitions (`@ssgoi/vue/transitions`)
 - `fadeIn()` / `fadeOut()`

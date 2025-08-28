@@ -215,16 +215,16 @@ nav-title: "クイックスタート"
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
-    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // ホーム → 紹介: 左にスライド
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 紹介 → ホーム: 右にスライド
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // リスト → 詳細: スケール
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // ホーム → 紹介: 上にスクロール
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 紹介 → ホーム: 下にスクロール
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // リスト → 詳細: ドリル
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
 
@@ -249,16 +249,16 @@ nav-title: "クイックスタート"
     <!-- src/routes/+layout.svelte -->
     <script>
       import { Ssgoi } from "@ssgoi/svelte";
-      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+      import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
       const ssgoiConfig = {
         transitions: [
-          // ホーム → 紹介: 左にスライド
-          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-          // 紹介 → ホーム: 右にスライド
-          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-          // リスト → 詳細: スケール
-          { from: "/list", to: "/detail/*", transition: scale() },
+          // ホーム → 紹介: 上にスクロール
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 紹介 → ホーム: 下にスクロール
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // リスト → 詳細: ドリル
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
         ],
       };
     </script>
@@ -284,16 +284,16 @@ nav-title: "クイックスタート"
 
     <script setup>
     import { Ssgoi } from "@ssgoi/vue";
-    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // ホーム → 紹介: 左にスライド
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 紹介 → ホーム: 右にスライド
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // リスト → 詳細: スケール
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // ホーム → 紹介: 上にスクロール
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 紹介 → ホーム: 下にスクロール
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // リスト → 詳細: ドリル
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
     </script>

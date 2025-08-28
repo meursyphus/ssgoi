@@ -217,16 +217,16 @@ nav-title: "Quick Start"
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
-    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // Home → About: slide left
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // About → Home: slide right
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // List → Detail: scale
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // Home → About: scroll up
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // About → Home: scroll down
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // List → Detail: drill (enter)
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
 
@@ -251,16 +251,16 @@ nav-title: "Quick Start"
     <!-- src/routes/+layout.svelte -->
     <script>
       import { Ssgoi } from "@ssgoi/svelte";
-      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+      import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
       const ssgoiConfig = {
         transitions: [
-          // Home → About: slide left
-          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-          // About → Home: slide right
-          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-          // List → Detail: scale
-          { from: "/list", to: "/detail/*", transition: scale() },
+          // Home → About: scroll up
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // About → Home: scroll down
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // List → Detail: drill (enter)
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
         ],
       };
     </script>
@@ -286,16 +286,16 @@ nav-title: "Quick Start"
 
     <script setup>
     import { Ssgoi } from "@ssgoi/vue";
-    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // Home → About: slide left
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // About → Home: slide right
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // List → Detail: scale
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // Home → About: scroll up
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // About → Home: scroll down
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // List → Detail: drill (enter)
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
     </script>

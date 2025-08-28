@@ -210,16 +210,16 @@ nav-title: "빠른 시작"
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
-    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // 홈 → 소개: 왼쪽으로 슬라이드
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 소개 → 홈: 오른쪽으로 슬라이드
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // 목록 → 상세: 확대
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // 홈 → 소개: 위로 스크롤
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 소개 → 홈: 아래로 스크롤
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // 목록 → 상세: 드릴 (진입)
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
 
@@ -243,16 +243,16 @@ nav-title: "빠른 시작"
     <!-- src/routes/+layout.svelte -->
     <script>
       import { Ssgoi } from "@ssgoi/svelte";
-      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+      import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
       const ssgoiConfig = {
         transitions: [
-          // 홈 → 소개: 왼쪽으로 슬라이드
-          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-          // 소개 → 홈: 오른쪽으로 슬라이드
-          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-          // 목록 → 상세: 확대
-          { from: "/list", to: "/detail/*", transition: scale() },
+          // 홈 → 소개: 위로 스크롤
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 소개 → 홈: 아래로 스크롤
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // 목록 → 상세: 드릴 (진입)
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
         ],
       };
     </script>
@@ -277,16 +277,16 @@ nav-title: "빠른 시작"
 
     <script setup>
     import { Ssgoi } from "@ssgoi/vue";
-    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // 홈 → 소개: 왼쪽으로 슬라이드
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 소개 → 홈: 오른쪽으로 슬라이드
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // 리스트 → 상세: 스케일
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // 홈 → 소개: 위로 스크롤
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 소개 → 홈: 아래로 스크롤
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // 리스트 → 상세: 드릴 (진입)
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
     </script>

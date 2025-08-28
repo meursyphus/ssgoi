@@ -38,10 +38,11 @@ packages/core/
 │   │   │   ├── scale.ts
 │   │   │   └── slide.ts
 │   │   └── view-transitions/        # Page transitions
+│   │       ├── drill.ts
 │   │       ├── fade.ts
 │   │       ├── hero.ts
 │   │       ├── pinterest.ts
-│   │       └── ripple.ts
+│   │       └── scroll.ts
 │   └── components/                  # Shared components
 ```
 
@@ -124,11 +125,10 @@ Key concepts:
 
 ### View Transitions (Page-level)
 - `fade()` - Smooth opacity transition
-- `slide()` - Directional sliding
-- `scale()` - Zoom in/out effect
+- `scroll()` - Vertical scrolling (up/down)
+- `drill()` - Drill in/out effect (enter/exit)
 - `hero()` - Shared element transitions
 - `pinterest()` - Pinterest-style expand
-- `ripple()` - Material Design ripple
 
 ### Element Transitions (Component-level)
 - `fadeIn()` / `fadeOut()`
@@ -193,13 +193,13 @@ const config = {
     {
       from: '/home',
       to: '/about',
-      transition: slide({ direction: 'left' }),
+      transition: scroll({ direction: 'up' }),
       symmetric: true  // Auto-creates reverse transition
     },
     {
       from: '/products',
       to: '/products/*',  // Wildcard support
-      transition: scale()
+      transition: drill({ direction: 'enter' })
     }
   ]
 };
