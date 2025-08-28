@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
   "private": false,
   "type": "module",
@@ -54,7 +54,7 @@
     "prepare": "pnpm run build"
   },
   "dependencies": {
-    "@ssgoi/core": "^2.1.0"
+    "@ssgoi/core": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
