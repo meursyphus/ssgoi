@@ -1,25 +1,15 @@
 'use client'
 
 import Giscus from '@giscus/react'
-import { useEffect, useState } from 'react'
+import { getGiscusLanguage } from '@/lib/giscus-utils'
+import { SupportedLanguage } from '@/i18n/supported-languages'
 
 interface GiscusCommentsProps {
   slug: string // Use slug as the unique identifier
-  lang: string
+  lang: SupportedLanguage
 }
 
 export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
-
-  // Map language codes to giscus supported languages
-  const getGiscusLang = (lang: string) => {
-    const langMap: Record<string, string> = {
-      ko: 'ko',
-      en: 'en',
-      ja: 'ja',
-      zh: 'zh-CN',
-    }
-    return langMap[lang] || 'en'
-  }
 
   return (
     <div className="mt-16 pt-8 border-t border-gray-700">
@@ -36,7 +26,7 @@ export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
         emitMetadata="0"
         inputPosition="bottom"
         theme="dark"
-        lang={getGiscusLang(lang)}
+        lang={getGiscusLanguage(lang)}
         loading="lazy"
       />
     </div>

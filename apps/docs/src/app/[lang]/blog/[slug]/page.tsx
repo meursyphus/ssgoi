@@ -9,6 +9,7 @@ import { BlogPostLink } from "@/components/blog/blog-post-link";
 import { createSEOMetadata } from "@/lib/seo-metadata";
 import { BlogPostStructuredData } from "../structured-data";
 import GiscusComments from "@/components/blog/giscus-comments";
+import { SupportedLanguage } from "@/i18n/supported-languages";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -135,7 +136,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {await MDXContent({ content: post.content })}
           </div>
 
-          <GiscusComments slug={slug} lang={lang} />
+          <GiscusComments slug={slug} lang={lang as SupportedLanguage} />
 
           <footer className="mt-16 pt-8 border-t border-gray-800">
             <BlogPostLink
