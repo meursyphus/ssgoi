@@ -8,6 +8,7 @@ import { getServerTranslations } from "@/i18n/get-server-translations";
 import { BlogPostLink } from "@/components/blog/blog-post-link";
 import { createSEOMetadata } from "@/lib/seo-metadata";
 import { BlogPostStructuredData } from "../structured-data";
+import GiscusComments from "@/components/blog/giscus-comments";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -133,6 +134,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="prose prose-invert prose-lg max-w-none">
             {await MDXContent({ content: post.content })}
           </div>
+
+          <GiscusComments slug={slug} lang={lang} />
 
           <footer className="mt-16 pt-8 border-t border-gray-800">
             <BlogPostLink
