@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
-import IPhone3D from "@/components/iphone/iphone-3d";
+import IPhone3D from "@/components/home/iphone/iphone-3d";
 import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
 import { Metadata } from "next";
@@ -18,12 +18,15 @@ export async function generateMetadata({
   const { lang } = await params;
   const t = await getServerTranslations("metadata", lang);
 
-  return createSEOMetadata({
-    title: t("title"),
-    description: t("description"),
-    type: "website",
-    url: `/${lang}`,
-  }, lang);
+  return createSEOMetadata(
+    {
+      title: t("title"),
+      description: t("description"),
+      type: "website",
+      url: `/${lang}`,
+    },
+    lang
+  );
 }
 
 export default async function Home({ params }: HomePageProps) {
@@ -67,10 +70,7 @@ export default async function Home({ params }: HomePageProps) {
                   {t("buttons.getStarted")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <Link
-                  href={`/${lang}/demo`}
-                  className="btn-secondary text-lg"
-                >
+                <Link href={`/${lang}/demo`} className="btn-secondary text-lg">
                   <Zap className="h-5 w-5" />
                   {t("buttons.demo")}
                 </Link>
@@ -125,7 +125,10 @@ export default async function Home({ params }: HomePageProps) {
 
             {/* 오른쪽: 앱 데모 */}
             <div className="relative">
-              <div className="relative mx-auto" style={{ width: '450px', height: '650px' }}>
+              <div
+                className="relative mx-auto"
+                style={{ width: "450px", height: "650px" }}
+              >
                 {/* 3D iPhone Component */}
                 <IPhone3D color="black">
                   <Demo />
@@ -237,7 +240,9 @@ export default async function Home({ params }: HomePageProps) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 SolidJS
-                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
+                <span className="block text-xs">
+                  {t("frameworks.comingSoon")}
+                </span>
               </span>
             </div>
 
@@ -254,7 +259,9 @@ export default async function Home({ params }: HomePageProps) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Qwik
-                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
+                <span className="block text-xs">
+                  {t("frameworks.comingSoon")}
+                </span>
               </span>
             </div>
           </div>
@@ -278,7 +285,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-green to-vivid-cyan">
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.ssr.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.ssr.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.ssr.description")}
               </p>
@@ -290,7 +299,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-cyan to-vivid-blue">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.browserCompat.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.browserCompat.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.browserCompat.description")}
               </p>
@@ -302,7 +313,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-purple to-vivid-pink">
                 <Zap className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.zeroConfig.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.zeroConfig.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.zeroConfig.description")}
               </p>

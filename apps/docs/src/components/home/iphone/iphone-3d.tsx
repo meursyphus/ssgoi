@@ -25,9 +25,9 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
   // Color mappings for titanium finishes
   const colors = {
     natural: {
-      frame: '#9e9891',
-      frameMetallic: 1,
-      frameRoughness: 0.3,
+      frame: '#c0c0c0',  // Silver metallic
+      frameMetallic: 0.95,
+      frameRoughness: 0.15,
     },
     blue: {
       frame: '#2a3b4e',
@@ -35,9 +35,9 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
       frameRoughness: 0.3,
     },
     white: {
-      frame: '#d8d6d4',
+      frame: '#e8e8e8',
       frameMetallic: 0.9,
-      frameRoughness: 0.4,
+      frameRoughness: 0.2,
     },
     black: {
       frame: '#1a1b1d',
@@ -48,14 +48,18 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
 
   const currentColor = colors[color as keyof typeof colors];
   
-  // Scale down all dimensions
-  const scale = 0.8;
+  // iPhone 15 Pro actual dimensions (in Three.js units)
+  const phoneWidth = 2.4;
+  const phoneHeight = 5.2;
+  const phoneDepth = 0.28;
+  const screenInset = 0.08;  // Bezel size
+  const scale = 0.7;  // Overall scale
 
   return (
     <group ref={meshRef} position={[0, 0, 0]} scale={[scale, scale, scale]}>
-      {/* Main body/frame */}
+      {/* Main body/frame - thinner design */}
       <RoundedBox
-        args={[2.4, 5.2, 0.35]}
+        args={[phoneWidth, phoneHeight, phoneDepth]}
         radius={0.35}
         smoothness={4}
         position={[0, 0, 0]}
@@ -64,15 +68,16 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
           color={currentColor.frame}
           metalness={currentColor.frameMetallic}
           roughness={currentColor.frameRoughness}
+          envMapIntensity={1.5}  // Enhanced reflection
         />
       </RoundedBox>
 
       {/* Screen bezel (slightly inset) */}
       <RoundedBox
-        args={[2.25, 5.05, 0.36]}
+        args={[phoneWidth - 0.06, phoneHeight - 0.06, phoneDepth + 0.01]}
         radius={0.32}
         smoothness={4}
-        position={[0, 0, 0.01]}
+        position={[0, 0, 0.005]}
       >
         <meshStandardMaterial 
           color="#000000"
@@ -81,34 +86,49 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
         />
       </RoundedBox>
 
-      {/* Screen */}
-      <Box args={[2.15, 4.95, 0.02]} position={[0, 0, 0.19]}>
-        <meshBasicMaterial color="#000000" />
+      {/* Screen - only visible from front */}
+      <group>
+        {/* Black screen background for depth */}
+        <Box 
+          args={[phoneWidth - screenInset * 2, phoneHeight - screenInset * 2, 0.01]} 
+          position={[0, 0, phoneDepth/2 - 0.005]}
+        >
+          <meshBasicMaterial color="#000000" />
+        </Box>
+        
+        {/* HTML content - simple and direct */}
         <Html
           transform
           distanceFactor={1.5}
-          position={[0, 0, 0.01]}
-          style={{
-            width: '345px',
-            height: '792px',
-            borderRadius: '48px',
+          position={[0, 0, phoneDepth/2]}
+          center
+        >
+          <div style={{
+            width: '324px',  // 90% of 360px for padding
+            height: '702px',  // 90% of 780px for padding
+            borderRadius: '35px',
             overflow: 'hidden',
             background: '#000',
-            transform: 'scale(1)'
-          }}
-        >
-          <div style={{ width: '100%', height: '100%', transform: 'scale(0.93)' }}>
-            {children}
+            pointerEvents: 'auto',
+          }}>
+            <div style={{
+              width: '360px',
+              height: '780px',
+              transform: 'scale(0.9)',
+              transformOrigin: 'top left'
+            }}>
+              {children}
+            </div>
           </div>
         </Html>
-      </Box>
+      </group>
 
       {/* Dynamic Island */}
       <RoundedBox
         args={[0.8, 0.22, 0.05]}
         radius={0.1}
         smoothness={4}
-        position={[0, 2.35, 0.19]}
+        position={[0, 2.35, 0.15]}  // Adjusted for thinner frame
       >
         <meshStandardMaterial 
           color="#000000"
@@ -121,7 +141,7 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
       <Cylinder
         args={[0.04, 0.04, 0.02, 32]}
         rotation={[Math.PI / 2, 0, 0]}
-        position={[0, 2.35, 0.2]}
+        position={[0, 2.35, 0.16]}  // Adjusted for thinner frame
       >
         <meshStandardMaterial
           color="#1a1a2a"
@@ -131,29 +151,29 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
       </Cylinder>
 
       {/* Power button (right side) */}
-      <Box args={[0.02, 0.6, 0.15]} position={[1.21, 0.8, 0]}>
+      <Box args={[0.015, 0.6, 0.12]} position={[1.21, 0.8, 0]}>  {/* Thinner button */}
         <meshStandardMaterial
-          color="#6a6c6e"
-          metalness={1}
-          roughness={0.4}
+          color="#b8b8b8"  // Silver color
+          metalness={0.95}
+          roughness={0.2}
         />
       </Box>
 
       {/* Volume up button (left side) */}
-      <Box args={[0.02, 0.4, 0.15]} position={[-1.21, 1.2, 0]}>
+      <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 1.2, 0]}>  {/* Thinner button */}
         <meshStandardMaterial
-          color="#6a6c6e"
-          metalness={1}
-          roughness={0.4}
+          color="#b8b8b8"  // Silver color
+          metalness={0.95}
+          roughness={0.2}
         />
       </Box>
 
       {/* Volume down button (left side) */}
-      <Box args={[0.02, 0.4, 0.15]} position={[-1.21, 0.6, 0]}>
+      <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 0.6, 0]}>  {/* Thinner button */}
         <meshStandardMaterial
-          color="#6a6c6e"
-          metalness={1}
-          roughness={0.4}
+          color="#b8b8b8"  // Silver color
+          metalness={0.95}
+          roughness={0.2}
         />
       </Box>
 
@@ -272,8 +292,9 @@ export default function IPhone3D({ children, color = 'natural' }: IPhone3DProps)
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '600px' }}>
       <Canvas
-        camera={{ position: [3, 1.5, 4.5], fov: 40 }}
+        camera={{ position: [2.8, 1.2, 4], fov: 42 }}  // Adjusted camera for better view
         style={{ background: 'transparent' }}
+        gl={{ preserveDrawingBuffer: true }}
       >
         <Suspense fallback={null}>
           <PresentationControls
@@ -282,7 +303,9 @@ export default function IPhone3D({ children, color = 'natural' }: IPhone3DProps)
             polar={[-0.4, 0.2]}
             azimuth={[-1, 0.75]}
             config={{ mass: 2, tension: 400 }}
-            snap={{ mass: 4, tension: 400 }}
+            snap={false}  // Disable snap to prevent stuck state
+            enabled={true}  // Ensure controls are enabled
+            cursor={true}  // Show cursor feedback
           >
             <Float
               speed={1.5}
