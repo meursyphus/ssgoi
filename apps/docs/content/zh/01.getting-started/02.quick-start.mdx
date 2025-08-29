@@ -215,16 +215,16 @@ nav-title: "快速入门"
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
-    import { slide, fade, scale } from "@ssgoi/react/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // 首页 → 关于：向左滑动
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 关于 → 首页：向右滑动
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // 列表 → 详情：缩放
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // 首页 → 关于：向上滚动
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 关于 → 首页：向下滚动
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // 列表 → 详情：钻入
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
 
@@ -249,16 +249,16 @@ nav-title: "快速入门"
     <!-- src/routes/+layout.svelte -->
     <script>
       import { Ssgoi } from "@ssgoi/svelte";
-      import { slide, fade, scale } from "@ssgoi/svelte/view-transitions";
+      import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
       const ssgoiConfig = {
         transitions: [
-          // 首页 → 关于：向左滑动
-          { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-          // 关于 → 首页：向右滑动
-          { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-          // 列表 → 详情：缩放
-          { from: "/list", to: "/detail/*", transition: scale() },
+          // 首页 → 关于：向上滚动
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 关于 → 首页：向下滚动
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // 列表 → 详情：钻入
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
         ],
       };
     </script>
@@ -284,16 +284,16 @@ nav-title: "快速入门"
 
     <script setup>
     import { Ssgoi } from "@ssgoi/vue";
-    import { slide, fade, scale } from "@ssgoi/vue/view-transitions";
+    import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
     const ssgoiConfig = {
       transitions: [
-        // 首页 → 关于：向左滑动
-        { from: "/", to: "/about", transition: slide({ direction: "left" }) },
-        // 关于 → 首页：向右滑动
-        { from: "/about", to: "/", transition: slide({ direction: "right" }) },
-        // 列表 → 详情：缩放
-        { from: "/list", to: "/detail/*", transition: scale() },
+        // 首页 → 关于：向上滚动
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 关于 → 首页：向下滚动
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // 列表 → 详情：钻入
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
       ],
     };
     </script>

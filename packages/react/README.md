@@ -73,12 +73,12 @@ Define different transitions for different routes:
 ```tsx
 const config = {
   transitions: [
-    // Slide between tabs
-    { from: '/home', to: '/about', transition: slide({ direction: 'left' }) },
-    { from: '/about', to: '/home', transition: slide({ direction: 'right' }) },
+    // Scroll between tabs
+    { from: '/home', to: '/about', transition: scroll({ direction: 'up' }) },
+    { from: '/about', to: '/home', transition: scroll({ direction: 'down' }) },
     
-    // Scale up when entering details
-    { from: '/products', to: '/products/*', transition: scale() },
+    // Drill in when entering details
+    { from: '/products', to: '/products/*', transition: drill({ direction: 'enter' }) },
     
     // Pinterest-style image transitions
     { from: '/gallery', to: '/photo/*', transition: pinterest() }
@@ -95,7 +95,7 @@ Automatically create bidirectional transitions:
 {
   from: '/home',
   to: '/about', 
-  transition: slide({ direction: 'left' }),
+  transition: scroll({ direction: 'up' }),
   symmetric: true  // Automatically creates reverse transition
 }
 ```
@@ -126,14 +126,14 @@ function Card() {
 ```tsx
 // app/layout.tsx
 import { Ssgoi } from '@ssgoi/react';
-import { slide } from '@ssgoi/react/view-transitions';
+import { scroll } from '@ssgoi/react/view-transitions';
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
         <Ssgoi config={{
-          defaultTransition: slide({ direction: 'left' })
+          defaultTransition: scroll({ direction: 'up' })
         }}>
           <div style={{ position: 'relative', minHeight: '100vh' }}>
             {children}
@@ -206,11 +206,10 @@ Apply transitions to individual elements.
 
 ### Page Transitions (`@ssgoi/react/view-transitions`)
 - `fade()` - Smooth opacity transition
-- `slide()` - Directional sliding (left/right/up/down)
-- `scale()` - Zoom in/out effect
+- `scroll()` - Vertical scrolling (up/down)
+- `drill()` - Drill in/out effect (enter/exit)
 - `hero()` - Shared element transitions
 - `pinterest()` - Pinterest-style expand effect
-- `ripple()` - Material Design ripple effect
 
 ### Element Transitions (`@ssgoi/react/transitions`)
 - `fadeIn()` / `fadeOut()`
