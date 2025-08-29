@@ -41,6 +41,7 @@
   ],
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
+    "framer-motion": "^12.23.12",
     "next-mdx-remote-client": "^2.1.2"
   },
   "devDependencies": {

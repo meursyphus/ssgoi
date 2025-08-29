@@ -1,0 +1,299 @@
+---
+title: "Slide Transition"
+description: "Horizontal slide transitions between same-level content"
+nav-title: "Slide"
+---
+
+# Slide Transition
+
+Slide transition creates an effect where pages slide horizontally, used when navigating between sibling content at the same level. It provides a natural horizontal movement experience in tab navigation or step-based UIs.
+
+## Demo
+
+<ViewTransitionDemo type="slide" />
+
+## UX Principles
+
+### When to Use?
+
+Slide transition is used for **horizontal content navigation**.
+
+#### Suitability by Content Relationship
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "no",
+      description: "Independent sections should use fade"
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "yes",
+      description: "Optimal for same-level tabs or steps"
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "Parent-child structures should use drill or hero"
+    }
+  ]}
+/>
+
+#### Primary Use Cases
+
+- **Tab Navigation**: Content switching in tab UI
+- **Image Gallery**: Swipe transitions between images
+- **Settings Screen**: Horizontal movement between categories
+- **Onboarding Steps**: Step-by-step progress screens
+
+### Why Does It Work This Way?
+
+1. **Matches Horizontal Gestures**: Naturally connects with mobile left/right swipe
+2. **Tab Metaphor**: Intuitive experience like flipping through physical tabs
+3. **Direction Recognition**: Visually expresses forward/backward direction
+
+### Motion Design
+
+```
+LEFT Direction (Next):
+Outgoing screen: Pushed to the left (current content goes left)
+Incoming screen: Enters from right (next content appears)
+
+RIGHT Direction (Previous):
+Outgoing screen: Pushed to the right (current content goes right)
+Incoming screen: Enters from left (previous content returns)
+```
+
+## Basic Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: slide()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: slide()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Practical Examples
+
+### 1. Tab Navigation
+
+Content switching in tab UI:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/tabs/home',
+          to: '/tabs/profile',
+          transition: slide({ direction: 'left' }),
+          symmetric: true  // Automatically right on back navigation
+        },
+        {
+          from: '/tabs/profile',
+          to: '/tabs/settings',
+          transition: slide({ direction: 'left' }),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/tabs/home',
+            to: '/tabs/profile',
+            transition: slide({ direction: 'left' }),
+            symmetric: true  // Automatically right on back navigation
+          },
+          {
+            from: '/tabs/profile',
+            to: '/tabs/settings',
+            transition: slide({ direction: 'left' }),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Image Gallery
+
+Swipe transitions between images:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/photo-*',
+          to: '/gallery/photo-*',
+          transition: slide({ 
+            direction: 'left',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/photo-*',
+            to: '/gallery/photo-*',
+            transition: slide({ 
+              direction: 'left',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. Dynamic Direction via Middleware
+
+Automatically determine direction based on tab order:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const createMiddleware = (tabs) => {
+      return (from, to) => {
+        const fromIndex = tabs.indexOf(from);
+        const toIndex = tabs.indexOf(to);
+        
+        if (fromIndex < toIndex) {
+          return { from: "/nav/left", to: "/nav/right" };
+        } else {
+          return { from: "/nav/right", to: "/nav/left" };
+        }
+      };
+    };
+
+    const config = {
+      transitions: [
+        {
+          from: "/nav/left",
+          to: "/nav/right",
+          transition: slide({ direction: "left" })
+        },
+        {
+          from: "/nav/right",
+          to: "/nav/left",
+          transition: slide({ direction: "right" })
+        }
+      ],
+      middleware: createMiddleware(tabOrder)
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const createMiddleware = (tabs) => {
+        return (from, to) => {
+          const fromIndex = tabs.indexOf(from);
+          const toIndex = tabs.indexOf(to);
+          
+          if (fromIndex < toIndex) {
+            return { from: "/nav/left", to: "/nav/right" };
+          } else {
+            return { from: "/nav/right", to: "/nav/left" };
+          }
+        };
+      };
+
+      const config = {
+        transitions: [
+          {
+            from: "/nav/left",
+            to: "/nav/right",
+            transition: slide({ direction: "left" })
+          },
+          {
+            from: "/nav/right",
+            to: "/nav/left",
+            transition: slide({ direction: "right" })
+          }
+        ],
+        middleware: createMiddleware(tabOrder)
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Performance Optimization
+
+- Uses only `transform: translateX()` for GPU acceleration
+- Maintains smooth 60fps without layout recalculation
+- Automatically preserves horizontal scroll position
+
+## Accessibility
+
+- Disables transitions when `prefers-reduced-motion` is set
+- Full keyboard navigation support
+- Properly conveys tab structure to screen readers
+
+## Best Practices
+
+### ✅ DO
+
+- Use for tab navigation or step UIs
+- Apply to left/right swiping in image galleries
+- Utilize for horizontal movement between setting categories
+- Maintain bidirectional consistency with symmetric option
+- Connect with natural swipe gestures on mobile
+
+### ❌ DON'T
+
+- Don't use for unrelated section navigation (use fade)
+- Don't use for hierarchical structure exploration (use drill or hero)
+- Don't mix with vertical scrolling (maintain consistency)
+- Don't use with too many tabs (more than 5)

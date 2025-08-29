@@ -1,0 +1,299 @@
+---
+title: "滑动过渡"
+description: "同级内容之间的水平滑动过渡"
+nav-title: "滑动"
+---
+
+# 滑动过渡
+
+滑动过渡创建页面左右滑动切换的效果，用于同级兄弟内容之间的导航。在标签导航或步骤式界面中提供自然的水平移动体验。
+
+## 演示
+
+<ViewTransitionDemo type="slide" />
+
+## UX 原则
+
+### 何时使用？
+
+滑动过渡用于**水平内容导航**。
+
+#### 内容关系适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "no",
+      description: "独立部分建议使用淡入淡出"
+    },
+    {
+      label: "兄弟关系",
+      suitable: "yes",
+      description: "最适合同级标签或步骤"
+    },
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "父子结构建议使用钻入或英雄过渡"
+    }
+  ]}
+/>
+
+#### 主要使用场景
+
+- **标签导航**：标签界面的内容切换
+- **图片画廊**：图片之间的滑动切换
+- **设置界面**：类别之间的水平移动
+- **引导步骤**：分步进度界面
+
+### 为什么这样设计？
+
+1. **与水平手势一致**：自然地与移动端左右滑动连接
+2. **标签隐喻**：像翻阅实体标签的直观体验
+3. **方向识别**：视觉上表达前进/后退方向
+
+### 动效设计
+
+```
+左方向（下一个）：
+离开画面：向左推出（当前内容向左）
+进入画面：从右侧进入（下一个内容出现）
+
+右方向（上一个）：
+离开画面：向右推出（当前内容向右）
+进入画面：从左侧进入（上一个内容返回）
+```
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: slide()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: slide()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 实战示例
+
+### 1. 标签导航
+
+标签界面中的内容切换：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/tabs/home',
+          to: '/tabs/profile',
+          transition: slide({ direction: 'left' }),
+          symmetric: true  // 返回时自动向右
+        },
+        {
+          from: '/tabs/profile',
+          to: '/tabs/settings',
+          transition: slide({ direction: 'left' }),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/tabs/home',
+            to: '/tabs/profile',
+            transition: slide({ direction: 'left' }),
+            symmetric: true  // 返回时自动向右
+          },
+          {
+            from: '/tabs/profile',
+            to: '/tabs/settings',
+            transition: slide({ direction: 'left' }),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 图片画廊
+
+图片之间的滑动切换：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/photo-*',
+          to: '/gallery/photo-*',
+          transition: slide({ 
+            direction: 'left',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/photo-*',
+            to: '/gallery/photo-*',
+            transition: slide({ 
+              direction: 'left',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 通过中间件动态方向
+
+根据标签顺序自动确定方向：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const createMiddleware = (tabs) => {
+      return (from, to) => {
+        const fromIndex = tabs.indexOf(from);
+        const toIndex = tabs.indexOf(to);
+        
+        if (fromIndex < toIndex) {
+          return { from: "/nav/left", to: "/nav/right" };
+        } else {
+          return { from: "/nav/right", to: "/nav/left" };
+        }
+      };
+    };
+
+    const config = {
+      transitions: [
+        {
+          from: "/nav/left",
+          to: "/nav/right",
+          transition: slide({ direction: "left" })
+        },
+        {
+          from: "/nav/right",
+          to: "/nav/left",
+          transition: slide({ direction: "right" })
+        }
+      ],
+      middleware: createMiddleware(tabOrder)
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const createMiddleware = (tabs) => {
+        return (from, to) => {
+          const fromIndex = tabs.indexOf(from);
+          const toIndex = tabs.indexOf(to);
+          
+          if (fromIndex < toIndex) {
+            return { from: "/nav/left", to: "/nav/right" };
+          } else {
+            return { from: "/nav/right", to: "/nav/left" };
+          }
+        };
+      };
+
+      const config = {
+        transitions: [
+          {
+            from: "/nav/left",
+            to: "/nav/right",
+            transition: slide({ direction: "left" })
+          },
+          {
+            from: "/nav/right",
+            to: "/nav/left",
+            transition: slide({ direction: "right" })
+          }
+        ],
+        middleware: createMiddleware(tabOrder)
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 性能优化
+
+- 仅使用 `transform: translateX()` 实现 GPU 加速
+- 无需布局重计算，保持流畅的 60fps
+- 自动保留水平滚动位置
+
+## 无障碍访问
+
+- 设置 `prefers-reduced-motion` 时禁用过渡
+- 完全支持键盘导航
+- 正确传达标签结构给屏幕阅读器
+
+## 最佳实践
+
+### ✅ 应该做
+
+- 用于标签导航或步骤界面
+- 应用于图片画廊的左右滑动
+- 用于设置界面类别之间的移动
+- 使用 symmetric 选项保持双向一致性
+- 与移动端的自然滑动手势连接
+
+### ❌ 不应该做
+
+- 不要用于无关部分之间的导航（使用淡入淡出）
+- 不要用于层级结构探索（使用钻入或英雄过渡）
+- 不要与垂直滚动混用（保持一致性）
+- 不要用于过多的标签（超过5个）
