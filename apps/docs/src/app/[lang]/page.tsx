@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
+import IPhone from "@/components/iphone";
 import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
 import { Metadata } from "next";
@@ -125,15 +126,10 @@ export default async function Home({ params }: HomePageProps) {
             {/* 오른쪽: 앱 데모 */}
             <div className="relative">
               <div className="relative mx-auto max-w-sm">
-                {/* 모바일 프레임 */}
-                <div className="relative overflow-hidden rounded-[3rem] border-8 border-white/10 bg-black shadow-2xl">
-                  <div className="absolute left-1/2 top-4 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
-
-                  {/* Demo Component */}
-                  <div className="aspect-[9/19.5]">
-                    <Demo />
-                  </div>
-                </div>
+                {/* 3D iPhone Component */}
+                <IPhone scale={0.9}>
+                  <Demo />
+                </IPhone>
 
                 {/* 플로팅 배지 */}
                 <div className="absolute -left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 text-sm font-medium text-white shadow-lg">

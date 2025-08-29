@@ -1,0 +1,369 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.iphone {
+  position: relative;
+  width: 380px;
+  height: 820px;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+/* Titanium Frame Base */
+.frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #2a2c2e 0%, #1a1b1d 50%, #2a2c2e 100%);
+  border-radius: 54px;
+  padding: 10px;
+  box-shadow: 
+    /* Outer depth shadows */
+    0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 10px 40px rgba(0, 0, 0, 0.6),
+    0 30px 60px rgba(0, 0, 0, 0.4),
+    0 50px 100px rgba(0, 0, 0, 0.3),
+    /* Inner metallic highlights */
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.8);
+  transform: translateZ(30px);
+  overflow: hidden;
+}
+
+/* Metallic edge highlight */
+.edgeHighlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 54px;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Titanium color variants */
+.iphone--natural .frame {
+  background: linear-gradient(145deg, #c8c2bc 0%, #9e9891 25%, #7e7973 50%, #9e9891 75%, #c8c2bc 100%);
+}
+
+.iphone--blue .frame {
+  background: linear-gradient(145deg, #3a4d63 0%, #2a3b4e 25%, #1a2939 50%, #2a3b4e 75%, #3a4d63 100%);
+}
+
+.iphone--white .frame {
+  background: linear-gradient(145deg, #e8e6e4 0%, #d8d6d4 25%, #c8c6c4 50%, #d8d6d4 75%, #e8e6e4 100%);
+}
+
+.iphone--black .frame {
+  background: linear-gradient(145deg, #2a2c2e 0%, #1a1b1d 25%, #0a0b0d 50%, #1a1b1d 75%, #2a2c2e 100%);
+}
+
+/* Dynamic Island */
+.dynamicIsland {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 36px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 
+    inset 0 0 3px rgba(0, 0, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.camera {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, #4a4a5a, #1a1a2a);
+  border-radius: 50%;
+  border: 1.5px solid #2a2a3a;
+  box-shadow: 
+    inset 0 0 2px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Screen */
+.screen {
+  position: relative;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  margin: 2px;
+  background: #000;
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 0 0 2px rgba(0, 0, 0, 0.9),
+    inset 0 0 15px rgba(0, 0, 0, 0.7),
+    inset 0 0 3px rgba(0, 0, 0, 0.5);
+  transform: translateZ(10px);
+}
+
+/* Enhanced metallic buttons */
+.powerButton,
+.volumeUpButton,
+.volumeDownButton,
+.actionButton {
+  position: absolute;
+  background: linear-gradient(90deg, #3a3c3e, #2a2c2e, #3a3c3e);
+  box-shadow: 
+    0 0 0 0.5px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 0.5px 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transform: translateZ(35px);
+}
+
+.buttonInner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+/* Power button (right side) */
+.powerButton {
+  right: -3px;
+  top: 210px;
+  width: 3px;
+  height: 100px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(180deg, #4a4c4e, #2a2c2e, #4a4c4e);
+}
+
+/* Volume buttons (left side) */
+.volumeUpButton {
+  left: -3px;
+  top: 190px;
+  width: 3px;
+  height: 70px;
+  border-radius: 2px 0 0 2px;
+  background: linear-gradient(180deg, #4a4c4e, #2a2c2e, #4a4c4e);
+}
+
+.volumeDownButton {
+  left: -3px;
+  top: 270px;
+  width: 3px;
+  height: 70px;
+  border-radius: 2px 0 0 2px;
+  background: linear-gradient(180deg, #4a4c4e, #2a2c2e, #4a4c4e);
+}
+
+/* Action button (left side, above volume) */
+.actionButton {
+  left: -3px;
+  top: 130px;
+  width: 3px;
+  height: 45px;
+  border-radius: 2px 0 0 2px;
+  background: linear-gradient(180deg, #ff9500, #ff7a00, #ff9500);
+}
+
+/* Multiple shine layers for depth */
+.shineLayer1 {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.02) 45%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 55%,
+    transparent 70%
+  );
+  transform: translateZ(40px);
+  pointer-events: none;
+  animation: shineMove 4s infinite;
+  border-radius: 54px;
+}
+
+.shineLayer2 {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.01) 48%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0.01) 52%,
+    transparent 60%
+  );
+  transform: translateZ(45px);
+  pointer-events: none;
+  animation: shineMove 4s infinite 0.5s;
+  border-radius: 54px;
+}
+
+.reflectionGradient {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.015) 0%,
+    transparent 50%
+  );
+  transform: translateZ(50px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.iphone:hover .reflectionGradient {
+  opacity: 1;
+}
+
+@keyframes shineMove {
+  0%, 100% {
+    left: -150%;
+  }
+  20%, 80% {
+    left: -150%;
+  }
+  50% {
+    left: 150%;
+  }
+}
+
+/* Enhanced hover effects */
+.iphone:hover .frame {
+  box-shadow: 
+    0 0 0 0.5px rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    0 60px 120px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.iphone:hover .shineLayer1 {
+  animation-duration: 2s;
+}
+
+.iphone:hover .shineLayer2 {
+  animation-duration: 2s;
+}
+
+/* Button press effect */
+.powerButton:active,
+.volumeUpButton:active,
+.volumeDownButton:active,
+.actionButton:active {
+  transform: translateZ(32px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .iphone {
+    width: 304px;
+    height: 656px;
+  }
+  
+  .dynamicIsland {
+    width: 100px;
+    height: 29px;
+  }
+  
+  .camera {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .frame {
+    border-radius: 43px;
+    padding: 8px;
+  }
+  
+  .screen {
+    border-radius: 35px;
+  }
+  
+  .powerButton {
+    height: 80px;
+    top: 168px;
+  }
+  
+  .volumeUpButton {
+    height: 56px;
+    top: 152px;
+  }
+  
+  .volumeDownButton {
+    height: 56px;
+    top: 216px;
+  }
+  
+  .actionButton {
+    height: 36px;
+    top: 104px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 60px 10px;
+  }
+  
+  .iphone {
+    width: 285px;
+    height: 615px;
+  }
+  
+  .frame {
+    border-radius: 40px;
+    padding: 7px;
+  }
+  
+  .screen {
+    border-radius: 33px;
+  }
+  
+  .dynamicIsland {
+    width: 94px;
+    height: 27px;
+    border-radius: 16px;
+  }
+  
+  .camera {
+    width: 7px;
+    height: 7px;
+  }
+}
+
