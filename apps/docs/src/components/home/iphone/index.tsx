@@ -1,81 +1,310 @@
-'use client';
+"use client";
 
-import React from 'react';
-import styles from './iphone.module.css';
+import React, { useRef, Suspense, useMemo } from "react";
+import { Canvas, useFrame, createPortal, useThree } from "@react-three/fiber";
+import {
+  RoundedBox,
+  Box,
+  Cylinder,
+  MeshReflectorMaterial,
+  Environment,
+  PresentationControls,
+  Float,
+  Html,
+  useFBO,
+  Plane,
+} from "@react-three/drei";
+import * as THREE from "three";
 
-interface IPhoneProps {
+interface IPhone3DProps {
   children: React.ReactNode;
-  className?: string;
-  scale?: number;
-  color?: 'natural' | 'blue' | 'white' | 'black';
+  color?: "natural" | "blue" | "white" | "black";
 }
 
-export default function IPhone({ 
-  children, 
-  className = '', 
-  scale = 1,
-  color = 'natural'
-}: IPhoneProps) {
+function IPhoneModel({
+  children,
+  color = "natural",
+}: {
+  children: React.ReactNode;
+  color: string;
+}) {
+  const meshRef = useRef<THREE.Group>(null);
+
+  // Color mappings for titanium finishes
+  const colors = {
+    natural: {
+      frame: "#c0c0c0", // Silver metallic
+      frameMetallic: 0.95,
+      frameRoughness: 0.15,
+    },
+    blue: {
+      frame: "#2a3b4e",
+      frameMetallic: 1,
+      frameRoughness: 0.3,
+    },
+    white: {
+      frame: "#e8e8e8",
+      frameMetallic: 0.9,
+      frameRoughness: 0.2,
+    },
+    black: {
+      frame: "#1a1b1d",
+      frameMetallic: 1,
+      frameRoughness: 0.2,
+    },
+  };
+
+  const currentColor = colors[color as keyof typeof colors];
+
+  // iPhone 15 Pro actual dimensions (in Three.js units)
+  const phoneWidth = 2.4;
+  const phoneHeight = 5.2;
+  const phoneDepth = 0.28;
+  const screenInset = 0.08; // Bezel size
+  const scale = 0.7; // Overall scale
+
   return (
-    <div className={`${styles.container} ${className}`}>
-      <div 
-        className={`${styles.iphone} ${styles[`iphone--${color}`]}`}
-        style={{
-          transform: `
-            perspective(1400px)
-            rotateX(-5deg)
-            rotateY(-20deg)
-            scale3d(${scale}, ${scale}, ${scale})
-          `
-        }}
+    <group ref={meshRef} position={[0, 0, 0]} scale={[scale, scale, scale]}>
+      {/* Main body/frame - thinner design */}
+      <RoundedBox
+        args={[phoneWidth, phoneHeight, phoneDepth]}
+        radius={0.35}
+        smoothness={4}
+        position={[0, 0, 0]}
       >
-        {/* Left Side Frame */}
-        <div className={styles.leftSide}>
-          <div className={styles.actionButton}>
-            <div className={styles.buttonInner}></div>
-          </div>
-          <div className={styles.volumeUpButton}>
-            <div className={styles.buttonInner}></div>
-          </div>
-          <div className={styles.volumeDownButton}>
-            <div className={styles.buttonInner}></div>
-          </div>
-        </div>
-        
-        {/* Right Side Frame */}
-        <div className={styles.rightSide}>
-          <div className={styles.powerButton}>
-            <div className={styles.buttonInner}></div>
-          </div>
-        </div>
-        
-        {/* Bottom Frame */}
-        <div className={styles.bottomSide}>
-          <div className={styles.chargingPort}></div>
-          <div className={styles.speakerGrillLeft}></div>
-          <div className={styles.speakerGrillRight}></div>
-        </div>
-        
-        {/* Main Frame */}
-        <div className={styles.frame}>
-          {/* Dynamic Island */}
-          <div className={styles.dynamicIsland}>
-            <div className={styles.camera}></div>
-          </div>
-          
-          {/* Screen */}
-          <div className={styles.screen}>
+        <meshStandardMaterial
+          color={currentColor.frame}
+          metalness={currentColor.frameMetallic}
+          roughness={currentColor.frameRoughness}
+          envMapIntensity={1.5} // Enhanced reflection
+        />
+      </RoundedBox>
+
+      {/* Screen bezel (slightly inset) */}
+      <RoundedBox
+        args={[phoneWidth - 0.06, phoneHeight - 0.06, phoneDepth + 0.01]}
+        radius={0.32}
+        smoothness={4}
+        position={[0, 0, 0.005]}
+      >
+        <meshStandardMaterial color="#000000" metalness={0.8} roughness={0.8} />
+      </RoundedBox>
+
+      {/* Screen - render texture approach */}
+      <group position={[0, 0, phoneDepth / 2 + 0.001]}>
+        {/* Screen plane with content */}
+        <Plane
+          args={[phoneWidth - screenInset * 2, phoneHeight - screenInset * 2]}
+        >
+          <meshBasicMaterial color="#000000" />
+        </Plane>
+
+        {/* HTML overlay positioned exactly on screen */}
+        <Html
+          transform
+          occlude
+          distanceFactor={2.5}
+          position={[0, 0, 0.01]}
+          style={{
+            width: `${(phoneWidth - screenInset * 2) * 160}px`,
+            height: `${(phoneHeight - screenInset * 2) * 160}px`,
+          }}
+          center
+        >
+          <div
+            style={{
+              overflow: "hidden",
+              backgroundColor: "red",
+              width: "100%",
+              height: "100%",
+            }}
+          >
             {children}
           </div>
-          
-          {/* Frame edges and highlights */}
-          <div className={styles.frameEdge}></div>
-          <div className={styles.innerBevel}></div>
-        </div>
-        
-        {/* Metallic shine effect */}
-        <div className={styles.metallicShine}></div>
-      </div>
+        </Html>
+      </group>
+
+      {/* Dynamic Island */}
+      <RoundedBox
+        args={[0.8, 0.22, 0.05]}
+        radius={0.1}
+        smoothness={4}
+        position={[0, 2.35, 0.15]} // Adjusted for thinner frame
+      >
+        <meshStandardMaterial color="#000000" metalness={0.5} roughness={0.8} />
+      </RoundedBox>
+
+      {/* Camera lens */}
+      <Cylinder
+        args={[0.04, 0.04, 0.02, 32]}
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, 2.35, 0.16]} // Adjusted for thinner frame
+      >
+        <meshStandardMaterial color="#1a1a2a" metalness={1} roughness={0.2} />
+      </Cylinder>
+
+      {/* Power button (right side) */}
+      <Box args={[0.015, 0.6, 0.12]} position={[1.21, 0.8, 0]}>
+        {" "}
+        {/* Thinner button */}
+        <meshStandardMaterial
+          color="#b8b8b8" // Silver color
+          metalness={0.95}
+          roughness={0.2}
+        />
+      </Box>
+
+      {/* Volume up button (left side) */}
+      <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 1.2, 0]}>
+        {" "}
+        {/* Thinner button */}
+        <meshStandardMaterial
+          color="#b8b8b8" // Silver color
+          metalness={0.95}
+          roughness={0.2}
+        />
+      </Box>
+
+      {/* Volume down button (left side) */}
+      <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 0.6, 0]}>
+        {" "}
+        {/* Thinner button */}
+        <meshStandardMaterial
+          color="#b8b8b8" // Silver color
+          metalness={0.95}
+          roughness={0.2}
+        />
+      </Box>
+
+      {/* Action button (left side) */}
+      <Box args={[0.02, 0.3, 0.15]} position={[-1.21, 1.8, 0]}>
+        <meshStandardMaterial color="#ff9500" metalness={0.9} roughness={0.3} />
+      </Box>
+
+      {/* Bottom speaker grills */}
+      <group position={[0, -2.6, 0]}>
+        {/* Left speaker */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Cylinder
+            key={`left-${i}`}
+            args={[0.015, 0.015, 0.1, 6]}
+            rotation={[Math.PI / 2, 0, 0]}
+            position={[-0.3 - i * 0.04, 0, 0]}
+          >
+            <meshStandardMaterial color="#0a0a0a" />
+          </Cylinder>
+        ))}
+
+        {/* Charging port */}
+        <RoundedBox args={[0.22, 0.02, 0.1]} radius={0.01} position={[0, 0, 0]}>
+          <meshStandardMaterial color="#0a0a0a" />
+        </RoundedBox>
+
+        {/* Right speaker */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Cylinder
+            key={`right-${i}`}
+            args={[0.015, 0.015, 0.1, 6]}
+            rotation={[Math.PI / 2, 0, 0]}
+            position={[0.3 + i * 0.04, 0, 0]}
+          >
+            <meshStandardMaterial color="#0a0a0a" />
+          </Cylinder>
+        ))}
+      </group>
+
+      {/* Camera bump (back) */}
+      <group position={[-0.55, 1.8, -0.2]}>
+        <RoundedBox args={[0.9, 0.9, 0.15]} radius={0.15} smoothness={4}>
+          <meshStandardMaterial
+            color={currentColor.frame}
+            metalness={currentColor.frameMetallic}
+            roughness={currentColor.frameRoughness}
+          />
+        </RoundedBox>
+
+        {/* Three camera lenses */}
+        <Cylinder
+          args={[0.18, 0.18, 0.08, 32]}
+          rotation={[Math.PI / 2, 0, 0]}
+          position={[-0.2, 0.2, 0.08]}
+        >
+          <meshStandardMaterial color="#1a1a1a" metalness={1} roughness={0.1} />
+        </Cylinder>
+        <Cylinder
+          args={[0.18, 0.18, 0.08, 32]}
+          rotation={[Math.PI / 2, 0, 0]}
+          position={[0.2, 0.2, 0.08]}
+        >
+          <meshStandardMaterial color="#1a1a1a" metalness={1} roughness={0.1} />
+        </Cylinder>
+        <Cylinder
+          args={[0.22, 0.22, 0.08, 32]}
+          rotation={[Math.PI / 2, 0, 0]}
+          position={[0, -0.2, 0.08]}
+        >
+          <meshStandardMaterial color="#1a1a1a" metalness={1} roughness={0.1} />
+        </Cylinder>
+
+        {/* LiDAR scanner */}
+        <Cylinder
+          args={[0.06, 0.06, 0.05, 32]}
+          rotation={[Math.PI / 2, 0, 0]}
+          position={[0.35, -0.1, 0.08]}
+        >
+          <meshStandardMaterial
+            color="#2a2a2a"
+            metalness={0.8}
+            roughness={0.3}
+          />
+        </Cylinder>
+      </group>
+    </group>
+  );
+}
+
+export default function IPhone3D({
+  children,
+  color = "natural",
+}: IPhone3DProps) {
+  return (
+    <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
+      <Canvas
+        camera={{ position: [2.8, 1.2, 4], fov: 42 }} // Adjusted camera for better view
+        style={{ background: "transparent" }}
+        gl={{ preserveDrawingBuffer: true }}
+      >
+        <Suspense fallback={null}>
+          <PresentationControls
+            global
+            rotation={[0.13, -0.5, 0]}
+            polar={[-0.4, 0.2]}
+            azimuth={[-1, 0.75]}
+            snap={false} // Disable snap to prevent stuck state
+            enabled={true} // Ensure controls are enabled
+            cursor={true} // Show cursor feedback
+          >
+            <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.15}>
+              <IPhoneModel color={color}>{children}</IPhoneModel>
+            </Float>
+          </PresentationControls>
+
+          {/* Lighting */}
+          <ambientLight intensity={0.5} />
+          <spotLight
+            position={[10, 10, 10]}
+            angle={0.15}
+            penumbra={1}
+            intensity={1}
+            castShadow
+          />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} />
+          <directionalLight position={[0, 5, 5]} intensity={0.5} castShadow />
+
+          {/* Environment for realistic reflections */}
+          <Environment preset="city" />
+        </Suspense>
+      </Canvas>
     </div>
   );
 }

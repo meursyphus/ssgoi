@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
-import IPhone3D from "@/components/home/iphone/iphone-3d";
+import IPhone3D from "@/components/home/iphone";
 import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
 import { Metadata } from "next";
@@ -126,12 +126,12 @@ export default async function Home({ params }: HomePageProps) {
             {/* 오른쪽: 앱 데모 */}
             <div className="relative">
               <div
-                className="relative mx-auto"
+                className="relative mx-auto z-0"
                 style={{ width: "450px", height: "650px" }}
               >
                 {/* 3D iPhone Component */}
                 <IPhone3D color="black">
-                  <Demo />
+                  <Demo autoPlay={false} />
                 </IPhone3D>
 
                 {/* 플로팅 배지 */}
