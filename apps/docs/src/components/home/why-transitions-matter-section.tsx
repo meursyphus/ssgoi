@@ -207,35 +207,43 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
         });
       });
 
-      // Comparison section with split screen effect
-      const leftPanel = document.querySelector(".left-panel");
-      const rightPanel = document.querySelector(".right-panel");
+      // Comparison cards entrance animations
+      gsap.from(".traditional-card", {
+        scrollTrigger: {
+          trigger: ".traditional-card",
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        x: -100,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+      });
 
-      if (leftPanel && rightPanel) {
-        gsap.from(leftPanel, {
-          scrollTrigger: {
-            trigger: ".comparison-section",
-            start: "top 80%",
-            end: "top 20%",
-            scrub: 1,
-          },
-          x: "-100%",
-          rotation: -5,
-          opacity: 0,
-        });
+      gsap.from(".ssgoi-card", {
+        scrollTrigger: {
+          trigger: ".ssgoi-card", 
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        x: 100,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+      });
 
-        gsap.from(rightPanel, {
-          scrollTrigger: {
-            trigger: ".comparison-section",
-            start: "top 80%",
-            end: "top 20%",
-            scrub: 1,
-          },
-          x: "100%",
-          rotation: 5,
-          opacity: 0,
-        });
-      }
+      // VS divider animation
+      gsap.from(".vs-divider", {
+        scrollTrigger: {
+          trigger: ".vs-divider",
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+        scale: 0,
+        rotation: 180,
+        duration: 0.8,
+        ease: "back.out(1.7)",
+      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -304,17 +312,17 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
         {/* 3D Cards Container */}
         <div
           ref={cardsContainerRef}
-          className="relative w-full h-full max-w-6xl px-4 sm:px-6 lg:px-8"
+          className="relative w-full h-full px-4 sm:px-6 lg:px-8 flex items-center justify-center"
           style={{ perspective: "2000px", transformStyle: "preserve-3d" }}
         >
           {reasons.map((reason, index) => (
             <div
               key={index}
-              className="reason-card w-full"
+              className="reason-card w-full max-w-7xl"
             >
-              <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                 {/* Left side - Visual */}
-                <div className="relative h-[300px] sm:h-[350px] lg:h-[400px] rounded-xl lg:rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative h-[350px] sm:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                   <div
                     className="absolute inset-0"
                     style={{ background: reason.bgImage }}
@@ -327,7 +335,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                           style={{ backgroundColor: reason.color }}
                         />
                       </div>
-                      <reason.icon className="relative h-32 w-32 text-white drop-shadow-2xl" />
+                      <reason.icon className="relative h-40 w-40 lg:h-48 lg:w-48 text-white drop-shadow-2xl" />
                     </div>
                   </div>
                   {/* Animated particles */}
@@ -348,14 +356,14 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                 </div>
 
                 {/* Right side - Content */}
-                <div className="text-left px-4">
-                  <span className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-gradient-to-r ${reason.gradient} text-white mb-4 sm:mb-6 shadow-lg`}>
+                <div className="text-left px-4 lg:px-0">
+                  <span className={`inline-block px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-bold bg-gradient-to-r ${reason.gradient} text-white mb-6 sm:mb-8 shadow-2xl`}>
                     Reason #{index + 1}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-3 sm:mb-6">
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-8">
                     {reason.title}
                   </h3>
-                  <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed mb-6 sm:mb-8">
+                  <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 leading-relaxed mb-8 sm:mb-10">
                     {reason.description}
                   </p>
                   <div className="flex items-center space-x-4">
@@ -369,61 +377,182 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
         </div>
       </div>
 
-      {/* Split screen comparison */}
-      <div className="comparison-section relative h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 flex">
-          {/* Left Panel - Traditional */}
-          <div className="left-panel relative w-1/2 h-full bg-gray-900 flex items-center justify-center border-r-4 border-gray-700">
-            <div className="text-center px-12">
-              <div className="mb-8">
-                <div className="w-24 h-24 mx-auto bg-gray-800 rounded-lg flex items-center justify-center">
-                  <div className="w-12 h-1 bg-gray-600" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold text-gray-500 mb-4">
-                Traditional Web
-              </h3>
-              <p className="text-lg text-gray-600 max-w-md">
-                Jarring page changes that break user flow and feel disconnected
-              </p>
-              <div className="mt-8 space-y-2">
-                <div className="h-2 bg-gray-800 rounded" />
-                <div className="h-2 bg-gray-800 rounded w-4/5" />
-                <div className="h-2 bg-gray-800 rounded w-3/5" />
-              </div>
-            </div>
+      {/* Enhanced Comparison Section */}
+      <div className="comparison-section relative px-4 sm:px-6 lg:px-8 py-24 overflow-hidden">
+        <div className="mx-auto max-w-7xl">
+          {/* Section Title */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-4">
+              Experience the <span className="gradient-orange">Difference</span>
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-300">See how SSGOI transforms your web experience</p>
           </div>
 
-          {/* Right Panel - With SSGOI */}
-          <div className="right-panel relative w-1/2 h-full bg-gradient-to-br from-vivid-purple/20 to-vivid-orange/20 flex items-center justify-center">
-            <div className="text-center px-12">
-              <div className="mb-8">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-r from-vivid-purple to-vivid-orange rounded-lg flex items-center justify-center shadow-2xl">
-                  <Sparkles className="h-12 w-12 text-white" />
+          {/* Comparison Cards - Vertical layout */}
+          <div className="space-y-8 lg:space-y-12">
+            {/* Traditional Web Card */}
+            <div className="traditional-card relative">
+              <div className="rounded-2xl border-2 border-gray-800 bg-gray-900/80 backdrop-blur-sm p-8 sm:p-12 overflow-hidden">
+                {/* Background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px)`,
+                  }} />
+                </div>
+                
+                <div className="relative grid lg:grid-cols-2 gap-8 items-center">
+                  {/* Left side - Visual Demo */}
+                  <div className="order-2 lg:order-1">
+                    <div className="relative rounded-xl bg-gray-950 p-6 border border-gray-800">
+                      {/* Simulated browser */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                      </div>
+                      
+                      {/* Blinking/Flashing content - simulating page refresh */}
+                      <div className="space-y-3">
+                        <div className="h-8 bg-gray-800 rounded animate-blink" />
+                        <div className="h-32 bg-gray-800 rounded animate-blink" style={{ animationDelay: "0.15s" }} />
+                        <div className="h-8 bg-gray-800 rounded animate-blink" style={{ animationDelay: "0.3s" }} />
+                      </div>
+                      
+                      {/* Flash effect overlay */}
+                      <div className="absolute inset-0 bg-white rounded-lg animate-flash-overlay" />
+                    </div>
+                  </div>
+
+                  {/* Right side - Content */}
+                  <div className="order-1 lg:order-2">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center">
+                        <div className="w-6 h-0.5 bg-gray-600" />
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-400">Traditional Web</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-red-500 text-xl mt-0.5">✕</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Jarring Transitions</p>
+                          <p className="text-gray-500 text-sm">Full page reloads break user focus</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-red-500 text-xl mt-0.5">✕</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Lost Context</p>
+                          <p className="text-gray-500 text-sm">Users lose their place during navigation</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-red-500 text-xl mt-0.5">✕</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Poor Performance</p>
+                          <p className="text-gray-500 text-sm">Feels slow and unresponsive</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-white mb-4">
-                With SSGOI
-              </h3>
-              <p className="text-lg text-gray-200 max-w-md">
-                Smooth, contextual navigation that feels natural and keeps users engaged
-              </p>
-              <div className="mt-8 space-y-2">
-                <div className="h-2 bg-gradient-to-r from-vivid-purple to-vivid-orange rounded shadow-lg" 
-                     style={{ animation: "pulse 2s ease-in-out infinite" }} />
-                <div className="h-2 bg-gradient-to-r from-vivid-orange to-vivid-purple rounded w-4/5 shadow-lg" 
-                     style={{ animation: "pulse 2s ease-in-out infinite", animationDelay: "0.2s" }} />
-                <div className="h-2 bg-gradient-to-r from-vivid-purple to-vivid-orange rounded w-3/5 shadow-lg" 
-                     style={{ animation: "pulse 2s ease-in-out infinite", animationDelay: "0.4s" }} />
+            </div>
+
+            {/* VS Divider */}
+            <div className="vs-divider relative flex items-center justify-center py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t-2 border-dashed border-gray-700" />
+              </div>
+              <div className="relative">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-vivid-purple to-vivid-orange rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                  <span className="text-xl sm:text-2xl font-black text-white">VS</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Center divider with VS */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center border-4 border-gray-700 shadow-2xl">
-            <span className="text-2xl font-black text-white">VS</span>
+            {/* SSGOI Card */}
+            <div className="ssgoi-card relative">
+              <div className="rounded-2xl border-2 border-vivid-purple/30 bg-gradient-to-br from-vivid-purple/10 to-vivid-orange/10 backdrop-blur-sm p-8 sm:p-12 overflow-hidden">
+                {/* Animated background gradient */}
+                <div className="absolute inset-0 opacity-30">
+                  <div className="absolute inset-0 bg-gradient-to-r from-vivid-purple/20 to-vivid-orange/20 animate-gradient" />
+                </div>
+                
+                <div className="relative grid lg:grid-cols-2 gap-8 items-center">
+                  {/* Left side - Visual Demo */}
+                  <div className="order-2 lg:order-1">
+                    <div className="relative rounded-xl bg-gray-900/50 p-6 border border-vivid-purple/30 shadow-2xl">
+                      {/* Simulated browser */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse" style={{ animationDelay: "0.1s" }} />
+                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: "0.2s" }} />
+                      </div>
+                      
+                      {/* Smooth sliding content - preserving context */}
+                      <div className="relative h-40 overflow-hidden">
+                        {/* Content sliding animation */}
+                        <div className="absolute inset-0 animate-slide-content">
+                          <div className="space-y-3">
+                            <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                            <div className="h-24 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
+                            <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                          </div>
+                          {/* Second set for continuous sliding */}
+                          <div className="space-y-3 mt-6">
+                            <div className="h-8 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
+                            <div className="h-24 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                            <div className="h-8 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
+                          </div>
+                        </div>
+                        
+                        {/* Context preservation indicator */}
+                        <div className="absolute top-2 right-2 flex items-center gap-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <span className="text-xs text-green-500 font-medium">Context Preserved</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right side - Content */}
+                  <div className="order-1 lg:order-2">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-vivid-purple to-vivid-orange flex items-center justify-center shadow-lg">
+                        <Sparkles className="h-6 w-6 text-white" />
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white">With SSGOI</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-green-500 text-xl mt-0.5">✓</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Smooth Transitions</p>
+                          <p className="text-gray-300 text-sm">Seamless navigation with beautiful animations</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-green-500 text-xl mt-0.5">✓</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Maintained Context</p>
+                          <p className="text-gray-300 text-sm">Users always know where they are</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-green-500 text-xl mt-0.5">✓</span>
+                        <div>
+                          <p className="text-white font-semibold mb-1">Native-like Feel</p>
+                          <p className="text-gray-300 text-sm">Fast, responsive, and delightful to use</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -451,6 +580,65 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           50% {
             opacity: 1;
           }
+        }
+        
+        @keyframes blink {
+          0%, 40% {
+            opacity: 1;
+          }
+          60%, 100% {
+            opacity: 0;
+          }
+        }
+        
+        @keyframes flash-overlay {
+          0%, 90% {
+            opacity: 0;
+          }
+          95% {
+            opacity: 0.3;
+          }
+          100% {
+            opacity: 0;
+          }
+        }
+        
+        @keyframes slide-content {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+        
+        @keyframes gradient {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        
+        .animate-blink {
+          animation: blink 2s ease-in-out infinite;
+        }
+        
+        .animate-flash-overlay {
+          animation: flash-overlay 2s ease-in-out infinite;
+        }
+        
+        .animate-slide-content {
+          animation: slide-content 5s linear infinite;
+        }
+        
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 5s ease infinite;
         }
       `}</style>
     </section>
