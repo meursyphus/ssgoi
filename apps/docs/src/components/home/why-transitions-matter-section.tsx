@@ -15,25 +15,25 @@ const reasons = [
   {
     icon: Eye,
     title: "Visual Context",
-    description: "Transitions provide visual cues about where users are going and where they came from",
+    description: "Provide visual cues about navigation and user location",
     gradient: "from-blue-500 to-cyan-500",
   },
   {
     icon: Sparkles,
     title: "Brand Value",
-    description: "Smooth transitions elevate your brand perception from 'just a website' to 'premium experience'",
+    description: "Elevate your brand from 'just a website' to premium experience",
     gradient: "from-purple-500 to-pink-500",
   },
   {
     icon: TrendingUp,
     title: "User Engagement",
-    description: "Natural motion keeps users engaged and reduces perceived loading time",
+    description: "Keep users engaged and reduce perceived loading time",
     gradient: "from-green-500 to-emerald-500",
   },
   {
     icon: MousePointer,
     title: "Native Feel",
-    description: "Bridge the gap between web and native apps with fluid interactions",
+    description: "Bridge the gap between web and native apps",
     gradient: "from-orange-500 to-yellow-500",
   },
 ];
@@ -129,7 +129,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
             <span className="gradient-purple">Pretty Effects</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            They're essential for creating intuitive, engaging web experiences that users love
+            They're essential for creating intuitive, engaging web experiences
           </p>
         </div>
 
@@ -143,48 +143,42 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           <p className="text-gray-400">— The Psychology of Web Motion</p>
         </div>
 
-        {/* Reason Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Reason Cards - 2 column grid with fixed height */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 max-w-5xl mx-auto">
           {reasons.map((reason, index) => (
             <div
               key={index}
               ref={(el) => {el && (cardsRef.current[index] = el)}}
-              className="group relative"
+              className="group relative h-full"
             >
               <div className={`absolute inset-0 bg-gradient-to-r ${reason.gradient} opacity-10 blur-xl group-hover:opacity-20 transition-opacity`} />
-              <div className="relative rounded-xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm p-6 hover:border-gray-600 transition-colors">
-                <div className={`reason-icon inline-flex p-3 rounded-lg bg-gradient-to-r ${reason.gradient} mb-4`}>
+              <div className="relative h-full min-h-[200px] rounded-xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm p-8 hover:border-gray-600 transition-colors flex flex-col">
+                <div className={`reason-icon inline-flex p-3 rounded-lg bg-gradient-to-r ${reason.gradient} mb-4 w-fit`}>
                   <reason.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{reason.title}</h3>
-                <p className="text-sm text-gray-400">{reason.description}</p>
+                <h3 className="text-xl font-bold text-white mb-3">{reason.title}</h3>
+                <p className="text-base text-gray-400 flex-1">{reason.description}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Examples */}
-        <div className="mt-16 grid gap-8 lg:grid-cols-3">
-          <div className="rounded-xl border border-gray-700 bg-gray-800/30 p-6">
-            <h3 className="text-lg font-bold text-white mb-3">Without Transitions</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>❌ Jarring page changes</li>
-              <li>❌ Lost user context</li>
-              <li>❌ Feels like a website</li>
-              <li>❌ Higher bounce rates</li>
-            </ul>
-          </div>
-          
-          <div className="rounded-xl border border-vivid-purple/30 bg-gradient-to-br from-vivid-purple/10 to-vivid-orange/10 p-6 lg:col-span-2">
-            <h3 className="text-lg font-bold text-white mb-3">With SSGOI Transitions</h3>
-            <ul className="grid gap-2 text-sm text-gray-300 sm:grid-cols-2">
-              <li>✅ Smooth, contextual navigation</li>
-              <li>✅ Clear visual hierarchy</li>
-              <li>✅ Native app experience</li>
-              <li>✅ Increased engagement</li>
-              <li>✅ Premium brand perception</li>
-              <li>✅ Better user retention</li>
-            </ul>
+        {/* Simplified comparison */}
+        <div className="mt-16 max-w-4xl mx-auto">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-xl border border-gray-700 bg-gray-800/30 p-8">
+              <h3 className="text-xl font-bold text-white mb-4">Traditional Web</h3>
+              <p className="text-base text-gray-400">
+                Jarring page changes that break user flow and feel disconnected
+              </p>
+            </div>
+            
+            <div className="rounded-xl border border-vivid-purple/30 bg-gradient-to-br from-vivid-purple/10 to-vivid-orange/10 p-8">
+              <h3 className="text-xl font-bold text-white mb-4">With SSGOI</h3>
+              <p className="text-base text-gray-300">
+                Smooth, contextual navigation that feels natural and keeps users engaged
+              </p>
+            </div>
           </div>
         </div>
       </div>

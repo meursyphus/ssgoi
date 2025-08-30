@@ -135,15 +135,15 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
             </div>
             <div className="p-6 text-center border-x border-gray-700">
               <h3 className="text-lg font-semibold text-gray-300">Browser API</h3>
-              <p className="text-xs text-gray-500 mt-1">View Transitions</p>
+              <p className="text-sm text-gray-500 mt-1">View Transitions</p>
             </div>
             <div className="p-6 text-center border-r border-gray-700">
               <h3 className="text-lg font-semibold text-gray-300">Other Libraries</h3>
-              <p className="text-xs text-gray-500 mt-1">Framer, Auto-Animate, etc</p>
+              <p className="text-sm text-gray-500 mt-1">Framer, Auto-Animate, etc</p>
             </div>
             <div className="p-6 text-center">
               <h3 className="text-lg font-semibold gradient-green">SSGOI</h3>
-              <p className="text-xs text-gray-400 mt-1">Universal solution</p>
+              <p className="text-sm text-gray-400 mt-1">Universal solution</p>
             </div>
           </div>
 
@@ -195,19 +195,19 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         <div className="float-element-comp-1 grid gap-4 md:grid-cols-3 mt-12">
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
             <h3 className="font-bold text-white mb-2">🚀 Keep Your Stack</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-base text-gray-400">
               No need to change your router or framework. Works with Next.js, SvelteKit, Nuxt, and more.
             </p>
           </div>
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
             <h3 className="font-bold text-white mb-2">🎨 True Customization</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-base text-gray-400">
               Spring-based physics animations with full control over timing, easing, and behavior.
             </p>
           </div>
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
             <h3 className="font-bold text-white mb-2">🌍 Universal Support</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-base text-gray-400">
               Works in all browsers, all frameworks, with SSR/SSG. One library for everything.
             </p>
           </div>
