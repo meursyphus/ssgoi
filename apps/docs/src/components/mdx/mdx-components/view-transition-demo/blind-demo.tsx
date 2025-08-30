@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { curtain } from "@ssgoi/react/view-transitions";
+import { blind } from "@ssgoi/react/view-transitions";
 import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";
@@ -35,7 +35,7 @@ function TheaterPage() {
             )}
           >
             <span className="text-gradient bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
-              CURTAIN
+              blind
             </span>
           </h1>
           <p
@@ -46,7 +46,7 @@ function TheaterPage() {
           >
             Experience dramatic transitions that create anticipation and focus
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <button className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
               Watch Demo
@@ -101,7 +101,7 @@ function Act1Page() {
             Act I: The Beginning
           </h1>
           <p className="text-gray-300 text-lg">
-            When the curtain rises, a new story unfolds
+            When the blind rises, a new story unfolds
           </p>
         </div>
 
@@ -113,7 +113,9 @@ function Act1Page() {
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start gap-3">
                 <span className="text-green-400 mt-1">✓</span>
-                <span>Onboarding flows where each step builds anticipation</span>
+                <span>
+                  Onboarding flows where each step builds anticipation
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-green-400 mt-1">✓</span>
@@ -135,7 +137,7 @@ function Act1Page() {
               ⚙️ Customization Options
             </h2>
             <pre className="bg-gray-900 p-4 rounded overflow-x-auto">
-              <code className="text-gray-300 text-sm">{`curtain({
+              <code className="text-gray-300 text-sm">{`blind({
   blindCount: 12,      // Number of blind strips
   direction: 'horizontal', // or 'vertical'
   staggerDelay: 30,    // Delay between each blind
@@ -185,7 +187,7 @@ function Act2Page() {
               Stage Performance
             </h3>
             <p className="text-gray-400">
-              Like a theater curtain, the transition creates a clear separation
+              Like a theater blind, the transition creates a clear separation
               between scenes, perfect for storytelling experiences.
             </p>
           </div>
@@ -218,7 +220,7 @@ function Act2Page() {
               Visual Impact
             </h3>
             <p className="text-gray-400">
-              The curtain effect adds a premium, polished feel to transitions,
+              The blind effect adds a premium, polished feel to transitions,
               elevating the perceived quality of your application.
             </p>
           </div>
@@ -232,7 +234,7 @@ function Act2Page() {
             Transform ordinary page transitions into memorable experiences
           </p>
           <button className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-            Get Started with Curtain
+            Get Started with blind
           </button>
         </div>
       </div>
@@ -266,7 +268,7 @@ function FinalePage() {
               The Grand Finale
             </span>
           </h1>
-          
+
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
             Every great show deserves an unforgettable ending
           </p>
@@ -275,9 +277,12 @@ function FinalePage() {
             <div className="bg-gray-800/50 backdrop-blur p-4 rounded-lg text-left">
               <code className="text-sm text-gray-300">
                 <span className="text-blue-400">import</span>{" "}
-                <span className="text-yellow-400">{"{ curtain }"}</span>{" "}
+                <span className="text-yellow-400">{"{ blind }"}</span>{" "}
                 <span className="text-blue-400">from</span>{" "}
-                <span className="text-green-400">'@ssgoi/react/view-transitions'</span>;
+                <span className="text-green-400">
+                  '@ssgoi/react/view-transitions'
+                </span>
+                ;
               </code>
             </div>
 
@@ -285,7 +290,8 @@ function FinalePage() {
               <code className="text-sm text-gray-300">
                 <span className="text-blue-400">const</span> config = {"{"}
                 <br />
-                {"  "}defaultTransition: <span className="text-yellow-400">curtain</span>()
+                {"  "}defaultTransition:{" "}
+                <span className="text-yellow-400">blind</span>()
                 <br />
                 {"}"};
               </code>
@@ -304,9 +310,9 @@ function FinalePage() {
                 </div>
               ))}
             </div>
-            
+
             <p className="text-gray-400 text-sm">
-              Thank you for watching the Curtain Transition Demo
+              Thank you for watching the blind Transition Demo
             </p>
           </div>
         </div>
@@ -316,7 +322,7 @@ function FinalePage() {
 }
 
 // Route configuration
-const curtainRoutes: RouteConfig[] = [
+const blindRoutes: RouteConfig[] = [
   { path: "/", component: TheaterPage, label: "Opening" },
   { path: "/act1", component: Act1Page, label: "Act I" },
   { path: "/act2", component: Act2Page, label: "Act II" },
@@ -327,17 +333,17 @@ const curtainRoutes: RouteConfig[] = [
 function HeaderActions() {
   return (
     <>
-      <span className="text-gray-400 text-sm">Curtain Transition</span>
+      <span className="text-gray-400 text-sm">blind Transition</span>
     </>
   );
 }
 
-export function CurtainDemo() {
+export function BlindDemo() {
   const config = {
-    defaultTransition: curtain({
+    defaultTransition: blind({
       blindCount: 10,
       staggerDelay: 30,
-      direction: 'horizontal'
+      direction: "horizontal",
     }),
   };
 
@@ -351,7 +357,11 @@ export function CurtainDemo() {
   }
 
   return (
-    <BrowserMockup routes={curtainRoutes} config={config} layout={TheaterLayout} />
+    <BrowserMockup
+      routes={blindRoutes}
+      config={config}
+      layout={TheaterLayout}
+    />
   );
 }
 

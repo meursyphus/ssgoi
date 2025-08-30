@@ -1,7 +1,7 @@
 ---
-title: "커튼 전환"
+title: "블라인드 전환"
 description: "블라인드가 닫히고 열리는 듯한 극적인 전환 효과"
-nav-title: "커튼"
+nav-title: "블라인드"
 ---
 
 # 커튼 전환
@@ -10,7 +10,7 @@ nav-title: "커튼"
 
 ## 데모
 
-<ViewTransitionDemo type="curtain" />
+<ViewTransitionDemo type="blind" />
 
 ## UX 원칙
 
@@ -117,12 +117,12 @@ nav-title: "커튼"
     })
 
     // 수직 방향 커튼
-    curtain({ 
+    curtain({
       direction: 'vertical'  // 위에서 아래로 내려오는 커튼
     })
 
     // 순차적 지연 시간 조절
-    curtain({ 
+    curtain({
       staggerDelay: 50  // 블라인드 간 지연 시간 (ms)
     })
 
@@ -133,10 +133,11 @@ nav-title: "커튼"
     })
 
     // 커튼 색상 변경
-    curtain({ 
+    curtain({
       curtainColor: '#1a1a1a'  // 기본값: '#000000' (검정색)
     })
     ```
+
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
@@ -144,17 +145,17 @@ nav-title: "커튼"
       import { curtain } from '@ssgoi/svelte/view-transitions';
 
       // 블라인드 개수 조절
-      const manyBlinds = curtain({ 
+      const manyBlinds = curtain({
         blindCount: 15  // 더 많은 블라인드로 세밀한 효과
       });
 
       // 수직 방향 커튼
-      const verticalCurtain = curtain({ 
+      const verticalCurtain = curtain({
         direction: 'vertical'  // 위에서 아래로 내려오는 커튼
       });
 
       // 순차적 지연 시간 조절
-      const slowStagger = curtain({ 
+      const slowStagger = curtain({
         staggerDelay: 50  // 블라인드 간 지연 시간 (ms)
       });
 
@@ -165,11 +166,12 @@ nav-title: "커튼"
       });
 
       // 커튼 색상 변경
-      const darkCurtain = curtain({ 
+      const darkCurtain = curtain({
         curtainColor: '#1a1a1a'  // 기본값: '#000000' (검정색)
       });
     </script>
     ```
+
   </TabPanel>
 </Tabs>
 
@@ -315,17 +317,17 @@ nav-title: "커튼"
 ```typescript
 interface CurtainOptions {
   // 스프링 설정
-  inSpring?: SpringConfig;       // IN 애니메이션 스프링 (기본: { stiffness: 300, damping: 22 })
-  outSpring?: SpringConfig;      // OUT 애니메이션 스프링 (기본: { stiffness: 400, damping: 25 })
-  
+  inSpring?: SpringConfig; // IN 애니메이션 스프링 (기본: { stiffness: 300, damping: 22 })
+  outSpring?: SpringConfig; // OUT 애니메이션 스프링 (기본: { stiffness: 400, damping: 25 })
+
   // 타이밍 설정
-  transitionDelay?: number;      // OUT과 IN 사이 대기 시간 (기본: 50ms)
-  staggerDelay?: number;         // 블라인드 간 지연 시간 (기본: 30ms)
-  
+  transitionDelay?: number; // OUT과 IN 사이 대기 시간 (기본: 50ms)
+  staggerDelay?: number; // 블라인드 간 지연 시간 (기본: 30ms)
+
   // 시각적 설정
-  blindCount?: number;           // 블라인드 개수 (기본: 10)
-  direction?: 'horizontal' | 'vertical';  // 블라인드 방향 (기본: 'horizontal')
-  curtainColor?: string;         // 커튼 색상 (기본: '#000000')
+  blindCount?: number; // 블라인드 개수 (기본: 10)
+  direction?: "horizontal" | "vertical"; // 블라인드 방향 (기본: 'horizontal')
+  curtainColor?: string; // 커튼 색상 (기본: '#000000')
 }
 ```
 

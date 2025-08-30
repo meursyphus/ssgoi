@@ -1,4 +1,4 @@
-export * from "./curtain";
+export * from "./blind";
 export * from "./drill";
 export * from "./fade";
 export * from "./hero";
