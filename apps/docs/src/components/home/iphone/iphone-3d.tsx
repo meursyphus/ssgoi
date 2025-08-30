@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { useRef, Suspense, useMemo } from 'react';
+import { Canvas, useFrame, createPortal, useThree } from '@react-three/fiber';
 import { 
   RoundedBox, 
   Box, 
@@ -10,7 +10,9 @@ import {
   Environment,
   PresentationControls,
   Float,
-  Html
+  Html,
+  useFBO,
+  Plane
 } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -86,36 +88,40 @@ function IPhoneModel({ children, color = 'natural' }: { children: React.ReactNod
         />
       </RoundedBox>
 
-      {/* Screen - only visible from front */}
-      <group>
-        {/* Black screen background for depth */}
-        <Box 
-          args={[phoneWidth - screenInset * 2, phoneHeight - screenInset * 2, 0.01]} 
-          position={[0, 0, phoneDepth/2 - 0.005]}
-        >
+      {/* Screen - render texture approach */}
+      <group position={[0, 0, phoneDepth/2 + 0.001]}>
+        {/* Screen plane with content */}
+        <Plane args={[phoneWidth - screenInset * 2, phoneHeight - screenInset * 2]}>
           <meshBasicMaterial color="#000000" />
-        </Box>
+        </Plane>
         
-        {/* HTML content - simple and direct */}
+        {/* HTML overlay positioned exactly on screen */}
         <Html
           transform
-          distanceFactor={1.5}
-          position={[0, 0, phoneDepth/2]}
+          occlude
+          distanceFactor={1}
+          position={[0, 0, 0.01]}
+          style={{
+            width: `${(phoneWidth - screenInset * 2) * 160}px`,
+            height: `${(phoneHeight - screenInset * 2) * 160}px`,
+          }}
           center
         >
           <div style={{
-            width: '324px',  // 90% of 360px for padding
-            height: '702px',  // 90% of 780px for padding
-            borderRadius: '35px',
+            width: '100%',
+            height: '100%',
+            borderRadius: '28px',
             overflow: 'hidden',
             background: '#000',
-            pointerEvents: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
             <div style={{
-              width: '360px',
-              height: '780px',
-              transform: 'scale(0.9)',
-              transformOrigin: 'top left'
+              width: '100%',
+              height: '100%',
+              transform: 'scale(0.95)',
+              transformOrigin: 'center',
             }}>
               {children}
             </div>
