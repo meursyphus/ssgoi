@@ -1,0 +1,141 @@
+---
+title: "Mask Animation"
+description: "Stylish reveal and hide effects using clipping masks"
+nav-title: "Mask"
+---
+
+# Mask Animation
+
+The Mask animation uses clipping masks to create stylish reveal and hide effects where elements appear or disappear in circular, elliptical, or square shapes. It provides elegant transitions similar to Material Design's ripple effect.
+
+<TransitionDemo type="mask" />
+
+## Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { mask } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...mask()
+        })}>
+          Mask me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { mask } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...mask()
+    }}>
+      Mask me!
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { mask } from '@ssgoi/vue/transitions';
+    </script>
+
+    <template>
+      <div v-transition="{
+        key: 'my-element',
+        ...mask()
+      }">
+        Mask me!
+      </div>
+    </template>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface MaskOptions {
+  shape?: 'circle' | 'ellipse' | 'square';  // Mask shape (default: 'circle')
+  origin?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 
+           'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';  // Origin position (default: 'center')
+  scale?: number;     // Mask size scale (default: 1.5)
+  fade?: boolean;     // Apply fade effect simultaneously (default: false)
+  spring?: {
+    stiffness?: number;  // Spring stiffness (default: 300)
+    damping?: number;    // Damping ratio (default: 30)
+  };
+}
+```
+
+### Examples
+
+```tsx
+// Circular mask from center
+mask()
+
+// Circular mask from top-left
+mask({ origin: 'top-left' })
+
+// Elliptical mask
+mask({ shape: 'ellipse' })
+
+// Square mask
+mask({ shape: 'square', origin: 'center' })
+
+// With fade effect
+mask({ fade: true })
+
+// Larger mask range
+mask({ scale: 2 })
+
+// Smooth animation
+mask({ spring: { stiffness: 100, damping: 20 } })
+```
+
+## Use Cases
+
+### Card Ripple Effect
+
+```tsx
+// Ripple effect from click position
+mask({ 
+  origin: 'top-left',  // Set dynamically based on click position
+  scale: 2,
+  spring: { stiffness: 400, damping: 35 }
+})
+```
+
+### Modal Opening Effect
+
+```tsx
+// Modal expanding from button position
+mask({
+  origin: 'bottom-right',  // Button position
+  scale: 3,
+  fade: true
+})
+```
+
+### Gallery Image Transition
+
+```tsx
+// Expand from image center
+mask({
+  shape: 'circle',
+  origin: 'center',
+  scale: 1.5,
+  spring: { stiffness: 200, damping: 25 }
+})
+```
