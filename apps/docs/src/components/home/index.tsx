@@ -20,11 +20,11 @@ export function HomePageContent({ lang }: HomePageContentProps) {
       <TransitionShowcaseSection lang={lang} />
       <ComparisonSection lang={lang} />
       <FeaturesTimelineSection lang={lang} />
-      {/* <StatsSection lang={lang} /> */}
-      {/* <FrameworkSection lang={lang} /> */}
-      {/* <WhySsgoiSection lang={lang} /> */}
-      {/* <CodeExampleSection lang={lang} /> */}
-      {/* <CtaSection lang={lang} /> */}
+      <StatsSection lang={lang} />
+      <FrameworkSection lang={lang} />
+      <WhySsgoiSection lang={lang} />
+      <CodeExampleSection lang={lang} />
+      <CtaSection lang={lang} />
     </SsgoiTransition>
   );
 }

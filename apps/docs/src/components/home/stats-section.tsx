@@ -71,22 +71,20 @@ export function StatsSection({ lang }: StatsSectionProps) {
         if (counter) {
           const target = stats[index].value;
           
-          gsap.fromTo(
-            { value: 0 },
-            { 
-              value: target,
-              duration: 2,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: stat,
-                start: "top 75%",
-                toggleActions: "play none none reverse",
-              },
-              onUpdate: function() {
-                counter.textContent = Math.floor(this.targets()[0].value).toLocaleString();
-              }
+          const obj = { value: 0 };
+          gsap.to(obj, {
+            value: target,
+            duration: 2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: stat,
+              start: "top 75%",
+              toggleActions: "play none none reverse",
+            },
+            onUpdate: () => {
+              counter.textContent = Math.floor(obj.value).toLocaleString();
             }
-          );
+          });
         }
 
         // Icon pulse animation
@@ -135,7 +133,7 @@ export function StatsSection({ lang }: StatsSectionProps) {
           {stats.map((stat, index) => (
             <div
               key={index}
-              ref={(el) => (statsRef.current[index] = el)}
+              ref={(el) => {el && (statsRef.current[index] = el)}}
               className="group relative"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
