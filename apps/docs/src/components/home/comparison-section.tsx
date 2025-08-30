@@ -75,22 +75,78 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         ease: "power3.out",
       });
 
-      // Table rows animation
+      // Table rows animation - different for desktop and mobile
       rowsRef.current.forEach((row, index) => {
         if (!row) return;
 
-        gsap.from(row, {
-          scrollTrigger: {
-            trigger: row,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-          x: index % 2 === 0 ? -50 : 50,
-          opacity: 0,
-          duration: 0.8,
-          delay: index * 0.1,
-          ease: "power2.out",
-        });
+        // Check if it's a desktop row (has grid-cols-4 class) or mobile card
+        const isDesktop = row.classList.contains("grid-cols-4");
+        
+        if (isDesktop) {
+          // Desktop table row animation - slide from sides
+          gsap.from(row, {
+            scrollTrigger: {
+              trigger: row,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+            x: index % 2 === 0 ? -50 : 50,
+            opacity: 0,
+            duration: 0.8,
+            delay: index * 0.1,
+            ease: "power2.out",
+          });
+        } else {
+          // Mobile card animation - scale up with bounce
+          gsap.from(row, {
+            scrollTrigger: {
+              trigger: row,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+            y: 60,
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.7,
+            delay: index * 0.15,
+            ease: "back.out(1.7)",
+          });
+
+          // Animate inner elements of mobile cards
+          const icon = row.querySelector(".lucide");
+          const comparisons = row.querySelectorAll(".space-y-3 > div");
+          
+          if (icon) {
+            gsap.from(icon, {
+              scrollTrigger: {
+                trigger: row,
+                start: "top 80%",
+                toggleActions: "play none none reverse",
+              },
+              rotate: 360,
+              scale: 0,
+              duration: 0.6,
+              delay: index * 0.15 + 0.2,
+              ease: "back.out(2)",
+            });
+          }
+
+          // Stagger the comparison items within each card
+          comparisons.forEach((comp, i) => {
+            gsap.from(comp, {
+              scrollTrigger: {
+                trigger: row,
+                start: "top 80%",
+                toggleActions: "play none none reverse",
+              },
+              x: i % 2 === 0 ? -30 : 30,
+              opacity: 0,
+              duration: 0.5,
+              delay: index * 0.15 + 0.3 + (i * 0.1),
+              ease: "power2.out",
+            });
+          });
+        }
       });
 
       // Floating elements
@@ -127,8 +183,8 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
           </p>
         </div>
 
-        {/* Comparison Table */}
-        <div className="mb-16 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        {/* Comparison Table - Desktop */}
+        <div className="mb-16 hidden lg:block overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm">
           <div className="grid grid-cols-4 border-b border-gray-700 bg-gray-800/80">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-400">Feature</h3>
@@ -185,6 +241,72 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
                     <X className="h-5 w-5 text-red-500" />
                   )}
                   <span className="text-gray-300 text-sm">{item.ssgoi.text}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Comparison - Mobile/Tablet */}
+        <div className="mb-16 lg:hidden space-y-6">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-white mb-2">Feature Comparison</h3>
+            <p className="text-gray-400">Swipe to see how SSGOI stands out</p>
+          </div>
+          
+          {/* Mobile comparison cards */}
+          {comparisonData.map((item, index) => (
+            <div
+              key={item.feature}
+              ref={(el) => {el && (rowsRef.current[index] = el)}}
+              className="rounded-xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm p-6 transition-all hover:bg-gray-800/70 hover:border-gray-600 hover:shadow-lg"
+            >
+              {/* Feature Title */}
+              <div className="flex items-center gap-3 mb-6">
+                <item.icon className="h-6 w-6 text-gray-400" />
+                <h4 className="text-lg font-bold text-white">{item.feature}</h4>
+              </div>
+              
+              {/* Comparison Grid */}
+              <div className="space-y-3">
+                {/* Browser API */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50">
+                  <span className="text-sm font-medium text-gray-400">Browser API</span>
+                  <div className="flex items-center gap-2">
+                    {item.browserAPI.support ? (
+                      <Check className="h-4 w-4 text-yellow-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-xs text-gray-500">{item.browserAPI.text}</span>
+                  </div>
+                </div>
+                
+                {/* Other Libraries */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50">
+                  <span className="text-sm font-medium text-gray-400">Other Libs</span>
+                  <div className="flex items-center gap-2">
+                    {item.otherLibs.support ? (
+                      <Check className="h-4 w-4 text-yellow-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-xs text-gray-500">{item.otherLibs.text}</span>
+                  </div>
+                </div>
+                
+                {/* SSGOI - Highlighted */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 border border-vivid-purple/30 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-vivid-purple/5 to-vivid-orange/5 animate-pulse" />
+                  <span className="relative z-10 text-sm font-bold gradient-green">SSGOI</span>
+                  <div className="relative z-10 flex items-center gap-2">
+                    {item.ssgoi.support ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-xs text-gray-300 font-medium">{item.ssgoi.text}</span>
+                  </div>
                 </div>
               </div>
             </div>
