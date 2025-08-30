@@ -348,7 +348,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                 </div>
 
                 {/* Right side - Content */}
-                <div className="text-left px-2 sm:px-0">
+                <div className="text-left px-4">
                   <span className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-gradient-to-r ${reason.gradient} text-white mb-4 sm:mb-6 shadow-lg`}>
                     Reason #{index + 1}
                   </span>
