@@ -1,0 +1,190 @@
+---
+title: "Blind Transition"
+description: "A transition that covers and reveals the screen with a blind effect"
+nav-title: "Blind"
+---
+
+# Blind Transition
+
+The blind transition uses multiple bars that sequentially cover and reveal the screen during page transitions. It's suitable for transitions between unrelated or distant content.
+
+## Demo
+
+<ViewTransitionDemo type="blind" />
+
+## UX Principles
+
+### When to Use?
+
+Use blind transitions for **unrelated content** or when moving to a **completely new context**.
+
+#### Suitability by Content Relationship
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "yes",
+      description: "Moving to completely different topics or sections",
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "no",
+      description: "Slide is more suitable for same-level content",
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "Drill is more suitable for parent-child relationships",
+    },
+  ]}
+/>
+
+### Why Does It Work This Way?
+
+The blind completely covers the screen before revealing the new screen, visually disconnecting from the previous content. This clearly communicates to users that they've moved to a completely new context.
+
+### Motion Design
+
+```
+1. OUT: Blinds close sequentially, covering the screen
+2. Hold: Screen remains covered briefly
+3. IN: Blinds open sequentially, revealing the new screen
+```
+
+## Basic Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { blind } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { blind } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: blind()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## Options
+
+```typescript
+interface BlindOptions {
+  // Spring config
+  inSpring?: SpringConfig; // IN animation (default: { stiffness: 75, damping: 25 })
+  outSpring?: SpringConfig; // OUT animation (default: { stiffness: 80, damping: 25 })
+
+  // Timing
+  transitionDelay?: number; // Delay between OUT and IN (default: 300ms)
+  staggerDelay?: number; // Delay between blinds (default: 100ms)
+
+  // Visual
+  blindCount?: number; // Number of blinds (default: 10)
+  direction?: "horizontal" | "vertical"; // Direction (default: 'horizontal')
+  blindColor?: string; // Color (default: '#000000')
+}
+```
+
+### Customization Examples
+
+```tsx
+// Fast transition
+blind({
+  staggerDelay: 20,
+  transitionDelay: 100,
+});
+
+// Vertical blinds
+blind({
+  direction: "vertical",
+  blindCount: 15,
+});
+
+// Smooth transition
+blind({
+  outSpring: { stiffness: 60, damping: 20 },
+  inSpring: { stiffness: 50, damping: 18 },
+});
+
+// Color change
+blind({
+  blindColor: "#1a1a1a",
+});
+```
+
+## Real-World Examples
+
+### Home to Settings
+
+```tsx
+{
+  from: '/home',
+  to: '/settings',
+  transition: blind()
+}
+```
+
+### Between Categories
+
+```tsx
+{
+  from: '/shop/*',
+  to: '/blog/*',
+  transition: blind({
+    blindCount: 12,
+    staggerDelay: 25
+  })
+}
+```
+
+### Dashboard After Login
+
+```tsx
+{
+  from: '/login',
+  to: '/dashboard',
+  transition: blind({
+    transitionDelay: 500,
+    blindColor: '#0f172a'
+  })
+}
+```
+
+## Comparison with Other Transitions
+
+- **vs Fade**: Blind provides more dramatic and clear separation
+- **vs Slide**: Blind has no directionality, suitable for unrelated content
+- **vs Drill**: Blind is used for horizontal movement without hierarchy
+
+## Performance Considerations
+
+- Blinds are dynamically created and automatically removed after animation
+- Uses GPU acceleration for smooth animations
+- More than 20 blinds may impact performance on low-end devices
