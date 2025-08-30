@@ -130,7 +130,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
         </div>
 
         {/* Single column layout with max width */}
-        <div className="max-w-4xl mx-auto space-y-16">
+        <div className="max-w-5xl mx-auto space-y-20">
           {transitions.map((transition, index) => (
             <div
               key={transition.type}
@@ -143,16 +143,16 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
               {/* Content */}
               <div className="relative">
                 {/* Header */}
-                <div className="p-8 lg:p-10">
-                  <div className="flex items-start justify-between">
+                <div className="p-6 sm:p-8 lg:p-10">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">{transition.title}</h3>
-                      <p className="text-lg text-muted-foreground max-w-2xl">{transition.description}</p>
+                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">{transition.title}</h3>
+                      <p className="text-base sm:text-lg text-muted-foreground">{transition.description}</p>
                     </div>
-                    {/* View documentation link */}
+                    {/* View documentation link - desktop */}
                     <Link 
                       href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
-                      className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 transition-all hover:bg-gray-800/70`}
+                      className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 transition-all hover:bg-gray-800/70 whitespace-nowrap`}
                     >
                       <span className={`text-base font-medium ${transition.accentColor}`}>View docs</span>
                       <ArrowRight className={`h-4 w-4 ${transition.accentColor}`} />
@@ -161,31 +161,15 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
                 </div>
                 
                 {/* Large Browser mockup with demo */}
-                <div className="px-8 pb-8 lg:px-10 lg:pb-10">
-                  <div className="demo-container relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-900 border border-gray-700 shadow-2xl">
-                    {/* Browser header */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-gray-800 border-b border-gray-700">
-                      <div className="flex gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        <div className="w-3 h-3 rounded-full bg-green-500" />
-                      </div>
-                      <div className="flex-1 flex justify-center">
-                        <div className="bg-gray-700 rounded-lg px-4 py-1 text-sm text-gray-400">
-                          ssgoi.com/demo/{transition.type}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Demo content - full size */}
-                    <div className="relative h-[calc(100%-44px)] overflow-hidden bg-gray-950">
-                      <ViewTransitionDemo type={transition.type as any} />
-                    </div>
+                <div className="px-4 pb-6 sm:px-8 sm:pb-8 lg:px-10 lg:pb-10">
+                  <div className="demo-container relative rounded-xl shadow-2xl">
+                    {/* ViewTransitionDemo handles its own aspect ratio and overflow */}
+                    <ViewTransitionDemo type={transition.type as any} />
                   </div>
                 </div>
 
                 {/* Mobile view documentation link */}
-                <div className="px-8 pb-8 sm:hidden">
+                <div className="px-6 pb-6 sm:hidden">
                   <Link 
                     href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-gradient-to-r from-vivid-purple to-vivid-orange text-white font-medium"
