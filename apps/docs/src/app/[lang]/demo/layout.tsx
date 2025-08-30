@@ -1,6 +1,7 @@
 import React from "react";
 import DemoWrapper from "./demo-wrapper";
 import { Metadata } from "next";
+import { SsgoiTransition } from "@ssgoi/react";
 
 export const metadata: Metadata = {
   title: "Demo - SSGOI",
@@ -27,5 +28,9 @@ export const metadata: Metadata = {
 }
 
 export default function Layout({children}: {children: React.ReactNode}) {
-    return <DemoWrapper>{children}</DemoWrapper>
+    return (
+      <SsgoiTransition id="/demo">
+        <DemoWrapper>{children}</DemoWrapper>
+      </SsgoiTransition>
+    );
 }

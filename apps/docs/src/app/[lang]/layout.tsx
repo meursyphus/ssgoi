@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
-import { getServerTranslations } from "@/i18n";
 import { StructuredData } from "./structured-data";
 import { ConsoleWelcome } from "@/components/console-welcome";
 import { createSEOMetadata } from "@/lib/seo-metadata";
+import { SsgoiProvider } from "@/components/layout/ssgoi";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  
+
   return createSEOMetadata({}, lang);
 }
 
@@ -36,9 +36,12 @@ export default async function RootLayout({
         <TranslationsProvider lang={lang}>
           <StructuredData lang={lang} />
           <ConsoleWelcome />
+
           <div className="relative">
             <Header />
-            <main>{children}</main>
+            <main className="relative z-0">
+              <SsgoiProvider>{children}</SsgoiProvider>
+            </main>
           </div>
         </TranslationsProvider>
       </body>
