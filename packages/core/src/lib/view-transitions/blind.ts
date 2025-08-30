@@ -127,7 +127,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: (element) => {
+    out: () => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -178,7 +178,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: (element) => {
+    in: () => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
