@@ -49,6 +49,12 @@ const transitionOptions = {
     { name: 'y', type: 'range', min: -500, max: 500, step: 10, default: -100 },
     { name: 'x', type: 'range', min: -500, max: 500, step: 10, default: 0 },
     { name: 'opacity', type: 'range', min: 0, max: 1, step: 0.1, default: 0 }
+  ],
+  mask: [
+    { name: 'shape', type: 'select', options: ['circle', 'ellipse', 'square'], default: 'circle' },
+    { name: 'origin', type: 'select', options: ['center', 'top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'], default: 'center' },
+    { name: 'scale', type: 'range', min: 0.5, max: 3, step: 0.1, default: 1.5 },
+    { name: 'fade', type: 'toggle', default: false }
   ]
 } as const;
 
