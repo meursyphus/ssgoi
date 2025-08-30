@@ -67,3 +67,5 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
 
   return <Suspense fallback={<DemoLoading />}>{renderDemo()}</Suspense>;
 }
+
+export default ViewTransitionDemo;
