@@ -127,7 +127,7 @@ export default async function Home({ params }: HomePageProps) {
             <div className="relative">
               <div
                 className="relative mx-auto z-0"
-                style={{ width: "450px", height: "650px" }}
+                style={{ width: "500px", height: "700px" }}
               >
                 {/* 3D iPhone Component */}
                 <IPhone3D color="black">

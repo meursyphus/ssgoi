@@ -61,7 +61,7 @@ function IPhoneModel({
   const phoneHeight = 5.2;
   const phoneDepth = 0.28;
   const screenInset = 0.08; // Bezel size
-  const scale = 0.7; // Overall scale
+  const scale = 0.65; // Overall scale
 
   return (
     <group ref={meshRef} position={[0, 0, 0]} scale={[scale, scale, scale]}>
@@ -104,23 +104,14 @@ function IPhoneModel({
           transform
           occlude
           distanceFactor={2.5}
-          position={[0, 0, 0.01]}
+          position={[0, 0, 0.02]}
           style={{
             width: `${(phoneWidth - screenInset * 2) * 160}px`,
             height: `${(phoneHeight - screenInset * 2) * 160}px`,
           }}
           center
         >
-          <div
-            style={{
-              overflow: "hidden",
-              backgroundColor: "red",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            {children}
-          </div>
+          {children}
         </Html>
       </group>
 
@@ -277,7 +268,7 @@ export default function IPhone3D({
         <Suspense fallback={null}>
           <PresentationControls
             global
-            rotation={[0.13, -0.5, 0]}
+            rotation={[-0.2, 0.5, 0.0]}
             polar={[-0.4, 0.2]}
             azimuth={[-1, 0.75]}
             snap={false} // Disable snap to prevent stuck state
