@@ -403,19 +403,80 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                 <div className="relative grid lg:grid-cols-2 gap-8 items-center">
                   {/* Left side - Visual Demo */}
                   <div className="order-2 lg:order-1">
-                    <div className="relative rounded-xl bg-gray-950 p-6 border border-gray-800">
+                    <div className="relative rounded-xl bg-gray-950 p-4 border border-gray-800">
                       {/* Simulated browser */}
-                      <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-800">
                         <div className="w-3 h-3 rounded-full bg-red-500/50" />
                         <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
                         <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                        <div className="flex-1 mx-4">
+                          <div className="h-6 bg-gray-850 rounded-full px-3 flex items-center">
+                            <span className="text-[10px] text-gray-600">example.com</span>
+                          </div>
+                        </div>
                       </div>
                       
-                      {/* Blinking/Flashing content - simulating page refresh */}
-                      <div className="space-y-3">
-                        <div className="h-8 bg-gray-800 rounded animate-blink" />
-                        <div className="h-32 bg-gray-800 rounded animate-blink" style={{ animationDelay: "0.15s" }} />
-                        <div className="h-8 bg-gray-800 rounded animate-blink" style={{ animationDelay: "0.3s" }} />
+                      {/* Realistic page layouts that blink */}
+                      <div className="relative h-64">
+                        {/* Layout 1 - Blog Post List */}
+                        <div className="absolute inset-0 p-3 animate-page-switch">
+                          {/* Header */}
+                          <div className="mb-4">
+                            <div className="h-10 bg-gray-800 rounded w-1/3 mb-2" />
+                            <div className="h-3 bg-gray-850 rounded w-2/3" />
+                          </div>
+                          
+                          {/* Post List */}
+                          <div className="space-y-3">
+                            {/* Post 1 */}
+                            <div className="flex gap-3 p-3 bg-gray-850/50 rounded">
+                              <div className="w-20 h-20 bg-gray-800 rounded" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-gray-800 rounded w-3/4" />
+                                <div className="h-3 bg-gray-850 rounded" />
+                                <div className="h-3 bg-gray-850 rounded w-5/6" />
+                                <div className="flex gap-2 mt-2">
+                                  <div className="h-2 w-12 bg-gray-700 rounded" />
+                                  <div className="h-2 w-16 bg-gray-700 rounded" />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Post 2 */}
+                            <div className="flex gap-3 p-3 bg-gray-850/50 rounded">
+                              <div className="w-20 h-20 bg-gray-800 rounded" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-gray-800 rounded w-2/3" />
+                                <div className="h-3 bg-gray-850 rounded" />
+                                <div className="h-3 bg-gray-850 rounded w-4/5" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Layout 2 - Blog Post Detail */}
+                        <div className="absolute inset-0 p-3 animate-page-switch" style={{ animationDelay: "1.5s" }}>
+                          {/* Article Header */}
+                          <div className="mb-4">
+                            <div className="h-8 bg-gray-800 rounded w-4/5 mb-2" />
+                            <div className="flex gap-2 mb-3">
+                              <div className="h-3 w-16 bg-gray-700 rounded" />
+                              <div className="h-3 w-20 bg-gray-700 rounded" />
+                              <div className="h-3 w-16 bg-gray-700 rounded" />
+                            </div>
+                          </div>
+                          
+                          {/* Hero Image */}
+                          <div className="h-32 bg-gray-850 rounded mb-4" />
+                          
+                          {/* Article Content */}
+                          <div className="space-y-2">
+                            <div className="h-3 bg-gray-850 rounded" />
+                            <div className="h-3 bg-gray-850 rounded" />
+                            <div className="h-3 bg-gray-850 rounded w-5/6" />
+                            <div className="h-3 bg-gray-850 rounded w-4/5" />
+                          </div>
+                        </div>
                       </div>
                       
                       {/* Flash effect overlay */}
@@ -435,24 +496,15 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Jarring Transitions</p>
-                          <p className="text-gray-500 text-sm">Full page reloads break user focus</p>
-                        </div>
+                        <p className="text-white font-semibold">Jarring Transitions</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Lost Context</p>
-                          <p className="text-gray-500 text-sm">Users lose their place during navigation</p>
-                        </div>
+                        <p className="text-white font-semibold">Lost Context</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Poor Performance</p>
-                          <p className="text-gray-500 text-sm">Feels slow and unresponsive</p>
-                        </div>
+                        <p className="text-white font-semibold">Poor Performance</p>
                       </div>
                     </div>
                   </div>
@@ -491,27 +543,102 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                         <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: "0.2s" }} />
                       </div>
                       
-                      {/* Smooth sliding content - preserving context */}
-                      <div className="relative h-40 overflow-hidden">
-                        {/* Content sliding animation */}
-                        <div className="absolute inset-0 animate-slide-content">
-                          <div className="space-y-3">
-                            <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
-                            <div className="h-24 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
-                            <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                      {/* Smooth sliding transitions - like native app */}
+                      <div className="relative h-64 overflow-hidden rounded-lg">
+                        {/* Container for sliding pages */}
+                        <div className="flex animate-slow-slide">
+                          {/* Page 1 - Blog Post List */}
+                          <div className="min-w-full p-3">
+                            {/* Header */}
+                            <div className="mb-4">
+                              <div className="h-10 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-1/3 mb-2" />
+                              <div className="h-3 bg-vivid-purple/20 rounded w-2/3" />
+                            </div>
+                            
+                            {/* Post List with SSGOI colors */}
+                            <div className="space-y-3">
+                              {/* Post 1 */}
+                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 rounded">
+                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-vivid-purple/25 rounded w-3/4" />
+                                  <div className="h-3 bg-vivid-orange/20 rounded" />
+                                  <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
+                                  <div className="flex gap-2 mt-2">
+                                    <div className="h-2 w-12 bg-vivid-orange/30 rounded" />
+                                    <div className="h-2 w-16 bg-vivid-purple/30 rounded" />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Post 2 */}
+                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-orange/10 to-vivid-purple/10 rounded">
+                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-orange/30 to-vivid-purple/30 rounded" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-vivid-orange/25 rounded w-2/3" />
+                                  <div className="h-3 bg-vivid-purple/20 rounded" />
+                                  <div className="h-3 bg-vivid-orange/20 rounded w-4/5" />
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          {/* Second set for continuous sliding */}
-                          <div className="space-y-3 mt-6">
-                            <div className="h-8 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
-                            <div className="h-24 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded" />
-                            <div className="h-8 bg-gradient-to-r from-vivid-orange/30 to-vivid-purple/30 rounded" />
+                          
+                          {/* Page 2 - Blog Post Detail */}
+                          <div className="min-w-full p-3">
+                            {/* Article Header */}
+                            <div className="mb-4">
+                              <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-4/5 mb-2" />
+                              <div className="flex gap-2 mb-3">
+                                <div className="h-3 w-16 bg-vivid-purple/25 rounded" />
+                                <div className="h-3 w-20 bg-vivid-orange/25 rounded" />
+                                <div className="h-3 w-16 bg-vivid-purple/25 rounded" />
+                              </div>
+                            </div>
+                            
+                            {/* Hero Image */}
+                            <div className="h-32 bg-gradient-to-br from-vivid-purple/20 to-vivid-orange/20 rounded mb-4" />
+                            
+                            {/* Article Content */}
+                            <div className="space-y-2">
+                              <div className="h-3 bg-vivid-purple/20 rounded" />
+                              <div className="h-3 bg-vivid-orange/20 rounded" />
+                              <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
+                              <div className="h-3 bg-vivid-orange/20 rounded w-4/5" />
+                            </div>
+                          </div>
+                          
+                          {/* Page 3 - duplicate for smooth loop */}
+                          <div className="min-w-full p-3">
+                            {/* Header */}
+                            <div className="mb-4">
+                              <div className="h-10 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-1/3 mb-2" />
+                              <div className="h-3 bg-vivid-purple/20 rounded w-2/3" />
+                            </div>
+                            
+                            {/* Post List duplicate */}
+                            <div className="space-y-3">
+                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 rounded">
+                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-purple/30 to-vivid-orange/30 rounded" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-vivid-purple/25 rounded w-3/4" />
+                                  <div className="h-3 bg-vivid-orange/20 rounded" />
+                                  <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         
                         {/* Context preservation indicator */}
-                        <div className="absolute top-2 right-2 flex items-center gap-1">
+                        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded-full">
                           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                           <span className="text-xs text-green-500 font-medium">Context Preserved</span>
+                        </div>
+                        
+                        {/* Page dots indicator */}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          <div className="w-1.5 h-1.5 bg-vivid-purple rounded-full animate-dot-1" />
+                          <div className="w-1.5 h-1.5 bg-vivid-purple/40 rounded-full animate-dot-2" />
                         </div>
                       </div>
                     </div>
@@ -529,24 +656,15 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Smooth Transitions</p>
-                          <p className="text-gray-300 text-sm">Seamless navigation with beautiful animations</p>
-                        </div>
+                        <p className="text-white font-semibold">Smooth Transitions</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Maintained Context</p>
-                          <p className="text-gray-300 text-sm">Users always know where they are</p>
-                        </div>
+                        <p className="text-white font-semibold">Maintained Context</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <div>
-                          <p className="text-white font-semibold mb-1">Native-like Feel</p>
-                          <p className="text-gray-300 text-sm">Fast, responsive, and delightful to use</p>
-                        </div>
+                        <p className="text-white font-semibold">Native-like Feel</p>
                       </div>
                     </div>
                   </div>
@@ -582,12 +700,15 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           }
         }
         
-        @keyframes blink {
-          0%, 40% {
+        @keyframes page-switch {
+          0%, 45% {
             opacity: 1;
           }
-          60%, 100% {
+          50%, 95% {
             opacity: 0;
+          }
+          100% {
+            opacity: 1;
           }
         }
         
@@ -603,12 +724,42 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           }
         }
         
-        @keyframes slide-content {
+        @keyframes slow-slide {
           0% {
-            transform: translateY(0);
+            transform: translateX(0);
+          }
+          48% {
+            transform: translateX(0);
+          }
+          52% {
+            transform: translateX(-33.33%);
+          }
+          98% {
+            transform: translateX(-33.33%);
           }
           100% {
-            transform: translateY(-50%);
+            transform: translateX(-66.66%);
+          }
+        }
+        
+        @keyframes dot-1 {
+          0%, 48% {
+            opacity: 1;
+          }
+          52%, 100% {
+            opacity: 0.4;
+          }
+        }
+        
+        @keyframes dot-2 {
+          0%, 48% {
+            opacity: 0.4;
+          }
+          52%, 98% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0.4;
           }
         }
         
@@ -624,16 +775,24 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           }
         }
         
-        .animate-blink {
-          animation: blink 2s ease-in-out infinite;
+        .animate-page-switch {
+          animation: page-switch 2s ease-in-out infinite;
         }
         
         .animate-flash-overlay {
           animation: flash-overlay 2s ease-in-out infinite;
         }
         
-        .animate-slide-content {
-          animation: slide-content 5s linear infinite;
+        .animate-slow-slide {
+          animation: slow-slide 8s ease-in-out infinite;
+        }
+        
+        .animate-dot-1 {
+          animation: dot-1 8s ease-in-out infinite;
+        }
+        
+        .animate-dot-2 {
+          animation: dot-2 8s ease-in-out infinite;
         }
         
         .animate-gradient {
