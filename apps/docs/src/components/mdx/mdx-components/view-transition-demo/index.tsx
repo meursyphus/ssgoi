@@ -23,9 +23,12 @@ const DrillDemo = lazy(() =>
 const SlideDemo = lazy(() =>
   import("./slide-demo").then((m) => ({ default: m.SlideDemo }))
 );
+const CurtainDemo = lazy(() =>
+  import("./curtain-demo").then((m) => ({ default: m.CurtainDemo }))
+);
 
 export interface ViewTransitionDemoProps {
-  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide";
+  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "curtain";
 }
 
 // Loading component
@@ -55,6 +58,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <DrillDemo />;
       case "slide":
         return <SlideDemo />;
+      case "curtain":
+        return <CurtainDemo />;
       default:
         return null;
     }

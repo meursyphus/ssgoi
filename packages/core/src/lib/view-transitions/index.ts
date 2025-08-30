@@ -1,3 +1,4 @@
+export * from "./curtain";
 export * from "./drill";
 export * from "./fade";
 export * from "./hero";
