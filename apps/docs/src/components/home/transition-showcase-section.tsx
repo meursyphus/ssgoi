@@ -16,24 +16,27 @@ interface TransitionShowcaseSectionProps {
 const transitions = [
   {
     type: "fade",
-    title: "Fade",
-    description: "Smooth opacity transition for context changes",
+    title: "Fade Transition",
+    description: "Smooth opacity transition perfect for context changes and top-level navigation",
     gradient: "from-purple-500/20 to-pink-500/20",
     borderColor: "border-purple-500/30",
+    accentColor: "text-purple-400",
   },
   {
     type: "hero",
-    title: "Hero",
-    description: "Shared element animation for detail views",
+    title: "Hero Transition",
+    description: "Shared element animation that creates seamless transitions for detail views",
     gradient: "from-green-500/20 to-emerald-500/20",
     borderColor: "border-green-500/30",
+    accentColor: "text-green-400",
   },
   {
     type: "scroll",
-    title: "Scroll",
-    description: "Vertical scrolling for sequential content",
+    title: "Scroll Transition",
+    description: "Vertical scrolling effect ideal for sequential content and storytelling",
     gradient: "from-blue-500/20 to-cyan-500/20",
     borderColor: "border-blue-500/30",
+    accentColor: "text-blue-400",
   },
 ];
 
@@ -71,9 +74,26 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
           y: 80,
           opacity: 0,
           duration: 0.8,
-          delay: index * 0.15,
+          delay: index * 0.2,
           ease: "power2.out",
         });
+
+        // Demo animation on scroll
+        const demo = card.querySelector(".demo-container");
+        if (demo) {
+          gsap.from(demo, {
+            scrollTrigger: {
+              trigger: demo,
+              start: "top 75%",
+              toggleActions: "play none none reverse",
+            },
+            scale: 0.95,
+            opacity: 0,
+            duration: 1,
+            delay: 0.3,
+            ease: "power2.out",
+          });
+        }
       });
 
       // Parallax background elements
@@ -109,69 +129,81 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        {/* Single column layout with max width */}
+        <div className="max-w-4xl mx-auto space-y-16">
           {transitions.map((transition, index) => (
             <div
               key={transition.type}
               ref={(el) => {el && (cardsRef.current[index] = el)}}
-              className={`group relative overflow-hidden rounded-2xl border ${transition.borderColor} bg-card/50 backdrop-blur-sm`}
+              className={`group relative overflow-hidden rounded-3xl border ${transition.borderColor} bg-card/50 backdrop-blur-sm`}
             >
               {/* Gradient background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${transition.gradient} opacity-50`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${transition.gradient} opacity-30`} />
               
               {/* Content */}
               <div className="relative">
-                <div className="p-6 pb-0">
-                  <h3 className="text-2xl font-bold text-white mb-2">{transition.title}</h3>
-                  <p className="text-muted-foreground mb-4">{transition.description}</p>
+                {/* Header */}
+                <div className="p-8 lg:p-10">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">{transition.title}</h3>
+                      <p className="text-lg text-muted-foreground max-w-2xl">{transition.description}</p>
+                    </div>
+                    {/* View documentation link */}
+                    <Link 
+                      href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
+                      className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 transition-all hover:bg-gray-800/70`}
+                    >
+                      <span className={`text-base font-medium ${transition.accentColor}`}>View docs</span>
+                      <ArrowRight className={`h-4 w-4 ${transition.accentColor}`} />
+                    </Link>
+                  </div>
                 </div>
                 
-                {/* Larger Browser mockup with demo */}
-                <div className="px-6 pb-6">
-                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-900 border border-gray-700">
+                {/* Large Browser mockup with demo */}
+                <div className="px-8 pb-8 lg:px-10 lg:pb-10">
+                  <div className="demo-container relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-900 border border-gray-700 shadow-2xl">
                     {/* Browser header */}
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 border-b border-gray-700">
-                      <div className="flex gap-1.5">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-gray-800 border-b border-gray-700">
+                      <div className="flex gap-2">
                         <div className="w-3 h-3 rounded-full bg-red-500" />
                         <div className="w-3 h-3 rounded-full bg-yellow-500" />
                         <div className="w-3 h-3 rounded-full bg-green-500" />
                       </div>
                       <div className="flex-1 flex justify-center">
-                        <div className="bg-gray-700 rounded px-3 py-0.5 text-xs text-gray-400">
-                          ssgoi.com/demo
+                        <div className="bg-gray-700 rounded-lg px-4 py-1 text-sm text-gray-400">
+                          ssgoi.com/demo/{transition.type}
                         </div>
                       </div>
                     </div>
                     
-                    {/* Demo content - larger scale */}
-                    <div className="relative h-[calc(100%-32px)] overflow-hidden">
-                      <div className="scale-[0.7] origin-top-left w-[143%] h-[143%]">
-                        <ViewTransitionDemo type={transition.type as any} />
-                      </div>
+                    {/* Demo content - full size */}
+                    <div className="relative h-[calc(100%-44px)] overflow-hidden bg-gray-950">
+                      <ViewTransitionDemo type={transition.type as any} />
                     </div>
                   </div>
                 </div>
-                
-                {/* View More Link */}
-                <Link 
-                  href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
-                  className="block p-6 pt-0"
-                >
-                  <div className="flex items-center gap-2 text-sm font-medium text-vivid-purple hover:text-vivid-orange transition-colors">
+
+                {/* Mobile view documentation link */}
+                <div className="px-8 pb-8 sm:hidden">
+                  <Link 
+                    href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-gradient-to-r from-vivid-purple to-vivid-orange text-white font-medium"
+                  >
                     <span>View documentation</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </Link>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         {/* View All Transitions Button */}
-        <div className="mt-12 text-center">
+        <div className="mt-16 text-center">
           <Link 
             href={`/${lang}/docs/view-transitions/01-fade`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-vivid-purple to-vivid-orange text-white font-medium hover:shadow-lg transition-all transform hover:scale-105"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-vivid-purple to-vivid-orange text-white text-lg font-medium hover:shadow-lg transition-all transform hover:scale-105"
           >
             <span>Explore All Transitions</span>
             <ArrowRight className="h-5 w-5" />

@@ -106,12 +106,12 @@ export async function HeroSection({ lang }: HeroSectionProps) {
                 <Demo autoPlay={false} />
               </IPhone3D>
 
-              {/* 플로팅 배지 */}
-              <div className="absolute -left-2 md:-left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg">
+              {/* 플로팅 배지 - 아이폰 근처에 배치 */}
+              <div className="absolute left-0 md:left-8 top-1/3 md:top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 md:px-4 md:py-2.5 text-sm md:text-base font-medium text-white shadow-lg">
                 {t("floatingBadges.performance")}
               </div>
               <div
-                className="absolute -right-2 md:-right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg"
+                className="absolute right-0 md:right-8 bottom-1/3 md:bottom-1/4 animate-float rounded-lg bg-vivid-purple px-3 py-2 md:px-4 md:py-2.5 text-sm md:text-base font-medium text-white shadow-lg"
                 style={{ animationDelay: "1s" }}
               >
                 {t("floatingBadges.stateMemory")}

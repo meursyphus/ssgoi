@@ -44,10 +44,16 @@ import { Ssgoi } from '@ssgoi/vue'`,
     title: "Shared Element Transitions",
     description: "Create seamless animations between pages with shared elements",
     color: "from-purple-500 to-pink-500",
-    code: `hero({ 
-  element: '.product-card',
-  duration: 800 
-})`,
+    code: `config: {
+  transitions: [
+    {
+      from: '/gallery',
+      to: '/gallery/*',
+      transition: hero(),
+      symmetric: true
+    }
+  ]
+}`,
   },
   {
     icon: Globe,
