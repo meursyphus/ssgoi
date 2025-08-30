@@ -4,7 +4,7 @@ import type {
   GetTransitionConfig,
   Transition,
 } from "./types";
-import { getScrollingElement } from "./utils";
+import { getScrollingElement } from "./utils/get-scrolling-element";
 
 /**
  * SSGOI Transition Context Operation Principles

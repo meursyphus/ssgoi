@@ -1,5 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { getAccurateBoundingRect } from "../utils/get-transformed-rect";
 
 interface PinterestOptions {
   spring?: Partial<SpringConfig>;
@@ -27,8 +28,8 @@ interface PinterestOptions {
  */
 
 function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
-  const rootRect = root.getBoundingClientRect();
-  const elRect = el.getBoundingClientRect();
+  const rootRect = getAccurateBoundingRect(root);
+  const elRect = getAccurateBoundingRect(el);
 
   return new DOMRect(
     elRect.left - rootRect.left,
@@ -290,7 +291,7 @@ function createAnimationConfig(
   // Calculate rects based on mode
   const galleryRect = getRect(isEnterMode ? fromNode : toNode, galleryEl);
   const detailRect = getRect(isEnterMode ? toNode : fromNode, detailEl);
-  const pageRect = toNode.getBoundingClientRect();
+  const pageRect = getAccurateBoundingRect(toNode);
 
   // Return appropriate animation functions based on mode
   if (isEnterMode) {

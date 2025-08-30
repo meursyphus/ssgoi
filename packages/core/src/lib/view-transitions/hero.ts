@@ -1,5 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { getAccurateBoundingRect } from "../utils/get-transformed-rect";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
@@ -11,8 +12,8 @@ function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
 }
 
 function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
-  const rootRect = root.getBoundingClientRect();
-  const elRect = el.getBoundingClientRect();
+  const rootRect = getAccurateBoundingRect(root);
+  const elRect = getAccurateBoundingRect(el);
 
   return new DOMRect(
     elRect.left - rootRect.left,
