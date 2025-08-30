@@ -1,0 +1,141 @@
+---
+title: "遮罩动画"
+description: "使用剪切遮罩实现时尚的显示和隐藏效果"
+nav-title: "遮罩"
+---
+
+# 遮罩动画
+
+遮罩（Mask）动画使用剪切遮罩创建时尚的显示和隐藏效果，元素以圆形、椭圆形或方形的形状出现或消失。它提供了类似 Material Design 涟漪效果的优雅过渡。
+
+<TransitionDemo type="mask" />
+
+## 使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { transition } from '@ssgoi/react';
+    import { mask } from '@ssgoi/react/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...mask()
+        })}>
+          遮罩效果！
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { transition } from '@ssgoi/svelte';
+      import { mask } from '@ssgoi/svelte/transitions';
+    </script>
+
+    <div use:transition={{
+      key: 'my-element',
+      ...mask()
+    }}>
+      遮罩效果！
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { mask } from '@ssgoi/vue/transitions';
+    </script>
+
+    <template>
+      <div v-transition="{
+        key: 'my-element',
+        ...mask()
+      }">
+        遮罩效果！
+      </div>
+    </template>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface MaskOptions {
+  shape?: 'circle' | 'ellipse' | 'square';  // 遮罩形状（默认：'circle'）
+  origin?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 
+           'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';  // 起始位置（默认：'center'）
+  scale?: number;     // 遮罩大小比例（默认：1.5）
+  fade?: boolean;     // 同时应用淡入淡出效果（默认：false）
+  spring?: {
+    stiffness?: number;  // 弹簧刚度（默认：300）
+    damping?: number;    // 阻尼系数（默认：30）
+  };
+}
+```
+
+### 使用示例
+
+```tsx
+// 从中心开始的圆形遮罩
+mask()
+
+// 从左上角开始的圆形遮罩
+mask({ origin: 'top-left' })
+
+// 椭圆形遮罩
+mask({ shape: 'ellipse' })
+
+// 方形遮罩
+mask({ shape: 'square', origin: 'center' })
+
+// 带淡入淡出效果
+mask({ fade: true })
+
+// 更大范围的遮罩
+mask({ scale: 2 })
+
+// 平滑动画
+mask({ spring: { stiffness: 100, damping: 20 } })
+```
+
+## 应用场景
+
+### 卡片涟漪效果
+
+```tsx
+// 从点击位置开始的涟漪效果
+mask({ 
+  origin: 'top-left',  // 根据点击位置动态设置
+  scale: 2,
+  spring: { stiffness: 400, damping: 35 }
+})
+```
+
+### 模态窗口打开效果
+
+```tsx
+// 从按钮位置展开的模态窗口
+mask({
+  origin: 'bottom-right',  // 按钮位置
+  scale: 3,
+  fade: true
+})
+```
+
+### 画廊图片过渡
+
+```tsx
+// 从图片中心展开
+mask({
+  shape: 'circle',
+  origin: 'center',
+  scale: 1.5,
+  spring: { stiffness: 200, damping: 25 }
+})
+```
