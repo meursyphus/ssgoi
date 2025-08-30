@@ -7,6 +7,7 @@ import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
 import { Metadata } from "next";
 import { createSEOMetadata } from "@/lib/seo-metadata";
+import { SsgoiTransition } from "@ssgoi/react";
 
 interface HomePageProps {
   params: Promise<{ lang: string }>;
@@ -34,7 +35,7 @@ export default async function Home({ params }: HomePageProps) {
   const t = await getServerTranslations("home", lang);
 
   return (
-    <div className="relative">
+    <SsgoiTransition id="/" as="div" className="relative">
       {/* Hero Section - 좌우 분할 */}
       <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
         {/* 배경 그라데이션 효과 */}
@@ -368,6 +369,6 @@ export default async function Home({ params }: HomePageProps) {
           </div>
         </div>
       </section>
-    </div>
+    </SsgoiTransition>
   );
 }
