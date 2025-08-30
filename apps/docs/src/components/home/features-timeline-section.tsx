@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Sparkles, Layers, Cpu, Rocket, Globe, Code2 } from "lucide-react";
+import Image from "next/image";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,46 +14,71 @@ interface FeaturesTimelineSectionProps {
 
 const features = [
   {
-    icon: Sparkles,
-    title: "Beautiful Transitions",
-    description: "Choose from 15+ pre-built transition effects or create your own custom animations",
-    color: "from-purple-500 to-pink-500",
-    code: `fade({ spring: { stiffness: 300 } })`,
+    icon: Rocket,
+    title: "One Line Setup",
+    description: "Get started with a single line of code. No complex configuration needed",
+    color: "from-orange-500 to-yellow-500",
+    code: `<Ssgoi config={{ defaultTransition: fade() }}>
+  <App />
+</Ssgoi>`,
   },
   {
     icon: Layers,
     title: "Framework Agnostic",
-    description: "Works seamlessly with React, Svelte, Vue, and more. Use your existing routing system",
+    description: "Works with React, Svelte, Vue. Solid and Qwik coming soon",
     color: "from-blue-500 to-cyan-500",
-    code: `<Ssgoi config={config}>\n  <App />\n</Ssgoi>`,
+    frameworks: [
+      { name: "react", available: true },
+      { name: "svelte", available: true },
+      { name: "vue", available: true },
+      { name: "solidjs", available: false },
+      { name: "qwik", available: false }
+    ],
+    code: `// Same API across all frameworks
+import { Ssgoi } from '@ssgoi/react'
+import { Ssgoi } from '@ssgoi/svelte'
+import { Ssgoi } from '@ssgoi/vue'`,
   },
   {
-    icon: Cpu,
-    title: "Performance First",
-    description: "Hardware-accelerated animations with 60 FPS. Spring-based physics for natural motion",
-    color: "from-green-500 to-emerald-500",
-    code: `spring: { stiffness: 150, damping: 25 }`,
-  },
-  {
-    icon: Rocket,
-    title: "Zero Configuration",
-    description: "Get started in minutes with sensible defaults. Progressively customize as needed",
-    color: "from-orange-500 to-yellow-500",
-    code: `defaultTransition: fade()`,
+    icon: Sparkles,
+    title: "Shared Element Transitions",
+    description: "Create seamless animations between pages with shared elements",
+    color: "from-purple-500 to-pink-500",
+    code: `hero({ 
+  element: '.product-card',
+  duration: 800 
+})`,
   },
   {
     icon: Globe,
-    title: "SSR Ready",
-    description: "Full server-side rendering support with Next.js, Nuxt, and SvelteKit. SEO friendly",
+    title: "SSR & SSG Ready",
+    description: "Full support for Next.js, Nuxt, SvelteKit. No hydration issues, SEO friendly",
+    color: "from-green-500 to-emerald-500",
+    code: `// Works out of the box with:
+// ✓ Next.js App Router
+// ✓ SvelteKit
+// ✓ Nuxt 3`,
+  },
+  {
+    icon: Cpu,
+    title: "Spring Physics",
+    description: "Natural motion with configurable spring physics for smooth animations",
     color: "from-red-500 to-pink-500",
-    code: `// Works out of the box\nexport default App`,
+    code: `spring: { 
+  stiffness: 300,  // Responsiveness
+  damping: 30      // Smoothness
+}`,
   },
   {
     icon: Code2,
-    title: "Developer Experience",
-    description: "TypeScript support, detailed docs, and helpful error messages. Build with confidence",
+    title: "TypeScript First",
+    description: "Full TypeScript support with detailed types and intelligent autocomplete",
     color: "from-indigo-500 to-purple-500",
-    code: `transition: hero({ element: '.card' })`,
+    code: `// Full type safety and autocomplete
+config: SsgoiConfig = {
+  defaultTransition: fade(),
+  transitions: [...]
+}`,
   },
 ];
 
@@ -126,7 +152,7 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
       });
 
       // Floating elements parallax
-      gsap.to(".float-element-1", {
+      gsap.to(".float-element-feat-1", {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top bottom",
@@ -135,17 +161,6 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
         },
         y: -200,
         rotation: 360,
-      });
-
-      gsap.to(".float-element-2", {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 3,
-        },
-        y: -150,
-        rotation: -360,
       });
     }, sectionRef);
 
@@ -156,8 +171,7 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
     <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
       {/* Floating background elements */}
       <div className="absolute inset-0 -z-10">
-        <div className="float-element-1 absolute left-10 top-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-vivid-purple/5 to-vivid-orange/5 blur-3xl" />
-        <div className="float-element-2 absolute right-10 bottom-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-vivid-green/5 to-vivid-blue/5 blur-3xl" />
+        <div className="float-element-feat-1 absolute left-10 top-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-vivid-purple/5 to-vivid-orange/5 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-7xl">
@@ -167,7 +181,7 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
             <span className="gradient-green">Delightful Transitions</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Scroll to explore the features that make SSGOI the perfect choice for your next project
+            Powerful features that make SSGOI the perfect choice for modern web applications
           </p>
         </div>
 
@@ -184,7 +198,7 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
               return (
                 <div
                   key={index}
-                  ref={(el) => (itemsRef.current[index] = el)}
+                  ref={(el) => {el && (itemsRef.current[index] = el)}}
                   className={`relative flex items-center ${
                     isLeft ? "lg:flex-row" : "lg:flex-row-reverse"
                   }`}
@@ -203,10 +217,35 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
                         <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
                         <p className="text-muted-foreground mb-6">{feature.description}</p>
                         
+                        {/* Framework logos if applicable */}
+                        {feature.frameworks && (
+                          <div className="flex gap-4 mb-6">
+                            {feature.frameworks.map((framework: any) => (
+                              <div 
+                                key={framework.name} 
+                                className={`relative w-10 h-10 rounded-lg bg-gray-900 border ${framework.available ? 'border-gray-700' : 'border-gray-800'} flex items-center justify-center`}
+                              >
+                                <Image
+                                  src={`/icons/${framework.name}.svg`}
+                                  alt={framework.name}
+                                  width={24}
+                                  height={24}
+                                  className={framework.available ? 'opacity-80' : 'opacity-30'}
+                                />
+                                {!framework.available && (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-[8px] text-gray-500 font-medium bg-gray-900 px-1 rounded">soon</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
                         {/* Code example */}
                         <div className="code-block">
                           <div className="rounded-lg bg-gray-900 border border-gray-700 p-4">
-                            <pre className="text-sm text-gray-300">
+                            <pre className="text-sm text-gray-300 overflow-x-auto">
                               <code>{feature.code}</code>
                             </pre>
                           </div>
