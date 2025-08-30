@@ -1,0 +1,190 @@
+---
+title: "百叶窗过渡"
+description: "使用百叶窗效果遮盖和显示屏幕的过渡"
+nav-title: "百叶窗"
+---
+
+# 百叶窗过渡
+
+百叶窗过渡使用多个条状元素依次遮盖和显示屏幕来实现页面过渡。适用于无关或距离较远的内容之间的过渡。
+
+## 演示
+
+<ViewTransitionDemo type="blind" />
+
+## UX 原则
+
+### 何时使用？
+
+百叶窗用于**无关内容**之间的过渡或移动到**全新上下文**时。
+
+#### 内容关系适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "yes",
+      description: "移动到完全不同的主题或部分",
+    },
+    {
+      label: "同级关系",
+      suitable: "no",
+      description: "同级内容更适合使用滑动",
+    },
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "上下级关系更适合使用钻入",
+    },
+  ]}
+/>
+
+### 为什么这样工作？
+
+百叶窗在显示新屏幕前完全遮盖屏幕，视觉上切断与之前内容的联系。这清楚地向用户传达已经移动到全新的上下文。
+
+### 动效设计
+
+```
+1. OUT：百叶窗依次关闭，遮盖屏幕
+2. 等待：屏幕短暂完全遮盖
+3. IN：百叶窗依次打开，显示新屏幕
+```
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { blind } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { blind } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: blind()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 选项
+
+```typescript
+interface BlindOptions {
+  // 弹簧配置
+  inSpring?: SpringConfig; // IN 动画（默认：{ stiffness: 75, damping: 25 }）
+  outSpring?: SpringConfig; // OUT 动画（默认：{ stiffness: 80, damping: 25 }）
+
+  // 时间控制
+  transitionDelay?: number; // OUT 和 IN 之间的延迟（默认：300ms）
+  staggerDelay?: number; // 百叶窗之间的延迟（默认：100ms）
+
+  // 视觉效果
+  blindCount?: number; // 百叶窗数量（默认：10）
+  direction?: "horizontal" | "vertical"; // 方向（默认：'horizontal'）
+  blindColor?: string; // 颜色（默认：'#000000'）
+}
+```
+
+### 自定义示例
+
+```tsx
+// 快速过渡
+blind({
+  staggerDelay: 20,
+  transitionDelay: 100,
+});
+
+// 垂直百叶窗
+blind({
+  direction: "vertical",
+  blindCount: 15,
+});
+
+// 平滑过渡
+blind({
+  outSpring: { stiffness: 60, damping: 20 },
+  inSpring: { stiffness: 50, damping: 18 },
+});
+
+// 更改颜色
+blind({
+  blindColor: "#1a1a1a",
+});
+```
+
+## 实际示例
+
+### 主页到设置
+
+```tsx
+{
+  from: '/home',
+  to: '/settings',
+  transition: blind()
+}
+```
+
+### 类别之间移动
+
+```tsx
+{
+  from: '/shop/*',
+  to: '/blog/*',
+  transition: blind({
+    blindCount: 12,
+    staggerDelay: 25
+  })
+}
+```
+
+### 登录后到仪表板
+
+```tsx
+{
+  from: '/login',
+  to: '/dashboard',
+  transition: blind({
+    transitionDelay: 500,
+    blindColor: '#0f172a'
+  })
+}
+```
+
+## 与其他过渡的比较
+
+- **vs 淡入淡出**：百叶窗提供更戏剧性和明确的分隔
+- **vs 滑动**：百叶窗没有方向性，适合无关内容
+- **vs 钻入**：百叶窗用于没有层级的水平移动
+
+## 性能考虑
+
+- 百叶窗动态创建并在动画后自动移除
+- 使用 GPU 加速实现流畅动画
+- 超过 20 个百叶窗可能会影响低端设备的性能

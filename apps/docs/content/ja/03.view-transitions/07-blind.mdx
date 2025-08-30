@@ -1,0 +1,190 @@
+---
+title: "ブラインドトランジション"
+description: "ブラインド効果で画面を覆い、表示するトランジション"
+nav-title: "ブラインド"
+---
+
+# ブラインドトランジション
+
+ブラインドトランジションは、複数のバーが順次画面を覆い、表示することでページを遷移させます。関連性のない、または離れたコンテンツ間の遷移に適しています。
+
+## デモ
+
+<ViewTransitionDemo type="blind" />
+
+## UXの原則
+
+### いつ使用する？
+
+ブラインドは**無関係なコンテンツ**間の遷移や、**完全に新しいコンテキスト**への移動時に使用します。
+
+#### コンテンツ関係別の適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "無関係なコンテンツ",
+      suitable: "yes",
+      description: "完全に異なるトピックやセクションへの移動",
+    },
+    {
+      label: "兄弟関係",
+      suitable: "no",
+      description: "同じレベルのコンテンツにはスライドがより適切",
+    },
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "上下関係にはドリルがより適切",
+    },
+  ]}
+/>
+
+### なぜこのように動作するのか？
+
+ブラインドが画面を完全に覆った後、新しい画面を表示することで、前のコンテンツとの視覚的な連結を断ち切ります。これにより、ユーザーに完全に新しいコンテキストに移動したことを明確に伝えます。
+
+### モーションデザイン
+
+```
+1. OUT：ブラインドが順次閉じて画面を覆う
+2. 待機：画面が短時間完全に覆われる
+3. IN：ブラインドが順次開いて新しい画面を表示
+```
+
+## 基本的な使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { blind } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { blind } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: blind()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## オプション
+
+```typescript
+interface BlindOptions {
+  // スプリング設定
+  inSpring?: SpringConfig; // IN アニメーション（デフォルト：{ stiffness: 75, damping: 25 }）
+  outSpring?: SpringConfig; // OUT アニメーション（デフォルト：{ stiffness: 80, damping: 25 }）
+
+  // タイミング
+  transitionDelay?: number; // OUT と IN の間の遅延（デフォルト：300ms）
+  staggerDelay?: number; // ブラインド間の遅延（デフォルト：100ms）
+
+  // ビジュアル
+  blindCount?: number; // ブラインドの数（デフォルト：10）
+  direction?: "horizontal" | "vertical"; // 方向（デフォルト：'horizontal'）
+  blindColor?: string; // 色（デフォルト：'#000000'）
+}
+```
+
+### カスタマイズ例
+
+```tsx
+// 高速トランジション
+blind({
+  staggerDelay: 20,
+  transitionDelay: 100,
+});
+
+// 垂直ブラインド
+blind({
+  direction: "vertical",
+  blindCount: 15,
+});
+
+// スムーズなトランジション
+blind({
+  outSpring: { stiffness: 60, damping: 20 },
+  inSpring: { stiffness: 50, damping: 18 },
+});
+
+// 色の変更
+blind({
+  blindColor: "#1a1a1a",
+});
+```
+
+## 実例
+
+### ホームから設定へ
+
+```tsx
+{
+  from: '/home',
+  to: '/settings',
+  transition: blind()
+}
+```
+
+### カテゴリー間の移動
+
+```tsx
+{
+  from: '/shop/*',
+  to: '/blog/*',
+  transition: blind({
+    blindCount: 12,
+    staggerDelay: 25
+  })
+}
+```
+
+### ログイン後のダッシュボード
+
+```tsx
+{
+  from: '/login',
+  to: '/dashboard',
+  transition: blind({
+    transitionDelay: 500,
+    blindColor: '#0f172a'
+  })
+}
+```
+
+## 他のトランジションとの比較
+
+- **vs フェード**：ブラインドはより劇的で明確な分離を提供
+- **vs スライド**：ブラインドは方向性がなく、無関係なコンテンツに適切
+- **vs ドリル**：ブラインドは階層のない水平移動に使用
+
+## パフォーマンスの考慮事項
+
+- ブラインドは動的に作成され、アニメーション後に自動的に削除されます
+- GPU アクセラレーションを使用してスムーズなアニメーションを提供
+- 20個以上のブラインドは低スペックデバイスでパフォーマンスに影響する可能性があります

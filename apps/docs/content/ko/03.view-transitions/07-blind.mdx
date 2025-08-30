@@ -1,0 +1,190 @@
+---
+title: "블라인드 전환"
+description: "블라인드 효과로 화면을 가리고 드러내는 전환"
+nav-title: "블라인드"
+---
+
+# 블라인드 전환
+
+블라인드 전환은 여러 개의 막대가 순차적으로 화면을 가리고 드러내며 페이지를 전환합니다. 서로 관련이 없거나 거리가 먼 콘텐츠 간 전환에 적합합니다.
+
+## 데모
+
+<ViewTransitionDemo type="blind" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+블라인드는 **관련 없는 콘텐츠** 간 전환이나 **완전히 새로운 맥락**으로 이동할 때 사용합니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "yes",
+      description: "완전히 다른 주제나 섹션으로 이동",
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "같은 레벨의 콘텐츠는 슬라이드가 더 적합",
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "상하위 관계는 드릴이 더 적합",
+    },
+  ]}
+/>
+
+### 왜 이렇게 동작하나요?
+
+블라인드가 화면을 완전히 가린 후 새로운 화면을 드러내는 방식으로, 이전 콘텐츠와의 연결을 시각적으로 차단합니다. 이는 사용자에게 완전히 새로운 맥락으로 이동했음을 명확히 전달합니다.
+
+### 모션 디자인
+
+```
+1. OUT: 블라인드가 순차적으로 닫히며 화면을 가림
+2. 대기: 짧은 시간 동안 화면이 완전히 가려짐
+3. IN: 블라인드가 순차적으로 열리며 새 화면을 드러냄
+```
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { blind } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { blind } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: blind()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 옵션
+
+```typescript
+interface BlindOptions {
+  // 스프링 설정
+  inSpring?: SpringConfig; // IN 애니메이션 (기본: { stiffness: 75, damping: 25 })
+  outSpring?: SpringConfig; // OUT 애니메이션 (기본: { stiffness: 80, damping: 25 })
+
+  // 타이밍
+  transitionDelay?: number; // OUT과 IN 사이 대기 (기본: 300ms)
+  staggerDelay?: number; // 블라인드 간 지연 (기본: 100ms)
+
+  // 시각
+  blindCount?: number; // 블라인드 개수 (기본: 10)
+  direction?: "horizontal" | "vertical"; // 방향 (기본: 'horizontal')
+  blindColor?: string; // 색상 (기본: '#000000')
+}
+```
+
+### 커스터마이징 예시
+
+```tsx
+// 빠른 전환
+blind({
+  staggerDelay: 20,
+  transitionDelay: 100,
+});
+
+// 수직 블라인드
+blind({
+  direction: "vertical",
+  blindCount: 15,
+});
+
+// 부드러운 전환
+blind({
+  outSpring: { stiffness: 60, damping: 20 },
+  inSpring: { stiffness: 50, damping: 18 },
+});
+
+// 색상 변경
+blind({
+  blindColor: "#1a1a1a",
+});
+```
+
+## 실전 예시
+
+### 홈에서 설정으로
+
+```tsx
+{
+  from: '/home',
+  to: '/settings',
+  transition: blind()
+}
+```
+
+### 카테고리 간 이동
+
+```tsx
+{
+  from: '/shop/*',
+  to: '/blog/*',
+  transition: blind({
+    blindCount: 12,
+    staggerDelay: 25
+  })
+}
+```
+
+### 로그인 후 대시보드
+
+```tsx
+{
+  from: '/login',
+  to: '/dashboard',
+  transition: blind({
+    transitionDelay: 500,
+    blindColor: '#0f172a'
+  })
+}
+```
+
+## 다른 전환과의 비교
+
+- **vs 페이드**: 블라인드는 더 극적이고 명확한 구분을 제공
+- **vs 슬라이드**: 블라인드는 방향성이 없어 관련 없는 콘텐츠에 적합
+- **vs 드릴**: 블라인드는 계층 관계가 없는 수평적 이동에 사용
+
+## 성능 고려사항
+
+- 블라인드는 동적으로 생성되고 애니메이션 후 자동 제거됩니다
+- GPU 가속을 활용하여 부드러운 애니메이션을 제공합니다
+- 20개 이상의 블라인드는 저사양 기기에서 성능에 영향을 줄 수 있습니다
