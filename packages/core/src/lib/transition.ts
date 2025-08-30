@@ -2,7 +2,7 @@ import { createTransitionCallback } from "./create-transition-callback";
 import { StrategyContext, TRANSITION_STRATEGY, TransitionStrategy } from "./transition-strategy";
 import type { Transition, TransitionCallback, TransitionOptions } from "./types";
 import type { TransitionKey } from "./types";
-import { parseCallerLocation } from "./utils";
+import { parseCallerLocation } from "./utils/parse-caller-location";
 
 /**
  * Centralized transition management

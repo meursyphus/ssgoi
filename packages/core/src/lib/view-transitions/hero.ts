@@ -1,5 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { getRect } from "../utils/get-rect";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
@@ -8,18 +9,6 @@ interface HeroOptions {
 
 function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
   return page.querySelector(`[data-hero-key="${key}"]`);
-}
-
-function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
-  const rootRect = root.getBoundingClientRect();
-  const elRect = el.getBoundingClientRect();
-
-  return new DOMRect(
-    elRect.left - rootRect.left,
-    elRect.top - rootRect.top,
-    elRect.width,
-    elRect.height
-  );
 }
 
 export const hero = (options: HeroOptions = {}): SggoiTransition => {

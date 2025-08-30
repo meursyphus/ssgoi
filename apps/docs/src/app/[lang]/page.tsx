@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Zap, CheckCircle, Code2, Globe } from "lucide-react";
 import Demo from "@/components/demo";
+import IPhone3D from "@/components/home/iphone";
 import { CodeExample } from "@/components/code-example";
 import { getServerTranslations } from "@/i18n";
 import { Metadata } from "next";
@@ -17,12 +18,15 @@ export async function generateMetadata({
   const { lang } = await params;
   const t = await getServerTranslations("metadata", lang);
 
-  return createSEOMetadata({
-    title: t("title"),
-    description: t("description"),
-    type: "website",
-    url: `/${lang}`,
-  }, lang);
+  return createSEOMetadata(
+    {
+      title: t("title"),
+      description: t("description"),
+      type: "website",
+      url: `/${lang}`,
+    },
+    lang
+  );
 }
 
 export default async function Home({ params }: HomePageProps) {
@@ -66,10 +70,7 @@ export default async function Home({ params }: HomePageProps) {
                   {t("buttons.getStarted")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <Link
-                  href={`/${lang}/demo`}
-                  className="btn-secondary text-lg"
-                >
+                <Link href={`/${lang}/demo`} className="btn-secondary text-lg">
                   <Zap className="h-5 w-5" />
                   {t("buttons.demo")}
                 </Link>
@@ -124,23 +125,18 @@ export default async function Home({ params }: HomePageProps) {
 
             {/* 오른쪽: 앱 데모 */}
             <div className="relative">
-              <div className="relative mx-auto max-w-sm">
-                {/* 모바일 프레임 */}
-                <div className="relative overflow-hidden rounded-[3rem] border-8 border-white/10 bg-black shadow-2xl">
-                  <div className="absolute left-1/2 top-4 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
-
-                  {/* Demo Component */}
-                  <div className="aspect-[9/19.5]">
-                    <Demo />
-                  </div>
-                </div>
+              <div className="relative mx-auto z-0 w-full max-w-[400px] md:max-w-[700px] aspect-[5/7]">
+                {/* 3D iPhone Component */}
+                <IPhone3D color="black">
+                  <Demo autoPlay={false} />
+                </IPhone3D>
 
                 {/* 플로팅 배지 */}
-                <div className="absolute -left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 text-sm font-medium text-white shadow-lg">
+                <div className="absolute -left-2 md:-left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg">
                   {t("floatingBadges.performance")}
                 </div>
                 <div
-                  className="absolute -right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-3 py-2 text-sm font-medium text-white shadow-lg"
+                  className="absolute -right-2 md:-right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg"
                   style={{ animationDelay: "1s" }}
                 >
                   {t("floatingBadges.stateMemory")}
@@ -241,7 +237,9 @@ export default async function Home({ params }: HomePageProps) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 SolidJS
-                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
+                <span className="block text-xs">
+                  {t("frameworks.comingSoon")}
+                </span>
               </span>
             </div>
 
@@ -258,7 +256,9 @@ export default async function Home({ params }: HomePageProps) {
               </div>
               <span className="text-sm font-medium text-muted-foreground">
                 Qwik
-                <span className="block text-xs">{t("frameworks.comingSoon")}</span>
+                <span className="block text-xs">
+                  {t("frameworks.comingSoon")}
+                </span>
               </span>
             </div>
           </div>
@@ -282,7 +282,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-green to-vivid-cyan">
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.ssr.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.ssr.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.ssr.description")}
               </p>
@@ -294,7 +296,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-cyan to-vivid-blue">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.browserCompat.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.browserCompat.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.browserCompat.description")}
               </p>
@@ -306,7 +310,9 @@ export default async function Home({ params }: HomePageProps) {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-purple to-vivid-pink">
                 <Zap className="h-8 w-8 text-white" />
               </div>
-              <h3 className="mb-4 text-2xl font-bold">{t("whySSGOI.features.zeroConfig.title")}</h3>
+              <h3 className="mb-4 text-2xl font-bold">
+                {t("whySSGOI.features.zeroConfig.title")}
+              </h3>
               <p className="text-lg text-muted-foreground">
                 {t("whySSGOI.features.zeroConfig.description")}
               </p>

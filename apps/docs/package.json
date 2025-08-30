@@ -16,6 +16,9 @@
     "@radix-ui/react-navigation-menu": "^1.2.13",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-separator": "^1.1.7",
+    "@react-three/drei": "^10.7.4",
+    "@react-three/fiber": "^9.3.0",
+    "@types/three": "^0.179.0",
     "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -33,6 +36,7 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
+    "three": "^0.179.1",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

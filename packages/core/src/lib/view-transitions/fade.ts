@@ -1,5 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing, sleep } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { sleep } from "../utils/sleep";
 
 const DEFAULT_OUT_SPRING = { stiffness: 400, damping: 20 };
 const DEFAULT_IN_SPRING = { stiffness: 40, damping: 8 };

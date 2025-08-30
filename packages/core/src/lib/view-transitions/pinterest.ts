@@ -1,5 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { getRect } from "../utils/get-rect";
 
 interface PinterestOptions {
   spring?: Partial<SpringConfig>;
@@ -25,18 +26,6 @@ interface PinterestOptions {
  * - Detail page: Use data-pinterest-detail-key="unique-id"
  * - The transition auto-detects the mode based on which keys match between pages
  */
-
-function getRect(root: HTMLElement, el: HTMLElement): DOMRect {
-  const rootRect = root.getBoundingClientRect();
-  const elRect = el.getBoundingClientRect();
-
-  return new DOMRect(
-    elRect.left - rootRect.left,
-    elRect.top - rootRect.top,
-    elRect.width,
-    elRect.height
-  );
-}
 
 type AnimationFunc = (progress: number) => void;
 
