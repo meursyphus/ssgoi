@@ -91,13 +91,19 @@ function IPhoneModel({
       </RoundedBox>
 
       {/* Screen - render texture approach */}
-      <group position={[0, 0, phoneDepth / 2 + 0.001]}>
-        {/* Screen plane with content */}
-        <Plane
-          args={[phoneWidth - screenInset * 2, phoneHeight - screenInset * 2]}
+      <group position={[0, 0, phoneDepth / 2 - 0.01]}>
+        {/* Screen plane with rounded corners */}
+        <RoundedBox
+          args={[
+            phoneWidth - screenInset * 2,
+            phoneHeight - screenInset * 2,
+            0.01,
+          ]}
+          radius={0.28}
+          smoothness={4}
         >
           <meshBasicMaterial color="#000000" />
-        </Plane>
+        </RoundedBox>
 
         {/* HTML overlay positioned exactly on screen */}
         <Html
@@ -106,8 +112,10 @@ function IPhoneModel({
           distanceFactor={2.5}
           position={[0, 0, 0.02]}
           style={{
-            width: `${(phoneWidth - screenInset * 2) * 160}px`,
-            height: `${(phoneHeight - screenInset * 2) * 160}px`,
+            width: `${(phoneWidth - screenInset * 2) * 150}px`,
+            height: `${(phoneHeight - screenInset * 2) * 150}px`,
+            overflow: "hidden",
+            borderRadius: "20px",
           }}
           center
         >
@@ -268,7 +276,7 @@ export default function IPhone3D({
         <Suspense fallback={null}>
           <PresentationControls
             global
-            rotation={[-0.2, 0.5, 0.0]}
+            rotation={[-0.3, 0.5, 0.1]}
             polar={[-0.4, 0.2]}
             azimuth={[-1, 0.75]}
             snap={false} // Disable snap to prevent stuck state

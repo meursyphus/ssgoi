@@ -125,21 +125,18 @@ export default async function Home({ params }: HomePageProps) {
 
             {/* 오른쪽: 앱 데모 */}
             <div className="relative">
-              <div
-                className="relative mx-auto z-0"
-                style={{ width: "500px", height: "700px" }}
-              >
+              <div className="relative mx-auto z-0 w-full max-w-[400px] md:max-w-[700px] aspect-[5/7]">
                 {/* 3D iPhone Component */}
                 <IPhone3D color="black">
                   <Demo autoPlay={false} />
                 </IPhone3D>
 
                 {/* 플로팅 배지 */}
-                <div className="absolute -left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 text-sm font-medium text-white shadow-lg">
+                <div className="absolute -left-2 md:-left-4 top-1/4 animate-float rounded-lg bg-vivid-orange px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg">
                   {t("floatingBadges.performance")}
                 </div>
                 <div
-                  className="absolute -right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-3 py-2 text-sm font-medium text-white shadow-lg"
+                  className="absolute -right-2 md:-right-4 bottom-1/4 animate-float rounded-lg bg-vivid-purple px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-white shadow-lg"
                   style={{ animationDelay: "1s" }}
                 >
                   {t("floatingBadges.stateMemory")}
