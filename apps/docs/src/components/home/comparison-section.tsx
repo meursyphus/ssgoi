@@ -75,78 +75,112 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         ease: "power3.out",
       });
 
-      // Table rows animation - different for desktop and mobile
+      // Desktop table header animation
+      gsap.from(".table-header", {
+        scrollTrigger: {
+          trigger: ".comparison-table",
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        y: -30,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+
+      // Desktop table rows animation
+      const desktopRows = gsap.utils.toArray<HTMLElement>(".comparison-table .grid-cols-4");
+      desktopRows.forEach((row, index) => {
+        // Skip header row
+        if (row.classList.contains("table-header")) return;
+        
+        gsap.from(row, {
+          scrollTrigger: {
+            trigger: row,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+          x: index % 2 === 0 ? -50 : 50,
+          opacity: 0,
+          duration: 0.8,
+          delay: index * 0.1,
+          ease: "power2.out",
+        });
+
+        // Animate check/X icons separately
+        const icons = row.querySelectorAll(".lucide");
+        icons.forEach((icon, i) => {
+          gsap.from(icon, {
+            scrollTrigger: {
+              trigger: row,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+            scale: 0,
+            rotation: 180,
+            duration: 0.5,
+            delay: index * 0.1 + 0.3 + (i * 0.1),
+            ease: "back.out(2)",
+          });
+        });
+      });
+
+      // Mobile cards animation
       rowsRef.current.forEach((row, index) => {
         if (!row) return;
-
-        // Check if it's a desktop row (has grid-cols-4 class) or mobile card
-        const isDesktop = row.classList.contains("grid-cols-4");
         
-        if (isDesktop) {
-          // Desktop table row animation - slide from sides
-          gsap.from(row, {
+        // Only animate mobile cards (not desktop rows)
+        if (row.classList.contains("grid-cols-4")) return;
+        
+        // Mobile card animation - scale up with bounce
+        gsap.from(row, {
+          scrollTrigger: {
+            trigger: row,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+          y: 60,
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.7,
+          delay: index * 0.15,
+          ease: "back.out(1.7)",
+        });
+
+        // Animate inner elements of mobile cards
+        const icon = row.querySelector(".lucide");
+        const comparisons = row.querySelectorAll(".space-y-3 > div");
+        
+        if (icon) {
+          gsap.from(icon, {
             scrollTrigger: {
               trigger: row,
-              start: "top 85%",
+              start: "top 80%",
               toggleActions: "play none none reverse",
             },
-            x: index % 2 === 0 ? -50 : 50,
-            opacity: 0,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: "power2.out",
-          });
-        } else {
-          // Mobile card animation - scale up with bounce
-          gsap.from(row, {
-            scrollTrigger: {
-              trigger: row,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
-            },
-            y: 60,
-            opacity: 0,
-            scale: 0.95,
-            duration: 0.7,
-            delay: index * 0.15,
-            ease: "back.out(1.7)",
-          });
-
-          // Animate inner elements of mobile cards
-          const icon = row.querySelector(".lucide");
-          const comparisons = row.querySelectorAll(".space-y-3 > div");
-          
-          if (icon) {
-            gsap.from(icon, {
-              scrollTrigger: {
-                trigger: row,
-                start: "top 80%",
-                toggleActions: "play none none reverse",
-              },
-              rotate: 360,
-              scale: 0,
-              duration: 0.6,
-              delay: index * 0.15 + 0.2,
-              ease: "back.out(2)",
-            });
-          }
-
-          // Stagger the comparison items within each card
-          comparisons.forEach((comp, i) => {
-            gsap.from(comp, {
-              scrollTrigger: {
-                trigger: row,
-                start: "top 80%",
-                toggleActions: "play none none reverse",
-              },
-              x: i % 2 === 0 ? -30 : 30,
-              opacity: 0,
-              duration: 0.5,
-              delay: index * 0.15 + 0.3 + (i * 0.1),
-              ease: "power2.out",
-            });
+            rotate: 360,
+            scale: 0,
+            duration: 0.6,
+            delay: index * 0.15 + 0.2,
+            ease: "back.out(2)",
           });
         }
+
+        // Stagger the comparison items within each card
+        comparisons.forEach((comp, i) => {
+          gsap.from(comp, {
+            scrollTrigger: {
+              trigger: row,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+            x: i % 2 === 0 ? -30 : 30,
+            opacity: 0,
+            duration: 0.5,
+            delay: index * 0.15 + 0.3 + (i * 0.1),
+            ease: "power2.out",
+          });
+        });
       });
 
       // Floating elements
@@ -184,8 +218,8 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         </div>
 
         {/* Comparison Table - Desktop */}
-        <div className="mb-16 hidden lg:block overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-          <div className="grid grid-cols-4 border-b border-gray-700 bg-gray-800/80">
+        <div className="comparison-table mb-16 hidden lg:block overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+          <div className="table-header grid grid-cols-4 border-b border-gray-700 bg-gray-800/80">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-400">Feature</h3>
             </div>
