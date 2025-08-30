@@ -341,9 +341,9 @@ function HeaderActions() {
 export function BlindDemo() {
   const config = {
     defaultTransition: blind({
-      blindCount: 10,
-      staggerDelay: 30,
+      blindCount: 7,
       direction: "horizontal",
+      blindColor: "lab(8.11897% .811279 -12.254)",
     }),
   };
 

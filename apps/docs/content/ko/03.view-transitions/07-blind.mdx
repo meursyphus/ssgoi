@@ -1,12 +1,12 @@
 ---
 title: "블라인드 전환"
-description: "블라인드가 닫히고 열리는 듯한 극적인 전환 효과"
+description: "블라인드 효과로 화면을 가리고 드러내는 전환"
 nav-title: "블라인드"
 ---
 
-# 커튼 전환
+# 블라인드 전환
 
-커튼 전환은 블라인드나 커튼이 닫히고 열리는 듯한 시각적 효과로 화면을 전환합니다. 여러 개의 막대가 순차적으로 화면을 가리고 드러내며, 무대의 막이 오르내리는 듯한 극적인 연출을 제공합니다.
+블라인드 전환은 여러 개의 막대가 순차적으로 화면을 가리고 드러내며 페이지를 전환합니다. 서로 관련이 없거나 거리가 먼 콘텐츠 간 전환에 적합합니다.
 
 ## 데모
 
@@ -16,52 +16,41 @@ nav-title: "블라인드"
 
 ### 언제 사용하나요?
 
-커튼 전환은 **극적인 전환(Dramatic Transition)** 이나 **중요한 순간 강조** 시 사용됩니다.
+블라인드는 **관련 없는 콘텐츠** 간 전환이나 **완전히 새로운 맥락**으로 이동할 때 사용합니다.
 
 #### 콘텐츠 관계별 적합성
 
 <SuitabilityTable
   items={[
     {
-      label: "중요한 발표",
+      label: "관련 없는 콘텐츠",
       suitable: "yes",
-      description: "결과 공개, 새로운 기능 소개 등 드라마틱한 연출이 필요할 때",
+      description: "완전히 다른 주제나 섹션으로 이동",
     },
     {
-      label: "섹션 전환",
-      suitable: "yes",
-      description: "챕터나 단계별 콘텐츠 전환 시 명확한 구분을 제공",
-    },
-    {
-      label: "일반 네비게이션",
+      label: "형제 관계",
       suitable: "no",
-      description: "평범한 페이지 이동에는 과도한 효과일 수 있음",
+      description: "같은 레벨의 콘텐츠는 슬라이드가 더 적합",
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "상하위 관계는 드릴이 더 적합",
     },
   ]}
 />
 
-#### 주요 사용 케이스
-
-- **온보딩 플로우**: 단계별 튜토리얼이나 소개 화면
-- **결과 공개**: 테스트 결과, 점수 발표 등 긴장감 있는 순간
-- **스토리텔링**: 내러티브가 있는 콘텐츠 전환
-- **프레젠테이션 모드**: 슬라이드쇼나 갤러리 모드
-
 ### 왜 이렇게 동작하나요?
 
-1. **시선 집중**: 순차적인 블라인드 애니메이션이 사용자의 주의를 끌어당깁니다
-2. **기대감 조성**: 콘텐츠가 점진적으로 드러나며 궁금증을 유발합니다
-3. **명확한 전환**: 화면이 완전히 가려졌다가 열리며 확실한 구분을 제공합니다
+블라인드가 화면을 완전히 가린 후 새로운 화면을 드러내는 방식으로, 이전 콘텐츠와의 연결을 시각적으로 차단합니다. 이는 사용자에게 완전히 새로운 맥락으로 이동했음을 명확히 전달합니다.
 
 ### 모션 디자인
 
 ```
-나가는 화면: 블라인드가 왼쪽에서 오른쪽으로 순차적으로 닫힘
-짧은 대기: 완전히 가려진 상태 유지
-들어오는 화면: 블라인드가 오른쪽에서 왼쪽으로 순차적으로 열림
+1. OUT: 블라인드가 순차적으로 닫히며 화면을 가림
+2. 대기: 짧은 시간 동안 화면이 완전히 가려짐
+3. IN: 블라인드가 순차적으로 열리며 새 화면을 드러냄
 ```
-
-이 시퀀스는 무대의 막이 닫히고 열리는 듯한 극장적 경험을 제공합니다.
 
 ## 기본 사용법
 
@@ -69,10 +58,10 @@ nav-title: "블라인드"
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
-    import { curtain } from '@ssgoi/react/view-transitions';
+    import { blind } from '@ssgoi/react/view-transitions';
 
     const config = {
-      defaultTransition: curtain()
+      defaultTransition: blind()
     };
 
     export default function App() {
@@ -89,10 +78,10 @@ nav-title: "블라인드"
     ```svelte
     <script>
       import { Ssgoi } from '@ssgoi/svelte';
-      import { curtain } from '@ssgoi/svelte/view-transitions';
+      import { blind } from '@ssgoi/svelte/view-transitions';
 
       const config = {
-        defaultTransition: curtain()
+        defaultTransition: blind()
       };
     </script>
 
@@ -104,255 +93,98 @@ nav-title: "블라인드"
   </TabPanel>
 </Tabs>
 
-## 고급 옵션
-
-### 커튼 커스터마이징
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
-  <TabPanel value="react">
-    ```tsx
-    // 블라인드 개수 조절
-    curtain({ 
-      blindCount: 15  // 더 많은 블라인드로 세밀한 효과
-    })
-
-    // 수직 방향 커튼
-    curtain({
-      direction: 'vertical'  // 위에서 아래로 내려오는 커튼
-    })
-
-    // 순차적 지연 시간 조절
-    curtain({
-      staggerDelay: 50  // 블라인드 간 지연 시간 (ms)
-    })
-
-    // 전환 속도 조절
-    curtain({
-      outSpring: { stiffness: 500, damping: 30 },  // 빠른 닫힘
-      inSpring: { stiffness: 200, damping: 20 }     // 부드러운 열림
-    })
-
-    // 커튼 색상 변경
-    curtain({
-      curtainColor: '#1a1a1a'  // 기본값: '#000000' (검정색)
-    })
-    ```
-
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      import { curtain } from '@ssgoi/svelte/view-transitions';
-
-      // 블라인드 개수 조절
-      const manyBlinds = curtain({
-        blindCount: 15  // 더 많은 블라인드로 세밀한 효과
-      });
-
-      // 수직 방향 커튼
-      const verticalCurtain = curtain({
-        direction: 'vertical'  // 위에서 아래로 내려오는 커튼
-      });
-
-      // 순차적 지연 시간 조절
-      const slowStagger = curtain({
-        staggerDelay: 50  // 블라인드 간 지연 시간 (ms)
-      });
-
-      // 전환 속도 조절
-      const customSpeed = curtain({
-        outSpring: { stiffness: 500, damping: 30 },  // 빠른 닫힘
-        inSpring: { stiffness: 200, damping: 20 }     // 부드러운 열림
-      });
-
-      // 커튼 색상 변경
-      const darkCurtain = curtain({
-        curtainColor: '#1a1a1a'  // 기본값: '#000000' (검정색)
-      });
-    </script>
-    ```
-
-  </TabPanel>
-</Tabs>
-
-## 실전 활용 예시
-
-### 1. 온보딩 스텝
-
-단계별 온보딩에서 각 단계를 극적으로 전환:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      transitions: [
-        {
-          from: '/onboarding/*',
-          to: '/onboarding/*',
-          transition: curtain({
-            blindCount: 8,
-            staggerDelay: 40
-          })
-        }
-      ]
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        transitions: [
-          {
-            from: '/onboarding/*',
-            to: '/onboarding/*',
-            transition: curtain({
-              blindCount: 8,
-              staggerDelay: 40
-            })
-          }
-        ]
-      };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 2. 결과 발표 화면
-
-테스트나 게임 결과를 드라마틱하게 공개:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      transitions: [
-        {
-          from: '/quiz/question/*',
-          to: '/quiz/result',
-          transition: curtain({
-            blindCount: 12,
-            direction: 'horizontal',
-            staggerDelay: 25,
-            transitionDelay: 500  // 긴장감 조성을 위한 대기 시간
-          })
-        }
-      ]
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        transitions: [
-          {
-            from: '/quiz/question/*',
-            to: '/quiz/result',
-            transition: curtain({
-              blindCount: 12,
-              direction: 'horizontal',
-              staggerDelay: 25,
-              transitionDelay: 500  // 긴장감 조성을 위한 대기 시간
-            })
-          }
-        ]
-      };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-### 3. 갤러리 모드
-
-이미지나 작품을 극장처럼 전환:
-
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
-  <TabPanel value="react">
-    ```tsx
-    const config = {
-      transitions: [
-        {
-          from: '/gallery/*',
-          to: '/gallery/*',
-          transition: curtain({
-            blindCount: 20,
-            direction: 'vertical',
-            staggerDelay: 15,
-            outSpring: { stiffness: 300, damping: 25 },
-            inSpring: { stiffness: 250, damping: 22 }
-          })
-        }
-      ]
-    };
-    ```
-  </TabPanel>
-  <TabPanel value="svelte">
-    ```svelte
-    <script>
-      const config = {
-        transitions: [
-          {
-            from: '/gallery/*',
-            to: '/gallery/*',
-            transition: curtain({
-              blindCount: 20,
-              direction: 'vertical',
-              staggerDelay: 15,
-              outSpring: { stiffness: 300, damping: 25 },
-              inSpring: { stiffness: 250, damping: 22 }
-            })
-          }
-        ]
-      };
-    </script>
-    ```
-  </TabPanel>
-</Tabs>
-
-## API 레퍼런스
-
-### CurtainOptions
+## 옵션
 
 ```typescript
-interface CurtainOptions {
+interface BlindOptions {
   // 스프링 설정
-  inSpring?: SpringConfig; // IN 애니메이션 스프링 (기본: { stiffness: 300, damping: 22 })
-  outSpring?: SpringConfig; // OUT 애니메이션 스프링 (기본: { stiffness: 400, damping: 25 })
+  inSpring?: SpringConfig; // IN 애니메이션 (기본: { stiffness: 75, damping: 25 })
+  outSpring?: SpringConfig; // OUT 애니메이션 (기본: { stiffness: 80, damping: 25 })
 
-  // 타이밍 설정
-  transitionDelay?: number; // OUT과 IN 사이 대기 시간 (기본: 50ms)
-  staggerDelay?: number; // 블라인드 간 지연 시간 (기본: 30ms)
+  // 타이밍
+  transitionDelay?: number; // OUT과 IN 사이 대기 (기본: 300ms)
+  staggerDelay?: number; // 블라인드 간 지연 (기본: 100ms)
 
-  // 시각적 설정
+  // 시각
   blindCount?: number; // 블라인드 개수 (기본: 10)
-  direction?: "horizontal" | "vertical"; // 블라인드 방향 (기본: 'horizontal')
-  curtainColor?: string; // 커튼 색상 (기본: '#000000')
+  direction?: "horizontal" | "vertical"; // 방향 (기본: 'horizontal')
+  blindColor?: string; // 색상 (기본: '#000000')
 }
 ```
 
-## 접근성
+### 커스터마이징 예시
 
-- 애니메이션이 진행되는 동안 포커스 이동이 자연스럽게 처리됩니다
-- `prefers-reduced-motion` 설정 시 애니메이션이 단순화됩니다
-- 스크린 리더는 전환을 무시하고 콘텐츠 변경만 인식합니다
+```tsx
+// 빠른 전환
+blind({
+  staggerDelay: 20,
+  transitionDelay: 100,
+});
+
+// 수직 블라인드
+blind({
+  direction: "vertical",
+  blindCount: 15,
+});
+
+// 부드러운 전환
+blind({
+  outSpring: { stiffness: 60, damping: 20 },
+  inSpring: { stiffness: 50, damping: 18 },
+});
+
+// 색상 변경
+blind({
+  blindColor: "#1a1a1a",
+});
+```
+
+## 실전 예시
+
+### 홈에서 설정으로
+
+```tsx
+{
+  from: '/home',
+  to: '/settings',
+  transition: blind()
+}
+```
+
+### 카테고리 간 이동
+
+```tsx
+{
+  from: '/shop/*',
+  to: '/blog/*',
+  transition: blind({
+    blindCount: 12,
+    staggerDelay: 25
+  })
+}
+```
+
+### 로그인 후 대시보드
+
+```tsx
+{
+  from: '/login',
+  to: '/dashboard',
+  transition: blind({
+    transitionDelay: 500,
+    blindColor: '#0f172a'
+  })
+}
+```
+
+## 다른 전환과의 비교
+
+- **vs 페이드**: 블라인드는 더 극적이고 명확한 구분을 제공
+- **vs 슬라이드**: 블라인드는 방향성이 없어 관련 없는 콘텐츠에 적합
+- **vs 드릴**: 블라인드는 계층 관계가 없는 수평적 이동에 사용
 
 ## 성능 고려사항
 
-- 블라인드는 동적으로 생성되고 애니메이션 완료 후 자동 제거됩니다
+- 블라인드는 동적으로 생성되고 애니메이션 후 자동 제거됩니다
 - GPU 가속을 활용하여 부드러운 애니메이션을 제공합니다
-- 많은 수의 블라인드(20개 이상)는 저사양 기기에서 성능 영향을 줄 수 있습니다
-
-## 모범 사례
-
-### ✅ DO
-
-- 중요한 순간이나 특별한 콘텐츠 전환에 사용
-- 브랜드 아이덴티티에 맞게 커스터마이징
-- 적절한 블라인드 개수로 성능과 효과의 균형 유지
-
-### ❌ DON'T
-
-- 빈번한 일반 네비게이션에는 사용하지 마세요
-- 너무 많은 블라인드로 과도한 효과 자제
-- 빠른 연속 전환이 필요한 곳에는 부적합
+- 20개 이상의 블라인드는 저사양 기기에서 성능에 영향을 줄 수 있습니다

@@ -2,8 +2,8 @@ import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing, sleep } from "../utils";
 
 const DEFAULT_OUT_SPRING = { stiffness: 80, damping: 25 };
-const DEFAULT_IN_SPRING = { stiffness: 80, damping: 22 };
-const DEFAULT_TRANSITION_DELAY = 100;
+const DEFAULT_IN_SPRING = { stiffness: 75, damping: 25 };
+const DEFAULT_TRANSITION_DELAY = 300;
 const DEFAULT_BLIND_COUNT = 10;
 const DEFAULT_DIRECTION = "horizontal" as const;
 const DEFAULT_BLIND_COLOR = "#000000";
@@ -25,7 +25,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
     transitionDelay = DEFAULT_TRANSITION_DELAY,
     blindCount = DEFAULT_BLIND_COUNT,
     direction = DEFAULT_DIRECTION,
-    staggerDelay = 30,
+    staggerDelay = 100,
     blindColor = DEFAULT_BLIND_COLOR,
   } = options;
 
@@ -58,7 +58,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   // Helper function to create blinds
   const createBlinds = (
     element: HTMLElement,
-    initialState: "hidden" | "closed"
+    initialState: "hidden" | "closed",
+    transformOrigin: "left" | "right" = "left"
   ) => {
     // Ensure parent has position relative for absolute positioning
     const parentStyle = window.getComputedStyle(element);
@@ -85,28 +86,34 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
       if (direction === "horizontal") {
         const blindHeight = 100 / blindCount;
+        // Add 1px overlap by slightly increasing height
+        const actualHeight = `calc(${blindHeight}% + 1px)`;
         blind.style.cssText = `
           position: absolute;
           top: ${blindHeight * i}%;
           left: 0;
           width: 100%;
-          height: ${blindHeight}%;
+          height: ${actualHeight};
           background: ${blindColor};
           transform: scaleX(${initialState === "hidden" ? 0 : 1});
-          transform-origin: left center;
+          transform-origin: ${transformOrigin} center;
           will-change: transform;
         `;
       } else {
         const blindWidth = 100 / blindCount;
+        // Add 1px overlap by slightly increasing width
+        const actualWidth = `calc(${blindWidth}% + 1px)`;
         blind.style.cssText = `
           position: absolute;
           top: 0;
           left: ${blindWidth * i}%;
-          width: ${blindWidth}%;
+          width: ${actualWidth};
           height: 100%;
           background: ${blindColor};
           transform: scaleY(${initialState === "hidden" ? 0 : 1});
-          transform-origin: top center;
+          transform-origin: ${
+            transformOrigin === "left" ? "top" : "bottom"
+          } center;
           will-change: transform;
         `;
       }
@@ -120,7 +127,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: () => {
+    out: (element) => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -134,22 +141,28 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
 
-          // Create blinds starting from hidden state
-          blindsData = createBlinds(element, "hidden");
+          // Create blinds starting from hidden state (will appear one by one)
+          // OUT uses left origin - blinds expand from left to right
+          blindsData = createBlinds(element, "hidden", "left");
         },
         onStart: () => {},
         tick: (progress) => {
           if (!blindsData) return;
 
-          // Blinds close sequentially (left to right or top to bottom)
+          // OUT: progress goes 1 → 0, we want blinds to close (0 → 1)
+          // So we use (1 - progress) to reverse it
+          const reversedProgress = 1 - progress;
+
+          // Blinds appear sequentially to cover the screen (left to right)
           blindsData.blinds.forEach((blind, index) => {
             const blindProgress = calculateBlindProgress(
-              progress,
+              reversedProgress,
               index,
               blindCount,
-              false
+              false // not reversed - left to right
             );
 
+            // blindProgress goes 0 → 1, so blind appears (closes the view)
             if (direction === "horizontal") {
               blind.style.transform = `scaleX(${blindProgress})`;
             } else {
@@ -173,11 +186,12 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         spring: inSpring,
         prepare: (element) => {
           element.style.position = "relative";
+          element.style.zIndex = "0";
+          // Create blinds in closed state (fully covering the screen)
+          // IN uses right origin - blinds collapse from right to left
+          blindsData = createBlinds(element, "closed", "right");
         },
-        onStart: () => {
-          // Create blinds in closed state
-          blindsData = createBlinds(element, "closed");
-        },
+        onStart: () => {},
         wait: async () => {
           // Wait for OUT animation to complete
           if (outAnimationComplete) {
@@ -189,15 +203,16 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         tick: (progress) => {
           if (!blindsData) return;
 
-          // Blinds open sequentially (right to left or bottom to top)
+          // IN: Blinds disappear sequentially to reveal the screen (left to right, same as OUT)
           blindsData.blinds.forEach((blind, index) => {
             const blindProgress = calculateBlindProgress(
               progress,
               index,
               blindCount,
-              true // reversed for opening
+              false // same direction as OUT - left to right
             );
 
+            // blindProgress goes 0 → 1, but we want blind to disappear, so use 1 - progress
             if (direction === "horizontal") {
               blind.style.transform = `scaleX(${1 - blindProgress})`;
             } else {
