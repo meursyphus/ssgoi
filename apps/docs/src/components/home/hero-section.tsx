@@ -102,7 +102,7 @@ export async function HeroSection({ lang }: HeroSectionProps) {
           <div className="relative">
             <div className="relative mx-auto z-0 w-full max-w-[400px] md:max-w-[700px] aspect-[5/7]">
               {/* 3D iPhone Component */}
-              <IPhone3D color="black">
+              <IPhone3D color="blue">
                 <Demo autoPlay={false} />
               </IPhone3D>
             </div>
