@@ -193,3 +193,77 @@ export const createDefaultStrategy = <TAnimationValue = number>(
     },
   };
 };
+
+/**
+ * Page transition strategy - Always starts fresh without checking current animations
+ * This is used for page-level transitions where each transition should be independent
+ */
+export const createPageTransitionStrategy = <TAnimationValue = number>(
+  _: StrategyContext<TAnimationValue>
+): TransitionStrategy<TAnimationValue> => {
+  return {
+    runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
+      // Always start fresh for IN transition
+      const config = await configs.in;
+      if (!config) {
+        return {
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
+      return {
+        config,
+        state: {
+          position: from,
+          velocity: 0 as TAnimationValue extends number
+            ? number
+            : Record<string, number>,
+        },
+        from,
+        to,
+        direction: "forward",
+      };
+    },
+
+    runOut: async (configs: TransitionConfigs<TAnimationValue>) => {
+      // Always start fresh for OUT transition
+      const config = await configs.out;
+      if (!config) {
+        return {
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
+      return {
+        config,
+        state: {
+          position: from,
+          velocity: 0 as TAnimationValue extends number
+            ? number
+            : Record<string, number>,
+        },
+        from,
+        to,
+        direction: "forward",
+      };
+    },
+  };
+};

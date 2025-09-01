@@ -5,6 +5,7 @@ import type {
   Transition,
 } from "./types";
 import { getScrollingElement } from "./utils/get-scrolling-element";
+import { TRANSITION_STRATEGY, createPageTransitionStrategy } from "./transition-strategy";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -228,6 +229,8 @@ export function createSggoiTransitionContext(
         const transitionConfig = await getTransition(path, "out");
         return transitionConfig(element);
       },
+      // Add page transition strategy for page-level transitions
+      [TRANSITION_STRATEGY]: createPageTransitionStrategy,
     };
   };
 }
