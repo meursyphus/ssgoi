@@ -7,7 +7,7 @@ interface BlogLayoutProps {
 export default function BlogLayout({ children }: BlogLayoutProps) {
   return (
     <SsgoiTransition 
-      id="/blog"
+      id="/ssgoi/blog"
       as="div" 
       className="min-h-[calc(100vh-4rem)] bg-zinc-950 pt-16"
     >

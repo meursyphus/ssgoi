@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function Layout({children}: {children: React.ReactNode}) {
     return (
-      <SsgoiTransition id="/demo">
+      <SsgoiTransition id="/ssgoi/demo">
         <DemoWrapper>{children}</DemoWrapper>
       </SsgoiTransition>
     );

@@ -19,7 +19,7 @@ export default async function DocsLayout({
     <>
       <NavigationSetter navigation={navigation} />
       <SsgoiTransition
-        id="/docs"
+        id="/ssgoi/docs"
         as="div"
         className="min-h-[calc(100vh-4rem)] pt-16"
       >

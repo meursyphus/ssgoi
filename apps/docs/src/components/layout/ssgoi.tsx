@@ -11,15 +11,8 @@ interface SsgoiProviderProps {
 export function SsgoiProvider({ children }: SsgoiProviderProps) {
   const config = useMemo<SsgoiConfig>(
     () => ({
-      transitions: 
-      [
-        // {
-        //   from: "/",
-        //   to: "/blog",
-        //   transition: fade(),
-        //   symmetric: true,
-        // }
-      ],
+      transitions: [],
+      defaultTransition: fade(),
     }),
     []
   );

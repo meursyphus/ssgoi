@@ -12,12 +12,12 @@ interface HomePageContentProps {
 
 export function HomePageContent({ lang }: HomePageContentProps) {
   return (
-    <SsgoiTransition id="/" as="div" className="relative">
-      {/* <HeroSection lang={lang} />
+    <SsgoiTransition id="/ssgoi" as="div" className="relative">
+      <HeroSection lang={lang} />
       <WhyTransitionsMatterSection lang={lang} />
       <TransitionShowcaseSection lang={lang} />
       <ComparisonSection lang={lang} />
-      <FeaturesTimelineSection lang={lang} /> */}
+      <FeaturesTimelineSection lang={lang} />
       <CtaSection lang={lang} />
     </SsgoiTransition>
   );
