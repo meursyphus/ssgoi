@@ -22,7 +22,8 @@
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
-    "legacy-docs:build": "pnpm --filter legacy-docs build"
+    "legacy-docs:build": "pnpm --filter legacy-docs build",
+    "prepare": "husky"
   },
   "author": "meursyphus",
   "license": "MIT",
@@ -47,11 +48,32 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "highlight.js": "^11.11.1",
-    "highlightjs-svelte": "^1.0.6"
+    "highlightjs-svelte": "^1.0.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
+    ]
+  },
+  "lint-staged": {
+    "packages/core/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "packages/react/**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --config packages/react/eslint.config.js"
+    ],
+    "packages/svelte/**/*.{ts,svelte}": [
+      "prettier --write",
+      "eslint --fix --config packages/svelte/eslint.config.js"
+    ],
+    "packages/vue/**/*.{ts,vue}": [
+      "prettier --write"
+    ],
+    "apps/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
     ]
   }
 }
