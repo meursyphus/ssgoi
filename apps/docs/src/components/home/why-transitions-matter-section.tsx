@@ -13,36 +13,28 @@ interface WhyTransitionsMatterSectionProps {
 
 const reasons = [
   {
-    icon: Eye,
-    title: "Visual Context",
-    description: "Provide visual cues about navigation and user location",
-    gradient: "from-blue-500 to-cyan-500",
-    color: "#0EA5E9",
-    bgImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    icon: MousePointer,
+    title: "Native-like Experience",
+    description: "Deliver app-quality interactions on the web with seamless, responsive transitions that users expect",
+    gradient: "from-orange-500 to-yellow-500",
+    color: "#F97316",
+    bgImage: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
   },
   {
     icon: Sparkles,
-    title: "Brand Value",
-    description: "Elevate your brand from 'just a website' to premium experience",
+    title: "Brand Identity",
+    description: "Create unique motion signatures that make your brand memorable and distinct",
     gradient: "from-purple-500 to-pink-500",
     color: "#A855F7",
     bgImage: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
   },
   {
-    icon: TrendingUp,
-    title: "User Engagement",
-    description: "Keep users engaged and reduce perceived loading time",
-    gradient: "from-green-500 to-emerald-500",
-    color: "#10B981",
-    bgImage: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-  },
-  {
-    icon: MousePointer,
-    title: "Native Feel",
-    description: "Bridge the gap between web and native apps",
-    gradient: "from-orange-500 to-yellow-500",
-    color: "#F97316",
-    bgImage: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    icon: Eye,
+    title: "Visual Context",
+    description: "Maintain spatial awareness as users navigate, showing clear relationships between pages",
+    gradient: "from-blue-500 to-cyan-500",
+    color: "#0EA5E9",
+    bgImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   },
 ];
 
@@ -322,36 +314,215 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
             >
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                 {/* Left side - Visual */}
-                <div className="relative h-[350px] sm:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative h-[350px] sm:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl bg-gray-900 border border-gray-800">
+                  {/* Background gradient subtle */}
                   <div
-                    className="absolute inset-0"
+                    className="absolute inset-0 opacity-10"
                     style={{ background: reason.bgImage }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 blur-3xl opacity-50">
-                        <div
-                          className="w-48 h-48 rounded-full"
-                          style={{ backgroundColor: reason.color }}
-                        />
+                  
+                  {/* Different UI mockup for each reason */}
+                  <div className="absolute inset-0 p-6 flex items-center justify-center">
+                    {index === 0 && (
+                      /* Native-like Experience - Mobile app-like interface */
+                      <div className="w-full flex justify-center">
+                        {/* Phone mockup */}
+                        <div className="relative w-72 h-[500px] bg-gray-800 rounded-[3rem] p-2 border-2 border-gray-700 shadow-2xl">
+                          <div className="bg-gray-900 rounded-[2.75rem] h-full overflow-hidden">
+                            {/* Phone notch */}
+                            <div className="h-6 bg-gray-800 flex justify-center items-center">
+                              <div className="w-24 h-3 bg-gray-900 rounded-full" />
+                            </div>
+                            {/* Screen content with native transitions */}
+                            <div className="relative h-full p-4">
+                              {/* App cards sliding in */}
+                              <div className="space-y-3">
+                                {[...Array(4)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl p-4 backdrop-blur border border-orange-500/20"
+                                    style={{
+                                      animation: `slideInFromRight 0.6s ease-out`,
+                                      animationDelay: `${i * 0.15}s`,
+                                      animationFillMode: 'both'
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl animate-pulse" />
+                                      <div className="flex-1">
+                                        <div className="h-3 bg-orange-400/50 rounded w-3/4 mb-2" />
+                                        <div className="h-2 bg-yellow-400/30 rounded w-1/2" />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              {/* Floating action button */}
+                              <div className="absolute bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center animate-bounce-slow">
+                                <MousePointer className="w-6 h-6 text-white" />
+                              </div>
+                              {/* Tab bar */}
+                              <div className="absolute bottom-4 left-4 right-4 bg-gray-800/90 backdrop-blur rounded-2xl p-3 flex justify-around">
+                                {[...Array(4)].map((_, i) => (
+                                  <div 
+                                    key={i} 
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                    style={{
+                                      background: i === 1 ? 'linear-gradient(135deg, #F97316, #FCD34D)' : '',
+                                      backgroundColor: i !== 1 ? '#374151' : ''
+                                    }}
+                                  >
+                                    <div className="w-4 h-4 bg-white/20 rounded" />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <reason.icon className="relative h-40 w-40 lg:h-48 lg:w-48 text-white drop-shadow-2xl" />
-                    </div>
-                  </div>
-                  {/* Animated particles */}
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(6)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute w-2 h-2 bg-white/80 rounded-full"
-                        style={{
-                          left: `${(i * 17 + 10) % 90}%`,
-                          top: `${(i * 23 + 15) % 85}%`,
-                          animation: `float ${3 + i}s ease-in-out infinite`,
-                          animationDelay: `${i * 0.5}s`,
-                        }}
-                      />
-                    ))}
+                    )}
+                    
+                    {index === 1 && (
+                      /* Brand Identity - Unique motion signatures */
+                      <div className="w-full flex items-center justify-center">
+                        <div className="relative">
+                          {/* Pulsing rings */}
+                          <div className="absolute inset-0 -m-32">
+                            {[...Array(3)].map((_, i) => (
+                              <div
+                                key={i}
+                                className="absolute inset-0 border-2 border-purple-500/30 rounded-full"
+                                style={{
+                                  animation: `brandPulse 3s ease-out infinite`,
+                                  animationDelay: `${i * 1}s`
+                                }}
+                              />
+                            ))}
+                          </div>
+                          {/* Main brand container */}
+                          <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 p-8 rounded-3xl shadow-2xl">
+                            {/* Animated brand icon */}
+                            <div className="w-32 h-32 relative">
+                              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent rounded-2xl" />
+                              <Sparkles className="w-full h-full text-white p-6" style={{
+                                animation: 'brandRotate 8s linear infinite'
+                              }} />
+                            </div>
+                          </div>
+                          {/* Orbiting elements */}
+                          <div className="absolute inset-0" style={{
+                            animation: 'orbitRotate 10s linear infinite'
+                          }}>
+                            {[0, 120, 240].map((deg, i) => (
+                              <div
+                                key={i}
+                                className="absolute w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl shadow-lg"
+                                style={{
+                                  top: '50%',
+                                  left: '50%',
+                                  transform: `rotate(${deg}deg) translateX(120px) translateY(-50%)`,
+                                }}
+                              >
+                                <div className="w-full h-full rounded-xl bg-gradient-to-tr from-white/30 to-transparent flex items-center justify-center">
+                                  <div className="w-6 h-6 bg-white/50 rounded" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Brand tagline */}
+                          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 text-center w-48">
+                            <div className="h-8 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-lg mb-2" style={{
+                              animation: 'fadeInUp 1s ease-out 0.5s both'
+                            }} />
+                            <div className="h-4 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-lg w-32 mx-auto" style={{
+                              animation: 'fadeInUp 1s ease-out 0.7s both'
+                            }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {index === 2 && (
+                      /* Visual Context - Spatial navigation awareness */
+                      <div className="w-full flex items-center justify-center">
+                        <div className="relative h-[400px] w-full" style={{ perspective: '1000px' }}>
+                          {/* Navigation path */}
+                          <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" style={{
+                            animation: 'pathGlow 2s ease-in-out infinite'
+                          }} />
+                          
+                          {/* Page cards in 3D space */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            {/* Previous page */}
+                            <div 
+                              className="absolute w-48 h-64 bg-gray-800/80 backdrop-blur rounded-xl border border-gray-700 p-4"
+                              style={{
+                                transform: 'translateX(-250px) translateZ(-100px) rotateY(25deg)',
+                                animation: 'floatPage 4s ease-in-out infinite'
+                              }}
+                            >
+                              <div className="flex items-center gap-2 mb-4">
+                                <ArrowRight className="w-4 h-4 text-gray-500 rotate-180" />
+                                <span className="text-sm text-gray-400">Previous</span>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-gray-700/50 rounded" />
+                                <div className="h-3 bg-gray-700/50 rounded w-3/4" />
+                              </div>
+                            </div>
+                            
+                            {/* Current page (highlighted) */}
+                            <div 
+                              className="absolute w-56 h-72 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 backdrop-blur rounded-xl border-2 border-blue-500 p-4 shadow-2xl z-10"
+                              style={{
+                                transform: 'translateZ(50px)',
+                                animation: 'pulseGlow 2s ease-in-out infinite'
+                              }}
+                            >
+                              <div className="flex items-center justify-center mb-4">
+                                <Eye className="w-8 h-8 text-blue-400" />
+                              </div>
+                              <div className="text-center mb-4">
+                                <span className="text-blue-400 font-semibold">You are here</span>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-4 bg-blue-500/30 rounded" />
+                                <div className="h-4 bg-cyan-500/30 rounded" />
+                                <div className="h-4 bg-blue-500/30 rounded w-3/4" />
+                              </div>
+                            </div>
+                            
+                            {/* Next page */}
+                            <div 
+                              className="absolute w-48 h-64 bg-gray-800/80 backdrop-blur rounded-xl border border-gray-700 p-4"
+                              style={{
+                                transform: 'translateX(250px) translateZ(-100px) rotateY(-25deg)',
+                                animation: 'floatPage 4s ease-in-out infinite',
+                                animationDelay: '2s'
+                              }}
+                            >
+                              <div className="flex items-center gap-2 mb-4 justify-end">
+                                <span className="text-sm text-gray-400">Next</span>
+                                <ArrowRight className="w-4 h-4 text-gray-500" />
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-gray-700/50 rounded" />
+                                <div className="h-3 bg-gray-700/50 rounded w-3/4" />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Breadcrumb trail */}
+                          <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center gap-3">
+                            <div className="w-2 h-2 bg-gray-600 rounded-full" />
+                            <div className="w-2 h-2 bg-gray-600 rounded-full" />
+                            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                            <div className="w-2 h-2 bg-gray-600 rounded-full" />
+                            <div className="w-2 h-2 bg-gray-600 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -377,305 +548,117 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
         </div>
       </div>
 
-      {/* Enhanced Comparison Section */}
-      <div className="comparison-section relative px-4 sm:px-6 lg:px-8 py-24 overflow-hidden">
-        <div className="mx-auto max-w-7xl">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-4">
-              Experience the <span className="gradient-orange">Difference</span>
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-300">See how SSGOI transforms your web experience</p>
-          </div>
-
-          {/* Comparison Cards - Vertical layout */}
-          <div className="space-y-8 lg:space-y-12">
-            {/* Traditional Web Card */}
-            <div className="traditional-card relative">
-              <div className="rounded-2xl border-2 border-gray-800 bg-gray-900/80 backdrop-blur-sm p-8 sm:p-12 overflow-hidden">
-                {/* Background pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px)`,
-                  }} />
-                </div>
-                
-                <div className="relative grid lg:grid-cols-2 gap-8 items-center">
-                  {/* Left side - Visual Demo */}
-                  <div className="order-2 lg:order-1">
-                    <div className="relative rounded-xl bg-gray-950 p-4 border border-gray-800">
-                      {/* Simulated browser */}
-                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-800">
-                        <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-green-500/50" />
-                        <div className="flex-1 mx-4">
-                          <div className="h-6 bg-gray-850 rounded-full px-3 flex items-center">
-                            <span className="text-[10px] text-gray-600">example.com</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Realistic page layouts that blink */}
-                      <div className="relative h-64">
-                        {/* Layout 1 - Blog Post List */}
-                        <div className="absolute inset-0 p-3 animate-page-switch">
-                          {/* Header */}
-                          <div className="mb-4">
-                            <div className="h-10 bg-gray-800 rounded w-1/3 mb-2" />
-                            <div className="h-3 bg-gray-850 rounded w-2/3" />
-                          </div>
-                          
-                          {/* Post List */}
-                          <div className="space-y-3">
-                            {/* Post 1 */}
-                            <div className="flex gap-3 p-3 bg-gray-850/50 rounded">
-                              <div className="w-20 h-20 bg-gray-800 rounded" />
-                              <div className="flex-1 space-y-2">
-                                <div className="h-4 bg-gray-800 rounded w-3/4" />
-                                <div className="h-3 bg-gray-850 rounded" />
-                                <div className="h-3 bg-gray-850 rounded w-5/6" />
-                                <div className="flex gap-2 mt-2">
-                                  <div className="h-2 w-12 bg-gray-700 rounded" />
-                                  <div className="h-2 w-16 bg-gray-700 rounded" />
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Post 2 */}
-                            <div className="flex gap-3 p-3 bg-gray-850/50 rounded">
-                              <div className="w-20 h-20 bg-gray-800 rounded" />
-                              <div className="flex-1 space-y-2">
-                                <div className="h-4 bg-gray-800 rounded w-2/3" />
-                                <div className="h-3 bg-gray-850 rounded" />
-                                <div className="h-3 bg-gray-850 rounded w-4/5" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Layout 2 - Blog Post Detail */}
-                        <div className="absolute inset-0 p-3 animate-page-switch" style={{ animationDelay: "1.5s" }}>
-                          {/* Article Header */}
-                          <div className="mb-4">
-                            <div className="h-8 bg-gray-800 rounded w-4/5 mb-2" />
-                            <div className="flex gap-2 mb-3">
-                              <div className="h-3 w-16 bg-gray-700 rounded" />
-                              <div className="h-3 w-20 bg-gray-700 rounded" />
-                              <div className="h-3 w-16 bg-gray-700 rounded" />
-                            </div>
-                          </div>
-                          
-                          {/* Hero Image */}
-                          <div className="h-32 bg-gray-850 rounded mb-4" />
-                          
-                          {/* Article Content */}
-                          <div className="space-y-2">
-                            <div className="h-3 bg-gray-850 rounded" />
-                            <div className="h-3 bg-gray-850 rounded" />
-                            <div className="h-3 bg-gray-850 rounded w-5/6" />
-                            <div className="h-3 bg-gray-850 rounded w-4/5" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Flash effect overlay */}
-                      <div className="absolute inset-0 bg-white rounded-lg animate-flash-overlay" />
-                    </div>
-                  </div>
-
-                  {/* Right side - Content */}
-                  <div className="order-1 lg:order-2">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center">
-                        <div className="w-6 h-0.5 bg-gray-600" />
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-400">Traditional Web</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <p className="text-white font-semibold">Jarring Transitions</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <p className="text-white font-semibold">Lost Context</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-red-500 text-xl mt-0.5">✕</span>
-                        <p className="text-white font-semibold">Poor Performance</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* VS Divider */}
-            <div className="vs-divider relative flex items-center justify-center py-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-dashed border-gray-700" />
-              </div>
-              <div className="relative">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-vivid-purple to-vivid-orange rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-                  <span className="text-xl sm:text-2xl font-black text-white">VS</span>
-                </div>
-              </div>
-            </div>
-
-            {/* SSGOI Card */}
-            <div className="ssgoi-card relative">
-              <div className="rounded-2xl border-2 border-vivid-purple/30 bg-gradient-to-br from-vivid-purple/10 to-vivid-orange/10 backdrop-blur-sm p-8 sm:p-12 overflow-hidden">
-                {/* Animated background gradient */}
-                <div className="absolute inset-0 opacity-30">
-                  <div className="absolute inset-0 bg-gradient-to-r from-vivid-purple/20 to-vivid-orange/20 animate-gradient" />
-                </div>
-                
-                <div className="relative grid lg:grid-cols-2 gap-8 items-center">
-                  {/* Left side - Visual Demo */}
-                  <div className="order-2 lg:order-1">
-                    <div className="relative rounded-xl bg-gray-900/50 p-6 border border-vivid-purple/30 shadow-2xl">
-                      {/* Simulated browser */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse" style={{ animationDelay: "0.1s" }} />
-                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: "0.2s" }} />
-                      </div>
-                      
-                      {/* Smooth sliding transitions - like native app */}
-                      <div className="relative h-64 overflow-hidden rounded-lg">
-                        {/* Container for sliding pages */}
-                        <div className="flex animate-slow-slide">
-                          {/* Page 1 - Blog Post List */}
-                          <div className="min-w-full p-3">
-                            {/* Header */}
-                            <div className="mb-4">
-                              <div className="h-10 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-1/3 mb-2" />
-                              <div className="h-3 bg-vivid-purple/20 rounded w-2/3" />
-                            </div>
-                            
-                            {/* Post List with SSGOI colors */}
-                            <div className="space-y-3">
-                              {/* Post 1 */}
-                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 rounded">
-                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-purple/30 to-vivid-orange/30 rounded" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="h-4 bg-vivid-purple/25 rounded w-3/4" />
-                                  <div className="h-3 bg-vivid-orange/20 rounded" />
-                                  <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
-                                  <div className="flex gap-2 mt-2">
-                                    <div className="h-2 w-12 bg-vivid-orange/30 rounded" />
-                                    <div className="h-2 w-16 bg-vivid-purple/30 rounded" />
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Post 2 */}
-                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-orange/10 to-vivid-purple/10 rounded">
-                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-orange/30 to-vivid-purple/30 rounded" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="h-4 bg-vivid-orange/25 rounded w-2/3" />
-                                  <div className="h-3 bg-vivid-purple/20 rounded" />
-                                  <div className="h-3 bg-vivid-orange/20 rounded w-4/5" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Page 2 - Blog Post Detail */}
-                          <div className="min-w-full p-3">
-                            {/* Article Header */}
-                            <div className="mb-4">
-                              <div className="h-8 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-4/5 mb-2" />
-                              <div className="flex gap-2 mb-3">
-                                <div className="h-3 w-16 bg-vivid-purple/25 rounded" />
-                                <div className="h-3 w-20 bg-vivid-orange/25 rounded" />
-                                <div className="h-3 w-16 bg-vivid-purple/25 rounded" />
-                              </div>
-                            </div>
-                            
-                            {/* Hero Image */}
-                            <div className="h-32 bg-gradient-to-br from-vivid-purple/20 to-vivid-orange/20 rounded mb-4" />
-                            
-                            {/* Article Content */}
-                            <div className="space-y-2">
-                              <div className="h-3 bg-vivid-purple/20 rounded" />
-                              <div className="h-3 bg-vivid-orange/20 rounded" />
-                              <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
-                              <div className="h-3 bg-vivid-orange/20 rounded w-4/5" />
-                            </div>
-                          </div>
-                          
-                          {/* Page 3 - duplicate for smooth loop */}
-                          <div className="min-w-full p-3">
-                            {/* Header */}
-                            <div className="mb-4">
-                              <div className="h-10 bg-gradient-to-r from-vivid-purple/30 to-vivid-orange/30 rounded w-1/3 mb-2" />
-                              <div className="h-3 bg-vivid-purple/20 rounded w-2/3" />
-                            </div>
-                            
-                            {/* Post List duplicate */}
-                            <div className="space-y-3">
-                              <div className="flex gap-3 p-3 bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 rounded">
-                                <div className="w-20 h-20 bg-gradient-to-br from-vivid-purple/30 to-vivid-orange/30 rounded" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="h-4 bg-vivid-purple/25 rounded w-3/4" />
-                                  <div className="h-3 bg-vivid-orange/20 rounded" />
-                                  <div className="h-3 bg-vivid-purple/20 rounded w-5/6" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Context preservation indicator */}
-                        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded-full">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span className="text-xs text-green-500 font-medium">Context Preserved</span>
-                        </div>
-                        
-                        {/* Page dots indicator */}
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                          <div className="w-1.5 h-1.5 bg-vivid-purple rounded-full animate-dot-1" />
-                          <div className="w-1.5 h-1.5 bg-vivid-purple/40 rounded-full animate-dot-2" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right side - Content */}
-                  <div className="order-1 lg:order-2">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-vivid-purple to-vivid-orange flex items-center justify-center shadow-lg">
-                        <Sparkles className="h-6 w-6 text-white" />
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-white">With SSGOI</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <p className="text-white font-semibold">Smooth Transitions</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <p className="text-white font-semibold">Maintained Context</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-green-500 text-xl mt-0.5">✓</span>
-                        <p className="text-white font-semibold">Native-like Feel</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <style jsx>{`
+        @keyframes slideInFromRight {
+          from {
+            opacity: 0;
+            transform: translateX(100px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes bounce-slow {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        
+        @keyframes brandPulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes brandRotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes orbitRotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes pathGlow {
+          0%, 100% {
+            opacity: 0.3;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes floatPage {
+          0%, 100% {
+            transform: translateY(0) translateX(var(--translate-x, -250px)) translateZ(var(--translate-z, -100px)) rotateY(var(--rotate-y, 25deg));
+          }
+          50% {
+            transform: translateY(-10px) translateX(var(--translate-x, -250px)) translateZ(var(--translate-z, -100px)) rotateY(var(--rotate-y, 25deg));
+          }
+        }
+        
+        @keyframes pulseGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+          }
+          50% {
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+          }
+        }
+        
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes slidePages {
+          0%, 45% {
+            transform: translateX(0);
+          }
+          50%, 95% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+        
         @keyframes float {
           0%, 100% {
             transform: translateY(0) translateX(0);
@@ -798,6 +781,10 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
         .animate-gradient {
           background-size: 200% 200%;
           animation: gradient 5s ease infinite;
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 2s ease-in-out infinite;
         }
       `}</style>
     </section>

@@ -1,6 +1,7 @@
 import { SsgoiTransition } from "@ssgoi/react";
 import { HeroSection } from "./hero-section";
 import { WhyTransitionsMatterSection } from "./why-transitions-matter-section";
+import { ExperienceDifferenceSection } from "./experience-difference-section";
 import { TransitionShowcaseSection } from "./transition-showcase-section";
 import { ComparisonSection } from "./comparison-section";
 import { FeaturesTimelineSection } from "./features-timeline-section";
@@ -15,6 +16,7 @@ export function HomePageContent({ lang }: HomePageContentProps) {
     <SsgoiTransition id="/ssgoi" as="div" className="relative">
       <HeroSection lang={lang} />
       <WhyTransitionsMatterSection lang={lang} />
+      <ExperienceDifferenceSection lang={lang} />
       <TransitionShowcaseSection lang={lang} />
       <ComparisonSection lang={lang} />
       <FeaturesTimelineSection lang={lang} />
