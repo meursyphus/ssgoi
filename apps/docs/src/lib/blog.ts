@@ -90,7 +90,7 @@ export async function getAllBlogPosts(lang: string): Promise<BlogMetadata[]> {
  */
 export async function getBlogPost(
   lang: string,
-  slug: string
+  slug: string,
 ): Promise<BlogPost | null> {
   try {
     const postPath = getPostPath(lang);
@@ -138,7 +138,7 @@ export async function getBlogPost(
  */
 export async function getRecentBlogPosts(
   lang: string,
-  limit: number = 5
+  limit: number = 5,
 ): Promise<BlogMetadata[]> {
   const allPosts = await getAllBlogPosts(lang);
   return allPosts.slice(0, limit);

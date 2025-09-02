@@ -5,7 +5,12 @@ import { ReactNode } from "react";
 import { TranslationsContext } from "./internal/client-translations-provider";
 import { interpolate } from "./internal/interpolate";
 import { Messages } from "./messages/types";
-import { NestedKeyOf, NestedValueOf, getNestedValue, isReactNode } from "./internal/translation-utils";
+import {
+  NestedKeyOf,
+  NestedValueOf,
+  getNestedValue,
+  isReactNode,
+} from "./internal/translation-utils";
 
 export function useTranslations<Namespace extends keyof Messages>(
   namespace: Namespace,
@@ -15,11 +20,14 @@ export function useTranslations<Namespace extends keyof Messages>(
   function t<
     Key extends NestedKeyOf<Messages[Namespace]>,
     Variables extends { [key: string]: any } = {},
-  >(key: Key, variables?: Variables): NestedValueOf<Messages[Namespace], Key> extends string 
-    ? string 
-    : NestedValueOf<Messages[Namespace], Key> extends ReactNode 
-    ? ReactNode
-    : string {
+  >(
+    key: Key,
+    variables?: Variables,
+  ): NestedValueOf<Messages[Namespace], Key> extends string
+    ? string
+    : NestedValueOf<Messages[Namespace], Key> extends ReactNode
+      ? ReactNode
+      : string {
     const value = getNestedValue(messages[namespace], key);
 
     if (!value) {
@@ -36,7 +44,9 @@ export function useTranslations<Namespace extends keyof Messages>(
     } else if (isReactNode(value)) {
       return value as any;
     } else {
-      console.warn(`Translation for key "${namespace}.${key}" is not a valid type.`);
+      console.warn(
+        `Translation for key "${namespace}.${key}" is not a valid type.`,
+      );
       return key as any;
     }
   }

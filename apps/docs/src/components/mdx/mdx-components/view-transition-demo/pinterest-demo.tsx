@@ -206,7 +206,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
               className="w-full h-auto"
               data-pinterest-detail-key={item.id}
             />
-            
+
             {/* Back button overlay */}
             <DemoLink
               to="/pinterest/gallery"
@@ -229,7 +229,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
             <button className="absolute top-3 right-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-full transition-colors">
               Save
             </button>
-            
+
             {/* Like count overlay */}
             <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
               <span className="text-white text-sm font-medium">
@@ -326,7 +326,11 @@ const detailPages = pinterestItems.map((item) => ({
 
 // Route configuration
 const pinterestRoutes: RouteConfig[] = [
-  { path: "/pinterest/gallery", component: PinterestGridPage, label: "Pinterest" },
+  {
+    path: "/pinterest/gallery",
+    component: PinterestGridPage,
+    label: "Pinterest",
+  },
   ...detailPages,
 ];
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import '../app.css';
-  import { Ssgoi } from '@ssgoi/svelte';
-  import { hero } from '@ssgoi/svelte/view-transitions';
-  
+  import "../app.css";
+  import { Ssgoi } from "@ssgoi/svelte";
+  import { hero } from "@ssgoi/svelte/view-transitions";
+
   interface Props {
     children: () => any;
   }
@@ -13,8 +13,8 @@
     transitions: [
       // Use hero transition between main and item detail pages
       {
-        from: '/',
-        to: '/item/*',
+        from: "/",
+        to: "/item/*",
         transition: hero({ spring: { stiffness: 5, damping: 1 } }),
         symmetric: true,
       },

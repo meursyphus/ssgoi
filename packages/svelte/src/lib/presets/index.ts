@@ -1,1 +1,1 @@
-export * from "@ssgoi/core/presets";
+export * from '@ssgoi/core/presets';

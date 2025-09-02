@@ -14,10 +14,15 @@ export const home: HomeMessages = {
   },
   subtitle: (
     <>
-      ウェブに<span className="font-semibold text-white">ネイティブアプリのようなページトランジション</span>を構築。
+      ウェブに
+      <span className="font-semibold text-white">
+        ネイティブアプリのようなページトランジション
+      </span>
+      を構築。
     </>
   ),
-  description: "Next.js、Nuxt、SvelteKitなどのすべてのSSRフレームワークと完全に互換性があります。SEOを犠牲にすることなく、素晴らしいアニメーションを作成できます。",
+  description:
+    "Next.js、Nuxt、SvelteKitなどのすべてのSSRフレームワークと完全に互換性があります。SEOを犠牲にすることなく、素晴らしいアニメーションを作成できます。",
   buttons: {
     getStarted: "はじめる",
     github: "GitHub",
@@ -55,15 +60,18 @@ export const home: HomeMessages = {
     features: {
       ssr: {
         title: "完璧なSSRサポート",
-        description: "Next.js、Nuxt、SvelteKitなどのSSRフレームワークで完璧に動作します。SEOを犠牲にすることなく、美しいページトランジションを作成できます。",
+        description:
+          "Next.js、Nuxt、SvelteKitなどのSSRフレームワークで完璧に動作します。SEOを犠牲にすることなく、美しいページトランジションを作成できます。",
       },
       browserCompat: {
         title: "すべてのブラウザ対応",
-        description: "Chrome、Firefox、Safari、すべての最新ブラウザで一貫した体験を提供します。",
+        description:
+          "Chrome、Firefox、Safari、すべての最新ブラウザで一貫した体験を提供します。",
       },
       zeroConfig: {
         title: "ゼロ設定",
-        description: "フレームワークのルーティングをそのまま使用。複雑な設定なしにすぐに開始できます。",
+        description:
+          "フレームワークのルーティングをそのまま使用。複雑な設定なしにすぐに開始できます。",
       },
     },
   },
@@ -79,7 +87,8 @@ export const home: HomeMessages = {
   // CTA Section
   cta: {
     title: "今すぐ始める",
-    subtitle: "必要なのは5分だけ。SSGOIでウェブにネイティブアプリ体験を追加しましょう。",
+    subtitle:
+      "必要なのは5分だけ。SSGOIでウェブにネイティブアプリ体験を追加しましょう。",
     buttons: {
       viewDocs: "ドキュメントを見る",
       github: "GitHub",
@@ -92,11 +101,13 @@ export const home: HomeMessages = {
       line1: "すべてのトランジションを",
       line2: "体験する",
     },
-    subtitle: "最も人気のあるトランジション効果をプレビューします。実際のアプリでどのように動作するか確認してください。",
+    subtitle:
+      "最も人気のあるトランジション効果をプレビューします。実際のアプリでどのように動作するか確認してください。",
     transitions: {
       fade: {
         title: "フェード",
-        description: "スムーズな不透明度トランジションでエレガントなページ切り替えを作成",
+        description:
+          "スムーズな不透明度トランジションでエレガントなページ切り替えを作成",
       },
       hero: {
         title: "ヒーロー",
@@ -170,15 +181,18 @@ export const home: HomeMessages = {
     advantages: {
       keepStack: {
         title: "既存のスタックを維持",
-        description: "現在のルーターとフレームワークをそのまま使用。追加の依存関係は不要です。",
+        description:
+          "現在のルーターとフレームワークをそのまま使用。追加の依存関係は不要です。",
       },
       trueCustomization: {
         title: "真のカスタマイズ",
-        description: "スプリング物理とタイミングを完全に制御し、ユニークなブランド体験を作成。",
+        description:
+          "スプリング物理とタイミングを完全に制御し、ユニークなブランド体験を作成。",
       },
       universalSupport: {
         title: "ユニバーサルサポート",
-        description: "すべてのブラウザ、すべてのフレームワーク、すべての環境で同じように動作します。",
+        description:
+          "すべてのブラウザ、すべてのフレームワーク、すべての環境で同じように動作します。",
       },
     },
   },
@@ -202,7 +216,8 @@ export const home: HomeMessages = {
       line1: "体験の違いを",
       line2: "感じてください",
     },
-    subtitle: "トランジション効果がユーザー体験をどのように変えるか直接確認してください",
+    subtitle:
+      "トランジション効果がユーザー体験をどのように変えるか直接確認してください",
     traditional: {
       title: "従来のウェブ",
       uxPoints: {
@@ -276,11 +291,13 @@ export const home: HomeMessages = {
       },
       sharedElements: {
         title: "共有要素トランジション",
-        description: "ページ間で共有要素を使用してシームレスなアニメーションを作成",
+        description:
+          "ページ間で共有要素を使用してシームレスなアニメーションを作成",
       },
       ssrReady: {
         title: "SSR & SSG対応",
-        description: "Next.js、Nuxt、SvelteKitを完全サポート。ハイドレーション問題なし、SEOフレンドリー",
+        description:
+          "Next.js、Nuxt、SvelteKitを完全サポート。ハイドレーション問題なし、SEOフレンドリー",
       },
       springPhysics: {
         title: "スプリング物理",
@@ -288,7 +305,8 @@ export const home: HomeMessages = {
       },
       typescriptFirst: {
         title: "TypeScriptファースト",
-        description: "詳細な型とインテリジェントな自動補完で完全なTypeScriptサポート",
+        description:
+          "詳細な型とインテリジェントな自動補完で完全なTypeScriptサポート",
       },
     },
   },
@@ -302,15 +320,18 @@ export const home: HomeMessages = {
     reasons: {
       nativeLike: {
         title: "ネイティブのような体験",
-        description: "シームレスで応答性の高いトランジションで、ユーザーが期待するアプリレベルのインタラクションをウェブで提供",
+        description:
+          "シームレスで応答性の高いトランジションで、ユーザーが期待するアプリレベルのインタラクションをウェブで提供",
       },
       brandIdentity: {
         title: "ブランドアイデンティティ",
-        description: "ブランドを記憶に残り、独特にする独自のモーションシグネチャーを作成",
+        description:
+          "ブランドを記憶に残り、独特にする独自のモーションシグネチャーを作成",
       },
       visualContext: {
         title: "視覚的コンテキスト",
-        description: "ユーザーがナビゲートする際に空間認識を維持し、ページ間の明確な関係を表示",
+        description:
+          "ユーザーがナビゲートする際に空間認識を維持し、ページ間の明確な関係を表示",
       },
     },
     reasonBadge: "理由 #",
@@ -342,12 +363,16 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "適切な場所のアニメーションは<span className="text-white">体験をより直感的にし</span>、ナビゲーションを容易にします。"
+          "適切な場所のアニメーションは
+          <span className="text-white">体験をより直感的にし</span>
+          、ナビゲーションを容易にします。"
         </>
       ),
       quote2: (
         <>
-          "モーションはユーザーが<span className="text-white">ナビゲーションを理解</span>するのを助け、有益で楽しいフィードバックを提供します。"
+          "モーションはユーザーが
+          <span className="text-white">ナビゲーションを理解</span>
+          するのを助け、有益で楽しいフィードバックを提供します。"
         </>
       ),
       author1: "— Google Material Design",

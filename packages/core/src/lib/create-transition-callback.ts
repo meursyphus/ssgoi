@@ -11,12 +11,16 @@ export function createTransitionCallback<TAnimationValue = number>(
   getTransition: () => Transition<undefined, TAnimationValue>,
   options?: {
     onCleanupEnd?: () => void;
-    strategy?: (context: StrategyContext<TAnimationValue>) => TransitionStrategy<TAnimationValue>;
-  }
+    strategy?: (
+      context: StrategyContext<TAnimationValue>,
+    ) => TransitionStrategy<TAnimationValue>;
+  },
 ): TransitionCallback {
   // Combined state: tracks both animation instance and direction
-  let currentAnimation: { animator: Animator<TAnimationValue>; direction: "in" | "out" } | null =
-    null;
+  let currentAnimation: {
+    animator: Animator<TAnimationValue>;
+    direction: "in" | "out";
+  } | null = null;
   let currentClone: HTMLElement | null = null; // Track current clone element
   let parentRef: Element | null = null;
   let nextSiblingRef: Element | null = null;
@@ -30,7 +34,8 @@ export function createTransitionCallback<TAnimationValue = number>(
 
   // Create strategy upfront for closure
   const strategy =
-    options?.strategy?.(context) || createDefaultStrategy<TAnimationValue>(context);
+    options?.strategy?.(context) ||
+    createDefaultStrategy<TAnimationValue>(context);
 
   const runEntrance = async (element: HTMLElement) => {
     if (currentClone) {

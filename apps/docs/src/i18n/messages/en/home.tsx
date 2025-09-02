@@ -14,10 +14,15 @@ export const home: HomeMessages = {
   },
   subtitle: (
     <>
-      Build <span className="font-semibold text-white">native app-like page transitions</span> for the web.
+      Build{" "}
+      <span className="font-semibold text-white">
+        native app-like page transitions
+      </span>{" "}
+      for the web.
     </>
   ),
-  description: "Perfect compatibility with all SSR frameworks like Next.js, Nuxt, and SvelteKit. Create stunning animations without sacrificing SEO.",
+  description:
+    "Perfect compatibility with all SSR frameworks like Next.js, Nuxt, and SvelteKit. Create stunning animations without sacrificing SEO.",
   buttons: {
     getStarted: "Get Started",
     github: "GitHub",
@@ -38,7 +43,8 @@ export const home: HomeMessages = {
   frameworks: {
     title: (
       <>
-        Same experience across <span className="gradient-orange">all environments</span>
+        Same experience across{" "}
+        <span className="gradient-orange">all environments</span>
       </>
     ),
     subtitle: "Use consistent APIs regardless of framework",
@@ -55,15 +61,18 @@ export const home: HomeMessages = {
     features: {
       ssr: {
         title: "Perfect SSR Support",
-        description: "Works perfectly with SSR frameworks like Next.js, Nuxt, and SvelteKit. Create beautiful page transitions without sacrificing SEO.",
+        description:
+          "Works perfectly with SSR frameworks like Next.js, Nuxt, and SvelteKit. Create beautiful page transitions without sacrificing SEO.",
       },
       browserCompat: {
         title: "All Browsers Compatible",
-        description: "Provides consistent experience across Chrome, Firefox, Safari and all modern browsers.",
+        description:
+          "Provides consistent experience across Chrome, Firefox, Safari and all modern browsers.",
       },
       zeroConfig: {
         title: "Zero Configuration",
-        description: "Use your framework's routing as-is. Start immediately without complex setup.",
+        description:
+          "Use your framework's routing as-is. Start immediately without complex setup.",
       },
     },
   },
@@ -79,7 +88,8 @@ export const home: HomeMessages = {
   // CTA Section
   cta: {
     title: "Start Now",
-    subtitle: "5 minutes is all you need. Add native app experience to the web with SSGOI.",
+    subtitle:
+      "5 minutes is all you need. Add native app experience to the web with SSGOI.",
     buttons: {
       viewDocs: "View Documentation",
       github: "GitHub",
@@ -92,19 +102,23 @@ export const home: HomeMessages = {
       line1: "Experience",
       line2: "Every Transition",
     },
-    subtitle: "Preview our most popular transitions. Each one is optimized for performance and works across all browsers.",
+    subtitle:
+      "Preview our most popular transitions. Each one is optimized for performance and works across all browsers.",
     transitions: {
       fade: {
         title: "Fade Transition",
-        description: "Smooth opacity transition perfect for context changes and top-level navigation",
+        description:
+          "Smooth opacity transition perfect for context changes and top-level navigation",
       },
       hero: {
         title: "Hero Transition",
-        description: "Shared element animation that creates seamless transitions for detail views",
+        description:
+          "Shared element animation that creates seamless transitions for detail views",
       },
       scroll: {
         title: "Scroll Transition",
-        description: "Vertical scrolling effect ideal for sequential content and storytelling",
+        description:
+          "Vertical scrolling effect ideal for sequential content and storytelling",
       },
     },
     viewDocs: "View docs",
@@ -170,15 +184,18 @@ export const home: HomeMessages = {
     advantages: {
       keepStack: {
         title: "🚀 Keep Your Stack",
-        description: "No need to change your router or framework. Works with Next.js, SvelteKit, Nuxt, and more.",
+        description:
+          "No need to change your router or framework. Works with Next.js, SvelteKit, Nuxt, and more.",
       },
       trueCustomization: {
         title: "🎨 True Customization",
-        description: "Spring-based physics animations with full control over timing, easing, and behavior.",
+        description:
+          "Spring-based physics animations with full control over timing, easing, and behavior.",
       },
       universalSupport: {
         title: "🌍 Universal Support",
-        description: "Works in all browsers, all frameworks, with SSR/SSG. One library for everything.",
+        description:
+          "Works in all browsers, all frameworks, with SSR/SSG. One library for everything.",
       },
     },
   },
@@ -268,27 +285,33 @@ export const home: HomeMessages = {
     features: {
       oneLineSetup: {
         title: "One Line Setup",
-        description: "Get started with a single line of code. No complex configuration needed",
+        description:
+          "Get started with a single line of code. No complex configuration needed",
       },
       frameworkAgnostic: {
         title: "Framework Agnostic",
-        description: "Works with React, Svelte, Vue. Solid and Qwik coming soon",
+        description:
+          "Works with React, Svelte, Vue. Solid and Qwik coming soon",
       },
       sharedElements: {
         title: "Shared Element Transitions",
-        description: "Create seamless animations between pages with shared elements",
+        description:
+          "Create seamless animations between pages with shared elements",
       },
       ssrReady: {
         title: "SSR & SSG Ready",
-        description: "Full support for Next.js, Nuxt, SvelteKit. No hydration issues, SEO friendly",
+        description:
+          "Full support for Next.js, Nuxt, SvelteKit. No hydration issues, SEO friendly",
       },
       springPhysics: {
         title: "Spring Physics",
-        description: "Natural motion with configurable spring physics for smooth animations",
+        description:
+          "Natural motion with configurable spring physics for smooth animations",
       },
       typescriptFirst: {
         title: "TypeScript First",
-        description: "Full TypeScript support with detailed types and intelligent autocomplete",
+        description:
+          "Full TypeScript support with detailed types and intelligent autocomplete",
       },
     },
   },
@@ -298,19 +321,23 @@ export const home: HomeMessages = {
       line1: "Transitions are not just",
       line2: "Pretty Effects",
     },
-    subtitle: "They're essential for creating intuitive, engaging web experiences",
+    subtitle:
+      "They're essential for creating intuitive, engaging web experiences",
     reasons: {
       nativeLike: {
         title: "Native-like Experience",
-        description: "Deliver app-quality interactions on the web with seamless, responsive transitions that users expect",
+        description:
+          "Deliver app-quality interactions on the web with seamless, responsive transitions that users expect",
       },
       brandIdentity: {
         title: "Brand Identity",
-        description: "Create unique motion signatures that make your brand memorable and distinct",
+        description:
+          "Create unique motion signatures that make your brand memorable and distinct",
       },
       visualContext: {
         title: "Visual Context",
-        description: "Maintain spatial awareness as users navigate, showing clear relationships between pages",
+        description:
+          "Maintain spatial awareness as users navigate, showing clear relationships between pages",
       },
     },
     reasonBadge: "Reason #",
@@ -342,17 +369,22 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "Animations in the right places can <span className="text-white">make experiences more intuitive</span> and easier to navigate."
+          "Animations in the right places can{" "}
+          <span className="text-white">make experiences more intuitive</span>{" "}
+          and easier to navigate."
         </>
       ),
       quote2: (
         <>
-          "Motion helps users <span className="text-white">understand navigation</span> and provides feedback that's both informative and delightful."
+          "Motion helps users{" "}
+          <span className="text-white">understand navigation</span> and provides
+          feedback that's both informative and delightful."
         </>
       ),
       author1: "— Google Material Design",
       author2: "— Apple Human Interface Guidelines",
     },
-    bottomNote: "Based on studies from Nielsen Norman Group and Google Research",
+    bottomNote:
+      "Based on studies from Nielsen Norman Group and Google Research",
   },
 };

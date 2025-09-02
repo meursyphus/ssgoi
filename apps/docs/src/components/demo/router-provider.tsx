@@ -31,9 +31,7 @@ export function RouterProvider({
   };
 
   return (
-    <RouterContext.Provider value={router}>
-      {children}
-    </RouterContext.Provider>
+    <RouterContext.Provider value={router}>{children}</RouterContext.Provider>
   );
 }
 

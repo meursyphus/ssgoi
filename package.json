@@ -50,7 +50,9 @@
     "highlight.js": "^11.11.1",
     "highlightjs-svelte": "^1.0.6",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.6"
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^3.4.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -59,21 +61,30 @@
   },
   "lint-staged": {
     "packages/core/**/*.{ts,tsx}": [
-      "prettier --write"
+      "prettier --write --config packages/core/.prettierrc"
     ],
     "packages/react/**/*.{ts,tsx}": [
-      "prettier --write",
+      "prettier --write --config packages/react/.prettierrc",
       "eslint --fix --config packages/react/eslint.config.js"
     ],
     "packages/svelte/**/*.{ts,svelte}": [
-      "prettier --write",
+      "prettier --write --config packages/svelte/.prettierrc",
       "eslint --fix --config packages/svelte/eslint.config.js"
     ],
     "packages/vue/**/*.{ts,vue}": [
-      "prettier --write"
+      "prettier --write --config packages/vue/.prettierrc"
     ],
-    "apps/**/*.{ts,tsx,js,jsx}": [
-      "prettier --write"
+    "apps/docs/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write --config apps/docs/.prettierrc"
+    ],
+    "apps/react-demo/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write --config apps/react-demo/.prettierrc"
+    ],
+    "apps/svelte-demo/**/*.{ts,js,svelte}": [
+      "prettier --write --config apps/svelte-demo/.prettierrc"
+    ],
+    "apps/vue-demo/**/*.{ts,js,vue}": [
+      "prettier --write --config apps/vue-demo/.prettierrc"
     ]
   }
 }

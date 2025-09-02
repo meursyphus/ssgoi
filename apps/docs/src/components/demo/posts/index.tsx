@@ -11,7 +11,7 @@ export default function PostsDemo() {
 
   // Prefetch all post detail pages on mount
   useEffect(() => {
-    posts.forEach(post => {
+    posts.forEach((post) => {
       router.prefetch(`/demo/posts/${post.id}`);
     });
   }, []);
@@ -67,9 +67,13 @@ export default function PostsDemo() {
                       alt={post.author.name}
                       className="w-4 h-4 rounded-full"
                     />
-                    <span className="text-xs text-gray-300">{post.author.name}</span>
+                    <span className="text-xs text-gray-300">
+                      {post.author.name}
+                    </span>
                     <span className="text-xs text-gray-500">•</span>
-                    <span className="text-xs text-gray-500">{post.readTime}m</span>
+                    <span className="text-xs text-gray-500">
+                      {post.readTime}m
+                    </span>
                     <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-400 rounded-full ml-auto">
                       {post.category}
                     </span>

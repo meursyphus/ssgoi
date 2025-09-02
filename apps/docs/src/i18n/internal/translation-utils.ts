@@ -11,7 +11,7 @@ export type NestedKeyOf<TObj extends object> = {
 // 중첩된 키 경로로 값의 타입을 추출하는 유틸리티 타입
 export type NestedValueOf<
   TObj extends object,
-  TPath extends string
+  TPath extends string,
 > = TPath extends `${infer Key}.${infer Rest}`
   ? Key extends keyof TObj
     ? TObj[Key] extends object
@@ -19,19 +19,19 @@ export type NestedValueOf<
       : never
     : never
   : TPath extends keyof TObj
-  ? TObj[TPath]
-  : never;
+    ? TObj[TPath]
+    : never;
 
 // 주어진 키 경로로 객체에서 값을 가져오는 함수
 export function getNestedValue(obj: any, path: string): any {
   const keys = path.split(".");
   let value = obj;
-  
+
   for (const key of keys) {
     value = value?.[key];
     if (value === undefined) return undefined;
   }
-  
+
   return value;
 }
 

@@ -28,7 +28,7 @@ function extractLeafNodes(navigation: NavigationItem[]): NavigationItem[] {
 // Create middleware that determines navigation direction based on order
 function createNavigationMiddleware(navigation: NavigationItem[]) {
   const leafNodes = extractLeafNodes(navigation);
-  
+
   // Create a map of path to index for quick lookup
   const pathToIndex = new Map<string, number>();
   leafNodes.forEach((node, index) => {
@@ -64,7 +64,7 @@ export function DocsSsgoi({
   navigation: NavigationItem[];
 }) {
   const isMobile = useMobile();
-  
+
   const config = useMemo(() => {
     // Define the core transitions using generic paths
     const transitions: NonNullable<SsgoiConfig["transitions"]> = [
@@ -92,9 +92,5 @@ export function DocsSsgoi({
     };
   }, [navigation, isMobile]);
 
-  return (
-    <_Ssgoi config={config}>
-      {children}
-    </_Ssgoi>
-  );
+  return <_Ssgoi config={config}>{children}</_Ssgoi>;
 }

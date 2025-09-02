@@ -1,4 +1,4 @@
-import PinterestDetail from '@/components/demo/posts/detail'
+import PinterestDetail from "@/components/demo/posts/detail";
 export default async function Page() {
-    return <PinterestDetail />
+  return <PinterestDetail />;
 }

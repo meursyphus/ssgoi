@@ -13,9 +13,9 @@ export function BlogPostLink({ fallbackHref, ...props }: BlogPostLinkProps) {
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    
+
     // Check if we came from the blog list page
-    if (typeof window !== 'undefined' && document.referrer.includes('/blog')) {
+    if (typeof window !== "undefined" && document.referrer.includes("/blog")) {
       router.back();
     } else {
       router.push(fallbackHref);

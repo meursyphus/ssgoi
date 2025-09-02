@@ -1,1 +1,1 @@
-export * from '@ssgoi/core/transitions';
+export * from "@ssgoi/core/transitions";

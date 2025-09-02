@@ -20,7 +20,7 @@ export async function generateMetadata({
       type: "website",
       url: `/${lang}`,
     },
-    lang
+    lang,
   );
 }
 

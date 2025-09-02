@@ -26,7 +26,7 @@ export default defineConfig({
         "transitions/index": resolve(__dirname, "src/lib/transitions/index.ts"),
         "view-transitions/index": resolve(
           __dirname,
-          "src/lib/view-transitions/index.ts"
+          "src/lib/view-transitions/index.ts",
         ),
         types: resolve(__dirname, "src/lib/types.ts"),
         "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),

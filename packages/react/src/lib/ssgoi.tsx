@@ -13,7 +13,7 @@ interface SsgoiProps {
 export const Ssgoi: React.FC<SsgoiProps> = ({ config, children }) => {
   const contextValue = useMemo<SsgoiContext>(
     () => createSggoiTransitionContext(config),
-    [config]
+    [config],
   );
 
   return <SsgoiProvider value={contextValue}>{children}</SsgoiProvider>;

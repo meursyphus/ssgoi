@@ -31,7 +31,10 @@ function IntroPage() {
             "Mobile app-like UX",
             "Intuitive page navigation",
           ].map((item, index) => (
-            <div key={index} className="flex items-start space-x-2 md:space-x-3">
+            <div
+              key={index}
+              className="flex items-start space-x-2 md:space-x-3"
+            >
               <div className="mt-0.5 md:mt-1">
                 <svg
                   className="h-4 w-4 md:h-5 md:w-5 text-blue-500"
@@ -68,7 +71,9 @@ function IntroPage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm md:text-base font-medium text-gray-100">Get Started</p>
+              <p className="text-sm md:text-base font-medium text-gray-100">
+                Get Started
+              </p>
               <p className="text-xs md:text-sm text-gray-400">
                 Click the menu items to navigate between sections
               </p>
@@ -87,7 +92,9 @@ function FeaturesPage() {
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">✨</div>
 
-        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">Key Features</h1>
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">
+          Key Features
+        </h1>
 
         <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
           Discover the powerful features of scroll transitions.
@@ -136,7 +143,9 @@ function FeaturesPage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm md:text-base font-medium text-gray-100">Learn More</p>
+              <p className="text-sm md:text-base font-medium text-gray-100">
+                Learn More
+              </p>
               <p className="text-xs md:text-sm text-gray-400">
                 Navigate through the menu to explore more
               </p>
@@ -155,7 +164,9 @@ function UsagePage() {
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">🚀</div>
 
-        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">How to Use</h1>
+        <h1 className="mb-3 md:mb-4 text-xl md:text-3xl font-bold text-gray-100">
+          How to Use
+        </h1>
 
         <p className="mb-4 md:mb-6 text-sm md:text-lg text-gray-400">
           Apply scroll transitions with simple configuration.
@@ -204,7 +215,9 @@ function UsagePage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm md:text-base font-medium text-gray-100">Apply Now</p>
+              <p className="text-sm md:text-base font-medium text-gray-100">
+                Apply Now
+              </p>
               <p className="text-xs md:text-sm text-gray-400">
                 Use the navigation menu to continue
               </p>
@@ -274,7 +287,9 @@ function ExamplesPage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm md:text-base font-medium text-gray-100">Resources</p>
+              <p className="text-sm md:text-base font-medium text-gray-100">
+                Resources
+              </p>
               <p className="text-xs md:text-sm text-gray-400">
                 Continue exploring with the navigation menu
               </p>
@@ -384,7 +399,9 @@ function ScrollLayout({ children }: { children: React.ReactNode }) {
 
         {/* Content Area */}
         <div className="flex-1 bg-gray-900 overflow-x-hidden overflow-y-hidden">
-          <div className="md:ml-0 pt-10 md:pt-0 relative z-0 h-full overflow-hidden">{children}</div>
+          <div className="md:ml-0 pt-10 md:pt-0 relative z-0 h-full overflow-hidden">
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -60,7 +60,10 @@ const DEFAULT_METADATA = {
   baseUrl: "https://ssgoi.dev",
 };
 
-export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: string = "en"): Promise<Metadata> {
+export async function createSEOMetadata(
+  options: SEOMetadataOptions = {},
+  lang: string = "en",
+): Promise<Metadata> {
   const {
     title,
     description,
@@ -83,7 +86,7 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
 
   // Get translations for default values
   const t = await getServerTranslations("metadata", lang);
-  
+
   // Use provided values or fall back to translated defaults
   const finalTitle = title || t("title");
   const finalDescription = description || t("description");
@@ -93,8 +96,10 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
 
   // Prepare images array
   const ogImages = images || [image];
-  const processedImages = ogImages.map(img => ({
-    url: img.url.startsWith("http") ? img.url : `${DEFAULT_METADATA.baseUrl}${img.url}`,
+  const processedImages = ogImages.map((img) => ({
+    url: img.url.startsWith("http")
+      ? img.url
+      : `${DEFAULT_METADATA.baseUrl}${img.url}`,
     width: img.width || DEFAULT_METADATA.image.width,
     height: img.height || DEFAULT_METADATA.image.height,
     alt: img.alt || DEFAULT_METADATA.image.alt,
@@ -116,7 +121,7 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
       card: DEFAULT_METADATA.twitterCard,
       title: finalTitle,
       description: finalDescription,
-      images: processedImages.map(img => img.url),
+      images: processedImages.map((img) => img.url),
     },
     // LinkedIn uses Open Graph tags, but we can add extra metadata
     other: {
@@ -141,8 +146,8 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
 
   // Add URL if provided
   if (url) {
-    metadata.openGraph!.url = url.startsWith("http") 
-      ? url 
+    metadata.openGraph!.url = url.startsWith("http")
+      ? url
       : `${DEFAULT_METADATA.baseUrl}${url}`;
   }
 
@@ -154,7 +159,7 @@ export async function createSEOMetadata(options: SEOMetadataOptions = {}, lang: 
       authors,
       tags,
     };
-    
+
     // Add article metadata to other tags for platforms that support it
     if (articleData.publishedTime) {
       metadata.other!["article:published_time"] = articleData.publishedTime;
@@ -213,5 +218,7 @@ export const LOCALE_METADATA = {
 } as const;
 
 export function getLocaleMetadata(lang: string) {
-  return LOCALE_METADATA[lang as keyof typeof LOCALE_METADATA] || LOCALE_METADATA.en;
+  return (
+    LOCALE_METADATA[lang as keyof typeof LOCALE_METADATA] || LOCALE_METADATA.en
+  );
 }

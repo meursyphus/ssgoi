@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SsgoiTransition, transition } from '@ssgoi/svelte';
-  
+  import { SsgoiTransition, transition } from "@ssgoi/svelte";
+
   let showShapes = $state(true);
   let stiffness = $state(300);
   let damping = $state(30);
@@ -11,12 +11,12 @@
   }
 
   const colors = [
-    { id: 1, color: '#FF6B6B', name: 'Coral' },
-    { id: 2, color: '#4ECDC4', name: 'Turquoise' },
-    { id: 3, color: '#45B7D1', name: 'Sky Blue' },
-    { id: 4, color: '#96CEB4', name: 'Sage' },
-    { id: 5, color: '#FECA57', name: 'Sunflower' },
-    { id: 6, color: '#DDA0DD', name: 'Plum' },
+    { id: 1, color: "#FF6B6B", name: "Coral" },
+    { id: 2, color: "#4ECDC4", name: "Turquoise" },
+    { id: 3, color: "#45B7D1", name: "Sky Blue" },
+    { id: 4, color: "#96CEB4", name: "Sage" },
+    { id: 5, color: "#FECA57", name: "Sunflower" },
+    { id: 6, color: "#DDA0DD", name: "Plum" },
   ];
 </script>
 
@@ -103,11 +103,8 @@
     </div>
 
     <div class="toggle-section">
-      <button
-        onclick={() => showShapes = !showShapes}
-        class="toggle-button"
-      >
-        {showShapes ? 'Hide Elements' : 'Show Elements'}
+      <button onclick={() => (showShapes = !showShapes)} class="toggle-button">
+        {showShapes ? "Hide Elements" : "Show Elements"}
       </button>
     </div>
 
@@ -119,7 +116,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: 'fade',
+                  key: "fade",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -145,7 +142,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: 'scale-rotate',
+                  key: "scale-rotate",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     from: { scale: 0, rotate: 0 },
@@ -208,7 +205,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: 'bounce-scale',
+                  key: "bounce-scale",
                   in: (element) => ({
                     spring: {
                       stiffness: stiffness * 0.8,
@@ -445,7 +442,7 @@
   }
 
   .pentagon::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -70px;
     left: -40px;

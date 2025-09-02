@@ -147,7 +147,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
               toEl.style.position = originalPosition;
               toEl.style.transformOrigin = originalTransformOrigin;
               toEl.style.zIndex = originalZIndex;
-            }
+            },
           );
         },
       };

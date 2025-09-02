@@ -128,8 +128,8 @@ function useMobile() {
   const [isMobile, setIsMobile] = useState(true); // Default to true for SSR
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
     // Set initial value
     setIsMobile(mediaQuery.matches);
 
@@ -138,10 +138,10 @@ function useMobile() {
       setIsMobile(e.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
 
     return () => {
-      mediaQuery.removeEventListener('change', handleChange);
+      mediaQuery.removeEventListener("change", handleChange);
     };
   }, []);
 

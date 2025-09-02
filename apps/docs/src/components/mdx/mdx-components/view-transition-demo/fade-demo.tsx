@@ -19,7 +19,7 @@ function HomePage() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12 sm:py-20"
+          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12 sm:py-20",
         )}
       >
         <div className="text-center space-y-6">
@@ -31,7 +31,7 @@ function HomePage() {
           <h1
             className={cn(
               "font-bold text-white",
-              isMobile ? "text-2xl" : "text-4xl sm:text-6xl"
+              isMobile ? "text-2xl" : "text-4xl sm:text-6xl",
             )}
           >
             Welcome to{" "}
@@ -42,7 +42,7 @@ function HomePage() {
           <p
             className={cn(
               "text-gray-300 max-w-2xl mx-auto",
-              isMobile ? "text-base" : "text-xl sm:text-2xl"
+              isMobile ? "text-base" : "text-xl sm:text-2xl",
             )}
           >
             Native app-like page transitions for the web. Transform your static
@@ -102,13 +102,13 @@ function FeaturesPage() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
         <h1
           className={cn(
             "font-bold text-white mb-8",
-            isMobile ? "text-2xl" : "text-4xl"
+            isMobile ? "text-2xl" : "text-4xl",
           )}
         >
           Features
@@ -131,7 +131,7 @@ function FeaturesPage() {
                   >
                     {transition}()
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -207,13 +207,13 @@ function ExamplesPage() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12",
         )}
       >
         <h1
           className={cn(
             "font-bold text-white mb-8",
-            isMobile ? "text-2xl" : "text-4xl"
+            isMobile ? "text-2xl" : "text-4xl",
           )}
         >
           Examples
@@ -264,13 +264,13 @@ function GettingStartedPage() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
         <h1
           className={cn(
             "font-bold text-white mb-8",
-            isMobile ? "text-2xl" : "text-4xl"
+            isMobile ? "text-2xl" : "text-4xl",
           )}
         >
           Get Started
@@ -435,7 +435,7 @@ const DemoLayout = memo(
                 <h1
                   className={cn(
                     "font-bold text-white flex items-center gap-2",
-                    isMobile ? "text-base" : "text-xl"
+                    isMobile ? "text-base" : "text-xl",
                   )}
                 >
                   <span>{logo}</span>
@@ -451,7 +451,7 @@ const DemoLayout = memo(
                         isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
                         currentPath === route.path
                           ? "bg-gray-700 text-white"
-                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white",
                       )}
                     >
                       {route.label}
@@ -470,7 +470,7 @@ const DemoLayout = memo(
         <main className="flex-1 overflow-auto relative z-0">{children}</main>
       </div>
     );
-  }
+  },
 );
 
 DemoLayout.displayName = "DemoLayout";

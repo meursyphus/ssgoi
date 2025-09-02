@@ -14,7 +14,9 @@ interface TransitionShowcaseSectionProps {
   lang: string;
 }
 
-export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionProps) {
+export function TransitionShowcaseSection({
+  lang,
+}: TransitionShowcaseSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const t = useTranslations("home");
@@ -114,7 +116,10 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+    >
       {/* Background elements */}
       <div className="absolute inset-0 -z-10">
         <div className="parallax-showcase-1 absolute left-1/4 top-0 h-96 w-96 rounded-full bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 blur-3xl" />
@@ -123,8 +128,12 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
       <div className="mx-auto max-w-7xl">
         <div className="showcase-title text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="gradient-purple">{t("transitionShowcase.title.line1")}</span>{" "}
-            <span className="text-white">{t("transitionShowcase.title.line2")}</span>
+            <span className="gradient-purple">
+              {t("transitionShowcase.title.line1")}
+            </span>{" "}
+            <span className="text-white">
+              {t("transitionShowcase.title.line2")}
+            </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("transitionShowcase.subtitle")}
@@ -136,32 +145,46 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
           {transitions.map((transition, index) => (
             <div
               key={transition.type}
-              ref={(el) => {el && (cardsRef.current[index] = el)}}
+              ref={(el) => {
+                el && (cardsRef.current[index] = el);
+              }}
               className={`group relative overflow-hidden rounded-3xl border ${transition.borderColor} bg-card/50 backdrop-blur-sm`}
             >
               {/* Gradient background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${transition.gradient} opacity-30`} />
-              
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${transition.gradient} opacity-30`}
+              />
+
               {/* Content */}
               <div className="relative">
                 {/* Header */}
                 <div className="p-6 sm:p-8 lg:p-10">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">{transition.title}</h3>
-                      <p className="text-base sm:text-lg text-muted-foreground">{transition.description}</p>
+                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
+                        {transition.title}
+                      </h3>
+                      <p className="text-base sm:text-lg text-muted-foreground">
+                        {transition.description}
+                      </p>
                     </div>
                     {/* View documentation link - desktop */}
-                    <Link 
+                    <Link
                       href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
                       className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 transition-all hover:bg-gray-800/70 whitespace-nowrap`}
                     >
-                      <span className={`text-base font-medium ${transition.accentColor}`}>{t("transitionShowcase.viewDocs")}</span>
-                      <ArrowRight className={`h-4 w-4 ${transition.accentColor}`} />
+                      <span
+                        className={`text-base font-medium ${transition.accentColor}`}
+                      >
+                        {t("transitionShowcase.viewDocs")}
+                      </span>
+                      <ArrowRight
+                        className={`h-4 w-4 ${transition.accentColor}`}
+                      />
                     </Link>
                   </div>
                 </div>
-                
+
                 {/* Large Browser mockup with demo */}
                 <div className="px-4 pb-6 sm:px-8 sm:pb-8 lg:px-10 lg:pb-10">
                   <div className="demo-container relative rounded-xl shadow-2xl">
@@ -172,7 +195,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
 
                 {/* Mobile view documentation link */}
                 <div className="px-6 pb-6 sm:hidden">
-                  <Link 
+                  <Link
                     href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-gradient-to-r from-vivid-purple to-vivid-orange text-white font-medium"
                   >
@@ -187,7 +210,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
 
         {/* View All Transitions Button */}
         <div className="mt-16 text-center">
-          <Link 
+          <Link
             href={`/${lang}/docs/view-transitions/01-fade`}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-vivid-purple to-vivid-orange text-white text-lg font-medium hover:shadow-lg transition-all transform hover:scale-105"
           >

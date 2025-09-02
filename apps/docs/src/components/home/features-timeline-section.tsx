@@ -13,7 +13,9 @@ interface FeaturesTimelineSectionProps {
   lang: string;
 }
 
-export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) {
+export function FeaturesTimelineSection({
+  lang,
+}: FeaturesTimelineSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -39,7 +41,7 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
         { name: "svelte", available: true },
         { name: "vue", available: true },
         { name: "solidjs", available: false },
-        { name: "qwik", available: false }
+        { name: "qwik", available: false },
       ],
       code: `// Same API across all frameworks
 import { Ssgoi } from '@ssgoi/react'
@@ -109,7 +111,7 @@ config: SsgoiConfig = {
             end: "bottom 40%",
             scrub: 1,
           },
-        }
+        },
       );
 
       // Feature items animation
@@ -176,7 +178,10 @@ config: SsgoiConfig = {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+    >
       {/* Floating background elements */}
       <div className="absolute inset-0 -z-10">
         <div className="float-element-feat-1 absolute left-10 top-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-vivid-purple/5 to-vivid-orange/5 blur-3xl" />
@@ -185,8 +190,12 @@ config: SsgoiConfig = {
       <div className="mx-auto max-w-7xl">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="text-white">{t("featuresTimeline.title.line1")}</span>{" "}
-            <span className="gradient-green">{t("featuresTimeline.title.line2")}</span>
+            <span className="text-white">
+              {t("featuresTimeline.title.line1")}
+            </span>{" "}
+            <span className="gradient-green">
+              {t("featuresTimeline.title.line2")}
+            </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("featuresTimeline.subtitle")}
@@ -206,7 +215,9 @@ config: SsgoiConfig = {
               return (
                 <div
                   key={index}
-                  ref={(el) => {el && (itemsRef.current[index] = el)}}
+                  ref={(el) => {
+                    el && (itemsRef.current[index] = el);
+                  }}
                   className={`relative flex items-center ${
                     isLeft ? "lg:flex-row" : "lg:flex-row-reverse"
                   }`}
@@ -215,41 +226,57 @@ config: SsgoiConfig = {
                   <div className="timeline-dot absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-r from-vivid-purple to-vivid-orange shadow-lg shadow-vivid-purple/50" />
 
                   {/* Content */}
-                  <div className={`w-full lg:w-1/2 ${isLeft ? "lg:pr-16" : "lg:pl-16"}`}>
+                  <div
+                    className={`w-full lg:w-1/2 ${isLeft ? "lg:pr-16" : "lg:pl-16"}`}
+                  >
                     <div className="relative group">
-                      <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`} />
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`}
+                      />
                       <div className="relative rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm p-8">
-                        <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-4`}>
+                        <div
+                          className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-4`}
+                        >
                           <feature.icon className="h-6 w-6 text-white" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
-                        <p className="text-muted-foreground mb-6">{feature.description}</p>
-                        
+                        <h3 className="text-2xl font-bold text-white mb-3">
+                          {feature.title}
+                        </h3>
+                        <p className="text-muted-foreground mb-6">
+                          {feature.description}
+                        </p>
+
                         {/* Framework logos if applicable */}
                         {feature.frameworks && (
                           <div className="flex gap-4 mb-6">
                             {feature.frameworks.map((framework: any) => (
-                              <div 
-                                key={framework.name} 
-                                className={`relative w-10 h-10 rounded-lg bg-gray-900 border ${framework.available ? 'border-gray-700' : 'border-gray-800'} flex items-center justify-center`}
+                              <div
+                                key={framework.name}
+                                className={`relative w-10 h-10 rounded-lg bg-gray-900 border ${framework.available ? "border-gray-700" : "border-gray-800"} flex items-center justify-center`}
                               >
                                 <Image
                                   src={`/icons/${framework.name}.svg`}
                                   alt={framework.name}
                                   width={24}
                                   height={24}
-                                  className={framework.available ? 'opacity-80' : 'opacity-30'}
+                                  className={
+                                    framework.available
+                                      ? "opacity-80"
+                                      : "opacity-30"
+                                  }
                                 />
                                 {!framework.available && (
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-[8px] text-gray-500 font-medium bg-gray-900 px-1 rounded">soon</span>
+                                    <span className="text-[8px] text-gray-500 font-medium bg-gray-900 px-1 rounded">
+                                      soon
+                                    </span>
                                   </div>
                                 )}
                               </div>
                             ))}
                           </div>
                         )}
-                        
+
                         {/* Code example */}
                         <div className="code-block">
                           <div className="rounded-lg bg-gray-900 border border-gray-700 p-4">

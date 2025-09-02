@@ -1,9 +1,9 @@
-import type { TransitionKey } from '../types';
+import type { TransitionKey } from "../types";
 
 interface ScaleOptions {
   start?: number;
   opacity?: number;
-  axis?: 'x' | 'y' | 'both';
+  axis?: "x" | "y" | "both";
   spring?: {
     stiffness?: number;
     damping?: number;
@@ -15,18 +15,18 @@ export const scale = (options: ScaleOptions = {}) => {
   const {
     start = 0,
     opacity = 0,
-    axis = 'both',
+    axis = "both",
     spring = { stiffness: 300, damping: 30 },
-    key
+    key,
   } = options;
 
   const getScaleTransform = (value: number): string => {
     switch (axis) {
-      case 'x':
+      case "x":
         return `scaleX(${value})`;
-      case 'y':
+      case "y":
         return `scaleY(${value})`;
-      case 'both':
+      case "both":
       default:
         return `scale(${value})`;
     }
@@ -39,7 +39,7 @@ export const scale = (options: ScaleOptions = {}) => {
         const scaleValue = start + (1 - start) * progress;
         element.style.transform = getScaleTransform(scaleValue);
         element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      }
+      },
     }),
     out: (element: HTMLElement) => ({
       spring,
@@ -47,8 +47,8 @@ export const scale = (options: ScaleOptions = {}) => {
         const scaleValue = start + (1 - start) * progress;
         element.style.transform = getScaleTransform(scaleValue);
         element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      }
+      },
     }),
-    ...(key && { key })
+    ...(key && { key }),
   };
 };

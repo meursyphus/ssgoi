@@ -84,7 +84,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         },
       ],
     }),
-    []
+    [],
   );
   return (
     <div className="h-full bg-gray-900 flex">

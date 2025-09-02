@@ -1,4 +1,4 @@
-import type { TransitionKey } from '../types';
+import type { TransitionKey } from "../types";
 
 interface BlurOptions {
   amount?: number | string;
@@ -19,11 +19,11 @@ export const blur = (options: BlurOptions = {}) => {
     scale = false,
     fade = true,
     spring = { stiffness: 300, damping: 30 },
-    key
+    key,
   } = options;
 
   const getBlurAmount = (value: number | string): string => {
-    return typeof value === 'number' ? `${value}px` : value;
+    return typeof value === "number" ? `${value}px` : value;
   };
 
   return {
@@ -31,44 +31,54 @@ export const blur = (options: BlurOptions = {}) => {
       spring,
       tick: (progress: number) => {
         const blurMultiplier = 1 - progress;
-        const blurValue = typeof amount === 'number' 
-          ? blurMultiplier * amount 
-          : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
-        
-        element.style.filter = typeof amount === 'number' 
-          ? `blur(${blurValue}px)` 
-          : `blur(${blurValue})`;
-        
+        const blurValue =
+          typeof amount === "number"
+            ? blurMultiplier * amount
+            : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
+
+        element.style.filter =
+          typeof amount === "number"
+            ? `blur(${blurValue}px)`
+            : `blur(${blurValue})`;
+
         if (scale) {
           element.style.transform = `scale(${0.8 + progress * 0.2})`;
         }
-        
+
         if (fade) {
-          element.style.opacity = (opacity + (1 - opacity) * progress).toString();
+          element.style.opacity = (
+            opacity +
+            (1 - opacity) * progress
+          ).toString();
         }
-      }
+      },
     }),
     out: (element: HTMLElement) => ({
       spring,
       tick: (progress: number) => {
         const blurMultiplier = 1 - progress;
-        const blurValue = typeof amount === 'number' 
-          ? blurMultiplier * amount 
-          : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
-        
-        element.style.filter = typeof amount === 'number' 
-          ? `blur(${blurValue}px)` 
-          : `blur(${blurValue})`;
-        
+        const blurValue =
+          typeof amount === "number"
+            ? blurMultiplier * amount
+            : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
+
+        element.style.filter =
+          typeof amount === "number"
+            ? `blur(${blurValue}px)`
+            : `blur(${blurValue})`;
+
         if (scale) {
           element.style.transform = `scale(${0.8 + progress * 0.2})`;
         }
-        
+
         if (fade) {
-          element.style.opacity = (opacity + (1 - opacity) * progress).toString();
+          element.style.opacity = (
+            opacity +
+            (1 - opacity) * progress
+          ).toString();
         }
-      }
+      },
     }),
-    ...(key && { key })
+    ...(key && { key }),
   };
 };

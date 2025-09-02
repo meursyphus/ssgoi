@@ -27,17 +27,28 @@ function ClothingPage() {
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Clothing</h2>
-            <span className="text-sm text-gray-500">{products.length} items</span>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+              Clothing
+            </h2>
+            <span className="text-sm text-gray-500">
+              {products.length} items
+            </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {products.map((product) => (
-              <div key={product.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+              <div
+                key={product.id}
+                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow"
+              >
                 <div className="bg-blue-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">{product.name}</h3>
-                <p className="text-lg font-bold text-gray-900">{product.price}</p>
+                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                  {product.name}
+                </h3>
+                <p className="text-lg font-bold text-gray-900">
+                  {product.price}
+                </p>
                 <button className="mt-2 w-full bg-blue-600 text-white text-sm py-1.5 rounded hover:bg-blue-700 transition-colors">
                   Add to Cart
                 </button>
@@ -66,12 +77,19 @@ function ShoesPage() {
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Shoes</h2>
-            <span className="text-sm text-gray-500">{products.length} items</span>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+              Shoes
+            </h2>
+            <span className="text-sm text-gray-500">
+              {products.length} items
+            </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {products.map((product) => (
-              <div key={product.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative">
+              <div
+                key={product.id}
+                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative"
+              >
                 {product.tag && (
                   <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
                     {product.tag}
@@ -80,8 +98,12 @@ function ShoesPage() {
                 <div className="bg-green-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">{product.name}</h3>
-                <p className="text-lg font-bold text-gray-900">{product.price}</p>
+                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                  {product.name}
+                </h3>
+                <p className="text-lg font-bold text-gray-900">
+                  {product.price}
+                </p>
                 <button className="mt-2 w-full bg-green-600 text-white text-sm py-1.5 rounded hover:bg-green-700 transition-colors">
                   Add to Cart
                 </button>
@@ -112,12 +134,19 @@ function AccessoriesPage() {
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Accessories</h2>
-            <span className="text-sm text-gray-500">{products.length} items</span>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+              Accessories
+            </h2>
+            <span className="text-sm text-gray-500">
+              {products.length} items
+            </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {products.map((product) => (
-              <div key={product.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative">
+              <div
+                key={product.id}
+                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative"
+              >
                 {product.tag && (
                   <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
                     {product.tag}
@@ -126,8 +155,12 @@ function AccessoriesPage() {
                 <div className="bg-orange-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">{product.name}</h3>
-                <p className="text-lg font-bold text-gray-900">{product.price}</p>
+                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                  {product.name}
+                </h3>
+                <p className="text-lg font-bold text-gray-900">
+                  {product.price}
+                </p>
                 <button className="mt-2 w-full bg-orange-600 text-white text-sm py-1.5 rounded hover:bg-orange-700 transition-colors">
                   Add to Cart
                 </button>
@@ -144,7 +177,11 @@ function AccessoriesPage() {
 const slideRoutes: RouteConfig[] = [
   { path: "/slide/clothing", component: ClothingPage, label: "Clothing" },
   { path: "/slide/shoes", component: ShoesPage, label: "Shoes" },
-  { path: "/slide/accessories", component: AccessoriesPage, label: "Accessories" },
+  {
+    path: "/slide/accessories",
+    component: AccessoriesPage,
+    label: "Accessories",
+  },
 ];
 
 // Custom layout with tab navigation
@@ -168,15 +205,37 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex items-center space-x-3">
               <button className="p-2 text-gray-600 hover:text-gray-900">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </button>
               <button className="p-2 text-gray-600 hover:text-gray-900 relative">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
                 </svg>
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  3
+                </span>
               </button>
             </div>
           </div>

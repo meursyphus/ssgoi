@@ -1,5 +1,9 @@
 import type { Messages } from "../messages/types";
-import { SUPPORTED_LANGUAGES, SupportedLanguage, DEFAULT_LANGUAGE } from "../supported-languages";
+import {
+  SUPPORTED_LANGUAGES,
+  SupportedLanguage,
+  DEFAULT_LANGUAGE,
+} from "../supported-languages";
 
 export async function loadTranslations(lang: string): Promise<Messages> {
   let messages: Messages;

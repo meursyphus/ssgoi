@@ -22,8 +22,8 @@ export const SsgoiTransition = <T extends ElementType = "div">({
   const Component = as || "div";
 
   return (
-    <Component 
-      ref={transition(getTransition(id))} 
+    <Component
+      ref={transition(getTransition(id))}
       data-ssgoi-transition={id}
       className={className}
       {...rest}

@@ -29,10 +29,10 @@ export interface TransitionConfigs<TAnimationValue = number> {
 
 export interface TransitionStrategy<TAnimationValue = number> {
   runIn: (
-    configs: TransitionConfigs<TAnimationValue>
+    configs: TransitionConfigs<TAnimationValue>,
   ) => Promise<AnimationSetup<TAnimationValue>>;
   runOut: (
-    configs: TransitionConfigs<TAnimationValue>
+    configs: TransitionConfigs<TAnimationValue>,
   ) => Promise<AnimationSetup<TAnimationValue>>;
 }
 
@@ -69,7 +69,7 @@ export interface TransitionStrategy<TAnimationValue = number> {
  */
 
 export const createDefaultStrategy = <TAnimationValue = number>(
-  context: StrategyContext<TAnimationValue>
+  context: StrategyContext<TAnimationValue>,
 ): TransitionStrategy<TAnimationValue> => {
   return {
     runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
@@ -199,7 +199,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
  * This is used for page-level transitions where each transition should be independent
  */
 export const createPageTransitionStrategy = <TAnimationValue = number>(
-  _: StrategyContext<TAnimationValue>
+  _: StrategyContext<TAnimationValue>,
 ): TransitionStrategy<TAnimationValue> => {
   return {
     runIn: async (configs: TransitionConfigs<TAnimationValue>) => {

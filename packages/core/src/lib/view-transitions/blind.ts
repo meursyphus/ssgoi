@@ -37,7 +37,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
     globalProgress: number,
     blindIndex: number,
     totalBlinds: number,
-    isReversed: boolean = false
+    isReversed: boolean = false,
   ): number => {
     const staggerRatio = Math.min(0.5, (staggerDelay * totalBlinds) / 1000);
     const activeRatio = 1 - staggerRatio;
@@ -59,7 +59,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   const createBlinds = (
     element: HTMLElement,
     initialState: "hidden" | "closed",
-    transformOrigin: "left" | "right" = "left"
+    transformOrigin: "left" | "right" = "left",
   ) => {
     // Ensure parent has position relative for absolute positioning
     const parentStyle = window.getComputedStyle(element);
@@ -159,7 +159,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
               reversedProgress,
               index,
               blindCount,
-              false // not reversed - left to right
+              false, // not reversed - left to right
             );
 
             // blindProgress goes 0 → 1, so blind appears (closes the view)
@@ -209,7 +209,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
               progress,
               index,
               blindCount,
-              false // same direction as OUT - left to right
+              false, // same direction as OUT - left to right
             );
 
             // blindProgress goes 0 → 1, but we want blind to disappear, so use 1 - progress

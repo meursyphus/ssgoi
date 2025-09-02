@@ -3,6 +3,6 @@ export type SidebarMessages = {
     "getting-started": string;
     "core-concepts": string;
     "view-transitions": string;
-    "transitions": string;
+    transitions: string;
   };
 };

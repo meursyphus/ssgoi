@@ -5,6 +5,6 @@ export const sidebar: SidebarMessages = {
     "getting-started": "はじめに",
     "core-concepts": "コアコンセプト",
     "view-transitions": "ビュートランジション",
-    "transitions": "トランジション",
+    transitions: "トランジション",
   },
 };

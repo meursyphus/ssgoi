@@ -23,7 +23,7 @@ export async function DocsStructuredData({
   nextDoc?: DocNavigationLink | null;
 }) {
   const t = await getServerTranslations("docsStructuredData", lang);
-  
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
@@ -53,18 +53,20 @@ export async function DocsStructuredData({
   };
 
   // BreadcrumbList schema
-  const breadcrumbSchema = breadcrumbs ? {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: breadcrumbs.map((crumb, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@id": crumb.url,
-        name: crumb.name
+  const breadcrumbSchema = breadcrumbs
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbs.map((crumb, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@id": crumb.url,
+            name: crumb.name,
+          },
+        })),
       }
-    }))
-  } : null;
+    : null;
 
   // Related pages schema
   const relatedPages = [];
@@ -73,7 +75,7 @@ export async function DocsStructuredData({
       "@type": "TechArticle",
       headline: prevDoc.title,
       url: `https://ssgoi.dev/${lang}/docs/${prevDoc.path}`,
-      position: "previous"
+      position: "previous",
     });
   }
   if (nextDoc) {
@@ -81,20 +83,23 @@ export async function DocsStructuredData({
       "@type": "TechArticle",
       headline: nextDoc.title,
       url: `https://ssgoi.dev/${lang}/docs/${nextDoc.path}`,
-      position: "next"
+      position: "next",
     });
   }
 
-  const relatedPagesSchema = relatedPages.length > 0 ? {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Related Documentation",
-    itemListElement: relatedPages.map((page, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: page
-    }))
-  } : null;
+  const relatedPagesSchema =
+    relatedPages.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Related Documentation",
+          itemListElement: relatedPages.map((page, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: page,
+          })),
+        }
+      : null;
 
   return (
     <>
@@ -111,7 +116,9 @@ export async function DocsStructuredData({
       {relatedPagesSchema && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(relatedPagesSchema) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(relatedPagesSchema),
+          }}
         />
       )}
     </>

@@ -42,7 +42,7 @@ function createDetailIn(
     pageRect: DOMRect;
     scrollOffset: { x: number; y: number };
   },
-  node: HTMLElement
+  node: HTMLElement,
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
@@ -94,7 +94,7 @@ function createGalleryOut(
     detailRect: DOMRect;
     scrollOffset: { x: number; y: number };
   },
-  node: HTMLElement
+  node: HTMLElement,
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
@@ -131,7 +131,7 @@ function createGalleryIn(
     detailRect: DOMRect;
     scrollOffset: { x: number; y: number };
   },
-  node: HTMLElement
+  node: HTMLElement,
 ): AnimationFunc {
   const dx =
     toRect.left -
@@ -170,7 +170,7 @@ function createDetailOut(
     pageRect: DOMRect;
     scrollOffset: { x: number; y: number };
   },
-  node: HTMLElement
+  node: HTMLElement,
 ): AnimationFunc {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
@@ -219,14 +219,14 @@ interface AnimationHandlers {
 function createAnimationConfig(
   fromNode: HTMLElement,
   toNode: HTMLElement,
-  scrollOffset: { x: number; y: number }
+  scrollOffset: { x: number; y: number },
 ): AnimationHandlers | null {
   // Find detail element first (only one per page)
   const fromDetail = fromNode.querySelector(
-    "[data-pinterest-detail-key]"
+    "[data-pinterest-detail-key]",
   ) as HTMLElement | null;
   const toDetail = toNode.querySelector(
-    "[data-pinterest-detail-key]"
+    "[data-pinterest-detail-key]",
   ) as HTMLElement | null;
 
   // Early return if multiple details on either page
@@ -249,7 +249,7 @@ function createAnimationConfig(
 
     // Find matching gallery in from page
     galleryEl = fromNode.querySelector(
-      `[data-pinterest-gallery-key="${key}"]`
+      `[data-pinterest-gallery-key="${key}"]`,
     ) as HTMLElement | null;
 
     if (galleryEl) {
@@ -264,7 +264,7 @@ function createAnimationConfig(
 
     // Find matching gallery in to page
     galleryEl = toNode.querySelector(
-      `[data-pinterest-gallery-key="${key}"]`
+      `[data-pinterest-gallery-key="${key}"]`,
     ) as HTMLElement | null;
 
     if (galleryEl) {
@@ -286,22 +286,22 @@ function createAnimationConfig(
     return {
       inAnimation: createDetailIn(
         { detailRect, galleryRect, pageRect, scrollOffset },
-        toNode
+        toNode,
       ),
       outAnimation: createGalleryOut(
         { galleryRect, detailRect, scrollOffset },
-        fromNode
+        fromNode,
       ),
     };
   } else {
     return {
       inAnimation: createGalleryIn(
         { galleryRect, detailRect, scrollOffset },
-        toNode
+        toNode,
       ),
       outAnimation: createDetailOut(
         { detailRect, galleryRect, pageRect, scrollOffset },
-        fromNode
+        fromNode,
       ),
     };
   }

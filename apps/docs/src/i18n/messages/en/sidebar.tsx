@@ -5,6 +5,6 @@ export const sidebar: SidebarMessages = {
     "getting-started": "Getting Started",
     "core-concepts": "Core Concepts",
     "view-transitions": "View Transitions",
-    "transitions": "Transitions",
+    transitions: "Transitions",
   },
 };

@@ -11,10 +11,10 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ onBack }: ProductDetailProps) {
   const router = useDemoRouter();
-  const currentPath = router.currentPath || '';
+  const currentPath = router.currentPath || "";
   // Extract productId from path: /demo/products/[id]
-  const productId = currentPath.split('/').pop() || '';
-  
+  const productId = currentPath.split("/").pop() || "";
+
   const product = getProduct(productId);
   const [quantity, setQuantity] = useState(1);
 
@@ -38,11 +38,18 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
         {/* Back button */}
         <div className="px-4 py-4">
           <button
-            onClick={onBack || (() => router.goto('/demo/products'))}
+            onClick={onBack || (() => router.goto("/demo/products"))}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             <span>Back</span>
           </button>
@@ -51,7 +58,10 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
         {/* Product content */}
         <div className="px-4 pb-8">
           {/* Product image with hero transition */}
-          <div data-hero-key={product.id} className="relative aspect-square rounded-xl overflow-hidden mb-6">
+          <div
+            data-hero-key={product.id}
+            className="relative aspect-square rounded-xl overflow-hidden mb-6"
+          >
             <img
               src={product.image}
               alt={product.name}
@@ -60,11 +70,11 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
             {product.badge && (
               <span
                 className={`absolute top-4 left-4 px-3 py-1.5 rounded-md text-sm font-semibold uppercase ${
-                  product.badge === 'new'
-                    ? 'bg-teal-500 text-white'
-                    : product.badge === 'sale'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-yellow-400 text-gray-900'
+                  product.badge === "new"
+                    ? "bg-teal-500 text-white"
+                    : product.badge === "sale"
+                      ? "bg-red-500 text-white"
+                      : "bg-yellow-400 text-gray-900"
                 }`}
               >
                 {product.badge}
@@ -77,21 +87,29 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
             <span className="text-sm text-gray-500 uppercase tracking-wider">
               {product.category}
             </span>
-            <h1 className="text-2xl font-bold text-white mt-2 mb-4">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-white mt-2 mb-4">
+              {product.name}
+            </h1>
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
               <span className="text-yellow-400 text-lg">★★★★★</span>
               <span className="font-semibold text-white">{product.rating}</span>
-              <span className="text-gray-500 text-sm">({product.reviews} reviews)</span>
+              <span className="text-gray-500 text-sm">
+                ({product.reviews} reviews)
+              </span>
             </div>
 
-            <p className="text-gray-300 mb-6 leading-relaxed">{product.description}</p>
+            <p className="text-gray-300 mb-6 leading-relaxed">
+              {product.description}
+            </p>
 
             {/* Price section */}
             <div className="mb-6">
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-white">${product.price}</span>
+                <span className="text-3xl font-bold text-white">
+                  ${product.price}
+                </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-xl text-gray-500 line-through">
@@ -108,10 +126,15 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
             {/* Features */}
             {product.features && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-white mb-3">Key Features</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">
+                  Key Features
+                </h3>
                 <ul className="space-y-2">
                   {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-300">
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-gray-300"
+                    >
                       <span className="text-teal-400 mt-0.5">•</span>
                       <span>{feature}</span>
                     </li>
@@ -157,7 +180,9 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
                 </>
               ) : (
                 <>
-                  <p className="text-center text-gray-500 font-medium mb-4">Out of Stock</p>
+                  <p className="text-center text-gray-500 font-medium mb-4">
+                    Out of Stock
+                  </p>
                   <button className="w-full py-3 bg-gray-800 text-gray-300 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
                     Notify When Available
                   </button>

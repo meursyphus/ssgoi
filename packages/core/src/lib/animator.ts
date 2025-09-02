@@ -15,16 +15,18 @@ export interface AnimationOptions<TAnimationValue = number> {
  * New Animator implementation using Popmotion
  * Provides spring-based animations with fine control
  * Supports both number and object animations
- * 
+ *
  * @template TAnimationValue - The type of value being animated (number | object)
  */
 export class Animator<TAnimationValue = number> {
   private options: AnimationOptions<TAnimationValue>;
   private currentValue: TAnimationValue;
-  private velocity: TAnimationValue extends number ? number : Record<string, number>;
+  private velocity: TAnimationValue extends number
+    ? number
+    : Record<string, number>;
   private isAnimating = false;
   private controls: { stop: () => void } | null = null;
-  
+
   // For object animations
   private animationMap: Map<string, { stop: () => void }> | null = null;
   private activeAnimations = new Set<string>();
@@ -52,7 +54,9 @@ export class Animator<TAnimationValue = number> {
         ? number
         : Record<string, number>;
     } else {
-      this.velocity = 0 as TAnimationValue extends number ? number : Record<string, number>;
+      this.velocity = 0 as TAnimationValue extends number
+        ? number
+        : Record<string, number>;
     }
   }
 
@@ -65,7 +69,7 @@ export class Animator<TAnimationValue = number> {
     this.isAnimating = true;
 
     const target = reverse ? this.options.from : this.options.to;
-    
+
     // Handle object animations differently
     if (typeof this.currentValue === "object" && this.currentValue !== null) {
       this.animateObject(target as any, reverse);
@@ -102,7 +106,8 @@ export class Animator<TAnimationValue = number> {
           if (typeof value === "number" && typeof previousValue === "number") {
             // For numbers, calculate velocity in units per second, then normalize
             const rawVelocity = (value - previousValue) / timeDelta;
-            this.velocity = (rawVelocity / 1000) as TAnimationValue extends number
+            this.velocity = (rawVelocity /
+              1000) as TAnimationValue extends number
               ? number
               : Record<string, number>; // Normalize to 0-1 range
           } else if (typeof value === "object" && value !== null) {
@@ -155,50 +160,57 @@ export class Animator<TAnimationValue = number> {
   private animateObject = (target: any, _reverse: boolean) => {
     const from = this.currentValue as any;
     const keys = Object.keys(from);
-    
+
     // Initialize animations map
     this.animationMap = new Map();
     this.activeAnimations.clear();
     this.completedAnimations.clear();
     this.updatedProperties.clear();
-    
+
     // Track values and timing for velocity calculation
     const currentValues: any = { ...from };
     const lastUpdateTime: Record<string, number> = {};
     let firstUpdateReceived = false;
-    
+
     // Function to check if all active properties have been updated
     const checkAndFireUpdate = () => {
       // Only fire update if all active (non-completed) properties have been updated
-      const activeKeys = keys.filter(k => !this.completedAnimations.has(k));
-      const allActiveUpdated = activeKeys.every(k => this.updatedProperties.has(k));
-      
+      const activeKeys = keys.filter((k) => !this.completedAnimations.has(k));
+      const allActiveUpdated = activeKeys.every((k) =>
+        this.updatedProperties.has(k),
+      );
+
       if (allActiveUpdated && activeKeys.length > 0) {
         // Calculate velocity for each property
         if (typeof this.velocity === "object" && this.velocity) {
           const currentTime = performance.now();
-          
+
           Object.keys(currentValues).forEach((k) => {
             if (lastUpdateTime[k]) {
               const timeDelta = (currentTime - lastUpdateTime[k]) / 1000;
               const prevVal = (this.currentValue as any)[k];
               const currVal = currentValues[k];
-              
-              if (typeof prevVal === "number" && typeof currVal === "number" && timeDelta > 0) {
-                (this.velocity as any)[k] = (currVal - prevVal) / timeDelta / 1000;
+
+              if (
+                typeof prevVal === "number" &&
+                typeof currVal === "number" &&
+                timeDelta > 0
+              ) {
+                (this.velocity as any)[k] =
+                  (currVal - prevVal) / timeDelta / 1000;
               }
             }
             lastUpdateTime[k] = currentTime;
           });
         }
-        
+
         // Update current value and fire callback
         this.currentValue = { ...currentValues } as TAnimationValue;
         this.options.onUpdate(this.currentValue);
-        
+
         // Clear updated properties for next frame
         this.updatedProperties.clear();
-        
+
         // Call onStart only once after first update
         if (!firstUpdateReceived && this.options.onStart) {
           firstUpdateReceived = true;
@@ -206,11 +218,11 @@ export class Animator<TAnimationValue = number> {
         }
       }
     };
-    
+
     // Create animation for each property
     keys.forEach((key) => {
       this.activeAnimations.add(key);
-      
+
       const animateOptions: any = {
         from: from[key],
         to: target[key],
@@ -218,43 +230,47 @@ export class Animator<TAnimationValue = number> {
         damping: this.options.spring.damping,
         mass: 1,
       };
-      
+
       // Add velocity if exists
-      if (typeof this.velocity === "object" && this.velocity && key in this.velocity) {
+      if (
+        typeof this.velocity === "object" &&
+        this.velocity &&
+        key in this.velocity
+      ) {
         animateOptions.velocity = (this.velocity as any)[key] * 1000;
       }
-      
+
       const animation = animate({
         ...animateOptions,
         onUpdate: (value: number) => {
           currentValues[key] = value;
           this.updatedProperties.add(key);
-          
+
           // Check if we should fire the update callback
           checkAndFireUpdate();
         },
         onComplete: () => {
           this.completedAnimations.add(key);
           this.updatedProperties.delete(key); // Remove from updated set
-          
+
           // Check if all animations completed
           if (this.completedAnimations.size === keys.length) {
             this.currentValue = target;
             this.isAnimating = false;
             this.animationMap = null;
-            
+
             // Reset velocity
             if (typeof this.velocity === "object" && this.velocity) {
               Object.keys(this.velocity).forEach((k) => {
                 (this.velocity as any)[k] = 0;
               });
             }
-            
+
             this.options.onComplete();
           }
         },
       });
-      
+
       this.animationMap!.set(key, animation);
     });
   };
@@ -298,13 +314,13 @@ export class Animator<TAnimationValue = number> {
 
   stop(): void {
     this.isAnimating = false;
-    
+
     // Stop number animation
     if (this.controls) {
       this.controls.stop();
       this.controls = null;
     }
-    
+
     // Stop object animations
     if (this.animationMap) {
       this.animationMap.forEach((animation) => {
@@ -313,15 +329,17 @@ export class Animator<TAnimationValue = number> {
       this.animationMap.clear();
       this.animationMap = null;
     }
-    
+
     // Clear update tracking
     this.updatedProperties.clear();
-    
+
     // Preserve velocity when stopping
   }
 
   // State getters
-  getVelocity(): TAnimationValue extends number ? number : Record<string, number> {
+  getVelocity(): TAnimationValue extends number
+    ? number
+    : Record<string, number> {
     return this.velocity;
   }
 
@@ -349,7 +367,7 @@ export class Animator<TAnimationValue = number> {
 
   // State setters
   setVelocity(
-    velocity: TAnimationValue extends number ? number : Record<string, number>
+    velocity: TAnimationValue extends number ? number : Record<string, number>,
   ): void {
     this.velocity = velocity;
   }
@@ -374,9 +392,11 @@ export class Animator<TAnimationValue = number> {
   static fromState<TAnimationValue = number>(
     state: {
       position: TAnimationValue;
-      velocity: TAnimationValue extends number ? number : Record<string, number>;
+      velocity: TAnimationValue extends number
+        ? number
+        : Record<string, number>;
     },
-    newOptions: Partial<AnimationOptions<TAnimationValue>>
+    newOptions: Partial<AnimationOptions<TAnimationValue>>,
   ): Animator<TAnimationValue> {
     const animation = new Animator<TAnimationValue>(newOptions);
     animation.setValue(state.position);
