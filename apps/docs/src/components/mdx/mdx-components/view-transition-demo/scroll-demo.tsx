@@ -13,7 +13,7 @@ import type { RouteConfig } from "../browser-mockup";
 // Intro Section Page
 function IntroPage() {
   return (
-    <DemoPage path="/intro">
+    <DemoPage path="/scroll/intro">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">📝</div>
 
@@ -83,7 +83,7 @@ function IntroPage() {
 // Features Section Page
 function FeaturesPage() {
   return (
-    <DemoPage path="/features">
+    <DemoPage path="/scroll/features">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">✨</div>
 
@@ -151,7 +151,7 @@ function FeaturesPage() {
 // Usage Section Page
 function UsagePage() {
   return (
-    <DemoPage path="/usage">
+    <DemoPage path="/scroll/usage">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">🚀</div>
 
@@ -219,7 +219,7 @@ function UsagePage() {
 // Examples Section Page
 function ExamplesPage() {
   return (
-    <DemoPage path="/examples">
+    <DemoPage path="/scroll/examples">
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
         <div className="mb-3 md:mb-6 text-2xl md:text-4xl">💡</div>
 
@@ -288,10 +288,10 @@ function ExamplesPage() {
 
 // Route configuration with sidebar navigation
 const scrollRoutes: RouteConfig[] = [
-  { path: "/intro", component: IntroPage, label: "📝 Introduction" },
-  { path: "/features", component: FeaturesPage, label: "✨ Features" },
-  { path: "/usage", component: UsagePage, label: "🚀 Usage" },
-  { path: "/examples", component: ExamplesPage, label: "💡 Examples" },
+  { path: "/scroll/intro", component: IntroPage, label: "📝 Introduction" },
+  { path: "/scroll/features", component: FeaturesPage, label: "✨ Features" },
+  { path: "/scroll/usage", component: UsagePage, label: "🚀 Usage" },
+  { path: "/scroll/examples", component: ExamplesPage, label: "💡 Examples" },
 ];
 
 // Custom layout with sidebar navigation

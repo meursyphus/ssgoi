@@ -13,7 +13,7 @@ function TheaterPage() {
 
   return (
     <DemoPage
-      path="/"
+      path="/blind"
       className="bg-gradient-to-br from-gray-900 via-red-950 to-gray-900 min-h-full"
     >
       <div
@@ -82,7 +82,7 @@ function Act1Page() {
 
   return (
     <DemoPage
-      path="/act1"
+      path="/blind/act1"
       className="bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 min-h-full"
     >
       <div
@@ -157,7 +157,7 @@ function Act2Page() {
 
   return (
     <DemoPage
-      path="/act2"
+      path="/blind/act2"
       className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 min-h-full"
     >
       <div
@@ -248,7 +248,7 @@ function FinalePage() {
 
   return (
     <DemoPage
-      path="/finale"
+      path="/blind/finale"
       className="bg-gradient-to-br from-gray-900 via-yellow-950 to-gray-900 min-h-full"
     >
       <div
@@ -323,10 +323,10 @@ function FinalePage() {
 
 // Route configuration
 const blindRoutes: RouteConfig[] = [
-  { path: "/", component: TheaterPage, label: "Opening" },
-  { path: "/act1", component: Act1Page, label: "Act I" },
-  { path: "/act2", component: Act2Page, label: "Act II" },
-  { path: "/finale", component: FinalePage, label: "Finale" },
+  { path: "/blind", component: TheaterPage, label: "Opening" },
+  { path: "/blind/act1", component: Act1Page, label: "Act I" },
+  { path: "/blind/act2", component: Act2Page, label: "Act II" },
+  { path: "/blind/finale", component: FinalePage, label: "Finale" },
 ];
 
 // Header Actions Component

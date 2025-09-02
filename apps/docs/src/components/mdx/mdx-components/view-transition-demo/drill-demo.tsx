@@ -281,7 +281,7 @@ function PostDetailPage({ post }: { post: (typeof blogPosts)[0] }) {
         <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
           <div className="max-w-4xl mx-auto p-4">
             <DemoLink
-              to="/posts"
+              to="/drill/posts"
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors no-underline"
             >
               <svg
@@ -353,7 +353,7 @@ function PostDetailPage({ post }: { post: (typeof blogPosts)[0] }) {
           {/* Footer */}
           <footer className="mt-12 pt-8 border-t border-gray-800">
             <DemoLink
-              to="/posts"
+              to="/drill/posts"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors no-underline"
             >
               <svg
