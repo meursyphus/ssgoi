@@ -1,7 +1,7 @@
 import { getNavigationData } from "@/lib/post";
 import { Sidebar } from "./sidebar";
 import { NavigationSetter } from "@/components/layout/navigation-setter";
-import { DocsSsgoi } from "@/components/docs/ssgoi";
+import { DocsSsgoi, SsgoiTransition } from "@/components/docs/ssgoi";
 
 interface DocsLayoutProps {
   children: React.ReactNode;
@@ -18,7 +18,11 @@ export default async function DocsLayout({
   return (
     <>
       <NavigationSetter navigation={navigation} />
-      <div className="min-h-[calc(100vh-4rem)] pt-16">
+      <SsgoiTransition
+        id="/ssgoi/docs"
+        as="div"
+        className="min-h-[calc(100vh-4rem)] pt-16"
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             {/* Sidebar */}
@@ -38,7 +42,7 @@ export default async function DocsLayout({
             </main>
           </div>
         </div>
-      </div>
+      </SsgoiTransition>
     </>
   );
 }
