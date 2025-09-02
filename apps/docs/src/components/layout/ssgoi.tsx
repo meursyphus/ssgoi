@@ -14,7 +14,7 @@ export function SsgoiProvider({ children }: SsgoiProviderProps) {
       transitions: [],
       defaultTransition: fade(),
     }),
-    []
+    [],
   );
 
   return <Ssgoi config={config}>{children}</Ssgoi>;

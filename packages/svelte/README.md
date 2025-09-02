@@ -35,8 +35,8 @@ pnpm add @ssgoi/svelte
 ```svelte
 <!-- +layout.svelte -->
 <script>
-  import { Ssgoi } from '@ssgoi/svelte';
-  import { fade } from '@ssgoi/svelte/view-transitions';
+  import { Ssgoi } from "@ssgoi/svelte";
+  import { fade } from "@ssgoi/svelte/view-transitions";
 </script>
 
 <Ssgoi config={{ defaultTransition: fade() }}>
@@ -52,8 +52,8 @@ pnpm add @ssgoi/svelte
 ```svelte
 <!-- +page.svelte -->
 <script>
-  import { SsgoiTransition } from '@ssgoi/svelte';
-  import { page } from '$app/stores';
+  import { SsgoiTransition } from "@ssgoi/svelte";
+  import { page } from "$app/stores";
 </script>
 
 <SsgoiTransition id={$page.url.pathname}>
@@ -72,22 +72,35 @@ Define different transitions for different routes:
 
 ```svelte
 <script>
-  import { Ssgoi } from '@ssgoi/svelte';
-  import { scroll, fade, drill, pinterest } from '@ssgoi/svelte/view-transitions';
+  import { Ssgoi } from "@ssgoi/svelte";
+  import {
+    scroll,
+    fade,
+    drill,
+    pinterest,
+  } from "@ssgoi/svelte/view-transitions";
 
   const config = {
     transitions: [
       // Scroll between tabs
-      { from: '/home', to: '/about', transition: scroll({ direction: 'up' }) },
-      { from: '/about', to: '/home', transition: scroll({ direction: 'down' }) },
-      
+      { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
+      {
+        from: "/about",
+        to: "/home",
+        transition: scroll({ direction: "down" }),
+      },
+
       // Drill in when entering details
-      { from: '/products', to: '/products/*', transition: drill({ direction: 'enter' }) },
-      
+      {
+        from: "/products",
+        to: "/products/*",
+        transition: drill({ direction: "enter" }),
+      },
+
       // Pinterest-style image transitions
-      { from: '/gallery', to: '/photo/*', transition: pinterest() }
+      { from: "/gallery", to: "/photo/*", transition: pinterest() },
     ],
-    defaultTransition: fade()
+    defaultTransition: fade(),
   };
 </script>
 
@@ -103,7 +116,7 @@ Automatically create bidirectional transitions:
 ```svelte
 {
   from: '/home',
-  to: '/about', 
+  to: '/about',
   transition: scroll({ direction: 'up' }),
   symmetric: true  // Automatically creates reverse transition
 }
@@ -115,15 +128,17 @@ Animate specific elements during mount/unmount:
 
 ```svelte
 <script>
-  import { transition } from '@ssgoi/svelte';
-  import { fadeIn, slideUp } from '@ssgoi/svelte/transitions';
+  import { transition } from "@ssgoi/svelte";
+  import { fadeIn, slideUp } from "@ssgoi/svelte/transitions";
 </script>
 
-<div use:transition={{
-  key: 'card',
-  in: fadeIn(),
-  out: slideUp()
-}}>
+<div
+  use:transition={{
+    key: "card",
+    in: fadeIn(),
+    out: slideUp(),
+  }}
+>
   <h2>Animated Card</h2>
 </div>
 ```
@@ -166,6 +181,7 @@ Animate specific elements during mount/unmount:
 ### Components
 
 #### `<Ssgoi>`
+
 The provider component that manages transition context.
 
 ```svelte
@@ -175,6 +191,7 @@ The provider component that manages transition context.
 ```
 
 #### `<SsgoiTransition>`
+
 Wrapper component for pages that should transition.
 
 ```svelte
@@ -186,14 +203,17 @@ Wrapper component for pages that should transition.
 ### Actions
 
 #### `use:transition`
+
 Apply transitions to individual elements.
 
 ```svelte
-<div use:transition={{
-  key: 'unique-key',
-  in: fadeIn(),
-  out: fadeOut()
-}}>
+<div
+  use:transition={{
+    key: "unique-key",
+    in: fadeIn(),
+    out: fadeOut(),
+  }}
+>
   Content
 </div>
 ```
@@ -201,11 +221,12 @@ Apply transitions to individual elements.
 ### Stores
 
 #### `transitioning`
+
 Access transition state.
 
 ```svelte
 <script>
-  import { transitioning } from '@ssgoi/svelte';
+  import { transitioning } from "@ssgoi/svelte";
 </script>
 
 {#if $transitioning}
@@ -216,6 +237,7 @@ Access transition state.
 ## Built-in Transitions
 
 ### Page Transitions (`@ssgoi/svelte/view-transitions`)
+
 - `fade()` - Smooth opacity transition
 - `scroll()` - Vertical scrolling (up/down)
 - `drill()` - Drill in/out effect (enter/exit)
@@ -223,6 +245,7 @@ Access transition state.
 - `pinterest()` - Pinterest-style expand effect
 
 ### Element Transitions (`@ssgoi/svelte/transitions`)
+
 - `fadeIn()` / `fadeOut()`
 - `slideUp()` / `slideDown()` / `slideLeft()` / `slideRight()`
 - `scaleIn()` / `scaleOut()`
@@ -236,12 +259,12 @@ All transitions use spring physics for natural motion:
 
 ```javascript
 slide({
-  direction: 'left',
+  direction: "left",
   spring: {
-    stiffness: 300,  // 1-1000, higher = faster
-    damping: 30      // 0-100, higher = less oscillation
-  }
-})
+    stiffness: 300, // 1-1000, higher = faster
+    damping: 30, // 0-100, higher = less oscillation
+  },
+});
 ```
 
 ## TypeScript Support
@@ -249,7 +272,7 @@ slide({
 SSGOI is written in TypeScript and provides full type definitions:
 
 ```typescript
-import type { SsgoiConfig, TransitionConfig } from '@ssgoi/svelte';
+import type { SsgoiConfig, TransitionConfig } from "@ssgoi/svelte";
 
 const config: SsgoiConfig = {
   // Full type safety
@@ -273,6 +296,7 @@ const config: SsgoiConfig = {
 ## Documentation
 
 Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+
 - Complete API reference
 - Interactive examples
 - Advanced patterns

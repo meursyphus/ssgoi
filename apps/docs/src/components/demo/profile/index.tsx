@@ -32,7 +32,9 @@ export default function ProfileDemo() {
             {/* Profile Details */}
             <div className="mt-4">
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  {profile.name}
+                </h1>
                 {profile.verified && (
                   <svg
                     width="20"
@@ -117,7 +119,7 @@ export default function ProfileDemo() {
                   <p className="text-sm text-gray-400 line-clamp-2 mb-4">
                     {post.excerpt}
                   </p>
-                  
+
                   {/* Post Stats */}
                   <div className="flex gap-4 text-sm text-gray-500">
                     <span>❤️ {post.likes}</span>

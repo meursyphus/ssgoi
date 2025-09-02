@@ -14,10 +14,13 @@ export const home: HomeMessages = {
   },
   subtitle: (
     <>
-      为网页构建<span className="font-semibold text-white">原生应用般的页面过渡效果</span>。
+      为网页构建
+      <span className="font-semibold text-white">原生应用般的页面过渡效果</span>
+      。
     </>
   ),
-  description: "与Next.js、Nuxt、SvelteKit等所有SSR框架完美兼容。创建令人惊叹的动画效果，同时不影响SEO。",
+  description:
+    "与Next.js、Nuxt、SvelteKit等所有SSR框架完美兼容。创建令人惊叹的动画效果，同时不影响SEO。",
   buttons: {
     getStarted: "开始使用",
     github: "GitHub",
@@ -55,11 +58,13 @@ export const home: HomeMessages = {
     features: {
       ssr: {
         title: "完美的SSR支持",
-        description: "与Next.js、Nuxt、SvelteKit等SSR框架完美配合。创建优美的页面过渡效果而不牺牲SEO。",
+        description:
+          "与Next.js、Nuxt、SvelteKit等SSR框架完美配合。创建优美的页面过渡效果而不牺牲SEO。",
       },
       browserCompat: {
         title: "全浏览器兼容",
-        description: "在Chrome、Firefox、Safari和所有现代浏览器中提供一致的体验。",
+        description:
+          "在Chrome、Firefox、Safari和所有现代浏览器中提供一致的体验。",
       },
       zeroConfig: {
         title: "零配置",
@@ -280,7 +285,8 @@ export const home: HomeMessages = {
       },
       ssrReady: {
         title: "SSR & SSG就绪",
-        description: "完全支持Next.js、Nuxt、SvelteKit。无hydration问题，SEO友好",
+        description:
+          "完全支持Next.js、Nuxt、SvelteKit。无hydration问题，SEO友好",
       },
       springPhysics: {
         title: "弹簧物理",
@@ -302,7 +308,8 @@ export const home: HomeMessages = {
     reasons: {
       nativeLike: {
         title: "原生般的体验",
-        description: "通过无缝、响应迅速的过渡，在网页上提供用户期望的应用级交互",
+        description:
+          "通过无缝、响应迅速的过渡，在网页上提供用户期望的应用级交互",
       },
       brandIdentity: {
         title: "品牌识别",
@@ -342,12 +349,14 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "恰当位置的动画可以<span className="text-white">让体验更直观</span>，导航更容易。"
+          "恰当位置的动画可以<span className="text-white">让体验更直观</span>
+          ，导航更容易。"
         </>
       ),
       quote2: (
         <>
-          "动作帮助用户<span className="text-white">理解导航</span>，并提供既有信息又令人愉快的反馈。"
+          "动作帮助用户<span className="text-white">理解导航</span>
+          ，并提供既有信息又令人愉快的反馈。"
         </>
       ),
       author1: "— Google Material Design",

@@ -4,27 +4,27 @@ import React, { lazy, Suspense } from "react";
 
 // Dynamic imports for code splitting
 const FadeDemo = lazy(() =>
-  import("./fade-demo").then((m) => ({ default: m.FadeDemo }))
+  import("./fade-demo").then((m) => ({ default: m.FadeDemo })),
 );
 const ScrollDemo = lazy(() =>
-  import("./scroll-demo").then((m) => ({ default: m.ScrollDemo }))
+  import("./scroll-demo").then((m) => ({ default: m.ScrollDemo })),
 );
 const HeroDemo = lazy(() =>
-  import("./hero-demo").then((m) => ({ default: m.HeroDemo }))
+  import("./hero-demo").then((m) => ({ default: m.HeroDemo })),
 );
 const PinterestDemo = lazy(() =>
-  import("./pinterest-demo").then((m) => ({ default: m.PinterestDemo }))
+  import("./pinterest-demo").then((m) => ({ default: m.PinterestDemo })),
 );
 
 const DrillDemo = lazy(() =>
-  import("./drill-demo").then((m) => ({ default: m.DrillDemo }))
+  import("./drill-demo").then((m) => ({ default: m.DrillDemo })),
 );
 
 const SlideDemo = lazy(() =>
-  import("./slide-demo").then((m) => ({ default: m.SlideDemo }))
+  import("./slide-demo").then((m) => ({ default: m.SlideDemo })),
 );
 const BlindDemo = lazy(() =>
-  import("./blind-demo").then((m) => ({ default: m.BlindDemo }))
+  import("./blind-demo").then((m) => ({ default: m.BlindDemo })),
 );
 
 export interface ViewTransitionDemoProps {

@@ -14,10 +14,14 @@ export const home: HomeMessages = {
   },
   subtitle: (
     <>
-      <span className="font-semibold text-white">네이티브 앱 같은 페이지 전환</span>을 웹에서 구현하세요.
+      <span className="font-semibold text-white">
+        네이티브 앱 같은 페이지 전환
+      </span>
+      을 웹에서 구현하세요.
     </>
   ),
-  description: "Next.js, Nuxt, SvelteKit 등 모든 SSR 프레임워크와 완벽 호환. SEO를 포기하지 않고도 멋진 애니메이션을 만들 수 있습니다.",
+  description:
+    "Next.js, Nuxt, SvelteKit 등 모든 SSR 프레임워크와 완벽 호환. SEO를 포기하지 않고도 멋진 애니메이션을 만들 수 있습니다.",
   buttons: {
     getStarted: "시작하기",
     github: "GitHub",
@@ -55,15 +59,18 @@ export const home: HomeMessages = {
     features: {
       ssr: {
         title: "SSR 완벽 지원",
-        description: "Next.js, Nuxt, SvelteKit 같은 SSR 프레임워크에서 완벽하게 작동. SEO를 포기하지 않고도 멋진 페이지 전환을 구현하세요.",
+        description:
+          "Next.js, Nuxt, SvelteKit 같은 SSR 프레임워크에서 완벽하게 작동. SEO를 포기하지 않고도 멋진 페이지 전환을 구현하세요.",
       },
       browserCompat: {
         title: "모든 브라우저 호환",
-        description: "Chrome, Firefox, Safari 모든 브라우저에서 일관된 경험을 제공합니다.",
+        description:
+          "Chrome, Firefox, Safari 모든 브라우저에서 일관된 경험을 제공합니다.",
       },
       zeroConfig: {
         title: "제로 설정",
-        description: "프레임워크의 라우팅을 그대로 이용하세요. 복잡한 설정 없이 바로 시작할 수 있습니다.",
+        description:
+          "프레임워크의 라우팅을 그대로 이용하세요. 복잡한 설정 없이 바로 시작할 수 있습니다.",
       },
     },
   },
@@ -92,7 +99,8 @@ export const home: HomeMessages = {
       line1: "모든 전환을",
       line2: "경험해보세요",
     },
-    subtitle: "가장 인기 있는 전환 효과들을 미리보세요. 실제 앱에서 어떻게 동작하는지 확인해보세요.",
+    subtitle:
+      "가장 인기 있는 전환 효과들을 미리보세요. 실제 앱에서 어떻게 동작하는지 확인해보세요.",
     transitions: {
       fade: {
         title: "페이드",
@@ -170,15 +178,18 @@ export const home: HomeMessages = {
     advantages: {
       keepStack: {
         title: "기존 스택 유지",
-        description: "현재 라우터와 프레임워크를 그대로 사용하세요. 추가 의존성이 필요 없습니다.",
+        description:
+          "현재 라우터와 프레임워크를 그대로 사용하세요. 추가 의존성이 필요 없습니다.",
       },
       trueCustomization: {
         title: "진정한 커스터마이징",
-        description: "스프링 물리와 타이밍을 완전히 제어하여 브랜드만의 독특한 경험을 만드세요.",
+        description:
+          "스프링 물리와 타이밍을 완전히 제어하여 브랜드만의 독특한 경험을 만드세요.",
       },
       universalSupport: {
         title: "범용 지원",
-        description: "모든 브라우저, 모든 프레임워크, 모든 환경에서 동일하게 작동합니다.",
+        description:
+          "모든 브라우저, 모든 프레임워크, 모든 환경에서 동일하게 작동합니다.",
       },
     },
   },
@@ -268,7 +279,8 @@ export const home: HomeMessages = {
     features: {
       oneLineSetup: {
         title: "한 줄 설정",
-        description: "단 한 줄의 코드로 시작하세요. 복잡한 설정이 필요 없습니다",
+        description:
+          "단 한 줄의 코드로 시작하세요. 복잡한 설정이 필요 없습니다",
       },
       frameworkAgnostic: {
         title: "프레임워크 독립적",
@@ -280,7 +292,8 @@ export const home: HomeMessages = {
       },
       ssrReady: {
         title: "SSR & SSG 지원",
-        description: "Next.js, Nuxt, SvelteKit 완벽 지원. 하이드레이션 문제 없음, SEO 친화적",
+        description:
+          "Next.js, Nuxt, SvelteKit 완벽 지원. 하이드레이션 문제 없음, SEO 친화적",
       },
       springPhysics: {
         title: "스프링 물리",
@@ -302,15 +315,18 @@ export const home: HomeMessages = {
     reasons: {
       nativeLike: {
         title: "네이티브 같은 경험",
-        description: "사용자가 기대하는 매끄럽고 반응성 있는 전환으로 웹에서 앱 수준의 인터랙션을 제공하세요",
+        description:
+          "사용자가 기대하는 매끄럽고 반응성 있는 전환으로 웹에서 앱 수준의 인터랙션을 제공하세요",
       },
       brandIdentity: {
         title: "브랜드 아이덴티티",
-        description: "브랜드를 기억에 남고 독특하게 만드는 고유한 모션 시그니처를 만드세요",
+        description:
+          "브랜드를 기억에 남고 독특하게 만드는 고유한 모션 시그니처를 만드세요",
       },
       visualContext: {
         title: "시각적 컨텍스트",
-        description: "사용자가 탐색할 때 공간 인식을 유지하고 페이지 간 명확한 관계를 보여주세요",
+        description:
+          "사용자가 탐색할 때 공간 인식을 유지하고 페이지 간 명확한 관계를 보여주세요",
       },
     },
     reasonBadge: "이유 #",
@@ -342,12 +358,16 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "적절한 위치의 애니메이션은 <span className="text-white">경험을 더 직관적으로 만들고</span> 탐색을 쉽게 합니다."
+          "적절한 위치의 애니메이션은{" "}
+          <span className="text-white">경험을 더 직관적으로 만들고</span> 탐색을
+          쉽게 합니다."
         </>
       ),
       quote2: (
         <>
-          "모션은 사용자가 <span className="text-white">내비게이션을 이해하도록 돕고</span> 유익하면서도 즐거운 피드백을 제공합니다."
+          "모션은 사용자가{" "}
+          <span className="text-white">내비게이션을 이해하도록 돕고</span>{" "}
+          유익하면서도 즐거운 피드백을 제공합니다."
         </>
       ),
       author1: "— Google Material Design",

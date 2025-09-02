@@ -25,10 +25,7 @@ export async function CtaSection({ lang }: CtaSectionProps) {
                   <Zap className="h-5 w-5" />
                   {t("cta.buttons.viewDocs")}
                 </Link>
-                <Link
-                  href={`/${lang}/demo`}
-                  className="btn-secondary text-lg"
-                >
+                <Link href={`/${lang}/demo`} className="btn-secondary text-lg">
                   <Zap className="h-5 w-5" />
                   {t("cta.buttons.demo")}
                 </Link>

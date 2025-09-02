@@ -17,9 +17,10 @@ export interface Post {
 
 export const posts: Post[] = [
   {
-    id: 'svelte-5-runes',
-    title: 'Understanding Svelte 5 Runes: The Future of Reactivity',
-    excerpt: 'Dive deep into Svelte 5\'s new rune system and discover how it revolutionizes state management and reactivity.',
+    id: "svelte-5-runes",
+    title: "Understanding Svelte 5 Runes: The Future of Reactivity",
+    excerpt:
+      "Dive deep into Svelte 5's new rune system and discover how it revolutionizes state management and reactivity.",
     content: `# Understanding Svelte 5 Runes: The Future of Reactivity
 
 Svelte 5 introduces a groundbreaking new feature called **runes** that fundamentally changes how we think about reactivity in Svelte applications. In this comprehensive guide, we'll explore what runes are, why they were introduced, and how to use them effectively.
@@ -179,20 +180,21 @@ Svelte 5 runes represent a significant evolution in how we write reactive code. 
 
 The future of Svelte is bright, and runes are lighting the way forward. Happy coding!`,
     author: {
-      name: 'Sarah Chen',
-      avatar: '/demo/posts/avatar-5.jpg',
-      role: 'Senior Frontend Developer'
+      name: "Sarah Chen",
+      avatar: "/demo/posts/avatar-5.jpg",
+      role: "Senior Frontend Developer",
     },
-    category: 'Svelte',
+    category: "Svelte",
     readTime: 12,
-    publishedAt: '2024-01-25',
-    tags: ['Svelte 5', 'Runes', 'Reactivity', 'JavaScript', 'Web Development'],
-    coverImage: '/demo/posts/0-400x300.jpg'
+    publishedAt: "2024-01-25",
+    tags: ["Svelte 5", "Runes", "Reactivity", "JavaScript", "Web Development"],
+    coverImage: "/demo/posts/0-400x300.jpg",
   },
   {
-    id: 'flutter-animations',
-    title: 'Mastering Flutter Animations: From Basics to Advanced',
-    excerpt: 'Learn how to create beautiful, performant animations in Flutter that bring your mobile apps to life.',
+    id: "flutter-animations",
+    title: "Mastering Flutter Animations: From Basics to Advanced",
+    excerpt:
+      "Learn how to create beautiful, performant animations in Flutter that bring your mobile apps to life.",
     content: `# Mastering Flutter Animations: From Basics to Advanced
 
 Flutter's animation system is one of its most powerful features, enabling developers to create smooth, beautiful animations that run at 60fps. In this comprehensive guide, we'll journey from basic animations to advanced techniques that will make your apps truly stand out.
@@ -548,20 +550,21 @@ Flutter's animation system is incredibly powerful and flexible. Start with impli
 
 The key to mastering Flutter animations is practice. Start small, experiment with different curves and durations, and gradually work your way up to more complex animations. Your users will appreciate the polished, professional feel that well-crafted animations bring to your apps.`,
     author: {
-      name: 'Michael Park',
-      avatar: '/demo/posts/avatar-8.jpg',
-      role: 'Mobile App Developer'
+      name: "Michael Park",
+      avatar: "/demo/posts/avatar-8.jpg",
+      role: "Mobile App Developer",
     },
-    category: 'Flutter',
+    category: "Flutter",
     readTime: 15,
-    publishedAt: '2024-01-22',
-    tags: ['Flutter', 'Animations', 'Mobile Development', 'Dart', 'UI/UX'],
-    coverImage: '/demo/posts/48-400x300.jpg'
+    publishedAt: "2024-01-22",
+    tags: ["Flutter", "Animations", "Mobile Development", "Dart", "UI/UX"],
+    coverImage: "/demo/posts/48-400x300.jpg",
   },
   {
-    id: 'sveltekit-architecture',
-    title: 'Building Scalable Applications with SvelteKit',
-    excerpt: 'A comprehensive guide to architecting large-scale applications with SvelteKit, covering best practices, patterns, and real-world examples.',
+    id: "sveltekit-architecture",
+    title: "Building Scalable Applications with SvelteKit",
+    excerpt:
+      "A comprehensive guide to architecting large-scale applications with SvelteKit, covering best practices, patterns, and real-world examples.",
     content: `# Building Scalable Applications with SvelteKit
 
 SvelteKit has emerged as a powerful framework for building modern web applications. Its combination of Svelte's reactive components and a full-stack framework capabilities makes it an excellent choice for projects of any size. In this guide, we'll explore how to architect scalable applications with SvelteKit.
@@ -988,20 +991,27 @@ Key takeaways:
 
 As your application grows, SvelteKit grows with you, providing the tools and patterns needed to maintain a clean, performant codebase. The combination of Svelte's simplicity and SvelteKit's power creates a development experience that's both enjoyable and productive.`,
     author: {
-      name: 'Emma Wilson',
-      avatar: '/demo/posts/avatar-9.jpg',
-      role: 'Full-stack Developer'
+      name: "Emma Wilson",
+      avatar: "/demo/posts/avatar-9.jpg",
+      role: "Full-stack Developer",
     },
-    category: 'SvelteKit',
+    category: "SvelteKit",
     readTime: 18,
-    publishedAt: '2024-01-20',
-    tags: ['SvelteKit', 'Architecture', 'Scalability', 'Web Development', 'Best Practices'],
-    coverImage: '/demo/posts/180-400x300.jpg'
+    publishedAt: "2024-01-20",
+    tags: [
+      "SvelteKit",
+      "Architecture",
+      "Scalability",
+      "Web Development",
+      "Best Practices",
+    ],
+    coverImage: "/demo/posts/180-400x300.jpg",
   },
   {
-    id: 'react-server-components',
-    title: 'React Server Components: A Deep Dive',
-    excerpt: 'Understanding the revolutionary React Server Components and how they change the way we build React applications.',
+    id: "react-server-components",
+    title: "React Server Components: A Deep Dive",
+    excerpt:
+      "Understanding the revolutionary React Server Components and how they change the way we build React applications.",
     content: `# React Server Components: A Deep Dive
 
 React Server Components (RSC) represent a paradigm shift in how we build React applications. They enable components to render on the server, reducing bundle sizes and improving performance. Let's explore this game-changing technology.
@@ -1140,20 +1150,27 @@ React Server Components are not just an incremental improvement—they're a fund
 
 The future of React is here, and it's running on the server!`,
     author: {
-      name: 'Alex Johnson',
-      avatar: '/demo/posts/avatar-3.jpg',
-      role: 'React Core Team Alumni'
+      name: "Alex Johnson",
+      avatar: "/demo/posts/avatar-3.jpg",
+      role: "React Core Team Alumni",
     },
-    category: 'React',
+    category: "React",
     readTime: 10,
-    publishedAt: '2024-01-18',
-    tags: ['React', 'Server Components', 'Next.js', 'Performance', 'Web Development'],
-    coverImage: '/demo/posts/225-400x300.jpg'
+    publishedAt: "2024-01-18",
+    tags: [
+      "React",
+      "Server Components",
+      "Next.js",
+      "Performance",
+      "Web Development",
+    ],
+    coverImage: "/demo/posts/225-400x300.jpg",
   },
   {
-    id: 'modern-css-techniques',
-    title: 'Modern CSS Techniques You Should Know in 2024',
-    excerpt: 'Explore the latest CSS features including Container Queries, Cascade Layers, and the :has() selector that are revolutionizing web styling.',
+    id: "modern-css-techniques",
+    title: "Modern CSS Techniques You Should Know in 2024",
+    excerpt:
+      "Explore the latest CSS features including Container Queries, Cascade Layers, and the :has() selector that are revolutionizing web styling.",
     content: `# Modern CSS Techniques You Should Know in 2024
 
 CSS has evolved dramatically over the past few years. Features that once required JavaScript or complex workarounds are now possible with pure CSS. Let's explore the cutting-edge techniques that are changing how we style the web.
@@ -1400,20 +1417,21 @@ Modern CSS is incredibly powerful. Features like Container Queries, :has(), and 
 
 The key is to stay curious and keep experimenting. CSS continues to evolve, and the best is yet to come!`,
     author: {
-      name: 'Maria Garcia',
-      avatar: '/demo/posts/avatar-1.jpg',
-      role: 'CSS Specialist'
+      name: "Maria Garcia",
+      avatar: "/demo/posts/avatar-1.jpg",
+      role: "CSS Specialist",
     },
-    category: 'CSS',
+    category: "CSS",
     readTime: 8,
-    publishedAt: '2024-01-16',
-    tags: ['CSS', 'Web Design', 'Frontend', 'Modern CSS', 'Styling'],
-    coverImage: '/demo/posts/104-400x300.jpg'
+    publishedAt: "2024-01-16",
+    tags: ["CSS", "Web Design", "Frontend", "Modern CSS", "Styling"],
+    coverImage: "/demo/posts/104-400x300.jpg",
   },
   {
-    id: 'web-performance-2024',
-    title: 'Web Performance Optimization: A Comprehensive Guide',
-    excerpt: 'Master the art of web performance with modern techniques including Core Web Vitals optimization, resource hints, and cutting-edge loading strategies.',
+    id: "web-performance-2024",
+    title: "Web Performance Optimization: A Comprehensive Guide",
+    excerpt:
+      "Master the art of web performance with modern techniques including Core Web Vitals optimization, resource hints, and cutting-edge loading strategies.",
     content: `# Web Performance Optimization: A Comprehensive Guide
 
 Web performance is no longer optional—it's a critical factor for user experience, SEO, and business success. This guide covers everything you need to know about modern web performance optimization.
@@ -1711,20 +1729,27 @@ Web performance is a continuous journey, not a destination. Regular monitoring, 
 
 Remember: every millisecond counts. Your users will thank you for the effort you put into performance optimization!`,
     author: {
-      name: 'David Kim',
-      avatar: '/demo/posts/avatar-12.jpg',
-      role: 'Performance Engineer'
+      name: "David Kim",
+      avatar: "/demo/posts/avatar-12.jpg",
+      role: "Performance Engineer",
     },
-    category: 'Performance',
+    category: "Performance",
     readTime: 14,
-    publishedAt: '2024-01-14',
-    tags: ['Performance', 'Web Vitals', 'Optimization', 'JavaScript', 'Best Practices'],
-    coverImage: '/demo/posts/367-400x300.jpg'
+    publishedAt: "2024-01-14",
+    tags: [
+      "Performance",
+      "Web Vitals",
+      "Optimization",
+      "JavaScript",
+      "Best Practices",
+    ],
+    coverImage: "/demo/posts/367-400x300.jpg",
   },
   {
-    id: 'typescript-advanced-patterns',
-    title: 'Advanced TypeScript Patterns for Production',
-    excerpt: 'Level up your TypeScript skills with advanced patterns including type guards, conditional types, and template literal types.',
+    id: "typescript-advanced-patterns",
+    title: "Advanced TypeScript Patterns for Production",
+    excerpt:
+      "Level up your TypeScript skills with advanced patterns including type guards, conditional types, and template literal types.",
     content: `# Advanced TypeScript Patterns for Production
 
 TypeScript has evolved from a simple type checker to a powerful type system that can express complex relationships in your code. Let's explore advanced patterns that will make your production code more robust and maintainable.
@@ -2072,20 +2097,26 @@ Remember:
 
 TypeScript is not just about adding types—it's about designing better APIs and creating self-documenting code that helps your team move faster with confidence.`,
     author: {
-      name: 'James Chen',
-      avatar: '/demo/posts/avatar-7.jpg',
-      role: 'TypeScript Expert'
+      name: "James Chen",
+      avatar: "/demo/posts/avatar-7.jpg",
+      role: "TypeScript Expert",
     },
-    category: 'TypeScript',
+    category: "TypeScript",
     readTime: 12,
-    publishedAt: '2024-01-12',
-    tags: ['TypeScript', 'Advanced Patterns', 'Type Safety', 'Best Practices', 'JavaScript'],
-    coverImage: '/demo/posts/160-400x300.jpg'
-  }
+    publishedAt: "2024-01-12",
+    tags: [
+      "TypeScript",
+      "Advanced Patterns",
+      "Type Safety",
+      "Best Practices",
+      "JavaScript",
+    ],
+    coverImage: "/demo/posts/160-400x300.jpg",
+  },
 ];
 
 export function getPost(id: string): Post | undefined {
-  return posts.find(post => post.id === id);
+  return posts.find((post) => post.id === id);
 }
 
 export function getAllPosts(): Post[] {
@@ -2097,11 +2128,12 @@ export function getRelatedPosts(currentId: string, limit: number = 3): Post[] {
   if (!currentPost) return [];
 
   // Prioritize same category
-  const sameCategoryPosts = posts
-    .filter(p => p.id !== currentId && p.category === currentPost.category);
-  
+  const sameCategoryPosts = posts.filter(
+    (p) => p.id !== currentId && p.category === currentPost.category,
+  );
+
   const otherPosts = posts
-    .filter(p => p.id !== currentId && p.category !== currentPost.category)
+    .filter((p) => p.id !== currentId && p.category !== currentPost.category)
     .sort(() => Math.random() - 0.5);
 
   return [...sameCategoryPosts, ...otherPosts].slice(0, limit);

@@ -72,7 +72,7 @@ export function StatsSection({ lang }: StatsSectionProps) {
         const counter = stat.querySelector(".stat-counter");
         if (counter) {
           const target = stats[index].value;
-          
+
           const obj = { value: 0 };
           gsap.to(obj, {
             value: target,
@@ -85,7 +85,7 @@ export function StatsSection({ lang }: StatsSectionProps) {
             },
             onUpdate: () => {
               counter.textContent = Math.floor(obj.value).toLocaleString();
-            }
+            },
           });
         }
 
@@ -115,10 +115,11 @@ export function StatsSection({ lang }: StatsSectionProps) {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-      <div 
-        className="stats-gradient absolute inset-0 -z-10 bg-gradient-to-br from-vivid-purple/10 via-transparent to-vivid-orange/10 bg-[size:200%_200%] bg-[position:0%_0%]" 
-      />
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+    >
+      <div className="stats-gradient absolute inset-0 -z-10 bg-gradient-to-br from-vivid-purple/10 via-transparent to-vivid-orange/10 bg-[size:200%_200%] bg-[position:0%_0%]" />
 
       <div className="mx-auto max-w-7xl">
         <div className="text-center mb-12">
@@ -126,21 +127,23 @@ export function StatsSection({ lang }: StatsSectionProps) {
             <span className="text-white">{t("stats.title.line1")}</span>{" "}
             <span className="gradient-purple">{t("stats.title.line2")}</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
-            {t("stats.subtitle")}
-          </p>
+          <p className="text-lg text-muted-foreground">{t("stats.subtitle")}</p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <div
               key={index}
-              ref={(el) => {el && (statsRef.current[index] = el)}}
+              ref={(el) => {
+                el && (statsRef.current[index] = el);
+              }}
               className="group relative"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
               <div className="relative rounded-2xl border border-gray-700 bg-gray-800/80 backdrop-blur-sm p-8 text-center hover:border-gray-600 transition-colors">
-                <div className={`stat-icon inline-flex p-3 rounded-xl bg-gradient-to-r ${stat.color} mb-4`}>
+                <div
+                  className={`stat-icon inline-flex p-3 rounded-xl bg-gradient-to-r ${stat.color} mb-4`}
+                >
                   <stat.icon className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-3xl font-bold text-white mb-2">

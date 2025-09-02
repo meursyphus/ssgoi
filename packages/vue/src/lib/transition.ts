@@ -5,10 +5,15 @@ import type { Transition, TransitionKey } from "@ssgoi/core";
 export const transition = _transition;
 
 // Vue directive for element transitions
-export const vTransition: Directive<HTMLElement, (Transition & { key?: TransitionKey }) | undefined> = {
+export const vTransition: Directive<
+  HTMLElement,
+  (Transition & { key?: TransitionKey }) | undefined
+> = {
   mounted(el, binding) {
     if (!binding.value) {
-      console.warn("[SSGOI] v-transition directive requires a configuration object");
+      console.warn(
+        "[SSGOI] v-transition directive requires a configuration object",
+      );
       return;
     }
 

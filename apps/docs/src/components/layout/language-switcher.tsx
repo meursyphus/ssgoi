@@ -16,7 +16,7 @@ export function LanguageSwitcher() {
   const onOutsideClick = useOutsideClick();
 
   const currentLanguage = LANGUAGE_LIST.find(
-    (lang) => lang.locale === currentLang
+    (lang) => lang.locale === currentLang,
   );
 
   const handleLanguageChange = (locale: string) => {

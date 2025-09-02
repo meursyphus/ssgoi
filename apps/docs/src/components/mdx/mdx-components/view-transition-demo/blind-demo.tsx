@@ -19,7 +19,7 @@ function TheaterPage() {
       <div
         className={cn(
           "mx-auto flex flex-col items-center justify-center min-h-full",
-          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12",
         )}
       >
         <div className="text-center space-y-6">
@@ -31,7 +31,7 @@ function TheaterPage() {
           <h1
             className={cn(
               "font-bold text-white",
-              isMobile ? "text-3xl" : "text-5xl sm:text-7xl"
+              isMobile ? "text-3xl" : "text-5xl sm:text-7xl",
             )}
           >
             <span className="text-gradient bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
@@ -41,7 +41,7 @@ function TheaterPage() {
           <p
             className={cn(
               "text-gray-300 max-w-2xl mx-auto",
-              isMobile ? "text-base" : "text-xl sm:text-2xl"
+              isMobile ? "text-base" : "text-xl sm:text-2xl",
             )}
           >
             Experience dramatic transitions that create anticipation and focus
@@ -88,14 +88,14 @@ function Act1Page() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
         <div className="text-center mb-12">
           <h1
             className={cn(
               "font-bold text-white mb-4",
-              isMobile ? "text-3xl" : "text-5xl"
+              isMobile ? "text-3xl" : "text-5xl",
             )}
           >
             Act I: The Beginning
@@ -163,14 +163,14 @@ function Act2Page() {
       <div
         className={cn(
           "mx-auto",
-          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12"
+          isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
         <div className="text-center mb-12">
           <h1
             className={cn(
               "font-bold text-white mb-4",
-              isMobile ? "text-3xl" : "text-5xl"
+              isMobile ? "text-3xl" : "text-5xl",
             )}
           >
             Act II: The Reveal
@@ -254,14 +254,14 @@ function FinalePage() {
       <div
         className={cn(
           "mx-auto flex flex-col items-center justify-center min-h-full",
-          isMobile ? "px-3 py-6" : "max-w-4xl px-4"
+          isMobile ? "px-3 py-6" : "max-w-4xl px-4",
         )}
       >
         <div className="text-center space-y-6">
           <h1
             className={cn(
               "font-bold text-white mb-6",
-              isMobile ? "text-3xl" : "text-5xl sm:text-6xl"
+              isMobile ? "text-3xl" : "text-5xl sm:text-6xl",
             )}
           >
             <span className="text-gradient bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
@@ -397,7 +397,7 @@ const DemoLayout = memo(
                 <h1
                   className={cn(
                     "font-bold text-white flex items-center gap-2",
-                    isMobile ? "text-base" : "text-xl"
+                    isMobile ? "text-base" : "text-xl",
                   )}
                 >
                   <span>{logo}</span>
@@ -413,7 +413,7 @@ const DemoLayout = memo(
                         isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
                         currentPath === route.path
                           ? "bg-red-900/50 text-white border border-red-700"
-                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                          : "text-gray-300 hover:bg-gray-800 hover:text-white",
                       )}
                     >
                       {route.label}
@@ -432,7 +432,7 @@ const DemoLayout = memo(
         <main className="flex-1 overflow-auto relative z-0">{children}</main>
       </div>
     );
-  }
+  },
 );
 
 DemoLayout.displayName = "DemoLayout";

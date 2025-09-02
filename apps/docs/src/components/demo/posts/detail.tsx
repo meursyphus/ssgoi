@@ -32,26 +32,63 @@ export default function PostDetail({ onBack }: PostDetailProps) {
 
   // Markdown components with dark theme styles
   const markdownComponents = {
-    h1: ({ children }: any) => <h1 className="text-3xl font-bold text-white mb-6 mt-8">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold text-white mb-4 mt-6">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-xl font-bold text-white mb-3 mt-4">{children}</h3>,
-    p: ({ children }: any) => <p className="text-gray-300 mb-6 leading-relaxed">{children}</p>,
-    ul: ({ children }: any) => <ul className="list-disc list-inside text-gray-300 mb-6 space-y-2 pl-4">{children}</ul>,
-    ol: ({ children }: any) => <ol className="list-decimal list-inside text-gray-300 mb-6 space-y-2 pl-4">{children}</ol>,
+    h1: ({ children }: any) => (
+      <h1 className="text-3xl font-bold text-white mb-6 mt-8">{children}</h1>
+    ),
+    h2: ({ children }: any) => (
+      <h2 className="text-2xl font-bold text-white mb-4 mt-6">{children}</h2>
+    ),
+    h3: ({ children }: any) => (
+      <h3 className="text-xl font-bold text-white mb-3 mt-4">{children}</h3>
+    ),
+    p: ({ children }: any) => (
+      <p className="text-gray-300 mb-6 leading-relaxed">{children}</p>
+    ),
+    ul: ({ children }: any) => (
+      <ul className="list-disc list-inside text-gray-300 mb-6 space-y-2 pl-4">
+        {children}
+      </ul>
+    ),
+    ol: ({ children }: any) => (
+      <ol className="list-decimal list-inside text-gray-300 mb-6 space-y-2 pl-4">
+        {children}
+      </ol>
+    ),
     li: ({ children }: any) => <li className="text-gray-300">{children}</li>,
-    pre: ({ children }: any) => <pre className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6">{children}</pre>,
+    pre: ({ children }: any) => (
+      <pre className="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto mb-6">
+        {children}
+      </pre>
+    ),
     code: ({ node, inline, className, children, ...props }: any) => {
       // Inline code vs code block
       if (!inline && className) {
-        return <code className="text-gray-300" {...props}>{children}</code>;
+        return (
+          <code className="text-gray-300" {...props}>
+            {children}
+          </code>
+        );
       }
-      return <code className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm" {...props}>{children}</code>;
+      return (
+        <code
+          className="bg-gray-800 text-red-400 px-1.5 py-0.5 rounded text-sm"
+          {...props}
+        >
+          {children}
+        </code>
+      );
     },
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-gray-600 pl-4 my-6 text-gray-400 italic">{children}</blockquote>
+      <blockquote className="border-l-4 border-gray-600 pl-4 my-6 text-gray-400 italic">
+        {children}
+      </blockquote>
     ),
-    strong: ({ children }: any) => <strong className="font-bold text-white">{children}</strong>,
-    em: ({ children }: any) => <em className="italic text-gray-300">{children}</em>,
+    strong: ({ children }: any) => (
+      <strong className="font-bold text-white">{children}</strong>
+    ),
+    em: ({ children }: any) => (
+      <em className="italic text-gray-300">{children}</em>
+    ),
     hr: () => <hr className="border-gray-700 my-8" />,
   };
 
@@ -120,10 +157,7 @@ export default function PostDetail({ onBack }: PostDetailProps) {
 
         {/* Post content */}
         <article className="px-4 py-8 prose prose-invert max-w-none">
-          <Markdown 
-            remarkPlugins={[remarkGfm]}
-            components={markdownComponents}
-          >
+          <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
             {post.content}
           </Markdown>
         </article>

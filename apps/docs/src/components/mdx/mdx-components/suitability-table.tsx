@@ -18,17 +18,11 @@ export function SuitabilityTable({ items, className }: SuitabilityTableProps) {
   const getSuitabilityIcon = (suitable: "yes" | "no" | "maybe") => {
     switch (suitable) {
       case "yes":
-        return (
-          <span className="text-green-500 text-xl font-bold">✅</span>
-        );
+        return <span className="text-green-500 text-xl font-bold">✅</span>;
       case "no":
-        return (
-          <span className="text-red-500 text-xl font-bold">❌</span>
-        );
+        return <span className="text-red-500 text-xl font-bold">❌</span>;
       case "maybe":
-        return (
-          <span className="text-yellow-500 text-xl font-bold">⚠️</span>
-        );
+        return <span className="text-yellow-500 text-xl font-bold">⚠️</span>;
     }
   };
 
@@ -54,7 +48,7 @@ export function SuitabilityTable({ items, className }: SuitabilityTableProps) {
               key={index}
               className={cn(
                 "border-b border-gray-800",
-                index % 2 === 0 ? "bg-gray-900/50" : "bg-transparent"
+                index % 2 === 0 ? "bg-gray-900/50" : "bg-transparent",
               )}
             >
               <td className="px-4 py-3 text-sm font-medium text-gray-200">

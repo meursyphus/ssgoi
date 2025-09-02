@@ -10,11 +10,11 @@ export async function getAllDocPaths(): Promise<string[]> {
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-      
+
       if (entry.isDirectory()) {
         // Recursively traverse subdirectories
-        const newRelativePath = relativePath 
-          ? `${relativePath}/${entry.name.replace(/^\d+\./, "")}` 
+        const newRelativePath = relativePath
+          ? `${relativePath}/${entry.name.replace(/^\d+\./, "")}`
           : entry.name.replace(/^\d+\./, "");
         await traverseDir(fullPath, newRelativePath);
       } else if (entry.name.endsWith(".mdx")) {
@@ -22,11 +22,9 @@ export async function getAllDocPaths(): Promise<string[]> {
         const fileName = entry.name
           .replace(/^\d+-?/, "") // Remove number prefix
           .replace(".mdx", ""); // Remove extension
-        
-        const docPath = relativePath 
-          ? `${relativePath}/${fileName}`
-          : fileName;
-        
+
+        const docPath = relativePath ? `${relativePath}/${fileName}` : fileName;
+
         docPaths.push(docPath);
       }
     }

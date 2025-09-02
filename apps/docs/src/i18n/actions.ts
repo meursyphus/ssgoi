@@ -7,7 +7,10 @@ import { SUPPORTED_LANGUAGES } from "./supported-languages";
 const LANGUAGE_COOKIE_NAME = "preferred-language";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
-export async function setLanguagePreference(locale: string, currentPath: string) {
+export async function setLanguagePreference(
+  locale: string,
+  currentPath: string,
+) {
   // Validate the locale
   if (!SUPPORTED_LANGUAGES.includes(locale)) {
     throw new Error(`Unsupported language: ${locale}`);

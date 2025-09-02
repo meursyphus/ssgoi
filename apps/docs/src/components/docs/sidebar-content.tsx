@@ -12,20 +12,27 @@ interface SidebarContentProps {
   onLinkClick?: () => void;
 }
 
-export function SidebarContent({ navigation, lang, onLinkClick }: SidebarContentProps) {
+export function SidebarContent({
+  navigation,
+  lang,
+  onLinkClick,
+}: SidebarContentProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Auto-expand the group containing the active page
   useEffect(() => {
-    const findActiveParent = (items: NavigationItem[], parentPath?: string): string | null => {
+    const findActiveParent = (
+      items: NavigationItem[],
+      parentPath?: string,
+    ): string | null => {
       for (const item of items) {
         const itemPath = `/${lang}/docs/${item.path}`;
-        
+
         if (pathname === itemPath && parentPath) {
           return parentPath;
         }
-        
+
         if (item.children) {
           const activeParent = findActiveParent(item.children, item.path);
           if (activeParent) {
@@ -69,13 +76,15 @@ export function SidebarContent({ navigation, lang, onLinkClick }: SidebarContent
               className={`
                 w-full text-left px-3 py-2 flex items-center justify-between rounded-md
                 text-gray-300 hover:text-white hover:bg-zinc-800/50 transition-colors
-                ${level > 0 ? "ml-" + (level * 6) : ""}
+                ${level > 0 ? "ml-" + level * 6 : ""}
               `}
             >
-              <span className={`font-medium ${level > 0 ? "text-[13px]" : "text-sm"}`}>
+              <span
+                className={`font-medium ${level > 0 ? "text-[13px]" : "text-sm"}`}
+              >
                 {item.navTitle}
               </span>
-              <ChevronRight 
+              <ChevronRight
                 className={`w-4 h-4 transition-transform duration-300 text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
               />
             </button>
@@ -95,10 +104,11 @@ export function SidebarContent({ navigation, lang, onLinkClick }: SidebarContent
             onClick={onLinkClick}
             className={`
               block px-3 py-2 rounded-md transition-all text-sm relative
-              ${level > 0 ? "ml-" + (level * 6) : ""}
-              ${isActive 
-                ? "bg-gradient-to-r from-orange-500/20 to-orange-500/5 text-orange-400 font-medium border-l-2 border-orange-400 pl-2.5" 
-                : "text-gray-400 hover:text-white hover:bg-zinc-800/50 border-l-2 border-transparent hover:pl-2.5"
+              ${level > 0 ? "ml-" + level * 6 : ""}
+              ${
+                isActive
+                  ? "bg-gradient-to-r from-orange-500/20 to-orange-500/5 text-orange-400 font-medium border-l-2 border-orange-400 pl-2.5"
+                  : "text-gray-400 hover:text-white hover:bg-zinc-800/50 border-l-2 border-transparent hover:pl-2.5"
               }
               ${level > 0 ? "text-[13px]" : ""}
             `}

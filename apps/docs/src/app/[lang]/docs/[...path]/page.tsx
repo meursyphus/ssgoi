@@ -23,23 +23,30 @@ export async function generateMetadata({
   const post = await getPost(lang, postPath);
 
   if (!post) {
-    return createSEOMetadata({
-      title: "Page Not Found - SSGOI",
-      description: "The requested documentation page could not be found.",
-    }, lang);
+    return createSEOMetadata(
+      {
+        title: "Page Not Found - SSGOI",
+        description: "The requested documentation page could not be found.",
+      },
+      lang,
+    );
   }
 
   const baseUrl = "https://ssgoi.dev";
   const currentUrl = `/${lang}/docs/${postPath}`;
   const localeMetadata = getLocaleMetadata(lang);
 
-  const metadata = await createSEOMetadata({
-    title: `${post.title} - SSGOI`,
-    description: post.description || `Learn about ${post.title} in SSGOI documentation`,
-    type: "article",
-    url: currentUrl,
-    siteName: localeMetadata.siteName,
-  }, lang);
+  const metadata = await createSEOMetadata(
+    {
+      title: `${post.title} - SSGOI`,
+      description:
+        post.description || `Learn about ${post.title} in SSGOI documentation`,
+      type: "article",
+      url: currentUrl,
+      siteName: localeMetadata.siteName,
+    },
+    lang,
+  );
 
   // Add language alternates
   metadata.alternates = {
@@ -79,9 +86,12 @@ export default async function DocsPage({ params }: DocsPageProps) {
     { name: "Home", url: `https://ssgoi.dev/${lang}` },
     { name: "Docs", url: `https://ssgoi.dev/${lang}/docs` },
     ...path.map((segment, index) => ({
-      name: segment.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
-      url: `https://ssgoi.dev/${lang}/docs/${path.slice(0, index + 1).join("/")}`
-    }))
+      name: segment
+        .split("-")
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(" "),
+      url: `https://ssgoi.dev/${lang}/docs/${path.slice(0, index + 1).join("/")}`,
+    })),
   ];
 
   return (

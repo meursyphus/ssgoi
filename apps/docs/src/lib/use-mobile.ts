@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -14,11 +14,11 @@ export function useMobile() {
     checkMobile();
 
     // Add resize listener
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener("resize", checkMobile);
     };
   }, []);
 

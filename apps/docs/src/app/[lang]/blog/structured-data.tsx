@@ -15,7 +15,7 @@ export async function BlogListStructuredData({
   lang: string;
 }) {
   const t = await getServerTranslations("blogStructuredData", lang);
-  
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
@@ -31,7 +31,7 @@ export async function BlogListStructuredData({
         url: "https://ssgoi.dev/og.png",
       },
     },
-    blogPost: posts.map(post => ({
+    blogPost: posts.map((post) => ({
       "@type": "BlogPosting",
       headline: post.title,
       description: post.description,
@@ -77,7 +77,7 @@ export async function BlogPostStructuredData({
   lang: string;
 }) {
   const t = await getServerTranslations("blogStructuredData", lang);
-  
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -98,10 +98,12 @@ export async function BlogPostStructuredData({
         url: "https://ssgoi.dev/og.png",
       },
     },
-    image: post.thumbnail ? {
-      "@type": "ImageObject",
-      url: post.thumbnail,
-    } : undefined,
+    image: post.thumbnail
+      ? {
+          "@type": "ImageObject",
+          url: post.thumbnail,
+        }
+      : undefined,
     keywords: post.tags?.join(", "),
     inLanguage: lang,
     isPartOf: {
@@ -112,23 +114,25 @@ export async function BlogPostStructuredData({
   };
 
   // Add related articles if available
-  const relatedArticles = relatedPosts?.length ? {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Related Articles",
-    itemListElement: relatedPosts.map((relatedPost, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "BlogPosting",
-        headline: relatedPost.title,
-        description: relatedPost.description,
-        url: `https://ssgoi.dev/${lang}/blog/${relatedPost.slug}`,
-        datePublished: relatedPost.date,
-        image: relatedPost.thumbnail
+  const relatedArticles = relatedPosts?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Related Articles",
+        itemListElement: relatedPosts.map((relatedPost, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "BlogPosting",
+            headline: relatedPost.title,
+            description: relatedPost.description,
+            url: `https://ssgoi.dev/${lang}/blog/${relatedPost.slug}`,
+            datePublished: relatedPost.date,
+            image: relatedPost.thumbnail,
+          },
+        })),
       }
-    }))
-  } : null;
+    : null;
 
   return (
     <>

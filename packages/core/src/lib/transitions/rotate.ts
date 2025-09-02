@@ -1,4 +1,4 @@
-import type { TransitionKey } from '../types';
+import type { TransitionKey } from "../types";
 
 interface RotateOptions {
   degrees?: number;
@@ -6,7 +6,7 @@ interface RotateOptions {
   scale?: boolean;
   fade?: boolean;
   origin?: string;
-  axis?: '2d' | 'x' | 'y' | 'z';
+  axis?: "2d" | "x" | "y" | "z";
   perspective?: number;
   spring?: {
     stiffness?: number;
@@ -21,11 +21,11 @@ export const rotate = (options: RotateOptions = {}) => {
     clockwise = true,
     scale = false,
     fade = true,
-    origin = 'center',
-    axis = '2d',
+    origin = "center",
+    axis = "2d",
     perspective = 800,
     spring = { stiffness: 500, damping: 25 },
-    key
+    key,
   } = options;
 
   const rotation = clockwise ? degrees : -degrees;
@@ -33,13 +33,13 @@ export const rotate = (options: RotateOptions = {}) => {
   const getRotateTransform = (progress: number): string => {
     const angle = (1 - progress) * rotation;
     switch (axis) {
-      case 'x':
+      case "x":
         return `perspective(${perspective}px) rotateX(${angle}deg)`;
-      case 'y':
+      case "y":
         return `perspective(${perspective}px) rotateY(${angle}deg)`;
-      case 'z':
+      case "z":
         return `rotateZ(${angle}deg)`;
-      case '2d':
+      case "2d":
       default:
         return `rotate(${angle}deg)`;
     }
@@ -50,36 +50,36 @@ export const rotate = (options: RotateOptions = {}) => {
       spring,
       tick: (progress: number) => {
         const transforms = [getRotateTransform(progress)];
-        
+
         if (scale) {
           transforms.push(`scale(${progress})`);
         }
-        
-        element.style.transform = transforms.join(' ');
+
+        element.style.transform = transforms.join(" ");
         element.style.transformOrigin = origin;
-        
+
         if (fade) {
           element.style.opacity = progress.toString();
         }
-      }
+      },
     }),
     out: (element: HTMLElement) => ({
       spring,
       tick: (progress: number) => {
         const transforms = [getRotateTransform(progress)];
-        
+
         if (scale) {
           transforms.push(`scale(${progress})`);
         }
-        
-        element.style.transform = transforms.join(' ');
+
+        element.style.transform = transforms.join(" ");
         element.style.transformOrigin = origin;
-        
+
         if (fade) {
           element.style.opacity = progress.toString();
         }
-      }
+      },
     }),
-    ...(key && { key })
+    ...(key && { key }),
   };
 };

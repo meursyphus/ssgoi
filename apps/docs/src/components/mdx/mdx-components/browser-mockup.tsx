@@ -125,7 +125,7 @@ export function BrowserMockup({
   layout: Layout,
 }: BrowserMockupProps) {
   const [currentPath, setCurrentPath] = useState(
-    initialPath || routes[0]?.path || "/"
+    initialPath || routes[0]?.path || "/",
   );
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -153,7 +153,7 @@ export function BrowserMockup({
         className={cn(
           "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
           "h-[500px] md:h-[800px]", // Fixed heights for mobile and desktop
-          className
+          className,
         )}
       >
         {/* Browser Header */}
@@ -213,14 +213,14 @@ export const DemoLink = memo(
         onClick={() => navigate(to)}
         className={cn(
           "text-blue-500 hover:text-blue-600 underline cursor-pointer",
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </button>
     );
-  }
+  },
 );
 
 DemoLink.displayName = "DemoLink";
@@ -241,14 +241,14 @@ export const DemoCard = memo(
         className={cn(
           "p-4 border border-gray-700 rounded-lg",
           "hover:shadow-lg transition-shadow cursor-pointer",
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 DemoCard.displayName = "DemoCard";

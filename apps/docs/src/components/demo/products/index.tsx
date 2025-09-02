@@ -10,7 +10,7 @@ export default function ProductsDemo() {
 
   // Prefetch all product detail pages on mount
   useEffect(() => {
-    products.forEach(product => {
+    products.forEach((product) => {
       router.prefetch(`/demo/products/${product.id}`);
     });
   }, []);
@@ -35,7 +35,10 @@ export default function ProductsDemo() {
               className="bg-gray-900 rounded-xl transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl cursor-pointer"
             >
               {/* Product Image */}
-              <div data-hero-key={product.id} className="relative aspect-[4/3] rounded-t-xl overflow-hidden">
+              <div
+                data-hero-key={product.id}
+                className="relative aspect-[4/3] rounded-t-xl overflow-hidden"
+              >
                 <img
                   src={product.image}
                   alt={product.name}

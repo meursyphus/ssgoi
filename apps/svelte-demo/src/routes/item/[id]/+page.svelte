@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { SsgoiTransition } from '@ssgoi/svelte';
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
+  import { SsgoiTransition } from "@ssgoi/svelte";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
 
   const colors = [
-    { id: 1, color: '#FF6B6B', name: 'Coral' },
-    { id: 2, color: '#4ECDC4', name: 'Turquoise' },
-    { id: 3, color: '#45B7D1', name: 'Sky Blue' },
-    { id: 4, color: '#96CEB4', name: 'Sage' },
-    { id: 5, color: '#FECA57', name: 'Sunflower' },
-    { id: 6, color: '#DDA0DD', name: 'Plum' },
+    { id: 1, color: "#FF6B6B", name: "Coral" },
+    { id: 2, color: "#4ECDC4", name: "Turquoise" },
+    { id: 3, color: "#45B7D1", name: "Sky Blue" },
+    { id: 4, color: "#96CEB4", name: "Sage" },
+    { id: 5, color: "#FECA57", name: "Sunflower" },
+    { id: 6, color: "#DDA0DD", name: "Plum" },
   ];
 
   $: id = Number($page.params.id);
@@ -23,7 +23,7 @@
       style="background-color: {item.color}"
       data-hero-key={`color-${item.id}`}
     >
-      <button onclick={() => goto('/')} class="back-button">
+      <button onclick={() => goto("/")} class="back-button">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
           <path
             fill-rule="evenodd"
@@ -35,10 +35,7 @@
       </button>
 
       <div class="content">
-        <div
-          class="color-display"
-          style="background-color: {item.color}"
-        />
+        <div class="color-display" style="background-color: {item.color}" />
         <h1 class="color-title">{item.name}</h1>
         <p class="color-value">{item.color}</p>
 
@@ -46,7 +43,10 @@
           <div class="info-card">
             <div class="info-label">RGB</div>
             <div class="info-value">
-              {parseInt(item.color.slice(1, 3), 16)},{parseInt(item.color.slice(3, 5), 16)},{parseInt(item.color.slice(5, 7), 16)}
+              {parseInt(item.color.slice(1, 3), 16)},{parseInt(
+                item.color.slice(3, 5),
+                16,
+              )},{parseInt(item.color.slice(5, 7), 16)}
             </div>
           </div>
           <div class="info-card">
@@ -134,7 +134,7 @@
   .color-value {
     font-size: 1.5rem;
     opacity: 0.9;
-    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
     background: rgba(255, 255, 255, 0.2);
     padding: 0.5rem 1.5rem;
     border-radius: 8px;

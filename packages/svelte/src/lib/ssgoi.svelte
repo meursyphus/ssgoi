@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { SsgoiConfig } from '@ssgoi/core/types';
-  import { setSsgoiContext } from './context';
-  import { createSggoiTransitionContext } from '@ssgoi/core';
+  import type { SsgoiConfig } from "@ssgoi/core/types";
+  import { setSsgoiContext } from "./context";
+  import { createSggoiTransitionContext } from "@ssgoi/core";
 
   interface Props {
     config: SsgoiConfig;

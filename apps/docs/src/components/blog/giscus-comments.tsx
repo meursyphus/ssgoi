@@ -1,16 +1,15 @@
-'use client'
+"use client";
 
-import Giscus from '@giscus/react'
-import { getGiscusLanguage } from '@/lib/giscus-utils'
-import { SupportedLanguage } from '@/i18n/supported-languages'
+import Giscus from "@giscus/react";
+import { getGiscusLanguage } from "@/lib/giscus-utils";
+import { SupportedLanguage } from "@/i18n/supported-languages";
 
 interface GiscusCommentsProps {
-  slug: string // Use slug as the unique identifier
-  lang: SupportedLanguage
+  slug: string; // Use slug as the unique identifier
+  lang: SupportedLanguage;
 }
 
 export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
-
   return (
     <div className="mt-16 pt-8 border-t border-gray-700">
       <Giscus
@@ -30,5 +29,5 @@ export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
         loading="lazy"
       />
     </div>
-  )
+  );
 }

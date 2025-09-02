@@ -48,7 +48,10 @@ export function Header() {
             <span className="sr-only">{t("openMenu")}</span>
           </button>
 
-          <Link href={`/${currentLang}/`} className="flex items-center space-x-2">
+          <Link
+            href={`/${currentLang}/`}
+            className="flex items-center space-x-2"
+          >
             <img
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"
@@ -134,7 +137,7 @@ export function Header() {
               "text-white shadow-lg hover:shadow-xl hover:scale-105",
               "h-9 px-4",
               "border border-zinc-600 hover:border-zinc-500",
-              "group"
+              "group",
             )}
           >
             {/* GitHub Icon SVG */}

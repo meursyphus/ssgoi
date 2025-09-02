@@ -5,33 +5,37 @@ import { getPreferredLanguage } from "@/i18n/get-preferred-language";
 
 // Check if the request is for a static file
 function isStaticFile(pathname: string): boolean {
-  const staticFileExtensions = /\.(svg|png|jpg|jpeg|gif|ico|webp|txt|xml|pdf|json|csv)$/i;
+  const staticFileExtensions =
+    /\.(svg|png|jpg|jpeg|gif|ico|webp|txt|xml|pdf|json|csv)$/i;
   return staticFileExtensions.test(pathname);
 }
 
 // Check if the pathname already has a valid language prefix
 function hasLanguagePrefix(pathname: string): boolean {
   return SUPPORTED_LANGUAGES.some(
-    (lang) => pathname.startsWith(`/${lang}/`) || pathname === `/${lang}`
+    (lang) => pathname.startsWith(`/${lang}/`) || pathname === `/${lang}`,
   );
 }
 
 // Handle docs-specific redirects
 function handleDocsRedirect(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
-  
+
   // Check if this is a docs index page that needs redirect
   const docsIndexPattern = /^\/([^\/]+)\/docs\/?$/;
   const match = pathname.match(docsIndexPattern);
-  
+
   if (match) {
     const lang = match[1];
     if (SUPPORTED_LANGUAGES.includes(lang)) {
-      const newUrl = new URL(`/${lang}/docs/getting-started/introduction`, request.url);
+      const newUrl = new URL(
+        `/${lang}/docs/getting-started/introduction`,
+        request.url,
+      );
       return NextResponse.redirect(newUrl);
     }
   }
-  
+
   return null;
 }
 
@@ -47,7 +51,7 @@ export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
   // Sequential filtering approach
-  
+
   // 1. Skip static files
   if (isStaticFile(pathname)) {
     return NextResponse.next();

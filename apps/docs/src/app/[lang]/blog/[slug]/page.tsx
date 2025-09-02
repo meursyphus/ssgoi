@@ -30,7 +30,7 @@ export async function generateMetadata({
         title: "Post Not Found - SSGOI Blog",
         description: "The requested blog post could not be found.",
       },
-      lang
+      lang,
     );
   }
 
@@ -54,7 +54,7 @@ export async function generateMetadata({
         tags: post.tags,
       },
     },
-    lang
+    lang,
   );
 }
 

@@ -1,1 +1,1 @@
-export * from '@ssgoi/core/view-transitions';
+export * from "@ssgoi/core/view-transitions";

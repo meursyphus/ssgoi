@@ -22,5 +22,5 @@ export const LANGUAGE_LIST = [
 ];
 
 export const SUPPORTED_LANGUAGES = LANGUAGE_LIST.map(
-  (language) => language.locale
+  (language) => language.locale,
 );

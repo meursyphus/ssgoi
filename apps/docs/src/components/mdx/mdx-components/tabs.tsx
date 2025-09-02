@@ -21,7 +21,7 @@ interface TabsProps {
 
 export const Tabs = ({ items, children, defaultValue }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(
-    defaultValue || items[0]?.value || ""
+    defaultValue || items[0]?.value || "",
   );
 
   return (
@@ -68,7 +68,5 @@ export const TabPanel = ({ value, children }: TabPanelProps) => {
     return null;
   }
 
-  return (
-    <div>{children}</div>
-  );
+  return <div>{children}</div>;
 };

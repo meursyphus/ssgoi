@@ -5,7 +5,10 @@ import type {
   Transition,
 } from "./types";
 import { getScrollingElement } from "./utils/get-scrolling-element";
-import { TRANSITION_STRATEGY, createPageTransitionStrategy } from "./transition-strategy";
+import {
+  TRANSITION_STRATEGY,
+  createPageTransitionStrategy,
+} from "./transition-strategy";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -51,16 +54,16 @@ type PendingTransition = {
  * For each symmetric transition, creates a reverse transition automatically
  */
 function processSymmetricTransitions(
-  transitions: NonNullable<SsgoiConfig['transitions']>
-): Omit<NonNullable<SsgoiConfig['transitions']>[number], 'symmetric'>[] {
+  transitions: NonNullable<SsgoiConfig["transitions"]>,
+): Omit<NonNullable<SsgoiConfig["transitions"]>[number], "symmetric">[] {
   const reversedTransitions = transitions
-    .filter(t => t.symmetric)
-    .map(t => ({
+    .filter((t) => t.symmetric)
+    .map((t) => ({
       from: t.to,
       to: t.from,
       transition: t.transition,
     }));
-  
+
   return [...transitions, ...reversedTransitions];
 }
 
@@ -87,12 +90,13 @@ function createScrollManager() {
     // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
-      
+
       // IMPORTANT: When the scrolling element is document.documentElement (html element),
       // scroll events must be attached to window, not the element itself.
       // This is because document.documentElement doesn't fire scroll events directly.
       // For all other scrollable containers, we attach the listener to the element.
-      const target = scrollContainer === document.documentElement ? window : scrollContainer;
+      const target =
+        scrollContainer === document.documentElement ? window : scrollContainer;
       target.addEventListener("scroll", scrollListener, {
         passive: true,
       });
@@ -103,7 +107,10 @@ function createScrollManager() {
   };
 
   // Calculate scroll offset - computes difference between pages' scroll positions
-  const calculateScrollOffset = (from?: string, to?: string): { x: number; y: number } => {
+  const calculateScrollOffset = (
+    from?: string,
+    to?: string,
+  ): { x: number; y: number } => {
     const fromScroll =
       from && scrollPositions.has(from)
         ? scrollPositions.get(from)!
@@ -137,7 +144,7 @@ function createScrollManager() {
  * });
  */
 export function createSggoiTransitionContext(
-  options: SsgoiConfig
+  options: SsgoiConfig,
 ): SsgoiContext {
   // Destructure options with defaults
   const {
@@ -159,27 +166,30 @@ export function createSggoiTransitionContext(
       // Apply middleware transformation
       const { from: transformedFrom, to: transformedTo } = middleware(
         pendingTransition.from,
-        pendingTransition.to
+        pendingTransition.to,
       );
 
       const transition = findMatchingTransition(
         transformedFrom,
         transformedTo,
-        processedTransitions
+        processedTransitions,
       );
       const result = transition || defaultTransition;
-      const scrollOffset = calculateScrollOffset(pendingTransition.from, pendingTransition.to);
+      const scrollOffset = calculateScrollOffset(
+        pendingTransition.from,
+        pendingTransition.to,
+      );
       const context = { scrollOffset };
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
           pendingTransition.outResolve((element) =>
-            result.out!(element, context)
+            result.out!(element, context),
           );
         }
         if (result.in && pendingTransition.inResolve) {
           pendingTransition.inResolve((element) =>
-            result.in!(element, context)
+            result.in!(element, context),
           );
         }
       }
@@ -252,7 +262,7 @@ function findMatchingTransition<TContext>(
     from: string;
     to: string;
     transition: Transition<TContext>;
-  }>
+  }>,
 ): Transition<TContext> | null {
   // First try to find exact match for both from and to paths
   for (const config of transitions) {

@@ -38,7 +38,7 @@ function flattenNavigation(items: NavigationItem[]): NavigationLink[] {
 export function findNavigationLinks(
   navigation: NavigationItem[],
   currentPath: string,
-  lang: string
+  lang: string,
 ): NavigationLinks {
   const flattened = flattenNavigation(navigation);
 
@@ -47,7 +47,7 @@ export function findNavigationLinks(
 
   // Find the current page index
   const currentIndex = flattened.findIndex(
-    (item) => item.path === normalizedCurrentPath
+    (item) => item.path === normalizedCurrentPath,
   );
 
   if (currentIndex === -1) {

@@ -34,13 +34,13 @@ export type GetTransitionConfig<
   TAnimationValue = number,
 > = TContext extends undefined
   ? (
-      node: HTMLElement
+      node: HTMLElement,
     ) =>
       | TransitionConfig<TAnimationValue>
       | Promise<TransitionConfig<TAnimationValue>>
   : (
       node: HTMLElement,
-      context: TContext
+      context: TContext,
     ) =>
       | TransitionConfig<TAnimationValue>
       | Promise<TransitionConfig<TAnimationValue>>;
@@ -51,13 +51,16 @@ export type Transition<TContext = undefined, TAnimationValue = number> = {
   key?: TransitionKey;
 };
 
-export type TransitionOptions<TContext = undefined, TAnimationValue = number> = Transition<TContext, TAnimationValue> & {
+export type TransitionOptions<
+  TContext = undefined,
+  TAnimationValue = number,
+> = Transition<TContext, TAnimationValue> & {
   key?: TransitionKey;
   ref?: object;
 };
 
 export type TransitionCallback = (
-  element: HTMLElement | null
+  element: HTMLElement | null,
 ) => void | (() => void);
 
 export type SggoiTransitionContext = {
@@ -78,5 +81,5 @@ export type SsgoiConfig = {
 };
 
 export type SsgoiContext = (
-  path: string
+  path: string,
 ) => Transition & { key: TransitionKey };
