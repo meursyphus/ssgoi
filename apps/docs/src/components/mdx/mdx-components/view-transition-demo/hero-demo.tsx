@@ -172,7 +172,7 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
           <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
               <DemoLink
-                to="/gallery"
+                to="/hero/gallery"
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
               >
                 <svg
@@ -194,7 +194,7 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
                   Press ESC
                 </span>
                 <DemoLink
-                  to="/gallery"
+                  to="/hero/gallery"
                   className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
                   aria-label="Close"
                 >

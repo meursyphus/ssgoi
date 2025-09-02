@@ -107,7 +107,7 @@ const pinterestItems = [
 // Pinterest Grid Page Component
 function PinterestGridPage() {
   return (
-    <DemoPage path="/pinterest">
+    <DemoPage path="/pinterest/gallery">
       <div className="min-h-screen p-4">
         {/* Header */}
         <div className="mb-6 text-center">
@@ -122,7 +122,7 @@ function PinterestGridPage() {
           {pinterestItems.map((item) => (
             <DemoLink
               key={item.id}
-              to={`/pinterest/${item.id}`}
+              to={`/pinterest/gallery/${item.id}`}
               className="break-inside-avoid block no-underline"
             >
               <article className="relative group cursor-pointer">
@@ -185,7 +185,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        navigate("/pinterest");
+        navigate("/pinterest/gallery");
       }
     };
 
@@ -194,7 +194,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
   }, [navigate]);
 
   return (
-    <DemoPage path={`/pinterest/${item.id}`}>
+    <DemoPage path={`/pinterest/gallery/${item.id}`}>
       <div className="min-h-screen">
         {/* Content */}
         <div>
@@ -209,7 +209,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
             
             {/* Back button overlay */}
             <DemoLink
-              to="/pinterest"
+              to="/pinterest/gallery"
               className="absolute top-3 left-3 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors no-underline"
             >
               <svg
@@ -319,14 +319,14 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
 
 // Create route configuration for detail pages
 const detailPages = pinterestItems.map((item) => ({
-  path: `/pinterest/${item.id}`,
+  path: `/pinterest/gallery/${item.id}`,
   component: () => <PinterestDetailPage item={item} />,
   label: item.title,
 }));
 
 // Route configuration
 const pinterestRoutes: RouteConfig[] = [
-  { path: "/pinterest", component: PinterestGridPage, label: "Pinterest" },
+  { path: "/pinterest/gallery", component: PinterestGridPage, label: "Pinterest" },
   ...detailPages,
 ];
 
@@ -349,8 +349,8 @@ export function PinterestDemo() {
   const config = {
     transitions: [
       {
-        from: "/pinterest",
-        to: "/pinterest/*",
+        from: "/pinterest/gallery",
+        to: "/pinterest/gallery/*",
         transition: pinterest({ spring: { stiffness: 150, damping: 20 } }),
         symmetric: true,
       },
@@ -362,7 +362,7 @@ export function PinterestDemo() {
       routes={pinterestRoutes}
       config={config}
       layout={PinterestLayout}
-      initialPath="/pinterest"
+      initialPath="/pinterest/gallery"
     />
   );
 }

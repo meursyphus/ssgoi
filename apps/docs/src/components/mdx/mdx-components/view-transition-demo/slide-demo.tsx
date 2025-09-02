@@ -23,7 +23,7 @@ function ClothingPage() {
   ];
 
   return (
-    <DemoPage path="/clothing">
+    <DemoPage path="/slide/clothing">
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -62,7 +62,7 @@ function ShoesPage() {
   ];
 
   return (
-    <DemoPage path="/shoes">
+    <DemoPage path="/slide/shoes">
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -108,7 +108,7 @@ function AccessoriesPage() {
   ];
 
   return (
-    <DemoPage path="/accessories">
+    <DemoPage path="/slide/accessories">
       <div className="h-full bg-white">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -142,9 +142,9 @@ function AccessoriesPage() {
 
 // Route configuration with tab navigation
 const slideRoutes: RouteConfig[] = [
-  { path: "/clothing", component: ClothingPage, label: "Clothing" },
-  { path: "/shoes", component: ShoesPage, label: "Shoes" },
-  { path: "/accessories", component: AccessoriesPage, label: "Accessories" },
+  { path: "/slide/clothing", component: ClothingPage, label: "Clothing" },
+  { path: "/slide/shoes", component: ShoesPage, label: "Shoes" },
+  { path: "/slide/accessories", component: AccessoriesPage, label: "Accessories" },
 ];
 
 // Custom layout with tab navigation

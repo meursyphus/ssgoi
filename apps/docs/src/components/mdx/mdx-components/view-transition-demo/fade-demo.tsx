@@ -13,7 +13,7 @@ function HomePage() {
 
   return (
     <DemoPage
-      path="/"
+      path="/fade"
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -96,7 +96,7 @@ function FeaturesPage() {
 
   return (
     <DemoPage
-      path="/features"
+      path="/fade/features"
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -201,7 +201,7 @@ function ExamplesPage() {
 
   return (
     <DemoPage
-      path="/examples"
+      path="/fade/examples"
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -258,7 +258,7 @@ function GettingStartedPage() {
 
   return (
     <DemoPage
-      path="/start"
+      path="/fade/start"
       className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
     >
       <div
@@ -350,10 +350,10 @@ export default function HomePage() {
 
 // Route configuration
 const fadeRoutes: RouteConfig[] = [
-  { path: "/", component: HomePage, label: "Home" },
-  { path: "/features", component: FeaturesPage, label: "Features" },
-  { path: "/examples", component: ExamplesPage, label: "Examples" },
-  { path: "/start", component: GettingStartedPage, label: "Start" },
+  { path: "/fade", component: HomePage, label: "Home" },
+  { path: "/fade/features", component: FeaturesPage, label: "Features" },
+  { path: "/fade/examples", component: ExamplesPage, label: "Examples" },
+  { path: "/fade/start", component: GettingStartedPage, label: "Start" },
 ];
 
 // Header Actions Component
