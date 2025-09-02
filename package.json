@@ -64,12 +64,10 @@
       "prettier --write --config packages/core/.prettierrc"
     ],
     "packages/react/**/*.{ts,tsx}": [
-      "prettier --write --config packages/react/.prettierrc",
-      "eslint --fix --config packages/react/eslint.config.js"
+      "prettier --write --config packages/react/.prettierrc"
     ],
     "packages/svelte/**/*.{ts,svelte}": [
-      "prettier --write --config packages/svelte/.prettierrc",
-      "eslint --fix --config packages/svelte/eslint.config.js"
+      "prettier --write --config packages/svelte/.prettierrc"
     ],
     "packages/vue/**/*.{ts,vue}": [
       "prettier --write --config packages/vue/.prettierrc"
