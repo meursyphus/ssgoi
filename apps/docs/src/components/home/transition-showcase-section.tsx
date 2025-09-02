@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ViewTransitionDemo from "@/components/mdx/mdx-components/view-transition-demo";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,36 +14,37 @@ interface TransitionShowcaseSectionProps {
   lang: string;
 }
 
-const transitions = [
-  {
-    type: "fade",
-    title: "Fade Transition",
-    description: "Smooth opacity transition perfect for context changes and top-level navigation",
-    gradient: "from-purple-500/20 to-pink-500/20",
-    borderColor: "border-purple-500/30",
-    accentColor: "text-purple-400",
-  },
-  {
-    type: "hero",
-    title: "Hero Transition",
-    description: "Shared element animation that creates seamless transitions for detail views",
-    gradient: "from-green-500/20 to-emerald-500/20",
-    borderColor: "border-green-500/30",
-    accentColor: "text-green-400",
-  },
-  {
-    type: "scroll",
-    title: "Scroll Transition",
-    description: "Vertical scrolling effect ideal for sequential content and storytelling",
-    gradient: "from-blue-500/20 to-cyan-500/20",
-    borderColor: "border-blue-500/30",
-    accentColor: "text-blue-400",
-  },
-];
-
 export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const t = useTranslations("home");
+
+  const transitions = [
+    {
+      type: "fade",
+      title: t("transitionShowcase.transitions.fade.title"),
+      description: t("transitionShowcase.transitions.fade.description"),
+      gradient: "from-purple-500/20 to-pink-500/20",
+      borderColor: "border-purple-500/30",
+      accentColor: "text-purple-400",
+    },
+    {
+      type: "hero",
+      title: t("transitionShowcase.transitions.hero.title"),
+      description: t("transitionShowcase.transitions.hero.description"),
+      gradient: "from-green-500/20 to-emerald-500/20",
+      borderColor: "border-green-500/30",
+      accentColor: "text-green-400",
+    },
+    {
+      type: "scroll",
+      title: t("transitionShowcase.transitions.scroll.title"),
+      description: t("transitionShowcase.transitions.scroll.description"),
+      gradient: "from-blue-500/20 to-cyan-500/20",
+      borderColor: "border-blue-500/30",
+      accentColor: "text-blue-400",
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -121,11 +123,11 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
       <div className="mx-auto max-w-7xl">
         <div className="showcase-title text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="gradient-purple">Experience</span>{" "}
-            <span className="text-white">Every Transition</span>
+            <span className="gradient-purple">{t("transitionShowcase.title.line1")}</span>{" "}
+            <span className="text-white">{t("transitionShowcase.title.line2")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Preview our most popular transitions. Each one is optimized for performance and works across all browsers.
+            {t("transitionShowcase.subtitle")}
           </p>
         </div>
 
@@ -154,7 +156,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
                       href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
                       className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 transition-all hover:bg-gray-800/70 whitespace-nowrap`}
                     >
-                      <span className={`text-base font-medium ${transition.accentColor}`}>View docs</span>
+                      <span className={`text-base font-medium ${transition.accentColor}`}>{t("transitionShowcase.viewDocs")}</span>
                       <ArrowRight className={`h-4 w-4 ${transition.accentColor}`} />
                     </Link>
                   </div>
@@ -174,7 +176,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
                     href={`/${lang}/docs/view-transitions/${transition.type === "hero" ? "03-hero" : transition.type === "scroll" ? "02-scroll" : "01-fade"}`}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-gradient-to-r from-vivid-purple to-vivid-orange text-white font-medium"
                   >
-                    <span>View documentation</span>
+                    <span>{t("transitionShowcase.viewDocumentation")}</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -189,7 +191,7 @@ export function TransitionShowcaseSection({ lang }: TransitionShowcaseSectionPro
             href={`/${lang}/docs/view-transitions/01-fade`}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-vivid-purple to-vivid-orange text-white text-lg font-medium hover:shadow-lg transition-all transform hover:scale-105"
           >
-            <span>Explore All Transitions</span>
+            <span>{t("transitionShowcase.exploreAllTransitions")}</span>
             <ArrowRight className="h-5 w-5" />
           </Link>
         </div>

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Download, Star, Users, Zap } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,40 +12,41 @@ interface StatsSectionProps {
   lang: string;
 }
 
-const stats = [
-  {
-    icon: Download,
-    value: 50000,
-    suffix: "+",
-    label: "Downloads",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    icon: Star,
-    value: 2500,
-    suffix: "+",
-    label: "GitHub Stars",
-    color: "from-yellow-500 to-orange-500",
-  },
-  {
-    icon: Users,
-    value: 100,
-    suffix: "+",
-    label: "Contributors",
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    icon: Zap,
-    value: 60,
-    suffix: " FPS",
-    label: "Performance",
-    color: "from-purple-500 to-pink-500",
-  },
-];
-
 export function StatsSection({ lang }: StatsSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const statsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const t = useTranslations("home");
+
+  const stats = [
+    {
+      icon: Download,
+      value: 50000,
+      suffix: "+",
+      label: t("stats.items.downloads"),
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: Star,
+      value: 2500,
+      suffix: "+",
+      label: t("stats.items.githubStars"),
+      color: "from-yellow-500 to-orange-500",
+    },
+    {
+      icon: Users,
+      value: 100,
+      suffix: "+",
+      label: t("stats.items.contributors"),
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      icon: Zap,
+      value: 60,
+      suffix: " FPS",
+      label: t("stats.items.performance"),
+      color: "from-purple-500 to-pink-500",
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -121,11 +123,11 @@ export function StatsSection({ lang }: StatsSectionProps) {
       <div className="mx-auto max-w-7xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-black sm:text-4xl lg:text-5xl mb-4">
-            <span className="text-white">Trusted by Developers</span>{" "}
-            <span className="gradient-purple">Worldwide</span>
+            <span className="text-white">{t("stats.title.line1")}</span>{" "}
+            <span className="gradient-purple">{t("stats.title.line2")}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join thousands of developers building better web experiences
+            {t("stats.subtitle")}
           </p>
         </div>
 

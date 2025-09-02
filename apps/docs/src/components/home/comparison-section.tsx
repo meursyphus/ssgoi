@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, X, Zap, Globe, Router, Palette } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,54 +12,55 @@ interface ComparisonSectionProps {
   lang: string;
 }
 
-const comparisonData = [
-  {
-    feature: "Browser Support",
-    browserAPI: { support: false, text: "Chrome only" },
-    otherLibs: { support: false, text: "Varies" },
-    ssgoi: { support: true, text: "All modern browsers" },
-    icon: Globe,
-  },
-  {
-    feature: "Framework Support",
-    browserAPI: { support: true, text: "Any" },
-    otherLibs: { support: false, text: "Framework specific" },
-    ssgoi: { support: true, text: "React, Svelte, Vue, Solid" },
-    icon: Zap,
-  },
-  {
-    feature: "SSR/SSG Support",
-    browserAPI: { support: true, text: "Basic support" },
-    otherLibs: { support: false, text: "Often broken" },
-    ssgoi: { support: true, text: "Full support" },
-    icon: Zap,
-  },
-  {
-    feature: "Routing System",
-    browserAPI: { support: true, text: "Any router" },
-    otherLibs: { support: false, text: "Custom router required" },
-    ssgoi: { support: true, text: "Keep your router" },
-    icon: Router,
-  },
-  {
-    feature: "Physics Animations",
-    browserAPI: { support: false, text: "CSS only" },
-    otherLibs: { support: false, text: "Limited" },
-    ssgoi: { support: true, text: "Spring physics" },
-    icon: Palette,
-  },
-  {
-    feature: "Customization",
-    browserAPI: { support: false, text: "CSS only" },
-    otherLibs: { support: false, text: "Preset only" },
-    ssgoi: { support: true, text: "Fully customizable" },
-    icon: Palette,
-  },
-];
-
 export function ComparisonSection({ lang }: ComparisonSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const rowsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const t = useTranslations("home");
+
+  const comparisonData = [
+    {
+      feature: t("comparison.features.browserSupport.name"),
+      browserAPI: { support: false, text: t("comparison.features.browserSupport.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.browserSupport.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.browserSupport.ssgoi") },
+      icon: Globe,
+    },
+    {
+      feature: t("comparison.features.frameworkSupport.name"),
+      browserAPI: { support: true, text: t("comparison.features.frameworkSupport.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.frameworkSupport.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.frameworkSupport.ssgoi") },
+      icon: Zap,
+    },
+    {
+      feature: t("comparison.features.ssrSupport.name"),
+      browserAPI: { support: true, text: t("comparison.features.ssrSupport.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.ssrSupport.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.ssrSupport.ssgoi") },
+      icon: Zap,
+    },
+    {
+      feature: t("comparison.features.routingSystem.name"),
+      browserAPI: { support: true, text: t("comparison.features.routingSystem.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.routingSystem.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.routingSystem.ssgoi") },
+      icon: Router,
+    },
+    {
+      feature: t("comparison.features.physicsAnimations.name"),
+      browserAPI: { support: false, text: t("comparison.features.physicsAnimations.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.physicsAnimations.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.physicsAnimations.ssgoi") },
+      icon: Palette,
+    },
+    {
+      feature: t("comparison.features.customization.name"),
+      browserAPI: { support: false, text: t("comparison.features.customization.browserAPI") },
+      otherLibs: { support: false, text: t("comparison.features.customization.otherLibs") },
+      ssgoi: { support: true, text: t("comparison.features.customization.ssgoi") },
+      icon: Palette,
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -209,11 +211,11 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
       <div className="mx-auto max-w-7xl">
         <div className="comparison-title text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="text-white">Why Choose</span>{" "}
-            <span className="gradient-orange">SSGOI?</span>
+            <span className="text-white">{t("comparison.title.line1")}</span>{" "}
+            <span className="gradient-orange">{t("comparison.title.line2")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            The only transition library that works with your existing code
+            {t("comparison.subtitle")}
           </p>
         </div>
 
@@ -221,19 +223,19 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         <div className="comparison-table mb-16 hidden lg:block overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 backdrop-blur-sm">
           <div className="table-header grid grid-cols-4 border-b border-gray-700 bg-gray-800/80">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-400">Feature</h3>
+              <h3 className="text-lg font-semibold text-gray-400">{t("comparison.table.feature")}</h3>
             </div>
             <div className="p-6 text-center border-x border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-300">Browser API</h3>
-              <p className="text-sm text-gray-500 mt-1">View Transitions</p>
+              <h3 className="text-lg font-semibold text-gray-300">{t("comparison.table.browserAPI")}</h3>
+              <p className="text-sm text-gray-500 mt-1">{t("comparison.table.browserAPISubtitle")}</p>
             </div>
             <div className="p-6 text-center border-r border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-300">Other Libraries</h3>
-              <p className="text-sm text-gray-500 mt-1">Framer, Auto-Animate, etc</p>
+              <h3 className="text-lg font-semibold text-gray-300">{t("comparison.table.otherLibs")}</h3>
+              <p className="text-sm text-gray-500 mt-1">{t("comparison.table.otherLibsSubtitle")}</p>
             </div>
             <div className="p-6 text-center">
-              <h3 className="text-lg font-semibold gradient-green">SSGOI</h3>
-              <p className="text-sm text-gray-400 mt-1">Universal solution</p>
+              <h3 className="text-lg font-semibold gradient-green">{t("comparison.table.ssgoi")}</h3>
+              <p className="text-sm text-gray-400 mt-1">{t("comparison.table.ssgoiSubtitle")}</p>
             </div>
           </div>
 
@@ -284,8 +286,8 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         {/* Comparison - Mobile/Tablet */}
         <div className="mb-16 lg:hidden space-y-6">
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-white mb-2">Feature Comparison</h3>
-            <p className="text-gray-400">Swipe to see how SSGOI stands out</p>
+            <h3 className="text-2xl font-bold text-white mb-2">{t("comparison.mobileTitle")}</h3>
+            <p className="text-gray-400">{t("comparison.mobileDescription")}</p>
           </div>
           
           {/* Mobile comparison cards */}
@@ -305,7 +307,7 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
               <div className="space-y-3">
                 {/* Browser API */}
                 <div className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50">
-                  <span className="text-sm font-medium text-gray-400">Browser API</span>
+                  <span className="text-sm font-medium text-gray-400">{t("comparison.table.browserAPI")}</span>
                   <div className="flex items-center gap-2">
                     {item.browserAPI.support ? (
                       <Check className="h-4 w-4 text-yellow-500" />
@@ -318,7 +320,7 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
                 
                 {/* Other Libraries */}
                 <div className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50">
-                  <span className="text-sm font-medium text-gray-400">Other Libs</span>
+                  <span className="text-sm font-medium text-gray-400">{t("comparison.table.otherLibs")}</span>
                   <div className="flex items-center gap-2">
                     {item.otherLibs.support ? (
                       <Check className="h-4 w-4 text-yellow-500" />
@@ -332,7 +334,7 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
                 {/* SSGOI - Highlighted */}
                 <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-vivid-purple/10 to-vivid-orange/10 border border-vivid-purple/30 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-vivid-purple/5 to-vivid-orange/5 animate-pulse" />
-                  <span className="relative z-10 text-sm font-bold gradient-green">SSGOI</span>
+                  <span className="relative z-10 text-sm font-bold gradient-green">{t("comparison.table.ssgoi")}</span>
                   <div className="relative z-10 flex items-center gap-2">
                     {item.ssgoi.support ? (
                       <Check className="h-4 w-4 text-green-500" />
@@ -350,21 +352,21 @@ export function ComparisonSection({ lang }: ComparisonSectionProps) {
         {/* Key advantages */}
         <div className="float-element-comp-1 grid gap-4 md:grid-cols-3 mt-12">
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
-            <h3 className="font-bold text-white mb-2">🚀 Keep Your Stack</h3>
+            <h3 className="font-bold text-white mb-2">{t("comparison.advantages.keepStack.title")}</h3>
             <p className="text-base text-gray-400">
-              No need to change your router or framework. Works with Next.js, SvelteKit, Nuxt, and more.
+              {t("comparison.advantages.keepStack.description")}
             </p>
           </div>
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
-            <h3 className="font-bold text-white mb-2">🎨 True Customization</h3>
+            <h3 className="font-bold text-white mb-2">{t("comparison.advantages.trueCustomization.title")}</h3>
             <p className="text-base text-gray-400">
-              Spring-based physics animations with full control over timing, easing, and behavior.
+              {t("comparison.advantages.trueCustomization.description")}
             </p>
           </div>
           <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6">
-            <h3 className="font-bold text-white mb-2">🌍 Universal Support</h3>
+            <h3 className="font-bold text-white mb-2">{t("comparison.advantages.universalSupport.title")}</h3>
             <p className="text-base text-gray-400">
-              Works in all browsers, all frameworks, with SSR/SSG. One library for everything.
+              {t("comparison.advantages.universalSupport.description")}
             </p>
           </div>
         </div>

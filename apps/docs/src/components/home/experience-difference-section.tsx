@@ -4,49 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Calendar, Clock, Heart, User, AlertCircle, Brain, Sparkles } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ExperienceDifferenceSectionProps {
   lang: string;
 }
-
-// Mock blog data
-const blogPosts = [
-  {
-    id: 1,
-    title: "Building Modern Web Applications",
-    excerpt: "Explore the latest features...",
-    author: "Sarah Chen",
-    date: "Dec 15",
-    readTime: "5 min",
-    likes: 234,
-    category: "Development",
-    image: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&h=250&fit=crop",
-  },
-  {
-    id: 2,
-    title: "The Future of AI Development",
-    excerpt: "How AI is revolutionizing code...",
-    author: "Mike Johnson",
-    date: "Dec 14",
-    readTime: "8 min",
-    likes: 512,
-    category: "AI & ML",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop",
-  },
-  {
-    id: 3,
-    title: "Mastering TypeScript Patterns",
-    excerpt: "Deep dive into advanced features...",
-    author: "Emily Davis",
-    date: "Dec 13",
-    readTime: "12 min",
-    likes: 189,
-    category: "TypeScript",
-    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=250&fit=crop",
-  },
-];
 
 export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -55,6 +19,44 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [showTraditionalDetail, setShowTraditionalDetail] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const t = useTranslations("home");
+
+  // Mock blog data
+  const blogPosts = [
+    {
+      id: 1,
+      title: t("experienceDifference.demo.blogPosts.modernWeb.title"),
+      excerpt: t("experienceDifference.demo.blogPosts.modernWeb.excerpt"),
+      author: "Sarah Chen",
+      date: "Dec 15",
+      readTime: `5 ${t("experienceDifference.demo.readTime")}`,
+      likes: 234,
+      category: "Development",
+      image: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&h=250&fit=crop",
+    },
+    {
+      id: 2,
+      title: t("experienceDifference.demo.blogPosts.aiDevelopment.title"),
+      excerpt: t("experienceDifference.demo.blogPosts.aiDevelopment.excerpt"),
+      author: "Mike Johnson",
+      date: "Dec 14",
+      readTime: `8 ${t("experienceDifference.demo.readTime")}`,
+      likes: 512,
+      category: "AI & ML",
+      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop",
+    },
+    {
+      id: 3,
+      title: t("experienceDifference.demo.blogPosts.typescriptPatterns.title"),
+      excerpt: t("experienceDifference.demo.blogPosts.typescriptPatterns.excerpt"),
+      author: "Emily Davis",
+      date: "Dec 13",
+      readTime: `12 ${t("experienceDifference.demo.readTime")}`,
+      likes: 189,
+      category: "TypeScript",
+      image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=250&fit=crop",
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -203,11 +205,11 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
       <div className="mx-auto max-w-7xl">
         <div className="experience-title text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="gradient-orange">Experience</span>{" "}
-            <span className="text-white">the Difference</span>
+            <span className="gradient-orange">{t("experienceDifference.title.line1")}</span>{" "}
+            <span className="text-white">{t("experienceDifference.title.line2")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            See how page transitions affect user experience
+            {t("experienceDifference.subtitle")}
           </p>
         </div>
 
@@ -216,7 +218,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
           
           {/* Traditional Web Section */}
           <div className="demo-section">
-            <h3 className="text-2xl lg:text-3xl font-bold text-gray-400 mb-8 text-center">Traditional Web</h3>
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-400 mb-8 text-center">{t("experienceDifference.traditional.title")}</h3>
             <div className="flex flex-col lg:flex-row gap-8 items-center justify-center max-w-6xl mx-auto">
               {/* Description */}
               <div className="w-full lg:flex-1 lg:max-w-md">
@@ -224,22 +226,22 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                   <div className="ux-point flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">Loss of Context</p>
-                      <p className="text-sm text-gray-500">White flash breaks user focus and orientation</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.traditional.uxPoints.lossOfContext.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.traditional.uxPoints.lossOfContext.description")}</p>
                     </div>
                   </div>
                   <div className="ux-point flex items-start gap-3">
                     <Brain className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">High Cognitive Load</p>
-                      <p className="text-sm text-gray-500">Brain must reprocess entire page layout</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.traditional.uxPoints.highCognitiveLoad.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.traditional.uxPoints.highCognitiveLoad.description")}</p>
                     </div>
                   </div>
                   <div className="ux-point flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">Jarring Experience</p>
-                      <p className="text-sm text-gray-500">Feels disconnected and unresponsive</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.traditional.uxPoints.jarringExperience.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.traditional.uxPoints.jarringExperience.description")}</p>
                     </div>
                   </div>
                 </div>
@@ -268,7 +270,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                     {/* List or Detail view */}
                     {!showTraditionalDetail ? (
                       <div className="p-4 space-y-3">
-                        <h2 className="text-base font-bold text-white mb-3">Latest Posts</h2>
+                        <h2 className="text-base font-bold text-white mb-3">{t("experienceDifference.demo.latestPosts")}</h2>
                         {blogPosts.map((post, index) => (
                           <article
                             key={post.id}
@@ -284,7 +286,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                                 <div className="mt-1 flex gap-2 text-xs text-gray-500">
                                   <span>{post.readTime}</span>
                                   <span>·</span>
-                                  <span>{post.likes} likes</span>
+                                  <span>{post.likes} {t("experienceDifference.demo.likes")}</span>
                                 </div>
                               </div>
                             </div>
@@ -293,7 +295,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                       </div>
                     ) : (
                       <div className="p-4">
-                        <button className="text-xs text-blue-400 mb-3">← Back</button>
+                        <button className="text-xs text-blue-400 mb-3">{t("experienceDifference.demo.back")}</button>
                         <img src={currentPost.image} alt="" className="w-full h-32 object-cover rounded mb-3" />
                         <h1 className="text-lg font-bold text-white mb-2">{currentPost.title}</h1>
                         <div className="flex gap-3 text-xs text-gray-400 mb-2">
@@ -317,7 +319,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
 
           {/* With SSGOI Section */}
           <div className="demo-section">
-            <h3 className="text-2xl lg:text-3xl font-bold gradient-green mb-8 text-center">With SSGOI</h3>
+            <h3 className="text-2xl lg:text-3xl font-bold gradient-green mb-8 text-center">{t("experienceDifference.withSsgoi.title")}</h3>
             <div className="flex flex-col lg:flex-row gap-8 items-center justify-center max-w-6xl mx-auto">
               {/* Description */}
               <div className="w-full lg:flex-1 lg:max-w-md">
@@ -325,22 +327,22 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                   <div className="ux-point flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">Maintains Context</p>
-                      <p className="text-sm text-gray-500">Smooth flow keeps user focus intact</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.withSsgoi.uxPoints.maintainsContext.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.withSsgoi.uxPoints.maintainsContext.description")}</p>
                     </div>
                   </div>
                   <div className="ux-point flex items-start gap-3">
                     <Brain className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">Low Cognitive Load</p>
-                      <p className="text-sm text-gray-500">Natural, predictable motion patterns</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.withSsgoi.uxPoints.lowCognitiveLoad.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.withSsgoi.uxPoints.lowCognitiveLoad.description")}</p>
                     </div>
                   </div>
                   <div className="ux-point flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-gray-300">Delightful Experience</p>
-                      <p className="text-sm text-gray-500">Feels like a premium native app</p>
+                      <p className="text-base font-semibold text-gray-300">{t("experienceDifference.withSsgoi.uxPoints.delightfulExperience.title")}</p>
+                      <p className="text-sm text-gray-500">{t("experienceDifference.withSsgoi.uxPoints.delightfulExperience.description")}</p>
                     </div>
                   </div>
                 </div>
@@ -399,7 +401,7 @@ export function ExperienceDifferenceSection({ lang }: ExperienceDifferenceSectio
                         ssgoiActive ? 'translate-x-0' : 'translate-x-full'
                       }`}
                     >
-                      <button className="text-xs text-green-400 mb-3">← Back</button>
+                      <button className="text-xs text-green-400 mb-3">{t("experienceDifference.demo.back")}</button>
                       <img src={currentPost.image} alt="" className="w-full h-32 object-cover rounded mb-3" />
                       <h1 className="text-lg font-bold text-white mb-2">{currentPost.title}</h1>
                       <div className="flex gap-3 text-xs text-gray-400 mb-2">

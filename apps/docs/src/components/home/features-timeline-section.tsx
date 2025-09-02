@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Sparkles, Layers, Cpu, Rocket, Globe, Code2 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,39 +13,45 @@ interface FeaturesTimelineSectionProps {
   lang: string;
 }
 
-const features = [
-  {
-    icon: Rocket,
-    title: "One Line Setup",
-    description: "Get started with a single line of code. No complex configuration needed",
-    color: "from-orange-500 to-yellow-500",
-    code: `<Ssgoi config={{ defaultTransition: fade() }}>
+export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const t = useTranslations("home");
+
+  const features = [
+    {
+      icon: Rocket,
+      title: t("featuresTimeline.features.oneLineSetup.title"),
+      description: t("featuresTimeline.features.oneLineSetup.description"),
+      color: "from-orange-500 to-yellow-500",
+      code: `<Ssgoi config={{ defaultTransition: fade() }}>
   <App />
 </Ssgoi>`,
-  },
-  {
-    icon: Layers,
-    title: "Framework Agnostic",
-    description: "Works with React, Svelte, Vue. Solid and Qwik coming soon",
-    color: "from-blue-500 to-cyan-500",
-    frameworks: [
-      { name: "react", available: true },
-      { name: "svelte", available: true },
-      { name: "vue", available: true },
-      { name: "solidjs", available: false },
-      { name: "qwik", available: false }
-    ],
-    code: `// Same API across all frameworks
+    },
+    {
+      icon: Layers,
+      title: t("featuresTimeline.features.frameworkAgnostic.title"),
+      description: t("featuresTimeline.features.frameworkAgnostic.description"),
+      color: "from-blue-500 to-cyan-500",
+      frameworks: [
+        { name: "react", available: true },
+        { name: "svelte", available: true },
+        { name: "vue", available: true },
+        { name: "solidjs", available: false },
+        { name: "qwik", available: false }
+      ],
+      code: `// Same API across all frameworks
 import { Ssgoi } from '@ssgoi/react'
 import { Ssgoi } from '@ssgoi/svelte'
 import { Ssgoi } from '@ssgoi/vue'`,
-  },
-  {
-    icon: Sparkles,
-    title: "Shared Element Transitions",
-    description: "Create seamless animations between pages with shared elements",
-    color: "from-purple-500 to-pink-500",
-    code: `config: {
+    },
+    {
+      icon: Sparkles,
+      title: t("featuresTimeline.features.sharedElements.title"),
+      description: t("featuresTimeline.features.sharedElements.description"),
+      color: "from-purple-500 to-pink-500",
+      code: `config: {
   transitions: [
     {
       from: '/gallery',
@@ -54,44 +61,39 @@ import { Ssgoi } from '@ssgoi/vue'`,
     }
   ]
 }`,
-  },
-  {
-    icon: Globe,
-    title: "SSR & SSG Ready",
-    description: "Full support for Next.js, Nuxt, SvelteKit. No hydration issues, SEO friendly",
-    color: "from-green-500 to-emerald-500",
-    code: `// Works out of the box with:
+    },
+    {
+      icon: Globe,
+      title: t("featuresTimeline.features.ssrReady.title"),
+      description: t("featuresTimeline.features.ssrReady.description"),
+      color: "from-green-500 to-emerald-500",
+      code: `// Works out of the box with:
 // ✓ Next.js App Router
 // ✓ SvelteKit
 // ✓ Nuxt 3`,
-  },
-  {
-    icon: Cpu,
-    title: "Spring Physics",
-    description: "Natural motion with configurable spring physics for smooth animations",
-    color: "from-red-500 to-pink-500",
-    code: `spring: { 
+    },
+    {
+      icon: Cpu,
+      title: t("featuresTimeline.features.springPhysics.title"),
+      description: t("featuresTimeline.features.springPhysics.description"),
+      color: "from-red-500 to-pink-500",
+      code: `spring: { 
   stiffness: 300,  // Responsiveness
   damping: 30      // Smoothness
 }`,
-  },
-  {
-    icon: Code2,
-    title: "TypeScript First",
-    description: "Full TypeScript support with detailed types and intelligent autocomplete",
-    color: "from-indigo-500 to-purple-500",
-    code: `// Full type safety and autocomplete
+    },
+    {
+      icon: Code2,
+      title: t("featuresTimeline.features.typescriptFirst.title"),
+      description: t("featuresTimeline.features.typescriptFirst.description"),
+      color: "from-indigo-500 to-purple-500",
+      code: `// Full type safety and autocomplete
 config: SsgoiConfig = {
   defaultTransition: fade(),
   transitions: [...]
 }`,
-  },
-];
-
-export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -183,11 +185,11 @@ export function FeaturesTimelineSection({ lang }: FeaturesTimelineSectionProps) 
       <div className="mx-auto max-w-7xl">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-black sm:text-5xl lg:text-6xl mb-4">
-            <span className="text-white">Everything You Need for</span>{" "}
-            <span className="gradient-green">Delightful Transitions</span>
+            <span className="text-white">{t("featuresTimeline.title.line1")}</span>{" "}
+            <span className="gradient-green">{t("featuresTimeline.title.line2")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Powerful features that make SSGOI the perfect choice for modern web applications
+            {t("featuresTimeline.subtitle")}
           </p>
         </div>
 

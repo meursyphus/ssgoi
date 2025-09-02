@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Eye, Sparkles, TrendingUp, MousePointer, ArrowRight, Zap, Heart, Globe } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,32 +12,6 @@ interface WhyTransitionsMatterSectionProps {
   lang: string;
 }
 
-const reasons = [
-  {
-    icon: MousePointer,
-    title: "Native-like Experience",
-    description: "Deliver app-quality interactions on the web with seamless, responsive transitions that users expect",
-    gradient: "from-orange-500 to-yellow-500",
-    color: "#F97316",
-    bgImage: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-  },
-  {
-    icon: Sparkles,
-    title: "Brand Identity",
-    description: "Create unique motion signatures that make your brand memorable and distinct",
-    gradient: "from-purple-500 to-pink-500",
-    color: "#A855F7",
-    bgImage: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-  },
-  {
-    icon: Eye,
-    title: "Visual Context",
-    description: "Maintain spatial awareness as users navigate, showing clear relationships between pages",
-    gradient: "from-blue-500 to-cyan-500",
-    color: "#0EA5E9",
-    bgImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  },
-];
 
 const floatingIcons = [
   { icon: Zap, delay: 0 },
@@ -51,6 +26,34 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const textRevealRef = useRef<HTMLDivElement>(null);
   const indicatorsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const t = useTranslations("home");
+
+  const reasons = [
+    {
+      icon: MousePointer,
+      title: t("whyTransitionsMatter.reasons.nativeLike.title"),
+      description: t("whyTransitionsMatter.reasons.nativeLike.description"),
+      gradient: "from-orange-500 to-yellow-500",
+      color: "#F97316",
+      bgImage: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    },
+    {
+      icon: Sparkles,
+      title: t("whyTransitionsMatter.reasons.brandIdentity.title"),
+      description: t("whyTransitionsMatter.reasons.brandIdentity.description"),
+      gradient: "from-purple-500 to-pink-500",
+      color: "#A855F7",
+      bgImage: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    },
+    {
+      icon: Eye,
+      title: t("whyTransitionsMatter.reasons.visualContext.title"),
+      description: t("whyTransitionsMatter.reasons.visualContext.description"),
+      gradient: "from-blue-500 to-cyan-500",
+      color: "#0EA5E9",
+      bgImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -263,7 +266,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
       <div ref={textRevealRef} className="px-4 py-24 text-center">
         <h2 className="text-5xl font-black sm:text-6xl lg:text-7xl mb-8">
           <span className="inline-block">
-            {"Transitions are not just".split("").map((char, i) => (
+            {t("whyTransitionsMatter.title.line1").split("").map((char, i) => (
               <span key={i} className="char inline-block text-white">
                 {char === " " ? "\u00A0" : char}
               </span>
@@ -271,7 +274,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           </span>
           <br />
           <span className="inline-block mt-2">
-            {"Pretty Effects".split("").map((char, i) => (
+            {t("whyTransitionsMatter.title.line2").split("").map((char, i) => (
               <span key={i} className="char inline-block gradient-purple">
                 {char === " " ? "\u00A0" : char}
               </span>
@@ -279,7 +282,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
           </span>
         </h2>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          They're essential for creating intuitive, engaging web experiences
+          {t("whyTransitionsMatter.subtitle")}
         </p>
       </div>
 
@@ -463,7 +466,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                             >
                               <div className="flex items-center gap-2 mb-4">
                                 <ArrowRight className="w-4 h-4 text-gray-500 rotate-180" />
-                                <span className="text-sm text-gray-400">Previous</span>
+                                <span className="text-sm text-gray-400">{t("whyTransitionsMatter.previous")}</span>
                               </div>
                               <div className="space-y-2">
                                 <div className="h-3 bg-gray-700/50 rounded" />
@@ -483,7 +486,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                                 <Eye className="w-8 h-8 text-blue-400" />
                               </div>
                               <div className="text-center mb-4">
-                                <span className="text-blue-400 font-semibold">You are here</span>
+                                <span className="text-blue-400 font-semibold">{t("whyTransitionsMatter.youAreHere")}</span>
                               </div>
                               <div className="space-y-2">
                                 <div className="h-4 bg-blue-500/30 rounded" />
@@ -502,7 +505,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                               }}
                             >
                               <div className="flex items-center gap-2 mb-4 justify-end">
-                                <span className="text-sm text-gray-400">Next</span>
+                                <span className="text-sm text-gray-400">{t("whyTransitionsMatter.next")}</span>
                                 <ArrowRight className="w-4 h-4 text-gray-500" />
                               </div>
                               <div className="space-y-2">
@@ -529,7 +532,7 @@ export function WhyTransitionsMatterSection({ lang }: WhyTransitionsMatterSectio
                 {/* Right side - Content */}
                 <div className="text-left px-4 lg:px-0">
                   <span className={`inline-block px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-bold bg-gradient-to-r ${reason.gradient} text-white mb-6 sm:mb-8 shadow-2xl`}>
-                    Reason #{index + 1}
+                    {t("whyTransitionsMatter.reasonBadge")}{index + 1}
                   </span>
                   <h3 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-8">
                     {reason.title}
