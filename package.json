@@ -71,7 +71,8 @@
       "prettier --write --config packages/svelte/.prettierrc"
     ],
     "packages/vue/**/*.{ts,vue}": [
-      "prettier --write --config packages/vue/.prettierrc"
+      "prettier --write --config packages/vue/.prettierrc",
+      "eslint --fix --config packages/vue/eslint.config.js"
     ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/docs/.prettierrc"
