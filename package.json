@@ -61,7 +61,8 @@
   },
   "lint-staged": {
     "packages/core/**/*.{ts,tsx}": [
-      "prettier --write --config packages/core/.prettierrc"
+      "prettier --write --config packages/core/.prettierrc",
+      "eslint --fix --config packages/core/eslint.config.js"
     ],
     "packages/react/**/*.{ts,tsx}": [
       "prettier --write --config packages/react/.prettierrc"

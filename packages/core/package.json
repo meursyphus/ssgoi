@@ -49,7 +49,8 @@
     "watch": "vite build --watch",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "lint": "eslint ."
   },
   "keywords": [
     "page-transition",
@@ -77,9 +78,13 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.34.0",
     "@types/node": "^22.10.6",
+    "eslint": "^9.34.0",
+    "globals": "^16.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.7.3",
+    "typescript-eslint": "^8.42.0",
     "vite": "^6.0.7",
     "vite-plugin-dts": "^4.5.0"
   },
