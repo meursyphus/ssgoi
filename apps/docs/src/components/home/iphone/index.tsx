@@ -30,7 +30,10 @@ function IPhoneModel({
 }) {
   const meshRef = useRef<THREE.Group>(null);
   const { viewport } = useThree();
-  const [screenDimensions, setScreenDimensions] = useState({ width: 0, height: 0 });
+  const [screenDimensions, setScreenDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   // Color mappings for titanium finishes
   const colors = {
@@ -65,15 +68,29 @@ function IPhoneModel({
   const screenInset = 0.08; // Bezel size
   const scale = 0.65; // Overall scale
 
-  // Calculate responsive dimensions based on viewport
+  // Calculate responsive dimensions based on viewport and pixel density
   useEffect(() => {
-    // Calculate screen dimensions based on viewport size
+    // Get device pixel ratio for high-DPI displays
+    const dpr = window.devicePixelRatio || 1;
     const aspectRatio = window.innerHeight / window.innerWidth;
-    const baseFactor = Math.min(viewport.width, viewport.height) * 100;
     
+    // Normalize the base factor by pixel ratio to ensure consistent sizing
+    const baseFactor = (Math.min(viewport.width, viewport.height) * 100) / Math.sqrt(dpr);
+    
+    // Adjust for high-DPI displays (Retina, 4K, etc.)
+    const dpiAdjustment = dpr > 1 ? Math.min(dpr / 2, 1.5) : 1;
+
     setScreenDimensions({
-      width: (phoneWidth - screenInset * 2) * baseFactor * (aspectRatio > 1 ? 1.2 : 1),
-      height: (phoneHeight - screenInset * 2) * baseFactor * (aspectRatio > 1 ? 1.2 : 1),
+      width:
+        (phoneWidth - screenInset * 2) *
+        baseFactor *
+        dpiAdjustment *
+        (aspectRatio > 1 ? 1.2 : 1),
+      height:
+        (phoneHeight - screenInset * 2) *
+        baseFactor *
+        dpiAdjustment *
+        (aspectRatio > 1 ? 1.2 : 1),
     });
   }, [viewport, phoneWidth, phoneHeight, screenInset]);
 
@@ -123,7 +140,7 @@ function IPhoneModel({
         <Html
           transform
           occlude
-          distanceFactor={Math.min(viewport.width / 4, 2.5)}
+          distanceFactor={Math.min(viewport.width / (4 * (window.devicePixelRatio || 1)), 2.5)}
           position={[0, 0, 0.02]}
           style={{
             width: `${screenDimensions.width}px`,
@@ -132,6 +149,7 @@ function IPhoneModel({
             borderRadius: "20px",
             transform: "translate3d(0, 0, 0)", // Force GPU acceleration
             backfaceVisibility: "hidden", // Prevent flickering
+            willChange: "transform", // Optimize for animations
           }}
           center
         >
@@ -288,40 +306,52 @@ export default function IPhone3D({
   });
 
   useEffect(() => {
-    // Adjust camera settings based on window size
+    // Adjust camera settings based on window size and pixel density
     const updateCamera = () => {
       const aspectRatio = window.innerHeight / window.innerWidth;
+      const dpr = window.devicePixelRatio || 1;
       const isMobile = window.innerWidth < 768;
       const isTablet = window.innerWidth < 1024;
       
+      // Adjust FOV based on pixel density
+      const baseFov = dpr > 2 ? 38 : dpr > 1 ? 40 : 42;
+
       if (isMobile) {
         setCameraSettings({
           position: [2.5, 1.0, 3.5],
-          fov: 45,
+          fov: baseFov + 3,
         });
       } else if (isTablet) {
         setCameraSettings({
           position: [2.6, 1.1, 3.8],
-          fov: 43,
+          fov: baseFov + 1,
         });
       } else if (aspectRatio > 1.2) {
         // Portrait-oriented displays
         setCameraSettings({
           position: [2.8, 1.2, 4.5],
-          fov: 40,
+          fov: baseFov - 2,
         });
       } else {
-        // Default for landscape displays
+        // Default for landscape displays with DPI adjustment
+        const zPosition = 4 + (dpr > 2 ? 0.5 : 0);
         setCameraSettings({
-          position: [2.8, 1.2, 4],
-          fov: 42,
+          position: [2.8, 1.2, zPosition],
+          fov: baseFov,
         });
       }
     };
 
     updateCamera();
-    window.addEventListener('resize', updateCamera);
-    return () => window.removeEventListener('resize', updateCamera);
+    window.addEventListener("resize", updateCamera);
+    // Also update on DPR change (when moving between monitors)
+    const mediaQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mediaQuery.addEventListener("change", updateCamera);
+    
+    return () => {
+      window.removeEventListener("resize", updateCamera);
+      mediaQuery.removeEventListener("change", updateCamera);
+    };
   }, []);
 
   return (
