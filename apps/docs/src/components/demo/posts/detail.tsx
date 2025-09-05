@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -60,7 +61,7 @@ export default function PostDetail({ onBack }: PostDetailProps) {
         {children}
       </pre>
     ),
-    code: ({ node, inline, className, children, ...props }: any) => {
+    code: ({ inline, className, children, ...props }: any) => {
       // Inline code vs code block
       if (!inline && className) {
         return (

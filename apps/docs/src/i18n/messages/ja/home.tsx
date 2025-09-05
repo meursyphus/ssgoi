@@ -363,16 +363,16 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "適切な場所のアニメーションは
+          {`"適切な場所のアニメーションは`}
           <span className="text-white">体験をより直感的にし</span>
-          、ナビゲーションを容易にします。"
+          {`、ナビゲーションを容易にします。"`}
         </>
       ),
       quote2: (
         <>
-          "モーションはユーザーが
+          {`"モーションはユーザーが`}
           <span className="text-white">ナビゲーションを理解</span>
-          するのを助け、有益で楽しいフィードバックを提供します。"
+          {`するのを助け、有益で楽しいフィードバックを提供します。"`}
         </>
       ),
       author1: "— Google Material Design",

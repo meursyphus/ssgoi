@@ -2,20 +2,18 @@
 import { Ssgoi, SsgoiConfig, SsgoiTransition } from "@ssgoi/react";
 import { useMemo } from "react";
 import { hero } from "@ssgoi/react/view-transitions";
-import { useCurrentLanguage } from "@/i18n";
 
 interface BlogLayoutProps {
   children: React.ReactNode;
 }
 
 export default function BlogLayout({ children }: BlogLayoutProps) {
-  const lang = useCurrentLanguage();
   const config = useMemo<SsgoiConfig>(
     () => ({
       transitions: [],
       defaultTransition: hero(),
     }),
-    [lang],
+    [],
   );
 
   return (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect } from "react";
@@ -16,7 +17,7 @@ export default function PinterestDemo() {
     pinterestItems.forEach((item) => {
       router.prefetch(`/demo/pinterest/${item.id}`);
     });
-  }, []);
+  }, [router]);
 
   return (
     <SsgoiTransition id="/demo/pinterest">

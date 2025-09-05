@@ -1,10 +1,6 @@
-interface DocsIndexPageProps {
-  params: Promise<{ lang: string }>;
-}
-
 // This page should not be reached due to middleware redirect
 // Keeping it as a fallback in case of edge cases
-export default async function DocsIndexPage({ params }: DocsIndexPageProps) {
+export default async function DocsIndexPage() {
   return (
     <div className="text-center py-20">
       <h1 className="text-3xl font-bold mb-4">

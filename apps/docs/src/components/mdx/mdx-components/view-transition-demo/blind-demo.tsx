@@ -198,8 +198,8 @@ function Act2Page() {
               Focus Attention
             </h3>
             <p className="text-gray-400">
-              The sequential blind animation naturally draws the user's eye,
-              creating anticipation for what's coming next.
+              The sequential blind animation naturally draws the user&apos;s eye,
+              creating anticipation for what&apos;s coming next.
             </p>
           </div>
 
@@ -280,7 +280,7 @@ function FinalePage() {
                 <span className="text-yellow-400">{"{ blind }"}</span>{" "}
                 <span className="text-blue-400">from</span>{" "}
                 <span className="text-green-400">
-                  '@ssgoi/react/view-transitions'
+                  &apos;@ssgoi/react/view-transitions&apos;
                 </span>
                 ;
               </code>

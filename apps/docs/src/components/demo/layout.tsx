@@ -25,7 +25,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     router.prefetch("/demo/products");
     router.prefetch("/demo/pinterest");
     router.prefetch("/demo/profile");
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!mainRef.current) return;
@@ -35,9 +35,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       scrollPositions.current[pathRef.current] = mainRef.current.scrollTop;
     };
 
-    mainRef.current.addEventListener("scroll", handleScroll);
+    const element = mainRef.current;
+    element.addEventListener("scroll", handleScroll);
     return () => {
-      mainRef.current?.removeEventListener("scroll", handleScroll);
+      element?.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

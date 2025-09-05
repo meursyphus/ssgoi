@@ -48,7 +48,7 @@ export default function Demo({ autoPlay = true }: DemoProps) {
     }, 3000); // 3 seconds interval
 
     return () => clearInterval(intervalId);
-  }, [autoPlay, isHovered, isMobile]);
+  }, [autoPlay, isHovered, isMobile, routingPaths]);
 
   // Mouse event handlers
   useEffect(() => {

@@ -13,7 +13,7 @@ export default function ProductsDemo() {
     products.forEach((product) => {
       router.prefetch(`/demo/products/${product.id}`);
     });
-  }, []);
+  }, [router]);
   return (
     <SsgoiTransition id="/demo/products">
       <div className="min-h-screen bg-gray-950 px-4 py-8">

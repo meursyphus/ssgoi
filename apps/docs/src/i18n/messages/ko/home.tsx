@@ -358,16 +358,16 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "적절한 위치의 애니메이션은{" "}
+          {`"적절한 위치의 애니메이션은 `}
           <span className="text-white">경험을 더 직관적으로 만들고</span> 탐색을
-          쉽게 합니다."
+          {`쉽게 합니다."`}
         </>
       ),
       quote2: (
         <>
-          "모션은 사용자가{" "}
+          {`"모션은 사용자가 `}
           <span className="text-white">내비게이션을 이해하도록 돕고</span>{" "}
-          유익하면서도 즐거운 피드백을 제공합니다."
+          {`유익하면서도 즐거운 피드백을 제공합니다."`}
         </>
       ),
       author1: "— Google Material Design",
