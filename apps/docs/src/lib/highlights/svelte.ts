@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
 Language: Svelte.js
 Requires: xml.js, javascript.js, css.js

@@ -369,16 +369,18 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          "Animations in the right places can{" "}
-          <span className="text-white">make experiences more intuitive</span>{" "}
-          and easier to navigate."
+          {`"Animations in the right places can `}
+          <span className="text-white">
+            make experiences more intuitive
+          </span>{" "}
+          {`and easier to navigate."`}
         </>
       ),
       quote2: (
         <>
-          "Motion helps users{" "}
+          {`"Motion helps users `}
           <span className="text-white">understand navigation</span> and provides
-          feedback that's both informative and delightful."
+          {`feedback that's both informative and delightful."`}
         </>
       ),
       author1: "— Google Material Design",

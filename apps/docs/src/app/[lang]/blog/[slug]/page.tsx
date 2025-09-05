@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getBlogPost, getAllBlogPosts } from "@/lib/blog";
 import { MDXContent } from "./mdx-content";
 import { SsgoiTransition } from "@ssgoi/react";
-import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";
 import { BlogPostLink } from "@/components/blog/blog-post-link";

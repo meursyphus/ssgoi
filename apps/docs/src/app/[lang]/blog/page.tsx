@@ -1,6 +1,5 @@
 import { getAllBlogPosts } from "@/lib/blog";
 import { SsgoiTransition } from "@ssgoi/react";
-import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getServerTranslations } from "@/i18n/get-server-translations";

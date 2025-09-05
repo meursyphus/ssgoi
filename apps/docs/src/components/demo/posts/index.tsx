@@ -14,7 +14,7 @@ export default function PostsDemo() {
     posts.forEach((post) => {
       router.prefetch(`/demo/posts/${post.id}`);
     });
-  }, []);
+  }, [posts, router]);
 
   return (
     <SsgoiTransition id="/demo/posts">

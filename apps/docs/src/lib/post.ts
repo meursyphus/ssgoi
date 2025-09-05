@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import matter from "gray-matter";

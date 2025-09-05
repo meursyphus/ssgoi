@@ -30,8 +30,6 @@ const productImages = [
   "/demo/products/292-400x400.jpg", // Candles
 ];
 
-const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"];
-
 export const products: Product[] = [
   {
     id: "prod-1",
