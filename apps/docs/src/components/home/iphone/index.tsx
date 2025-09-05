@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, Suspense, useMemo } from "react";
+import React, { useRef, Suspense, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame, createPortal, useThree } from "@react-three/fiber";
 import {
   RoundedBox,
@@ -29,6 +29,8 @@ function IPhoneModel({
   color: string;
 }) {
   const meshRef = useRef<THREE.Group>(null);
+  const { viewport } = useThree();
+  const [screenDimensions, setScreenDimensions] = useState({ width: 0, height: 0 });
 
   // Color mappings for titanium finishes
   const colors = {
@@ -62,6 +64,18 @@ function IPhoneModel({
   const phoneDepth = 0.28;
   const screenInset = 0.08; // Bezel size
   const scale = 0.65; // Overall scale
+
+  // Calculate responsive dimensions based on viewport
+  useEffect(() => {
+    // Calculate screen dimensions based on viewport size
+    const aspectRatio = window.innerHeight / window.innerWidth;
+    const baseFactor = Math.min(viewport.width, viewport.height) * 100;
+    
+    setScreenDimensions({
+      width: (phoneWidth - screenInset * 2) * baseFactor * (aspectRatio > 1 ? 1.2 : 1),
+      height: (phoneHeight - screenInset * 2) * baseFactor * (aspectRatio > 1 ? 1.2 : 1),
+    });
+  }, [viewport, phoneWidth, phoneHeight, screenInset]);
 
   return (
     <group ref={meshRef} position={[0, 0, 0]} scale={[scale, scale, scale]}>
@@ -109,13 +123,15 @@ function IPhoneModel({
         <Html
           transform
           occlude
-          distanceFactor={2.5}
+          distanceFactor={Math.min(viewport.width / 4, 2.5)}
           position={[0, 0, 0.02]}
           style={{
-            width: `${(phoneWidth - screenInset * 2) * 150}px`,
-            height: `${(phoneHeight - screenInset * 2) * 150}px`,
+            width: `${screenDimensions.width}px`,
+            height: `${screenDimensions.height}px`,
             overflow: "hidden",
             borderRadius: "20px",
+            transform: "translate3d(0, 0, 0)", // Force GPU acceleration
+            backfaceVisibility: "hidden", // Prevent flickering
           }}
           center
         >
@@ -266,12 +282,54 @@ export default function IPhone3D({
   children,
   color = "natural",
 }: IPhone3DProps) {
+  const [cameraSettings, setCameraSettings] = useState({
+    position: [2.8, 1.2, 4] as [number, number, number],
+    fov: 42,
+  });
+
+  useEffect(() => {
+    // Adjust camera settings based on window size
+    const updateCamera = () => {
+      const aspectRatio = window.innerHeight / window.innerWidth;
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth < 1024;
+      
+      if (isMobile) {
+        setCameraSettings({
+          position: [2.5, 1.0, 3.5],
+          fov: 45,
+        });
+      } else if (isTablet) {
+        setCameraSettings({
+          position: [2.6, 1.1, 3.8],
+          fov: 43,
+        });
+      } else if (aspectRatio > 1.2) {
+        // Portrait-oriented displays
+        setCameraSettings({
+          position: [2.8, 1.2, 4.5],
+          fov: 40,
+        });
+      } else {
+        // Default for landscape displays
+        setCameraSettings({
+          position: [2.8, 1.2, 4],
+          fov: 42,
+        });
+      }
+    };
+
+    updateCamera();
+    window.addEventListener('resize', updateCamera);
+    return () => window.removeEventListener('resize', updateCamera);
+  }, []);
+
   return (
     <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
       <Canvas
-        camera={{ position: [2.8, 1.2, 4], fov: 42 }} // Adjusted camera for better view
+        camera={{ position: cameraSettings.position, fov: cameraSettings.fov }}
         style={{ background: "transparent" }}
-        gl={{ preserveDrawingBuffer: true }}
+        gl={{ preserveDrawingBuffer: true, antialias: true }}
       >
         <Suspense fallback={null}>
           <PresentationControls
