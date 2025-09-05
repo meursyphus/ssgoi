@@ -198,8 +198,8 @@ function Act2Page() {
               Focus Attention
             </h3>
             <p className="text-gray-400">
-              The sequential blind animation naturally draws the user&apos;s eye,
-              creating anticipation for what&apos;s coming next.
+              The sequential blind animation naturally draws the user&apos;s
+              eye, creating anticipation for what&apos;s coming next.
             </p>
           </div>
 

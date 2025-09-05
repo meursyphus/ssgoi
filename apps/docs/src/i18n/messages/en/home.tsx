@@ -370,7 +370,9 @@ export const home: HomeMessages = {
       quote1: (
         <>
           {`"Animations in the right places can `}
-          <span className="text-white">make experiences more intuitive</span>{" "}
+          <span className="text-white">
+            make experiences more intuitive
+          </span>{" "}
           {`and easier to navigate."`}
         </>
       ),

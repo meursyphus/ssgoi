@@ -349,13 +349,15 @@ export const home: HomeMessages = {
     quotes: {
       quote1: (
         <>
-          {`"恰当位置的动画可以`}<span className="text-white">让体验更直观</span>
+          {`"恰当位置的动画可以`}
+          <span className="text-white">让体验更直观</span>
           {`，导航更容易。"`}
         </>
       ),
       quote2: (
         <>
-          {`"动作帮助用户`}<span className="text-white">理解导航</span>
+          {`"动作帮助用户`}
+          <span className="text-white">理解导航</span>
           {`，并提供既有信息又令人愉快的反馈。"`}
         </>
       ),
