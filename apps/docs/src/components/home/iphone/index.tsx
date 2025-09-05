@@ -276,7 +276,7 @@ export default function IPhone3D({
         <Suspense fallback={null}>
           <PresentationControls
             global
-            rotation={[-0.3, 0.5, 0.1]}
+            rotation={[-0.4, 0.9, 0.1]}
             polar={[-0.4, 0.2]}
             azimuth={[-1, 0.75]}
             snap={false} // Disable snap to prevent stuck state
