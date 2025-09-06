@@ -8,6 +8,8 @@ import { useCurrentLanguage } from "@/i18n/use-current-language";
 import { useTranslations } from "@/i18n/use-translations";
 import { MobileDrawer } from "./mobile-drawer";
 import { LanguageSwitcher } from "./language-switcher";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export function Header() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -15,6 +17,17 @@ export function Header() {
   const [isLoadingStars, setIsLoadingStars] = useState(true);
   const currentLang = useCurrentLanguage();
   const t = useTranslations("header");
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    // Remove language prefix from pathname for comparison
+    const pathWithoutLang = pathname.replace(new RegExp(`^/${currentLang}`), '');
+    const cleanPath = path.replace(new RegExp(`^/${currentLang}`), '');
+    
+    // Check for exact match or if current path starts with the nav item path
+    return pathWithoutLang === cleanPath || 
+           (cleanPath !== '/' && pathWithoutLang.startsWith(cleanPath));
+  };
 
   useEffect(() => {
     fetch("https://api.github.com/repos/meursyphus/ssgoi")
@@ -52,9 +65,11 @@ export function Header() {
             href={`/${currentLang}/`}
             className="flex items-center space-x-2"
           >
-            <img
+            <Image
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"
+              width={32}
+              height={32}
               className="h-8 w-8 rounded-full object-cover"
             />
             <span className="text-2xl font-bold text-orange-500">SSGOI</span>
@@ -63,19 +78,34 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href={`/${currentLang}/docs`}
-              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-orange-400",
+                isActive(`/${currentLang}/docs`) 
+                  ? "text-orange-400" 
+                  : "text-gray-300"
+              )}
             >
               {t("docs")}
             </Link>
             <Link
               href={`/${currentLang}/blog`}
-              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-orange-400",
+                isActive(`/${currentLang}/blog`) 
+                  ? "text-orange-400" 
+                  : "text-gray-300"
+              )}
             >
               {t("blog")}
             </Link>
             <Link
               href={`/${currentLang}/demo`}
-              className="text-sm font-medium text-gray-300 transition-colors hover:text-orange-400"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-orange-400",
+                isActive(`/${currentLang}/demo`) 
+                  ? "text-orange-400" 
+                  : "text-gray-300"
+              )}
             >
               {t("demo")}
             </Link>
