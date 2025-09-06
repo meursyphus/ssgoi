@@ -21,12 +21,17 @@ export function Header() {
 
   const isActive = (path: string) => {
     // Remove language prefix from pathname for comparison
-    const pathWithoutLang = pathname.replace(new RegExp(`^/${currentLang}`), '');
-    const cleanPath = path.replace(new RegExp(`^/${currentLang}`), '');
-    
+    const pathWithoutLang = pathname.replace(
+      new RegExp(`^/${currentLang}`),
+      "",
+    );
+    const cleanPath = path.replace(new RegExp(`^/${currentLang}`), "");
+
     // Check for exact match or if current path starts with the nav item path
-    return pathWithoutLang === cleanPath || 
-           (cleanPath !== '/' && pathWithoutLang.startsWith(cleanPath));
+    return (
+      pathWithoutLang === cleanPath ||
+      (cleanPath !== "/" && pathWithoutLang.startsWith(cleanPath))
+    );
   };
 
   useEffect(() => {
@@ -80,9 +85,9 @@ export function Header() {
               href={`/${currentLang}/docs`}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-orange-400",
-                isActive(`/${currentLang}/docs`) 
-                  ? "text-orange-400" 
-                  : "text-gray-300"
+                isActive(`/${currentLang}/docs`)
+                  ? "text-orange-400"
+                  : "text-gray-300",
               )}
             >
               {t("docs")}
@@ -91,9 +96,9 @@ export function Header() {
               href={`/${currentLang}/blog`}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-orange-400",
-                isActive(`/${currentLang}/blog`) 
-                  ? "text-orange-400" 
-                  : "text-gray-300"
+                isActive(`/${currentLang}/blog`)
+                  ? "text-orange-400"
+                  : "text-gray-300",
               )}
             >
               {t("blog")}
@@ -102,9 +107,9 @@ export function Header() {
               href={`/${currentLang}/demo`}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-orange-400",
-                isActive(`/${currentLang}/demo`) 
-                  ? "text-orange-400" 
-                  : "text-gray-300"
+                isActive(`/${currentLang}/demo`)
+                  ? "text-orange-400"
+                  : "text-gray-300",
               )}
             >
               {t("demo")}
