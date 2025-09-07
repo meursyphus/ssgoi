@@ -45,8 +45,8 @@ function HomePage() {
               isMobile ? "text-base" : "text-xl sm:text-2xl",
             )}
           >
-            시네마틱한 전환 효과로 웹 페이지에 특별한 경험을 더합니다. 
-            프리미엄 브랜드 경험을 위한 완벽한 선택입니다.
+            시네마틱한 전환 효과로 웹 페이지에 특별한 경험을 더합니다. 프리미엄
+            브랜드 경험을 위한 완벽한 선택입니다.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <button className="px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
@@ -70,7 +70,9 @@ function HomePage() {
           </div>
           <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur">
             <div className="text-3xl mb-3">✨</div>
-            <h3 className="text-lg font-semibold text-white mb-2">부드러운 모션</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              부드러운 모션
+            </h3>
             <p className="text-gray-400 text-sm">
               스프링 기반 물리 엔진으로 자연스러운 움직임
             </p>
@@ -165,8 +167,8 @@ function FeaturesPage() {
               💾 최상위 네비게이션 최적화
             </h2>
             <p className="text-gray-300">
-              관련 없는 콘텐츠 간 이동, 헤더 네비게이션, 메인 탭 전환에 
-              최적화된 전환 효과입니다.
+              관련 없는 콘텐츠 간 이동, 헤더 네비게이션, 메인 탭 전환에 최적화된
+              전환 효과입니다.
             </p>
           </div>
         </div>
@@ -334,12 +336,10 @@ export default function HomePage() {
           </div>
 
           <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              ✨ 완료!
-            </h2>
+            <h2 className="text-xl font-semibold text-white mb-4">✨ 완료!</h2>
             <p className="text-gray-300">
-              이제 페이지 전환 시 시네마틱한 Film 효과가 적용됩니다. 
-              최상위 네비게이션이나 독립적인 섹션 간 이동에 사용하세요.
+              이제 페이지 전환 시 시네마틱한 Film 효과가 적용됩니다. 최상위
+              네비게이션이나 독립적인 섹션 간 이동에 사용하세요.
             </p>
           </div>
         </div>
@@ -392,7 +392,11 @@ export function FilmDemo() {
   // Custom layout with SSGOI branding
   function SSGOILayout({ children }: { children: React.ReactNode }) {
     return (
-      <DemoLayout logo="🎬" title="SSGOI Film" headerActions={<HeaderActions />}>
+      <DemoLayout
+        logo="🎬"
+        title="SSGOI Film"
+        headerActions={<HeaderActions />}
+      >
         {children}
       </DemoLayout>
     );
