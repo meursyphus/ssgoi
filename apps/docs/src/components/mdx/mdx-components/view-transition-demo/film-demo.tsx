@@ -45,7 +45,8 @@ function HomePage() {
               isMobile ? "text-base" : "text-xl sm:text-2xl",
             )}
           >
-            영화 필름처럼 회전하는 전환 효과로 페이지 간 이동에 입체감을 더합니다.
+            영화 필름처럼 회전하는 전환 효과로 페이지 간 이동에 입체감을
+            더합니다.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <button className="px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
@@ -69,7 +70,9 @@ function HomePage() {
           </div>
           <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur">
             <div className="text-3xl mb-3">✨</div>
-            <h3 className="text-lg font-semibold text-white mb-2">부드러운 애니메이션</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              부드러운 애니메이션
+            </h3>
             <p className="text-gray-400 text-sm">
               스프링 기반 물리 엔진으로 자연스러운 움직임
             </p>
@@ -140,7 +143,8 @@ function FeaturesPage() {
                 🎬 3D 회전 효과
               </h3>
               <p className="text-gray-300 mb-4">
-                Y축을 기준으로 회전하는 페이지 전환으로 깊이감 있는 네비게이션을 제공합니다.
+                Y축을 기준으로 회전하는 페이지 전환으로 깊이감 있는 네비게이션을
+                제공합니다.
               </p>
               <ul className="space-y-2 text-gray-400">
                 <li>• 부드러운 3D 변환</li>
@@ -168,7 +172,8 @@ function FeaturesPage() {
                 🎨 커스터마이징 가능
               </h3>
               <p className="text-gray-300 mb-4">
-                스프링 설정을 통해 원하는 느낌의 애니메이션을 구현할 수 있습니다.
+                스프링 설정을 통해 원하는 느낌의 애니메이션을 구현할 수
+                있습니다.
               </p>
               <ul className="space-y-2 text-gray-400">
                 <li>• Stiffness 조절</li>

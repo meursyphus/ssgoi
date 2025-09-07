@@ -31,7 +31,15 @@ const FilmDemo = lazy(() =>
 );
 
 export interface ViewTransitionDemoProps {
-  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "blind" | "film";
+  type:
+    | "fade"
+    | "hero"
+    | "pinterest"
+    | "scroll"
+    | "drill"
+    | "slide"
+    | "blind"
+    | "film";
 }
 
 // Loading component

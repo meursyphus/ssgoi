@@ -11,7 +11,7 @@ export const film = (): SggoiTransition => {
           element.style.opacity = "0";
         },
         tick: (progress) => {
-          const rotation = -90 + (90 * progress);
+          const rotation = -90 + 90 * progress;
           element.style.transform = `rotateY(${rotation}deg)`;
           element.style.opacity = progress.toString();
         },
