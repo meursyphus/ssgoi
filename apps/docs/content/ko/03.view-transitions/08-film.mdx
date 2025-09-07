@@ -1,0 +1,79 @@
+---
+title: "필름 전환"
+description: "영화 필름처럼 회전하는 전환 효과"
+nav-title: "필름"
+---
+
+# 필름 전환
+
+필름 전환은 3D 회전을 통해 페이지가 영화 필름처럼 전환되는 효과입니다.
+
+## 데모
+
+<ViewTransitionDemo type="film" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+(추후 작성 예정)
+
+### 왜 이렇게 동작하나요?
+
+(추후 작성 예정)
+
+### 모션 디자인
+
+(추후 작성 예정)
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { film } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: film()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { film } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: film()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 커스터마이징
+
+현재 필름 전환은 기본 설정만 지원합니다. 추후 다양한 옵션이 추가될 예정입니다.
+
+## 브라우저 지원
+
+필름 전환은 CSS 3D 변환을 사용하므로 모든 최신 브라우저에서 동작합니다.
+
+## 추가 리소스
+
+더 많은 예제와 고급 사용법은 준비 중입니다.
