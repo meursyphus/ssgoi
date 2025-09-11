@@ -34,6 +34,9 @@ nav-title: "快速入门"
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
+    > **📝 注意: RSC（React Server Components）限制**
+    > RSC无法将函数作为props传递，因此无法使用`config`属性。请在每个页面使用`SsgoiTransition`组件的`transition`属性来设置默认过渡效果。
+
     ### 1. 根布局设置 (Next.js App Router)
 
     ```tsx
@@ -49,7 +52,7 @@ nav-title: "快速入门"
       return (
         <html>
           <body>
-            <Ssgoi config={{ defaultTransition: fade() }}>
+            <Ssgoi>
               {/* ⚠️ 重要：必须设置position: relative！ */}
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}

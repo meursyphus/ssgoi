@@ -34,6 +34,9 @@ nav-title: "Quick Start"
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
+    > **📝 Note: RSC (React Server Components) Limitations**
+    > RSC cannot pass functions as props, so the `config` attribute cannot be used. Set default transition effects using the `transition` attribute of the `SsgoiTransition` component on each page.
+
     ### 1. Root Layout Setup (Next.js App Router)
 
     ```tsx
@@ -49,7 +52,7 @@ nav-title: "Quick Start"
       return (
         <html>
           <body>
-            <Ssgoi config={{ defaultTransition: fade() }}>
+            <Ssgoi>
               {/* ⚠️ Important: position: relative is required! */}
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
