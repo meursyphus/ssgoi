@@ -34,6 +34,8 @@ nav-title: "クイックスタート"
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
   <TabPanel value="react">
+  > **📝 注記: RSC（React Server Components）の制限事項**
+    > RSCでは関数をpropsとして渡すことができないため、`config`属性を使用できません。デフォルトのトランジション効果設定は、各ページで`SsgoiTransition`コンポーネントの`transition`属性を使用して指定してください。
     ### 1. ルートレイアウトの設定 (Next.js App Router)
 
     ```tsx
@@ -49,7 +51,7 @@ nav-title: "クイックスタート"
       return (
         <html>
           <body>
-            <Ssgoi config={{ defaultTransition: fade() }}>
+            <Ssgoi>
               {/* ⚠️ 重要: position: relativeが必要です！ */}
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
