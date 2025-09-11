@@ -9,5 +9,6 @@ export const mobileMenu: MobileMenuMessages = {
   documents: "文档",
   blog: "博客",
   demo: "演示",
+  showcase: "展示",
   language: "语言 / Language",
 };

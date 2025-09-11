@@ -8,4 +8,5 @@ export type MobileMenuMessages = {
   blog: string;
   language: string;
   demo: string;
+  showcase: string;
 };

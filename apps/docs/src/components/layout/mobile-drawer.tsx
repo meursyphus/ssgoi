@@ -179,6 +179,24 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                           {t("demo")}
                         </Link>
                       </li>
+                      <li>
+                        <Link
+                          href={`/${lang}/showcase`}
+                          onClick={onClose}
+                          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+                          </svg>
+                          {t("showcase")}
+                        </Link>
+                      </li>
                     </ul>
                   </nav>
                 </div>
