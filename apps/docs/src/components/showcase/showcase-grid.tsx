@@ -8,14 +8,12 @@ import { useTranslations } from "@/i18n/use-translations";
 
 export function ShowcaseGrid() {
   const t = useTranslations("showcase");
-  
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-bold text-gray-100">{t("title")}</h1>
-        <p className="mb-6 text-lg text-gray-400">
-          {t("subtitle")}
-        </p>
+        <p className="mb-6 text-lg text-gray-400">{t("subtitle")}</p>
 
         <div className="mx-auto max-w-2xl rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
           <div className="flex items-center justify-center gap-2 mb-3">
@@ -42,10 +40,10 @@ export function ShowcaseGrid() {
 
       {showcaseData.length === 0 ? (
         <div className="rounded-lg border border-dashed border-zinc-700 bg-zinc-900/50 p-12 text-center">
-          <p className="mb-2 text-lg font-medium text-gray-300">{t("noSitesYet")}</p>
-          <p className="text-sm text-gray-500">
-            {t("beTheFirst")}
+          <p className="mb-2 text-lg font-medium text-gray-300">
+            {t("noSitesYet")}
           </p>
+          <p className="text-sm text-gray-500">{t("beTheFirst")}</p>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

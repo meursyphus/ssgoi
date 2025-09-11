@@ -123,7 +123,7 @@ export function Header() {
                   : "text-gray-300",
               )}
             >
-              Showcase
+              {t("showcase")}
             </Link>
           </nav>
         </div>

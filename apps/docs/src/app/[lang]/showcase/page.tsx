@@ -8,7 +8,7 @@ export async function generateMetadata({
   params: { lang: string };
 }): Promise<Metadata> {
   const t = await getServerTranslations(params.lang, "showcase");
-  
+
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
