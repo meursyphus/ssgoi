@@ -11,7 +11,8 @@ export const showcaseData: ShowcaseItem[] = [
   {
     id: "mvpstar-ai",
     title: "MVPstar.ai",
-    description: "AI-powered MVP builder that helps entrepreneurs validate and build their ideas faster with beautiful page transitions powered by SSGOI.",
+    description:
+      "AI-powered MVP builder that helps entrepreneurs validate and build their ideas faster with beautiful page transitions powered by SSGOI.",
     url: "https://mvpstar.ai",
     thumbnail: "/showcase/mvpstar-ai.png",
     tags: ["Next.js", "AI", "SaaS"],

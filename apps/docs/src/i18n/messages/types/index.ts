@@ -8,6 +8,7 @@ import { BlogMessages } from "./blog";
 import { HomeStructuredDataMessages } from "./home-structured-data";
 import { BlogStructuredDataMessages } from "./blog-structured-data";
 import { DocsStructuredDataMessages } from "./docs-structured-data";
+import { ShowcaseMessages } from "./showcase";
 
 export type Messages = {
   header: HeaderMessages;
@@ -20,6 +21,7 @@ export type Messages = {
   homeStructuredData: HomeStructuredDataMessages;
   blogStructuredData: BlogStructuredDataMessages;
   docsStructuredData: DocsStructuredDataMessages;
+  showcase: ShowcaseMessages;
 };
 
 export type {
@@ -33,4 +35,5 @@ export type {
   HomeStructuredDataMessages,
   BlogStructuredDataMessages,
   DocsStructuredDataMessages,
+  ShowcaseMessages,
 };

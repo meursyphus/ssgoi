@@ -1,10 +1,19 @@
 import { ShowcaseGrid } from "@/components/showcase/showcase-grid";
 import type { Metadata } from "next";
+import { getServerTranslations } from "@/i18n/get-server-translations";
 
-export const metadata: Metadata = {
-  title: "Showcase | SSGOI",
-  description: "Discover amazing websites built with SSGOI - Universal page transition library for the web",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: { lang: string };
+}): Promise<Metadata> {
+  const t = await getServerTranslations(params.lang, "showcase");
+  
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default function ShowcasePage() {
   return (
