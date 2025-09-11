@@ -79,6 +79,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
+    "@rollup/rollup-darwin-arm64": "^4.50.1",
     "@types/node": "^22.10.6",
     "eslint": "^9.34.0",
     "globals": "^16.3.0",
