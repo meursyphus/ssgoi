@@ -12,15 +12,15 @@ export const none = (options: NoneOptions = {}) => {
   const { spring = { stiffness: 1000, damping: 100 }, key } = options;
 
   return {
-    in: (_element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (_progress: number) => {
+      tick: () => {
         // No animation, just instantly show
       },
     }),
-    out: (_element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (_progress: number) => {
+      tick: () => {
         // No animation, just instantly hide
       },
     }),

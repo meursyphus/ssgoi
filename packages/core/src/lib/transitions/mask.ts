@@ -62,7 +62,7 @@ export const mask = (options: MaskOptions = {}) => {
     switch (shape) {
       case "ellipse":
         return `ellipse(${size}% ${size * 0.75}% at ${position})`;
-      case "square":
+      case "square": {
         const squareSize = progress * scale * 100;
         const [x, y] = position.split(" ");
         const xVal = parseFloat(x!);
@@ -73,6 +73,7 @@ export const mask = (options: MaskOptions = {}) => {
         }% ${yVal - halfSize}%, ${xVal + halfSize}% ${yVal + halfSize}%, ${
           xVal - halfSize
         }% ${yVal + halfSize}%)`;
+      }
       case "circle":
       default:
         return `circle(${size}% at ${position})`;

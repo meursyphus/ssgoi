@@ -97,7 +97,9 @@ const __cleanupRegistry = FinalizationRegistryCtor
   ? (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
       try {
         unregisterTransition(key);
-      } catch {}
+      } catch {
+        // Ignore cleanup errors
+      }
     }) as { register: (target: object, heldValue: TransitionKey) => void })
   : undefined;
 
@@ -167,7 +169,9 @@ export function transition<TAnimationValue = number>(
   if (options.ref && __cleanupRegistry) {
     try {
       __cleanupRegistry.register(options.ref, resolvedKey);
-    } catch {}
+    } catch {
+      // Ignore registration errors
+    }
   }
 
   return registerTransition(
