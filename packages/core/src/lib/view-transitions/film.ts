@@ -1,31 +1,89 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { SggoiTransition } from "../types";
+import type { SggoiTransition, SggoiTransitionContext } from "../types";
+import { getRect } from "../utils/get-rect";
 // import { prepareOutgoing } from "../utils/prepare-outgoing";
+
+/**
+ * Calculate the visible viewport rect for film transition
+ * Returns the area where the transition will be visible
+ */
+function getFilmRect(context: SggoiTransitionContext) {
+  const containerRect = getRect(document.body, context.positionedParent);
+  const scrollY = context.scroll.y;
+
+  return {
+    top: containerRect.top + scrollY,
+    left: 0,
+    width: containerRect.width,
+    height: window.innerHeight - containerRect.top,
+  };
+}
+
+/**
+ * Set transform-origin to the center of film rect
+ */
+function applyFilmTransformOrigin(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  element.style.transformOrigin = `${centerX}px ${centerY}px`;
+}
+
+/**
+ * Apply clipPath to limit element visibility to film rect
+ * Common prepare function for both in and out transitions
+ */
+function applyFilmClip(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+  element.style.clipPath = `polygon(
+    ${rect.left}px ${rect.top}px,
+    ${rect.left + rect.width}px ${rect.top}px,
+    ${rect.left + rect.width}px ${rect.top + rect.height}px,
+    ${rect.left}px ${rect.top + rect.height}px
+  )`;
+}
+
+/**
+ * Map progress value from one range to another
+ * e.g., mapProgress(0.2, 0, 0.4) = 0.5 (maps 0.2 in range 0-0.4 to 0.5 in range 0-1)
+ */
+function mapProgress(progress: number, start: number, end: number): number {
+  if (progress <= start) return 0;
+  if (progress >= end) return 1;
+  return (progress - start) / (end - start);
+}
 
 export const film = (): SggoiTransition => {
   return {
     out: async (element, context) => {
       // 나가는 화면 애니메이션
-      // 1. prepareOutgoing()으로 position: fixed 설정
-      // 2. 컨테이너 크기 계산 (element.getBoundingClientRect())
-      // 3. 검은 배경 표현을 위한 준비
+      const rect = getFilmRect(context);
+    
+  
 
       return {
         prepare: () => {
-          // prepareOutgoing(element)
-          // element에 검은 테두리/배경 추가
-          // z-index 설정으로 레이어 관리
+          applyFilmTransformOrigin(element, rect);
+          applyFilmClip(element, rect);
         },
         tick: (progress) => {
-          // progress를 3단계로 매핑
-          // Stage 1 (0 ~ 0.4): 축소하면서 위로 이동
-          //   - scale: 1 → 0.7
-          //   - translateY: 0 → -20%
-          //   - 프레임 테두리 효과 (box-shadow 또는 outline)
-          // Stage 2 (0.4 ~ 0.6): 화면 밖으로 완전히 이동
-          //   - translateY: -20% → -120%
-          //   - opacity: 1 → 0 (선택적)
-          // Stage 3 (0.6 ~ 1.0): 나간 상태 유지
+          // OUT: progress는 1 → 0으로 진행
+          // Stage 1 (1.0 ~ 0.6): 축소
+          if (progress > 0.6) {
+            const stage1Progress = mapProgress(progress, 0.6, 1.0);
+            const scale = 0.9 + 0.1 * stage1Progress; // 0.9 → 1
+            element.style.transform = `scale(${scale})`;
+          }
+          // Stage 2 (0.6 ~ 0.4): 위로 이동
+          else if (progress > 0.4) {
+            const stage2Progress = mapProgress(progress, 0.4, 0.6);
+            const translateY = -rect.height * (1 - stage2Progress); // 0 → -height
+            element.style.transform = `translateY(${translateY}px) scale(0.9)`;
+          }
+          // Stage 3 (0.4 ~ 0): 다시 확대하면서 나감
+          else {
+            const stage3Progress = mapProgress(progress, 0, 0.4);
+            const scale = 0.9 + 0.1 * (1 - stage3Progress); // 0.9 → 1
+            element.style.transform = `translateY(${-rect.height}px) scale(${scale})`;
+          }
         },
       };
     },
@@ -35,26 +93,34 @@ export const film = (): SggoiTransition => {
       // 1. 컨테이너 크기 계산
       // 2. 초기 위치 설정 (화면 아래, 작은 크기)
 
+      const rect = getFilmRect(context);
+
       return {
         prepare: () => {
-          // 초기 상태 설정
-          // transform-origin: center 또는 top
-          // z-index로 레이어 순서 관리
+          applyFilmTransformOrigin(element, rect);
+          applyFilmClip(element, rect);
+          // 초기 위치: 화면 아래에 위치
+          element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
         },
         tick: (progress) => {
-          // progress를 3단계로 매핑
-          // Stage 1 (0 ~ 0.4): 대기 (아직 안 보임)
-          //   - translateY: 120% (화면 아래)
-          //   - scale: 0.7
-          //   - opacity: 0
+          // IN: progress는 0 → 1로 진행
+          // Stage 1 (0 ~ 0.4): 대기
+          if (progress < 0.4) {
+            // 초기 위치 유지
+            element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
+          }
           // Stage 2 (0.4 ~ 0.6): 프레임 간격 통과
-          //   - 여전히 화면 밖
-          //   - opacity: 0 → 1 준비
+          else if (progress < 0.6) {
+            // 여전히 대기 (간격 연출)
+            element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
+          }
           // Stage 3 (0.6 ~ 1.0): 아래에서 올라오며 확대
-          //   - translateY: 120% → 0
-          //   - scale: 0.7 → 1
-          //   - opacity: 1
-          //   - 프레임에서 스크린으로 확대되는 느낌
+          else {
+            const stage3Progress = mapProgress(progress, 0.6, 1.0);
+            const translateY = rect.height * (1 - stage3Progress); // height → 0
+            const scale = 0.9 + 0.1 * stage3Progress; // 0.9 → 1
+            element.style.transform = `translateY(${translateY}px) scale(${scale})`;
+          }
         },
       };
     },
