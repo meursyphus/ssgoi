@@ -5,6 +5,7 @@ import type {
   Transition,
 } from "./types";
 import { getScrollingElement } from "./utils/get-scrolling-element";
+import { getPositionedParent } from "./utils/get-positioned-parent";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -128,10 +129,18 @@ function createScrollManager() {
   // Getter for scroll container - returns null if not initialized yet
   const getScrollContainer = () => scrollContainer;
 
+  // Get scroll position for a specific path
+  const getScrollPosition = (path?: string): { x: number; y: number } => {
+    return path && scrollPositions.has(path)
+      ? scrollPositions.get(path)!
+      : { x: 0, y: 0 };
+  };
+
   return {
     startScrollTracking,
     calculateScrollOffset,
     getScrollContainer,
+    getScrollPosition,
   };
 }
 
@@ -163,7 +172,8 @@ export function createSggoiTransitionContext(
   const processedTransitions = processSymmetricTransitions(transitions);
 
   // Initialize scroll manager
-  const { startScrollTracking, calculateScrollOffset, getScrollContainer } = createScrollManager();
+  const { startScrollTracking, calculateScrollOffset, getScrollContainer, getScrollPosition } =
+    createScrollManager();
 
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
@@ -183,23 +193,46 @@ export function createSggoiTransitionContext(
         pendingTransition.from,
         pendingTransition.to,
       );
-      const context = {
+
+      // Create context for OUT transition (from page)
+      const outContext = {
         scrollOffset,
+        scroll: getScrollPosition(pendingTransition.from),
         get scrollingElement() {
           // Use lazy evaluation - get scrollContainer when actually accessed
           return getScrollContainer() || document.documentElement;
-        }
+        },
+        get positionedParent() {
+          // Use lazy evaluation - calculate positioned parent when accessed
+          const scrollContainer = getScrollContainer();
+          return scrollContainer ? getPositionedParent(scrollContainer) : document.body;
+        },
+      };
+
+      // Create context for IN transition (to page)
+      const inContext = {
+        scrollOffset,
+        scroll: getScrollPosition(pendingTransition.to),
+        get scrollingElement() {
+          // Use lazy evaluation - get scrollContainer when actually accessed
+          return getScrollContainer() || document.documentElement;
+        },
+        get positionedParent() {
+          // Use lazy evaluation - calculate positioned parent when accessed
+          const scrollContainer = getScrollContainer();
+          return scrollContainer ? getPositionedParent(scrollContainer) : document.body;
+        },
       };
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {
           pendingTransition.outResolve((element) =>
-            result.out!(element, context),
+            result.out!(element, outContext),
           );
         }
         if (result.in && pendingTransition.inResolve) {
           pendingTransition.inResolve((element) =>
-            result.in!(element, context),
+            result.in!(element, inContext),
           );
         }
       }
