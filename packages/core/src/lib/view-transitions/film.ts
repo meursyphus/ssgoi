@@ -1,7 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { SggoiTransition, SggoiTransitionContext } from "../types";
+ 
+import type { SggoiTransition, SggoiTransitionContext, SpringConfig } from "../types";
 import { getRect } from "../utils/get-rect";
 // import { prepareOutgoing } from "../utils/prepare-outgoing";
+
+// Default spring configuration for smooth, cinematic motion
+const DEFAULT_SPRING: SpringConfig = {
+  stiffness: 100,  // Lower stiffness for smoother motion
+  damping: 20,      // Lower damping for more fluid movement
+};
+
+interface FilmOptions {
+  spring?: SpringConfig;
+  scale?: number;  // Scale factor (default: 0.9)
+}
 
 /**
  * Calculate the visible viewport rect for film transition
@@ -22,7 +33,10 @@ function getFilmRect(context: SggoiTransitionContext) {
 /**
  * Set transform-origin to the center of film rect
  */
-function applyFilmTransformOrigin(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+function applyFilmTransformOrigin(
+  element: HTMLElement,
+  rect: ReturnType<typeof getFilmRect>,
+) {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
   element.style.transformOrigin = `${centerX}px ${centerY}px`;
@@ -32,7 +46,10 @@ function applyFilmTransformOrigin(element: HTMLElement, rect: ReturnType<typeof 
  * Apply clipPath to limit element visibility to film rect
  * Common prepare function for both in and out transitions
  */
-function applyFilmClip(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+function applyFilmClip(
+  element: HTMLElement,
+  rect: ReturnType<typeof getFilmRect>,
+) {
   element.style.clipPath = `polygon(
     ${rect.left}px ${rect.top}px,
     ${rect.left + rect.width}px ${rect.top}px,
@@ -51,38 +68,45 @@ function mapProgress(progress: number, start: number, end: number): number {
   return (progress - start) / (end - start);
 }
 
-export const film = (): SggoiTransition => {
+export const film = (options?: FilmOptions): SggoiTransition => {
+  const spring = options?.spring ?? DEFAULT_SPRING;
+  const scale = options?.scale ?? 0.9;
+
   return {
     out: async (element, context) => {
       // 나가는 화면 애니메이션
       const rect = getFilmRect(context);
-    
-  
 
       return {
+        spring,
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
+        },
+        onEnd: () => {
+          // Clean up styles after animation
+          element.style.clipPath = '';
+          element.style.transformOrigin = '';
         },
         tick: (progress) => {
           // OUT: progress는 1 → 0으로 진행
           // Stage 1 (1.0 ~ 0.6): 축소
           if (progress > 0.6) {
             const stage1Progress = mapProgress(progress, 0.6, 1.0);
-            const scale = 0.9 + 0.1 * stage1Progress; // 0.9 → 1
-            element.style.transform = `scale(${scale})`;
+            const currentScale = scale + (1 - scale) * stage1Progress; // scale → 1
+            element.style.transform = `scale(${currentScale})`;
           }
           // Stage 2 (0.6 ~ 0.4): 위로 이동
           else if (progress > 0.4) {
             const stage2Progress = mapProgress(progress, 0.4, 0.6);
             const translateY = -rect.height * (1 - stage2Progress); // 0 → -height
-            element.style.transform = `translateY(${translateY}px) scale(0.9)`;
+            element.style.transform = `translateY(${translateY}px) scale(${scale})`;
           }
           // Stage 3 (0.4 ~ 0): 다시 확대하면서 나감
           else {
             const stage3Progress = mapProgress(progress, 0, 0.4);
-            const scale = 0.9 + 0.1 * (1 - stage3Progress); // 0.9 → 1
-            element.style.transform = `translateY(${-rect.height}px) scale(${scale})`;
+            const currentScale = scale + (1 - scale) * (1 - stage3Progress); // scale → 1
+            element.style.transform = `translateY(${-rect.height}px) scale(${currentScale})`;
           }
         },
       };
@@ -96,30 +120,36 @@ export const film = (): SggoiTransition => {
       const rect = getFilmRect(context);
 
       return {
+        spring,
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
           // 초기 위치: 화면 아래에 위치
-          element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
+          element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+        },
+        onEnd: () => {
+          // Clean up styles after animation
+          element.style.clipPath = '';
+          element.style.transformOrigin = '';
         },
         tick: (progress) => {
           // IN: progress는 0 → 1로 진행
           // Stage 1 (0 ~ 0.4): 대기
           if (progress < 0.4) {
             // 초기 위치 유지
-            element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
+            element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
           }
           // Stage 2 (0.4 ~ 0.6): 프레임 간격 통과
           else if (progress < 0.6) {
             // 여전히 대기 (간격 연출)
-            element.style.transform = `translateY(${rect.height}px) scale(0.9)`;
+            element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
           }
           // Stage 3 (0.6 ~ 1.0): 아래에서 올라오며 확대
           else {
             const stage3Progress = mapProgress(progress, 0.6, 1.0);
             const translateY = rect.height * (1 - stage3Progress); // height → 0
-            const scale = 0.9 + 0.1 * stage3Progress; // 0.9 → 1
-            element.style.transform = `translateY(${translateY}px) scale(${scale})`;
+            const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
+            element.style.transform = `translateY(${translateY}px) scale(${currentScale})`;
           }
         },
       };
