@@ -172,8 +172,12 @@ export function createSggoiTransitionContext(
   const processedTransitions = processSymmetricTransitions(transitions);
 
   // Initialize scroll manager
-  const { startScrollTracking, calculateScrollOffset, getScrollContainer, getScrollPosition } =
-    createScrollManager();
+  const {
+    startScrollTracking,
+    calculateScrollOffset,
+    getScrollContainer,
+    getScrollPosition,
+  } = createScrollManager();
 
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
@@ -205,7 +209,9 @@ export function createSggoiTransitionContext(
         get positionedParent() {
           // Use lazy evaluation - calculate positioned parent when accessed
           const scrollContainer = getScrollContainer();
-          return scrollContainer ? getPositionedParent(scrollContainer) : document.body;
+          return scrollContainer
+            ? getPositionedParent(scrollContainer)
+            : document.body;
         },
       };
 
@@ -220,7 +226,9 @@ export function createSggoiTransitionContext(
         get positionedParent() {
           // Use lazy evaluation - calculate positioned parent when accessed
           const scrollContainer = getScrollContainer();
-          return scrollContainer ? getPositionedParent(scrollContainer) : document.body;
+          return scrollContainer
+            ? getPositionedParent(scrollContainer)
+            : document.body;
         },
       };
 

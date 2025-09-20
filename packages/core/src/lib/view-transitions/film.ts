@@ -14,8 +14,8 @@ const DEFAULT_SPRING: SpringConfig = {
 };
 
 // Stage timing configuration (30% - 40% - 30%)
-const STAGE_1_END = 0.3;   // Stage 1: 0 ~ 0.3 (30%)
-const STAGE_2_END = 0.7;   // Stage 2: 0.3 ~ 0.7 (40%)
+const STAGE_1_END = 0.3; // Stage 1: 0 ~ 0.3 (30%)
+const STAGE_2_END = 0.7; // Stage 2: 0.3 ~ 0.7 (40%)
 // Stage 3: 0.7 ~ 1.0 (30%)
 
 interface FilmOptions {
@@ -89,7 +89,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       return {
         spring,
         prepare: () => {
-          prepareOutgoing(element)
+          prepareOutgoing(element);
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
         },
@@ -110,8 +110,12 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           }
           // Stage 2 (0.3 ~ 0.7): scale 유지하며 위로 이동
           else if (progress < STAGE_2_END) {
-            const stage2Progress = mapProgress(progress, STAGE_1_END, STAGE_2_END);
-          
+            const stage2Progress = mapProgress(
+              progress,
+              STAGE_1_END,
+              STAGE_2_END,
+            );
+
             const translateY = -rect.height * stage2Progress; // 0 → -height
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
           }
@@ -137,9 +141,8 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
-      
+
           element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
-  
         },
         onEnd: () => {
           // Clean up styles after animation
@@ -156,7 +159,11 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           }
           // Stage 2 (0.3 ~ 0.7): 아래에서 위로 올라옴
           else if (progress < STAGE_2_END) {
-            const stage2Progress = mapProgress(progress, STAGE_1_END, STAGE_2_END);
+            const stage2Progress = mapProgress(
+              progress,
+              STAGE_1_END,
+              STAGE_2_END,
+            );
             const translateY = rect.height * (1 - stage2Progress); // height → 0
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
             element.style.opacity = "1";

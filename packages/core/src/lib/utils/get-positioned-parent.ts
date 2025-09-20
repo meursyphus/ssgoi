@@ -10,7 +10,12 @@ export const getPositionedParent = (element: HTMLElement): HTMLElement => {
     const position = window.getComputedStyle(parent).position;
 
     // Check if parent is positioned (not static)
-    if (position === "relative" || position === "absolute" || position === "fixed" || position === "sticky") {
+    if (
+      position === "relative" ||
+      position === "absolute" ||
+      position === "fixed" ||
+      position === "sticky"
+    ) {
       return parent;
     }
 
