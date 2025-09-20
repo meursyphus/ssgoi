@@ -1,17 +1,26 @@
- 
-import type { SggoiTransition, SggoiTransitionContext, SpringConfig } from "../types";
+import type {
+  SggoiTransition,
+  SggoiTransitionContext,
+  SpringConfig,
+} from "../types";
+import { prepareOutgoing } from "../utils";
 import { getRect } from "../utils/get-rect";
 // import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 100,  // Lower stiffness for smoother motion
-  damping: 20,      // Lower damping for more fluid movement
+  stiffness: 20, // Lower stiffness for smoother motion
+  damping: 50, // Lower damping for more fluid movement
 };
+
+// Stage timing configuration (30% - 40% - 30%)
+const STAGE_1_END = 0.3;   // Stage 1: 0 ~ 0.3 (30%)
+const STAGE_2_END = 0.7;   // Stage 2: 0.3 ~ 0.7 (40%)
+// Stage 3: 0.7 ~ 1.0 (30%)
 
 interface FilmOptions {
   spring?: SpringConfig;
-  scale?: number;  // Scale factor (default: 0.9)
+  scale?: number; // Scale factor (default: 0.9)
 }
 
 /**
@@ -23,7 +32,7 @@ function getFilmRect(context: SggoiTransitionContext) {
   const scrollY = context.scroll.y;
 
   return {
-    top: containerRect.top + scrollY,
+    top: scrollY,
     left: 0,
     width: containerRect.width,
     height: window.innerHeight - containerRect.top,
@@ -80,32 +89,36 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       return {
         spring,
         prepare: () => {
+          prepareOutgoing(element)
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
         },
         onEnd: () => {
           // Clean up styles after animation
-          element.style.clipPath = '';
-          element.style.transformOrigin = '';
+          element.style.clipPath = "";
+          element.style.transformOrigin = "";
         },
-        tick: (progress) => {
-          // OUT: progress는 1 → 0으로 진행
-          // Stage 1 (1.0 ~ 0.6): 축소
-          if (progress > 0.6) {
-            const stage1Progress = mapProgress(progress, 0.6, 1.0);
-            const currentScale = scale + (1 - scale) * stage1Progress; // scale → 1
+        tick: (_progress) => {
+          // OUT: _progress는 1 → 0으로 진행
+          const progress = 1 - _progress; // 0 → 1로 변환하여 작업
+
+          // Stage 1 (0 ~ 0.3): 1 → scale로 축소
+          if (progress < STAGE_1_END) {
+            const stage1Progress = mapProgress(progress, 0, STAGE_1_END);
+            const currentScale = 1 - (1 - scale) * stage1Progress; // 1 → scale
             element.style.transform = `scale(${currentScale})`;
           }
-          // Stage 2 (0.6 ~ 0.4): 위로 이동
-          else if (progress > 0.4) {
-            const stage2Progress = mapProgress(progress, 0.4, 0.6);
-            const translateY = -rect.height * (1 - stage2Progress); // 0 → -height
+          // Stage 2 (0.3 ~ 0.7): scale 유지하며 위로 이동
+          else if (progress < STAGE_2_END) {
+            const stage2Progress = mapProgress(progress, STAGE_1_END, STAGE_2_END);
+          
+            const translateY = -rect.height * stage2Progress; // 0 → -height
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
           }
-          // Stage 3 (0.4 ~ 0): 다시 확대하면서 나감
+          // Stage 3 (0.7 ~ 1.0): scale → 1로 확대하며 위에 유지
           else {
-            const stage3Progress = mapProgress(progress, 0, 0.4);
-            const currentScale = scale + (1 - scale) * (1 - stage3Progress); // scale → 1
+            const stage3Progress = mapProgress(progress, STAGE_2_END, 1.0);
+            const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
             element.style.transform = `translateY(${-rect.height}px) scale(${currentScale})`;
           }
         },
@@ -124,32 +137,36 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
-          // 초기 위치: 화면 아래에 위치
+      
           element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+  
         },
         onEnd: () => {
           // Clean up styles after animation
-          element.style.clipPath = '';
-          element.style.transformOrigin = '';
+          element.style.clipPath = "";
+          element.style.transformOrigin = "";
         },
         tick: (progress) => {
           // IN: progress는 0 → 1로 진행
-          // Stage 1 (0 ~ 0.4): 대기
-          if (progress < 0.4) {
-            // 초기 위치 유지
+          // Stage 1 (0 ~ 0.3): 대기 (화면 밖, 안 보임)
+          if (progress < STAGE_1_END) {
+            // 초기 위치 유지 (화면 아래)
             element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+            element.style.opacity = "0";
           }
-          // Stage 2 (0.4 ~ 0.6): 프레임 간격 통과
-          else if (progress < 0.6) {
-            // 여전히 대기 (간격 연출)
-            element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+          // Stage 2 (0.3 ~ 0.7): 아래에서 위로 올라옴
+          else if (progress < STAGE_2_END) {
+            const stage2Progress = mapProgress(progress, STAGE_1_END, STAGE_2_END);
+            const translateY = rect.height * (1 - stage2Progress); // height → 0
+            element.style.transform = `translateY(${translateY}px) scale(${scale})`;
+            element.style.opacity = "1";
           }
-          // Stage 3 (0.6 ~ 1.0): 아래에서 올라오며 확대
+          // Stage 3 (0.7 ~ 1.0): 제자리에서 scale 확대
           else {
-            const stage3Progress = mapProgress(progress, 0.6, 1.0);
-            const translateY = rect.height * (1 - stage3Progress); // height → 0
+            const stage3Progress = mapProgress(progress, STAGE_2_END, 1.0);
             const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
-            element.style.transform = `translateY(${translateY}px) scale(${currentScale})`;
+            element.style.transform = `scale(${currentScale})`;
+            element.style.opacity = "1";
           }
         },
       };
