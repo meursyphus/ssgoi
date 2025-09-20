@@ -88,7 +88,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     [],
   );
   return (
-    <div className="h-full bg-gray-900 flex z-0">
+    <div className="h-full bg-gray-900 flex">
       {/* Mobile Frame */}
       <div className="w-full bg-black flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
