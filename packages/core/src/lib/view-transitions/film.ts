@@ -9,13 +9,13 @@ import { getRect } from "../utils/get-rect";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 20, // Lower stiffness for smoother motion
-  damping: 50, // Lower damping for more fluid movement
+  stiffness: 10, // Lower stiffness for smoother motion
+  damping: 5, // Lower damping for more fluid movement
 };
 
 // Stage timing configuration (30% - 40% - 30%)
-const STAGE_1_END = 0.3; // Stage 1: 0 ~ 0.3 (30%)
-const STAGE_2_END = 0.7; // Stage 2: 0.3 ~ 0.7 (40%)
+const STAGE_1_END = 0.2; // Stage 1: 0 ~ 0.3 (30%)
+const STAGE_2_END = 0.82; // Stage 2: 0.3 ~ 0.7 (40%)
 // Stage 3: 0.7 ~ 1.0 (30%)
 
 interface FilmOptions {
