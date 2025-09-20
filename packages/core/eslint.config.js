@@ -10,6 +10,10 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser, // DOM API usage (window, document, HTMLElement)
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+        project: './tsconfig.json',
+      },
     },
   },
 );
