@@ -10,7 +10,7 @@ interface SsgoiProviderProps {
 }
 
 export function SsgoiProvider({ children }: SsgoiProviderProps) {
- const isMobile = useMobile();
+  const isMobile = useMobile();
   const config = useMemo<SsgoiConfig>(
     () => ({
       transitions: isMobile
