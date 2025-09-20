@@ -83,9 +83,13 @@ function HomePage() {
             <div className="group relative aspect-[2/3] bg-gradient-to-br from-purple-900 to-purple-700 rounded-lg overflow-hidden">
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">Drama • 2024</div>
+                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">
+                  Drama • 2024
+                </div>
                 <h3 className="text-2xl font-bold text-white mb-2">The Fade</h3>
-                <p className="text-gray-300 text-sm">A smooth transition between parallel worlds</p>
+                <p className="text-gray-300 text-sm">
+                  A smooth transition between parallel worlds
+                </p>
               </div>
               <div className="absolute top-4 right-4 bg-yellow-500 text-black px-2 py-1 text-xs font-bold rounded">
                 PREMIERE
@@ -95,9 +99,15 @@ function HomePage() {
             <div className="group relative aspect-[2/3] bg-gradient-to-br from-blue-900 to-cyan-700 rounded-lg overflow-hidden">
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">Action • 2024</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Drill Down</h3>
-                <p className="text-gray-300 text-sm">Dive deep into layered narratives</p>
+                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">
+                  Action • 2024
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Drill Down
+                </h3>
+                <p className="text-gray-300 text-sm">
+                  Dive deep into layered narratives
+                </p>
               </div>
               <div className="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">
                 HOT
@@ -107,9 +117,15 @@ function HomePage() {
             <div className="group relative aspect-[2/3] bg-gradient-to-br from-pink-900 to-orange-700 rounded-lg overflow-hidden">
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">Epic • 2024</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Hero's Journey</h3>
-                <p className="text-gray-300 text-sm">Shared elements across epic scenes</p>
+                <div className="text-white/80 text-xs uppercase tracking-wider mb-2">
+                  Epic • 2024
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Hero's Journey
+                </h3>
+                <p className="text-gray-300 text-sm">
+                  Shared elements across epic scenes
+                </p>
               </div>
               <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 text-xs font-bold rounded">
                 4K
@@ -123,12 +139,16 @@ function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500">
             <div className="text-center">
               <div className="text-3xl mb-2">🏆</div>
-              <div className="text-xs uppercase tracking-wider">Best Transition</div>
+              <div className="text-xs uppercase tracking-wider">
+                Best Transition
+              </div>
               <div className="text-xs">Webby Awards</div>
             </div>
             <div className="text-center">
               <div className="text-3xl mb-2">🎭</div>
-              <div className="text-xs uppercase tracking-wider">UX Excellence</div>
+              <div className="text-xs uppercase tracking-wider">
+                UX Excellence
+              </div>
               <div className="text-xs">Awwwards</div>
             </div>
             <div className="text-center">
@@ -148,10 +168,7 @@ function FeaturesPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/film/features"
-      className="bg-black min-h-full"
-    >
+    <DemoPage path="/film/features" className="bg-black min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -177,13 +194,25 @@ function FeaturesPage() {
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-lg border border-gray-800">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-red-600/10 rounded-lg">
-                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">Cinematography</h3>
-                <p className="text-gray-500 text-sm">Visual storytelling essentials</p>
+                <p className="text-gray-500 text-sm">
+                  Visual storytelling essentials
+                </p>
               </div>
             </div>
             <div className="space-y-4">
@@ -191,21 +220,29 @@ function FeaturesPage() {
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2" />
                 <div>
                   <div className="text-white font-semibold">Depth of Field</div>
-                  <div className="text-gray-400 text-sm">Layer-based focus transitions with blur effects</div>
+                  <div className="text-gray-400 text-sm">
+                    Layer-based focus transitions with blur effects
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">Camera Movement</div>
-                  <div className="text-gray-400 text-sm">Smooth panning, tilting, and tracking shots</div>
+                  <div className="text-white font-semibold">
+                    Camera Movement
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    Smooth panning, tilting, and tracking shots
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2" />
                 <div>
                   <div className="text-white font-semibold">Aspect Ratios</div>
-                  <div className="text-gray-400 text-sm">Cinematic widescreen to vertical mobile</div>
+                  <div className="text-gray-400 text-sm">
+                    Cinematic widescreen to vertical mobile
+                  </div>
                 </div>
               </div>
             </div>
@@ -215,13 +252,27 @@ function FeaturesPage() {
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-lg border border-gray-800">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-purple-600/10 rounded-lg">
-                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 12h18M3 8h18M3 16h18" />
+                <svg
+                  className="w-6 h-6 text-purple-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 4v16M17 4v16M3 12h18M3 8h18M3 16h18"
+                  />
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Post-Production</h3>
-                <p className="text-gray-500 text-sm">Professional editing suite</p>
+                <h3 className="text-xl font-bold text-white">
+                  Post-Production
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  Professional editing suite
+                </p>
               </div>
             </div>
             <div className="space-y-4">
@@ -229,21 +280,31 @@ function FeaturesPage() {
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2" />
                 <div>
                   <div className="text-white font-semibold">Color Grading</div>
-                  <div className="text-gray-400 text-sm">Custom palettes for each transition</div>
+                  <div className="text-gray-400 text-sm">
+                    Custom palettes for each transition
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">Timeline Control</div>
-                  <div className="text-gray-400 text-sm">Precise timing with spring physics</div>
+                  <div className="text-white font-semibold">
+                    Timeline Control
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    Precise timing with spring physics
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">Special Effects</div>
-                  <div className="text-gray-400 text-sm">Particle systems and visual enhancements</div>
+                  <div className="text-white font-semibold">
+                    Special Effects
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    Particle systems and visual enhancements
+                  </div>
                 </div>
               </div>
             </div>
@@ -252,7 +313,9 @@ function FeaturesPage() {
 
         {/* Transition Techniques */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white mb-8">Signature Techniques</h2>
+          <h2 className="text-2xl font-bold text-white mb-8">
+            Signature Techniques
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
               { name: "fade", status: "classic" },
@@ -260,7 +323,7 @@ function FeaturesPage() {
               { name: "scroll", status: "dynamic" },
               { name: "hero", status: "epic" },
               { name: "pinterest", status: "modern" },
-              { name: "drill", status: "bold" }
+              { name: "drill", status: "bold" },
             ].map((technique) => (
               <div
                 key={technique.name}
@@ -268,14 +331,20 @@ function FeaturesPage() {
                   "relative p-4 rounded-lg text-center border transition-all hover:scale-105",
                   technique.name === "film"
                     ? "bg-gradient-to-br from-red-900/20 to-red-800/20 border-red-600/50"
-                    : "bg-gray-900 border-gray-800 hover:border-gray-700"
+                    : "bg-gray-900 border-gray-800 hover:border-gray-700",
                 )}
               >
-                <div className="text-white font-mono text-sm mb-1">{technique.name}()</div>
-                <div className={cn(
-                  "text-xs uppercase tracking-wider",
-                  technique.name === "film" ? "text-red-400" : "text-gray-500"
-                )}>
+                <div className="text-white font-mono text-sm mb-1">
+                  {technique.name}()
+                </div>
+                <div
+                  className={cn(
+                    "text-xs uppercase tracking-wider",
+                    technique.name === "film"
+                      ? "text-red-400"
+                      : "text-gray-500",
+                  )}
+                >
                   {technique.status}
                 </div>
                 {technique.name === "film" && (
@@ -290,20 +359,30 @@ function FeaturesPage() {
 
         {/* Technical Specs */}
         <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-8 rounded-lg border border-gray-800">
-          <h3 className="text-xl font-bold text-white mb-6">Technical Specifications</h3>
+          <h3 className="text-xl font-bold text-white mb-6">
+            Technical Specifications
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Performance</div>
+              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                Performance
+              </div>
               <div className="text-3xl font-bold text-white">60 FPS</div>
-              <div className="text-gray-500 text-sm">Buttery smooth animations</div>
+              <div className="text-gray-500 text-sm">
+                Buttery smooth animations
+              </div>
             </div>
             <div>
-              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Bundle Size</div>
+              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                Bundle Size
+              </div>
               <div className="text-3xl font-bold text-white">&lt;15KB</div>
               <div className="text-gray-500 text-sm">Lightweight and fast</div>
             </div>
             <div>
-              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Compatibility</div>
+              <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                Compatibility
+              </div>
               <div className="text-3xl font-bold text-white">100%</div>
               <div className="text-gray-500 text-sm">All modern browsers</div>
             </div>
@@ -325,7 +404,8 @@ function ExamplesPage() {
       year: "2024",
       genre: "Psychological Thriller",
       rating: "9.2",
-      image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&h=750&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&h=750&fit=crop",
       awards: ["🏆 Best Cinematography", "🎬 Directors Choice"],
     },
     {
@@ -334,7 +414,8 @@ function ExamplesPage() {
       year: "2024",
       genre: "Science Fiction",
       rating: "8.9",
-      image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=500&h=750&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=500&h=750&fit=crop",
       awards: ["✨ Visual Effects", "🎵 Best Score"],
     },
     {
@@ -343,7 +424,8 @@ function ExamplesPage() {
       year: "2024",
       genre: "Art House",
       rating: "8.7",
-      image: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=500&h=750&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=500&h=750&fit=crop",
       awards: ["🎨 Art Direction", "📝 Original Screenplay"],
     },
     {
@@ -352,16 +434,14 @@ function ExamplesPage() {
       year: "2024",
       genre: "Action Thriller",
       rating: "8.5",
-      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&h=750&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&h=750&fit=crop",
       awards: ["💥 Best Action", "🎭 Supporting Actor"],
     },
   ];
 
   return (
-    <DemoPage
-      path="/film/examples"
-      className="bg-black min-h-full"
-    >
+    <DemoPage path="/film/examples" className="bg-black min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -416,7 +496,10 @@ function ExamplesPage() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {film.awards.map((award, i) => (
-                      <span key={i} className="text-xs bg-black/50 backdrop-blur px-2 py-1 rounded text-gray-300">
+                      <span
+                        key={i}
+                        className="text-xs bg-black/50 backdrop-blur px-2 py-1 rounded text-gray-300"
+                      >
                         {award}
                       </span>
                     ))}
@@ -432,22 +515,30 @@ function ExamplesPage() {
 
         {/* Behind the Scenes */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-lg border border-gray-800">
-          <h2 className="text-2xl font-bold text-white mb-6">Behind the Scenes</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">
+            Behind the Scenes
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <div className="text-purple-400 font-semibold mb-2">Pre-Production</div>
+              <div className="text-purple-400 font-semibold mb-2">
+                Pre-Production
+              </div>
               <p className="text-gray-400 text-sm">
                 Storyboarding transitions with precise timing and visual flow
               </p>
             </div>
             <div>
-              <div className="text-purple-400 font-semibold mb-2">Production</div>
+              <div className="text-purple-400 font-semibold mb-2">
+                Production
+              </div>
               <p className="text-gray-400 text-sm">
                 Capturing smooth animations with 60fps performance
               </p>
             </div>
             <div>
-              <div className="text-purple-400 font-semibold mb-2">Post-Production</div>
+              <div className="text-purple-400 font-semibold mb-2">
+                Post-Production
+              </div>
               <p className="text-gray-400 text-sm">
                 Fine-tuning spring physics for natural motion
               </p>
@@ -464,10 +555,7 @@ function GettingStartedPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/film/start"
-      className="bg-black min-h-full"
-    >
+    <DemoPage path="/film/start" className="bg-black min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -501,7 +589,9 @@ function GettingStartedPage() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-2xl font-bold text-red-500">SCENE 1</div>
                 <div className="text-gray-500">|</div>
-                <div className="text-gray-400 uppercase tracking-wider text-sm">Installation</div>
+                <div className="text-gray-400 uppercase tracking-wider text-sm">
+                  Installation
+                </div>
               </div>
               <p className="text-gray-300 mb-6">
                 Begin your journey with a simple installation
@@ -526,9 +616,13 @@ function GettingStartedPage() {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600" />
             <div className="p-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-2xl font-bold text-purple-500">SCENE 2</div>
+                <div className="text-2xl font-bold text-purple-500">
+                  SCENE 2
+                </div>
                 <div className="text-gray-500">|</div>
-                <div className="text-gray-400 uppercase tracking-wider text-sm">Configuration</div>
+                <div className="text-gray-400 uppercase tracking-wider text-sm">
+                  Configuration
+                </div>
               </div>
               <p className="text-gray-300 mb-6">
                 Set the stage with FILM transition
@@ -570,7 +664,9 @@ export default function App() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-2xl font-bold text-pink-500">SCENE 3</div>
                 <div className="text-gray-500">|</div>
-                <div className="text-gray-400 uppercase tracking-wider text-sm">Action</div>
+                <div className="text-gray-400 uppercase tracking-wider text-sm">
+                  Action
+                </div>
               </div>
               <p className="text-gray-300 mb-6">
                 Wrap your scenes with transition magic
@@ -580,7 +676,9 @@ export default function App() {
                   <div className="w-3 h-3 bg-red-500 rounded-full" />
                   <div className="w-3 h-3 bg-yellow-500 rounded-full" />
                   <div className="w-3 h-3 bg-green-500 rounded-full" />
-                  <span className="text-gray-500 text-xs ml-2">HomePage.tsx</span>
+                  <span className="text-gray-500 text-xs ml-2">
+                    HomePage.tsx
+                  </span>
                 </div>
                 <pre className="text-gray-300 font-mono text-sm overflow-x-auto">
                   <code>{`import { SsgoiTransition } from '@ssgoi/react';
@@ -603,23 +701,31 @@ export default function HomePage() {
           <div className="relative bg-gradient-to-r from-red-900/20 to-purple-900/20 p-8 rounded-lg border border-purple-600/30">
             <div className="text-center">
               <div className="text-6xl mb-4">🎬</div>
-              <h2 className="text-2xl font-bold text-white mb-4">That's a Wrap!</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                That's a Wrap!
+              </h2>
               <p className="text-gray-300 max-w-2xl mx-auto">
-                Your application now features cinematic FILM transitions.
-                Every page change becomes a carefully crafted scene transition,
+                Your application now features cinematic FILM transitions. Every
+                page change becomes a carefully crafted scene transition,
                 creating an immersive experience for your audience.
               </p>
               <div className="flex flex-wrap justify-center gap-4 mt-6">
                 <div className="px-4 py-2 bg-black/50 rounded-lg border border-gray-700">
-                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Runtime</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                    Runtime
+                  </div>
                   <div className="text-white font-bold">60 FPS</div>
                 </div>
                 <div className="px-4 py-2 bg-black/50 rounded-lg border border-gray-700">
-                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Format</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                    Format
+                  </div>
                   <div className="text-white font-bold">Web</div>
                 </div>
                 <div className="px-4 py-2 bg-black/50 rounded-lg border border-gray-700">
-                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Rating</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                    Rating
+                  </div>
                   <div className="text-white font-bold">★★★★★</div>
                 </div>
               </div>
