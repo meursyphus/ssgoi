@@ -125,9 +125,13 @@ function createScrollManager() {
     };
   };
 
+  // Getter for scroll container - returns null if not initialized yet
+  const getScrollContainer = () => scrollContainer;
+
   return {
     startScrollTracking,
     calculateScrollOffset,
+    getScrollContainer,
   };
 }
 
@@ -159,7 +163,7 @@ export function createSggoiTransitionContext(
   const processedTransitions = processSymmetricTransitions(transitions);
 
   // Initialize scroll manager
-  const { startScrollTracking, calculateScrollOffset } = createScrollManager();
+  const { startScrollTracking, calculateScrollOffset, getScrollContainer } = createScrollManager();
 
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
@@ -179,7 +183,13 @@ export function createSggoiTransitionContext(
         pendingTransition.from,
         pendingTransition.to,
       );
-      const context = { scrollOffset };
+      const context = {
+        scrollOffset,
+        get scrollingElement() {
+          // Use lazy evaluation - get scrollContainer when actually accessed
+          return getScrollContainer() || document.documentElement;
+        }
+      };
 
       if (result) {
         if (result.out && pendingTransition.outResolve) {

@@ -63,8 +63,24 @@ export type TransitionCallback = (
   element: HTMLElement | null,
 ) => void | (() => void);
 
+/**
+ * Context object passed to view transitions
+ * Provides essential information for smooth page transitions
+ */
 export type SggoiTransitionContext = {
+  /**
+   * The scroll position difference between 'from' and 'to' pages
+   * Used in hero and pinterest transitions to maintain natural scroll position
+   * when transitioning between pages with different scroll states
+   */
   scrollOffset: { x: number; y: number };
+
+  /**
+   * The scrollable container element (document.documentElement or custom container)
+   * Provides viewport dimensions for calculating transition animations
+   * Lazy-evaluated to handle delayed initialization
+   */
+  scrollingElement: HTMLElement;
 };
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;
