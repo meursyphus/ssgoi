@@ -90,7 +90,7 @@ export default function Home() {
                 e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              🎯 Demo Hero Rotate Animation
+              🔥 Demo Tunnel Emergence Animation
             </Link>
           </div>
         </div>
