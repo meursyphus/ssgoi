@@ -38,8 +38,8 @@ export default function RotatePage() {
             lineHeight: "1.6",
           }}
         >
-          This page demonstrates the hero rotate transition with a 45° rotation
-          and scaling effect. The transition shows:
+          This page demonstrates the enhanced hero rotate transition with
+          dramatic tunnel emergence effect and staggered timing phases:
         </p>
 
         <div
@@ -58,15 +58,20 @@ export default function RotatePage() {
               margin: "0",
             }}
           >
-            <li style={{ marginBottom: "1rem" }}>✨ Previous page fades out</li>
             <li style={{ marginBottom: "1rem" }}>
-              🎯 This page appears rotated 45° and scaled down
+              ✨ Previous page fades out smoothly
             </li>
             <li style={{ marginBottom: "1rem" }}>
-              📈 Gradually scales up to 2/3 size
+              🔥 Page emerges from tiny dot with 45° rotation
             </li>
             <li style={{ marginBottom: "1rem" }}>
-              🔄 Rotates back to 0° while filling screen
+              📈 Ultra-slow scaling growth (0-70%)
+            </li>
+            <li style={{ marginBottom: "1rem" }}>
+              🔄 Rotation starts at 70% progress
+            </li>
+            <li style={{ marginBottom: "1rem" }}>
+              ⚡ Final dramatic expansion with glow effect (80-100%)
             </li>
           </ul>
         </div>
