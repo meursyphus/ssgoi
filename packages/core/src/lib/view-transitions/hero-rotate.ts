@@ -80,11 +80,14 @@ export const heroRotate = (
         tick: (progress) => {
           // Calculate current scale - very slow growth to rotationTriggerPoint, then final push
           let currentScale: number;
-          if (progress <= rotationTriggerPoint) {
-            // Very gradual scaling from 0.01 to about 0.8 by trigger point (80%)
-            const scaleProgress = progress / rotationTriggerPoint;
-            // Ultra slow ease - nonic (^9) for extremely slow start
-            const easedProgress = Math.pow(scaleProgress, 9); // Nonic for ultra slow start
+          if (progress <= 0.05) {
+            // Entry phase (0-5%): stay very small
+            currentScale = initialScale;
+          } else if (progress <= rotationTriggerPoint) {
+            // Trans phase (5-80%): gradual growth with nonic curve
+            const transProgress =
+              (progress - 0.05) / (rotationTriggerPoint - 0.05);
+            const easedProgress = Math.pow(transProgress, 9); // Nonic for ultra slow start
             currentScale = initialScale + (0.8 - initialScale) * easedProgress;
           } else {
             // Final 20%: scale from 0.8 to 1.0
