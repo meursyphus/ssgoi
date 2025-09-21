@@ -28,7 +28,7 @@ export const heroRotate = (
 
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
-  const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.7; // 70% point for dramatic final transformation
+  const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
 
   return {
     out: async (element) => {
@@ -83,8 +83,8 @@ export const heroRotate = (
           if (progress <= rotationTriggerPoint) {
             // Very gradual scaling from 0.01 to about 0.8 by trigger point (80%)
             const scaleProgress = progress / rotationTriggerPoint;
-            // Extremely slow ease - septic (^7) for ultra slow start
-            const easedProgress = Math.pow(scaleProgress, 7); // Septic for ultra slow start
+            // Ultra slow ease - nonic (^9) for extremely slow start
+            const easedProgress = Math.pow(scaleProgress, 9); // Nonic for ultra slow start
             currentScale = initialScale + (0.8 - initialScale) * easedProgress;
           } else {
             // Final 20%: scale from 0.8 to 1.0
@@ -118,17 +118,18 @@ export const heroRotate = (
             currentBorderRadius = maxBorderRadius * (1 - easedBorderProgress);
           }
 
-          // Calculate rotation - using rotationTriggerPoint
+          // Calculate rotation - starts earlier than scale for more natural movement
           let currentRotation: number;
-          if (progress <= rotationTriggerPoint) {
-            // Keep full rotation until trigger point (80%)
-            currentRotation = initialRotation; // No rotation change until 80%
+          const rotationStartPoint = 0.7; // Start rotation at 70%
+          if (progress <= rotationStartPoint) {
+            // Keep full rotation until 70%
+            currentRotation = initialRotation;
           } else {
-            // Final 20%: rotate from full to 0 degrees (all rotation happens here)
+            // 70-100%: rotate from full to 0 degrees (rotation phase)
             const finalProgress =
-              (progress - rotationTriggerPoint) / (1 - rotationTriggerPoint);
+              (progress - rotationStartPoint) / (1 - rotationStartPoint);
             const easedFinalProgress = 1 - Math.pow(1 - finalProgress, 2);
-            currentRotation = initialRotation * (1 - easedFinalProgress); // Complete rotation
+            currentRotation = initialRotation * (1 - easedFinalProgress);
           }
 
           // Apply the combined transform with tunnel effect
