@@ -1,7 +1,11 @@
 "use client";
 
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { hero, heroRotate } from "@ssgoi/react/view-transitions";
+import {
+  hero,
+  heroRotate,
+  heroRotateReverse,
+} from "@ssgoi/react/view-transitions";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
@@ -13,12 +17,17 @@ const ssgoiConfig: SsgoiConfig = {
       transition: hero({ spring: { stiffness: 5, damping: 1 } }),
       symmetric: true,
     },
-    // Hero rotate transition for rotation demo
+    // Hero rotate transition for rotation demo - forward
     {
       from: "/",
       to: "/rotate",
       transition: heroRotate(),
-      symmetric: true,
+    },
+    // Hero rotate reverse transition - backward
+    {
+      from: "/rotate",
+      to: "/",
+      transition: heroRotateReverse(),
     },
   ],
 };
