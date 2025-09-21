@@ -286,7 +286,7 @@ export function createSggoiTransitionContext(
     }
   };
 
-  return (path: string) => {
+  const ssgoiContext = (path: string) => {
     return {
       key: path,
       in: async (element: HTMLElement) => {
@@ -304,6 +304,8 @@ export function createSggoiTransitionContext(
       [TRANSITION_STRATEGY]: createPageTransitionStrategy,
     };
   };
+
+  return ssgoiContext;
 }
 
 /**
