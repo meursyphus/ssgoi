@@ -1,5 +1,4 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface HeroRotateOptions {
   spring?: Partial<SpringConfig>;
@@ -22,27 +21,38 @@ export const heroRotate = (
   options: HeroRotateOptions = {},
 ): SggoiTransition => {
   const spring: SpringConfig = {
-    // Matched to analyzed timing: 1.728s with ease-out characteristics
-    stiffness: options.spring?.stiffness ?? 180,
-    damping: options.spring?.damping ?? 25,
+    // Much slower animation - 4x duration by reducing stiffness further
+    stiffness: options.spring?.stiffness ?? 50,
+    damping: options.spring?.damping ?? 30,
   };
 
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
-  const initialScale = options.initialScale ?? 0.3; // Small initial size
-  const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.66; // 2/3 point from description
+  const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
+  const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.7; // 70% point for dramatic final transformation
 
   return {
     out: async (element) => {
+      // Store original styles for cleanup
+      const originalOpacity = element.style.opacity;
+
       return {
-        spring,
+        spring: {
+          stiffness: 300, // Faster spring for quick fade out
+          damping: 25,
+        },
         from: 1,
         to: 0,
-        prepare: (element) => {
-          prepareOutgoing(element);
+        prepare: () => {
+          // Ensure element is visible at start
+          element.style.opacity = "1";
         },
         tick: (progress) => {
-          // Fade out the outgoing page
+          // Simple linear fade out - no rotation or scaling
           element.style.opacity = String(progress);
+        },
+        onEnd: () => {
+          // Reset opacity
+          element.style.opacity = originalOpacity;
         },
       };
     },
@@ -58,7 +68,7 @@ export const heroRotate = (
         from: 0,
         to: 1,
         prepare: () => {
-          // Set up the incoming page for animation
+          // Set up the incoming page for animation with stable positioning
           element.style.transformOrigin = "center center";
           element.style.position = "relative";
           element.style.zIndex = "1000";
@@ -68,30 +78,132 @@ export const heroRotate = (
           element.style.opacity = "1";
         },
         tick: (progress) => {
-          // Calculate current scale (from initialScale to 1.0)
-          const currentScale = initialScale + (1 - initialScale) * progress;
-
-          // Calculate rotation based on trigger point
-          let currentRotation: number;
+          // Calculate current scale - very slow growth to rotationTriggerPoint, then final push
+          let currentScale: number;
           if (progress <= rotationTriggerPoint) {
-            // No rotation change until trigger point
-            currentRotation = initialRotation;
+            // Very gradual scaling from 0.01 to about 0.8 by trigger point (80%)
+            const scaleProgress = progress / rotationTriggerPoint;
+            // Extremely slow ease - septic (^7) for ultra slow start
+            const easedProgress = Math.pow(scaleProgress, 7); // Septic for ultra slow start
+            currentScale = initialScale + (0.8 - initialScale) * easedProgress;
           } else {
-            // Rotate from initialRotation to 0 after trigger point
-            const rotationProgress =
+            // Final 20%: scale from 0.8 to 1.0
+            const finalProgress =
               (progress - rotationTriggerPoint) / (1 - rotationTriggerPoint);
-            currentRotation = initialRotation * (1 - rotationProgress);
+            const easedFinalProgress = 1 - Math.pow(1 - finalProgress, 3);
+            currentScale = 0.8 + 0.2 * easedFinalProgress;
           }
 
-          // Apply the combined transform
-          element.style.transform = `rotate(${currentRotation}deg) scale(${currentScale})`;
+          // Add dramatic glow effect during final transformation
+          let glowIntensity = 0;
+          if (progress > rotationTriggerPoint) {
+            const glowProgress =
+              (progress - rotationTriggerPoint) / (1 - rotationTriggerPoint);
+            glowIntensity = Math.pow(glowProgress, 2) * 3; // Intense glow in final 20%
+          }
+          const boxShadow = `0 0 ${glowIntensity * 60}px rgba(255, 255, 255, ${glowIntensity * 0.4})`;
+
+          // Border radius effect: starts very round, becomes rectangular in final 20%
+          const maxBorderRadius =
+            Math.min(window.innerWidth, window.innerHeight) * 0.5;
+          let currentBorderRadius: number;
+          if (progress <= rotationTriggerPoint) {
+            // Keep circular until trigger point (80%)
+            currentBorderRadius = maxBorderRadius;
+          } else {
+            // Quickly become rectangular in final 20%
+            const borderProgress =
+              (progress - rotationTriggerPoint) / (1 - rotationTriggerPoint);
+            const easedBorderProgress = Math.pow(borderProgress, 2); // Ease-in for quick change
+            currentBorderRadius = maxBorderRadius * (1 - easedBorderProgress);
+          }
+
+          // Calculate rotation - using rotationTriggerPoint
+          let currentRotation: number;
+          if (progress <= rotationTriggerPoint) {
+            // Keep full rotation until trigger point (80%)
+            currentRotation = initialRotation; // No rotation change until 80%
+          } else {
+            // Final 20%: rotate from full to 0 degrees (all rotation happens here)
+            const finalProgress =
+              (progress - rotationTriggerPoint) / (1 - rotationTriggerPoint);
+            const easedFinalProgress = 1 - Math.pow(1 - finalProgress, 2);
+            currentRotation = initialRotation * (1 - easedFinalProgress); // Complete rotation
+          }
+
+          // Apply the combined transform with tunnel effect
+          element.style.transform = `rotate(${currentRotation.toFixed(2)}deg) scale(${currentScale.toFixed(4)})`;
+          element.style.boxShadow = boxShadow;
+          element.style.borderRadius = `${currentBorderRadius.toFixed(2)}px`;
+          element.style.transition = "box-shadow 0.1s ease-out";
+          element.style.overflow = "hidden"; // Ensure content respects border radius
         },
         onEnd: () => {
-          // Reset to original styles
+          // Reset to original styles including tunnel effects
           element.style.transform = originalTransform;
           element.style.transformOrigin = originalTransformOrigin;
           element.style.position = originalPosition;
           element.style.zIndex = originalZIndex;
+          element.style.boxShadow = "";
+          element.style.transition = "";
+          element.style.borderRadius = "";
+          element.style.overflow = "";
+        },
+      };
+    },
+  };
+};
+
+/**
+ * Hero Rotate Reverse Transition
+ *
+ * Simple fade out for reverse navigation
+ */
+export const heroRotateReverse = (
+  options: Pick<HeroRotateOptions, "spring"> = {},
+): SggoiTransition => {
+  const spring: SpringConfig = {
+    // Fast fade out for reverse navigation
+    stiffness: options.spring?.stiffness ?? 300,
+    damping: options.spring?.damping ?? 25,
+  };
+
+  return {
+    out: async (element) => {
+      const originalOpacity = element.style.opacity;
+
+      return {
+        spring,
+        from: 1,
+        to: 0,
+        prepare: () => {
+          element.style.opacity = "1";
+        },
+        tick: (progress) => {
+          // Simple fade out
+          element.style.opacity = String(progress);
+        },
+        onEnd: () => {
+          element.style.opacity = originalOpacity;
+        },
+      };
+    },
+    in: async (element) => {
+      const originalOpacity = element.style.opacity;
+
+      return {
+        spring,
+        from: 0,
+        to: 1,
+        prepare: () => {
+          element.style.opacity = "0";
+        },
+        tick: (progress) => {
+          // Simple fade in
+          element.style.opacity = String(progress);
+        },
+        onEnd: () => {
+          element.style.opacity = originalOpacity;
         },
       };
     },
