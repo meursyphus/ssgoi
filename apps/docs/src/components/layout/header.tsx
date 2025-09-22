@@ -114,6 +114,17 @@ export function Header() {
             >
               {t("demo")}
             </Link>
+            <Link
+              href={`/${currentLang}/showcase`}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-orange-400",
+                isActive(`/${currentLang}/showcase`)
+                  ? "text-orange-400"
+                  : "text-gray-300",
+              )}
+            >
+              {t("showcase")}
+            </Link>
           </nav>
         </div>
 
