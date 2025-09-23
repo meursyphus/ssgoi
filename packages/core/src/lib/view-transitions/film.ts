@@ -120,7 +120,7 @@ function createCornerBorders(
 
   // Top-left corner
   const topLeft = document.createElement("div");
-  topLeft.style.position = "absolute";
+  topLeft.style.position = "fixed";
   topLeft.style.pointerEvents = "none";
   topLeft.style.zIndex = "9999";
   topLeft.style.top = `${rect.top - borderWidth}px`;
@@ -148,7 +148,7 @@ function createCornerBorders(
 
   // Top-right corner
   const topRight = document.createElement("div");
-  topRight.style.position = "absolute";
+  topRight.style.position = "fixed";
   topRight.style.pointerEvents = "none";
   topRight.style.zIndex = "9999";
   topRight.style.top = `${rect.top - borderWidth}px`;
@@ -176,7 +176,7 @@ function createCornerBorders(
 
   // Bottom-left corner
   const bottomLeft = document.createElement("div");
-  bottomLeft.style.position = "absolute";
+  bottomLeft.style.position = "fixed";
   bottomLeft.style.pointerEvents = "none";
   bottomLeft.style.zIndex = "9999";
   bottomLeft.style.top = `${rect.top + rect.height - borderLength + borderWidth}px`;
@@ -204,7 +204,7 @@ function createCornerBorders(
 
   // Bottom-right corner
   const bottomRight = document.createElement("div");
-  bottomRight.style.position = "absolute";
+  bottomRight.style.position = "fixed";
   bottomRight.style.pointerEvents = "none";
   bottomRight.style.zIndex = "9999";
   bottomRight.style.top = `${rect.top + rect.height - borderLength + borderWidth}px`;
@@ -253,11 +253,12 @@ export const film = (options?: FilmOptions): SggoiTransition => {
     out: async (element, context) => {
       // 나가는 화면 애니메이션
       const rect = getFilmRect(context);
+      const containerRect = getRect(document.body, context.positionedParent);
 
       // Create border elements before return
       const borderElements = createCornerBorders(borderColor, {
         ...rect,
-        top: 0,
+        top: containerRect.top,
       });
 
       return {
@@ -294,7 +295,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           if (progress < STAGE_1_END) {
             const stage1Progress = mapProgress(progress, 0, STAGE_1_END);
             const currentScale = 1 - (1 - scale) * stage1Progress; // 1 → scale
-            element.style.transform = `scale(${currentScale})`;
+            element.style.transform = `translateY(${-rect.top}px) scale(${currentScale})`;
 
             // Calculate how much the element has shrunk
             const offsetX = (rect.width - rect.width * currentScale) / 2;
@@ -345,9 +346,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
-          applyFlimTranslate(element, rect);
-
-          element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+          element.style.transform = `translateY(${-rect.top + rect.height}px) scale(${scale})`;
         },
         onEnd: () => {
           // Clean up styles after animation
