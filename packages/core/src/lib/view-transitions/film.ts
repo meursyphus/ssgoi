@@ -352,6 +352,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // Clean up styles after animation
           element.style.clipPath = "";
           element.style.transformOrigin = "";
+          element.style.transform = "";
         },
         tick: (progress) => {
           // IN: progress는 0 → 1로 진행
