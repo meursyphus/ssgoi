@@ -69,10 +69,12 @@ function processSymmetricTransitions(
 }
 
 /**
- * Creates a scroll tracking manager for preserving scroll positions between page transitions
+ * Creates a context manager for tracking transition-related information
+ * including scroll positions and DOM element relationships
  */
-function createScrollManager() {
+function createContextManager() {
   let scrollContainer: HTMLElement | null = null;
+  let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
 
@@ -86,8 +88,11 @@ function createScrollManager() {
     }
   };
 
-  // Start tracking scroll for a path - initializes scroll container and updates current path
-  const startScrollTracking = (element: HTMLElement, path: string) => {
+  // Initialize context with element - sets up scroll tracking and stores element for later use
+  const initializeContext = (element: HTMLElement, path: string) => {
+    // Store the element for positioned parent calculation
+    contextElement = element;
+
     // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
@@ -129,6 +134,12 @@ function createScrollManager() {
   // Getter for scroll container - returns null if not initialized yet
   const getScrollContainer = () => scrollContainer;
 
+  // Get positioned parent element - finds the nearest positioned ancestor
+  const getPositionedParentElement = () => {
+    if (!contextElement) return document.body;
+    return getPositionedParent(contextElement);
+  };
+
   // Get scroll position for a specific path
   const getScrollPosition = (path?: string): { x: number; y: number } => {
     return path && scrollPositions.has(path)
@@ -137,9 +148,10 @@ function createScrollManager() {
   };
 
   return {
-    startScrollTracking,
+    initializeContext,
     calculateScrollOffset,
     getScrollContainer,
+    getPositionedParentElement,
     getScrollPosition,
   };
 }
@@ -171,13 +183,14 @@ export function createSggoiTransitionContext(
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(transitions);
 
-  // Initialize scroll manager
+  // Initialize context manager
   const {
-    startScrollTracking,
+    initializeContext,
     calculateScrollOffset,
     getScrollContainer,
+    getPositionedParentElement,
     getScrollPosition,
-  } = createScrollManager();
+  } = createContextManager();
 
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
@@ -207,28 +220,25 @@ export function createSggoiTransitionContext(
           return getScrollContainer() || document.documentElement;
         },
         get positionedParent() {
-          // Use lazy evaluation - calculate positioned parent when accessed
-          const scrollContainer = getScrollContainer();
-          return scrollContainer
-            ? getPositionedParent(scrollContainer)
-            : document.body;
+          // Use lazy evaluation - get positioned parent from context manager
+          return getPositionedParentElement();
         },
       };
 
       // Create context for IN transition (to page)
       const inContext = {
         scrollOffset,
-        scroll: getScrollPosition(pendingTransition.to),
+        get scroll() {
+          if (!pendingTransition) return { x: 0, y: 0 };
+          return getScrollPosition(pendingTransition.to);
+        },
         get scrollingElement() {
           // Use lazy evaluation - get scrollContainer when actually accessed
           return getScrollContainer() || document.documentElement;
         },
         get positionedParent() {
-          // Use lazy evaluation - calculate positioned parent when accessed
-          const scrollContainer = getScrollContainer();
-          return scrollContainer
-            ? getPositionedParent(scrollContainer)
-            : document.body;
+          // Use lazy evaluation - get positioned parent from context manager
+          return getPositionedParentElement();
         },
       };
 
@@ -280,8 +290,8 @@ export function createSggoiTransitionContext(
     return {
       key: path,
       in: async (element: HTMLElement) => {
-        // Start scroll tracking for this path when element enters
-        startScrollTracking(element, path);
+        // Initialize context for this path when element enters
+        initializeContext(element, path);
 
         const transitionConfig = await getTransition(path, "in");
         return transitionConfig(element);

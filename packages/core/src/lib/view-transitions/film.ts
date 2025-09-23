@@ -32,10 +32,10 @@ interface FilmOptions {
  */
 function getFilmRect(context: SggoiTransitionContext) {
   const containerRect = getRect(document.body, context.positionedParent);
-  const scrollY = 0// context.scroll.y;
+  const top = context.scroll.y;
 
   return {
-    top: scrollY,
+    top,
     left: 0,
     width: containerRect.width,
     height: window.innerHeight - containerRect.top,
@@ -70,6 +70,10 @@ function applyFilmClip(
   )`;
 }
 
+function applyFlimTranslate(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+  element.style.transform = `translateY(${-rect.top}px)`;
+}
+
 /**
  * Map progress value from one range to another
  * e.g., mapProgress(0.2, 0, 0.4) = 0.5 (maps 0.2 in range 0-0.4 to 0.5 in range 0-1)
@@ -81,12 +85,28 @@ function mapProgress(progress: number, start: number, end: number): number {
 }
 
 /**
+ * Helper function to update border positions
+ */
+function updateBorders(borderElements: CornerBorders, offsetX: number, offsetY: number) {
+  borderElements.topLeft.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  borderElements.topRight.style.transform = `translate(${-offsetX}px, ${offsetY}px)`;
+  borderElements.bottomLeft.style.transform = `translate(${offsetX}px, ${-offsetY}px)`;
+  borderElements.bottomRight.style.transform = `translate(${-offsetX}px, ${-offsetY}px)`;
+}
+
+interface CornerBorders extends Iterable<HTMLElement> {
+  topLeft: HTMLElement;
+  topRight: HTMLElement;
+  bottomLeft: HTMLElement;
+  bottomRight: HTMLElement;
+}
+
+/**
  * Create corner border elements (ㄴ ㄱ shapes)
  */
-function createCornerBorders(color: string = "white", rect: ReturnType<typeof getFilmRect>): HTMLElement[] {
-  const borders: HTMLElement[] = [];
+function createCornerBorders(color: string = "white", rect: ReturnType<typeof getFilmRect>): CornerBorders {
   const borderWidth = 2;
-  const borderLength = 20;
+  const borderLength = 10;
 
   // Top-right corner (ㄱ shape)
   const topRight = document.createElement("div");
@@ -192,13 +212,23 @@ function createCornerBorders(color: string = "white", rect: ReturnType<typeof ge
   bottomRight.appendChild(bottomRightH);
   bottomRight.appendChild(bottomRightV);
 
-  borders.push(topRight, bottomLeft, topLeft, bottomRight);
-  return borders;
+  return {
+    topLeft,
+    topRight,
+    bottomLeft,
+    bottomRight,
+    *[Symbol.iterator]() {
+      yield topLeft;
+      yield topRight;
+      yield bottomLeft;
+      yield bottomRight;
+    }
+  };
 }
 
 export const film = (options?: FilmOptions): SggoiTransition => {
   const spring = options?.spring ?? DEFAULT_SPRING;
-  const scale = options?.scale ?? 0.9;
+  const scale = options?.scale ?? 0.92
   const borderColor = options?.border?.color ?? "white";
 
   return {
@@ -207,8 +237,8 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       const rect = getFilmRect(context);
 
       // Create border elements before return
-      const borderElements: HTMLElement[] = createCornerBorders(borderColor, rect);
-  
+      const borderElements = createCornerBorders(borderColor, rect);
+
 
       return {
         spring,
@@ -216,12 +246,12 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           prepareOutgoing(element);
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
+          applyFlimTranslate(element, rect);
 
-          // Add border elements as children
-          if (borderElements.length > 0) {
-            borderElements.forEach(border => {
-              element.appendChild(border);
-            });
+          // Add border elements to positionedParent with transition
+          for (const border of borderElements) {
+            context.positionedParent.appendChild(border);
+            border.style.transition = 'transform 0.18s ease-out';
           }
         },
         onEnd: () => {
@@ -229,13 +259,11 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           element.style.clipPath = "";
           element.style.transformOrigin = "";
 
-          // Remove border elements
-          if (borderElements.length > 0) {
-            borderElements.forEach(border => {
-              if (border.parentNode === element) {
-                element.removeChild(border);
-              }
-            });
+          // Remove border elements from positionedParent
+          for (const border of borderElements) {
+            if (border.parentNode === context.positionedParent) {
+              context.positionedParent.removeChild(border);
+            }
           }
         },
         tick: (_progress) => {
@@ -247,6 +275,13 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             const stage1Progress = mapProgress(progress, 0, STAGE_1_END);
             const currentScale = 1 - (1 - scale) * stage1Progress; // 1 → scale
             element.style.transform = `scale(${currentScale})`;
+
+            // Calculate how much the element has shrunk
+            const offsetX = (rect.width - rect.width * currentScale) / 2;
+            const offsetY = (rect.height - rect.height * currentScale) / 2;
+
+
+            updateBorders(borderElements, offsetX, offsetY);
           }
           // Stage 2 (0.3 ~ 0.7): scale 유지하며 위로 이동
           else if (progress < STAGE_2_END) {
@@ -256,14 +291,22 @@ export const film = (options?: FilmOptions): SggoiTransition => {
               STAGE_2_END,
             );
 
-            const translateY = -rect.height * stage2Progress; // 0 → -height
+            const translateY = -rect.top -rect.height * stage2Progress; // 0 → -height
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
+
+            // Borders stay at their final Stage 1 position (no update needed)
           }
           // Stage 3 (0.7 ~ 1.0): scale → 1로 확대하며 위에 유지
           else {
             const stage3Progress = mapProgress(progress, STAGE_2_END, 1.0);
             const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
-            element.style.transform = `translateY(${-rect.height}px) scale(${currentScale})`;
+            element.style.transform = `translateY(${-rect.top-rect.height}px) scale(${currentScale})`;
+
+            // Calculate current offset
+            const offsetX = (rect.width - rect.width * currentScale) / 2;
+            const offsetY = (rect.height - rect.height * currentScale) / 2;
+
+            updateBorders(borderElements, offsetX, offsetY);
           }
         },
       };
@@ -276,44 +319,28 @@ export const film = (options?: FilmOptions): SggoiTransition => {
 
       const rect = getFilmRect(context);
 
-      // Create border elements before return
-      const borderElements: HTMLElement[] = createCornerBorders(borderColor, rect);
+      // No borders for IN animation
 
       return {
         spring,
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
+          applyFlimTranslate(element, rect);
 
           element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
-
-          // Add border elements as children with initial translate
-          if (borderElements.length > 0) {
-            borderElements.forEach(border => {
-              element.appendChild(border);
-            });
-          }
         },
         onEnd: () => {
           // Clean up styles after animation
           element.style.clipPath = "";
           element.style.transformOrigin = "";
-
-          // Remove border elements
-          if (borderElements.length > 0) {
-            borderElements.forEach(border => {
-              if (border.parentNode === element) {
-                element.removeChild(border);
-              }
-            });
-          }
         },
         tick: (progress) => {
           // IN: progress는 0 → 1로 진행
           // Stage 1 (0 ~ 0.3): 대기 (화면 밖, 안 보임)
           if (progress < STAGE_1_END) {
             // 초기 위치 유지 (화면 아래)
-            element.style.transform = `translateY(${rect.height}px) scale(${scale})`;
+            element.style.transform = `translateY(${-rect.top + rect.height}px) scale(${scale})`;
             element.style.opacity = "0";
           }
           // Stage 2 (0.3 ~ 0.7): 아래에서 위로 올라옴
@@ -323,7 +350,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
               STAGE_1_END,
               STAGE_2_END,
             );
-            const translateY = rect.height * (1 - stage2Progress); // height → 0
+            const translateY = -rect.top + rect.height * (1 - stage2Progress); // height → 0
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
             element.style.opacity = "1";
           }
@@ -331,7 +358,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           else {
             const stage3Progress = mapProgress(progress, STAGE_2_END, 1.0);
             const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
-            element.style.transform = `scale(${currentScale})`;
+            element.style.transform = `translateY(${-rect.top}px) scale(${currentScale})`;
             element.style.opacity = "1";
           }
         },
