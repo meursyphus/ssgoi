@@ -70,7 +70,7 @@ export default function Home() {
               Jaemin Transition
             </h3>
             <Link
-              href="/rotate"
+              href="/jaemin"
               style={{
                 display: "inline-block",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",

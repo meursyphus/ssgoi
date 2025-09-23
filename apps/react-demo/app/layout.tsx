@@ -13,15 +13,15 @@ const ssgoiConfig: SsgoiConfig = {
       transition: hero({ spring: { stiffness: 5, damping: 1 } }),
       symmetric: true,
     },
-    // Jaemin transition for rotation demo - forward
+    // Jaemin transition for jaemin demo - forward
     {
       from: "/",
-      to: "/rotate",
+      to: "/jaemin",
       transition: jaemin(),
     },
     // Jaemin reverse transition - backward
     {
-      from: "/rotate",
+      from: "/jaemin",
       to: "/",
       transition: jaeminReverse(),
     },
