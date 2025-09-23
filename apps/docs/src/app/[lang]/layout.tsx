@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { StructuredData } from "./structured-data";
@@ -10,6 +10,12 @@ import { SsgoiProvider } from "@/components/layout/ssgoi";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["400", "500", "600", "700"],
 });
 
 export async function generateMetadata({
@@ -32,17 +38,17 @@ export default async function RootLayout({
   const { lang } = await params;
   return (
     <html lang={lang} suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+      >
         <TranslationsProvider lang={lang}>
           <StructuredData lang={lang} />
           <ConsoleWelcome />
 
-          <div className="relative">
-            <Header />
-            <main className="relative z-0 overflow-hidden">
-              <SsgoiProvider>{children}</SsgoiProvider>
-            </main>
-          </div>
+          <Header />
+          <main className="relative z-0 overflow-hidden pt-20">
+            <SsgoiProvider>{children}</SsgoiProvider>
+          </main>
         </TranslationsProvider>
       </body>
     </html>
