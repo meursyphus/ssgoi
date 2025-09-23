@@ -147,7 +147,7 @@ function createCornerBorders(
   topLeft.appendChild(topLeftV);
 
   // Top-right corner
-  const topRight = document.createElement("div");
+const topRight = document.createElement("div");
   topRight.style.position = "fixed";
   topRight.style.pointerEvents = "none";
   topRight.style.zIndex = "9999";

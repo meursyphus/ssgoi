@@ -22,7 +22,7 @@ export default function DemoWrapper({
     },
   };
   return (
-    <div className="h-full grow flex items-center justify-center bg-gray-100 lg:py-10">
+    <div className="h-[calc(100vh-80px)] grow flex items-center justify-center bg-gray-100 lg:py-10">
       <div className="w-full h-full lg:w-[390px] lg:h-[844px] lg:rounded-[3rem] overflow-hidden lg:border-8 lg:border-gray-900 lg:shadow-2xl">
         <RouterProvider
           currentPath={pathname.replace(`/${lang}`, "")}
