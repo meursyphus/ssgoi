@@ -67,7 +67,7 @@ export default function Home() {
                 color: "#333",
               }}
             >
-              Hero Rotate Transition
+              Jaemin Transition
             </h3>
             <Link
               href="/rotate"
