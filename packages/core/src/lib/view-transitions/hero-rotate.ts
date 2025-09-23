@@ -37,8 +37,8 @@ export const heroRotate = (
 
       return {
         spring: {
-          stiffness: 300, // Faster spring for quick fade out
-          damping: 25,
+          stiffness: 5, // Extremely slow fade out
+          damping: 20,
         },
         from: 1,
         to: 0,
@@ -167,8 +167,8 @@ export const heroRotateReverse = (
   options: Pick<HeroRotateOptions, "spring"> = {},
 ): SggoiTransition => {
   const spring: SpringConfig = {
-    // Fast fade out for reverse navigation
-    stiffness: options.spring?.stiffness ?? 300,
+    // Much slower, more visible fade out for reverse navigation
+    stiffness: options.spring?.stiffness ?? 80,
     damping: options.spring?.damping ?? 25,
   };
 
