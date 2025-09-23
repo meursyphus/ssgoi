@@ -255,7 +255,10 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       const rect = getFilmRect(context);
 
       // Create border elements before return
-      const borderElements = createCornerBorders(borderColor, {...rect, top: 0});
+      const borderElements = createCornerBorders(borderColor, {
+        ...rect,
+        top: 0,
+      });
 
       return {
         spring,
@@ -277,7 +280,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           element.style.transformOrigin = "";
 
           // Remove border elements from positionedParent
-          setTimeout(() => {  
+          setTimeout(() => {
             for (const border of borderElements) {
               context.positionedParent.removeChild(border);
             }
