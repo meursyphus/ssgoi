@@ -18,12 +18,12 @@ export function SsgoiProvider({ children }: SsgoiProviderProps) {
         : [
             // Apply film transition to non-demo pages
             {
-              from: "/non-demo/*",
+              from: "*",
               to: "/non-demo/*",
               transition: film(),
             },
           ],
-      defaultTransition: fade(),
+
       middleware(from, to) {
         // Transform paths: non-demo routes get prefixed with /non-demo
         const isDemoRoute = (path: string) => path.includes("/demo");

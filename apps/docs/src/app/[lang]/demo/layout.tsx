@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <SsgoiTransition id="/ssgoi/demo">
+    <SsgoiTransition className="h-full flex-1 flex flex-col" id="/ssgoi/demo">
       <DemoWrapper>{children}</DemoWrapper>
     </SsgoiTransition>
   );

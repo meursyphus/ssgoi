@@ -32,17 +32,17 @@ export default async function RootLayout({
   const { lang } = await params;
   return (
     <html lang={lang} suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased h-screen flex flex-col`}>
         <TranslationsProvider lang={lang}>
           <StructuredData lang={lang} />
           <ConsoleWelcome />
 
-          <div className="relative">
+
             <Header />
-            <main className="relative z-0 overflow-hidden">
+            <main className="relative z-0 overflow-hidden flex-1 flex flex-col">
               <SsgoiProvider>{children}</SsgoiProvider>
             </main>
-          </div>
+  
         </TranslationsProvider>
       </body>
     </html>
