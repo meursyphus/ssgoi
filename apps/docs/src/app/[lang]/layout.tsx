@@ -39,7 +39,7 @@ export default async function RootLayout({
 
           <div className="relative">
             <Header />
-            <main className="relative z-0">
+            <main className="relative z-0 overflow-hidden">
               <SsgoiProvider>{children}</SsgoiProvider>
             </main>
           </div>

@@ -18,7 +18,7 @@ export default function PostsDemo() {
 
   return (
     <SsgoiTransition id="/demo/posts">
-      <div className="min-h-screen bg-gray-950 px-4 py-8">
+      <div className="min-h-full bg-gray-950 px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Latest Posts</h1>
