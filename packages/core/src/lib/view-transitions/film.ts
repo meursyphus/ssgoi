@@ -70,7 +70,10 @@ function applyFilmClip(
   )`;
 }
 
-function applyFlimTranslate(element: HTMLElement, rect: ReturnType<typeof getFilmRect>) {
+function applyFlimTranslate(
+  element: HTMLElement,
+  rect: ReturnType<typeof getFilmRect>,
+) {
   element.style.transform = `translateY(${-rect.top}px)`;
 }
 
@@ -87,7 +90,11 @@ function mapProgress(progress: number, start: number, end: number): number {
 /**
  * Helper function to update border positions
  */
-function updateBorders(borderElements: CornerBorders, offsetX: number, offsetY: number) {
+function updateBorders(
+  borderElements: CornerBorders,
+  offsetX: number,
+  offsetY: number,
+) {
   borderElements.topLeft.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
   borderElements.topRight.style.transform = `translate(${-offsetX}px, ${offsetY}px)`;
   borderElements.bottomLeft.style.transform = `translate(${offsetX}px, ${-offsetY}px)`;
@@ -104,7 +111,10 @@ interface CornerBorders extends Iterable<HTMLElement> {
 /**
  * Create corner border elements (ㄴ ㄱ shapes)
  */
-function createCornerBorders(color: string = "white", rect: ReturnType<typeof getFilmRect>): CornerBorders {
+function createCornerBorders(
+  color: string = "white",
+  rect: ReturnType<typeof getFilmRect>,
+): CornerBorders {
   const borderWidth = 2;
   const borderLength = 10;
 
@@ -222,13 +232,13 @@ function createCornerBorders(color: string = "white", rect: ReturnType<typeof ge
       yield topRight;
       yield bottomLeft;
       yield bottomRight;
-    }
+    },
   };
 }
 
 export const film = (options?: FilmOptions): SggoiTransition => {
   const spring = options?.spring ?? DEFAULT_SPRING;
-  const scale = options?.scale ?? 0.92
+  const scale = options?.scale ?? 0.92;
   const borderColor = options?.border?.color ?? "white";
 
   return {
@@ -238,7 +248,6 @@ export const film = (options?: FilmOptions): SggoiTransition => {
 
       // Create border elements before return
       const borderElements = createCornerBorders(borderColor, rect);
-
 
       return {
         spring,
@@ -251,7 +260,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // Add border elements to positionedParent with transition
           for (const border of borderElements) {
             context.positionedParent.appendChild(border);
-            border.style.transition = 'transform 0.18s ease-out';
+            border.style.transition = "transform 0.18s ease-out";
           }
         },
         onEnd: () => {
@@ -280,7 +289,6 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             const offsetX = (rect.width - rect.width * currentScale) / 2;
             const offsetY = (rect.height - rect.height * currentScale) / 2;
 
-
             updateBorders(borderElements, offsetX, offsetY);
           }
           // Stage 2 (0.3 ~ 0.7): scale 유지하며 위로 이동
@@ -291,7 +299,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
               STAGE_2_END,
             );
 
-            const translateY = -rect.top -rect.height * stage2Progress; // 0 → -height
+            const translateY = -rect.top - rect.height * stage2Progress; // 0 → -height
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
 
             // Borders stay at their final Stage 1 position (no update needed)
@@ -300,7 +308,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           else {
             const stage3Progress = mapProgress(progress, STAGE_2_END, 1.0);
             const currentScale = scale + (1 - scale) * stage3Progress; // scale → 1
-            element.style.transform = `translateY(${-rect.top-rect.height}px) scale(${currentScale})`;
+            element.style.transform = `translateY(${-rect.top - rect.height}px) scale(${currentScale})`;
 
             // Calculate current offset
             const offsetX = (rect.width - rect.width * currentScale) / 2;
