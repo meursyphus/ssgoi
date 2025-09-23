@@ -118,65 +118,15 @@ function createCornerBorders(
   const borderWidth = 2;
   const borderLength = 10;
 
-  // Top-right corner (ㄱ shape)
-  const topRight = document.createElement("div");
-  topRight.style.position = "absolute";
-  topRight.style.pointerEvents = "none";
-  topRight.style.zIndex = "9999";
-  topRight.style.top = `${rect.top}px`;
-  topRight.style.left = `${rect.left + rect.width - borderLength}px`;
-  // Horizontal line
-  const topRightH = document.createElement("div");
-  topRightH.style.position = "absolute";
-  topRightH.style.width = `${borderLength}px`;
-  topRightH.style.height = `${borderWidth}px`;
-  topRightH.style.backgroundColor = color;
-  topRightH.style.top = "0";
-  topRightH.style.right = "0";
-  // Vertical line
-  const topRightV = document.createElement("div");
-  topRightV.style.position = "absolute";
-  topRightV.style.width = `${borderWidth}px`;
-  topRightV.style.height = `${borderLength}px`;
-  topRightV.style.backgroundColor = color;
-  topRightV.style.top = "0";
-  topRightV.style.right = "0";
-  topRight.appendChild(topRightH);
-  topRight.appendChild(topRightV);
-
-  // Bottom-left corner (ㄴ shape)
-  const bottomLeft = document.createElement("div");
-  bottomLeft.style.position = "absolute";
-  bottomLeft.style.pointerEvents = "none";
-  bottomLeft.style.zIndex = "9999";
-  bottomLeft.style.top = `${rect.top + rect.height - borderLength}px`;
-  bottomLeft.style.left = `${rect.left}px`;
-  // Horizontal line
-  const bottomLeftH = document.createElement("div");
-  bottomLeftH.style.position = "absolute";
-  bottomLeftH.style.width = `${borderLength}px`;
-  bottomLeftH.style.height = `${borderWidth}px`;
-  bottomLeftH.style.backgroundColor = color;
-  bottomLeftH.style.top = `${borderLength - borderWidth}px`;
-  bottomLeftH.style.left = "0";
-  // Vertical line
-  const bottomLeftV = document.createElement("div");
-  bottomLeftV.style.position = "absolute";
-  bottomLeftV.style.width = `${borderWidth}px`;
-  bottomLeftV.style.height = `${borderLength}px`;
-  bottomLeftV.style.backgroundColor = color;
-  bottomLeftV.style.top = "0";
-  bottomLeftV.style.left = "0";
-  bottomLeft.appendChild(bottomLeftH);
-  bottomLeft.appendChild(bottomLeftV);
-
-  // Top-left corner (rotated ㄱ)
+  // Top-left corner
   const topLeft = document.createElement("div");
   topLeft.style.position = "absolute";
   topLeft.style.pointerEvents = "none";
   topLeft.style.zIndex = "9999";
-  topLeft.style.top = `${rect.top}px`;
-  topLeft.style.left = `${rect.left}px`;
+  topLeft.style.top = `${rect.top - borderWidth}px`;
+  topLeft.style.left = `${rect.left - borderWidth}px`;
+  topLeft.style.width = `${borderLength}px`;
+  topLeft.style.height = `${borderLength}px`;
   // Horizontal line
   const topLeftH = document.createElement("div");
   topLeftH.style.position = "absolute";
@@ -196,29 +146,87 @@ function createCornerBorders(
   topLeft.appendChild(topLeftH);
   topLeft.appendChild(topLeftV);
 
-  // Bottom-right corner (rotated ㄴ)
+  // Top-right corner
+  const topRight = document.createElement("div");
+  topRight.style.position = "absolute";
+  topRight.style.pointerEvents = "none";
+  topRight.style.zIndex = "9999";
+  topRight.style.top = `${rect.top - borderWidth}px`;
+  topRight.style.left = `${rect.left + rect.width - borderLength + borderWidth}px`;
+  topRight.style.width = `${borderLength}px`;
+  topRight.style.height = `${borderLength}px`;
+  // Horizontal line
+  const topRightH = document.createElement("div");
+  topRightH.style.position = "absolute";
+  topRightH.style.width = `${borderLength}px`;
+  topRightH.style.height = `${borderWidth}px`;
+  topRightH.style.backgroundColor = color;
+  topRightH.style.top = "0";
+  topRightH.style.right = "0";
+  // Vertical line
+  const topRightV = document.createElement("div");
+  topRightV.style.position = "absolute";
+  topRightV.style.width = `${borderWidth}px`;
+  topRightV.style.height = `${borderLength}px`;
+  topRightV.style.backgroundColor = color;
+  topRightV.style.top = "0";
+  topRightV.style.right = "0";
+  topRight.appendChild(topRightH);
+  topRight.appendChild(topRightV);
+
+  // Bottom-left corner
+  const bottomLeft = document.createElement("div");
+  bottomLeft.style.position = "absolute";
+  bottomLeft.style.pointerEvents = "none";
+  bottomLeft.style.zIndex = "9999";
+  bottomLeft.style.top = `${rect.top + rect.height - borderLength + borderWidth}px`;
+  bottomLeft.style.left = `${rect.left - borderWidth}px`;
+  bottomLeft.style.width = `${borderLength}px`;
+  bottomLeft.style.height = `${borderLength}px`;
+  // Horizontal line
+  const bottomLeftH = document.createElement("div");
+  bottomLeftH.style.position = "absolute";
+  bottomLeftH.style.width = `${borderLength}px`;
+  bottomLeftH.style.height = `${borderWidth}px`;
+  bottomLeftH.style.backgroundColor = color;
+  bottomLeftH.style.bottom = "0";
+  bottomLeftH.style.left = "0";
+  // Vertical line
+  const bottomLeftV = document.createElement("div");
+  bottomLeftV.style.position = "absolute";
+  bottomLeftV.style.width = `${borderWidth}px`;
+  bottomLeftV.style.height = `${borderLength}px`;
+  bottomLeftV.style.backgroundColor = color;
+  bottomLeftV.style.bottom = "0";
+  bottomLeftV.style.left = "0";
+  bottomLeft.appendChild(bottomLeftH);
+  bottomLeft.appendChild(bottomLeftV);
+
+  // Bottom-right corner
   const bottomRight = document.createElement("div");
   bottomRight.style.position = "absolute";
   bottomRight.style.pointerEvents = "none";
   bottomRight.style.zIndex = "9999";
-  bottomRight.style.top = `${rect.top + rect.height - borderLength}px`;
-  bottomRight.style.left = `${rect.left + rect.width - borderLength}px`;
+  bottomRight.style.top = `${rect.top + rect.height - borderLength + borderWidth}px`;
+  bottomRight.style.left = `${rect.left + rect.width - borderLength + borderWidth}px`;
+  bottomRight.style.width = `${borderLength}px`;
+  bottomRight.style.height = `${borderLength}px`;
   // Horizontal line
   const bottomRightH = document.createElement("div");
   bottomRightH.style.position = "absolute";
   bottomRightH.style.width = `${borderLength}px`;
   bottomRightH.style.height = `${borderWidth}px`;
   bottomRightH.style.backgroundColor = color;
-  bottomRightH.style.top = `${borderLength - borderWidth}px`;
-  bottomRightH.style.left = "0";
+  bottomRightH.style.bottom = "0";
+  bottomRightH.style.right = "0";
   // Vertical line
   const bottomRightV = document.createElement("div");
   bottomRightV.style.position = "absolute";
   bottomRightV.style.width = `${borderWidth}px`;
   bottomRightV.style.height = `${borderLength}px`;
   bottomRightV.style.backgroundColor = color;
-  bottomRightV.style.top = "0";
-  bottomRightV.style.left = `${borderLength - borderWidth}px`;
+  bottomRightV.style.bottom = "0";
+  bottomRightV.style.right = "0";
   bottomRight.appendChild(bottomRightH);
   bottomRight.appendChild(bottomRightV);
 
@@ -247,7 +255,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       const rect = getFilmRect(context);
 
       // Create border elements before return
-      const borderElements = createCornerBorders(borderColor, rect);
+      const borderElements = createCornerBorders(borderColor, {...rect, top: 0});
 
       return {
         spring,
@@ -260,7 +268,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // Add border elements to positionedParent with transition
           for (const border of borderElements) {
             context.positionedParent.appendChild(border);
-            border.style.transition = "transform 0.18s ease-out";
+            border.style.transition = "transform 0.1s ease-out";
           }
         },
         onEnd: () => {
@@ -269,11 +277,11 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           element.style.transformOrigin = "";
 
           // Remove border elements from positionedParent
-          for (const border of borderElements) {
-            if (border.parentNode === context.positionedParent) {
+          setTimeout(() => {  
+            for (const border of borderElements) {
               context.positionedParent.removeChild(border);
             }
-          }
+          }, 1000);
         },
         tick: (_progress) => {
           // OUT: _progress는 1 → 0으로 진행
