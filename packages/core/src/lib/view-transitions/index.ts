@@ -3,7 +3,7 @@ export * from "./drill";
 export * from "./fade";
 export * from "./film";
 export * from "./hero";
-export * from "./hero-rotate";
+export * from "./jaemin";
 export * from "./pinterest";
 export * from "./scroll";
 export * from "./slide";
