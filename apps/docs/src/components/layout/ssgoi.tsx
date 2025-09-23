@@ -23,7 +23,7 @@ export function SsgoiProvider({ children }: SsgoiProviderProps) {
               transition: film(),
             },
           ],
-      defaultTransition: isMobile ? undefined : fade(),
+      defaultTransition: fade(),
       middleware(from, to) {
         // Transform paths: non-demo routes get prefixed with /non-demo
         const isDemoRoute = (path: string) => path.includes("/demo");
