@@ -29,7 +29,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
       out: (element, context) => ({
         spring,
         prepare: (element) => {
-          prepareOutgoing(element, context)
+          prepareOutgoing(element, context);
           element.style.zIndex = "-1";
         },
         tick: (progress) => {

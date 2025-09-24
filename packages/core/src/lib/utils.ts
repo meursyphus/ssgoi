@@ -1,4 +1,3 @@
-
 /**
  * Gets the scrolling element that contains the given element
  * Returns the first scrollable parent element or document.documentElement
