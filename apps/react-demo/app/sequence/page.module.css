@@ -1,0 +1,111 @@
+.toggleSection {
+  text-align: center;
+  margin-bottom: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.toggleButton {
+  padding: 0.875rem 2.5rem;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Stagger Section Styles */
+.staggerSection {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.subTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.staggerContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.staggerItem {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.staggerItemCircle {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+}
+
+.staggerItemSmall {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.staggerItemText {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .appTitle {
+    font-size: 2.5rem;
+  }
+
+  .shapesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+
+  .staggerContainer {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .staggerItem {
+    width: 60px;
+    height: 60px;
+  }
+
+  .staggerItemSmall {
+    width: 40px;
+    height: 40px;
+  }
+
+  .staggerItemText {
+    font-size: 0.75rem;
+  }
+}

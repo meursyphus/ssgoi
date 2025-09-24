@@ -343,7 +343,6 @@ function applySequenceTransition<TAnimationValue>(
       }
     };
 
-    queueMicrotask(keepCloneConnected);
     requestAnimationFrame(() => keepCloneConnected());
 
     const targetChildren = hasHostParent

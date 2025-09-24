@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SsgoiTransition, transition } from "@ssgoi/react";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { colors } from "../constants";
 
 // Shape container component that maintains size
 interface ShapeContainerProps {
@@ -18,16 +19,7 @@ function ShapeContainer({ label, children }: ShapeContainerProps) {
       <p className={styles.shapeLabel}>{label}</p>
     </div>
   );
-}
-
-const colors = [
-  { id: 1, color: "#FF6B6B", name: "Coral" },
-  { id: 2, color: "#4ECDC4", name: "Turquoise" },
-  { id: 3, color: "#45B7D1", name: "Sky Blue" },
-  { id: 4, color: "#96CEB4", name: "Sage" },
-  { id: 5, color: "#FECA57", name: "Sunflower" },
-  { id: 6, color: "#DDA0DD", name: "Plum" },
-];
+} //#endregion
 
 export default function Home() {
   const [showShapes, setShowShapes] = useState(true);
@@ -235,6 +227,11 @@ export default function Home() {
               )}
             </ShapeContainer>
           </div>
+        </div>
+        <div className={styles.toggleSection}>
+          <Link href="/sequence" className={styles.toggleButton}>
+            Sequence
+          </Link>
         </div>
       </div>
     </SsgoiTransition>
