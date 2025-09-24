@@ -1,4 +1,5 @@
 import type { SpringConfig, SggoiTransition } from "../types";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface JaeminOptions {
   spring?: Partial<SpringConfig>;
@@ -21,7 +22,7 @@ interface JaeminOptions {
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     // Much slower animation - 4x duration by reducing stiffness further
-    stiffness: options.spring?.stiffness ?? 50,
+    stiffness: options.spring?.stiffness ?? 100,
     damping: options.spring?.damping ?? 30,
   };
 
@@ -30,7 +31,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
 
   return {
-    out: async (element) => {
+    out: async (element, context) => {
       // Store original styles for cleanup
       const originalOpacity = element.style.opacity;
 
@@ -41,8 +42,9 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
         },
         from: 1,
         to: 0,
-        prepare: () => {
+        prepare: (element) => {
           // Ensure element is visible at start
+          prepareOutgoing(element, context);
           element.style.opacity = "1";
         },
         tick: (progress) => {
@@ -170,63 +172,6 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           element.style.height = "";
           element.style.overflow = "";
           element.style.borderRadius = "";
-        },
-      };
-    },
-  };
-};
-
-/**
- * Jaemin Reverse Transition
- *
- * Simple fade out for reverse navigation
- * Created by Jaemin
- */
-export const jaeminReverse = (
-  options: Pick<JaeminOptions, "spring"> = {},
-): SggoiTransition => {
-  const spring: SpringConfig = {
-    // Much slower, more visible fade out for reverse navigation
-    stiffness: options.spring?.stiffness ?? 80,
-    damping: options.spring?.damping ?? 25,
-  };
-
-  return {
-    out: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 1,
-        to: 0,
-        prepare: () => {
-          element.style.opacity = "1";
-        },
-        tick: (progress) => {
-          // Simple fade out
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
-        },
-      };
-    },
-    in: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 0,
-        to: 1,
-        prepare: () => {
-          element.style.opacity = "0";
-        },
-        tick: (progress) => {
-          // Simple fade in
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
         },
       };
     },
