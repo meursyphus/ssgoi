@@ -1,10 +1,31 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type {
+  SpringConfig,
+  SggoiTransition,
+  SggoiTransitionContext,
+} from "../types";
+import { getRect } from "../utils/get-rect";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface JaeminOptions {
   spring?: Partial<SpringConfig>;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
+}
+
+/**
+ * Calculate the visible viewport rect for jaemin transition
+ */
+function getJaeminRect(context: SggoiTransitionContext) {
+  const containerRect = getRect(document.body, context.positionedParent);
+  const top = context.scroll.y;
+
+  return {
+    top,
+    left: 0,
+    width: containerRect.width,
+    height: window.innerHeight - containerRect.top,
+  };
 }
 
 /**
@@ -30,7 +51,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
 
   return {
-    out: async (element) => {
+    out: async (element, context) => {
       // Store original styles for cleanup
       const originalOpacity = element.style.opacity;
 
@@ -43,6 +64,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
         to: 0,
         prepare: () => {
           // Ensure element is visible at start
+          prepareOutgoing(element, context);
           element.style.opacity = "1";
         },
         tick: (progress) => {
@@ -55,7 +77,9 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: async (element) => {
+    in: async (element, context) => {
+      const rect = getJaeminRect(context);
+
       // Store original styles for cleanup
       const originalTransform = element.style.transform;
       const originalTransformOrigin = element.style.transformOrigin;
@@ -68,8 +92,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
         to: 1,
         prepare: () => {
           // Calculate border radius once and store as CSS custom property
-          const maxBorderRadius =
-            Math.min(window.innerWidth, window.innerHeight) * 0.4;
+          const maxBorderRadius = Math.min(rect.width, rect.height) * 0.4;
           element.style.setProperty(
             "--max-border-radius",
             `${maxBorderRadius}px`,
@@ -80,13 +103,16 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           element.style.willChange = "transform";
           element.style.backfaceVisibility = "hidden";
 
-          // Set up the incoming page for animation with fixed viewport positioning
-          element.style.transformOrigin = "50% 50%";
+          // Set up transform origin to center of rect
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          element.style.transformOrigin = `${centerX}px ${centerY}px`;
+
           element.style.position = "fixed";
-          element.style.top = "0";
-          element.style.left = "0";
-          element.style.width = "100vw";
-          element.style.height = "100vh";
+          element.style.top = `${rect.top}px`;
+          element.style.left = `${rect.left}px`;
+          element.style.width = `${rect.width}px`;
+          element.style.height = `${rect.height}px`;
           element.style.zIndex = "1000";
           element.style.overflow = "hidden"; // Clip content during scaling
 
@@ -170,63 +196,6 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           element.style.height = "";
           element.style.overflow = "";
           element.style.borderRadius = "";
-        },
-      };
-    },
-  };
-};
-
-/**
- * Jaemin Reverse Transition
- *
- * Simple fade out for reverse navigation
- * Created by Jaemin
- */
-export const jaeminReverse = (
-  options: Pick<JaeminOptions, "spring"> = {},
-): SggoiTransition => {
-  const spring: SpringConfig = {
-    // Much slower, more visible fade out for reverse navigation
-    stiffness: options.spring?.stiffness ?? 80,
-    damping: options.spring?.damping ?? 25,
-  };
-
-  return {
-    out: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 1,
-        to: 0,
-        prepare: () => {
-          element.style.opacity = "1";
-        },
-        tick: (progress) => {
-          // Simple fade out
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
-        },
-      };
-    },
-    in: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 0,
-        to: 1,
-        prepare: () => {
-          element.style.opacity = "0";
-        },
-        tick: (progress) => {
-          // Simple fade in
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
         },
       };
     },

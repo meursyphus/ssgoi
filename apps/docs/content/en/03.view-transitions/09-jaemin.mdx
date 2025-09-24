@@ -1,0 +1,222 @@
+---
+title: "Jaemin Transition"
+description: "A creative transition effect using rotation and scale"
+nav-title: "Jaemin"
+---
+
+# Jaemin Transition
+
+The Jaemin transition is a creative transition effect created by [Jaemin Chun (elrion018)](https://github.com/elrion018). It provides a dramatic transition where the previous page fades out while the new page starts from a small dot and rotates to fill the entire screen.
+
+## Demo
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <img src="/view-transitions/jaemin.gif" alt="Jaemin transition demo" style={{ maxWidth: '100%', borderRadius: '0.5rem' }} />
+</div>
+
+## UX Principles
+
+### When to Use?
+
+The Jaemin transition is used to emphasize **Special Moments**.
+
+#### Suitability by Content Relationship
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Special Actions",
+      suitable: "yes",
+      description: "Completing important tasks or achievements",
+    },
+    {
+      label: "Regular Navigation",
+      suitable: "no",
+      description: "Too dramatic for normal page transitions",
+    },
+    {
+      label: "Frequent Actions",
+      suitable: "no",
+      description: "Can be overwhelming if used repeatedly",
+    },
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Achievement Unlocks**: When users complete important milestones
+- **Special Features**: Accessing premium or hidden content
+- **Celebratory Moments**: Success states or rewards
+- **Easter Eggs**: Hidden features or surprise interactions
+
+### Why Does It Work This Way?
+
+1. **Dramatic Emphasis**: The rotation and scale create a sense of importance
+2. **Visual Delight**: Unexpected motion adds personality to the interface
+3. **Memorable Experience**: Unique transition makes moments stand out
+4. **Creative Expression**: Shows attention to detail and craftsmanship
+
+### Motion Design
+
+The Jaemin transition combines multiple animation techniques for a unique effect.
+
+**Outgoing Screen Motion**
+The current screen begins to fade out gradually. This creates a soft departure that doesn't compete with the incoming animation, allowing the new content to take center stage.
+
+**The Rotation Entry**
+The new screen emerges from the center as a tiny point, then expands outward while rotating. This spiral growth creates a sense of energy and excitement, as if the new content is bursting forth with enthusiasm.
+
+**Scale and Timing**
+The combination of rotation and scaling is carefully timed. The rotation completes just as the screen reaches full size, creating a satisfying resolution to the animation sequence.
+
+## Basic Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { jaemin } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: jaemin()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { jaemin } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: jaemin()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## Configuration Options
+
+```typescript
+jaemin({
+  duration?: number;  // Animation duration in milliseconds (default: 800)
+  rotation?: number;  // Rotation degrees (default: 720)
+  scale?: {
+    from: number;     // Starting scale (default: 0)
+    to: number;       // Ending scale (default: 1)
+  };
+})
+```
+
+## Practical Examples
+
+### 1. Achievement Unlock
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/challenge-complete',
+          to: '/achievement',
+          transition: jaemin({ duration: 1000 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/challenge-complete',
+            to: '/achievement',
+            transition: jaemin({ duration: 1000 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Premium Feature Access
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/upgrade',
+          to: '/premium-features',
+          transition: jaemin({ rotation: 1080 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/upgrade',
+            to: '/premium-features',
+            transition: jaemin({ rotation: 1080 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Accessibility
+
+- Respects `prefers-reduced-motion` settings
+- Screen readers announce content changes appropriately
+- Keyboard navigation remains functional during transitions
+
+## Best Practices
+
+### ✅ DO
+
+- Use for truly special moments
+- Reserve for achievements and rewards
+- Apply to easter eggs and surprises
+- Use sparingly for maximum impact
+
+### ❌ DON'T
+
+- Don't use for regular navigation
+- Avoid in frequently accessed areas
+- Don't apply to error states
+- Never use for critical user flows
+
+## Performance Notes
+
+The Jaemin transition uses GPU-accelerated transforms for smooth performance. However, due to its complex animation, consider:
+
+- Testing on lower-end devices
+- Providing a simpler fallback for performance-constrained environments
+- Using the `prefers-reduced-motion` media query for accessibility

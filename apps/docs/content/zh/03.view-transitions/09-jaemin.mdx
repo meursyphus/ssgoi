@@ -1,0 +1,222 @@
+---
+title: "载敏过渡"
+description: "利用旋转和缩放的创意过渡效果"
+nav-title: "载敏"
+---
+
+# 载敏过渡
+
+载敏过渡是由[千宰民（elrion018）](https://github.com/elrion018)创建的创意过渡效果。它提供了一种戏剧性的过渡，前一页淡出，而新页面从一个小点开始旋转并填满整个屏幕。
+
+## 演示
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <img src="/view-transitions/jaemin.gif" alt="载敏过渡演示" style={{ maxWidth: '100%', borderRadius: '0.5rem' }} />
+</div>
+
+## 用户体验原则
+
+### 何时使用？
+
+载敏过渡用于强调**特殊时刻**。
+
+#### 按内容关系的适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "特殊操作",
+      suitable: "yes",
+      description: "完成重要任务或成就时",
+    },
+    {
+      label: "常规导航",
+      suitable: "no",
+      description: "对于普通页面过渡过于戏剧化",
+    },
+    {
+      label: "频繁操作",
+      suitable: "no",
+      description: "重复使用可能会让人感到不适",
+    },
+  ]}
+/>
+
+#### 主要使用案例
+
+- **成就解锁**：用户完成重要里程碑时
+- **特殊功能**：访问高级或隐藏内容
+- **庆祝时刻**：成功状态或奖励
+- **彩蛋**：隐藏功能或惊喜互动
+
+### 为什么这样工作？
+
+1. **戏剧性强调**：旋转和缩放创造重要性感
+2. **视觉愉悦**：意外的动作为界面增添个性
+3. **难忘体验**：独特的过渡让瞬间脱颖而出
+4. **创意表达**：展示对细节的关注和工艺
+
+### 动效设计
+
+载敏过渡结合了多种动画技术，创造独特效果。
+
+**离场画面动作**
+当前屏幕开始逐渐淡出。这创造了一个柔和的离场，不会与传入的动画竞争，让新内容成为焦点。
+
+**旋转进入**
+新屏幕从中心作为一个微小的点出现，然后在旋转的同时向外扩展。这种螺旋式增长创造了一种能量和兴奋感，仿佛新内容充满热情地迸发出来。
+
+**缩放和时机**
+旋转和缩放的组合经过精心计时。旋转恰好在屏幕达到全尺寸时完成，为动画序列创造了令人满意的结束。
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { jaemin } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: jaemin()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { jaemin } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: jaemin()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 配置选项
+
+```typescript
+jaemin({
+  duration?: number;  // 动画持续时间（毫秒）（默认：800）
+  rotation?: number;  // 旋转角度（默认：720）
+  scale?: {
+    from: number;     // 起始缩放（默认：0）
+    to: number;       // 结束缩放（默认：1）
+  };
+})
+```
+
+## 实际示例
+
+### 1. 成就解锁
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/challenge-complete',
+          to: '/achievement',
+          transition: jaemin({ duration: 1000 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/challenge-complete',
+            to: '/achievement',
+            transition: jaemin({ duration: 1000 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 高级功能访问
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/upgrade',
+          to: '/premium-features',
+          transition: jaemin({ rotation: 1080 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/upgrade',
+            to: '/premium-features',
+            transition: jaemin({ rotation: 1080 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 无障碍访问
+
+- 遵守 `prefers-reduced-motion` 设置
+- 屏幕阅读器正确播报内容变化
+- 过渡期间键盘导航保持功能
+
+## 最佳实践
+
+### ✅ 应该做
+
+- 用于真正特殊的时刻
+- 为成就和奖励保留
+- 应用于彩蛋和惊喜
+- 谨慎使用以获得最大效果
+
+### ❌ 不应该做
+
+- 不要用于常规导航
+- 避免在频繁访问的区域
+- 不要应用于错误状态
+- 永远不要用于关键用户流程
+
+## 性能说明
+
+载敏过渡使用GPU加速变换以获得流畅的性能。但是，由于其复杂的动画，请考虑：
+
+- 在低端设备上测试
+- 为性能受限的环境提供更简单的回退
+- 使用 `prefers-reduced-motion` 媒体查询以提高无障碍访问
