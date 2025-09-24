@@ -28,14 +28,7 @@ const BlindDemo = lazy(() =>
 );
 
 export interface ViewTransitionDemoProps {
-  type:
-    | "fade"
-    | "hero"
-    | "pinterest"
-    | "scroll"
-    | "drill"
-    | "slide"
-    | "blind";
+  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "blind";
 }
 
 // Loading component

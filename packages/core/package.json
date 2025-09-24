@@ -89,6 +89,7 @@
     "vite-plugin-dts": "^4.5.0"
   },
   "dependencies": {
-    "popmotion": "^11.0.5"
+    "popmotion": "^11.0.5",
+    "@ssgoi/react": "file:../react"
   }
 }

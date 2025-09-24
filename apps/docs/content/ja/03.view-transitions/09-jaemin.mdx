@@ -1,0 +1,222 @@
+---
+title: "ジェミン トランジション"
+description: "回転とスケールを活用した独創的なトランジション効果"
+nav-title: "ジェミン"
+---
+
+# ジェミン トランジション
+
+ジェミントランジションは、[チョン・ジェミン（elrion018）](https://github.com/elrion018)によって作られた独創的なトランジション効果です。前のページがフェードアウトしながら、新しいページが小さな点から始まり、回転しながら画面全体を満たすドラマチックなトランジションを提供します。
+
+## デモ
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <img src="/view-transitions/jaemin.gif" alt="ジェミントランジションデモ" style={{ maxWidth: '100%', borderRadius: '0.5rem' }} />
+</div>
+
+## UXの原則
+
+### いつ使用するか？
+
+ジェミントランジションは**特別な瞬間（Special Moments）**を強調する際に使用されます。
+
+#### コンテンツ関係別の適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "特別なアクション",
+      suitable: "yes",
+      description: "重要なタスクや達成の完了時",
+    },
+    {
+      label: "通常のナビゲーション",
+      suitable: "no",
+      description: "通常のページ遷移には劇的すぎる",
+    },
+    {
+      label: "頻繁なアクション",
+      suitable: "no",
+      description: "繰り返し使用すると圧倒的になる可能性がある",
+    },
+  ]}
+/>
+
+#### 主な使用ケース
+
+- **アチーブメントのアンロック**：ユーザーが重要なマイルストーンを達成した時
+- **特別な機能**：プレミアムコンテンツや隠しコンテンツへのアクセス
+- **お祝いの瞬間**：成功状態や報酬
+- **イースターエッグ**：隠し機能やサプライズインタラクション
+
+### なぜこのように動作するのか？
+
+1. **ドラマチックな強調**：回転とスケールが重要性を演出
+2. **視覚的な喜び**：予期しないモーションがインターフェースに個性を追加
+3. **記憶に残る体験**：ユニークなトランジションが瞬間を際立たせる
+4. **創造的な表現**：細部へのこだわりと職人技を示す
+
+### モーションデザイン
+
+ジェミントランジションは、ユニークな効果のために複数のアニメーション技術を組み合わせています。
+
+**退出画面の動き**
+現在の画面が徐々にフェードアウトし始めます。これにより、入ってくるアニメーションと競合しないソフトな退出が作られ、新しいコンテンツが中心となることができます。
+
+**回転エントリー**
+新しい画面は中心から小さな点として現れ、回転しながら外側に拡大します。このスパイラル成長は、新しいコンテンツが熱意を持って飛び出してくるかのような、エネルギーと興奮の感覚を生み出します。
+
+**スケールとタイミング**
+回転とスケーリングの組み合わせは慎重にタイミングが調整されています。画面がフルサイズに達すると同時に回転が完了し、アニメーションシーケンスに満足のいく解決をもたらします。
+
+## 基本的な使用方法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { jaemin } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: jaemin()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { jaemin } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: jaemin()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 設定オプション
+
+```typescript
+jaemin({
+  duration?: number;  // アニメーション時間（ミリ秒）（デフォルト：800）
+  rotation?: number;  // 回転角度（デフォルト：720）
+  scale?: {
+    from: number;     // 開始スケール（デフォルト：0）
+    to: number;       // 終了スケール（デフォルト：1）
+  };
+})
+```
+
+## 実践的な例
+
+### 1. アチーブメントのアンロック
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/challenge-complete',
+          to: '/achievement',
+          transition: jaemin({ duration: 1000 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/challenge-complete',
+            to: '/achievement',
+            transition: jaemin({ duration: 1000 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. プレミアム機能へのアクセス
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/upgrade',
+          to: '/premium-features',
+          transition: jaemin({ rotation: 1080 })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/upgrade',
+            to: '/premium-features',
+            transition: jaemin({ rotation: 1080 })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## アクセシビリティ
+
+- `prefers-reduced-motion`設定を尊重
+- スクリーンリーダーがコンテンツの変更を適切に通知
+- トランジション中もキーボードナビゲーションが機能
+
+## ベストプラクティス
+
+### ✅ すべきこと
+
+- 本当に特別な瞬間に使用する
+- アチーブメントや報酬のために予約する
+- イースターエッグやサプライズに適用する
+- 最大の効果のために控えめに使用する
+
+### ❌ してはいけないこと
+
+- 通常のナビゲーションには使用しない
+- 頻繁にアクセスされる領域では避ける
+- エラー状態には適用しない
+- 重要なユーザーフローには決して使用しない
+
+## パフォーマンスノート
+
+ジェミントランジションは、スムーズなパフォーマンスのためにGPU加速トランスフォームを使用しています。ただし、複雑なアニメーションのため、以下を考慮してください：
+
+- 低スペックデバイスでのテスト
+- パフォーマンスが制限された環境のためのシンプルなフォールバックの提供
+- アクセシビリティのための`prefers-reduced-motion`メディアクエリの使用
