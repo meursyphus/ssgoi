@@ -1,0 +1,299 @@
+---
+title: "スライド トランジション"
+description: "同じレベルのコンテンツ間の水平スライド遷移"
+nav-title: "スライド"
+---
+
+# スライド トランジション
+
+スライドトランジションは、同じレベルの兄弟コンテンツ間のナビゲーション時にページが横にスライドする効果を作成します。タブナビゲーションやステップベースのUIで自然な水平移動体験を提供します。
+
+## デモ
+
+<ViewTransitionDemo type="slide" />
+
+## UXの原則
+
+### いつ使用するか？
+
+スライドトランジションは**水平コンテンツナビゲーション**に使用されます。
+
+#### コンテンツ関係による適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "無関係なコンテンツ",
+      suitable: "no",
+      description: "独立したセクションではフェードを使用"
+    },
+    {
+      label: "兄弟関係",
+      suitable: "yes",
+      description: "同レベルのタブやステップに最適"
+    },
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "親子構造ではドリルやヒーローを使用"
+    }
+  ]}
+/>
+
+#### 主な使用例
+
+- **タブナビゲーション**：タブUIでのコンテンツ切り替え
+- **画像ギャラリー**：画像間のスワイプ遷移
+- **設定画面**：カテゴリ間の水平移動
+- **オンボーディングステップ**：段階的な進行画面
+
+### なぜこのように動作するのか？
+
+1. **水平ジェスチャーとの一致**：モバイルの左右スワイプと自然に連携
+2. **タブのメタファー**：物理的なタブをめくるような直感的な体験
+3. **方向の認識**：前進/後退の方向を視覚的に表現
+
+### モーションデザイン
+
+```
+LEFT方向（次へ）：
+出ていく画面：左に押し出される（現在のコンテンツが左へ）
+入ってくる画面：右から入る（次のコンテンツが表示）
+
+RIGHT方向（前へ）：
+出ていく画面：右に押し出される（現在のコンテンツが右へ）
+入ってくる画面：左から入る（前のコンテンツが戻る）
+```
+
+## 基本的な使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { slide } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: slide()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリのコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { slide } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: slide()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 実践例
+
+### 1. タブナビゲーション
+
+タブUIでのコンテンツ切り替え：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/tabs/home',
+          to: '/tabs/profile',
+          transition: slide({ direction: 'left' }),
+          symmetric: true  // 戻るナビゲーション時に自動的に右へ
+        },
+        {
+          from: '/tabs/profile',
+          to: '/tabs/settings',
+          transition: slide({ direction: 'left' }),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/tabs/home',
+            to: '/tabs/profile',
+            transition: slide({ direction: 'left' }),
+            symmetric: true  // 戻るナビゲーション時に自動的に右へ
+          },
+          {
+            from: '/tabs/profile',
+            to: '/tabs/settings',
+            transition: slide({ direction: 'left' }),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 画像ギャラリー
+
+画像間のスワイプ遷移：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/photo-*',
+          to: '/gallery/photo-*',
+          transition: slide({
+            direction: 'left',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/photo-*',
+            to: '/gallery/photo-*',
+            transition: slide({
+              direction: 'left',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. ミドルウェアを介した動的方向
+
+タブ順序に基づいて方向を自動的に決定：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const createMiddleware = (tabs) => {
+      return (from, to) => {
+        const fromIndex = tabs.indexOf(from);
+        const toIndex = tabs.indexOf(to);
+
+        if (fromIndex < toIndex) {
+          return { from: "/nav/left", to: "/nav/right" };
+        } else {
+          return { from: "/nav/right", to: "/nav/left" };
+        }
+      };
+    };
+
+    const config = {
+      transitions: [
+        {
+          from: "/nav/left",
+          to: "/nav/right",
+          transition: slide({ direction: "left" })
+        },
+        {
+          from: "/nav/right",
+          to: "/nav/left",
+          transition: slide({ direction: "right" })
+        }
+      ],
+      middleware: createMiddleware(tabOrder)
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const createMiddleware = (tabs) => {
+        return (from, to) => {
+          const fromIndex = tabs.indexOf(from);
+          const toIndex = tabs.indexOf(to);
+
+          if (fromIndex < toIndex) {
+            return { from: "/nav/left", to: "/nav/right" };
+          } else {
+            return { from: "/nav/right", to: "/nav/left" };
+          }
+        };
+      };
+
+      const config = {
+        transitions: [
+          {
+            from: "/nav/left",
+            to: "/nav/right",
+            transition: slide({ direction: "left" })
+          },
+          {
+            from: "/nav/right",
+            to: "/nav/left",
+            transition: slide({ direction: "right" })
+          }
+        ],
+        middleware: createMiddleware(tabOrder)
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## パフォーマンス最適化
+
+- GPU加速のために`transform: translateX()`のみ使用
+- レイアウトの再計算なしでスムーズな60fpsを維持
+- 水平スクロール位置を自動的に保持
+
+## アクセシビリティ
+
+- `prefers-reduced-motion`設定時にトランジションを無効化
+- 完全なキーボードナビゲーションサポート
+- スクリーンリーダーにタブ構造を適切に伝達
+
+## ベストプラクティス
+
+### ✅ すべきこと
+
+- タブナビゲーションやステップUIに使用
+- 画像ギャラリーの左右スワイプに適用
+- 設定カテゴリ間の水平移動に活用
+- symmetricオプションで双方向の一貫性を維持
+- モバイルで自然なスワイプジェスチャーと連携
+
+### ❌ してはいけないこと
+
+- 無関係なセクションナビゲーションには使用しない（フェードを使用）
+- 階層構造の探索には使用しない（ドリルやヒーローを使用）
+- 垂直スクロールと混在させない（一貫性を維持）
+- タブが多すぎる場合には使用しない（5個以上）

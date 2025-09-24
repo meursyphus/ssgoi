@@ -20,23 +20,74 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
 
   const isUp = direction === "up";
 
+  // Shared state between out and in animations
+  let outElementHeight: number | null = null;
+  let inElementHeight: number | null = null;
+  let calculatedHeight: number | null = null;
+
+  // Common height calculation function
+  const calculateHeight = (): number | null => {
+    // Both heights must be available
+    if (outElementHeight === null || inElementHeight === null) {
+      return null;
+    }
+
+    // Min of out and in heights, then max with viewport
+    const minHeight = Math.min(outElementHeight, inElementHeight);
+    const viewportHeight = window.innerHeight;
+    return Math.max(minHeight, viewportHeight);
+  };
+
   return {
-    in: (element) => ({
-      spring,
-      tick: (progress) => {
-        const translateY = isUp
-          ? (1 - progress) * 100 // 100 → 0
-          : (1 - progress) * -100; // -100 → 0
-        element.style.transform = `translateY(${translateY}vh)`;
-      },
-    }),
+    in: (element) => {
+      // Get incoming element height before animation starts
+      inElementHeight = element.offsetHeight;
+
+      // Calculate height if both values are ready
+      if (outElementHeight !== null) {
+        calculatedHeight = calculateHeight();
+      }
+
+      return {
+        spring,
+        tick: (progress) => {
+          // Check if height is calculated
+          if (calculatedHeight === null) {
+            // Try to calculate if not done yet
+            calculatedHeight = calculateHeight();
+            if (calculatedHeight === null) return; // Still not ready
+          }
+
+          const translateY = isUp
+            ? (1 - progress) * calculatedHeight // calculatedHeight → 0
+            : (1 - progress) * -calculatedHeight; // -calculatedHeight → 0
+          element.style.transform = `translateY(${translateY}px)`;
+        },
+      };
+    },
     out: (element) => ({
       spring,
+      onStart: () => {
+        // Capture outgoing element height at animation start (before detached)
+        outElementHeight = element.offsetHeight;
+
+        // Calculate height if both values are ready
+        if (inElementHeight !== null) {
+          calculatedHeight = calculateHeight();
+        }
+      },
       tick: (progress) => {
+        // Check if height is calculated
+        if (calculatedHeight === null) {
+          // Try to calculate if not done yet
+          calculatedHeight = calculateHeight();
+          if (calculatedHeight === null) return; // Still not ready
+        }
+
         const translateY = isUp
-          ? (1 - progress) * -100 // 0 → -100
-          : (1 - progress) * 100; // 0 → 100
-        element.style.transform = `translateY(${translateY}vh)`;
+          ? (1 - progress) * -calculatedHeight // 0 → -calculatedHeight
+          : (1 - progress) * calculatedHeight; // 0 → calculatedHeight
+        element.style.transform = `translateY(${translateY}px)`;
       },
       prepare: (element) => {
         prepareOutgoing(element);

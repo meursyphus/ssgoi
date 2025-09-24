@@ -198,9 +198,9 @@ export const createDefaultStrategy = <TAnimationValue = number>(
  * Page transition strategy - Always starts fresh without checking current animations
  * This is used for page-level transitions where each transition should be independent
  */
-export const createPageTransitionStrategy = <TAnimationValue = number>(
-  _: StrategyContext<TAnimationValue>,
-): TransitionStrategy<TAnimationValue> => {
+export const createPageTransitionStrategy = <
+  TAnimationValue = number,
+>(): TransitionStrategy<TAnimationValue> => {
   return {
     runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
       // Always start fresh for IN transition

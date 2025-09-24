@@ -1,5 +1,5 @@
 import type { SpringConfig, SggoiTransition } from "../types";
-import { prepareOutgoing } from "../utils";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface SlideOptions {
   direction?: "left" | "right";
@@ -30,7 +30,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
         element.style.transform = `translateX(${translateX}%)`;
       },
     }),
-    out: (element) => ({
+    out: (element, context) => ({
       spring,
       tick: (progress) => {
         const translateX = isLeft
@@ -39,7 +39,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
         element.style.transform = `translateX(${translateX}%)`;
       },
       prepare: (element) => {
-        prepareOutgoing(element);
+        prepareOutgoing(element, context);
 
         element.style.zIndex = isLeft ? "-1" : "1";
       },

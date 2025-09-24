@@ -6,6 +6,7 @@ import { TransitionShowcaseSection } from "./transition-showcase-section";
 import { ComparisonSection } from "./comparison-section";
 import { FeaturesTimelineSection } from "./features-timeline-section";
 import { CtaSection } from "./cta-section";
+import { ContributorsSection } from "./contributors-section";
 
 interface HomePageContentProps {
   lang: string;
@@ -21,6 +22,7 @@ export function HomePageContent({ lang }: HomePageContentProps) {
       <ComparisonSection lang={lang} />
       <FeaturesTimelineSection lang={lang} />
       <CtaSection lang={lang} />
+      <ContributorsSection lang={lang} />
     </SsgoiTransition>
   );
 }

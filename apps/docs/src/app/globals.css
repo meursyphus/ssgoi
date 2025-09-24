@@ -160,11 +160,11 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { 
+  0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
-  50% { 
+  50% {
     opacity: 0.8;
     transform: scale(1.05);
   }
@@ -179,12 +179,82 @@ body {
   }
 }
 
+@keyframes gradient-xy {
+  0%, 100% {
+    transform: translateX(0%) translateY(0%);
+  }
+  25% {
+    transform: translateX(10%) translateY(-10%);
+  }
+  50% {
+    transform: translateX(-10%) translateY(10%);
+  }
+  75% {
+    transform: translateX(5%) translateY(-5%);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes float-slow-reverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-30px, 30px) scale(1.1);
+  }
+  66% {
+    transform: translate(20px, -20px) scale(0.9);
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(20px, -20px) scale(1.05) rotate(90deg);
+  }
+  50% {
+    transform: translate(-10px, 10px) scale(0.95) rotate(180deg);
+  }
+  75% {
+    transform: translate(15px, -5px) scale(1.02) rotate(270deg);
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 15s ease infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 20s ease-in-out infinite;
+}
+
+.animate-float-slow-reverse {
+  animation: float-slow-reverse 20s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 15s ease-in-out infinite;
 }
 
 /* 버튼 효과 */

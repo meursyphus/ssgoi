@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { animate } from "popmotion";
 
 import type { SpringConfig } from "./types";
@@ -72,7 +73,7 @@ export class Animator<TAnimationValue = number> {
 
     // Handle object animations differently
     if (typeof this.currentValue === "object" && this.currentValue !== null) {
-      this.animateObject(target as any, reverse);
+      this.animateObject(target as any);
       return;
     }
 
@@ -157,7 +158,7 @@ export class Animator<TAnimationValue = number> {
     });
   };
 
-  private animateObject = (target: any, _reverse: boolean) => {
+  private animateObject = (target: any) => {
     const from = this.currentValue as any;
     const keys = Object.keys(from);
 
