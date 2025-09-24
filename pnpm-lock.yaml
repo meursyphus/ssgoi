@@ -265,9 +265,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@ssgoi/react':
-        specifier: file:../react
-        version: file:packages/react(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       popmotion:
         specifier: ^11.0.5
         version: 11.0.5
@@ -2102,13 +2099,6 @@ packages:
 
   '@speed-highlight/core@1.2.7':
     resolution: {integrity: sha512-0dxmVj4gxg3Jg879kvFS/msl4s9F3T9UXC1InxgOf7t5NvcPD97u/WTA5vL/IxWHMn7qSxBozqrnnE2wvl1m8g==}
-
-  '@ssgoi/react@file:packages/react':
-    resolution: {directory: packages/react, type: directory}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^19.0.0
-      react-dom: ^19.0.0
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -8369,12 +8359,6 @@ snapshots:
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@speed-highlight/core@1.2.7': {}
-
-  '@ssgoi/react@file:packages/react(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@ssgoi/core': link:packages/core
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
 
   '@standard-schema/spec@1.0.0': {}
 
