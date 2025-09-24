@@ -5,6 +5,17 @@ export type SpringConfig = {
   damping?: number;
 };
 
+export type SequenceConfig = {
+  // Base delay for sequence effect (ms)
+  delay?: number; // Default: 50ms
+
+  // Direction of sequence animation
+  direction?: "normal" | "reverse"; // Default: "normal"
+
+  // Custom delay function: (index, total) => delayInMs
+  delayFn?: (index: number, total: number) => number;
+};
+
 export type TransitionConfig<TAnimationValue = number> = {
   // Spring physics configuration
   spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
@@ -27,6 +38,9 @@ export type TransitionConfig<TAnimationValue = number> = {
 
   // Called when animation ends
   onEnd?: () => void;
+
+  // Sequence configuration for child elements
+  sequence?: SequenceConfig;
 };
 
 export type GetTransitionConfig<

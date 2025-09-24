@@ -9,8 +9,7 @@ import type {
   TransitionCallback,
   TransitionOptions,
 } from "./types";
-import type { TransitionKey } from "./types";
-import { parseCallerLocation } from "./utils/parse-caller-location";
+import type { TransitionKey, SequenceConfig } from "./types";
 
 /**
  * Centralized transition management
@@ -18,7 +17,11 @@ import { parseCallerLocation } from "./utils/parse-caller-location";
  */
 
 // Map to store transition definitions by key
-const transitionDefinitions = new Map<TransitionKey, Transition<any, any>>();
+const transitionDefinitions = new Map<
+  TransitionKey,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Transition<undefined, any>
+>();
 
 // Map to store transition callbacks by key
 const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
@@ -33,6 +36,10 @@ function registerTransition<TAnimationValue = number>(
   strategy?: (
     context: StrategyContext<TAnimationValue>,
   ) => TransitionStrategy<TAnimationValue>,
+  additionalOptions?: {
+    sequenceConfig?: SequenceConfig;
+    baseKey?: string | symbol;
+  },
 ): TransitionCallback {
   transitionDefinitions.set(key, transition);
 
@@ -55,6 +62,8 @@ function registerTransition<TAnimationValue = number>(
     {
       strategy,
       onCleanupEnd: () => unregisterTransition(key),
+      sequenceConfig: additionalOptions?.sequenceConfig,
+      baseKey: additionalOptions?.baseKey,
     },
   );
   transitionCallbacks.set(key, callback);
@@ -73,31 +82,94 @@ function unregisterTransition(key: TransitionKey): void {
 // Auto key generation
 // ---------------------------------------------
 
-export function generateAutoKey(): TransitionKey {
-  // Fallback to a stable key from the callsite when available
-  const location = parseCallerLocation(new Error().stack);
-  if (location) {
-    const key =
-      `auto_${location.file}_${location.line}_${location.column}` as const;
+/**
+ * Simple string hash function for generating stable keys
+ */
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36);
+}
+
+/**
+ * Generate a content-based key from transition options
+ */
+function generateContentKey<TAnimationValue>(
+  options: TransitionOptions<undefined, TAnimationValue> & {
+    [TRANSITION_STRATEGY]?: (
+      context: StrategyContext<TAnimationValue>,
+    ) => TransitionStrategy<TAnimationValue>;
+  },
+): string {
+  const parts: string[] = [];
+
+  // Include 'in' function content
+  if (options.in) {
+    if (typeof options.in === "function") {
+      parts.push(`in:${options.in.toString()}`);
+    } else {
+      parts.push(`in:${JSON.stringify(options.in)}`);
+    }
+  }
+
+  // Include 'out' function content
+  if (options.out) {
+    if (typeof options.out === "function") {
+      parts.push(`out:${options.out.toString()}`);
+    } else {
+      parts.push(`out:${JSON.stringify(options.out)}`);
+    }
+  }
+
+  // Include strategy if present
+  if (options[TRANSITION_STRATEGY]) {
+    parts.push(`strategy:${options[TRANSITION_STRATEGY].toString()}`);
+  }
+
+  const contentString = parts.join("|");
+  const hash = simpleHash(contentString);
+  return `auto_content_${hash}`;
+}
+
+export function generateAutoKey<TAnimationValue>(
+  options?: TransitionOptions<undefined, TAnimationValue> & {
+    [TRANSITION_STRATEGY]?: (
+      context: StrategyContext<TAnimationValue>,
+    ) => TransitionStrategy<TAnimationValue>;
+  },
+): TransitionKey {
+  // Primary approach: generate content-based key from transition configuration
+  if (options && (options.in || options.out)) {
+    const key = generateContentKey(options);
     return key;
   }
 
-  // Fallback to a unique symbol when callsite is unavailable
-  const key = Symbol(`ssgoi_auto_${Date.now()}`);
+  // Fallback: unique symbol for cases without transition configuration
+  const key = Symbol(
+    `ssgoi_auto_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+  );
   return key;
 }
 
 // Optional GC-based cleanup registry (browser/node supporting FinalizationRegistry)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
   | (new (cb: (heldValue: TransitionKey) => void) => {
       register: (target: object, heldValue: TransitionKey) => void;
     })
   | undefined;
 const __cleanupRegistry = FinalizationRegistryCtor
-  ? (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
+  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
       try {
         unregisterTransition(key);
-      } catch {}
+      } catch {
+        /** empty block */
+      }
     }) as { register: (target: object, heldValue: TransitionKey) => void })
   : undefined;
 
@@ -161,15 +233,20 @@ export function transition<TAnimationValue = number>(
     ) => TransitionStrategy<TAnimationValue>;
   },
 ): TransitionCallback {
-  const resolvedKey = options.key ?? generateAutoKey();
-
+  const resolvedKey = options.key ?? generateAutoKey(options);
   // Register GC cleanup for auto-generated keys bound to a ref
   if (options.ref && __cleanupRegistry) {
     try {
       __cleanupRegistry.register(options.ref, resolvedKey);
-    } catch {}
+    } catch {
+      /** empty block */
+    }
   }
 
+  // Check if sequence configuration exists
+  const sequenceConfig = getSequenceConfigFromOptions(options);
+
+  // Use registerTransition for both regular and sequence transitions
   return registerTransition(
     resolvedKey,
     {
@@ -177,5 +254,24 @@ export function transition<TAnimationValue = number>(
       out: options.out,
     },
     options[TRANSITION_STRATEGY],
+    {
+      sequenceConfig,
+      baseKey: resolvedKey,
+    },
   );
+}
+
+// ---------------------------------------------
+// Sequence support functions
+// ---------------------------------------------
+
+/**
+ * Extract sequence configuration from transition options
+ */
+function getSequenceConfigFromOptions<TAnimationValue>(
+  options: TransitionOptions<undefined, TAnimationValue>,
+): SequenceConfig | undefined {
+  // sequence configuration is directly on the options object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (options as any).sequence;
 }
