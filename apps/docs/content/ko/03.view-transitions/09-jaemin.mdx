@@ -1,0 +1,176 @@
+---
+title: "재민 전환"
+description: "회전과 스케일을 활용한 독창적인 전환 효과"
+nav-title: "재민"
+---
+
+# 재민 전환
+
+재민 전환은 [천재민(elrion018)](https://github.com/elrion018)이 만든 독창적인 전환 효과입니다. 이전 페이지가 페이드 아웃되면서 새로운 페이지가 작은 점에서 시작해 회전하며 화면을 가득 채우는 극적인 전환을 제공합니다.
+
+## 데모
+
+<ViewTransitionDemo type="jaemin" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+재민 전환은 **특별한 순간(Special Moments)** 을 강조할 때 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "yes",
+      description: "브랜드 아이덴티티를 강조하는 특별한 전환",
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "동일 레벨의 콘텐츠는 스크롤 사용 권장",
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "부모-자식 구조는 히어로와 같은 확장 전환 사용 권장",
+    },
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **브랜드 강조**: 앱의 고유한 개성과 브랜드 아이덴티티를 전달
+- **특별한 순간**: 중요한 이벤트나 마일스톤 달성 시
+- **프리미엄 경험**: 고급 기능이나 특별한 섹션 진입
+
+### 왜 이렇게 동작하나요?
+
+1. **시선 집중**: 중앙의 작은 점에서 시작해 자연스럽게 시선을 중심으로 유도합니다
+2. **극적인 연출**: 45도 회전과 스케일 변화로 역동적인 느낌을 전달합니다
+3. **단계적 전개**: 느린 시작에서 빠른 마무리로 기대감을 조성합니다
+
+### 모션 디자인
+
+재민 전환은 3단계의 정교한 타이밍으로 구성됩니다.
+
+**나가는 화면의 페이드**
+현재 화면이 부드럽게 사라지며 새로운 콘텐츠를 위한 무대를 비웁니다.
+
+**진입 단계 (0-5%)**
+새 화면이 화면 중앙에 아주 작은 원형으로 나타납니다. 45도 회전된 상태로 시작해 신비로운 첫인상을 만듭니다.
+
+**성장 단계 (5-80%)**
+극도로 느린 속도로 크기가 커지기 시작합니다. Nonic(9제곱) 이징 함수를 사용해 초반에는 거의 움직임이 없다가 점차 가속됩니다. 이 구간에서는 회전 상태를 유지하며 둥근 모서리가 점차 보이기 시작합니다.
+
+**완성 단계 (80-100%)**
+마지막 20% 구간에서 급격한 변화가 일어납니다. 크기가 빠르게 확대되며 동시에 회전이 0도로 돌아오고, 둥근 모서리가 직사각형으로 변하며 화면에 완벽하게 맞춰집니다.
+
+```
+초기 상태: 45° 회전, 0.01 스케일, 둥근 모서리
+중간 상태: 45° 회전 유지, 천천히 확대, 둥근 모서리 유지
+최종 상태: 0° 회전, 1.0 스케일, 직사각형
+```
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { jaemin } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: jaemin()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { jaemin } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: jaemin()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+
+## 실전 활용 예시
+
+### 브랜드 아이덴티티 강조
+
+앱의 독특한 개성을 표현하고 싶을 때:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/special',
+          transition: jaemin(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/special',
+            transition: jaemin(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 접근성
+
+- `prefers-reduced-motion` 설정 시 자동으로 애니메이션 비활성화
+- 스크린 리더는 전환 중에도 콘텐츠 변경을 올바르게 인식
+- 키보드 네비게이션과 완벽하게 호환
+
+## 모범 사례
+
+### ✅ DO
+
+- 브랜드 아이덴티티를 강조할 때 사용
+- 특별한 경험을 제공하고 싶을 때
+- 최상위 레벨 네비게이션에 사용
+
+### ❌ DON'T
+
+- 관련 콘텐츠 간 이동에는 사용하지 마세요 (슬라이드나 스크롤 사용)
+- 너무 자주 사용하지 마세요 (특별함이 사라집니다)
+- 부분적인 UI 변경에는 사용하지 마세요

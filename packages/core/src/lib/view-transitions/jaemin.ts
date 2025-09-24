@@ -60,7 +60,8 @@ function applyJaeminClip(
     element.style.clipPath = `circle(${radius * borderRadiusPercent}px at ${centerX}px ${centerY}px)`;
   } else if (borderRadiusPercent > 0.01) {
     // Rounded rectangle using inset with border-radius
-    const insetRadius = Math.min(rect.width, rect.height) * 0.4 * borderRadiusPercent;
+    const insetRadius =
+      Math.min(rect.width, rect.height) * 0.4 * borderRadiusPercent;
     element.style.clipPath = `inset(${rect.top}px ${window.innerWidth - rect.left - rect.width}px ${window.innerHeight - rect.top - rect.height}px ${rect.left}px round ${insetRadius}px)`;
   } else {
     // Perfect rectangle

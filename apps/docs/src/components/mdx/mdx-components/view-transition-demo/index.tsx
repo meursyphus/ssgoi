@@ -29,6 +29,9 @@ const BlindDemo = lazy(() =>
 const FilmDemo = lazy(() =>
   import("./film-demo").then((m) => ({ default: m.FilmDemo })),
 );
+const JaeminDemo = lazy(() =>
+  import("./jaemin-demo").then((m) => ({ default: m.JaeminDemo })),
+);
 
 export interface ViewTransitionDemoProps {
   type:
@@ -39,7 +42,8 @@ export interface ViewTransitionDemoProps {
     | "drill"
     | "slide"
     | "blind"
-    | "film";
+    | "film"
+    | "jaemin";
 }
 
 // Loading component
@@ -73,6 +77,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <BlindDemo />;
       case "film":
         return <FilmDemo />;
+      case "jaemin":
+        return <JaeminDemo />;
       default:
         return null;
     }
