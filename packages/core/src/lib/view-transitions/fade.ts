@@ -42,7 +42,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: (element) => {
+    out: (element, context) => {
       // Create promise for OUT animation completion
       outAnimationComplete = new Promise((resolve) => {
         resolveOutAnimation = resolve;
@@ -53,7 +53,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         tick: (progress) => {
           element.style.opacity = progress.toString();
         },
-        prepare: prepareOutgoing,
+        prepare: (element) => prepareOutgoing(element, context),
         onEnd: () => {
           // Resolve the promise when OUT animation completes
           if (resolveOutAnimation) {

@@ -26,10 +26,10 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           }
         },
       }),
-      out: (element) => ({
+      out: (element, context) => ({
         spring,
         prepare: (element) => {
-          prepareOutgoing(element);
+          prepareOutgoing(element, context);
           element.style.zIndex = "-1";
         },
         tick: (progress) => {
@@ -57,13 +57,13 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           }
         },
       }),
-      out: (element) => ({
+      out: (element, context) => ({
         spring: {
           stiffness: 100,
           damping: 20,
         },
         prepare: (element) => {
-          prepareOutgoing(element);
+          prepareOutgoing(element, context);
           element.style.zIndex = "100";
         },
         tick: (progress) => {

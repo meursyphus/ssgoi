@@ -3,9 +3,9 @@ import type {
   SggoiTransitionContext,
   SpringConfig,
 } from "../types";
-import { prepareOutgoing } from "../utils";
+
 import { getRect } from "../utils/get-rect";
-// import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
