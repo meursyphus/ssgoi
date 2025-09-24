@@ -1,7 +1,7 @@
 "use client";
 
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { fade, hero, jaemin, } from "@ssgoi/react/view-transitions";
+import { fade, hero, jaemin } from "@ssgoi/react/view-transitions";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {

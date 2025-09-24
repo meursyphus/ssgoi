@@ -70,7 +70,11 @@ function HomePage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
                 <span className="text-sm">@elrion018</span>
@@ -159,10 +163,14 @@ function HomePage() {
 
         {/* Technical Excellence */}
         <div className="text-center border-t border-gray-800 pt-16">
-          <h3 className="text-xl font-bold text-white mb-8">Performance Optimized</h3>
+          <h3 className="text-xl font-bold text-white mb-8">
+            Performance Optimized
+          </h3>
           <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500">
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">60fps</div>
+              <div className="text-3xl font-bold text-purple-400 mb-2">
+                60fps
+              </div>
               <div className="text-xs uppercase tracking-wider">
                 Smooth Animation
               </div>
@@ -232,17 +240,19 @@ function FeaturesPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Animation Phases</h3>
-                <p className="text-gray-500 text-sm">
-                  3단계 타이밍 시스템
-                </p>
+                <h3 className="text-xl font-bold text-white">
+                  Animation Phases
+                </h3>
+                <p className="text-gray-500 text-sm">3단계 타이밍 시스템</p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">Entry Phase (0-5%)</div>
+                  <div className="text-white font-semibold">
+                    Entry Phase (0-5%)
+                  </div>
                   <div className="text-gray-400 text-sm">
                     극소 크기로 진입, 회전 상태 유지
                   </div>
@@ -262,7 +272,9 @@ function FeaturesPage() {
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">Finale Phase (80-100%)</div>
+                  <div className="text-white font-semibold">
+                    Finale Phase (80-100%)
+                  </div>
                   <div className="text-gray-400 text-sm">
                     급속 확대, 회전 복귀, 모서리 변형
                   </div>
@@ -293,16 +305,16 @@ function FeaturesPage() {
                 <h3 className="text-xl font-bold text-white">
                   Performance Optimizations
                 </h3>
-                <p className="text-gray-500 text-sm">
-                  부드러운 60fps 보장
-                </p>
+                <p className="text-gray-500 text-sm">부드러운 60fps 보장</p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">GPU Acceleration</div>
+                  <div className="text-white font-semibold">
+                    GPU Acceleration
+                  </div>
                   <div className="text-gray-400 text-sm">
                     translateZ(0), will-change 최적화
                   </div>
@@ -311,9 +323,7 @@ function FeaturesPage() {
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2" />
                 <div>
-                  <div className="text-white font-semibold">
-                    CSS Variables
-                  </div>
+                  <div className="text-white font-semibold">CSS Variables</div>
                   <div className="text-gray-400 text-sm">
                     동적 계산 최소화, CSS 변수 활용
                   </div>
@@ -339,10 +349,14 @@ function FeaturesPage() {
           </h2>
           <div className="bg-gray-800 rounded-lg overflow-hidden">
             <div className="p-6 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white mb-4">Spring Physics</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Spring Physics
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <div className="text-purple-400 font-mono text-sm mb-2">stiffness</div>
+                  <div className="text-purple-400 font-mono text-sm mb-2">
+                    stiffness
+                  </div>
                   <div className="text-gray-400 text-sm mb-3">
                     스프링 강도 (기본값: 50)
                   </div>
@@ -356,7 +370,9 @@ function FeaturesPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-purple-400 font-mono text-sm mb-2">damping</div>
+                  <div className="text-purple-400 font-mono text-sm mb-2">
+                    damping
+                  </div>
                   <div className="text-gray-400 text-sm mb-3">
                     감쇠 계수 (기본값: 30)
                   </div>
@@ -372,22 +388,30 @@ function FeaturesPage() {
               </div>
             </div>
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Transform Options</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Transform Options
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <div className="text-blue-400 font-mono text-sm mb-2">initialRotation</div>
+                  <div className="text-blue-400 font-mono text-sm mb-2">
+                    initialRotation
+                  </div>
                   <div className="text-gray-400 text-sm">
                     초기 회전 각도 (기본값: 45도)
                   </div>
                 </div>
                 <div>
-                  <div className="text-blue-400 font-mono text-sm mb-2">initialScale</div>
+                  <div className="text-blue-400 font-mono text-sm mb-2">
+                    initialScale
+                  </div>
                   <div className="text-gray-400 text-sm">
                     초기 스케일 값 (기본값: 0.01)
                   </div>
                 </div>
                 <div>
-                  <div className="text-blue-400 font-mono text-sm mb-2">rotationTriggerPoint</div>
+                  <div className="text-blue-400 font-mono text-sm mb-2">
+                    rotationTriggerPoint
+                  </div>
                   <div className="text-gray-400 text-sm">
                     회전 시작 지점 (기본값: 0.8 = 80%)
                   </div>
@@ -407,7 +431,9 @@ function FeaturesPage() {
               <div className="w-3 h-3 bg-red-500 rounded-full" />
               <div className="w-3 h-3 bg-yellow-500 rounded-full" />
               <div className="w-3 h-3 bg-green-500 rounded-full" />
-              <span className="text-gray-500 text-xs ml-2">jaemin.config.ts</span>
+              <span className="text-gray-500 text-xs ml-2">
+                jaemin.config.ts
+              </span>
             </div>
             <pre className="text-gray-300 font-mono text-sm overflow-x-auto">
               <code>{`import { jaemin } from '@ssgoi/react/view-transitions';
@@ -593,9 +619,7 @@ function ExamplesPage() {
                   <td className="py-3 px-4">
                     <span className="text-gray-400 font-mono">film()</span>
                   </td>
-                  <td className="py-3 px-4 text-gray-300">
-                    필름 프레임 효과
-                  </td>
+                  <td className="py-3 px-4 text-gray-300">필름 프레임 효과</td>
                   <td className="py-3 px-4 text-gray-400 text-sm">
                     시네마틱한 전환
                   </td>
@@ -604,9 +628,7 @@ function ExamplesPage() {
                   <td className="py-3 px-4">
                     <span className="text-gray-400 font-mono">hero()</span>
                   </td>
-                  <td className="py-3 px-4 text-gray-300">
-                    공유 요소 확대
-                  </td>
+                  <td className="py-3 px-4 text-gray-300">공유 요소 확대</td>
                   <td className="py-3 px-4 text-gray-400 text-sm">
                     리스트 → 상세
                   </td>
@@ -663,9 +685,7 @@ function GettingStartedPage() {
                   Installation
                 </div>
               </div>
-              <p className="text-gray-300 mb-6">
-                SSGOI 패키지 설치
-              </p>
+              <p className="text-gray-300 mb-6">SSGOI 패키지 설치</p>
               <div className="bg-black/50 p-6 rounded-lg border border-gray-700">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-red-500 rounded-full" />
@@ -689,17 +709,13 @@ $ pnpm add @ssgoi/react`}</code>
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-pink-600" />
             <div className="p-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-2xl font-bold text-blue-500">
-                  STEP 2
-                </div>
+                <div className="text-2xl font-bold text-blue-500">STEP 2</div>
                 <div className="text-gray-500">|</div>
                 <div className="text-gray-400 uppercase tracking-wider text-sm">
                   Basic Setup
                 </div>
               </div>
-              <p className="text-gray-300 mb-6">
-                앱에 재민 전환 적용
-              </p>
+              <p className="text-gray-300 mb-6">앱에 재민 전환 적용</p>
               <div className="bg-black/50 p-6 rounded-lg border border-gray-700">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-red-500 rounded-full" />
@@ -824,12 +840,11 @@ export default function DashboardPage() {
           <div className="relative bg-gradient-to-r from-purple-900/20 to-blue-900/20 p-8 rounded-lg border border-purple-600/30">
             <div className="text-center">
               <div className="text-6xl mb-4">🚀</div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                준비 완료!
-              </h2>
+              <h2 className="text-2xl font-bold text-white mb-4">준비 완료!</h2>
               <p className="text-gray-300 max-w-2xl mx-auto">
-                이제 여러분의 애플리케이션에 재민 전환이 적용되었습니다.
-                작은 점에서 시작해 화면을 가득 채우는 마법같은 전환 효과를 경험해보세요.
+                이제 여러분의 애플리케이션에 재민 전환이 적용되었습니다. 작은
+                점에서 시작해 화면을 가득 채우는 마법같은 전환 효과를
+                경험해보세요.
               </p>
               <div className="flex flex-wrap justify-center gap-4 mt-6">
                 <a
@@ -839,7 +854,11 @@ export default function DashboardPage() {
                   className="px-4 py-2 bg-black/50 rounded-lg border border-gray-700 text-white hover:bg-black/70 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                     </svg>
                     <span className="text-sm">Created by @elrion018</span>
