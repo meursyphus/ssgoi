@@ -41,6 +41,36 @@
           </a>
         {/each}
       </div>
+
+      <!-- Hero Rotate Demo -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: #333;">
+          Hero Rotate Transition
+        </h3>
+        <a
+          href="/rotate"
+          style="
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+          "
+          onmouseenter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onmouseleave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          🎯 Demo Hero Rotate Animation
+        </a>
+      </div>
     </div>
 
     <!-- DOM Transition Section -->
