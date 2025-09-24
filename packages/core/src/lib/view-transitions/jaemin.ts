@@ -1,10 +1,76 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type {
+  SpringConfig,
+  SggoiTransition,
+  SggoiTransitionContext,
+} from "../types";
+import { getRect } from "../utils/get-rect";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { sleep } from "../utils/sleep";
 
 interface JaeminOptions {
   spring?: Partial<SpringConfig>;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
+  transitionDelay?: number; // Delay between out and in animations
+}
+
+/**
+ * Calculate the visible viewport rect for jaemin transition
+ */
+function getJaeminRect(context: SggoiTransitionContext) {
+  const containerRect = getRect(document.body, context.positionedParent);
+  const top = context.scroll.y;
+
+  return {
+    top,
+    left: 0,
+    width: containerRect.width,
+    height: window.innerHeight - containerRect.top,
+  };
+}
+
+/**
+ * Set transform-origin to the center of jaemin rect
+ */
+function applyJaeminTransformOrigin(
+  element: HTMLElement,
+  rect: ReturnType<typeof getJaeminRect>,
+) {
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  element.style.transformOrigin = `${centerX}px ${centerY}px`;
+}
+
+/**
+ * Apply clipPath to limit element visibility to jaemin rect
+ * Supports dynamic border radius for circular/rounded rect clip
+ */
+function applyJaeminClip(
+  element: HTMLElement,
+  rect: ReturnType<typeof getJaeminRect>,
+  borderRadiusPercent: number = 0, // 0 = rectangle, 1 = maximum roundness
+) {
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  if (borderRadiusPercent > 0.95) {
+    // Near-circular: use circle clip for smoother rendering
+    const radius = Math.min(rect.width, rect.height) / 2;
+    element.style.clipPath = `circle(${radius * borderRadiusPercent}px at ${centerX}px ${centerY}px)`;
+  } else if (borderRadiusPercent > 0.01) {
+    // Rounded rectangle using inset with border-radius
+    const insetRadius = Math.min(rect.width, rect.height) * 0.4 * borderRadiusPercent;
+    element.style.clipPath = `inset(${rect.top}px ${window.innerWidth - rect.left - rect.width}px ${window.innerHeight - rect.top - rect.height}px ${rect.left}px round ${insetRadius}px)`;
+  } else {
+    // Perfect rectangle
+    element.style.clipPath = `polygon(
+      ${rect.left}px ${rect.top}px,
+      ${rect.left + rect.width}px ${rect.top}px,
+      ${rect.left + rect.width}px ${rect.top + rect.height}px,
+      ${rect.left}px ${rect.top + rect.height}px
+    )`;
+  }
 }
 
 /**
@@ -28,11 +94,20 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
+  const transitionDelay = options.transitionDelay ?? 100; // Delay between out and in animations
+
+  // Shared promise for coordinating OUT and IN animations
+  let outAnimationComplete: Promise<void>;
+  let resolveOutAnimation: (() => void) | null = null;
 
   return {
-    out: async (element) => {
-      // Store original styles for cleanup
+    out: async (element, context) => {
       const originalOpacity = element.style.opacity;
+
+      // Create promise for OUT animation completion
+      outAnimationComplete = new Promise((resolve) => {
+        resolveOutAnimation = resolve;
+      });
 
       return {
         spring: {
@@ -42,61 +117,60 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
         from: 1,
         to: 0,
         prepare: () => {
-          // Ensure element is visible at start
+          prepareOutgoing(element, context);
           element.style.opacity = "1";
         },
         tick: (progress) => {
-          // Simple linear fade out - no rotation or scaling
           element.style.opacity = String(progress);
         },
         onEnd: () => {
-          // Reset opacity
           element.style.opacity = originalOpacity;
+          // Resolve the promise when OUT animation completes
+          if (resolveOutAnimation) {
+            resolveOutAnimation();
+          }
         },
       };
     },
-    in: async (element) => {
-      // Store original styles for cleanup
+    in: async (element, context) => {
+      const rect = getJaeminRect(context);
       const originalTransform = element.style.transform;
       const originalTransformOrigin = element.style.transformOrigin;
-      const originalPosition = element.style.position;
-      const originalZIndex = element.style.zIndex;
+      const originalClipPath = element.style.clipPath;
 
       return {
         spring,
         from: 0,
         to: 1,
         prepare: () => {
-          // Calculate border radius once and store as CSS custom property
-          const maxBorderRadius =
-            Math.min(window.innerWidth, window.innerHeight) * 0.4;
-          element.style.setProperty(
-            "--max-border-radius",
-            `${maxBorderRadius}px`,
-          );
-          element.style.setProperty("--border-radius-scale", "1");
-
           // GPU acceleration hints
-          element.style.willChange = "transform";
+          element.style.willChange = "transform, clip-path";
           element.style.backfaceVisibility = "hidden";
 
-          // Set up the incoming page for animation with fixed viewport positioning
-          element.style.transformOrigin = "50% 50%";
-          element.style.position = "fixed";
-          element.style.top = "0";
-          element.style.left = "0";
-          element.style.width = "100vw";
-          element.style.height = "100vh";
-          element.style.zIndex = "1000";
-          element.style.overflow = "hidden"; // Clip content during scaling
+          // Set transform origin to center of visible rect
+          applyJaeminTransformOrigin(element, rect);
 
-          // Start with rotated and scaled state and initial border radius
+          // Apply initial clip path (fully rounded when small)
+          applyJaeminClip(element, rect, 1);
+
+          // Start with rotated and scaled state
           element.style.transform = `rotate(${initialRotation}deg) scale(${initialScale}) translateZ(0)`;
-          element.style.borderRadius = `calc(var(--max-border-radius) * var(--border-radius-scale))`;
+
+          // Start with opacity 0 to hide until OUT completes
+          element.style.opacity = "0";
+        },
+        wait: async () => {
+          // Wait for OUT animation to complete if it exists
+          if (outAnimationComplete) {
+            await outAnimationComplete;
+            // Configurable delay after OUT completes
+            await sleep(transitionDelay);
+          }
+          // Now make it visible
           element.style.opacity = "1";
         },
         tick: (progress) => {
-          // Calculate current scale with 3-phase timing (no visual effects yet)
+          // Calculate current scale with 3-phase timing
           let currentScale: number;
           if (progress <= 0.05) {
             // Entry phase (0-5%): stay very small
@@ -130,103 +204,32 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           }
 
           // Border radius scale factor: sync with rotation timing (70-100%)
-          let borderRadiusScale: number;
+          let borderRadiusPercent: number;
           if (progress <= rotationStartPoint) {
             // Keep fully rounded until rotation starts (70%)
-            borderRadiusScale = 1;
+            borderRadiusPercent = 1;
           } else {
             // Rapidly become rectangular during rotation phase (70-100%)
             const borderProgress =
               (progress - rotationStartPoint) / (1 - rotationStartPoint);
             // Very aggressive curve - radius disappears quickly as rotation completes
             const easedProgress = Math.pow(borderProgress, 0.5); // Square root for fast early change
-            borderRadiusScale = 1 - easedProgress;
+            borderRadiusPercent = 1 - easedProgress;
           }
 
-          // Apply transform and border radius scale
+          // Apply transform and dynamic clip path
           element.style.transform = `rotate(${currentRotation.toFixed(2)}deg) scale(${currentScale.toFixed(4)}) translateZ(0)`;
-          element.style.setProperty(
-            "--border-radius-scale",
-            borderRadiusScale.toFixed(4),
-          );
+          applyJaeminClip(element, rect, borderRadiusPercent);
         },
         onEnd: () => {
           // Clean up optimization hints
           element.style.willChange = "";
           element.style.backfaceVisibility = "";
 
-          // Reset CSS custom properties
-          element.style.removeProperty("--max-border-radius");
-          element.style.removeProperty("--border-radius-scale");
-
           // Reset to original styles
           element.style.transform = originalTransform;
           element.style.transformOrigin = originalTransformOrigin;
-          element.style.position = originalPosition;
-          element.style.zIndex = originalZIndex;
-          element.style.top = "";
-          element.style.left = "";
-          element.style.width = "";
-          element.style.height = "";
-          element.style.overflow = "";
-          element.style.borderRadius = "";
-        },
-      };
-    },
-  };
-};
-
-/**
- * Jaemin Reverse Transition
- *
- * Simple fade out for reverse navigation
- * Created by Jaemin
- */
-export const jaeminReverse = (
-  options: Pick<JaeminOptions, "spring"> = {},
-): SggoiTransition => {
-  const spring: SpringConfig = {
-    // Much slower, more visible fade out for reverse navigation
-    stiffness: options.spring?.stiffness ?? 80,
-    damping: options.spring?.damping ?? 25,
-  };
-
-  return {
-    out: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 1,
-        to: 0,
-        prepare: () => {
-          element.style.opacity = "1";
-        },
-        tick: (progress) => {
-          // Simple fade out
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
-        },
-      };
-    },
-    in: async (element) => {
-      const originalOpacity = element.style.opacity;
-
-      return {
-        spring,
-        from: 0,
-        to: 1,
-        prepare: () => {
-          element.style.opacity = "0";
-        },
-        tick: (progress) => {
-          // Simple fade in
-          element.style.opacity = String(progress);
-        },
-        onEnd: () => {
-          element.style.opacity = originalOpacity;
+          element.style.clipPath = originalClipPath;
         },
       };
     },
