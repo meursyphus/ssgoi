@@ -4,7 +4,6 @@ import { getServerTranslations } from "@/i18n/get-server-translations";
 import { SsgoiTransition } from "@/components/docs/ssgoi";
 import { createSEOMetadata } from "@/lib/seo-metadata";
 
-
 export async function generateMetadata({
   params,
 }: {
