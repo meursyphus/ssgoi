@@ -18,4 +18,14 @@ export const showcaseData: ShowcaseItem[] = [
   //   thumbnail: "/showcase/your-site.png", // Add image to public/showcase/
   //   tags: ["React", "E-commerce", etc.],
   // },
+
+  {
+    id: "burrr",
+    title: "Burrr AI",
+    description:
+      "A Seoul-based startup driving innovation with generative AI, chatbots, and cutting-edge AI solutions.",
+    url: "https://burrr.ai",
+    thumbnail: "/showcase/burrr.gif",
+    tags: ["AI", "Chatbot", "Sveltekit"],
+  },
 ];
