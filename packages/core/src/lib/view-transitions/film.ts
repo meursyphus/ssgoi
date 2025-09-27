@@ -115,8 +115,8 @@ function createCornerBorders(
   color: string = "white",
   rect: ReturnType<typeof getFilmRect>,
 ): CornerBorders {
-  const borderWidth = 2;
-  const borderLength = 10;
+  const borderWidth = 1;
+  const borderLength = 15;
 
   // Top-left corner
   const topLeft = document.createElement("div");
@@ -246,7 +246,7 @@ function createCornerBorders(
 
 export const film = (options?: FilmOptions): SggoiTransition => {
   const spring = options?.spring ?? DEFAULT_SPRING;
-  const scale = options?.scale ?? 0.92;
+  const scale = options?.scale ?? 0.85;
   const borderColor = options?.border?.color ?? "white";
 
   return {
@@ -301,7 +301,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             const offsetX = (rect.width - rect.width * currentScale) / 2;
             const offsetY = (rect.height - rect.height * currentScale) / 2;
 
-            updateBorders(borderElements, offsetX, offsetY);
+            updateBorders(borderElements, offsetX * 0.8, offsetY * 0.8);
           }
           // Stage 2 (0.3 ~ 0.7): scale 유지하며 위로 이동
           else if (progress < STAGE_2_END) {
@@ -314,7 +314,10 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             const translateY = -rect.top - rect.height * stage2Progress; // 0 → -height
             element.style.transform = `translateY(${translateY}px) scale(${scale})`;
 
-            // Borders stay at their final Stage 1 position (no update needed)
+            // Borders stay at their final Stage 1 position
+            const offsetX = (rect.width - rect.width * scale) / 2;
+            const offsetY = (rect.height - rect.height * scale) / 2;
+            updateBorders(borderElements, offsetX * 0.8, offsetY * 0.8);
           }
           // Stage 3 (0.7 ~ 1.0): scale → 1로 확대하며 위에 유지
           else {
@@ -326,7 +329,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             const offsetX = (rect.width - rect.width * currentScale) / 2;
             const offsetY = (rect.height - rect.height * currentScale) / 2;
 
-            updateBorders(borderElements, offsetX, offsetY);
+            updateBorders(borderElements, offsetX * 0.8, offsetY * 0.8);
           }
         },
       };
