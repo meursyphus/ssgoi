@@ -1,0 +1,221 @@
+---
+title: "胶片过渡"
+description: "如胶片般沿着3D曲面流动的顺滑过渡效果"
+nav-title: "胶片"
+---
+
+# 胶片过渡
+
+胶片（Strip）过渡创建了类似胶片通过放映机的3D曲面过渡效果。当前画面向右弯曲退出，新画面从左侧沿着相同曲线进入，创造连续的流动感，自然地表现内容的推进。
+
+## 演示
+
+<ViewTransitionDemo type="strip" />
+
+## UX原则
+
+### 何时使用
+
+胶片过渡用于**高端品牌体验**。
+
+#### 内容关系适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "yes",
+      description: "独立板块间的高端过渡（首页 → 服务）",
+    },
+    {
+      label: "兄弟关系",
+      suitable: "no",
+      description: "同级内容建议使用滑动过渡",
+    },
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "父子结构建议使用钻入或英雄过渡",
+    },
+  ]}
+/>
+
+#### 主要使用场景
+
+- **品牌体验**：高端着陆页的默认过渡
+- **顶层导航**：通过头部菜单在主要板块间移动
+- **展示网站**：作品集或产品介绍页面
+- **电影效果**：需要电影质感的品牌网站
+
+### 为什么这样运作
+
+1. **物理隐喻**：数字化重现真实胶片的运动
+2. **连续性表达**：提供内容不间断的感觉
+3. **空间感知**：3D曲面传达深度和高端感
+4. **自然流畅**：曲线运动提供顺滑的视觉体验
+
+### 动效设计
+
+```
+退出画面：中心 → 右侧曲面（3D变形 + 淡出）
+进入画面：左侧曲面 → 中心（3D变形 + 淡入）
+曲面效果：使用perspective和rotateY实现胶片效果
+```
+
+这个序列给用户提供"内容在连续的胶片上延续"的心理模型。
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { strip } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { strip } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: strip()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 实战示例
+
+### 基本用法（推荐）
+
+建议使用默认值的胶片过渡：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: strip()  // 建议使用默认值
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: strip()  // 建议使用默认值
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 应用于特定路由
+
+应用于顶层导航：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: strip(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/services',
+          transition: strip(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: strip(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/services',
+            transition: strip(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## 无障碍访问
+
+- 设置`prefers-reduced-motion`时自动最小化3D效果
+- 屏幕阅读器在过渡期间正确识别内容变化
+- 完全兼容键盘导航
+
+## 最佳实践
+
+### ✅ 应该
+
+- 作为着陆页的默认过渡
+- 应用于顶层导航（头部菜单）
+- 提供高端品牌体验时
+- 作品集或展示网站
+- **将页面背景设为透明**（过渡效果更加美观）
+
+### ❌ 不应该
+
+- 兄弟内容使用滑动过渡
+- 层级导航使用钻入或英雄过渡
+- 不适合画廊内部导航（建议使用滑动）
+- 优先使用默认值而非调整选项
+
+## 💡 设计技巧
+
+使用胶片过渡时获得最佳视觉效果：
+
+```css
+/* 将每个页面的背景设为透明 */
+.page-content {
+  background: transparent;
+}
+
+/* 在布局组件应用统一背景 */
+.layout-wrapper {
+  background: linear-gradient(to bottom right, #fef3e9, #fce7f3);
+}
+```
+
+这样在页面过渡时，胶片移动的效果会更加自然流畅。

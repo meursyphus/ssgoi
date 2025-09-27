@@ -1,7 +1,6 @@
 import type { SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-
 const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
 
 export const strip = (): SggoiTransition => {
@@ -38,7 +37,7 @@ export const strip = (): SggoiTransition => {
         spring: DEFAULT_SPRING,
         prepare: (element) => prepareOutgoing(element, context),
         tick: (_progress) => {
-          const progress = 1 -_progress;
+          const progress = 1 - _progress;
           const translateX = progress * 100;
           element.style.transform = `translateX(${translateX}%)`;
         },

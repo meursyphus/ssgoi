@@ -1,0 +1,222 @@
+---
+title: "스트립 전환"
+description: "필름 스트립처럼 3D 곡면을 따라 흐르는 부드러운 전환 효과"
+nav-title: "스트립"
+---
+
+# 스트립 전환
+
+스트립 전환은 필름 스트립이 영사기를 통과하는 듯한 3D 곡면 전환 효과입니다. 현재 화면이 오른쪽으로 휘어지며 나가고, 새 화면이 왼쪽에서 같은 곡선을 따라 들어오며, 연속적인 흐름을 만들어 자연스러운 콘텐츠 진행을 표현합니다.
+
+## 데모
+
+<ViewTransitionDemo type="strip" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+스트립 전환은 **순차적 진행(Sequential Progress)** 시 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "yes",
+      description: "독립적인 섹션 간 프리미엄 전환 (홈 → 서비스)",
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "동일 레벨의 콘텐츠는 슬라이드 사용 권장",
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "부모-자식 구조는 드릴이나 히어로 사용 권장",
+    },
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **브랜드 경험**: 프리미엄 랜딩 페이지의 기본 전환
+- **최상위 네비게이션**: 헤더 메뉴를 통한 주요 섹션 간 이동
+- **쇼케이스 사이트**: 포트폴리오나 제품 소개 페이지
+- **시네마틱 효과**: 영화적인 느낌이 필요한 브랜드 사이트
+
+### 왜 이렇게 동작하나요?
+
+1. **물리적 은유**: 실제 필름 스트립의 움직임을 디지털로 재현
+2. **연속성 표현**: 콘텐츠가 끊기지 않고 이어진다는 느낌 제공
+3. **공간적 인지**: 3D 곡면으로 깊이감과 프리미엄 느낌 전달
+4. **자연스러운 흐름**: 곡선 움직임으로 부드러운 시각적 경험
+
+### 모션 디자인
+
+```
+나가는 화면: 중앙 → 오른쪽 곡면 (3D 변형 + 페이드)
+들어오는 화면: 왼쪽 곡면 → 중앙 (3D 변형 + 페이드)
+곡면 효과: perspective와 rotateY로 필름 스트립 효과
+```
+
+이 시퀀스는 사용자에게 "콘텐츠가 연속된 스트립으로 이어져 있다"는 멘탈 모델을 제공합니다.
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { strip } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { strip } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: strip()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 실전 활용 예시
+
+### 기본 사용법 (권장)
+
+strip 전환은 기본값으로 사용하는 것을 권장합니다:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: strip()  // 기본값 사용 권장
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: strip()  // 기본값 사용 권장
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 특정 라우트 적용
+
+최상위 네비게이션에 적용:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: strip(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/services',
+          transition: strip(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: strip(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/services',
+            transition: strip(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+
+## 접근성
+
+- `prefers-reduced-motion` 설정 시 자동으로 3D 효과 최소화
+- 스크린 리더는 전환 중에도 콘텐츠 변경을 올바르게 인식
+- 키보드 네비게이션과 완벽하게 호환
+
+## 모범 사례
+
+### ✅ DO
+
+- 랜딩 페이지의 기본 전환으로 사용
+- 최상위 네비게이션 (헤더 메뉴)에 적용
+- 프리미엄 브랜드 경험 제공 시
+- 포트폴리오나 쇼케이스 사이트
+- **페이지 배경을 투명하게 설정** (전환 효과가 더 아름답게 표현됨)
+
+### ❌ DON'T
+
+- 형제 관계 콘텐츠에는 슬라이드 전환 사용
+- 계층 구조 네비게이션에는 드릴이나 히어로 사용
+- 갤러리 내부 탐색에는 적합하지 않음 (슬라이드 권장)
+- 옵션 조정보다는 기본값 사용을 권장
+
+## 💡 디자인 팁
+
+Strip 전환을 사용할 때 최상의 시각적 효과를 위해:
+
+```css
+/* 각 페이지의 배경을 투명하게 설정 */
+.page-content {
+  background: transparent;
+}
+
+/* 레이아웃 컴포넌트에 통일된 배경 적용 */
+.layout-wrapper {
+  background: linear-gradient(to bottom right, #fef3e9, #fce7f3);
+}
+```
+
+이렇게 하면 페이지 전환 시 필름 스트립이 움직이는 듯한 효과가 더욱 자연스럽고 부드럽게 표현됩니다.

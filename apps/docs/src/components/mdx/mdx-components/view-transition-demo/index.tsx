@@ -26,9 +26,12 @@ const SlideDemo = lazy(() =>
 const BlindDemo = lazy(() =>
   import("./blind-demo").then((m) => ({ default: m.BlindDemo })),
 );
+const StripDemo = lazy(() =>
+  import("./strip-demo").then((m) => ({ default: m.StripDemo })),
+);
 
 export interface ViewTransitionDemoProps {
-  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "blind";
+  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "blind" | "strip";
 }
 
 // Loading component
@@ -60,6 +63,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <SlideDemo />;
       case "blind":
         return <BlindDemo />;
+      case "strip":
+        return <StripDemo />;
       default:
         return null;
     }
