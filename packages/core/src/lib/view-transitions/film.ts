@@ -9,11 +9,11 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 12, // Lower stiffness for smoother motion
-  damping: 5.5, // Lower damping for more fluid movement
+  stiffness: 5, // Lower stiffness for smoother motion
+  damping: 3.5, // Lower damping for more fluid movement
 };
 
-const DEFAULT_SCALE = 0.75;
+const DEFAULT_SCALE = 0.80;
 const DEFAULT_BORDER_COLOR = "white";
 
 type Timing = {
@@ -33,7 +33,7 @@ const SCALE_UP: Timing = {
 };
 
 const TRANSLATE: Timing = {
-  start: 0.1,
+  start: 0.2,
   end: 0.9,
 };
 
@@ -76,6 +76,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // Add border elements to positionedParent with transition
           for (const border of borderElements) {
             context.positionedParent.appendChild(border);
+         
           }
         },
         onEnd: () => {
@@ -203,8 +204,8 @@ function updateBorders(
   _offsetX: number,
   _offsetY: number,
 ) {
-  const offsetX = _offsetX * 0.5;
-  const offsetY = _offsetY * 0.5;
+  const offsetX = _offsetX * 0.7;
+  const offsetY = _offsetY * 0.7;
   borderElements.topLeft.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
   borderElements.topRight.style.transform = `translate(${-offsetX}px, ${offsetY}px)`;
   borderElements.bottomLeft.style.transform = `translate(${offsetX}px, ${-offsetY}px)`;
