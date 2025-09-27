@@ -9,11 +9,11 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 7, // Lower stiffness for smoother motion
-  damping: 3, // Lower damping for more fluid movement
+  stiffness: 12, // Lower stiffness for smoother motion
+  damping: 5.5, // Lower damping for more fluid movement
 };
 
-const DEFAULT_SCALE = 0.7;
+const DEFAULT_SCALE = 0.75;
 const DEFAULT_BORDER_COLOR = "white";
 
 type Timing = {
@@ -24,17 +24,17 @@ type Timing = {
 // timing configuration
 const SCALE_DOWN: Timing = {
   start: 0,
-  end: 0.3,
+  end: 0.45,
 };
 
 const SCALE_UP: Timing = {
-  start: 0.7,
-  end: 1,
+  start: 0.85,
+  end: 1.0,
 };
 
 const TRANSLATE: Timing = {
   start: 0.1,
-  end: 0.8,
+  end: 0.9,
 };
 
 interface FilmOptions {

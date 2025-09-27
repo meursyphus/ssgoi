@@ -17,11 +17,7 @@ export default function BlogLayout({ children }: BlogLayoutProps) {
   );
 
   return (
-    <SsgoiTransition
-      id="/ssgoi/blog"
-      as="div"
-      className="page"
-    >
+    <SsgoiTransition id="/ssgoi/blog" as="div" className="page">
       <div className="relative overflow-hidden z-0 pt-16">
         <Ssgoi config={config}>{children}</Ssgoi>
       </div>
