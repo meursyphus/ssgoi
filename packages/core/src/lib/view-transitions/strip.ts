@@ -12,7 +12,6 @@ export const strip = (): SggoiTransition => {
 
   return {
     in: (element) => {
-      
       return {
         spring: DEFAULT_SPRING,
         prepare: (element) => {

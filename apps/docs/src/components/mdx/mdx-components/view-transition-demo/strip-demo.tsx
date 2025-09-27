@@ -253,7 +253,9 @@ const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-scroll overflow-x-hidden relative z-0">{children}</main>
+      <main className="flex-1 overflow-y-scroll overflow-x-hidden relative z-0">
+        {children}
+      </main>
     </div>
   );
 });
