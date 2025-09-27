@@ -12,10 +12,7 @@ function SpeakingPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/strip"
-      className="min-h-full"
-    >
+    <DemoPage path="/strip" className="min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col justify-center min-h-full",
@@ -27,7 +24,7 @@ function SpeakingPage() {
             className={cn(
               "font-black leading-none",
               isMobile ? "text-6xl" : "text-[10rem]",
-              "text-orange-500 tracking-tight"
+              "text-orange-500 tracking-tight",
             )}
           >
             SPEAKING
@@ -38,7 +35,8 @@ function SpeakingPage() {
               isMobile ? "text-lg max-w-sm" : "text-2xl max-w-2xl",
             )}
           >
-            Transform your ideas into powerful narratives that captivate and inspire.
+            Transform your ideas into powerful narratives that captivate and
+            inspire.
           </p>
           <div className="flex gap-4 pt-4">
             <button className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors">
@@ -59,10 +57,7 @@ function CreatingPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/strip/creating"
-      className="min-h-full"
-    >
+    <DemoPage path="/strip/creating" className="min-h-full">
       <div
         className={cn(
           "mx-auto flex items-center justify-center min-h-full",
@@ -76,7 +71,7 @@ function CreatingPage() {
                 "font-black",
                 isMobile ? "text-5xl" : "text-[8rem]",
                 "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600",
-                "tracking-tight leading-none"
+                "tracking-tight leading-none",
               )}
             >
               CREATING
@@ -86,7 +81,7 @@ function CreatingPage() {
                 "font-black absolute inset-0 blur-3xl opacity-30",
                 isMobile ? "text-5xl" : "text-[8rem]",
                 "text-purple-600",
-                "tracking-tight leading-none"
+                "tracking-tight leading-none",
               )}
             >
               CREATING
@@ -114,7 +109,8 @@ function CreatingPage() {
               isMobile ? "text-base" : "text-xl",
             )}
           >
-            Where imagination meets execution. Build something extraordinary today.
+            Where imagination meets execution. Build something extraordinary
+            today.
           </p>
         </div>
       </div>
@@ -127,10 +123,7 @@ function ImpactPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/strip/impact"
-      className="min-h-full"
-    >
+    <DemoPage path="/strip/impact" className="min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col justify-center min-h-full relative",
@@ -146,7 +139,7 @@ function ImpactPage() {
               className={cn(
                 "font-black",
                 isMobile ? "text-5xl" : "text-[7rem]",
-                "text-gray-900 leading-none tracking-tight"
+                "text-gray-900 leading-none tracking-tight",
               )}
             >
               IMPACT
@@ -171,7 +164,7 @@ function ImpactPage() {
           <div
             className={cn(
               "absolute bottom-8 right-8",
-              isMobile ? "hidden" : "block"
+              isMobile ? "hidden" : "block",
             )}
           >
             <div className="w-32 h-32 rounded-full bg-orange-400 opacity-20 blur-3xl"></div>
@@ -188,7 +181,6 @@ const stripRoutes: RouteConfig[] = [
   { path: "/strip/creating", component: CreatingPage, label: "Creating" },
   { path: "/strip/impact", component: ImpactPage, label: "Impact" },
 ];
-
 
 // Custom Layout Component
 const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
@@ -241,8 +233,18 @@ const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
             {/* Mobile menu button */}
             {isMobile && (
               <button className="text-gray-600 hover:text-gray-900">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             )}
@@ -264,10 +266,6 @@ export function StripDemo() {
   };
 
   return (
-    <BrowserMockup
-      routes={stripRoutes}
-      config={config}
-      layout={StripLayout}
-    />
+    <BrowserMockup routes={stripRoutes} config={config} layout={StripLayout} />
   );
 }

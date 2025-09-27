@@ -13,7 +13,8 @@ export const strip = (): SggoiTransition => {
       return {
         spring: DEFAULT_SPRING,
         prepare: (element) => {
-          element.style.transform = "translateX(-100%)";
+          element.style.transformOrigin = "0% center";
+          element.style.transform = "perspective(800px) rotateY(-85deg)";
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
@@ -22,8 +23,8 @@ export const strip = (): SggoiTransition => {
           }
         },
         tick: (progress) => {
-          const translateX = (1 - progress) * -100;
-          element.style.transform = `translateX(${translateX}%)`;
+          const rotateY = (1 - progress) * -85;
+          element.style.transform = `perspective(800px) rotateY(${rotateY}deg)`;
         },
       };
     },
@@ -35,11 +36,14 @@ export const strip = (): SggoiTransition => {
 
       return {
         spring: DEFAULT_SPRING,
-        prepare: (element) => prepareOutgoing(element, context),
+        prepare: (element) => {
+          prepareOutgoing(element, context);
+          element.style.transformOrigin = "0% center";
+        },
         tick: (_progress) => {
           const progress = 1 - _progress;
-          const translateX = progress * 100;
-          element.style.transform = `translateX(${translateX}%)`;
+          const rotateY = progress * 85;
+          element.style.transform = `perspective(800px) rotateY(${rotateY}deg)`;
         },
         onEnd: () => {
           // Resolve the promise when OUT animation completes

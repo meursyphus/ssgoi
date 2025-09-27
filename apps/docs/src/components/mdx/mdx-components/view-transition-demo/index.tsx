@@ -31,7 +31,15 @@ const StripDemo = lazy(() =>
 );
 
 export interface ViewTransitionDemoProps {
-  type: "fade" | "hero" | "pinterest" | "scroll" | "drill" | "slide" | "blind" | "strip";
+  type:
+    | "fade"
+    | "hero"
+    | "pinterest"
+    | "scroll"
+    | "drill"
+    | "slide"
+    | "blind"
+    | "strip";
 }
 
 // Loading component
