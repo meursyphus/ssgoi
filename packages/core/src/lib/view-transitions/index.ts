@@ -7,3 +7,4 @@ export * from "./jaemin";
 export * from "./pinterest";
 export * from "./scroll";
 export * from "./slide";
+export * from "./strip";
