@@ -1,0 +1,221 @@
+---
+title: "ストリップトランジション"
+description: "フィルムストリップのように3D曲面に沿って流れる滑らかな遷移効果"
+nav-title: "ストリップ"
+---
+
+# ストリップトランジション
+
+ストリップ（Strip）トランジションは、フィルムストリップが映写機を通過するような3D曲面の遷移効果を作り出します。現在の画面が右に曲がりながら退場し、新しい画面が左から同じ曲線に沿って入場し、連続的な流れを作り出して自然にコンテンツの進行を表現します。
+
+## デモ
+
+<ViewTransitionDemo type="strip" />
+
+## UX原則
+
+### いつ使うか
+
+ストリップトランジションは**プレミアムブランド体験**で使用されます。
+
+#### コンテンツ関係の適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "無関係なコンテンツ",
+      suitable: "yes",
+      description: "独立したセクション間のプレミアムな遷移（ホーム → サービス）",
+    },
+    {
+      label: "兄弟関係",
+      suitable: "no",
+      description: "同レベルのコンテンツにはスライドトランジションを推奨",
+    },
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "親子構造にはドリルやヒーローを推奨",
+    },
+  ]}
+/>
+
+#### 主な使用ケース
+
+- **ブランド体験**：プレミアムランディングページのデフォルト遷移
+- **トップレベルナビゲーション**：ヘッダーメニューによる主要セクション間の移動
+- **ショーケースサイト**：ポートフォリオや製品紹介ページ
+- **シネマティック効果**：映画的な感覚が必要なブランドサイト
+
+### なぜこのように動作するのか
+
+1. **物理的メタファー**：実際のフィルムストリップの動きをデジタルで再現
+2. **連続性の表現**：コンテンツが途切れずに続く感覚を提供
+3. **空間的知覚**：3D曲面が深さとプレミアム感を伝える
+4. **自然な流れ**：曲線の動きが滑らかな視覚体験を提供
+
+### モーションデザイン
+
+```
+退出画面：中央 → 右曲面（3D変形 + フェード）
+進入画面：左曲面 → 中央（3D変形 + フェード）
+曲面効果：perspectiveとrotateYを使用したフィルムストリップ効果
+```
+
+このシーケンスは「コンテンツが連続したストリップ上に続いている」というメンタルモデルをユーザーに提供します。
+
+## 基本的な使い方
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { strip } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { strip } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: strip()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## 実践的な例
+
+### 基本的な使い方（推奨）
+
+ストリップトランジションはデフォルト値での使用を推奨します：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: strip()  // デフォルト値の使用を推奨
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: strip()  // デフォルト値の使用を推奨
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 特定ルートへの適用
+
+トップレベルナビゲーションに適用：
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: strip(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/services',
+          transition: strip(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: strip(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/services',
+            transition: strip(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## アクセシビリティ
+
+- `prefers-reduced-motion`設定時に自動的に3D効果を最小化
+- スクリーンリーダーは遷移中もコンテンツの変更を正しく認識
+- キーボードナビゲーションと完全に互換
+
+## ベストプラクティス
+
+### ✅ すべきこと
+
+- ランディングページのデフォルトトランジションとして使用
+- トップレベルナビゲーション（ヘッダーメニュー）に適用
+- プレミアムブランド体験を提供する時
+- ポートフォリオやショーケースサイト
+- **ページ背景を透明に設定**（遷移効果がより美しく表現される）
+
+### ❌ すべきでないこと
+
+- 兄弟コンテンツにはスライドトランジションを使用
+- 階層ナビゲーションにはドリルやヒーローを使用
+- ギャラリー内部のナビゲーションには不適切（スライド推奨）
+- オプション調整よりデフォルト値の使用を推奨
+
+## 💡 デザインのヒント
+
+ストリップトランジションで最高の視覚効果を得るために：
+
+```css
+/* 各ページの背景を透明に設定 */
+.page-content {
+  background: transparent;
+}
+
+/* レイアウトコンポーネントに統一背景を適用 */
+.layout-wrapper {
+  background: linear-gradient(to bottom right, #fef3e9, #fce7f3);
+}
+```
+
+このようにすることで、ページ遷移時にフィルムストリップが動くような効果がより自然で滑らかに表現されます。

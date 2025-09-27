@@ -1,0 +1,221 @@
+---
+title: "Strip Transition"
+description: "Smooth transition effect flowing along a 3D curve like a film strip"
+nav-title: "Strip"
+---
+
+# Strip Transition
+
+The Strip transition creates a 3D curved transition effect reminiscent of film strips passing through a projector. The current screen curves out to the right, while the new screen enters from the left along the same curve, creating a continuous flow that naturally expresses content progression.
+
+## Demo
+
+<ViewTransitionDemo type="strip" />
+
+## UX Principles
+
+### When to Use
+
+Strip transitions are used for **Premium Brand Experiences**.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "yes",
+      description: "Premium transitions between independent sections (Home → Services)",
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "no",
+      description: "Use slide transitions for same-level content",
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "Use drill or hero for parent-child structures",
+    },
+  ]}
+/>
+
+#### Key Use Cases
+
+- **Brand Experience**: Default transition for premium landing pages
+- **Top-level Navigation**: Moving between major sections via header menu
+- **Showcase Sites**: Portfolio or product introduction pages
+- **Cinematic Effects**: Brand sites requiring a film-like feel
+
+### Why It Works This Way
+
+1. **Physical Metaphor**: Digitally recreates the movement of actual film strips
+2. **Continuous Expression**: Provides a feeling of uninterrupted content flow
+3. **Spatial Perception**: 3D curves convey depth and premium feel
+4. **Natural Flow**: Curved motion provides smooth visual experience
+
+### Motion Design
+
+```
+Exiting Screen: Center → Right curve (3D transform + fade)
+Entering Screen: Left curve → Center (3D transform + fade)
+Curve Effect: Film strip effect using perspective and rotateY
+```
+
+This sequence provides users with the mental model that "content continues on a continuous strip."
+
+## Basic Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { strip } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { strip } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: strip()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+</Tabs>
+
+## Practical Examples
+
+### Basic Usage (Recommended)
+
+It's recommended to use strip transitions with default values:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      defaultTransition: strip()  // Recommended to use defaults
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        defaultTransition: strip()  // Recommended to use defaults
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### Apply to Specific Routes
+
+Apply to top-level navigation:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: strip(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/services',
+          transition: strip(),
+          symmetric: true
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: strip(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/services',
+            transition: strip(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+## Accessibility
+
+- Automatically minimizes 3D effects when `prefers-reduced-motion` is set
+- Screen readers correctly recognize content changes during transitions
+- Fully compatible with keyboard navigation
+
+## Best Practices
+
+### ✅ DO
+
+- Use as default transition for landing pages
+- Apply to top-level navigation (header menus)
+- When providing premium brand experiences
+- Portfolio or showcase sites
+- **Set page backgrounds to transparent** (transition effects appear more beautiful)
+
+### ❌ DON'T
+
+- Use slide transitions for sibling content
+- Use drill or hero for hierarchical navigation
+- Not suitable for gallery internal navigation (slide recommended)
+- Prefer defaults over option adjustments
+
+## 💡 Design Tips
+
+For the best visual effects when using Strip transitions:
+
+```css
+/* Set each page's background to transparent */
+.page-content {
+  background: transparent;
+}
+
+/* Apply unified background to layout component */
+.layout-wrapper {
+  background: linear-gradient(to bottom right, #fef3e9, #fce7f3);
+}
+```
+
+This makes the film strip movement effect appear more natural and smooth during page transitions.
