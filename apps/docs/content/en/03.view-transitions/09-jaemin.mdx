@@ -6,13 +6,17 @@ nav-title: "Jaemin"
 
 # Jaemin Transition
 
-The Jaemin transition is a creative transition effect created by [Jaemin Chun (elrion018)](https://github.com/elrion018). It provides a dramatic transition where the previous page fades out while the new page starts from a small dot and rotates to fill the entire screen.
+The Jaemin transition is a creative transition effect created by [Jaemin Cheon (elrion018)](https://github.com/elrion018). It provides a dramatic transition where the previous page fades out while the new page starts from a small dot and rotates to fill the entire screen.
 
 ## Demo
 
-<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-  <img src="/view-transitions/jaemin.gif" alt="Jaemin transition demo" style={{ maxWidth: '100%', borderRadius: '0.5rem' }} />
-</div>
+<ViewTransitionDemo type="jaemin" />
+
+**Try navigating between tabs to see the difference:**
+- **Home ↔ Premium ↔ Achievement**: Experience the dramatic Jaemin transition with rotation and scaling
+- **Settings**: Uses standard browser navigation (no special transition) for comparison
+
+Notice how the Jaemin transition creates a sense of excitement and importance, while regular navigation feels more subdued - perfect for demonstrating when to use each approach.
 
 ## UX Principles
 
@@ -114,13 +118,34 @@ The combination of rotation and scaling is carefully timed. The rotation complet
 
 ```typescript
 jaemin({
-  duration?: number;  // Animation duration in milliseconds (default: 800)
-  rotation?: number;  // Rotation degrees (default: 720)
-  scale?: {
-    from: number;     // Starting scale (default: 0)
-    to: number;       // Ending scale (default: 1)
+  spring?: {
+    stiffness?: number;  // Animation spring stiffness (default: 50)
+    damping?: number;    // Animation spring damping (default: 30)
   };
+  initialRotation?: number;      // Initial rotation angle in degrees (default: 45)
+  initialScale?: number;         // Initial scale factor (default: 0.01)
+  rotationTriggerPoint?: number; // Progress point where rotation starts 0-1 (default: 0.8)
+  containerMode?: 'auto' | 'positioned-parent' | 'viewport'; // Container detection mode (default: 'auto')
 })
+```
+
+### Container Modes
+
+The `containerMode` option controls how the transition calculates its container bounds:
+
+- **`'auto'`** (default): Automatically detects the environment. Uses positioned parent bounds if smaller than 80% of viewport, otherwise uses full viewport
+- **`'positioned-parent'`**: Always uses the nearest positioned parent as container bounds. Ideal for demos, modals, or constrained layouts
+- **`'viewport'`**: Always uses the full browser viewport as container bounds. Best for full-page applications
+
+```typescript
+// Auto detection (recommended for most cases)
+jaemin()
+
+// Explicit container control for demos/modals
+jaemin({ containerMode: 'positioned-parent' })
+
+// Full viewport for immersive experiences
+jaemin({ containerMode: 'viewport' })
 ```
 
 ## Practical Examples

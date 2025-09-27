@@ -11,21 +11,58 @@ interface JaeminOptions {
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
+  containerMode?: "auto" | "positioned-parent" | "viewport"; // Container detection mode
 }
 
 /**
  * Calculate the visible viewport rect for jaemin transition
  */
-function getJaeminRect(context: SggoiTransitionContext) {
-  const containerRect = getRect(document.body, context.positionedParent);
-  const top = context.scroll.y;
+function getJaeminRect(
+  context: SggoiTransitionContext,
+  containerMode: "auto" | "positioned-parent" | "viewport" = "auto",
+) {
+  // Get the positioned parent's bounds
+  const positionedParentRect = context.positionedParent.getBoundingClientRect();
 
-  return {
-    top,
-    left: 0,
-    width: containerRect.width,
-    height: window.innerHeight - containerRect.top,
-  };
+  // Determine if we should use constrained environment based on mode
+  let isConstrainedEnvironment: boolean;
+
+  switch (containerMode) {
+    case "positioned-parent":
+      isConstrainedEnvironment = true;
+      break;
+    case "viewport":
+      isConstrainedEnvironment = false;
+      break;
+    case "auto":
+    default:
+      // Auto-detect based on positioned parent size
+      isConstrainedEnvironment =
+        positionedParentRect.height < window.innerHeight * 0.8 ||
+        positionedParentRect.width < window.innerWidth * 0.8;
+      break;
+  }
+
+  if (isConstrainedEnvironment) {
+    // Use container-relative positioning for mockup/demo environments
+    return {
+      top: positionedParentRect.top,
+      left: positionedParentRect.left,
+      width: positionedParentRect.width,
+      height: positionedParentRect.height,
+    };
+  } else {
+    // Use original full-viewport calculation for normal browser usage
+    const containerRect = getRect(document.body, context.positionedParent);
+    const top = context.scroll.y;
+
+    return {
+      top,
+      left: 0,
+      width: containerRect.width,
+      height: window.innerHeight - containerRect.top,
+    };
+  }
 }
 
 /**
@@ -49,6 +86,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
+  const containerMode = options.containerMode ?? "auto"; // Default to auto detection
 
   return {
     out: async (element, context) => {
@@ -78,7 +116,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       };
     },
     in: async (element, context) => {
-      const rect = getJaeminRect(context);
+      const rect = getJaeminRect(context, containerMode);
 
       // Store original styles for cleanup
       const originalTransform = element.style.transform;
@@ -104,15 +142,40 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           element.style.backfaceVisibility = "hidden";
 
           // Set up transform origin to center of rect
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          element.style.transformOrigin = `${centerX}px ${centerY}px`;
+          // For constrained environments (mockups), use percentage-based origin for better compatibility
+          // For full browser, use absolute positioning for precise control
+          const positionedParentRect =
+            context.positionedParent.getBoundingClientRect();
+          const isConstrainedEnvironment =
+            positionedParentRect.height < window.innerHeight * 0.8 ||
+            positionedParentRect.width < window.innerWidth * 0.8;
 
-          element.style.position = "fixed";
-          element.style.top = `${rect.top}px`;
-          element.style.left = `${rect.left}px`;
-          element.style.width = `${rect.width}px`;
-          element.style.height = `${rect.height}px`;
+          if (isConstrainedEnvironment) {
+            // Use percentage-based transform origin for mockup environments
+            element.style.transformOrigin = "50% 50%";
+          } else {
+            // Use absolute positioning for full browser environments
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            element.style.transformOrigin = `${centerX}px ${centerY}px`;
+          }
+
+          // Use different positioning strategy based on environment
+          if (isConstrainedEnvironment) {
+            // For mockup environments, use absolute positioning relative to the container
+            element.style.position = "absolute";
+            element.style.top = "0px";
+            element.style.left = "0px";
+            element.style.width = `${rect.width}px`;
+            element.style.height = `${rect.height}px`;
+          } else {
+            // For full browser, use fixed positioning as before
+            element.style.position = "fixed";
+            element.style.top = `${rect.top}px`;
+            element.style.left = `${rect.left}px`;
+            element.style.width = `${rect.width}px`;
+            element.style.height = `${rect.height}px`;
+          }
           element.style.zIndex = "1000";
           element.style.overflow = "hidden"; // Clip content during scaling
 
