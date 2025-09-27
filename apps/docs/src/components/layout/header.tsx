@@ -19,6 +19,7 @@ import { MobileDrawer } from "./mobile-drawer";
 import { LanguageSwitcher } from "./language-switcher";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { fetchWithCache } from "@/lib/github-cache";
 
 export function Header() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -44,12 +45,14 @@ export function Header() {
   };
 
   useEffect(() => {
-    fetch("https://api.github.com/repos/meursyphus/ssgoi")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
+    const STARS_CACHE_KEY = "ssgoi_github_stars";
+    const STARS_TTL = 30 * 60 * 1000; // 30 minutes
 
-        return res.json();
-      })
+    fetchWithCache(
+      "https://api.github.com/repos/meursyphus/ssgoi",
+      STARS_CACHE_KEY,
+      STARS_TTL,
+    )
       .then((data) => {
         setStars(data.stargazers_count);
         setIsLoadingStars(false);

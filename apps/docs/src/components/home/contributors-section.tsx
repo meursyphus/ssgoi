@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Github } from "lucide-react";
 import Link from "next/link";
+import { fetchWithCache } from "@/lib/github-cache";
 
 interface Contributor {
   login: string;
@@ -22,14 +23,16 @@ export function ContributorsSection({ lang }: ContributorsSectionProps) {
 
   useEffect(() => {
     const fetchContributors = async () => {
+      const CONTRIBUTORS_CACHE_KEY = "ssgoi_github_contributors";
+      const CONTRIBUTORS_TTL = 50 * 60 * 1000; // 50 minutes
+
       try {
-        const response = await fetch(
+        const data = await fetchWithCache<Contributor[]>(
           "https://api.github.com/repos/meursyphus/ssgoi/contributors",
+          CONTRIBUTORS_CACHE_KEY,
+          CONTRIBUTORS_TTL,
         );
-        if (response.ok) {
-          const data = await response.json();
-          setContributors(data);
-        }
+        setContributors(data);
       } catch (error) {
         console.error("Failed to fetch contributors:", error);
       } finally {
