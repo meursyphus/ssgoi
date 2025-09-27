@@ -121,6 +121,39 @@ nav-title: "재민"
   </TabPanel>
 </Tabs>
 
+## 설정 옵션
+
+```typescript
+jaemin({
+  spring?: {
+    stiffness?: number;  // 애니메이션 스프링 강성 (기본값: 50)
+    damping?: number;    // 애니메이션 스프링 감쇠 (기본값: 30)
+  };
+  initialRotation?: number;      // 초기 회전 각도 (도) (기본값: 45)
+  initialScale?: number;         // 초기 스케일 팩터 (기본값: 0.01)
+  rotationTriggerPoint?: number; // 회전 시작 지점 0-1 (기본값: 0.8)
+  containerMode?: 'auto' | 'positioned-parent' | 'viewport'; // 컨테이너 감지 모드 (기본값: 'auto')
+})
+```
+
+### 컨테이너 모드
+
+`containerMode` 옵션은 전환이 컨테이너 경계를 계산하는 방법을 제어합니다:
+
+- **`'auto'`** (기본값): 환경을 자동으로 감지합니다. positioned parent가 뷰포트의 80%보다 작으면 그 경계를 사용하고, 그렇지 않으면 전체 뷰포트를 사용합니다
+- **`'positioned-parent'`**: 항상 가장 가까운 positioned parent를 컨테이너 경계로 사용합니다. 데모, 모달, 제한된 레이아웃에 이상적입니다
+- **`'viewport'`**: 항상 전체 브라우저 뷰포트를 컨테이너 경계로 사용합니다. 전체 페이지 애플리케이션에 최적입니다
+
+```typescript
+// 자동 감지 (대부분의 경우 권장)
+jaemin()
+
+// 데모/모달을 위한 명시적 컨테이너 제어
+jaemin({ containerMode: 'positioned-parent' })
+
+// 몰입형 경험을 위한 전체 뷰포트
+jaemin({ containerMode: 'viewport' })
+```
 
 ## 실전 활용 예시
 

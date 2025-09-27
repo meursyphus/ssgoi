@@ -118,13 +118,34 @@ nav-title: "ジェミン"
 
 ```typescript
 jaemin({
-  duration?: number;  // アニメーション時間（ミリ秒）（デフォルト：800）
-  rotation?: number;  // 回転角度（デフォルト：720）
-  scale?: {
-    from: number;     // 開始スケール（デフォルト：0）
-    to: number;       // 終了スケール（デフォルト：1）
+  spring?: {
+    stiffness?: number;  // アニメーションスプリング剛性 (デフォルト: 50)
+    damping?: number;    // アニメーションスプリング減衰 (デフォルト: 30)
   };
+  initialRotation?: number;      // 初期回転角度（度）(デフォルト: 45)
+  initialScale?: number;         // 初期スケールファクター (デフォルト: 0.01)
+  rotationTriggerPoint?: number; // 回転開始ポイント 0-1 (デフォルト: 0.8)
+  containerMode?: 'auto' | 'positioned-parent' | 'viewport'; // コンテナ検出モード (デフォルト: 'auto')
 })
+```
+
+### コンテナモード
+
+`containerMode`オプションは、トランジションがコンテナ境界を計算する方法を制御します：
+
+- **`'auto'`** (デフォルト): 環境を自動検出します。positioned parentがビューポートの80%より小さい場合はその境界を使用し、そうでなければ全ビューポートを使用します
+- **`'positioned-parent'`**: 常に最も近いpositioned parentをコンテナ境界として使用します。デモ、モーダル、制約されたレイアウトに最適です
+- **`'viewport'`**: 常に全ブラウザビューポートをコンテナ境界として使用します。フルページアプリケーションに最適です
+
+```typescript
+// 自動検出（ほとんどの場合に推奨）
+jaemin()
+
+// デモ/モーダル用の明示的コンテナ制御
+jaemin({ containerMode: 'positioned-parent' })
+
+// 没入体験用の全ビューポート
+jaemin({ containerMode: 'viewport' })
 ```
 
 ## 実践的な例
