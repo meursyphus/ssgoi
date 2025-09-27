@@ -13,7 +13,7 @@ const DEFAULT_SPRING: SpringConfig = {
   damping: 3.5, // Lower damping for more fluid movement
 };
 
-const DEFAULT_SCALE = 0.80;
+const DEFAULT_SCALE = 0.8;
 const DEFAULT_BORDER_COLOR = "white";
 
 type Timing = {
@@ -76,7 +76,6 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // Add border elements to positionedParent with transition
           for (const border of borderElements) {
             context.positionedParent.appendChild(border);
-         
           }
         },
         onEnd: () => {
