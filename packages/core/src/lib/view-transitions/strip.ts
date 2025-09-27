@@ -2,6 +2,8 @@ import type { SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
+const ROTATE_Y = 20;
+const PERSPECTIVE = 800;
 
 export const strip = (): SggoiTransition => {
   // Shared promise for coordinating OUT and IN animations
@@ -10,11 +12,11 @@ export const strip = (): SggoiTransition => {
 
   return {
     in: (element) => {
+      
       return {
         spring: DEFAULT_SPRING,
         prepare: (element) => {
-          element.style.transformOrigin = "0% center";
-          element.style.transform = "perspective(800px) rotateY(-85deg)";
+          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ROTATE_Y}deg) translateX(-100%)`;
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
@@ -23,8 +25,12 @@ export const strip = (): SggoiTransition => {
           }
         },
         tick: (progress) => {
-          const rotateY = (1 - progress) * -85;
-          element.style.transform = `perspective(800px) rotateY(${rotateY}deg)`;
+          const rotateY = (1 - progress) * ROTATE_Y;
+          const translateX = -(1 - progress) * 100;
+          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${rotateY}deg) translateX(${translateX}%)`;
+        },
+        onEnd: () => {
+          element.style.transform = "";
         },
       };
     },
@@ -38,18 +44,19 @@ export const strip = (): SggoiTransition => {
         spring: DEFAULT_SPRING,
         prepare: (element) => {
           prepareOutgoing(element, context);
-          element.style.transformOrigin = "0% center";
         },
         tick: (_progress) => {
           const progress = 1 - _progress;
-          const rotateY = progress * 85;
-          element.style.transform = `perspective(800px) rotateY(${rotateY}deg)`;
+          const rotateY = progress * ROTATE_Y;
+          const translateX = progress * 100;
+          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${-rotateY}deg) translateX(${translateX}%)`;
         },
         onEnd: () => {
           // Resolve the promise when OUT animation completes
           if (resolveOutAnimation) {
             resolveOutAnimation();
           }
+          element.style.transform = "";
         },
       };
     },
