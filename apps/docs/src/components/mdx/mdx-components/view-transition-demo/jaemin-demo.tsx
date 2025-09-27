@@ -453,19 +453,19 @@ export function JaeminDemo() {
       {
         from: "/jaemin",
         to: "/jaemin/premium",
-        transition: jaemin(),
+        transition: jaemin({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       {
         from: "/jaemin",
         to: "/jaemin/achievement",
-        transition: jaemin(),
+        transition: jaemin({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       {
         from: "/jaemin/premium",
         to: "/jaemin/achievement",
-        transition: jaemin(),
+        transition: jaemin({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       // Settings uses standard browser navigation (not special)

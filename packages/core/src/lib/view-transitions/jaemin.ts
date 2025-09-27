@@ -11,20 +11,37 @@ interface JaeminOptions {
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
+  containerMode?: "auto" | "positioned-parent" | "viewport"; // Container detection mode
 }
 
 /**
  * Calculate the visible viewport rect for jaemin transition
  */
-function getJaeminRect(context: SggoiTransitionContext) {
+function getJaeminRect(
+  context: SggoiTransitionContext,
+  containerMode: "auto" | "positioned-parent" | "viewport" = "auto",
+) {
   // Get the positioned parent's bounds
   const positionedParentRect = context.positionedParent.getBoundingClientRect();
 
-  // Check if we're in a constrained environment (like BrowserMockup)
-  // If the positioned parent is significantly smaller than the viewport, use container bounds
-  const isConstrainedEnvironment =
-    positionedParentRect.height < window.innerHeight * 0.8 ||
-    positionedParentRect.width < window.innerWidth * 0.8;
+  // Determine if we should use constrained environment based on mode
+  let isConstrainedEnvironment: boolean;
+
+  switch (containerMode) {
+    case "positioned-parent":
+      isConstrainedEnvironment = true;
+      break;
+    case "viewport":
+      isConstrainedEnvironment = false;
+      break;
+    case "auto":
+    default:
+      // Auto-detect based on positioned parent size
+      isConstrainedEnvironment =
+        positionedParentRect.height < window.innerHeight * 0.8 ||
+        positionedParentRect.width < window.innerWidth * 0.8;
+      break;
+  }
 
   if (isConstrainedEnvironment) {
     // Use container-relative positioning for mockup/demo environments
@@ -69,6 +86,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
+  const containerMode = options.containerMode ?? "auto"; // Default to auto detection
 
   return {
     out: async (element, context) => {
@@ -98,7 +116,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       };
     },
     in: async (element, context) => {
-      const rect = getJaeminRect(context);
+      const rect = getJaeminRect(context, containerMode);
 
       // Store original styles for cleanup
       const originalTransform = element.style.transform;
