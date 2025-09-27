@@ -23,7 +23,7 @@ export default async function DocsLayout({
         as="div"
         className="min-h-[calc(100vh-4rem)] pt-16"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             {/* Sidebar */}
             <aside className="hidden md:block w-64 flex-shrink-0">

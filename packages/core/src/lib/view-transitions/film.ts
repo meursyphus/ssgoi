@@ -9,8 +9,8 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configuration for smooth, cinematic motion
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 10, // Lower stiffness for smoother motion
-  damping: 5, // Lower damping for more fluid movement
+  stiffness: 7, // Lower stiffness for smoother motion
+  damping: 3, // Lower damping for more fluid movement
 };
 
 const DEFAULT_SCALE = 0.7;
@@ -25,18 +25,17 @@ type Timing = {
 const SCALE_DOWN: Timing = {
   start: 0,
   end: 0.3,
-}
+};
 
 const SCALE_UP: Timing = {
   start: 0.7,
   end: 1,
-}
+};
 
 const TRANSLATE: Timing = {
-  start: 0.2,
-  end: 0.75,
-}
-
+  start: 0.1,
+  end: 0.8,
+};
 
 interface FilmOptions {
   spring?: SpringConfig;
@@ -45,7 +44,6 @@ interface FilmOptions {
     color?: string; // Border color (default: white)
   };
 }
-
 
 export const film = (options?: FilmOptions): SggoiTransition => {
   const spring = options?.spring ?? DEFAULT_SPRING;
@@ -96,29 +94,40 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           // OUT: _progress는 1 → 0으로 진행
           const progress = 1 - _progress; // 0 → 1로 변환하여 작업
 
-          
-          if(SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
-            const scaleProgress = mapProgress(progress, SCALE_DOWN.start, SCALE_DOWN.end);
+          if (SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
+            const scaleProgress = mapProgress(
+              progress,
+              SCALE_DOWN.start,
+              SCALE_DOWN.end,
+            );
             currentScale = 1 - (1 - scale) * scaleProgress; // 1 -> option.scale
           }
 
-          if(SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
-            const scaleProgress = mapProgress(progress, SCALE_UP.start, SCALE_UP.end);
+          if (SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
+            const scaleProgress = mapProgress(
+              progress,
+              SCALE_UP.start,
+              SCALE_UP.end,
+            );
             currentScale = scale + (1 - scale) * scaleProgress; // option.scale -> 1
           }
 
-          if(TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
-            const translateProgress = mapProgress(progress, TRANSLATE.start, TRANSLATE.end);
+          if (TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
+            const translateProgress = mapProgress(
+              progress,
+              TRANSLATE.start,
+              TRANSLATE.end,
+            );
             currentTranslateY = -rect.top - rect.height * translateProgress;
           }
 
           element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
 
-                // Calculate how much the element has shrunk
-                  const offsetX = (rect.width - rect.width * currentScale) / 2;
-                  const offsetY = (rect.height - rect.height * currentScale) / 2;
-      
-                  updateBorders(borderElements, offsetX, offsetY);  
+          // Calculate how much the element has shrunk
+          const offsetX = (rect.width - rect.width * currentScale) / 2;
+          const offsetY = (rect.height - rect.height * currentScale) / 2;
+
+          updateBorders(borderElements, offsetX, offsetY);
         },
       };
     },
@@ -151,20 +160,32 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         tick: (progress) => {
           // IN: progress는 0 → 1로 진행
 
-
-          if(SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
-            const scaleProgress = mapProgress(progress, SCALE_DOWN.start, SCALE_DOWN.end);
+          if (SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
+            const scaleProgress = mapProgress(
+              progress,
+              SCALE_DOWN.start,
+              SCALE_DOWN.end,
+            );
             currentScale = 1 - (1 - scale) * scaleProgress; // 1 -> scale
           }
 
-          if(SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
-            const scaleProgress = mapProgress(progress, SCALE_UP.start, SCALE_UP.end);
+          if (SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
+            const scaleProgress = mapProgress(
+              progress,
+              SCALE_UP.start,
+              SCALE_UP.end,
+            );
             currentScale = scale + (1 - scale) * scaleProgress; // scale → 1
           }
 
-          if(TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
-            const translateProgress = mapProgress(progress, TRANSLATE.start, TRANSLATE.end);
-            currentTranslateY = -rect.top + rect.height * (1 - translateProgress);
+          if (TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
+            const translateProgress = mapProgress(
+              progress,
+              TRANSLATE.start,
+              TRANSLATE.end,
+            );
+            currentTranslateY =
+              -rect.top + rect.height * (1 - translateProgress);
           }
 
           element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
@@ -173,7 +194,6 @@ export const film = (options?: FilmOptions): SggoiTransition => {
     },
   };
 };
-
 
 /**
  * Helper function to update border positions
@@ -333,7 +353,6 @@ function createCornerBorders(
     },
   };
 }
-
 
 /**
  * Calculate the visible viewport rect for film transition

@@ -22,8 +22,8 @@ export async function generateMetadata({
 
 export default function ShowcasePage() {
   return (
-    <SsgoiTransition id="/ssgoi/showcase">
-      <div className="min-h-screen bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
+    <SsgoiTransition className="page" id="/ssgoi/showcase">
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <ShowcaseGrid />
       </div>
     </SsgoiTransition>

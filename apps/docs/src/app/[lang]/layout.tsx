@@ -46,7 +46,7 @@ export default async function RootLayout({
           <ConsoleWelcome />
 
           <Header />
-          <main className="relative z-0 overflow-hidden pt-20">
+          <main className="relative z-0 overflow-hidden">
             <SsgoiProvider>{children}</SsgoiProvider>
           </main>
         </TranslationsProvider>

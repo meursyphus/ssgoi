@@ -85,6 +85,10 @@ body {
   color: var(--color-foreground);
 }
 
+.page {
+  padding-top: 80px;
+}
+
 /* 그라데이션 텍스트 효과 */
 .gradient-text {
   background: linear-gradient(135deg, var(--color-vivid-orange), var(--color-vivid-pink), var(--color-vivid-purple));

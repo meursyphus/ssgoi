@@ -14,7 +14,7 @@ interface HomePageContentProps {
 
 export function HomePageContent({ lang }: HomePageContentProps) {
   return (
-    <SsgoiTransition id="/ssgoi" as="div" className="relative">
+    <SsgoiTransition id="/ssgoi" as="div" className="relative page">
       <HeroSection lang={lang} />
       <WhyTransitionsMatterSection lang={lang} />
       <ExperienceDifferenceSection lang={lang} />
