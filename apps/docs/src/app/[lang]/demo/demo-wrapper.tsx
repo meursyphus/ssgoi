@@ -25,7 +25,7 @@ export default function DemoWrapper({
     },
   };
   return (
-    <div className="h-[calc(100vh-80px)] md:h-screen md:-mt-20 grow flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-black lg:py-10 relative overflow-hidden">
+    <div className="h-screen md:h-screen grow flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-black pt-20 relative overflow-hidden">
       {/* Noise texture overlay */}
       <div
         className="absolute inset-0 opacity-[0.015]"

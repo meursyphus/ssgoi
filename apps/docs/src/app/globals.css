@@ -81,8 +81,13 @@
 }
 
 body {
-  background-color: var(--color-background);
+  background-color: #121212;
   color: var(--color-foreground);
+}
+
+.page {
+  padding-top: 80px;
+  background-color: var(--color-background);
 }
 
 /* 그라데이션 텍스트 효과 */
