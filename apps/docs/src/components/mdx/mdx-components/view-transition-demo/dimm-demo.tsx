@@ -19,7 +19,7 @@ function SpeakingPage() {
     <DemoPage path="/dimm" className="min-h-full">
       <div
         className={cn(
-          "mx-auto flex flex-col justify-center min-h-full",
+          "mx-auto flex flex-col justify-center min-h-full bg-purple-100",
           isMobile ? "px-6 py-12" : "max-w-6xl px-8 py-20",
         )}
       >
@@ -74,7 +74,7 @@ function CreatingPage() {
     <DemoPage path="/dimm/creating" className="min-h-full">
       <div
         className={cn(
-          "mx-auto flex items-center justify-center min-h-full",
+          "mx-auto flex items-center justify-center min-h-full bg-yellow-100",
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >
@@ -153,7 +153,7 @@ function ImpactPage() {
     <DemoPage path="/dimm/impact" className="min-h-full">
       <div
         className={cn(
-          "mx-auto flex flex-col justify-center min-h-full relative",
+          "mx-auto flex flex-col justify-center min-h-full relative bg-green-100",
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >

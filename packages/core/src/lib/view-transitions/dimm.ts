@@ -32,29 +32,22 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
     padding = 20,
   } = options;
 
-  let outAnimationComplete: Promise<void>;
-  let resolveOutAnimation: (() => void) | null = null;
-
   return {
     out: (element, context) => {
-      outAnimationComplete = new Promise<void>((resolve) => {
-        resolveOutAnimation = resolve;
-      });
-
       return {
-        spring: outSpring,
+        spring: inSpring, // Use same spring as `in` to sync duration
         prepare: () => {
           prepareOutgoing(element, context);
-          element.style.zIndex = "1";
+          element.style.zIndex = "0";
         },
         tick: (progress) => {
-          element.style.opacity = progress.toString();
+          // This is a dummy animation to keep the element from disappearing prematurely.
+          // It remains visible throughout the transition.
+          element.style.opacity = "1";
         },
         onEnd: () => {
+          // Hide it completely at the very end.
           element.style.opacity = "0";
-          if (resolveOutAnimation) {
-            resolveOutAnimation();
-          }
         },
       };
     },
@@ -67,7 +60,12 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
       return {
         spring: inSpring,
         prepare: () => {
-          element.style.zIndex = "0";
+          element.style.position = "absolute";
+          element.style.left = "0";
+          element.style.top = "0";
+          element.style.width = "100%";
+          element.style.height = "100%";
+          element.style.zIndex = "1";
           element.style.opacity = "1";
 
           const triggerRect = lastTriggerRect;
@@ -101,9 +99,6 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
           element.style.clipPath = `circle(${initialRadius}px at ${startX}px ${startY}px)`;
         },
         wait: async () => {
-          if (outAnimationComplete) {
-            await outAnimationComplete;
-          }
           await sleep(transitionDelay);
         },
         tick: (progress) => {
