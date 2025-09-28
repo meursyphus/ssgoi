@@ -1,3 +1,4 @@
+export * from "./dimm";
 export * from "./blind";
 export * from "./drill";
 export * from "./fade";
