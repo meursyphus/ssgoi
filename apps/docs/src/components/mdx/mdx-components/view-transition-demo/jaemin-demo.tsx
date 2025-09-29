@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { jaeminInternal } from "@ssgoi/core/view-transitions/jaemin";
+import { jaeminInternal } from "@ssgoi/core";
 import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";

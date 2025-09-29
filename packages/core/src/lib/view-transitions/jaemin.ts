@@ -15,7 +15,7 @@ interface JaeminOptions {
 
 // Internal interface for demo usage only - not exported
 interface JaeminInternalOptions extends JaeminOptions {
-  containerMode?: "auto" | "positioned-parent" | "viewport"; // Container detection mode
+  containerMode?: "positioned-parent" | "viewport"; // Container mode (default: 'viewport')
 }
 
 /**
@@ -23,32 +23,12 @@ interface JaeminInternalOptions extends JaeminOptions {
  */
 function getJaeminRect(
   context: SggoiTransitionContext,
-  containerMode: "auto" | "positioned-parent" | "viewport" = "auto",
+  containerMode: "positioned-parent" | "viewport" = "viewport",
 ) {
-  // Get the positioned parent's bounds
-  const positionedParentRect = context.positionedParent.getBoundingClientRect();
-
-  // Determine if we should use constrained environment based on mode
-  let isConstrainedEnvironment: boolean;
-
-  switch (containerMode) {
-    case "positioned-parent":
-      isConstrainedEnvironment = true;
-      break;
-    case "viewport":
-      isConstrainedEnvironment = false;
-      break;
-    case "auto":
-    default:
-      // Auto-detect based on positioned parent size
-      isConstrainedEnvironment =
-        positionedParentRect.height < window.innerHeight * 0.8 ||
-        positionedParentRect.width < window.innerWidth * 0.8;
-      break;
-  }
-
-  if (isConstrainedEnvironment) {
-    // Use container-relative positioning for mockup/demo environments
+  if (containerMode === "positioned-parent") {
+    // Use positioned parent bounds for demos/modals
+    const positionedParentRect =
+      context.positionedParent.getBoundingClientRect();
     return {
       top: positionedParentRect.top,
       left: positionedParentRect.left,
@@ -56,7 +36,7 @@ function getJaeminRect(
       height: positionedParentRect.height,
     };
   } else {
-    // Use original full-viewport calculation for normal browser usage
+    // Default: Use full viewport calculation
     const containerRect = getRect(document.body, context.positionedParent);
     const top = context.scroll.y;
 
@@ -97,7 +77,7 @@ export const jaeminInternal = (
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
-  const containerMode = options.containerMode ?? "auto"; // Default to auto detection
+  const containerMode = options.containerMode ?? "viewport"; // Default to viewport
 
   return {
     out: async (element, context) => {
@@ -152,35 +132,22 @@ export const jaeminInternal = (
           element.style.willChange = "transform";
           element.style.backfaceVisibility = "hidden";
 
-          // Set up transform origin to center of rect
-          // For constrained environments (mockups), use percentage-based origin for better compatibility
-          // For full browser, use absolute positioning for precise control
-          const positionedParentRect =
-            context.positionedParent.getBoundingClientRect();
-          const isConstrainedEnvironment =
-            positionedParentRect.height < window.innerHeight * 0.8 ||
-            positionedParentRect.width < window.innerWidth * 0.8;
-
-          if (isConstrainedEnvironment) {
-            // Use percentage-based transform origin for mockup environments
+          // Set up transform origin and positioning based on container mode
+          if (containerMode === "positioned-parent") {
+            // Use percentage-based transform origin for demo environments
             element.style.transformOrigin = "50% 50%";
-          } else {
-            // Use absolute positioning for full browser environments
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            element.style.transformOrigin = `${centerX}px ${centerY}px`;
-          }
-
-          // Use different positioning strategy based on environment
-          if (isConstrainedEnvironment) {
-            // For mockup environments, use absolute positioning relative to the container
+            // Use absolute positioning relative to the container
             element.style.position = "absolute";
             element.style.top = "0px";
             element.style.left = "0px";
             element.style.width = `${rect.width}px`;
             element.style.height = `${rect.height}px`;
           } else {
-            // For full browser, use fixed positioning as before
+            // Default viewport mode: use absolute positioning for precise control
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Use fixed positioning for full browser
             element.style.position = "fixed";
             element.style.top = `${rect.top}px`;
             element.style.left = `${rect.left}px`;
