@@ -125,28 +125,9 @@ jaemin({
   initialRotation?: number;      // 初始旋转角度（度）(默认: 45)
   initialScale?: number;         // 初始缩放因子 (默认: 0.01)
   rotationTriggerPoint?: number; // 旋转开始点 0-1 (默认: 0.8)
-  containerMode?: 'auto' | 'positioned-parent' | 'viewport'; // 容器检测模式 (默认: 'auto')
 })
 ```
 
-### 容器模式
-
-`containerMode`选项控制过渡如何计算其容器边界：
-
-- **`'auto'`** (默认): 自动检测环境。如果positioned parent小于视口的80%则使用其边界，否则使用全视口
-- **`'positioned-parent'`**: 始终使用最近的positioned parent作为容器边界。适用于演示、模态框或受限布局
-- **`'viewport'`**: 始终使用完整的浏览器视口作为容器边界。最适合全页面应用程序
-
-```typescript
-// 自动检测（大多数情况下推荐）
-jaemin()
-
-// 演示/模态框的显式容器控制
-jaemin({ containerMode: 'positioned-parent' })
-
-// 沉浸式体验的全视口
-jaemin({ containerMode: 'viewport' })
-```
 
 ## 实际示例
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { jaemin } from "@ssgoi/react/view-transitions";
+import { jaeminInternal } from "@ssgoi/core/view-transitions/jaemin";
 import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";
@@ -453,19 +453,19 @@ export function JaeminDemo() {
       {
         from: "/jaemin",
         to: "/jaemin/premium",
-        transition: jaemin({ containerMode: "positioned-parent" }),
+        transition: jaeminInternal({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       {
         from: "/jaemin",
         to: "/jaemin/achievement",
-        transition: jaemin({ containerMode: "positioned-parent" }),
+        transition: jaeminInternal({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       {
         from: "/jaemin/premium",
         to: "/jaemin/achievement",
-        transition: jaemin({ containerMode: "positioned-parent" }),
+        transition: jaeminInternal({ containerMode: "positioned-parent" }),
         symmetric: true,
       },
       // Settings uses standard browser navigation (not special)

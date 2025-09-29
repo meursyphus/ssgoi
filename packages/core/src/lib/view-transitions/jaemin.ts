@@ -11,6 +11,10 @@ interface JaeminOptions {
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
+}
+
+// Internal interface for demo usage only - not exported
+interface JaeminInternalOptions extends JaeminOptions {
   containerMode?: "auto" | "positioned-parent" | "viewport"; // Container detection mode
 }
 
@@ -77,6 +81,13 @@ function getJaeminRect(
  * Created by Jaemin
  */
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
+  return jaeminInternal(options);
+};
+
+// Internal implementation that supports containerMode for demo usage
+export const jaeminInternal = (
+  options: JaeminInternalOptions = {},
+): SggoiTransition => {
   const spring: SpringConfig = {
     // Much slower animation - 4x duration by reducing stiffness further
     stiffness: options.spring?.stiffness ?? 50,
