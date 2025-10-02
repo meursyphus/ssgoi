@@ -103,7 +103,7 @@ export async function HeroSection({ lang }: HeroSectionProps) {
             <div className="relative mx-auto z-0 w-full max-w-[400px] md:max-w-[700px] aspect-[5/7]">
               {/* 3D iPhone Component */}
               <IPhone3D color="blue">
-                <Demo autoPlay={false} />
+                <Demo autoPlay />
               </IPhone3D>
             </div>
             {/* 플로팅 배지 - 아이폰 근처에 배치 */}
