@@ -1,0 +1,43 @@
+import {
+  Directive,
+  ElementRef,
+  input,
+  OnInit,
+  OnDestroy,
+  inject,
+} from "@angular/core";
+import { transition as coreTransition } from "@ssgoi/core";
+import type { Transition, TransitionKey } from "@ssgoi/core";
+
+export type ElementTransitionConfig = Transition & { key?: TransitionKey };
+
+@Directive({
+  selector: "[transition]",
+})
+export class ElementTransitionDirective implements OnInit, OnDestroy {
+  transition = input.required<ElementTransitionConfig>();
+
+  private cleanup?: () => void;
+  private el = inject(ElementRef<HTMLElement>);
+
+  ngOnInit() {
+    const config = this.transition();
+
+    // Use setTimeout to ensure the element is fully mounted
+    setTimeout(() => {
+      const cleanupResult = coreTransition({
+        key: config.key,
+        in: config.in,
+        out: config.out,
+        ref: this.el.nativeElement,
+      })(this.el.nativeElement);
+      if (cleanupResult) {
+        this.cleanup = cleanupResult;
+      }
+    }, 0);
+  }
+
+  ngOnDestroy() {
+    this.cleanup?.();
+  }
+}
