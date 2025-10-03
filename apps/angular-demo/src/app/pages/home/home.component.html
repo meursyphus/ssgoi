@@ -1,0 +1,183 @@
+<ssgoi-transition id="/">
+  <div class="app-container">
+    <div class="hero-section">
+      <h1 class="app-title">SSGOI Angular Demo</h1>
+    </div>
+
+    <!-- Hero Transition Section -->
+    <div class="hero-transition-section">
+      <h2 class="section-title">Hero Transition</h2>
+      <div class="color-grid">
+        @for (item of colors; track item.id) {
+          <a
+            [routerLink]="['/item', item.id]"
+            class="color-box"
+            [style.backgroundColor]="item.color"
+            [attr.data-hero-key]="'color-' + item.id"
+          >
+            <span class="color-name">{{ item.name }}</span>
+          </a>
+        }
+      </div>
+
+      <!-- Jaemin Transition Demo -->
+      <div style="margin-top: 2rem">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: #333">
+          Jaemin Transition
+        </h3>
+        <a
+          routerLink="/jaemin"
+          style="
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease;
+          "
+          (mouseenter)="onJaeminButtonHover($event, true)"
+          (mouseleave)="onJaeminButtonHover($event, false)"
+        >
+          🔥 Demo Tunnel Emergence Animation
+        </a>
+      </div>
+    </div>
+
+    <!-- DOM Transition Section -->
+    <div class="controls-section">
+      <div class="controls">
+        <div class="speed-buttons">
+          <button
+            class="speed-button"
+            [class.active]="stiffness() === 100"
+            (click)="setSpeed(100, 20)"
+          >
+            Smooth
+          </button>
+          <button
+            class="speed-button"
+            [class.active]="stiffness() === 300"
+            (click)="setSpeed(300, 30)"
+          >
+            Normal
+          </button>
+          <button
+            class="speed-button"
+            [class.active]="stiffness() === 500"
+            (click)="setSpeed(500, 40)"
+          >
+            Fast
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Stiffness</label>
+          <input
+            type="number"
+            class="control-input"
+            [value]="stiffness()"
+            (input)="stiffness.set(+$any($event.target).value)"
+            min="1"
+            max="1000"
+          />
+          <span class="control-value">(1-1000)</span>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Damping</label>
+          <input
+            type="number"
+            class="control-input"
+            [value]="damping()"
+            (input)="damping.set(+$any($event.target).value)"
+            min="0"
+            max="100"
+          />
+          <span class="control-value">(0-100)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-section">
+      <button (click)="toggleShapes()" class="toggle-button">
+        {{ showShapes() ? 'Hide Elements' : 'Show Elements' }}
+      </button>
+    </div>
+
+    <div class="examples-section">
+      <h2 class="section-title">DOM Transition</h2>
+      <div class="shapes-grid">
+        <!-- Fade -->
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            @if (showShapes()) {
+              <div
+                [transition]="{
+                  in: fadeTransition,
+                  out: fadeTransition,
+                }"
+                class="shape circle"
+              ></div>
+            }
+          </div>
+          <p class="shape-label">Fade</p>
+        </div>
+
+        <!-- Scale + Rotate -->
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            @if (showShapes()) {
+              <div
+                [transition]="{
+                  key: 'scale-rotate',
+                  in: scaleRotateTransition,
+                  out: scaleRotateTransition,
+                }"
+                class="shape triangle"
+              ></div>
+            }
+          </div>
+          <p class="shape-label">Scale + Rotate</p>
+        </div>
+
+        <!-- Slide In -->
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            @if (showShapes()) {
+              <div
+                [transition]="{
+                  key: 'slide',
+                  in: slideTransition,
+                  out: slideTransition,
+                }"
+                class="shape square"
+              ></div>
+            }
+          </div>
+          <p class="shape-label">Slide In</p>
+        </div>
+
+        <!-- Bounce Scale -->
+        <div class="shape-container">
+          <div class="shape-wrapper">
+            @if (showShapes()) {
+              <div
+                [transition]="{
+                  key: 'bounce-scale',
+                  in: bounceScaleTransitionIn,
+                  out: bounceScaleTransitionOut,
+                }"
+                class="shape pentagon"
+              ></div>
+            }
+          </div>
+          <p class="shape-label">Bounce Scale</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ssgoi-transition>
