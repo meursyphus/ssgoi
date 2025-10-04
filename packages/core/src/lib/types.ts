@@ -96,6 +96,12 @@ export type SggoiTransitionContext = {
    * Lazy-evaluated to handle delayed initialization
    */
   positionedParent: HTMLElement;
+
+  /**
+   * The trigger element (element that triggered the transition)
+   * Lazy-evaluated to handle delayed initialization
+   */
+  triggerElement: HTMLElement | null;
 };
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;

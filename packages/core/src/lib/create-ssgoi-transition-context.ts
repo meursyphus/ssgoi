@@ -76,6 +76,7 @@ function createContextManager() {
   let scrollContainer: HTMLElement | null = null;
   let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
+  const triggerElements: Map<string, HTMLElement> = new Map();
   let currentPath: string | null = null;
 
   // Scroll listener - captures current scroll position
@@ -85,6 +86,13 @@ function createContextManager() {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
       });
+    }
+  };
+
+  const targetElementListener = (e: Event) => {
+    if (currentPath && e.target instanceof HTMLElement) {
+      console.log("targetElementListener", currentPath, e.target);
+      triggerElements.set(currentPath, e.target);
     }
   };
 
@@ -107,6 +115,16 @@ function createContextManager() {
         passive: true,
       });
     }
+
+    // registeer event
+    contextElement.removeEventListener("touchend", targetElementListener);
+    contextElement.removeEventListener("mousedown", targetElementListener);
+    contextElement.addEventListener("touchend", targetElementListener, {
+      passive: true,
+    });
+    contextElement.addEventListener("mousedown", targetElementListener, {
+      passive: true,
+    });
 
     // Update current path for scroll position tracking
     currentPath = path;
@@ -146,6 +164,11 @@ function createContextManager() {
       ? scrollPositions.get(path)!
       : { x: 0, y: 0 };
   };
+  const getTriggerElement = (path?: string): HTMLElement | null => {
+    return path && triggerElements.has(path)
+      ? triggerElements.get(path)!
+      : null;
+  };
 
   return {
     initializeContext,
@@ -153,6 +176,7 @@ function createContextManager() {
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    getTriggerElement,
   };
 }
 
@@ -190,6 +214,7 @@ export function createSggoiTransitionContext(
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    getTriggerElement,
   } = createContextManager();
 
   function checkAndResolve() {
@@ -210,10 +235,10 @@ export function createSggoiTransitionContext(
         pendingTransition.from,
         pendingTransition.to,
       );
-
       // Create context for OUT transition (from page)
       const outContext = {
         scrollOffset,
+        triggerElement: getTriggerElement(pendingTransition.from),
         scroll: getScrollPosition(pendingTransition.from),
         get scrollingElement() {
           // Use lazy evaluation - get scrollContainer when actually accessed
@@ -228,6 +253,7 @@ export function createSggoiTransitionContext(
       // Create context for IN transition (to page)
       const inContext = {
         scrollOffset,
+        triggerElement: getTriggerElement(pendingTransition.to),
         get scroll() {
           if (!pendingTransition) return { x: 0, y: 0 };
           return getScrollPosition(pendingTransition.to);
