@@ -13,19 +13,40 @@ interface JaeminOptions {
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
 }
 
+// Internal interface for demo usage only - not exported
+interface JaeminInternalOptions extends JaeminOptions {
+  containerMode?: "positioned-parent" | "viewport"; // Container mode (default: 'viewport')
+}
+
 /**
  * Calculate the visible viewport rect for jaemin transition
  */
-function getJaeminRect(context: SggoiTransitionContext) {
-  const containerRect = getRect(document.body, context.positionedParent);
-  const top = context.scroll.y;
+function getJaeminRect(
+  context: SggoiTransitionContext,
+  containerMode: "positioned-parent" | "viewport" = "viewport",
+) {
+  if (containerMode === "positioned-parent") {
+    // Use positioned parent bounds for demos/modals
+    const positionedParentRect =
+      context.positionedParent.getBoundingClientRect();
+    return {
+      top: positionedParentRect.top,
+      left: positionedParentRect.left,
+      width: positionedParentRect.width,
+      height: positionedParentRect.height,
+    };
+  } else {
+    // Default: Use full viewport calculation
+    const containerRect = getRect(document.body, context.positionedParent);
+    const top = context.scroll.y;
 
-  return {
-    top,
-    left: 0,
-    width: containerRect.width,
-    height: window.innerHeight - containerRect.top,
-  };
+    return {
+      top,
+      left: 0,
+      width: containerRect.width,
+      height: window.innerHeight - containerRect.top,
+    };
+  }
 }
 
 /**
@@ -40,6 +61,13 @@ function getJaeminRect(context: SggoiTransitionContext) {
  * Created by Jaemin
  */
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
+  return jaeminInternal(options);
+};
+
+// Internal implementation that supports containerMode for demo usage
+export const jaeminInternal = (
+  options: JaeminInternalOptions = {},
+): SggoiTransition => {
   const spring: SpringConfig = {
     // Much slower animation - 4x duration by reducing stiffness further
     stiffness: options.spring?.stiffness ?? 50,
@@ -49,6 +77,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
   const initialRotation = options.initialRotation ?? 45; // 45 degrees from log data
   const initialScale = options.initialScale ?? 0.01; // Very small initial size - like a tiny dot
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8; // 80% point for dramatic final transformation
+  const containerMode = options.containerMode ?? "viewport"; // Default to viewport
 
   return {
     out: async (element, context) => {
@@ -78,7 +107,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       };
     },
     in: async (element, context) => {
-      const rect = getJaeminRect(context);
+      const rect = getJaeminRect(context, containerMode);
 
       // Store original styles for cleanup
       const originalTransform = element.style.transform;
@@ -103,16 +132,28 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
           element.style.willChange = "transform";
           element.style.backfaceVisibility = "hidden";
 
-          // Set up transform origin to center of rect
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          element.style.transformOrigin = `${centerX}px ${centerY}px`;
-
-          element.style.position = "fixed";
-          element.style.top = `${rect.top}px`;
-          element.style.left = `${rect.left}px`;
-          element.style.width = `${rect.width}px`;
-          element.style.height = `${rect.height}px`;
+          // Set up transform origin and positioning based on container mode
+          if (containerMode === "positioned-parent") {
+            // Use percentage-based transform origin for demo environments
+            element.style.transformOrigin = "50% 50%";
+            // Use absolute positioning relative to the container
+            element.style.position = "absolute";
+            element.style.top = "0px";
+            element.style.left = "0px";
+            element.style.width = `${rect.width}px`;
+            element.style.height = `${rect.height}px`;
+          } else {
+            // Default viewport mode: use absolute positioning for precise control
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Use fixed positioning for full browser
+            element.style.position = "fixed";
+            element.style.top = `${rect.top}px`;
+            element.style.left = `${rect.left}px`;
+            element.style.width = `${rect.width}px`;
+            element.style.height = `${rect.height}px`;
+          }
           element.style.zIndex = "1000";
           element.style.overflow = "hidden"; // Clip content during scaling
 

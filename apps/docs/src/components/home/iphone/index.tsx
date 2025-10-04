@@ -1,18 +1,58 @@
 "use client";
 
-import React, { useRef, Suspense, useMemo } from "react";
-import { Canvas, useFrame, createPortal, useThree } from "@react-three/fiber";
+import React from "react";
+
+interface IPhone2DProps {
+  children: React.ReactNode;
+  color?: "natural" | "blue" | "white" | "black";
+}
+
+/**
+ * Simple 2D iPhone mockup component
+ *
+ * TODO: Replace with IPhone3D once the HTML component DPR layout issue is fixed
+ * The 3D version has a bug where layout starting positions differ in low DPR environments
+ */
+function IPhone2D({ children }: IPhone2DProps) {
+  // iPhone-like dimensions with proper aspect ratio
+
+  return (
+    <div className="flex items-center justify-center w-full h-full">
+      {/* iPhone frame */}
+      <div
+        className={`relative w-full max-w-[350px] aspect-[9/19.5] bg-gray-900 rounded-[48px] p-3 shadow-2xl`}
+      >
+        {/* Dynamic Island */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-3xl z-10" />
+
+        {/* Screen */}
+        <div className="relative w-full h-full bg-black rounded-[40px] overflow-hidden">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default IPhone2D;
+
+/* ============================================================================
+ * 3D iPhone Component (Currently Disabled)
+ * ============================================================================
+ * TODO: Re-enable when DPR layout issue is fixed
+ * Issue: HTML component has incorrect layout starting positions in low DPR environments
+ * ============================================================================
+
+import { Suspense, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import {
   RoundedBox,
   Box,
   Cylinder,
-  MeshReflectorMaterial,
   Environment,
   PresentationControls,
   Float,
   Html,
-  useFBO,
-  Plane,
 } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -65,7 +105,7 @@ function IPhoneModel({
 
   return (
     <group ref={meshRef} position={[0, 0, 0]} scale={[scale, scale, scale]}>
-      {/* Main body/frame - thinner design */}
+      {/* Main body/frame - thinner design *\/}
       <RoundedBox
         args={[phoneWidth, phoneHeight, phoneDepth]}
         radius={0.35}
@@ -80,7 +120,7 @@ function IPhoneModel({
         />
       </RoundedBox>
 
-      {/* Screen bezel (slightly inset) */}
+      {/* Screen bezel (slightly inset) *\/}
       <RoundedBox
         args={[phoneWidth - 0.06, phoneHeight - 0.06, phoneDepth + 0.01]}
         radius={0.32}
@@ -90,9 +130,9 @@ function IPhoneModel({
         <meshStandardMaterial color="#000000" metalness={0.8} roughness={0.8} />
       </RoundedBox>
 
-      {/* Screen - render texture approach */}
+      {/* Screen - render texture approach *\/}
       <group position={[0, 0, phoneDepth / 2 - 0.01]}>
-        {/* Screen plane with rounded corners */}
+        {/* Screen plane with rounded corners *\/}
         <RoundedBox
           args={[
             phoneWidth - screenInset * 2,
@@ -105,7 +145,7 @@ function IPhoneModel({
           <meshBasicMaterial color="#000000" />
         </RoundedBox>
 
-        {/* HTML overlay positioned exactly on screen */}
+        {/* HTML overlay positioned exactly on screen *\/}
         <Html
           transform
           occlude
@@ -123,7 +163,7 @@ function IPhoneModel({
         </Html>
       </group>
 
-      {/* Dynamic Island */}
+      {/* Dynamic Island *\/}
       <RoundedBox
         args={[0.8, 0.22, 0.05]}
         radius={0.1}
@@ -133,7 +173,7 @@ function IPhoneModel({
         <meshStandardMaterial color="#000000" metalness={0.5} roughness={0.8} />
       </RoundedBox>
 
-      {/* Camera lens */}
+      {/* Camera lens *\/}
       <Cylinder
         args={[0.04, 0.04, 0.02, 32]}
         rotation={[Math.PI / 2, 0, 0]}
@@ -142,10 +182,10 @@ function IPhoneModel({
         <meshStandardMaterial color="#1a1a2a" metalness={1} roughness={0.2} />
       </Cylinder>
 
-      {/* Power button (right side) */}
+      {/* Power button (right side) *\/}
       <Box args={[0.015, 0.6, 0.12]} position={[1.21, 0.8, 0]}>
         {" "}
-        {/* Thinner button */}
+        {/* Thinner button *\/}
         <meshStandardMaterial
           color="#b8b8b8" // Silver color
           metalness={0.95}
@@ -153,10 +193,10 @@ function IPhoneModel({
         />
       </Box>
 
-      {/* Volume up button (left side) */}
+      {/* Volume up button (left side) *\/}
       <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 1.2, 0]}>
         {" "}
-        {/* Thinner button */}
+        {/* Thinner button *\/}
         <meshStandardMaterial
           color="#b8b8b8" // Silver color
           metalness={0.95}
@@ -164,10 +204,10 @@ function IPhoneModel({
         />
       </Box>
 
-      {/* Volume down button (left side) */}
+      {/* Volume down button (left side) *\/}
       <Box args={[0.015, 0.4, 0.12]} position={[-1.21, 0.6, 0]}>
         {" "}
-        {/* Thinner button */}
+        {/* Thinner button *\/}
         <meshStandardMaterial
           color="#b8b8b8" // Silver color
           metalness={0.95}
@@ -175,14 +215,14 @@ function IPhoneModel({
         />
       </Box>
 
-      {/* Action button (left side) */}
+      {/* Action button (left side) *\/}
       <Box args={[0.02, 0.3, 0.15]} position={[-1.21, 1.8, 0]}>
         <meshStandardMaterial color="#ff9500" metalness={0.9} roughness={0.3} />
       </Box>
 
-      {/* Bottom speaker grills */}
+      {/* Bottom speaker grills *\/}
       <group position={[0, -2.6, 0]}>
-        {/* Left speaker */}
+        {/* Left speaker *\/}
         {Array.from({ length: 6 }).map((_, i) => (
           <Cylinder
             key={`left-${i}`}
@@ -194,12 +234,12 @@ function IPhoneModel({
           </Cylinder>
         ))}
 
-        {/* Charging port */}
+        {/* Charging port *\/}
         <RoundedBox args={[0.22, 0.02, 0.1]} radius={0.01} position={[0, 0, 0]}>
           <meshStandardMaterial color="#0a0a0a" />
         </RoundedBox>
 
-        {/* Right speaker */}
+        {/* Right speaker *\/}
         {Array.from({ length: 6 }).map((_, i) => (
           <Cylinder
             key={`right-${i}`}
@@ -212,7 +252,7 @@ function IPhoneModel({
         ))}
       </group>
 
-      {/* Camera bump (back) */}
+      {/* Camera bump (back) *\/}
       <group position={[-0.55, 1.8, -0.2]}>
         <RoundedBox args={[0.9, 0.9, 0.15]} radius={0.15} smoothness={4}>
           <meshStandardMaterial
@@ -222,7 +262,7 @@ function IPhoneModel({
           />
         </RoundedBox>
 
-        {/* Three camera lenses */}
+        {/* Three camera lenses *\/}
         <Cylinder
           args={[0.18, 0.18, 0.08, 32]}
           rotation={[Math.PI / 2, 0, 0]}
@@ -245,7 +285,7 @@ function IPhoneModel({
           <meshStandardMaterial color="#1a1a1a" metalness={1} roughness={0.1} />
         </Cylinder>
 
-        {/* LiDAR scanner */}
+        {/* LiDAR scanner *\/}
         <Cylinder
           args={[0.06, 0.06, 0.05, 32]}
           rotation={[Math.PI / 2, 0, 0]}
@@ -288,7 +328,7 @@ export default function IPhone3D({
             </Float>
           </PresentationControls>
 
-          {/* Lighting */}
+          {/* Lighting *\/}
           <ambientLight intensity={0.5} />
           <spotLight
             position={[10, 10, 10]}
@@ -300,10 +340,12 @@ export default function IPhone3D({
           <pointLight position={[-10, -10, -10]} intensity={0.5} />
           <directionalLight position={[0, 5, 5]} intensity={0.5} castShadow />
 
-          {/* Environment for realistic reflections */}
+          {/* Environment for realistic reflections *\/}
           <Environment preset="city" />
         </Suspense>
       </Canvas>
     </div>
   );
 }
+
+ * ============================================================================ */
