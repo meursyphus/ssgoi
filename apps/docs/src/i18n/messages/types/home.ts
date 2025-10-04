@@ -25,6 +25,7 @@ export type HomeMessages = {
     vue: string;
     solidjs: string;
     qwik: string;
+    angular: string;
   };
   floatingBadges: {
     performance: string;
