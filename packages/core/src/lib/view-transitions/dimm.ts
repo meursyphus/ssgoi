@@ -1,8 +1,11 @@
 import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { sleep } from "../utils/sleep";
 
 interface DimmOptions {
-  spring?: SpringConfig;
+  inSpring?: SpringConfig;
+  outSpring?: SpringConfig;
+  transitionDelay?: number;
   padding?: number;
 }
 
@@ -20,23 +23,17 @@ if (typeof document !== "undefined") {
   );
 }
 
+const DEFAULT_TRANSITION_DELAY = 30;
+
 export const dimm = (options: DimmOptions = {}): SggoiTransition => {
-  let isTransitioning = false;
-
-  const { spring = { stiffness: 80, damping: 20 }, padding = 20 } = options;
-
-  let geometry: {
-    initialRadius: number;
-    finalRadius: number;
-    startX: number;
-    startY: number;
-    clientWidth: number;
-    clientHeight: number;
-  } | null = null;
+  const {
+    inSpring = { stiffness: 80, damping: 20 },
+    outSpring = { stiffness: 300, damping: 30 },
+    transitionDelay = DEFAULT_TRANSITION_DELAY,
+    padding = 10,
+  } = options;
 
   const getGeometry = (element: HTMLElement) => {
-    if (geometry) return geometry;
-
     const triggerRect = lastTriggerRect;
     const parentRect = element.getBoundingClientRect();
     const clientWidth = element.clientWidth;
@@ -55,7 +52,6 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
       startY = clientHeight / 2;
       initialRadius = 0;
     }
-    lastTriggerRect = null;
 
     const cornerDistances = [
       Math.hypot(startX, startY),
@@ -65,7 +61,7 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
     ];
     const finalRadius = Math.max(...cornerDistances);
 
-    geometry = {
+    return {
       initialRadius,
       finalRadius,
       startX,
@@ -73,58 +69,19 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
       clientWidth,
       clientHeight,
     };
-    return geometry;
   };
 
-  return {
-    out: (element, context) => {
-      if (isTransitioning) {
-        return {
-          prepare: () => {
-            prepareOutgoing(element, context);
-            element.style.opacity = "0";
-          },
-        };
-      }
-      isTransitioning = true;
-      geometry = null;
+  // Shared promise for coordinating OUT and IN animations
+  let outAnimationComplete: Promise<void>;
+  let resolveOutAnimation: (() => void) | null = null;
 
+  return {
+    in: (element, context) => {
       return {
-        spring,
+        spring: inSpring,
         prepare: () => {
           prepareOutgoing(element, context);
           element.style.zIndex = "1";
-          const { clientWidth, clientHeight, startX, startY, initialRadius } =
-            getGeometry(element);
-          const clipPath = `path(evenodd, "M 0 0 H ${clientWidth} V ${clientHeight} H 0 Z M ${startX - initialRadius} ${startY} a ${initialRadius} ${initialRadius} 0 1 0 ${initialRadius * 2} 0 a ${initialRadius} ${initialRadius} 0 1 0 -${initialRadius * 2} 0")`;
-          element.style.clipPath = clipPath;
-        },
-        tick: (progress) => {
-          if (!geometry) return;
-          const {
-            initialRadius,
-            finalRadius,
-            startX,
-            startY,
-            clientWidth,
-            clientHeight,
-          } = geometry;
-          const currentRadius =
-            initialRadius + (finalRadius - initialRadius) * progress;
-          const clipPath = `path(evenodd, "M 0 0 H ${clientWidth} V ${clientHeight} H 0 Z M ${startX - currentRadius} ${startY} a ${currentRadius} ${currentRadius} 0 1 0 ${currentRadius * 2} 0 a ${currentRadius} ${currentRadius} 0 1 0 -${currentRadius * 2} 0")`;
-          element.style.clipPath = clipPath;
-        },
-        onEnd: () => {
-          element.style.clipPath = "";
-          element.style.opacity = "0";
-        },
-      };
-    },
-    in: (element) => {
-      return {
-        spring,
-        prepare: () => {
-          element.style.zIndex = "0";
           element.style.position = "absolute";
           element.style.left = "0";
           element.style.top = "0";
@@ -134,9 +91,17 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
           const clipPath = `circle(${initialRadius}px at ${startX}px ${startY}px)`;
           element.style.clipPath = clipPath;
         },
+        wait: async () => {
+          // Wait for OUT animation to complete if it exists
+          if (outAnimationComplete) {
+            await outAnimationComplete;
+            // Configurable delay after OUT completes
+            await sleep(transitionDelay);
+          }
+        },
         tick: (progress) => {
-          if (!geometry) return;
-          const { initialRadius, finalRadius, startX, startY } = geometry;
+          const { initialRadius, finalRadius, startX, startY } =
+            getGeometry(element);
           const currentRadius =
             initialRadius + (finalRadius - initialRadius) * progress;
           const clipPath = `circle(${currentRadius}px at ${startX}px ${startY}px)`;
@@ -144,7 +109,36 @@ export const dimm = (options: DimmOptions = {}): SggoiTransition => {
         },
         onEnd: () => {
           element.style.clipPath = "";
-          isTransitioning = false;
+        },
+      };
+    },
+    out: (element, context) => {
+      // Create promise for OUT animation completion
+      outAnimationComplete = new Promise((resolve) => {
+        resolveOutAnimation = resolve;
+      });
+
+      return {
+        spring: outSpring,
+        prepare: () => {
+          prepareOutgoing(element, context);
+          element.style.zIndex = "0";
+          element.style.position = "absolute";
+          element.style.left = "0";
+          element.style.top = "0";
+          element.style.width = "100%";
+          element.style.height = "100%";
+          element.style.opacity = "0";
+        },
+        tick: (progress) => {
+          element.style.opacity = progress.toString();
+        },
+        onEnd: () => {
+          element.style.opacity = "1";
+          // Resolve the promise when OUT animation completes
+          if (resolveOutAnimation) {
+            resolveOutAnimation();
+          }
         },
       };
     },
