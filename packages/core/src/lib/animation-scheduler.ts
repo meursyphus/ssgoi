@@ -25,6 +25,7 @@ export class AnimationScheduler<TAnimationValue = number> {
   private animators: Map<string, AnimatorEntry<TAnimationValue>> = new Map();
   private springOrder: string[] = [];
   private completedCount = 0;
+  private completedAnimators = new Set<string>();
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
   private timeoutIds: number[] = [];
@@ -68,6 +69,12 @@ export class AnimationScheduler<TAnimationValue = number> {
       );
       return;
     }
+
+    // Prevent duplicate completion
+    if (this.completedAnimators.has(id)) {
+      return;
+    }
+    this.completedAnimators.add(id);
 
     this.completedCount++;
     entry.item.onComplete?.();
@@ -134,6 +141,7 @@ export class AnimationScheduler<TAnimationValue = number> {
 
     this.direction = "forward";
     this.completedCount = 0;
+    this.completedAnimators.clear();
     this.config.onStart?.();
 
     const schedule = this.config.schedule ?? "overlap";
@@ -176,6 +184,7 @@ export class AnimationScheduler<TAnimationValue = number> {
 
     this.direction = "backward";
     this.completedCount = 0;
+    this.completedAnimators.clear();
     this.config.onStart?.();
 
     const schedule = this.config.schedule ?? "overlap";
