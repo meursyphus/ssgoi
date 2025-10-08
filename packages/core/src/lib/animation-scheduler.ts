@@ -203,9 +203,14 @@ export class AnimationScheduler<TAnimationValue = number> {
       }
 
       case "chain": {
-        const maxOffset = Math.max(
-          ...Array.from(this.animators.values()).map((e) => e.item.offset ?? 0),
-        );
+        const maxOffset =
+          this.animators.size === 0
+            ? 0
+            : Math.max(
+                ...Array.from(this.animators.values()).map(
+                  (e) => e.item.offset ?? 0,
+                ),
+              );
         this.springOrder.forEach((id) => {
           const entry = this.animators.get(id);
           if (!entry) return;
