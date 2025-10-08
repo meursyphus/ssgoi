@@ -1,4 +1,4 @@
-import type { TransitionConfig } from "./types";
+import type { SingleSpringConfig } from "./types";
 import type { Animator } from "./animator";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
@@ -12,7 +12,7 @@ export interface StrategyContext<TAnimationValue = number> {
 }
 
 export interface AnimationSetup<TAnimationValue = number> {
-  config?: TransitionConfig<TAnimationValue>;
+  config?: SingleSpringConfig<TAnimationValue>;
   state: {
     position: TAnimationValue;
     velocity: TAnimationValue extends number ? number : Record<string, number>;
@@ -23,8 +23,8 @@ export interface AnimationSetup<TAnimationValue = number> {
 }
 
 export interface TransitionConfigs<TAnimationValue = number> {
-  in?: Promise<TransitionConfig<TAnimationValue>>;
-  out?: Promise<TransitionConfig<TAnimationValue>>;
+  in?: Promise<SingleSpringConfig<TAnimationValue>>;
+  out?: Promise<SingleSpringConfig<TAnimationValue>>;
 }
 
 export interface TransitionStrategy<TAnimationValue = number> {
