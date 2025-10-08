@@ -171,20 +171,13 @@ export class AnimationScheduler<TAnimationValue = number> {
 
     switch (schedule) {
       case "overlap":
-        this.animators.forEach((entry) => {
-          entry.startTime = Date.now();
-          entry.animator.backward();
-        });
+        this.springOrder.forEach((id) => this.startBackwardAnimator(id));
         break;
 
       case "wait": {
         const lastId = this.springOrder[this.springOrder.length - 1];
         if (lastId) {
-          const lastEntry = this.animators.get(lastId);
-          if (lastEntry) {
-            lastEntry.startTime = Date.now();
-            lastEntry.animator.backward();
-          }
+          this.startBackwardAnimator(lastId);
         }
         break;
       }
@@ -193,18 +186,16 @@ export class AnimationScheduler<TAnimationValue = number> {
         const maxOffset = Math.max(
           ...Array.from(this.animators.values()).map((e) => e.item.offset ?? 0),
         );
-        this.animators.forEach((entry) => {
+        this.springOrder.forEach((id) => {
+          const entry = this.animators.get(id);
+          if (!entry) return;
           const offset = entry.item.offset ?? 0;
           const mirroredOffset = maxOffset - offset;
 
           if (mirroredOffset === 0) {
-            entry.startTime = Date.now();
-            entry.animator.backward();
+            this.startBackwardAnimator(id);
           } else {
-            setTimeout(() => {
-              entry.startTime = Date.now();
-              entry.animator.backward();
-            }, mirroredOffset);
+            setTimeout(() => this.startBackwardAnimator(id), mirroredOffset);
           }
         });
         break;
