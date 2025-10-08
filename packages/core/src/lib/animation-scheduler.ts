@@ -129,6 +129,9 @@ export class AnimationScheduler<TAnimationValue = number> {
   }
 
   forward(): void {
+    // Stop any running animations and clear pending timeouts
+    this.stop();
+
     this.direction = "forward";
     this.completedCount = 0;
     this.config.onStart?.();
@@ -168,6 +171,9 @@ export class AnimationScheduler<TAnimationValue = number> {
   }
 
   backward(): void {
+    // Stop any running animations and clear pending timeouts
+    this.stop();
+
     this.direction = "backward";
     this.completedCount = 0;
     this.config.onStart?.();
@@ -217,9 +223,10 @@ export class AnimationScheduler<TAnimationValue = number> {
     this.timeoutIds.forEach((id) => clearTimeout(id));
     this.timeoutIds = [];
 
-    // Stop all animators
+    // Stop all animators and reset startTime
     this.animators.forEach((entry) => {
       entry.animator.stop();
+      entry.startTime = null;
     });
   }
 
