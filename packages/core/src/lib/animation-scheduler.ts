@@ -27,6 +27,7 @@ export class AnimationScheduler<TAnimationValue = number> {
   private completedCount = 0;
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
+  private timeoutIds: number[] = [];
 
   constructor(config: MultiSpringConfig<TAnimationValue>) {
     this.config = config;
@@ -155,7 +156,11 @@ export class AnimationScheduler<TAnimationValue = number> {
           if (offset === 0) {
             this.startAnimator(id);
           } else {
-            setTimeout(() => this.startAnimator(id), offset);
+            const timeoutId = window.setTimeout(
+              () => this.startAnimator(id),
+              offset,
+            );
+            this.timeoutIds.push(timeoutId);
           }
         });
         break;
@@ -195,7 +200,11 @@ export class AnimationScheduler<TAnimationValue = number> {
           if (mirroredOffset === 0) {
             this.startBackwardAnimator(id);
           } else {
-            setTimeout(() => this.startBackwardAnimator(id), mirroredOffset);
+            const timeoutId = window.setTimeout(
+              () => this.startBackwardAnimator(id),
+              mirroredOffset,
+            );
+            this.timeoutIds.push(timeoutId);
           }
         });
         break;
@@ -204,6 +213,11 @@ export class AnimationScheduler<TAnimationValue = number> {
   }
 
   stop(): void {
+    // Clear all pending timeouts
+    this.timeoutIds.forEach((id) => clearTimeout(id));
+    this.timeoutIds = [];
+
+    // Stop all animators
     this.animators.forEach((entry) => {
       entry.animator.stop();
     });
