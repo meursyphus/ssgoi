@@ -239,6 +239,9 @@ export class AnimationScheduler<TAnimationValue = number> {
       );
     }
 
+    // Toggle direction
+    this.direction = this.direction === "forward" ? "backward" : "forward";
+
     this.animators.forEach((entry) => {
       if (entry.startTime !== null) {
         const currentState = entry.animator.getCurrentState();
