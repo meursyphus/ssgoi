@@ -118,6 +118,14 @@ export class AnimationScheduler<TAnimationValue = number> {
       return;
     }
 
+    // Prevent starting already running animation
+    if (entry.startTime !== null) {
+      console.warn(
+        `AnimationScheduler: animator with id "${id}" already started`,
+      );
+      return;
+    }
+
     entry.startTime = Date.now();
     entry.animator.forward();
   }
@@ -127,6 +135,14 @@ export class AnimationScheduler<TAnimationValue = number> {
     if (!entry) {
       console.warn(
         `AnimationScheduler: animator with id "${id}" not found on backward start`,
+      );
+      return;
+    }
+
+    // Prevent starting already running animation
+    if (entry.startTime !== null) {
+      console.warn(
+        `AnimationScheduler: animator with id "${id}" already started`,
       );
       return;
     }
