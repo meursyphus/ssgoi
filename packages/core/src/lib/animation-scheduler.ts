@@ -72,13 +72,26 @@ export class AnimationScheduler<TAnimationValue = number> {
     entry.item.onComplete?.();
     this.config.onProgress?.(this.completedCount, this.config.springs.length);
 
-    if (this.config.schedule === "wait" && this.direction === "forward") {
-      const currentIndex = this.springOrder.indexOf(id);
-      const nextId = this.springOrder[currentIndex + 1];
-      if (nextId) {
-        const nextEntry = this.animators.get(nextId);
-        if (nextEntry && nextEntry.startTime === null) {
-          this.startAnimator(nextId);
+    if (this.config.schedule === "wait") {
+      if (this.direction === "forward") {
+        // Forward: start next animation
+        const currentIndex = this.springOrder.indexOf(id);
+        const nextId = this.springOrder[currentIndex + 1];
+        if (nextId) {
+          const nextEntry = this.animators.get(nextId);
+          if (nextEntry && nextEntry.startTime === null) {
+            this.startAnimator(nextId);
+          }
+        }
+      } else if (this.direction === "backward") {
+        // Backward: start previous animation
+        const currentIndex = this.springOrder.indexOf(id);
+        const prevId = this.springOrder[currentIndex - 1];
+        if (prevId) {
+          const prevEntry = this.animators.get(prevId);
+          if (prevEntry && prevEntry.startTime === null) {
+            this.startBackwardAnimator(prevId);
+          }
         }
       }
     }
@@ -99,6 +112,19 @@ export class AnimationScheduler<TAnimationValue = number> {
 
     entry.startTime = Date.now();
     entry.animator.forward();
+  }
+
+  private startBackwardAnimator(id: string): void {
+    const entry = this.animators.get(id);
+    if (!entry) {
+      console.warn(
+        `AnimationScheduler: animator with id "${id}" not found on backward start`,
+      );
+      return;
+    }
+
+    entry.startTime = Date.now();
+    entry.animator.backward();
   }
 
   forward(): void {
