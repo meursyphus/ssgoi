@@ -1,7 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import { Ssgoi } from "@ssgoi/svelte";
-  import { hero, heroRotate } from "@ssgoi/svelte/view-transitions";
+  import { fade, hero, jaemin } from "@ssgoi/svelte/view-transitions";
 
   interface Props {
     children: () => any;
@@ -21,9 +21,13 @@
       // Hero rotate transition for rotation demo
       {
         from: "/",
-        to: "/rotate",
-        transition: heroRotate(),
-        symmetric: true,
+        to: "/jaemin",
+        transition: jaemin(),
+      },
+      {
+        from: "/jaemin",
+        to: "/",
+        transition: fade(),
       },
     ],
   };

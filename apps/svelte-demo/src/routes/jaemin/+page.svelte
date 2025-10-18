@@ -2,7 +2,7 @@
   import { SsgoiTransition } from "@ssgoi/svelte";
 </script>
 
-<SsgoiTransition id="/rotate">
+<SsgoiTransition id="/jaemin">
   <div
     style="
       min-height: 100vh;
@@ -23,7 +23,7 @@
         text-align: center;
       "
     >
-      Hero Rotate Demo
+      Jaemin Transition
     </h1>
 
     <p
@@ -35,8 +35,7 @@
         line-height: 1.6;
       "
     >
-      This page demonstrates the hero rotate transition with a 45° rotation and
-      scaling effect. The transition shows:
+      This page demonstrates the jaemin transition effect. The transition shows:
     </p>
 
     <div
