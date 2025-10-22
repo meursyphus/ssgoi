@@ -93,6 +93,41 @@ export default function Home() {
               🔥 Demo Tunnel Emergence Animation
             </Link>
           </div>
+
+          <div style={{ marginTop: "2rem" }}>
+            <h3
+              style={{
+                fontSize: "1.5rem",
+                marginBottom: "1rem",
+                color: "#333",
+              }}
+            >
+              TextShape Transition
+            </h3>
+            <Link
+              href="/text-shape"
+              style={{
+                display: "inline-block",
+                background: "linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)",
+                color: "white",
+                padding: "1rem 2rem",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: "600",
+                fontSize: "1.1rem",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              🎨 Demo Text + Shape Transition
+            </Link>
+          </div>
         </div>
 
         {/* DOM Transition Section */}

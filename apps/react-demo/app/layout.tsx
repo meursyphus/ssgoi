@@ -1,7 +1,7 @@
 "use client";
 
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { fade, hero, jaemin } from "@ssgoi/react/view-transitions";
+import { fade, hero, jaemin, textShape } from "@ssgoi/react/view-transitions";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
@@ -22,6 +22,21 @@ const ssgoiConfig: SsgoiConfig = {
     // Jaemin reverse transition - backward
     {
       from: "/jaemin",
+      to: "/",
+      transition: fade(),
+    },
+    {
+      from: "/",
+      to: "/text-shape",
+      transition: textShape({
+        color: "#764ba2",
+        texts: ["Hello", "World"],
+        textDuration: 1500,
+        shape: "circle",
+      }),
+    },
+    {
+      from: "/text-shape",
       to: "/",
       transition: fade(),
     },
