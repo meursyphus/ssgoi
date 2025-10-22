@@ -42,13 +42,13 @@
         {/each}
       </div>
 
-      <!-- Hero Rotate Demo -->
+      <!-- Jaemin Demo -->
       <div style="margin-top: 2rem;">
         <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: #333;">
-          Hero Rotate Transition
+          Jaemin Transition
         </h3>
         <a
-          href="/rotate"
+          href="/jaemin"
           style="
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -68,7 +68,7 @@
             e.currentTarget.style.transform = "translateY(0)";
           }}
         >
-          🎯 Demo Hero Rotate Animation
+          🎯 Demo Tunnel Emergence Animation
         </a>
       </div>
     </div>

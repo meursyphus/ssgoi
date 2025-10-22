@@ -73,22 +73,27 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
       "import": "./dist/index.js"
     },
     "./transitions": {
       "types": "./dist/transitions/index.d.ts",
+      "svelte": "./dist/transitions/index.js",
       "import": "./dist/transitions/index.js"
     },
     "./view-transitions": {
       "types": "./dist/view-transitions/index.d.ts",
+      "svelte": "./dist/view-transitions/index.js",
       "import": "./dist/view-transitions/index.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
+      "svelte": "./dist/types.js",
       "import": "./dist/types.js"
     },
     "./presets": {
       "types": "./dist/presets/index.d.ts",
+      "svelte": "./dist/presets/index.js",
       "import": "./dist/presets/index.js"
     }
   }
