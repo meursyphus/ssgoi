@@ -25,7 +25,8 @@ Fade transitions are used for **Context Changes**.
     {
       label: "Unrelated Content",
       suitable: "yes",
-      description: "Moving between completely independent sections (Home → Settings)",
+      description:
+        "Moving between completely independent sections (Home → Settings)",
     },
     {
       label: "Sibling Relationship",
@@ -35,7 +36,8 @@ Fade transitions are used for **Context Changes**.
     {
       label: "Hierarchical Relationship",
       suitable: "no",
-      description: "Expansion transitions like hero recommended for parent-child structures",
+      description:
+        "Expansion transitions like hero recommended for parent-child structures",
     },
   ]}
 />
@@ -163,7 +165,11 @@ When quick response to user actions is needed:
     ```tsx
     const config = {
       defaultTransition: fade({
-        spring: {
+        inSpring: { //Applies when entering the page.
+          stiffness: 400,  // Fast transition
+          damping: 35      // Smooth finish
+        }
+        outSpring: { //Applies when you leave the page.
           stiffness: 400,  // Fast transition
           damping: 35      // Smooth finish
         }
@@ -176,7 +182,11 @@ When quick response to user actions is needed:
     <script>
       const config = {
         defaultTransition: fade({
-          spring: {
+          inSpring: { //Applies when entering the page.
+            stiffness: 400,  // Fast transition
+            damping: 35      // Smooth finish
+          },
+          outSpring: { //Applies when you leave the page.
             stiffness: 400,  // Fast transition
             damping: 35      // Smooth finish
           }
@@ -196,10 +206,14 @@ For pages where brand experience is important:
     ```tsx
     const config = {
       defaultTransition: fade({
-        spring: {
-          stiffness: 150,  // Slow transition
-          damping: 25      // Smooth deceleration
-        }
+         inSpring: { //Applies when entering the page.
+            stiffness: 150,  // Slow transition
+            damping: 25      // Smooth deceleration
+          },
+          outSpring: { //Applies when you leave the page.
+           stiffness: 150,  // Slow transition
+           damping: 25      // Smooth deceleration
+          }
       })
     };
     ```
@@ -209,9 +223,13 @@ For pages where brand experience is important:
     <script>
       const config = {
         defaultTransition: fade({
-          spring: {
+           inSpring: { //Applies when entering the page.
             stiffness: 150,  // Slow transition
             damping: 25      // Smooth deceleration
+          },
+          outSpring: { //Applies when you leave the page.
+           stiffness: 150,  // Slow transition
+           damping: 25      // Smooth deceleration
           }
         })
       };
