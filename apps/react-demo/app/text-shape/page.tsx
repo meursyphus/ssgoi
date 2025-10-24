@@ -2,19 +2,10 @@
 
 import Link from "next/link";
 import { SsgoiTransition } from "@ssgoi/react";
-import { textShape } from "@ssgoi/react/view-transitions";
 
 export default function TextShapeDemo() {
   return (
-    <SsgoiTransition
-      id="/text-shape"
-      transition={textShape({
-        color: "#764ba2", // 배경 색상
-        texts: ["안녕하세요", "환영합니다"], // 순차적으로 표시될 텍스트
-        textDuration: 1500, // 각 텍스트가 보여지는 시간 (ms)
-        shape: "circle", // circle | square | triangle 선택 가능
-      })}
-    >
+    <SsgoiTransition id="/text-shape">
       <main
         style={{
           height: "100vh",

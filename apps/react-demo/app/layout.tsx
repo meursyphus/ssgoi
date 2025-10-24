@@ -29,9 +29,10 @@ const ssgoiConfig: SsgoiConfig = {
       from: "/",
       to: "/text-shape",
       transition: textShape({
-        color: "#764ba2",
+        bgColor: "#764ba2",
+        textColor: "#000000",
         texts: ["Hello", "World"],
-        textDuration: 1500,
+        textDuration: 1000,
         shape: "circle",
       }),
     },

@@ -1,21 +1,27 @@
 import type { SggoiTransition, SpringConfig } from "../types";
 
+type HexColor = `#${string}`;
+
 interface TextShapeOptions {
-  color?: string;
+  bgColor?: HexColor;
+  textColor?: HexColor;
   texts?: string[];
-  textDuration?: number;
   shape?: "circle" | "square" | "triangle";
   spring?: Partial<SpringConfig>;
+  textDuration?: number;
 }
 
-export const textShape = (options: TextShapeOptions = {}): SggoiTransition => {
-  const color = options.color ?? "#000000";
-  const texts = options.texts ?? ["Hello", "World"];
-  const textDuration = options.textDuration ?? 1500;
-  const shape = options.shape ?? "circle";
+export const textShape = ({
+  bgColor = "#000000",
+  textColor = "#FFFFFF",
+  texts = [],
+  textDuration = 1500,
+  shape = "circle",
+  spring: springOptions = {},
+}: TextShapeOptions): SggoiTransition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 70,
-    damping: options.spring?.damping ?? 30,
+    stiffness: springOptions?.stiffness ?? 70,
+    damping: springOptions?.damping ?? 30,
   };
 
   return {
@@ -23,8 +29,8 @@ export const textShape = (options: TextShapeOptions = {}): SggoiTransition => {
       spring,
       from: 1,
       to: 0,
-      tick: (progress) => {
-        element.style.opacity = String(progress);
+      tick: (p) => {
+        element.style.opacity = String(p);
       },
       onEnd: () => {
         element.style.opacity = "1";
@@ -32,13 +38,13 @@ export const textShape = (options: TextShapeOptions = {}): SggoiTransition => {
     }),
 
     in: async (element) => {
+      // ===== Overlay =====
       const overlay = document.createElement("div");
       overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
+      overlay.style.inset = "0";
       overlay.style.width = "100vw";
       overlay.style.height = "100vh";
-      overlay.style.backgroundColor = color;
+      overlay.style.backgroundColor = bgColor;
       overlay.style.zIndex = "9999";
       overlay.style.display = "flex";
       overlay.style.alignItems = "center";
@@ -47,47 +53,121 @@ export const textShape = (options: TextShapeOptions = {}): SggoiTransition => {
       overlay.style.clipPath = "none";
       document.body.appendChild(overlay);
 
-      const container = document.createElement("div");
-      container.style.position = "relative";
-      container.style.width = "100%";
-      container.style.height = "3rem";
-      container.style.display = "flex";
-      container.style.alignItems = "center";
-      container.style.justifyContent = "center";
-      container.style.overflow = "hidden";
-      overlay.appendChild(container);
+      // ===== Viewport (항상 현재 텍스트만 보이게) =====
+      const viewport = document.createElement("div");
+      viewport.style.position = "relative";
+      viewport.style.display = "inline-block";
+      viewport.style.height = "5.5rem";
+      viewport.style.overflow = "hidden";
+      overlay.appendChild(viewport);
 
-      const textEls: HTMLSpanElement[] = texts.map((t, i) => {
-        const span = document.createElement("span");
-        span.textContent = t;
-        span.style.position = "absolute";
-        span.style.fontSize = "2rem";
-        span.style.color = "#fff";
-        span.style.whiteSpace = "nowrap";
-        span.style.transition = "transform 0.8s ease";
-        span.style.transform = i === 0 ? "translateX(0%)" : "translateX(100%)";
-        container.appendChild(span);
-        return span;
+      // ===== Wrapper =====
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "flex";
+      wrapper.style.height = "100%";
+      wrapper.style.willChange = "transform";
+      wrapper.style.transition = "transform 0.8s ease";
+      viewport.appendChild(wrapper);
+
+      // ===== Slides =====
+      const slides: HTMLDivElement[] = [];
+      texts.forEach((t) => {
+        const slide = document.createElement("div");
+        slide.textContent = t;
+        slide.style.display = "inline-flex";
+        slide.style.alignItems = "center";
+        slide.style.justifyContent = "center";
+        slide.style.whiteSpace = "nowrap";
+        slide.style.fontSize = "4rem";
+        slide.style.fontWeight = "900";
+        slide.style.letterSpacing = "0.02em";
+        slide.style.color = textColor;
+        wrapper.appendChild(slide);
+        slides.push(slide);
       });
 
+      // ===== 슬라이드 전환 로직 =====
       let idx = 0;
+
+      const updateSlide = () => {
+        console.log("TEST UPDATE SLIDE", idx);
+
+        const current = slides[idx];
+        if (!current) return;
+
+        // 현재 텍스트 width
+        const currentWidth = current.getBoundingClientRect().width;
+
+        // === 핵심: 이전 슬라이드들의 width 합산 ===
+        const prevWidths = slides
+          .slice(0, idx)
+          .reduce((sum, slide) => sum + slide.getBoundingClientRect().width, 0);
+
+        console.log(
+          "TEST currentWidth",
+          currentWidth,
+          "prevWidths",
+          prevWidths,
+        );
+
+        // viewport는 현재 슬라이드의 width로 맞춤
+        viewport.style.width = `${currentWidth}px`;
+
+        // wrapper 총 width는 모든 슬라이드 합으로 맞춤
+        const totalWidth = slides.reduce(
+          (sum, slide) => sum + slide.getBoundingClientRect().width,
+          0,
+        );
+        wrapper.style.width = `${totalWidth}px`;
+
+        // wrapper 이동: 이전 요소들의 총합
+        wrapper.style.transform = `translateX(-${prevWidths}px)`;
+      };
+
       const showNext = () => {
-        if (idx < textEls.length - 1) {
-          const current = textEls[idx]!;
-          const next = textEls[idx + 1]!;
-
-          next.style.transform = "translateX(100%)";
-
-          requestAnimationFrame(() => {
-            current.style.transform = "translateX(-100%)";
-            next.style.transform = "translateX(0%)";
-          });
-
+        if (idx < slides.length - 1) {
           idx++;
+          updateSlide();
           setTimeout(showNext, textDuration);
+        } else {
+          // 마지막 텍스트 후 shape 축소 시작
+          startShapeClose();
         }
       };
 
+      const startShapeClose = () => {
+        let progress = 0;
+        const step = () => {
+          progress += 0.02; // 속도 조절 가능
+          const scale = 1 - progress;
+
+          if (shape === "circle") {
+            overlay.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
+          } else if (shape === "square") {
+            overlay.style.clipPath = `inset(${(1 - scale) * 50}% round ${
+              10 * scale
+            }%)`;
+          } else {
+            const p = scale * 100;
+            overlay.style.clipPath = `polygon(50% ${50 - p}%, ${
+              50 - p
+            }% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+          }
+
+          viewport.style.transform = `scale(${scale})`;
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            overlay.remove();
+            element.style.opacity = "1";
+          }
+        };
+        requestAnimationFrame(step);
+      };
+
+      // 초기화 + 시작
+      updateSlide();
       setTimeout(showNext, textDuration);
 
       return {
@@ -95,30 +175,6 @@ export const textShape = (options: TextShapeOptions = {}): SggoiTransition => {
         from: 0,
         to: 1,
         prepare: () => {
-          element.style.opacity = "1";
-        },
-        tick: (progress) => {
-          if (
-            progress >= 0.7 &&
-            textEls.length > 0 &&
-            idx >= texts.length - 1
-          ) {
-            const scale = 1 - (progress - 0.7) / 0.3;
-
-            if (shape === "circle") {
-              overlay.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
-            } else if (shape === "square") {
-              overlay.style.clipPath = `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
-            } else {
-              const p = scale * 100;
-              overlay.style.clipPath = `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
-            }
-
-            container.style.transform = `scale(${scale})`;
-          }
-        },
-        onEnd: () => {
-          overlay.remove();
           element.style.opacity = "1";
         },
       };
