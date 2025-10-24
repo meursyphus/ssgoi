@@ -254,3 +254,50 @@ export type WaitScheduleEntry = {
   type: "wait";
   id: string;
 };
+
+/**
+ * Animation state (discriminated union)
+ * Different return types for single vs multi-spring animations
+ * @internal
+ */
+export type AnimationState<T = number> =
+  | SingleAnimationState<T>
+  | MultiAnimationState;
+
+/**
+ * Single spring animation state
+ * Supports both number and object animations
+ * @internal
+ */
+export type SingleAnimationState<T = number> = {
+  type: "single";
+  position: T;
+  velocity: T extends number ? number : Record<string, number>;
+  from: T;
+  to: T;
+};
+
+/**
+ * Multi-spring animation state
+ * Always uses number for progress tracking
+ * @internal
+ */
+export type MultiAnimationState = {
+  type: "multi";
+  completed: number;
+  total: number;
+  direction: "forward" | "backward";
+};
+
+/**
+ * Common interface for animation controllers
+ * Implemented by both Animator (single spring) and AnimationScheduler (multi-spring)
+ * @internal
+ */
+export interface AnimationController<T = number> {
+  forward(): void;
+  backward(): void;
+  stop(): void;
+  reverse(options?: { offsetMode?: "immediate" | "mirror" | "reverse" }): void;
+  getCurrentState(): AnimationState<T>;
+}

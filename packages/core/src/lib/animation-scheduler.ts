@@ -3,6 +3,8 @@ import type {
   MultiSpringConfig,
   SpringItem,
   NormalizedScheduleEntry,
+  AnimationController,
+  AnimationState,
 } from "./types";
 
 /**
@@ -23,8 +25,12 @@ type AnimatorEntry<TAnimationValue> = {
  * - overlap: All springs start immediately (parallel)
  * - wait: Each spring waits for previous to complete (sequential)
  * - chain: Springs start with offset delays
+ *
+ * Note: getCurrentState() always returns MultiAnimationState (number-based progress)
  */
-export class AnimationScheduler<TAnimationValue = number> {
+export class AnimationScheduler<TAnimationValue = number>
+  implements AnimationController<number>
+{
   private config: MultiSpringConfig<TAnimationValue>;
   private animators: Map<string, AnimatorEntry<TAnimationValue>> = new Map();
   private springOrder: string[] = [];
@@ -348,42 +354,48 @@ export class AnimationScheduler<TAnimationValue = number> {
     this.direction = this.direction === "forward" ? "backward" : "forward";
 
     this.animators.forEach((entry) => {
-      if (entry.startTime !== null) {
-        const currentState = entry.animator.getCurrentState();
-        const isCompleted = currentState.position === currentState.to;
-
-        if (isCompleted) {
-          const newAnimator = Animator.fromState(
-            {
-              position: 1 as TAnimationValue,
-              velocity: 0 as TAnimationValue extends number
-                ? number
-                : Record<string, number>,
-            },
-            {
-              from: entry.item.to ?? (1 as TAnimationValue),
-              to: entry.item.from ?? (0 as TAnimationValue),
-              spring: entry.item.spring,
-              onUpdate: entry.item.tick,
-              onComplete: () => this.onAnimatorComplete(entry.id),
-              onStart: entry.item.onStart,
-            },
-          );
-          newAnimator.forward();
-          entry.animator = newAnimator;
-        } else {
-          entry.animator.reverse();
-        }
+      if (entry.startTime === null) {
+        return;
       }
+
+      const state = entry.animator.getCurrentState();
+
+      // Animator always returns SingleAnimationState
+      if (state.type !== "single") {
+        return;
+      }
+
+      const isCompleted = state.position === state.to;
+
+      if (isCompleted) {
+        const newAnimator = Animator.fromState(
+          {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          {
+            from: entry.item.to ?? (1 as TAnimationValue),
+            to: entry.item.from ?? (0 as TAnimationValue),
+            spring: entry.item.spring,
+            onUpdate: entry.item.tick,
+            onComplete: () => this.onAnimatorComplete(entry.id),
+            onStart: entry.item.onStart,
+          },
+        );
+        newAnimator.forward();
+        entry.animator = newAnimator;
+        return;
+      }
+
+      entry.animator.reverse();
     });
   }
 
-  getState(): {
-    completed: number;
-    total: number;
-    direction: "forward" | "backward";
-  } {
+  getCurrentState(): AnimationState<number> {
     return {
+      type: "multi" as const,
       completed: this.completedCount,
       total: this.config.springs.length,
       direction: this.direction,

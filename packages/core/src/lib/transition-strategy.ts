@@ -5,6 +5,8 @@ export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext<TAnimationValue = number> {
   // Current animation state
+  // Note: This is for single spring only (Animator)
+  // Multi-spring (AnimationScheduler) is handled separately in create-transition-callback
   currentAnimation: {
     animator: Animator<TAnimationValue>;
     direction: "in" | "out";
@@ -78,8 +80,24 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 4: OUT animation running + IN trigger
       if (currentAnimation && currentAnimation.direction === "out") {
         // Stop current OUT animation
-        const currentState = currentAnimation.animator.getCurrentState();
+        const state = currentAnimation.animator.getCurrentState();
         currentAnimation.animator.stop();
+
+        // Animator always returns SingleAnimationState
+        if (state.type !== "single") {
+          // Fallback (should not happen)
+          return {
+            state: {
+              position: 0 as TAnimationValue,
+              velocity: 0 as TAnimationValue extends number
+                ? number
+                : Record<string, number>,
+            },
+            from: 0 as TAnimationValue,
+            to: 1 as TAnimationValue,
+            direction: "forward",
+          };
+        }
 
         // Use OUT config but reverse direction
         if (configs.out) {
@@ -89,7 +107,10 @@ export const createDefaultStrategy = <TAnimationValue = number>(
             outConfig;
           return {
             config: outConfig,
-            state: currentState,
+            state: {
+              position: state.position,
+              velocity: state.velocity,
+            },
             from, // OUT animation's from
             to, // OUT animation's to
             direction: "backward", // Will actually go 0→1
@@ -136,8 +157,24 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 3: IN animation running + OUT trigger
       if (currentAnimation && currentAnimation.direction === "in") {
         // Stop current IN animation
-        const currentState = currentAnimation.animator.getCurrentState();
+        const state = currentAnimation.animator.getCurrentState();
         currentAnimation.animator.stop();
+
+        // Animator always returns SingleAnimationState
+        if (state.type !== "single") {
+          // Fallback (should not happen)
+          return {
+            state: {
+              position: 1 as TAnimationValue,
+              velocity: 0 as TAnimationValue extends number
+                ? number
+                : Record<string, number>,
+            },
+            from: 1 as TAnimationValue,
+            to: 0 as TAnimationValue,
+            direction: "forward",
+          };
+        }
 
         // Use IN config but reverse direction
         if (configs.in) {
@@ -149,8 +186,8 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           return {
             config: inConfig,
             state: {
-              position: currentState.position,
-              velocity: currentState.velocity,
+              position: state.position,
+              velocity: state.velocity,
             },
             from, // IN animation's from
             to, // IN animation's to

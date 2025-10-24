@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { animate } from "popmotion";
 
-import type { SpringConfig } from "./types";
+import type {
+  SpringConfig,
+  AnimationController,
+  AnimationState,
+} from "./types";
 
 export interface AnimationOptions<TAnimationValue = number> {
   from: TAnimationValue;
@@ -19,7 +23,9 @@ export interface AnimationOptions<TAnimationValue = number> {
  *
  * @template TAnimationValue - The type of value being animated (number | object)
  */
-export class Animator<TAnimationValue = number> {
+export class Animator<TAnimationValue = number>
+  implements AnimationController<TAnimationValue>
+{
   private options: AnimationOptions<TAnimationValue>;
   private currentValue: TAnimationValue;
   private velocity: TAnimationValue extends number
@@ -352,13 +358,9 @@ export class Animator<TAnimationValue = number> {
     return this.isAnimating;
   }
 
-  getCurrentState(): {
-    position: TAnimationValue;
-    velocity: TAnimationValue extends number ? number : Record<string, number>;
-    from: TAnimationValue;
-    to: TAnimationValue;
-  } {
+  getCurrentState(): AnimationState<TAnimationValue> {
     return {
+      type: "single" as const,
       position: this.currentValue,
       velocity: this.velocity,
       from: this.options.from,
