@@ -225,3 +225,32 @@ export type SsgoiConfig = {
 export type SsgoiContext = (
   path: string,
 ) => Transition & { key: TransitionKey };
+
+/**
+ * Normalized schedule entry for internal processing (discriminated union)
+ * Used by AnimationScheduler to unify different schedule strategies
+ * @internal
+ */
+export type NormalizedScheduleEntry = OffsetScheduleEntry | WaitScheduleEntry;
+
+/**
+ * Offset-based schedule entry (overlap/chain modes)
+ * - delay=0: immediate start (overlap)
+ * - delay>0: delayed start with fixed timing (chain)
+ * @internal
+ */
+export type OffsetScheduleEntry = {
+  type: "offset";
+  id: string;
+  delay: number; // milliseconds
+};
+
+/**
+ * Wait-based schedule entry (wait mode)
+ * Dynamic dependency - starts after previous spring completes
+ * @internal
+ */
+export type WaitScheduleEntry = {
+  type: "wait";
+  id: string;
+};

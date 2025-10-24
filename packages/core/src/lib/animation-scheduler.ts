@@ -1,5 +1,9 @@
 import { Animator } from "./animator";
-import type { MultiSpringConfig, SpringItem } from "./types";
+import type {
+  MultiSpringConfig,
+  SpringItem,
+  NormalizedScheduleEntry,
+} from "./types";
 
 /**
  * Entry to track individual spring animation state
@@ -61,6 +65,91 @@ export class AnimationScheduler<TAnimationValue = number> {
     });
   }
 
+  /**
+   * Normalize schedule configuration to unified internal representation
+   * Uses discriminated union and early return pattern
+   *
+   * @param direction - "forward" or "backward" direction
+   */
+  private normalizeSchedule(
+    direction: "forward" | "backward",
+  ): NormalizedScheduleEntry[] {
+    const schedule = this.config.schedule ?? "overlap";
+
+    return this.springOrder.map((id, index) => {
+      const entry = this.animators.get(id);
+      if (!entry) {
+        throw new Error(
+          `AnimationScheduler: animator with id "${id}" not found during normalization`,
+        );
+      }
+
+      // Overlap: all springs start immediately
+      if (schedule === "overlap") {
+        return {
+          type: "offset" as const,
+          id,
+          delay: 0,
+        };
+      }
+
+      // Wait mode
+      if (schedule === "wait") {
+        // First in forward: start immediately
+        if (direction === "forward" && index === 0) {
+          return {
+            type: "offset" as const,
+            id,
+            delay: 0,
+          };
+        }
+
+        // Last in backward: start immediately
+        if (direction === "backward" && index === this.springOrder.length - 1) {
+          return {
+            type: "offset" as const,
+            id,
+            delay: 0,
+          };
+        }
+
+        // Others: wait for previous/next to complete
+        return {
+          type: "wait" as const,
+          id,
+        };
+      }
+
+      // Chain mode: offset-based delays
+      const offset = entry.item.offset ?? 0;
+
+      // Forward: use offset as-is
+      if (direction === "forward") {
+        return {
+          type: "offset" as const,
+          id,
+          delay: offset,
+        };
+      }
+
+      // Backward: mirror offset (maxOffset - offset)
+      const maxOffset =
+        this.animators.size === 0
+          ? 0
+          : Math.max(
+              ...Array.from(this.animators.values()).map(
+                (e) => e.item.offset ?? 0,
+              ),
+            );
+
+      return {
+        type: "offset" as const,
+        id,
+        delay: maxOffset - offset,
+      };
+    });
+  }
+
   private onAnimatorComplete(id: string): void {
     const entry = this.animators.get(id);
     if (!entry) {
@@ -80,32 +169,49 @@ export class AnimationScheduler<TAnimationValue = number> {
     entry.item.onComplete?.();
     this.config.onProgress?.(this.completedCount, this.config.springs.length);
 
-    if (this.config.schedule === "wait") {
-      if (this.direction === "forward") {
-        // Forward: start next animation
-        const currentIndex = this.springOrder.indexOf(id);
-        const nextId = this.springOrder[currentIndex + 1];
-        if (nextId) {
-          const nextEntry = this.animators.get(nextId);
-          if (nextEntry && nextEntry.startTime === null) {
-            this.startAnimator(nextId);
-          }
-        }
-      } else if (this.direction === "backward") {
-        // Backward: start previous animation
-        const currentIndex = this.springOrder.indexOf(id);
-        const prevId = this.springOrder[currentIndex - 1];
-        if (prevId) {
-          const prevEntry = this.animators.get(prevId);
-          if (prevEntry && prevEntry.startTime === null) {
-            this.startBackwardAnimator(prevId);
-          }
-        }
-      }
-    }
+    // Handle wait mode chaining (start next/previous spring)
+    this.handleWaitModeChaining(id);
 
+    // Check if all springs completed
     if (this.completedCount === this.config.springs.length) {
       this.config.onEnd?.();
+    }
+  }
+
+  /**
+   * Handle wait mode chaining: start next/previous spring after completion
+   */
+  private handleWaitModeChaining(completedId: string): void {
+    // Skip if not wait mode
+    if (this.config.schedule !== "wait") {
+      return;
+    }
+
+    const currentIndex = this.springOrder.indexOf(completedId);
+
+    // Forward: start next animation
+    if (this.direction === "forward") {
+      const nextId = this.springOrder[currentIndex + 1];
+      if (!nextId) {
+        return;
+      }
+
+      const nextEntry = this.animators.get(nextId);
+      if (nextEntry && nextEntry.startTime === null) {
+        this.startAnimator(nextId);
+      }
+      return;
+    }
+
+    // Backward: start previous animation
+    const prevId = this.springOrder[currentIndex - 1];
+    if (!prevId) {
+      return;
+    }
+
+    const prevEntry = this.animators.get(prevId);
+    if (prevEntry && prevEntry.startTime === null) {
+      this.startBackwardAnimator(prevId);
     }
   }
 
@@ -160,38 +266,28 @@ export class AnimationScheduler<TAnimationValue = number> {
     this.completedAnimators.clear();
     this.config.onStart?.();
 
-    const schedule = this.config.schedule ?? "overlap";
+    // Normalize schedule to unified representation
+    const entries = this.normalizeSchedule("forward");
 
-    switch (schedule) {
-      case "overlap":
-        this.springOrder.forEach((id) => this.startAnimator(id));
-        break;
-
-      case "wait": {
-        const firstId = this.springOrder[0];
-        if (firstId) {
-          this.startAnimator(firstId);
-        }
-        break;
+    entries.forEach((entry) => {
+      // Wait mode: will be started by onAnimatorComplete
+      if (entry.type === "wait") {
+        return;
       }
 
-      case "chain":
-        this.springOrder.forEach((id) => {
-          const entry = this.animators.get(id);
-          if (!entry) return;
-          const offset = entry.item.offset ?? 0;
-          if (offset === 0) {
-            this.startAnimator(id);
-          } else {
-            const timeoutId = window.setTimeout(
-              () => this.startAnimator(id),
-              offset,
-            );
-            this.timeoutIds.push(timeoutId);
-          }
-        });
-        break;
-    }
+      // Offset mode: immediate start
+      if (entry.delay === 0) {
+        this.startAnimator(entry.id);
+        return;
+      }
+
+      // Offset mode: delayed start
+      const timeoutId = window.setTimeout(
+        () => this.startAnimator(entry.id),
+        entry.delay,
+      );
+      this.timeoutIds.push(timeoutId);
+    });
   }
 
   backward(): void {
@@ -203,49 +299,28 @@ export class AnimationScheduler<TAnimationValue = number> {
     this.completedAnimators.clear();
     this.config.onStart?.();
 
-    const schedule = this.config.schedule ?? "overlap";
+    // Normalize schedule to unified representation
+    const entries = this.normalizeSchedule("backward");
 
-    switch (schedule) {
-      case "overlap":
-        this.springOrder.forEach((id) => this.startBackwardAnimator(id));
-        break;
-
-      case "wait": {
-        const lastId = this.springOrder[this.springOrder.length - 1];
-        if (lastId) {
-          this.startBackwardAnimator(lastId);
-        }
-        break;
+    entries.forEach((entry) => {
+      // Wait mode: will be started by onAnimatorComplete (in reverse order)
+      if (entry.type === "wait") {
+        return;
       }
 
-      case "chain": {
-        const maxOffset =
-          this.animators.size === 0
-            ? 0
-            : Math.max(
-                ...Array.from(this.animators.values()).map(
-                  (e) => e.item.offset ?? 0,
-                ),
-              );
-        this.springOrder.forEach((id) => {
-          const entry = this.animators.get(id);
-          if (!entry) return;
-          const offset = entry.item.offset ?? 0;
-          const mirroredOffset = maxOffset - offset;
-
-          if (mirroredOffset === 0) {
-            this.startBackwardAnimator(id);
-          } else {
-            const timeoutId = window.setTimeout(
-              () => this.startBackwardAnimator(id),
-              mirroredOffset,
-            );
-            this.timeoutIds.push(timeoutId);
-          }
-        });
-        break;
+      // Offset mode: immediate start
+      if (entry.delay === 0) {
+        this.startBackwardAnimator(entry.id);
+        return;
       }
-    }
+
+      // Offset mode: delayed start (mirrored for chain)
+      const timeoutId = window.setTimeout(
+        () => this.startBackwardAnimator(entry.id),
+        entry.delay,
+      );
+      this.timeoutIds.push(timeoutId);
+    });
   }
 
   stop(): void {
