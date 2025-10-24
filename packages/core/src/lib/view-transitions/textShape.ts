@@ -4,20 +4,20 @@ type HexColor = `#${string}`;
 
 interface TextShapeOptions {
   bgColor?: HexColor;
-  textColor?: HexColor;
   texts?: string[];
   shape?: "circle" | "square" | "triangle";
   spring?: Partial<SpringConfig>;
   textDuration?: number;
+  textStyle?: Partial<CSSStyleDeclaration>;
 }
 
 export const textShape = ({
   bgColor = "#000000",
-  textColor = "#FFFFFF",
   texts = [],
   textDuration = 1500,
   shape = "circle",
   spring: springOptions = {},
+  textStyle = {},
 }: TextShapeOptions): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: springOptions?.stiffness ?? 70,
@@ -38,7 +38,7 @@ export const textShape = ({
     }),
 
     in: async (element) => {
-      // ===== Overlay =====
+      // ===== Overlay Layer =====
       const overlay = document.createElement("div");
       overlay.style.position = "fixed";
       overlay.style.inset = "0";
@@ -53,7 +53,7 @@ export const textShape = ({
       overlay.style.clipPath = "none";
       document.body.appendChild(overlay);
 
-      // ===== Viewport (항상 현재 텍스트만 보이게) =====
+      // ===== Viewport (only shows the current text) =====
       const viewport = document.createElement("div");
       viewport.style.position = "relative";
       viewport.style.display = "inline-block";
@@ -69,11 +69,12 @@ export const textShape = ({
       wrapper.style.transition = "transform 0.8s ease";
       viewport.appendChild(wrapper);
 
-      // ===== Slides =====
+      // ===== Slides (text items) =====
       const slides: HTMLDivElement[] = [];
       texts.forEach((t) => {
         const slide = document.createElement("div");
         slide.textContent = t;
+        // text basic style
         slide.style.display = "inline-flex";
         slide.style.alignItems = "center";
         slide.style.justifyContent = "center";
@@ -81,12 +82,16 @@ export const textShape = ({
         slide.style.fontSize = "4rem";
         slide.style.fontWeight = "900";
         slide.style.letterSpacing = "0.02em";
-        slide.style.color = textColor;
+        slide.style.color = "#FFFFFF";
+
+        //custom style override
+        Object.assign(slide.style, textStyle);
+
         wrapper.appendChild(slide);
         slides.push(slide);
       });
 
-      // ===== 슬라이드 전환 로직 =====
+      // ===== Slide transition logic =====
       let idx = 0;
 
       const updateSlide = () => {
@@ -95,32 +100,24 @@ export const textShape = ({
         const current = slides[idx];
         if (!current) return;
 
-        // 현재 텍스트 width
         const currentWidth = current.getBoundingClientRect().width;
 
-        // === 핵심: 이전 슬라이드들의 width 합산 ===
+        // === Sum of all previous slides width ===
         const prevWidths = slides
           .slice(0, idx)
           .reduce((sum, slide) => sum + slide.getBoundingClientRect().width, 0);
 
-        console.log(
-          "TEST currentWidth",
-          currentWidth,
-          "prevWidths",
-          prevWidths,
-        );
-
-        // viewport는 현재 슬라이드의 width로 맞춤
+        // Match viewport width with current slide width
         viewport.style.width = `${currentWidth}px`;
 
-        // wrapper 총 width는 모든 슬라이드 합으로 맞춤
+        // Wrapper total width = sum of all slides width
         const totalWidth = slides.reduce(
           (sum, slide) => sum + slide.getBoundingClientRect().width,
           0,
         );
         wrapper.style.width = `${totalWidth}px`;
 
-        // wrapper 이동: 이전 요소들의 총합
+        // Shift wrapper to show only the current slide
         wrapper.style.transform = `translateX(-${prevWidths}px)`;
       };
 
@@ -130,7 +127,7 @@ export const textShape = ({
           updateSlide();
           setTimeout(showNext, textDuration);
         } else {
-          // 마지막 텍스트 후 shape 축소 시작
+          // After the last text, start closing the shape
           startShapeClose();
         }
       };
@@ -138,7 +135,7 @@ export const textShape = ({
       const startShapeClose = () => {
         let progress = 0;
         const step = () => {
-          progress += 0.02; // 속도 조절 가능
+          progress += 0.02; // Speed control
           const scale = 1 - progress;
 
           if (shape === "circle") {
@@ -166,7 +163,7 @@ export const textShape = ({
         requestAnimationFrame(step);
       };
 
-      // 초기화 + 시작
+      // Initialize & start
       updateSlide();
       setTimeout(showNext, textDuration);
 
