@@ -3,11 +3,13 @@
   "homepage": "https://ssgoi.dev",
   "version": "2.0.0",
   "private": true,
-  "description": "SSGOI is a powerful and easy-to-use page transition library for Svelte and SvelteKit applications.",
+  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue).",
   "scripts": {
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",
     "core:build": "pnpm --filter @ssgoi/core build",
+    "angular:build": "pnpm --filter @ssgoi/angular build",
+    "angular:watch": "pnpm --filter @ssgoi/angular watch",
     "react:build": "pnpm --filter @ssgoi/react build",
     "react:watch": "pnpm --filter @ssgoi/react watch",
     "svelte:build": "pnpm --filter @ssgoi/svelte build",
@@ -16,6 +18,7 @@
     "vue:watch": "pnpm --filter @ssgoi/vue watch",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
+    "angular-demo": "pnpm --filter angular-demo dev",
     "react-demo": "pnpm --filter react-demo dev",
     "svelte-demo": "pnpm --filter svelte-demo dev",
     "vue-demo": "pnpm --filter vue-demo dev",
@@ -35,8 +38,11 @@
     "url": "https://github.com/meursyphus/ssgoi/issues"
   },
   "keywords": [
+    "angular",
+    "react",
     "svelte",
     "sveltekit",
+    "vue",
     "page-transition",
     "animation"
   ],
@@ -64,6 +70,9 @@
       "prettier --write --config packages/core/.prettierrc",
       "eslint --fix --config packages/core/eslint.config.js"
     ],
+    "packages/angular/**/*.{ts}": [
+      "prettier --write"
+    ],
     "packages/react/**/*.{ts,tsx}": [
       "prettier --write --config packages/react/.prettierrc"
     ],
@@ -76,6 +85,9 @@
     ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/docs/.prettierrc"
+    ],
+    "apps/angular-demo/**/*.{ts,html,css}": [
+      "prettier --write --config apps/angular-demo/.prettierrc"
     ],
     "apps/react-demo/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/react-demo/.prettierrc"

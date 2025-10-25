@@ -1,0 +1,85 @@
+{
+  "name": "@ssgoi/angular",
+  "version": "2.3.0",
+  "description": "Angular bindings for SSGOI - Native app-like page transitions for Angular applications",
+  "private": false,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "watch": "ng-packagr -p ng-package.json --watch",
+    "prepare": "pnpm run build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0"
+  },
+  "devDependencies": {
+    "@angular-eslint/builder": "^20.3.0",
+    "@angular-eslint/eslint-plugin": "^20.3.0",
+    "@angular-eslint/eslint-plugin-template": "^20.3.0",
+    "@angular-eslint/schematics": "^20.3.0",
+    "@angular-eslint/template-parser": "^20.3.0",
+    "@angular/common": "^20.3.4",
+    "@angular/compiler": "^20.3.4",
+    "@angular/compiler-cli": "^20.3.4",
+    "@angular/core": "^20.3.4",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "ng-packagr": "^20.3.0",
+    "typescript": "~5.8.3"
+  },
+  "keywords": [
+    "angular",
+    "page-transition",
+    "animation",
+    "ssgoi",
+    "spring-physics",
+    "standalone"
+  ],
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
+    "directory": "packages/angular"
+  },
+  "homepage": "https://ssgoi.dev",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular.mjs"
+    },
+    "./presets": {
+      "types": "./dist/presets/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular-presets.mjs"
+    },
+    "./transitions": {
+      "types": "./dist/transitions/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular-transitions.mjs"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular-view-transitions.mjs"
+    }
+  },
+  "sideEffects": false
+}
