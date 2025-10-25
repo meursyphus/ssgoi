@@ -1,14 +1,12 @@
-import type { SingleSpringConfig } from "./types";
-import type { Animator } from "./animator";
+import type { SingleSpringConfig, AnimationController } from "./types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext<TAnimationValue = number> {
   // Current animation state
-  // Note: This is for single spring only (Animator)
-  // Multi-spring (AnimationScheduler) is handled separately in create-transition-callback
+  // Supports both single spring (Animator) and multi-spring (AnimationScheduler)
   currentAnimation: {
-    animator: Animator<TAnimationValue>;
+    controller: AnimationController<TAnimationValue>;
     direction: "in" | "out";
   } | null;
 }
@@ -80,12 +78,14 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 4: OUT animation running + IN trigger
       if (currentAnimation && currentAnimation.direction === "out") {
         // Stop current OUT animation
-        const state = currentAnimation.animator.getCurrentState();
-        currentAnimation.animator.stop();
+        const state = currentAnimation.controller.getCurrentState();
+        currentAnimation.controller.stop();
 
-        // Animator always returns SingleAnimationState
-        if (state.type !== "single") {
-          // Fallback (should not happen)
+        // Check if multi-spring animation
+        if (state.type === "multi") {
+          // Multi-spring: directly reverse the controller
+          currentAnimation.controller.reverse();
+          // Return special setup indicating already handled
           return {
             state: {
               position: 0 as TAnimationValue,
@@ -99,7 +99,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           };
         }
 
-        // Use OUT config but reverse direction
+        // Single-spring: use OUT config but reverse direction
         if (configs.out) {
           const outConfig = await configs.out;
           // Extract from/to with defaults for out transition
@@ -157,12 +157,14 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 3: IN animation running + OUT trigger
       if (currentAnimation && currentAnimation.direction === "in") {
         // Stop current IN animation
-        const state = currentAnimation.animator.getCurrentState();
-        currentAnimation.animator.stop();
+        const state = currentAnimation.controller.getCurrentState();
+        currentAnimation.controller.stop();
 
-        // Animator always returns SingleAnimationState
-        if (state.type !== "single") {
-          // Fallback (should not happen)
+        // Check if multi-spring animation
+        if (state.type === "multi") {
+          // Multi-spring: directly reverse the controller
+          currentAnimation.controller.reverse();
+          // Return special setup indicating already handled
           return {
             state: {
               position: 1 as TAnimationValue,
@@ -176,7 +178,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           };
         }
 
-        // Use IN config but reverse direction
+        // Single-spring: use IN config but reverse direction
         if (configs.in) {
           const inConfig = await configs.in;
 
