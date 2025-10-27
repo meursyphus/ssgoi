@@ -152,6 +152,8 @@ export const textShape = ({
               }% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
               break;
             }
+            default:
+              overlay.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
           }
 
           viewport.style.transform = `scale(${scale})`;
