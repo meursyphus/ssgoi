@@ -162,26 +162,34 @@ nav-title: "フェード"
   <TabPanel value="react">
     ```tsx
     const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 400,  // 高速トランジション
-          damping: 35      // 滑らかな仕上がり
-        }
-      })
-    };
+       defaultTransition: fade({
+         inSpring: { //ページに入るときに適用されます。
+           stiffness: 400,  // 速いトランジション
+           damping: 35      // スムーズな終了
+         },
+         outSpring: { //ページから離れるときに適用されます。
+           stiffness: 400,  // 速いトランジション
+           damping: 35      // スムーズな終了
+         }
+       })
+     };
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
     <script>
       const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 400,  // 高速トランジション
-            damping: 35      // 滑らかな仕上がり
-          }
-        })
-      };
+        defaultTransition: fade({
+          inSpring: { //ページに入るときに適用されます。
+            stiffness: 400,  // 速いトランジション
+            damping: 35      // スムーズな終了
+          },
+          outSpring: { //ページから離れるときに適用されます。
+            stiffness: 400,  // 速いトランジション
+            damping: 35      // スムーズな終了
+          }
+        })
+      };
     </script>
     ```
   </TabPanel>
@@ -195,26 +203,34 @@ nav-title: "フェード"
   <TabPanel value="react">
     ```tsx
     const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 150,  // ゆっくりとしたトランジション
-          damping: 25      // 滑らかな減速
-        }
-      })
-    };
+        defaultTransition: fade({
+           inSpring: { //ページに入るときに適用されます。
+              stiffness: 150,  // 遅いトランジション
+              damping: 25      // スムーズな減速
+            },
+            outSpring: { //ページから離れるときに適用されます。
+             stiffness: 150,  // 遅いトランジション
+             damping: 25      // スムーズな減速
+            }
+        })
+      };
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
     <script>
       const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 150,  // ゆっくりとしたトランジション
-            damping: 25      // 滑らかな減速
-          }
-        })
-      };
+        defaultTransition: fade({
+           inSpring: { //ページに入るときに適用されます。
+              stiffness: 150,  // 遅いトランジション
+              damping: 25      // スムーズな減速
+            },
+            outSpring: { //ページから離れるときに適用されます。
+             stiffness: 150,  // 遅いトランジション
+             damping: 25      // スムーズな減速
+            }
+        })
+      };
     </script>
     ```
   </TabPanel>
