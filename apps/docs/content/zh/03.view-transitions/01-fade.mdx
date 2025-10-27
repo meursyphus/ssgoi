@@ -162,26 +162,34 @@ nav-title: "淡入淡出"
   <TabPanel value="react">
     ```tsx
     const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 400,  // 快速过渡
-          damping: 35      // 平滑结束
-        }
-      })
-    };
+       defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         },
+         outSpring: { // 离开页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         }
+       })
+     };
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
     <script>
       const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 400,  // 快速过渡
-            damping: 35      // 平滑结束
-          }
-        })
-      };
+        defaultTransition: fade({
+          inSpring: { // 进入页面时应用。
+            stiffness: 400,  // 快速过渡
+            damping: 35      // 平滑结束
+          },
+          outSpring: { // 离开页面时应用。
+            stiffness: 400,  // 快速过渡
+            damping: 35      // 平滑结束
+          }
+        })
+     };
     </script>
     ```
   </TabPanel>
@@ -195,26 +203,34 @@ nav-title: "淡入淡出"
   <TabPanel value="react">
     ```tsx
     const config = {
-      defaultTransition: fade({
-        spring: {
-          stiffness: 150,  // 缓慢过渡
-          damping: 25      // 平滑减速
-        }
-      })
-    };
+      defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+            stiffness: 150,  // 缓慢过渡
+            damping: 25      // 平滑减速
+           },
+          outSpring: { // 离开页面时应用。
+           stiffness: 150,  // 缓慢过渡
+           damping: 25      // 平滑减速
+           }
+      })
+    };
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```svelte
     <script>
       const config = {
-        defaultTransition: fade({
-          spring: {
-            stiffness: 150,  // 缓慢过渡
-            damping: 25      // 平滑减速
-          }
-        })
-      };
+        defaultTransition: fade({
+           inSpring: { // 进入页面时应用。
+              stiffness: 150,  // 缓慢过渡
+              damping: 25      // 平滑减速
+            },
+            outSpring: { // 离开页面时应用。
+             stiffness: 150,  // 缓慢过渡
+             damping: 25      // 平滑减速
+            }
+        })
+    };
     </script>
     ```
   </TabPanel>
