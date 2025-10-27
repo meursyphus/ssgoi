@@ -5,6 +5,7 @@ import { getRect } from "../utils/get-rect";
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
   timeout?: number;
+  maxDistance?: number;
 }
 
 function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
@@ -17,6 +18,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     damping: options.spring?.damping ?? 30,
   };
   const timeout = options.timeout ?? 300;
+  const maxDistance = options.maxDistance ?? 1000;
 
   // Closure variables to share state between in/out
   let fromNode: HTMLElement | null = null;
@@ -96,17 +98,21 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             originalZIndex,
           };
         })
-        .filter(Boolean) as Array<{
-        toEl: HTMLElement;
-        dx: number;
-        dy: number;
-        dw: number;
-        dh: number;
-        originalTransform: string;
-        originalPosition: string;
-        originalTransformOrigin: string;
-        originalZIndex: string;
-      }>;
+        .filter(
+          (
+            animation,
+          ): animation is {
+            toEl: HTMLElement;
+            dx: number;
+            dy: number;
+            dw: number;
+            dh: number;
+            originalTransform: string;
+            originalPosition: string;
+            originalTransformOrigin: string;
+            originalZIndex: string;
+          } => animation !== null && Math.abs(animation.dy) <= maxDistance,
+        );
 
       // Reset fromNode for next transition
       fromNode = null;
