@@ -1,9 +1,7 @@
 import type { SggoiTransition, SpringConfig } from "../types";
 
-type HexColor = `#${string}`;
-
 interface TextShapeOptions {
-  bgColor?: HexColor;
+  bgColor?: string;
   texts?: string[];
   shape?: "circle" | "square" | "triangle";
   spring?: Partial<SpringConfig>;
@@ -44,7 +42,7 @@ export const textShape = ({
       overlay.style.inset = "0";
       overlay.style.width = "100vw";
       overlay.style.height = "100vh";
-      overlay.style.backgroundColor = bgColor;
+      overlay.style.background = bgColor;
       overlay.style.zIndex = "9999";
       overlay.style.display = "flex";
       overlay.style.alignItems = "center";
