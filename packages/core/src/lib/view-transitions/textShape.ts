@@ -136,17 +136,22 @@ export const textShape = ({
           progress += 0.02; // Speed control
           const scale = 1 - progress;
 
-          if (shape === "circle") {
-            overlay.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
-          } else if (shape === "square") {
-            overlay.style.clipPath = `inset(${(1 - scale) * 50}% round ${
-              10 * scale
-            }%)`;
-          } else {
-            const p = scale * 100;
-            overlay.style.clipPath = `polygon(50% ${50 - p}%, ${
-              50 - p
-            }% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+          switch (shape) {
+            case "circle":
+              overlay.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
+              break;
+            case "square":
+              overlay.style.clipPath = `inset(${(1 - scale) * 50}% round ${
+                10 * scale
+              }%)`;
+              break;
+            case "triangle": {
+              const p = scale * 100;
+              overlay.style.clipPath = `polygon(50% ${50 - p}%, ${
+                50 - p
+              }% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+              break;
+            }
           }
 
           viewport.style.transform = `scale(${scale})`;
