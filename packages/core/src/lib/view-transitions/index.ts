@@ -8,4 +8,4 @@ export * from "./pinterest";
 export * from "./scroll";
 export * from "./slide";
 export * from "./strip";
-export * from "./textShape";
+export * from "./curtain-reveal";

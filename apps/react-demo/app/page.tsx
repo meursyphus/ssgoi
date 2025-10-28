@@ -102,10 +102,10 @@ export default function Home() {
                 color: "#333",
               }}
             >
-              TextShape Transition
+              Curtain Reveal Transition
             </h3>
             <Link
-              href="/text-shape"
+              href="/curtain-reveal"
               style={{
                 display: "inline-block",
                 background: "linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)",
@@ -125,7 +125,7 @@ export default function Home() {
                 e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              🎨 Demo Text + Shape Transition
+              🎨 Demo Curtain Reveal Transition
             </Link>
           </div>
         </div>

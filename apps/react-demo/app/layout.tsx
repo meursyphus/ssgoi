@@ -1,7 +1,12 @@
 "use client";
 
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { fade, hero, jaemin, textShape } from "@ssgoi/react/view-transitions";
+import {
+  fade,
+  hero,
+  jaemin,
+  curtainReveal,
+} from "@ssgoi/react/view-transitions";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
@@ -27,9 +32,9 @@ const ssgoiConfig: SsgoiConfig = {
     },
     {
       from: "/",
-      to: "/text-shape",
-      transition: textShape({
-        bgColor: "#DDA0DD",
+      to: "/curtain-reveal",
+      transition: curtainReveal({
+        background: "#DDA0DD",
         texts: ["Hello", "World"],
         textStyle: { color: "#000000" },
         textDuration: 1000,
@@ -37,7 +42,7 @@ const ssgoiConfig: SsgoiConfig = {
       }),
     },
     {
-      from: "/text-shape",
+      from: "/curtain-reveal",
       to: "/",
       transition: fade(),
     },

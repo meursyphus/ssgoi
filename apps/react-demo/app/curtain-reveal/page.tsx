@@ -3,29 +3,36 @@
 import Link from "next/link";
 import { SsgoiTransition } from "@ssgoi/react";
 
-export default function TextShapeDemo() {
+export default function CurtainRevealDemo() {
   const features = [
     {
-      icon: "📝",
-      title: "Text Slide Phase",
+      icon: "🎭",
+      title: "Curtain Opening Phase",
       description:
-        "Multiple text strings appear sequentially in the center of the screen.",
+        "The overlay reveals the page content as if curtains are being drawn aside.",
       details:
-        "A viewport masks the wrapper so that only the current text is visible, sliding horizontally as each new text appears.",
+        "Clip-path gradually opens from the center, giving a cinematic curtain-like effect.",
+    },
+    {
+      icon: "🪟",
+      title: "Content Showcase",
+      description:
+        "While the curtain is open, content is clearly visible in the viewport.",
+      details: "You can customize text, styling, and timing during the reveal.",
     },
     {
       icon: "⭕",
-      title: "Shape Closing Phase",
+      title: "Curtain Closing Phase",
       description:
-        "After the final text, the overlay closes with a shape-based animation.",
+        "At the end, the curtain smoothly closes with a shape-based animation.",
       details:
-        "Clip-path is animated into circle, square, or triangle forms, collapsing the overlay dramatically.",
+        "Circle, square, or triangle shapes collapse to hide the overlay dramatically.",
     },
     {
       icon: "⚙️",
       title: "Physics Smoothness",
       description:
-        "Spring physics (stiffness, damping) ensure smooth transitions.",
+        "Spring physics (stiffness, damping) ensure natural, fluid motion.",
       details:
         "Animations run at 60fps using requestAnimationFrame and CSS transforms.",
     },
@@ -38,14 +45,14 @@ export default function TextShapeDemo() {
       description: "Closing animation types based on CSS clip-path.",
     },
     {
-      label: "Text Duration",
+      label: "Reveal Duration",
       value: "1500ms (default)",
-      description: "Duration each text stays before moving to the next.",
+      description: "Time each reveal state is displayed before transitioning.",
     },
     {
       label: "Spring Config",
       value: "stiffness: 70, damping: 30",
-      description: "Physics tuning for natural animation feel.",
+      description: "Physics tuning for smooth animation feel.",
     },
     {
       label: "Custom Styling",
@@ -55,12 +62,12 @@ export default function TextShapeDemo() {
   ];
 
   return (
-    <SsgoiTransition id="/text-shape">
+    <SsgoiTransition id="/curtain-reveal">
       <div
         style={{
           minHeight: "100vh",
           background:
-            "linear-gradient(135deg, #ff4e50 0%, #f9d423 50%, #e1f5c4 100%)",
+            "linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%)",
           color: "#fff",
           padding: "2rem",
         }}
@@ -78,17 +85,18 @@ export default function TextShapeDemo() {
               fontSize: "3rem",
               fontWeight: "bold",
               marginBottom: "1.5rem",
-              background: "linear-gradient(45deg, #fff, #f9d423, #ff4e50)",
+              background: "linear-gradient(45deg, #fff, #fdbb2d, #b21f1f)",
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Text + Shape Transition
+            Curtain Reveal Transition
           </h1>
           <p style={{ fontSize: "1.2rem", opacity: 0.9, lineHeight: "1.6" }}>
-            This demo shows a cinematic page transition: sequential text slides
-            followed by a dramatic shape-based closing animation.
+            This demo showcases a curtain-like cinematic transition: the overlay
+            opens to reveal content, then closes with a dramatic shape-based
+            animation.
           </p>
         </div>
 
@@ -205,8 +213,8 @@ export default function TextShapeDemo() {
             Demo Complete ✅
           </h2>
           <p style={{ marginBottom: "1.5rem", opacity: 0.9 }}>
-            The Text + Shape transition blends sequential storytelling with
-            shape-driven closure for a unique immersive effect.
+            The Curtain Reveal transition blends cinematic storytelling with
+            shape-driven closure for a dramatic immersive effect.
           </p>
           <Link
             href="/"
