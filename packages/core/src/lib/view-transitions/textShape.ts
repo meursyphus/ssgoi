@@ -93,8 +93,6 @@ export const textShape = ({
       let idx = 0;
 
       const updateSlide = () => {
-        console.log("TEST UPDATE SLIDE", idx);
-
         const current = slides[idx];
         if (!current) return;
 
