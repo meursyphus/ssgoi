@@ -69,6 +69,70 @@ function processSymmetricTransitions(
 }
 
 /**
+ * Creates a swipe detector for iOS Safari swipe-back gesture
+ * Detects edge swipes that trigger Safari's native back navigation
+ */
+function createSwipeDetector(enabled: boolean) {
+  let isSwipeDetected = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!enabled) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!enabled) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+
+    // Detect edge swipe: starts near left edge and moves right
+    const isEdgeSwipe = touchStartX < 50; // Within 50px from left edge
+    const isRightwardSwipe = deltaX > 30; // Moved right more than 30px
+    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY); // More horizontal than vertical
+
+    if (isEdgeSwipe && isRightwardSwipe && isHorizontalSwipe) {
+      isSwipeDetected = true;
+
+      // Reset the flag after a delay to allow normal navigation to resume
+      setTimeout(() => {
+        isSwipeDetected = false;
+      }, 500);
+    }
+  };
+
+  const isSwipePending = () => isSwipeDetected;
+
+  const initialize = () => {
+    if (!enabled) return;
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+  };
+
+  const cleanup = () => {
+    window.removeEventListener("touchstart", handleTouchStart);
+    window.removeEventListener("touchmove", handleTouchMove);
+  };
+
+  return {
+    initialize,
+    cleanup,
+    isSwipePending,
+  };
+}
+
+/**
  * Creates a context manager for tracking transition-related information
  * including scroll positions and DOM element relationships
  */
@@ -176,6 +240,7 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
+    skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
   } = options;
 
   let pendingTransition: PendingTransition | null = null;
@@ -191,6 +256,10 @@ export function createSggoiTransitionContext(
     getPositionedParentElement,
     getScrollPosition,
   } = createContextManager();
+
+  // Initialize swipe detector
+  const swipeDetector = createSwipeDetector(skipOnIosSwipe);
+  swipeDetector.initialize();
 
   function checkAndResolve() {
     if (pendingTransition?.from && pendingTransition?.to) {
@@ -260,6 +329,11 @@ export function createSggoiTransitionContext(
   }
 
   const getTransition = async (path: string, type: "out" | "in") => {
+    // Skip animations if iOS swipe-back gesture is detected
+    if (swipeDetector.isSwipePending()) {
+      return () => ({}); // Return empty transition
+    }
+
     if (type === "in") {
       // If IN is called but no OUT is pending, no transition occurs (e.g., page refresh)
       if (!pendingTransition || !pendingTransition.from) {
