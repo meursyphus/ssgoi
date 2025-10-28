@@ -44,10 +44,12 @@ const DEFAULT_SLIDE_STYLE = {
   color: "#FFFFFF",
 };
 
+type CurtainShape = "circle" | "square" | "triangle";
+
 interface CurtainRevealOptions {
   background?: string;
   texts?: string[];
-  shape?: "circle" | "square" | "triangle";
+  shape?: CurtainShape;
   inSpring?: SpringConfig;
   outSpring?: SpringConfig;
   textDuration?: number;
@@ -150,6 +152,19 @@ export const curtainReveal = (
           setTimeout(loop, textDuration);
         });
 
+      const getClipPath = (shape: CurtainShape, scale: number) => {
+        switch (shape) {
+          case "circle":
+            return `circle(${scale * 100}% at 50% 50%)`;
+          case "square":
+            return `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
+          case "triangle": {
+            const p = scale * 100;
+            return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+          }
+        }
+      };
+
       // ===== Curtain Close =====
       const curtainCloseAnimation = () =>
         new Promise<void>((resolve) => {
@@ -157,26 +172,10 @@ export const curtainReveal = (
           let progress = 0;
 
           const step = () => {
-            progress += 0.02;
+            progress = Math.min(progress + 0.02, 1);
             const scale = 1 - progress;
 
-            switch (shape) {
-              case "circle":
-                overlay!.style.clipPath = `circle(${scale * 100}% at 50% 50%)`;
-                break;
-              case "square":
-                overlay!.style.clipPath = `inset(${(1 - scale) * 50}% round ${
-                  10 * scale
-                }%)`;
-                break;
-              case "triangle": {
-                const p = scale * 100;
-                overlay!.style.clipPath = `polygon(50% ${50 - p}%, ${
-                  50 - p
-                }% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
-                break;
-              }
-            }
+            overlay!.style.clipPath = getClipPath(shape, scale);
             viewport!.style.transform = `scale(${scale})`;
 
             if (progress < 1) {
