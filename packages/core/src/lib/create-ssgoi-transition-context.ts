@@ -106,7 +106,7 @@ function createSwipeDetector(enabled: boolean) {
   const isSwipePending = () => isSwipeDetected;
 
   const initialize = () => {
-    if(typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     if (!enabled) return;
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
@@ -114,7 +114,7 @@ function createSwipeDetector(enabled: boolean) {
   };
 
   const cleanup = () => {
-    if(typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.removeEventListener("touchstart", handleTouchStart);
     window.removeEventListener("touchend", handleTouchEnd);
   };
