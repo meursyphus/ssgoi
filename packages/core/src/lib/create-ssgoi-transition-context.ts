@@ -74,8 +74,7 @@ function processSymmetricTransitions(
  */
 function createSwipeDetector(enabled: boolean) {
   let isSwipeDetected = false;
-  let touchStartX = 0;
-  let touchStartY = 0;
+  let isEdgeTouch = false;
 
   const handleTouchStart = (e: TouchEvent) => {
     if (!enabled) return;
@@ -83,46 +82,41 @@ function createSwipeDetector(enabled: boolean) {
     const touch = e.touches[0];
     if (!touch) return;
 
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
+    // Check if touch started near left edge (within 50px from left)
+    isEdgeTouch = touch.clientX < 50;
   };
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchEnd = () => {
     if (!enabled) return;
 
-    const touch = e.touches[0];
-    if (!touch) return;
-
-    const deltaX = touch.clientX - touchStartX;
-    const deltaY = touch.clientY - touchStartY;
-
-    // Detect edge swipe: starts near left edge and moves right
-    const isEdgeSwipe = touchStartX < 50; // Within 50px from left edge
-    const isRightwardSwipe = deltaX > 30; // Moved right more than 30px
-    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY); // More horizontal than vertical
-
-    if (isEdgeSwipe && isRightwardSwipe && isHorizontalSwipe) {
+    // If touch started at edge and ended, assume it's a swipe-back gesture
+    if (isEdgeTouch) {
       isSwipeDetected = true;
 
-      // Reset the flag after a delay to allow normal navigation to resume
+      // Reset the flag after 500ms to allow normal navigation to resume
       setTimeout(() => {
         isSwipeDetected = false;
       }, 500);
     }
+
+    // Reset edge touch flag
+    isEdgeTouch = false;
   };
 
   const isSwipePending = () => isSwipeDetected;
 
   const initialize = () => {
+    if (typeof window === "undefined") return;
     if (!enabled) return;
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
   };
 
   const cleanup = () => {
+    if (typeof window === "undefined") return;
     window.removeEventListener("touchstart", handleTouchStart);
-    window.removeEventListener("touchmove", handleTouchMove);
+    window.removeEventListener("touchend", handleTouchEnd);
   };
 
   return {
