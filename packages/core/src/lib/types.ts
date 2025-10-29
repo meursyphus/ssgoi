@@ -109,6 +109,12 @@ export type SsgoiConfig = {
   }[];
   defaultTransition?: SggoiTransition;
   middleware?: (from: string, to: string) => { from: string; to: string };
+  /**
+   * Skip page transitions when iOS/Safari swipe-back gesture is detected
+   * This prevents animation conflicts between SSGOI and Safari's native swipe animation
+   * @default true
+   */
+  skipOnIosSwipe?: boolean;
 };
 
 export type SsgoiContext = (
