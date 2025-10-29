@@ -18,7 +18,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     damping: options.spring?.damping ?? 30,
   };
   const timeout = options.timeout ?? 300;
-  const maxDistance = options.maxDistance ?? 400;
+  const maxDistance = options.maxDistance ?? 700;
 
   // Closure variables to share state between in/out
   let fromNode: HTMLElement | null = null;
