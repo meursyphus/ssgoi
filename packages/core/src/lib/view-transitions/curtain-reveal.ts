@@ -1,40 +1,37 @@
 import type { SggoiTransition, SpringConfig } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_OUT_SPRING = { stiffness: 1, damping: 1 };
-const DEFAULT_IN_SPRING = { stiffness: 9999, damping: 9999 };
+/** Defaults */
+const DEFAULT_OUT_SPRING: SpringConfig = { stiffness: 1, damping: 1 };
+const DEFAULT_IN_SPRING: SpringConfig = { stiffness: 80, damping: 25 };
 const DEFAULT_BACKGROUND = "#000000";
 const DEFAULT_SHAPE = "circle" as const;
 const DEFAULT_TEXT_DURATION = 1500;
 
-const DEFAULT_OVERLAY_STYLE = {
+const DEFAULT_OVERLAY_STYLE: Partial<CSSStyleDeclaration> = {
   position: "fixed",
   inset: "0",
   width: "100vw",
-  height: "100vh",
+  height: "100%",
   zIndex: "9999",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   overflow: "hidden",
-  clipPath: "none",
 };
-
-const DEFAULT_VIEWPORT_STYLE = {
+const DEFAULT_VIEWPORT_STYLE: Partial<CSSStyleDeclaration> = {
   position: "relative",
   display: "inline-block",
   height: "5.5rem",
   overflow: "hidden",
 };
-
-const DEFAULT_WRAPPER_STYLE = {
+const DEFAULT_WRAPPER_STYLE: Partial<CSSStyleDeclaration> = {
   display: "flex",
   height: "100%",
   willChange: "transform",
   transition: "transform 0.8s ease",
 };
-
-const DEFAULT_SLIDE_STYLE = {
+const DEFAULT_SLIDE_STYLE: Partial<CSSStyleDeclaration> = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
@@ -48,8 +45,7 @@ const DEFAULT_SLIDE_STYLE = {
 type CurtainShape = "circle" | "square" | "triangle";
 
 interface CurtainRevealOptions {
-  /**
-   * Background style.
+  /** Background style.
    *
    * Supports both:
    * - Solid colors (e.g., `"#000000"`, `"rgb(255, 0, 0)"`)
@@ -64,8 +60,23 @@ interface CurtainRevealOptions {
   textStyle?: Partial<CSSStyleDeclaration>;
 }
 
+function getClipPath(shape: CurtainShape, scale: number): string {
+  switch (shape) {
+    case "circle":
+      return `circle(${scale * 100}% at 50% 50%)`;
+    case "square":
+      return `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
+    case "triangle": {
+      const p = scale * 100;
+      return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+    }
+  }
+}
+
+const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+
 export const curtainReveal = (
-  options: CurtainRevealOptions,
+  options: CurtainRevealOptions = {},
 ): SggoiTransition => {
   const {
     background = DEFAULT_BACKGROUND,
@@ -78,18 +89,42 @@ export const curtainReveal = (
   } = options;
 
   return {
+    out: (element, context) => {
+      const originalOpacity = element.style.opacity;
+
+      return {
+        spring: outSpring,
+        from: 1,
+        to: 0,
+        prepare: (el) => {
+          prepareOutgoing(el, context);
+          el.style.opacity = "1";
+        },
+        tick: (progress) => {
+          element.style.opacity = String(progress);
+        },
+        onEnd: () => {
+          element.style.opacity = originalOpacity;
+        },
+      };
+    },
+
     in: (element: HTMLElement) => {
       let overlay: HTMLElement | null = null;
       let viewport: HTMLElement | null = null;
       let wrapper: HTMLElement | null = null;
 
-      // ===== Overlay 생성 =====
+      const originalBodyOverflow = document.body.style.overflow;
+
+      let cancelled = false;
+      const timeouts: number[] = [];
+      let rafId: number | null = null;
+
+      let curtainPhaseEnabled = false;
+
       const createOverlay = () => {
         overlay = document.createElement("div");
-        Object.assign(overlay.style, {
-          ...DEFAULT_OVERLAY_STYLE,
-          background,
-        });
+        Object.assign(overlay.style, DEFAULT_OVERLAY_STYLE, { background });
         document.body.appendChild(overlay);
 
         viewport = document.createElement("div");
@@ -103,119 +138,89 @@ export const curtainReveal = (
         texts.forEach((t) => {
           const slide = document.createElement("div");
           slide.textContent = t;
-          Object.assign(slide.style, {
-            ...DEFAULT_SLIDE_STYLE,
-            ...textStyle,
-          });
+          Object.assign(slide.style, DEFAULT_SLIDE_STYLE, textStyle);
           wrapper!.appendChild(slide);
         });
       };
 
-      // ===== Slide Animation =====
       const slideAnimation = () =>
         new Promise<void>((resolve) => {
           if (!wrapper || !viewport) return resolve();
+
           const slides = Array.from(wrapper.children) as HTMLElement[];
           let idx = 0;
 
+          const widths = slides.map((el) => el.getBoundingClientRect().width);
+
           const updateSlide = () => {
-            const current = slides[idx];
-            if (!current) return;
-            const currentWidth = current.getBoundingClientRect().width;
-            const prevWidths = slides
-              .slice(0, idx)
-              .reduce((sum, s) => sum + s.getBoundingClientRect().width, 0);
+            const currentWidth = widths[idx] ?? 0;
+            const prevWidths = sum(widths.slice(0, idx));
 
             viewport!.style.width = `${currentWidth}px`;
-            const totalWidth = slides.reduce(
-              (sum, s) => sum + s.getBoundingClientRect().width,
-              0,
-            );
-            wrapper!.style.width = `${totalWidth}px`;
+
             wrapper!.style.transform = `translateX(-${prevWidths}px)`;
           };
 
-          const loop = () => {
+          const step = () => {
+            if (cancelled) return resolve();
             if (idx < slides.length - 1) {
               idx++;
               updateSlide();
-              setTimeout(loop, textDuration);
+              const id = window.setTimeout(step, textDuration);
+              timeouts.push(id);
             } else {
               resolve();
             }
           };
 
           updateSlide();
-          setTimeout(loop, textDuration);
+          const id = window.setTimeout(step, textDuration);
+          timeouts.push(id);
         });
 
-      // ===== ClipPath Shape =====
-      const getClipPath = (shape: CurtainShape, scale: number) => {
-        switch (shape) {
-          case "circle":
-            return `circle(${scale * 100}% at 50% 50%)`;
-          case "square":
-            return `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
-          case "triangle": {
-            const p = scale * 100;
-            return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${
-              50 + p
-            }% ${50 + p}%)`;
-          }
+      const cancelAllTimers = () => {
+        cancelled = true;
+        timeouts.forEach((id) => clearTimeout(id));
+        timeouts.length = 0;
+        if (rafId != null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
         }
       };
 
-      // ===== Curtain Close =====
-      const curtainCloseAnimation = () =>
-        new Promise<void>((resolve) => {
-          if (!overlay || !viewport) return resolve();
-          let progress = 0;
-
-          const step = () => {
-            progress = Math.min(progress + 0.02, 1);
-            const scale = 1 - progress;
-
-            overlay!.style.clipPath = getClipPath(shape, scale);
-            viewport!.style.transform = `scale(${scale})`;
-
-            if (progress < 1) {
-              requestAnimationFrame(step);
-            } else {
-              overlay!.style.display = "none";
-              resolve();
-            }
-          };
-          requestAnimationFrame(step);
-        });
-
       return {
         spring: inSpring,
+        from: 0,
+        to: 1,
+
         prepare: () => {
+          document.body.style.overflow = "hidden";
           element.style.opacity = "1";
           createOverlay();
-        },
-        wait: async () => {
-          await slideAnimation();
-          await curtainCloseAnimation();
-        },
-        onEnd: () => {
-          if (overlay) {
-            overlay.remove();
-            overlay = viewport = wrapper = null;
+          if (overlay && viewport) {
+            overlay.style.clipPath = "none";
+            viewport.style.transform = "scale(1)";
           }
         },
-      };
-    },
-    out: (element, context) => {
-      return {
-        spring: outSpring,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
-          el.style.opacity = "1";
-          element.style.opacity = "0";
+
+        wait: async () => {
+          await slideAnimation();
+          curtainPhaseEnabled = true;
         },
-        tick: () => {},
-        onEnd: () => {},
+
+        tick: (progress) => {
+          if (!curtainPhaseEnabled || !overlay || !viewport) return;
+          const scale = 1 - progress;
+          overlay.style.clipPath = getClipPath(shape, scale);
+          viewport.style.transform = `scale(${scale})`;
+        },
+
+        onEnd: () => {
+          cancelAllTimers();
+          overlay?.remove();
+          overlay = viewport = wrapper = null;
+          document.body.style.overflow = originalBodyOverflow;
+        },
       };
     },
   };
