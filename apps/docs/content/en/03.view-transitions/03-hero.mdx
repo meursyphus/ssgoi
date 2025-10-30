@@ -71,7 +71,7 @@ Other Elements:
 
 ### 1. Transition Setup
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -120,13 +120,49 @@ Other Elements:
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { hero } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: hero(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Marking Elements
 
 Add `data-hero-key` attribute to shared elements:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // List Page
@@ -193,6 +229,66 @@ Add `data-hero-key` attribute to shared elements:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router, RouterLink } from "@angular/router";
+
+    interface Product {
+      id: string;
+      name: string;
+      description: string;
+      image: string;
+    }
+
+    // List Page
+    @Component({
+      selector: "app-product-list",
+      standalone: true,
+      imports: [NgFor, RouterLink],
+      template: `
+        <div class="grid">
+          <a
+            *ngFor="let product of products"
+            [routerLink]="['/product', product.id]"
+          >
+            <img
+              [attr.data-hero-key]="'product-' + product.id"
+              [src]="product.image"
+              [alt]="product.name"
+            />
+            <h3>{{ product.name }}</h3>
+          </a>
+        </div>
+      `
+    })
+    export class ProductListComponent {
+      products: Product[] = PRODUCTS; // Provide product data from your store/service
+    }
+
+    // Detail Page
+    @Component({
+      selector: "app-product-detail",
+      standalone: true,
+      template: `
+        <div>
+          <img
+            [attr.data-hero-key]="'product-' + product.id"
+            [src]="product.image"
+            [alt]="product.name"
+            class="w-full"
+          />
+          <h1>{{ product.name }}</h1>
+          <p>{{ product.description }}</p>
+        </div>
+      `
+    })
+    export class ProductDetailComponent {
+      @Input() product!: Product; // Define Product model for your app
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Practical Examples
@@ -201,7 +297,7 @@ Add `data-hero-key` attribute to shared elements:
 
 Thumbnail to fullscreen expansion:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Gallery Grid
@@ -260,13 +356,78 @@ Thumbnail to fullscreen expansion:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { RouterLink } from "@angular/router";
+
+    interface GalleryImage {
+      id: string;
+      thumb: string;
+      full: string;
+      title: string;
+      author: string;
+      description: string;
+    }
+
+    interface Photo {
+      id: string;
+      full: string;
+      title: string;
+      description: string;
+    }
+
+    // Gallery Grid
+    @Component({
+      selector: "app-gallery",
+      standalone: true,
+      imports: [NgFor, RouterLink],
+      template: `
+        <div class="grid grid-cols-3 gap-4">
+          <a
+            *ngFor="let image of images"
+            [routerLink]="['/photo', image.id]"
+          >
+            <div
+              [attr.data-hero-key]="'photo-' + image.id"
+              class="aspect-square overflow-hidden"
+            >
+              <img [src]="image.thumb" class="object-cover w-full h-full" />
+            </div>
+          </a>
+        </div>
+      `
+    })
+    export class GalleryComponent {
+      images: GalleryImage[] = IMAGES; // Replace with your image data source
+    }
+
+    // Fullscreen View
+    @Component({
+      selector: "app-photo-view",
+      standalone: true,
+      template: `
+        <div
+          [attr.data-hero-key]="'photo-' + photo.id"
+          class="fixed inset-0 bg-black"
+        >
+          <img [src]="photo.full" class="w-full h-full object-contain" />
+        </div>
+      `
+    })
+    export class PhotoViewComponent {
+      @Input() photo!: Photo; // Match your photo model
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Card Expansion
 
 Small card to fullscreen detail:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Card List
@@ -328,13 +489,74 @@ Small card to fullscreen detail:
     </article>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Item {
+      id: string;
+      title: string;
+      summary: string;
+      fullContent: string;
+    }
+
+    // Card List
+    @Component({
+      selector: "app-card-grid",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="grid gap-6">
+          <article
+            *ngFor="let item of items"
+            (click)="open(item.id)"
+            [attr.data-hero-key]="'card-' + item.id"
+            class="bg-white rounded-lg shadow-lg p-4 cursor-pointer"
+          >
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+          </article>
+        </div>
+      `
+    })
+    export class CardGridComponent {
+      items: Item[] = ITEMS; // Provide list data
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/item', id]);
+      }
+    }
+
+    // Expanded Detail
+    @Component({
+      selector: "app-item-detail",
+      standalone: true,
+      template: `
+        <article
+          [attr.data-hero-key]="'card-' + item.id"
+          class="min-h-screen bg-white p-8"
+        >
+          <h1 class="text-4xl">{{ item.title }}</h1>
+          <p class="text-lg">{{ item.fullContent }}</p>
+        </article>
+      `
+    })
+    export class ItemDetailComponent {
+      @Input() item!: Item; // Match your item model
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. Multiple Hero Elements
 
 Multiple elements transitioning simultaneously:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Profile Card
@@ -395,6 +617,66 @@ Multiple elements transitioning simultaneously:
         {user.name}
       </h1>
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { Router } from "@angular/router";
+
+    interface User {
+      id: string;
+      name: string;
+      avatar: string;
+    }
+
+    // Profile Card
+    @Component({
+      selector: "app-profile-card",
+      standalone: true,
+      template: `
+        <div (click)="openProfile()">
+          <img
+            [attr.data-hero-key]="'avatar-' + user.id"
+            [src]="user.avatar"
+            class="w-16 h-16 rounded-full"
+          />
+          <h3 [attr.data-hero-key]="'name-' + user.id">
+            {{ user.name }}
+          </h3>
+        </div>
+      `
+    })
+    export class ProfileCardComponent {
+      @Input() user!: User; // Provide user model
+
+      constructor(private readonly router: Router) {}
+
+      openProfile() {
+        this.router.navigate(['/profile', this.user.id]);
+      }
+    }
+
+    // Profile Detail
+    @Component({
+      selector: "app-profile-detail",
+      standalone: true,
+      template: `
+        <div>
+          <img
+            [attr.data-hero-key]="'avatar-' + user.id"
+            [src]="user.avatar"
+            class="w-32 h-32 rounded-full"
+          />
+          <h1 [attr.data-hero-key]="'name-' + user.id">
+            {{ user.name }}
+          </h1>
+        </div>
+      `
+    })
+    export class ProfileDetailComponent {
+      @Input() user!: User;
+    }
     ```
   </TabPanel>
 </Tabs>

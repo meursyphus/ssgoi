@@ -73,7 +73,7 @@ nav-title: "핀터레스트"
 
 ### 1. 전환 설정
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -122,13 +122,49 @@ nav-title: "핀터레스트"
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { pinterest } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: pinterest(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. 요소 마킹
 
 갤러리와 상세 페이지에 각각 다른 data 속성 사용:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // 갤러리 페이지
@@ -202,6 +238,73 @@ nav-title: "핀터레스트"
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router, RouterLink } from "@angular/router";
+
+    interface GalleryItem {
+      id: string;
+      title: string;
+      image: string;
+      description: string;
+    }
+
+    // Gallery Page
+    @Component({
+      selector: "app-gallery",
+      standalone: true,
+      imports: [NgFor, RouterLink],
+      template: `
+        <div class="masonry-grid">
+          <a
+            *ngFor="let item of items"
+            [routerLink]="['/gallery', item.id]"
+            [attr.data-pinterest-gallery-key]="item.id"
+            class="gallery-item"
+          >
+            <img [src]="item.image" [alt]="item.title" />
+            <h3>{{ item.title }}</h3>
+          </a>
+        </div>
+      `
+    })
+    export class GalleryComponent {
+      items: GalleryItem[] = ITEMS; // Provide gallery items
+    }
+
+    // Detail Page
+    @Component({
+      selector: "app-gallery-detail",
+      standalone: true,
+      template: `
+        <div
+          [attr.data-pinterest-detail-key]="item.id"
+          class="detail-container"
+        >
+          <button (click)="close()">
+            ✕ Close
+          </button>
+          <img [src]="item.image" [alt]="item.title" />
+          <article>
+            <h1>{{ item.title }}</h1>
+            <p>{{ item.description }}</p>
+          </article>
+        </div>
+      `
+    })
+    export class GalleryDetailComponent {
+      @Input() item!: GalleryItem; // Provide GalleryItem model
+
+      constructor(private readonly router: Router) {}
+
+      close() {
+        this.router.navigate(['/gallery']);
+      }
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 실전 활용 예시
@@ -210,7 +313,7 @@ nav-title: "핀터레스트"
 
 Pinterest 스타일 메이슨리 레이아웃:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // 메이슨리 그리드
@@ -306,13 +409,100 @@ Pinterest 스타일 메이슨리 레이아웃:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Product {
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+      description: string;
+    }
+
+    interface GalleryImage {
+      id: string;
+      url: string;
+      title: string;
+      author: string;
+      description: string;
+    }
+
+    // Masonry Grid
+    @Component({
+      selector: "app-masonry-gallery",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="columns-2 md:columns-3 lg:columns-4 gap-4">
+          <div
+            *ngFor="let image of images"
+            [attr.data-pinterest-gallery-key]="image.id"
+            (click)="open(image.id)"
+            class="break-inside-avoid mb-4 cursor-pointer 
+                   hover:scale-105 transition-transform"
+          >
+            <img
+              [src]="image.url"
+              [alt]="image.title"
+              class="w-full rounded-lg"
+            />
+            <div class="p-2">
+              <p class="text-sm font-medium">{{ image.title }}</p>
+              <p class="text-xs text-gray-500">{{ image.author }}</p>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class MasonryGalleryComponent {
+      images: GalleryImage[] = IMAGES; // Provide image data
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/image', id]);
+      }
+    }
+
+    // Expanded View
+    @Component({
+      selector: "app-image-view",
+      standalone: true,
+      template: `
+        <div
+          [attr.data-pinterest-detail-key]="image.id"
+          class="fixed inset-0 bg-white z-50 overflow-auto"
+        >
+          <div class="max-w-4xl mx-auto p-4">
+            <img
+              [src]="image.url"
+              [alt]="image.title"
+              class="w-full rounded-lg shadow-xl"
+            />
+            <div class="mt-4">
+              <h1 class="text-2xl font-bold">{{ image.title }}</h1>
+              <p class="text-gray-600 mt-2">{{ image.description }}</p>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class ImageViewComponent {
+      @Input() image!: GalleryImage; // Match your image model
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. 제품 카탈로그
 
 제품 카드가 상세 페이지로 확장:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // 제품 그리드
@@ -414,6 +604,81 @@ Pinterest 스타일 메이슨리 레이아웃:
         </div>
       </div>
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    // Product Grid
+    @Component({
+      selector: "app-product-grid",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <article
+            *ngFor="let product of products"
+            [attr.data-pinterest-gallery-key]="product.id"
+            (click)="open(product.id)"
+            class="bg-white rounded-xl shadow-lg overflow-hidden
+                   cursor-pointer hover:shadow-xl transition-shadow"
+          >
+            <img
+              [src]="product.image"
+              [alt]="product.name"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-4">
+              <h3 class="font-semibold">{{ product.name }}</h3>
+              <p class="text-lg font-bold mt-2">{{ '$' + product.price }}</p>
+            </div>
+          </article>
+        </div>
+      `
+    })
+    export class ProductGridComponent {
+      products: Product[] = PRODUCTS; // Provide product data
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/product', id]);
+      }
+    }
+
+    // Product Detail
+    @Component({
+      selector: "app-product-detail",
+      standalone: true,
+      template: `
+        <div
+          [attr.data-pinterest-detail-key]="product.id"
+          class="min-h-screen bg-white"
+        >
+          <div class="grid md:grid-cols-2 gap-8 p-8">
+            <img
+              [src]="product.image"
+              [alt]="product.name"
+              class="w-full rounded-lg"
+            />
+            <div>
+              <h1 class="text-3xl font-bold">{{ product.name }}</h1>
+              <p class="text-2xl font-bold mt-4">{{ '$' + product.price }}</p>
+              <p class="mt-4 text-gray-600">{{ product.description }}</p>
+              <button class="mt-6 bg-black text-white px-8 py-3 rounded-lg">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class ProductDetailComponent {
+      @Input() product!: Product; // Provide Product model
+    }
     ```
   </TabPanel>
 </Tabs>

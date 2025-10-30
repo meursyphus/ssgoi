@@ -54,7 +54,7 @@ nav-title: "블라인드"
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -90,6 +90,35 @@ nav-title: "블라인드"
     </Ssgoi>
     ```
 
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { blind } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: blind()
+      };
+    }
+    ```
   </TabPanel>
 </Tabs>
 

@@ -67,7 +67,7 @@ DOWN 방향 (이전으로):
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -102,6 +102,35 @@ DOWN 방향 (이전으로):
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: scroll()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 실전 활용 예시
@@ -110,7 +139,7 @@ DOWN 방향 (이전으로):
 
 챕터나 섹션 간 이동:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -153,13 +182,50 @@ DOWN 방향 (이전으로):
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/docs/intro',
+            to: '/docs/getting-started',
+            transition: scroll({ direction: 'up' }),
+            symmetric: true  // 뒤로가기 시 자동으로 down
+          },
+          {
+            from: '/docs/getting-started',
+            to: '/docs/api',
+            transition: scroll({ direction: 'up' }),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. 온보딩 플로우
 
 단계별 튜토리얼:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -167,7 +233,7 @@ DOWN 방향 (이전으로):
         {
           from: '/onboarding/step-*',
           to: '/onboarding/step-*',
-          transition: scroll({ 
+          transition: scroll({
             direction: 'up',
             spring: { stiffness: 300, damping: 30 }
           })
@@ -184,7 +250,7 @@ DOWN 방향 (이전으로):
           {
             from: '/onboarding/step-*',
             to: '/onboarding/step-*',
-            transition: scroll({ 
+            transition: scroll({
               direction: 'up',
               spring: { stiffness: 300, damping: 30 }
             })
@@ -194,20 +260,53 @@ DOWN 방향 (이전으로):
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/onboarding/step-*',
+            to: '/onboarding/step-*',
+            transition: scroll({
+              direction: 'up',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. 미들웨어를 통한 동적 방향
 
 네비게이션 순서에 따라 방향 자동 결정:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const createMiddleware = (routes) => {
       return (from, to) => {
         const fromIndex = routes.indexOf(from);
         const toIndex = routes.indexOf(to);
-        
+
         if (fromIndex < toIndex) {
           return { from: "/nav/prev", to: "/nav/next" };
         } else {
@@ -240,7 +339,7 @@ DOWN 방향 (이전으로):
         return (from, to) => {
           const fromIndex = routes.indexOf(from);
           const toIndex = routes.indexOf(to);
-          
+
           if (fromIndex < toIndex) {
             return { from: "/nav/prev", to: "/nav/next" };
           } else {
@@ -265,6 +364,61 @@ DOWN 방향 (이전으로):
         middleware: createMiddleware(routeOrder)
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      private readonly routeOrder = [
+        '/docs/intro',
+        '/docs/getting-started',
+        '/docs/api'
+      ];
+
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/nav/prev',
+            to: '/nav/next',
+            transition: scroll({ direction: 'up' })
+          },
+          {
+            from: '/nav/next',
+            to: '/nav/prev',
+            transition: scroll({ direction: 'down' })
+          }
+        ],
+        middleware: (from: string, to: string) => {
+          const fromIndex = this.routeOrder.indexOf(from);
+          const toIndex = this.routeOrder.indexOf(to);
+
+          if (fromIndex !== -1 && toIndex !== -1) {
+            if (fromIndex < toIndex) {
+              return { from: '/nav/prev', to: '/nav/next' };
+            } else {
+              return { from: '/nav/next', to: '/nav/prev' };
+            }
+          }
+
+          return { from, to };
+        }
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

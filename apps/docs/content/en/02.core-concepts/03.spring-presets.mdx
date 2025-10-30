@@ -15,6 +15,8 @@ You can import spring presets from the `presets` module:
 import { config } from '@ssgoi/react/presets';
 // or
 import { config } from '@ssgoi/svelte/presets';
+// or
+import { config } from '@ssgoi/angular/presets';
 
 // Use in transitions
 transition({
@@ -97,7 +99,7 @@ transition({
 
 ### Using presets in view transitions
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -158,7 +160,7 @@ transition({
       ]
     };
     </script>
-
+    
     <template>
       <Ssgoi :config="transitionConfig">
         <slot />
@@ -166,11 +168,46 @@ transition({
     </template>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { config } from "@ssgoi/angular/presets";
+    import { fade, slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: fade({
+         inSpring: config.gentle,
+         outSpring: config.slow,
+        }),
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: slide({ spring: config.wobbly })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### Using presets in element transitions
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -225,6 +262,34 @@ transition({
         Content
       </div>
     </template>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+    import { config } from '@ssgoi/angular/presets';
+    import type { TransitionDirectiveConfig } from '@ssgoi/angular';
+
+    @Component({
+      selector: 'app-my',
+      standalone: true,
+      imports: [TransitionDirective],
+      template: `
+        <div [transition]="fadeInConfig">
+          Content
+        </div>
+      `
+    })
+    export class MyComponent {
+      fadeInConfig: TransitionDirectiveConfig = {
+        spring: config.slow,
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+    }
     ```
   </TabPanel>
 </Tabs>
