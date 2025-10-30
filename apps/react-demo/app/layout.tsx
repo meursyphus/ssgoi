@@ -37,7 +37,6 @@ const ssgoiConfig: SsgoiConfig = {
         background: "#DDA0DD",
         texts: ["Hello", "World"],
         textStyle: { color: "#000000" },
-        textDuration: 1000,
         shape: "circle",
       }),
     },

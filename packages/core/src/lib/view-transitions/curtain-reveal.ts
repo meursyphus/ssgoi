@@ -3,10 +3,10 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 /** Defaults */
 const DEFAULT_OUT_SPRING: SpringConfig = { stiffness: 1, damping: 1 };
-const DEFAULT_IN_SPRING: SpringConfig = { stiffness: 80, damping: 25 };
+const DEFAULT_IN_SPRING: SpringConfig = { stiffness: 20, damping: 25 };
 const DEFAULT_BACKGROUND = "#000000";
 const DEFAULT_SHAPE = "circle" as const;
-const DEFAULT_TEXT_DURATION = 1500;
+const CURTAIN_REVEAL_OVERLAY_ID = "CURTAIN_REVEAL_OVERLAY_ID";
 
 const DEFAULT_OVERLAY_STYLE: Partial<CSSStyleDeclaration> = {
   position: "fixed",
@@ -29,7 +29,7 @@ const DEFAULT_WRAPPER_STYLE: Partial<CSSStyleDeclaration> = {
   display: "flex",
   height: "100%",
   willChange: "transform",
-  transition: "transform 0.8s ease",
+  transition: "transform 0.3s ease",
 };
 const DEFAULT_SLIDE_STYLE: Partial<CSSStyleDeclaration> = {
   display: "inline-flex",
@@ -56,7 +56,6 @@ interface CurtainRevealOptions {
   shape?: CurtainShape;
   inSpring?: SpringConfig;
   outSpring?: SpringConfig;
-  textDuration?: number;
   textStyle?: Partial<CSSStyleDeclaration>;
 }
 
@@ -68,7 +67,9 @@ function getClipPath(shape: CurtainShape, scale: number): string {
       return `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
     case "triangle": {
       const p = scale * 100;
-      return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+      return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${
+        50 + p
+      }% ${50 + p}%)`;
     }
   }
 }
@@ -81,7 +82,6 @@ export const curtainReveal = (
   const {
     background = DEFAULT_BACKGROUND,
     texts = [],
-    textDuration = DEFAULT_TEXT_DURATION,
     shape = DEFAULT_SHAPE,
     inSpring = DEFAULT_IN_SPRING,
     outSpring = DEFAULT_OUT_SPRING,
@@ -115,15 +115,15 @@ export const curtainReveal = (
       let wrapper: HTMLElement | null = null;
 
       const originalBodyOverflow = document.body.style.overflow;
+      const prevCurtainRevealOverlay = document.getElementById(
+        CURTAIN_REVEAL_OVERLAY_ID,
+      );
 
-      let cancelled = false;
-      const timeouts: number[] = [];
-      let rafId: number | null = null;
-
-      let curtainPhaseEnabled = false;
+      let widths: number[] = [];
 
       const createOverlay = () => {
         overlay = document.createElement("div");
+        overlay.id = CURTAIN_REVEAL_OVERLAY_ID;
         Object.assign(overlay.style, DEFAULT_OVERLAY_STYLE, { background });
         document.body.appendChild(overlay);
 
@@ -141,51 +141,10 @@ export const curtainReveal = (
           Object.assign(slide.style, DEFAULT_SLIDE_STYLE, textStyle);
           wrapper!.appendChild(slide);
         });
-      };
 
-      const slideAnimation = () =>
-        new Promise<void>((resolve) => {
-          if (!wrapper || !viewport) return resolve();
-
-          const slides = Array.from(wrapper.children) as HTMLElement[];
-          let idx = 0;
-
-          const widths = slides.map((el) => el.getBoundingClientRect().width);
-
-          const updateSlide = () => {
-            const currentWidth = widths[idx] ?? 0;
-            const prevWidths = sum(widths.slice(0, idx));
-
-            viewport!.style.width = `${currentWidth}px`;
-
-            wrapper!.style.transform = `translateX(-${prevWidths}px)`;
-          };
-
-          const step = () => {
-            if (cancelled) return resolve();
-            if (idx < slides.length - 1) {
-              idx++;
-              updateSlide();
-              const id = window.setTimeout(step, textDuration);
-              timeouts.push(id);
-            } else {
-              resolve();
-            }
-          };
-
-          updateSlide();
-          const id = window.setTimeout(step, textDuration);
-          timeouts.push(id);
-        });
-
-      const cancelAllTimers = () => {
-        cancelled = true;
-        timeouts.forEach((id) => clearTimeout(id));
-        timeouts.length = 0;
-        if (rafId != null) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
+        widths = Array.from(wrapper.children).map(
+          (el) => (el as HTMLElement).getBoundingClientRect().width,
+        );
       };
 
       return {
@@ -196,6 +155,8 @@ export const curtainReveal = (
         prepare: () => {
           document.body.style.overflow = "hidden";
           element.style.opacity = "1";
+          prevCurtainRevealOverlay?.remove();
+
           createOverlay();
           if (overlay && viewport) {
             overlay.style.clipPath = "none";
@@ -203,20 +164,34 @@ export const curtainReveal = (
           }
         },
 
-        wait: async () => {
-          await slideAnimation();
-          curtainPhaseEnabled = true;
-        },
-
         tick: (progress) => {
-          if (!curtainPhaseEnabled || !overlay || !viewport) return;
-          const scale = 1 - progress;
-          overlay.style.clipPath = getClipPath(shape, scale);
-          viewport.style.transform = `scale(${scale})`;
+          if (!overlay || !viewport || !wrapper) return;
+
+          if (progress <= 0.7 && texts.length > 0) {
+            const slideProgress = progress / 0.7;
+            const idx = Math.min(
+              Math.floor(slideProgress * texts.length),
+              texts.length - 1,
+            );
+            const currentWidth = widths[idx] ?? 0;
+            const prevWidths = sum(widths.slice(0, idx));
+
+            viewport.style.width = `${currentWidth}px`;
+            wrapper.style.transform = `translateX(-${prevWidths}px)`;
+          }
+
+          if (progress > 0.7) {
+            const curtainProgress = Math.max(
+              0,
+              Math.min(1, (progress - 0.7) / 0.2),
+            );
+            const scale = 1 - curtainProgress;
+            overlay.style.clipPath = getClipPath(shape, scale);
+            viewport.style.transform = `scale(${scale})`;
+          }
         },
 
         onEnd: () => {
-          cancelAllTimers();
           overlay?.remove();
           overlay = viewport = wrapper = null;
           document.body.style.overflow = originalBodyOverflow;
