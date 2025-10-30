@@ -48,6 +48,13 @@ const DEFAULT_SLIDE_STYLE = {
 type CurtainShape = "circle" | "square" | "triangle";
 
 interface CurtainRevealOptions {
+  /**
+   * Background style.
+   *
+   * Supports both:
+   * - Solid colors (e.g., `"#000000"`, `"rgb(255, 0, 0)"`)
+   * - CSS gradients (e.g., `"linear-gradient(to right, #000, #fff)"`)
+   */
   background?: string;
   texts?: string[];
   shape?: CurtainShape;
