@@ -1,4 +1,5 @@
 import type { SggoiTransition, SpringConfig } from "../types";
+import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const DEFAULT_OUT_SPRING = { stiffness: 1, damping: 1 };
 const DEFAULT_IN_SPRING = { stiffness: 9999, damping: 9999 };
@@ -70,25 +71,14 @@ export const curtainReveal = (
   } = options;
 
   return {
-    out: async (element: HTMLElement) => ({
-      spring: outSpring,
-      tick: (p) => {
-        element.style.opacity = String(p);
-      },
-      onEnd: () => {
-        element.style.opacity = "1";
-      },
-    }),
-
     in: (element: HTMLElement) => {
       let overlay: HTMLElement | null = null;
       let viewport: HTMLElement | null = null;
       let wrapper: HTMLElement | null = null;
 
-      // ===== Overlay =====
+      // ===== Overlay 생성 =====
       const createOverlay = () => {
         overlay = document.createElement("div");
-        overlay.id = "OVERLAY";
         Object.assign(overlay.style, {
           ...DEFAULT_OVERLAY_STYLE,
           background,
@@ -114,7 +104,7 @@ export const curtainReveal = (
         });
       };
 
-      // ===== Slides =====
+      // ===== Slide Animation =====
       const slideAnimation = () =>
         new Promise<void>((resolve) => {
           if (!wrapper || !viewport) return resolve();
@@ -152,6 +142,7 @@ export const curtainReveal = (
           setTimeout(loop, textDuration);
         });
 
+      // ===== ClipPath Shape =====
       const getClipPath = (shape: CurtainShape, scale: number) => {
         switch (shape) {
           case "circle":
@@ -160,7 +151,9 @@ export const curtainReveal = (
             return `inset(${(1 - scale) * 50}% round ${10 * scale}%)`;
           case "triangle": {
             const p = scale * 100;
-            return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${50 + p}% ${50 + p}%)`;
+            return `polygon(50% ${50 - p}%, ${50 - p}% ${50 + p}%, ${
+              50 + p
+            }% ${50 + p}%)`;
           }
         }
       };
@@ -198,13 +191,24 @@ export const curtainReveal = (
           await slideAnimation();
           await curtainCloseAnimation();
         },
-
         onEnd: () => {
           if (overlay) {
             overlay.remove();
             overlay = viewport = wrapper = null;
           }
         },
+      };
+    },
+    out: (element, context) => {
+      return {
+        spring: outSpring,
+        prepare: (el) => {
+          prepareOutgoing(el, context);
+          el.style.opacity = "1";
+          element.style.opacity = "0";
+        },
+        tick: () => {},
+        onEnd: () => {},
       };
     },
   };
