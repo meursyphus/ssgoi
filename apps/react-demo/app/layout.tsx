@@ -1,7 +1,12 @@
 "use client";
 
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { fade, hero, jaemin } from "@ssgoi/react/view-transitions";
+import {
+  fade,
+  hero,
+  jaemin,
+  curtainReveal,
+} from "@ssgoi/react/view-transitions";
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
@@ -22,6 +27,21 @@ const ssgoiConfig: SsgoiConfig = {
     // Jaemin reverse transition - backward
     {
       from: "/jaemin",
+      to: "/",
+      transition: fade(),
+    },
+    {
+      from: "/",
+      to: "/curtain-reveal",
+      transition: curtainReveal({
+        background: "#DDA0DD",
+        texts: ["Hello", "World"],
+        textStyle: { color: "#000000" },
+        shape: "circle",
+      }),
+    },
+    {
+      from: "/curtain-reveal",
       to: "/",
       transition: fade(),
     },
