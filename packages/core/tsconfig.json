@@ -25,5 +25,5 @@
     "declarationMap": true,
     "outDir": "./dist"
   },
-  "include": ["src", "src/lib"]
+  "include": ["src", "src/lib", "vitest.config.ts"]
 }
