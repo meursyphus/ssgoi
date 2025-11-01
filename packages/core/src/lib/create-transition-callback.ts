@@ -52,7 +52,14 @@ export function createTransitionCallback<TAnimationValue = number>(
 
     // Get transition config
     const inConfig = transition.in && (await transition.in(element));
-    const outConfig = transition.out && (await transition.out(element));
+
+    // Only fetch OUT config for DOM element transitions (those without custom strategy)
+    // Page transitions (with createPageTransitionStrategy) don't need OUT config here
+    // because calling transition.out() would start a new pending transition that never resolves
+    const outConfig =
+      !options?.strategy && transition.out
+        ? await transition.out(element)
+        : undefined;
 
     if (!inConfig) {
       return;
@@ -113,6 +120,13 @@ export function createTransitionCallback<TAnimationValue = number>(
       return;
     }
 
+    // Type guard: config must be SingleSpringConfig at this point
+    // because we already handled MultiSpringConfig above
+    if ("springs" in setup.config) {
+      console.error("Unexpected MultiSpringConfig in single-spring path");
+      return;
+    }
+
     setup.config.prepare?.(element);
 
     // Wait if configured
@@ -147,7 +161,8 @@ export function createTransitionCallback<TAnimationValue = number>(
     const transition = getTransition();
 
     // Get transition config
-    const inConfig = transition.in && (await transition.in(element));
+    // NOTE: Don't call transition.in() here - it can interfere with page transitions
+    // by modifying pendingTransition state. OUT transitions only need OUT config.
     const outConfig = transition.out && (await transition.out(element));
 
     if (!outConfig) {
@@ -159,7 +174,7 @@ export function createTransitionCallback<TAnimationValue = number>(
       // Multi-spring path: use AnimationScheduler
       // Check if we should reverse current animation via strategy
       const configs: TransitionConfigs<TAnimationValue> = {
-        in: inConfig && Promise.resolve(inConfig),
+        in: undefined, // Don't fetch IN config for exit transitions
         out: Promise.resolve(outConfig),
       };
 
@@ -211,12 +226,19 @@ export function createTransitionCallback<TAnimationValue = number>(
 
     // Single-spring path: use Animator with strategy
     const configs: TransitionConfigs<TAnimationValue> = {
-      in: inConfig && Promise.resolve(inConfig),
+      in: undefined, // Don't fetch IN config for exit transitions
       out: Promise.resolve(outConfig),
     };
 
     const setup = await strategy.runOut(configs);
     if (!setup.config) {
+      return;
+    }
+
+    // Type guard: config must be SingleSpringConfig at this point
+    // because we already handled MultiSpringConfig above
+    if ("springs" in setup.config) {
+      console.error("Unexpected MultiSpringConfig in single-spring path");
       return;
     }
 

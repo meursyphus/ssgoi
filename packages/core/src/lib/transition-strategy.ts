@@ -1,4 +1,8 @@
-import type { SingleSpringConfig, AnimationController } from "./types";
+import type {
+  TransitionConfig,
+  AnimationController,
+  SingleSpringConfig,
+} from "./types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
@@ -12,7 +16,7 @@ export interface StrategyContext<TAnimationValue = number> {
 }
 
 export interface AnimationSetup<TAnimationValue = number> {
-  config?: SingleSpringConfig<TAnimationValue>;
+  config?: TransitionConfig<TAnimationValue>;
   state: {
     position: TAnimationValue;
     velocity: TAnimationValue extends number ? number : Record<string, number>;
@@ -23,8 +27,8 @@ export interface AnimationSetup<TAnimationValue = number> {
 }
 
 export interface TransitionConfigs<TAnimationValue = number> {
-  in?: Promise<SingleSpringConfig<TAnimationValue>>;
-  out?: Promise<SingleSpringConfig<TAnimationValue>>;
+  in?: Promise<TransitionConfig<TAnimationValue>>;
+  out?: Promise<TransitionConfig<TAnimationValue>>;
 }
 
 export interface TransitionStrategy<TAnimationValue = number> {
@@ -102,9 +106,9 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         // Single-spring: use OUT config but reverse direction
         if (configs.out) {
           const outConfig = await configs.out;
-          // Extract from/to with defaults for out transition
+          // Extract from/to with defaults for out transition (single-spring)
           const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } =
-            outConfig;
+            outConfig as SingleSpringConfig<TAnimationValue>;
           return {
             config: outConfig,
             state: {
@@ -135,7 +139,23 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         };
       }
 
-      // Extract from/to with defaults for in transition
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to with defaults for in transition (single-spring)
       const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
@@ -182,9 +202,9 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         if (configs.in) {
           const inConfig = await configs.in;
 
-          // Extract from/to with defaults for in transition
+          // Extract from/to with defaults for in transition (single-spring)
           const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } =
-            inConfig;
+            inConfig as SingleSpringConfig<TAnimationValue>;
           return {
             config: inConfig,
             state: {
@@ -215,7 +235,23 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         };
       }
 
-      // Extract from/to with defaults for out transition
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to with defaults for out transition (single-spring)
       const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,
@@ -258,6 +294,23 @@ export const createPageTransitionStrategy = <
         };
       }
 
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to for single-spring
       const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
@@ -290,6 +343,23 @@ export const createPageTransitionStrategy = <
         };
       }
 
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to for single-spring
       const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,
