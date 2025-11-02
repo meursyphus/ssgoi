@@ -10,12 +10,12 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configurations for each animation phase
 const DEFAULT_SCALE_SPRING: SpringConfig = {
-  stiffness: 9,
+  stiffness: 8,
   damping: 3.5,
 };
 
 const DEFAULT_TRANSLATE_SPRING: SpringConfig = {
-  stiffness: 6,
+  stiffness: 5,
   damping: 3.5,
 };
 
@@ -26,7 +26,7 @@ const DEFAULT_BORDER_COLOR = "white";
 // These match the original progress-based timing
 const SCALE_DOWN_OFFSET = 0; // Starts at 0%
 const TRANSLATE_OFFSET = 0.2; // Starts at 20%
-const SCALE_UP_OFFSET = 0.85; // Starts at 85%
+const SCALE_UP_OFFSET = 0.75; // Starts at 85%
 
 // Convert relative timing to milliseconds (assuming ~2s total animation)
 const BASE_DURATION = 2000;
