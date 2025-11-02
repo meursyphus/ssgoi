@@ -1,12 +1,16 @@
-import type { TransitionConfig } from "./types";
-import type { Animator } from "./animator";
+import type {
+  TransitionConfig,
+  AnimationController,
+  SingleSpringConfig,
+} from "./types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext<TAnimationValue = number> {
   // Current animation state
+  // Supports both single spring (Animator) and multi-spring (AnimationScheduler)
   currentAnimation: {
-    animator: Animator<TAnimationValue>;
+    controller: AnimationController<TAnimationValue>;
     direction: "in" | "out";
   } | null;
 }
@@ -78,18 +82,39 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 4: OUT animation running + IN trigger
       if (currentAnimation && currentAnimation.direction === "out") {
         // Stop current OUT animation
-        const currentState = currentAnimation.animator.getCurrentState();
-        currentAnimation.animator.stop();
+        const state = currentAnimation.controller.getCurrentState();
+        currentAnimation.controller.stop();
 
-        // Use OUT config but reverse direction
+        // Check if multi-spring animation
+        if (state.type === "multi") {
+          // Multi-spring: directly reverse the controller
+          currentAnimation.controller.reverse();
+          // Return special setup indicating already handled
+          return {
+            state: {
+              position: 0 as TAnimationValue,
+              velocity: 0 as TAnimationValue extends number
+                ? number
+                : Record<string, number>,
+            },
+            from: 0 as TAnimationValue,
+            to: 1 as TAnimationValue,
+            direction: "forward",
+          };
+        }
+
+        // Single-spring: use OUT config but reverse direction
         if (configs.out) {
           const outConfig = await configs.out;
-          // Extract from/to with defaults for out transition
+          // Extract from/to with defaults for out transition (single-spring)
           const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } =
-            outConfig;
+            outConfig as SingleSpringConfig<TAnimationValue>;
           return {
             config: outConfig,
-            state: currentState,
+            state: {
+              position: state.position,
+              velocity: state.velocity,
+            },
             from, // OUT animation's from
             to, // OUT animation's to
             direction: "backward", // Will actually go 0→1
@@ -114,7 +139,23 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         };
       }
 
-      // Extract from/to with defaults for in transition
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to with defaults for in transition (single-spring)
       const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
@@ -136,21 +177,39 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       // Scenario 3: IN animation running + OUT trigger
       if (currentAnimation && currentAnimation.direction === "in") {
         // Stop current IN animation
-        const currentState = currentAnimation.animator.getCurrentState();
-        currentAnimation.animator.stop();
+        const state = currentAnimation.controller.getCurrentState();
+        currentAnimation.controller.stop();
 
-        // Use IN config but reverse direction
+        // Check if multi-spring animation
+        if (state.type === "multi") {
+          // Multi-spring: directly reverse the controller
+          currentAnimation.controller.reverse();
+          // Return special setup indicating already handled
+          return {
+            state: {
+              position: 1 as TAnimationValue,
+              velocity: 0 as TAnimationValue extends number
+                ? number
+                : Record<string, number>,
+            },
+            from: 1 as TAnimationValue,
+            to: 0 as TAnimationValue,
+            direction: "forward",
+          };
+        }
+
+        // Single-spring: use IN config but reverse direction
         if (configs.in) {
           const inConfig = await configs.in;
 
-          // Extract from/to with defaults for in transition
+          // Extract from/to with defaults for in transition (single-spring)
           const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } =
-            inConfig;
+            inConfig as SingleSpringConfig<TAnimationValue>;
           return {
             config: inConfig,
             state: {
-              position: currentState.position,
-              velocity: currentState.velocity,
+              position: state.position,
+              velocity: state.velocity,
             },
             from, // IN animation's from
             to, // IN animation's to
@@ -176,7 +235,23 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         };
       }
 
-      // Extract from/to with defaults for out transition
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to with defaults for out transition (single-spring)
       const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,
@@ -219,6 +294,23 @@ export const createPageTransitionStrategy = <
         };
       }
 
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 0 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 0 as TAnimationValue,
+          to: 1 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to for single-spring
       const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
       return {
         config,
@@ -251,6 +343,23 @@ export const createPageTransitionStrategy = <
         };
       }
 
+      // For multi-spring, return config without extracting from/to
+      if ("springs" in config) {
+        return {
+          config,
+          state: {
+            position: 1 as TAnimationValue,
+            velocity: 0 as TAnimationValue extends number
+              ? number
+              : Record<string, number>,
+          },
+          from: 1 as TAnimationValue,
+          to: 0 as TAnimationValue,
+          direction: "forward",
+        };
+      }
+
+      // Extract from/to for single-spring
       const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
       return {
         config,

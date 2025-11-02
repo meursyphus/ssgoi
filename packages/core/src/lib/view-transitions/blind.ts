@@ -1,6 +1,11 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type {
+  SpringConfig,
+  SggoiTransition,
+  MultiSpringConfig,
+} from "../types";
 import { sleep } from "../utils";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
+
 const DEFAULT_OUT_SPRING = { stiffness: 80, damping: 25 };
 const DEFAULT_IN_SPRING = { stiffness: 75, damping: 25 };
 const DEFAULT_TRANSITION_DELAY = 300;
@@ -31,29 +36,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
   let outAnimationComplete: Promise<void>;
   let resolveOutAnimation: (() => void) | null = null;
-
-  // Helper function to calculate individual blind progress
-  const calculateBlindProgress = (
-    globalProgress: number,
-    blindIndex: number,
-    totalBlinds: number,
-    isReversed: boolean = false,
-  ): number => {
-    const staggerRatio = Math.min(0.5, (staggerDelay * totalBlinds) / 1000);
-    const activeRatio = 1 - staggerRatio;
-
-    const index = isReversed ? totalBlinds - 1 - blindIndex : blindIndex;
-    const blindStartTime = (index / totalBlinds) * staggerRatio;
-    const blindEndTime = blindStartTime + activeRatio;
-
-    if (globalProgress <= blindStartTime) {
-      return 0;
-    } else if (globalProgress >= blindEndTime) {
-      return 1;
-    } else {
-      return (globalProgress - blindStartTime) / activeRatio;
-    }
-  };
 
   // Helper function to create blinds
   const createBlinds = (
@@ -127,7 +109,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: () => {
+    out: (): MultiSpringConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -135,8 +117,31 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         resolveOutAnimation = resolve;
       });
 
+      // Create SpringItem for each blind
+      const springs = Array.from({ length: blindCount }, (_, index) => {
+        return {
+          from: 0,
+          to: 1,
+          spring: outSpring,
+          offset: index * staggerDelay,
+          tick: (progress: number) => {
+            if (!blindsData) return;
+            const blind = blindsData.blinds[index];
+            if (!blind) return;
+
+            // OUT: progress goes 0 → 1 (blind appears to cover screen)
+            if (direction === "horizontal") {
+              blind.style.transform = `scaleX(${progress})`;
+            } else {
+              blind.style.transform = `scaleY(${progress})`;
+            }
+          },
+        };
+      });
+
       return {
-        spring: outSpring,
+        springs,
+        schedule: "chain",
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
@@ -146,30 +151,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
           blindsData = createBlinds(element, "hidden", "left");
         },
         onStart: () => {},
-        tick: (progress) => {
-          if (!blindsData) return;
-
-          // OUT: progress goes 1 → 0, we want blinds to close (0 → 1)
-          // So we use (1 - progress) to reverse it
-          const reversedProgress = 1 - progress;
-
-          // Blinds appear sequentially to cover the screen (left to right)
-          blindsData.blinds.forEach((blind, index) => {
-            const blindProgress = calculateBlindProgress(
-              reversedProgress,
-              index,
-              blindCount,
-              false, // not reversed - left to right
-            );
-
-            // blindProgress goes 0 → 1, so blind appears (closes the view)
-            if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${blindProgress})`;
-            } else {
-              blind.style.transform = `scaleY(${blindProgress})`;
-            }
-          });
-        },
         onEnd: () => {
           // OUT element will be removed, taking blinds with it
           if (resolveOutAnimation) {
@@ -178,12 +159,35 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: () => {
+    in: (): MultiSpringConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
+      // Create SpringItem for each blind
+      const springs = Array.from({ length: blindCount }, (_, index) => {
+        return {
+          from: 1,
+          to: 0,
+          spring: inSpring,
+          offset: index * staggerDelay,
+          tick: (progress: number) => {
+            if (!blindsData) return;
+            const blind = blindsData.blinds[index];
+            if (!blind) return;
+
+            // IN: progress goes 1 → 0 (blind disappears to reveal screen)
+            if (direction === "horizontal") {
+              blind.style.transform = `scaleX(${progress})`;
+            } else {
+              blind.style.transform = `scaleY(${progress})`;
+            }
+          },
+        };
+      });
+
       return {
-        spring: inSpring,
+        springs,
+        schedule: "chain",
         prepare: (element) => {
           element.style.position = "relative";
           element.style.zIndex = "0";
@@ -199,26 +203,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
           }
           // Additional delay between OUT and IN
           await sleep(transitionDelay);
-        },
-        tick: (progress) => {
-          if (!blindsData) return;
-
-          // IN: Blinds disappear sequentially to reveal the screen (left to right, same as OUT)
-          blindsData.blinds.forEach((blind, index) => {
-            const blindProgress = calculateBlindProgress(
-              progress,
-              index,
-              blindCount,
-              false, // same direction as OUT - left to right
-            );
-
-            // blindProgress goes 0 → 1, but we want blind to disappear, so use 1 - progress
-            if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${1 - blindProgress})`;
-            } else {
-              blind.style.transform = `scaleY(${1 - blindProgress})`;
-            }
-          });
         },
         onEnd: () => {
           // Clean up blinds after animation completes

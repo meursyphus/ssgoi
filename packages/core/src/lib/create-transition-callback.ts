@@ -1,5 +1,11 @@
-import type { Transition, TransitionCallback } from "./types";
+import type {
+  Transition,
+  TransitionCallback,
+  AnimationController,
+} from "./types";
+import { isMultiSpring } from "./types";
 import { Animator } from "./animator";
+import { AnimationScheduler } from "./animation-scheduler";
 import {
   createDefaultStrategy,
   type StrategyContext,
@@ -16,9 +22,9 @@ export function createTransitionCallback<TAnimationValue = number>(
     ) => TransitionStrategy<TAnimationValue>;
   },
 ): TransitionCallback {
-  // Combined state: tracks both animation instance and direction
+  // Combined state: tracks both animation controller (Animator or AnimationScheduler) and direction
   let currentAnimation: {
-    animator: Animator<TAnimationValue>;
+    controller: AnimationController<TAnimationValue>;
     direction: "in" | "out";
   } | null = null;
   let currentClone: HTMLElement | null = null; // Track current clone element
@@ -43,13 +49,81 @@ export function createTransitionCallback<TAnimationValue = number>(
       currentClone = null;
     }
     const transition = getTransition();
+
+    // Get transition config
+    const inConfig = transition.in && (await transition.in(element));
+
+    // Only fetch OUT config for DOM element transitions (those without custom strategy)
+    // Page transitions (with createPageTransitionStrategy) don't need OUT config here
+    // because calling transition.out() would start a new pending transition that never resolves
+    const outConfig =
+      !options?.strategy && transition.out
+        ? await transition.out(element)
+        : undefined;
+
+    if (!inConfig) {
+      return;
+    }
+
+    // Check if multi-spring animation
+    if (isMultiSpring(inConfig)) {
+      // Multi-spring path: use AnimationScheduler
+      // Check if we should reverse current animation via strategy
+      const configs: TransitionConfigs<TAnimationValue> = {
+        in: Promise.resolve(inConfig),
+        out: outConfig && Promise.resolve(outConfig),
+      };
+
+      const setup = await strategy.runIn(configs);
+
+      // If config is undefined, strategy already handled reversal
+      if (!setup.config) {
+        // Strategy reversed the existing AnimationScheduler
+        // Update direction
+        if (currentAnimation) {
+          currentAnimation.direction = "in";
+        }
+        return;
+      }
+
+      // Create new AnimationScheduler
+      inConfig.prepare?.(element);
+
+      if (inConfig.wait) {
+        await inConfig.wait();
+      }
+
+      const scheduler = new AnimationScheduler({
+        ...inConfig,
+        onEnd: () => {
+          currentAnimation = null;
+          inConfig.onEnd?.();
+        },
+      });
+
+      currentAnimation = {
+        controller: scheduler as AnimationController<TAnimationValue>,
+        direction: "in",
+      };
+      scheduler.forward();
+      return;
+    }
+
+    // Single-spring path: use Animator with strategy
     const configs: TransitionConfigs<TAnimationValue> = {
-      in: transition.in && Promise.resolve(transition.in(element)),
-      out: transition.out && Promise.resolve(transition.out(element)),
+      in: Promise.resolve(inConfig),
+      out: outConfig && Promise.resolve(outConfig),
     };
 
     const setup = await strategy.runIn(configs);
     if (!setup.config) {
+      return;
+    }
+
+    // Type guard: config must be SingleSpringConfig at this point
+    // because we already handled MultiSpringConfig above
+    if ("springs" in setup.config) {
+      console.error("Unexpected MultiSpringConfig in single-spring path");
       return;
     }
 
@@ -72,7 +146,7 @@ export function createTransitionCallback<TAnimationValue = number>(
       },
     });
 
-    currentAnimation = { animator, direction: "in" };
+    currentAnimation = { controller: animator, direction: "in" };
 
     if (setup.direction === "forward") {
       animator.forward();
@@ -86,13 +160,85 @@ export function createTransitionCallback<TAnimationValue = number>(
 
     const transition = getTransition();
 
+    // Get transition config
+    // NOTE: Don't call transition.in() here - it can interfere with page transitions
+    // by modifying pendingTransition state. OUT transitions only need OUT config.
+    const outConfig = transition.out && (await transition.out(element));
+
+    if (!outConfig) {
+      return;
+    }
+
+    // Check if multi-spring animation
+    if (isMultiSpring(outConfig)) {
+      // Multi-spring path: use AnimationScheduler
+      // Check if we should reverse current animation via strategy
+      const configs: TransitionConfigs<TAnimationValue> = {
+        in: undefined, // Don't fetch IN config for exit transitions
+        out: Promise.resolve(outConfig),
+      };
+
+      const setup = await strategy.runOut(configs);
+
+      // If config is undefined, strategy already handled reversal
+      if (!setup.config) {
+        // Strategy reversed the existing AnimationScheduler
+        // Update direction and cleanup clone
+        if (currentAnimation) {
+          currentAnimation.direction = "out";
+        }
+        if (currentClone) {
+          currentClone.remove();
+          currentClone = null;
+        }
+        return;
+      }
+
+      // Create new AnimationScheduler
+      outConfig.prepare?.(element);
+
+      insertClone();
+
+      if (outConfig.wait) {
+        await outConfig.wait();
+      }
+
+      const scheduler = new AnimationScheduler({
+        ...outConfig,
+        onEnd: () => {
+          outConfig.onEnd?.();
+          if (currentClone) {
+            currentClone.remove();
+            currentClone = null;
+          }
+          currentAnimation = null;
+          options?.onCleanupEnd?.();
+        },
+      });
+
+      currentAnimation = {
+        controller: scheduler as AnimationController<TAnimationValue>,
+        direction: "out",
+      };
+      scheduler.forward();
+      return;
+    }
+
+    // Single-spring path: use Animator with strategy
     const configs: TransitionConfigs<TAnimationValue> = {
-      in: transition.in && Promise.resolve(transition.in(element)),
-      out: transition.out && Promise.resolve(transition.out(element)),
+      in: undefined, // Don't fetch IN config for exit transitions
+      out: Promise.resolve(outConfig),
     };
 
     const setup = await strategy.runOut(configs);
     if (!setup.config) {
+      return;
+    }
+
+    // Type guard: config must be SingleSpringConfig at this point
+    // because we already handled MultiSpringConfig above
+    if ("springs" in setup.config) {
+      console.error("Unexpected MultiSpringConfig in single-spring path");
       return;
     }
 
@@ -122,7 +268,7 @@ export function createTransitionCallback<TAnimationValue = number>(
       },
     });
 
-    currentAnimation = { animator, direction: "out" };
+    currentAnimation = { controller: animator, direction: "out" };
 
     if (setup.direction === "forward") {
       animator.forward();
