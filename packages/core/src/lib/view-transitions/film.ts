@@ -91,7 +91,8 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         }
 
         // Calculate translate
-        const currentTranslateY = -rect.top - rect.height * state.translateProgress;
+        const currentTranslateY =
+          -rect.top - rect.height * state.translateProgress;
 
         // Apply transform
         element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
@@ -206,7 +207,8 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         }
 
         // Calculate translate (inverted for IN animation)
-        const currentTranslateY = -rect.top + rect.height * (1 - state.translateProgress);
+        const currentTranslateY =
+          -rect.top + rect.height * (1 - state.translateProgress);
 
         // Apply transform
         element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
