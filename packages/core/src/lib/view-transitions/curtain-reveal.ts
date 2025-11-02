@@ -42,6 +42,11 @@ const DEFAULT_SLIDE_STYLE: Partial<CSSStyleDeclaration> = {
   color: "#FFFFFF",
 };
 
+//magic Numbers
+const OUT_OPACITY_OFFSET = 0.4;
+const TEXT_PHASE_END = 0.5;
+const SHAPE_PHASE_DURATION = 0.2;
+
 type CurtainShape = "circle" | "square" | "triangle";
 
 interface CurtainRevealOptions {
@@ -101,7 +106,8 @@ export const curtainReveal = (
           el.style.opacity = "1";
         },
         tick: (progress) => {
-          element.style.opacity = String(progress);
+          const opacityProgress = Math.max(0, progress - OUT_OPACITY_OFFSET);
+          element.style.opacity = String(opacityProgress);
         },
         onEnd: () => {
           element.style.opacity = originalOpacity;
@@ -167,8 +173,8 @@ export const curtainReveal = (
         tick: (progress) => {
           if (!overlay || !viewport || !wrapper) return;
 
-          if (progress <= 0.7 && texts.length > 0) {
-            const slideProgress = progress / 0.7;
+          if (progress <= TEXT_PHASE_END && texts.length > 0) {
+            const slideProgress = progress / TEXT_PHASE_END;
             const idx = Math.min(
               Math.floor(slideProgress * texts.length),
               texts.length - 1,
@@ -180,10 +186,10 @@ export const curtainReveal = (
             wrapper.style.transform = `translateX(-${prevWidths}px)`;
           }
 
-          if (progress > 0.7) {
+          if (progress > TEXT_PHASE_END) {
             const curtainProgress = Math.max(
               0,
-              Math.min(1, (progress - 0.7) / 0.2),
+              Math.min(1, (progress - TEXT_PHASE_END) / SHAPE_PHASE_DURATION),
             );
             const scale = 1 - curtainProgress;
             overlay.style.clipPath = getClipPath(shape, scale);
