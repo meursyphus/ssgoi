@@ -20,8 +20,7 @@
     "lib": ["ES2022", "dom"],
     "useDefineForClassFields": false,
     "paths": {
-      "@ssgoi/angular": ["../../packages/angular/dist"],
-      "@ssgoi/angular/*": ["../../packages/angular/dist/*"]
+      "@/*": ["./src/*"]
     }
   },
   "angularCompilerOptions": {

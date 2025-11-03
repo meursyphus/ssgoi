@@ -30,6 +30,7 @@ export const home: HomeMessages = {
     react: "React",
     svelte: "Svelte",
     vue: "Vue",
+    angular: "Angular",
     solidjs: "SolidJS (即将推出)",
     qwik: "Qwik (即将推出)",
   },

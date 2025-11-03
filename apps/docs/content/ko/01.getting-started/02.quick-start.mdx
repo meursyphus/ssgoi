@@ -6,7 +6,7 @@ nav-title: "빠른 시작"
 
 ## 패키지 설치
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```bash
     npm install @ssgoi/react 
@@ -28,11 +28,18 @@ nav-title: "빠른 시작"
     # 또는 pnpm add @ssgoi/vue
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```bash
+    npm install @ssgoi/angular
+    # 또는 yarn add @ssgoi/angular
+    # 또는 pnpm add @ssgoi/angular
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 기본 설정 (2분)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. 루트 레이아웃 설정 (Next.js App Router)
     ```tsx
@@ -202,11 +209,90 @@ nav-title: "빠른 시작"
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ### 1. 루트 컴포넌트 설정 (Angular 20+)
+
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <!-- ⚠️ 중요: position: relative 필수! -->
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: fade(),
+      };
+    }
+    ```
+
+    > **왜 position: relative가 필요한가요?**
+    > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
+
+    ### 2. 페이지 래핑
+
+    ```typescript
+    // home.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-home",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/'">
+          <main>
+            <h1>홈 페이지</h1>
+            <!-- 페이지 내용 -->
+          </main>
+        </section>
+      `,
+    })
+    export class HomeComponent {}
+
+    // about.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-about",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/about'">
+          <main>
+            <h1>소개 페이지</h1>
+            <!-- 페이지 내용 -->
+          </main>
+        </section>
+      `,
+    })
+    export class AboutComponent {}
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 다양한 트랜지션 적용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -292,6 +378,43 @@ nav-title: "빠른 시작"
     </script>
     ```
 
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll, fade, drill } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          // 홈 → 소개: 위로 스크롤
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 소개 → 홈: 아래로 스크롤
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // 목록 → 상세: 드릴 (진입)
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+        ],
+      };
+    }
+    ```
   </TabPanel>
 </Tabs>
 

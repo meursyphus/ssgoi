@@ -31,6 +31,7 @@ export const home: HomeMessages = {
     react: "React",
     svelte: "Svelte",
     vue: "Vue",
+    angular: "Angular",
     solidjs: "SolidJS (지원 예정)",
     qwik: "Qwik (지원 예정)",
   },

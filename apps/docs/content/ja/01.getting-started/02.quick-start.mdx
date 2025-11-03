@@ -6,33 +6,40 @@ nav-title: "クイックスタート"
 
 ## パッケージのインストール
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
-    ```bash 
-    npm install @ssgoi/react 
-    # or yarn add @ssgoi/react 
-    # or pnpm add @ssgoi/react 
+    ```bash
+    npm install @ssgoi/react
+    # or yarn add @ssgoi/react
+    # or pnpm add @ssgoi/react
     ```
   </TabPanel>
   <TabPanel value="svelte">
-    ```bash 
-    npm install @ssgoi/svelte 
-    # or yarn add @ssgoi/svelte 
-    # or pnpm add @ssgoi/svelte 
+    ```bash
+    npm install @ssgoi/svelte
+    # or yarn add @ssgoi/svelte
+    # or pnpm add @ssgoi/svelte
     ```
   </TabPanel>
   <TabPanel value="vue">
-    ```bash 
-    npm install @ssgoi/vue 
-    # or yarn add @ssgoi/vue 
-    # or pnpm add @ssgoi/vue 
+    ```bash
+    npm install @ssgoi/vue
+    # or yarn add @ssgoi/vue
+    # or pnpm add @ssgoi/vue
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```bash
+    npm install @ssgoi/angular
+    # or yarn add @ssgoi/angular
+    # or pnpm add @ssgoi/angular
     ```
   </TabPanel>
 </Tabs>
 
 ## 基本セットアップ（2分）
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. ルートレイアウトの設定 (Next.js App Router)
 
@@ -207,11 +214,90 @@ nav-title: "クイックスタート"
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ### 1. ルートコンポーネントの設定 (Angular 20+)
+
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <!-- ⚠️ 重要: position: relativeが必要です！ -->
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: fade(),
+      };
+    }
+    ```
+
+    > **なぜposition: relativeが必要なのか？**
+    > ページがアニメーションで出ていくとき、`position: absolute`が適用されます。親要素に`position: relative`がないと、ページが間違った位置に移動する可能性があります。
+
+    ### 2. ページのラップ
+
+    ```typescript
+    // home.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-home",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/'">
+          <main>
+            <h1>ホームページ</h1>
+            <!-- ページコンテンツ -->
+          </main>
+        </section>
+      `,
+    })
+    export class HomeComponent {}
+
+    // about.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-about",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/about'">
+          <main>
+            <h1>紹介ページ</h1>
+            <!-- ページコンテンツ -->
+          </main>
+        </section>
+      `,
+    })
+    export class AboutComponent {}
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 様々なトランジションの適用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -299,6 +385,43 @@ nav-title: "クイックスタート"
     </script>
     ```
 
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll, fade, drill } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          // ホーム → 紹介: 上にスクロール
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 紹介 → ホーム: 下にスクロール
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // リスト → 詳細: ドリル
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+        ],
+      };
+    }
+    ```
   </TabPanel>
 </Tabs>
 

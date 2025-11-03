@@ -14,18 +14,24 @@ try this: [ssgoi.dev](https://ssgoi.dev)
 - **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit. No hydration issues, SEO-friendly
 - **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit - all work seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **🎨 Framework Agnostic** - One consistent API for React, Svelte, Vue, SolidJS, and more
+- **🎨 Framework Agnostic** - One consistent API for Angular, React, Svelte, Vue, and more
 
 ## Quick Start
 
 ### Installation
 
 ```bash
+# Angular
+npm install @ssgoi/angular
+
 # React
 npm install @ssgoi/react
 
 # Svelte
 npm install @ssgoi/svelte
+
+# Vue
+npm install @ssgoi/vue
 ```
 
 ### Add Transitions in 30 Seconds
@@ -139,6 +145,49 @@ function Card() {
 - `rotate`
 
 ## Framework Examples
+
+### Angular
+
+```typescript
+// app.component.ts
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Ssgoi } from '@ssgoi/angular';
+import { fade } from '@ssgoi/angular/view-transitions';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, Ssgoi],
+  template: `
+    <ssgoi [config]="config">
+      <div style="position: relative; min-height: 100vh">
+        <router-outlet />
+      </div>
+    </ssgoi>
+  `
+})
+export class AppComponent {
+  config = {
+    defaultTransition: fade()
+  };
+}
+
+// home.component.ts
+import { Component } from '@angular/core';
+import { SsgoiTransition } from '@ssgoi/angular';
+
+@Component({
+  selector: 'app-home',
+  imports: [SsgoiTransition],
+  template: `
+    <ssgoi-transition id="/">
+      <h1>Welcome</h1>
+      <!-- Your page content -->
+    </ssgoi-transition>
+  `
+})
+export class HomeComponent {}
+```
 
 ### Next.js App Router
 

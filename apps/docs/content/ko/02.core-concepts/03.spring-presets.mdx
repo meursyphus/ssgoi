@@ -15,6 +15,8 @@ SSGOI는 물리 값을 수동으로 조정하지 않고도 다양한 애니메�
 import { config } from '@ssgoi/react/presets';
 // 또는
 import { config } from '@ssgoi/svelte/presets';
+// 또는
+import { config } from '@ssgoi/angular/presets';
 
 // 트랜지션에서 사용
 transition({
@@ -97,7 +99,7 @@ transition({
 
 ### 뷰 트랜지션에서 프리셋 사용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -166,11 +168,46 @@ transition({
     </template>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { config } from "@ssgoi/angular/presets";
+    import { fade, slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 앱 콘텐츠 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: fade({
+         inSpring: config.gentle,
+         outSpring: config.slow,
+        }),
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: slide({ spring: config.wobbly })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 요소 트랜지션에서 프리셋 사용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -225,6 +262,34 @@ transition({
         컨텐츠
       </div>
     </template>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+    import { config } from '@ssgoi/angular/presets';
+    import type { TransitionDirectiveConfig } from '@ssgoi/angular';
+
+    @Component({
+      selector: 'app-my',
+      standalone: true,
+      imports: [TransitionDirective],
+      template: `
+        <div [transition]="fadeInConfig">
+          컨텐츠
+        </div>
+      `
+    })
+    export class MyComponent {
+      fadeInConfig: TransitionDirectiveConfig = {
+        spring: config.slow,
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

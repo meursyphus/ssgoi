@@ -66,7 +66,7 @@ nav-title: "ストリップ"
 
 ## 基本的な使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -103,7 +103,38 @@ nav-title: "ストリップ"
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { strip } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: strip()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ## 実践的な例
 
@@ -111,7 +142,7 @@ nav-title: "ストリップ"
 
 ストリップトランジションはデフォルト値での使用を推奨します：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -128,13 +159,39 @@ nav-title: "ストリップ"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { strip } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: strip()  // Recommended to use defaults
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ### 特定ルートへの適用
 
 トップレベルナビゲーションに適用：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -177,7 +234,46 @@ nav-title: "ストリップ"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { strip } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: strip(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/services',
+            transition: strip(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ## アクセシビリティ
 

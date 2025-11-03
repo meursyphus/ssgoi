@@ -8,7 +8,7 @@ nav-title: "要素アニメーション"
 
 様々なトランジション効果の使用方法：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -201,6 +201,64 @@ nav-title: "要素アニメーション"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/angular/transitions';
+
+    @Component({
+      selector: 'app-element-transitions',
+      standalone: true,
+      imports: [TransitionDirective],
+      template: `
+        <!-- Fadeトランジション -->
+        <div [transition]="fadeTransition">
+          Fade効果
+        </div>
+
+        <!-- Scaleトランジション -->
+        <div [transition]="scaleTransition">
+          Scale効果
+        </div>
+
+        <!-- Blurトランジション -->
+        <div [transition]="blurTransition">
+          Blur効果
+        </div>
+
+        <!-- Slideトランジション（方向指定） -->
+        <div [transition]="slideTransition">
+          Slide効果
+        </div>
+
+        <!-- Flyトランジション（カスタム位置） -->
+        <div [transition]="flyTransition">
+          Fly効果
+        </div>
+
+        <!-- Rotateトランジション -->
+        <div [transition]="rotateTransition">
+          Rotate効果
+        </div>
+
+        <!-- Bounceトランジション -->
+        <div [transition]="bounceTransition">
+          Bounce効果
+        </div>
+      `
+    })
+    export class ElementTransitionsComponent {
+      fadeTransition = { key: 'fade-element', ...fade({ spring: { stiffness: 300, damping: 30 } }) };
+      scaleTransition = { key: 'scale-element', ...scale({ spring: { stiffness: 300, damping: 30 } }) };
+      blurTransition = { key: 'blur-element', ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }) };
+      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }) };
+      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }) };
+      rotateTransition = { key: 'rotate-element', ...rotate({ spring: { stiffness: 300, damping: 30 } }) };
+      bounceTransition = { key: 'bounce-element', ...bounce({ spring: { stiffness: 300, damping: 30 } }) };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 基本構造
@@ -246,7 +304,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## フレームワーク別の使用方法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -321,6 +379,39 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     <script setup>
     import { transition } from '@ssgoi/vue';
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+
+    @Component({
+      selector: 'app-custom',
+      standalone: true,
+      imports: [TransitionDirective],
+      template: `
+        <div [transition]="transitionConfig">
+          コンテンツ
+        </div>
+      `,
+    })
+    export class CustomComponent {
+      transitionConfig = {
+        key: 'unique-key',
+        in: (element: HTMLElement) => ({
+          tick: (progress: number) => {
+            element.style.opacity = `${progress}`;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          }
+        }),
+        out: (element: HTMLElement) => ({
+          tick: (progress: number) => {
+            element.style.opacity = `${progress}`;
+          }
+        })
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

@@ -72,7 +72,7 @@ This sequence provides users with a clear visual metaphor of "moving to a new sc
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -109,6 +109,35 @@ This sequence provides users with a clear visual metaphor of "moving to a new sc
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { film } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: film()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## Real-world Examples
@@ -117,7 +146,7 @@ This sequence provides users with a clear visual metaphor of "moving to a new sc
 
 Navigation between main sections in bottom tab bar or top tabs:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -158,6 +187,43 @@ Navigation between main sections in bottom tab bar or top tabs:
         ]
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { film } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/profile',
+            transition: film(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: film(),
+            symmetric: true
+          }
+        ]
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

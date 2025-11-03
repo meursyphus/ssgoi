@@ -64,7 +64,7 @@ nav-title: "페이드"
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -101,6 +101,35 @@ nav-title: "페이드"
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: fade()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 실전 활용 예시
@@ -109,7 +138,7 @@ nav-title: "페이드"
 
 하단 탭바나 상단 탭에서 주요 섹션 간 이동:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -152,13 +181,50 @@ nav-title: "페이드"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/home',
+            to: '/profile',
+            transition: fade(),
+            symmetric: true
+          },
+          {
+            from: '/home',
+            to: '/settings',
+            transition: fade(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. 빠른 전환 (즉각적인 응답)
 
 사용자 액션에 빠르게 반응해야 할 때:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -193,13 +259,46 @@ nav-title: "페이드"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: fade({
+          inSpring: { //페이지에 들어갈 때 적용됩니다.
+            stiffness: 400,  // 빠른 트랜지션
+            damping: 35      // 부드러운 마무리
+          },
+          outSpring: { //페이지를 떠날 때 적용됩니다.
+            stiffness: 400,  // 빠른 트랜지션
+            damping: 35      // 부드러운 마무리
+          }
+        })
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. 우아한 전환 (프리미엄 느낌)
 
 브랜드 경험이 중요한 페이지:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -232,6 +331,39 @@ nav-title: "페이드"
         })
     };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: fade({
+           inSpring: { //페이지에 들어갈 때 적용됩니다.
+            stiffness: 150,  // 느린 트랜지션
+            damping: 25      // 부드러운 감속
+          },
+          outSpring: { //페이지를 떠날 때 적용됩니다.
+           stiffness: 150,  // 느린 트랜지션
+           damping: 25      // 부드러운 감속
+          }
+        })
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

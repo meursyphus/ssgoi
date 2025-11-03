@@ -67,7 +67,7 @@ DOWN方向（前へ）:
 
 ## 基本的な使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -102,7 +102,38 @@ DOWN方向（前へ）:
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: scroll()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ## 実践的な活用例
 
@@ -110,7 +141,7 @@ DOWN方向（前へ）:
 
 チャプターやセクション間の移動:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -153,13 +184,52 @@ DOWN方向（前へ）:
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/docs/intro',
+            to: '/docs/getting-started',
+            transition: scroll({ direction: 'up' }),
+            symmetric: true  // Automatically down on back navigation
+          },
+          {
+            from: '/docs/getting-started',
+            to: '/docs/api',
+            transition: scroll({ direction: 'up' }),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ### 2. オンボーディングフロー
 
 ステップバイステップのチュートリアル:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -194,13 +264,48 @@ DOWN方向（前へ）:
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/onboarding/step-*',
+            to: '/onboarding/step-*',
+            transition: scroll({
+              direction: 'up',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ### 3. ミドルウェアによる動的方向
 
 ナビゲーション順序に応じて方向を自動決定:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const createMiddleware = (routes) => {
@@ -267,7 +372,64 @@ DOWN方向（前へ）:
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      private readonly routeOrder = [
+        '/docs/intro',
+        '/docs/getting-started',
+        '/docs/api'
+      ];
+
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/nav/prev',
+            to: '/nav/next',
+            transition: scroll({ direction: 'up' })
+          },
+          {
+            from: '/nav/next',
+            to: '/nav/prev',
+            transition: scroll({ direction: 'down' })
+          }
+        ],
+        middleware: (from: string, to: string) => {
+          const fromIndex = this.routeOrder.indexOf(from);
+          const toIndex = this.routeOrder.indexOf(to);
+
+          if (fromIndex !== -1 && toIndex !== -1) {
+            if (fromIndex < toIndex) {
+              return { from: '/nav/prev', to: '/nav/next' };
+            } else {
+              return { from: '/nav/next', to: '/nav/prev' };
+            }
+          }
+
+          return { from, to };
+        }
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
+  
+
 
 ## パフォーマンス最適化
 

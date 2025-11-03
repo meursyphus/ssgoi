@@ -67,7 +67,7 @@ RIGHT 방향 (이전으로):
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -102,6 +102,35 @@ RIGHT 방향 (이전으로):
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="ssgoiConfig"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        defaultTransition: slide()
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ## 실전 활용 예시
@@ -110,7 +139,7 @@ RIGHT 방향 (이전으로):
 
 탭 UI에서 콘텐츠 전환:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -153,13 +182,50 @@ RIGHT 방향 (이전으로):
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/tabs/home',
+            to: '/tabs/profile',
+            transition: slide({ direction: 'left' }),
+            symmetric: true  // Automatically right on back navigation
+          },
+          {
+            from: '/tabs/profile',
+            to: '/tabs/settings',
+            transition: slide({ direction: 'left' }),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. 이미지 갤러리
 
 이미지 간 스와이프 전환:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -194,13 +260,46 @@ RIGHT 방향 (이전으로):
     </script>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery/photo-*',
+            to: '/gallery/photo-*',
+            transition: slide({
+              direction: 'left',
+              spring: { stiffness: 300, damping: 30 }
+            })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. 미들웨어를 통한 동적 방향
 
 탭 순서에 따라 방향 자동 결정:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const createMiddleware = (tabs) => {
@@ -265,6 +364,60 @@ RIGHT 방향 (이전으로):
         middleware: createMiddleware(tabOrder)
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { slide } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="ssgoiConfig">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      private readonly tabOrder = [
+        '/tabs/home',
+        '/tabs/profile',
+        '/tabs/settings'
+      ];
+
+      ssgoiConfig: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/nav/left',
+            to: '/nav/right',
+            transition: slide({ direction: 'left' })
+          },
+          {
+            from: '/nav/right',
+            to: '/nav/left',
+            transition: slide({ direction: 'right' })
+          }
+        ],
+        middleware: (from: string, to: string) => {
+          const fromIndex = this.tabOrder.indexOf(from);
+          const toIndex = this.tabOrder.indexOf(to);
+
+          if (fromIndex !== -1 && toIndex !== -1) {
+            if (fromIndex < toIndex) {
+              return { from: '/nav/left', to: '/nav/right' };
+            }
+            return { from: '/nav/right', to: '/nav/left' };
+          }
+
+          return { from, to };
+        }
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

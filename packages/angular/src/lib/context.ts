@@ -7,8 +7,16 @@ export const SSGOI_CONTEXT = new InjectionToken<SsgoiContext | undefined>(
 
 export function injectSsgoi(): SsgoiContext {
   const context = inject(SSGOI_CONTEXT, { optional: true });
+
   if (!context) {
-    throw new Error("injectSsgoi must be used within Ssgoi");
+    // During SSR or when not wrapped in <ssgoi>, return a no-op context
+    // This prevents errors during server-side rendering
+    return () => ({
+      key: "",
+      in: async () => ({}),
+      out: async () => ({}),
+    });
   }
+
   return context;
 }

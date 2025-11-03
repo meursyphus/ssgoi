@@ -1,38 +1,58 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import type { SsgoiConfig } from '@ssgoi/angular';
 import { Ssgoi } from '@ssgoi/angular';
 import { fade, hero, jaemin } from '@ssgoi/angular/view-transitions';
-import type { SsgoiConfig } from '@ssgoi/angular';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Ssgoi],
+  imports: [RouterOutlet, Ssgoi, SidebarComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ssgoi [config]="ssgoiConfig">
-      <div style="position: relative; min-height: 100vh; width: 100%">
+    <app-sidebar />
+    <div class="ml-64">
+      <main
+        ssgoi
+        [config]="ssgoiConfig"
+        class="relative min-h-screen w-full text-gray-100"
+      >
         <router-outlet />
-      </div>
-    </ssgoi>
+      </main>
+    </div>
   `,
   styles: [],
 })
 export class AppComponent {
   ssgoiConfig: SsgoiConfig = {
+    middleware(from, to) {
+      // Skip transition if navigating to the same path
+      if (from === to) {
+        return { from: '', to: '' };
+      }
+
+      return { from, to };
+    },
     transitions: [
       {
         from: '/',
-        to: '/item/*',
-        transition: hero({ spring: { stiffness: 5, damping: 1 } }),
+        to: '/transitions/*',
+        transition: fade(),
         symmetric: true,
       },
       {
-        from: '/',
-        to: '/jaemin',
-        transition: jaemin(),
+        from: '/transitions/*',
+        to: '/transitions/*',
+        transition: fade(),
       },
       {
-        from: '/jaemin',
-        to: '/',
+        from: '/',
+        to: '/view-transitions/*',
+        transition: fade(),
+      },
+      {
+        from: '/view-transitions/*',
+        to: '/view-transitions/*',
         transition: fade(),
       },
     ],

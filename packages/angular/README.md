@@ -1,6 +1,6 @@
 # @ssgoi/angular
 
-Angular bindings for SSGOI - Native app-like page transitions for Angular applications.
+Angular bindings for SSGOI that give any Angular 20+ app native-feeling page and element transitions powered by the `@ssgoi/core` animation engine.
 
 ## Installation
 
@@ -12,126 +12,119 @@ pnpm add @ssgoi/angular
 yarn add @ssgoi/angular
 ```
 
-## Features
+## What You Get
 
-- 🎯 **Modern Angular** - Built with Angular v20+ signal-based APIs and standalone components
-- 🚀 **Spring Physics** - Smooth, natural animations powered by spring physics
-- 📦 **SSR Compatible** - Full support for Angular Universal
-- 🎨 **Customizable** - Extensive animation options and configurations
-- 🔄 **Router Agnostic** - Works with Angular Router and any other routing solution
-- ⚡ **Tree-shakeable** - Optimized bundle size with ES modules
-- 🔥 **Performance Optimized** - OnPush change detection strategy for maximum performance
+- `Ssgoi` directive (selector: `[ssgoi]`) that bootstraps the core transition context on the client and gracefully no-ops during SSR.
+- `SsgoiTransition` directive (selector: `[ssgoiTransition]`) that wires individual route containers into the transition system.
+- `TransitionDirective` (selector: `[transition]`) for running element-level in/out animations with spring physics.
+- `injectSsgoi()` helper and `SSGOI_CONTEXT` injection token for retrieving transition definitions anywhere in your component tree.
+- Re-exported transition factories and presets under `@ssgoi/angular/view-transitions`, `@ssgoi/angular/transitions`, and `@ssgoi/angular/presets`.
 
 ## Quick Start
 
-### 1. Wrap your app with Ssgoi component
+### 1. Provide the transition context once
 
 ```typescript
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { Ssgoi } from '@ssgoi/angular';
-import { fade } from '@ssgoi/angular/view-transitions';
+import { Component, signal } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { Ssgoi, SsgoiConfig } from "@ssgoi/angular";
+import { fade } from "@ssgoi/angular/view-transitions";
 
 @Component({
-  selector: 'app-root',
+  selector: "app-root",
+  standalone: true,
   imports: [RouterOutlet, Ssgoi],
   template: `
-    <ssgoi [config]="ssgoiConfig">
-      <div style="position: relative; min-height: 100vh">
-        <router-outlet />
-      </div>
-    </ssgoi>
-  `
+    <div
+      ssgoi
+      [config]="ssgoiConfig()"
+      style="position: relative; min-height: 100vh"
+    >
+      <router-outlet />
+    </div>
+  `,
 })
 export class AppComponent {
-  ssgoiConfig = {
-    defaultTransition: fade()
-  };
+  protected readonly ssgoiConfig = signal<SsgoiConfig>({
+    defaultTransition: fade(),
+  });
 }
 ```
 
-### 2. Wrap your pages with SsgoiTransition
+### 2. Mark each routed view with `SsgoiTransition`
 
 ```typescript
-import { Component } from '@angular/core';
-import { SsgoiTransition } from '@ssgoi/angular';
+import { Component } from "@angular/core";
+import { SsgoiTransition } from "@ssgoi/angular";
 
 @Component({
-  selector: 'app-home',
+  selector: "app-home",
+  standalone: true,
   imports: [SsgoiTransition],
   template: `
-    <ssgoi-transition id="/home">
+    <section [ssgoiTransition]="'/home'">
       <h1>Home Page</h1>
-    </ssgoi-transition>
-  `
+    </section>
+  `,
 })
 export class HomeComponent {}
 ```
 
-## API
+The value you pass to `[ssgoiTransition]` should uniquely identify the view (commonly the route path).
 
-### Components
-
-#### `Ssgoi`
-
-Main wrapper component that provides transition context.
-
-**Props:**
-- `config: SsgoiConfig` - Transition configuration
-
-#### `SsgoiTransition`
-
-Wraps individual pages/routes for transitions.
-
-**Props:**
-- `id: string` - Unique identifier (typically the route path)
-- `className?: string` - Optional CSS class
-
-### Directive
-
-#### `SsgoiTransitionDirective`
-
-Directive for element-level transitions.
+### 3. (Optional) Add element-level transitions
 
 ```typescript
-import { Component } from '@angular/core';
-import { SsgoiTransitionDirective } from '@ssgoi/angular';
-import { injectSsgoi } from '@ssgoi/angular';
+import { Component } from "@angular/core";
+import { TransitionDirective } from "@ssgoi/angular";
+import { fadeIn, fadeOut } from "@ssgoi/angular/transitions";
 
 @Component({
-  selector: 'app-example',
-  imports: [SsgoiTransitionDirective],
-  template: `<div [ssgoiTransition]="'my-element'">Content</div>`
+  selector: "app-call-to-action",
+  standalone: true,
+  imports: [TransitionDirective],
+  template: `
+    <button
+      [transition]="{
+        key: 'cta',
+        in: fadeIn({ duration: 220 }),
+        out: fadeOut({ duration: 180 })
+      }"
+    >
+      Get Started
+    </button>
+  `,
 })
-export class ExampleComponent {}
+export class CallToActionComponent {}
 ```
 
-### Functions
+## How It Works
 
-#### `injectSsgoi()`
+- `Ssgoi` wraps `createSggoiTransitionContext` from `@ssgoi/core` and injects it via `SSGOI_CONTEXT`. The directive guards against the server platform so SSR renders stay deterministic.
+- `SsgoiTransition` reads that context with `injectSsgoi()`, sets `data-ssgoi-transition` on the host, and subscribes the element to the core transition runner.
+- `TransitionDirective` lets any element opt into spring-driven enter/leave effects while sharing the same scheduling primitives as view transitions.
 
-Injectable function to access SSGOI context within components.
+Because everything is driven by signals, Angular change detection stays minimal and the bundle remains fully tree-shakeable.
 
-```typescript
-const getTransition = injectSsgoi();
-const transition = getTransition('/route-id');
-```
+## API Reference
+
+- `Ssgoi`
+  - `config: SsgoiConfig` (input, optional) – global transition configuration. Uses `{}` as default.
+- `SsgoiTransition`
+  - `ssgoiTransition: string` (required input) – identifier for the target view/container.
+- `TransitionDirective`
+  - `transition: TransitionDirectiveConfig` (required input) – accepts any config from `@ssgoi/core`, plus an optional `key` to coordinate enter/leave pairs.
+- `injectSsgoi(): SsgoiContext` – returns a function that looks up transition definitions by id. During SSR it falls back to a no-op implementation so you can call it unconditionally.
 
 ## Available Transitions
 
-### View Transitions (Page-level)
+View-level factories:
 
 ```typescript
-import {
-  fade,
-  scroll,
-  drill,
-  hero,
-  pinterest
-} from '@ssgoi/angular/view-transitions';
+import { fade, scroll, drill, hero, pinterest } from "@ssgoi/angular/view-transitions";
 ```
 
-### Element Transitions
+Element-level factories:
 
 ```typescript
 import {
@@ -145,25 +138,32 @@ import {
   scaleOut,
   bounce,
   blur,
-  rotate
-} from '@ssgoi/angular/transitions';
+  rotate,
+} from "@ssgoi/angular/transitions";
 ```
 
-## Configuration Example
+Presets that combine common configurations:
 
 ```typescript
-import { fade, scroll } from '@ssgoi/angular/view-transitions';
+import { marketingPreset, dashboardPreset } from "@ssgoi/angular/presets";
+```
 
-const config = {
+## Sample Configuration
+
+```typescript
+import { fade, scroll } from "@ssgoi/angular/view-transitions";
+import type { SsgoiConfig } from "@ssgoi/angular";
+
+export const config: SsgoiConfig = {
   defaultTransition: fade(),
   transitions: [
     {
-      from: '/home',
-      to: '/about',
-      transition: scroll({ direction: 'up' }),
-      symmetric: true
-    }
-  ]
+      from: "/home",
+      to: "/about",
+      transition: scroll({ direction: "up" }),
+      symmetric: true,
+    },
+  ],
 };
 ```
 

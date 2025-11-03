@@ -72,7 +72,7 @@ Drill Back (Exit):
 
 ### 1. Transition Configuration
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -131,6 +131,47 @@ Drill Back (Exit):
     </Ssgoi>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { drill } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/categories',
+            to: '/categories/*',
+            transition: drill({ direction: 'enter' }),
+            symmetric: false
+          },
+          {
+            from: '/categories/*',
+            to: '/categories',
+            transition: drill({ direction: 'exit' })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Options Configuration
@@ -152,7 +193,7 @@ interface DrillOptions {
 
 Navigating nested category structures:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Main Categories
@@ -230,13 +271,97 @@ Navigating nested category structures:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface CategoryItem {
+      id: string;
+      name: string;
+    }
+
+    interface Category {
+      slug: string;
+      name: string;
+      itemCount: number;
+      items: CategoryItem[];
+    }
+
+    // Main Categories
+    @Component({
+      selector: "app-categories",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="p-4">
+          <h1 class="text-2xl mb-4">Categories</h1>
+          <div class="space-y-2">
+            <button
+              *ngFor="let category of categories"
+              (click)="open(category.slug)"
+              class="w-full text-left p-4 bg-white rounded-lg shadow"
+            >
+              <h3 class="font-semibold">{{ category.name }}</h3>
+              <p class="text-gray-600">
+                {{ category.itemCount }} items
+              </p>
+            </button>
+          </div>
+        </div>
+      `
+    })
+    export class CategoriesComponent {
+      categories: Category[] = CATEGORIES; // Provide category data
+
+      constructor(private readonly router: Router) {}
+
+      open(slug: string) {
+        this.router.navigate(['/categories', slug]);
+      }
+    }
+
+    // Subcategory
+    @Component({
+      selector: "app-sub-category",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="p-4">
+          <button (click)="back()" class="mb-4">
+            ← Back
+          </button>
+          <h1 class="text-2xl mb-4">{{ category.name }}</h1>
+          <div class="grid gap-4">
+            <div
+              *ngFor="let item of category.items"
+              class="p-4 bg-white rounded-lg"
+            >
+              {{ item.name }}
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class SubCategoryComponent {
+      @Input() category!: Category; // Provide Category model
+
+      constructor(private readonly router: Router) {}
+
+      back() {
+        this.router.navigate(['/categories']);
+      }
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 2. Settings Menu
 
 From settings to detailed options:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Main Settings
@@ -324,13 +449,97 @@ From settings to detailed options:
     </div>
     ```
   </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface SettingMenuItem {
+      id: string;
+      label: string;
+      icon: string;
+    }
+
+    // Main Settings
+    @Component({
+      selector: "app-settings",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="max-w-lg mx-auto">
+          <h1 class="text-2xl p-4 border-b">Settings</h1>
+          <div class="divide-y">
+            <button
+              *ngFor="let item of menuItems"
+              (click)="open(item.id)"
+              class="flex items-center w-full text-left p-4 hover:bg-gray-50"
+            >
+              <span class="text-2xl mr-4">{{ item.icon }}</span>
+              <span class="flex-1">{{ item.label }}</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+      `
+    })
+    export class SettingsComponent {
+      readonly menuItems: SettingMenuItem[] = [
+        { id: 'profile', label: 'Profile Settings', icon: '👤' },
+        { id: 'privacy', label: 'Privacy & Security', icon: '🔒' },
+        { id: 'notifications', label: 'Notifications', icon: '🔔' },
+        { id: 'display', label: 'Display Settings', icon: '🎨' }
+      ];
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/settings', id]);
+      }
+    }
+
+    // Setting Detail
+    @Component({
+      selector: "app-setting-detail",
+      standalone: true,
+      template: `
+        <div class="max-w-lg mx-auto">
+          <div class="flex items-center p-4 border-b">
+            <button (click)="back()">←</button>
+            <h1 class="text-xl ml-4">{{ title }}</h1>
+          </div>
+          <div class="p-4">
+            <!-- Detailed setting options -->
+          </div>
+        </div>
+      `
+    })
+    export class SettingDetailComponent {
+      private readonly titles: Record<string, string> = {
+        profile: 'Profile Settings',
+        privacy: 'Privacy & Security',
+        notifications: 'Notifications',
+        display: 'Display Settings'
+      };
+
+      type = 'profile'; // Replace with resolved route param
+      title = this.titles[this.type];
+
+      constructor(private readonly router: Router) {}
+
+      back() {
+        this.router.navigate(['/settings']);
+      }
+    }
+    ```
+  </TabPanel>
 </Tabs>
 
 ### 3. File Explorer
 
 Folder structure navigation:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     function FileExplorer({ path }) {
@@ -420,6 +629,84 @@ Folder structure navigation:
         {/each}
       </div>
     </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor, NgIf } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { SsgoiConfig } from "@ssgoi/angular";
+    import { drill } from "@ssgoi/angular/view-transitions";
+
+    interface FileNode {
+      id: string;
+      name: string;
+      path: string;
+      isFolder: boolean;
+    }
+
+    @Component({
+      selector: "app-file-explorer",
+      standalone: true,
+      imports: [NgFor, NgIf],
+      template: `
+        <div class="h-screen flex flex-col">
+          <div class="p-3 bg-gray-100 text-sm">
+            <ng-container *ngFor="let segment of segments; let i = index">
+              <span *ngIf="i > 0"> / </span>
+              <button (click)="navigateToLevel(i)">
+                {{ segment }}
+              </button>
+            </ng-container>
+          </div>
+          <div class="flex-1 overflow-auto p-4">
+            <div
+              *ngFor="let file of files"
+              (click)="file.isFolder && open(file.path)"
+              class="flex items-center p-2 hover:bg-gray-50"
+            >
+              <span class="mr-2">
+                {{ file.isFolder ? '📁' : '📄' }}
+              </span>
+              {{ file.name }}
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class FileExplorerComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/files/*',
+            to: '/files/*/*',
+            transition: drill({
+              opacity: true,
+              spring: { stiffness: 180, damping: 22 }
+            })
+          }
+        ]
+      };
+
+      currentPath = '/files';
+      files: FileNode[] = FILES; // Provide folder/file list
+
+      constructor(private readonly router: Router) {}
+
+      get segments() {
+        return this.currentPath.split('/');
+      }
+
+      open(path: string) {
+        this.router.navigate([path]);
+      }
+
+      navigateToLevel(index: number) {
+        const nextPath = this.segments.slice(0, index + 1).join('/');
+        this.router.navigate([nextPath]);
+      }
+    }
     ```
   </TabPanel>
 </Tabs>
