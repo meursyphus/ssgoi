@@ -127,7 +127,7 @@ nav-title: "载敏"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -135,7 +135,7 @@ nav-title: "载敏"
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: jaemin()
       };
     }
@@ -203,13 +203,13 @@ jaemin({
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 应用内容 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/challenge-complete',
@@ -266,13 +266,13 @@ jaemin({
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 应用内容 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/upgrade',

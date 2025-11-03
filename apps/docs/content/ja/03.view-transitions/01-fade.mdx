@@ -116,7 +116,7 @@ nav-title: "フェード"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -124,7 +124,7 @@ nav-title: "フェード"
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade()
       };
     }
@@ -193,13 +193,13 @@ nav-title: "フェード"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/home',
@@ -271,13 +271,13 @@ nav-title: "フェード"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade({
           inSpring: { //ページに入るときに適用されます。
             stiffness: 400,  // 速いトランジション
@@ -345,13 +345,13 @@ nav-title: "フェード"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade({
            inSpring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション

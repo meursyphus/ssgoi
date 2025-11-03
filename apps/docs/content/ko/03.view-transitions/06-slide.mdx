@@ -117,7 +117,7 @@ RIGHT 방향 (이전으로):
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -125,7 +125,7 @@ RIGHT 방향 (이전으로):
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: slide()
       };
     }
@@ -194,13 +194,13 @@ RIGHT 방향 (이전으로):
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/tabs/home',
@@ -272,13 +272,13 @@ RIGHT 방향 (이전으로):
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/gallery/photo-*',
@@ -378,7 +378,7 @@ RIGHT 방향 (이전으로):
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- App content -->
         </div>
       `
@@ -390,7 +390,7 @@ RIGHT 방향 (이전으로):
         '/tabs/settings'
       ];
 
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/nav/left',

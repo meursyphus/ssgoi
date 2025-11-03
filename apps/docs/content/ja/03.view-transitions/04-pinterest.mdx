@@ -137,7 +137,7 @@ Pinterestトランジションは**視覚的コンテンツの拡大探索**時�
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -145,7 +145,7 @@ Pinterestトランジションは**視覚的コンテンツの拡大探索**時�
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/gallery',

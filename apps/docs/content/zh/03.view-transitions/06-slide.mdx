@@ -117,7 +117,7 @@ nav-title: "滑动"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -125,7 +125,7 @@ nav-title: "滑动"
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: slide()
       };
     }
@@ -194,13 +194,13 @@ nav-title: "滑动"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 应用内容 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/tabs/home',
@@ -272,13 +272,13 @@ nav-title: "滑动"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 应用内容 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/gallery/photo-*',
@@ -378,7 +378,7 @@ nav-title: "滑动"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 应用内容 -->
         </div>
       `
@@ -390,7 +390,7 @@ nav-title: "滑动"
         '/tabs/settings'
       ];
 
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/nav/left',

@@ -233,7 +233,7 @@ nav-title: "快速入门"
         <!-- ⚠️ 重要：必须设置position: relative！ -->
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -241,7 +241,7 @@ nav-title: "快速入门"
       `,
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade(),
       };
     }
@@ -303,7 +303,7 @@ nav-title: "快速入门"
     // app/layout.tsx
     import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 首页 → 关于：向上滚动
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -318,7 +318,7 @@ nav-title: "快速入门"
       return (
         <html>
           <body>
-            <Ssgoi config={ssgoiConfig}>
+            <Ssgoi config={config}>
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
               </div>
@@ -337,7 +337,7 @@ nav-title: "快速入门"
       import { Ssgoi } from "@ssgoi/svelte";
       import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
-      const ssgoiConfig = {
+      const config = {
         transitions: [
           // 首页 → 关于：向上滚动
           { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -349,7 +349,7 @@ nav-title: "快速入门"
       };
     </script>
 
-    <Ssgoi config={ssgoiConfig}>
+    <Ssgoi config={config}>
       <div style="position: relative; min-height: 100vh;">
         <slot />
       </div>
@@ -361,7 +361,7 @@ nav-title: "快速入门"
     ```vue
     <!-- app.vue -->
     <template>
-      <Ssgoi :config="ssgoiConfig">
+      <Ssgoi :config="config">
         <div style="position: relative; min-height: 100vh">
           <NuxtPage />
         </div>
@@ -372,7 +372,7 @@ nav-title: "快速入门"
     import { Ssgoi } from "@ssgoi/vue";
     import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 首页 → 关于：向上滚动
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -402,7 +402,7 @@ nav-title: "快速入门"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -410,7 +410,7 @@ nav-title: "快速入门"
       `,
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           // 首页 → 关于：向上滚动
           { from: "/", to: "/about", transition: scroll({ direction: "up" }) },

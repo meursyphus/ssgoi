@@ -116,7 +116,7 @@ nav-title: "페이드"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -124,7 +124,7 @@ nav-title: "페이드"
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade()
       };
     }
@@ -193,13 +193,13 @@ nav-title: "페이드"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 앱 내용 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/home',
@@ -271,13 +271,13 @@ nav-title: "페이드"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 앱 내용 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade({
           inSpring: { //페이지에 들어갈 때 적용됩니다.
             stiffness: 400,  // 빠른 트랜지션
@@ -345,13 +345,13 @@ nav-title: "페이드"
       standalone: true,
       imports: [Ssgoi],
       template: `
-        <div ssgoi [config]="ssgoiConfig">
+        <div ssgoi [config]="config">
           <!-- 앱 내용 -->
         </div>
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade({
            inSpring: { //페이지에 들어갈 때 적용됩니다.
             stiffness: 150,  // 느린 트랜지션

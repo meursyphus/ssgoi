@@ -228,7 +228,7 @@ nav-title: "빠른 시작"
         <!-- ⚠️ 중요: position: relative 필수! -->
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -236,7 +236,7 @@ nav-title: "빠른 시작"
       `,
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade(),
       };
     }
@@ -298,7 +298,7 @@ nav-title: "빠른 시작"
     // app/layout.tsx
     import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 홈 → 소개: 위로 스크롤
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -313,7 +313,7 @@ nav-title: "빠른 시작"
       return (
         <html>
           <body>
-            <Ssgoi config={ssgoiConfig}>
+            <Ssgoi config={config}>
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
               </div>
@@ -331,7 +331,7 @@ nav-title: "빠른 시작"
       import { Ssgoi } from "@ssgoi/svelte";
       import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
-      const ssgoiConfig = {
+      const config = {
         transitions: [
           // 홈 → 소개: 위로 스크롤
           { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -343,7 +343,7 @@ nav-title: "빠른 시작"
       };
     </script>
 
-    <Ssgoi config={ssgoiConfig}>
+    <Ssgoi config={config}>
       <div style="position: relative; min-height: 100vh;">
         <slot />
       </div>
@@ -354,7 +354,7 @@ nav-title: "빠른 시작"
     ```vue
     <!-- app.vue -->
     <template>
-      <Ssgoi :config="ssgoiConfig">
+      <Ssgoi :config="config">
         <div style="position: relative; min-height: 100vh">
           <NuxtPage />
         </div>
@@ -365,7 +365,7 @@ nav-title: "빠른 시작"
     import { Ssgoi } from "@ssgoi/vue";
     import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 홈 → 소개: 위로 스크롤
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -395,7 +395,7 @@ nav-title: "빠른 시작"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -403,7 +403,7 @@ nav-title: "빠른 시작"
       `,
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           // 홈 → 소개: 위로 스크롤
           { from: "/", to: "/about", transition: scroll({ direction: "up" }) },

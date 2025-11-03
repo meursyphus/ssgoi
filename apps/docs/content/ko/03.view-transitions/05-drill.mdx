@@ -146,7 +146,7 @@ nav-title: "드릴"
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -154,7 +154,7 @@ nav-title: "드릴"
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/categories',
@@ -676,7 +676,7 @@ interface DrillOptions {
       `
     })
     export class FileExplorerComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         transitions: [
           {
             from: '/files/*',

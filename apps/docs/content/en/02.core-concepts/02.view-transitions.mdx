@@ -99,7 +99,7 @@ interface SsgoiConfig {
       template: `
         <div
           ssgoi
-          [config]="ssgoiConfig"
+          [config]="config"
           style="position: relative; min-height: 100vh;"
         >
           <router-outlet />
@@ -107,7 +107,7 @@ interface SsgoiConfig {
       `
     })
     export class AppComponent {
-      ssgoiConfig: SsgoiConfig = {
+      config: SsgoiConfig = {
         defaultTransition: fade(), // Default transition
         transitions: [
           {
@@ -335,7 +335,7 @@ Wrapper component (directive for Angular) that wraps each page:
     import { drill, scroll } from '@ssgoi/angular/view-transitions';
     import type { SsgoiConfig } from '@ssgoi/angular';
 
-    const ssgoiConfig: SsgoiConfig = {
+    const config: SsgoiConfig = {
       transitions: [
         // List → Detail
         {
