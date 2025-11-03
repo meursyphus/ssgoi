@@ -12,7 +12,7 @@ The Fly animation creates effects where elements fly in from specific coordinate
 
 ## Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -59,6 +59,29 @@ The Fly animation creates effects where elements fly in from specific coordinate
         Fly me!
       </div>
     </template>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+    import { fly } from '@ssgoi/angular/transitions';
+
+    @Component({
+      selector: 'app-component',
+      imports: [TransitionDirective],
+      template: `
+        <div [transition]="flyTransition">
+          Fly me!
+        </div>
+      `
+    })
+    export class AppComponent {
+      flyTransition = {
+        key: 'my-element',
+        ...fly(),
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

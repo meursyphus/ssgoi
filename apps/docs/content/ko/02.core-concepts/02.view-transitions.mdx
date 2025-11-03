@@ -22,7 +22,7 @@ interface SsgoiConfig {
 
 ### 기본 설정
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from "@ssgoi/react";
@@ -83,6 +83,46 @@ interface SsgoiConfig {
         <slot />
       </div>
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade, scroll } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: fade(), // 기본 전환
+        transitions: [
+          {
+            from: '/',
+            to: '/about',
+            transition: scroll({ direction: 'up' })
+          },
+          {
+            from: '/about',
+            to: '/',
+            transition: scroll({ direction: 'down' })
+          }
+        ]
+      };
+    }
     ```
   </TabPanel>
 </Tabs>
@@ -178,18 +218,57 @@ const scrollAwareTransition = {
 };
 ```
 
-## SsgoiTransition 컴포넌트
+## SsgoiTransition 래퍼
 
-각 페이지를 감싸는 래퍼 컴포넌트:
+각 페이지를 감싸는 래퍼 컴포넌트(Angular에서는 디렉티브):
 
-```jsx
-<SsgoiTransition id="/page-path">
-  <PageContent />
-</SsgoiTransition>
-```
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { SsgoiTransition } from "@ssgoi/react";
 
-- `id`: 경로 매칭에 사용되는 식별자
-- 이 ID가 config의 from/to 패턴과 매칭됨
+    export default function Page() {
+      return (
+        <SsgoiTransition id="/page-path">
+          <PageContent />
+        </SsgoiTransition>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { SsgoiTransition } from "@ssgoi/svelte";
+    </script>
+
+    <SsgoiTransition id="/page-path">
+      <PageContent />
+    </SsgoiTransition>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-page",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/page-path'">
+          <app-page-content />
+        </section>
+      `
+    })
+    export class PageComponent {}
+    ```
+  </TabPanel>
+</Tabs>
+
+- `ssgoiTransition`: 경로 매칭에 사용되는 식별자
+- 이 값이 config의 from/to 패턴과 매칭됨
 
 ## 동작 흐름
 
@@ -204,7 +283,7 @@ const scrollAwareTransition = {
 
 ### 계층적 네비게이션
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```javascript
     const config = {
@@ -230,7 +309,7 @@ const scrollAwareTransition = {
     ```svelte
     <script>
       import { drill, scroll } from "@ssgoi/svelte/view-transitions";
-      
+
       const config = {
         transitions: [
           // 목록 → 상세
@@ -249,6 +328,30 @@ const scrollAwareTransition = {
         ],
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { drill, scroll } from '@ssgoi/angular/view-transitions';
+    import type { SsgoiConfig } from '@ssgoi/angular';
+
+    const config: SsgoiConfig = {
+      transitions: [
+        // 목록 → 상세
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: true // 상세 → 목록도 자동 처리
+        },
+
+        // 탭 네비게이션
+        { from: '/tab1', to: '/tab2', transition: scroll({ direction: 'up' }) },
+        { from: '/tab2', to: '/tab3', transition: scroll({ direction: 'up' }) },
+        { from: '/tab3', to: '/tab2', transition: scroll({ direction: 'down' }) },
+        { from: '/tab2', to: '/tab1', transition: scroll({ direction: 'down' }) }
+      ]
+    };
     ```
   </TabPanel>
 </Tabs>

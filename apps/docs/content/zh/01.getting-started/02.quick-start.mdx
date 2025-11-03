@@ -6,33 +6,40 @@ nav-title: "快速入门"
 
 ## 安装包
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
-    ```bash 
-    npm install @ssgoi/react 
-    # or yarn add @ssgoi/react 
-    # or pnpm add @ssgoi/react 
+    ```bash
+    npm install @ssgoi/react
+    # or yarn add @ssgoi/react
+    # or pnpm add @ssgoi/react
     ```
   </TabPanel>
   <TabPanel value="svelte">
-    ```bash 
-    npm install @ssgoi/svelte 
-    # or yarn add @ssgoi/svelte 
-    # or pnpm add @ssgoi/svelte 
+    ```bash
+    npm install @ssgoi/svelte
+    # or yarn add @ssgoi/svelte
+    # or pnpm add @ssgoi/svelte
     ```
   </TabPanel>
   <TabPanel value="vue">
-    ```bash 
-    npm install @ssgoi/vue 
-    # or yarn add @ssgoi/vue 
-    # or pnpm add @ssgoi/vue 
+    ```bash
+    npm install @ssgoi/vue
+    # or yarn add @ssgoi/vue
+    # or pnpm add @ssgoi/vue
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```bash
+    npm install @ssgoi/angular
+    # or yarn add @ssgoi/angular
+    # or pnpm add @ssgoi/angular
     ```
   </TabPanel>
 </Tabs>
 
 ## 基本设置（2分钟）
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. 根布局设置 (Next.js App Router)
 
@@ -207,17 +214,96 @@ nav-title: "快速入门"
     ```
 
   </TabPanel>
+  <TabPanel value="angular">
+    ### 1. 根组件设置 (Angular 20+)
+
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { fade } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <!-- ⚠️ 重要：必须设置position: relative！ -->
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: fade(),
+      };
+    }
+    ```
+
+    > **为什么需要position: relative？**
+    > 当页面动画退出时，会应用`position: absolute`。如果父元素没有`position: relative`，页面可能会移动到错误的位置。
+
+    ### 2. 页面包装
+
+    ```typescript
+    // home.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-home",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/'">
+          <main>
+            <h1>首页</h1>
+            <!-- 页面内容 -->
+          </main>
+        </section>
+      `,
+    })
+    export class HomeComponent {}
+
+    // about.component.ts
+    import { Component } from "@angular/core";
+    import { SsgoiTransition } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-about",
+      standalone: true,
+      imports: [SsgoiTransition],
+      template: `
+        <section [ssgoiTransition]="'/about'">
+          <main>
+            <h1>关于页面</h1>
+            <!-- 页面内容 -->
+          </main>
+        </section>
+      `,
+    })
+    export class AboutComponent {}
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 应用各种过渡效果
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
     import { scroll, fade, drill } from "@ssgoi/react/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 首页 → 关于：向上滚动
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -232,7 +318,7 @@ nav-title: "快速入门"
       return (
         <html>
           <body>
-            <Ssgoi config={ssgoiConfig}>
+            <Ssgoi config={config}>
               <div style={{ position: "relative", minHeight: "100vh" }}>
                 {children}
               </div>
@@ -251,7 +337,7 @@ nav-title: "快速入门"
       import { Ssgoi } from "@ssgoi/svelte";
       import { scroll, fade, drill } from "@ssgoi/svelte/view-transitions";
 
-      const ssgoiConfig = {
+      const config = {
         transitions: [
           // 首页 → 关于：向上滚动
           { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -263,7 +349,7 @@ nav-title: "快速入门"
       };
     </script>
 
-    <Ssgoi config={ssgoiConfig}>
+    <Ssgoi config={config}>
       <div style="position: relative; min-height: 100vh;">
         <slot />
       </div>
@@ -275,7 +361,7 @@ nav-title: "快速入门"
     ```vue
     <!-- app.vue -->
     <template>
-      <Ssgoi :config="ssgoiConfig">
+      <Ssgoi :config="config">
         <div style="position: relative; min-height: 100vh">
           <NuxtPage />
         </div>
@@ -286,7 +372,7 @@ nav-title: "快速入门"
     import { Ssgoi } from "@ssgoi/vue";
     import { scroll, fade, drill } from "@ssgoi/vue/view-transitions";
 
-    const ssgoiConfig = {
+    const config = {
       transitions: [
         // 首页 → 关于：向上滚动
         { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
@@ -299,6 +385,43 @@ nav-title: "快速入门"
     </script>
     ```
 
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    // app.component.ts
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { scroll, fade, drill } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `,
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          // 首页 → 关于：向上滚动
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 关于 → 首页：向下滚动
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // 列表 → 详情：钻入
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+        ],
+      };
+    }
+    ```
   </TabPanel>
 </Tabs>
 

@@ -32,6 +32,7 @@ export const home: HomeMessages = {
     react: "React",
     svelte: "Svelte",
     vue: "Vue",
+    angular: "Angular",
     solidjs: "SolidJS (Coming Soon)",
     qwik: "Qwik (Coming Soon)",
   },

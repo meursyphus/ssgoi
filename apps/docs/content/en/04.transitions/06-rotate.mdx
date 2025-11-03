@@ -12,7 +12,7 @@ The Rotate animation creates effects by rotating elements as they appear or disa
 
 ## Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -59,6 +59,29 @@ The Rotate animation creates effects by rotating elements as they appear or disa
         Rotate me!
       </div>
     </template>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from '@angular/core';
+    import { TransitionDirective } from '@ssgoi/angular';
+    import { rotate } from '@ssgoi/angular/transitions';
+
+    @Component({
+      selector: 'app-component',
+      imports: [TransitionDirective],
+      template: `
+        <div [transition]="rotateTransition">
+          Rotate me!
+        </div>
+      `
+    })
+    export class AppComponent {
+      rotateTransition = {
+        key: 'my-element',
+        ...rotate(),
+      };
+    }
     ```
   </TabPanel>
 </Tabs>

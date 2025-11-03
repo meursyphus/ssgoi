@@ -77,6 +77,14 @@ export async function HeroSection({ lang }: HeroSectionProps) {
                   npm install @ssgoi/vue
                 </code>
               </div>
+              <div className="rounded-lg bg-card/50 p-4">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  {t("quickInstall.angular")}
+                </p>
+                <code className="font-mono text-sm text-white">
+                  npm install @ssgoi/angular
+                </code>
+              </div>
               {/* SolidJS - 추가 예정 */}
               <div className="rounded-lg bg-card/50 p-4 opacity-50">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
