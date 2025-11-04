@@ -54,7 +54,8 @@ export function Header() {
       STARS_TTL,
     )
       .then((data) => {
-        setStars(data.stargazers_count);
+        const typedData = data as { stargazers_count: number };
+        setStars(typedData.stargazers_count);
         setIsLoadingStars(false);
       })
       .catch(() => {
