@@ -54,7 +54,8 @@ export function Header() {
       STARS_TTL,
     )
       .then((data) => {
-        setStars(data.stargazers_count);
+        const typedData = data as { stargazers_count: number };
+        setStars(typedData.stargazers_count);
         setIsLoadingStars(false);
       })
       .catch(() => {
@@ -64,10 +65,9 @@ export function Header() {
   }, []);
 
   return (
-    <header className="fixed top-0 z-50 w-full h-20 flex items-center justify-center">
-      {/* Mobile Layout - Center logo with GitHub and menu */}
-      <div className="md:hidden absolute top-4 z-50 flex items-center justify-between w-full px-4">
-        <div className="flex-1" /> {/* Spacer */}
+    <>
+      {/* Mobile Layout - Center logo */}
+      <header className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-50">
         <div className="px-4 py-2 rounded-full bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 shadow-2xl shadow-black/20 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent before:pointer-events-none relative">
           <Link
             href={`/${currentLang}/`}
@@ -85,21 +85,21 @@ export function Header() {
             </span>
           </Link>
         </div>
-        <div className="flex-1 flex justify-end">
-          <button
-            className="inline-flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 hover:bg-zinc-800/70 text-gray-300 hover:text-white h-10 w-10 relative"
-            onClick={() => {
-              setMobileDrawerOpen(!mobileDrawerOpen);
-            }}
-          >
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">{t("openMenu")}</span>
-          </button>
-        </div>
-      </div>
+      </header>
+
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden fixed top-4 right-4 z-50 inline-flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 hover:bg-zinc-800/70 text-gray-300 hover:text-white h-10 w-10"
+        onClick={() => {
+          setMobileDrawerOpen(!mobileDrawerOpen);
+        }}
+      >
+        <Menu className="h-4 w-4" />
+        <span className="sr-only">{t("openMenu")}</span>
+      </button>
 
       {/* Desktop/Tablet Layout */}
-      <div className="hidden md:block absolute top-4 z-50 mx-auto px-2 py-2 rounded-full bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 shadow-2xl shadow-black/20 transition-all duration-300 hover:shadow-black/30 max-w-fit before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent before:pointer-events-none">
+      <header className="hidden md:block fixed top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 shadow-2xl shadow-black/20 transition-all duration-300 hover:shadow-black/30 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent before:pointer-events-none">
         <div className="flex items-center gap-2 px-3">
           {/* Logo */}
           <Link
@@ -294,13 +294,13 @@ export function Header() {
             </Link>
           </div>
         </div>
-      </div>
+      </header>
 
       <MobileDrawer
         isOpen={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
         lang={currentLang}
       />
-    </header>
+    </>
   );
 }
