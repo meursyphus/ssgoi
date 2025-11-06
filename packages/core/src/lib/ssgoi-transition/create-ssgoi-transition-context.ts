@@ -3,13 +3,13 @@ import type {
   SsgoiContext,
   GetTransitionConfig,
   Transition,
-} from "./types";
-import { getScrollingElement } from "./utils/get-scrolling-element";
-import { getPositionedParent } from "./utils/get-positioned-parent";
+} from "../types";
+import { getScrollingElement } from "../utils/get-scrolling-element";
+import { getPositionedParent } from "../utils/get-positioned-parent";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
-} from "./transition-strategy";
+} from "../transition/transition-strategy";
 
 /**
  * SSGOI Transition Context Operation Principles

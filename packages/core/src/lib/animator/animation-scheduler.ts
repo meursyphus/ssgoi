@@ -1,11 +1,11 @@
-import { Animator } from "./animator";
+import { Animator } from ".";
 import type {
   MultiSpringConfig,
   SpringItem,
   NormalizedScheduleEntry,
   AnimationController,
   AnimationState,
-} from "./types";
+} from "../types";
 
 /**
  * Entry to track individual spring animation state

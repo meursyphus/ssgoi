@@ -1,4 +1,4 @@
-import { createTransitionCallback } from "./create-transition-callback";
+import { createTransitionCallback } from "./create-transition-callback"
 import {
   StrategyContext,
   TRANSITION_STRATEGY,
@@ -8,9 +8,9 @@ import type {
   Transition,
   TransitionCallback,
   TransitionOptions,
-} from "./types";
-import type { TransitionKey } from "./types";
-import { parseCallerLocation } from "./utils/parse-caller-location";
+} from "../types";
+import type { TransitionKey } from "../types";
+import { parseCallerLocation } from "../utils/parse-caller-location";
 
 /**
  * Centralized transition management
@@ -18,6 +18,7 @@ import { parseCallerLocation } from "./utils/parse-caller-location";
  */
 
 // Map to store transition definitions by key
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transitionDefinitions = new Map<TransitionKey, Transition<any, any>>();
 
 // Map to store transition callbacks by key
@@ -88,12 +89,14 @@ export function generateAutoKey(): TransitionKey {
 }
 
 // Optional GC-based cleanup registry (browser/node supporting FinalizationRegistry)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
   | (new (cb: (heldValue: TransitionKey) => void) => {
       register: (target: object, heldValue: TransitionKey) => void;
     })
   | undefined;
 const __cleanupRegistry = FinalizationRegistryCtor
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ? (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
       try {
         unregisterTransition(key);
