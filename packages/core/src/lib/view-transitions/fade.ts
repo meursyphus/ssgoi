@@ -2,9 +2,9 @@ import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep } from "../utils/sleep";
 
-const DEFAULT_OUT_SPRING = { stiffness: 400, damping: 20 };
-const DEFAULT_IN_SPRING = { stiffness: 40, damping: 8 };
-const DEFAULT_TRANSITION_DELAY = 100;
+const DEFAULT_OUT_SPRING = { stiffness: 7, damping: 4 };
+const DEFAULT_IN_SPRING = { stiffness: 8, damping: 4 };
+const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
   inSpring?: SpringConfig;
@@ -28,6 +28,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         spring: inSpring,
         prepare: (element) => {
           element.style.opacity = "0";
+          element.style.willChange = "opacity";
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
@@ -53,7 +54,10 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         tick: (progress) => {
           element.style.opacity = progress.toString();
         },
-        prepare: (element) => prepareOutgoing(element, context),
+        prepare: (element) => {
+          prepareOutgoing(element, context);
+          element.style.willChange = "opacity";
+        },
         onEnd: () => {
           // Resolve the promise when OUT animation completes
           if (resolveOutAnimation) {

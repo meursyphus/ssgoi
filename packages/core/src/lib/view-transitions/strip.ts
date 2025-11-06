@@ -1,7 +1,7 @@
 import type { SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
+const DEFAULT_SPRING = { stiffness: 17, damping: 6 };
 const ROTATE_Y = 20;
 const PERSPECTIVE = 800;
 

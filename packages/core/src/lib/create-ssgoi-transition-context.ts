@@ -234,7 +234,7 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
-    skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
+    skipOnIosSwipe = false, // Default to true - skip animations on iOS swipe
   } = options;
 
   let pendingTransition: PendingTransition | null = null;

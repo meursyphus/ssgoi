@@ -7,7 +7,7 @@ interface SlideOptions {
 }
 
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 30,
+  stiffness: 15,
   damping: 7,
 };
 
