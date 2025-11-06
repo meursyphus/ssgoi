@@ -73,7 +73,6 @@ export function DocsSsgoi({
         to: "/demo/after",
         transition: scroll({
           direction: "up",
-          spring: { stiffness: 30, damping: 7 },
         }),
       },
       {
@@ -81,7 +80,6 @@ export function DocsSsgoi({
         to: "/demo/previous",
         transition: scroll({
           direction: "down",
-          spring: { stiffness: 30, damping: 7 },
         }),
       },
     ];

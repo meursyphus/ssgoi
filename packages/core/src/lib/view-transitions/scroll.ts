@@ -7,8 +7,8 @@ interface ScrollOptions {
 }
 
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 30,
-  damping: 7,
+  stiffness: 5,
+  damping: 4,
 };
 
 export const scroll = (options: ScrollOptions = {}): SggoiTransition => {

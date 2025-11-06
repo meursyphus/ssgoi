@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { animate } from "popmotion";
+import { animate } from "./animate";
 
 import type {
   SpringConfig,
