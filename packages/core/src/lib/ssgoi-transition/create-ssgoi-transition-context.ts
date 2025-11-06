@@ -1,8 +1,4 @@
-import type {
-  SsgoiConfig,
-  SsgoiContext,
-  GetTransitionConfig,
-} from "../types";
+import type { SsgoiConfig, SsgoiContext, GetTransitionConfig } from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -65,7 +61,7 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
-    skipOnIosSwipe = false, // Default to true - skip animations on iOS swipe
+    skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
   } = options;
 
   let pendingTransition: PendingTransition | null = null;
