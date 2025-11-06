@@ -80,7 +80,8 @@ export function animate(options: AnimateOptions): AnimationControls {
     // Check convergence
     const displacement = Math.abs(to - position);
     const speed = Math.abs(velocity);
-    const isSettling = displacement < POSITION_THRESHOLD && speed < VELOCITY_THRESHOLD;
+    const isSettling =
+      displacement < POSITION_THRESHOLD && speed < VELOCITY_THRESHOLD;
 
     if (isSettling) {
       settleTime += h;
