@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import type { SpringConfig, SpringItem } from "./types";
-import { Animator } from "../animator";
+import { Animator } from "./animator";
 
 /**
  * Mock timer utilities for testing animations

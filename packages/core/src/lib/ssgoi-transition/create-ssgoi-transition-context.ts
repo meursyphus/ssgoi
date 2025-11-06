@@ -2,14 +2,16 @@ import type {
   SsgoiConfig,
   SsgoiContext,
   GetTransitionConfig,
-  Transition,
 } from "../types";
-import { getScrollingElement } from "../utils/get-scrolling-element";
-import { getPositionedParent } from "../utils/get-positioned-parent";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
 } from "../transition/transition-strategy";
+import type { PendingTransition } from "./types";
+import { processSymmetricTransitions } from "./process-symmetric-transitions";
+import { createSwipeDetector } from "./create-swipe-detector";
+import { createContextManager } from "./create-context-manager";
+import { findMatchingTransition } from "./find-matching-transition";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -42,177 +44,6 @@ import {
  * - When only IN is called, checkAndResolve doesn't work without 'from'
  * - Promise isn't resolved, so animation doesn't start
  */
-
-type PendingTransition = {
-  from?: string;
-  to?: string;
-  outResolve?: (transition: GetTransitionConfig) => void;
-  inResolve?: (transition: GetTransitionConfig) => void;
-};
-
-/**
- * Processes symmetric transitions to create bidirectional navigation
- * For each symmetric transition, creates a reverse transition automatically
- */
-function processSymmetricTransitions(
-  transitions: NonNullable<SsgoiConfig["transitions"]>,
-): Omit<NonNullable<SsgoiConfig["transitions"]>[number], "symmetric">[] {
-  const reversedTransitions = transitions
-    .filter((t) => t.symmetric)
-    .map((t) => ({
-      from: t.to,
-      to: t.from,
-      transition: t.transition,
-    }));
-
-  return [...transitions, ...reversedTransitions];
-}
-
-/**
- * Creates a swipe detector for iOS Safari swipe-back gesture
- * Detects edge swipes that trigger Safari's native back navigation
- */
-function createSwipeDetector(enabled: boolean) {
-  let isSwipeDetected = false;
-  let isEdgeTouch = false;
-
-  const handleTouchStart = (e: TouchEvent) => {
-    if (!enabled) return;
-
-    const touch = e.touches[0];
-    if (!touch) return;
-
-    // Check if touch started near left edge (within 50px from left)
-    isEdgeTouch = touch.clientX < 50;
-  };
-
-  const handleTouchEnd = () => {
-    if (!enabled) return;
-
-    // If touch started at edge and ended, assume it's a swipe-back gesture
-    if (isEdgeTouch) {
-      isSwipeDetected = true;
-
-      // Reset the flag after 500ms to allow normal navigation to resume
-      setTimeout(() => {
-        isSwipeDetected = false;
-      }, 500);
-    }
-
-    // Reset edge touch flag
-    isEdgeTouch = false;
-  };
-
-  const isSwipePending = () => isSwipeDetected;
-
-  const initialize = () => {
-    if (typeof window === "undefined") return;
-    if (!enabled) return;
-
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-  };
-
-  const cleanup = () => {
-    if (typeof window === "undefined") return;
-    window.removeEventListener("touchstart", handleTouchStart);
-    window.removeEventListener("touchend", handleTouchEnd);
-  };
-
-  return {
-    initialize,
-    cleanup,
-    isSwipePending,
-  };
-}
-
-/**
- * Creates a context manager for tracking transition-related information
- * including scroll positions and DOM element relationships
- */
-function createContextManager() {
-  let scrollContainer: HTMLElement | null = null;
-  let contextElement: HTMLElement | null = null;
-  const scrollPositions: Map<string, { x: number; y: number }> = new Map();
-  let currentPath: string | null = null;
-
-  // Scroll listener - captures current scroll position
-  const scrollListener = () => {
-    if (scrollContainer && currentPath) {
-      scrollPositions.set(currentPath, {
-        x: scrollContainer.scrollLeft,
-        y: scrollContainer.scrollTop,
-      });
-    }
-  };
-
-  // Initialize context with element - sets up scroll tracking and stores element for later use
-  const initializeContext = (element: HTMLElement, path: string) => {
-    // Store the element for positioned parent calculation
-    contextElement = element;
-
-    // Initialize scroll container once - finds the scrollable element
-    if (!scrollContainer) {
-      scrollContainer = getScrollingElement(element);
-
-      // IMPORTANT: When the scrolling element is document.documentElement (html element),
-      // scroll events must be attached to window, not the element itself.
-      // This is because document.documentElement doesn't fire scroll events directly.
-      // For all other scrollable containers, we attach the listener to the element.
-      const target =
-        scrollContainer === document.documentElement ? window : scrollContainer;
-      target.addEventListener("scroll", scrollListener, {
-        passive: true,
-      });
-    }
-
-    // Update current path for scroll position tracking
-    currentPath = path;
-  };
-
-  // Calculate scroll offset - computes difference between pages' scroll positions
-  const calculateScrollOffset = (
-    from?: string,
-    to?: string,
-  ): { x: number; y: number } => {
-    const fromScroll =
-      from && scrollPositions.has(from)
-        ? scrollPositions.get(from)!
-        : { x: 0, y: 0 };
-
-    const toScroll =
-      to && scrollPositions.has(to) ? scrollPositions.get(to)! : { x: 0, y: 0 };
-
-    return {
-      x: -toScroll.x + fromScroll.x,
-      y: -toScroll.y + fromScroll.y,
-    };
-  };
-
-  // Getter for scroll container - returns null if not initialized yet
-  const getScrollContainer = () => scrollContainer;
-
-  // Get positioned parent element - finds the nearest positioned ancestor
-  const getPositionedParentElement = () => {
-    if (!contextElement) return document.body;
-    return getPositionedParent(contextElement);
-  };
-
-  // Get scroll position for a specific path
-  const getScrollPosition = (path?: string): { x: number; y: number } => {
-    return path && scrollPositions.has(path)
-      ? scrollPositions.get(path)!
-      : { x: 0, y: 0 };
-  };
-
-  return {
-    initializeContext,
-    calculateScrollOffset,
-    getScrollContainer,
-    getPositionedParentElement,
-    getScrollPosition,
-  };
-}
 
 /**
  * Creates a transition configuration
@@ -374,59 +205,4 @@ export function createSggoiTransitionContext(
   };
 
   return ssgoiContext;
-}
-
-/**
- * Matches a path against a pattern
- * Supports exact matches and wildcard patterns
- *
- * @example
- * matchPath('/products', '/products') // true
- * matchPath('/products/123', '/products/*') // true
- * matchPath('/products/123', '/products') // false
- * matchPath('/anything', '*') // true
- */
-function findMatchingTransition<TContext>(
-  from: string,
-  to: string,
-  transitions: Array<{
-    from: string;
-    to: string;
-    transition: Transition<TContext>;
-  }>,
-): Transition<TContext> | null {
-  // First try to find exact match for both from and to paths
-  for (const config of transitions) {
-    if (matchPath(from, config.from) && matchPath(to, config.to)) {
-      return config.transition;
-    }
-  }
-
-  // Then try wildcard matches if no exact match found
-  for (const config of transitions) {
-    if (
-      (config.from === "*" || matchPath(from, config.from)) &&
-      (config.to === "*" || matchPath(to, config.to))
-    ) {
-      return config.transition;
-    }
-  }
-
-  return null;
-}
-
-function matchPath(path: string, pattern: string): boolean {
-  // Universal match - asterisk matches any path
-  if (pattern === "*") {
-    return true;
-  }
-
-  // Wildcard match - pattern ending with /* matches path and subpaths
-  if (pattern.endsWith("/*")) {
-    const prefix = pattern.slice(0, -2);
-    return path === prefix || path.startsWith(prefix + "/");
-  }
-
-  // Exact match - paths must be identical
-  return path === pattern;
 }

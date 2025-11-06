@@ -1,4 +1,4 @@
-import { createTransitionCallback } from "./create-transition-callback"
+import { createTransitionCallback } from "./create-transition-callback";
 import {
   StrategyContext,
   TRANSITION_STRATEGY,
@@ -96,8 +96,8 @@ const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
     })
   | undefined;
 const __cleanupRegistry = FinalizationRegistryCtor
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ? (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
+  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
       try {
         unregisterTransition(key);
       } catch {
