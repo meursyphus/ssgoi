@@ -36,7 +36,9 @@ export function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-zinc-800 hover:text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Globe className="h-4 w-4" />
-        <span className="hidden sm:inline">{currentLanguage?.title}</span>
+        <span className="hidden sm:inline whitespace-nowrap">
+          {currentLanguage?.title}
+        </span>
         <ChevronDown
           className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />

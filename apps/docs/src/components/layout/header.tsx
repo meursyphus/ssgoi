@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  Menu,
-  Star,
-  Github,
-  Home,
-  FileText,
-  BookOpen,
-  AppWindow,
-  Sparkles,
-} from "lucide-react";
+import { Menu, Star, Github } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCurrentLanguage } from "@/i18n/use-current-language";
 import { useTranslations } from "@/i18n/use-translations";
@@ -99,12 +90,12 @@ export function Header() {
       </button>
 
       {/* Desktop/Tablet Layout */}
-      <header className="hidden md:block fixed top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 shadow-2xl shadow-black/20 transition-all duration-300 hover:shadow-black/30 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent before:pointer-events-none">
+      <header className="hidden md:block fixed top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-zinc-700/50 shadow-2xl shadow-black/20 transition-all duration-300 hover:shadow-black/30 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent before:pointer-events-none w-fit">
         <div className="flex items-center gap-2 px-3">
           {/* Logo */}
           <Link
             href={`/${currentLang}/`}
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 shrink-0"
           >
             <Image
               src="/ssgoi-logo.png"
@@ -113,17 +104,17 @@ export function Header() {
               height={28}
               className="h-7 w-7 rounded-full object-cover transition-transform group-hover:scale-110"
             />
-            <span className="text-lg font-bold text-orange-500 transition-colors group-hover:text-orange-400 font-[family-name:var(--font-space-grotesk)] tracking-wide">
+            <span className="text-lg font-bold text-orange-500 transition-colors group-hover:text-orange-400 font-[family-name:var(--font-space-grotesk)] tracking-wide whitespace-nowrap">
               SSGOI
             </span>
           </Link>
 
           {/* Desktop Navigation - Full text */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="flex items-center gap-1 shrink-0">
             <Link
               href={`/${currentLang}/docs`}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 relative z-10",
+                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 relative z-10 whitespace-nowrap",
                 isActive(`/${currentLang}/docs`)
                   ? "bg-orange-500/20 text-orange-400"
                   : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
@@ -134,7 +125,7 @@ export function Header() {
             <Link
               href={`/${currentLang}/blog`}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200",
+                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap",
                 isActive(`/${currentLang}/blog`)
                   ? "bg-orange-500/20 text-orange-400"
                   : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
@@ -145,7 +136,7 @@ export function Header() {
             <Link
               href={`/${currentLang}/demo`}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200",
+                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap",
                 isActive(`/${currentLang}/demo`)
                   ? "bg-orange-500/20 text-orange-400"
                   : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
@@ -156,7 +147,7 @@ export function Header() {
             <Link
               href={`/${currentLang}/showcase`}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200",
+                "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap",
                 isActive(`/${currentLang}/showcase`)
                   ? "bg-orange-500/20 text-orange-400"
                   : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
@@ -166,68 +157,15 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Tablet Navigation - Icons only */}
-          <nav className="flex lg:hidden items-center gap-1">
-            <Link
-              href={`/${currentLang}/docs`}
-              className={cn(
-                "p-2 rounded-full transition-all duration-200",
-                isActive(`/${currentLang}/docs`)
-                  ? "bg-orange-500/20 text-orange-400"
-                  : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
-              )}
-              title={t("docs")}
-            >
-              <FileText className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${currentLang}/blog`}
-              className={cn(
-                "p-2 rounded-full transition-all duration-200",
-                isActive(`/${currentLang}/blog`)
-                  ? "bg-orange-500/20 text-orange-400"
-                  : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
-              )}
-              title={t("blog")}
-            >
-              <BookOpen className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${currentLang}/demo`}
-              className={cn(
-                "p-2 rounded-full transition-all duration-200",
-                isActive(`/${currentLang}/demo`)
-                  ? "bg-orange-500/20 text-orange-400"
-                  : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
-              )}
-              title={t("demo")}
-            >
-              <AppWindow className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${currentLang}/showcase`}
-              className={cn(
-                "p-2 rounded-full transition-all duration-200",
-                isActive(`/${currentLang}/showcase`)
-                  ? "bg-orange-500/20 text-orange-400"
-                  : "text-gray-300 hover:bg-zinc-800 hover:text-orange-400",
-              )}
-              title={t("showcase")}
-            >
-              <Sparkles className="h-4 w-4" />
-            </Link>
-          </nav>
-
           {/* Separator */}
-          <div className="hidden lg:block w-px h-5 bg-zinc-700" />
+          <div className="hidden lg:block w-px h-5 bg-zinc-700 shrink-0" />
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
+          <div className="w-[250px] lg:w-[300px] justify-center flex items-center gap-2">
             {/* Language Switcher */}
             <LanguageSwitcher />
-
             {/* Social Links - Hidden on tablet, visible on desktop */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1 shrink-0">
               {/* Discord Link */}
               <Link
                 href="https://discord.gg/9gSSWQbvX4"
@@ -276,7 +214,7 @@ export function Header() {
                 "text-white shadow-lg hover:shadow-xl hover:scale-105",
                 "h-8 px-3",
                 "border border-zinc-600 hover:border-zinc-500",
-                "group",
+                "shrink-0 whitespace-nowrap",
               )}
             >
               <Github className="h-3.5 w-3.5" />
