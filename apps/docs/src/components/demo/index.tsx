@@ -45,7 +45,7 @@ export default function Demo({ autoPlay = true }: DemoProps) {
       currentRouteIndex.current =
         (currentRouteIndex.current + 1) % routingPaths.length;
       setCurrentPath(routingPaths[currentRouteIndex.current]);
-    }, 3000); // 3 seconds interval
+    }, 5000); // 3 seconds interval
 
     return () => clearInterval(intervalId);
   }, [autoPlay, isHovered, isMobile, routingPaths]);
