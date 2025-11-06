@@ -5,7 +5,7 @@ import type {
   SpringConfig,
   AnimationController,
   AnimationState,
-} from "./types";
+} from "../types";
 
 export interface AnimationOptions<TAnimationValue = number> {
   from: TAnimationValue;

@@ -2,10 +2,10 @@ import type {
   Transition,
   TransitionCallback,
   AnimationController,
-} from "./types";
-import { isMultiSpring } from "./types";
-import { Animator } from "./animator";
-import { AnimationScheduler } from "./animation-scheduler";
+} from "../types";
+import { isMultiSpring } from "../types";
+import { Animator } from "../animator";
+import { AnimationScheduler } from "../animator/animation-scheduler";
 import {
   createDefaultStrategy,
   type StrategyContext,

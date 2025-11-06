@@ -2,7 +2,7 @@ import type {
   TransitionConfig,
   AnimationController,
   SingleSpringConfig,
-} from "./types";
+} from "../types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 

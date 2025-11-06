@@ -1,6 +1,6 @@
 export * from "./types";
-export * from "./transition";
-export * from "./create-ssgoi-transition-context";
-export * from "./transition-strategy";
+export * from "./transition/transition";
+export * from "./ssgoi-transition/create-ssgoi-transition-context";
+export * from "./transition/transition-strategy";
 // Internal exports for demo usage
 export { jaeminInternal } from "./view-transitions/jaemin";
