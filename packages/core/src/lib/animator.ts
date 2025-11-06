@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { animate } from "popmotion";
+import { animate } from "./spring-animation";
 
 import type {
   SpringConfig,
@@ -17,7 +17,7 @@ export interface AnimationOptions<TAnimationValue = number> {
 }
 
 /**
- * New Animator implementation using Popmotion
+ * Animator implementation with custom spring physics
  * Provides spring-based animations with fine control
  * Supports both number and object animations
  *
