@@ -30,7 +30,6 @@ export function createSwipeDetector(enabled: boolean) {
     if (!enabled) return;
     if (!isEdgeTouch) return;
 
-
     const touch = e.touches[0];
     if (!touch) return;
 
@@ -38,7 +37,10 @@ export function createSwipeDetector(enabled: boolean) {
     const deltaY = touch.clientY - startY;
 
     // Detect swipe: moved right more than threshold and horizontal movement is dominant
-    if (deltaX > window.outerWidth / 2 - 5 && Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (
+      deltaX > window.outerWidth / 2 - 5 &&
+      Math.abs(deltaX) > Math.abs(deltaY)
+    ) {
       isSwipeDetected = true;
     } else {
       isSwipeDetected = false;
@@ -85,6 +87,6 @@ export function createSwipeDetector(enabled: boolean) {
     initialize,
     cleanup,
     isSwipePending,
-    resetSwipeDetection
+    resetSwipeDetection,
   };
 }

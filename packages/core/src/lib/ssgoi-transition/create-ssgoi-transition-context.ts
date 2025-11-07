@@ -154,7 +154,7 @@ export function createSggoiTransitionContext(
     if (swipeDetector.isSwipePending()) {
       // Reset swipe detection to allow normal navigation after this check
       swipeDetector.resetSwipeDetection();
-      
+
       return () => ({}); // Return empty transition
     }
 
