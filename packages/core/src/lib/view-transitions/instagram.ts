@@ -139,6 +139,7 @@ function createDetailOut(
 }
 
 interface AnimationHandlers {
+  isEnterMode: boolean;
   inAnimation?: AnimationFunc;
   outAnimation?: AnimationFunc;
 }
@@ -213,6 +214,7 @@ function createAnimationConfig(
   // exitMode: use OUT animation (Detail animates out), IN stays
   if (isEnterMode) {
     return {
+      isEnterMode: true,
       inAnimation: createDetailIn(
         { detailRect, galleryRect, pageRect, scrollOffset },
         toNode,
@@ -221,6 +223,7 @@ function createAnimationConfig(
     };
   } else {
     return {
+      isEnterMode: false,
       outAnimation: createDetailOut(
         { detailRect, galleryRect, pageRect, scrollOffset },
         fromNode,
@@ -232,8 +235,8 @@ function createAnimationConfig(
 
 export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 30,
-    damping: options.spring?.damping ?? 10,
+    stiffness: options.spring?.stiffness ?? 150,
+    damping: options.spring?.damping ?? 20,
   };
   const timeout = options.timeout ?? 300;
 
@@ -307,7 +310,11 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
-          element.style.zIndex = "-1";
+           
+          if (!handlers?.isEnterMode) {
+            element.style.zIndex = "-1";
+          }
+       
         },
         tick: (progress) => {
           // Use outAnimation if available (exitMode), otherwise stay visible

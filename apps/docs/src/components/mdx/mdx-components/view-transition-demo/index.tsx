@@ -15,6 +15,9 @@ const HeroDemo = lazy(() =>
 const PinterestDemo = lazy(() =>
   import("./pinterest-demo").then((m) => ({ default: m.PinterestDemo })),
 );
+const InstagramDemo = lazy(() =>
+  import("./instagram-demo").then((m) => ({ default: m.InstagramDemo })),
+);
 
 const DrillDemo = lazy(() =>
   import("./drill-demo").then((m) => ({ default: m.DrillDemo })),
@@ -38,6 +41,7 @@ export interface ViewTransitionDemoProps {
     | "fade"
     | "hero"
     | "pinterest"
+    | "instagram"
     | "scroll"
     | "drill"
     | "slide"
@@ -69,6 +73,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <HeroDemo />;
       case "pinterest":
         return <PinterestDemo />;
+      case "instagram":
+        return <InstagramDemo />;
       case "drill":
         return <DrillDemo />;
       case "slide":
