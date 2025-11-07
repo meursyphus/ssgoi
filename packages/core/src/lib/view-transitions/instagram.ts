@@ -318,8 +318,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
           }
         },
         prepare: (element) => {
-         
-         prepareOutgoing(element, context);
+          prepareOutgoing(element, context);
           if (!handlers?.isEnterMode) {
             element.style.zIndex = "-1";
           }
