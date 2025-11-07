@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { profile, posts } from "./mock-data";
+import { profile } from "./mock-data";
 import { SsgoiTransition } from "@ssgoi/react";
+import { Feed } from "./feed";
 
 export default function ProfileDemo() {
   return (
@@ -95,41 +96,9 @@ export default function ProfileDemo() {
           </div>
         </div>
 
-        {/* Posts Section */}
-        <div className="mt-8 px-4 pb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Posts</h2>
-          <div className="flex flex-col gap-3">
-            {posts.map((post) => (
-              <article
-                key={post.id}
-                className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800"
-              >
-                <img
-                  src={post.coverImage}
-                  alt={post.title}
-                  className="w-full h-32 object-cover"
-                />
-                <div className="p-4">
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">
-                    {post.category}
-                  </span>
-                  <h3 className="text-base font-semibold text-white mt-1 mb-2 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                    {post.excerpt}
-                  </p>
-
-                  {/* Post Stats */}
-                  <div className="flex gap-4 text-sm text-gray-500">
-                    <span>❤️ {post.likes}</span>
-                    <span>💬 {post.comments}</span>
-                    <span>🔗 {post.shares}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+        {/* Posts Section - Instagram Style Feed */}
+        <div className="mt-8 pb-8">
+          <Feed />
         </div>
       </div>
     </SsgoiTransition>

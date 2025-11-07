@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
-import { drill, hero, pinterest, fade } from "@ssgoi/react/view-transitions";
+import { drill, hero, pinterest, fade, instagram } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
 
 interface DemoLayoutProps {
@@ -82,6 +82,12 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           from: "/demo/posts/*",
           to: "/demo/posts",
           transition: drill({ direction: "exit" }),
+        },
+        {
+          from: "/demo/profile",
+          to: "/demo/profile/*",
+          transition: instagram(),
+          symmetric: true,
         },
       ],
     }),
