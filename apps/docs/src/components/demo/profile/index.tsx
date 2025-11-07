@@ -10,7 +10,7 @@ export default function ProfileDemo() {
     <SsgoiTransition id="/demo/profile">
       <div className=" bg-gray-950">
         {/* Profile Header */}
-        <div className="relative hidden">
+        <div className="relative">
           {/* Cover Image */}
           <div className="h-32 relative">
             <img
