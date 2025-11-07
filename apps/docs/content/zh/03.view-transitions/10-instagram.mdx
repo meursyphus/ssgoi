@@ -1,0 +1,841 @@
+---
+title: "Instagram 过渡效果"
+description: "图片展开并过渡到详细视图的 Instagram 风格过渡"
+nav-title: "Instagram"
+---
+
+# Instagram 过渡效果
+
+Instagram 过渡是一种**扩展型过渡(Expansion Transition)**,网格中的小图片会扩展到全屏。与 Pinterest 过渡类似,但离开页面保持静态无动画,只有进入页面有动画。
+
+## 演示
+
+<ViewTransitionDemo type="instagram" />
+
+## UX 原则
+
+### 何时使用?
+
+Instagram 过渡用于**从以图片为中心的信息流到详细视图的过渡**。
+
+#### 根据内容关系的适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "不相关的内容",
+      suitable: "no",
+      description: "没有可扩展的连接点,不适合"
+    },
+    {
+      label: "同级关系",
+      suitable: "maybe",
+      description: "可考虑用于网格内图片间的导航"
+    },
+    {
+      label: "层级关系",
+      suitable: "yes",
+      description: "最适合相同内容的放大视图,如缩略图→全屏视图"
+    }
+  ]}
+/>
+
+#### 主要使用场景
+
+- **社交媒体信息流**: 从网格信息流到帖子详情的过渡
+- **照片画廊**: 从小缩略图放大到大图片
+- **作品集**: 从作品网格到详细视图
+- **产品列表**: 从产品网格到详情页
+
+### 为什么这样工作?
+
+1. **保持焦点**: 离开页面保持不变,让用户清楚知道从哪里来
+2. **性能优化**: 只对一个页面进行动画,确保流畅过渡
+3. **自然扩展**: 所选图片自然地填满屏幕
+4. **保持上下文**: 背景保持可见,防止方向迷失
+
+### 动效设计
+
+```
+扩展过程(画廊 → 详情):
+1. 画廊页面保持静态(无动画)
+2. 详情页从所选图片位置扩展
+3. 通过 clip-path 放大填满屏幕
+4. 最终占据整个屏幕
+
+收缩过程(详情 → 画廊):
+1. 详情页保持静态(无动画)
+2. 画廊页面在收缩到目标图片位置时出现
+3. 通过不透明度和缩放动画流畅出现
+```
+
+## 基本用法
+
+### 1. 配置过渡
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { instagram } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: instagram(),
+          symmetric: true
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { instagram } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: instagram(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { instagram } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: instagram(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 标记元素
+
+为画廊和详情页使用不同的 data 属性:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 画廊页面(3列网格)
+    function Gallery() {
+      return (
+        <div className="grid grid-cols-3 gap-1">
+          {items.map(item => (
+            <Link
+              key={item.id}
+              to={`/gallery/${item.id}`}
+              className="aspect-square"
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                data-instagram-gallery-key={item.id}
+                className="w-full h-full object-cover"
+              />
+            </Link>
+          ))}
+        </div>
+      );
+    }
+
+    // 详情页
+    function PostDetail({ item }) {
+      return (
+        <div className="min-h-screen">
+          <img
+            src={item.image}
+            alt={item.title}
+            data-instagram-detail-key={item.id}
+            className="w-full h-auto"
+          />
+          <div className="p-4">
+            <p className="font-semibold">{item.likes} likes</p>
+            <p className="mt-2">{item.caption}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 画廊页面(3列网格) -->
+    <div class="grid grid-cols-3 gap-1">
+      {#each items as item}
+        <a
+          href="/gallery/{item.id}"
+          class="aspect-square"
+        >
+          <img
+            src={item.image}
+            alt={item.title}
+            data-instagram-gallery-key={item.id}
+            class="w-full h-full object-cover"
+          />
+        </a>
+      {/each}
+    </div>
+
+    <!-- 详情页 -->
+    <div class="min-h-screen">
+      <img
+        src={item.image}
+        alt={item.title}
+        data-instagram-detail-key={item.id}
+        class="w-full h-auto"
+      />
+      <div class="p-4">
+        <p class="font-semibold">{item.likes} likes</p>
+        <p class="mt-2">{item.caption}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router, RouterLink } from "@angular/router";
+
+    interface GalleryItem {
+      id: string;
+      title: string;
+      image: string;
+      likes: number;
+      caption: string;
+    }
+
+    // 画廊页面(3列网格)
+    @Component({
+      selector: "app-gallery",
+      standalone: true,
+      imports: [NgFor, RouterLink],
+      template: `
+        <div class="grid grid-cols-3 gap-1">
+          <a
+            *ngFor="let item of items"
+            [routerLink]="['/gallery', item.id]"
+            class="aspect-square"
+          >
+            <img
+              [src]="item.image"
+              [alt]="item.title"
+              [attr.data-instagram-gallery-key]="item.id"
+              class="w-full h-full object-cover"
+            />
+          </a>
+        </div>
+      `
+    })
+    export class GalleryComponent {
+      items: GalleryItem[] = ITEMS; // 提供画廊项目
+    }
+
+    // 详情页
+    @Component({
+      selector: "app-post-detail",
+      standalone: true,
+      template: `
+        <div class="min-h-screen">
+          <img
+            [src]="item.image"
+            [alt]="item.title"
+            [attr.data-instagram-detail-key]="item.id"
+            class="w-full h-auto"
+          />
+          <div class="p-4">
+            <p class="font-semibold">{{ item.likes }} likes</p>
+            <p class="mt-2">{{ item.caption }}</p>
+          </div>
+        </div>
+      `
+    })
+    export class PostDetailComponent {
+      @Input() item!: GalleryItem;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 实践示例
+
+### 1. Instagram 风格信息流
+
+统一的3列网格:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 3列网格
+    function InstagramFeed() {
+      return (
+        <div className="grid grid-cols-3 gap-1">
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              onClick={() => navigate(`/post/${post.id}`)}
+              className="relative aspect-square cursor-pointer group"
+            >
+              <img
+                src={post.image}
+                alt={post.title}
+                data-instagram-gallery-key={post.id}
+                className="w-full h-full object-cover"
+              />
+              {/* 悬停叠加层 */}
+              <div className="absolute inset-0 bg-black/40 opacity-0
+                              group-hover:opacity-100 transition-opacity
+                              flex items-center justify-center">
+                <span className="text-white font-semibold">
+                  ❤️ {post.likes.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // 帖子详情
+    function PostView({ post }) {
+      return (
+        <div className="min-h-screen bg-black">
+          <img
+            src={post.image}
+            alt={post.title}
+            data-instagram-detail-key={post.id}
+            className="w-full h-auto"
+          />
+
+          {/* 帖子详情 */}
+          <div className="bg-white p-4">
+            <div className="flex items-center gap-4 mb-4">
+              <button className="flex items-center gap-2">
+                <HeartIcon className="w-6 h-6" />
+                <span>{post.likes}</span>
+              </button>
+              <button>
+                <CommentIcon className="w-6 h-6" />
+              </button>
+              <button>
+                <ShareIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-sm">
+              <strong>{post.author}</strong> {post.caption}
+            </p>
+
+            <p className="text-xs text-gray-500 mt-2">
+              {post.timestamp}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 3列网格 -->
+    <div class="grid grid-cols-3 gap-1">
+      {#each posts as post}
+        <div
+          on:click={() => goto(`/post/${post.id}`)}
+          class="relative aspect-square cursor-pointer group"
+        >
+          <img
+            src={post.image}
+            alt={post.title}
+            data-instagram-gallery-key={post.id}
+            class="w-full h-full object-cover"
+          />
+          <!-- 悬停叠加层 -->
+          <div class="absolute inset-0 bg-black/40 opacity-0
+                      group-hover:opacity-100 transition-opacity
+                      flex items-center justify-center">
+            <span class="text-white font-semibold">
+              ❤️ {post.likes.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      {/each}
+    </div>
+
+    <!-- 帖子详情 -->
+    <div class="min-h-screen bg-black">
+      <img
+        src={post.image}
+        alt={post.title}
+        data-instagram-detail-key={post.id}
+        class="w-full h-auto"
+      />
+
+      <!-- 帖子详情 -->
+      <div class="bg-white p-4">
+        <div class="flex items-center gap-4 mb-4">
+          <button class="flex items-center gap-2">
+            <HeartIcon class="w-6 h-6" />
+            <span>{post.likes}</span>
+          </button>
+          <button>
+            <CommentIcon class="w-6 h-6" />
+          </button>
+          <button>
+            <ShareIcon class="w-6 h-6" />
+          </button>
+        </div>
+
+        <p class="text-sm">
+          <strong>{post.author}</strong> {post.caption}
+        </p>
+
+        <p class="text-xs text-gray-500 mt-2">
+          {post.timestamp}
+        </p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Post {
+      id: string;
+      title: string;
+      image: string;
+      likes: number;
+      author: string;
+      caption: string;
+      timestamp: string;
+    }
+
+    // Instagram 信息流(3列网格)
+    @Component({
+      selector: "app-instagram-feed",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="grid grid-cols-3 gap-1">
+          <div
+            *ngFor="let post of posts"
+            (click)="open(post.id)"
+            class="relative aspect-square cursor-pointer group"
+          >
+            <img
+              [src]="post.image"
+              [alt]="post.title"
+              [attr.data-instagram-gallery-key]="post.id"
+              class="w-full h-full object-cover"
+            />
+            <!-- 悬停叠加层 -->
+            <div class="absolute inset-0 bg-black/40 opacity-0
+                        group-hover:opacity-100 transition-opacity
+                        flex items-center justify-center">
+              <span class="text-white font-semibold">
+                ❤️ {{ post.likes.toLocaleString() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class InstagramFeedComponent {
+      posts: Post[] = POSTS; // 提供帖子数据
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/post', id]);
+      }
+    }
+
+    // 帖子视图
+    @Component({
+      selector: "app-post-view",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-black">
+          <img
+            [src]="post.image"
+            [alt]="post.title"
+            [attr.data-instagram-detail-key]="post.id"
+            class="w-full h-auto"
+          />
+
+          <!-- 帖子详情 -->
+          <div class="bg-white p-4">
+            <div class="flex items-center gap-4 mb-4">
+              <button class="flex items-center gap-2">
+                <svg class="w-6 h-6"><!-- 爱心图标 --></svg>
+                <span>{{ post.likes }}</span>
+              </button>
+              <button>
+                <svg class="w-6 h-6"><!-- 评论图标 --></svg>
+              </button>
+              <button>
+                <svg class="w-6 h-6"><!-- 分享图标 --></svg>
+              </button>
+            </div>
+
+            <p class="text-sm">
+              <strong>{{ post.author }}</strong> {{ post.caption }}
+            </p>
+
+            <p class="text-xs text-gray-500 mt-2">
+              {{ post.timestamp }}
+            </p>
+          </div>
+        </div>
+      `
+    })
+    export class PostViewComponent {
+      @Input() post!: Post;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 照片作品集
+
+从作品网格到全屏:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 作品集网格
+    function PortfolioGrid() {
+      return (
+        <main className="container mx-auto p-4">
+          <div className="grid grid-cols-3 gap-4">
+            {works.map((work) => (
+              <article
+                key={work.id}
+                onClick={() => navigate(`/work/${work.id}`)}
+                className="relative aspect-square rounded-lg overflow-hidden
+                           cursor-pointer hover:scale-105 transition-transform"
+              >
+                <img
+                  src={work.thumbnail}
+                  alt={work.title}
+                  data-instagram-gallery-key={work.id}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-3
+                                bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="text-white font-semibold text-sm">
+                    {work.title}
+                  </h3>
+                  <p className="text-white/80 text-xs">{work.category}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+      );
+    }
+
+    // 作品详情
+    function WorkDetail({ work }) {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <div className="max-w-4xl mx-auto">
+            <img
+              src={work.image}
+              alt={work.title}
+              data-instagram-detail-key={work.id}
+              className="w-full h-auto"
+            />
+
+            <div className="p-6 text-white">
+              <h1 className="text-3xl font-bold mb-2">{work.title}</h1>
+              <p className="text-gray-400 mb-4">{work.category}</p>
+              <p className="text-gray-300 leading-relaxed">
+                {work.description}
+              </p>
+
+              <div className="mt-6 flex gap-4">
+                <span className="text-sm text-gray-400">
+                  {work.date}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {work.client}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 作品集网格 -->
+    <main class="container mx-auto p-4">
+      <div class="grid grid-cols-3 gap-4">
+        {#each works as work}
+          <article
+            on:click={() => goto(`/work/${work.id}`)}
+            class="relative aspect-square rounded-lg overflow-hidden
+                   cursor-pointer hover:scale-105 transition-transform"
+          >
+            <img
+              src={work.thumbnail}
+              alt={work.title}
+              data-instagram-gallery-key={work.id}
+              class="w-full h-full object-cover"
+            />
+            <div class="absolute bottom-0 left-0 right-0 p-3
+                        bg-gradient-to-t from-black/80 to-transparent">
+              <h3 class="text-white font-semibold text-sm">
+                {work.title}
+              </h3>
+              <p class="text-white/80 text-xs">{work.category}</p>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </main>
+
+    <!-- 作品详情 -->
+    <div class="min-h-screen bg-gray-900">
+      <div class="max-w-4xl mx-auto">
+        <img
+          src={work.image}
+          alt={work.title}
+          data-instagram-detail-key={work.id}
+          class="w-full h-auto"
+        />
+
+        <div class="p-6 text-white">
+          <h1 class="text-3xl font-bold mb-2">{work.title}</h1>
+          <p class="text-gray-400 mb-4">{work.category}</p>
+          <p class="text-gray-300 leading-relaxed">
+            {work.description}
+          </p>
+
+          <div class="mt-6 flex gap-4">
+            <span class="text-sm text-gray-400">
+              {work.date}
+            </span>
+            <span class="text-sm text-gray-400">
+              {work.client}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Work {
+      id: string;
+      title: string;
+      thumbnail: string;
+      image: string;
+      category: string;
+      description: string;
+      date: string;
+      client: string;
+    }
+
+    // 作品集网格
+    @Component({
+      selector: "app-portfolio-grid",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <main class="container mx-auto p-4">
+          <div class="grid grid-cols-3 gap-4">
+            <article
+              *ngFor="let work of works"
+              (click)="open(work.id)"
+              class="relative aspect-square rounded-lg overflow-hidden
+                     cursor-pointer hover:scale-105 transition-transform"
+            >
+              <img
+                [src]="work.thumbnail"
+                [alt]="work.title"
+                [attr.data-instagram-gallery-key]="work.id"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute bottom-0 left-0 right-0 p-3
+                          bg-gradient-to-t from-black/80 to-transparent">
+                <h3 class="text-white font-semibold text-sm">
+                  {{ work.title }}
+                </h3>
+                <p class="text-white/80 text-xs">{{ work.category }}</p>
+              </div>
+            </article>
+          </div>
+        </main>
+      `
+    })
+    export class PortfolioGridComponent {
+      works: Work[] = WORKS; // 提供作品数据
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/work', id]);
+      }
+    }
+
+    // 作品详情
+    @Component({
+      selector: "app-work-detail",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <div class="max-w-4xl mx-auto">
+            <img
+              [src]="work.image"
+              [alt]="work.title"
+              [attr.data-instagram-detail-key]="work.id"
+              class="w-full h-auto"
+            />
+
+            <div class="p-6 text-white">
+              <h1 class="text-3xl font-bold mb-2">{{ work.title }}</h1>
+              <p class="text-gray-400 mb-4">{{ work.category }}</p>
+              <p class="text-gray-300 leading-relaxed">
+                {{ work.description }}
+              </p>
+
+              <div class="mt-6 flex gap-4">
+                <span class="text-sm text-gray-400">
+                  {{ work.date }}
+                </span>
+                <span class="text-sm text-gray-400">
+                  {{ work.client }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class WorkDetailComponent {
+      @Input() work!: Work;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 自定义
+
+### 弹簧配置
+
+调整动画的弹性和速度:
+
+```typescript
+instagram({
+  spring: {
+    stiffness: 150,  // 越低越平滑
+    damping: 20      // 越高越快稳定
+  }
+})
+```
+
+## 注意事项
+
+### 区分键属性
+
+- **画廊**: `data-instagram-gallery-key`
+- **详情**: `data-instagram-detail-key`
+- 必须使用不同的属性名
+
+### 布局考虑事项
+
+- 画廊应使用统一网格(推荐3列)
+- 详情页需要足够的内边距
+- 图片应保持宽高比
+
+### 与 Pinterest 过渡的区别
+
+- **Pinterest**: 两个页面都有动画
+- **Instagram**: 只有进入页面有动画
+- **性能**: Instagram 更轻量更快
+- **用途**: Instagram 最适合统一网格
+
+## 无障碍访问
+
+- 支持 ESC 键关闭详情页
+- 增强的键盘导航
+- 减少动效设置时立即过渡
+
+## 最佳实践
+
+### ✅ 应该做的
+
+- 用于统一的3列网格
+- 应用于以图片为中心的内容
+- 提供清晰的关闭按钮
+- 使用移动优化的布局
+
+### ❌ 不应该做的
+
+- 不适合不规则网格
+- 避免用于以文字为主的内容
+- 不要同时扩展太多元素
+- 在慢速网络上使用大图片要小心
