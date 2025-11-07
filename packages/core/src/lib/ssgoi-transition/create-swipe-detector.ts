@@ -43,10 +43,7 @@ export function createSwipeDetector(enabled: boolean) {
     if (deltaX > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipeDetected = true;
 
-      // Reset the flag immediately to allow normal navigation to resume
-      setTimeout(() => {
-        isSwipeDetected = false;
-      }, 0);
+
     }
   };
 
@@ -57,6 +54,11 @@ export function createSwipeDetector(enabled: boolean) {
     isEdgeTouch = false;
     startX = 0;
     startY = 0;
+
+    // Reset the flag immediately to allow normal navigation to resume
+    setTimeout(() => {
+      isSwipeDetected = false;
+    }, 200);
   };
 
   const isSwipePending = () => isSwipeDetected;
