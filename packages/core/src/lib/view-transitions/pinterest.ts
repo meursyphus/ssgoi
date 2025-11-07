@@ -284,7 +284,12 @@ function createAnimationConfig(
   if (isEnterMode) {
     return {
       inAnimation: createDetailIn(
-        { detailRect, galleryRect, pageRect: toNode.getBoundingClientRect(), scrollOffset },
+        {
+          detailRect,
+          galleryRect,
+          pageRect: toNode.getBoundingClientRect(),
+          scrollOffset,
+        },
         toNode,
       ),
       outAnimation: createGalleryOut(
@@ -299,7 +304,12 @@ function createAnimationConfig(
         toNode,
       ),
       outAnimation: createDetailOut(
-        { detailRect, galleryRect, pageRect: fromNode.getBoundingClientRect(), scrollOffset },
+        {
+          detailRect,
+          galleryRect,
+          pageRect: fromNode.getBoundingClientRect(),
+          scrollOffset,
+        },
         fromNode,
       ),
     };

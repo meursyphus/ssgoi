@@ -215,7 +215,12 @@ function createAnimationConfig(
     return {
       isEnterMode: true,
       inAnimation: createDetailIn(
-        { detailRect, galleryRect, pageRect: toNode.getBoundingClientRect(), scrollOffset },
+        {
+          detailRect,
+          galleryRect,
+          pageRect: toNode.getBoundingClientRect(),
+          scrollOffset,
+        },
         toNode,
       ),
       // No outAnimation - gallery stays visible
@@ -224,7 +229,12 @@ function createAnimationConfig(
     return {
       isEnterMode: false,
       outAnimation: createDetailOut(
-        { detailRect, galleryRect, pageRect: fromNode.getBoundingClientRect(), scrollOffset },
+        {
+          detailRect,
+          galleryRect,
+          pageRect: fromNode.getBoundingClientRect(),
+          scrollOffset,
+        },
         fromNode,
       ),
       // No inAnimation - gallery stays visible
