@@ -59,9 +59,9 @@ const BrowserHeader = memo(() => {
       {/* Address bar */}
       <div className="flex-1 flex items-center">
         <div className="flex-1 max-w-md mx-auto">
-          <div className="bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 flex items-center gap-2">
+          <div className="bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 flex items-center gap-2 overflow-hidden">
             <svg
-              className="w-4 h-4 text-gray-400"
+              className="w-4 h-4 text-gray-400 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,8 +73,10 @@ const BrowserHeader = memo(() => {
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
               />
             </svg>
-            <span className="text-gray-400">localhost:3000</span>
-            <span className="text-gray-200">{currentPath}</span>
+            <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
+              <span className="text-gray-400">localhost:3000</span>
+              <span className="text-gray-200">{currentPath}</span>
+            </div>
           </div>
         </div>
       </div>
