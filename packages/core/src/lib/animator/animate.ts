@@ -57,8 +57,8 @@ export function animate(options: AnimateOptions): AnimationControls {
   const zeta = damping / (2 * Math.sqrt(stiffness * mass)); // Damping ratio
 
   // Convergence thresholds
-  const POSITION_THRESHOLD = 0.01;
-  const VELOCITY_THRESHOLD = 0.01;
+  const POSITION_THRESHOLD = 0.1;
+  const VELOCITY_THRESHOLD = 0.1;
 
   // Track time for stability checks
   let settleTime = 0;
