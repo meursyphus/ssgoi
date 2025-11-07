@@ -43,10 +43,10 @@ export function createSwipeDetector(enabled: boolean) {
     if (deltaX > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipeDetected = true;
 
-      // Reset the flag after 500ms to allow normal navigation to resume
+      // Reset the flag immediately to allow normal navigation to resume
       setTimeout(() => {
         isSwipeDetected = false;
-      }, 500);
+      }, 0);
     }
   };
 
