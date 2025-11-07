@@ -1,0 +1,273 @@
+---
+title: "커튼 리빌 전환"
+description: "텍스트 시퀀스와 모양 애니메이션으로 화면을 드러내는 전환"
+nav-title: "커튼 리빌"
+---
+
+# 커튼 리빌 전환
+
+커튼 리빌 전환은 화면을 가리는 오버레이 위에서 텍스트가 순차적으로 나타난 후, 선택한 모양(원, 사각형, 삼각형)이 축소되며 새로운 페이지를 드러냅니다. 브랜드 메시지나 스토리를 전달하면서 극적인 페이지 전환을 연출할 때 적합합니다.
+
+:::info[Credits]
+이 전환은 [@HyeongSeoku](https://github.com/HyeongSeoku)님이 기여해주셨습니다.
+:::
+
+## 데모
+
+<ViewTransitionDemo type="curtain-reveal" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+커튼 리빌은 **브랜드 메시지를 전달**하거나 **중요한 페이지 전환**에서 사용자의 주목을 끌고 싶을 때 사용합니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "브랜드 경험",
+      suitable: "yes",
+      description: "로고, 슬로건 등 브랜드 메시지를 전달",
+    },
+    {
+      label: "중요한 전환",
+      suitable: "yes",
+      description: "랜딩 페이지, 제품 소개 등 임팩트가 필요한 페이지",
+    },
+    {
+      label: "일반 네비게이션",
+      suitable: "no",
+      description: "자주 반복되는 전환에는 과도할 수 있음",
+    },
+    {
+      label: "빠른 탐색",
+      suitable: "no",
+      description: "사용자가 빠르게 정보를 찾을 때는 방해가 될 수 있음",
+    },
+  ]}
+/>
+
+### 왜 이렇게 동작하나요?
+
+텍스트 시퀀스가 먼저 나타나 사용자의 주목을 끌고, 이어서 모양 애니메이션이 새로운 페이지를 드러냅니다. 이는 단순한 화면 전환을 넘어 스토리텔링과 브랜드 경험을 제공합니다.
+
+### 모션 디자인
+
+```
+1. OUT: 이전 페이지가 서서히 사라짐
+2. IN (텍스트 페이즈 - 50%): 텍스트가 순차적으로 나타남
+3. IN (모양 페이즈 - 20%): 선택한 모양이 축소되며 새 페이지를 드러냄
+```
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { curtainReveal } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: curtainReveal({
+        texts: ['환영합니다', 'SSGOI'],
+        background: '#000000'
+      })
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { curtainReveal } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: curtainReveal({
+          texts: ['환영합니다', 'SSGOI'],
+          background: '#000000'
+        })
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { curtainReveal } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: curtainReveal({
+          texts: ['환영합니다', 'SSGOI'],
+          background: '#000000'
+        })
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 옵션
+
+```typescript
+interface CurtainRevealOptions {
+  // 스프링 설정
+  inSpring?: SpringConfig; // IN 애니메이션 (기본: { stiffness: 20, damping: 25 })
+  outSpring?: SpringConfig; // OUT 애니메이션 (기본: { stiffness: 1, damping: 1 })
+
+  // 배경
+  background?: string; // 배경 색상 또는 그라디언트 (기본: '#000000')
+  // 단색: "#000000", "rgb(255, 0, 0)"
+  // 그라디언트: "linear-gradient(to right, #000, #fff)"
+
+  // 텍스트
+  texts?: string[]; // 순차적으로 나타날 텍스트 배열 (기본: [])
+  textStyle?: Partial<CSSStyleDeclaration>; // 텍스트 스타일 커스터마이징
+
+  // 모양
+  shape?: "circle" | "square" | "triangle"; // 드러내는 모양 (기본: 'circle')
+}
+```
+
+### 커스터마이징 예시
+
+```tsx
+// 그라디언트 배경
+curtainReveal({
+  texts: ['Welcome', 'to the future'],
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  shape: 'circle'
+});
+
+// 사각형 모양
+curtainReveal({
+  texts: ['Loading', 'Experience'],
+  shape: 'square',
+  background: '#1a1a1a'
+});
+
+// 커스텀 텍스트 스타일
+curtainReveal({
+  texts: ['Brand', 'Story'],
+  textStyle: {
+    fontSize: '8rem',
+    fontFamily: 'serif',
+    color: '#FFD700',
+    fontWeight: 'bold'
+  }
+});
+
+// 빠른 전환
+curtainReveal({
+  texts: ['Go'],
+  inSpring: { stiffness: 40, damping: 30 },
+  outSpring: { stiffness: 2, damping: 2 }
+});
+
+// 삼각형 모양
+curtainReveal({
+  texts: ['Transform', 'Create', 'Inspire'],
+  shape: 'triangle',
+  background: 'linear-gradient(to bottom, #232526, #414345)'
+});
+```
+
+## 실전 예시
+
+### 브랜드 랜딩 페이지
+
+```tsx
+{
+  from: '/',
+  to: '/brand',
+  transition: curtainReveal({
+    texts: ['Our Story', 'Begins Here'],
+    background: 'linear-gradient(to right, #000000, #434343)',
+    shape: 'circle'
+  })
+}
+```
+
+### 제품 소개 페이지
+
+```tsx
+{
+  from: '/home',
+  to: '/product',
+  transition: curtainReveal({
+    texts: ['Introducing', 'Innovation'],
+    shape: 'square',
+    textStyle: {
+      fontFamily: 'Arial, sans-serif',
+      letterSpacing: '0.1em'
+    }
+  })
+}
+```
+
+### 포트폴리오 전환
+
+```tsx
+{
+  from: '/portfolio',
+  to: '/portfolio/*',
+  transition: curtainReveal({
+    texts: ['Design', 'Develop', 'Deliver'],
+    background: '#0f172a',
+    shape: 'triangle'
+  })
+}
+```
+
+## 다른 전환과의 비교
+
+- **vs 블라인드**: 커튼 리빌은 텍스트 메시지를 전달하며 더 극적
+- **vs 페이드**: 커튼 리빌은 브랜드 스토리텔링에 초점
+- **vs 드릴**: 커튼 리빌은 계층 관계 없이 메시지 전달에 집중
+
+## 성능 고려사항
+
+- 오버레이와 텍스트 요소는 동적으로 생성되고 애니메이션 후 자동 제거됩니다
+- GPU 가속을 활용하여 부드러운 애니메이션을 제공합니다
+- 텍스트가 많을수록 전환 시간이 길어지므로 2-3개의 짧은 텍스트를 권장합니다
+- clip-path 애니메이션은 대부분의 모던 브라우저에서 잘 지원되지만, 구형 브라우저에서는 대체 전환을 고려하세요
+
+## 사용 팁
+
+- **텍스트 개수**: 2-3개의 짧은 텍스트가 가장 효과적입니다
+- **메시지 길이**: 각 텍스트는 1-3단어로 간결하게 유지하세요
+- **사용 빈도**: 자주 반복되는 네비게이션보다는 특별한 순간에 사용하세요
+- **배경 선택**: 브랜드 컬러를 활용하거나 그라디언트로 시각적 흥미를 더하세요

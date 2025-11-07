@@ -35,6 +35,11 @@ const StripDemo = lazy(() =>
 const JaeminDemo = lazy(() =>
   import("./jaemin-demo").then((m) => ({ default: m.JaeminDemo })),
 );
+const CurtainRevealDemo = lazy(() =>
+  import("./curtain-reveal-demo").then((m) => ({
+    default: m.CurtainRevealDemo,
+  })),
+);
 
 export interface ViewTransitionDemoProps {
   type:
@@ -47,7 +52,8 @@ export interface ViewTransitionDemoProps {
     | "slide"
     | "blind"
     | "strip"
-    | "jaemin";
+    | "jaemin"
+    | "curtain-reveal";
 }
 
 // Loading component
@@ -85,6 +91,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <StripDemo />;
       case "jaemin":
         return <JaeminDemo />;
+      case "curtain-reveal":
+        return <CurtainRevealDemo />;
       default:
         return null;
     }
