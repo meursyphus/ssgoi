@@ -66,16 +66,20 @@ function PostCard({ post, router }: PostCardProps) {
       className="cursor-pointer group"
     >
       <div
-        data-instagram-gallery-key={post.id}
-        className="relative overflow-hidden"
+       
+        className="relative"
       >
         <img
-          src={post.coverImage}
+          src={post.coverImage.url}
           alt={post.title}
-          className="w-full h-auto object-cover transition-transform duration-200 group-hover:scale-105"
+          style={{
+            aspectRatio: post.coverImage.aspectRatio
+          }}
+           data-instagram-gallery-key={post.id}
+          className="w-full object-cover transition-transform duration-200"
         />
         {/* Overlay on hover */}
-        <div className="absolute he inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute hidden inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <h3 className="text-white text-xs font-semibold line-clamp-2 mb-1">
               {post.title}

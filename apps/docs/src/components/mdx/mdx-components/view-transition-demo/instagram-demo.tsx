@@ -293,7 +293,7 @@ export function InstagramDemo() {
       {
         from: "/instagram/gallery",
         to: "/instagram/gallery/*",
-        transition: instagram({ spring: { stiffness: 150, damping: 20 } }),
+        transition: instagram(),
         symmetric: true,
       },
     ],

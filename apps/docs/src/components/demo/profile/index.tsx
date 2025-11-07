@@ -8,9 +8,9 @@ import { Feed } from "./feed";
 export default function ProfileDemo() {
   return (
     <SsgoiTransition id="/demo/profile">
-      <div className="min-h-screen bg-gray-950">
+      <div className=" bg-gray-950">
         {/* Profile Header */}
-        <div className="relative">
+        <div className="relative hidden">
           {/* Cover Image */}
           <div className="h-32 relative">
             <img

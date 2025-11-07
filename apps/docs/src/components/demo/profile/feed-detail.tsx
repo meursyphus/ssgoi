@@ -36,7 +36,7 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
   if (!post) {
     return (
       <SsgoiTransition id={`/demo/profile/${postId}`}>
-        <div className="min-h-screen bg-gray-950 px-4 py-8">
+        <div className=" bg-gray-950 px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
       </SsgoiTransition>
@@ -45,16 +45,21 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
 
   return (
     <SsgoiTransition id={`/demo/profile/${postId}`}>
-      <div className="min-h-screen bg-gray-950">
+      <div className=" bg-gray-950">
         {/* Content */}
         <div>
           {/* Image with overlays */}
-          <div className="relative">
+          <div 
+          data-instagram-detail-key={post.id}
+          className="relative">
             <img
-              src={post.coverImage}
+              src={post.coverImage.url}
               alt={post.title}
-              className="w-full h-auto"
-              data-instagram-detail-key={post.id}
+              style={{
+                aspectRatio: post.coverImage.aspectRatio
+              }}
+              className="w-full"
+              
             />
 
             {/* Back button overlay */}
