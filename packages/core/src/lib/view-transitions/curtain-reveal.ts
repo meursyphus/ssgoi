@@ -1,9 +1,14 @@
-import type { SggoiTransition, SpringConfig } from "../types";
+import type {
+  SggoiTransition,
+  SpringConfig,
+  MultiSpringConfig,
+} from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 /** Defaults */
 const DEFAULT_OUT_SPRING: SpringConfig = { stiffness: 1, damping: 1 };
-const DEFAULT_IN_SPRING: SpringConfig = { stiffness: 20, damping: 25 };
+const DEFAULT_TEXT_SPRING: SpringConfig = { stiffness: 15, damping: 10 };
+const DEFAULT_SHAPE_SPRING: SpringConfig = { stiffness: 15, damping: 10 };
 const DEFAULT_BACKGROUND = "#000000";
 const DEFAULT_SHAPE = "circle" as const;
 const CURTAIN_REVEAL_OVERLAY_ID = "CURTAIN_REVEAL_OVERLAY_ID";
@@ -44,8 +49,6 @@ const DEFAULT_SLIDE_STYLE: Partial<CSSStyleDeclaration> = {
 
 //magic Numbers
 const OUT_OPACITY_OFFSET = 0.4;
-const TEXT_PHASE_END = 0.5;
-const SHAPE_PHASE_DURATION = 0.2;
 
 type CurtainShape = "circle" | "square" | "triangle";
 
@@ -59,7 +62,8 @@ interface CurtainRevealOptions {
   background?: string;
   texts?: string[];
   shape?: CurtainShape;
-  inSpring?: SpringConfig;
+  textSpring?: SpringConfig;
+  shapeSpring?: SpringConfig;
   outSpring?: SpringConfig;
   textStyle?: Partial<CSSStyleDeclaration>;
 }
@@ -88,7 +92,8 @@ export const curtainReveal = (
     background = DEFAULT_BACKGROUND,
     texts = [],
     shape = DEFAULT_SHAPE,
-    inSpring = DEFAULT_IN_SPRING,
+    textSpring = DEFAULT_TEXT_SPRING,
+    shapeSpring = DEFAULT_SHAPE_SPRING,
     outSpring = DEFAULT_OUT_SPRING,
     textStyle = {},
   } = options;
@@ -115,7 +120,7 @@ export const curtainReveal = (
       };
     },
 
-    in: (element: HTMLElement) => {
+    in: (element: HTMLElement): MultiSpringConfig => {
       let overlay: HTMLElement | null = null;
       let viewport: HTMLElement | null = null;
       let wrapper: HTMLElement | null = null;
@@ -153,10 +158,47 @@ export const curtainReveal = (
         );
       };
 
-      return {
-        spring: inSpring,
+      const springs = [];
+
+      // Spring 1: Text slide animation (if texts exist)
+      if (texts.length > 0) {
+        springs.push({
+          from: 0,
+          to: 1,
+          spring: textSpring,
+          tick: (progress: number) => {
+            if (!viewport || !wrapper) return;
+
+            const idx = Math.min(
+              Math.floor(progress * texts.length),
+              texts.length - 1,
+            );
+            const currentWidth = widths[idx] ?? 0;
+            const prevWidths = sum(widths.slice(0, idx));
+
+            viewport.style.width = `${currentWidth}px`;
+            wrapper.style.transform = `translateX(-${prevWidths}px)`;
+          },
+        });
+      }
+
+      // Spring 2: Shape reveal animation
+      springs.push({
         from: 0,
         to: 1,
+        spring: shapeSpring,
+        tick: (progress: number) => {
+          if (!overlay || !viewport) return;
+
+          const scale = 1 - progress;
+          overlay.style.clipPath = getClipPath(shape, scale);
+          viewport.style.transform = `scale(${scale})`;
+        },
+      });
+
+      return {
+        springs,
+        schedule: "wait",
 
         prepare: () => {
           document.body.style.overflow = "hidden";
@@ -170,32 +212,7 @@ export const curtainReveal = (
           }
         },
 
-        tick: (progress) => {
-          if (!overlay || !viewport || !wrapper) return;
-
-          if (progress <= TEXT_PHASE_END && texts.length > 0) {
-            const slideProgress = progress / TEXT_PHASE_END;
-            const idx = Math.min(
-              Math.floor(slideProgress * texts.length),
-              texts.length - 1,
-            );
-            const currentWidth = widths[idx] ?? 0;
-            const prevWidths = sum(widths.slice(0, idx));
-
-            viewport.style.width = `${currentWidth}px`;
-            wrapper.style.transform = `translateX(-${prevWidths}px)`;
-          }
-
-          if (progress > TEXT_PHASE_END) {
-            const curtainProgress = Math.max(
-              0,
-              Math.min(1, (progress - TEXT_PHASE_END) / SHAPE_PHASE_DURATION),
-            );
-            const scale = 1 - curtainProgress;
-            overlay.style.clipPath = getClipPath(shape, scale);
-            viewport.style.transform = `scale(${scale})`;
-          }
-        },
+        onStart: () => {},
 
         onEnd: () => {
           overlay?.remove();

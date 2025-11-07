@@ -411,8 +411,6 @@ export function CurtainRevealDemo() {
       texts: ["Transform", "Experience", "SSGOI"],
       background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       shape: "circle",
-      inSpring: { stiffness: 20, damping: 25 },
-      outSpring: { stiffness: 1, damping: 1 },
     }),
   };
 
