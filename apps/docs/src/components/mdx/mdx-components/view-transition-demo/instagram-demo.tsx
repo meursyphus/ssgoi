@@ -14,62 +14,74 @@ import type { RouteConfig } from "../browser-mockup";
 const instagramItems = [
   {
     id: "post-1",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
     likes: 1234,
   },
   {
     id: "post-2",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=400&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=400&fit=crop",
     likes: 892,
   },
   {
     id: "post-3",
-    image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=500&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=500&fit=crop",
     likes: 2341,
   },
   {
     id: "post-4",
-    image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=450&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=450&fit=crop",
     likes: 567,
   },
   {
     id: "post-5",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=550&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=550&fit=crop",
     likes: 1789,
   },
   {
     id: "post-6",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=350&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=350&fit=crop",
     likes: 3421,
   },
   {
     id: "post-7",
-    image: "https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=400&h=480&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=400&h=480&fit=crop",
     likes: 945,
   },
   {
     id: "post-8",
-    image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400&h=420&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400&h=420&fit=crop",
     likes: 2156,
   },
   {
     id: "post-9",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=520&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=520&fit=crop",
     likes: 1678,
   },
   {
     id: "post-10",
-    image: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=400&h=380&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=400&h=380&fit=crop",
     likes: 4321,
   },
   {
     id: "post-11",
-    image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=460&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=460&fit=crop",
     likes: 876,
   },
   {
     id: "post-12",
-    image: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=500&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=500&fit=crop",
     likes: 2987,
   },
 ];
@@ -82,9 +94,7 @@ function InstagramGridPage() {
         {/* Header */}
         <div className="mb-3 px-3 pt-3 text-center">
           <h1 className="text-xl font-bold text-white mb-1">Gallery</h1>
-          <p className="text-gray-400 text-xs">
-            Tap any photo to view details
-          </p>
+          <p className="text-gray-400 text-xs">Tap any photo to view details</p>
         </div>
 
         {/* Instagram 3-Column Masonry Grid */}
@@ -207,8 +217,8 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
             {/* Caption */}
             <div className="mb-3">
               <p className="text-white text-sm">
-                <span className="font-semibold">username</span> Beautiful
-                moment captured! ✨
+                <span className="font-semibold">username</span> Beautiful moment
+                captured! ✨
               </p>
             </div>
 

@@ -310,11 +310,10 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
-           
+
           if (!handlers?.isEnterMode) {
             element.style.zIndex = "-1";
           }
-       
         },
         tick: (progress) => {
           // Use outAnimation if available (exitMode), otherwise stay visible
