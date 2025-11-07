@@ -33,7 +33,7 @@ export default function Demo({ autoPlay = true }: DemoProps) {
     "/demo/pinterest",
     "/demo/pinterest/pin-1",
     "/demo/pinterest",
-    "/demo/profile",  
+    "/demo/profile",
     "/demo/profile/post-1",
   ];
   const currentRouteIndex = useRef(0);
