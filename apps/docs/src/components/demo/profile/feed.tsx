@@ -7,11 +7,6 @@ import { useDemoRouter } from "../router-provider";
 export function Feed() {
   const router = useDemoRouter();
 
-  // Split items into three columns for masonry effect
-  const column1Items = posts.filter((_, index) => index % 3 === 0);
-  const column2Items = posts.filter((_, index) => index % 3 === 1);
-  const column3Items = posts.filter((_, index) => index % 3 === 2);
-
   // Prefetch all post detail pages on mount
   useEffect(() => {
     posts.forEach((post) => {
@@ -28,27 +23,10 @@ export function Feed() {
       </div>
 
       {/* Instagram 3-Column Masonry Grid */}
-      <div className="grid grid-cols-3 gap-1">
-        {/* Column 1 */}
-        <div className="flex flex-col gap-1">
-          {column1Items.map((post) => (
-            <PostCard key={post.id} post={post} router={router} />
-          ))}
-        </div>
-
-        {/* Column 2 */}
-        <div className="flex flex-col gap-1">
-          {column2Items.map((post) => (
-            <PostCard key={post.id} post={post} router={router} />
-          ))}
-        </div>
-
-        {/* Column 3 */}
-        <div className="flex flex-col gap-1">
-          {column3Items.map((post) => (
-            <PostCard key={post.id} post={post} router={router} />
-          ))}
-        </div>
+      <div className="columns-3 gap-1">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} router={router} />
+        ))}
       </div>
     </div>
   );
@@ -63,17 +41,14 @@ function PostCard({ post, router }: PostCardProps) {
   return (
     <article
       onClick={() => router.goto(`/demo/profile/${post.id}`)}
-      className="cursor-pointer group"
+      className="cursor-pointer group break-inside-avoid block mb-1"
     >
       <div className="relative">
         <img
           src={post.coverImage.url}
           alt={post.title}
-          style={{
-            aspectRatio: post.coverImage.aspectRatio,
-          }}
+          className="w-full h-auto object-cover transition-transform duration-200"
           data-instagram-gallery-key={post.id}
-          className="w-full object-cover transition-transform duration-200"
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">

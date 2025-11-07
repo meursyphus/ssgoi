@@ -279,13 +279,12 @@ function createAnimationConfig(
   // Calculate rects based on mode
   const galleryRect = getRect(isEnterMode ? fromNode : toNode, galleryEl);
   const detailRect = getRect(isEnterMode ? toNode : fromNode, detailEl);
-  const pageRect = toNode.getBoundingClientRect();
 
   // Return appropriate animation functions based on mode
   if (isEnterMode) {
     return {
       inAnimation: createDetailIn(
-        { detailRect, galleryRect, pageRect, scrollOffset },
+        { detailRect, galleryRect, pageRect: toNode.getBoundingClientRect(), scrollOffset },
         toNode,
       ),
       outAnimation: createGalleryOut(
@@ -300,7 +299,7 @@ function createAnimationConfig(
         toNode,
       ),
       outAnimation: createDetailOut(
-        { detailRect, galleryRect, pageRect, scrollOffset },
+        { detailRect, galleryRect, pageRect: fromNode.getBoundingClientRect(), scrollOffset },
         fromNode,
       ),
     };

@@ -45,18 +45,16 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
 
   return (
     <SsgoiTransition id={`/demo/profile/${postId}`}>
-      <div className=" bg-gray-950">
+      <div className="bg-gray-950">
         {/* Content */}
         <div>
           {/* Image with overlays */}
-          <div data-instagram-detail-key={post.id} className="relative">
+          <div className="relative">
             <img
               src={post.coverImage.url}
               alt={post.title}
-              style={{
-                aspectRatio: post.coverImage.aspectRatio,
-              }}
-              className="w-full"
+              className="w-full h-auto"
+              data-instagram-detail-key={post.id}
             />
 
             {/* Back button overlay */}
