@@ -1,0 +1,841 @@
+---
+title: "インスタグラムトランジション"
+description: "画像が拡大して詳細画面に遷移するInstagramスタイルのトランジション"
+nav-title: "Instagram"
+---
+
+# インスタグラムトランジション
+
+インスタグラムトランジションは、グリッド内の小さな画像が全画面に拡大する**拡張型トランジション(Expansion Transition)**です。Pinterestトランジションと似ていますが、離脱ページはアニメーションなしでそのまま維持され、進入ページのみアニメーションします。
+
+## デモ
+
+<ViewTransitionDemo type="instagram" />
+
+## UXの原則
+
+### いつ使用しますか?
+
+インスタグラムトランジションは、**画像中心のフィードから詳細ビューへの遷移**時に使用されます。
+
+#### コンテンツ関係別の適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "関連性のないコンテンツ",
+      suitable: "no",
+      description: "拡大する接続点がないため不適切"
+    },
+    {
+      label: "兄弟関係",
+      suitable: "maybe",
+      description: "グリッド内の画像間移動時に検討可能"
+    },
+    {
+      label: "階層関係",
+      suitable: "yes",
+      description: "サムネイル→フルビューのような同じコンテンツの拡大ビューに最適"
+    }
+  ]}
+/>
+
+#### 主な使用ケース
+
+- **ソーシャルメディアフィード**: グリッドフィードから投稿詳細への遷移
+- **フォトギャラリー**: 小さなサムネイルから大きな画像への拡大
+- **ポートフォリオ**: 作品グリッドから詳細ビューへ
+- **商品リスト**: 商品グリッドから詳細ページへ
+
+### なぜこのように動作しますか?
+
+1. **焦点の維持**: 離脱ページがそのまま維持され、どこから来たのかが明確
+2. **パフォーマンス最適化**: 1ページのみアニメーションしてスムーズな遷移を保証
+3. **自然な拡張**: 選択した画像が自然に画面を埋める
+4. **コンテキストの保存**: 背景が維持され、方向感覚の喪失を防止
+
+### モーションデザイン
+
+```
+拡張プロセス(ギャラリー → 詳細):
+1. ギャラリーページはそのまま維持(アニメーションなし)
+2. 詳細ページが選択された画像位置から拡張
+3. clip-pathで画面を埋めながら拡大
+4. 最終的に全画面を占める
+
+縮小プロセス(詳細 → ギャラリー):
+1. 詳細ページはそのまま維持(アニメーションなし)
+2. ギャラリーページがターゲット画像位置へ縮小しながら表示
+3. 不透明度とスケールアニメーションでスムーズに登場
+```
+
+## 基本的な使用方法
+
+### 1. トランジション設定
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { instagram } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: instagram(),
+          symmetric: true
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリのコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { instagram } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: instagram(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { instagram } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery',
+            to: '/gallery/*',
+            transition: instagram(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 要素のマーキング
+
+ギャラリーと詳細ページにそれぞれ異なるdata属性を使用:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // ギャラリーページ(3列グリッド)
+    function Gallery() {
+      return (
+        <div className="grid grid-cols-3 gap-1">
+          {items.map(item => (
+            <Link
+              key={item.id}
+              to={`/gallery/${item.id}`}
+              className="aspect-square"
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                data-instagram-gallery-key={item.id}
+                className="w-full h-full object-cover"
+              />
+            </Link>
+          ))}
+        </div>
+      );
+    }
+
+    // 詳細ページ
+    function PostDetail({ item }) {
+      return (
+        <div className="min-h-screen">
+          <img
+            src={item.image}
+            alt={item.title}
+            data-instagram-detail-key={item.id}
+            className="w-full h-auto"
+          />
+          <div className="p-4">
+            <p className="font-semibold">{item.likes} likes</p>
+            <p className="mt-2">{item.caption}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- ギャラリーページ(3列グリッド) -->
+    <div class="grid grid-cols-3 gap-1">
+      {#each items as item}
+        <a
+          href="/gallery/{item.id}"
+          class="aspect-square"
+        >
+          <img
+            src={item.image}
+            alt={item.title}
+            data-instagram-gallery-key={item.id}
+            class="w-full h-full object-cover"
+          />
+        </a>
+      {/each}
+    </div>
+
+    <!-- 詳細ページ -->
+    <div class="min-h-screen">
+      <img
+        src={item.image}
+        alt={item.title}
+        data-instagram-detail-key={item.id}
+        class="w-full h-auto"
+      />
+      <div class="p-4">
+        <p class="font-semibold">{item.likes} likes</p>
+        <p class="mt-2">{item.caption}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router, RouterLink } from "@angular/router";
+
+    interface GalleryItem {
+      id: string;
+      title: string;
+      image: string;
+      likes: number;
+      caption: string;
+    }
+
+    // ギャラリーページ(3列グリッド)
+    @Component({
+      selector: "app-gallery",
+      standalone: true,
+      imports: [NgFor, RouterLink],
+      template: `
+        <div class="grid grid-cols-3 gap-1">
+          <a
+            *ngFor="let item of items"
+            [routerLink]="['/gallery', item.id]"
+            class="aspect-square"
+          >
+            <img
+              [src]="item.image"
+              [alt]="item.title"
+              [attr.data-instagram-gallery-key]="item.id"
+              class="w-full h-full object-cover"
+            />
+          </a>
+        </div>
+      `
+    })
+    export class GalleryComponent {
+      items: GalleryItem[] = ITEMS; // ギャラリーアイテムを提供
+    }
+
+    // 詳細ページ
+    @Component({
+      selector: "app-post-detail",
+      standalone: true,
+      template: `
+        <div class="min-h-screen">
+          <img
+            [src]="item.image"
+            [alt]="item.title"
+            [attr.data-instagram-detail-key]="item.id"
+            class="w-full h-auto"
+          />
+          <div class="p-4">
+            <p class="font-semibold">{{ item.likes }} likes</p>
+            <p class="mt-2">{{ item.caption }}</p>
+          </div>
+        </div>
+      `
+    })
+    export class PostDetailComponent {
+      @Input() item!: GalleryItem;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 実践例
+
+### 1. Instagramスタイルのフィード
+
+均一な3列グリッド:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 3列グリッド
+    function InstagramFeed() {
+      return (
+        <div className="grid grid-cols-3 gap-1">
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              onClick={() => navigate(`/post/${post.id}`)}
+              className="relative aspect-square cursor-pointer group"
+            >
+              <img
+                src={post.image}
+                alt={post.title}
+                data-instagram-gallery-key={post.id}
+                className="w-full h-full object-cover"
+              />
+              {/* ホバーオーバーレイ */}
+              <div className="absolute inset-0 bg-black/40 opacity-0
+                              group-hover:opacity-100 transition-opacity
+                              flex items-center justify-center">
+                <span className="text-white font-semibold">
+                  ❤️ {post.likes.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // 投稿詳細
+    function PostView({ post }) {
+      return (
+        <div className="min-h-screen bg-black">
+          <img
+            src={post.image}
+            alt={post.title}
+            data-instagram-detail-key={post.id}
+            className="w-full h-auto"
+          />
+
+          {/* 投稿詳細 */}
+          <div className="bg-white p-4">
+            <div className="flex items-center gap-4 mb-4">
+              <button className="flex items-center gap-2">
+                <HeartIcon className="w-6 h-6" />
+                <span>{post.likes}</span>
+              </button>
+              <button>
+                <CommentIcon className="w-6 h-6" />
+              </button>
+              <button>
+                <ShareIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-sm">
+              <strong>{post.author}</strong> {post.caption}
+            </p>
+
+            <p className="text-xs text-gray-500 mt-2">
+              {post.timestamp}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 3列グリッド -->
+    <div class="grid grid-cols-3 gap-1">
+      {#each posts as post}
+        <div
+          on:click={() => goto(`/post/${post.id}`)}
+          class="relative aspect-square cursor-pointer group"
+        >
+          <img
+            src={post.image}
+            alt={post.title}
+            data-instagram-gallery-key={post.id}
+            class="w-full h-full object-cover"
+          />
+          <!-- ホバーオーバーレイ -->
+          <div class="absolute inset-0 bg-black/40 opacity-0
+                      group-hover:opacity-100 transition-opacity
+                      flex items-center justify-center">
+            <span class="text-white font-semibold">
+              ❤️ {post.likes.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      {/each}
+    </div>
+
+    <!-- 投稿詳細 -->
+    <div class="min-h-screen bg-black">
+      <img
+        src={post.image}
+        alt={post.title}
+        data-instagram-detail-key={post.id}
+        class="w-full h-auto"
+      />
+
+      <!-- 投稿詳細 -->
+      <div class="bg-white p-4">
+        <div class="flex items-center gap-4 mb-4">
+          <button class="flex items-center gap-2">
+            <HeartIcon class="w-6 h-6" />
+            <span>{post.likes}</span>
+          </button>
+          <button>
+            <CommentIcon class="w-6 h-6" />
+          </button>
+          <button>
+            <ShareIcon class="w-6 h-6" />
+          </button>
+        </div>
+
+        <p class="text-sm">
+          <strong>{post.author}</strong> {post.caption}
+        </p>
+
+        <p class="text-xs text-gray-500 mt-2">
+          {post.timestamp}
+        </p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Post {
+      id: string;
+      title: string;
+      image: string;
+      likes: number;
+      author: string;
+      caption: string;
+      timestamp: string;
+    }
+
+    // Instagramフィード(3列グリッド)
+    @Component({
+      selector: "app-instagram-feed",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="grid grid-cols-3 gap-1">
+          <div
+            *ngFor="let post of posts"
+            (click)="open(post.id)"
+            class="relative aspect-square cursor-pointer group"
+          >
+            <img
+              [src]="post.image"
+              [alt]="post.title"
+              [attr.data-instagram-gallery-key]="post.id"
+              class="w-full h-full object-cover"
+            />
+            <!-- ホバーオーバーレイ -->
+            <div class="absolute inset-0 bg-black/40 opacity-0
+                        group-hover:opacity-100 transition-opacity
+                        flex items-center justify-center">
+              <span class="text-white font-semibold">
+                ❤️ {{ post.likes.toLocaleString() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class InstagramFeedComponent {
+      posts: Post[] = POSTS; // 投稿データを提供
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/post', id]);
+      }
+    }
+
+    // 投稿ビュー
+    @Component({
+      selector: "app-post-view",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-black">
+          <img
+            [src]="post.image"
+            [alt]="post.title"
+            [attr.data-instagram-detail-key]="post.id"
+            class="w-full h-auto"
+          />
+
+          <!-- 投稿詳細 -->
+          <div class="bg-white p-4">
+            <div class="flex items-center gap-4 mb-4">
+              <button class="flex items-center gap-2">
+                <svg class="w-6 h-6"><!-- ハートアイコン --></svg>
+                <span>{{ post.likes }}</span>
+              </button>
+              <button>
+                <svg class="w-6 h-6"><!-- コメントアイコン --></svg>
+              </button>
+              <button>
+                <svg class="w-6 h-6"><!-- シェアアイコン --></svg>
+              </button>
+            </div>
+
+            <p class="text-sm">
+              <strong>{{ post.author }}</strong> {{ post.caption }}
+            </p>
+
+            <p class="text-xs text-gray-500 mt-2">
+              {{ post.timestamp }}
+            </p>
+          </div>
+        </div>
+      `
+    })
+    export class PostViewComponent {
+      @Input() post!: Post;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. フォトポートフォリオ
+
+作品グリッドからフルスクリーンへ:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // ポートフォリオグリッド
+    function PortfolioGrid() {
+      return (
+        <main className="container mx-auto p-4">
+          <div className="grid grid-cols-3 gap-4">
+            {works.map((work) => (
+              <article
+                key={work.id}
+                onClick={() => navigate(`/work/${work.id}`)}
+                className="relative aspect-square rounded-lg overflow-hidden
+                           cursor-pointer hover:scale-105 transition-transform"
+              >
+                <img
+                  src={work.thumbnail}
+                  alt={work.title}
+                  data-instagram-gallery-key={work.id}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-3
+                                bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="text-white font-semibold text-sm">
+                    {work.title}
+                  </h3>
+                  <p className="text-white/80 text-xs">{work.category}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+      );
+    }
+
+    // 作品詳細
+    function WorkDetail({ work }) {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <div className="max-w-4xl mx-auto">
+            <img
+              src={work.image}
+              alt={work.title}
+              data-instagram-detail-key={work.id}
+              className="w-full h-auto"
+            />
+
+            <div className="p-6 text-white">
+              <h1 className="text-3xl font-bold mb-2">{work.title}</h1>
+              <p className="text-gray-400 mb-4">{work.category}</p>
+              <p className="text-gray-300 leading-relaxed">
+                {work.description}
+              </p>
+
+              <div className="mt-6 flex gap-4">
+                <span className="text-sm text-gray-400">
+                  {work.date}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {work.client}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- ポートフォリオグリッド -->
+    <main class="container mx-auto p-4">
+      <div class="grid grid-cols-3 gap-4">
+        {#each works as work}
+          <article
+            on:click={() => goto(`/work/${work.id}`)}
+            class="relative aspect-square rounded-lg overflow-hidden
+                   cursor-pointer hover:scale-105 transition-transform"
+          >
+            <img
+              src={work.thumbnail}
+              alt={work.title}
+              data-instagram-gallery-key={work.id}
+              class="w-full h-full object-cover"
+            />
+            <div class="absolute bottom-0 left-0 right-0 p-3
+                        bg-gradient-to-t from-black/80 to-transparent">
+              <h3 class="text-white font-semibold text-sm">
+                {work.title}
+              </h3>
+              <p class="text-white/80 text-xs">{work.category}</p>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </main>
+
+    <!-- 作品詳細 -->
+    <div class="min-h-screen bg-gray-900">
+      <div class="max-w-4xl mx-auto">
+        <img
+          src={work.image}
+          alt={work.title}
+          data-instagram-detail-key={work.id}
+          class="w-full h-auto"
+        />
+
+        <div class="p-6 text-white">
+          <h1 class="text-3xl font-bold mb-2">{work.title}</h1>
+          <p class="text-gray-400 mb-4">{work.category}</p>
+          <p class="text-gray-300 leading-relaxed">
+            {work.description}
+          </p>
+
+          <div class="mt-6 flex gap-4">
+            <span class="text-sm text-gray-400">
+              {work.date}
+            </span>
+            <span class="text-sm text-gray-400">
+              {work.client}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+
+    interface Work {
+      id: string;
+      title: string;
+      thumbnail: string;
+      image: string;
+      category: string;
+      description: string;
+      date: string;
+      client: string;
+    }
+
+    // ポートフォリオグリッド
+    @Component({
+      selector: "app-portfolio-grid",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <main class="container mx-auto p-4">
+          <div class="grid grid-cols-3 gap-4">
+            <article
+              *ngFor="let work of works"
+              (click)="open(work.id)"
+              class="relative aspect-square rounded-lg overflow-hidden
+                     cursor-pointer hover:scale-105 transition-transform"
+            >
+              <img
+                [src]="work.thumbnail"
+                [alt]="work.title"
+                [attr.data-instagram-gallery-key]="work.id"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute bottom-0 left-0 right-0 p-3
+                          bg-gradient-to-t from-black/80 to-transparent">
+                <h3 class="text-white font-semibold text-sm">
+                  {{ work.title }}
+                </h3>
+                <p class="text-white/80 text-xs">{{ work.category }}</p>
+              </div>
+            </article>
+          </div>
+        </main>
+      `
+    })
+    export class PortfolioGridComponent {
+      works: Work[] = WORKS; // 作品データを提供
+
+      constructor(private readonly router: Router) {}
+
+      open(id: string) {
+        this.router.navigate(['/work', id]);
+      }
+    }
+
+    // 作品詳細
+    @Component({
+      selector: "app-work-detail",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <div class="max-w-4xl mx-auto">
+            <img
+              [src]="work.image"
+              [alt]="work.title"
+              [attr.data-instagram-detail-key]="work.id"
+              class="w-full h-auto"
+            />
+
+            <div class="p-6 text-white">
+              <h1 class="text-3xl font-bold mb-2">{{ work.title }}</h1>
+              <p class="text-gray-400 mb-4">{{ work.category }}</p>
+              <p class="text-gray-300 leading-relaxed">
+                {{ work.description }}
+              </p>
+
+              <div class="mt-6 flex gap-4">
+                <span class="text-sm text-gray-400">
+                  {{ work.date }}
+                </span>
+                <span class="text-sm text-gray-400">
+                  {{ work.client }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    export class WorkDetailComponent {
+      @Input() work!: Work;
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## カスタマイズ
+
+### スプリング設定
+
+アニメーションの弾性と速度を調整:
+
+```typescript
+instagram({
+  spring: {
+    stiffness: 150,  // 低いほどスムーズ
+    damping: 20      // 高いほど素早く落ち着く
+  }
+})
+```
+
+## 注意事項
+
+### キー属性の区別
+
+- **ギャラリー**: `data-instagram-gallery-key`
+- **詳細**: `data-instagram-detail-key`
+- 必ず異なる属性名を使用
+
+### レイアウトの考慮事項
+
+- ギャラリーは均一なグリッド(3列推奨)
+- 詳細ページは十分な余白が必要
+- 画像はaspect-ratioを維持
+
+### Pinterestトランジションとの違い
+
+- **Pinterest**: 両方のページがアニメーション
+- **Instagram**: 進入ページのみアニメーション
+- **パフォーマンス**: Instagramがより軽量で高速
+- **用途**: Instagramは均一なグリッドに最適
+
+## アクセシビリティ
+
+- ESCキーで詳細ページを閉じる機能をサポート
+- キーボードナビゲーションの改善
+- モーション削減設定時は即座に遷移
+
+## ベストプラクティス
+
+### ✅ すべきこと
+
+- 均一な3列グリッドで使用
+- 画像中心のコンテンツに適用
+- 閉じるボタンを明確に提供
+- モバイル最適化されたレイアウト
+
+### ❌ してはいけないこと
+
+- 不規則なグリッドには不適切
+- テキスト中心のコンテンツには使用を控える
+- 多すぎる要素が同時に拡大しないように
+- 低速ネットワークでの大容量画像使用に注意

@@ -2,34 +2,34 @@ import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
-interface PinterestOptions {
+interface InstagramOptions {
   spring?: Partial<SpringConfig>;
   timeout?: number;
 }
 
 /**
- * Pinterest-style transition for gallery/detail views
+ * Instagram-style transition for gallery/detail views
+ *
+ * Hybrid approach - uses Pinterest's IN animation for enter mode, OUT animation for exit mode.
  *
  * Scenarios:
  * 1. Gallery → Detail (enter mode):
- *    - Gallery item expands to fill the screen with clip-path animation
- *    - From: Small gallery item position
- *    - To: Full detail view
+ *    - Detail animates in with clip-path (from Pinterest IN)
+ *    - Gallery stays visible without animation
  *
  * 2. Detail → Gallery (exit mode):
- *    - Detail view shrinks down to gallery item position
- *    - From: Full detail view
- *    - To: Small gallery item position
+ *    - Detail animates out with clip-path (from Pinterest OUT)
+ *    - Gallery stays visible without animation
  *
  * Usage:
- * - Gallery page: Use data-pinterest-gallery-key="unique-id"
- * - Detail page: Use data-pinterest-detail-key="unique-id"
+ * - Gallery page: Use data-instagram-gallery-key="unique-id"
+ * - Detail page: Use data-instagram-detail-key="unique-id"
  * - The transition auto-detects the mode based on which keys match between pages
  */
 
 type AnimationFunc = (progress: number) => void;
 
-// Animation creators for each transition type
+// IN animation from Pinterest - for enter mode
 function createDetailIn(
   {
     detailRect: fromRect,
@@ -84,80 +84,7 @@ function createDetailIn(
   };
 }
 
-function createGalleryOut(
-  {
-    galleryRect: fromRect,
-    detailRect: toRect,
-    scrollOffset,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
-  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
-  const dx =
-    toRect.left -
-    fromRect.left +
-    (toRect.width - fromRect.width) / 2 +
-    scrollOffset.x;
-  const dy =
-    toRect.top -
-    fromRect.top +
-    (toRect.height - fromRect.height) / 2 +
-    scrollOffset.y;
-
-  // scale 계산
-  const scaleX = toRect.width / fromRect.width;
-  const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  return (progress: number) => {
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-    const t = 1 - progress; // 0 -> 1
-    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
-    node.style.opacity = `${1 - t}`;
-  };
-}
-
-function createGalleryIn(
-  {
-    galleryRect: fromRect,
-    detailRect: toRect,
-    scrollOffset,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
-  const dx =
-    toRect.left -
-    fromRect.left +
-    (toRect.width - fromRect.width) / 2 -
-    scrollOffset.x;
-  const dy =
-    toRect.top -
-    fromRect.top +
-    (toRect.height - fromRect.height) / 2 -
-    scrollOffset.y;
-
-  // scale 계산
-  const scaleX = toRect.width / fromRect.width;
-  const scaleY = toRect.height / fromRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  return (progress: number) => {
-    const t = 1 - progress; // 1 -> 0;
-    const u = progress; // 0 -> 1;
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
-    node.style.opacity = `${u}`;
-  };
-}
-
+// OUT animation from Pinterest - for exit mode
 function createDetailOut(
   {
     detailRect: fromRect,
@@ -212,8 +139,9 @@ function createDetailOut(
 }
 
 interface AnimationHandlers {
-  inAnimation: AnimationFunc;
-  outAnimation: AnimationFunc;
+  isEnterMode: boolean;
+  inAnimation?: AnimationFunc;
+  outAnimation?: AnimationFunc;
 }
 
 function createAnimationConfig(
@@ -223,16 +151,16 @@ function createAnimationConfig(
 ): AnimationHandlers | null {
   // Find detail element first (only one per page)
   const fromDetail = fromNode.querySelector(
-    "[data-pinterest-detail-key]",
+    "[data-instagram-detail-key]",
   ) as HTMLElement | null;
   const toDetail = toNode.querySelector(
-    "[data-pinterest-detail-key]",
+    "[data-instagram-detail-key]",
   ) as HTMLElement | null;
 
   // Early return if multiple details on either page
   if (
-    fromNode.querySelectorAll("[data-pinterest-detail-key]").length > 1 ||
-    toNode.querySelectorAll("[data-pinterest-detail-key]").length > 1
+    fromNode.querySelectorAll("[data-instagram-detail-key]").length > 1 ||
+    toNode.querySelectorAll("[data-instagram-detail-key]").length > 1
   ) {
     return null;
   }
@@ -244,12 +172,12 @@ function createAnimationConfig(
   // Case 1: Gallery → Detail (enter mode)
   if (!fromDetail && toDetail) {
     detailEl = toDetail;
-    const key = detailEl.getAttribute("data-pinterest-detail-key");
+    const key = detailEl.getAttribute("data-instagram-detail-key");
     if (!key) return null;
 
     // Find matching gallery in from page
     galleryEl = fromNode.querySelector(
-      `[data-pinterest-gallery-key="${key}"]`,
+      `[data-instagram-gallery-key="${key}"]`,
     ) as HTMLElement | null;
 
     if (galleryEl) {
@@ -259,12 +187,12 @@ function createAnimationConfig(
   // Case 2: Detail → Gallery (exit mode)
   else if (fromDetail && !toDetail) {
     detailEl = fromDetail;
-    const key = detailEl.getAttribute("data-pinterest-detail-key");
+    const key = detailEl.getAttribute("data-instagram-detail-key");
     if (!key) return null;
 
     // Find matching gallery in to page
     galleryEl = toNode.querySelector(
-      `[data-pinterest-gallery-key="${key}"]`,
+      `[data-instagram-gallery-key="${key}"]`,
     ) as HTMLElement | null;
 
     if (galleryEl) {
@@ -281,8 +209,11 @@ function createAnimationConfig(
   const detailRect = getRect(isEnterMode ? toNode : fromNode, detailEl);
 
   // Return appropriate animation functions based on mode
+  // enterMode: use IN animation (Detail animates in), OUT stays
+  // exitMode: use OUT animation (Detail animates out), IN stays
   if (isEnterMode) {
     return {
+      isEnterMode: true,
       inAnimation: createDetailIn(
         {
           detailRect,
@@ -292,17 +223,11 @@ function createAnimationConfig(
         },
         toNode,
       ),
-      outAnimation: createGalleryOut(
-        { galleryRect, detailRect, scrollOffset },
-        fromNode,
-      ),
+      // No outAnimation - gallery stays visible
     };
   } else {
     return {
-      inAnimation: createGalleryIn(
-        { galleryRect, detailRect, scrollOffset },
-        toNode,
-      ),
+      isEnterMode: false,
       outAnimation: createDetailOut(
         {
           detailRect,
@@ -312,14 +237,15 @@ function createAnimationConfig(
         },
         fromNode,
       ),
+      // No inAnimation - gallery stays visible
     };
   }
 }
 
-export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
+export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 30,
-    damping: options.spring?.damping ?? 10,
+    stiffness: options.spring?.stiffness ?? 150,
+    damping: options.spring?.damping ?? 20,
   };
   const timeout = options.timeout ?? 300;
 
@@ -371,7 +297,10 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       return {
         spring,
         tick: (progress) => {
-          if (handlers) handlers.inAnimation(progress);
+          // Use inAnimation if available (enterMode), otherwise stay visible
+          if (handlers?.inAnimation) {
+            handlers.inAnimation(progress);
+          }
         },
       };
     },
@@ -390,10 +319,16 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         },
         prepare: (element) => {
           prepareOutgoing(element);
-          element.style.zIndex = "-1";
+
+          if (!handlers?.isEnterMode) {
+            element.style.zIndex = "-1";
+          }
         },
         tick: (progress) => {
-          if (handlers) handlers.outAnimation(progress);
+          // Use outAnimation if available (exitMode), otherwise stay visible
+          if (handlers?.outAnimation) {
+            handlers.outAnimation(progress);
+          }
         },
       };
     },

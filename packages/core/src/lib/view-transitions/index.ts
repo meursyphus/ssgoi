@@ -3,6 +3,7 @@ export * from "./drill";
 export * from "./fade";
 export * from "./film";
 export * from "./hero";
+export * from "./instagram";
 export { jaemin } from "./jaemin";
 export * from "./pinterest";
 export * from "./scroll";

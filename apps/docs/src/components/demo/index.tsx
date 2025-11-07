@@ -10,6 +10,7 @@ import ProductDetail from "./products/detail";
 import PinterestList from "./pinterest";
 import PinterestDetail from "./pinterest/detail";
 import Profile from "./profile";
+import FeedDetail from "./profile/feed-detail";
 
 interface DemoProps {
   autoPlay?: boolean;
@@ -33,6 +34,7 @@ export default function Demo({ autoPlay = true }: DemoProps) {
     "/demo/pinterest/pin-1",
     "/demo/pinterest",
     "/demo/profile",
+    "/demo/profile/post-1",
   ];
   const currentRouteIndex = useRef(0);
 
@@ -108,6 +110,9 @@ export default function Demo({ autoPlay = true }: DemoProps) {
 
     // Profile route
     if (section === "profile") {
+      if (id) {
+        return <FeedDetail />;
+      }
       return <Profile />;
     }
 
