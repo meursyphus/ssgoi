@@ -304,7 +304,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: async (element) => {
+    out: async (element, context) => {
       return {
         spring,
         onStart: () => {
@@ -318,8 +318,8 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
           }
         },
         prepare: (element) => {
-          prepareOutgoing(element);
-
+         
+         prepareOutgoing(element, context);
           if (!handlers?.isEnterMode) {
             element.style.zIndex = "-1";
           }
