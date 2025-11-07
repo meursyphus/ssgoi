@@ -65,17 +65,14 @@ function PostCard({ post, router }: PostCardProps) {
       onClick={() => router.goto(`/demo/profile/${post.id}`)}
       className="cursor-pointer group"
     >
-      <div
-       
-        className="relative"
-      >
+      <div className="relative">
         <img
           src={post.coverImage.url}
           alt={post.title}
           style={{
-            aspectRatio: post.coverImage.aspectRatio
+            aspectRatio: post.coverImage.aspectRatio,
           }}
-           data-instagram-gallery-key={post.id}
+          data-instagram-gallery-key={post.id}
           className="w-full object-cover transition-transform duration-200"
         />
         {/* Overlay on hover */}

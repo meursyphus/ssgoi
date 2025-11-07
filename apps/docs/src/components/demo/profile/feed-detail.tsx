@@ -49,17 +49,14 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
         {/* Content */}
         <div>
           {/* Image with overlays */}
-          <div 
-          data-instagram-detail-key={post.id}
-          className="relative">
+          <div data-instagram-detail-key={post.id} className="relative">
             <img
               src={post.coverImage.url}
               alt={post.title}
               style={{
-                aspectRatio: post.coverImage.aspectRatio
+                aspectRatio: post.coverImage.aspectRatio,
               }}
               className="w-full"
-              
             />
 
             {/* Back button overlay */}
