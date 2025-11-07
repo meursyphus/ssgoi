@@ -2,8 +2,8 @@ import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep } from "../utils/sleep";
 
-const DEFAULT_OUT_SPRING = { stiffness: 10, damping: 4 };
-const DEFAULT_IN_SPRING = { stiffness: 11, damping: 4 };
+const DEFAULT_OUT_SPRING = { stiffness: 10, damping: 4.5 };
+const DEFAULT_IN_SPRING = { stiffness: 65, damping: 14 };
 const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
@@ -54,7 +54,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         tick: (progress) => {
           element.style.opacity = progress.toString();
         },
-        prepare: (element) => {
+        prepare: () => {
           prepareOutgoing(element, context);
           element.style.willChange = "opacity";
         },
