@@ -42,8 +42,6 @@ export function createSwipeDetector(enabled: boolean) {
     // Detect swipe: moved right more than threshold and horizontal movement is dominant
     if (deltaX > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipeDetected = true;
-
-
     }
   };
 
