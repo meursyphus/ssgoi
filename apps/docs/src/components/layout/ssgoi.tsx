@@ -16,15 +16,18 @@ export function SsgoiProvider({ children }: SsgoiProviderProps) {
       transitions: isMobile
         ? []
         : [
-            // Apply film transition to non-demo pages
+            // Apply film transition only within non-demo pages
             {
-              from: "*",
+              from: "/non-demo/*",
               to: "/non-demo/*",
               transition: film(),
             },
           ],
 
       middleware(from, to) {
+        if (from === to) {
+          return { from: "none", to: "none" };
+        }
         // Transform paths: non-demo routes get prefixed with /non-demo
         const isDemoRoute = (path: string) => path.includes("/demo");
 
