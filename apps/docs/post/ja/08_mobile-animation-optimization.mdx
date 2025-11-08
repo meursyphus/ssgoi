@@ -1,0 +1,98 @@
+---
+title: "ssgoi 2.5.2: モバイルアニメーション最適化完了 🎉"
+description: "可変FPS環境でもスムーズなアニメーションを!GSAPとSvelte Motionのノウハウを取り入れ、独自のアニメーションエンジンを構築してモバイル性能を大幅に改善しました。"
+thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&h=800&fit=crop"
+date: "2025-11-08"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "ムン・デスン"
+tags: ["performance", "mobile", "optimization", "release"]
+---
+
+こんにちは、ssgoiのメンテナーです。
+
+本日、ssgoi 2.5.2をリリースしました。このバージョンの核心は**モバイル環境の最適化**です。
+
+## なぜ再構築したのか?
+
+以前は、アニメーション実装を外部ライブラリに依存していました。迅速な開発のための選択でした。
+
+しかし、ユーザーからのフィードバックが寄せられ始めました:
+- 「モバイルでカクカクします」
+- 「アプリを切り替えて戻ると壊れます」
+- 「Galaxyデバイスでもたつきます」
+
+使用していたライブラリ(古いバージョン)は、可変FPSを全く考慮していませんでした。
+
+**「自分たちで作ろう。」**
+
+## どのように構築したか
+
+### ステップ1: 優れたコードの研究
+
+GSAP(20k stars)のTicker実装を分析しました:
+- Delta Time Clamping(時間差制限)
+- Lag Smoothing(遅延スムージング)
+- Adaptive Frame Rate(適応フレームレート)
+
+Svelte Motionのスプリング実装も分析しました:
+- Semi-Implicit Euler(半陰的オイラー法)
+- Allen Chouの正規化技法
+
+React Native Reanimatedのネイティブ最適化も参考にしました。
+
+### ステップ2: コア最適化の実装
+
+**半陰的オイラー法**
+```typescript
+// 速度が先、位置が後(順序が重要!)
+velocity += -2*dt*ζ*ω*velocity + dt*ω²*(target - position);
+position += dt*velocity;
+```
+
+**可変FPS防御コード**
+```typescript
+// 1. dtを制限
+dt = Math.min(dt, 0.1);
+
+// 2. バックグラウンド復帰への対応
+if (elapsed > 500) {
+  startTime += elapsed - 33;
+}
+```
+
+**RAF最適化**
+```typescript
+// シングルトンパターン - RAFは一度だけ呼び出し
+ticker.subscribe(animation.update);
+```
+
+### ステップ3: 実機テスト
+
+- iPhone 13, 14 Pro
+- Galaxy S21, S23
+- ローエンドAndroid(Galaxy A12)
+
+すべてのデバイスで安定動作を確認 ✅
+
+アップデートすると自動的に適用されます。
+
+## 詳細な技術文書
+
+最適化プロセスと数値解析理論:
+https://velog.io/@k-svelte-master/optimize-anaimtion-performance-in-mobile
+
+## おわりに
+
+オープンソースライブラリを運営して学んだこと:
+- ユーザーフィードバックが最も重要
+- 優れたコードをたくさん読む必要がある
+- 小さな最適化が集まって大きな違いを生む
+
+皆様のフィードバックのおかげで、より良いライブラリになりました。
+ありがとうございます! 🙏
+
+---
+
+Github: https://github.com/meursyphus/ssgoi
+NPM: https://www.npmjs.com/package/ssgoi

@@ -1,0 +1,98 @@
+---
+title: "ssgoi 2.5.2: 모바일 애니메이션 최적화 완료 🎉"
+description: "가변 FPS 환경에서도 부드러운 애니메이션을! GSAP, Svelte Motion의 노하우를 담아 직접 만든 애니메이션 엔진으로 모바일 성능을 대폭 개선했습니다."
+thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&h=800&fit=crop"
+date: "2025-11-08"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "문대승"
+tags: ["performance", "mobile", "optimization", "release"]
+---
+
+안녕하세요, ssgoi 메인테이너입니다.
+
+오늘 ssgoi 2.5.2를 릴리즈했습니다. 이번 버전의 핵심은 **모바일 환경 최적화**입니다.
+
+## 왜 다시 만들었나?
+
+기존에는 애니메이션 구현을 외부 라이브러리에 의존하고 있었습니다. 빠르게 개발하기 위한 선택이었죠.
+
+하지만 유저 피드백이 들어오기 시작했습니다:
+- "모바일에서 뻑뻑해요"
+- "앱 전환하고 돌아오면 깨져요"
+- "갤럭시에서 버벅여요"
+
+사용 중이던 라이브러리(오래된 버전)는 가변 FPS를 전혀 고려하지 않았습니다.
+
+**"직접 만들자."**
+
+## 어떻게 만들었나?
+
+### 1단계: 좋은 코드 연구
+
+GSAP (20k stars)의 Ticker 구현을 뜯어봤습니다.
+- Delta Time Clamping
+- Lag Smoothing
+- Adaptive Frame Rate
+
+Svelte Motion의 spring 구현도 분석했습니다.
+- Semi-Implicit Euler
+- Allen Chou의 정규화 기법
+
+React Native Reanimated의 네이티브 최적화도 참고했습니다.
+
+### 2단계: 핵심 최적화 구현
+
+**Semi-Implicit Euler**
+```typescript
+// 속도 먼저, 위치 나중 (순서가 중요!)
+velocity += -2*dt*ζ*ω*velocity + dt*ω²*(target - position);
+position += dt*velocity;
+```
+
+**가변 FPS 방어 코드**
+```typescript
+// 1. dt 제한
+dt = Math.min(dt, 0.1);
+
+// 2. 백그라운드 복귀 대응
+if (elapsed > 500) {
+  startTime += elapsed - 33;
+}
+```
+
+**RAF 최적화**
+```typescript
+// 싱글톤 패턴으로 RAF 1번만 호출
+ticker.subscribe(animation.update);
+```
+
+### 3단계: 실기기 테스트
+
+- iPhone 13, 14 Pro
+- Galaxy S21, S23
+- 저사양 안드로이드 (Galaxy A12)
+
+모든 기기에서 안정적으로 작동 확인 ✅
+
+업데이트하면 자동으로 적용됩니다.
+
+## 상세 기술 문서
+
+최적화 과정과 수치해석 이론:
+https://velog.io/@k-svelte-master/optimize-anaimtion-performance-in-mobile
+
+## 마치며
+
+오픈소스 라이브러리를 운영하면서 배운 점:
+- 유저 피드백이 가장 중요하다
+- 좋은 코드를 많이 읽어야 한다
+- 작은 최적화가 모여 큰 차이를 만든다
+
+여러분의 피드백 덕분에 더 나은 라이브러리가 되었습니다.
+감사합니다! 🙏
+
+---
+
+Github: https://github.com/meursyphus/ssgoi
+NPM: https://www.npmjs.com/package/ssgoi
