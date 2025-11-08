@@ -26,8 +26,8 @@ export const slow: SpringConfig = {
 };
 
 export const molasses: SpringConfig = {
-  stiffness: 280,
-  damping: 120,
+  stiffness: 150,
+  damping: 60,
 };
 
 export const config = {
