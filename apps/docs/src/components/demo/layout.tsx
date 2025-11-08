@@ -62,7 +62,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config: SsgoiConfig = useMemo(
     () => ({
-      defaultTransition: fade(),
       transitions: [
         // Pinterest transitions
         {
