@@ -7,7 +7,7 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 /** Defaults */
 const DEFAULT_OUT_SPRING: SpringConfig = { stiffness: 1, damping: 1 };
-const DEFAULT_TEXT_SPRING: SpringConfig = { stiffness: 15, damping: 10 };
+const DEFAULT_TEXT_SPRING: SpringConfig = { stiffness: 15, damping: 6 };
 const DEFAULT_SHAPE_SPRING: SpringConfig = { stiffness: 15, damping: 10 };
 const DEFAULT_BACKGROUND = "#000000";
 const DEFAULT_SHAPE = "circle" as const;
@@ -34,7 +34,6 @@ const DEFAULT_WRAPPER_STYLE: Partial<CSSStyleDeclaration> = {
   display: "flex",
   height: "100%",
   willChange: "transform",
-  transition: "transform 0.3s ease",
 };
 const DEFAULT_SLIDE_STYLE: Partial<CSSStyleDeclaration> = {
   display: "inline-flex",
@@ -158,27 +157,27 @@ export const curtainReveal = (
         );
       };
 
+
+
       const springs = [];
 
-      // Spring 1: Text slide animation (if texts exist)
+      // Spring 1~N: Text slide animation (one spring per text)
       if (texts.length > 0) {
-        springs.push({
-          from: 0,
-          to: 1,
-          spring: textSpring,
-          tick: (progress: number) => {
-            if (!viewport || !wrapper) return;
+        texts.forEach((_, idx) => {
+          springs.push({
+            from: 0,
+            to: 1,
+            spring: textSpring,
+            tick: (progress: number) => {
+              if (!viewport || !wrapper) return;
 
-            const idx = Math.min(
-              Math.floor(progress * texts.length),
-              texts.length - 1,
-            );
-            const currentWidth = widths[idx] ?? 0;
-            const prevWidths = sum(widths.slice(0, idx));
+              const from = sum(widths.slice(0, idx));
+              const to = sum(widths.slice(0, idx + 1));
+              const offset = from + (to - from) * progress;
 
-            viewport.style.width = `${currentWidth}px`;
-            wrapper.style.transform = `translateX(-${prevWidths}px)`;
-          },
+              wrapper.style.transform = `translateX(-${offset}px)`;
+            },
+          });
         });
       }
 
