@@ -157,8 +157,6 @@ export const curtainReveal = (
         );
       };
 
-
-
       const springs = [];
 
       // Spring 1~N: Text slide animation (one spring per text)
