@@ -58,13 +58,14 @@ export function createTransitionCallback<TAnimationValue = number>(
     // because calling transition.out() would start a new pending transition that never resolves
     const outConfig =
       !options?.strategy && transition.out
-        ? await transition.out(element)
+        ? transition.out(element)
         : undefined;
+    
 
     if (!inConfig) {
       return;
     }
-
+  
     // Check if multi-spring animation
     if (isMultiSpring(inConfig)) {
       // Multi-spring path: use AnimationScheduler

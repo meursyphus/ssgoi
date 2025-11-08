@@ -16,6 +16,7 @@ export const transition = <TAnimationValue = number>(
   });
   let cleanup = callback(node);
 
+
   return {
     update(
       newParams: Transition<undefined, TAnimationValue> & {
