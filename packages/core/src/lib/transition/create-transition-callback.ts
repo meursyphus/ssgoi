@@ -60,12 +60,11 @@ export function createTransitionCallback<TAnimationValue = number>(
       !options?.strategy && transition.out
         ? transition.out(element)
         : undefined;
-    
 
     if (!inConfig) {
       return;
     }
-  
+
     // Check if multi-spring animation
     if (isMultiSpring(inConfig)) {
       // Multi-spring path: use AnimationScheduler
