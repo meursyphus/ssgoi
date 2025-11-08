@@ -44,8 +44,8 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
   }
 
   return (
-    <SsgoiTransition id={`/demo/profile/${postId}`}>
-      <div className="bg-gray-950">
+    <SsgoiTransition className="" id={`/demo/profile/${postId}`}>
+      <div className="bg-gray-950 min-h-[760px]">
         {/* Content */}
         <div>
           {/* Image with overlays */}
