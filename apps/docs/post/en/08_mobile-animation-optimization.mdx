@@ -1,0 +1,120 @@
+---
+title: "ssgoi 2.5.2: Mobile Animation Optimization Complete 🎉"
+description: "Smooth animations even in variable FPS environments! We've significantly improved mobile performance by building our own animation engine inspired by GSAP and Svelte Motion."
+thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&h=800&fit=crop"
+date: "2025-11-08"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["performance", "mobile", "optimization", "release"]
+---
+
+Hello, I'm the maintainer of ssgoi.
+
+Today we released ssgoi 2.5.2. The core focus of this version is **mobile environment optimization**.
+
+## Why Rebuild?
+
+Previously, we relied on an external library for animation implementation. It was a choice made for rapid development.
+
+But user feedback started coming in:
+- "It feels janky on mobile"
+- "It breaks when I switch apps and come back"
+- "It stutters on Galaxy devices"
+
+The library we were using (an older version) didn't account for variable FPS at all.
+
+**"Let's build it ourselves."**
+
+## How We Built It
+
+### Step 1: Study Good Code
+
+We dissected GSAP's (20k stars) Ticker implementation:
+- Delta Time Clamping
+- Lag Smoothing
+- Adaptive Frame Rate
+
+We analyzed Svelte Motion's spring implementation:
+- Semi-Implicit Euler
+- Allen Chou's normalization technique
+
+We also referenced React Native Reanimated's native optimizations.
+
+### Step 2: Implement Core Optimizations
+
+**Semi-Implicit Euler**
+```typescript
+// Velocity first, position later (order matters!)
+velocity += -2*dt*ζ*ω*velocity + dt*ω²*(target - position);
+position += dt*velocity;
+```
+
+**Variable FPS Defense Code**
+```typescript
+// 1. Clamp dt
+dt = Math.min(dt, 0.1);
+
+// 2. Handle background return
+if (elapsed > 500) {
+  startTime += elapsed - 33;
+}
+```
+
+**RAF Optimization**
+```typescript
+// Singleton pattern - call RAF only once
+ticker.subscribe(animation.update);
+```
+
+### Step 3: Real Device Testing
+
+- iPhone 13, 14 Pro
+- Galaxy S21, S23
+- Low-end Android (Galaxy A12)
+
+Confirmed stable operation on all devices ✅
+
+## Results
+
+**Bundle Size**: Slightly increased (custom implementation)
+**Performance**: Significantly improved (especially on mobile)
+**Stability**: Background return issues resolved
+
+## Usage
+
+Your existing code works as-is:
+```typescript
+import { transition } from 'ssgoi';
+
+transition({
+  from: elementA,
+  to: elementB,
+  duration: 300
+});
+```
+
+Just update:
+```bash
+npm update ssgoi
+```
+
+## Detailed Technical Documentation
+
+Optimization process and numerical analysis theory:
+https://velog.io/@k-svelte-master/optimize-anaimtion-performance-in-mobile
+
+## Closing Thoughts
+
+Lessons learned from running an open-source library:
+- User feedback is most important
+- You need to read a lot of good code
+- Small optimizations add up to make a big difference
+
+Thanks to your feedback, we've built a better library.
+Thank you! 🙏
+
+---
+
+Github: https://github.com/meursyphus/ssgoi
+NPM: https://www.npmjs.com/package/ssgoi
