@@ -296,10 +296,20 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
 
       return {
         spring,
+        prepare: () => {
+          if (handlers?.inAnimation) {
+            toNode.style.willChange = "transform, clip-path";
+          }
+        },
         tick: (progress) => {
           // Use inAnimation if available (enterMode), otherwise stay visible
           if (handlers?.inAnimation) {
             handlers.inAnimation(progress);
+          }
+        },
+        onEnd: () => {
+          if (handlers?.inAnimation) {
+            toNode.style.willChange = "auto";
           }
         },
       };
@@ -321,6 +331,9 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
           prepareOutgoing(element, context);
           if (!handlers?.isEnterMode) {
             element.style.zIndex = "-1";
+          }
+          if (handlers?.outAnimation) {
+            element.style.willChange = "transform, clip-path";
           }
         },
         tick: (progress) => {
