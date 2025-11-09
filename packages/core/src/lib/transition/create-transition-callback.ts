@@ -295,8 +295,7 @@ export function createTransitionCallback<TAnimationValue = number>(
     runEntrance(element);
 
     return () => {
-      const cloned = element.cloneNode(true) as HTMLElement;
-      runExitTransition(cloned);
+      runExitTransition(element);
     };
   };
 }
