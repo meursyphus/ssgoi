@@ -23,11 +23,17 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
   return {
     in: (element) => ({
       spring,
+      prepare: () => {
+        element.style.willChange = "transform";
+      },
       tick: (progress) => {
         const translateX = isLeft
           ? (1 - progress) * 100 // 100 → 0
           : (1 - progress) * -100; // -100 → 0
         element.style.transform = `translateX(${translateX}%)`;
+      },
+      onEnd: () => {
+        element.style.willChange = "auto";
       },
     }),
     out: (element, context) => ({
@@ -42,6 +48,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
         prepareOutgoing(element, context);
 
         element.style.zIndex = isLeft ? "-1" : "1";
+        element.style.willChange = "transform";
       },
     }),
   };
