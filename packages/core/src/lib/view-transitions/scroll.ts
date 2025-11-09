@@ -50,6 +50,9 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
 
       return {
         spring,
+        prepare: () => {
+          element.style.willChange = "transform";
+        },
         tick: (progress) => {
           // Check if height is calculated
           if (calculatedHeight === null) {
@@ -62,6 +65,9 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
             ? (1 - progress) * calculatedHeight // calculatedHeight → 0
             : (1 - progress) * -calculatedHeight; // -calculatedHeight → 0
           element.style.transform = `translateY(${translateY}px)`;
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
         },
       };
     },
@@ -93,6 +99,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         prepareOutgoing(element);
 
         element.style.zIndex = isUp ? "-1" : "1";
+        element.style.willChange = "transform";
       },
     }),
   };
