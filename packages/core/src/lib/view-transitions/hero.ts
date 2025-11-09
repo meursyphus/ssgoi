@@ -85,6 +85,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
           const originalPosition = toEl.style.position;
           const originalTransformOrigin = toEl.style.transformOrigin;
           const originalZIndex = toEl.style.zIndex;
+          const originalWillChange = toEl.style.willChange;
 
           return {
             toEl,
@@ -96,6 +97,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             originalPosition,
             originalTransformOrigin,
             originalZIndex,
+            originalWillChange,
           };
         })
         .filter(
@@ -111,6 +113,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             originalPosition: string;
             originalTransformOrigin: string;
             originalZIndex: string;
+            originalWillChange: string;
           } => animation !== null && Math.abs(animation.dy) <= maxDistance,
         );
 
@@ -131,6 +134,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             toEl.style.position = "relative";
             toEl.style.transformOrigin = "top left";
             toEl.style.zIndex = "1000";
+            toEl.style.willChange = "transform";
           });
         },
         tick: (progress) => {
@@ -148,11 +152,13 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
               originalPosition,
               originalTransformOrigin,
               originalZIndex,
+              originalWillChange,
             }) => {
               toEl.style.transform = originalTransform;
               toEl.style.position = originalPosition;
               toEl.style.transformOrigin = originalTransformOrigin;
               toEl.style.zIndex = originalZIndex;
+              toEl.style.willChange = originalWillChange;
             },
           );
         },
