@@ -302,5 +302,5 @@ export function createTransitionCallback<TAnimationValue = number>(
         runExitTransition(element);
       }
     };
-  }
+  };
 }
