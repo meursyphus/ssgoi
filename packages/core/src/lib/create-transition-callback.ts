@@ -6,6 +6,10 @@ import {
   type TransitionStrategy,
   type TransitionConfigs,
 } from "./transition-strategy";
+import {
+  globalRemovalDetector,
+  shouldAutoDetectRemoval,
+} from "./removal-detection";
 
 export function createTransitionCallback<TAnimationValue = number>(
   getTransition: () => Transition<undefined, TAnimationValue>,
@@ -148,9 +152,24 @@ export function createTransitionCallback<TAnimationValue = number>(
 
     runEntrance(element);
 
-    return () => {
+    // Manual cleanup function
+    const cleanup = () => {
       const cloned = element.cloneNode(true) as HTMLElement;
       runExitTransition(cloned);
+    };
+
+    // Setup automatic removal detection if enabled
+    let detectorCleanup: (() => void) | undefined;
+    if (shouldAutoDetectRemoval()) {
+      detectorCleanup = globalRemovalDetector.observe(element, cleanup);
+    }
+
+    // Return cleanup function (for framework lifecycle hooks)
+    return () => {
+      // Disconnect detector first to prevent duplicate execution
+      detectorCleanup?.();
+      // Then run cleanup
+      cleanup();
     };
   };
 }

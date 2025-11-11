@@ -14,11 +14,9 @@ function isReact19OrHigher(): boolean {
   if (typeof window === "undefined") return false;
 
   try {
-    const React = (window as Window & { React?: { version?: string } }).React;
-    if (!React || !React.version) return false;
+    const React = (window as Window & { React: { version: string } }).React;
 
-    const version = React.version;
-    const majorVersion = parseInt(version.split(".")[0], 10);
+    const majorVersion = parseInt(React.version.split(".")[0] ?? "0", 10);
 
     return majorVersion >= 19;
   } catch {
