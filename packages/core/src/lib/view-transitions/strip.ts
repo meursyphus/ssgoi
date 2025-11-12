@@ -15,6 +15,7 @@ export const strip = (): SggoiTransition => {
       return {
         spring: DEFAULT_SPRING,
         prepare: (element) => {
+          element.style.willChange = "transform";
           element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ROTATE_Y}deg) translateX(-100%)`;
         },
         wait: async () => {
@@ -30,6 +31,7 @@ export const strip = (): SggoiTransition => {
         },
         onEnd: () => {
           element.style.transform = "";
+          element.style.willChange = "auto";
         },
       };
     },
@@ -43,6 +45,7 @@ export const strip = (): SggoiTransition => {
         spring: DEFAULT_SPRING,
         prepare: (element) => {
           prepareOutgoing(element, context);
+          element.style.willChange = "transform";
         },
         tick: (_progress) => {
           const progress = 1 - _progress;
