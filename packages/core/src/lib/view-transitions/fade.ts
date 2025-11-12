@@ -1,6 +1,6 @@
 import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { sleep } from "../utils/sleep";
+import { sleep, round } from "../utils";
 
 const DEFAULT_OUT_SPRING = { stiffness: 65, damping: 16 };
 const DEFAULT_IN_SPRING = { stiffness: 65, damping: 14 };
@@ -39,7 +39,11 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
           }
         },
         tick: (progress) => {
-          element.style.opacity = progress.toString();
+          const opacity = round(progress, 2);
+          element.style.opacity = opacity.toString();
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
         },
       };
     },
@@ -63,6 +67,8 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
           if (resolveOutAnimation) {
             resolveOutAnimation();
           }
+
+          element.style.willChange = "auto";
         },
       };
     },
