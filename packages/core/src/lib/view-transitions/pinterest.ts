@@ -370,8 +370,14 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
 
       return {
         spring,
+        prepare: () => {
+          toNode.style.willChange = "transform, clip-path, opacity";
+        },
         tick: (progress) => {
           if (handlers) handlers.inAnimation(progress);
+        },
+        onEnd: () => {
+          toNode.style.willChange = "auto";
         },
       };
     },
@@ -391,6 +397,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";
+          element.style.willChange = "transform, clip-path, opacity";
         },
         tick: (progress) => {
           if (handlers) handlers.outAnimation(progress);
