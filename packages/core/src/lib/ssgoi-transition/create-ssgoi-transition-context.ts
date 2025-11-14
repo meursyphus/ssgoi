@@ -152,6 +152,9 @@ export function createSggoiTransitionContext(
   const getTransition = async (path: string, type: "out" | "in") => {
     // Skip animations if iOS swipe-back gesture is detected
     if (swipeDetector.isSwipePending()) {
+      // Reset swipe detection to allow normal navigation after this check
+      swipeDetector.resetSwipeDetection();
+
       return () => ({}); // Return empty transition
     }
 
