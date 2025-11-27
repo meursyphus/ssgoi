@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "description": "React bindings for SSGOI - Native app-like page transitions for React applications",
   "private": false,
   "type": "module",
@@ -54,7 +54,7 @@
     "prepare": "pnpm run build"
   },
   "dependencies": {
-    "@ssgoi/core": "workspace:*"
+    "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
     "react": "^19.0.0",

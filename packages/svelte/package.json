@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/svelte",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "description": "Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit applications",
   "private": false,
   "main": "./dist/index.js",
@@ -21,7 +21,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "dependencies": {
-    "@ssgoi/core": "workspace:*"
+    "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
