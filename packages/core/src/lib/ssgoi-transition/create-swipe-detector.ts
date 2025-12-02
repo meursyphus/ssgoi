@@ -8,8 +8,6 @@ export function createSwipeDetector(enabled: boolean) {
   let startY = 0;
   let isEdgeTouch = false;
 
-  // Minimum horizontal distance to consider it a swipe (in pixels)
-  const SWIPE_THRESHOLD = 50;
   // Maximum distance from left edge to start detecting (in pixels)
   const EDGE_THRESHOLD = 50;
 
@@ -31,7 +29,6 @@ export function createSwipeDetector(enabled: boolean) {
   const handleTouchMove = (e: TouchEvent) => {
     if (!enabled) return;
     if (!isEdgeTouch) return;
-    if (isSwipeDetected) return; // Already detected, skip further checks
 
     const touch = e.touches[0];
     if (!touch) return;
@@ -40,13 +37,13 @@ export function createSwipeDetector(enabled: boolean) {
     const deltaY = touch.clientY - startY;
 
     // Detect swipe: moved right more than threshold and horizontal movement is dominant
-    if (deltaX > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (
+      deltaX > window.outerWidth / 2 - 5 &&
+      Math.abs(deltaX) > Math.abs(deltaY)
+    ) {
       isSwipeDetected = true;
-
-      // Reset the flag after 500ms to allow normal navigation to resume
-      setTimeout(() => {
-        isSwipeDetected = false;
-      }, 500);
+    } else {
+      isSwipeDetected = false;
     }
   };
 
@@ -77,9 +74,19 @@ export function createSwipeDetector(enabled: boolean) {
     window.removeEventListener("touchend", handleTouchEnd);
   };
 
+  let swipeResetCounter = 0;
+  const resetSwipeDetection = () => {
+    swipeResetCounter++;
+    if (swipeResetCounter > 1) {
+      swipeResetCounter = 0;
+      isSwipeDetected = false;
+    }
+  };
+
   return {
     initialize,
     cleanup,
     isSwipePending,
+    resetSwipeDetection,
   };
 }
