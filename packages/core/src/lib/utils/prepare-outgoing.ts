@@ -10,6 +10,6 @@ export const prepareOutgoing = (
 ): void => {
   element.style.position = "absolute";
   element.style.width = "100%";
-  element.style.top = `${-1 * (context?.scroll.y ?? 0)}px`;
+  element.style.top = `${-1 * (context?.scrollOffset?.y ?? 0)}px`;
   element.style.left = "0";
 };
