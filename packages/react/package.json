@@ -54,7 +54,7 @@
     "prepare": "pnpm run build"
   },
   "dependencies": {
-    "@ssgoi/core": "file:../core"
+    "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
     "react": "^19.0.0",
