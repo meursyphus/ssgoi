@@ -30,19 +30,30 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
       in: (element) => ({
         spring,
         prepare: () => {
+          // GPU acceleration hints
           element.style.willChange = opacity
             ? "transform, opacity"
             : "transform";
+          element.style.backfaceVisibility = "hidden";
+          element.style.perspective = "1000px";
+          element.style.transformStyle = "preserve-3d";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
         },
         tick: (progress) => {
-          element.style.transform = `translateX(${(1 - progress) * 100}%)`;
+          // translate3d forces GPU layer
+          element.style.transform = `translate3d(${(1 - progress) * 100}%, 0, 0)`;
           if (opacity) {
-            // TODO: Apply opacity only to content, not the whole element
             element.style.opacity = progress.toString();
           }
         },
         onEnd: () => {
           element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          element.style.perspective = "";
+          element.style.transformStyle = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       }),
       out: (element, context) => ({
@@ -50,14 +61,20 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         prepare: (element) => {
           prepareOutgoing(element, context);
           element.style.zIndex = "-1";
+          // GPU acceleration hints
           element.style.willChange = opacity
             ? "transform, opacity"
             : "transform";
+          element.style.backfaceVisibility = "hidden";
+          element.style.perspective = "1000px";
+          element.style.transformStyle = "preserve-3d";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+          element.style.pointerEvents = "none"; // prevent interaction during exit
         },
         tick: (progress) => {
-          element.style.transform = `translateX(${-(1 - progress) * 20}%)`;
+          element.style.transform = `translate3d(${-(1 - progress) * 20}%, 0, 0)`;
           if (opacity) {
-            // TODO: Apply opacity only to content, not the whole element
             element.style.opacity = progress.toString();
           }
         },
@@ -69,35 +86,50 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
       in: (element) => ({
         spring,
         prepare: () => {
+          // GPU acceleration hints
           element.style.willChange = opacity
             ? "transform, opacity"
             : "transform";
+          element.style.backfaceVisibility = "hidden";
+          element.style.perspective = "1000px";
+          element.style.transformStyle = "preserve-3d";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
         },
         tick: (progress) => {
-          element.style.transform = `translateX(${-(1 - progress) * 20}%)`;
+          element.style.transform = `translate3d(${-(1 - progress) * 20}%, 0, 0)`;
           if (opacity) {
-            // TODO: Apply opacity only to content, not the whole element
             element.style.opacity = progress.toString();
           }
         },
         onEnd: () => {
           element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          element.style.perspective = "";
+          element.style.transformStyle = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       }),
       out: (element, context) => ({
         spring,
         prepare: (element) => {
           prepareOutgoing(element, context);
+          element.style.zIndex = "100";
+          // GPU acceleration hints
           element.style.willChange = opacity
             ? "transform, opacity"
             : "transform";
-          element.style.zIndex = "100";
+          element.style.backfaceVisibility = "hidden";
+          element.style.perspective = "1000px";
+          element.style.transformStyle = "preserve-3d";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+          element.style.pointerEvents = "none";
         },
         tick: (progress) => {
-          element.style.transform = `translateX(${(1 - progress) * 100}%)`;
-
+          element.style.transform = `translate3d(${(1 - progress) * 100}%, 0, 0)`;
           if (opacity) {
-            // TODO: Apply opacity only to content, not the whole element
             element.style.opacity = progress.toString();
           }
         },

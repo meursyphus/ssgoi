@@ -19,6 +19,7 @@ class Ticker {
   // Lag smoothing (mobile optimization)
   private lagThreshold = 500; // ms - detect tab switches, backgrounding
   private adjustedLag = 33; // ms - max time jump to prevent animation skip
+  private maxDeltaTime = 33; // ms - clamp for physics stability (30fps minimum)
 
   // FPS throttling
   private gap = 1000 / 240; // max 240fps
@@ -26,12 +27,18 @@ class Ticker {
 
   private tick = () => {
     const now = Date.now();
-    let frameElapsed = now - this.lastUpdate;
+    const rawFrameElapsed = now - this.lastUpdate; // 실제 경과 시간 (보정 전)
+    let frameElapsed = rawFrameElapsed;
 
     // Lag smoothing: prevent huge time jumps (e.g., tab switch on mobile)
+    // > 500ms: tab switch detected → adjust startTime to maintain sync
     if (frameElapsed > this.lagThreshold || frameElapsed < 0) {
       this.startTime += frameElapsed - this.adjustedLag;
       frameElapsed = this.adjustedLag;
+    }
+    // 33~500ms: clamp for physics stability (drift allowed)
+    else if (frameElapsed > this.maxDeltaTime) {
+      frameElapsed = this.maxDeltaTime;
     }
 
     this.lastUpdate = now;
