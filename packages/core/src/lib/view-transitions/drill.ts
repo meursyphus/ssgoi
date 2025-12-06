@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER_SPRING: SpringConfig = {
@@ -35,23 +35,21 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             ? "transform, opacity"
             : "transform";
           element.style.backfaceVisibility = "hidden";
-          element.style.perspective = "1000px";
-          element.style.transformStyle = "preserve-3d";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
         },
-        tick: (progress) => {
-          // translate3d forces GPU layer
-          element.style.transform = `translate3d(${(1 - progress) * 100}%, 0, 0)`;
+        css: (progress): StyleObject => {
+          const style: StyleObject = {
+            transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
+          };
           if (opacity) {
-            element.style.opacity = progress.toString();
+            style.opacity = progress;
           }
+          return style;
         },
         onEnd: () => {
           element.style.willChange = "auto";
           element.style.backfaceVisibility = "";
-          element.style.perspective = "";
-          element.style.transformStyle = "";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "";
         },
@@ -66,17 +64,18 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             ? "transform, opacity"
             : "transform";
           element.style.backfaceVisibility = "hidden";
-          element.style.perspective = "1000px";
-          element.style.transformStyle = "preserve-3d";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           element.style.pointerEvents = "none"; // prevent interaction during exit
         },
-        tick: (progress) => {
-          element.style.transform = `translate3d(${-(1 - progress) * 20}%, 0, 0)`;
+        css: (progress): StyleObject => {
+          const style: StyleObject = {
+            transform: `translate3d(${-(1 - progress) * 20}%, 0, 0)`,
+          };
           if (opacity) {
-            element.style.opacity = progress.toString();
+            style.opacity = progress;
           }
+          return style;
         },
       }),
     };
@@ -91,22 +90,21 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             ? "transform, opacity"
             : "transform";
           element.style.backfaceVisibility = "hidden";
-          element.style.perspective = "1000px";
-          element.style.transformStyle = "preserve-3d";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
         },
-        tick: (progress) => {
-          element.style.transform = `translate3d(${-(1 - progress) * 20}%, 0, 0)`;
+        css: (progress): StyleObject => {
+          const style: StyleObject = {
+            transform: `translate3d(${-(1 - progress) * 20}%, 0, 0)`,
+          };
           if (opacity) {
-            element.style.opacity = progress.toString();
+            style.opacity = progress;
           }
+          return style;
         },
         onEnd: () => {
           element.style.willChange = "auto";
           element.style.backfaceVisibility = "";
-          element.style.perspective = "";
-          element.style.transformStyle = "";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "";
         },
@@ -121,17 +119,18 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             ? "transform, opacity"
             : "transform";
           element.style.backfaceVisibility = "hidden";
-          element.style.perspective = "1000px";
-          element.style.transformStyle = "preserve-3d";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           element.style.pointerEvents = "none";
         },
-        tick: (progress) => {
-          element.style.transform = `translate3d(${(1 - progress) * 100}%, 0, 0)`;
+        css: (progress): StyleObject => {
+          const style: StyleObject = {
+            transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
+          };
           if (opacity) {
-            element.style.opacity = progress.toString();
+            style.opacity = progress;
           }
+          return style;
         },
       }),
     };
