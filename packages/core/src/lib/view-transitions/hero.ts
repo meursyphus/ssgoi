@@ -176,6 +176,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
             resolver = null;
           }
         },
+        tick: () => {},
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.opacity = "0";
