@@ -19,7 +19,14 @@ interface BlindOptions {
   transitionDelay?: number;
   blindCount?: number;
   direction?: "horizontal" | "vertical";
-  staggerDelay?: number;
+  /**
+   * Progress threshold (0-1) at which each subsequent blind starts
+   * - 0: All blinds start simultaneously (overlap)
+   * - 0.2: Each blind starts when previous reaches 20% progress
+   * - 1: Each blind waits for previous to complete (sequential)
+   * @default 0.15
+   */
+  staggerProgress?: number;
   blindColor?: string;
 }
 
@@ -30,7 +37,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
     transitionDelay = DEFAULT_TRANSITION_DELAY,
     blindCount = DEFAULT_BLIND_COUNT,
     direction = DEFAULT_DIRECTION,
-    staggerDelay = 100,
+    staggerProgress = 0.15,
     blindColor = DEFAULT_BLIND_COLOR,
   } = options;
 
@@ -123,7 +130,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
           from: 0,
           to: 1,
           spring: outSpring,
-          offset: index * staggerDelay,
+          // First blind triggers immediately, others trigger when previous passes staggerProgress
+          triggerAt: index === 0 ? 0 : staggerProgress,
           tick: (progress: number) => {
             if (!blindsData) return;
             const blind = blindsData.blinds[index];
@@ -141,7 +149,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
       return {
         springs,
-        schedule: "chain",
+        schedule: "overlap",
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
@@ -169,7 +177,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
           from: 1,
           to: 0,
           spring: inSpring,
-          offset: index * staggerDelay,
+          // First blind triggers immediately, others trigger when previous passes staggerProgress
+          triggerAt: index === 0 ? 0 : staggerProgress,
           tick: (progress: number) => {
             if (!blindsData) return;
             const blind = blindsData.blinds[index];
@@ -187,7 +196,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
       return {
         springs,
-        schedule: "chain",
+        schedule: "overlap",
         prepare: (element) => {
           element.style.position = "relative";
           element.style.zIndex = "0";

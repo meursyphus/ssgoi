@@ -46,6 +46,6 @@ export async function normalizeToMultiSpring(
           : undefined,
       },
     ],
-    schedule: "wait",
+    schedule: "parallel",
   };
 }

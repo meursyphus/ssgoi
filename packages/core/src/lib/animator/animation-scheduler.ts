@@ -2,7 +2,7 @@ import { Animator } from ".";
 import type {
   MultiSpringConfig,
   SpringItem,
-  NormalizedScheduleEntry,
+  NormalizedSpringEntry,
   AnimationController,
   AnimationState,
 } from "../types";
@@ -14,27 +14,29 @@ type AnimatorEntry = {
   id: string;
   item: SpringItem;
   animator: Animator;
-  startTime: number | null;
+  started: boolean;
 };
 
 /**
  * AnimationScheduler - Coordinates multiple spring animations
  *
- * Manages the lifecycle and timing of multiple spring animations.
- * Supports three scheduling strategies:
- * - overlap: All springs start immediately (parallel)
- * - wait: Each spring waits for previous to complete (sequential)
- * - chain: Springs start with offset delays
+ * Manages the lifecycle and timing of multiple spring animations using
+ * progress-based scheduling. Each spring starts when the previous spring's
+ * normalized progress reaches the specified startProgress threshold.
+ *
+ * Schedule types are syntactic sugar:
+ * - overlap: All springs start at startProgress: 0
+ * - wait: Each spring starts at startProgress: 1 (after previous completes)
  */
 export class AnimationScheduler implements AnimationController {
   private config: MultiSpringConfig;
   private animators: Map<string, AnimatorEntry> = new Map();
+  private normalizedEntries: Map<string, NormalizedSpringEntry> = new Map();
   private springOrder: string[] = [];
   private completedCount = 0;
   private completedAnimators = new Set<string>();
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
-  private timeoutIds: number[] = [];
 
   constructor(config: MultiSpringConfig) {
     this.config = config;
@@ -46,13 +48,38 @@ export class AnimationScheduler implements AnimationController {
   }
 
   private initializeAnimators(): void {
-    this.config.springs.forEach((item) => {
+    const schedule = this.config.schedule ?? "overlap";
+
+    this.config.springs.forEach((item, index) => {
       const id = this.generateId();
+
+      // Normalize triggerAt from schedule type
+      let triggerAt: number;
+      if (schedule === "parallel") {
+        triggerAt = 0;
+      } else if (schedule === "wait") {
+        // First spring triggers immediately, others wait for previous to complete
+        triggerAt = index === 0 ? 0 : 1;
+      } else {
+        // overlap: use item.triggerAt or default to 0
+        triggerAt = item.triggerAt ?? 0;
+      }
+
+      // Wrap tick to track progress and trigger next spring
+      const originalTick = item.tick;
+      const wrappedTick = originalTick
+        ? (position: number) => {
+            originalTick(position);
+            this.checkAndStartNextSpring(id, position);
+          }
+        : undefined;
+
+      // For CSS animations, we need a different approach - check on complete
       const animator = new Animator({
         from: item.from,
         to: item.to,
         spring: item.spring,
-        tick: item.tick,
+        tick: wrappedTick,
         css: item.css,
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
@@ -62,50 +89,53 @@ export class AnimationScheduler implements AnimationController {
         id,
         item,
         animator,
-        startTime: null,
+        started: false,
       });
+      this.normalizedEntries.set(id, { id, triggerAt });
       this.springOrder.push(id);
     });
   }
 
-  private normalizeSchedule(
-    direction: "forward" | "backward",
-  ): NormalizedScheduleEntry[] {
-    const schedule = this.config.schedule ?? "overlap";
+  /**
+   * Check if next spring should start based on current spring's progress
+   */
+  private checkAndStartNextSpring(
+    currentId: string,
+    currentPosition: number,
+  ): void {
+    const currentEntry = this.animators.get(currentId);
+    if (!currentEntry) return;
 
-    return this.springOrder.map((id, index) => {
-      const entry = this.animators.get(id);
-      if (!entry) {
-        throw new Error(
-          `AnimationScheduler: animator with id "${id}" not found`,
-        );
+    // Calculate normalized progress (0~1)
+    const from = currentEntry.item.from ?? 0;
+    const to = currentEntry.item.to ?? 1;
+    const range = to - from;
+    const normalizedProgress =
+      range !== 0 ? (currentPosition - from) / range : 1;
+
+    // Find next spring in current direction
+    const currentIndex = this.springOrder.indexOf(currentId);
+    const nextId =
+      this.direction === "forward"
+        ? this.springOrder[currentIndex + 1]
+        : this.springOrder[currentIndex - 1];
+
+    if (!nextId) return;
+
+    const nextEntry = this.animators.get(nextId);
+    if (!nextEntry || nextEntry.started) return;
+
+    const nextNormalized = this.normalizedEntries.get(nextId);
+    if (!nextNormalized) return;
+
+    // Trigger next spring when progress threshold is reached
+    if (normalizedProgress >= nextNormalized.triggerAt) {
+      if (this.direction === "forward") {
+        this.startAnimator(nextId);
+      } else {
+        this.startBackwardAnimator(nextId);
       }
-
-      if (schedule === "overlap") {
-        return { type: "offset" as const, id, delay: 0 };
-      }
-
-      if (schedule === "wait") {
-        if (direction === "forward" && index === 0) {
-          return { type: "offset" as const, id, delay: 0 };
-        }
-        if (direction === "backward" && index === this.springOrder.length - 1) {
-          return { type: "offset" as const, id, delay: 0 };
-        }
-        return { type: "wait" as const, id };
-      }
-
-      // Chain mode
-      const offset = entry.item.offset ?? 0;
-      if (direction === "forward") {
-        return { type: "offset" as const, id, delay: offset };
-      }
-
-      const maxOffset = Math.max(
-        ...Array.from(this.animators.values()).map((e) => e.item.offset ?? 0),
-      );
-      return { type: "offset" as const, id, delay: maxOffset - offset };
-    });
+    }
   }
 
   private onAnimatorComplete(id: string): void {
@@ -119,54 +149,57 @@ export class AnimationScheduler implements AnimationController {
     entry.item.onComplete?.();
     this.config.onProgress?.(this.completedCount, this.config.springs.length);
 
-    this.handleWaitModeChaining(id);
+    // For CSS animations or startProgress: 1, trigger next on complete
+    this.triggerNextOnComplete(id);
 
     if (this.completedCount === this.config.springs.length) {
       this.config.onEnd?.();
     }
   }
 
-  private handleWaitModeChaining(completedId: string): void {
-    if (this.config.schedule !== "wait") {
-      return;
-    }
-
+  /**
+   * Trigger next spring when triggerAt is 1 (wait mode)
+   * This handles both CSS animations and tick-based animations
+   */
+  private triggerNextOnComplete(completedId: string): void {
     const currentIndex = this.springOrder.indexOf(completedId);
 
+    const nextId =
+      this.direction === "forward"
+        ? this.springOrder[currentIndex + 1]
+        : this.springOrder[currentIndex - 1];
+
+    if (!nextId) return;
+
+    const nextEntry = this.animators.get(nextId);
+    if (!nextEntry || nextEntry.started) return;
+
+    const nextNormalized = this.normalizedEntries.get(nextId);
+    if (!nextNormalized || nextNormalized.triggerAt < 1) return;
+
+    // triggerAt is 1, so trigger on complete
     if (this.direction === "forward") {
-      const nextId = this.springOrder[currentIndex + 1];
-      if (nextId) {
-        const nextEntry = this.animators.get(nextId);
-        if (nextEntry && nextEntry.startTime === null) {
-          this.startAnimator(nextId);
-        }
-      }
+      this.startAnimator(nextId);
     } else {
-      const prevId = this.springOrder[currentIndex - 1];
-      if (prevId) {
-        const prevEntry = this.animators.get(prevId);
-        if (prevEntry && prevEntry.startTime === null) {
-          this.startBackwardAnimator(prevId);
-        }
-      }
+      this.startBackwardAnimator(nextId);
     }
   }
 
   private startAnimator(id: string): void {
     const entry = this.animators.get(id);
-    if (!entry || entry.startTime !== null) {
+    if (!entry || entry.started) {
       return;
     }
-    entry.startTime = Date.now();
+    entry.started = true;
     entry.animator.forward();
   }
 
   private startBackwardAnimator(id: string): void {
     const entry = this.animators.get(id);
-    if (!entry || entry.startTime !== null) {
+    if (!entry || entry.started) {
       return;
     }
-    entry.startTime = Date.now();
+    entry.started = true;
     entry.animator.backward();
   }
 
@@ -175,23 +208,14 @@ export class AnimationScheduler implements AnimationController {
     this.direction = "forward";
     this.completedCount = 0;
     this.completedAnimators.clear();
+    this.animators.forEach((entry) => (entry.started = false));
     this.config.onStart?.();
 
-    const entries = this.normalizeSchedule("forward");
-    entries.forEach((entry) => {
-      if (entry.type === "wait") {
-        return;
-      }
-      if (entry.delay === 0) {
-        this.startAnimator(entry.id);
-      } else {
-        const timeoutId = window.setTimeout(
-          () => this.startAnimator(entry.id),
-          entry.delay,
-        );
-        this.timeoutIds.push(timeoutId);
-      }
-    });
+    // Start first spring immediately
+    const firstId = this.springOrder[0];
+    if (firstId) {
+      this.startAnimator(firstId);
+    }
   }
 
   backward(): void {
@@ -199,31 +223,20 @@ export class AnimationScheduler implements AnimationController {
     this.direction = "backward";
     this.completedCount = 0;
     this.completedAnimators.clear();
+    this.animators.forEach((entry) => (entry.started = false));
     this.config.onStart?.();
 
-    const entries = this.normalizeSchedule("backward");
-    entries.forEach((entry) => {
-      if (entry.type === "wait") {
-        return;
-      }
-      if (entry.delay === 0) {
-        this.startBackwardAnimator(entry.id);
-      } else {
-        const timeoutId = window.setTimeout(
-          () => this.startBackwardAnimator(entry.id),
-          entry.delay,
-        );
-        this.timeoutIds.push(timeoutId);
-      }
-    });
+    // Start last spring immediately (for backward)
+    const lastId = this.springOrder[this.springOrder.length - 1];
+    if (lastId) {
+      this.startBackwardAnimator(lastId);
+    }
   }
 
   stop(): void {
-    this.timeoutIds.forEach((id) => clearTimeout(id));
-    this.timeoutIds = [];
     this.animators.forEach((entry) => {
       entry.animator.stop();
-      entry.startTime = null;
+      entry.started = false;
     });
   }
 
@@ -231,7 +244,7 @@ export class AnimationScheduler implements AnimationController {
     this.direction = this.direction === "forward" ? "backward" : "forward";
 
     this.animators.forEach((entry) => {
-      if (entry.startTime === null) {
+      if (!entry.started) {
         return;
       }
 

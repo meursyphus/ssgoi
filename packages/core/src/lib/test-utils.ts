@@ -34,7 +34,6 @@ export function createMockSpringItem(
     tick: vi.fn(),
     onStart: vi.fn(),
     onComplete: vi.fn(),
-    offset: 0,
     ...overrides,
   };
 }

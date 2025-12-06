@@ -12,11 +12,11 @@ export type StyleObject = Record<string, number | string>;
 
 /**
  * Schedule strategy for multi-spring animations
- * - overlap: All springs start immediately (parallel execution)
- * - wait: Each spring waits for previous to complete (sequential)
- * - chain: Springs start with offset delays
+ * - parallel: All springs start simultaneously (triggerAt: 0)
+ * - wait: Each spring starts after previous completes (triggerAt: 1)
+ * - overlap: Custom staggered timing using triggerAt on each SpringItem
  */
-export type ScheduleType = "overlap" | "wait" | "chain";
+export type ScheduleType = "parallel" | "wait" | "overlap";
 
 /**
  * Base configuration shared by both single and multi-spring transitions
@@ -137,10 +137,23 @@ export type SpringItem = {
   onComplete?: () => void;
 
   /**
-   * Delay offset in milliseconds before this spring starts
-   * Only applies to 'chain' schedule mode
+   * Progress threshold (0-1) at which this spring triggers.
+   * Only used when schedule is "overlap".
+   *
+   * Fires when the previous spring's normalized progress passes this point.
+   *
+   * @example
+   * // Staggered animation: each spring triggers when previous passes 30%
+   * {
+   *   schedule: "overlap",
+   *   springs: [
+   *     { tick: (p) => ..., triggerAt: 0 },   // first triggers immediately
+   *     { tick: (p) => ..., triggerAt: 0.3 }, // triggers when prev passes 30%
+   *     { tick: (p) => ..., triggerAt: 0.3 }, // triggers when prev passes 30%
+   *   ]
+   * }
    */
-  offset?: number;
+  triggerAt?: number;
 };
 
 /**
@@ -294,32 +307,17 @@ export type SsgoiContext = (
 ) => Transition & { key: TransitionKey };
 
 /**
- * Normalized schedule entry for internal processing (discriminated union)
- * Used by AnimationScheduler to unify different schedule strategies
+ * Normalized spring entry for internal processing
+ * All schedule strategies are converted to triggerAt values
  * @internal
  */
-export type NormalizedScheduleEntry = OffsetScheduleEntry | WaitScheduleEntry;
-
-/**
- * Offset-based schedule entry (overlap/chain modes)
- * - delay=0: immediate start (overlap)
- * - delay>0: delayed start with fixed timing (chain)
- * @internal
- */
-export type OffsetScheduleEntry = {
-  type: "offset";
+export type NormalizedSpringEntry = {
   id: string;
-  delay: number; // milliseconds
-};
-
-/**
- * Wait-based schedule entry (wait mode)
- * Dynamic dependency - starts after previous spring completes
- * @internal
- */
-export type WaitScheduleEntry = {
-  type: "wait";
-  id: string;
+  /**
+   * Progress threshold (0-1) at which this spring triggers
+   * Fires when previous spring's normalized progress passes this point
+   */
+  triggerAt: number;
 };
 
 /**
