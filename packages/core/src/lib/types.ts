@@ -76,6 +76,10 @@ export type SingleSpringConfig = BaseTransitionConfig & {
 
 /**
  * Individual spring item in a multi-spring animation
+ *
+ * Supports two animation modes (mutually exclusive):
+ * - tick: RAF-based animation with callback on each frame
+ * - css: Web Animation API with CSS style generation (GPU accelerated)
  */
 export type SpringItem = {
   from?: number; // Default: 0 for in, 1 for out
@@ -113,7 +117,21 @@ export type SpringItem = {
    *   element.style.height = height * progress  // WRITE only
    * }
    */
-  tick: (progress: number) => void;
+  tick?: (progress: number) => void;
+
+  /**
+   * Style generator for Web Animation API mode
+   *
+   * When provided, the animation uses Web Animation API instead of RAF.
+   * Spring physics are pre-computed and converted to keyframes.
+   *
+   * @param progress - Current progress value (0 to 1)
+   * @returns Style object for Web Animation API
+   */
+  css?: {
+    element: HTMLElement;
+    style: (progress: number) => StyleObject;
+  };
 
   onStart?: () => void;
   onComplete?: () => void;
@@ -333,6 +351,9 @@ export type MultiAnimationState = {
   completed: number;
   total: number;
   direction: "forward" | "backward";
+  // Position/velocity from first spring (for reversal support in normalized single-spring)
+  position: number;
+  velocity: number;
 };
 
 /**

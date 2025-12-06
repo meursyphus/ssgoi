@@ -53,6 +53,7 @@ export class AnimationScheduler implements AnimationController {
         to: item.to,
         spring: item.spring,
         tick: item.tick,
+        css: item.css,
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
       });
@@ -262,11 +263,44 @@ export class AnimationScheduler implements AnimationController {
   }
 
   getCurrentState(): AnimationState {
+    // TODO: Currently uses only the first animator's position/velocity.
+    // Need to consider how to handle multi-spring with different progress per spring:
+    // - Use average values?
+    // - Use the most/least progressed spring?
+    // - Use first spring only? (current approach, works for normalized single-spring)
+    const firstId = this.springOrder[0];
+    const firstEntry = firstId ? this.animators.get(firstId) : undefined;
+    const firstState = firstEntry?.animator.getCurrentState();
+
     return {
       type: "multi" as const,
       completed: this.completedCount,
       total: this.config.springs.length,
       direction: this.direction,
+      position: firstState?.type === "single" ? firstState.position : 0,
+      velocity: firstState?.type === "single" ? firstState.velocity : 0,
     };
+  }
+
+  /**
+   * Create AnimationScheduler from existing state
+   * Used for resuming animations from interrupted state (e.g., reversing mid-animation)
+   *
+   * For single-spring configs (normalized from SingleSpringConfig), this allows
+   * smooth reversal by preserving position and velocity.
+   */
+  static fromState(
+    state: { position: number; velocity: number },
+    config: MultiSpringConfig,
+  ): AnimationScheduler {
+    const scheduler = new AnimationScheduler(config);
+
+    // Apply state to all animators (for single-spring normalized configs, there's only one)
+    scheduler.animators.forEach((entry) => {
+      entry.animator.setValue(state.position);
+      entry.animator.setVelocity(state.velocity);
+    });
+
+    return scheduler;
   }
 }
