@@ -110,7 +110,7 @@ export const createDefaultStrategy = (
             },
             from, // OUT animation's from
             to, // OUT animation's to
-            direction: "backward", // Will actually go 0→1
+            direction: "backward", // Will actually go 0→1 (backward means toward 'from')
           };
         }
       }
@@ -186,7 +186,6 @@ export const createDefaultStrategy = (
         // Single-spring: use IN config but reverse direction
         if (configs.in) {
           const inConfig = await configs.in;
-
           // Extract from/to with defaults for in transition (single-spring)
           const { from = 0, to = 1 } = inConfig as SingleSpringConfig;
           return {
@@ -197,7 +196,7 @@ export const createDefaultStrategy = (
             },
             from, // IN animation's from
             to, // IN animation's to
-            direction: "backward", // Will actually go 1→0
+            direction: "backward", // Will actually go 1→0 (backward means toward 'from')
           };
         }
       }

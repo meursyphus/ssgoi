@@ -58,8 +58,16 @@ export function animate(options: AnimationOptions): AnimationControls {
     throw new Error("Cannot use both 'tick' and 'css' options together");
   }
 
+  // No animation mode - complete immediately
   if (!tick && !css) {
-    throw new Error("Either 'tick' or 'css' option is required");
+    onStart?.();
+    onComplete();
+    return {
+      stop: () => {},
+      getPosition: () => to,
+      getVelocity: () => 0,
+      isRunning: () => false,
+    };
   }
 
   // CSS mode

@@ -243,7 +243,7 @@ export class AnimationScheduler implements AnimationController {
 
       if (isCompleted) {
         const newAnimator = Animator.fromState(
-          { position: 1 },
+          { position: 1, velocity: 0 },
           {
             from: entry.item.to ?? 1,
             to: entry.item.from ?? 0,

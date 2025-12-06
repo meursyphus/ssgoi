@@ -39,10 +39,12 @@ export class Animator implements AnimationController {
       style: (progress: number) => StyleObject;
     };
     onComplete: () => void;
-    onStart: () => void;
+    onStart?: () => void;
   };
   private controls: AnimationControls | null = null;
   private isAnimating = false;
+  private currentValue: number;
+  private currentVelocity: number = 0;
 
   constructor(options: AnimatorOptions) {
     if (options.tick && options.css) {
@@ -56,28 +58,25 @@ export class Animator implements AnimationController {
       tick: options.tick,
       css: options.css,
       onComplete: options.onComplete ?? (() => {}),
-      onStart: options.onStart ?? (() => {}),
+      onStart: options.onStart,
     };
+    this.currentValue = this.options.from;
   }
 
-  private runAnimation(reverse: boolean = false) {
+  private runAnimation(targetValue: number) {
     this.isAnimating = true;
 
-    const from = reverse ? this.options.to : this.options.from;
-    const to = reverse ? this.options.from : this.options.to;
-
-    const currentPos = this.controls?.getPosition() ?? from;
-    const currentVel = this.controls?.getVelocity() ?? 0;
-
     this.controls = animate({
-      from: currentPos,
-      to,
+      from: this.currentValue,
+      to: targetValue,
       spring: this.options.spring,
-      velocity: currentVel,
+      velocity: this.currentVelocity,
       tick: this.options.tick,
       css: this.options.css,
       onStart: this.options.onStart,
       onComplete: () => {
+        this.currentValue = targetValue;
+        this.currentVelocity = 0;
         this.isAnimating = false;
         this.controls = null;
         this.options.onComplete();
@@ -87,12 +86,12 @@ export class Animator implements AnimationController {
 
   forward(): void {
     this.stop();
-    this.runAnimation(false);
+    this.runAnimation(this.options.to);
   }
 
   backward(): void {
     this.stop();
-    this.runAnimation(true);
+    this.runAnimation(this.options.from);
   }
 
   reverse(): void {
@@ -102,12 +101,15 @@ export class Animator implements AnimationController {
 
     if (this.isAnimating) {
       this.stop();
-      this.runAnimation(false);
+      this.runAnimation(this.options.to);
     }
   }
 
   stop(): void {
     if (this.controls) {
+      // Save current state before stopping
+      this.currentValue = this.controls.getPosition();
+      this.currentVelocity = this.controls.getVelocity();
       this.controls.stop();
       this.controls = null;
     }
@@ -115,11 +117,11 @@ export class Animator implements AnimationController {
   }
 
   getVelocity(): number {
-    return this.controls?.getVelocity() ?? 0;
+    return this.controls?.getVelocity() ?? this.currentVelocity;
   }
 
   getCurrentValue(): number {
-    return this.controls?.getPosition() ?? this.options.from;
+    return this.controls?.getPosition() ?? this.currentValue;
   }
 
   getIsAnimating(): boolean {
@@ -136,18 +138,25 @@ export class Animator implements AnimationController {
     };
   }
 
+  setValue(value: number): void {
+    this.currentValue = value;
+  }
+
+  setVelocity(velocity: number): void {
+    this.currentVelocity = velocity;
+  }
+
   updateOptions(newOptions: Partial<AnimatorOptions>): void {
     this.options = { ...this.options, ...newOptions } as typeof this.options;
   }
 
   static fromState(
-    state: { position: number; velocity?: number },
+    state: { position: number; velocity: number },
     options: AnimatorOptions,
   ): Animator {
-    const animator = new Animator({
-      ...options,
-      from: state.position,
-    });
+    const animator = new Animator(options);
+    animator.setValue(state.position);
+    animator.setVelocity(state.velocity);
     return animator;
   }
 }

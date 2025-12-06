@@ -103,23 +103,18 @@ export function createTransitionCallback(
       await setup.config.wait();
     }
 
-    const animator = Animator.fromState(
-      { position: setup.state.position as number },
-      {
-        from: setup.from,
-        to: setup.to,
-        spring: setup.config.spring,
-        tick: setup.config.tick,
-        css: setup.config.css
-          ? { element, style: setup.config.css }
-          : undefined,
-        onStart: setup.config.onStart,
-        onComplete: () => {
-          currentAnimation = null;
-          setup.config?.onEnd?.();
-        },
+    const animator = Animator.fromState(setup.state, {
+      from: setup.from,
+      to: setup.to,
+      spring: setup.config.spring,
+      tick: setup.config.tick,
+      css: setup.config.css ? { element, style: setup.config.css } : undefined,
+      onStart: setup.config.onStart,
+      onComplete: () => {
+        currentAnimation = null;
+        setup.config?.onEnd?.();
       },
-    );
+    });
 
     currentAnimation = { controller: animator, direction: "in" };
 
@@ -200,28 +195,23 @@ export function createTransitionCallback(
       await setup.config.wait();
     }
 
-    const animator = Animator.fromState(
-      { position: setup.state.position as number },
-      {
-        from: setup.from,
-        to: setup.to,
-        spring: setup.config.spring,
-        tick: setup.config.tick,
-        css: setup.config.css
-          ? { element, style: setup.config.css }
-          : undefined,
-        onStart: setup.config.onStart,
-        onComplete: () => {
-          setup.config?.onEnd?.();
-          if (currentClone) {
-            currentClone.remove();
-            currentClone = null;
-          }
-          currentAnimation = null;
-          options?.onCleanupEnd?.();
-        },
+    const animator = Animator.fromState(setup.state, {
+      from: setup.from,
+      to: setup.to,
+      spring: setup.config.spring,
+      tick: setup.config.tick,
+      css: setup.config.css ? { element, style: setup.config.css } : undefined,
+      onStart: setup.config.onStart,
+      onComplete: () => {
+        setup.config?.onEnd?.();
+        if (currentClone) {
+          currentClone.remove();
+          currentClone = null;
+        }
+        currentAnimation = null;
+        options?.onCleanupEnd?.();
       },
-    );
+    });
 
     currentAnimation = { controller: animator, direction: "out" };
 
