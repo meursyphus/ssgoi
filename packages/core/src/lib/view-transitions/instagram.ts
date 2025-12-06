@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
@@ -27,24 +27,32 @@ interface InstagramOptions {
  * - The transition auto-detects the mode based on which keys match between pages
  */
 
-type AnimationFunc = (progress: number) => void;
+type CssAnimationFunc = (progress: number) => StyleObject;
+
+interface AnimationParams {
+  dx: number;
+  dy: number;
+  scale: number;
+  scrollOffset: { x: number; y: number };
+  transformOrigin: string;
+  startTop?: number;
+  startRight?: number;
+  startBottom?: number;
+  startLeft?: number;
+}
 
 // IN animation from Pinterest - for enter mode
-function createDetailIn(
-  {
-    detailRect: fromRect,
-    galleryRect: toRect,
-    pageRect,
-    scrollOffset,
-  }: {
-    detailRect: DOMRect;
-    galleryRect: DOMRect;
-    pageRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
-  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+function createDetailInParams({
+  detailRect: fromRect,
+  galleryRect: toRect,
+  pageRect,
+  scrollOffset,
+}: {
+  detailRect: DOMRect;
+  galleryRect: DOMRect;
+  pageRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationParams {
   const dx =
     toRect.left -
     fromRect.left +
@@ -56,12 +64,10 @@ function createDetailIn(
     (toRect.height - fromRect.height) / 2 -
     scrollOffset.y;
 
-  // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  // clip-path 계산
   const startTop = (fromRect.top / pageRect.height) * 100;
   const startRight =
     ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
@@ -71,35 +77,49 @@ function createDetailIn(
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
 
-  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-  return (progress: number) => {
-    const u = 1 - progress;
-    const currentTop = startTop * u;
-    const currentRight = startRight * u;
-    const currentBottom = startBottom * u;
-    const currentLeft = startLeft * u;
+  return {
+    dx,
+    dy,
+    scale,
+    scrollOffset,
+    transformOrigin: `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`,
+    startTop,
+    startRight,
+    startBottom,
+    startLeft,
+  };
+}
 
-    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+function createDetailInCss(params: AnimationParams): CssAnimationFunc {
+  const { dx, dy, scale, startTop, startRight, startBottom, startLeft } =
+    params;
+
+  return (progress: number): StyleObject => {
+    const u = 1 - progress;
+    const currentTop = startTop! * u;
+    const currentRight = startRight! * u;
+    const currentBottom = startBottom! * u;
+    const currentLeft = startLeft! * u;
+
+    return {
+      clipPath: `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`,
+      transform: `translate3d(${dx * u}px, ${dy * u}px, 0) scale(${1 + (scale - 1) * u})`,
+    };
   };
 }
 
 // OUT animation from Pinterest - for exit mode
-function createDetailOut(
-  {
-    detailRect: fromRect,
-    galleryRect: toRect,
-    pageRect,
-    scrollOffset,
-  }: {
-    detailRect: DOMRect;
-    galleryRect: DOMRect;
-    pageRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
-  // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
+function createDetailOutParams({
+  detailRect: fromRect,
+  galleryRect: toRect,
+  pageRect,
+  scrollOffset,
+}: {
+  detailRect: DOMRect;
+  galleryRect: DOMRect;
+  pageRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationParams {
   const dx =
     toRect.left -
     fromRect.left +
@@ -111,12 +131,10 @@ function createDetailOut(
     (toRect.height - fromRect.height) / 2 +
     scrollOffset.y;
 
-  // scale 계산
   const scaleX = toRect.width / fromRect.width;
   const scaleY = toRect.height / fromRect.height;
   const scale = Math.min(scaleX, scaleY);
 
-  // clip-path 계산
   const startTop = (fromRect.top / pageRect.height) * 100;
   const startRight =
     ((pageRect.width - (fromRect.left + fromRect.width)) / pageRect.width) *
@@ -125,23 +143,52 @@ function createDetailOut(
     ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
-  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-  return (progress: number) => {
-    const t = 1 - progress; // 0 -> 1 for out transitions
-    const currentTop = startTop * t;
-    const currentRight = startRight * t;
-    const currentBottom = startBottom * t;
-    const currentLeft = startLeft * t;
 
-    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
+  return {
+    dx,
+    dy,
+    scale,
+    scrollOffset,
+    transformOrigin: `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`,
+    startTop,
+    startRight,
+    startBottom,
+    startLeft,
+  };
+}
+
+function createDetailOutCss(params: AnimationParams): CssAnimationFunc {
+  const {
+    dx,
+    dy,
+    scale,
+    scrollOffset,
+    startTop,
+    startRight,
+    startBottom,
+    startLeft,
+  } = params;
+
+  return (progress: number): StyleObject => {
+    const t = 1 - progress;
+    const currentTop = startTop! * t;
+    const currentRight = startRight! * t;
+    const currentBottom = startBottom! * t;
+    const currentLeft = startLeft! * t;
+
+    return {
+      clipPath: `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`,
+      transform: `translate3d(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px, 0) scale(${1 + (scale - 1) * t})`,
+    };
   };
 }
 
 interface AnimationHandlers {
   isEnterMode: boolean;
-  inAnimation?: AnimationFunc;
-  outAnimation?: AnimationFunc;
+  inCss?: CssAnimationFunc;
+  outCss?: CssAnimationFunc;
+  inTransformOrigin?: string;
+  outTransformOrigin?: string;
 }
 
 function createAnimationConfig(
@@ -212,32 +259,30 @@ function createAnimationConfig(
   // enterMode: use IN animation (Detail animates in), OUT stays
   // exitMode: use OUT animation (Detail animates out), IN stays
   if (isEnterMode) {
+    const inParams = createDetailInParams({
+      detailRect,
+      galleryRect,
+      pageRect: toNode.getBoundingClientRect(),
+      scrollOffset,
+    });
     return {
       isEnterMode: true,
-      inAnimation: createDetailIn(
-        {
-          detailRect,
-          galleryRect,
-          pageRect: toNode.getBoundingClientRect(),
-          scrollOffset,
-        },
-        toNode,
-      ),
-      // No outAnimation - gallery stays visible
+      inCss: createDetailInCss(inParams),
+      inTransformOrigin: inParams.transformOrigin,
+      // No outCss - gallery stays visible
     };
   } else {
+    const outParams = createDetailOutParams({
+      detailRect,
+      galleryRect,
+      pageRect: fromNode.getBoundingClientRect(),
+      scrollOffset,
+    });
     return {
       isEnterMode: false,
-      outAnimation: createDetailOut(
-        {
-          detailRect,
-          galleryRect,
-          pageRect: fromNode.getBoundingClientRect(),
-          scrollOffset,
-        },
-        fromNode,
-      ),
-      // No inAnimation - gallery stays visible
+      outCss: createDetailOutCss(outParams),
+      outTransformOrigin: outParams.transformOrigin,
+      // No inCss - gallery stays visible
     };
   }
 }
@@ -278,7 +323,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         fromNode = null;
         return {
           spring,
-          tick: () => {},
+          css: () => ({}),
         };
       }
 
@@ -287,7 +332,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       if (!handlers) {
         return {
           spring,
-          tick: () => {},
+          css: () => ({}),
         };
       }
 
@@ -296,10 +341,34 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
 
       return {
         spring,
-        tick: (progress) => {
-          // Use inAnimation if available (enterMode), otherwise stay visible
-          if (handlers?.inAnimation) {
-            handlers.inAnimation(progress);
+        prepare: () => {
+          if (handlers?.inCss) {
+            // GPU acceleration hints
+            element.style.willChange = "transform, clip-path";
+            element.style.backfaceVisibility = "hidden";
+            (
+              element.style as CSSStyleDeclaration & { contain: string }
+            ).contain = "layout paint";
+            if (handlers.inTransformOrigin) {
+              element.style.transformOrigin = handlers.inTransformOrigin;
+            }
+          }
+        },
+        css: (progress): StyleObject => {
+          // Use inCss if available (enterMode), otherwise return empty
+          if (handlers?.inCss) {
+            return handlers.inCss(progress);
+          }
+          return {};
+        },
+        onEnd: () => {
+          if (handlers?.inCss) {
+            element.style.willChange = "auto";
+            element.style.backfaceVisibility = "";
+            (
+              element.style as CSSStyleDeclaration & { contain: string }
+            ).contain = "";
+            element.style.transformOrigin = "";
           }
         },
       };
@@ -317,17 +386,29 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
             resolver = null;
           }
         },
-        prepare: (element) => {
-          prepareOutgoing(element);
+        prepare: (el) => {
+          prepareOutgoing(el);
           if (!handlers?.isEnterMode) {
-            element.style.zIndex = "-1";
+            el.style.zIndex = "-1";
+          }
+          if (handlers?.outCss) {
+            // GPU acceleration hints
+            el.style.willChange = "transform, clip-path";
+            el.style.backfaceVisibility = "hidden";
+            (el.style as CSSStyleDeclaration & { contain: string }).contain =
+              "layout paint";
+            el.style.pointerEvents = "none";
+            if (handlers.outTransformOrigin) {
+              el.style.transformOrigin = handlers.outTransformOrigin;
+            }
           }
         },
-        tick: (progress) => {
-          // Use outAnimation if available (exitMode), otherwise stay visible
-          if (handlers?.outAnimation) {
-            handlers.outAnimation(progress);
+        css: (progress): StyleObject => {
+          // Use outCss if available (exitMode), otherwise return empty
+          if (handlers?.outCss) {
+            return handlers.outCss(progress);
           }
+          return {};
         },
       };
     },
