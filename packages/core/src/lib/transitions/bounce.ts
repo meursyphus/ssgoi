@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface BounceOptions {
   height?: number;
@@ -24,64 +24,43 @@ export const bounce = (options: BounceOptions = {}) => {
     key,
   } = options;
 
+  const getCss = (progress: number): StyleObject => {
+    const style: StyleObject = {};
+    const transforms: string[] = [];
+
+    // Enhanced bounce effect with intensity control
+    const bounceWave = Math.sin(progress * Math.PI * (1 + intensity));
+    const dampening = 1 - progress;
+    const bounceOffset = bounceWave * height * dampening;
+
+    if (direction === "up") {
+      transforms.push(`translateY(${-Math.abs(bounceOffset)}px)`);
+    } else {
+      transforms.push(`translateY(${Math.abs(bounceOffset)}px)`);
+    }
+
+    if (scale) {
+      const scaleValue = 0.8 + progress * 0.2 + bounceWave * 0.05 * dampening;
+      transforms.push(`scale(${scaleValue})`);
+    }
+
+    style.transform = transforms.join(" ");
+
+    if (fade) {
+      style.opacity = progress;
+    }
+
+    return style;
+  };
+
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const transforms = [];
-
-        // Enhanced bounce effect with intensity control
-        const bounceWave = Math.sin(progress * Math.PI * (1 + intensity));
-        const dampening = 1 - progress;
-        const bounceOffset = bounceWave * height * dampening;
-
-        if (direction === "up") {
-          transforms.push(`translateY(${-Math.abs(bounceOffset)}px)`);
-        } else {
-          transforms.push(`translateY(${Math.abs(bounceOffset)}px)`);
-        }
-
-        if (scale) {
-          const scaleValue =
-            0.8 + progress * 0.2 + bounceWave * 0.05 * dampening;
-          transforms.push(`scale(${scaleValue})`);
-        }
-
-        element.style.transform = transforms.join(" ");
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const transforms = [];
-
-        // Enhanced bounce effect with intensity control
-        const bounceWave = Math.sin(progress * Math.PI * (1 + intensity));
-        const dampening = 1 - progress;
-        const bounceOffset = bounceWave * height * dampening;
-
-        if (direction === "up") {
-          transforms.push(`translateY(${-Math.abs(bounceOffset)}px)`);
-        } else {
-          transforms.push(`translateY(${Math.abs(bounceOffset)}px)`);
-        }
-
-        if (scale) {
-          const scaleValue =
-            0.8 + progress * 0.2 + bounceWave * 0.05 * dampening;
-          transforms.push(`scale(${scaleValue})`);
-        }
-
-        element.style.transform = transforms.join(" ");
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };

@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface SlideOptions {
   direction?: "left" | "right" | "up" | "down";
@@ -34,61 +34,53 @@ export const slide = (options: SlideOptions = {}) => {
 
   const actualDirection = getActualDirection();
 
-  const getDistance = (value: number | string): string => {
-    return typeof value === "number" ? `${value}px` : value;
-  };
-
-  const getTransform = (progress: number) => {
+  const getTransform = (progress: number): string => {
     const multiplier = 1 - progress;
-    const offset =
-      typeof distance === "number"
-        ? multiplier * distance
-        : `calc(${getDistance(distance)} * ${multiplier})`;
 
-    switch (actualDirection) {
-      case "left":
-        return typeof distance === "number"
-          ? `translateX(${-offset}px)`
-          : `translateX(calc(-1 * ${offset}))`;
-      case "right":
-        return typeof distance === "number"
-          ? `translateX(${offset}px)`
-          : `translateX(${offset})`;
-      case "up":
-        return typeof distance === "number"
-          ? `translateY(${-offset}px)`
-          : `translateY(calc(-1 * ${offset}))`;
-      case "down":
-        return typeof distance === "number"
-          ? `translateY(${offset}px)`
-          : `translateY(${offset})`;
+    if (typeof distance === "number") {
+      const offset = multiplier * distance;
+      switch (actualDirection) {
+        case "left":
+          return `translate3d(${-offset}px, 0, 0)`;
+        case "right":
+          return `translate3d(${offset}px, 0, 0)`;
+        case "up":
+          return `translate3d(0, ${-offset}px, 0)`;
+        case "down":
+          return `translate3d(0, ${offset}px, 0)`;
+      }
+    } else {
+      switch (actualDirection) {
+        case "left":
+          return `translate3d(calc(-1 * ${distance} * ${multiplier}), 0, 0)`;
+        case "right":
+          return `translate3d(calc(${distance} * ${multiplier}), 0, 0)`;
+        case "up":
+          return `translate3d(0, calc(-1 * ${distance} * ${multiplier}), 0)`;
+        case "down":
+          return `translate3d(0, calc(${distance} * ${multiplier}), 0)`;
+      }
     }
   };
 
+  const getCss = (progress: number): StyleObject => {
+    const style: StyleObject = {
+      transform: getTransform(progress),
+    };
+    if (fade) {
+      style.opacity = opacity + (1 - opacity) * progress;
+    }
+    return style;
+  };
+
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        element.style.transform = getTransform(progress);
-        if (fade) {
-          element.style.opacity = (
-            opacity +
-            (1 - opacity) * progress
-          ).toString();
-        }
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        element.style.transform = getTransform(progress);
-        if (fade) {
-          element.style.opacity = (
-            opacity +
-            (1 - opacity) * progress
-          ).toString();
-        }
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };
