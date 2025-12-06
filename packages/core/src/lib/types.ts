@@ -1,9 +1,14 @@
 export type TransitionKey = string | symbol;
 
 export type SpringConfig = {
-  stiffness?: number;
-  damping?: number;
+  stiffness: number;
+  damping: number;
 };
+
+/**
+ * CSS style object type
+ */
+export type StyleObject = Record<string, number | string>;
 
 /**
  * Schedule strategy for multi-spring animations
@@ -31,28 +36,50 @@ export type BaseTransitionConfig = {
 };
 
 /**
- * Single spring configuration (existing - backward compatible)
+ * Single spring configuration
  * Used for simple transitions with a single animation value
+ *
+ * Supports two animation modes:
+ * - tick: RAF-based animation with callback on each frame
+ * - css: Web Animation API with CSS string generation
  */
-export type SingleSpringConfig<TAnimationValue = number> =
-  BaseTransitionConfig & {
-    // Spring physics configuration
-    spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
+export type SingleSpringConfig = BaseTransitionConfig & {
+  // Spring physics configuration
+  spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
-    // Animation range values
-    from?: TAnimationValue; // Default: 0 for in, 1 for out
-    to?: TAnimationValue; // Default: 1 for in, 0 for out
+  // Animation range values
+  from?: number; // Default: 0 for in, 1 for out
+  to?: number; // Default: 1 for in, 0 for out
 
-    // Callback for each frame with progress value
-    tick?: (progress: TAnimationValue) => void;
-  };
+  // Callback for each frame with progress value (RAF-based)
+  tick?: (progress: number) => void;
+
+  /**
+   * Style generator for Web Animation API mode
+   *
+   * When provided, the animation uses Web Animation API instead of RAF.
+   * Spring physics are pre-computed and converted to keyframes.
+   *
+   * @param progress - Current progress value (0 to 1)
+   * @returns Style object for Web Animation API
+   *
+   * @example
+   * ```ts
+   * css: (progress) => ({
+   *   opacity: progress,
+   *   transform: `translateY(${(1 - progress) * 20}px)`,
+   * })
+   * ```
+   */
+  css?: (progress: number) => StyleObject;
+};
 
 /**
  * Individual spring item in a multi-spring animation
  */
-export type SpringItem<TAnimationValue = number> = {
-  from?: TAnimationValue; // Default: 0 for in, 1 for out
-  to?: TAnimationValue; // Default: 1 for in, 0 for out
+export type SpringItem = {
+  from?: number; // Default: 0 for in, 1 for out
+  to?: number; // Default: 1 for in, 0 for out
   spring?: SpringConfig;
 
   /**
@@ -86,7 +113,7 @@ export type SpringItem<TAnimationValue = number> = {
    *   element.style.height = height * progress  // WRITE only
    * }
    */
-  tick: (progress: TAnimationValue) => void;
+  tick: (progress: number) => void;
 
   onStart?: () => void;
   onComplete?: () => void;
@@ -99,73 +126,89 @@ export type SpringItem<TAnimationValue = number> = {
 };
 
 /**
- * Multi-spring configuration (new feature)
+ * Multi-spring configuration
  * Used for complex transitions with multiple coordinated animations
  */
-export type MultiSpringConfig<TAnimationValue = number> =
-  BaseTransitionConfig & {
-    // Array of spring animations to coordinate
-    springs: SpringItem<TAnimationValue>[];
+export type MultiSpringConfig = BaseTransitionConfig & {
+  // Array of spring animations to coordinate
+  springs: SpringItem[];
 
-    // How to schedule multiple springs (default: 'overlap')
-    schedule?: ScheduleType;
+  // How to schedule multiple springs (default: 'overlap')
+  schedule?: ScheduleType;
 
-    // Called after each spring completes with progress count
-    onProgress?: (completed: number, total: number) => void;
-  };
+  // Called after each spring completes with progress count
+  onProgress?: (completed: number, total: number) => void;
+};
 
 /**
  * Transition configuration - supports both single and multi-spring animations
  * Uses Union Type for type safety and backward compatibility
  */
-export type TransitionConfig<TAnimationValue = number> =
-  | SingleSpringConfig<TAnimationValue>
-  | MultiSpringConfig<TAnimationValue>;
+export type TransitionConfig = SingleSpringConfig | MultiSpringConfig;
 
 /**
  * Type guard to check if config is single spring
  */
-export function isSingleSpring<T>(
-  config: TransitionConfig<T>,
-): config is SingleSpringConfig<T> {
-  return "tick" in config && !("springs" in config);
+export function isSingleSpring(
+  config: TransitionConfig,
+): config is SingleSpringConfig {
+  return ("tick" in config || "css" in config) && !("springs" in config);
 }
 
 /**
  * Type guard to check if config is multi-spring
  */
-export function isMultiSpring<T>(
-  config: TransitionConfig<T>,
-): config is MultiSpringConfig<T> {
+export function isMultiSpring(
+  config: TransitionConfig,
+): config is MultiSpringConfig {
   return "springs" in config;
 }
 
-export type GetTransitionConfig<
-  TContext = undefined,
-  TAnimationValue = number,
-> = TContext extends undefined
-  ? (
-      node: HTMLElement,
-    ) =>
-      | TransitionConfig<TAnimationValue>
-      | Promise<TransitionConfig<TAnimationValue>>
-  : (
-      node: HTMLElement,
-      context: TContext,
-    ) =>
-      | TransitionConfig<TAnimationValue>
-      | Promise<TransitionConfig<TAnimationValue>>;
+/**
+ * Type guard to check if config uses CSS mode (Web Animation API)
+ */
+export function isCssAnimation(
+  config: SingleSpringConfig,
+): config is SingleSpringConfig & { css: (progress: number) => string } {
+  return "css" in config && typeof config.css === "function";
+}
 
-export type Transition<TContext = undefined, TAnimationValue = number> = {
-  in?: GetTransitionConfig<TContext, TAnimationValue>;
-  out?: GetTransitionConfig<TContext, TAnimationValue>;
+/**
+ * Type guard to check if config uses tick mode (RAF-based)
+ */
+export function isTickAnimation(
+  config: SingleSpringConfig,
+): config is SingleSpringConfig & { tick: (progress: number) => void } {
+  return "tick" in config && typeof config.tick === "function";
+}
+
+/**
+ * Validate that config doesn't have both tick and css defined
+ * @throws Error if both tick and css are defined
+ */
+export function validateAnimationMode(config: SingleSpringConfig): void {
+  if (isCssAnimation(config) && isTickAnimation(config)) {
+    throw new Error(
+      "SingleSpringConfig cannot have both 'tick' and 'css' defined. Use one or the other.",
+    );
+  }
+}
+
+export type GetTransitionConfig<TContext = undefined> =
+  TContext extends undefined
+    ? (node: HTMLElement) => TransitionConfig | Promise<TransitionConfig>
+    : (
+        node: HTMLElement,
+        context: TContext,
+      ) => TransitionConfig | Promise<TransitionConfig>;
+
+export type Transition<TContext = undefined> = {
+  in?: GetTransitionConfig<TContext>;
+  out?: GetTransitionConfig<TContext>;
   key?: TransitionKey;
 };
 
-export type TransitionOptions<
-  TContext = undefined,
-  TAnimationValue = number,
-> = Transition<TContext, TAnimationValue> & {
+export type TransitionOptions<TContext = undefined> = Transition<TContext> & {
   key?: TransitionKey;
   ref?: object;
 };
@@ -266,21 +309,18 @@ export type WaitScheduleEntry = {
  * Different return types for single vs multi-spring animations
  * @internal
  */
-export type AnimationState<T = number> =
-  | SingleAnimationState<T>
-  | MultiAnimationState;
+export type AnimationState = SingleAnimationState | MultiAnimationState;
 
 /**
  * Single spring animation state
- * Supports both number and object animations
  * @internal
  */
-export type SingleAnimationState<T = number> = {
+export type SingleAnimationState = {
   type: "single";
-  position: T;
-  velocity: T extends number ? number : Record<string, number>;
-  from: T;
-  to: T;
+  position: number;
+  velocity: number;
+  from: number;
+  to: number;
 };
 
 /**
@@ -300,10 +340,10 @@ export type MultiAnimationState = {
  * Implemented by both Animator (single spring) and AnimationScheduler (multi-spring)
  * @internal
  */
-export interface AnimationController<T = number> {
+export interface AnimationController {
   forward(): void;
   backward(): void;
   stop(): void;
-  reverse(options?: { offsetMode?: "immediate" | "mirror" | "reverse" }): void;
-  getCurrentState(): AnimationState<T>;
+  reverse(): void;
+  getCurrentState(): AnimationState;
 }

@@ -207,6 +207,7 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
+                    key: "fade",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
@@ -228,24 +229,22 @@ export default function Home() {
             <ShapeContainer label="Scale + Rotate">
               {showShapes && (
                 <div
-                  ref={transition<{ scale: number; rotate: number }>({
+                  ref={transition({
+                    key: "scale-rotate",
                     in: (element) => ({
                       spring: { stiffness, damping },
-                      from: { scale: 0, rotate: 0 },
-                      to: { scale: 1, rotate: 360 },
-                      tick: (progress) => {
-                        element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
-                        element.style.opacity = progress.scale.toString();
-                      },
+
+                      css: (progress) => ({
+                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
-                      from: { scale: 1, rotate: 360 },
-                      to: { scale: 0, rotate: 0 },
-                      tick: (progress) => {
-                        element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
-                        element.style.opacity = progress.scale.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                   })}
                   className={`${styles.shape} ${styles.triangle}`}
@@ -257,19 +256,20 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
+                    key: "slide-in",
                     in: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                        element.style.opacity = progress.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `translateX(${(1 - progress) * -100}px)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                        element.style.opacity = progress.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `translateX(${(1 - progress) * -100}px)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                   })}
                   className={`${styles.shape} ${styles.square}`}
@@ -281,6 +281,7 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
+                    key: "bounce-scale",
                     in: (element) => ({
                       spring: {
                         stiffness: stiffness * 0.8,

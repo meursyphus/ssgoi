@@ -13,35 +13,29 @@ import {
   type TransitionConfigs,
 } from "./transition-strategy";
 
-export function createTransitionCallback<TAnimationValue = number>(
-  getTransition: () => Transition<undefined, TAnimationValue>,
+export function createTransitionCallback(
+  getTransition: () => Transition<undefined>,
   options?: {
     onCleanupEnd?: () => void;
-    strategy?: (
-      context: StrategyContext<TAnimationValue>,
-    ) => TransitionStrategy<TAnimationValue>;
+    strategy?: (context: StrategyContext) => TransitionStrategy;
   },
 ): TransitionCallback {
-  // Combined state: tracks both animation controller (Animator or AnimationScheduler) and direction
   let currentAnimation: {
-    controller: AnimationController<TAnimationValue>;
+    controller: AnimationController;
     direction: "in" | "out";
   } | null = null;
-  let currentClone: HTMLElement | null = null; // Track current clone element
+  let currentClone: HTMLElement | null = null;
   let parentRef: Element | null = null;
   let nextSiblingRef: Element | null = null;
 
-  // Create context for strategy
-  const context: StrategyContext<TAnimationValue> = {
+  const context: StrategyContext = {
     get currentAnimation() {
       return currentAnimation;
     },
   };
 
-  // Create strategy upfront for closure
   const strategy =
-    options?.strategy?.(context) ||
-    createDefaultStrategy<TAnimationValue>(context);
+    options?.strategy?.(context) || createDefaultStrategy(context);
 
   const runEntrance = async (element: HTMLElement) => {
     if (currentClone) {
@@ -50,12 +44,7 @@ export function createTransitionCallback<TAnimationValue = number>(
     }
     const transition = getTransition();
 
-    // Get transition config
     const inConfig = transition.in && (await transition.in(element));
-
-    // Only fetch OUT config for DOM element transitions (those without custom strategy)
-    // Page transitions (with createPageTransitionStrategy) don't need OUT config here
-    // because calling transition.out() would start a new pending transition that never resolves
     const outConfig =
       !options?.strategy && transition.out
         ? transition.out(element)
@@ -65,30 +54,22 @@ export function createTransitionCallback<TAnimationValue = number>(
       return;
     }
 
-    // Check if multi-spring animation
+    // Multi-spring path
     if (isMultiSpring(inConfig)) {
-      // Multi-spring path: use AnimationScheduler
-      // Check if we should reverse current animation via strategy
-      const configs: TransitionConfigs<TAnimationValue> = {
+      const configs: TransitionConfigs = {
         in: Promise.resolve(inConfig),
         out: outConfig && Promise.resolve(outConfig),
       };
 
       const setup = await strategy.runIn(configs);
-
-      // If config is undefined, strategy already handled reversal
       if (!setup.config) {
-        // Strategy reversed the existing AnimationScheduler
-        // Update direction
         if (currentAnimation) {
           currentAnimation.direction = "in";
         }
         return;
       }
 
-      // Create new AnimationScheduler
       inConfig.prepare?.(element);
-
       if (inConfig.wait) {
         await inConfig.wait();
       }
@@ -101,35 +82,23 @@ export function createTransitionCallback<TAnimationValue = number>(
         },
       });
 
-      currentAnimation = {
-        controller: scheduler as AnimationController<TAnimationValue>,
-        direction: "in",
-      };
+      currentAnimation = { controller: scheduler, direction: "in" };
       scheduler.forward();
       return;
     }
 
-    // Single-spring path: use Animator with strategy
-    const configs: TransitionConfigs<TAnimationValue> = {
+    // Single-spring path
+    const configs: TransitionConfigs = {
       in: Promise.resolve(inConfig),
       out: outConfig && Promise.resolve(outConfig),
     };
 
     const setup = await strategy.runIn(configs);
-    if (!setup.config) {
-      return;
-    }
-
-    // Type guard: config must be SingleSpringConfig at this point
-    // because we already handled MultiSpringConfig above
-    if ("springs" in setup.config) {
-      console.error("Unexpected MultiSpringConfig in single-spring path");
+    if (!setup.config || "springs" in setup.config) {
       return;
     }
 
     setup.config.prepare?.(element);
-
-    // Wait if configured
     if (setup.config.wait) {
       await setup.config.wait();
     }
@@ -138,8 +107,9 @@ export function createTransitionCallback<TAnimationValue = number>(
       from: setup.from,
       to: setup.to,
       spring: setup.config.spring,
+      tick: setup.config.tick,
+      css: setup.config.css ? { element, style: setup.config.css } : undefined,
       onStart: setup.config.onStart,
-      onUpdate: setup.config.tick,
       onComplete: () => {
         currentAnimation = null;
         setup.config?.onEnd?.();
@@ -159,31 +129,21 @@ export function createTransitionCallback<TAnimationValue = number>(
     currentClone = element;
 
     const transition = getTransition();
-
-    // Get transition config
-    // NOTE: Don't call transition.in() here - it can interfere with page transitions
-    // by modifying pendingTransition state. OUT transitions only need OUT config.
     const outConfig = transition.out && (await transition.out(element));
 
     if (!outConfig) {
       return;
     }
 
-    // Check if multi-spring animation
+    // Multi-spring path
     if (isMultiSpring(outConfig)) {
-      // Multi-spring path: use AnimationScheduler
-      // Check if we should reverse current animation via strategy
-      const configs: TransitionConfigs<TAnimationValue> = {
-        in: undefined, // Don't fetch IN config for exit transitions
+      const configs: TransitionConfigs = {
+        in: undefined,
         out: Promise.resolve(outConfig),
       };
 
       const setup = await strategy.runOut(configs);
-
-      // If config is undefined, strategy already handled reversal
       if (!setup.config) {
-        // Strategy reversed the existing AnimationScheduler
-        // Update direction and cleanup clone
         if (currentAnimation) {
           currentAnimation.direction = "out";
         }
@@ -194,11 +154,8 @@ export function createTransitionCallback<TAnimationValue = number>(
         return;
       }
 
-      // Create new AnimationScheduler
       outConfig.prepare?.(element);
-
       insertClone();
-
       if (outConfig.wait) {
         await outConfig.wait();
       }
@@ -216,37 +173,24 @@ export function createTransitionCallback<TAnimationValue = number>(
         },
       });
 
-      currentAnimation = {
-        controller: scheduler as AnimationController<TAnimationValue>,
-        direction: "out",
-      };
+      currentAnimation = { controller: scheduler, direction: "out" };
       scheduler.forward();
       return;
     }
 
-    // Single-spring path: use Animator with strategy
-    const configs: TransitionConfigs<TAnimationValue> = {
-      in: undefined, // Don't fetch IN config for exit transitions
+    // Single-spring path
+    const configs: TransitionConfigs = {
+      in: undefined,
       out: Promise.resolve(outConfig),
     };
 
     const setup = await strategy.runOut(configs);
-    if (!setup.config) {
-      return;
-    }
-
-    // Type guard: config must be SingleSpringConfig at this point
-    // because we already handled MultiSpringConfig above
-    if ("springs" in setup.config) {
-      console.error("Unexpected MultiSpringConfig in single-spring path");
+    if (!setup.config || "springs" in setup.config) {
       return;
     }
 
     setup.config.prepare?.(element);
-
     insertClone();
-
-    // Wait if configured
     if (setup.config.wait) {
       await setup.config.wait();
     }
@@ -255,8 +199,9 @@ export function createTransitionCallback<TAnimationValue = number>(
       from: setup.from,
       to: setup.to,
       spring: setup.config.spring,
+      tick: setup.config.tick,
+      css: setup.config.css ? { element, style: setup.config.css } : undefined,
       onStart: setup.config.onStart,
-      onUpdate: setup.config.tick,
       onComplete: () => {
         setup.config?.onEnd?.();
         if (currentClone) {
