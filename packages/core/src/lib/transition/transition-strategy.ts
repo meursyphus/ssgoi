@@ -6,38 +6,34 @@ import type {
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
-export interface StrategyContext<TAnimationValue = number> {
+export interface StrategyContext {
   // Current animation state
   // Supports both single spring (Animator) and multi-spring (AnimationScheduler)
   currentAnimation: {
-    controller: AnimationController<TAnimationValue>;
+    controller: AnimationController;
     direction: "in" | "out";
   } | null;
 }
 
-export interface AnimationSetup<TAnimationValue = number> {
-  config?: TransitionConfig<TAnimationValue>;
+export interface AnimationSetup {
+  config?: TransitionConfig;
   state: {
-    position: TAnimationValue;
-    velocity: TAnimationValue extends number ? number : Record<string, number>;
+    position: number;
+    velocity: number;
   };
-  from: TAnimationValue;
-  to: TAnimationValue;
+  from: number;
+  to: number;
   direction: "forward" | "backward";
 }
 
-export interface TransitionConfigs<TAnimationValue = number> {
-  in?: Promise<TransitionConfig<TAnimationValue>>;
-  out?: Promise<TransitionConfig<TAnimationValue>>;
+export interface TransitionConfigs {
+  in?: Promise<TransitionConfig>;
+  out?: Promise<TransitionConfig>;
 }
 
-export interface TransitionStrategy<TAnimationValue = number> {
-  runIn: (
-    configs: TransitionConfigs<TAnimationValue>,
-  ) => Promise<AnimationSetup<TAnimationValue>>;
-  runOut: (
-    configs: TransitionConfigs<TAnimationValue>,
-  ) => Promise<AnimationSetup<TAnimationValue>>;
+export interface TransitionStrategy {
+  runIn: (configs: TransitionConfigs) => Promise<AnimationSetup>;
+  runOut: (configs: TransitionConfigs) => Promise<AnimationSetup>;
 }
 
 /**
@@ -72,11 +68,11 @@ export interface TransitionStrategy<TAnimationValue = number> {
  * - Cleanup callback: Handles exit transitions
  */
 
-export const createDefaultStrategy = <TAnimationValue = number>(
-  context: StrategyContext<TAnimationValue>,
-): TransitionStrategy<TAnimationValue> => {
+export const createDefaultStrategy = (
+  context: StrategyContext,
+): TransitionStrategy => {
   return {
-    runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
+    runIn: async (configs: TransitionConfigs) => {
       const { currentAnimation } = context;
 
       // Scenario 4: OUT animation running + IN trigger
@@ -92,13 +88,11 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           // Return special setup indicating already handled
           return {
             state: {
-              position: 0 as TAnimationValue,
-              velocity: 0 as TAnimationValue extends number
-                ? number
-                : Record<string, number>,
+              position: 0,
+              velocity: 0,
             },
-            from: 0 as TAnimationValue,
-            to: 1 as TAnimationValue,
+            from: 0,
+            to: 1,
             direction: "forward",
           };
         }
@@ -107,8 +101,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         if (configs.out) {
           const outConfig = await configs.out;
           // Extract from/to with defaults for out transition (single-spring)
-          const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } =
-            outConfig as SingleSpringConfig<TAnimationValue>;
+          const { from = 1, to = 0 } = outConfig as SingleSpringConfig;
           return {
             config: outConfig,
             state: {
@@ -128,13 +121,11 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         // No config, return minimal setup
         return {
           state: {
-            position: 0 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 0,
+            velocity: 0,
           },
-          from: 0 as TAnimationValue,
-          to: 1 as TAnimationValue,
+          from: 0,
+          to: 1,
           direction: "forward",
         };
       }
@@ -144,26 +135,22 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         return {
           config,
           state: {
-            position: 0 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 0,
+            velocity: 0,
           },
-          from: 0 as TAnimationValue,
-          to: 1 as TAnimationValue,
+          from: 0,
+          to: 1,
           direction: "forward",
         };
       }
 
       // Extract from/to with defaults for in transition (single-spring)
-      const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
+      const { from = 0, to = 1 } = config;
       return {
         config,
         state: {
           position: from,
-          velocity: 0 as TAnimationValue extends number
-            ? number
-            : Record<string, number>,
+          velocity: 0,
         },
         from,
         to,
@@ -171,7 +158,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
       };
     },
 
-    runOut: async (configs: TransitionConfigs<TAnimationValue>) => {
+    runOut: async (configs: TransitionConfigs) => {
       const { currentAnimation } = context;
 
       // Scenario 3: IN animation running + OUT trigger
@@ -187,13 +174,11 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           // Return special setup indicating already handled
           return {
             state: {
-              position: 1 as TAnimationValue,
-              velocity: 0 as TAnimationValue extends number
-                ? number
-                : Record<string, number>,
+              position: 1,
+              velocity: 0,
             },
-            from: 1 as TAnimationValue,
-            to: 0 as TAnimationValue,
+            from: 1,
+            to: 0,
             direction: "forward",
           };
         }
@@ -203,8 +188,7 @@ export const createDefaultStrategy = <TAnimationValue = number>(
           const inConfig = await configs.in;
 
           // Extract from/to with defaults for in transition (single-spring)
-          const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } =
-            inConfig as SingleSpringConfig<TAnimationValue>;
+          const { from = 0, to = 1 } = inConfig as SingleSpringConfig;
           return {
             config: inConfig,
             state: {
@@ -224,13 +208,11 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         // No config, return minimal setup
         return {
           state: {
-            position: 1 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 1,
+            velocity: 0,
           },
-          from: 1 as TAnimationValue,
-          to: 0 as TAnimationValue,
+          from: 1,
+          to: 0,
           direction: "forward",
         };
       }
@@ -240,26 +222,22 @@ export const createDefaultStrategy = <TAnimationValue = number>(
         return {
           config,
           state: {
-            position: 1 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 1,
+            velocity: 0,
           },
-          from: 1 as TAnimationValue,
-          to: 0 as TAnimationValue,
+          from: 1,
+          to: 0,
           direction: "forward",
         };
       }
 
       // Extract from/to with defaults for out transition (single-spring)
-      const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
+      const { from = 1, to = 0 } = config;
       return {
         config,
         state: {
           position: from,
-          velocity: 0 as TAnimationValue extends number
-            ? number
-            : Record<string, number>,
+          velocity: 0,
         },
         from,
         to,
@@ -273,23 +251,19 @@ export const createDefaultStrategy = <TAnimationValue = number>(
  * Page transition strategy - Always starts fresh without checking current animations
  * This is used for page-level transitions where each transition should be independent
  */
-export const createPageTransitionStrategy = <
-  TAnimationValue = number,
->(): TransitionStrategy<TAnimationValue> => {
+export const createPageTransitionStrategy = (): TransitionStrategy => {
   return {
-    runIn: async (configs: TransitionConfigs<TAnimationValue>) => {
+    runIn: async (configs: TransitionConfigs) => {
       // Always start fresh for IN transition
       const config = await configs.in;
       if (!config) {
         return {
           state: {
-            position: 0 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 0,
+            velocity: 0,
           },
-          from: 0 as TAnimationValue,
-          to: 1 as TAnimationValue,
+          from: 0,
+          to: 1,
           direction: "forward",
         };
       }
@@ -299,26 +273,22 @@ export const createPageTransitionStrategy = <
         return {
           config,
           state: {
-            position: 0 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 0,
+            velocity: 0,
           },
-          from: 0 as TAnimationValue,
-          to: 1 as TAnimationValue,
+          from: 0,
+          to: 1,
           direction: "forward",
         };
       }
 
       // Extract from/to for single-spring
-      const { from = 0 as TAnimationValue, to = 1 as TAnimationValue } = config;
+      const { from = 0, to = 1 } = config;
       return {
         config,
         state: {
           position: from,
-          velocity: 0 as TAnimationValue extends number
-            ? number
-            : Record<string, number>,
+          velocity: 0,
         },
         from,
         to,
@@ -326,19 +296,17 @@ export const createPageTransitionStrategy = <
       };
     },
 
-    runOut: async (configs: TransitionConfigs<TAnimationValue>) => {
+    runOut: async (configs: TransitionConfigs) => {
       // Always start fresh for OUT transition
       const config = await configs.out;
       if (!config) {
         return {
           state: {
-            position: 1 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 1,
+            velocity: 0,
           },
-          from: 1 as TAnimationValue,
-          to: 0 as TAnimationValue,
+          from: 1,
+          to: 0,
           direction: "forward",
         };
       }
@@ -348,26 +316,22 @@ export const createPageTransitionStrategy = <
         return {
           config,
           state: {
-            position: 1 as TAnimationValue,
-            velocity: 0 as TAnimationValue extends number
-              ? number
-              : Record<string, number>,
+            position: 1,
+            velocity: 0,
           },
-          from: 1 as TAnimationValue,
-          to: 0 as TAnimationValue,
+          from: 1,
+          to: 0,
           direction: "forward",
         };
       }
 
       // Extract from/to for single-spring
-      const { from = 1 as TAnimationValue, to = 0 as TAnimationValue } = config;
+      const { from = 1, to = 0 } = config;
       return {
         config,
         state: {
           position: from,
-          velocity: 0 as TAnimationValue extends number
-            ? number
-            : Record<string, number>,
+          velocity: 0,
         },
         from,
         to,

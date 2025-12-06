@@ -18,32 +18,26 @@ import { parseCallerLocation } from "../utils/parse-caller-location";
  */
 
 // Map to store transition definitions by key
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const transitionDefinitions = new Map<TransitionKey, Transition<any, any>>();
+const transitionDefinitions = new Map<TransitionKey, Transition<undefined>>();
 
 // Map to store transition callbacks by key
 const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
 
 /**
  * Registers a transition with a key and returns the callback
- * Usage: registerTransition('fade', { in: fadeIn, out: fadeOut })
  */
-function registerTransition<TAnimationValue = number>(
+function registerTransition(
   key: TransitionKey,
-  transition: Transition<undefined, TAnimationValue>,
-  strategy?: (
-    context: StrategyContext<TAnimationValue>,
-  ) => TransitionStrategy<TAnimationValue>,
+  transition: Transition<undefined>,
+  strategy?: (context: StrategyContext) => TransitionStrategy,
 ): TransitionCallback {
   transitionDefinitions.set(key, transition);
 
-  // Return existing callback if it exists
   let callback = transitionCallbacks.get(key);
   if (callback) {
     return callback;
   }
 
-  // Create new callback
   callback = createTransitionCallback(
     () => {
       const trans = transitionDefinitions.get(key);
@@ -75,7 +69,6 @@ function unregisterTransition(key: TransitionKey): void {
 // ---------------------------------------------
 
 export function generateAutoKey(): TransitionKey {
-  // Fallback to a stable key from the callsite when available
   const location = parseCallerLocation(new Error().stack);
   if (location) {
     const key =
@@ -83,12 +76,11 @@ export function generateAutoKey(): TransitionKey {
     return key;
   }
 
-  // Fallback to a unique symbol when callsite is unavailable
   const key = Symbol(`ssgoi_auto_${Date.now()}`);
   return key;
 }
 
-// Optional GC-based cleanup registry (browser/node supporting FinalizationRegistry)
+// Optional GC-based cleanup registry
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
   | (new (cb: (heldValue: TransitionKey) => void) => {
@@ -127,26 +119,10 @@ const __cleanupRegistry = FinalizationRegistryCtor
  * 4. `tick` - Called on each animation frame with progress value (1 → 0)
  * 5. `onEnd` - Called when animation completes and element is removed
  *
- * The `key` parameter is crucial for transition management - it uniquely identifies
- * each transition instance, allowing the system to track, cleanup, and prevent
- * conflicts between multiple transitions on the same element.
- *
- * @param {object} options - Configuration object
- * @param {TransitionKey} options.key - Unique identifier for this transition instance.
- *                                      Can be string or symbol. Used to manage and cleanup
- *                                      transitions internally.
- * @param {Function} options.in - Configuration for entrance animation.
- *                                Returns TransitionConfig with lifecycle hooks.
- * @param {Function} options.out - Configuration for exit animation.
- *                                 Returns TransitionConfig with lifecycle hooks.
- *
- * @template TAnimationValue - The type of value being animated (number | object)
- *
  * @returns {TransitionCallback} A callback function to be used as a ref
  *
  * @example
  * ```tsx
- * // Simple fade transition
  * <div ref={transition({
  *   key: 'hero-fade',
  *   in: (element) => ({
@@ -159,16 +135,13 @@ const __cleanupRegistry = FinalizationRegistryCtor
  * })} />
  * ```
  */
-export function transition<TAnimationValue = number>(
-  options: TransitionOptions<undefined, TAnimationValue> & {
-    [TRANSITION_STRATEGY]?: (
-      context: StrategyContext<TAnimationValue>,
-    ) => TransitionStrategy<TAnimationValue>;
+export function transition(
+  options: TransitionOptions<undefined> & {
+    [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
   },
 ): TransitionCallback {
   const resolvedKey = options.key ?? generateAutoKey();
 
-  // Register GC cleanup for auto-generated keys bound to a ref
   if (options.ref && __cleanupRegistry) {
     try {
       __cleanupRegistry.register(options.ref, resolvedKey);
