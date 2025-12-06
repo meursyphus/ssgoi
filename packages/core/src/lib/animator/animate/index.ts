@@ -1,8 +1,8 @@
 /**
  * Animate Module
  *
- * 통합 애니메이션 인터페이스
- * tick 또는 css 옵션에 따라 내부적으로 적절한 runner 선택
+ * Unified animation interface
+ * Internally selects appropriate runner based on tick or css option
  */
 
 import { runTickAnimation } from "./tick-runner";
@@ -12,10 +12,10 @@ import type { AnimationControls, AnimationOptions } from "./types";
 export type { AnimationControls, AnimationOptions };
 
 /**
- * Spring 애니메이션 실행
+ * Run spring animation
  *
- * tick 옵션 사용 시: RAF 기반 실시간 애니메이션
- * css 옵션 사용 시: Web Animation API 기반 (GPU 가속)
+ * tick option: RAF-based real-time animation
+ * css option: Web Animation API based (GPU accelerated)
  *
  * @example
  * ```ts
@@ -35,7 +35,7 @@ export type { AnimationControls, AnimationOptions };
  *   spring: { stiffness: 300, damping: 30 },
  *   css: {
  *     element: myElement,
- *     keyframe: (progress) => ({
+ *     style: (progress) => ({
  *       opacity: String(progress),
  *       transform: `scale(${0.5 + 0.5 * progress})`,
  *     }),
@@ -43,10 +43,10 @@ export type { AnimationControls, AnimationOptions };
  *   onComplete: () => console.log('done'),
  * });
  *
- * // 중간에 중지하고 상태 확인
+ * // Stop mid-animation and check state
  * controls.stop();
- * console.log(controls.getPosition()); // 현재 위치
- * console.log(controls.getVelocity()); // 현재 속도
+ * console.log(controls.getPosition()); // Current position
+ * console.log(controls.getVelocity()); // Current velocity
  * ```
  */
 export function animate(options: AnimationOptions): AnimationControls {

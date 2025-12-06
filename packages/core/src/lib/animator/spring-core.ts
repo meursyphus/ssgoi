@@ -1,10 +1,10 @@
 /**
  * Spring Core
  *
- * Spring 물리 계산의 핵심 로직을 담은 모듈
- * animate.ts (RAF 기반)와 css-keyframe-generator.ts (동기 시뮬레이션) 모두에서 사용
+ * Core module containing spring physics calculation logic
+ * Used by both tick-runner (RAF based) and css-runner (synchronous simulation)
  *
- * 최적화된 Semi-implicit Euler 방식 사용 (Allen Chou's approach)
+ * Uses optimized Semi-implicit Euler method (Allen Chou's approach)
  */
 
 export interface SpringConfig {
@@ -23,10 +23,10 @@ export interface SpringConstants {
 }
 
 /**
- * Spring 상수 미리 계산 (성능 최적화)
+ * Pre-compute spring constants (performance optimization)
  *
- * @param config Spring 설정
- * @returns omega (각진동수), zeta (감쇠비)
+ * @param config Spring configuration
+ * @returns omega (angular frequency), zeta (damping ratio)
  */
 export function computeSpringConstants(config: SpringConfig): SpringConstants {
   const stiffness = config.stiffness;
@@ -38,18 +38,17 @@ export function computeSpringConstants(config: SpringConfig): SpringConstants {
 }
 
 /**
- * Spring 한 스텝 계산 (Semi-implicit Euler)
+ * Calculate one spring step (Semi-implicit Euler)
  *
- * 기존 F = -k(x-xt) - d*v 대신
- * omega와 zeta를 사용한 최적화된 공식 사용:
+ * Uses optimized formula with omega and zeta instead of F = -k(x-xt) - d*v:
  * - v += -2*h*zeta*omega*v + h*omega^2*(target - x)
  * - x += h*v
  *
- * @param state 현재 상태 (position, velocity)
- * @param target 목표 위치
- * @param constants 미리 계산된 spring 상수 (omega, zeta)
- * @param dt delta time (seconds)
- * @returns 새로운 상태
+ * @param state Current state (position, velocity)
+ * @param target Target position
+ * @param constants Pre-computed spring constants (omega, zeta)
+ * @param dt Delta time (seconds)
+ * @returns New state
  */
 export function stepSpring(
   state: SpringState,
@@ -81,7 +80,7 @@ export const VELOCITY_THRESHOLD = 0.01;
 export const SETTLE_THRESHOLD = 0.05; // 50ms of settling
 
 /**
- * Spring이 목표에 수렴했는지 확인
+ * Check if spring has converged to target
  */
 export function isSettled(state: SpringState, target: number): boolean {
   const displacement = Math.abs(target - state.position);
@@ -90,14 +89,14 @@ export function isSettled(state: SpringState, target: number): boolean {
 }
 
 /**
- * Spring 전체 시뮬레이션 (동기적)
- * Web Animation API용 keyframe 생성에 사용
+ * Full spring simulation (synchronous)
+ * Used for Web Animation API keyframe generation
  *
- * @param config Spring 설정
- * @param from 시작값
- * @param to 목표값
- * @param initialVelocity 초기 속도
- * @returns 프레임별 progress 배열과 duration
+ * @param config Spring configuration
+ * @param from Start value
+ * @param to Target value
+ * @param initialVelocity Initial velocity
+ * @returns Frame-by-frame progress array and duration
  */
 export function simulateSpring(
   config: SpringConfig,
@@ -107,7 +106,7 @@ export function simulateSpring(
 ): { frames: number[]; duration: number } {
   const constants = computeSpringConstants(config);
   const FRAME_TIME = 1 / 60; // 60fps (seconds)
-  const MAX_FRAMES = 600; // 최대 10초
+  const MAX_FRAMES = 600; // Max 10 seconds
 
   let state: SpringState = { position: from, velocity: initialVelocity };
   let settleTime = 0;
@@ -115,18 +114,18 @@ export function simulateSpring(
   const frames: number[] = [];
 
   for (let i = 0; i < MAX_FRAMES; i++) {
-    // Progress 계산 (0~1)
+    // Calculate progress (0~1)
     const progress = range !== 0 ? (state.position - from) / range : 1;
     frames.push(Math.max(0, Math.min(1, progress)));
 
-    // Spring 스텝
+    // Spring step
     state = stepSpring(state, to, constants, FRAME_TIME);
 
-    // 수렴 체크
+    // Check convergence
     if (isSettled(state, to)) {
       settleTime += FRAME_TIME;
       if (settleTime >= SETTLE_THRESHOLD) {
-        // 마지막 프레임은 정확히 목표값
+        // Final frame is exactly target value
         const finalProgress = range !== 0 ? 1 : 1;
         frames.push(finalProgress);
         break;

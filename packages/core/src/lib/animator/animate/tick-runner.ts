@@ -1,7 +1,7 @@
 /**
- * Tick Runner (RAF 기반 Spring 애니메이션)
+ * Tick Runner (RAF based Spring Animation)
  *
- * requestAnimationFrame을 사용하여 실시간 spring 애니메이션을 실행
+ * Executes real-time spring animation using requestAnimationFrame
  */
 
 import { ticker } from "../ticker";
@@ -26,7 +26,7 @@ export interface TickRunnerOptions {
 }
 
 /**
- * RAF 기반 Spring 애니메이션 실행
+ * Run spring animation via RAF
  */
 export function runTickAnimation(
   options: TickRunnerOptions,
@@ -56,10 +56,10 @@ export function runTickAnimation(
       onStart?.();
     }
 
-    // Spring 스텝 계산
+    // Calculate spring step
     state = stepSpring(state, to, constants, deltaTime);
 
-    // 수렴 체크
+    // Check convergence
     if (isSettled(state, to)) {
       settleTime += Math.min(deltaTime, 0.033);
 

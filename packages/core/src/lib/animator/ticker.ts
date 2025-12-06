@@ -27,7 +27,7 @@ class Ticker {
 
   private tick = () => {
     const now = Date.now();
-    const rawFrameElapsed = now - this.lastUpdate; // 실제 경과 시간 (보정 전)
+    const rawFrameElapsed = now - this.lastUpdate; // Actual elapsed time (before adjustment)
     let frameElapsed = rawFrameElapsed;
 
     // Lag smoothing: prevent huge time jumps (e.g., tab switch on mobile)

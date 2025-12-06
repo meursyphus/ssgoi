@@ -1,16 +1,16 @@
 /**
- * Animation Runner 공통 타입
+ * Animation Runner common types
  */
 
 import type { SpringConfig } from "../spring-core";
 
 /**
- * CSS 스타일 객체 타입
+ * CSS style object type
  */
 export type StyleObject = Record<string, number | string>;
 
 /**
- * Animation Controls - tick-runner와 css-runner 모두 동일한 인터페이스
+ * Animation Controls - Common interface for both tick-runner and css-runner
  */
 export interface AnimationControls {
   stop: () => void;
@@ -20,7 +20,7 @@ export interface AnimationControls {
 }
 
 /**
- * Animation Options - 통합 옵션
+ * Animation Options - Unified options
  */
 export interface AnimationOptions {
   from: number;
@@ -30,7 +30,7 @@ export interface AnimationOptions {
   onComplete: () => void;
   onStart?: () => void;
 
-  // 둘 중 하나만 사용
+  // Use only one of these
   tick?: (value: number) => void;
   css?: {
     element: HTMLElement;

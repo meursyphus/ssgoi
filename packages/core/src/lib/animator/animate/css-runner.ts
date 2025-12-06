@@ -1,11 +1,11 @@
 /**
- * CSS Runner (Web Animation API 기반 Spring 애니메이션)
+ * CSS Runner (Web Animation API based Spring Animation)
  *
- * Spring 물리를 미리 시뮬레이션하여 keyframe으로 변환 후
- * Web Animation API로 실행.
+ * Pre-simulates spring physics and converts to keyframes,
+ * then executes via Web Animation API.
  *
- * 시뮬레이션 데이터를 기록해두어 중간에 stop 시
- * 정확한 position과 velocity를 역산할 수 있음.
+ * Records simulation data to accurately calculate
+ * position and velocity when stopped mid-animation.
  */
 
 import {
@@ -30,7 +30,7 @@ export interface CssRunnerOptions {
 }
 
 /**
- * 시뮬레이션 프레임 데이터
+ * Simulation frame data
  */
 interface SimulationFrame {
   time: number; // ms
@@ -41,8 +41,8 @@ interface SimulationFrame {
 const FRAME_TIME = 1000 / 60; // ~16.67ms per frame
 
 /**
- * Spring 전체 시뮬레이션 (동기적)
- * position, velocity를 시간별로 기록
+ * Full spring simulation (synchronous)
+ * Records position and velocity over time
  */
 function simulateSpring(
   from: number,
@@ -51,7 +51,7 @@ function simulateSpring(
   initialVelocity = 0,
 ): SimulationFrame[] {
   const constants = computeSpringConstants(spring);
-  const MAX_FRAMES = 600; // 최대 10초
+  const MAX_FRAMES = 600; // Max 10 seconds
 
   let state: SpringState = { position: from, velocity: initialVelocity };
   let settleTime = 0;
@@ -60,21 +60,21 @@ function simulateSpring(
   for (let i = 0; i < MAX_FRAMES; i++) {
     const time = i * FRAME_TIME;
 
-    // 현재 상태 기록
+    // Record current state
     frames.push({
       time,
       position: state.position,
       velocity: state.velocity,
     });
 
-    // Spring 스텝 (초 단위로 변환)
+    // Spring step (convert to seconds)
     state = stepSpring(state, to, constants, FRAME_TIME / 1000);
 
-    // 수렴 체크
+    // Check convergence
     if (isSettled(state, to)) {
       settleTime += FRAME_TIME / 1000;
       if (settleTime >= SETTLE_THRESHOLD) {
-        // 마지막 프레임 - 정확히 목표값
+        // Final frame - exact target value
         frames.push({
           time: (i + 1) * FRAME_TIME,
           position: to,
@@ -91,8 +91,8 @@ function simulateSpring(
 }
 
 /**
- * 경과 시간에서 position과 velocity를 역산
- * 이진 탐색 + 선형 보간
+ * Interpolate position and velocity from elapsed time
+ * Uses binary search + linear interpolation
  */
 function interpolateFrame(
   frames: SimulationFrame[],
@@ -105,7 +105,7 @@ function interpolateFrame(
   const firstFrame = frames[0]!;
   const lastFrame = frames[frames.length - 1]!;
 
-  // 범위 체크
+  // Bounds check
   if (elapsedTime <= 0) {
     return { position: firstFrame.position, velocity: firstFrame.velocity };
   }
@@ -114,7 +114,7 @@ function interpolateFrame(
     return { position: lastFrame.position, velocity: lastFrame.velocity };
   }
 
-  // 이진 탐색으로 프레임 찾기
+  // Binary search for frame
   let low = 0;
   let high = frames.length - 1;
 
@@ -127,7 +127,7 @@ function interpolateFrame(
     }
   }
 
-  // 선형 보간
+  // Linear interpolation
   const f1 = frames[low]!;
   const f2 = frames[high]!;
   const t = (elapsedTime - f1.time) / (f2.time - f1.time);
@@ -139,26 +139,20 @@ function interpolateFrame(
 }
 
 /**
- * SimulationFrame[] -> Keyframe[]
+ * Convert SimulationFrame[] to Keyframe[]
  */
 function framesToKeyframes(
   frames: SimulationFrame[],
-  from: number,
-  to: number,
-  styleFn: (progress: number) => StyleObject,
+  styleFn: (position: number) => StyleObject,
 ): Keyframe[] {
-  const range = to - from;
-
   return frames.map((frame) => {
-    // position을 0~1 progress로 변환
-    const progress = range !== 0 ? (frame.position - from) / range : 1;
-    const clampedProgress = Math.max(0, Math.min(1, progress));
-    return styleFn(clampedProgress) as Keyframe;
+    // Pass position value directly (same behavior as tick-runner)
+    return styleFn(frame.position) as Keyframe;
   });
 }
 
 /**
- * Web Animation API 기반 Spring 애니메이션 실행
+ * Run spring animation via Web Animation API
  */
 export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const {
@@ -172,10 +166,10 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     onStart,
   } = options;
 
-  // Phase 1: 시뮬레이션 (시간별 position, velocity 기록)
+  // Phase 1: Simulation (record position, velocity over time)
   const frames = simulateSpring(from, to, spring, initialVelocity);
 
-  // 빈 프레임 처리
+  // Handle empty frames
   if (frames.length === 0) {
     onStart?.();
     onComplete();
@@ -187,16 +181,16 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     };
   }
 
-  // Phase 2: Keyframe 생성
-  const keyframes = framesToKeyframes(frames, from, to, styleFn);
+  // Phase 2: Generate keyframes
+  const keyframes = framesToKeyframes(frames, styleFn);
   const lastFrame = frames[frames.length - 1]!;
   const duration = lastFrame.time;
 
-  // Phase 3: Web Animation API 실행
+  // Phase 3: Execute via Web Animation API
   const animation = element.animate(keyframes, {
     duration,
     fill: "forwards",
-    easing: "linear", // spring 물리가 이미 keyframes에 적용됨
+    easing: "linear", // Spring physics already applied in keyframes
   });
 
   let isActive = true;

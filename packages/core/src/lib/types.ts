@@ -6,7 +6,7 @@ export type SpringConfig = {
 };
 
 /**
- * CSS 스타일 객체 타입
+ * CSS style object type
  */
 export type StyleObject = Record<string, number | string>;
 

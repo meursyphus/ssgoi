@@ -233,17 +233,18 @@ export default function Home() {
                     key: "scale-rotate",
                     in: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                        element.style.opacity = progress.toString();
-                      },
+
+                      css: (progress) => ({
+                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
-                        element.style.opacity = progress.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                   })}
                   className={`${styles.shape} ${styles.triangle}`}
@@ -258,17 +259,17 @@ export default function Home() {
                     key: "slide-in",
                     in: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                        element.style.opacity = progress.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `translateX(${(1 - progress) * -100}px)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                     out: (element) => ({
                       spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.transform = `translateX(${(1 - progress) * -100}px)`;
-                        element.style.opacity = progress.toString();
-                      },
+                      css: (progress) => ({
+                        transform: `translateX(${(1 - progress) * -100}px)`,
+                        opacity: progress.toString(),
+                      }),
                     }),
                   })}
                   className={`${styles.shape} ${styles.square}`}

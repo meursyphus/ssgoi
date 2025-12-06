@@ -22,11 +22,11 @@ export interface AnimatorOptions {
 }
 
 /**
- * Animator - Spring 기반 애니메이션 컨트롤러
+ * Animator - Spring-based Animation Controller
  *
- * tick 또는 css 옵션에 따라 내부적으로 적절한 runner 사용
- * - tick: RAF 기반 실시간 애니메이션
- * - css: Web Animation API 기반 (GPU 가속, 시뮬레이션 데이터로 velocity 추적)
+ * Internally selects appropriate runner based on tick or css option
+ * - tick: RAF-based real-time animation
+ * - css: Web Animation API based (GPU accelerated, velocity tracking via simulation data)
  */
 export class Animator implements AnimationController {
   private options: {
