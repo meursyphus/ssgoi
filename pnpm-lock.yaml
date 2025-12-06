@@ -427,8 +427,8 @@ importers:
   packages/react:
     dependencies:
       '@ssgoi/core':
-        specifier: workspace:^
-        version: link:../core
+        specifier: ^2.5.6
+        version: 2.5.6
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -3711,6 +3711,10 @@ packages:
 
   '@speed-highlight/core@1.2.10':
     resolution: {integrity: sha512-WzAkyxhveUzsbtaOU4Ebxg4kWUTt5ADXvwSut/wV+cG7/RD6FYBq7NAFMdRH4irsKwjaQYahEv5nM0LZ73tTLg==}
+
+  '@ssgoi/core@2.5.6':
+    resolution: {integrity: sha512-vd7ouk93Ykl5EEn7rjvOQQO9hNlGj2fjFxP/UU0C7ZQBEOCz5pEmYn0tt/CyUTB+RjQOAafrGeSdcedUQ0xk1A==}
+    engines: {node: '>=18.0.0'}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -13424,6 +13428,8 @@ snapshots:
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@speed-highlight/core@1.2.10': {}
+
+  '@ssgoi/core@2.5.6': {}
 
   '@standard-schema/spec@1.0.0': {}
 
