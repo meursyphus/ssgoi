@@ -1,6 +1,6 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { sleep, round } from "../utils";
+import { sleep } from "../utils";
 
 const DEFAULT_OUT_SPRING = { stiffness: 65, damping: 16 };
 const DEFAULT_IN_SPRING = { stiffness: 65, damping: 14 };
@@ -26,8 +26,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     in: (element) => {
       return {
         spring: inSpring,
-        prepare: (element) => {
-          element.style.opacity = "0";
+        prepare: () => {
           element.style.willChange = "opacity";
         },
         wait: async () => {
@@ -38,10 +37,9 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
             await sleep(transitionDelay);
           }
         },
-        tick: (progress) => {
-          const opacity = round(progress, 2);
-          element.style.opacity = opacity.toString();
-        },
+        css: (progress): StyleObject => ({
+          opacity: progress,
+        }),
         onEnd: () => {
           element.style.willChange = "auto";
         },
@@ -55,9 +53,9 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
 
       return {
         spring: outSpring,
-        tick: (progress) => {
-          element.style.opacity = progress.toString();
-        },
+        css: (progress): StyleObject => ({
+          opacity: progress,
+        }),
         prepare: () => {
           prepareOutgoing(element, context);
           element.style.willChange = "opacity";
@@ -67,7 +65,6 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
           if (resolveOutAnimation) {
             resolveOutAnimation();
           }
-
           element.style.willChange = "auto";
         },
       };

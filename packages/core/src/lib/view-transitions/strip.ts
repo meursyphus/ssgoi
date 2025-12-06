@@ -1,4 +1,4 @@
-import type { SggoiTransition } from "../types";
+import type { SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const DEFAULT_SPRING = { stiffness: 17, damping: 6 };
@@ -14,9 +14,12 @@ export const strip = (): SggoiTransition => {
     in: (element) => {
       return {
         spring: DEFAULT_SPRING,
-        prepare: (element) => {
+        prepare: () => {
+          // GPU acceleration hints
           element.style.willChange = "transform";
-          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ROTATE_Y}deg) translateX(-100%)`;
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
@@ -24,14 +27,19 @@ export const strip = (): SggoiTransition => {
             await outAnimationComplete;
           }
         },
-        tick: (progress) => {
+        css: (progress): StyleObject => {
           const rotateY = (1 - progress) * ROTATE_Y;
           const translateX = -(1 - progress) * 100;
-          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${rotateY}deg) translateX(${translateX}%)`;
+          return {
+            transform: `perspective(${PERSPECTIVE}px) rotateY(${rotateY}deg) translate3d(${translateX}%, 0, 0)`,
+          };
         },
         onEnd: () => {
           element.style.transform = "";
           element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },
@@ -43,15 +51,22 @@ export const strip = (): SggoiTransition => {
 
       return {
         spring: DEFAULT_SPRING,
-        prepare: (element) => {
-          prepareOutgoing(element, context);
-          element.style.willChange = "transform";
+        prepare: (el) => {
+          prepareOutgoing(el, context);
+          // GPU acceleration hints
+          el.style.willChange = "transform";
+          el.style.backfaceVisibility = "hidden";
+          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+          el.style.pointerEvents = "none";
         },
-        tick: (_progress) => {
+        css: (_progress): StyleObject => {
           const progress = 1 - _progress;
           const rotateY = progress * ROTATE_Y;
           const translateX = progress * 100;
-          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${-rotateY}deg) translateX(${translateX}%)`;
+          return {
+            transform: `perspective(${PERSPECTIVE}px) rotateY(${-rotateY}deg) translate3d(${translateX}%, 0, 0)`,
+          };
         },
         onEnd: () => {
           // Resolve the promise when OUT animation completes
