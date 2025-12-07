@@ -1,24 +1,28 @@
 import { Animator } from ".";
 import { Animation } from "./animation";
 import type {
-  MultiSpringConfig,
+  NormalizedMultiSpringConfig,
   SpringItem,
-  NormalizedScheduleEntry,
   AnimationState,
 } from "../types";
+
+/**
+ * Normalized spring item with offset
+ */
+type NormalizedSpringItem = SpringItem & { normalizedOffset: number };
 
 /**
  * Entry to track individual spring animation state
  */
 type AnimatorEntry = {
   id: string;
-  item: SpringItem;
+  item: NormalizedSpringItem;
   animator: Animator;
-  startTime: number | null;
+  started: boolean;
 };
 
 export interface MultiAnimatorOptions {
-  config: MultiSpringConfig;
+  config: NormalizedMultiSpringConfig;
   from: number;
   to: number;
   element?: HTMLElement;
@@ -29,20 +33,23 @@ export interface MultiAnimatorOptions {
  *
  * Extends Animation base class to provide unified interface.
  * Manages the lifecycle and timing of multiple spring animations.
- * Supports three scheduling strategies:
- * - overlap: All springs start immediately (parallel)
- * - wait: Each spring waits for previous to complete (sequential)
- * - chain: Springs start with offset delays
+ *
+ * All scheduling is progress-based using normalizedOffset (0-1):
+ * - offset 0: Start immediately with previous spring
+ * - offset 1: Start after previous spring completes
+ * - offset 0-1: Start when previous spring reaches this progress
+ *
+ * Config must be pre-normalized using normalizeMultiSpringSchedule()
  */
 export class MultiAnimator extends Animation {
-  private config: MultiSpringConfig;
+  private config: NormalizedMultiSpringConfig;
   private animators: Map<string, AnimatorEntry> = new Map();
   private springOrder: string[] = [];
   private completedCount = 0;
   private completedAnimators = new Set<string>();
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
-  private timeoutIds: number[] = [];
+  private rafId: number | null = null;
   private element?: HTMLElement;
   private from: number;
   private to: number;
@@ -80,48 +87,33 @@ export class MultiAnimator extends Animation {
         id,
         item,
         animator,
-        startTime: null,
+        started: false,
       });
       this.springOrder.push(id);
     });
   }
 
-  private normalizeSchedule(
-    direction: "forward" | "backward",
-  ): NormalizedScheduleEntry[] {
-    const schedule = this.config.schedule ?? "overlap";
+  /**
+   * Calculate progress of an animator (0-1)
+   * Progress = |position - from| / |to - from|
+   */
+  private getAnimatorProgress(entry: AnimatorEntry): number {
+    const state = entry.animator.getCurrentState();
+    const range = Math.abs(state.to - state.from);
+    if (range === 0) return 1;
+    return Math.abs(state.position - state.from) / range;
+  }
 
-    return this.springOrder.map((id, index) => {
-      const entry = this.animators.get(id);
-      if (!entry) {
-        throw new Error(`MultiAnimator: animator with id "${id}" not found`);
-      }
-
-      if (schedule === "overlap") {
-        return { type: "offset" as const, id, delay: 0 };
-      }
-
-      if (schedule === "wait") {
-        if (direction === "forward" && index === 0) {
-          return { type: "offset" as const, id, delay: 0 };
-        }
-        if (direction === "backward" && index === this.springOrder.length - 1) {
-          return { type: "offset" as const, id, delay: 0 };
-        }
-        return { type: "wait" as const, id };
-      }
-
-      // Chain mode
-      const offset = entry.item.offset ?? 0;
-      if (direction === "forward") {
-        return { type: "offset" as const, id, delay: offset };
-      }
-
-      const maxOffset = Math.max(
-        ...Array.from(this.animators.values()).map((e) => e.item.offset ?? 0),
-      );
-      return { type: "offset" as const, id, delay: maxOffset - offset };
-    });
+  /**
+   * Get order of springs based on direction
+   * Forward: 0, 1, 2, ...
+   * Backward: n-1, n-2, ..., 0
+   */
+  private getOrderedIds(): string[] {
+    if (this.direction === "forward") {
+      return this.springOrder;
+    }
+    return [...this.springOrder].reverse();
   }
 
   private onAnimatorComplete(id: string): void {
@@ -135,55 +127,79 @@ export class MultiAnimator extends Animation {
     entry.item.onComplete?.();
     this.config.onProgress?.(this.completedCount, this.config.springs.length);
 
-    this.handleWaitModeChaining(id);
-
     if (this.completedCount === this.config.springs.length) {
+      this.stopScheduler();
       this.config.onEnd?.();
     }
   }
 
-  private handleWaitModeChaining(completedId: string): void {
-    if (this.config.schedule !== "wait") {
-      return;
-    }
+  /**
+   * Check and start springs based on previous spring's progress
+   * Called on each frame while animation is running
+   */
+  private checkAndStartSprings(): void {
+    const orderedIds = this.getOrderedIds();
 
-    const currentIndex = this.springOrder.indexOf(completedId);
+    for (let i = 0; i < orderedIds.length; i++) {
+      const id = orderedIds[i]!;
+      const entry = this.animators.get(id);
+      if (!entry || entry.started) continue;
 
-    if (this.direction === "forward") {
-      const nextId = this.springOrder[currentIndex + 1];
-      if (nextId) {
-        const nextEntry = this.animators.get(nextId);
-        if (nextEntry && nextEntry.startTime === null) {
-          this.startAnimator(nextId);
-        }
+      // First spring always starts immediately
+      if (i === 0) {
+        this.startAnimator(id);
+        continue;
       }
-    } else {
-      const prevId = this.springOrder[currentIndex - 1];
-      if (prevId) {
-        const prevEntry = this.animators.get(prevId);
-        if (prevEntry && prevEntry.startTime === null) {
-          this.startBackwardAnimator(prevId);
-        }
+
+      // Check previous spring's progress
+      const prevId = orderedIds[i - 1]!;
+      const prevEntry = this.animators.get(prevId);
+      if (!prevEntry || !prevEntry.started) continue;
+
+      const prevProgress = this.getAnimatorProgress(prevEntry);
+      const requiredOffset = entry.item.normalizedOffset;
+
+      // Start when previous reaches required progress
+      if (prevProgress >= requiredOffset) {
+        this.startAnimator(id);
       }
     }
   }
 
   private startAnimator(id: string): void {
     const entry = this.animators.get(id);
-    if (!entry || entry.startTime !== null) {
+    if (!entry || entry.started) {
       return;
     }
-    entry.startTime = Date.now();
-    entry.animator.forward();
+    entry.started = true;
+
+    if (this.direction === "forward") {
+      entry.animator.forward();
+    } else {
+      entry.animator.backward();
+    }
   }
 
-  private startBackwardAnimator(id: string): void {
-    const entry = this.animators.get(id);
-    if (!entry || entry.startTime !== null) {
-      return;
+  /**
+   * Start the scheduler loop that checks spring progress
+   */
+  private startScheduler(): void {
+    const tick = () => {
+      this.checkAndStartSprings();
+
+      // Continue if any animation is still running
+      if (this.getIsAnimating()) {
+        this.rafId = requestAnimationFrame(tick);
+      }
+    };
+    this.rafId = requestAnimationFrame(tick);
+  }
+
+  private stopScheduler(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
     }
-    entry.startTime = Date.now();
-    entry.animator.backward();
   }
 
   private getFirstAnimator(): Animator | null {
@@ -197,23 +213,11 @@ export class MultiAnimator extends Animation {
     this.direction = "forward";
     this.completedCount = 0;
     this.completedAnimators.clear();
+    this.resetStartedFlags();
     this.config.onStart?.();
 
-    const entries = this.normalizeSchedule("forward");
-    entries.forEach((entry) => {
-      if (entry.type === "wait") {
-        return;
-      }
-      if (entry.delay === 0) {
-        this.startAnimator(entry.id);
-      } else {
-        const timeoutId = window.setTimeout(
-          () => this.startAnimator(entry.id),
-          entry.delay,
-        );
-        this.timeoutIds.push(timeoutId);
-      }
-    });
+    // Start scheduler - it will handle starting springs based on progress
+    this.startScheduler();
   }
 
   backward(): void {
@@ -221,31 +225,24 @@ export class MultiAnimator extends Animation {
     this.direction = "backward";
     this.completedCount = 0;
     this.completedAnimators.clear();
+    this.resetStartedFlags();
     this.config.onStart?.();
 
-    const entries = this.normalizeSchedule("backward");
-    entries.forEach((entry) => {
-      if (entry.type === "wait") {
-        return;
-      }
-      if (entry.delay === 0) {
-        this.startBackwardAnimator(entry.id);
-      } else {
-        const timeoutId = window.setTimeout(
-          () => this.startBackwardAnimator(entry.id),
-          entry.delay,
-        );
-        this.timeoutIds.push(timeoutId);
-      }
+    // Start scheduler - it will handle starting springs based on progress
+    this.startScheduler();
+  }
+
+  private resetStartedFlags(): void {
+    this.animators.forEach((entry) => {
+      entry.started = false;
     });
   }
 
   stop(): void {
-    this.timeoutIds.forEach((id) => clearTimeout(id));
-    this.timeoutIds = [];
+    this.stopScheduler();
     this.animators.forEach((entry) => {
       entry.animator.stop();
-      entry.startTime = null;
+      entry.started = false;
     });
   }
 
@@ -253,7 +250,7 @@ export class MultiAnimator extends Animation {
     this.direction = this.direction === "forward" ? "backward" : "forward";
 
     this.animators.forEach((entry) => {
-      if (entry.startTime === null) {
+      if (!entry.started) {
         return;
       }
 

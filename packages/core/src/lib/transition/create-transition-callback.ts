@@ -1,5 +1,5 @@
 import type { Transition, TransitionCallback } from "../types";
-import { normalizeToMultiSpring } from "../types";
+import { normalizeToMultiSpring, normalizeMultiSpringSchedule } from "../types";
 import { MultiAnimator } from "../animator/multi-animator";
 import { Animation } from "../animator/animation";
 import {
@@ -71,14 +71,16 @@ export function createTransitionCallback(
       await config.wait();
     }
 
-    const animator = MultiAnimator.fromState(setup.state, {
-      config: {
-        ...config,
-        onEnd: () => {
-          currentAnimation = null;
-          config.onEnd?.();
-        },
+    const normalizedConfig = normalizeMultiSpringSchedule({
+      ...config,
+      onEnd: () => {
+        currentAnimation = null;
+        config.onEnd?.();
       },
+    });
+
+    const animator = MultiAnimator.fromState(setup.state, {
+      config: normalizedConfig,
       from: setup.from,
       to: setup.to,
       element,
@@ -133,19 +135,21 @@ export function createTransitionCallback(
       await config.wait();
     }
 
-    const animator = MultiAnimator.fromState(setup.state, {
-      config: {
-        ...config,
-        onEnd: () => {
-          config.onEnd?.();
-          if (currentClone) {
-            currentClone.remove();
-            currentClone = null;
-          }
-          currentAnimation = null;
-          options?.onCleanupEnd?.();
-        },
+    const normalizedConfig = normalizeMultiSpringSchedule({
+      ...config,
+      onEnd: () => {
+        config.onEnd?.();
+        if (currentClone) {
+          currentClone.remove();
+          currentClone = null;
+        }
+        currentAnimation = null;
+        options?.onCleanupEnd?.();
       },
+    });
+
+    const animator = MultiAnimator.fromState(setup.state, {
+      config: normalizedConfig,
       from: setup.from,
       to: setup.to,
       element,

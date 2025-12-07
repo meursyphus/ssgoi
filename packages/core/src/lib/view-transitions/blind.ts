@@ -19,7 +19,6 @@ interface BlindOptions {
   transitionDelay?: number;
   blindCount?: number;
   direction?: "horizontal" | "vertical";
-  staggerDelay?: number;
   blindColor?: string;
 }
 
@@ -30,7 +29,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
     transitionDelay = DEFAULT_TRANSITION_DELAY,
     blindCount = DEFAULT_BLIND_COUNT,
     direction = DEFAULT_DIRECTION,
-    staggerDelay = 100,
     blindColor = DEFAULT_BLIND_COLOR,
   } = options;
 
@@ -121,7 +119,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
           spring: outSpring,
-          offset: index * staggerDelay,
+          offset: 0.2,
           tick: (progress: number) => {
             if (!blindsData) return;
             const blind = blindsData.blinds[index];
@@ -140,7 +138,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
       return {
         springs,
-        schedule: "chain",
+        schedule: "stagger",
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
@@ -166,7 +164,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
           spring: inSpring,
-          offset: index * staggerDelay,
+          offset: 0.2,
           tick: (progress: number) => {
             if (!blindsData) return;
             const blind = blindsData.blinds[index];
@@ -185,7 +183,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
 
       return {
         springs,
-        schedule: "chain",
+        schedule: "stagger",
         prepare: (element) => {
           element.style.position = "relative";
           element.style.zIndex = "0";
