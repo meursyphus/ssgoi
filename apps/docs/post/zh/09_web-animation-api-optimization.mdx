@@ -1,0 +1,162 @@
+---
+title: "ssgoi 3.0: 使用 Web Animation API 更快了"
+description: "预先计算 Spring 物理并通过 Web Animation API 执行。无论主线程负载如何，都能保持 60fps。"
+thumbnail: "/post/web-animation-api-optimization/thumbnail.jpg"
+date: "2025-12-07"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "文大升"
+tags: ["performance", "web-animation-api", "spring", "release"]
+---
+
+ssgoi 3.0 将动画引擎切换为基于 Web Animation API。
+
+**即使 CPU 负载很高，动画也不会卡顿。**
+
+## 新接口：`css`
+
+在现有的 `tick` 之外，新增了 `css` 选项。
+
+```typescript
+// 现有：tick（基于 RAF，每帧执行）
+transition({
+  key: "fade",
+  in: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = progress.toString();
+    },
+  }),
+});
+
+// 新增：css（基于 Web Animation API）
+transition({
+  key: "scale-rotate",
+  in: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+      opacity: progress,
+    }),
+  }),
+});
+```
+
+使用 `css` 时，会**预先完全计算** Spring 物理，生成 Keyframe 数组，然后通过 `element.animate()` 执行。
+
+## 为什么更快？
+
+`tick` 每帧都在主线程执行回调。主线程繁忙时？会卡顿。
+
+`css` 预先创建 Keyframe 并委托给合成器线程。主线程再忙也没关系。
+
+```
+[tick] 每帧计算
+  RAF → 物理计算 → 回调执行 → RAF → ...
+        ↑ 主线程繁忙时这里会卡顿
+
+[css] 预先计算后委托
+  模拟(一次) → Keyframes → element.animate()
+                           ↑ 在合成器线程执行
+```
+
+在 CPU 6倍减速测试中，`tick` 每次卡顿 100ms，而 `css` 保持了 60fps。
+
+## View Transition 也已优化
+
+页面过渡效果也切换到了 `css`。
+
+```typescript
+// fade view transition
+export const fade = (): SggoiTransition => ({
+  in: (element) => ({
+    spring: { stiffness: 65, damping: 14 },
+    css: (progress) => ({ opacity: progress }),  // 使用 css
+  }),
+  out: (element) => ({
+    spring: { stiffness: 65, damping: 16 },
+    css: (progress) => ({ opacity: progress }),
+  }),
+});
+
+// drill view transition
+export const drill = (): SggoiTransition => ({
+  in: (element) => ({
+    spring: { stiffness: 150, damping: 20 },
+    css: (progress) => ({
+      transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
+    }),
+  }),
+  // ...
+});
+```
+
+`fade`、`drill`、`slide`、`scroll`、`strip` 等大多数 view transition 现在都使用 `css`。
+
+## 创新：Spring 连续性得以保持
+
+Web Animation API 规范中**没有获取当前速度的方法。** 当前位置？可以用 `animation.currentTime` 大概计算。速度？没有。
+
+所以通常使用 Web Animation API 时，连续的 Spring 是不可能的。中途方向改变时，必须重新开始。
+
+ssgoi 不一样。我们**保存所有模拟数据**。
+
+```typescript
+// 保存模拟结果
+const frames: SimulationFrame[] = [
+  { time: 0,    position: 0,   velocity: 12 },
+  { time: 16,   position: 0.3, velocity: 8 },
+  { time: 32,   position: 0.7, velocity: 3 },
+  // ...
+];
+
+// 即使动画中途停止
+function getPosition() {
+  const elapsed = performance.now() - startTime;
+  return interpolateFrame(frames, elapsed).position;
+}
+
+function getVelocity() {
+  const elapsed = performance.now() - startTime;
+  return interpolateFrame(frames, elapsed).velocity;
+}
+```
+
+用 Binary Search 找到当前时间对应的帧，然后线性插值。O(log n)。
+
+**因此，即使使用 Web Animation API，也能保持 Spring 的连续性。** 中途方向改变时，会继承当前速度，自然过渡。
+
+## 为什么用 Spring？
+
+CSS Transition 在中途方向改变时会中断。它忽略速度，开始新的动画。
+
+Spring 保持当前速度，自然地改变方向。遵循物理定律。
+
+而且配置很直观：
+
+```typescript
+// 这是什么意思？
+{ easing: "cubic-bezier(0.4, 0, 0.2, 1)" }
+
+// 这个能理解
+{ stiffness: 300, damping: 30 }
+```
+
+## 什么时候用什么？
+
+- **`css`**：简单样式变化（opacity、transform）
+- **`tick`**：复杂逻辑、需要 DOM 操作
+- **页面过渡**：自动应用 `css`
+
+## 更新
+
+```bash
+npm update @ssgoi/react
+npm update @ssgoi/svelte
+```
+
+现有的 `tick` 代码仍然正常工作。
+
+---
+
+代码：[css-runner.ts](https://github.com/meursyphus/ssgoi/blob/main/packages/core/src/lib/animator/animate/css-runner.ts)
