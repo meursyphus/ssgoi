@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface ScaleOptions {
   start?: number;
@@ -32,22 +32,22 @@ export const scale = (options: ScaleOptions = {}) => {
     }
   };
 
+  const getCss = (progress: number): StyleObject => {
+    const scaleValue = start + (1 - start) * progress;
+    return {
+      transform: getScaleTransform(scaleValue),
+      opacity: opacity + (1 - opacity) * progress,
+    };
+  };
+
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const scaleValue = start + (1 - start) * progress;
-        element.style.transform = getScaleTransform(scaleValue);
-        element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const scaleValue = start + (1 - start) * progress;
-        element.style.transform = getScaleTransform(scaleValue);
-        element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };

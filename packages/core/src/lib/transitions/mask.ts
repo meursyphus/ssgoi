@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface MaskOptions {
   shape?: "circle" | "ellipse" | "square";
@@ -80,26 +80,26 @@ export const mask = (options: MaskOptions = {}) => {
     }
   };
 
+  const getCss = (progress: number): StyleObject => {
+    const style: StyleObject = {
+      clipPath: getClipPath(progress),
+    };
+
+    if (fade) {
+      style.opacity = progress;
+    }
+
+    return style;
+  };
+
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        element.style.clipPath = getClipPath(progress);
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        element.style.clipPath = getClipPath(progress);
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };

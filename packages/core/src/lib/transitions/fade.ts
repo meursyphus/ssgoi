@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface FadeOptions {
   from?: number;
@@ -19,19 +19,17 @@ export const fade = (options: FadeOptions = {}) => {
   } = options;
 
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const opacity = from + (to - from) * progress;
-        element.style.opacity = opacity.toString();
-      },
+      css: (progress: number): StyleObject => ({
+        opacity: from + (to - from) * progress,
+      }),
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const opacity = from + (to - from) * progress;
-        element.style.opacity = opacity.toString();
-      },
+      css: (progress: number): StyleObject => ({
+        opacity: from + (to - from) * progress,
+      }),
     }),
     ...(key && { key }),
   };

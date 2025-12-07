@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface NoneOptions {
   spring?: {
@@ -14,15 +14,11 @@ export const none = (options: NoneOptions = {}) => {
   return {
     in: () => ({
       spring,
-      tick: () => {
-        // No animation, just instantly show
-      },
+      css: (): StyleObject => ({}),
     }),
     out: () => ({
       spring,
-      tick: () => {
-        // No animation, just instantly hide
-      },
+      css: (): StyleObject => ({}),
     }),
     ...(key && { key }),
   };

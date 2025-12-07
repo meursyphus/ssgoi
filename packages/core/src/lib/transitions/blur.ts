@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface BlurOptions {
   amount?: number | string;
@@ -22,62 +22,35 @@ export const blur = (options: BlurOptions = {}) => {
     key,
   } = options;
 
-  const getBlurAmount = (value: number | string): string => {
-    return typeof value === "number" ? `${value}px` : value;
+  const getCss = (progress: number): StyleObject => {
+    const blurMultiplier = 1 - progress;
+    const style: StyleObject = {};
+
+    if (typeof amount === "number") {
+      style.filter = `blur(${blurMultiplier * amount}px)`;
+    } else {
+      style.filter = `blur(calc(${amount} * ${blurMultiplier}))`;
+    }
+
+    if (scale) {
+      style.transform = `scale(${0.8 + progress * 0.2})`;
+    }
+
+    if (fade) {
+      style.opacity = opacity + (1 - opacity) * progress;
+    }
+
+    return style;
   };
 
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const blurMultiplier = 1 - progress;
-        const blurValue =
-          typeof amount === "number"
-            ? blurMultiplier * amount
-            : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
-
-        element.style.filter =
-          typeof amount === "number"
-            ? `blur(${blurValue}px)`
-            : `blur(${blurValue})`;
-
-        if (scale) {
-          element.style.transform = `scale(${0.8 + progress * 0.2})`;
-        }
-
-        if (fade) {
-          element.style.opacity = (
-            opacity +
-            (1 - opacity) * progress
-          ).toString();
-        }
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const blurMultiplier = 1 - progress;
-        const blurValue =
-          typeof amount === "number"
-            ? blurMultiplier * amount
-            : `calc(${getBlurAmount(amount)} * ${blurMultiplier})`;
-
-        element.style.filter =
-          typeof amount === "number"
-            ? `blur(${blurValue}px)`
-            : `blur(${blurValue})`;
-
-        if (scale) {
-          element.style.transform = `scale(${0.8 + progress * 0.2})`;
-        }
-
-        if (fade) {
-          element.style.opacity = (
-            opacity +
-            (1 - opacity) * progress
-          ).toString();
-        }
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };

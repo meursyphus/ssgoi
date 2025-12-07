@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface FlyOptions {
   x?: number | string;
@@ -20,46 +20,38 @@ export const fly = (options: FlyOptions = {}) => {
     key,
   } = options;
 
-  const getX = (value: number | string): string => {
-    return typeof value === "number" ? `${value}px` : value;
-  };
+  const getCss = (progress: number): StyleObject => {
+    const multiplier = 1 - progress;
 
-  const getY = (value: number | string): string => {
-    return typeof value === "number" ? `${value}px` : value;
+    let xOffset: string;
+    let yOffset: string;
+
+    if (typeof x === "number") {
+      xOffset = `${multiplier * x}px`;
+    } else {
+      xOffset = `calc(${x} * ${multiplier})`;
+    }
+
+    if (typeof y === "number") {
+      yOffset = `${multiplier * y}px`;
+    } else {
+      yOffset = `calc(${y} * ${multiplier})`;
+    }
+
+    return {
+      transform: `translate3d(${xOffset}, ${yOffset}, 0)`,
+      opacity: opacity + (1 - opacity) * progress,
+    };
   };
 
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const xOffset =
-          typeof x === "number"
-            ? (1 - progress) * x
-            : `calc(${getX(x)} * ${1 - progress})`;
-        const yOffset =
-          typeof y === "number"
-            ? (1 - progress) * y
-            : `calc(${getY(y)} * ${1 - progress})`;
-
-        element.style.transform = `translate(${typeof x === "number" ? xOffset + "px" : xOffset}, ${typeof y === "number" ? yOffset + "px" : yOffset})`;
-        element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const xOffset =
-          typeof x === "number"
-            ? (1 - progress) * x
-            : `calc(${getX(x)} * ${1 - progress})`;
-        const yOffset =
-          typeof y === "number"
-            ? (1 - progress) * y
-            : `calc(${getY(y)} * ${1 - progress})`;
-
-        element.style.transform = `translate(${typeof x === "number" ? xOffset + "px" : xOffset}, ${typeof y === "number" ? yOffset + "px" : yOffset})`;
-        element.style.opacity = (opacity + (1 - opacity) * progress).toString();
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };

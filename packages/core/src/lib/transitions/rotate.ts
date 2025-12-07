@@ -1,4 +1,4 @@
-import type { TransitionKey } from "../types";
+import type { StyleObject, TransitionKey } from "../types";
 
 interface RotateOptions {
   degrees?: number;
@@ -45,40 +45,32 @@ export const rotate = (options: RotateOptions = {}) => {
     }
   };
 
+  const getCss = (progress: number): StyleObject => {
+    const style: StyleObject = {};
+    const transforms = [getRotateTransform(progress)];
+
+    if (scale) {
+      transforms.push(`scale(${progress})`);
+    }
+
+    style.transform = transforms.join(" ");
+    style.transformOrigin = origin;
+
+    if (fade) {
+      style.opacity = progress;
+    }
+
+    return style;
+  };
+
   return {
-    in: (element: HTMLElement) => ({
+    in: () => ({
       spring,
-      tick: (progress: number) => {
-        const transforms = [getRotateTransform(progress)];
-
-        if (scale) {
-          transforms.push(`scale(${progress})`);
-        }
-
-        element.style.transform = transforms.join(" ");
-        element.style.transformOrigin = origin;
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
-    out: (element: HTMLElement) => ({
+    out: () => ({
       spring,
-      tick: (progress: number) => {
-        const transforms = [getRotateTransform(progress)];
-
-        if (scale) {
-          transforms.push(`scale(${progress})`);
-        }
-
-        element.style.transform = transforms.join(" ");
-        element.style.transformOrigin = origin;
-
-        if (fade) {
-          element.style.opacity = progress.toString();
-        }
-      },
+      css: getCss,
     }),
     ...(key && { key }),
   };
