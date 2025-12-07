@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ssgoi/core": "workspace:*"
+    "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
     "@angular/common": "^20.0.0",
