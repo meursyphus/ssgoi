@@ -51,27 +51,34 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
       return {
         spring,
         prepare: () => {
+          // GPU acceleration hints
           element.style.willChange = "transform";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
         },
         tick: (progress) => {
-          // Check if height is calculated
+          // Use cached height or recalculate
           if (calculatedHeight === null) {
-            // Try to calculate if not done yet
             calculatedHeight = calculateHeight();
-            if (calculatedHeight === null) return; // Still not ready
           }
+          const height = calculatedHeight ?? window.innerHeight;
 
           const translateY = isUp
-            ? (1 - progress) * calculatedHeight // calculatedHeight → 0
-            : (1 - progress) * -calculatedHeight; // -calculatedHeight → 0
-          element.style.transform = `translateY(${translateY}px)`;
+            ? (1 - progress) * height
+            : (1 - progress) * -height;
+
+          element.style.transform = `translate3d(0, ${translateY}px, 0)`;
         },
         onEnd: () => {
           element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },
-    out: (element) => ({
+    out: (element, context) => ({
       spring,
       onStart: () => {
         // Capture outgoing element height at animation start (before detached)
@@ -83,23 +90,27 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         }
       },
       tick: (progress) => {
-        // Check if height is calculated
+        // Use cached height or recalculate
         if (calculatedHeight === null) {
-          // Try to calculate if not done yet
           calculatedHeight = calculateHeight();
-          if (calculatedHeight === null) return; // Still not ready
         }
+        const height = calculatedHeight ?? window.innerHeight;
 
         const translateY = isUp
-          ? (1 - progress) * -calculatedHeight // 0 → -calculatedHeight
-          : (1 - progress) * calculatedHeight; // 0 → calculatedHeight
-        element.style.transform = `translateY(${translateY}px)`;
-      },
-      prepare: (element) => {
-        prepareOutgoing(element);
+          ? (1 - progress) * -height
+          : (1 - progress) * height;
 
-        element.style.zIndex = isUp ? "-1" : "1";
-        element.style.willChange = "transform";
+        element.style.transform = `translate3d(0, ${translateY}px, 0)`;
+      },
+      prepare: (el) => {
+        prepareOutgoing(el, context);
+        el.style.zIndex = isUp ? "-1" : "1";
+        // GPU acceleration hints
+        el.style.willChange = "transform";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+        el.style.pointerEvents = "none";
       },
     }),
   };

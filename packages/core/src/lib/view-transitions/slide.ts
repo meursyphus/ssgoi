@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface SlideOptions {
@@ -24,31 +24,45 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
     in: (element) => ({
       spring,
       prepare: () => {
+        // GPU acceleration hints
         element.style.willChange = "transform";
+        element.style.backfaceVisibility = "hidden";
+        (element.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
       },
-      tick: (progress) => {
+      css: (progress): StyleObject => {
         const translateX = isLeft
-          ? (1 - progress) * 100 // 100 → 0
-          : (1 - progress) * -100; // -100 → 0
-        element.style.transform = `translateX(${translateX}%)`;
+          ? (1 - progress) * 100
+          : (1 - progress) * -100;
+        return {
+          transform: `translate3d(${translateX}%, 0, 0)`,
+        };
       },
       onEnd: () => {
         element.style.willChange = "auto";
+        element.style.backfaceVisibility = "";
+        (element.style as CSSStyleDeclaration & { contain: string }).contain =
+          "";
       },
     }),
-    out: (element, context) => ({
+    out: (_element, context) => ({
       spring,
-      tick: (progress) => {
+      css: (progress): StyleObject => {
         const translateX = isLeft
-          ? (1 - progress) * -100 // 0 → -100
-          : (1 - progress) * 100; // 0 → 100
-        element.style.transform = `translateX(${translateX}%)`;
+          ? (1 - progress) * -100
+          : (1 - progress) * 100;
+        return {
+          transform: `translate3d(${translateX}%, 0, 0)`,
+        };
       },
-      prepare: (element) => {
-        prepareOutgoing(element, context);
-
-        element.style.zIndex = isLeft ? "-1" : "1";
-        element.style.willChange = "transform";
+      prepare: (el) => {
+        prepareOutgoing(el, context);
+        // GPU acceleration hints
+        el.style.willChange = "transform";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+        el.style.pointerEvents = "none";
       },
     }),
   };
