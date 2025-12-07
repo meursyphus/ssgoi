@@ -1,8 +1,4 @@
-import type {
-  TransitionConfig,
-  AnimationController,
-  SingleSpringConfig,
-} from "../types";
+import type { TransitionConfig, AnimationController } from "../types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
@@ -100,16 +96,15 @@ export const createDefaultStrategy = (
         // Single-spring: use OUT config but reverse direction
         if (configs.out) {
           const outConfig = await configs.out;
-          // Extract from/to with defaults for out transition (single-spring)
-          const { from = 1, to = 0 } = outConfig as SingleSpringConfig;
+          // OUT animation: from=1, to=0, backward goes toward from (1)
           return {
             config: outConfig,
             state: {
               position: state.position,
               velocity: state.velocity,
             },
-            from, // OUT animation's from
-            to, // OUT animation's to
+            from: 1,
+            to: 0,
             direction: "backward", // Will actually go 0→1 (backward means toward 'from')
           };
         }
@@ -144,16 +139,15 @@ export const createDefaultStrategy = (
         };
       }
 
-      // Extract from/to with defaults for in transition (single-spring)
-      const { from = 0, to = 1 } = config;
+      // IN animation: from=0, to=1
       return {
         config,
         state: {
-          position: from,
+          position: 0,
           velocity: 0,
         },
-        from,
-        to,
+        from: 0,
+        to: 1,
         direction: "forward",
       };
     },
@@ -186,16 +180,15 @@ export const createDefaultStrategy = (
         // Single-spring: use IN config but reverse direction
         if (configs.in) {
           const inConfig = await configs.in;
-          // Extract from/to with defaults for in transition (single-spring)
-          const { from = 0, to = 1 } = inConfig as SingleSpringConfig;
+          // IN animation: from=0, to=1, backward goes toward from (0)
           return {
             config: inConfig,
             state: {
               position: state.position,
               velocity: state.velocity,
             },
-            from, // IN animation's from
-            to, // IN animation's to
+            from: 0,
+            to: 1,
             direction: "backward", // Will actually go 1→0 (backward means toward 'from')
           };
         }
@@ -230,16 +223,15 @@ export const createDefaultStrategy = (
         };
       }
 
-      // Extract from/to with defaults for out transition (single-spring)
-      const { from = 1, to = 0 } = config;
+      // OUT animation: from=1, to=0
       return {
         config,
         state: {
-          position: from,
+          position: 1,
           velocity: 0,
         },
-        from,
-        to,
+        from: 1,
+        to: 0,
         direction: "forward",
       };
     },
@@ -281,16 +273,15 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
         };
       }
 
-      // Extract from/to for single-spring
-      const { from = 0, to = 1 } = config;
+      // IN animation: from=0, to=1
       return {
         config,
         state: {
-          position: from,
+          position: 0,
           velocity: 0,
         },
-        from,
-        to,
+        from: 0,
+        to: 1,
         direction: "forward",
       };
     },
@@ -324,16 +315,15 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
         };
       }
 
-      // Extract from/to for single-spring
-      const { from = 1, to = 0 } = config;
+      // OUT animation: from=1, to=0
       return {
         config,
         state: {
-          position: from,
+          position: 1,
           velocity: 0,
         },
-        from,
-        to,
+        from: 1,
+        to: 0,
         direction: "forward",
       };
     },

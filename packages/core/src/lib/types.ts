@@ -47,10 +47,6 @@ export type SingleSpringConfig = BaseTransitionConfig & {
   // Spring physics configuration
   spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
-  // Animation range values
-  from?: number; // Default: 0 for in, 1 for out
-  to?: number; // Default: 1 for in, 0 for out
-
   // Callback for each frame with progress value (RAF-based)
   tick?: (progress: number) => void;
 
@@ -78,8 +74,6 @@ export type SingleSpringConfig = BaseTransitionConfig & {
  * Individual spring item in a multi-spring animation
  */
 export type SpringItem = {
-  from?: number; // Default: 0 for in, 1 for out
-  to?: number; // Default: 1 for in, 0 for out
   spring?: SpringConfig;
 
   /**

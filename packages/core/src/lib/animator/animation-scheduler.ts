@@ -46,11 +46,12 @@ export class AnimationScheduler implements AnimationController {
   }
 
   private initializeAnimators(): void {
+    // IN animation: from=0, to=1 (forward goes 0→1, backward goes 1→0)
     this.config.springs.forEach((item) => {
       const id = this.generateId();
       const animator = new Animator({
-        from: item.from,
-        to: item.to,
+        from: 0,
+        to: 1,
         spring: item.spring,
         tick: item.tick,
         onComplete: () => this.onAnimatorComplete(id),
@@ -242,11 +243,12 @@ export class AnimationScheduler implements AnimationController {
       const isCompleted = state.position === state.to;
 
       if (isCompleted) {
+        // Reverse completed animation: swap from/to (1→0 becomes 0→1)
         const newAnimator = Animator.fromState(
           { position: 1, velocity: 0 },
           {
-            from: entry.item.to ?? 1,
-            to: entry.item.from ?? 0,
+            from: 1,
+            to: 0,
             spring: entry.item.spring,
             tick: entry.item.tick,
             onComplete: () => this.onAnimatorComplete(entry.id),
