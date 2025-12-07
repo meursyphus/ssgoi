@@ -1,9 +1,9 @@
 import { Animator } from ".";
+import { Animation } from "./animation";
 import type {
   MultiSpringConfig,
   SpringItem,
   NormalizedScheduleEntry,
-  AnimationController,
   AnimationState,
 } from "../types";
 
@@ -17,16 +17,24 @@ type AnimatorEntry = {
   startTime: number | null;
 };
 
+export interface MultiAnimatorOptions {
+  config: MultiSpringConfig;
+  from: number;
+  to: number;
+  element?: HTMLElement;
+}
+
 /**
- * AnimationScheduler - Coordinates multiple spring animations
+ * MultiAnimator - Coordinates multiple spring animations
  *
+ * Extends Animation base class to provide unified interface.
  * Manages the lifecycle and timing of multiple spring animations.
  * Supports three scheduling strategies:
  * - overlap: All springs start immediately (parallel)
  * - wait: Each spring waits for previous to complete (sequential)
  * - chain: Springs start with offset delays
  */
-export class AnimationScheduler implements AnimationController {
+export class MultiAnimator extends Animation {
   private config: MultiSpringConfig;
   private animators: Map<string, AnimatorEntry> = new Map();
   private springOrder: string[] = [];
@@ -35,9 +43,16 @@ export class AnimationScheduler implements AnimationController {
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
   private timeoutIds: number[] = [];
+  private element?: HTMLElement;
+  private from: number;
+  private to: number;
 
-  constructor(config: MultiSpringConfig) {
-    this.config = config;
+  constructor(options: MultiAnimatorOptions) {
+    super();
+    this.config = options.config;
+    this.from = options.from;
+    this.to = options.to;
+    this.element = options.element;
     this.initializeAnimators();
   }
 
@@ -46,14 +61,17 @@ export class AnimationScheduler implements AnimationController {
   }
 
   private initializeAnimators(): void {
-    // IN animation: from=0, to=1 (forward goes 0→1, backward goes 1→0)
     this.config.springs.forEach((item) => {
       const id = this.generateId();
       const animator = new Animator({
-        from: 0,
-        to: 1,
+        from: this.from,
+        to: this.to,
         spring: item.spring,
         tick: item.tick,
+        css:
+          item.css && this.element
+            ? { element: this.element, style: item.css }
+            : undefined,
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
       });
@@ -76,9 +94,7 @@ export class AnimationScheduler implements AnimationController {
     return this.springOrder.map((id, index) => {
       const entry = this.animators.get(id);
       if (!entry) {
-        throw new Error(
-          `AnimationScheduler: animator with id "${id}" not found`,
-        );
+        throw new Error(`MultiAnimator: animator with id "${id}" not found`);
       }
 
       if (schedule === "overlap") {
@@ -170,6 +186,12 @@ export class AnimationScheduler implements AnimationController {
     entry.animator.backward();
   }
 
+  private getFirstAnimator(): Animator | null {
+    const firstId = this.springOrder[0];
+    if (!firstId) return null;
+    return this.animators.get(firstId)?.animator ?? null;
+  }
+
   forward(): void {
     this.stop();
     this.direction = "forward";
@@ -236,21 +258,23 @@ export class AnimationScheduler implements AnimationController {
       }
 
       const state = entry.animator.getCurrentState();
-      if (state.type !== "single") {
-        return;
-      }
-
       const isCompleted = state.position === state.to;
 
       if (isCompleted) {
-        // Reverse completed animation: swap from/to (1→0 becomes 0→1)
+        // Reverse completed animation: swap from/to
+        const cssOption =
+          entry.item.css && this.element
+            ? { element: this.element, style: entry.item.css }
+            : undefined;
+
         const newAnimator = Animator.fromState(
-          { position: 1, velocity: 0 },
+          { position: this.to, velocity: 0 },
           {
-            from: 1,
-            to: 0,
+            from: this.to,
+            to: this.from,
             spring: entry.item.spring,
             tick: entry.item.tick,
+            css: cssOption,
             onComplete: () => this.onAnimatorComplete(entry.id),
             onStart: entry.item.onStart,
           },
@@ -264,11 +288,78 @@ export class AnimationScheduler implements AnimationController {
   }
 
   getCurrentState(): AnimationState {
+    // Return first animator's state
+    const firstAnimator = this.getFirstAnimator();
+    if (firstAnimator) {
+      return firstAnimator.getCurrentState();
+    }
+
+    // Fallback if no animators
     return {
-      type: "multi" as const,
-      completed: this.completedCount,
-      total: this.config.springs.length,
-      direction: this.direction,
+      position: 0,
+      velocity: 0,
+      from: 0,
+      to: 1,
     };
+  }
+
+  /**
+   * Get current position value from first animator
+   */
+  getCurrentValue(): number {
+    const firstAnimator = this.getFirstAnimator();
+    return firstAnimator?.getCurrentValue() ?? 0;
+  }
+
+  /**
+   * Get current velocity from first animator
+   */
+  getVelocity(): number {
+    const firstAnimator = this.getFirstAnimator();
+    return firstAnimator?.getVelocity() ?? 0;
+  }
+
+  /**
+   * Set position value on first animator
+   * TODO: Support per-spring control
+   */
+  setValue(value: number): void {
+    const firstAnimator = this.getFirstAnimator();
+    firstAnimator?.setValue(value);
+  }
+
+  /**
+   * Set velocity on first animator
+   * TODO: Support per-spring control
+   */
+  setVelocity(velocity: number): void {
+    const firstAnimator = this.getFirstAnimator();
+    firstAnimator?.setVelocity(velocity);
+  }
+
+  /**
+   * Check if any animation is currently running
+   */
+  getIsAnimating(): boolean {
+    for (const entry of this.animators.values()) {
+      if (entry.animator.getIsAnimating()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Create MultiAnimator from existing state
+   * Uses first animator's state for initialization
+   */
+  static fromState(
+    state: { position: number; velocity: number },
+    options: MultiAnimatorOptions,
+  ): MultiAnimator {
+    const animator = new MultiAnimator(options);
+    animator.setValue(state.position);
+    animator.setVelocity(state.velocity);
+    return animator;
   }
 }

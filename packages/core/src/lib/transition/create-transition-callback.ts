@@ -1,16 +1,12 @@
-import type {
-  Transition,
-  TransitionCallback,
-  AnimationController,
-} from "../types";
-import { isMultiSpring } from "../types";
-import { Animator } from "../animator";
-import { AnimationScheduler } from "../animator/animation-scheduler";
+import type { Transition, TransitionCallback } from "../types";
+import { normalizeToMultiSpring } from "../types";
+import { MultiAnimator } from "../animator/multi-animator";
+import { Animation } from "../animator/animation";
 import {
   createDefaultStrategy,
   type StrategyContext,
   type TransitionStrategy,
-  type TransitionConfigs,
+  type InternalTransitionConfigs,
 } from "./transition-strategy";
 
 export function createTransitionCallback(
@@ -21,7 +17,7 @@ export function createTransitionCallback(
   },
 ): TransitionCallback {
   let currentAnimation: {
-    controller: AnimationController;
+    controller: Animation;
     direction: "in" | "out";
   } | null = null;
   let currentClone: HTMLElement | null = null;
@@ -47,73 +43,45 @@ export function createTransitionCallback(
     const inConfig = transition.in && (await transition.in(element));
     const outConfig =
       !options?.strategy && transition.out
-        ? transition.out(element)
+        ? await transition.out(element)
         : undefined;
 
     if (!inConfig) {
       return;
     }
 
-    // Multi-spring path
-    if (isMultiSpring(inConfig)) {
-      const configs: TransitionConfigs = {
-        in: Promise.resolve(inConfig),
-        out: outConfig && Promise.resolve(outConfig),
-      };
-
-      const setup = await strategy.runIn(configs);
-      if (!setup.config) {
-        if (currentAnimation) {
-          currentAnimation.direction = "in";
-        }
-        return;
-      }
-
-      inConfig.prepare?.(element);
-      if (inConfig.wait) {
-        await inConfig.wait();
-      }
-
-      const scheduler = new AnimationScheduler({
-        ...inConfig,
-        onEnd: () => {
-          currentAnimation = null;
-          inConfig.onEnd?.();
-        },
-      });
-
-      currentAnimation = { controller: scheduler, direction: "in" };
-      scheduler.forward();
-      return;
-    }
-
-    // Single-spring path
-    const configs: TransitionConfigs = {
-      in: Promise.resolve(inConfig),
-      out: outConfig && Promise.resolve(outConfig),
+    // Normalize to multi-spring config before passing to strategy
+    const configs: InternalTransitionConfigs = {
+      in: normalizeToMultiSpring(inConfig),
+      out: outConfig ? normalizeToMultiSpring(outConfig) : undefined,
     };
 
     const setup = await strategy.runIn(configs);
-    if (!setup.config || "springs" in setup.config) {
+    if (!setup.config) {
+      if (currentAnimation) {
+        currentAnimation.direction = "in";
+      }
       return;
     }
 
-    setup.config.prepare?.(element);
-    if (setup.config.wait) {
-      await setup.config.wait();
+    const config = setup.config;
+
+    config.prepare?.(element);
+    if (config.wait) {
+      await config.wait();
     }
 
-    const animator = Animator.fromState(setup.state, {
+    const animator = MultiAnimator.fromState(setup.state, {
+      config: {
+        ...config,
+        onEnd: () => {
+          currentAnimation = null;
+          config.onEnd?.();
+        },
+      },
       from: setup.from,
       to: setup.to,
-      spring: setup.config.spring,
-      tick: setup.config.tick,
-      css: setup.config.css ? { element, style: setup.config.css } : undefined,
-      onStart: setup.config.onStart,
-      onComplete: () => {
-        currentAnimation = null;
-        setup.config?.onEnd?.();
-      },
+      element,
     });
 
     currentAnimation = { controller: animator, direction: "in" };
@@ -129,41 +97,47 @@ export function createTransitionCallback(
     currentClone = element;
 
     const transition = getTransition();
+    const inConfig =
+      !options?.strategy && transition.in
+        ? await transition.in(element)
+        : undefined;
     const outConfig = transition.out && (await transition.out(element));
 
     if (!outConfig) {
       return;
     }
 
-    // Multi-spring path
-    if (isMultiSpring(outConfig)) {
-      const configs: TransitionConfigs = {
-        in: undefined,
-        out: Promise.resolve(outConfig),
-      };
+    // Normalize to multi-spring config before passing to strategy
+    const configs: InternalTransitionConfigs = {
+      in: inConfig ? normalizeToMultiSpring(inConfig) : undefined,
+      out: normalizeToMultiSpring(outConfig),
+    };
 
-      const setup = await strategy.runOut(configs);
-      if (!setup.config) {
-        if (currentAnimation) {
-          currentAnimation.direction = "out";
-        }
-        if (currentClone) {
-          currentClone.remove();
-          currentClone = null;
-        }
-        return;
+    const setup = await strategy.runOut(configs);
+    if (!setup.config) {
+      if (currentAnimation) {
+        currentAnimation.direction = "out";
       }
-
-      outConfig.prepare?.(element);
-      insertClone();
-      if (outConfig.wait) {
-        await outConfig.wait();
+      if (currentClone) {
+        currentClone.remove();
+        currentClone = null;
       }
+      return;
+    }
 
-      const scheduler = new AnimationScheduler({
-        ...outConfig,
+    const config = setup.config;
+
+    config.prepare?.(element);
+    insertClone();
+    if (config.wait) {
+      await config.wait();
+    }
+
+    const animator = MultiAnimator.fromState(setup.state, {
+      config: {
+        ...config,
         onEnd: () => {
-          outConfig.onEnd?.();
+          config.onEnd?.();
           if (currentClone) {
             currentClone.remove();
             currentClone = null;
@@ -171,46 +145,10 @@ export function createTransitionCallback(
           currentAnimation = null;
           options?.onCleanupEnd?.();
         },
-      });
-
-      currentAnimation = { controller: scheduler, direction: "out" };
-      scheduler.forward();
-      return;
-    }
-
-    // Single-spring path
-    const configs: TransitionConfigs = {
-      in: undefined,
-      out: Promise.resolve(outConfig),
-    };
-
-    const setup = await strategy.runOut(configs);
-    if (!setup.config || "springs" in setup.config) {
-      return;
-    }
-
-    setup.config.prepare?.(element);
-    insertClone();
-    if (setup.config.wait) {
-      await setup.config.wait();
-    }
-
-    const animator = Animator.fromState(setup.state, {
+      },
       from: setup.from,
       to: setup.to,
-      spring: setup.config.spring,
-      tick: setup.config.tick,
-      css: setup.config.css ? { element, style: setup.config.css } : undefined,
-      onStart: setup.config.onStart,
-      onComplete: () => {
-        setup.config?.onEnd?.();
-        if (currentClone) {
-          currentClone.remove();
-          currentClone = null;
-        }
-        currentAnimation = null;
-        options?.onCleanupEnd?.();
-      },
+      element,
     });
 
     currentAnimation = { controller: animator, direction: "out" };

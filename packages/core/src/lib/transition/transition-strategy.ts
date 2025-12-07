@@ -1,18 +1,23 @@
-import type { TransitionConfig, AnimationController } from "../types";
+import type { MultiSpringConfig } from "../types";
+import type { Animation } from "../animator/animation";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext {
   // Current animation state
-  // Supports both single spring (Animator) and multi-spring (AnimationScheduler)
   currentAnimation: {
-    controller: AnimationController;
+    controller: Animation;
     direction: "in" | "out";
   } | null;
 }
 
-export interface AnimationSetup {
-  config?: TransitionConfig;
+/**
+ * Internal animation setup returned by strategy
+ * Always uses MultiSpringConfig (normalized from user's Single/Multi config)
+ * @internal
+ */
+export interface InternalAnimationSetup {
+  config?: MultiSpringConfig;
   state: {
     position: number;
     velocity: number;
@@ -22,14 +27,23 @@ export interface AnimationSetup {
   direction: "forward" | "backward";
 }
 
-export interface TransitionConfigs {
-  in?: Promise<TransitionConfig>;
-  out?: Promise<TransitionConfig>;
+/**
+ * Internal transition configs passed to strategy
+ * Always uses MultiSpringConfig (normalized before passing)
+ * @internal
+ */
+export interface InternalTransitionConfigs {
+  in?: MultiSpringConfig;
+  out?: MultiSpringConfig;
 }
 
 export interface TransitionStrategy {
-  runIn: (configs: TransitionConfigs) => Promise<AnimationSetup>;
-  runOut: (configs: TransitionConfigs) => Promise<AnimationSetup>;
+  runIn: (
+    configs: InternalTransitionConfigs,
+  ) => Promise<InternalAnimationSetup>;
+  runOut: (
+    configs: InternalTransitionConfigs,
+  ) => Promise<InternalAnimationSetup>;
 }
 
 /**
@@ -68,41 +82,22 @@ export const createDefaultStrategy = (
   context: StrategyContext,
 ): TransitionStrategy => {
   return {
-    runIn: async (configs: TransitionConfigs) => {
+    runIn: async (configs: InternalTransitionConfigs) => {
       const { currentAnimation } = context;
 
       // Scenario 4: OUT animation running + IN trigger
       if (currentAnimation && currentAnimation.direction === "out") {
-        // Stop current OUT animation
-        const state = currentAnimation.controller.getCurrentState();
+        // Stop current OUT animation, get state from first animator
+        const position = currentAnimation.controller.getCurrentValue();
+        const velocity = currentAnimation.controller.getVelocity();
         currentAnimation.controller.stop();
 
-        // Check if multi-spring animation
-        if (state.type === "multi") {
-          // Multi-spring: directly reverse the controller
-          currentAnimation.controller.reverse();
-          // Return special setup indicating already handled
-          return {
-            state: {
-              position: 0,
-              velocity: 0,
-            },
-            from: 0,
-            to: 1,
-            direction: "forward",
-          };
-        }
-
-        // Single-spring: use OUT config but reverse direction
+        // Use OUT config but reverse direction
         if (configs.out) {
-          const outConfig = await configs.out;
           // OUT animation: from=1, to=0, backward goes toward from (1)
           return {
-            config: outConfig,
-            state: {
-              position: state.position,
-              velocity: state.velocity,
-            },
+            config: configs.out,
+            state: { position, velocity },
             from: 1,
             to: 0,
             direction: "backward", // Will actually go 0→1 (backward means toward 'from')
@@ -111,24 +106,10 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 1: No animation running OR IN already running
-      const config = await configs.in;
+      const config = configs.in;
       if (!config) {
         // No config, return minimal setup
         return {
-          state: {
-            position: 0,
-            velocity: 0,
-          },
-          from: 0,
-          to: 1,
-          direction: "forward",
-        };
-      }
-
-      // For multi-spring, return config without extracting from/to
-      if ("springs" in config) {
-        return {
-          config,
           state: {
             position: 0,
             velocity: 0,
@@ -152,41 +133,22 @@ export const createDefaultStrategy = (
       };
     },
 
-    runOut: async (configs: TransitionConfigs) => {
+    runOut: async (configs: InternalTransitionConfigs) => {
       const { currentAnimation } = context;
 
       // Scenario 3: IN animation running + OUT trigger
       if (currentAnimation && currentAnimation.direction === "in") {
-        // Stop current IN animation
-        const state = currentAnimation.controller.getCurrentState();
+        // Stop current IN animation, get state from first animator
+        const position = currentAnimation.controller.getCurrentValue();
+        const velocity = currentAnimation.controller.getVelocity();
         currentAnimation.controller.stop();
 
-        // Check if multi-spring animation
-        if (state.type === "multi") {
-          // Multi-spring: directly reverse the controller
-          currentAnimation.controller.reverse();
-          // Return special setup indicating already handled
-          return {
-            state: {
-              position: 1,
-              velocity: 0,
-            },
-            from: 1,
-            to: 0,
-            direction: "forward",
-          };
-        }
-
-        // Single-spring: use IN config but reverse direction
+        // Use IN config but reverse direction
         if (configs.in) {
-          const inConfig = await configs.in;
           // IN animation: from=0, to=1, backward goes toward from (0)
           return {
-            config: inConfig,
-            state: {
-              position: state.position,
-              velocity: state.velocity,
-            },
+            config: configs.in,
+            state: { position, velocity },
             from: 0,
             to: 1,
             direction: "backward", // Will actually go 1→0 (backward means toward 'from')
@@ -195,24 +157,10 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 2: No animation running OR OUT already running
-      const config = await configs.out;
+      const config = configs.out;
       if (!config) {
         // No config, return minimal setup
         return {
-          state: {
-            position: 1,
-            velocity: 0,
-          },
-          from: 1,
-          to: 0,
-          direction: "forward",
-        };
-      }
-
-      // For multi-spring, return config without extracting from/to
-      if ("springs" in config) {
-        return {
-          config,
           state: {
             position: 1,
             velocity: 0,
@@ -244,25 +192,11 @@ export const createDefaultStrategy = (
  */
 export const createPageTransitionStrategy = (): TransitionStrategy => {
   return {
-    runIn: async (configs: TransitionConfigs) => {
+    runIn: async (configs: InternalTransitionConfigs) => {
       // Always start fresh for IN transition
-      const config = await configs.in;
+      const config = configs.in;
       if (!config) {
         return {
-          state: {
-            position: 0,
-            velocity: 0,
-          },
-          from: 0,
-          to: 1,
-          direction: "forward",
-        };
-      }
-
-      // For multi-spring, return config without extracting from/to
-      if ("springs" in config) {
-        return {
-          config,
           state: {
             position: 0,
             velocity: 0,
@@ -286,25 +220,11 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
       };
     },
 
-    runOut: async (configs: TransitionConfigs) => {
+    runOut: async (configs: InternalTransitionConfigs) => {
       // Always start fresh for OUT transition
-      const config = await configs.out;
+      const config = configs.out;
       if (!config) {
         return {
-          state: {
-            position: 1,
-            velocity: 0,
-          },
-          from: 1,
-          to: 0,
-          direction: "forward",
-        };
-      }
-
-      // For multi-spring, return config without extracting from/to
-      if ("springs" in config) {
-        return {
-          config,
           state: {
             position: 1,
             velocity: 0,

@@ -1,10 +1,7 @@
 import { animate } from "./animate";
 import type { AnimationControls, StyleObject } from "./animate/types";
-import type {
-  SpringConfig,
-  AnimationController,
-  AnimationState,
-} from "../types";
+import type { SpringConfig, AnimationState } from "../types";
+import { Animation } from "./animation";
 
 export type { StyleObject };
 
@@ -22,13 +19,13 @@ export interface AnimatorOptions {
 }
 
 /**
- * Animator - Spring-based Animation Controller
+ * Animator - Spring-based Animation Controller for single spring
  *
  * Internally selects appropriate runner based on tick or css option
  * - tick: RAF-based real-time animation
  * - css: Web Animation API based (GPU accelerated, velocity tracking via simulation data)
  */
-export class Animator implements AnimationController {
+export class Animator extends Animation {
   private options: {
     from: number;
     to: number;
@@ -47,6 +44,8 @@ export class Animator implements AnimationController {
   private currentVelocity: number = 0;
 
   constructor(options: AnimatorOptions) {
+    super();
+
     if (options.tick && options.css) {
       throw new Error("Cannot use both 'tick' and 'css' options together");
     }
@@ -130,7 +129,6 @@ export class Animator implements AnimationController {
 
   getCurrentState(): AnimationState {
     return {
-      type: "single" as const,
       position: this.getCurrentValue(),
       velocity: this.getVelocity(),
       from: this.options.from,

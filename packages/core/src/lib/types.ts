@@ -72,42 +72,43 @@ export type SingleSpringConfig = BaseTransitionConfig & {
 
 /**
  * Individual spring item in a multi-spring animation
+ *
+ * Supports two animation modes (mutually exclusive):
+ * - tick: RAF-based animation with callback on each frame
+ * - css: Web Animation API with CSS string generation
  */
 export type SpringItem = {
   spring?: SpringConfig;
 
   /**
-   * Frame callback - called on each animation frame with progress value
+   * Frame callback - called on each animation frame with progress value (RAF-based)
    *
    * **Performance Warning:** Use WRITE-ONLY operations for best performance.
    * Avoid reading layout properties inside tick to prevent layout thrashing.
    *
-   * Layout-triggering properties (causes forced synchronous layout):
-   * - element.offsetWidth, offsetHeight, offsetTop, offsetLeft
-   * - element.clientWidth, clientHeight
-   * - element.getBoundingClientRect()
-   * - element.scrollWidth, scrollHeight, scrollTop, scrollLeft
-   * - window.getComputedStyle(element)
-   *
    * @example
-   * // ❌ Bad: Layout read in tick (causes thrashing)
    * tick: (progress) => {
-   *   const height = element.offsetHeight  // READ - forces layout!
-   *   element.style.height = height * progress
-   * }
-   *
-   * @example
-   * // ✅ Good: Read in prepare, write in tick
-   * prepare: (element) => {
-   *   const height = element.offsetHeight  // READ once before animation
-   *   element.dataset.height = height.toString()
-   * },
-   * tick: (progress) => {
-   *   const height = parseFloat(element.dataset.height)
-   *   element.style.height = height * progress  // WRITE only
+   *   element.style.opacity = String(progress)
    * }
    */
-  tick: (progress: number) => void;
+  tick?: (progress: number) => void;
+
+  /**
+   * Style generator for Web Animation API mode
+   *
+   * When provided, the animation uses Web Animation API instead of RAF.
+   * Spring physics are pre-computed and converted to keyframes.
+   *
+   * @param progress - Current progress value (0 to 1)
+   * @returns Style object for Web Animation API
+   *
+   * @example
+   * css: (progress) => ({
+   *   opacity: progress,
+   *   transform: `translateY(${(1 - progress) * 20}px)`,
+   * })
+   */
+  css?: (progress: number) => StyleObject;
 
   onStart?: () => void;
   onComplete?: () => void;
@@ -186,6 +187,52 @@ export function validateAnimationMode(config: SingleSpringConfig): void {
       "SingleSpringConfig cannot have both 'tick' and 'css' defined. Use one or the other.",
     );
   }
+}
+
+/**
+ * Validate SpringItem doesn't have both tick and css defined
+ * @throws Error if both tick and css are defined
+ */
+export function validateSpringItem(item: SpringItem): void {
+  if (item.tick && item.css) {
+    throw new Error(
+      "SpringItem cannot have both 'tick' and 'css' defined. Use one or the other.",
+    );
+  }
+}
+
+/**
+ * Normalize TransitionConfig to MultiSpringConfig
+ * Converts SingleSpringConfig to MultiSpringConfig with single spring item
+ * @internal
+ */
+export function normalizeToMultiSpring(
+  config: TransitionConfig,
+): MultiSpringConfig {
+  if (isMultiSpring(config)) {
+    // Validate all spring items
+    config.springs.forEach(validateSpringItem);
+    return config;
+  }
+
+  // Validate single spring config
+  validateAnimationMode(config);
+
+  // Convert SingleSpringConfig to MultiSpringConfig
+  return {
+    prepare: config.prepare,
+    wait: config.wait,
+    onStart: config.onStart,
+    onEnd: config.onEnd,
+    springs: [
+      {
+        spring: config.spring,
+        tick: config.tick,
+        css: config.css,
+      },
+    ],
+    schedule: "overlap",
+  };
 }
 
 export type GetTransitionConfig<TContext = undefined> =
@@ -299,45 +346,13 @@ export type WaitScheduleEntry = {
 };
 
 /**
- * Animation state (discriminated union)
- * Different return types for single vs multi-spring animations
+ * Animation state
+ * For MultiAnimator: returns first animator's state
  * @internal
  */
-export type AnimationState = SingleAnimationState | MultiAnimationState;
-
-/**
- * Single spring animation state
- * @internal
- */
-export type SingleAnimationState = {
-  type: "single";
+export type AnimationState = {
   position: number;
   velocity: number;
   from: number;
   to: number;
 };
-
-/**
- * Multi-spring animation state
- * Always uses number for progress tracking
- * @internal
- */
-export type MultiAnimationState = {
-  type: "multi";
-  completed: number;
-  total: number;
-  direction: "forward" | "backward";
-};
-
-/**
- * Common interface for animation controllers
- * Implemented by both Animator (single spring) and AnimationScheduler (multi-spring)
- * @internal
- */
-export interface AnimationController {
-  forward(): void;
-  backward(): void;
-  stop(): void;
-  reverse(): void;
-  getCurrentState(): AnimationState;
-}
