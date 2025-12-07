@@ -120,8 +120,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          from: 0,
-          to: 1,
           spring: outSpring,
           offset: index * staggerDelay,
           tick: (progress: number) => {
@@ -129,11 +127,12 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
             const blind = blindsData.blinds[index];
             if (!blind) return;
 
-            // OUT: progress goes 0 → 1 (blind appears to cover screen)
+            // OUT: progress goes 1 → 0, but blind should appear (0 → 1)
+            const scale = 1 - progress;
             if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${progress})`;
+              blind.style.transform = `scaleX(${scale})`;
             } else {
-              blind.style.transform = `scaleY(${progress})`;
+              blind.style.transform = `scaleY(${scale})`;
             }
           },
         };
@@ -166,8 +165,6 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          from: 1,
-          to: 0,
           spring: inSpring,
           offset: index * staggerDelay,
           tick: (progress: number) => {
@@ -175,11 +172,12 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
             const blind = blindsData.blinds[index];
             if (!blind) return;
 
-            // IN: progress goes 1 → 0 (blind disappears to reveal screen)
+            // IN: progress goes 0 → 1, but blind should disappear (1 → 0)
+            const scale = 1 - progress;
             if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${progress})`;
+              blind.style.transform = `scaleX(${scale})`;
             } else {
-              blind.style.transform = `scaleY(${progress})`;
+              blind.style.transform = `scaleY(${scale})`;
             }
           },
         };
