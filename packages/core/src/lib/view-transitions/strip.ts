@@ -20,6 +20,8 @@ export const strip = (): SggoiTransition => {
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
+          // Set initial transform for css keyframe generation
+          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ROTATE_Y}deg) translate3d(-100%, 0, 0)`;
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
@@ -59,6 +61,8 @@ export const strip = (): SggoiTransition => {
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           el.style.pointerEvents = "none";
+          // Set initial transform for css keyframe generation
+          el.style.transform = `perspective(${PERSPECTIVE}px) rotateY(0deg) translate3d(0%, 0, 0)`;
         },
         css: (_progress): StyleObject => {
           const progress = 1 - _progress;
