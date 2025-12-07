@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface ScrollOptions {
@@ -57,7 +57,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
         },
-        css: (progress): StyleObject => {
+        tick: (progress) => {
           // Use cached height or recalculate
           if (calculatedHeight === null) {
             calculatedHeight = calculateHeight();
@@ -68,9 +68,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
             ? (1 - progress) * height
             : (1 - progress) * -height;
 
-          return {
-            transform: `translate3d(0, ${translateY}px, 0)`,
-          };
+          element.style.transform = `translate3d(0, ${translateY}px, 0)`;
         },
         onEnd: () => {
           element.style.willChange = "auto";
@@ -80,7 +78,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: (element) => ({
+    out: (element, context) => ({
       spring,
       onStart: () => {
         // Capture outgoing element height at animation start (before detached)
@@ -91,7 +89,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
           calculatedHeight = calculateHeight();
         }
       },
-      css: (progress): StyleObject => {
+      tick: (progress) => {
         // Use cached height or recalculate
         if (calculatedHeight === null) {
           calculatedHeight = calculateHeight();
@@ -102,12 +100,10 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
           ? (1 - progress) * -height
           : (1 - progress) * height;
 
-        return {
-          transform: `translate3d(0, ${translateY}px, 0)`,
-        };
+        element.style.transform = `translate3d(0, ${translateY}px, 0)`;
       },
       prepare: (el) => {
-        prepareOutgoing(el);
+        prepareOutgoing(el, context);
         el.style.zIndex = isUp ? "-1" : "1";
         // GPU acceleration hints
         el.style.willChange = "transform";
