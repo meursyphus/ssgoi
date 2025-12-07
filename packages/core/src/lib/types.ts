@@ -11,12 +11,12 @@ export type SpringConfig = {
 export type StyleObject = Record<string, number | string>;
 
 /**
- * Schedule strategy for multi-spring animations
- * - overlap: All springs start immediately (parallel execution)
- * - wait: Each spring waits for previous to complete (sequential)
- * - chain: Springs start with offset delays
+ * Schedule strategy for multi-spring animations (user-facing)
+ * - parallel: All springs start immediately (offset = 0)
+ * - sequential: Each spring waits for previous to complete (offset = 1)
+ * - stagger: Springs start at custom progress offsets (0-1)
  */
-export type ScheduleType = "overlap" | "wait" | "chain";
+export type ScheduleType = "parallel" | "sequential" | "stagger";
 
 /**
  * Base configuration shared by both single and multi-spring transitions
@@ -114,8 +114,14 @@ export type SpringItem = {
   onComplete?: () => void;
 
   /**
-   * Delay offset in milliseconds before this spring starts
-   * Only applies to 'chain' schedule mode
+   * Progress offset (0-1) before this spring starts
+   * - 0: Start immediately (parallel behavior)
+   * - 1: Start after previous spring completes (sequential behavior)
+   * - 0.5: Start when previous spring is 50% complete
+   *
+   * Only applies to 'stagger' schedule mode.
+   * For 'parallel' mode, all springs start at 0.
+   * For 'sequential' mode, all springs use offset 1.
    */
   offset?: number;
 };
@@ -128,7 +134,7 @@ export type MultiSpringConfig = BaseTransitionConfig & {
   // Array of spring animations to coordinate
   springs: SpringItem[];
 
-  // How to schedule multiple springs (default: 'overlap')
+  // How to schedule multiple springs (default: 'parallel')
   schedule?: ScheduleType;
 
   // Called after each spring completes with progress count
@@ -231,7 +237,7 @@ export function normalizeToMultiSpring(
         css: config.css,
       },
     ],
-    schedule: "overlap",
+    schedule: "parallel",
   };
 }
 
@@ -317,33 +323,85 @@ export type SsgoiContext = (
 ) => Transition & { key: TransitionKey };
 
 /**
- * Normalized schedule entry for internal processing (discriminated union)
- * Used by AnimationScheduler to unify different schedule strategies
+ * Normalized schedule entry for internal processing
+ * All schedule types are normalized to progress-based offsets (0-1)
+ *
+ * Progress offset determines when each spring starts relative to previous spring:
+ * - 0: Start immediately (parallel)
+ * - 1: Start after previous completes (sequential)
+ * - 0.5: Start when previous is 50% complete
+ *
  * @internal
  */
-export type NormalizedScheduleEntry = OffsetScheduleEntry | WaitScheduleEntry;
-
-/**
- * Offset-based schedule entry (overlap/chain modes)
- * - delay=0: immediate start (overlap)
- * - delay>0: delayed start with fixed timing (chain)
- * @internal
- */
-export type OffsetScheduleEntry = {
-  type: "offset";
+export type NormalizedScheduleEntry = {
   id: string;
-  delay: number; // milliseconds
+  /**
+   * Progress offset (0-1) relative to previous spring
+   * - 0: Start immediately with previous spring
+   * - 1: Start after previous spring completes
+   * - 0-1: Start when previous spring reaches this progress
+   */
+  offset: number;
 };
 
 /**
- * Wait-based schedule entry (wait mode)
- * Dynamic dependency - starts after previous spring completes
+ * Normalized multi-spring config for internal use
+ * Schedule is always normalized to progress-based offsets
  * @internal
  */
-export type WaitScheduleEntry = {
-  type: "wait";
-  id: string;
+export type NormalizedMultiSpringConfig = Omit<
+  MultiSpringConfig,
+  "springs" | "schedule"
+> & {
+  springs: Array<SpringItem & { normalizedOffset: number }>;
 };
+
+/**
+ * Normalize MultiSpringConfig schedule to progress-based offsets
+ *
+ * Converts user-facing schedule types to unified offset values:
+ * - parallel: All springs get offset 0 (start together)
+ * - sequential: All springs get offset 1 (wait for previous)
+ * - stagger: Use each spring's custom offset (0-1)
+ *
+ * @internal
+ */
+export function normalizeMultiSpringSchedule(
+  config: MultiSpringConfig,
+): NormalizedMultiSpringConfig {
+  const schedule = config.schedule ?? "parallel";
+
+  const normalizedSprings = config.springs.map((spring) => {
+    let normalizedOffset: number;
+
+    switch (schedule) {
+      case "parallel":
+        // All start immediately
+        normalizedOffset = 0;
+        break;
+      case "sequential":
+        // Each waits for previous to complete
+        normalizedOffset = 1;
+        break;
+      case "stagger":
+        // Use custom offset, default to 0
+        normalizedOffset = Math.max(0, Math.min(1, spring.offset ?? 0));
+        break;
+      default:
+        normalizedOffset = 0;
+    }
+
+    return { ...spring, normalizedOffset };
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { schedule: _, ...rest } = config;
+
+  return {
+    ...rest,
+    springs: normalizedSprings,
+  };
+}
 
 /**
  * Animation state
