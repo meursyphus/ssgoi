@@ -1,0 +1,162 @@
+---
+title: "ssgoi 3.0: Faster with Web Animation API"
+description: "Pre-calculate Spring physics and run via Web Animation API. Maintains 60fps regardless of main thread load."
+thumbnail: "/post/web-animation-api-optimization/thumbnail.jpg"
+date: "2025-12-07"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["performance", "web-animation-api", "spring", "release"]
+---
+
+ssgoi 3.0 switches the animation engine to Web Animation API.
+
+**Animations stay smooth even under heavy CPU load.**
+
+## New Interface: `css`
+
+A new `css` option has been added alongside the existing `tick`.
+
+```typescript
+// Existing: tick (RAF-based, runs every frame)
+transition({
+  key: "fade",
+  in: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = progress.toString();
+    },
+  }),
+});
+
+// New: css (Web Animation API based)
+transition({
+  key: "scale-rotate",
+  in: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+      opacity: progress,
+    }),
+  }),
+});
+```
+
+When you use `css`, Spring physics are **pre-calculated entirely**, converted to a Keyframe array, and executed via `element.animate()`.
+
+## Why Is It Faster?
+
+`tick` runs a callback on the main thread every frame. If the main thread is busy? It stutters.
+
+`css` creates Keyframes upfront and delegates to the compositor thread. Doesn't matter if the main thread is busy.
+
+```
+[tick] Calculate every frame
+  RAF → physics calc → callback → RAF → ...
+        ↑ stutters when main thread is busy
+
+[css] Pre-calculate and delegate
+  simulation(once) → Keyframes → element.animate()
+                                 ↑ runs on compositor thread
+```
+
+In CPU 6x slowdown tests, `tick` stuttered 100ms at a time, while `css` maintained 60fps.
+
+## View Transitions Are Also Optimized
+
+Page transition effects have also been converted to `css`.
+
+```typescript
+// fade view transition
+export const fade = (): SggoiTransition => ({
+  in: (element) => ({
+    spring: { stiffness: 65, damping: 14 },
+    css: (progress) => ({ opacity: progress }),  // uses css
+  }),
+  out: (element) => ({
+    spring: { stiffness: 65, damping: 16 },
+    css: (progress) => ({ opacity: progress }),
+  }),
+});
+
+// drill view transition
+export const drill = (): SggoiTransition => ({
+  in: (element) => ({
+    spring: { stiffness: 150, damping: 20 },
+    css: (progress) => ({
+      transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
+    }),
+  }),
+  // ...
+});
+```
+
+Most view transitions like `fade`, `drill`, `slide`, `scroll`, `strip` now use `css`.
+
+## The Innovation: Spring Continuity Is Preserved
+
+The Web Animation API spec has **no way to get the current velocity.** Current position? You can roughly calculate it with `animation.currentTime`. Velocity? Nope.
+
+So normally, using Web Animation API makes continuous Spring impossible. When direction changes mid-animation, you have to start over.
+
+ssgoi is different. We **store all simulation data**.
+
+```typescript
+// Store simulation results
+const frames: SimulationFrame[] = [
+  { time: 0,    position: 0,   velocity: 12 },
+  { time: 16,   position: 0.3, velocity: 8 },
+  { time: 32,   position: 0.7, velocity: 3 },
+  // ...
+];
+
+// Even when stopped mid-animation
+function getPosition() {
+  const elapsed = performance.now() - startTime;
+  return interpolateFrame(frames, elapsed).position;
+}
+
+function getVelocity() {
+  const elapsed = performance.now() - startTime;
+  return interpolateFrame(frames, elapsed).velocity;
+}
+```
+
+Binary search finds the frame for the current time, then linearly interpolates. O(log n).
+
+**This allows Spring continuity even with Web Animation API.** When direction changes mid-animation, it inherits the current velocity for a natural transition.
+
+## Why Spring?
+
+CSS Transition breaks when direction changes mid-animation. It ignores velocity and starts a new animation.
+
+Spring maintains current velocity and changes direction naturally. Following physics.
+
+And the config is intuitive:
+
+```typescript
+// What does this even mean?
+{ easing: "cubic-bezier(0.4, 0, 0.2, 1)" }
+
+// This makes sense
+{ stiffness: 300, damping: 30 }
+```
+
+## When to Use What?
+
+- **`css`**: Simple style changes (opacity, transform)
+- **`tick`**: Complex logic, DOM manipulation needed
+- **Page transitions**: `css` is applied automatically
+
+## Update
+
+```bash
+npm update @ssgoi/react
+npm update @ssgoi/svelte
+```
+
+Existing `tick` code still works as before.
+
+---
+
+Code: [css-runner.ts](https://github.com/meursyphus/ssgoi/blob/main/packages/core/src/lib/animator/animate/css-runner.ts)
