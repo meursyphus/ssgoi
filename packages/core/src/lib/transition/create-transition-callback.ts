@@ -42,10 +42,10 @@ export function createTransitionCallback(
     }
     const transition = getTransition();
 
-    const inConfig = transition.in && (await transition.in(element));
+    const inConfig = transition.in && transition.in(element);
     const outConfig =
       !options?.strategy && transition.out
-        ? await transition.out(element)
+        ? transition.out(element)
         : undefined;
 
     if (!inConfig) {
@@ -53,6 +53,7 @@ export function createTransitionCallback(
     }
 
     // Normalize to multi-spring config before passing to strategy
+    // normalizeToMultiSpring accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
       in: normalizeToMultiSpring(inConfig),
       out: outConfig ? normalizeToMultiSpring(outConfig) : undefined,
@@ -102,16 +103,15 @@ export function createTransitionCallback(
 
     const transition = getTransition();
     const inConfig =
-      !options?.strategy && transition.in
-        ? await transition.in(element)
-        : undefined;
-    const outConfig = transition.out && (await transition.out(element));
+      !options?.strategy && transition.in ? transition.in(element) : undefined;
+    const outConfig = transition.out && transition.out(element);
 
     if (!outConfig) {
       return;
     }
 
     // Normalize to multi-spring config before passing to strategy
+    // normalizeToMultiSpring accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
       in: inConfig ? normalizeToMultiSpring(inConfig) : undefined,
       out: normalizeToMultiSpring(outConfig),

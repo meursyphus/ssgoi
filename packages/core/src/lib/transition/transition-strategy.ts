@@ -29,12 +29,12 @@ export interface InternalAnimationSetup {
 
 /**
  * Internal transition configs passed to strategy
- * Always uses MultiSpringConfig (normalized before passing)
+ * Uses Promise<MultiSpringConfig> to allow lazy evaluation
  * @internal
  */
 export interface InternalTransitionConfigs {
-  in?: MultiSpringConfig;
-  out?: MultiSpringConfig;
+  in?: Promise<MultiSpringConfig>;
+  out?: Promise<MultiSpringConfig>;
 }
 
 export interface TransitionStrategy {
@@ -94,9 +94,10 @@ export const createDefaultStrategy = (
 
         // Use OUT config but reverse direction
         if (configs.out) {
+          const outConfig = await configs.out;
           // OUT animation: from=1, to=0, backward goes toward from (1)
           return {
-            config: configs.out,
+            config: outConfig,
             state: { position, velocity },
             from: 1,
             to: 0,
@@ -106,8 +107,7 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 1: No animation running OR IN already running
-      const config = configs.in;
-      if (!config) {
+      if (!configs.in) {
         // No config, return minimal setup
         return {
           state: {
@@ -119,6 +119,8 @@ export const createDefaultStrategy = (
           direction: "forward",
         };
       }
+
+      const config = await configs.in;
 
       // IN animation: from=0, to=1
       return {
@@ -145,9 +147,10 @@ export const createDefaultStrategy = (
 
         // Use IN config but reverse direction
         if (configs.in) {
+          const inConfig = await configs.in;
           // IN animation: from=0, to=1, backward goes toward from (0)
           return {
-            config: configs.in,
+            config: inConfig,
             state: { position, velocity },
             from: 0,
             to: 1,
@@ -157,8 +160,7 @@ export const createDefaultStrategy = (
       }
 
       // Scenario 2: No animation running OR OUT already running
-      const config = configs.out;
-      if (!config) {
+      if (!configs.out) {
         // No config, return minimal setup
         return {
           state: {
@@ -170,6 +172,8 @@ export const createDefaultStrategy = (
           direction: "forward",
         };
       }
+
+      const config = await configs.out;
 
       // OUT animation: from=1, to=0
       return {
@@ -194,8 +198,7 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
   return {
     runIn: async (configs: InternalTransitionConfigs) => {
       // Always start fresh for IN transition
-      const config = configs.in;
-      if (!config) {
+      if (!configs.in) {
         return {
           state: {
             position: 0,
@@ -206,6 +209,8 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
           direction: "forward",
         };
       }
+
+      const config = await configs.in;
 
       // IN animation: from=0, to=1
       return {
@@ -222,8 +227,7 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
 
     runOut: async (configs: InternalTransitionConfigs) => {
       // Always start fresh for OUT transition
-      const config = configs.out;
-      if (!config) {
+      if (!configs.out) {
         return {
           state: {
             position: 1,
@@ -234,6 +238,8 @@ export const createPageTransitionStrategy = (): TransitionStrategy => {
           direction: "forward",
         };
       }
+
+      const config = await configs.out;
 
       // OUT animation: from=1, to=0
       return {
