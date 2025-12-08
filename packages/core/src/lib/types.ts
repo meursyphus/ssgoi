@@ -255,9 +255,22 @@ export type Transition<TContext = undefined> = {
   key?: TransitionKey;
 };
 
+/**
+ * Scope behavior for transitions
+ * - 'global': Always run animations (default)
+ * - 'local': Skip animations when mounting/unmounting with parent TransitionScope
+ */
+export type TransitionScope = "global" | "local";
+
 export type TransitionOptions<TContext = undefined> = Transition<TContext> & {
   key?: TransitionKey;
   ref?: object;
+  /**
+   * Controls animation behavior relative to TransitionScope
+   * - 'global' (default): Always run IN/OUT animations
+   * - 'local': Skip animations when mounting/unmounting simultaneously with scope
+   */
+  scope?: TransitionScope;
 };
 
 export type TransitionCallback = (
