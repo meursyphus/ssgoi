@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/svelte",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit applications",
   "private": false,
   "main": "./dist/index.js",
