@@ -210,31 +210,34 @@ export function validateSpringItem(item: SpringItem): void {
 /**
  * Normalize TransitionConfig to MultiSpringConfig
  * Converts SingleSpringConfig to MultiSpringConfig with single spring item
+ * Accepts both sync config and Promise<TransitionConfig>
  * @internal
  */
-export function normalizeToMultiSpring(
-  config: TransitionConfig,
-): MultiSpringConfig {
-  if (isMultiSpring(config)) {
+export async function normalizeToMultiSpring(
+  config: TransitionConfig | Promise<TransitionConfig>,
+): Promise<MultiSpringConfig> {
+  const resolvedConfig = await config;
+
+  if (isMultiSpring(resolvedConfig)) {
     // Validate all spring items
-    config.springs.forEach(validateSpringItem);
-    return config;
+    resolvedConfig.springs.forEach(validateSpringItem);
+    return resolvedConfig;
   }
 
   // Validate single spring config
-  validateAnimationMode(config);
+  validateAnimationMode(resolvedConfig);
 
   // Convert SingleSpringConfig to MultiSpringConfig
   return {
-    prepare: config.prepare,
-    wait: config.wait,
-    onStart: config.onStart,
-    onEnd: config.onEnd,
+    prepare: resolvedConfig.prepare,
+    wait: resolvedConfig.wait,
+    onStart: resolvedConfig.onStart,
+    onEnd: resolvedConfig.onEnd,
     springs: [
       {
-        spring: config.spring,
-        tick: config.tick,
-        css: config.css,
+        spring: resolvedConfig.spring,
+        tick: resolvedConfig.tick,
+        css: resolvedConfig.css,
       },
     ],
     schedule: "parallel",
