@@ -1,4 +1,4 @@
-import type { Transition, TransitionCallback } from "../types";
+import type { Transition, TransitionCallback, TransitionScope } from "../types";
 import { normalizeToMultiSpring, normalizeMultiSpringSchedule } from "../types";
 import { MultiAnimator } from "../animator/multi-animator";
 import { Animation } from "../animator/animation";
@@ -8,12 +8,14 @@ import {
   type TransitionStrategy,
   type InternalTransitionConfigs,
 } from "./transition-strategy";
+import { findScope, isScopeReady } from "./transition-scope";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
   options?: {
     onCleanupEnd?: () => void;
     strategy?: (context: StrategyContext) => TransitionStrategy;
+    scope?: TransitionScope;
   },
 ): TransitionCallback {
   let currentAnimation: {
@@ -174,19 +176,49 @@ export function createTransitionCallback(
     }
   };
 
+  // Cached scope reference (only set for 'local' scope)
+  let scopeRef: Element | null = null;
+
   return (element: HTMLElement | null) => {
     if (!element) return;
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
 
-    runEntrance(element);
+    // === IN transition ===
+    if (options?.scope === "local") {
+      // Local scope: defer to microtask to find scope (parent ref may not have run yet)
+      queueMicrotask(() => {
+        scopeRef = findScope(element);
 
+        if (scopeRef && !isScopeReady(scopeRef)) {
+          // Scope not ready = simultaneous mount = skip IN animation
+          return;
+        }
+        runEntrance(element);
+      });
+    } else {
+      // Global scope: run immediately
+      runEntrance(element);
+    }
+
+    // === OUT transition ===
     return () => {
-      if (element.isConnected) {
-        const cloned = element.cloneNode(true) as HTMLElement;
-        runExitTransition(cloned);
+      const cloned = element.isConnected
+        ? (element.cloneNode(true) as HTMLElement)
+        : element;
+
+      if (scopeRef) {
+        // Local scope: defer to microtask and check if scope still exists
+        queueMicrotask(() => {
+          if (!document.contains(scopeRef!)) {
+            // Scope removed = simultaneous unmount = skip OUT animation
+            return;
+          }
+          runExitTransition(cloned);
+        });
       } else {
-        runExitTransition(element);
+        // Global scope: run immediately
+        runExitTransition(cloned);
       }
     };
   };

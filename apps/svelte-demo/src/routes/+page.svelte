@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { SsgoiTransition, transition } from "@ssgoi/svelte";
+  import { SsgoiTransition, transition, TransitionScope } from "@ssgoi/svelte";
 
   let showShapes = $state(true);
   let stiffness = $state(300);
   let damping = $state(30);
 
-  interface ShapeContainerProps {
-    label: string;
-    children: () => any;
-  }
+  // TransitionScope demo states
+  let showScopeContainer = $state(true);
+  let showLocalChild = $state(true);
+  let showGlobalChild = $state(true);
 
   const colors = [
     { id: 1, color: "#FF6B6B", name: "Coral" },
@@ -107,6 +107,7 @@
         </div>
 
         <div class="control-group">
+          <!-- svelte-ignore a11y_label_has_associated_control -->
           <label class="control-label">Stiffness</label>
           <input
             type="number"
@@ -119,6 +120,7 @@
         </div>
 
         <div class="control-group">
+          <!-- svelte-ignore a11y_label_has_associated_control -->
           <label class="control-label">Damping</label>
           <input
             type="number"
@@ -146,7 +148,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "fade",
+                  key: "svelte-fade",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -172,23 +174,19 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "scale-rotate",
+                  key: "svelte-scale-rotate",
                   in: (element) => ({
                     spring: { stiffness, damping },
-                    from: { scale: 0, rotate: 0 },
-                    to: { scale: 1, rotate: 360 },
                     tick: (progress) => {
-                      element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
-                      element.style.opacity = progress.scale.toString();
+                      element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
+                      element.style.opacity = progress.toString();
                     },
                   }),
                   out: (element) => ({
                     spring: { stiffness, damping },
-                    from: { scale: 1, rotate: 360 },
-                    to: { scale: 0, rotate: 0 },
                     tick: (progress) => {
-                      element.style.transform = `scale(${progress.scale}) rotate(${progress.rotate}deg)`;
-                      element.style.opacity = progress.scale.toString();
+                      element.style.transform = `scale(${progress}) rotate(${progress * 360}deg)`;
+                      element.style.opacity = progress.toString();
                     },
                   }),
                 }}
@@ -204,6 +202,7 @@
             {#if showShapes}
               <div
                 use:transition={{
+                  key: "svelte-slide-in",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -235,7 +234,7 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "bounce-scale",
+                  key: "svelte-bounce-scale",
                   in: (element) => ({
                     spring: {
                       stiffness: stiffness * 0.8,
@@ -262,6 +261,145 @@
           </div>
           <p class="shape-label">Bounce Scale</p>
         </div>
+      </div>
+    </div>
+
+    <!-- TransitionScope Demo Section -->
+    <div class="examples-section">
+      <h2 class="section-title">TransitionScope Demo</h2>
+      <p
+        style="color: #666; margin-bottom: 1.5rem; line-height: 1.6; text-align: center;"
+      >
+        <strong>Local scope:</strong> Skip animation when mounting/unmounting
+        with parent scope.
+        <br />
+        <strong>Global scope (default):</strong> Always run animation.
+      </p>
+
+      <div
+        style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap;"
+      >
+        <button
+          class="toggle-button"
+          onclick={() => (showScopeContainer = !showScopeContainer)}
+        >
+          {showScopeContainer ? "Hide Scope Container" : "Show Scope Container"}
+        </button>
+        <button
+          class="toggle-button"
+          onclick={() => (showLocalChild = !showLocalChild)}
+          disabled={!showScopeContainer}
+          style={!showScopeContainer
+            ? "opacity: 0.5; cursor: not-allowed;"
+            : ""}
+        >
+          {showLocalChild ? "Hide Local Child" : "Show Local Child"}
+        </button>
+        <button
+          class="toggle-button"
+          onclick={() => (showGlobalChild = !showGlobalChild)}
+          disabled={!showScopeContainer}
+          style={!showScopeContainer
+            ? "opacity: 0.5; cursor: not-allowed;"
+            : ""}
+        >
+          {showGlobalChild ? "Hide Global Child" : "Show Global Child"}
+        </button>
+      </div>
+
+      <div
+        style="display: flex; gap: 2rem; justify-content: center; min-height: 200px; align-items: center;"
+      >
+        {#if showScopeContainer}
+          <TransitionScope>
+            <div
+              style="padding: 2rem; border: 2px dashed #ccc; border-radius: 12px; display: flex; gap: 1.5rem; background: #fafafa;"
+            >
+              <div style="text-align: center;">
+                <p
+                  style="margin-bottom: 0.5rem; font-weight: 600; color: #333;"
+                >
+                  Local Scope
+                </p>
+                {#if showLocalChild}
+                  <div
+                    use:transition={{
+                      key: "svelte-scope-local-child",
+                      scope: "local",
+                      in: (element) => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                      out: (element) => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                    }}
+                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;"
+                  ></div>
+                {/if}
+                <p style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">
+                  Skips when scope unmounts
+                </p>
+              </div>
+
+              <div style="text-align: center;">
+                <p
+                  style="margin-bottom: 0.5rem; font-weight: 600; color: #333;"
+                >
+                  Global Scope
+                </p>
+                {#if showGlobalChild}
+                  <div
+                    use:transition={{
+                      key: "svelte-scope-global-child",
+                      in: (element) => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                      out: (element) => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                    }}
+                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px;"
+                  ></div>
+                {/if}
+                <p style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">
+                  Always animates
+                </p>
+              </div>
+            </div>
+          </TransitionScope>
+        {/if}
+      </div>
+
+      <div
+        style="margin-top: 1.5rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; font-size: 0.9rem; color: #555;"
+      >
+        <strong>Test scenarios:</strong>
+        <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8;">
+          <li>
+            <strong>Toggle individual children:</strong> Both should animate (scope
+            is stable)
+          </li>
+          <li>
+            <strong>Toggle Scope Container:</strong> Local child should NOT animate,
+            Global child should animate
+          </li>
+        </ul>
       </div>
     </div>
   </div>

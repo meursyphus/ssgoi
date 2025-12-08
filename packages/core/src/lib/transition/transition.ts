@@ -8,6 +8,7 @@ import type {
   Transition,
   TransitionCallback,
   TransitionOptions,
+  TransitionScope,
 } from "../types";
 import type { TransitionKey } from "../types";
 import { parseCallerLocation } from "../utils/parse-caller-location";
@@ -29,7 +30,10 @@ const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
 function registerTransition(
   key: TransitionKey,
   transition: Transition<undefined>,
-  strategy?: (context: StrategyContext) => TransitionStrategy,
+  options?: {
+    strategy?: (context: StrategyContext) => TransitionStrategy;
+    scope?: TransitionScope;
+  },
 ): TransitionCallback {
   transitionDefinitions.set(key, transition);
 
@@ -48,7 +52,8 @@ function registerTransition(
       return trans;
     },
     {
-      strategy,
+      strategy: options?.strategy,
+      scope: options?.scope,
       onCleanupEnd: () => unregisterTransition(key),
     },
   );
@@ -156,6 +161,9 @@ export function transition(
       in: options.in,
       out: options.out,
     },
-    options[TRANSITION_STRATEGY],
+    {
+      strategy: options[TRANSITION_STRATEGY],
+      scope: options.scope,
+    },
   );
 }

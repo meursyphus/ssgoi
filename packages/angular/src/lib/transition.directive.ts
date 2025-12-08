@@ -12,10 +12,12 @@ import { transition as coreTransition } from "@ssgoi/core";
 import type {
   Transition as CoreTransitionConfig,
   TransitionKey as CoreTransitionKey,
+  TransitionScope as CoreTransitionScope,
 } from "@ssgoi/core";
 
 export type TransitionDirectiveConfig = CoreTransitionConfig & {
   key?: CoreTransitionKey;
+  scope?: CoreTransitionScope;
 };
 
 @Directive({
@@ -39,6 +41,7 @@ export class TransitionDirective implements OnInit, OnDestroy {
       in: config.in,
       out: config.out,
       ref: this.el.nativeElement,
+      scope: config.scope,
     })(this.el.nativeElement);
 
     if (cleanupResult) {

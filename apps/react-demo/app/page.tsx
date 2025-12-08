@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SsgoiTransition, transition } from "@ssgoi/react";
+import { SsgoiTransition, transition, TransitionScope } from "@ssgoi/react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -33,6 +33,11 @@ export default function Home() {
   const [showShapes, setShowShapes] = useState(true);
   const [stiffness, setStiffness] = useState(300);
   const [damping, setDamping] = useState(30);
+
+  // TransitionScope demo states
+  const [showScopeContainer, setShowScopeContainer] = useState(true);
+  const [showLocalChild, setShowLocalChild] = useState(true);
+  const [showGlobalChild, setShowGlobalChild] = useState(true);
 
   return (
     <SsgoiTransition id="/">
@@ -306,6 +311,178 @@ export default function Home() {
                 />
               )}
             </ShapeContainer>
+          </div>
+        </div>
+
+        {/* TransitionScope Demo Section */}
+        <div className={styles.examplesSection}>
+          <h2 className={styles.sectionTitle}>TransitionScope Demo</h2>
+          <p style={{ color: "#666", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+            <strong>Local scope:</strong> Skip animation when mounting/unmounting
+            with parent scope.
+            <br />
+            <strong>Global scope (default):</strong> Always run animation.
+          </p>
+
+          <div className={styles.controls} style={{ marginBottom: "1.5rem" }}>
+            <button
+              className={styles.toggleButton}
+              onClick={() => setShowScopeContainer(!showScopeContainer)}
+              style={{ marginRight: "0.5rem" }}
+            >
+              {showScopeContainer ? "Hide Scope Container" : "Show Scope Container"}
+            </button>
+            <button
+              className={styles.toggleButton}
+              onClick={() => setShowLocalChild(!showLocalChild)}
+              style={{ marginRight: "0.5rem" }}
+              disabled={!showScopeContainer}
+            >
+              {showLocalChild ? "Hide Local Child" : "Show Local Child"}
+            </button>
+            <button
+              className={styles.toggleButton}
+              onClick={() => setShowGlobalChild(!showGlobalChild)}
+              disabled={!showScopeContainer}
+            >
+              {showGlobalChild ? "Hide Global Child" : "Show Global Child"}
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "2rem",
+              justifyContent: "center",
+              minHeight: "200px",
+              alignItems: "center",
+            }}
+          >
+            {showScopeContainer && (
+              <TransitionScope>
+                <div
+                  style={{
+                    padding: "2rem",
+                    border: "2px dashed #ccc",
+                    borderRadius: "12px",
+                    display: "flex",
+                    gap: "1.5rem",
+                    background: "#fafafa",
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <p
+                      style={{
+                        marginBottom: "0.5rem",
+                        fontWeight: 600,
+                        color: "#333",
+                      }}
+                    >
+                      Local Scope
+                    </p>
+                    {showLocalChild && (
+                      <div
+                        ref={transition({
+                          key: "scope-local-child",
+                          scope: "local",
+                          in: (element) => ({
+                            spring: { stiffness: 300, damping: 25 },
+                            css: (progress) => ({
+                              opacity: progress,
+                              transform: `scale(${0.5 + progress * 0.5})`,
+                            }),
+                          }),
+                          out: (element) => ({
+                            spring: { stiffness: 300, damping: 25 },
+                            css: (progress) => ({
+                              opacity: progress,
+                              transform: `scale(${0.5 + progress * 0.5})`,
+                            }),
+                          }),
+                        })}
+                        style={{
+                          width: "80px",
+                          height: "80px",
+                          background:
+                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          borderRadius: "12px",
+                        }}
+                      />
+                    )}
+                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                      Skips when scope unmounts
+                    </p>
+                  </div>
+
+                  <div style={{ textAlign: "center" }}>
+                    <p
+                      style={{
+                        marginBottom: "0.5rem",
+                        fontWeight: 600,
+                        color: "#333",
+                      }}
+                    >
+                      Global Scope
+                    </p>
+                    {showGlobalChild && (
+                      <div
+                        ref={transition({
+                          key: "scope-global-child",
+                          // scope: "global" is default
+                          in: (element) => ({
+                            spring: { stiffness: 300, damping: 25 },
+                            css: (progress) => ({
+                              opacity: progress,
+                              transform: `scale(${0.5 + progress * 0.5})`,
+                            }),
+                          }),
+                          out: (element) => ({
+                            spring: { stiffness: 300, damping: 25 },
+                            css: (progress) => ({
+                              opacity: progress,
+                              transform: `scale(${0.5 + progress * 0.5})`,
+                            }),
+                          }),
+                        })}
+                        style={{
+                          width: "80px",
+                          height: "80px",
+                          background:
+                            "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                          borderRadius: "12px",
+                        }}
+                      />
+                    )}
+                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                      Always animates
+                    </p>
+                  </div>
+                </div>
+              </TransitionScope>
+            )}
+          </div>
+
+          <div
+            style={{
+              marginTop: "1.5rem",
+              padding: "1rem",
+              background: "#f0f0f0",
+              borderRadius: "8px",
+              fontSize: "0.9rem",
+              color: "#555",
+            }}
+          >
+            <strong>Test scenarios:</strong>
+            <ul style={{ margin: "0.5rem 0 0 1.5rem", lineHeight: 1.8 }}>
+              <li>
+                <strong>Toggle individual children:</strong> Both should animate
+                (scope is stable)
+              </li>
+              <li>
+                <strong>Toggle Scope Container:</strong> Local child should NOT
+                animate, Global child should animate
+              </li>
+            </ul>
           </div>
         </div>
       </div>
