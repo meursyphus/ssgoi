@@ -2,6 +2,13 @@
 
 > Universal page transition library bringing native app-like transitions to web applications. Works across all modern browsers, unlike browser's View Transition API (Chrome-only). Check out ssgoi.dev for full documentation.
 
+## Performance Architecture
+
+SSGOI achieves 60fps animations through:
+- **Web Animation API**: Spring physics pre-computed to keyframes, runs on compositor thread
+- **GPU Acceleration**: Uses transform/opacity for hardware-accelerated rendering
+- **State Memory**: Animation positions preserved across navigation (back/forward)
+
 - [SSGOI Home](https://ssgoi.dev)
 
 ## search
@@ -71,6 +78,7 @@ NPM packages available:
 - [@ssgoi/react](https://www.npmjs.com/package/@ssgoi/react): React/Next.js integration
 - [@ssgoi/svelte](https://www.npmjs.com/package/@ssgoi/svelte): Svelte/SvelteKit integration
 - [@ssgoi/vue](https://www.npmjs.com/package/@ssgoi/vue): Vue.js integration
+- [@ssgoi/angular](https://www.npmjs.com/package/@ssgoi/angular): Angular integration
 
 ## installation
 
@@ -98,13 +106,23 @@ npm install @ssgoi/vue
 pnpm add @ssgoi/vue
 ```
 
+### Angular
+
+```bash
+npm install @ssgoi/angular
+# or
+pnpm add @ssgoi/angular
+```
+
 ## key-features
 
 - **Universal Browser Support**: Works on Chrome, Firefox, Safari, Edge (unlike View Transition API)
-- **Framework Agnostic**: Supports React, Next.js, Svelte, SvelteKit, Vue
+- **Web Animation API**: Spring physics pre-computed to keyframes, GPU-accelerated, main thread free
+- **Framework Agnostic**: Supports React, Next.js, Svelte, SvelteKit, Vue, Angular
 - **SSR-First Design**: No hydration issues, SEO-friendly
-- **Physics-Based Animations**: Natural spring animations using Popmotion
+- **Physics-Based Animations**: Natural spring animations
 - **Router Agnostic**: Works with any routing solution
+- **TransitionScope**: Control animation behavior for grouped elements
 - **TypeScript Support**: Full TypeScript definitions included
 - **Tree-Shakeable**: Only bundle the transitions you use
 - **Minimal Bundle Size**: Optimized for production
