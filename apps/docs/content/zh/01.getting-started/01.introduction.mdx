@@ -67,11 +67,15 @@ const config = {
 - **Pinterest**: Pinterest风格展开
 - **波纹**: Material Design波纹效果
 
-### ⚡ 优化的性能
+### ⚡ 极致的性能优化
 
-- 基于弹簧物理的自然运动
-- 小巧的打包体积（< 20KB gzipped）
-- 支持Tree-shaking，只包含您使用的部分
+SSGOI结合**Web Animation API**和**弹簧物理引擎**，提供最佳性能。
+
+- **基于Web Animation API**: 预计算弹簧物理并转换为关键帧，最小化主线程负载
+- **GPU加速**: 利用transform、opacity等合成层属性实现60fps动画
+- **动画状态记忆**: 浏览器前进/后退导航时也能平滑过渡
+- **自然的物理运动**: 弹簧动画带来非机械的自然动感
+- **小巧的打包体积**: < 20KB gzipped，支持Tree-shaking
 
 ### 🛠️ 对开发者友好
 
@@ -83,7 +87,7 @@ const config = {
 ## 开始使用
 
 <Note type="info">
-  SSGOI目前官方支持React、Svelte和Angular，Vue支持即将推出。
+  SSGOI官方支持React、Svelte、Vue和Angular。
 </Note>
 
 通过下一节的快速入门指南，了解如何将SSGOI应用到您的项目中！
