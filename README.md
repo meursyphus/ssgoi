@@ -11,10 +11,12 @@ try this: [ssgoi.dev](https://ssgoi.dev)
 ### ✨ Key Features
 
 - **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
+- **⚡ Blazing Fast** - Web Animation API + Spring physics pre-computed to keyframes. GPU-accelerated, main thread free
 - **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit. No hydration issues, SEO-friendly
 - **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit - all work seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
 - **🎨 Framework Agnostic** - One consistent API for Angular, React, Svelte, Vue, and more
+- **🎭 TransitionScope** - Control animation behavior for grouped elements (skip redundant animations)
 
 ## Quick Start
 
@@ -123,6 +125,32 @@ function Card() {
     })}>
       <h2>Animated Card</h2>
     </div>
+  );
+}
+```
+
+### TransitionScope
+
+Control animation behavior for grouped elements. Skip redundant animations when parent and children mount/unmount together:
+
+```tsx
+import { TransitionScope, transition } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/transitions';
+
+function Modal({ show }) {
+  return show && (
+    <TransitionScope>
+      <div className="modal">
+        {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
+        <div ref={transition({ ...fade(), scope: 'local' })}>
+          This won't animate when modal opens/closes
+        </div>
+        {/* scope: 'global' (default) - always animates */}
+        <div ref={transition({ ...fade() })}>
+          This always animates
+        </div>
+      </div>
+    </TransitionScope>
   );
 }
 ```
@@ -272,7 +300,14 @@ SSGOI intercepts DOM lifecycle events to create smooth transitions:
 3. **Enter Animation**: New page animates in
 4. **State Sync**: Animation state persists across navigation
 
-All powered by a spring physics engine for natural, smooth motion.
+### Performance Architecture
+
+SSGOI achieves 60fps animations through a unique approach:
+
+- **Spring Physics Pre-computation**: Spring animations are calculated once and converted to Web Animation API keyframes
+- **Off Main Thread**: Animations run on the compositor thread, keeping the main thread free for your app logic
+- **GPU Acceleration**: Uses `transform` and `opacity` for hardware-accelerated rendering
+- **State Memory**: Animation positions are preserved across navigation for seamless back/forward transitions
 
 ## Live Demos
 

@@ -271,12 +271,59 @@ interface TransitionConfig {
     stiffness: number; // スプリングの硅さ (デフォルト: 300)
     damping: number; // 減衰係数 (デフォルト: 30)
   };
-  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  // 2つのアニメーションモードから1つを選択（両方は使用不可）
+  tick?: (progress: number) => void; // RAFベースのアニメーション
+  css?: (progress: number) => StyleObject; // Web Animation APIベース（推奨）
   prepare?: (element: HTMLElement) => void; // アニメーション開始前の初期設定
   onStart?: () => void;
   onEnd?: () => void;
 }
 ```
+
+### アニメーションモード: `css` vs `tick`
+
+SSGOIは2つのアニメーションモードをサポートしています：
+
+#### `css`モード（推奨）
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+- **Web Animation API**を使用してメインスレッドの負荷を最小化
+- スプリング物理演算を事前計算してキーフレームに変換
+- GPUアクセラレーションによるスムーズなアニメーション
+- **パフォーマンスが優れているため、ほとんどの場合推奨**
+
+#### `tick`モード
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = String(progress);
+      element.style.transform = `translateY(${(1 - progress) * 20}px)`;
+    },
+  })
+}
+```
+
+- **requestAnimationFrame**ベースで毎フレームコールバックを実行
+- 直接的なDOM操作が必要な複雑なアニメーションに適している
+- アニメーション中に動的に値を変更する必要がある場合に有用
+
+<Note type="warning">
+`css`と`tick`は同時に使用できません。どちらか1つを選択してください。
+</Note>
 
 ### トランジションの定義
 
@@ -471,3 +518,188 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
   }
 }
 ```
+
+## TransitionScope
+
+`TransitionScope`は子要素のアニメーション動作を制御するコンテナです。親と子が同時にマウント/アンマウントされるときに不要なアニメーションをスキップできます。
+
+### 使用シナリオ
+
+- **ページ遷移**: ページ遷移時に個々の要素が別々にアニメーションしないようにする
+- **モーダル/ダイアログ**: コンテナと一緒に表示されるコンテンツの重複アニメーションを防止
+- **リスト**: リスト全体がマウント/アンマウントされるときに個々のアイテムのアニメーションをスキップ
+
+### scopeオプション
+
+```typescript
+interface TransitionOptions {
+  // ...
+  scope?: 'global' | 'local';
+}
+```
+
+- **`global`**（デフォルト）: 常にアニメーションを実行
+- **`local`**: TransitionScopeと同時にマウント/アンマウントされるときはアニメーションをスキップ
+
+### 使用例
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { TransitionScope, transition } from '@ssgoi/react';
+
+    function MyComponent() {
+      const [show, setShow] = useState(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show)}>Toggle</button>
+
+          {show && (
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: Scopeと同時にマウント/アンマウント時はアニメーションをスキップ */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope（Scopeと一緒に表示/非表示）
+                </div>
+
+                {/* global: 常にアニメーションを実行 */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global'はデフォルト
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope（常にアニメーション）
+                </div>
+              </div>
+            </TransitionScope>
+          )}
+        </>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { TransitionScope, transition } from '@ssgoi/svelte';
+
+      let show = true;
+    </script>
+
+    <button on:click={() => show = !show}>Toggle</button>
+
+    {#if show}
+      <TransitionScope>
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: Scopeと同時にマウント/アンマウント時はアニメーションをスキップ -->
+          <div
+            use:transition={{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Local Scope
+          </div>
+
+          <!-- global: 常にアニメーションを実行 -->
+          <div
+            use:transition={{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    {/if}
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <button @click="show = !show">Toggle</button>
+
+      <TransitionScope v-if="show">
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: Scopeと同時にマウント/アンマウント時はアニメーションをスキップ -->
+          <div
+            v-transition="{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Local Scope
+          </div>
+
+          <!-- global: 常にアニメーションを実行 -->
+          <div
+            v-transition="{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    </template>
+
+    <script setup>
+    import { ref } from 'vue';
+    import { TransitionScope } from '@ssgoi/vue';
+
+    const show = ref(true);
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 動作
+
+| 状況 | `scope: 'local'` | `scope: 'global'` |
+|------|------------------|-------------------|
+| Scopeと同時にマウント | アニメーションをスキップ | アニメーションを実行 |
+| Scopeと同時にアンマウント | アニメーションをスキップ | アニメーションを実行 |
+| Scope内で個別にトグル | アニメーションを実行 | アニメーションを実行 |

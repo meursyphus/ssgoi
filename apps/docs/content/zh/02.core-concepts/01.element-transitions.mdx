@@ -271,12 +271,59 @@ interface TransitionConfig {
     stiffness: number; // 弹簧刚度 (默认: 300)
     damping: number; // 阻尼系数 (默认: 30)
   };
-  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  // 选择两种动画模式之一（不能同时使用）
+  tick?: (progress: number) => void; // 基于RAF的动画
+  css?: (progress: number) => StyleObject; // 基于Web Animation API（推荐）
   prepare?: (element: HTMLElement) => void; // 动画开始前的初始设置
   onStart?: () => void;
   onEnd?: () => void;
 }
 ```
+
+### 动画模式: `css` vs `tick`
+
+SSGOI支持两种动画模式：
+
+#### `css`模式（推荐）
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+- 使用**Web Animation API**最小化主线程负载
+- 预计算弹簧物理并转换为关键帧
+- GPU加速实现流畅动画
+- **性能更好，大多数情况下推荐使用**
+
+#### `tick`模式
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = String(progress);
+      element.style.transform = `translateY(${(1 - progress) * 20}px)`;
+    },
+  })
+}
+```
+
+- 基于**requestAnimationFrame**，每帧执行回调
+- 适用于需要直接DOM操作的复杂动画
+- 当动画期间需要动态更改值时很有用
+
+<Note type="warning">
+`css`和`tick`不能同时使用。请选择其中一个。
+</Note>
 
 ### 过渡定义
 
@@ -471,3 +518,188 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
   }
 }
 ```
+
+## TransitionScope
+
+`TransitionScope`是一个控制子元素动画行为的容器。当父元素和子元素同时挂载/卸载时，可以跳过不必要的动画。
+
+### 使用场景
+
+- **页面过渡**: 防止页面过渡时各个元素单独动画
+- **模态框/对话框**: 防止与容器一起出现的内容重复动画
+- **列表**: 当整个列表挂载/卸载时跳过单个项目的动画
+
+### scope选项
+
+```typescript
+interface TransitionOptions {
+  // ...
+  scope?: 'global' | 'local';
+}
+```
+
+- **`global`**（默认）: 始终执行动画
+- **`local`**: 与TransitionScope同时挂载/卸载时跳过动画
+
+### 使用示例
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { TransitionScope, transition } from '@ssgoi/react';
+
+    function MyComponent() {
+      const [show, setShow] = useState(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show)}>Toggle</button>
+
+          {show && (
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: 与Scope同时挂载/卸载时跳过动画 */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope（与Scope一起显示/隐藏）
+                </div>
+
+                {/* global: 始终执行动画 */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global'是默认值
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope（始终动画）
+                </div>
+              </div>
+            </TransitionScope>
+          )}
+        </>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { TransitionScope, transition } from '@ssgoi/svelte';
+
+      let show = true;
+    </script>
+
+    <button on:click={() => show = !show}>Toggle</button>
+
+    {#if show}
+      <TransitionScope>
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: 与Scope同时挂载/卸载时跳过动画 -->
+          <div
+            use:transition={{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Local Scope
+          </div>
+
+          <!-- global: 始终执行动画 -->
+          <div
+            use:transition={{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    {/if}
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <button @click="show = !show">Toggle</button>
+
+      <TransitionScope v-if="show">
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: 与Scope同时挂载/卸载时跳过动画 -->
+          <div
+            v-transition="{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Local Scope
+          </div>
+
+          <!-- global: 始终执行动画 -->
+          <div
+            v-transition="{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    </template>
+
+    <script setup>
+    import { ref } from 'vue';
+    import { TransitionScope } from '@ssgoi/vue';
+
+    const show = ref(true);
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### 行为
+
+| 情况 | `scope: 'local'` | `scope: 'global'` |
+|------|------------------|-------------------|
+| 与Scope同时挂载 | 跳过动画 | 执行动画 |
+| 与Scope同时卸载 | 跳过动画 | 执行动画 |
+| 在Scope内单独切换 | 执行动画 | 执行动画 |

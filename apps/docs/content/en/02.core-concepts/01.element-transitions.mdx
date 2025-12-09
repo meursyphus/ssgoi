@@ -272,12 +272,59 @@ interface TransitionConfig {
     stiffness: number; // Spring stiffness (default: 300)
     damping: number; // Damping coefficient (default: 30)
   };
-  tick?: (progress: number) => void; // in: 0→1, out: 1→0
+  // Choose one of two animation modes (cannot use both)
+  tick?: (progress: number) => void; // RAF-based animation
+  css?: (progress: number) => StyleObject; // Web Animation API based (recommended)
   prepare?: (element: HTMLElement) => void; // Initial setup before animation starts
   onStart?: () => void;
   onEnd?: () => void;
 }
 ```
+
+### Animation Modes: `css` vs `tick`
+
+SSGOI supports two animation modes:
+
+#### `css` Mode (Recommended)
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+- Uses **Web Animation API** to minimize main thread load
+- Pre-computes spring physics and converts to keyframes
+- Smooth animations with GPU acceleration
+- **Recommended for most cases due to better performance**
+
+#### `tick` Mode
+
+```typescript
+{
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = String(progress);
+      element.style.transform = `translateY(${(1 - progress) * 20}px)`;
+    },
+  })
+}
+```
+
+- **requestAnimationFrame** based, executes callback every frame
+- Suitable for complex animations requiring direct DOM manipulation
+- Useful when values need to change dynamically during animation
+
+<Note type="warning">
+`css` and `tick` cannot be used simultaneously. Choose one.
+</Note>
 
 ### Transition Definition
 
@@ -472,3 +519,188 @@ The stage where DOM elements are prepared before animation starts:
   }
 }
 ```
+
+## TransitionScope
+
+`TransitionScope` is a container that controls the animation behavior of child elements. It can skip unnecessary animations when parent and children mount/unmount simultaneously.
+
+### Use Cases
+
+- **Page Transitions**: Prevent individual elements from animating separately during page transitions
+- **Modal/Dialog**: Prevent duplicate animations for content appearing with the container
+- **Lists**: Skip individual item animations when entire list mounts/unmounts
+
+### scope Option
+
+```typescript
+interface TransitionOptions {
+  // ...
+  scope?: 'global' | 'local';
+}
+```
+
+- **`global`** (default): Always run animations
+- **`local`**: Skip animations when mounting/unmounting simultaneously with TransitionScope
+
+### Usage Example
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { TransitionScope, transition } from '@ssgoi/react';
+
+    function MyComponent() {
+      const [show, setShow] = useState(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show)}>Toggle</button>
+
+          {show && (
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: Skip animation when mounting/unmounting with scope */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope (appears/disappears with Scope)
+                </div>
+
+                {/* global: Always run animation */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global' is default
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope (always animates)
+                </div>
+              </div>
+            </TransitionScope>
+          )}
+        </>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { TransitionScope, transition } from '@ssgoi/svelte';
+
+      let show = true;
+    </script>
+
+    <button on:click={() => show = !show}>Toggle</button>
+
+    {#if show}
+      <TransitionScope>
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: Skip animation when mounting/unmounting with scope -->
+          <div
+            use:transition={{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Local Scope
+          </div>
+
+          <!-- global: Always run animation -->
+          <div
+            use:transition={{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }}
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    {/if}
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <button @click="show = !show">Toggle</button>
+
+      <TransitionScope v-if="show">
+        <div style="padding: 2rem; border: 1px dashed #ccc;">
+          <!-- local: Skip animation when mounting/unmounting with scope -->
+          <div
+            v-transition="{
+              key: 'local-child',
+              scope: 'local',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Local Scope
+          </div>
+
+          <!-- global: Always run animation -->
+          <div
+            v-transition="{
+              key: 'global-child',
+              in: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+              out: () => ({
+                css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+              }),
+            }"
+          >
+            Global Scope
+          </div>
+        </div>
+      </TransitionScope>
+    </template>
+
+    <script setup>
+    import { ref } from 'vue';
+    import { TransitionScope } from '@ssgoi/vue';
+
+    const show = ref(true);
+    </script>
+    ```
+  </TabPanel>
+</Tabs>
+
+### Behavior
+
+| Situation | `scope: 'local'` | `scope: 'global'` |
+|-----------|------------------|-------------------|
+| Mount with Scope simultaneously | Skip animation | Run animation |
+| Unmount with Scope simultaneously | Skip animation | Run animation |
+| Toggle individually within Scope | Run animation | Run animation |

@@ -68,11 +68,15 @@ const config = {
 - **Pinterest**: Pinterest 스타일 확장
 - **Ripple**: Material Design 리플 효과
 
-### ⚡ 최적화된 성능
+### ⚡ 극한의 성능 최적화
 
-- 스프링 기반 물리 애니메이션으로 자연스러운 움직임
-- 작은 번들 사이즈 (< 20KB gzipped)
-- Tree-shaking 지원으로 사용하는 기능만 포함
+SSGOI는 **Web Animation API**와 **스프링 물리 엔진**을 결합하여 최상의 성능을 제공합니다.
+
+- **Web Animation API 기반**: 스프링 물리 연산을 미리 계산하여 키프레임으로 변환, 메인 스레드 부하 최소화
+- **GPU 가속**: transform, opacity 등 합성 레이어 속성을 활용한 60fps 애니메이션
+- **애니메이션 상태 기억**: 브라우저 뒤로가기/앞으로가기 시에도 자연스러운 전환
+- **자연스러운 물리 기반 움직임**: 스프링 애니메이션으로 기계적이지 않은 자연스러운 모션
+- **작은 번들 사이즈**: < 20KB gzipped, Tree-shaking 지원
 
 ### 🛠️ 개발자 친화적
 
@@ -84,7 +88,7 @@ const config = {
 ## 시작하기
 
 <Note type="info">
-  SSGOI는 현재 React, Svelte, Angular를 공식 지원하며, Vue 지원은 곧 추가될 예정입니다.
+  SSGOI는 React, Svelte, Vue, Angular를 공식 지원합니다.
 </Note>
 
 다음 섹션에서 빠른 시작 가이드를 통해 SSGOI를 프로젝트에 적용하는 방법을 알아보세요!
