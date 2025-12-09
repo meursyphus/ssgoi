@@ -192,7 +192,7 @@ export class MultiAnimator extends Animation {
         this.rafId = requestAnimationFrame(tick);
       }
     };
-    this.rafId = requestAnimationFrame(tick);
+    tick();
   }
 
   private stopScheduler(): void {
