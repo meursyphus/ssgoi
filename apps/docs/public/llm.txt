@@ -1,175 +1,310 @@
-# SSGOI (쓱오이)
+# SSGOI - Page Transition Library
 
-> Universal page transition library bringing native app-like transitions to web applications. Works across all modern browsers, unlike browser's View Transition API (Chrome-only). Check out ssgoi.dev for full documentation.
+> Universal page transition library for web applications. Works in all modern browsers (Chrome, Firefox, Safari), unlike browser's View Transition API (Chrome-only).
 
-## Performance Architecture
-
-SSGOI achieves 60fps animations through:
-- **Web Animation API**: Spring physics pre-computed to keyframes, runs on compositor thread
-- **GPU Acceleration**: Uses transform/opacity for hardware-accelerated rendering
-- **State Memory**: Animation positions preserved across navigation (back/forward)
-
-- [SSGOI Home](https://ssgoi.dev)
-
-## search
-
-- [Search the documentation](https://ssgoi.dev/search)
-
-## docs
-
-### getting-started
-
-- [Introduction](https://ssgoi.dev/en/docs/getting-started/introduction): Learn about SSGOI, a universal page transition library that brings native app-like transitions to web applications
-- [Quick Start](https://ssgoi.dev/en/docs/getting-started/quick-start): Get started with SSGOI in your React, Next.js, Svelte, or Vue application
-
-### core-concepts
-
-- [Element Transitions](https://ssgoi.dev/en/docs/core-concepts/element-transitions): Understand how to animate individual elements with mount/unmount transitions
-- [View Transitions](https://ssgoi.dev/en/docs/core-concepts/view-transitions): Learn about page-level transitions that create smooth navigation experiences
-- [Spring Presets](https://ssgoi.dev/en/docs/core-concepts/spring-presets): Explore physics-based spring animations for natural motion
-
-### view-transitions
-
-Page-level transitions for smooth navigation:
-
-- [Fade Transition](https://ssgoi.dev/en/docs/view-transitions/fade): Smooth opacity transitions between pages
-- [Scroll Transition](https://ssgoi.dev/en/docs/view-transitions/scroll): Directional scrolling transitions with automatic direction detection
-- [Hero Transition](https://ssgoi.dev/en/docs/view-transitions/hero): Shared element transitions for seamless content morphing
-- [Pinterest Transition](https://ssgoi.dev/en/docs/view-transitions/pinterest): Pinterest-style expanding card transitions
-
-### transitions
-
-Element-level transitions for components:
-
-- [Fade](https://ssgoi.dev/en/docs/transitions/fade): Fade in/out animations with opacity control
-- [Scale](https://ssgoi.dev/en/docs/transitions/scale): Scale animations for zoom effects
-- [Blur](https://ssgoi.dev/en/docs/transitions/blur): Blur effects combined with opacity transitions
-- [Slide](https://ssgoi.dev/en/docs/transitions/slide): Directional sliding animations (up, down, left, right)
-- [Fly](https://ssgoi.dev/en/docs/transitions/fly): Fly-in/out animations with position and opacity
-- [Rotate](https://ssgoi.dev/en/docs/transitions/rotate): Rotation animations with customizable angles
-- [Bounce](https://ssgoi.dev/en/docs/transitions/bounce): Bouncy spring animations for playful interactions
-
-## blog
-
-Recent blog posts about SSGOI:
-
-- [What is SSGOI?](https://ssgoi.dev/en/blog/what-is-ssgoi): Introduction to SSGOI and its core concepts
-- [How to Make Transitions](https://ssgoi.dev/en/blog/how-to-make-transition): Deep dive into creating custom transitions
-- [Physics Animation](https://ssgoi.dev/en/blog/physics-animation): Understanding spring-based physics animations
-- [Why Need Animation](https://ssgoi.dev/en/blog/why-need-animation): The importance of animations in modern web applications
-- [SSR Optimization](https://ssgoi.dev/en/blog/ssr-optimization): How SSGOI handles server-side rendering
-- [Vue Support](https://ssgoi.dev/en/blog/vue-support): Complete Vue.js integration guide
-
-## demo
-
-Interactive demos showcasing SSGOI capabilities:
-
-- [Demo Home](https://ssgoi.dev/en/demo): Main demo showcase page
-- [Pinterest Demo](https://ssgoi.dev/en/demo/pinterest): Pinterest-style expanding cards with hero transitions
-- [Posts Demo](https://ssgoi.dev/en/demo/posts): Blog post transitions with various effects
-- [Products Demo](https://ssgoi.dev/en/demo/products): E-commerce product gallery with smooth transitions
-- [Profile Demo](https://ssgoi.dev/en/demo/profile): User profile page with animated elements
-
-## packages
-
-NPM packages available:
-
-- [@ssgoi/core](https://www.npmjs.com/package/@ssgoi/core): Core transition engine and animations
-- [@ssgoi/react](https://www.npmjs.com/package/@ssgoi/react): React/Next.js integration
-- [@ssgoi/svelte](https://www.npmjs.com/package/@ssgoi/svelte): Svelte/SvelteKit integration
-- [@ssgoi/vue](https://www.npmjs.com/package/@ssgoi/vue): Vue.js integration
-- [@ssgoi/angular](https://www.npmjs.com/package/@ssgoi/angular): Angular integration
-
-## installation
-
-### React/Next.js
+## Installation (React/Next.js)
 
 ```bash
 npm install @ssgoi/react
-# or
-pnpm add @ssgoi/react
 ```
 
-### Svelte/SvelteKit
+Other frameworks:
+- Svelte: `npm install @ssgoi/svelte`
+- Vue: `npm install @ssgoi/vue`
+- Angular: `npm install @ssgoi/angular`
 
-```bash
-npm install @ssgoi/svelte
-# or
-pnpm add @ssgoi/svelte
+## Quick Start (React/Next.js)
+
+### 1. Layout Setup
+
+```tsx
+// app/layout.tsx
+import { Ssgoi } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/view-transitions";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <Ssgoi config={{ defaultTransition: fade() }}>
+          {/* IMPORTANT: position: relative and z-index: 0 required */}
+          <div style={{ position: "relative", zIndex: 0, minHeight: "100vh" }}>
+            {children}
+          </div>
+        </Ssgoi>
+      </body>
+    </html>
+  );
+}
 ```
 
-### Vue
+**Why `position: relative` is required:**
+- During OUT animation, the leaving page becomes `position: absolute`
+- Without a positioned parent, the page will jump to wrong position
+- `z-index: 0` creates a stacking context to prevent z-index conflicts
 
-```bash
-npm install @ssgoi/vue
-# or
-pnpm add @ssgoi/vue
+### 2. Page Setup
+
+Each page must be wrapped with `SsgoiTransition`:
+
+```tsx
+// app/page.tsx
+import { SsgoiTransition } from "@ssgoi/react";
+
+export default function HomePage() {
+  return (
+    <SsgoiTransition id="/">
+      <main>
+        <h1>Home</h1>
+      </main>
+    </SsgoiTransition>
+  );
+}
+
+// app/about/page.tsx
+export default function AboutPage() {
+  return (
+    <SsgoiTransition id="/about">
+      <main>
+        <h1>About</h1>
+      </main>
+    </SsgoiTransition>
+  );
+}
 ```
 
-### Angular
+**Important:** The `id` prop should match the route path for proper transition matching.
 
-```bash
-npm install @ssgoi/angular
-# or
-pnpm add @ssgoi/angular
-```
+## Route-based Transitions
 
-## key-features
+Define different transitions for different route pairs:
 
-- **Universal Browser Support**: Works on Chrome, Firefox, Safari, Edge (unlike View Transition API)
-- **Web Animation API**: Spring physics pre-computed to keyframes, GPU-accelerated, main thread free
-- **Framework Agnostic**: Supports React, Next.js, Svelte, SvelteKit, Vue, Angular
-- **SSR-First Design**: No hydration issues, SEO-friendly
-- **Physics-Based Animations**: Natural spring animations
-- **Router Agnostic**: Works with any routing solution
-- **TransitionScope**: Control animation behavior for grouped elements
-- **TypeScript Support**: Full TypeScript definitions included
-- **Tree-Shakeable**: Only bundle the transitions you use
-- **Minimal Bundle Size**: Optimized for production
-
-## configuration
-
-Basic configuration example:
-
-```typescript
-import { Ssgoi } from '@ssgoi/react';
-import { fade, slide, scale } from '@ssgoi/react/transitions';
+```tsx
+import { Ssgoi } from "@ssgoi/react";
+import { fade, scroll, drill, hero } from "@ssgoi/react/view-transitions";
 
 const config = {
-  // Default transition for all routes
   defaultTransition: fade(),
-  
-  // Route-specific transitions
   transitions: [
-    {
-      from: '/home',
-      to: '/about',
-      transition: slide({ direction: 'left' }),
-      symmetric: true  // Auto-creates reverse transition
+    // Scroll up when going home -> about
+    { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+    // Scroll down when going about -> home
+    { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+
+    // Drill into detail pages (wildcard pattern)
+    { from: "/products", to: "/products/*", transition: drill({ direction: "enter" }) },
+    { from: "/products/*", to: "/products", transition: drill({ direction: "exit" }) },
+
+    // Symmetric: auto-creates reverse transition
+    { from: "/blog", to: "/blog/*", transition: fade(), symmetric: true },
+  ],
+};
+
+<Ssgoi config={config}>
+  <div style={{ position: "relative", zIndex: 0, minHeight: "100vh" }}>
+    {children}
+  </div>
+</Ssgoi>
+```
+
+### Route Pattern Matching
+
+1. **Exact match**: `/home` matches only `/home`
+2. **Wildcard suffix**: `/products/*` matches `/products/123`, `/products/abc`
+3. **Global wildcard**: `*` matches any route
+
+Priority: Exact > Wildcard > Default
+
+## Built-in View Transitions (Page-level)
+
+```tsx
+import { fade, scroll, drill, hero, pinterest } from "@ssgoi/react/view-transitions";
+
+// Fade - smooth opacity transition
+fade()
+
+// Scroll - vertical scrolling
+scroll({ direction: "up" })   // or "down"
+
+// Drill - iOS-style drill in/out
+drill({ direction: "enter" }) // or "exit"
+
+// Hero - shared element animation (requires data-hero-key)
+hero()
+
+// Pinterest - expanding card effect
+pinterest()
+```
+
+## Element Transitions (Component-level)
+
+Animate individual elements on mount/unmount:
+
+```tsx
+import { transition } from "@ssgoi/react";
+import { fade, scale, slide, blur, rotate, bounce } from "@ssgoi/react/transitions";
+
+function Card({ show }) {
+  return show && (
+    <div ref={transition({
+      key: "my-card",
+      ...fade()
+    })}>
+      Card content
+    </div>
+  );
+}
+
+// With custom options
+<div ref={transition({
+  key: "custom",
+  ...scale({ start: 0.8, opacity: 0 })
+})}>
+  Content
+</div>
+
+// Available presets
+fade({ from: 0, to: 1 })
+scale({ start: 0, opacity: 0, axis: "both" | "x" | "y" })
+slide({ direction: "left" | "right" | "up" | "down", distance: 100 })
+blur({ amount: 10, scale: false, fade: true })
+rotate({ degrees: 180 })
+bounce()
+```
+
+## Custom Transitions
+
+Create custom transitions using `css` (recommended) or `tick`:
+
+```tsx
+// Using css (Web Animation API - better performance)
+<div ref={transition({
+  key: "custom",
+  in: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  }),
+  out: () => ({
+    spring: { stiffness: 300, damping: 30 },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  }),
+})}>
+  Content
+</div>
+
+// Using tick (RAF-based - for complex DOM manipulation)
+<div ref={transition({
+  key: "tick-example",
+  in: (element) => ({
+    spring: { stiffness: 300, damping: 30 },
+    tick: (progress) => {
+      element.style.opacity = String(progress);
+      element.style.transform = `scale(${0.8 + progress * 0.2})`;
     },
-    {
-      from: '/products',
-      to: '/products/*',  // Wildcard support
-      transition: scale()
-    }
-  ]
+  }),
+})}>
+  Content
+</div>
+```
+
+**css vs tick:**
+- `css`: Pre-computes spring physics to keyframes, runs on GPU, main thread free
+- `tick`: RAF-based, useful when you need dynamic DOM manipulation during animation
+- Cannot use both simultaneously
+
+## TransitionScope
+
+Control animation behavior for grouped elements:
+
+```tsx
+import { TransitionScope, transition } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/transitions";
+
+function Modal({ show }) {
+  return show && (
+    <TransitionScope>
+      <div className="modal">
+        {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
+        <div ref={transition({ ...fade(), scope: "local" })}>
+          Won't animate when modal opens/closes
+        </div>
+
+        {/* scope: 'global' (default) - always animates */}
+        <div ref={transition({ ...fade() })}>
+          Always animates
+        </div>
+      </div>
+    </TransitionScope>
+  );
+}
+```
+
+Use cases:
+- Page transitions where child elements shouldn't animate individually
+- Modal content that appears with the container
+- Lists that mount/unmount as a group
+
+## Hero Transitions
+
+Shared element animations between pages:
+
+```tsx
+// Page 1 - List
+<Link href="/item/1">
+  <div data-hero-key="item-1">
+    <img src="..." />
+  </div>
+</Link>
+
+// Page 2 - Detail
+<div data-hero-key="item-1">
+  <img src="..." />  {/* Same hero-key, element morphs */}
+</div>
+```
+
+Config:
+```tsx
+const config = {
+  transitions: [
+    { from: "/list", to: "/item/*", transition: hero() },
+  ],
 };
 ```
 
-## languages
+## Performance
 
-Documentation available in:
-- [English](https://ssgoi.dev/en)
-- [한국어 (Korean)](https://ssgoi.dev/ko)
-- [日本語 (Japanese)](https://ssgoi.dev/ja)
-- [中文 (Chinese)](https://ssgoi.dev/zh)
+SSGOI achieves 60fps through:
+- **Web Animation API**: Spring physics pre-computed to keyframes
+- **GPU acceleration**: Uses transform/opacity for hardware rendering
+- **Off main thread**: Animations run on compositor thread
+- **State memory**: Animation positions preserved across navigation (back/forward)
 
-## github
+## Common Pitfalls
 
-- [GitHub Repository](https://github.com/meursyphus/ssgoi)
-- [Report Issues](https://github.com/meursyphus/ssgoi/issues)
-- [Discussions](https://github.com/meursyphus/ssgoi/discussions)
+1. **Missing `position: relative`** on Ssgoi container
+   - OUT animation uses `position: absolute`
+   - Without positioned parent, page jumps incorrectly
 
-## license
+2. **Missing `SsgoiTransition` wrapper**
+   - Each page must be wrapped
+   - `id` should match route path
 
-MIT © MeurSyphus
+3. **Z-index issues**
+   - Add `zIndex: 0` to create stacking context
+   - Prevents child elements from overlapping incorrectly during transitions
+
+4. **Dynamic routes**
+   - Use wildcard patterns: `/products/*`
+   - Or dynamic id: `<SsgoiTransition id={`/products/${id}`}>`
+
+## Links
+
+- Documentation: https://ssgoi.dev
+- GitHub: https://github.com/meursyphus/ssgoi
+- NPM: @ssgoi/react, @ssgoi/svelte, @ssgoi/vue, @ssgoi/angular
