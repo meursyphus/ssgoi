@@ -99,16 +99,32 @@ export type SpringItem = {
    * When provided, the animation uses Web Animation API instead of RAF.
    * Spring physics are pre-computed and converted to keyframes.
    *
+   * Two forms supported:
+   * 1. Function only - uses parent element: `css: (progress) => ({ ... })`
+   * 2. Object with element - specifies target element: `css: { element, style: (progress) => ({ ... }) }`
+   *
    * @param progress - Current progress value (0 to 1)
    * @returns Style object for Web Animation API
    *
    * @example
+   * // Form 1: Function (element from parent)
    * css: (progress) => ({
    *   opacity: progress,
    *   transform: `translateY(${(1 - progress) * 20}px)`,
    * })
+   *
+   * @example
+   * // Form 2: Object with custom element
+   * css: {
+   *   element: myElement,
+   *   style: (progress) => ({
+   *     transform: `scale(${progress})`,
+   *   }),
+   * }
    */
-  css?: (progress: number) => StyleObject;
+  css?:
+    | ((progress: number) => StyleObject)
+    | { element: HTMLElement; style: (progress: number) => StyleObject };
 
   onStart?: () => void;
   onComplete?: () => void;
@@ -361,6 +377,17 @@ export type NormalizedScheduleEntry = {
 };
 
 /**
+ * Normalized spring item for internal use
+ * - css is always in object form: { element, style }
+ * - normalizedOffset is always present
+ * @internal
+ */
+export type NormalizedSpringItem = Omit<SpringItem, "css" | "offset"> & {
+  css?: { element: HTMLElement; style: (progress: number) => StyleObject };
+  normalizedOffset: number;
+};
+
+/**
  * Normalized multi-spring config for internal use
  * Schedule is always normalized to progress-based offsets
  * @internal
@@ -369,7 +396,7 @@ export type NormalizedMultiSpringConfig = Omit<
   MultiSpringConfig,
   "springs" | "schedule"
 > & {
-  springs: Array<SpringItem & { normalizedOffset: number }>;
+  springs: NormalizedSpringItem[];
 };
 
 /**
@@ -380,35 +407,51 @@ export type NormalizedMultiSpringConfig = Omit<
  * - sequential: All springs get offset 1 (wait for previous)
  * - stagger: Use each spring's custom offset (0-1)
  *
+ * Also normalizes css to object form: { element, style }
+ *
  * @internal
  */
 export function normalizeMultiSpringSchedule(
   config: MultiSpringConfig,
+  element?: HTMLElement,
 ): NormalizedMultiSpringConfig {
   const schedule = config.schedule ?? "parallel";
 
-  const normalizedSprings = config.springs.map((spring) => {
-    let normalizedOffset: number;
+  const normalizedSprings: NormalizedSpringItem[] = config.springs.map(
+    (spring) => {
+      let normalizedOffset: number;
 
-    switch (schedule) {
-      case "parallel":
-        // All start immediately
-        normalizedOffset = 0;
-        break;
-      case "sequential":
-        // Each waits for previous to complete
-        normalizedOffset = 1;
-        break;
-      case "stagger":
-        // Use custom offset, default to 0
-        normalizedOffset = Math.max(0, Math.min(1, spring.offset ?? 0));
-        break;
-      default:
-        normalizedOffset = 0;
-    }
+      switch (schedule) {
+        case "parallel":
+          // All start immediately
+          normalizedOffset = 0;
+          break;
+        case "sequential":
+          // Each waits for previous to complete
+          normalizedOffset = 1;
+          break;
+        case "stagger":
+          // Use custom offset, default to 0
+          normalizedOffset = Math.max(0, Math.min(1, spring.offset ?? 0));
+          break;
+        default:
+          normalizedOffset = 0;
+      }
 
-    return { ...spring, normalizedOffset };
-  });
+      // Normalize css to object form
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { css, offset: _, ...springRest } = spring;
+      const normalizedCss = css
+        ? typeof css === "function"
+          ? element
+            ? { element, style: css }
+            : undefined
+          : { element: css.element, style: css.style }
+        : undefined;
+
+      return { ...springRest, css: normalizedCss, normalizedOffset };
+    },
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { schedule: _, ...rest } = config;
