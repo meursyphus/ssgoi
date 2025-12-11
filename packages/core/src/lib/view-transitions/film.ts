@@ -1,4 +1,5 @@
 import type {
+  MultiSpringConfig,
   SggoiTransition,
   SggoiTransitionContext,
   SpringConfig,
@@ -7,51 +8,36 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-// Default spring configuration for smooth, cinematic motion
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 5, // Lower stiffness for smoother motion
-  damping: 3.5, // Lower damping for more fluid movement
+// Default spring configurations for each animation phase
+const DEFAULT_SPRINGS = {
+  scaleDown: { stiffness: 7, damping: 4 } as SpringConfig, // Soft start for cinematic scale
+  translate: { stiffness: 5, damping: 3.5 } as SpringConfig, // Medium for movement
+  scaleUp: { stiffness: 7, damping: 4 } as SpringConfig, // Crisp return to full size
+};
+
+// Stagger offsets (when each spring starts relative to previous)
+const OFFSETS = {
+  scaleDown: 0, // Start immediately
+  translate: 0.2, // Start when scaleDown is 25% complete
+  scaleUp: 0.9, // Start when translate is 70% complete
 };
 
 const DEFAULT_SCALE = 0.8;
 const DEFAULT_BORDER_COLOR = "white";
 
-type Timing = {
-  start: number;
-  end: number;
-};
-
-// timing configuration
-const SCALE_DOWN: Timing = {
-  start: 0,
-  end: 0.45,
-};
-
-const SCALE_UP: Timing = {
-  start: 0.85,
-  end: 1.0,
-};
-
-const TRANSLATE: Timing = {
-  start: 0.2,
-  end: 0.9,
-};
-
 interface FilmOptions {
-  spring?: SpringConfig;
-  scale?: number; // Scale factor (default: 0.9)
   border?: {
     color?: string; // Border color (default: white)
   };
 }
 
 export const film = (options?: FilmOptions): SggoiTransition => {
-  const spring = options?.spring ?? DEFAULT_SPRING;
-  const scale = options?.scale ?? DEFAULT_SCALE;
+  const springs = DEFAULT_SPRINGS;
+  const scale = DEFAULT_SCALE;
   const borderColor = options?.border?.color ?? DEFAULT_BORDER_COLOR;
 
   return {
-    out: async (element, context) => {
+    out: async (element, context): Promise<MultiSpringConfig> => {
       // 나가는 화면 애니메이션
       const rect = getFilmRect(context);
       const containerRect = getRect(document.body, context.positionedParent);
@@ -62,11 +48,59 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         top: containerRect.top,
       });
 
-      let currentScale = 1;
-      let currentTranslateY = -rect.top;
+      // Shared animation state
+      const state = {
+        scale: 1,
+        translateY: -rect.top,
+      };
+
+      // Update function called by all springs
+      const applyTransform = () => {
+        element.style.transform = `translateY(${state.translateY}px) scale(${state.scale})`;
+
+        // Calculate how much the element has shrunk
+        const offsetX = (rect.width - rect.width * state.scale) / 2;
+        const offsetY = (rect.height - rect.height * state.scale) / 2;
+        updateBorders(borderElements, offsetX, offsetY);
+      };
 
       return {
-        spring,
+        springs: [
+          // Spring 1: Scale Down (1 → scale)
+          {
+            spring: springs.scaleDown,
+            offset: OFFSETS.scaleDown,
+            tick: (progress) => {
+              // OUT: progress goes 1 → 0, convert to 0 → 1
+              const p = 1 - progress;
+              state.scale = 1 - (1 - scale) * p; // 1 → scale
+              applyTransform();
+            },
+          },
+          // Spring 2: Translate (vertical movement)
+          {
+            spring: springs.translate,
+            offset: OFFSETS.translate,
+            tick: (progress) => {
+              // OUT: progress goes 1 → 0, convert to 0 → 1
+              const p = 1 - progress;
+              state.translateY = -rect.top - rect.height * p;
+              applyTransform();
+            },
+          },
+          // Spring 3: Scale Up (scale → 1)
+          {
+            spring: springs.scaleUp,
+            offset: OFFSETS.scaleUp,
+            tick: (progress) => {
+              // OUT: progress goes 1 → 0, convert to 0 → 1
+              const p = 1 - progress;
+              state.scale = scale + (1 - scale) * p; // scale → 1
+              applyTransform();
+            },
+          },
+        ],
+        schedule: "stagger",
         prepare: () => {
           prepareOutgoing(element);
           applyFilmTransformOrigin(element, rect);
@@ -90,62 +124,58 @@ export const film = (options?: FilmOptions): SggoiTransition => {
             }
           }, 1000);
         },
-        tick: (_progress) => {
-          // OUT: _progress는 1 → 0으로 진행
-          const progress = 1 - _progress; // 0 → 1로 변환하여 작업
-
-          if (SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
-            const scaleProgress = mapProgress(
-              progress,
-              SCALE_DOWN.start,
-              SCALE_DOWN.end,
-            );
-            currentScale = 1 - (1 - scale) * scaleProgress; // 1 -> option.scale
-          }
-
-          if (SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
-            const scaleProgress = mapProgress(
-              progress,
-              SCALE_UP.start,
-              SCALE_UP.end,
-            );
-            currentScale = scale + (1 - scale) * scaleProgress; // option.scale -> 1
-          }
-
-          if (TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
-            const translateProgress = mapProgress(
-              progress,
-              TRANSLATE.start,
-              TRANSLATE.end,
-            );
-            currentTranslateY = -rect.top - rect.height * translateProgress;
-          }
-
-          element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
-
-          // Calculate how much the element has shrunk
-          const offsetX = (rect.width - rect.width * currentScale) / 2;
-          const offsetY = (rect.height - rect.height * currentScale) / 2;
-
-          updateBorders(borderElements, offsetX, offsetY);
-        },
       };
     },
 
-    in: async (element, context) => {
+    in: async (element, context): Promise<MultiSpringConfig> => {
       // 들어오는 화면 애니메이션
-      // 1. 컨테이너 크기 계산
-      // 2. 초기 위치 설정 (화면 아래, 작은 크기)
-
       const rect = getFilmRect(context);
 
-      // No borders for IN animation
+      // Shared animation state
+      const state = {
+        scale: scale,
+        translateY: -rect.top + rect.height,
+      };
 
-      let currentScale = scale;
-      let currentTranslateY = -rect.top + rect.height;
+      // Update function called by all springs
+      const applyTransform = () => {
+        element.style.transform = `translateY(${state.translateY}px) scale(${state.scale})`;
+      };
 
       return {
-        spring,
+        springs: [
+          // Spring 1: Scale Down (1 → scale) - element starts scaled, shrinks further
+          {
+            spring: springs.scaleDown,
+            offset: OFFSETS.scaleDown,
+            tick: (progress) => {
+              // IN: progress goes 0 → 1
+              state.scale = 1 - (1 - scale) * progress; // 1 → scale
+              applyTransform();
+            },
+          },
+          // Spring 2: Translate (vertical movement from bottom to top)
+          {
+            spring: springs.translate,
+            offset: OFFSETS.translate,
+            tick: (progress) => {
+              // IN: progress goes 0 → 1
+              state.translateY = -rect.top + rect.height * (1 - progress);
+              applyTransform();
+            },
+          },
+          // Spring 3: Scale Up (scale → 1) - element returns to full size
+          {
+            spring: springs.scaleUp,
+            offset: OFFSETS.scaleUp,
+            tick: (progress) => {
+              // IN: progress goes 0 → 1
+              state.scale = scale + (1 - scale) * progress; // scale → 1
+              applyTransform();
+            },
+          },
+        ],
+        schedule: "stagger",
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
@@ -156,39 +186,6 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           element.style.clipPath = "";
           element.style.transformOrigin = "";
           element.style.transform = "";
-        },
-        tick: (progress) => {
-          // IN: progress는 0 → 1로 진행
-
-          if (SCALE_DOWN.start <= progress && progress <= SCALE_DOWN.end) {
-            const scaleProgress = mapProgress(
-              progress,
-              SCALE_DOWN.start,
-              SCALE_DOWN.end,
-            );
-            currentScale = 1 - (1 - scale) * scaleProgress; // 1 -> scale
-          }
-
-          if (SCALE_UP.start <= progress && progress <= SCALE_UP.end) {
-            const scaleProgress = mapProgress(
-              progress,
-              SCALE_UP.start,
-              SCALE_UP.end,
-            );
-            currentScale = scale + (1 - scale) * scaleProgress; // scale → 1
-          }
-
-          if (TRANSLATE.start <= progress && progress <= TRANSLATE.end) {
-            const translateProgress = mapProgress(
-              progress,
-              TRANSLATE.start,
-              TRANSLATE.end,
-            );
-            currentTranslateY =
-              -rect.top + rect.height * (1 - translateProgress);
-          }
-
-          element.style.transform = `translateY(${currentTranslateY}px) scale(${currentScale})`;
         },
       };
     },
@@ -403,14 +400,4 @@ function applyFlimTranslate(
   rect: ReturnType<typeof getFilmRect>,
 ) {
   element.style.transform = `translateY(${-rect.top}px)`;
-}
-
-/**
- * Map progress value from one range to another
- * e.g., mapProgress(0.2, 0, 0.4) = 0.5 (maps 0.2 in range 0-0.4 to 0.5 in range 0-1)
- */
-function mapProgress(progress: number, start: number, end: number): number {
-  if (progress <= start) return 0;
-  if (progress >= end) return 1;
-  return (progress - start) / (end - start);
 }
