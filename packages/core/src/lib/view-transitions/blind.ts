@@ -2,6 +2,7 @@ import type {
   SpringConfig,
   SggoiTransition,
   MultiSpringConfig,
+  StyleObject,
 } from "../types";
 import { sleep } from "../utils";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
@@ -115,23 +116,29 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         resolveOutAnimation = resolve;
       });
 
-      // Create SpringItem for each blind
+      // Style generator for CSS animation mode
+      const style = (progress: number): StyleObject => {
+        // OUT: progress goes 1 → 0, but blind should appear (0 → 1)
+        const scale = 1 - progress;
+        return {
+          transform:
+            direction === "horizontal"
+              ? `scaleX(${scale})`
+              : `scaleY(${scale})`,
+        };
+      };
+
+      // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
           spring: outSpring,
           offset: 0.2,
-          tick: (progress: number) => {
-            if (!blindsData) return;
-            const blind = blindsData.blinds[index];
-            if (!blind) return;
-
-            // OUT: progress goes 1 → 0, but blind should appear (0 → 1)
-            const scale = 1 - progress;
-            if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${scale})`;
-            } else {
-              blind.style.transform = `scaleY(${scale})`;
-            }
+          css: {
+            // Use getter for lazy element access (evaluated after prepare)
+            get element(): HTMLElement {
+              return blindsData?.blinds[index] as HTMLElement;
+            },
+            style,
           },
         };
       });
@@ -160,23 +167,29 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
-      // Create SpringItem for each blind
+      // Style generator for CSS animation mode
+      const style = (progress: number): StyleObject => {
+        // IN: progress goes 0 → 1, but blind should disappear (1 → 0)
+        const scale = 1 - progress;
+        return {
+          transform:
+            direction === "horizontal"
+              ? `scaleX(${scale})`
+              : `scaleY(${scale})`,
+        };
+      };
+
+      // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
           spring: inSpring,
           offset: 0.2,
-          tick: (progress: number) => {
-            if (!blindsData) return;
-            const blind = blindsData.blinds[index];
-            if (!blind) return;
-
-            // IN: progress goes 0 → 1, but blind should disappear (1 → 0)
-            const scale = 1 - progress;
-            if (direction === "horizontal") {
-              blind.style.transform = `scaleX(${scale})`;
-            } else {
-              blind.style.transform = `scaleY(${scale})`;
-            }
+          css: {
+            // Use getter for lazy element access (evaluated after prepare)
+            get element(): HTMLElement {
+              return blindsData?.blinds[index] as HTMLElement;
+            },
+            style,
           },
         };
       });
