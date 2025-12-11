@@ -42,6 +42,10 @@ function registerTransition(
     return callback;
   }
 
+  // Store reference to the transition registered with this callback
+  // Used to prevent cleanup from removing a newer transition
+  const registeredTransition = transition;
+
   callback = createTransitionCallback(
     () => {
       const trans = transitionDefinitions.get(key);
@@ -54,7 +58,13 @@ function registerTransition(
     {
       strategy: options?.strategy,
       scope: options?.scope,
-      onCleanupEnd: () => unregisterTransition(key),
+      onCleanupEnd: () => {
+        // Only unregister if the current transition is still the one we registered
+        // This prevents cleanup from removing a newer transition when callbacks are reused
+        if (transitionDefinitions.get(key) === registeredTransition) {
+          unregisterTransition(key);
+        }
+      },
     },
   );
   transitionCallbacks.set(key, callback);
