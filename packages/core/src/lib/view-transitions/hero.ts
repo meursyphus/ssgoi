@@ -128,19 +128,19 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       }
 
       return {
-        spring,
+        springs: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
+          spring,
+          tick: (progress: number) => {
+            toEl.style.transform = `translate(${(1 - progress) * dx}px, ${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
+          },
+        })),
+        schedule: "parallel" as const,
         prepare: () => {
           heroAnimations.forEach(({ toEl }) => {
             toEl.style.position = "relative";
             toEl.style.transformOrigin = "top left";
             toEl.style.zIndex = "1000";
             toEl.style.willChange = "transform";
-          });
-        },
-        tick: (progress) => {
-          // Animate all hero elements
-          heroAnimations.forEach(({ toEl, dx, dy, dw, dh }) => {
-            toEl.style.transform = `translate(${(1 - progress) * dx}px,${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           });
         },
         onEnd: () => {
@@ -166,6 +166,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     },
     out: async (element) => {
       return {
+        spring,
         onStart: () => {
           // Store fromNode
           fromNode = element;

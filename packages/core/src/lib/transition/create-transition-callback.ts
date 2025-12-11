@@ -74,19 +74,21 @@ export function createTransitionCallback(
       await config.wait();
     }
 
-    const normalizedConfig = normalizeMultiSpringSchedule({
-      ...config,
-      onEnd: () => {
-        currentAnimation = null;
-        config.onEnd?.();
+    const normalizedConfig = normalizeMultiSpringSchedule(
+      {
+        ...config,
+        onEnd: () => {
+          currentAnimation = null;
+          config.onEnd?.();
+        },
       },
-    });
+      element,
+    );
 
     const animator = MultiAnimator.fromState(setup.state, {
       config: normalizedConfig,
       from: setup.from,
       to: setup.to,
-      element,
     });
 
     currentAnimation = { controller: animator, direction: "in" };
@@ -137,24 +139,26 @@ export function createTransitionCallback(
       await config.wait();
     }
 
-    const normalizedConfig = normalizeMultiSpringSchedule({
-      ...config,
-      onEnd: () => {
-        config.onEnd?.();
-        if (currentClone) {
-          currentClone.remove();
-          currentClone = null;
-        }
-        currentAnimation = null;
-        options?.onCleanupEnd?.();
+    const normalizedConfig = normalizeMultiSpringSchedule(
+      {
+        ...config,
+        onEnd: () => {
+          config.onEnd?.();
+          if (currentClone) {
+            currentClone.remove();
+            currentClone = null;
+          }
+          currentAnimation = null;
+          options?.onCleanupEnd?.();
+        },
       },
-    });
+      element,
+    );
 
     const animator = MultiAnimator.fromState(setup.state, {
       config: normalizedConfig,
       from: setup.from,
       to: setup.to,
-      element,
     });
 
     currentAnimation = { controller: animator, direction: "out" };

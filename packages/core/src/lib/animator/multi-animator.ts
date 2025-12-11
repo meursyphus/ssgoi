@@ -2,14 +2,9 @@ import { Animator } from ".";
 import { Animation } from "./animation";
 import type {
   NormalizedMultiSpringConfig,
-  SpringItem,
+  NormalizedSpringItem,
   AnimationState,
 } from "../types";
-
-/**
- * Normalized spring item with offset
- */
-type NormalizedSpringItem = SpringItem & { normalizedOffset: number };
 
 /**
  * Entry to track individual spring animation state
@@ -25,7 +20,6 @@ export interface MultiAnimatorOptions {
   config: NormalizedMultiSpringConfig;
   from: number;
   to: number;
-  element?: HTMLElement;
 }
 
 /**
@@ -50,7 +44,6 @@ export class MultiAnimator extends Animation {
   private direction: "forward" | "backward" = "forward";
   private idCounter = 0;
   private rafId: number | null = null;
-  private element?: HTMLElement;
   private from: number;
   private to: number;
 
@@ -59,7 +52,6 @@ export class MultiAnimator extends Animation {
     this.config = options.config;
     this.from = options.from;
     this.to = options.to;
-    this.element = options.element;
     this.initializeAnimators();
   }
 
@@ -75,10 +67,7 @@ export class MultiAnimator extends Animation {
         to: this.to,
         spring: item.spring,
         tick: item.tick,
-        css:
-          item.css && this.element
-            ? { element: this.element, style: item.css }
-            : undefined,
+        css: item.css,
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
       });
@@ -259,11 +248,6 @@ export class MultiAnimator extends Animation {
 
       if (isCompleted) {
         // Reverse completed animation: swap from/to
-        const cssOption =
-          entry.item.css && this.element
-            ? { element: this.element, style: entry.item.css }
-            : undefined;
-
         const newAnimator = Animator.fromState(
           { position: this.to, velocity: 0 },
           {
@@ -271,7 +255,7 @@ export class MultiAnimator extends Animation {
             to: this.from,
             spring: entry.item.spring,
             tick: entry.item.tick,
-            css: cssOption,
+            css: entry.item.css,
             onComplete: () => this.onAnimatorComplete(entry.id),
             onStart: entry.item.onStart,
           },
