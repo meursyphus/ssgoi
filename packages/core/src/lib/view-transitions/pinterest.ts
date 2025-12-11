@@ -27,23 +27,26 @@ interface PinterestOptions {
  * - The transition auto-detects the mode based on which keys match between pages
  */
 
-type AnimationFunc = (progress: number) => void;
+type StyleObject = Record<string, string>;
+type AnimationFunc = (progress: number) => StyleObject;
+
+interface AnimationConfig {
+  transformOrigin: string;
+  animate: AnimationFunc;
+}
 
 // Animation creators for each transition type
-function createDetailIn(
-  {
-    detailRect: fromRect,
-    galleryRect: toRect,
-    pageRect,
-    scrollOffset,
-  }: {
-    detailRect: DOMRect;
-    galleryRect: DOMRect;
-    pageRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
+function createDetailIn({
+  detailRect: fromRect,
+  galleryRect: toRect,
+  pageRect,
+  scrollOffset,
+}: {
+  detailRect: DOMRect;
+  galleryRect: DOMRect;
+  pageRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationConfig {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
     toRect.left -
@@ -71,31 +74,29 @@ function createDetailIn(
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
 
-  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-  return (progress: number) => {
-    const u = 1 - progress;
-    const currentTop = startTop * u;
-    const currentRight = startRight * u;
-    const currentBottom = startBottom * u;
-    const currentLeft = startLeft * u;
+  const transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
 
-    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`;
+  return {
+    transformOrigin,
+    animate: (progress: number) => {
+      const u = 1 - progress;
+      return {
+        clipPath: `inset(${startTop * u}% ${startRight * u}% ${startBottom * u}% ${startLeft * u}%)`,
+        transform: `translate(${dx * u}px, ${dy * u}px) scale(${1 + (scale - 1) * u})`,
+      };
+    },
   };
 }
 
-function createGalleryOut(
-  {
-    galleryRect: fromRect,
-    detailRect: toRect,
-    scrollOffset,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
+function createGalleryOut({
+  galleryRect: fromRect,
+  detailRect: toRect,
+  scrollOffset,
+}: {
+  galleryRect: DOMRect;
+  detailRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationConfig {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
     toRect.left -
@@ -113,26 +114,29 @@ function createGalleryOut(
   const scaleY = toRect.height / fromRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  return (progress: number) => {
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-    const t = 1 - progress; // 0 -> 1
-    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
-    node.style.opacity = `${1 - t}`;
+  const transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+
+  return {
+    transformOrigin,
+    animate: (progress: number) => {
+      const t = 1 - progress; // 0 -> 1
+      return {
+        transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`,
+        opacity: `${1 - t}`,
+      };
+    },
   };
 }
 
-function createGalleryIn(
-  {
-    galleryRect: fromRect,
-    detailRect: toRect,
-    scrollOffset,
-  }: {
-    galleryRect: DOMRect;
-    detailRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
+function createGalleryIn({
+  galleryRect: fromRect,
+  detailRect: toRect,
+  scrollOffset,
+}: {
+  galleryRect: DOMRect;
+  detailRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationConfig {
   const dx =
     toRect.left -
     fromRect.left +
@@ -149,29 +153,32 @@ function createGalleryIn(
   const scaleY = toRect.height / fromRect.height;
   const scale = Math.max(scaleX, scaleY);
 
-  return (progress: number) => {
-    const t = 1 - progress; // 1 -> 0;
-    const u = progress; // 0 -> 1;
-    node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-    node.style.transform = `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`;
-    node.style.opacity = `${u}`;
+  const transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+
+  return {
+    transformOrigin,
+    animate: (progress: number) => {
+      const t = 1 - progress; // 1 -> 0;
+      const u = progress; // 0 -> 1;
+      return {
+        transform: `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
+        opacity: `${u}`,
+      };
+    },
   };
 }
 
-function createDetailOut(
-  {
-    detailRect: fromRect,
-    galleryRect: toRect,
-    pageRect,
-    scrollOffset,
-  }: {
-    detailRect: DOMRect;
-    galleryRect: DOMRect;
-    pageRect: DOMRect;
-    scrollOffset: { x: number; y: number };
-  },
-  node: HTMLElement,
-): AnimationFunc {
+function createDetailOut({
+  detailRect: fromRect,
+  galleryRect: toRect,
+  pageRect,
+  scrollOffset,
+}: {
+  detailRect: DOMRect;
+  galleryRect: DOMRect;
+  pageRect: DOMRect;
+  scrollOffset: { x: number; y: number };
+}): AnimationConfig {
   // 시작 위치 (from)와 끝 위치 (to) 사이의 거리 계산
   const dx =
     toRect.left -
@@ -198,16 +205,18 @@ function createDetailOut(
     ((pageRect.height - (fromRect.top + fromRect.height)) / pageRect.height) *
     100;
   const startLeft = (fromRect.left / pageRect.width) * 100;
-  node.style.transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
-  return (progress: number) => {
-    const t = 1 - progress; // 0 -> 1 for out transitions
-    const currentTop = startTop * t;
-    const currentRight = startRight * t;
-    const currentBottom = startBottom * t;
-    const currentLeft = startLeft * t;
 
-    node.style.clipPath = `inset(${currentTop}% ${currentRight}% ${currentBottom}% ${currentLeft}%)`;
-    node.style.transform = `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`;
+  const transformOrigin = `${fromRect.left + fromRect.width / 2}px ${fromRect.top + fromRect.height / 2}px`;
+
+  return {
+    transformOrigin,
+    animate: (progress: number) => {
+      const t = 1 - progress; // 0 -> 1 for out transitions
+      return {
+        clipPath: `inset(${startTop * t}% ${startRight * t}% ${startBottom * t}% ${startLeft * t}%)`,
+        transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`,
+      };
+    },
   };
 }
 
@@ -282,36 +291,46 @@ function createAnimationConfig(
 
   // Return appropriate animation functions based on mode
   if (isEnterMode) {
+    const inConfig = createDetailIn({
+      detailRect,
+      galleryRect,
+      pageRect: toNode.getBoundingClientRect(),
+      scrollOffset,
+    });
+    const outConfig = createGalleryOut({
+      galleryRect,
+      detailRect,
+      scrollOffset,
+    });
+
+    // Apply transformOrigin to nodes
+    toNode.style.transformOrigin = inConfig.transformOrigin;
+    fromNode.style.transformOrigin = outConfig.transformOrigin;
+
     return {
-      inAnimation: createDetailIn(
-        {
-          detailRect,
-          galleryRect,
-          pageRect: toNode.getBoundingClientRect(),
-          scrollOffset,
-        },
-        toNode,
-      ),
-      outAnimation: createGalleryOut(
-        { galleryRect, detailRect, scrollOffset },
-        fromNode,
-      ),
+      inAnimation: inConfig.animate,
+      outAnimation: outConfig.animate,
     };
   } else {
+    const inConfig = createGalleryIn({
+      galleryRect,
+      detailRect,
+      scrollOffset,
+    });
+    const outConfig = createDetailOut({
+      detailRect,
+      galleryRect,
+      pageRect: fromNode.getBoundingClientRect(),
+      scrollOffset,
+    });
+
+    // Apply transformOrigin to nodes
+    toNode.style.transformOrigin = inConfig.transformOrigin;
+    fromNode.style.transformOrigin = outConfig.transformOrigin;
+
     return {
-      inAnimation: createGalleryIn(
-        { galleryRect, detailRect, scrollOffset },
-        toNode,
-      ),
-      outAnimation: createDetailOut(
-        {
-          detailRect,
-          galleryRect,
-          pageRect: fromNode.getBoundingClientRect(),
-          scrollOffset,
-        },
-        fromNode,
-      ),
+      inAnimation: inConfig.animate,
+      outAnimation: outConfig.animate,
     };
   }
 }
@@ -327,12 +346,14 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   let fromNode: HTMLElement | null = null;
   let resolver: ((value: boolean) => void) | null = null;
   let handlers: AnimationHandlers | null = null;
+  // New: for CSS mode synchronization
+  let resolveHandlers: (() => void) | null = null;
 
   return {
     in: async (element, { scrollOffset }) => {
       const toNode = element;
 
-      // Wait for fromNode to be set by out transition
+      // Wait for fromNode to be set by out transition's wait()
       const hasFromNode = await new Promise<boolean>((resolve) => {
         if (fromNode) {
           // fromNode already set by out transition
@@ -349,19 +370,28 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       });
 
       if (!hasFromNode || !fromNode) {
+        // Resolve handlers promise even if no fromNode (to unblock OUT's wait)
+        resolveHandlers?.();
+        resolveHandlers = null;
         fromNode = null;
         return {
           spring,
-          tick: () => {},
+          css: () => ({}),
         };
       }
 
       // Detect and prepare animation handlers with saved scrollOffset
       handlers = createAnimationConfig(fromNode, toNode, scrollOffset);
+
+      // Resolve handlers promise (unblock OUT's wait)
+      resolveHandlers?.();
+      resolveHandlers = null;
+
       if (!handlers) {
+        fromNode = null;
         return {
           spring,
-          tick: () => {},
+          css: () => ({}),
         };
       }
 
@@ -370,30 +400,41 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
 
       return {
         spring,
-        tick: (progress) => {
-          if (handlers) handlers.inAnimation(progress);
+        css: (progress) => {
+          if (!handlers) return {};
+          return handlers.inAnimation(progress);
         },
       };
     },
     out: async (element) => {
+      // Create handlersReady promise (will be resolved by IN transition)
+      const handlersReady = new Promise<void>((resolve) => {
+        resolveHandlers = resolve;
+      });
+
       return {
         spring,
-        onStart: () => {
-          // Store fromNode
-          fromNode = element;
-
-          // If there's a waiting resolver, resolve it
-          if (resolver) {
-            resolver(true);
-            resolver = null;
-          }
-        },
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";
         },
-        tick: (progress) => {
-          if (handlers) handlers.outAnimation(progress);
+        wait: async () => {
+          // Called after insertClone() - element is now in DOM!
+          fromNode = element;
+
+          // If there's a waiting resolver (IN is waiting), resolve it
+          if (resolver) {
+            resolver(true);
+            resolver = null;
+          }
+
+          // Wait for handlers to be created by IN transition
+          await handlersReady;
+        },
+        css: (progress) => {
+          // Called after wait() - handlers are guaranteed to exist
+          if (!handlers) return {};
+          return handlers.outAnimation(progress);
         },
       };
     },
