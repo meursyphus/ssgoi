@@ -10,16 +10,16 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 // Default spring configurations for each animation phase
 const DEFAULT_SPRINGS = {
-  scaleDown: { stiffness: 7, damping: 4 } as SpringConfig, // Soft start for cinematic scale
-  translate: { stiffness: 5, damping: 3.5 } as SpringConfig, // Medium for movement
-  scaleUp: { stiffness: 7, damping: 4 } as SpringConfig, // Crisp return to full size
+  scaleDown: { stiffness: 20, damping: 7 } as SpringConfig, // Soft start for cinematic scale
+  translate: { stiffness: 15, damping: 7 } as SpringConfig, // Medium for movement
+  scaleUp: { stiffness: 20, damping: 7 } as SpringConfig, // Crisp return to full size
 };
 
 // Stagger offsets (when each spring starts relative to previous)
 const OFFSETS = {
   scaleDown: 0, // Start immediately
   translate: 0.2, // Start when scaleDown is 25% complete
-  scaleUp: 0.9, // Start when translate is 70% complete
+  scaleUp: 0.8, // Start when translate is 70% complete
 };
 
 const DEFAULT_SCALE = 0.8;
