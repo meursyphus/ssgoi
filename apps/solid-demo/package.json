@@ -1,0 +1,27 @@
+{
+  "name": "solid-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev --port 5175",
+    "build": "vinxi build",
+    "start": "vinxi start"
+  },
+  "dependencies": {
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/start": "^1.1.7",
+    "@ssgoi/solid": "workspace:*",
+    "solid-js": "1.9.10",
+    "vinxi": "^0.5.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.4",
+    "vite-plugin-solid": "2.10.2"
+  }
+}

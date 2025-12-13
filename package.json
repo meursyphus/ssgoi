@@ -16,10 +16,13 @@
     "svelte:watch": "pnpm --filter @ssgoi/svelte watch",
     "vue:build": "pnpm --filter @ssgoi/vue build",
     "vue:watch": "pnpm --filter @ssgoi/vue watch",
+    "solid:build": "pnpm --filter @ssgoi/solid build",
+    "solid:watch": "pnpm --filter @ssgoi/solid watch",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
     "angular-demo": "pnpm --filter angular-demo dev",
     "react-demo": "pnpm --filter react-demo dev",
+    "solid-demo": "pnpm --filter solid-demo dev",
     "svelte-demo": "pnpm --filter svelte-demo dev",
     "vue-demo": "pnpm --filter vue-demo dev",
     "lint": "pnpm -r lint",
@@ -40,6 +43,8 @@
   "keywords": [
     "angular",
     "react",
+    "solid",
+    "solidjs",
     "svelte",
     "sveltekit",
     "vue",
@@ -83,6 +88,9 @@
       "prettier --write --config packages/vue/.prettierrc",
       "eslint --fix --config packages/vue/eslint.config.js"
     ],
+    "packages/solid/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/docs/.prettierrc"
     ],
@@ -91,6 +99,9 @@
     ],
     "apps/react-demo/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/react-demo/.prettierrc"
+    ],
+    "apps/solid-demo/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write --config apps/solid-demo/.prettierrc"
     ],
     "apps/svelte-demo/**/*.{ts,js,svelte}": [
       "prettier --write --config apps/svelte-demo/.prettierrc"
