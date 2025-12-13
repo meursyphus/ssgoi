@@ -4,53 +4,48 @@
   "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
   "private": false,
   "type": "module",
+  "sideEffects": false,
   "files": [
-    "dist",
-    "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
+    "lib",
+    "lib-types"
   ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./lib/index.qwik.mjs",
+  "qwik": "./lib/index.qwik.mjs",
+  "types": "./lib-types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "types": "./lib-types/index.d.ts",
+      "import": "./lib/index.qwik.mjs",
+      "require": "./lib/index.qwik.cjs"
     },
     "./transitions": {
-      "types": "./dist/transitions/index.d.ts",
-      "import": "./dist/transitions/index.js",
-      "require": "./dist/transitions/index.cjs",
-      "default": "./dist/transitions/index.js"
+      "types": "./lib-types/transitions/index.d.ts",
+      "import": "./lib/transitions/index.qwik.mjs",
+      "require": "./lib/transitions/index.qwik.cjs"
     },
     "./view-transitions": {
-      "types": "./dist/view-transitions/index.d.ts",
-      "import": "./dist/view-transitions/index.js",
-      "require": "./dist/view-transitions/index.cjs",
-      "default": "./dist/view-transitions/index.js"
+      "types": "./lib-types/view-transitions/index.d.ts",
+      "import": "./lib/view-transitions/index.qwik.mjs",
+      "require": "./lib/view-transitions/index.qwik.cjs"
     },
     "./types": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.js",
-      "require": "./dist/types.cjs",
-      "default": "./dist/types.js"
+      "types": "./lib-types/types.d.ts",
+      "import": "./lib/types.qwik.mjs",
+      "require": "./lib/types.qwik.cjs"
     },
     "./presets": {
-      "types": "./dist/presets/index.d.ts",
-      "import": "./dist/presets/index.js",
-      "require": "./dist/presets/index.cjs",
-      "default": "./dist/presets/index.js"
+      "types": "./lib-types/presets/index.d.ts",
+      "import": "./lib/presets/index.qwik.mjs",
+      "require": "./lib/presets/index.qwik.cjs"
     }
   },
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "tsc -b && vite build",
-    "watch": "vite build --watch",
+    "dev": "vite --mode ssr",
+    "build": "vite build --mode lib && tsc --emitDeclarationOnly",
+    "build.lib": "vite build --mode lib",
+    "build.types": "tsc --emitDeclarationOnly",
+    "watch": "vite build --mode lib --watch",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "package": "vite build",
     "prepare": "pnpm run build"
   },
   "dependencies": {
@@ -63,10 +58,8 @@
     "@builder.io/qwik": "^1.17.2",
     "@types/node": "^22.12.3",
     "prettier": "^3.6.2",
-    "rollup-plugin-preserve-directives": "^0.4.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4",
-    "vite-plugin-dts": "^4.5.4"
+    "vite": "^7.0.4"
   },
   "keywords": [
     "qwik",
