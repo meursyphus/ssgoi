@@ -1,0 +1,19 @@
+{
+  "name": "qwik-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 3002",
+    "build": "qwik build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@builder.io/qwik": "^1.17.2",
+    "@builder.io/qwik-city": "^1.17.2",
+    "@ssgoi/qwik": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^7.0.4",
+    "typescript": "^5"
+  }
+}
