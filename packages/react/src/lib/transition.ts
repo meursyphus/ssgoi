@@ -2,7 +2,6 @@
 
 import {
   transition as _transition,
-  watchUnmount,
   type Transition,
   type TransitionKey,
   type TransitionScope,
@@ -20,6 +19,9 @@ type TransitionOptions = Transition<undefined> & {
  * OUT transition is automatically triggered by MutationObserver
  * when the element is removed from the DOM - works with React 18+
  *
+ * The returned ref callback has a stable reference (cached by key),
+ * so it won't cause unnecessary re-renders when used with React refs.
+ *
  * @example
  * ```tsx
  * <div ref={transition({
@@ -30,17 +32,5 @@ type TransitionOptions = Transition<undefined> & {
  * ```
  */
 export const transition = (options: TransitionOptions) => {
-  const callback = _transition(options);
-
-  // Return ref callback
-  // Use MutationObserver to detect unmount and trigger OUT transition
-  return (element: HTMLElement | null) => {
-    if (element) {
-      const cleanup = callback(element);
-      if (cleanup) {
-        // Register cleanup with MutationObserver for automatic OUT transition
-        watchUnmount(element, cleanup);
-      }
-    }
-  };
+  return _transition(options, "auto");
 };
