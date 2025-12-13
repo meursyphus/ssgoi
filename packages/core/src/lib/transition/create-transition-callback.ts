@@ -197,9 +197,7 @@ export function createTransitionCallback(
     unwatch?.();
     unwatch = null;
 
-    const cloned = element.isConnected
-      ? (element.cloneNode(true) as HTMLElement)
-      : element;
+    const cloned = element.cloneNode(true) as HTMLElement;
 
     if (scopeRef) {
       // Local scope: defer to microtask and check if scope still exists

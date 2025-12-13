@@ -14,31 +14,31 @@ import { findMatchingTransition } from "./find-matching-transition";
  *
  * Page transition scenario: /home → /about
  *
- * 1. OUT animation starts (when /home page disappears)
- *    - getTransition('unique-id', 'out', '/home') is called
- *    - Stores { from: '/home' } in pendingTransitions
- *    - Creates Promise and stores outResolve (not resolved yet)
- *    - Calls checkAndResolve → waits because 'to' is missing
+ * **Order-independent design**: OUT and IN can arrive in any order.
+ * This is necessary because:
+ * - MutationObserver-based unmount detection may fire after mount
+ * - Different frameworks have different callback ordering
  *
- * 2. IN animation starts (when /about page appears)
- *    - getTransition('unique-id', 'in', '/about') is called
- *    - Adds { to: '/about' } to existing pending
- *    - Creates Promise and stores inResolve
+ * 1. First transition arrives (either OUT or IN)
+ *    - Creates pendingTransition with path info
+ *    - Starts timeout to wait for the other transition
+ *    - Calls checkAndResolve → waits because pair is incomplete
+ *
+ * 2. Second transition arrives (the other of OUT/IN)
+ *    - Clears the timeout
+ *    - Adds path info to pendingTransition
  *    - Calls checkAndResolve → both 'from' and 'to' are present!
  *
  * 3. Transition matching and resolution
- *    - Finds appropriate transition with from: '/home', to: '/about'
+ *    - Finds appropriate transition with from/to paths
  *    - Resolves both out and in with the found transition's settings
- *    - Removes the id from pendingTransitions
- *
- * Key point: OUT and IN wait for each other. When both are ready,
- *           they find the appropriate transition using from/to info
- *           and resolve simultaneously.
+ *    - Clears pendingTransition
  *
  * Edge cases:
- * - No OUT animation on page refresh or initial entry
- * - When only IN is called, checkAndResolve doesn't work without 'from'
- * - Promise isn't resolved, so animation doesn't start
+ * - Page refresh or initial entry: Only IN arrives
+ *   → Timeout expires, resolves with empty transition
+ * - Orphan OUT (rare): Only OUT arrives
+ *   → Timeout expires, just cleans up without resolving
  */
 
 /**
@@ -149,6 +149,21 @@ export function createSggoiTransitionContext(
     }
   }
 
+  // Helper to cancel previous pending transition
+  function cancelPendingTransition() {
+    if (!pendingTransition) return;
+
+    // Resolve any waiting promises with empty config to clean them up
+    if (pendingTransition.inResolve) {
+      pendingTransition.inResolve(() => ({}));
+    }
+    if (pendingTransition.outResolve) {
+      pendingTransition.outResolve(() => ({}));
+    }
+
+    pendingTransition = null;
+  }
+
   const getTransition = async (path: string, type: "out" | "in") => {
     // Skip animations if iOS swipe-back gesture is detected
     if (swipeDetector.isSwipePending()) {
@@ -158,11 +173,19 @@ export function createSggoiTransitionContext(
       return () => ({}); // Return empty transition
     }
 
-    if (type === "in") {
-      // If IN is called but no OUT is pending, no transition occurs (e.g., page refresh)
-      if (!pendingTransition || !pendingTransition.from) {
-        return () => ({}); // Return empty transition
-      }
+    // If this is a new transition (different path), cancel previous one
+    // Same path means it's the pair (OUT/IN) we're waiting for
+    const isNewTransition =
+      pendingTransition &&
+      ((type === "out" &&
+        pendingTransition.from &&
+        pendingTransition.from !== path) ||
+        (type === "in" &&
+          pendingTransition.to &&
+          pendingTransition.to !== path));
+
+    if (isNewTransition) {
+      cancelPendingTransition();
     }
 
     if (!pendingTransition) {
@@ -174,12 +197,15 @@ export function createSggoiTransitionContext(
       return new Promise<GetTransitionConfig>((resolve) => {
         pendingTransition!.outResolve = resolve;
         checkAndResolve();
+        // No timeout - wait indefinitely for IN
       });
     } else {
       pendingTransition.to = path;
       return new Promise<GetTransitionConfig>((resolve) => {
         pendingTransition!.inResolve = resolve;
         checkAndResolve();
+        // No timeout - wait indefinitely for OUT
+        // Page is visible even without resolve (no prepare() called yet)
       });
     }
   };
