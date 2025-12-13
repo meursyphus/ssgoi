@@ -4,7 +4,7 @@ import { Suspense } from "solid-js";
 import { MetaProvider } from "@solidjs/meta";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
 import { fade, hero } from "@ssgoi/solid/view-transitions";
-import "./app.css";
+import "./index.css";
 
 const ssgoiConfig: SsgoiConfig = {
   transitions: [
