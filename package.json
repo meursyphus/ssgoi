@@ -18,6 +18,8 @@
     "vue:watch": "pnpm --filter @ssgoi/vue watch",
     "solid:build": "pnpm --filter @ssgoi/solid build",
     "solid:watch": "pnpm --filter @ssgoi/solid watch",
+    "qwik:build": "pnpm --filter @ssgoi/qwik build",
+    "qwik:watch": "pnpm --filter @ssgoi/qwik watch",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
     "angular-demo": "pnpm --filter angular-demo dev",
@@ -25,6 +27,7 @@
     "solid-demo": "pnpm --filter solid-demo dev",
     "svelte-demo": "pnpm --filter svelte-demo dev",
     "vue-demo": "pnpm --filter vue-demo dev",
+    "qwik-demo": "pnpm --filter qwik-demo dev",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
@@ -48,6 +51,7 @@
     "svelte",
     "sveltekit",
     "vue",
+    "qwik",
     "page-transition",
     "animation"
   ],
@@ -88,8 +92,8 @@
       "prettier --write --config packages/vue/.prettierrc",
       "eslint --fix --config packages/vue/eslint.config.js"
     ],
-    "packages/solid/**/*.{ts,tsx}": [
-      "prettier --write"
+    "packages/qwik/**/*.{ts,tsx}": [
+      "prettier --write --config packages/qwik/.prettierrc"
     ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/docs/.prettierrc"
@@ -108,6 +112,9 @@
     ],
     "apps/vue-demo/**/*.{ts,js,vue}": [
       "prettier --write --config apps/vue-demo/.prettierrc"
+    ],
+    "apps/qwik-demo/**/*.{ts,tsx}": [
+      "prettier --write --config apps/qwik-demo/.prettierrc"
     ]
   }
 }
