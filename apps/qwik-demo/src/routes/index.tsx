@@ -1,6 +1,6 @@
-import { component$, useSignal } from "@builder.io/qwik";
+import { $, component$, useSignal, Slot } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
-import { SsgoiTransition, transition } from "@ssgoi/qwik";
+import { SsgoiTransition, Transition } from "@ssgoi/qwik";
 
 const colors = [
   { id: 1, color: "#FF6B6B", name: "Coral" },
@@ -10,6 +10,46 @@ const colors = [
   { id: 5, color: "#FECA57", name: "Sunflower" },
   { id: 6, color: "#DDA0DD", name: "Plum" },
 ];
+
+// Shape container component that maintains size
+const ShapeContainer = component$<{ label: string }>(({ label }) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1rem",
+        background: "white",
+        borderRadius: "12px",
+        padding: "2rem",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+      }}
+    >
+      <div
+        style={{
+          width: "120px",
+          height: "120px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Slot />
+      </div>
+      <p
+        style={{
+          fontSize: "1rem",
+          fontWeight: "500",
+          color: "#666",
+          margin: 0,
+        }}
+      >
+        {label}
+      </p>
+    </div>
+  );
+});
 
 export default component$(() => {
   const showShapes = useSignal(true);
@@ -113,79 +153,161 @@ export default component$(() => {
 
           <div
             style={{
-              display: "flex",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
               gap: "2rem",
-              justifyContent: "center",
-              minHeight: "150px",
-              alignItems: "center",
+              padding: "2rem",
             }}
           >
-            {showShapes.value && (
-              <>
-                <div
-                  ref={transition({
-                    key: "fade",
-                    in: (element) => ({
-                      spring: {
-                        stiffness: stiffness.value,
-                        damping: damping.value,
-                      },
-                      tick: (progress) => {
-                        element.style.opacity = progress.toString();
-                      },
+            <ShapeContainer label="Fade">
+              {showShapes.value && (
+                <Transition
+                  transitionKey="fade"
+                  in$={$((element) => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    tick: (progress) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }))}
+                  out$={$((element) => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    tick: (progress) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }))}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    }}
+                  />
+                </Transition>
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Scale + Rotate">
+              {showShapes.value && (
+                <Transition
+                  transitionKey="scale-rotate"
+                  in$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    css: (progress) => ({
+                      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                      opacity: progress.toString(),
                     }),
-                    out: (element) => ({
-                      spring: {
-                        stiffness: stiffness.value,
-                        damping: damping.value,
-                      },
-                      tick: (progress) => {
-                        element.style.opacity = progress.toString();
-                      },
+                  }))}
+                  out$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    css: (progress) => ({
+                      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                      opacity: progress.toString(),
                     }),
-                  })}
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "50%",
-                    background:
-                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  }}
-                />
-                <div
-                  ref={transition({
-                    key: "scale-rotate",
-                    in: (element) => ({
-                      spring: {
-                        stiffness: stiffness.value,
-                        damping: damping.value,
-                      },
-                      css: (progress) => ({
-                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
-                        opacity: progress.toString(),
-                      }),
+                  }))}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background:
+                        "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                      clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
+                    }}
+                  />
+                </Transition>
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Slide In">
+              {showShapes.value && (
+                <Transition
+                  transitionKey="slide-in"
+                  in$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    css: (progress) => ({
+                      transform: `translateX(${(1 - progress) * -100}px)`,
+                      opacity: progress.toString(),
                     }),
-                    out: (element) => ({
-                      spring: {
-                        stiffness: stiffness.value,
-                        damping: damping.value,
-                      },
-                      css: (progress) => ({
-                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
-                        opacity: progress.toString(),
-                      }),
+                  }))}
+                  out$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    css: (progress) => ({
+                      transform: `translateX(${(1 - progress) * -100}px)`,
+                      opacity: progress.toString(),
                     }),
-                  })}
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    background:
-                      "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                    clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
-                  }}
-                />
-              </>
-            )}
+                  }))}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background:
+                        "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+                      borderRadius: "8px",
+                    }}
+                  />
+                </Transition>
+              )}
+            </ShapeContainer>
+
+            <ShapeContainer label="Bounce Scale">
+              {showShapes.value && (
+                <Transition
+                  transitionKey="bounce-scale"
+                  in$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value * 0.8,
+                      damping: damping.value * 0.7,
+                    },
+                    css: (progress) => ({
+                      transform: `scale(${0.5 + progress * 0.5})`,
+                      opacity: progress.toString(),
+                    }),
+                  }))}
+                  out$={$(() => ({
+                    spring: {
+                      stiffness: stiffness.value,
+                      damping: damping.value,
+                    },
+                    css: (progress) => ({
+                      transform: `scale(${0.5 + progress * 0.5})`,
+                      opacity: progress.toString(),
+                    }),
+                  }))}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background:
+                        "linear-gradient(135deg, #4ecdc4 0%, #556270 100%)",
+                      borderRadius: "16px",
+                    }}
+                  />
+                </Transition>
+              )}
+            </ShapeContainer>
           </div>
         </section>
       </div>
