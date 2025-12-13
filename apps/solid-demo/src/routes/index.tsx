@@ -39,7 +39,7 @@ export default function Home() {
             {colors.map((item) => (
               <A
                 href={`/item/${item.id}`}
-                class="aspect-square rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 shadow-lg hover:-translate-y-1 hover:shadow-xl no-underline"
+                class="aspect-square rounded-xl flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl no-underline"
                 style={{ "background-color": item.color }}
                 data-hero-key={`color-${item.id}`}
               >
