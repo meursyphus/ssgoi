@@ -317,7 +317,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         },
       };
     },
-    out: async (element) => {
+    out: async (element, context) => {
       // Create handlersReady promise (will be resolved by IN transition)
       const handlersReady = new Promise<void>((resolve) => {
         resolveHandlers = resolve;
@@ -326,9 +326,11 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       return {
         spring,
         prepare: (element) => {
-          prepareOutgoing(element);
           if (!handlers?.isEnterMode) {
+            prepareOutgoing(element, context);
             element.style.zIndex = "-1";
+          } else {
+            prepareOutgoing(element);
           }
         },
         wait: async () => {
