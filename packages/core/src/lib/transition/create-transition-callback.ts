@@ -9,6 +9,7 @@ import {
   type InternalTransitionConfigs,
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
+import { watchUnmount } from "./unmount-observer";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
@@ -183,10 +184,45 @@ export function createTransitionCallback(
   // Cached scope reference (only set for 'local' scope)
   let scopeRef: Element | null = null;
 
+  // Track if unmount has been triggered (prevents double execution)
+  let unmountTriggered = false;
+  let unwatch: (() => void) | null = null;
+
+  // Function to handle unmount (called by observer)
+  const handleUnmount = (element: HTMLElement) => {
+    if (unmountTriggered) return;
+    unmountTriggered = true;
+
+    // Clean up watcher to free memory
+    unwatch?.();
+    unwatch = null;
+
+    const cloned = element.isConnected
+      ? (element.cloneNode(true) as HTMLElement)
+      : element;
+
+    if (scopeRef) {
+      // Local scope: defer to microtask and check if scope still exists
+      queueMicrotask(() => {
+        if (!document.contains(scopeRef!)) {
+          // Scope removed = simultaneous unmount = skip OUT animation
+          return;
+        }
+        runExitTransition(cloned);
+      });
+    } else {
+      // Global scope: run immediately
+      runExitTransition(cloned);
+    }
+  };
+
   return (element: HTMLElement | null) => {
     if (!element) return;
     parentRef = element.parentElement;
     nextSiblingRef = element.nextElementSibling;
+
+    // Reset unmount flag for new element
+    unmountTriggered = false;
 
     // === IN transition ===
     if (options?.scope === "local") {
@@ -198,6 +234,7 @@ export function createTransitionCallback(
           // Scope not ready = simultaneous mount = skip IN animation
           return;
         }
+
         runEntrance(element);
       });
     } else {
@@ -205,25 +242,11 @@ export function createTransitionCallback(
       runEntrance(element);
     }
 
-    // === OUT transition ===
-    return () => {
-      const cloned = element.isConnected
-        ? (element.cloneNode(true) as HTMLElement)
-        : element;
-
-      if (scopeRef) {
-        // Local scope: defer to microtask and check if scope still exists
-        queueMicrotask(() => {
-          if (!document.contains(scopeRef!)) {
-            // Scope removed = simultaneous unmount = skip OUT animation
-            return;
-          }
-          runExitTransition(cloned);
-        });
-      } else {
-        // Global scope: run immediately
-        runExitTransition(cloned);
-      }
-    };
+    // === Register MutationObserver-based unmount detection ===
+    // This enables automatic OUT transition for all frameworks
+    // No need for explicit cleanup - observer handles everything
+    unwatch = watchUnmount(element, () => {
+      handleUnmount(element);
+    });
   };
 }

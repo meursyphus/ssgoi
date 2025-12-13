@@ -10,6 +10,12 @@ type TransitionParams = Transition<undefined> & {
   scope?: TransitionScope;
 };
 
+/**
+ * Svelte action for element transitions
+ *
+ * OUT transition is automatically triggered by MutationObserver
+ * when the element is removed from the DOM - no destroy() needed
+ */
 export const transition = (node: HTMLElement, params: TransitionParams) => {
   let callback = _transition({
     key: params?.key,
@@ -18,7 +24,7 @@ export const transition = (node: HTMLElement, params: TransitionParams) => {
     ref: node,
     scope: params?.scope,
   });
-  let cleanup = callback(node);
+  callback(node);
 
   return {
     update(newParams: TransitionParams) {
@@ -29,10 +35,7 @@ export const transition = (node: HTMLElement, params: TransitionParams) => {
         ref: node,
         scope: newParams?.scope,
       });
-      cleanup = callback(node);
-    },
-    destroy() {
-      cleanup?.();
+      callback(node);
     },
   };
 };
