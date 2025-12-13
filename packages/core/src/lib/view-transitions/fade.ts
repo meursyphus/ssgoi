@@ -1,9 +1,9 @@
 import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { sleep } from "../utils";
+import { sleep, withResolvers } from "../utils";
 
-const DEFAULT_OUT_SPRING = { stiffness: 65, damping: 16 };
-const DEFAULT_IN_SPRING = { stiffness: 65, damping: 14 };
+const DEFAULT_OUT_SPRING = { stiffness: 120, damping: 15 };
+const DEFAULT_IN_SPRING = { stiffness: 100, damping: 20 };
 const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
@@ -19,21 +19,24 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     transitionDelay = DEFAULT_TRANSITION_DELAY,
   } = options;
   // Shared promise for coordinating OUT and IN animations
-  let outAnimationComplete: Promise<void>;
-  let resolveOutAnimation: (() => void) | null = null;
+  let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
+    withResolvers<void>();
 
   return {
     in: (element) => {
       return {
         spring: inSpring,
         prepare: () => {
+          element.style.opacity = "0";
           element.style.willChange = "opacity";
         },
         wait: async () => {
           // Wait for OUT animation to complete if it exists
           if (outAnimationComplete) {
             await outAnimationComplete;
-            // Configurable delay after OUT completes
+            const newResolvers = withResolvers<void>();
+            outAnimationComplete = newResolvers.promise;
+            resolveOutAnimation = newResolvers.resolve;
             await sleep(transitionDelay);
           }
         },
@@ -42,15 +45,11 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
         }),
         onEnd: () => {
           element.style.willChange = "auto";
+          element.style.opacity = "1";
         },
       };
     },
     out: (element, context) => {
-      // Create promise for OUT animation completion
-      outAnimationComplete = new Promise((resolve) => {
-        resolveOutAnimation = resolve;
-      });
-
       return {
         spring: outSpring,
         css: (progress): StyleObject => ({

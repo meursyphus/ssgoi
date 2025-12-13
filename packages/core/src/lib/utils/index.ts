@@ -5,3 +5,4 @@ export { parseCallerLocation } from "./parse-caller-location";
 export { sleep } from "./sleep";
 export { getRect } from "./get-rect";
 export { round, floor, ceil, toFixed } from "./number";
+export { withResolvers } from "./with-resolvers";
