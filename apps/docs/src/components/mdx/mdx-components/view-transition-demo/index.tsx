@@ -35,6 +35,9 @@ const StripDemo = lazy(() =>
 const JaeminDemo = lazy(() =>
   import("./jaemin-demo").then((m) => ({ default: m.JaeminDemo })),
 );
+const RotateDemo = lazy(() =>
+  import("./rotate-demo").then((m) => ({ default: m.RotateDemo })),
+);
 
 export interface ViewTransitionDemoProps {
   type:
@@ -47,7 +50,8 @@ export interface ViewTransitionDemoProps {
     | "slide"
     | "blind"
     | "strip"
-    | "jaemin";
+    | "jaemin"
+    | "rotate";
 }
 
 // Loading component
@@ -85,6 +89,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <StripDemo />;
       case "jaemin":
         return <JaeminDemo />;
+      case "rotate":
+        return <RotateDemo />;
       default:
         return null;
     }
