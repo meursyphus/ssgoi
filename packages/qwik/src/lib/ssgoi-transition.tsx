@@ -1,41 +1,41 @@
-import { component$, Slot, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, Slot, noSerialize, useComputed$ } from "@builder.io/qwik";
 import { useSsgoi } from "./context";
-import { transition as _transition, watchUnmount } from "@ssgoi/core";
+import { Transition } from "./transition-component";
 
 type SsgoiTransitionProps = {
   id: string;
   class?: string;
 };
 
+/**
+ * Page-level transition wrapper that gets transition config from Ssgoi context.
+ * Uses Transition component internally with noSerialize functions.
+ */
 export const SsgoiTransition = component$<SsgoiTransitionProps>(
   ({ id, class: className }) => {
     const contextSignal = useSsgoi();
-    const elementRef = useSignal<HTMLElement>();
 
-    // eslint-disable-next-line qwik/no-use-visible-task
-    useVisibleTask$(({ cleanup }) => {
-      const element = elementRef.value;
+    // Compute transition functions from context
+    const transitionFns = useComputed$(() => {
       const context = contextSignal.value;
+      if (!context) return { inFn: undefined, outFn: undefined };
 
-      if (!element || !context) return;
-
-      const transitionOptions = context(id);
-      const callback = _transition(transitionOptions);
-      const cleanupFn = callback(element);
-
-      if (cleanupFn) {
-        watchUnmount(element, cleanupFn);
-      }
-
-      cleanup(() => {
-        cleanupFn?.();
-      });
+      const options = context(id);
+      return {
+        inFn: options.in ? noSerialize(options.in) : undefined,
+        outFn: options.out ? noSerialize(options.out) : undefined,
+      };
     });
 
     return (
-      <div ref={elementRef} data-ssgoi-transition={id} class={className}>
+      <Transition
+        transitionKey={id}
+        inFn={transitionFns.value.inFn}
+        outFn={transitionFns.value.outFn}
+        class={className}
+      >
         <Slot />
-      </div>
+      </Transition>
     );
   },
 );

@@ -26,8 +26,6 @@ export const Ssgoi = component$<SsgoiProps>(({ config }) => {
       if (config) {
         contextValue.value = noSerialize(
           createSggoiTransitionContext(config, {
-            // Qwik uses MutationObserver for unmount detection,
-            // so OUT and IN can arrive in any order
             outFirst: false,
           }),
         );
