@@ -1,6 +1,6 @@
-import { component$, Slot } from "@builder.io/qwik";
-import { transition } from "./transition";
+import { component$, Slot, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 import { useSsgoi } from "./context";
+import { transition as _transition, watchUnmount } from "@ssgoi/core";
 
 type SsgoiTransitionProps = {
   id: string;
@@ -9,14 +9,31 @@ type SsgoiTransitionProps = {
 
 export const SsgoiTransition = component$<SsgoiTransitionProps>(
   ({ id, class: className }) => {
-    const getTransition = useSsgoi();
+    const contextSignal = useSsgoi();
+    const elementRef = useSignal<HTMLElement>();
+
+    // eslint-disable-next-line qwik/no-use-visible-task
+    useVisibleTask$(({ cleanup }) => {
+      const element = elementRef.value;
+      const context = contextSignal.value;
+
+      if (!element || !context) return;
+
+      const transitionOptions = context(id);
+      const callback = _transition(transitionOptions);
+      const cleanupFn = callback(element);
+
+      if (cleanupFn) {
+        watchUnmount(element, cleanupFn);
+      }
+
+      cleanup(() => {
+        cleanupFn?.();
+      });
+    });
 
     return (
-      <div
-        ref={transition(getTransition(id))}
-        data-ssgoi-transition={id}
-        class={className}
-      >
+      <div ref={elementRef} data-ssgoi-transition={id} class={className}>
         <Slot />
       </div>
     );

@@ -1,12 +1,15 @@
-import { createContextId, useContext } from "@builder.io/qwik";
+import {
+  createContextId,
+  useContext,
+  type Signal,
+  type NoSerialize,
+} from "@builder.io/qwik";
 import type { SsgoiContext } from "./types";
 
-export const SsgoiContextId = createContextId<SsgoiContext>("ssgoi-context");
+export const SsgoiContextId =
+  createContextId<Signal<NoSerialize<SsgoiContext> | null>>("ssgoi-context");
 
 export const useSsgoi = () => {
-  const context = useContext(SsgoiContextId);
-  if (!context) {
-    throw new Error("useSsgoi must be used within Ssgoi component");
-  }
-  return context;
+  const contextSignal = useContext(SsgoiContextId);
+  return contextSignal;
 };

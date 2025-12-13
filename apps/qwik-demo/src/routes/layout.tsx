@@ -1,6 +1,6 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, noSerialize } from "@builder.io/qwik";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/qwik";
-import { fade, hero } from "@ssgoi/qwik/view-transitions";
+import { hero } from "@ssgoi/qwik/view-transitions";
 
 const ssgoiConfig: SsgoiConfig = {
   transitions: [
@@ -15,7 +15,7 @@ const ssgoiConfig: SsgoiConfig = {
 
 export default component$(() => {
   return (
-    <Ssgoi config={ssgoiConfig}>
+    <Ssgoi config={noSerialize(ssgoiConfig)}>
       <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
         <Slot />
       </div>

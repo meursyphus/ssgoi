@@ -2,13 +2,6 @@
   "name": "@ssgoi/qwik",
   "version": "1.0.0",
   "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik applications",
-  "private": false,
-  "type": "module",
-  "sideEffects": false,
-  "files": [
-    "lib",
-    "lib-types"
-  ],
   "main": "./lib/index.qwik.mjs",
   "qwik": "./lib/index.qwik.mjs",
   "types": "./lib-types/index.d.ts",
@@ -39,14 +32,26 @@
       "require": "./lib/presets/index.qwik.cjs"
     }
   },
+  "files": [
+    "lib",
+    "lib-types"
+  ],
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "private": false,
+  "sideEffects": false,
+  "type": "module",
   "scripts": {
-    "dev": "vite --mode ssr",
-    "build": "vite build --mode lib && tsc --emitDeclarationOnly",
+    "build": "qwik build",
     "build.lib": "vite build --mode lib",
     "build.types": "tsc --emitDeclarationOnly",
+    "dev": "vite --mode ssr",
     "watch": "vite build --mode lib --watch",
-    "lint": "eslint .",
-    "prepare": "pnpm run build"
+    "lint": "eslint \"src/**/*.ts*\"",
+    "start": "vite --open --mode ssr",
+    "prepare": "pnpm run build",
+    "qwik": "qwik"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:^"
@@ -55,11 +60,18 @@
     "@builder.io/qwik": "^1.0.0"
   },
   "devDependencies": {
-    "@builder.io/qwik": "^1.17.2",
-    "@types/node": "^22.12.3",
-    "prettier": "^3.6.2",
-    "typescript": "~5.8.3",
-    "vite": "^5.4.0"
+    "@builder.io/qwik": "1.17.2",
+    "@eslint/js": "latest",
+    "@types/node": "20.19.0",
+    "eslint": "9.32.0",
+    "eslint-plugin-qwik": "1.17.2",
+    "globals": "16.4.0",
+    "prettier": "3.6.2",
+    "typescript": "5.4.5",
+    "typescript-eslint": "8.38.0",
+    "undici": "*",
+    "vite": "7.1.11",
+    "vite-tsconfig-paths": "^4.2.1"
   },
   "keywords": [
     "qwik",
@@ -81,8 +93,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

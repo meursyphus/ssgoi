@@ -2,25 +2,25 @@
   "compilerOptions": {
     "allowJs": true,
     "target": "ES2020",
-    "module": "ES2020",
-    "lib": ["ES2020", "DOM", "WebWorker", "DOM.Iterable"],
+    "module": "ES2022",
+    "lib": ["es2022", "DOM", "WebWorker", "DOM.Iterable"],
     "jsx": "react-jsx",
     "jsxImportSource": "@builder.io/qwik",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "incremental": true,
     "isolatedModules": true,
     "outDir": "tmp",
     "noEmit": true,
-    "types": ["@builder.io/qwik/jsx", "vite/client"],
     "paths": {
       "~/*": ["./src/*"]
-    }
+    },
+    /* if you do not use CSS modules, remove this line and delete the typescript-plugin-css-modules module from package.json */
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "server"]
+  "include": ["src", "./*.d.ts", "./*.config.ts"]
 }
