@@ -1,0 +1,1 @@
+import{z as o,c as i,k as n,o as s,H as t}from"./q-DI0xDJvE.js";import{S as r}from"./q-Dih95laJ.js";import{_auto_ssgoiConfig as a}from"./q-AQOm__g3.js";const m=()=>o(r,{get config(){return t(a)},children:n("div",null,{style:{position:"relative",minHeight:"100vh",width:"100%"}},o(s,null,3,"Mm_0"),1,null),[i]:{config:i}},1,"Mm_1");export{m as s_UoOnK5oIuY8};
