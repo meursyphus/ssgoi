@@ -5,13 +5,16 @@ import {
   TransitionStrategy,
 } from "./transition-strategy";
 import type {
+  RefCallback,
   Transition,
   TransitionCallback,
+  TransitionMode,
   TransitionOptions,
   TransitionScope,
 } from "../types";
 import type { TransitionKey } from "../types";
 import { parseCallerLocation } from "../utils/parse-caller-location";
+import { watchUnmount } from "./unmount-observer";
 
 /**
  * Centralized transition management
@@ -21,8 +24,11 @@ import { parseCallerLocation } from "../utils/parse-caller-location";
 // Map to store transition definitions by key
 const transitionDefinitions = new Map<TransitionKey, Transition<undefined>>();
 
-// Map to store transition callbacks by key
+// Map to store transition callbacks by key (manual mode)
 const transitionCallbacks = new Map<TransitionKey, TransitionCallback>();
+
+// Map to store ref callbacks by key (auto mode with MutationObserver)
+const refCallbacks = new Map<TransitionKey, RefCallback>();
 
 /**
  * Registers a transition with a key and returns the callback
@@ -77,6 +83,7 @@ function registerTransition(
 function unregisterTransition(key: TransitionKey): void {
   transitionDefinitions.delete(key);
   transitionCallbacks.delete(key);
+  refCallbacks.delete(key);
 }
 
 // ---------------------------------------------
@@ -113,6 +120,10 @@ const __cleanupRegistry = FinalizationRegistryCtor
     }) as { register: (target: object, heldValue: TransitionKey) => void })
   : undefined;
 
+type TransitionOptionsWithStrategy = TransitionOptions<undefined> & {
+  [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
+};
+
 /**
  * Framework-agnostic transition function that can be used as a ref
  *
@@ -134,27 +145,39 @@ const __cleanupRegistry = FinalizationRegistryCtor
  * 4. `tick` - Called on each animation frame with progress value (1 → 0)
  * 5. `onEnd` - Called when animation completes and element is removed
  *
- * @returns {TransitionCallback} A callback function to be used as a ref
+ * @param options - Transition configuration
+ * @param mode - 'manual' (default) returns cleanup, 'auto' handles unmount via MutationObserver
+ * @returns Callback function to be used as a ref
  *
  * @example
  * ```tsx
+ * // Manual mode (default) - you handle cleanup
  * <div ref={transition({
  *   key: 'hero-fade',
- *   in: (element) => ({
- *     prepare: (el) => el.style.opacity = '0',
- *     tick: (progress) => el.style.opacity = progress.toString(),
- *   }),
- *   out: (element) => ({
- *     tick: (progress) => el.style.opacity = progress.toString(),
- *   })
+ *   in: (element) => ({ tick: (p) => element.style.opacity = String(p) }),
+ *   out: (element) => ({ tick: (p) => element.style.opacity = String(p) }),
  * })} />
+ *
+ * // Auto mode - automatic unmount detection via MutationObserver
+ * <div ref={transition({
+ *   key: 'hero-fade',
+ *   in: (element) => ({ tick: (p) => element.style.opacity = String(p) }),
+ *   out: (element) => ({ tick: (p) => element.style.opacity = String(p) }),
+ * }, 'auto')} />
  * ```
  */
 export function transition(
-  options: TransitionOptions<undefined> & {
-    [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
-  },
-): TransitionCallback {
+  options: TransitionOptionsWithStrategy,
+  mode?: "manual",
+): TransitionCallback;
+export function transition(
+  options: TransitionOptionsWithStrategy,
+  mode: "auto",
+): RefCallback;
+export function transition(
+  options: TransitionOptionsWithStrategy,
+  mode: TransitionMode = "manual",
+): TransitionCallback | RefCallback {
   const resolvedKey = options.key ?? generateAutoKey();
 
   if (options.ref && __cleanupRegistry) {
@@ -165,7 +188,7 @@ export function transition(
     }
   }
 
-  return registerTransition(
+  const callback = registerTransition(
     resolvedKey,
     {
       in: options.in,
@@ -176,4 +199,26 @@ export function transition(
       scope: options.scope,
     },
   );
+
+  if (mode === "manual") {
+    return callback;
+  }
+
+  // Auto mode: return cached ref callback with MutationObserver integration
+  let refCallback = refCallbacks.get(resolvedKey);
+  if (refCallback) {
+    return refCallback;
+  }
+
+  refCallback = (element: HTMLElement | null) => {
+    if (element) {
+      const cleanup = callback(element);
+      if (cleanup) {
+        watchUnmount(element, cleanup);
+      }
+    }
+  };
+
+  refCallbacks.set(resolvedKey, refCallback);
+  return refCallback;
 }

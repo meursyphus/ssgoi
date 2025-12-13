@@ -297,6 +297,19 @@ export type TransitionCallback = (
 ) => void | (() => void);
 
 /**
+ * Ref callback type for 'auto' mode
+ * Handles null and manages unmount automatically via MutationObserver
+ */
+export type RefCallback = (element: HTMLElement | null) => void;
+
+/**
+ * Transition mode
+ * - 'manual': Returns TransitionCallback with cleanup function (default)
+ * - 'auto': Returns RefCallback with automatic unmount detection via MutationObserver
+ */
+export type TransitionMode = "manual" | "auto";
+
+/**
  * Context object passed to view transitions
  * Provides essential information for smooth page transitions
  */
