@@ -10,6 +10,13 @@ type TransitionParams = Transition<undefined> & {
   scope?: TransitionScope;
 };
 
+/**
+ * Svelte action for element transitions
+ *
+ * Uses Svelte's destroy callback for OUT transition detection.
+ * This ensures the correct transition config is used even when
+ * params are updated (e.g., during SvelteKit page navigation).
+ */
 export const transition = (node: HTMLElement, params: TransitionParams) => {
   let callback = _transition({
     key: params?.key,
@@ -32,6 +39,8 @@ export const transition = (node: HTMLElement, params: TransitionParams) => {
       cleanup = callback(node);
     },
     destroy() {
+      // Call cleanup to trigger OUT transition with the correct config
+      // The cleanup function captures the transition config at registration time
       cleanup?.();
     },
   };

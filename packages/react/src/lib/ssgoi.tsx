@@ -12,7 +12,12 @@ interface SsgoiProps {
 
 export const Ssgoi: React.FC<SsgoiProps> = ({ config, children }) => {
   const contextValue = useMemo<SsgoiContext>(
-    () => createSggoiTransitionContext(config),
+    () =>
+      createSggoiTransitionContext(config, {
+        // React uses MutationObserver for unmount detection,
+        // so OUT and IN can arrive in any order
+        outFirst: false,
+      }),
     [config],
   );
 

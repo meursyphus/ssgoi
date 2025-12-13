@@ -1,4 +1,9 @@
-import type { SsgoiConfig, SsgoiContext, GetTransitionConfig } from "../types";
+import type {
+  SsgoiConfig,
+  SsgoiContext,
+  SsgoiInternalOptions,
+  GetTransitionConfig,
+} from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -14,31 +19,20 @@ import { findMatchingTransition } from "./find-matching-transition";
  *
  * Page transition scenario: /home → /about
  *
- * 1. OUT animation starts (when /home page disappears)
- *    - getTransition('unique-id', 'out', '/home') is called
- *    - Stores { from: '/home' } in pendingTransitions
- *    - Creates Promise and stores outResolve (not resolved yet)
- *    - Calls checkAndResolve → waits because 'to' is missing
+ * **Default mode (outFirst: true)**: OUT must arrive before IN
+ * - Best for frameworks with native destroy callbacks (Svelte, Vue)
+ * - OUT triggers first, then IN completes the pair
+ * - If IN arrives without OUT, returns empty transition (page refresh)
  *
- * 2. IN animation starts (when /about page appears)
- *    - getTransition('unique-id', 'in', '/about') is called
- *    - Adds { to: '/about' } to existing pending
- *    - Creates Promise and stores inResolve
- *    - Calls checkAndResolve → both 'from' and 'to' are present!
+ * **Observer mode (outFirst: false)**: OUT and IN can arrive in any order
+ * - Best for frameworks using MutationObserver (React)
+ * - Either OUT or IN can arrive first
+ * - Both wait indefinitely for the other to complete the pair
  *
- * 3. Transition matching and resolution
- *    - Finds appropriate transition with from: '/home', to: '/about'
- *    - Resolves both out and in with the found transition's settings
- *    - Removes the id from pendingTransitions
- *
- * Key point: OUT and IN wait for each other. When both are ready,
- *           they find the appropriate transition using from/to info
- *           and resolve simultaneously.
- *
- * Edge cases:
- * - No OUT animation on page refresh or initial entry
- * - When only IN is called, checkAndResolve doesn't work without 'from'
- * - Promise isn't resolved, so animation doesn't start
+ * Flow:
+ * 1. First transition arrives → Creates pendingTransition
+ * 2. Second transition arrives → Completes the pair
+ * 3. checkAndResolve → Finds matching transition and resolves both
  */
 
 /**
@@ -55,6 +49,7 @@ import { findMatchingTransition } from "./find-matching-transition";
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
+  internalOptions?: SsgoiInternalOptions,
 ): SsgoiContext {
   // Destructure options with defaults
   const {
@@ -63,6 +58,9 @@ export function createSggoiTransitionContext(
     middleware = (from, to) => ({ from, to }), // Identity function as default
     skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
   } = options;
+
+  // Internal options (set by framework adapters)
+  const { outFirst = true } = internalOptions || {};
 
   let pendingTransition: PendingTransition | null = null;
 
@@ -149,12 +147,29 @@ export function createSggoiTransitionContext(
     }
   }
 
-  const getTransition = async (path: string, type: "out" | "in") => {
+  // Helper to cancel previous pending transition (observer mode only)
+  function cancelPendingTransition() {
+    if (!pendingTransition) return;
+
+    // Resolve any waiting promises with empty config to clean them up
+    if (pendingTransition.inResolve) {
+      pendingTransition.inResolve(() => ({}));
+    }
+    if (pendingTransition.outResolve) {
+      pendingTransition.outResolve(() => ({}));
+    }
+
+    pendingTransition = null;
+  }
+
+  /**
+   * Default mode: OUT must arrive before IN
+   * Original behavior for frameworks with native destroy callbacks
+   */
+  const getTransitionOutFirst = async (path: string, type: "out" | "in") => {
     // Skip animations if iOS swipe-back gesture is detected
     if (swipeDetector.isSwipePending()) {
-      // Reset swipe detection to allow normal navigation after this check
       swipeDetector.resetSwipeDetection();
-
       return () => ({}); // Return empty transition
     }
 
@@ -183,6 +198,57 @@ export function createSggoiTransitionContext(
       });
     }
   };
+
+  /**
+   * Observer mode: OUT and IN can arrive in any order
+   * For frameworks using MutationObserver for unmount detection
+   */
+  const getTransitionAnyOrder = async (path: string, type: "out" | "in") => {
+    // Skip animations if iOS swipe-back gesture is detected
+    if (swipeDetector.isSwipePending()) {
+      swipeDetector.resetSwipeDetection();
+      return () => ({}); // Return empty transition
+    }
+
+    // If this is a new transition (different path), cancel previous one
+    const isNewTransition =
+      pendingTransition &&
+      ((type === "out" &&
+        pendingTransition.from &&
+        pendingTransition.from !== path) ||
+        (type === "in" &&
+          pendingTransition.to &&
+          pendingTransition.to !== path));
+
+    if (isNewTransition) {
+      cancelPendingTransition();
+    }
+
+    if (!pendingTransition) {
+      pendingTransition = {};
+    }
+
+    if (type === "out") {
+      pendingTransition.from = path;
+      return new Promise<GetTransitionConfig>((resolve) => {
+        pendingTransition!.outResolve = resolve;
+        checkAndResolve();
+        // Wait indefinitely for IN
+      });
+    } else {
+      pendingTransition.to = path;
+      return new Promise<GetTransitionConfig>((resolve) => {
+        pendingTransition!.inResolve = resolve;
+        checkAndResolve();
+        // Wait indefinitely for OUT
+      });
+    }
+  };
+
+  // Select the appropriate getTransition based on mode
+  const getTransition = outFirst
+    ? getTransitionOutFirst
+    : getTransitionAnyOrder;
 
   const ssgoiContext = (path: string) => {
     return {

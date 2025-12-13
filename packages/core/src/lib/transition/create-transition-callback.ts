@@ -183,33 +183,16 @@ export function createTransitionCallback(
   // Cached scope reference (only set for 'local' scope)
   let scopeRef: Element | null = null;
 
-  return (element: HTMLElement | null) => {
-    if (!element) return;
-    parentRef = element.parentElement;
-    nextSiblingRef = element.nextElementSibling;
+  // Track if unmount has been triggered (prevents double execution)
+  let unmountTriggered = false;
 
-    // === IN transition ===
-    if (options?.scope === "local") {
-      // Local scope: defer to microtask to find scope (parent ref may not have run yet)
-      queueMicrotask(() => {
-        scopeRef = findScope(element);
-
-        if (scopeRef && !isScopeReady(scopeRef)) {
-          // Scope not ready = simultaneous mount = skip IN animation
-          return;
-        }
-        runEntrance(element);
-      });
-    } else {
-      // Global scope: run immediately
-      runEntrance(element);
-    }
-
-    // === OUT transition ===
+  // Function to handle unmount - returns cleanup function for framework adapters
+  const createUnmountHandler = (element: HTMLElement) => {
     return () => {
-      const cloned = element.isConnected
-        ? (element.cloneNode(true) as HTMLElement)
-        : element;
+      if (unmountTriggered) return;
+      unmountTriggered = true;
+
+      const cloned = element.cloneNode(true) as HTMLElement;
 
       if (scopeRef) {
         // Local scope: defer to microtask and check if scope still exists
@@ -225,5 +208,37 @@ export function createTransitionCallback(
         runExitTransition(cloned);
       }
     };
+  };
+
+  return (element: HTMLElement | null) => {
+    if (!element) return;
+    parentRef = element.parentElement;
+    nextSiblingRef = element.nextElementSibling;
+
+    // Reset unmount flag for new element
+    unmountTriggered = false;
+
+    // === IN transition ===
+    if (options?.scope === "local") {
+      // Local scope: defer to microtask to find scope (parent ref may not have run yet)
+      queueMicrotask(() => {
+        scopeRef = findScope(element);
+
+        if (scopeRef && !isScopeReady(scopeRef)) {
+          // Scope not ready = simultaneous mount = skip IN animation
+          return;
+        }
+
+        runEntrance(element);
+      });
+    } else {
+      // Global scope: run immediately
+      runEntrance(element);
+    }
+
+    // Return cleanup function for framework adapters to use
+    // - Svelte: call in destroy()
+    // - React: register with watchUnmount
+    return createUnmountHandler(element);
   };
 }
