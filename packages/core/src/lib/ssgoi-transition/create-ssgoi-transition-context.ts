@@ -1,4 +1,9 @@
-import type { SsgoiConfig, SsgoiContext, GetTransitionConfig } from "../types";
+import type {
+  SsgoiConfig,
+  SsgoiContext,
+  SsgoiInternalOptions,
+  GetTransitionConfig,
+} from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -14,31 +19,20 @@ import { findMatchingTransition } from "./find-matching-transition";
  *
  * Page transition scenario: /home → /about
  *
- * **Order-independent design**: OUT and IN can arrive in any order.
- * This is necessary because:
- * - MutationObserver-based unmount detection may fire after mount
- * - Different frameworks have different callback ordering
+ * **Default mode (outFirst: true)**: OUT must arrive before IN
+ * - Best for frameworks with native destroy callbacks (Svelte, Vue)
+ * - OUT triggers first, then IN completes the pair
+ * - If IN arrives without OUT, returns empty transition (page refresh)
  *
- * 1. First transition arrives (either OUT or IN)
- *    - Creates pendingTransition with path info
- *    - Starts timeout to wait for the other transition
- *    - Calls checkAndResolve → waits because pair is incomplete
+ * **Observer mode (outFirst: false)**: OUT and IN can arrive in any order
+ * - Best for frameworks using MutationObserver (React)
+ * - Either OUT or IN can arrive first
+ * - Both wait indefinitely for the other to complete the pair
  *
- * 2. Second transition arrives (the other of OUT/IN)
- *    - Clears the timeout
- *    - Adds path info to pendingTransition
- *    - Calls checkAndResolve → both 'from' and 'to' are present!
- *
- * 3. Transition matching and resolution
- *    - Finds appropriate transition with from/to paths
- *    - Resolves both out and in with the found transition's settings
- *    - Clears pendingTransition
- *
- * Edge cases:
- * - Page refresh or initial entry: Only IN arrives
- *   → Timeout expires, resolves with empty transition
- * - Orphan OUT (rare): Only OUT arrives
- *   → Timeout expires, just cleans up without resolving
+ * Flow:
+ * 1. First transition arrives → Creates pendingTransition
+ * 2. Second transition arrives → Completes the pair
+ * 3. checkAndResolve → Finds matching transition and resolves both
  */
 
 /**
@@ -55,6 +49,7 @@ import { findMatchingTransition } from "./find-matching-transition";
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
+  internalOptions?: SsgoiInternalOptions,
 ): SsgoiContext {
   // Destructure options with defaults
   const {
@@ -63,6 +58,9 @@ export function createSggoiTransitionContext(
     middleware = (from, to) => ({ from, to }), // Identity function as default
     skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
   } = options;
+
+  // Internal options (set by framework adapters)
+  const { outFirst = true } = internalOptions || {};
 
   let pendingTransition: PendingTransition | null = null;
 
@@ -149,7 +147,7 @@ export function createSggoiTransitionContext(
     }
   }
 
-  // Helper to cancel previous pending transition
+  // Helper to cancel previous pending transition (observer mode only)
   function cancelPendingTransition() {
     if (!pendingTransition) return;
 
@@ -164,16 +162,55 @@ export function createSggoiTransitionContext(
     pendingTransition = null;
   }
 
-  const getTransition = async (path: string, type: "out" | "in") => {
+  /**
+   * Default mode: OUT must arrive before IN
+   * Original behavior for frameworks with native destroy callbacks
+   */
+  const getTransitionOutFirst = async (path: string, type: "out" | "in") => {
     // Skip animations if iOS swipe-back gesture is detected
     if (swipeDetector.isSwipePending()) {
-      // Reset swipe detection to allow normal navigation after this check
+      swipeDetector.resetSwipeDetection();
+      return () => ({}); // Return empty transition
+    }
+
+    if (type === "in") {
+      // If IN is called but no OUT is pending, no transition occurs (e.g., page refresh)
+      if (!pendingTransition || !pendingTransition.from) {
+        return () => ({}); // Return empty transition
+      }
+    }
+
+    if (!pendingTransition) {
+      pendingTransition = {};
+    }
+
+    if (type === "out") {
+      pendingTransition.from = path;
+      return new Promise<GetTransitionConfig>((resolve) => {
+        pendingTransition!.outResolve = resolve;
+        checkAndResolve();
+      });
+    } else {
+      pendingTransition.to = path;
+      return new Promise<GetTransitionConfig>((resolve) => {
+        pendingTransition!.inResolve = resolve;
+        checkAndResolve();
+      });
+    }
+  };
+
+  /**
+   * Observer mode: OUT and IN can arrive in any order
+   * For frameworks using MutationObserver for unmount detection
+   */
+  const getTransitionAnyOrder = async (path: string, type: "out" | "in") => {
+    // Skip animations if iOS swipe-back gesture is detected
+    if (swipeDetector.isSwipePending()) {
       swipeDetector.resetSwipeDetection();
       return () => ({}); // Return empty transition
     }
 
     // If this is a new transition (different path), cancel previous one
-    // Same path means it's the pair (OUT/IN) we're waiting for
     const isNewTransition =
       pendingTransition &&
       ((type === "out" &&
@@ -196,18 +233,22 @@ export function createSggoiTransitionContext(
       return new Promise<GetTransitionConfig>((resolve) => {
         pendingTransition!.outResolve = resolve;
         checkAndResolve();
-        // No timeout - wait indefinitely for IN
+        // Wait indefinitely for IN
       });
     } else {
       pendingTransition.to = path;
       return new Promise<GetTransitionConfig>((resolve) => {
         pendingTransition!.inResolve = resolve;
         checkAndResolve();
-        // No timeout - wait indefinitely for OUT
-        // Page is visible even without resolve (no prepare() called yet)
+        // Wait indefinitely for OUT
       });
     }
   };
+
+  // Select the appropriate getTransition based on mode
+  const getTransition = outFirst
+    ? getTransitionOutFirst
+    : getTransitionAnyOrder;
 
   const ssgoiContext = (path: string) => {
     return {
