@@ -212,8 +212,10 @@ export function createTransitionCallback(
 
   return (element: HTMLElement | null) => {
     if (!element) return;
-    parentRef = element.parentElement;
-    nextSiblingRef = element.nextElementSibling;
+    requestAnimationFrame(() => {
+      parentRef = element.parentElement;
+      nextSiblingRef = element.nextElementSibling;
+    });
 
     // Reset unmount flag for new element
     unmountTriggered = false;

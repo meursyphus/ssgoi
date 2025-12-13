@@ -12,7 +12,7 @@ const ssgoiConfig: SsgoiConfig = {
     {
       from: "/",
       to: "/item/*",
-      transition: hero({ spring: { stiffness: 5, damping: 1 } }),
+      transition: hero(),
       symmetric: true,
     },
   ],
