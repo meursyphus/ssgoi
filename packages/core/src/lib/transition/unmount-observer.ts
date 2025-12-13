@@ -94,22 +94,18 @@ function initObserver(): void {
 /**
  * Register an element to watch for unmount
  *
+ * When the element is removed from DOM, the callback is executed
+ * and the element is automatically unregistered.
+ *
  * @param element - The element to watch
  * @param callback - Callback to execute when element is removed from DOM
- * @returns Unregister function to stop watching
  */
 export function watchUnmount(
   element: HTMLElement,
   callback: UnmountCallback,
-): () => void {
+): void {
   initObserver();
-
   watchedElements.set(element, callback);
-
-  // Return unregister function
-  return () => {
-    watchedElements.delete(element);
-  };
 }
 
 /**

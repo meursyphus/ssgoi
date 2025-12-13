@@ -9,7 +9,6 @@ import {
   type InternalTransitionConfigs,
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
-import { watchUnmount } from "./unmount-observer";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
@@ -186,32 +185,29 @@ export function createTransitionCallback(
 
   // Track if unmount has been triggered (prevents double execution)
   let unmountTriggered = false;
-  let unwatch: (() => void) | null = null;
 
-  // Function to handle unmount (called by observer)
-  const handleUnmount = (element: HTMLElement) => {
-    if (unmountTriggered) return;
-    unmountTriggered = true;
+  // Function to handle unmount - returns cleanup function for framework adapters
+  const createUnmountHandler = (element: HTMLElement) => {
+    return () => {
+      if (unmountTriggered) return;
+      unmountTriggered = true;
 
-    // Clean up watcher to free memory
-    unwatch?.();
-    unwatch = null;
+      const cloned = element.cloneNode(true) as HTMLElement;
 
-    const cloned = element.cloneNode(true) as HTMLElement;
-
-    if (scopeRef) {
-      // Local scope: defer to microtask and check if scope still exists
-      queueMicrotask(() => {
-        if (!document.contains(scopeRef!)) {
-          // Scope removed = simultaneous unmount = skip OUT animation
-          return;
-        }
+      if (scopeRef) {
+        // Local scope: defer to microtask and check if scope still exists
+        queueMicrotask(() => {
+          if (!document.contains(scopeRef!)) {
+            // Scope removed = simultaneous unmount = skip OUT animation
+            return;
+          }
+          runExitTransition(cloned);
+        });
+      } else {
+        // Global scope: run immediately
         runExitTransition(cloned);
-      });
-    } else {
-      // Global scope: run immediately
-      runExitTransition(cloned);
-    }
+      }
+    };
   };
 
   return (element: HTMLElement | null) => {
@@ -240,11 +236,9 @@ export function createTransitionCallback(
       runEntrance(element);
     }
 
-    // === Register MutationObserver-based unmount detection ===
-    // This enables automatic OUT transition for all frameworks
-    // No need for explicit cleanup - observer handles everything
-    unwatch = watchUnmount(element, () => {
-      handleUnmount(element);
-    });
+    // Return cleanup function for framework adapters to use
+    // - Svelte: call in destroy()
+    // - React: register with watchUnmount
+    return createUnmountHandler(element);
   };
 }
