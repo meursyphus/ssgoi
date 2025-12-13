@@ -1,4 +1,3 @@
-export { transition } from "./transition";
 export { Transition } from "./transition-component";
 export * from "./types";
 export { Ssgoi } from "./ssgoi";
