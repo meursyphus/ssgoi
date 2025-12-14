@@ -381,4 +381,72 @@ export const home: HomeMessages = {
     },
     bottomNote: "Nielsen Norman GroupとGoogle Researchの研究に基づく",
   },
+  // New Home Page Sections
+  newHome: {
+    hero: {
+      badge: "View Transitions API不要",
+      title: {
+        line1: "ウェブで感じる",
+        line2: "ネイティブレベルのトランジション",
+      },
+      description:
+        "ページ間のトランジションをスムーズに。すべてのブラウザで動作し、すべてのフレームワークをサポート。複雑な設定なしで数行のコードで開始できます。",
+      getStarted: "はじめる",
+      viewDemo: "デモを見る",
+    },
+    features: {
+      sectionLabel: "Features",
+      title: "なぜSSGOIか",
+      zeroConfig: {
+        title: "ゼロ設定",
+        description: "複雑な設定なしですぐに開始。デフォルト値だけで十分です。",
+      },
+      allBrowsers: {
+        title: "すべてのブラウザ",
+        description:
+          "ChromeのView Transitions APIに依存せず、Safari、Firefoxでも動作します。",
+      },
+      ssrSupport: {
+        title: "SSRサポート",
+        description:
+          "Next.js、Nuxt、SvelteKitなどすべてのSSRフレームワークと完全互換。",
+      },
+      smoothPerformance: {
+        title: "低スペックでもスムーズ",
+        description:
+          "Spring物理エンジン + Web Animations APIで低スペックモバイルでも60fpsアニメーションを保証。",
+      },
+    },
+    code: {
+      sectionLabel: "Code",
+      title: "シンプルなスタート",
+      description: "数行のコードでページトランジションを実装。",
+      tabSetup: "基本設定",
+      tabRouteConfig: "ルート設定",
+    },
+    frameworks: {
+      sectionLabel: "Frameworks",
+      title: "すべてのフレームワークをサポート",
+      description:
+        "同じAPI、同じ体験。フレームワークに関係なく一貫したトランジション効果。",
+      soon: "soon",
+    },
+    elementTransition: {
+      sectionLabel: "Element Transitions",
+      title: "個別要素トランジション",
+      description: "inとoutで登場/退場アニメーションを定義します",
+      toggleShow: "Show",
+      toggleHide: "Hide",
+    },
+    cta: {
+      title: "今すぐ始める",
+      description:
+        "数分でネイティブレベルのページトランジションを実装できます。",
+      viewDocs: "ドキュメントを見る",
+    },
+    footer: {
+      license: "MIT License",
+      builtWith: "Built with care",
+    },
+  },
 };

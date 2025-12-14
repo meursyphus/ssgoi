@@ -86,6 +86,19 @@ const galleryItems = [
 function GalleryListPage() {
   return (
     <DemoPage path="/gallery">
+      {/* Preload detail images (hidden) - using large size for fullscreen */}
+      <div className="hidden">
+        {galleryItems.map((item) => (
+          <Image
+            key={`preload-${item.id}`}
+            src={item.image}
+            alt=""
+            width={1920}
+            height={1080}
+            priority
+          />
+        ))}
+      </div>
       <div className="min-h-screen bg-[#121212] p-6">
         {/* Header */}
         <div className="mb-8 text-center">

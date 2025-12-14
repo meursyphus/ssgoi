@@ -1,29 +1,31 @@
-import { Zap, Globe, Layers, Sparkles } from "lucide-react";
+"use client";
+
+import { Zap, Globe, Layers, Smartphone } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
 
 export function FeaturesSection() {
+  const t = useTranslations("home");
+
   const features = [
     {
       icon: Zap,
-      title: "제로 설정",
-      description: "복잡한 설정 없이 바로 시작. 기본값만으로도 충분합니다.",
+      titleKey: "newHome.features.zeroConfig.title" as const,
+      descriptionKey: "newHome.features.zeroConfig.description" as const,
     },
     {
       icon: Globe,
-      title: "모든 브라우저",
-      description:
-        "Chrome의 View Transitions API에 의존하지 않아 Safari, Firefox에서도 동작합니다.",
+      titleKey: "newHome.features.allBrowsers.title" as const,
+      descriptionKey: "newHome.features.allBrowsers.description" as const,
     },
     {
       icon: Layers,
-      title: "SSR 지원",
-      description:
-        "Next.js, Nuxt, SvelteKit 등 모든 SSR 프레임워크와 완벽 호환됩니다.",
+      titleKey: "newHome.features.ssrSupport.title" as const,
+      descriptionKey: "newHome.features.ssrSupport.description" as const,
     },
     {
-      icon: Sparkles,
-      title: "물리 기반 애니메이션",
-      description:
-        "스프링 물리학을 사용해 자연스럽고 반응적인 전환을 제공합니다.",
+      icon: Smartphone,
+      titleKey: "newHome.features.smoothPerformance.title" as const,
+      descriptionKey: "newHome.features.smoothPerformance.description" as const,
     },
   ];
 
@@ -32,9 +34,11 @@ export function FeaturesSection() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
-            Features
+            {t("newHome.features.sectionLabel")}
           </p>
-          <h2 className="text-xl font-light tracking-tight">왜 SSGOI인가</h2>
+          <h2 className="text-xl font-light tracking-tight">
+            {t("newHome.features.title")}
+          </h2>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-x-12 gap-y-10">
@@ -45,9 +49,11 @@ export function FeaturesSection() {
                   <feature.icon className="w-3.5 h-3.5 text-neutral-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium mb-1">{feature.title}</h3>
+                  <h3 className="text-sm font-medium mb-1">
+                    {t(feature.titleKey)}
+                  </h3>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    {feature.description}
+                    {t(feature.descriptionKey)}
                   </p>
                 </div>
               </div>

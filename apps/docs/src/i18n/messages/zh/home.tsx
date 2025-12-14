@@ -367,4 +367,70 @@ export const home: HomeMessages = {
     },
     bottomNote: "基于Nielsen Norman Group和Google Research的研究",
   },
+  // New Home Page Sections
+  newHome: {
+    hero: {
+      badge: "无需View Transitions API",
+      title: {
+        line1: "在网页上感受",
+        line2: "原生级别的过渡",
+      },
+      description:
+        "页面间过渡流畅。在所有浏览器上运行，支持所有框架。无需复杂设置，只需几行代码即可开始。",
+      getStarted: "开始使用",
+      viewDemo: "查看演示",
+    },
+    features: {
+      sectionLabel: "Features",
+      title: "为什么选择SSGOI",
+      zeroConfig: {
+        title: "零配置",
+        description: "无需复杂设置即可立即开始。默认值就足够了。",
+      },
+      allBrowsers: {
+        title: "所有浏览器",
+        description:
+          "不依赖Chrome的View Transitions API，Safari和Firefox也能运行。",
+      },
+      ssrSupport: {
+        title: "SSR支持",
+        description: "与Next.js、Nuxt、SvelteKit等所有SSR框架完美兼容。",
+      },
+      smoothPerformance: {
+        title: "低端设备也流畅",
+        description:
+          "Spring物理引擎 + Web Animations API确保在低端移动设备上也能保持60fps动画。",
+      },
+    },
+    code: {
+      sectionLabel: "Code",
+      title: "简单开始",
+      description: "只需几行代码即可实现页面过渡。",
+      tabSetup: "基本设置",
+      tabRouteConfig: "路由配置",
+    },
+    frameworks: {
+      sectionLabel: "Frameworks",
+      title: "支持所有框架",
+      description:
+        "相同的API，相同的体验。无论使用哪种框架都能获得一致的过渡效果。",
+      soon: "soon",
+    },
+    elementTransition: {
+      sectionLabel: "Element Transitions",
+      title: "单独元素过渡",
+      description: "用in和out定义进入/退出动画",
+      toggleShow: "Show",
+      toggleHide: "Hide",
+    },
+    cta: {
+      title: "立即开始",
+      description: "几分钟内即可实现原生级别的页面过渡。",
+      viewDocs: "查看文档",
+    },
+    footer: {
+      license: "MIT License",
+      builtWith: "Built with care",
+    },
+  },
 };

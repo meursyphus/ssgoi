@@ -79,6 +79,19 @@ const instagramItems = [
 function InstagramGridPage() {
   return (
     <DemoPage path="/instagram/gallery">
+      {/* Preload detail images (hidden) */}
+      <div className="hidden">
+        {instagramItems.map((item) => (
+          <Image
+            key={`preload-${item.id}`}
+            src={item.image}
+            alt=""
+            width={800}
+            height={800}
+            priority
+          />
+        ))}
+      </div>
       <div className="min-h-screen bg-[#121212] p-1">
         {/* Header */}
         <div className="mb-3 px-3 pt-3 text-center">

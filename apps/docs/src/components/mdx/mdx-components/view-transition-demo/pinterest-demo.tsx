@@ -99,6 +99,19 @@ const pinterestItems = [
 function PinterestGridPage() {
   return (
     <DemoPage path="/pinterest/gallery">
+      {/* Preload detail images (hidden) */}
+      <div className="hidden">
+        {pinterestItems.map((item) => (
+          <Image
+            key={`preload-${item.id}`}
+            src={item.image}
+            alt=""
+            width={800}
+            height={1200}
+            priority
+          />
+        ))}
+      </div>
       <div className="min-h-screen p-4">
         {/* Header */}
         <div className="mb-6 text-center">
