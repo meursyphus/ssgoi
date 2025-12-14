@@ -12,7 +12,7 @@ nav-title: "플라이"
 
 ## 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -61,10 +61,27 @@ nav-title: "플라이"
     </template>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { fly } from '@ssgoi/solid/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...fly()
+        })}>
+          Fly me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
-    import { TransitionDirective } from '@ssgoi/angular';
+    import { TransitionDirective} from '@ssgoi/angular';
     import { fly } from '@ssgoi/angular/transitions';
 
     @Component({

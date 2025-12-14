@@ -75,7 +75,7 @@ nav-title: "ジェミン"
 
 ## 基本的な使用方法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -109,6 +109,44 @@ nav-title: "ジェミン"
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { jaemin } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: jaemin()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { jaemin } from '@ssgoi/solid/view-transitions';
+
+    export default function App() {
+      const config = {
+        defaultTransition: jaemin()
+      };
+
+      return (
+        <Ssgoi config={config}>
+          {/* アプリのコンテンツ */}
+        </Ssgoi>
+      );
+    }
     ```
 
   </TabPanel>

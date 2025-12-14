@@ -72,7 +72,7 @@ nav-title: "钻取"
 
 ### 1. 过渡配置
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -129,6 +129,66 @@ nav-title: "钻取"
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { drill } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { drill } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/categories',
+          to: '/categories/*',
+          transition: drill({ direction: 'enter' }),
+          symmetric: false
+        },
+        {
+          from: '/categories/*',
+          to: '/categories',
+          transition: drill({ direction: 'exit' })
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">

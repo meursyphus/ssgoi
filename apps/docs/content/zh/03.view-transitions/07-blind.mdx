@@ -54,7 +54,7 @@ nav-title: "百叶窗"
 
 ## 基本用法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -88,6 +88,44 @@ nav-title: "百叶窗"
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { blind } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { blind } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
     ```
 
   </TabPanel>

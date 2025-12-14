@@ -73,7 +73,7 @@ Contraction process (Detail → Gallery):
 
 ### 1. Configure Transition
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -122,6 +122,42 @@ Contraction process (Detail → Gallery):
     </Ssgoi>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { instagram } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { instagram } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component } from "@angular/core";
@@ -164,7 +200,7 @@ Contraction process (Detail → Gallery):
 
 Use different data attributes for gallery and detail pages:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Gallery page (3-column grid)
@@ -242,6 +278,42 @@ Use different data attributes for gallery and detail pages:
     </div>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { instagram } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { instagram } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component, Input } from "@angular/core";
@@ -314,7 +386,7 @@ Use different data attributes for gallery and detail pages:
 
 Uniform 3-column grid:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // 3-column grid
@@ -448,6 +520,42 @@ Uniform 3-column grid:
     </div>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { instagram } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { instagram } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component, Input } from "@angular/core";
@@ -554,7 +662,7 @@ Uniform 3-column grid:
 
 From work grid to fullscreen:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // Portfolio grid
@@ -682,6 +790,42 @@ From work grid to fullscreen:
     </div>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { instagram } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { instagram } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: instagram()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component, Input } from "@angular/core";

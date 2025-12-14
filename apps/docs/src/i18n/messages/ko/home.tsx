@@ -32,7 +32,7 @@ export const home: HomeMessages = {
     svelte: "Svelte",
     vue: "Vue",
     angular: "Angular",
-    solidjs: "SolidJS (지원 예정)",
+    solidjs: "SolidJS",
     qwik: "Qwik (지원 예정)",
   },
   floatingBadges: {
@@ -285,7 +285,7 @@ export const home: HomeMessages = {
       },
       frameworkAgnostic: {
         title: "프레임워크 독립적",
-        description: "React, Svelte, Vue와 작동. Solid와 Qwik 지원 예정",
+        description: "React, Svelte, Vue, Solid와 작동. Qwik 지원 예정",
       },
       sharedElements: {
         title: "공유 요소 전환",

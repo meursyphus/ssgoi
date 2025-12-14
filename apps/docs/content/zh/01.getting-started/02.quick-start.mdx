@@ -6,7 +6,7 @@ nav-title: "快速入门"
 
 ## 安装包
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```bash
     npm install @ssgoi/react
@@ -28,6 +28,13 @@ nav-title: "快速入门"
     # or pnpm add @ssgoi/vue
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```bash
+    npm install @ssgoi/solid
+    # or yarn add @ssgoi/solid
+    # or pnpm add @ssgoi/solid
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```bash
     npm install @ssgoi/angular
@@ -39,7 +46,7 @@ nav-title: "快速入门"
 
 ## 基本设置（2分钟）
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. 根布局设置 (Next.js App Router)
 
@@ -214,6 +221,68 @@ nav-title: "快速入门"
     ```
 
   </TabPanel>
+  <TabPanel value="solid">
+    ### 1. 根布局设置 (Solid Start)
+
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { fade } from "@ssgoi/solid/view-transitions";
+
+    const config = {
+      defaultTransition: fade()
+    };
+
+    export default function Root() {
+      return (
+        <Html>
+          <Body>
+            <Ssgoi config={config}>
+              {/* ⚠️ 重要：必须设置position: relative！ */}
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                <Routes />
+              </div>
+            </Ssgoi>
+          </Body>
+        </Html>
+      );
+    }
+    ```
+
+    > **为什么需要position: relative？**
+    > 当页面动画退出时，会应用`position: absolute`。如果父元素没有`position: relative`，页面可能会移动到错误的位置。
+
+    ### 2. 页面包装
+
+    ```tsx
+    // src/routes/index.tsx
+    import { SsgoiTransition } from "@ssgoi/solid";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>首页</h1>
+            {/* 页面内容 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // src/routes/about.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>关于页面</h1>
+            {/* 页面内容 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+
+  </TabPanel>
   <TabPanel value="angular">
     ### 1. 根组件设置 (Angular 20+)
 
@@ -297,7 +366,7 @@ nav-title: "快速入门"
 
 ## 应用各种过渡效果
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -383,6 +452,39 @@ nav-title: "快速入门"
       ],
     };
     </script>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { scroll, fade, drill } from "@ssgoi/solid/view-transitions";
+
+    const config = {
+      transitions: [
+        // 首页 → 关于：向上滚动
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // 关于 → 首页：向下滚动
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // 列表 → 详情：钻入
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+      ],
+    };
+
+    export default function Root() {
+      return (
+        <Html>
+          <Body>
+            <Ssgoi config={config}>
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                <Routes />
+              </div>
+            </Ssgoi>
+          </Body>
+        </Html>
+      );
+    }
     ```
 
   </TabPanel>

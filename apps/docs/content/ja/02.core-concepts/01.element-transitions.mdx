@@ -8,7 +8,7 @@ nav-title: "要素アニメーション"
 
 様々なトランジション効果の使用方法：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -201,6 +201,68 @@ nav-title: "要素アニメーション"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/solid/transitions';
+
+    // Fadeトランジション
+    <div ref={transition({
+      key: "fade-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fade効果
+    </div>
+
+    // Scaleトランジション
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Scale効果
+    </div>
+
+    // Blurトランジション
+    <div ref={transition({
+      key: "blur-element",
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Blur効果
+    </div>
+
+    // Slideトランジション（方向指定）
+    <div ref={transition({
+      key: "slide-element",
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Slide効果
+    </div>
+
+    // Flyトランジション（カスタム位置）
+    <div ref={transition({
+      key: "fly-element",
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fly効果
+    </div>
+
+    // Rotateトランジション
+    <div ref={transition({
+      key: "rotate-element",
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Rotate効果
+    </div>
+
+    // Bounceトランジション
+    <div ref={transition({
+      key: "bounce-element",
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Bounce効果
+    </div>
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
@@ -351,7 +413,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## フレームワーク別の使用方法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -426,6 +488,32 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     <script setup>
     import { transition } from '@ssgoi/vue';
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'unique-key',
+          in: (element) => ({
+            tick: (progress) => {
+              element.style.opacity = progress;
+              element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+            }
+          }),
+          out: (element) => ({
+            tick: (progress) => {
+              element.style.opacity = 1 - progress;
+            }
+          })
+        })}>
+          コンテンツ
+        </div>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -543,7 +631,7 @@ interface TransitionOptions {
 
 ### 使用例
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }]}>
   <TabPanel value="react">
     ```tsx
     import { TransitionScope, transition } from '@ssgoi/react';
@@ -692,6 +780,60 @@ interface TransitionOptions {
 
     const show = ref(true);
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { createSignal } from 'solid-js';
+    import { TransitionScope, transition } from '@ssgoi/solid';
+
+    function MyComponent() {
+      const [show, setShow] = createSignal(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show())}>Toggle</button>
+
+          {show() && (
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: Scopeと同時にマウント/アンマウント時はアニメーションをスキップ */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope（Scopeと一緒に表示/非表示）
+                </div>
+
+                {/* global: 常にアニメーションを実行 */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global'はデフォルト
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope（常にアニメーション）
+                </div>
+              </div>
+            </TransitionScope>
+          )}
+        </>
+      );
+    }
     ```
   </TabPanel>
 </Tabs>

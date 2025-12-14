@@ -85,12 +85,12 @@ export async function HeroSection({ lang }: HeroSectionProps) {
                   npm install @ssgoi/angular
                 </code>
               </div>
-              {/* SolidJS - 추가 예정 */}
-              <div className="rounded-lg bg-card/50 p-4 opacity-50">
+              {/* SolidJS */}
+              <div className="rounded-lg bg-card/50 p-4">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
                   {t("quickInstall.solidjs")}
                 </p>
-                <code className="font-mono text-sm text-white/50">
+                <code className="font-mono text-sm text-white">
                   npm install @ssgoi/solid
                 </code>
               </div>

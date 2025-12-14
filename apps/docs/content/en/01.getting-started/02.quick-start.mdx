@@ -6,40 +6,47 @@ nav-title: "Quick Start"
 
 ## Package Installation
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
-    ```bash 
-    npm install @ssgoi/react 
-    # or yarn add @ssgoi/react 
-    # or pnpm add @ssgoi/react 
+    ```bash
+    npm install @ssgoi/react
+    # or yarn add @ssgoi/react
+    # or pnpm add @ssgoi/react
     ```
   </TabPanel>
   <TabPanel value="svelte">
-    ```bash 
-    npm install @ssgoi/svelte 
-    # or yarn add @ssgoi/svelte 
-    # or pnpm add @ssgoi/svelte 
+    ```bash
+    npm install @ssgoi/svelte
+    # or yarn add @ssgoi/svelte
+    # or pnpm add @ssgoi/svelte
     ```
   </TabPanel>
   <TabPanel value="vue">
-    ```bash 
-    npm install @ssgoi/vue 
-    # or yarn add @ssgoi/vue 
-    # or pnpm add @ssgoi/vue 
+    ```bash
+    npm install @ssgoi/vue
+    # or yarn add @ssgoi/vue
+    # or pnpm add @ssgoi/vue
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```bash
+    npm install @ssgoi/solid
+    # or yarn add @ssgoi/solid
+    # or pnpm add @ssgoi/solid
     ```
   </TabPanel>
   <TabPanel value="angular">
-    ```bash 
-    npm install @ssgoi/angular 
-    # or yarn add @ssgoi/angular 
-    # or pnpm add @ssgoi/angular 
+    ```bash
+    npm install @ssgoi/angular
+    # or yarn add @ssgoi/angular
+    # or pnpm add @ssgoi/angular
     ```
   </TabPanel>
 </Tabs>
 
 ## Basic Setup (2 minutes)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. Root Layout Setup (Next.js App Router)
 
@@ -216,6 +223,64 @@ nav-title: "Quick Start"
     ```
 
   </TabPanel>
+  <TabPanel value="solid">
+    ### 1. Root Layout Setup (Solid Start)
+
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { fade } from "@ssgoi/solid/view-transitions";
+
+    export default function Root() {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={{ defaultTransition: fade() }}>
+              {/* ⚠️ Important: position: relative is required! */}
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                {/* App content */}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+    > **Why is position: relative required?**
+    > When a page animates out, `position: absolute` is applied. Without `position: relative` on the parent element, pages may move to incorrect positions.
+
+    ### 2. Page Wrapping
+
+    ```tsx
+    // src/routes/index.tsx
+    import { SsgoiTransition } from "@ssgoi/solid";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>Home Page</h1>
+            {/* Page content */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // src/routes/about.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>About Page</h1>
+            {/* Page content */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+
+  </TabPanel>
   <TabPanel value="angular">
     ### 1. Root Component Setup (Angular 20+)
 
@@ -299,7 +364,7 @@ nav-title: "Quick Start"
 
 ## Applying Various Transitions
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -385,6 +450,38 @@ nav-title: "Quick Start"
       ],
     };
     </script>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    // src/root.tsx
+    import { scroll, fade, drill } from "@ssgoi/solid/view-transitions";
+
+    const config = {
+      transitions: [
+        // Home → About: scroll up
+        { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+        // About → Home: scroll down
+        { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+        // List → Detail: drill (enter)
+        { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+      ],
+    };
+
+    export default function Root() {
+      return (
+        <html>
+          <body>
+            <Ssgoi config={config}>
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                {/* App content */}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
     ```
 
   </TabPanel>

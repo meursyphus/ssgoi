@@ -8,7 +8,7 @@ nav-title: "요소 애니메이션"
 
 다양한 transition 효과를 사용하는 방법입니다:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -202,6 +202,68 @@ nav-title: "요소 애니메이션"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/solid/transitions';
+
+    // Fade 트랜지션
+    <div ref={transition({
+      key: "fade-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fade 효과
+    </div>
+
+    // Scale 트랜지션
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Scale 효과
+    </div>
+
+    // Blur 트랜지션
+    <div ref={transition({
+      key: "blur-element",
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Blur 효과
+    </div>
+
+    // Slide 트랜지션 (방향 지정)
+    <div ref={transition({
+      key: "slide-element",
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Slide 효과
+    </div>
+
+    // Fly 트랜지션 (커스텀 위치)
+    <div ref={transition({
+      key: "fly-element",
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fly 효과
+    </div>
+
+    // Rotate 트랜지션
+    <div ref={transition({
+      key: "rotate-element",
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Rotate 효과
+    </div>
+
+    // Bounce 트랜지션
+    <div ref={transition({
+      key: "bounce-element",
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Bounce 효과
+    </div>
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
@@ -352,7 +414,7 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 
 ## 프레임워크별 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -427,6 +489,32 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
     <script setup>
     import { transition } from '@ssgoi/vue';
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'unique-key',
+          in: (element) => ({
+            tick: (progress) => {
+              element.style.opacity = `${progress}`;
+              element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+            }
+          }),
+          out: (element) => ({
+            tick: (progress) => {
+              element.style.opacity = `${1 - progress}`;
+            }
+          })
+        })}>
+          Content
+        </div>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">

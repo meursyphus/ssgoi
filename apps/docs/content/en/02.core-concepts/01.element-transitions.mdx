@@ -9,7 +9,7 @@ nav-title: "Element Animations"
 
 How to use various transition effects:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -202,6 +202,68 @@ How to use various transition effects:
     </script>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/solid/transitions';
+
+    // Fade transition
+    <div ref={transition({
+      key: "fade-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fade effect
+    </div>
+
+    // Scale transition
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Scale effect
+    </div>
+
+    // Blur transition
+    <div ref={transition({
+      key: "blur-element",
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Blur effect
+    </div>
+
+    // Slide transition (with direction)
+    <div ref={transition({
+      key: "slide-element",
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Slide effect
+    </div>
+
+    // Fly transition (custom position)
+    <div ref={transition({
+      key: "fly-element",
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fly effect
+    </div>
+
+    // Rotate transition
+    <div ref={transition({
+      key: "rotate-element",
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Rotate effect
+    </div>
+
+    // Bounce transition
+    <div ref={transition({
+      key: "bounce-element",
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Bounce effect
+    </div>
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
@@ -352,7 +414,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## Framework-specific Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -427,6 +489,28 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     <script setup>
     import { transition } from '@ssgoi/vue';
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+
+    <div ref={transition({
+      key: 'unique-key',
+      in: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = progress;
+          element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+        }
+      }),
+      out: (element) => ({
+        tick: (progress) => {
+          element.style.opacity = 1 - progress;
+        }
+      })
+    })}>
+      Content
+    </div>
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -544,7 +628,7 @@ interface TransitionOptions {
 
 ### Usage Example
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }]}>
   <TabPanel value="react">
     ```tsx
     import { TransitionScope, transition } from '@ssgoi/react';
@@ -693,6 +777,60 @@ interface TransitionOptions {
 
     const show = ref(true);
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { TransitionScope, transition } from '@ssgoi/solid';
+    import { createSignal } from 'solid-js';
+
+    function MyComponent() {
+      const [show, setShow] = createSignal(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show())}>Toggle</button>
+
+          {show() && (
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: Skip animation when mounting/unmounting with scope */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope (appears/disappears with Scope)
+                </div>
+
+                {/* global: Always run animation */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global' is default
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope (always animates)
+                </div>
+              </div>
+            </TransitionScope>
+          )}
+        </>
+      );
+    }
     ```
   </TabPanel>
 </Tabs>

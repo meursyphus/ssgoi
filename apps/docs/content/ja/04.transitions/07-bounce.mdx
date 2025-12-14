@@ -12,7 +12,7 @@ nav-title: "バウンス"
 
 ## 使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -61,10 +61,27 @@ nav-title: "バウンス"
     </template>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { bounce } from '@ssgoi/solid/transitions';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'my-element',
+          ...bounce()
+        })}>
+          Bounce me!
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
-    import { TransitionDirective } from '@ssgoi/angular';
+    import { TransitionDirective} from '@ssgoi/angular';
     import { bounce } from '@ssgoi/angular/transitions';
 
     @Component({

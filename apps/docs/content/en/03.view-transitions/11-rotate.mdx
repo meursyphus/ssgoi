@@ -84,7 +84,7 @@ The rotate transition shows its most beautiful effect when used with **images th
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -118,6 +118,44 @@ The rotate transition shows its most beautiful effect when used with **images th
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { rotate } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { rotate } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
     ```
 
   </TabPanel>
@@ -158,7 +196,7 @@ The rotate transition shows its most beautiful effect when used with **images th
 
 Transitions between fullscreen project images:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -221,6 +259,42 @@ Transitions between fullscreen project images:
     </div>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { rotate } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { rotate } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component } from "@angular/core";
@@ -258,7 +332,7 @@ Transitions between fullscreen project images:
 
 From intro to main content:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -297,6 +371,42 @@ From intro to main content:
     </script>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { rotate } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { rotate } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component } from "@angular/core";
@@ -338,7 +448,7 @@ From intro to main content:
 
 Transitions between images in fullscreen gallery:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -393,6 +503,42 @@ Transitions between images in fullscreen gallery:
     </div>
     ```
   </TabPanel>
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { rotate } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { rotate } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
   <TabPanel value="angular">
     ```typescript
     import { Component, Input } from "@angular/core";

@@ -71,7 +71,7 @@ Hero 元素的旅程：
 
 ### 1. 过渡设置
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -118,6 +118,56 @@ Hero 元素的旅程：
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { hero } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: hero(),
+          symmetric: true
+        }
+      ]
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { hero } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/gallery',
+          to: '/gallery/*',
+          transition: hero(),
+          symmetric: true
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">

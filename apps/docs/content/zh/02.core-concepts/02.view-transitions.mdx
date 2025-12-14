@@ -22,7 +22,7 @@ interface SsgoiConfig {
 
 ### 基本配置
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from "@ssgoi/react";
@@ -83,6 +83,76 @@ interface SsgoiConfig {
         <slot />
       </div>
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <!-- app.vue -->
+    <template>
+      <Ssgoi :config="config">
+        <div style="position: relative; min-height: 100vh">
+          <NuxtPage />
+        </div>
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from "@ssgoi/vue";
+    import { fade, scroll, drill } from "@ssgoi/vue/view-transitions";
+
+    const config = {
+      defaultTransition: fade(), // 默认过渡
+      transitions: [
+        {
+          from: "/",
+          to: "/about",
+          transition: scroll({ direction: "up" }),
+        },
+        {
+          from: "/about",
+          to: "/",
+          transition: scroll({ direction: "down" }),
+        },
+      ],
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { fade, scroll, drill } from "@ssgoi/solid/view-transitions";
+
+    const config = {
+      defaultTransition: fade(), // 默认过渡
+      transitions: [
+        {
+          from: "/",
+          to: "/about",
+          transition: scroll({ direction: "up" }),
+        },
+        {
+          from: "/about",
+          to: "/",
+          transition: scroll({ direction: "down" }),
+        },
+      ],
+    };
+
+    export default function Root() {
+      return (
+        <Html>
+          <Body>
+            <Ssgoi config={config}>
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                <Routes />
+              </div>
+            </Ssgoi>
+          </Body>
+        </Html>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -222,7 +292,7 @@ const scrollAwareTransition = {
 
 包装每个页面的包装器组件（在 Angular 中为指令）：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { SsgoiTransition } from "@ssgoi/react";
@@ -245,6 +315,32 @@ const scrollAwareTransition = {
     <SsgoiTransition id="/page-path">
       <PageContent />
     </SsgoiTransition>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <SsgoiTransition id="/page-path">
+        <PageContent />
+      </SsgoiTransition>
+    </template>
+
+    <script setup>
+    import { SsgoiTransition } from "@ssgoi/vue";
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { SsgoiTransition } from "@ssgoi/solid";
+
+    export default function Page() {
+      return (
+        <SsgoiTransition id="/page-path">
+          <PageContent />
+        </SsgoiTransition>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -283,7 +379,7 @@ const scrollAwareTransition = {
 
 ### 分层导航
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```javascript
     const config = {
@@ -328,6 +424,54 @@ const scrollAwareTransition = {
         ],
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { drill, scroll } from "@ssgoi/vue/view-transitions";
+
+    const config = {
+      transitions: [
+        // 列表 → 详情
+        {
+          from: "/products",
+          to: "/products/*",
+          transition: drill({ direction: 'enter' }),
+          symmetric: true, // 也自动处理详情 → 列表
+        },
+
+        // 标签导航
+        { from: "/tab1", to: "/tab2", transition: scroll({ direction: "up" }) },
+        { from: "/tab2", to: "/tab3", transition: scroll({ direction: "up" }) },
+        { from: "/tab3", to: "/tab2", transition: scroll({ direction: "down" }) },
+        { from: "/tab2", to: "/tab1", transition: scroll({ direction: "down" }) },
+      ],
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { drill, scroll } from "@ssgoi/solid/view-transitions";
+
+    const config = {
+      transitions: [
+        // 列表 → 详情
+        {
+          from: "/products",
+          to: "/products/*",
+          transition: drill({ direction: 'enter' }),
+          symmetric: true, // 也自动处理详情 → 列表
+        },
+
+        // 标签导航
+        { from: "/tab1", to: "/tab2", transition: scroll({ direction: "up" }) },
+        { from: "/tab2", to: "/tab3", transition: scroll({ direction: "up" }) },
+        { from: "/tab3", to: "/tab2", transition: scroll({ direction: "down" }) },
+        { from: "/tab2", to: "/tab1", transition: scroll({ direction: "down" }) },
+      ],
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">

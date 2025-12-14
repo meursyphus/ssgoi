@@ -99,7 +99,7 @@ transition({
 
 ### ビュートランジションでのプリセット使用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -168,6 +168,32 @@ transition({
     </template>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { config } from '@ssgoi/solid/presets';
+    import { fade, slide } from '@ssgoi/solid/view-transitions';
+
+    const transitionConfig = {
+      defaultTransition: fade({ spring: config.gentle }),
+      transitions: [
+        {
+          from: '/home',
+          to: '/about',
+          transition: slide({ spring: config.wobbly })
+        }
+      ]
+    };
+
+    export default function Root() {
+      return (
+        <Ssgoi config={transitionConfig}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from "@angular/core";
@@ -207,7 +233,7 @@ transition({
 
 ### 要素トランジションでのプリセット使用
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { transition } from '@ssgoi/react';
@@ -262,6 +288,27 @@ transition({
         コンテンツ
       </div>
     </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { config } from '@ssgoi/solid/presets';
+
+    function Component() {
+      return (
+        <div ref={transition({
+          key: 'fade-in',
+          spring: config.slow,
+          tick: (progress) => ({
+            opacity: progress,
+            transform: `translateY(${(1 - progress) * 20}px)`
+          })
+        })}>
+          コンテンツ
+        </div>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">

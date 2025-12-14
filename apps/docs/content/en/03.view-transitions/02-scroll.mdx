@@ -67,7 +67,7 @@ Incoming Screen: Descends from above (previous content returns)
 
 ## Basic Usage
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -100,6 +100,42 @@ Incoming Screen: Descends from above (previous content returns)
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: scroll()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <slot />
+      </Ssgoi>
+    </template>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { scroll } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: scroll()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -139,7 +175,7 @@ Incoming Screen: Descends from above (previous content returns)
 
 Moving between chapters or sections:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -180,6 +216,52 @@ Moving between chapters or sections:
         ]
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/docs/intro',
+          to: '/docs/getting-started',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true  // Automatically down on back navigation
+        },
+        {
+          from: '/docs/getting-started',
+          to: '/docs/api',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { scroll } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/docs/intro',
+          to: '/docs/getting-started',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true  // Automatically down on back navigation
+        },
+        {
+          from: '/docs/getting-started',
+          to: '/docs/api',
+          transition: scroll({ direction: 'up' }),
+          symmetric: true
+        }
+      ]
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -225,7 +307,7 @@ Moving between chapters or sections:
 
 Step-by-step tutorial:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -258,6 +340,44 @@ Step-by-step tutorial:
         ]
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/onboarding/step-*',
+          to: '/onboarding/step-*',
+          transition: scroll({
+            direction: 'up',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { scroll } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/onboarding/step-*',
+          to: '/onboarding/step-*',
+          transition: scroll({
+            direction: 'up',
+            spring: { stiffness: 300, damping: 30 }
+          })
+        }
+      ]
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -299,7 +419,7 @@ Step-by-step tutorial:
 
 Automatically determine direction based on navigation order:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const createMiddleware = (routes) => {
@@ -364,6 +484,76 @@ Automatically determine direction based on navigation order:
         middleware: createMiddleware(routeOrder)
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { scroll } from '@ssgoi/vue/view-transitions';
+
+    const createMiddleware = (routes) => {
+      return (from, to) => {
+        const fromIndex = routes.indexOf(from);
+        const toIndex = routes.indexOf(to);
+
+        if (fromIndex < toIndex) {
+          return { from: "/nav/prev", to: "/nav/next" };
+        } else {
+          return { from: "/nav/next", to: "/nav/prev" };
+        }
+      };
+    };
+
+    const config = {
+      transitions: [
+        {
+          from: "/nav/prev",
+          to: "/nav/next",
+          transition: scroll({ direction: "up" })
+        },
+        {
+          from: "/nav/next",
+          to: "/nav/prev",
+          transition: scroll({ direction: "down" })
+        }
+      ],
+      middleware: createMiddleware(routeOrder)
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { scroll } from '@ssgoi/solid/view-transitions';
+
+    const createMiddleware = (routes) => {
+      return (from, to) => {
+        const fromIndex = routes.indexOf(from);
+        const toIndex = routes.indexOf(to);
+
+        if (fromIndex < toIndex) {
+          return { from: "/nav/prev", to: "/nav/next" };
+        } else {
+          return { from: "/nav/next", to: "/nav/prev" };
+        }
+      };
+    };
+
+    const config = {
+      transitions: [
+        {
+          from: "/nav/prev",
+          to: "/nav/next",
+          transition: scroll({ direction: "up" })
+        },
+        {
+          from: "/nav/next",
+          to: "/nav/prev",
+          transition: scroll({ direction: "down" })
+        }
+      ],
+      middleware: createMiddleware(routeOrder)
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
