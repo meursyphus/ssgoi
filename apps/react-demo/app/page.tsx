@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SsgoiTransition, transition, TransitionScope } from "@ssgoi/react";
+import { fade, scale, blur, rotate, bounce } from "@ssgoi/react/transitions";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -38,6 +39,12 @@ export default function Home() {
   const [showScopeContainer, setShowScopeContainer] = useState(true);
   const [showLocalChild, setShowLocalChild] = useState(true);
   const [showGlobalChild, setShowGlobalChild] = useState(true);
+
+  // Auto Key Plugin demo states
+  const [showAutoKey1, setShowAutoKey1] = useState(true);
+  const [showExplicitKey, setShowExplicitKey] = useState(true);
+  const [showAutoKey2, setShowAutoKey2] = useState(true);
+  const [showListItems, setShowListItems] = useState(true);
 
   return (
     <SsgoiTransition id="/">
@@ -208,109 +215,101 @@ export default function Home() {
         <div className={styles.examplesSection}>
           <h2 className={styles.sectionTitle}>DOM Transition</h2>
           <div className={styles.shapesGrid}>
-            <ShapeContainer label="Fade">
-              {showShapes && (
-                <div
-                  ref={transition({
-                    key: "fade",
-                    in: (element) => ({
-                      spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.opacity = progress.toString();
-                      },
+            {[
+              {
+                label: "Fade",
+                shapeClass: styles.circle,
+                transition: {
+                  in: (element: HTMLElement) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress: number) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element: HTMLElement) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress: number) => {
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                },
+              },
+              {
+                label: "Scale + Rotate",
+                shapeClass: styles.triangle,
+                transition: {
+                  in: () => ({
+                    spring: { stiffness, damping },
+                    css: (progress: number) => ({
+                      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                      opacity: progress.toString(),
                     }),
-                    out: (element) => ({
-                      spring: { stiffness, damping },
-                      tick: (progress) => {
-                        element.style.opacity = progress.toString();
-                      },
+                  }),
+                  out: () => ({
+                    spring: { stiffness, damping },
+                    css: (progress: number) => ({
+                      transform: `scale(${progress}) rotate(${progress * 360}deg)`,
+                      opacity: progress.toString(),
                     }),
-                  })}
-                  className={`${styles.shape} ${styles.circle}`}
-                />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Scale + Rotate">
-              {showShapes && (
-                <div
-                  ref={transition({
-                    key: "scale-rotate",
-                    in: (element) => ({
-                      spring: { stiffness, damping },
-
-                      css: (progress) => ({
-                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
-                        opacity: progress.toString(),
-                      }),
+                  }),
+                },
+              },
+              {
+                label: "Slide In",
+                shapeClass: styles.square,
+                transition: {
+                  in: () => ({
+                    spring: { stiffness, damping },
+                    css: (progress: number) => ({
+                      transform: `translateX(${(1 - progress) * -100}px)`,
+                      opacity: progress.toString(),
                     }),
-                    out: (element) => ({
-                      spring: { stiffness, damping },
-                      css: (progress) => ({
-                        transform: `scale(${progress}) rotate(${progress * 360}deg)`,
-                        opacity: progress.toString(),
-                      }),
+                  }),
+                  out: () => ({
+                    spring: { stiffness, damping },
+                    css: (progress: number) => ({
+                      transform: `translateX(${(1 - progress) * -100}px)`,
+                      opacity: progress.toString(),
                     }),
-                  })}
-                  className={`${styles.shape} ${styles.triangle}`}
-                />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Slide In">
-              {showShapes && (
-                <div
-                  ref={transition({
-                    key: "slide-in",
-                    in: (element) => ({
-                      spring: { stiffness, damping },
-                      css: (progress) => ({
-                        transform: `translateX(${(1 - progress) * -100}px)`,
-                        opacity: progress.toString(),
-                      }),
-                    }),
-                    out: (element) => ({
-                      spring: { stiffness, damping },
-                      css: (progress) => ({
-                        transform: `translateX(${(1 - progress) * -100}px)`,
-                        opacity: progress.toString(),
-                      }),
-                    }),
-                  })}
-                  className={`${styles.shape} ${styles.square}`}
-                />
-              )}
-            </ShapeContainer>
-
-            <ShapeContainer label="Bounce Scale">
-              {showShapes && (
-                <div
-                  ref={transition({
-                    key: "bounce-scale",
-                    in: (element) => ({
-                      spring: {
-                        stiffness: stiffness * 0.8,
-                        damping: damping * 0.7,
-                      },
-                      tick: (progress) => {
-                        const scale = 0.5 + progress * 0.5;
-                        element.style.transform = `scale(${scale})`;
-                        element.style.opacity = progress.toString();
-                      },
-                    }),
-                    out: (element) => ({
-                      spring: { stiffness, damping },
-                      tick: (progress) => {
-                        const scale = 0.5 + progress * 0.5;
-                        element.style.transform = `scale(${scale})`;
-                        element.style.opacity = progress.toString();
-                      },
-                    }),
-                  })}
-                  className={`${styles.shape} ${styles.pentagon}`}
-                />
-              )}
-            </ShapeContainer>
+                  }),
+                },
+              },
+              {
+                label: "Bounce Scale",
+                shapeClass: styles.pentagon,
+                transition: {
+                  in: (element: HTMLElement) => ({
+                    spring: {
+                      stiffness: stiffness * 0.8,
+                      damping: damping * 0.7,
+                    },
+                    tick: (progress: number) => {
+                      const scale = 0.5 + progress * 0.5;
+                      element.style.transform = `scale(${scale})`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                  out: (element: HTMLElement) => ({
+                    spring: { stiffness, damping },
+                    tick: (progress: number) => {
+                      const scale = 0.5 + progress * 0.5;
+                      element.style.transform = `scale(${scale})`;
+                      element.style.opacity = progress.toString();
+                    },
+                  }),
+                },
+              },
+            ].map((item, index) => (
+              <ShapeContainer key={index} label={item.label}>
+                {showShapes && (
+                  <div
+                    key={index}
+                    ref={transition(item.transition)}
+                    className={`${styles.shape} ${item.shapeClass}`}
+                  />
+                )}
+              </ShapeContainer>
+            ))}
           </div>
         </div>
 
@@ -318,8 +317,8 @@ export default function Home() {
         <div className={styles.examplesSection}>
           <h2 className={styles.sectionTitle}>TransitionScope Demo</h2>
           <p style={{ color: "#666", marginBottom: "1.5rem", lineHeight: 1.6 }}>
-            <strong>Local scope:</strong> Skip animation when mounting/unmounting
-            with parent scope.
+            <strong>Local scope:</strong> Skip animation when
+            mounting/unmounting with parent scope.
             <br />
             <strong>Global scope (default):</strong> Always run animation.
           </p>
@@ -330,7 +329,9 @@ export default function Home() {
               onClick={() => setShowScopeContainer(!showScopeContainer)}
               style={{ marginRight: "0.5rem" }}
             >
-              {showScopeContainer ? "Hide Scope Container" : "Show Scope Container"}
+              {showScopeContainer
+                ? "Hide Scope Container"
+                : "Show Scope Container"}
             </button>
             <button
               className={styles.toggleButton}
@@ -383,7 +384,6 @@ export default function Home() {
                     {showLocalChild && (
                       <div
                         ref={transition({
-                          key: "scope-local-child",
                           scope: "local",
                           in: (element) => ({
                             spring: { stiffness: 300, damping: 25 },
@@ -409,7 +409,13 @@ export default function Home() {
                         }}
                       />
                     )}
-                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "#888",
+                        marginTop: "0.5rem",
+                      }}
+                    >
                       Skips when scope unmounts
                     </p>
                   </div>
@@ -427,7 +433,6 @@ export default function Home() {
                     {showGlobalChild && (
                       <div
                         ref={transition({
-                          key: "scope-global-child",
                           // scope: "global" is default
                           in: (element) => ({
                             spring: { stiffness: 300, damping: 25 },
@@ -453,7 +458,13 @@ export default function Home() {
                         }}
                       />
                     )}
-                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "#888",
+                        marginTop: "0.5rem",
+                      }}
+                    >
                       Always animates
                     </p>
                   </div>
@@ -481,6 +492,362 @@ export default function Home() {
               <li>
                 <strong>Toggle Scope Container:</strong> Local child should NOT
                 animate, Global child should animate
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Auto Key Plugin Demo Section */}
+        <div className={styles.examplesSection}>
+          <h2 className={styles.sectionTitle}>Auto Key Plugin Demo</h2>
+          <p style={{ color: "#666", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+            Testing <code>@ssgoi/react/plugin/auto-key</code> babel plugin.
+            <br />
+            Keys are auto-injected based on file:line:column + JSX key.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "1.5rem",
+              marginBottom: "2rem",
+            }}
+          >
+            {/* Case 1: Auto key (no explicit key) */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontWeight: 600,
+                  marginBottom: "0.5rem",
+                  color: "#333",
+                }}
+              >
+                Auto Key
+              </p>
+              <p
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#888",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                No explicit key
+              </p>
+              <button
+                onClick={() => setShowAutoKey1(!showAutoKey1)}
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.75rem",
+                  marginBottom: "0.75rem",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  background: showAutoKey1 ? "#e0e0e0" : "#fff",
+                }}
+              >
+                {showAutoKey1 ? "Hide" : "Show"}
+              </button>
+              <div
+                style={{
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {showAutoKey1 && (
+                  <div
+                    ref={transition({
+                      in: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                      out: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `scale(${0.5 + progress * 0.5})`,
+                        }),
+                      }),
+                    })}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background:
+                        "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+                      borderRadius: "8px",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Case 2: Explicit key */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontWeight: 600,
+                  marginBottom: "0.5rem",
+                  color: "#333",
+                }}
+              >
+                Explicit Key
+              </p>
+              <p
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#888",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                key: &quot;manual-key&quot;
+              </p>
+              <button
+                onClick={() => setShowExplicitKey(!showExplicitKey)}
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.75rem",
+                  marginBottom: "0.75rem",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  background: showExplicitKey ? "#e0e0e0" : "#fff",
+                }}
+              >
+                {showExplicitKey ? "Hide" : "Show"}
+              </button>
+              <div
+                style={{
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {showExplicitKey && (
+                  <div
+                    ref={transition({
+                      key: "manual-key",
+                      in: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `rotate(${progress * 360}deg)`,
+                        }),
+                      }),
+                      out: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `rotate(${progress * 360}deg)`,
+                        }),
+                      }),
+                    })}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background:
+                        "linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)",
+                      borderRadius: "8px",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Case 3: Another auto key (different position) */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontWeight: 600,
+                  marginBottom: "0.5rem",
+                  color: "#333",
+                }}
+              >
+                Auto Key 2
+              </p>
+              <p
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#888",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Different position
+              </p>
+              <button
+                onClick={() => setShowAutoKey2(!showAutoKey2)}
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.75rem",
+                  marginBottom: "0.75rem",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  background: showAutoKey2 ? "#e0e0e0" : "#fff",
+                }}
+              >
+                {showAutoKey2 ? "Hide" : "Show"}
+              </button>
+              <div
+                style={{
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {showAutoKey2 && (
+                  <div
+                    ref={transition({
+                      in: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `translateY(${(1 - progress) * 20}px)`,
+                        }),
+                      }),
+                      out: () => ({
+                        spring: { stiffness: 300, damping: 25 },
+                        css: (progress: number) => ({
+                          opacity: progress,
+                          transform: `translateY(${(1 - progress) * 20}px)`,
+                        }),
+                      }),
+                    })}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background:
+                        "linear-gradient(135deg, #4568dc 0%, #b06ab3 100%)",
+                      borderRadius: "8px",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Case 4: List with JSX key - different effects */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontWeight: 600,
+                  marginBottom: "0.5rem",
+                  color: "#333",
+                }}
+              >
+                List (map)
+              </p>
+              <p
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#888",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Different presets
+              </p>
+              <button
+                onClick={() => setShowListItems(!showListItems)}
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.75rem",
+                  marginBottom: "0.75rem",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  background: showListItems ? "#e0e0e0" : "#fff",
+                }}
+              >
+                {showListItems ? "Hide" : "Show"}
+              </button>
+              <div
+                style={{
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                {[
+                  { color: "#ff6b6b", effect: fade(), label: "fade" },
+                  { color: "#4ecdc4", effect: scale(), label: "scale" },
+                  { color: "#45b7d1", effect: blur(), label: "blur" },
+                  { color: "#96ceb4", effect: rotate(), label: "rotate" },
+                  { color: "#feca57", effect: bounce(), label: "bounce" },
+                ].map(
+                  (item, index) =>
+                    showListItems && (
+                      <div
+                        key={index}
+                        ref={transition(item.effect)}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          background: item.color,
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.5rem",
+                          color: "#fff",
+                          fontWeight: 600,
+                          textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                        }}
+                        title={item.label}
+                      />
+                    ),
+                )}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  marginTop: "0.25rem",
+                }}
+              >
+                {["fade", "scale", "blur", "rotate", "bounce"].map((label) => (
+                  <span
+                    key={label}
+                    style={{ fontSize: "0.55rem", color: "#888" }}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: "1rem",
+              background: "#f5f5f5",
+              borderRadius: "8px",
+              fontSize: "0.8rem",
+              color: "#555",
+            }}
+          >
+            <strong>How it works:</strong>
+            <ul style={{ margin: "0.5rem 0 0 1rem", lineHeight: 1.8 }}>
+              <li>
+                <strong>Auto Key:</strong> file:line:col (auto-injected)
+              </li>
+              <li>
+                <strong>Explicit Key:</strong> Uses provided key (plugin skips)
+              </li>
+              <li>
+                <strong>List:</strong> file:line:col:$&#123;index&#125; (JSX key
+                appended)
+              </li>
+              <li>
+                <strong>Presets:</strong> fade(), scale(), blur(), rotate(),
+                bounce()
               </li>
             </ul>
           </div>

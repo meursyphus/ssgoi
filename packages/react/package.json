@@ -6,6 +6,7 @@
   "type": "module",
   "files": [
     "dist",
+    "plugin",
     "!dist/**/*.test.*",
     "!dist/**/*.spec.*"
   ],
@@ -42,6 +43,10 @@
       "import": "./dist/presets/index.js",
       "require": "./dist/presets/index.cjs",
       "default": "./dist/presets/index.js"
+    },
+    "./plugin/auto-key": {
+      "require": "./plugin/auto-key.cjs",
+      "default": "./plugin/auto-key.cjs"
     }
   },
   "scripts": {
