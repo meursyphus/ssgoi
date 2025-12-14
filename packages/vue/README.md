@@ -115,8 +115,8 @@ Animate specific elements during mount/unmount:
 <template>
   <div v-transition="{
     key: 'card',
-    in: fadeIn(),
-    out: slideUp()
+    in: fade(),
+    out: slide({ direction: 'up' })
   }">
     <h2>Animated Card</h2>
   </div>
@@ -124,7 +124,7 @@ Animate specific elements during mount/unmount:
 
 <script setup>
 import { vTransition as vTransitionDirective } from '@ssgoi/vue';
-import { fadeIn, slideUp } from '@ssgoi/vue/transitions';
+import { fade, slide } from '@ssgoi/vue/transitions';
 
 // Local directive registration
 const vTransition = vTransitionDirective;
@@ -157,7 +157,7 @@ app.mount('#app');
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { transition } from '@ssgoi/vue';
-import { fadeIn, slideUp } from '@ssgoi/vue/transitions';
+import { fade, slide } from '@ssgoi/vue/transitions';
 
 const cardRef = ref();
 let cleanup;
@@ -165,8 +165,8 @@ let cleanup;
 onMounted(() => {
   cleanup = transition({
     key: 'card',
-    in: fadeIn(),
-    out: slideUp()
+    in: fade(),
+    out: slide({ direction: 'up' })
   })(cardRef.value);
 });
 
@@ -256,8 +256,8 @@ Apply transitions to individual elements.
 ```vue
 <div v-transition="{
   key: 'unique-key',
-  in: fadeIn(),
-  out: fadeOut()
+  in: fade(),
+  out: fade()
 }">
   Content
 </div>
@@ -271,8 +271,8 @@ Apply transitions programmatically.
 ```javascript
 const cleanup = transition({
   key: 'unique-key',
-  in: fadeIn(),
-  out: fadeOut()
+  in: fade(),
+  out: fade()
 })(element);
 ```
 
@@ -286,12 +286,12 @@ const cleanup = transition({
 - `pinterest()` - Pinterest-style expand effect
 
 ### Element Transitions (`@ssgoi/vue/transitions`)
-- `fadeIn()` / `fadeOut()`
-- `slideUp()` / `slideDown()` / `slideLeft()` / `slideRight()`
-- `scaleIn()` / `scaleOut()`
-- `bounce()`
-- `blur()`
-- `rotate()`
+- `fade()` - Fade in/out effect
+- `slide({ direction })` - Slide animation with direction: 'up', 'down', 'left', 'right'
+- `scale()` - Scale in/out effect
+- `bounce()` - Bounce animation
+- `blur()` - Blur effect
+- `rotate()` - Rotation animation
 
 ## Spring Physics Configuration
 

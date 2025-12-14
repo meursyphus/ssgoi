@@ -41,15 +41,13 @@ npm install @ssgoi/vue
 #### 1. Wrap your app
 
 ```tsx
-import { Ssgoi } from '@ssgoi/react';
-import { fade } from '@ssgoi/react/view-transitions';
+import { Ssgoi } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/view-transitions";
 
 export default function App() {
   return (
     <Ssgoi config={{ defaultTransition: fade() }}>
-      <div style={{ position: 'relative' }}>
-        {/* Your app */}
-      </div>
+      <div style={{ position: "relative" }}>{/* Your app */}</div>
     </Ssgoi>
   );
 }
@@ -58,7 +56,7 @@ export default function App() {
 #### 2. Wrap your pages
 
 ```tsx
-import { SsgoiTransition } from '@ssgoi/react';
+import { SsgoiTransition } from "@ssgoi/react";
 
 export default function HomePage() {
   return (
@@ -82,16 +80,20 @@ Define different transitions for different routes:
 const config = {
   transitions: [
     // Scroll between pages
-    { from: '/home', to: '/about', transition: scroll({ direction: 'up' }) },
-    { from: '/about', to: '/home', transition: scroll({ direction: 'down' }) },
-    
+    { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
+    { from: "/about", to: "/home", transition: scroll({ direction: "down" }) },
+
     // Drill when entering details
-    { from: '/products', to: '/products/*', transition: drill({ direction: 'enter' }) },
-    
+    {
+      from: "/products",
+      to: "/products/*",
+      transition: drill({ direction: "enter" }),
+    },
+
     // Pinterest-style image transitions
-    { from: '/gallery', to: '/photo/*', transition: pinterest() }
+    { from: "/gallery", to: "/photo/*", transition: pinterest() },
   ],
-  defaultTransition: fade()
+  defaultTransition: fade(),
 };
 ```
 
@@ -102,7 +104,7 @@ Automatically create bidirectional transitions:
 ```tsx
 {
   from: '/home',
-  to: '/about', 
+  to: '/about',
   transition: fade(),
   symmetric: true  // Automatically creates reverse transition
 }
@@ -113,44 +115,95 @@ Automatically create bidirectional transitions:
 Animate specific elements during mount/unmount:
 
 ```tsx
-import { transition } from '@ssgoi/react';
-import { fadeIn, slideUp } from '@ssgoi/react/transitions';
+import { transition } from "@ssgoi/react";
+import { fade, slide } from "@ssgoi/react/transitions";
 
+// With Auto Key Plugin - key is auto-generated based on file:line:column
 function Card() {
   return (
-    <div ref={transition({
-      key: 'card',
-      in: fadeIn(),
-      out: slideUp()
-    })}>
+    <div ref={transition(fade())}>
       <h2>Animated Card</h2>
     </div>
   );
 }
+
+// Without plugin - explicit key is required
+function CardManual() {
+  return (
+    <div
+      ref={transition({
+        key: "card",
+        ...fade(),
+      })}
+    >
+      <h2>Animated Card</h2>
+    </div>
+  );
+}
+
+// For list items in .map(), just use JSX key - the plugin appends it automatically
+function List({ items }) {
+  return items.map((item) => (
+    <div
+      key={item.id} // JSX key is enough - plugin generates file:line:col:${key}
+      ref={transition(fade())}
+    >
+      {item.name}
+    </div>
+  ));
+}
 ```
+
+#### Auto Key Plugin Setup (React)
+
+The Auto Key Plugin automatically generates unique keys for transition elements, eliminating the need to manually specify keys:
+
+```tsx
+// next.config.ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey());
+    return config;
+  },
+};
+
+export default nextConfig;
+```
+
+For other bundlers (Vite, Rollup, esbuild), see the [documentation](https://ssgoi.dev).
+
+**Benefits:**
+
+- No need to manually specify `key` for most cases
+- Keys are automatically generated based on source location (`file:line:column`)
+- Cleaner, more maintainable code
+
+**Important:** For dynamic lists (`.map()`), the plugin automatically appends the JSX `key` prop to the generated transition key (e.g., `file:line:col:${key}`), so you only need to provide the JSX `key` - no explicit transition key required.
 
 ### TransitionScope
 
 Control animation behavior for grouped elements. Skip redundant animations when parent and children mount/unmount together:
 
 ```tsx
-import { TransitionScope, transition } from '@ssgoi/react';
-import { fade } from '@ssgoi/react/transitions';
+import { TransitionScope, transition } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/transitions";
 
 function Modal({ show }) {
-  return show && (
-    <TransitionScope>
-      <div className="modal">
-        {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
-        <div ref={transition({ ...fade(), scope: 'local' })}>
-          This won't animate when modal opens/closes
+  return (
+    show && (
+      <TransitionScope>
+        <div className="modal">
+          {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
+          <div ref={transition({ ...fade(), scope: "local" })}>
+            This won't animate when modal opens/closes
+          </div>
+          {/* scope: 'global' (default) - always animates */}
+          <div ref={transition({ ...fade() })}>This always animates</div>
         </div>
-        {/* scope: 'global' (default) - always animates */}
-        <div ref={transition({ ...fade() })}>
-          This always animates
-        </div>
-      </div>
-    </TransitionScope>
+      </TransitionScope>
+    )
   );
 }
 ```
@@ -158,6 +211,7 @@ function Modal({ show }) {
 ## Built-in Transitions
 
 ### Page Transitions
+
 - `fade` - Smooth opacity transition
 - `scroll` - Vertical scrolling (up/down)
 - `drill` - Drill in/out effect (enter/exit)
@@ -165,12 +219,14 @@ function Modal({ show }) {
 - `pinterest` - Pinterest-style expand effect
 
 ### Element Transitions
-- `fadeIn` / `fadeOut`
-- `slideUp` / `slideDown` / `slideLeft` / `slideRight`
-- `scaleIn` / `scaleOut`
-- `bounce`
-- `blur`
-- `rotate`
+
+- `fade()` - Fade in/out
+- `scale()` - Scale in/out
+- `slide()` - Slide (direction: up/down/left/right)
+- `rotate()` - Rotate
+- `bounce()` - Bounce
+- `blur()` - Blur
+- `fly()` - Fly (custom x, y position)
 
 ## Framework Examples
 
@@ -178,13 +234,13 @@ function Modal({ show }) {
 
 ```typescript
 // app.component.ts
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { Ssgoi } from '@ssgoi/angular';
-import { fade } from '@ssgoi/angular/view-transitions';
+import { Component } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { Ssgoi } from "@ssgoi/angular";
+import { fade } from "@ssgoi/angular/view-transitions";
 
 @Component({
-  selector: 'app-root',
+  selector: "app-root",
   imports: [RouterOutlet, Ssgoi],
   template: `
     <ssgoi [config]="config">
@@ -192,27 +248,27 @@ import { fade } from '@ssgoi/angular/view-transitions';
         <router-outlet />
       </div>
     </ssgoi>
-  `
+  `,
 })
 export class AppComponent {
   config = {
-    defaultTransition: fade()
+    defaultTransition: fade(),
   };
 }
 
 // home.component.ts
-import { Component } from '@angular/core';
-import { SsgoiTransition } from '@ssgoi/angular';
+import { Component } from "@angular/core";
+import { SsgoiTransition } from "@ssgoi/angular";
 
 @Component({
-  selector: 'app-home',
+  selector: "app-home",
   imports: [SsgoiTransition],
   template: `
     <ssgoi-transition id="/">
       <h1>Welcome</h1>
       <!-- Your page content -->
     </ssgoi-transition>
-  `
+  `,
 })
 export class HomeComponent {}
 ```
@@ -221,17 +277,19 @@ export class HomeComponent {}
 
 ```tsx
 // app/layout.tsx
-import { Ssgoi } from '@ssgoi/react';
-import { fade } from '@ssgoi/react/view-transitions';
+import { Ssgoi } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/view-transitions";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <Ssgoi config={{
-          defaultTransition: fade()
-        }}>
-          <div style={{ position: 'relative', minHeight: '100vh' }}>
+        <Ssgoi
+          config={{
+            defaultTransition: fade(),
+          }}
+        >
+          <div style={{ position: "relative", minHeight: "100vh" }}>
             {children}
           </div>
         </Ssgoi>
@@ -241,14 +299,10 @@ export default function RootLayout({ children }) {
 }
 
 // app/page.tsx
-import { SsgoiTransition } from '@ssgoi/react';
+import { SsgoiTransition } from "@ssgoi/react";
 
 export default function Page() {
-  return (
-    <SsgoiTransition id="/">
-      {/* Your page content */}
-    </SsgoiTransition>
-  );
+  return <SsgoiTransition id="/">{/* Your page content */}</SsgoiTransition>;
 }
 ```
 
@@ -281,11 +335,13 @@ export default function Page() {
 ## Why SSGOI?
 
 ### vs View Transition API
+
 - ✅ Works in all browsers, not just Chrome
 - ✅ More animation options with spring physics
 - ✅ Better developer experience
 
 ### vs Other Animation Libraries
+
 - ✅ Built specifically for page transitions
 - ✅ SSR-first design
 - ✅ No router lock-in
@@ -314,17 +370,21 @@ SSGOI achieves 60fps animations through a unique approach:
 Try out SSGOI with our framework-specific demo applications:
 
 ### React Demo
+
 ```bash
 pnpm react-demo:dev
 # Opens at http://localhost:3001
 ```
+
 Explore Next.js App Router integration with various transition effects.
 
 ### Svelte Demo
+
 ```bash
 pnpm svelte-demo:dev
 # Opens at http://localhost:5174
 ```
+
 See SvelteKit integration with smooth page transitions.
 
 Visit the `/apps` directory to explore the demo source code and learn how to implement SSGOI in your own projects.
@@ -332,6 +392,7 @@ Visit the `/apps` directory to explore the demo source code and learn how to imp
 ## Documentation
 
 Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+
 - Detailed API reference
 - Interactive examples
 - Framework integration guides

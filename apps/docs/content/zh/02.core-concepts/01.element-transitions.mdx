@@ -14,60 +14,81 @@ nav-title: "元素动画"
     import { transition } from '@ssgoi/react';
     import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/react/transitions';
 
+    /**
+     * [React] Auto Key Plugin
+     *
+     * 使用插件时可以省略 key 属性。
+     * 基于 文件:行:列 自动生成唯一的 key。
+     *
+     * Next.js 配置:
+     * ```ts
+     * // next.config.ts
+     * import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+     *
+     * const nextConfig = {
+     *   webpack: (config) => {
+     *     config.plugins.push(SsgoiAutoKey());
+     *     return config;
+     *   },
+     * };
+     * ```
+     *
+     * ⚠️ 注意: .map() 列表中只需要 JSX key - 插件会自动处理
+     *
+     * // .map() 列表中的正确用法:
+     * {items.map((item) => (
+     *   <div
+     *     key={item.id}  // JSX key 就足够了
+     *     ref={transition(fade())}
+     *   >
+     *     {item.name}
+     *   </div>
+     * ))}
+     *
+     * // 不使用插件时，key 是必需的
+     */
+
     // Fade过渡
-    <div ref={transition({
-      key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
       Fade效果
     </div>
 
     // Scale过渡
-    <div ref={transition({
-      key: "scale-element",
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
       Scale效果
     </div>
 
     // Blur过渡
-    <div ref={transition({
-      key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
       Blur效果
     </div>
 
     // Slide过渡（方向指定）
-    <div ref={transition({
-      key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
       Slide效果
     </div>
 
     // Fly过渡（自定义位置）
-    <div ref={transition({
-      key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
       Fly效果
     </div>
 
     // Rotate过渡
-    <div ref={transition({
-      key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
       Rotate效果
     </div>
 
     // Bounce过渡
-    <div ref={transition({
-      key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
       Bounce效果
+    </div>
+
+    // 明确指定 key（不使用插件时必须）
+    <div ref={transition({
+      key: "custom-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      自定义 Key
     </div>
     ```
   </TabPanel>
@@ -554,7 +575,8 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 ### key
 
 - `key`必须在页面内唯一（这样即使DOM被创建后删除或删除后创建，动画状态也可以被跟踪）
-- 如果`key`未设置，则根据调用位置生成默认的自动键
+- React中可以使用Auto Key Plugin自动生成key（详见上方React标签页中的说明）
+- 如果`key`未设置且未使用插件，则根据调用位置生成默认的自动键
 
 ### in动画
 

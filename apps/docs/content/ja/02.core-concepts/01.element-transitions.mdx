@@ -14,60 +14,82 @@ nav-title: "要素アニメーション"
     import { transition } from '@ssgoi/react';
     import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/react/transitions';
 
+    /**
+     * [React] Auto Key Plugin
+     *
+     * プラグイン使用時、keyを省略できます。
+     * ファイル:行:列に基づいて一意のkeyが自動生成されます。
+     *
+     * Next.js 設定:
+     * ```ts
+     * // next.config.ts
+     * import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+     *
+     * const nextConfig = {
+     *   webpack: (config) => {
+     *     config.plugins.push(SsgoiAutoKey());
+     *     return config;
+     *   },
+     * };
+     * ```
+     *
+     * ⚠️ 注意: .map()リストではJSX keyだけで十分 - プラグインが自動処理
+     *
+     * // .map()リストではJSX keyだけで十分
+     * // プラグインが自動的にfile:line:col:${jsxKey}を生成
+     * {items.map((item) => (
+     *   <div
+     *     key={item.id}  // JSX keyだけで十分
+     *     ref={transition(fade())}
+     *   >
+     *     {item.name}
+     *   </div>
+     * ))}
+     *
+     * プラグインなしの場合、keyは必須です。
+     */
+
     // Fadeトランジション
-    <div ref={transition({
-      key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
       Fade効果
     </div>
 
     // Scaleトランジション
-    <div ref={transition({
-      key: "scale-element",
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
       Scale効果
     </div>
 
     // Blurトランジション
-    <div ref={transition({
-      key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
       Blur効果
     </div>
 
     // Slideトランジション（方向指定）
-    <div ref={transition({
-      key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
       Slide効果
     </div>
 
     // Flyトランジション（カスタム位置）
-    <div ref={transition({
-      key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
       Fly効果
     </div>
 
     // Rotateトランジション
-    <div ref={transition({
-      key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
       Rotate効果
     </div>
 
     // Bounceトランジション
-    <div ref={transition({
-      key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
       Bounce効果
+    </div>
+
+    // 明示的なkey（プラグインなしの場合は必須）
+    <div ref={transition({
+      key: "explicit-key",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      明示的なkeyを使用
     </div>
     ```
   </TabPanel>
@@ -556,7 +578,8 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 ### key
 
 - `key`はページ内で一意である必要があります（DOMが作成された後削除されたり、削除された後作成されたりしてもアニメーション状態を追跡できるようにするため）
-- `key`を設定しない場合、デフォルトで呼び出し位置に基づいた自動キーが生成されます
+- **React**: Auto Key Pluginを使用すると、`key`を省略可能（詳細はReactタブのコメントを参照）
+- **その他のフレームワーク**: `key`は必須です
 
 ### inアニメーション
 

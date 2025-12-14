@@ -121,7 +121,7 @@ import { fade, slide, scale } from '@ssgoi/react/view-transitions';
 
 ### `/transitions` - DOM 요소 애니메이션
 ```jsx
-import { fadeIn, slideUp } from '@ssgoi/react/transitions';
+import { fade, slide, blur, bounce, rotate, scale } from '@ssgoi/react/transitions';
 ```
 
 ### `/easing` - 이징 함수
@@ -171,14 +171,15 @@ const customTransition = {
 
 ```jsx
 import { transition } from '@ssgoi/react';
+import { fade } from '@ssgoi/react/transitions';
 
 function Component() {
   const [show, setShow] = useState(true);
-  
+
   return (
     <>
       {show && (
-        <div ref={transition({ key: 'item', ...fadeConfig })}>
+        <div ref={transition({ key: 'item', ...fade() })}>
           애니메이션이 적용될 요소
         </div>
       )}

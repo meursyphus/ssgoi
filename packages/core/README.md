@@ -106,14 +106,14 @@ Animate specific elements during mount/unmount:
 
 ```tsx
 import { transition } from '@ssgoi/react';
-import { fadeIn, slideUp } from '@ssgoi/react/transitions';
+import { fade, slide } from '@ssgoi/react/transitions';
 
 function Card() {
   return (
     <div ref={transition({
       key: 'card',
-      in: fadeIn(),
-      out: slideUp()
+      in: fade(),
+      out: slide({ direction: 'up' })
     })}>
       <h2>Animated Card</h2>
     </div>
@@ -131,12 +131,13 @@ function Card() {
 - `pinterest` - Pinterest-style expand effect
 
 ### Element Transitions
-- `fadeIn` / `fadeOut`
-- `slideUp` / `slideDown` / `slideLeft` / `slideRight`
-- `scaleIn` / `scaleOut`
-- `bounce`
-- `blur`
-- `rotate`
+- `fade` - Fade in/out
+- `scale` - Scale in/out
+- `slide` - Slide (direction: up/down/left/right)
+- `rotate` - Rotate
+- `bounce` - Bounce
+- `blur` - Blur
+- `fly` - Fly (custom x, y position)
 
 ## Framework Examples
 

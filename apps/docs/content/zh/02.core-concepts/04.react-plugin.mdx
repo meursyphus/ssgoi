@@ -1,0 +1,276 @@
+---
+title: "React Auto Key Plugin"
+description: "在 transition() 调用时自动生成 key 的构建插件"
+nav-title: "React Plugin"
+---
+
+## 概述
+
+`@ssgoi/react` 的 Auto Key Plugin 是一个构建时插件，可以在 `transition()` 函数调用时自动生成唯一的 `key`。
+
+### 为什么需要 key？
+
+SSGOI 需要唯一的 `key` 来跟踪元素的动画状态。没有 key：
+- 无法区分使用相同过渡效果的元素
+- 页面导航后动画状态不会保留
+- 元素挂载/卸载时会出现意外行为
+
+### 插件的作用
+
+在构建时分析所有 `transition()` 调用，并基于 **文件名:行:列** 自动注入唯一的 key。
+
+```tsx
+// 你写的代码
+<div ref={transition(fade())}>Content</div>
+
+// 构建后转换的代码
+<div ref={transition({ ...fade(), key: "page.tsx:15:6" })}>Content</div>
+```
+
+## 安装和配置
+
+插件已包含在 `@ssgoi/react` 包中，无需单独安装。
+
+### Next.js (Webpack)
+
+```ts
+// next.config.ts
+import type { NextConfig } from "next";
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig: NextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey());
+    return config;
+  },
+};
+
+export default nextConfig;
+```
+
+### Vite
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import SsgoiAutoKey from "@ssgoi/react/unplugin/vite";
+
+export default defineConfig({
+  plugins: [react(), SsgoiAutoKey()],
+});
+```
+
+### Rollup
+
+```ts
+// rollup.config.js
+import SsgoiAutoKey from "@ssgoi/react/unplugin/rollup";
+
+export default {
+  plugins: [SsgoiAutoKey()],
+};
+```
+
+### esbuild
+
+```ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/esbuild";
+
+await esbuild.build({
+  plugins: [SsgoiAutoKey()],
+});
+```
+
+## 使用方法
+
+### 基本用法（使用插件）
+
+配置插件后，可以省略 key。
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { fade, scale } from '@ssgoi/react/transitions';
+
+function MyComponent() {
+  return (
+    <>
+      {/* 可以省略 key - 自动生成 */}
+      <div ref={transition(fade())}>
+        Fade 效果
+      </div>
+
+      <div ref={transition(scale())}>
+        Scale 效果
+      </div>
+    </>
+  );
+}
+```
+
+### 显式 key
+
+需要时可以显式指定 key。插件会跳过已有 key 的调用。
+
+```tsx
+<div ref={transition({
+  key: "my-custom-key",  // 显式 key
+  ...fade()
+})}>
+  Content
+</div>
+```
+
+### 列表中使用（.map）
+
+对于使用 `.map()` 渲染的列表，**只需要 JSX key**。插件会读取 JSX key 并生成 `文件名:行:列:${jsxKey}` 格式。
+
+```tsx
+function ItemList({ items }) {
+  return (
+    <ul>
+      {items.map((item) => (
+        <li
+          key={item.id}  // JSX key 就足够了！
+          ref={transition(fade())}  // 插件自动处理
+        >
+          {item.name}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+生成的 key 示例：`ItemList.tsx:8:10:item-1`、`ItemList.tsx:8:10:item-2`...
+
+## 不使用插件
+
+如果不使用插件，必须手动指定唯一的 key。
+
+```tsx
+// 不使用插件 - key 是必需的！
+<div ref={transition({
+  key: "unique-key-1",
+  ...fade()
+})}>
+  Content
+</div>
+
+// 列表中也需要 key
+{items.map((item) => (
+  <li
+    key={item.id}
+    ref={transition({
+      key: `item-${item.id}`,  // transition key 也需要
+      ...fade()
+    })}
+  >
+    {item.name}
+  </li>
+))}
+```
+
+## 工作原理
+
+### 1. 代码分析
+
+插件扫描 `.tsx` 和 `.jsx` 文件中的 `transition()` 函数调用。
+
+### 2. 基于位置的 key 生成
+
+基于源代码位置（文件名、行、列）生成唯一的 key。
+
+```
+文件名:行:列
+例如：MyComponent.tsx:25:8
+```
+
+### 3. JSX key 组合（列表）
+
+对于 `.map()` 内的元素，会找到父 JSX 元素的 `key` prop 并组合。
+
+```
+文件名:行:列:${jsxKey}
+例如：ItemList.tsx:8:10:item-123
+```
+
+### 4. 代码转换
+
+转换原始代码以注入 key。
+
+```tsx
+// Before
+transition(fade())
+
+// After
+transition({ ...fade(), key: "MyComponent.tsx:25:8" })
+```
+
+## 插件选项
+
+```ts
+interface SsgoiAutoKeyOptions {
+  /**
+   * 要处理的文件扩展名
+   * @default ['.tsx', '.jsx']
+   */
+  include?: string[];
+
+  /**
+   * 要排除的文件模式
+   * @default [/node_modules/]
+   */
+  exclude?: (string | RegExp)[];
+}
+```
+
+### 示例
+
+```ts
+// next.config.ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey({
+      include: ['.tsx'],  // 只处理 .tsx 文件
+      exclude: [/node_modules/, /\.test\.tsx$/],  // 排除测试文件
+    }));
+    return config;
+  },
+};
+```
+
+## 注意事项
+
+<Note type="info">
+此插件**仅适用于 React**。不能与 Svelte、Vue、Angular 或其他框架一起使用。
+</Note>
+
+<Note type="warning">
+**条件渲染注意**：当同一位置根据条件渲染不同元素时，可能会生成相同的 key。这种情况下请使用显式 key。
+</Note>
+
+```tsx
+// ⚠️ 注意：同一位置的条件渲染
+{isLoading
+  ? <div ref={transition(fade())}>Loading...</div>  // key: file:10:6
+  : <div ref={transition(fade())}>Content</div>     // key: file:11:6（不同行，OK）
+}
+
+// ✅ 同一行时使用显式 key
+{isLoading
+  ? <div ref={transition({ key: "loading", ...fade() })}>Loading...</div>
+  : <div ref={transition({ key: "content", ...fade() })}>Content</div>
+}
+```
+
+## 调试
+
+开发时要检查生成的 key，可以在浏览器开发者工具中查看构建后的代码，或者这样打印：
+
+```tsx
+const myTransition = transition(fade());
+console.log(myTransition);  // 检查 key 值
+```
