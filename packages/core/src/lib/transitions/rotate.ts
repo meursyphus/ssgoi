@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface RotateOptions {
   degrees?: number;
@@ -15,7 +15,7 @@ interface RotateOptions {
   key?: TransitionKey;
 }
 
-export const rotate = (options: RotateOptions = {}) => {
+export const rotate = (options: RotateOptions = {}): Transition => {
   const {
     degrees = 360,
     clockwise = true,
@@ -24,9 +24,14 @@ export const rotate = (options: RotateOptions = {}) => {
     origin = "center",
     axis = "2d",
     perspective = 800,
-    spring = { stiffness: 500, damping: 25 },
+    spring: springOption,
     key,
   } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 500,
+    damping: springOption?.damping ?? 25,
+  };
 
   const rotation = clockwise ? degrees : -degrees;
 

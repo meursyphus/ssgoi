@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface BlurOptions {
   amount?: number | string;
@@ -12,15 +12,20 @@ interface BlurOptions {
   key?: TransitionKey;
 }
 
-export const blur = (options: BlurOptions = {}) => {
+export const blur = (options: BlurOptions = {}): Transition => {
   const {
     amount = 10,
     opacity = 0,
     scale = false,
     fade = true,
-    spring = { stiffness: 300, damping: 30 },
+    spring: springOption,
     key,
   } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+  };
 
   const getCss = (progress: number): StyleObject => {
     const blurMultiplier = 1 - progress;

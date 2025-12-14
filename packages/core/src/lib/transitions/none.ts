@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface NoneOptions {
   spring?: {
@@ -8,8 +8,13 @@ interface NoneOptions {
   key?: TransitionKey;
 }
 
-export const none = (options: NoneOptions = {}) => {
-  const { spring = { stiffness: 1000, damping: 100 }, key } = options;
+export const none = (options: NoneOptions = {}): Transition => {
+  const { spring: springOption, key } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 1000,
+    damping: springOption?.damping ?? 100,
+  };
 
   return {
     in: () => ({

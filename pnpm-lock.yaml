@@ -466,13 +466,22 @@ importers:
 
   packages/react:
     dependencies:
+      '@babel/core':
+        specifier: ^7.26.10
+        version: 7.28.5
       '@ssgoi/core':
         specifier: workspace:^
         version: link:../core
+      unplugin:
+        specifier: ^2.3.2
+        version: 2.3.10
     devDependencies:
       '@eslint/js':
         specifier: ^9.30.1
         version: 9.39.0
+      '@types/babel__core':
+        specifier: ^7.20.5
+        version: 7.20.5
       '@types/react':
         specifier: ^19.1.8
         version: 19.2.2

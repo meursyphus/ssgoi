@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface FadeOptions {
   from?: number;
@@ -10,13 +10,13 @@ interface FadeOptions {
   key?: TransitionKey;
 }
 
-export const fade = (options: FadeOptions = {}) => {
-  const {
-    from = 0,
-    to = 1,
-    spring = { stiffness: 300, damping: 30 },
-    key,
-  } = options;
+export const fade = (options: FadeOptions = {}): Transition => {
+  const { from = 0, to = 1, spring: springOption, key } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+  };
 
   return {
     in: () => ({

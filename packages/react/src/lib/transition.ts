@@ -8,7 +8,7 @@ import {
 } from "@ssgoi/core";
 
 type TransitionOptions = Transition<undefined> & {
-  key: TransitionKey;
+  key?: TransitionKey;
   scope?: TransitionScope;
 };
 
@@ -21,6 +21,9 @@ type TransitionOptions = Transition<undefined> & {
  * The returned ref callback has a stable reference (cached by key),
  * so it won't cause unnecessary re-renders when used with React refs.
  *
+ * Note: key is optional in the type signature because it can be auto-injected
+ * by babel-plugin-ssgoi at build time. However, it is required at runtime.
+ *
  * @example
  * ```tsx
  * <div ref={transition({
@@ -31,5 +34,16 @@ type TransitionOptions = Transition<undefined> & {
  * ```
  */
 export const transition = (options: TransitionOptions) => {
-  return _transition(options, "auto");
+  if (!options.key) {
+    throw new Error(
+      "[ssgoi] transition() requires a 'key' property. " +
+        "Either provide it manually or use plugin for auto-injection. " +
+        "import plugin from @ssgoi/react/unplugin/webpack; ",
+    );
+  }
+
+  return _transition(
+    options as TransitionOptions & { key: TransitionKey },
+    "auto",
+  );
 };

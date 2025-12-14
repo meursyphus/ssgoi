@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface FlyOptions {
   x?: number | string;
@@ -11,14 +11,13 @@ interface FlyOptions {
   key?: TransitionKey;
 }
 
-export const fly = (options: FlyOptions = {}) => {
-  const {
-    x = 0,
-    y = -100,
-    opacity = 0,
-    spring = { stiffness: 400, damping: 35 },
-    key,
-  } = options;
+export const fly = (options: FlyOptions = {}): Transition => {
+  const { x = 0, y = -100, opacity = 0, spring: springOption, key } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 400,
+    damping: springOption?.damping ?? 35,
+  };
 
   const getCss = (progress: number): StyleObject => {
     const multiplier = 1 - progress;
