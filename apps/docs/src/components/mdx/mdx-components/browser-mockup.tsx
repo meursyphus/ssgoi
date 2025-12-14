@@ -48,20 +48,20 @@ const BrowserHeader = memo(() => {
   const { currentPath } = useBrowserNavigation();
 
   return (
-    <div className="browser-header bg-gray-800 px-4 py-3 flex items-center gap-3">
-      {/* Traffic lights */}
-      <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-red-500" />
-        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-        <div className="w-3 h-3 rounded-full bg-green-500" />
+    <div className="browser-header bg-white/[0.02] border-b border-white/5 px-4 py-3 flex items-center gap-3">
+      {/* Traffic lights - minimal neutral design */}
+      <div className="flex items-center gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
       </div>
 
       {/* Address bar */}
       <div className="flex-1 flex items-center">
         <div className="flex-1 max-w-md mx-auto">
-          <div className="bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 flex items-center gap-2 overflow-hidden">
+          <div className="bg-white/[0.02] border border-white/5 rounded-lg px-3 py-1.5 text-sm text-neutral-300 flex items-center gap-2 overflow-hidden">
             <svg
-              className="w-4 h-4 text-gray-400 flex-shrink-0"
+              className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -74,18 +74,18 @@ const BrowserHeader = memo(() => {
               />
             </svg>
             <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-              <span className="text-gray-400">localhost:3000</span>
-              <span className="text-gray-200">{currentPath}</span>
+              <span className="text-neutral-500">localhost:3000</span>
+              <span className="text-neutral-200">{currentPath}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Browser actions */}
-      <div className="flex items-center gap-2">
-        <button className="p-1 hover:bg-gray-700 rounded">
+      <div className="flex items-center gap-1">
+        <button className="p-1.5 hover:bg-white/5 rounded transition-colors">
           <svg
-            className="w-4 h-4 text-gray-400"
+            className="w-3.5 h-3.5 text-neutral-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -154,7 +154,7 @@ export function BrowserMockup({
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         className={cn(
-          "browser-mockup w-full rounded-lg overflow-hidden shadow-2xl border border-gray-700",
+          "browser-mockup w-full rounded-xl overflow-hidden border border-white/10 bg-white/[0.02]",
           "h-[500px] md:h-[800px]", // Fixed heights for mobile and desktop
           className,
         )}
@@ -165,7 +165,7 @@ export function BrowserMockup({
         {/* Browser Content */}
         <div
           ref={contentRef}
-          className="browser-content bg-gray-900 flex-1 overflow-auto h-full custom-scrollbar"
+          className="browser-content bg-[#121212] flex-1 overflow-auto h-full custom-scrollbar"
         >
           <Ssgoi config={config}>
             {Layout ? (
@@ -215,7 +215,7 @@ export const DemoLink = memo(
       <button
         onClick={() => navigate(to)}
         className={cn(
-          "text-blue-500 hover:text-blue-600 underline cursor-pointer",
+          "text-neutral-300 hover:text-neutral-100 underline cursor-pointer transition-colors",
           className,
         )}
         {...props}
@@ -242,8 +242,8 @@ export const DemoCard = memo(
       <div
         onClick={onClick}
         className={cn(
-          "p-4 border border-gray-700 rounded-lg",
-          "hover:shadow-lg transition-shadow cursor-pointer",
+          "p-4 border border-white/10 rounded-lg bg-white/[0.02]",
+          "hover:bg-white/5 transition-colors cursor-pointer",
           className,
         )}
         {...props}

@@ -389,4 +389,73 @@ export const home: HomeMessages = {
     bottomNote:
       "Based on studies from Nielsen Norman Group and Google Research",
   },
+  // New Home Page Sections
+  newHome: {
+    hero: {
+      badge: "No View Transitions API required",
+      title: {
+        line1: "Native-level transitions",
+        line2: "on the web",
+      },
+      description:
+        "Smooth page transitions. Works on all browsers and supports all frameworks. Start with just a few lines of code without complex setup.",
+      getStarted: "Get Started",
+      viewDemo: "View Demo",
+    },
+    features: {
+      sectionLabel: "Features",
+      title: "Why SSGOI",
+      zeroConfig: {
+        title: "Zero Configuration",
+        description:
+          "Start immediately without complex setup. Default values are enough.",
+      },
+      allBrowsers: {
+        title: "All Browsers",
+        description:
+          "Works on Safari and Firefox too, not just Chrome's View Transitions API.",
+      },
+      ssrSupport: {
+        title: "SSR Support",
+        description:
+          "Perfectly compatible with all SSR frameworks like Next.js, Nuxt, and SvelteKit.",
+      },
+      smoothPerformance: {
+        title: "Smooth on Low-end Devices",
+        description:
+          "Spring physics engine + Web Animations API ensures 60fps animations even on low-end mobile devices.",
+      },
+    },
+    code: {
+      sectionLabel: "Code",
+      title: "Simple Start",
+      description: "Implement page transitions with just a few lines of code.",
+      tabSetup: "Basic Setup",
+      tabRouteConfig: "Route Config",
+    },
+    frameworks: {
+      sectionLabel: "Frameworks",
+      title: "All Frameworks Supported",
+      description:
+        "Same API, same experience. Consistent transition effects regardless of framework.",
+      soon: "soon",
+    },
+    elementTransition: {
+      sectionLabel: "Element Transitions",
+      title: "Individual Element Transitions",
+      description: "Define enter/exit animations with in and out",
+      toggleShow: "Show",
+      toggleHide: "Hide",
+    },
+    cta: {
+      title: "Get Started Now",
+      description:
+        "Implement native-level page transitions in just a few minutes.",
+      viewDocs: "View Documentation",
+    },
+    footer: {
+      license: "MIT License",
+      builtWith: "Built with care",
+    },
+  },
 };

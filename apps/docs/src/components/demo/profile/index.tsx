@@ -8,11 +8,11 @@ import { Feed } from "./feed";
 export default function ProfileDemo() {
   return (
     <SsgoiTransition id="/demo/profile">
-      <div className=" bg-gray-950">
+      <div className=" bg-[#121212]">
         {/* Profile Header */}
         <div className="relative">
           {/* Cover Image */}
-          <div className="h-32 relative">
+          <div className="h-24 relative">
             <img
               src={profile.coverImage}
               alt="Cover"
@@ -22,24 +22,24 @@ export default function ProfileDemo() {
           </div>
 
           {/* Profile Info */}
-          <div className="px-4 -mt-10 relative">
+          <div className="px-4 -mt-8 relative">
             {/* Avatar */}
             <img
               src={profile.avatar}
               alt={profile.name}
-              className="w-20 h-20 rounded-full border-4 border-gray-950 bg-gray-900"
+              className="w-16 h-16 rounded-full border-4 border-[#121212] bg-[#111]"
             />
 
             {/* Profile Details */}
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-white">
+            <div className="mt-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <h1 className="text-base font-medium text-white">
                   {profile.name}
                 </h1>
                 {profile.verified && (
                   <svg
-                    width="20"
-                    height="20"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="#1DA1F2"
                   >
@@ -47,33 +47,39 @@ export default function ProfileDemo() {
                   </svg>
                 )}
               </div>
-              <p className="text-gray-400 text-sm mb-3">{profile.username}</p>
-              <p className="text-gray-300 text-sm mb-4">{profile.bio}</p>
+              <p className="text-neutral-400 text-xs mb-2">
+                {profile.username}
+              </p>
+              <p className="text-neutral-300 text-xs mb-3">{profile.bio}</p>
 
               {/* Stats */}
-              <div className="flex gap-6 mb-4">
+              <div className="flex gap-4 mb-3">
                 <div className="text-center">
-                  <span className="block text-lg font-bold text-white">
+                  <span className="block text-sm font-medium text-white">
                     {profile.posts}
                   </span>
-                  <span className="block text-sm text-gray-400">Posts</span>
+                  <span className="block text-xs text-neutral-500">Posts</span>
                 </div>
                 <div className="text-center">
-                  <span className="block text-lg font-bold text-white">
+                  <span className="block text-sm font-medium text-white">
                     {profile.followers.toLocaleString()}
                   </span>
-                  <span className="block text-sm text-gray-400">Followers</span>
+                  <span className="block text-xs text-neutral-500">
+                    Followers
+                  </span>
                 </div>
                 <div className="text-center">
-                  <span className="block text-lg font-bold text-white">
+                  <span className="block text-sm font-medium text-white">
                     {profile.following.toLocaleString()}
                   </span>
-                  <span className="block text-sm text-gray-400">Following</span>
+                  <span className="block text-xs text-neutral-500">
+                    Following
+                  </span>
                 </div>
               </div>
 
               {/* Meta Info */}
-              <div className="flex flex-col gap-2 text-sm text-gray-400 mb-6">
+              <div className="flex flex-col gap-1 text-xs text-neutral-400 mb-4">
                 <span>📍 {profile.location}</span>
                 <span>
                   🔗{" "}
@@ -81,7 +87,7 @@ export default function ProfileDemo() {
                     href={profile.website}
                     target="_blank"
                     rel="noopener"
-                    className="text-teal-400 hover:underline"
+                    className="text-neutral-300 hover:underline"
                   >
                     {profile.website.replace("https://", "")}
                   </a>
@@ -89,7 +95,7 @@ export default function ProfileDemo() {
               </div>
 
               {/* Follow Button */}
-              <button className="w-full bg-white text-black py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors duration-200">
+              <button className="w-full bg-white text-black py-2 rounded-full text-xs font-medium hover:bg-neutral-200 transition-colors duration-200">
                 Follow
               </button>
             </div>
@@ -97,7 +103,7 @@ export default function ProfileDemo() {
         </div>
 
         {/* Posts Section - Instagram Style Feed */}
-        <div className="mt-8 pb-8">
+        <div className="mt-6 pb-6">
           <Feed />
         </div>
       </div>

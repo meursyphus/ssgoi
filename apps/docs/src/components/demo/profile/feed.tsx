@@ -15,11 +15,11 @@ export function Feed() {
   }, [router]);
 
   return (
-    <div className=" bg-gray-950 p-1">
+    <div className=" bg-[#121212] p-1">
       {/* Header */}
-      <div className="mb-3 px-3 pt-3">
-        <h2 className="text-xl font-bold text-white mb-1">Posts</h2>
-        <p className="text-gray-400 text-xs">Tap any post to view details</p>
+      <div className="mb-2 px-3 pt-2">
+        <h2 className="text-sm font-medium text-white mb-0.5">Posts</h2>
+        <p className="text-neutral-500 text-xs">Tap any post to view details</p>
       </div>
 
       {/* Instagram 3-Column Masonry Grid */}
@@ -52,15 +52,15 @@ function PostCard({ post, router }: PostCardProps) {
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <div className="absolute bottom-0 left-0 right-0 p-3">
-            <h3 className="text-white text-xs font-semibold line-clamp-2 mb-1">
+          <div className="absolute bottom-0 left-0 right-0 p-2">
+            <h3 className="text-white text-xs font-medium line-clamp-2 mb-1">
               {post.title}
             </h3>
-            <div className="flex items-center gap-3 text-white text-xs">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center gap-2 text-white text-xs">
+              <span className="flex items-center gap-0.5">
                 <svg
-                  width="12"
-                  height="12"
+                  width="10"
+                  height="10"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -68,10 +68,10 @@ function PostCard({ post, router }: PostCardProps) {
                 </svg>
                 {post.likes}
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-0.5">
                 <svg
-                  width="12"
-                  height="12"
+                  width="10"
+                  height="10"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

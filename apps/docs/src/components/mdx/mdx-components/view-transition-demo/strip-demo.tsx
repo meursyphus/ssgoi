@@ -12,37 +12,37 @@ function SpeakingPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage path="/strip" className="min-h-full">
+    <DemoPage path="/strip" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col justify-center min-h-full",
           isMobile ? "px-6 py-12" : "max-w-6xl px-8 py-20",
         )}
       >
-        <div className="space-y-8">
+        <div className="space-y-6">
           <h1
             className={cn(
-              "font-black leading-none",
-              isMobile ? "text-6xl" : "text-[10rem]",
-              "text-orange-500 tracking-tight",
+              "font-light leading-none",
+              isMobile ? "text-5xl" : "text-[8rem]",
+              "text-neutral-100 tracking-tight",
             )}
           >
             SPEAKING
           </h1>
           <p
             className={cn(
-              "font-medium text-gray-700",
-              isMobile ? "text-lg max-w-sm" : "text-2xl max-w-2xl",
+              "text-neutral-400",
+              isMobile ? "text-sm max-w-sm" : "text-base max-w-2xl",
             )}
           >
             Transform your ideas into powerful narratives that captivate and
             inspire.
           </p>
-          <div className="flex gap-4 pt-4">
-            <button className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors">
+          <div className="flex gap-3 pt-4">
+            <button className="px-5 py-2.5 bg-white text-neutral-900 text-sm rounded-full hover:bg-neutral-200 transition-colors">
               Start Now
             </button>
-            <button className="px-6 py-3 bg-white text-orange-500 border-2 border-orange-500 rounded-full font-semibold hover:bg-orange-50 transition-colors">
+            <button className="px-5 py-2.5 bg-white/5 text-neutral-300 text-sm border border-white/10 rounded-full hover:bg-white/10 transition-colors">
               Learn More
             </button>
           </div>
@@ -57,56 +57,46 @@ function CreatingPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage path="/strip/creating" className="min-h-full">
+    <DemoPage path="/strip/creating" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto flex items-center justify-center min-h-full",
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >
-        <div className="text-center space-y-12">
+        <div className="text-center space-y-10">
           <div className="relative">
             <h1
               className={cn(
-                "font-black",
+                "font-light",
                 isMobile ? "text-5xl" : "text-[8rem]",
-                "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600",
+                "text-neutral-100",
                 "tracking-tight leading-none",
               )}
             >
               CREATING
             </h1>
-            <div
-              className={cn(
-                "font-black absolute inset-0 blur-3xl opacity-30",
-                isMobile ? "text-5xl" : "text-[8rem]",
-                "text-purple-600",
-                "tracking-tight leading-none",
-              )}
-            >
-              CREATING
-            </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+          <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl mb-2">✨</div>
-              <p className="text-gray-700 font-medium">Innovate</p>
+              <div className="text-2xl mb-2">✨</div>
+              <p className="text-neutral-400 text-xs">Innovate</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-2">🎯</div>
-              <p className="text-gray-700 font-medium">Execute</p>
+              <div className="text-2xl mb-2">🎯</div>
+              <p className="text-neutral-400 text-xs">Execute</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-2">🚀</div>
-              <p className="text-gray-700 font-medium">Launch</p>
+              <div className="text-2xl mb-2">🚀</div>
+              <p className="text-neutral-400 text-xs">Launch</p>
             </div>
           </div>
 
           <p
             className={cn(
-              "font-medium text-gray-700 max-w-xl mx-auto",
-              isMobile ? "text-base" : "text-xl",
+              "text-neutral-400 max-w-xl mx-auto",
+              isMobile ? "text-sm" : "text-base",
             )}
           >
             Where imagination meets execution. Build something extraordinary
@@ -123,51 +113,44 @@ function ImpactPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage path="/strip/impact" className="min-h-full">
+    <DemoPage path="/strip/impact" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col justify-center min-h-full relative",
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >
-        <div className="space-y-16">
+        <div className="space-y-12">
           <div>
-            <p className="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-4">
+            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-4">
               Make a Difference
             </p>
             <h1
               className={cn(
-                "font-black",
+                "font-light",
                 isMobile ? "text-5xl" : "text-[7rem]",
-                "text-gray-900 leading-none tracking-tight",
+                "text-neutral-100 leading-none tracking-tight",
               )}
             >
               IMPACT
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="border-l-4 border-orange-500 pl-6">
-              <h3 className="text-gray-900 font-bold text-2xl mb-2">100M+</h3>
-              <p className="text-gray-600">Lives Changed</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="border-l border-white/20 pl-5">
+              <h3 className="text-neutral-100 font-medium text-xl mb-1">
+                100M+
+              </h3>
+              <p className="text-neutral-500 text-xs">Lives Changed</p>
             </div>
-            <div className="border-l-4 border-orange-500 pl-6">
-              <h3 className="text-gray-900 font-bold text-2xl mb-2">50+</h3>
-              <p className="text-gray-600">Countries Reached</p>
+            <div className="border-l border-white/20 pl-5">
+              <h3 className="text-neutral-100 font-medium text-xl mb-1">50+</h3>
+              <p className="text-neutral-500 text-xs">Countries Reached</p>
             </div>
-            <div className="border-l-4 border-orange-500 pl-6">
-              <h3 className="text-gray-900 font-bold text-2xl mb-2">∞</h3>
-              <p className="text-gray-600">Possibilities</p>
+            <div className="border-l border-white/20 pl-5">
+              <h3 className="text-neutral-100 font-medium text-xl mb-1">∞</h3>
+              <p className="text-neutral-500 text-xs">Possibilities</p>
             </div>
-          </div>
-
-          <div
-            className={cn(
-              "absolute bottom-8 right-8",
-              isMobile ? "hidden" : "block",
-            )}
-          >
-            <div className="w-32 h-32 rounded-full bg-orange-400 opacity-20 blur-3xl"></div>
           </div>
         </div>
       </div>
@@ -192,23 +175,23 @@ const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
   const { currentPath, navigate, routes } = context;
 
   return (
-    <div className="flex flex-col h-full relative bg-gradient-to-br from-orange-50 to-pink-50">
+    <div className="flex flex-col h-full relative bg-[#121212]">
       {/* Fixed Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-200/50">
+      <header className="sticky top-0 z-30 bg-[#121212]/90 backdrop-blur-sm border-b border-white/5">
         <div className={cn("mx-auto", isMobile ? "px-4" : "max-w-7xl px-8")}>
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
+          <div className="flex items-center justify-between h-12">
+            <div className="flex items-center gap-6">
               {/* Logo */}
               <button
                 onClick={() => navigate(routes[0].path)}
-                className="font-black text-2xl text-orange-500 hover:text-orange-600 transition-colors"
+                className="font-medium text-base text-neutral-200 hover:text-white transition-colors"
               >
                 CYD
               </button>
 
               {/* Navigation */}
               {!isMobile && (
-                <nav className="flex items-center gap-6">
+                <nav className="flex items-center gap-4">
                   {routes.map((route) => {
                     const isActive = currentPath === route.path;
                     return (
@@ -216,10 +199,10 @@ const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
                         key={route.path}
                         onClick={() => navigate(route.path)}
                         className={cn(
-                          "font-semibold text-sm uppercase tracking-wider transition-all",
+                          "text-xs uppercase tracking-wider transition-all",
                           isActive
-                            ? "text-orange-500 border-b-2 border-orange-500 pb-1"
-                            : "text-gray-600 hover:text-gray-900",
+                            ? "text-neutral-100"
+                            : "text-neutral-500 hover:text-neutral-300",
                         )}
                       >
                         {route.label}
@@ -232,9 +215,9 @@ const StripLayout = memo(({ children }: { children: React.ReactNode }) => {
 
             {/* Mobile menu button */}
             {isMobile && (
-              <button className="text-gray-600 hover:text-gray-900">
+              <button className="text-neutral-400 hover:text-neutral-200">
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

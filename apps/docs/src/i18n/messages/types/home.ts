@@ -332,4 +332,66 @@ export type HomeMessages = {
     };
     bottomNote: string;
   };
+  // New Home Page Sections
+  newHome: {
+    hero: {
+      badge: string;
+      title: {
+        line1: string;
+        line2: string;
+      };
+      description: string;
+      getStarted: string;
+      viewDemo: string;
+    };
+    features: {
+      sectionLabel: string;
+      title: string;
+      zeroConfig: {
+        title: string;
+        description: string;
+      };
+      allBrowsers: {
+        title: string;
+        description: string;
+      };
+      ssrSupport: {
+        title: string;
+        description: string;
+      };
+      smoothPerformance: {
+        title: string;
+        description: string;
+      };
+    };
+    code: {
+      sectionLabel: string;
+      title: string;
+      description: string;
+      tabSetup: string;
+      tabRouteConfig: string;
+    };
+    frameworks: {
+      sectionLabel: string;
+      title: string;
+      description: string;
+      soon: string;
+    };
+    elementTransition: {
+      sectionLabel: string;
+      title: string;
+      description: string;
+      toggleShow: string;
+      toggleHide: string;
+    };
+    cta: {
+      title: string;
+      description: string;
+      viewDocs: string;
+    };
+    footer: {
+      license: string;
+      builtWith: string;
+    };
+  };
 };

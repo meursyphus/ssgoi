@@ -376,4 +376,72 @@ export const home: HomeMessages = {
     },
     bottomNote: "Nielsen Norman Group과 Google Research의 연구 기반",
   },
+  // New Home Page Sections
+  newHome: {
+    hero: {
+      badge: "View Transitions API 불필요",
+      title: {
+        line1: "웹에서 느끼는",
+        line2: "네이티브 수준의 전환",
+      },
+      description:
+        "페이지 간 전환을 매끄럽게. 모든 브라우저에서 동작하고, 모든 프레임워크를 지원합니다. 복잡한 설정 없이 몇 줄의 코드로 시작하세요.",
+      getStarted: "시작하기",
+      viewDemo: "데모 보기",
+    },
+    features: {
+      sectionLabel: "Features",
+      title: "왜 SSGOI인가",
+      zeroConfig: {
+        title: "제로 설정",
+        description: "복잡한 설정 없이 바로 시작. 기본값만으로도 충분합니다.",
+      },
+      allBrowsers: {
+        title: "모든 브라우저",
+        description:
+          "Chrome의 View Transitions API에 의존하지 않아 Safari, Firefox에서도 동작합니다.",
+      },
+      ssrSupport: {
+        title: "SSR 지원",
+        description:
+          "Next.js, Nuxt, SvelteKit 등 모든 SSR 프레임워크와 완벽 호환됩니다.",
+      },
+      smoothPerformance: {
+        title: "저사양에서도 부드럽게",
+        description:
+          "Spring 물리 엔진 + Web Animations API로 저사양 모바일에서도 60fps 애니메이션을 보장합니다.",
+      },
+    },
+    code: {
+      sectionLabel: "Code",
+      title: "간단한 시작",
+      description: "몇 줄의 코드로 페이지 전환을 구현하세요.",
+      tabSetup: "기본 설정",
+      tabRouteConfig: "라우트 설정",
+    },
+    frameworks: {
+      sectionLabel: "Frameworks",
+      title: "모든 프레임워크 지원",
+      description:
+        "같은 API, 같은 경험. 프레임워크에 관계없이 일관된 전환 효과.",
+      soon: "soon",
+    },
+    elementTransition: {
+      sectionLabel: "Element Transitions",
+      title: "개별 요소 트랜지션",
+      description: "in과 out으로 등장/퇴장 애니메이션을 정의합니다",
+      toggleShow: "Show",
+      toggleHide: "Hide",
+    },
+    cta: {
+      title: "지금 시작하세요",
+      description:
+        "몇 분 안에 네이티브 수준의 페이지 전환을 구현할 수 있습니다.",
+      viewDocs: "문서 보기",
+    },
+    footer: {
+      license: "MIT License",
+      builtWith: "Built with care",
+    },
+  },
 };

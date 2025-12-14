@@ -21,26 +21,26 @@ export default function PinterestDemo() {
 
   return (
     <SsgoiTransition id="/demo/pinterest">
-      <div className="min-h-screen bg-gray-950 px-4 py-8">
+      <div className="min-h-screen bg-[#121212] px-4 py-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Gallery</h1>
-          <p className="text-gray-400">
+        <div className="mb-6">
+          <h1 className="text-sm font-medium text-white mb-1">Gallery</h1>
+          <p className="text-xs text-neutral-500">
             Explore inspiring ideas and creativity
           </p>
         </div>
 
         {/* Masonry Grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {/* Left Column */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {leftColumnItems.map((item) => (
               <PinCard key={item.id} item={item} router={router} />
             ))}
           </div>
 
           {/* Right Column */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {rightColumnItems.map((item) => (
               <PinCard key={item.id} item={item} router={router} />
             ))}
@@ -63,47 +63,47 @@ function PinCard({ item, router }: PinCardProps) {
         // Navigate to pin detail
         router.goto(`/demo/pinterest/${item.id}`);
       }}
-      className="bg-gray-900 rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-xl border border-gray-800 group cursor-pointer"
+      className="border border-white/5 rounded-lg overflow-hidden transition-all duration-200 hover:border-white/10 group cursor-pointer"
     >
       {/* Image with dynamic aspect ratio */}
       <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
         <img
           src={item.image}
           alt={item.title}
-          className="w-full h-full object-cover bg-gray-800"
+          className="w-full h-full object-cover bg-[#111]"
           data-pinterest-gallery-key={item.id}
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
         {/* Save button */}
-        <button className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700">
+        <button className="absolute top-2 right-2 bg-white/10 text-white px-2 py-0.5 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white/20">
           Save
         </button>
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-2">
+      <div className="p-2.5">
+        <h3 className="font-medium text-white text-xs mb-1.5 line-clamp-2">
           {item.title}
         </h3>
 
         {/* Author info */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-1.5 mb-2">
           <img
             src={item.author.avatar}
             alt={item.author.name}
-            className="w-6 h-6 rounded-full"
+            className="w-4 h-4 rounded-full"
           />
-          <span className="text-xs text-gray-400">{item.author.name}</span>
+          <span className="text-xs text-neutral-400">{item.author.name}</span>
         </div>
 
         {/* Stats and Category */}
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">
+          <span className="text-neutral-500">
             {item.saves.toLocaleString()} saves
           </span>
-          <span className="px-2 py-1 bg-gray-800 text-gray-300 rounded-full">
+          <span className="px-1.5 py-0.5 bg-white/5 text-neutral-400 rounded">
             {item.category}
           </span>
         </div>

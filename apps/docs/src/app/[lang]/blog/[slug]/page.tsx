@@ -75,7 +75,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <BlogPostLink
             href={`/${lang}/blog`}
             fallbackHref={`/${lang}/blog`}
-            className="inline-flex items-center text-gray-400 hover:text-white transition-colors mb-8"
+            className="inline-flex items-center text-xs text-neutral-400 hover:text-white transition-colors mb-8"
           >
             {t("backToBlog")}
           </BlogPostLink>
@@ -86,7 +86,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 data-hero-key={`/${lang}/blog/${post.slug}`}
                 src={post.thumbnail}
                 alt={post.title}
-                className="rounded-lg"
+                className="rounded border border-white/5"
                 style={{
                   width: post.thumbnailWidth,
                   aspectRatio: post.thumbnailWidth / post.thumbnailHeight,
@@ -96,9 +96,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           )}
 
           <header className="mb-8">
-            <h1 className="text-5xl font-bold text-white mb-4">{post.title}</h1>
+            <h1 className="text-3xl font-medium text-white mb-3">
+              {post.title}
+            </h1>
 
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-3 text-xs text-neutral-500">
               {post.date && (
                 <time dateTime={post.date}>
                   {new Date(post.date).toLocaleDateString(lang, {
@@ -118,11 +120,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
 
             {post.tags && post.tags.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-1.5">
                 {post.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 text-sm bg-gray-800 text-gray-300 rounded-full"
+                    className="px-2 py-0.5 text-xs bg-white/5 text-neutral-400 rounded border border-white/5"
                   >
                     {tag}
                   </span>
@@ -137,11 +139,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           <GiscusComments slug={slug} lang={lang as SupportedLanguage} />
 
-          <footer className="mt-16 pt-8 border-t border-gray-800">
+          <footer className="mt-16 pt-6 border-t border-white/5">
             <BlogPostLink
               href={`/${lang}/blog`}
               fallbackHref={`/${lang}/blog`}
-              className="inline-flex items-center text-orange-400 hover:text-orange-300 transition-colors"
+              className="inline-flex items-center text-xs text-neutral-400 hover:text-white transition-colors"
             >
               {t("backToBlog")}
             </BlogPostLink>

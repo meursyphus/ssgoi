@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import { instagram } from "@ssgoi/react/view-transitions";
 import {
   BrowserMockup,
@@ -10,78 +11,66 @@ import {
 } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 
-// Mock Instagram data with images from Unsplash
+// Mock Instagram data with local images
 const instagramItems = [
   {
     id: "post-1",
-    image:
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+    image: "/images/john-towner-JgOeRuGD_Y4-unsplash.jpg",
     likes: 1234,
   },
   {
     id: "post-2",
-    image:
-      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=400&fit=crop",
+    image: "/images/jeremy-bishop-8xznAGy4HcY-unsplash.jpg",
     likes: 892,
   },
   {
     id: "post-3",
-    image:
-      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=500&fit=crop",
+    image: "/images/stormseeker-rX12B5uX7QM-unsplash.jpg",
     likes: 2341,
   },
   {
     id: "post-4",
-    image:
-      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=450&fit=crop",
+    image: "/images/rosie-sun-1L71sPT5XKc-unsplash.jpg",
     likes: 567,
   },
   {
     id: "post-5",
-    image:
-      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=550&fit=crop",
+    image: "/images/leonardo-yip-NcWnJmeVtcw-unsplash.jpg",
     likes: 1789,
   },
   {
     id: "post-6",
-    image:
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=350&fit=crop",
+    image: "/images/m-wrona-pCgxm-HDMNs-unsplash.jpg",
     likes: 3421,
   },
   {
     id: "post-7",
-    image:
-      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=400&h=480&fit=crop",
+    image: "/images/jeremy-bishop-G9i_plbfDgk-unsplash.jpg",
     likes: 945,
   },
   {
     id: "post-8",
-    image:
-      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400&h=420&fit=crop",
+    image: "/images/karsten-wurth-7BjhtdogU3A-unsplash.jpg",
     likes: 2156,
   },
   {
     id: "post-9",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=520&fit=crop",
+    image: "/images/elliott-engelmann-DjlKxYFJlTc-unsplash.jpg",
     likes: 1678,
   },
   {
     id: "post-10",
-    image:
-      "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=400&h=380&fit=crop",
+    image: "/images/clay-banks-u27Rrbs9Dwc-unsplash.jpg",
     likes: 4321,
   },
   {
     id: "post-11",
-    image:
-      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=460&fit=crop",
+    image: "/images/breno-machado-in9-n0JwgZ0-unsplash.jpg",
     likes: 876,
   },
   {
     id: "post-12",
-    image:
-      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=500&fit=crop",
+    image: "/images/mike-yukhtenko-wfh8dDlNFOk-unsplash.jpg",
     likes: 2987,
   },
 ];
@@ -90,11 +79,28 @@ const instagramItems = [
 function InstagramGridPage() {
   return (
     <DemoPage path="/instagram/gallery">
-      <div className="min-h-screen bg-gray-950 p-1">
+      {/* Preload detail images (hidden) */}
+      <div className="hidden">
+        {instagramItems.map((item) => (
+          <Image
+            key={`preload-${item.id}`}
+            src={item.image}
+            alt=""
+            width={800}
+            height={800}
+            priority
+          />
+        ))}
+      </div>
+      <div className="min-h-screen bg-[#121212] p-1">
         {/* Header */}
         <div className="mb-3 px-3 pt-3 text-center">
-          <h1 className="text-xl font-bold text-white mb-1">Gallery</h1>
-          <p className="text-gray-400 text-xs">Tap any photo to view details</p>
+          <h1 className="text-base font-medium text-neutral-100 mb-1">
+            Gallery
+          </h1>
+          <p className="text-neutral-500 text-xs">
+            Tap any photo to view details
+          </p>
         </div>
 
         {/* Instagram 3-Column Masonry Grid */}
@@ -105,11 +111,14 @@ function InstagramGridPage() {
               to={`/instagram/gallery/${item.id}`}
               className="break-inside-avoid block no-underline mb-1"
             >
-              <img
+              <Image
                 src={item.image}
                 alt={`Post ${item.id}`}
+                width={400}
+                height={400}
                 className="w-full h-auto object-cover"
                 data-instagram-gallery-key={item.id}
+                priority
               />
             </DemoLink>
           ))}
@@ -137,14 +146,16 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
 
   return (
     <DemoPage path={`/instagram/gallery/${item.id}`}>
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-[#121212]">
         {/* Content */}
         <div>
           {/* Image with overlays */}
           <div className="relative">
-            <img
+            <Image
               src={item.image}
               alt={`Post ${item.id}`}
+              width={800}
+              height={800}
               className="w-full h-auto"
               data-instagram-detail-key={item.id}
             />
@@ -161,7 +172,7 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-white"
+                className="text-neutral-200"
               >
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
@@ -172,10 +183,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
           <div className="p-4">
             {/* Like section */}
             <div className="flex items-center gap-3 mb-3">
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -184,10 +195,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -196,10 +207,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -210,42 +221,44 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
               </button>
             </div>
 
-            <p className="text-white font-semibold text-sm mb-2">
+            <p className="text-neutral-200 font-medium text-sm mb-2">
               {item.likes.toLocaleString()} likes
             </p>
 
             {/* Caption */}
             <div className="mb-3">
-              <p className="text-white text-sm">
-                <span className="font-semibold">username</span> Beautiful moment
-                captured! ✨
+              <p className="text-neutral-300 text-sm">
+                <span className="font-medium text-neutral-200">username</span>{" "}
+                Beautiful moment captured! ✨
               </p>
             </div>
 
             {/* Comments */}
             <div className="space-y-2 mb-4">
-              <p className="text-gray-400 text-xs">View all 23 comments</p>
+              <p className="text-neutral-500 text-xs">View all 23 comments</p>
               <div className="space-y-1.5">
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user1</span> Amazing! 😍
+                <p className="text-neutral-300 text-sm">
+                  <span className="font-medium text-neutral-200">user1</span>{" "}
+                  Amazing! 😍
                 </p>
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user2</span> Love this!
+                <p className="text-neutral-300 text-sm">
+                  <span className="font-medium text-neutral-200">user2</span>{" "}
+                  Love this!
                 </p>
               </div>
             </div>
 
             {/* Time */}
-            <p className="text-gray-500 text-xs uppercase">2 hours ago</p>
+            <p className="text-neutral-600 text-xs uppercase">2 hours ago</p>
 
             {/* Comment input */}
-            <div className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-3">
+            <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
               <input
                 type="text"
                 placeholder="Add a comment..."
-                className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
+                className="flex-1 bg-transparent text-neutral-200 text-sm outline-none placeholder-neutral-600"
               />
-              <button className="text-blue-500 text-sm font-semibold">
+              <button className="text-neutral-400 text-sm font-medium hover:text-neutral-200 transition-colors">
                 Post
               </button>
             </div>
@@ -276,7 +289,7 @@ const instagramRoutes: RouteConfig[] = [
 // Custom layout for Instagram demo
 function InstagramLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-gray-950 min-h-full">
+    <div className="bg-[#121212] min-h-full">
       {/* Constrain width at layout level */}
       <div className="max-w-md mx-auto overflow-hidden">
         {/* Critical: relative z-0 wrapper for proper transition layering */}

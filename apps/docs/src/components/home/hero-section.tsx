@@ -1,128 +1,138 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Zap, CheckCircle } from "lucide-react";
-import IPhone3D from "@/components/home/iphone";
+import { ArrowRight, Copy, Check, ChevronRight } from "lucide-react";
 import Demo from "@/components/demo";
-import { getServerTranslations } from "@/i18n";
+import { useTranslations } from "@/i18n/use-translations";
 
 interface HeroSectionProps {
   lang: string;
 }
 
-export async function HeroSection({ lang }: HeroSectionProps) {
-  const t = await getServerTranslations("home", lang);
-  return (
-    <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
-      {/* 배경 그라데이션 효과 */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute left-0 top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-vivid-orange/20 blur-[120px]" />
-        <div className="absolute right-0 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-vivid-purple/15 blur-[120px]" />
-      </div>
+const frameworks = [
+  { name: "React", package: "@ssgoi/react" },
+  { name: "Svelte", package: "@ssgoi/svelte" },
+  { name: "Vue", package: "@ssgoi/vue" },
+  { name: "Solid", package: "@ssgoi/solid" },
+  { name: "Angular", package: "@ssgoi/angular" },
+];
 
-      <div className="mx-auto max-w-7xl">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
-          {/* 왼쪽: 텍스트 */}
+export function HeroSection({ lang }: HeroSectionProps) {
+  const [copied, setCopied] = useState(false);
+  const [activeFramework, setActiveFramework] = useState(0);
+  const t = useTranslations("home");
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(
+      `npm install ${frameworks[activeFramework].package}`,
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <section className="pt-32 pb-20 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left: Text content */}
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-vivid-green/30 bg-vivid-green/10 px-4 py-2">
-              <CheckCircle className="h-4 w-4 text-vivid-green" />
-              <span className="text-sm font-medium text-vivid-green">
-                {t("badge.text")}
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-[10px] text-neutral-400 uppercase tracking-wider">
+                {t("newHome.hero.badge")}
               </span>
             </div>
 
-            <h1 className="text-5xl font-black tracking-tight sm:text-6xl lg:text-7xl">
-              <span className="block text-white">{t("heroTitle.line1")}</span>
-              <span className="gradient-orange">{t("heroTitle.line2")}</span>
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl font-light tracking-tight leading-tight mb-6">
+              {t("newHome.hero.title.line1")}
+              <br />
+              <span className="text-neutral-500">
+                {t("newHome.hero.title.line2")}
+              </span>
             </h1>
-            <p className="mt-6 text-xl text-muted-foreground sm:text-2xl">
-              {t("subtitle")}
-            </p>
-            <p className="mt-4 text-lg text-muted-foreground">
-              {t("description")}
+
+            {/* Description */}
+            <p className="text-sm text-neutral-400 leading-relaxed mb-8 max-w-md">
+              {t("newHome.hero.description")}
             </p>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link href={`${lang}/docs`} className="btn-primary text-lg">
-                {t("buttons.getStarted")}
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link href={`/${lang}/demo`} className="btn-secondary text-lg">
-                <Zap className="h-5 w-5" />
-                {t("buttons.demo")}
-              </Link>
+            {/* Framework tabs */}
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {frameworks.map((fw, i) => (
+                <button
+                  key={fw.name}
+                  onClick={() => setActiveFramework(i)}
+                  className={`px-2.5 py-1 text-[10px] rounded transition-all ${
+                    activeFramework === i
+                      ? "bg-white/10 text-white"
+                      : "text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {fw.name}
+                </button>
+              ))}
             </div>
 
-            {/* 빠른 설치 */}
-            <div className="mt-12 space-y-3">
-              <div className="rounded-lg bg-card/50 p-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.react")}
-                </p>
-                <code className="font-mono text-sm text-white">
-                  npm install @ssgoi/react
+            {/* Install command */}
+            <div className="flex items-center gap-3 mb-10">
+              <div className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg">
+                <code className="text-xs text-neutral-300 font-mono">
+                  npm install {frameworks[activeFramework].package}
                 </code>
+                <button
+                  onClick={handleCopy}
+                  className="text-neutral-500 hover:text-white transition-colors"
+                >
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
               </div>
-              <div className="rounded-lg bg-card/50 p-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.svelte")}
-                </p>
-                <code className="font-mono text-sm text-white">
-                  npm install @ssgoi/svelte
-                </code>
-              </div>
-              <div className="rounded-lg bg-card/50 p-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.vue")}
-                </p>
-                <code className="font-mono text-sm text-white">
-                  npm install @ssgoi/vue
-                </code>
-              </div>
-              <div className="rounded-lg bg-card/50 p-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.angular")}
-                </p>
-                <code className="font-mono text-sm text-white">
-                  npm install @ssgoi/angular
-                </code>
-              </div>
-              {/* SolidJS */}
-              <div className="rounded-lg bg-card/50 p-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.solidjs")}
-                </p>
-                <code className="font-mono text-sm text-white">
-                  npm install @ssgoi/solid
-                </code>
-              </div>
-              {/* Qwik - 추가 예정 */}
-              <div className="rounded-lg bg-card/50 p-4 opacity-50">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("quickInstall.qwik")}
-                </p>
-                <code className="font-mono text-sm text-white/50">
-                  npm install @ssgoi/qwik
-                </code>
-              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex items-center gap-4">
+              <Link
+                href={`/${lang}/docs`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors"
+              >
+                {t("newHome.hero.getStarted")}
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href={`/${lang}/demo`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs text-neutral-400 hover:text-white transition-colors"
+              >
+                {t("newHome.hero.viewDemo")}
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
 
-          {/* 오른쪽: 앱 데모 */}
-          <div className="relative">
-            <div className="relative mx-auto z-0 w-full max-w-[400px] md:max-w-[700px] aspect-[5/7]">
-              {/* 3D iPhone Component */}
-              <IPhone3D color="blue">
-                <Demo autoPlay />
-              </IPhone3D>
-            </div>
-            {/* 플로팅 배지 - 아이폰 근처에 배치 */}
-            <div className="absolute left-0 md:left-8 top-1/3 md:top-1/4 animate-float rounded-lg bg-vivid-orange px-3 py-2 md:px-4 md:py-2.5 text-sm md:text-base font-medium text-white shadow-lg">
-              {t("floatingBadges.performance")}
-            </div>
-            <div
-              className="absolute right-0 z-1 md:right-8 bottom-1/3 md:bottom-1/4 animate-float rounded-lg bg-vivid-purple px-3 py-2 md:px-4 md:py-2.5 text-sm md:text-base font-medium text-white shadow-lg"
-              style={{ animationDelay: "1s" }}
-            >
-              {t("floatingBadges.stateMemory")}
+          {/* Right: Phone mockup with Demo */}
+          <div className="flex items-center justify-center">
+            <div className="relative w-[300px]">
+              {/* Phone frame */}
+              <div className="relative bg-neutral-900 rounded-[2.5rem] p-2 shadow-2xl border border-white/10">
+                {/* Dynamic Island */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
+
+                {/* Screen */}
+                <div className="relative w-full aspect-[9/19.5] bg-[#121212] rounded-[2rem] overflow-hidden">
+                  <Demo autoPlay />
+                </div>
+
+                {/* Home indicator */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/20 rounded-full" />
+              </div>
+
+              {/* Glow effect */}
+              <div className="absolute -inset-12 bg-gradient-to-r from-emerald-500/10 via-transparent to-blue-500/10 blur-3xl -z-10 opacity-60" />
             </div>
           </div>
         </div>

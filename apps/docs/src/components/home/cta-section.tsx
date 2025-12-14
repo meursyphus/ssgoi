@@ -1,37 +1,42 @@
-import Link from "next/link";
-import { Zap } from "lucide-react";
-import { getServerTranslations } from "@/i18n";
+"use client";
 
-interface CtaSectionProps {
+import Link from "next/link";
+import { ArrowRight, Github } from "lucide-react";
+import { useTranslations } from "@/i18n/use-translations";
+
+interface CTASectionProps {
   lang: string;
 }
 
-export async function CtaSection({ lang }: CtaSectionProps) {
-  const t = await getServerTranslations("home", lang);
+export function CTASection({ lang }: CTASectionProps) {
+  const t = useTranslations("home");
+
   return (
-    <section className="px-4 py-32 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-vivid-orange via-vivid-pink to-vivid-purple p-1">
-          <div className="rounded-[calc(1.5rem-1px)] bg-background p-12 sm:p-16">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                {t("cta.title")}
-              </h2>
-              <p className="mt-6 text-xl text-muted-foreground">
-                {t("cta.subtitle")}
-              </p>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link href={`${lang}/docs`} className="btn-primary text-lg">
-                  <Zap className="h-5 w-5" />
-                  {t("cta.buttons.viewDocs")}
-                </Link>
-                <Link href={`/${lang}/demo`} className="btn-secondary text-lg">
-                  <Zap className="h-5 w-5" />
-                  {t("cta.buttons.demo")}
-                </Link>
-              </div>
-            </div>
-          </div>
+    <section className="py-24 px-6 border-t border-white/5">
+      <div className="max-w-6xl mx-auto text-center">
+        <h2 className="text-2xl font-light tracking-tight mb-4">
+          {t("newHome.cta.title")}
+        </h2>
+        <p className="text-sm text-neutral-500 mb-8 max-w-md mx-auto">
+          {t("newHome.cta.description")}
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <Link
+            href={`/${lang}/docs`}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors"
+          >
+            {t("newHome.cta.viewDocs")}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <a
+            href="https://github.com/meursyphus/ssgoi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 text-xs text-neutral-400 border border-white/10 rounded-lg hover:bg-white/[0.02] transition-colors"
+          >
+            <Github className="w-3.5 h-3.5" />
+            GitHub
+          </a>
         </div>
       </div>
     </section>

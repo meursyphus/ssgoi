@@ -1,12 +1,11 @@
 import { SsgoiTransition } from "@ssgoi/react";
 import { HeroSection } from "./hero-section";
-import { WhyTransitionsMatterSection } from "./why-transitions-matter-section";
-import { ExperienceDifferenceSection } from "./experience-difference-section";
-import { TransitionShowcaseSection } from "./transition-showcase-section";
-import { ComparisonSection } from "./comparison-section";
-import { FeaturesTimelineSection } from "./features-timeline-section";
-import { CtaSection } from "./cta-section";
-import { ContributorsSection } from "./contributors-section";
+import { ElementTransitionSection } from "./element-transition-section";
+import { FeaturesSection } from "./features-section";
+import { CodeSection } from "./code-section";
+import { FrameworksSection } from "./frameworks-section";
+import { CTASection } from "./cta-section";
+import { Footer } from "./footer";
 
 interface HomePageContentProps {
   lang: string;
@@ -17,16 +16,15 @@ export function HomePageContent({ lang }: HomePageContentProps) {
     <SsgoiTransition
       id="/ssgoi"
       as="div"
-      className="relative page !bg-transparent"
+      className="relative page !bg-transparent min-h-screen"
     >
       <HeroSection lang={lang} />
-      <WhyTransitionsMatterSection lang={lang} />
-      <ExperienceDifferenceSection lang={lang} />
-      <TransitionShowcaseSection lang={lang} />
-      <ComparisonSection lang={lang} />
-      <FeaturesTimelineSection lang={lang} />
-      <CtaSection lang={lang} />
-      <ContributorsSection lang={lang} />
+      <FeaturesSection />
+      <ElementTransitionSection />
+      <CodeSection />
+      <FrameworksSection />
+      <CTASection lang={lang} />
+      <Footer />
     </SsgoiTransition>
   );
 }

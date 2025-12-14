@@ -12,10 +12,7 @@ function TheaterPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/blind"
-      className="bg-gradient-to-br from-gray-900 via-red-950 to-gray-900 min-h-full"
-    >
+    <DemoPage path="/blind" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col items-center justify-center min-h-full",
@@ -23,52 +20,50 @@ function TheaterPage() {
         )}
       >
         <div className="text-center space-y-6">
-          <div className="inline-block p-3 bg-red-500/10 rounded-full mb-4">
-            <span className="text-red-400 text-sm font-semibold">
+          <div className="inline-block px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mb-4">
+            <span className="text-neutral-400 text-xs font-medium tracking-wider">
               NOW SHOWING
             </span>
           </div>
           <h1
             className={cn(
-              "font-bold text-white",
+              "font-medium text-neutral-100",
               isMobile ? "text-3xl" : "text-5xl sm:text-7xl",
             )}
           >
-            <span className="text-gradient bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
-              blind
-            </span>
+            blind
           </h1>
           <p
             className={cn(
-              "text-gray-300 max-w-2xl mx-auto",
-              isMobile ? "text-base" : "text-xl sm:text-2xl",
+              "text-neutral-400 max-w-2xl mx-auto",
+              isMobile ? "text-sm" : "text-base",
             )}
           >
             Experience dramatic transitions that create anticipation and focus
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <button className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-8">
+            <button className="px-6 py-2.5 bg-white text-neutral-900 text-sm rounded-lg hover:bg-neutral-200 transition-colors">
               Watch Demo
             </button>
-            <button className="px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+            <button className="px-6 py-2.5 bg-white/5 border border-white/10 text-neutral-300 text-sm rounded-lg hover:bg-white/10 transition-colors">
               Learn More
             </button>
           </div>
         </div>
 
-        <div className="mt-20 grid grid-cols-3 gap-8 text-center">
+        <div className="mt-16 grid grid-cols-3 gap-6 text-center">
           <div>
-            <div className="text-4xl mb-2">🎭</div>
-            <p className="text-gray-400 text-sm">Theater Mode</p>
+            <div className="text-2xl mb-2">🎭</div>
+            <p className="text-neutral-500 text-xs">Theater Mode</p>
           </div>
           <div>
-            <div className="text-4xl mb-2">🎬</div>
-            <p className="text-gray-400 text-sm">Cinematic Feel</p>
+            <div className="text-2xl mb-2">🎬</div>
+            <p className="text-neutral-500 text-xs">Cinematic Feel</p>
           </div>
           <div>
-            <div className="text-4xl mb-2">✨</div>
-            <p className="text-gray-400 text-sm">Dramatic Effect</p>
+            <div className="text-2xl mb-2">✨</div>
+            <p className="text-neutral-500 text-xs">Dramatic Effect</p>
           </div>
         </div>
       </div>
@@ -81,63 +76,60 @@ function Act1Page() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/blind/act1"
-      className="bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 min-h-full"
-    >
+    <DemoPage path="/blind/act1" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
           isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h1
             className={cn(
-              "font-bold text-white mb-4",
-              isMobile ? "text-3xl" : "text-5xl",
+              "font-medium text-neutral-100 mb-3",
+              isMobile ? "text-2xl" : "text-4xl",
             )}
           >
             Act I: The Beginning
           </h1>
-          <p className="text-gray-300 text-lg">
+          <p className="text-neutral-400 text-sm">
             When the blind rises, a new story unfolds
           </p>
         </div>
 
-        <div className="space-y-8">
-          <div className="bg-gray-800/50 backdrop-blur p-8 rounded-lg">
-            <h2 className="text-2xl font-semibold text-white mb-4">
-              🎯 Perfect For
+        <div className="space-y-6">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-base font-medium text-neutral-200 mb-4">
+              Perfect For
             </h2>
-            <ul className="space-y-3 text-gray-300">
+            <ul className="space-y-2.5 text-neutral-400 text-sm">
               <li className="flex items-start gap-3">
-                <span className="text-green-400 mt-1">✓</span>
+                <span className="text-neutral-500 mt-0.5">✓</span>
                 <span>
                   Onboarding flows where each step builds anticipation
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-green-400 mt-1">✓</span>
+                <span className="text-neutral-500 mt-0.5">✓</span>
                 <span>Result reveals that need dramatic presentation</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-green-400 mt-1">✓</span>
+                <span className="text-neutral-500 mt-0.5">✓</span>
                 <span>Gallery or presentation modes with theatrical feel</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-green-400 mt-1">✓</span>
+                <span className="text-neutral-500 mt-0.5">✓</span>
                 <span>Story-driven experiences and narratives</span>
               </li>
             </ul>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur p-8 rounded-lg">
-            <h2 className="text-2xl font-semibold text-white mb-4">
-              ⚙️ Customization Options
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-base font-medium text-neutral-200 mb-4">
+              Customization Options
             </h2>
-            <pre className="bg-gray-900 p-4 rounded overflow-x-auto">
-              <code className="text-gray-300 text-sm">{`blind({
+            <pre className="bg-[#111] border border-white/5 p-4 rounded overflow-x-auto">
+              <code className="text-neutral-400 text-xs">{`blind({
   blindCount: 12,      // Number of blind strips
   direction: 'horizontal', // or 'vertical'
   staggerDelay: 30,    // Delay between each blind
@@ -156,84 +148,81 @@ function Act2Page() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/blind/act2"
-      className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 min-h-full"
-    >
+    <DemoPage path="/blind/act2" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
           isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h1
             className={cn(
-              "font-bold text-white mb-4",
-              isMobile ? "text-3xl" : "text-5xl",
+              "font-medium text-neutral-100 mb-3",
+              isMobile ? "text-2xl" : "text-4xl",
             )}
           >
             Act II: The Reveal
           </h1>
-          <p className="text-gray-300 text-lg">
+          <p className="text-neutral-400 text-sm">
             Building tension before the grand reveal
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-800/50 backdrop-blur p-6 rounded-lg">
-            <div className="text-4xl mb-4">🎪</div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white/[0.02] border border-white/5 p-5 rounded-lg">
+            <div className="text-2xl mb-3">🎪</div>
+            <h3 className="text-sm font-medium text-neutral-200 mb-2">
               Stage Performance
             </h3>
-            <p className="text-gray-400">
+            <p className="text-neutral-500 text-xs">
               Like a theater blind, the transition creates a clear separation
               between scenes, perfect for storytelling experiences.
             </p>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur p-6 rounded-lg">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+          <div className="bg-white/[0.02] border border-white/5 p-5 rounded-lg">
+            <div className="text-2xl mb-3">🎯</div>
+            <h3 className="text-sm font-medium text-neutral-200 mb-2">
               Focus Attention
             </h3>
-            <p className="text-gray-400">
+            <p className="text-neutral-500 text-xs">
               The sequential blind animation naturally draws the user&apos;s
               eye, creating anticipation for what&apos;s coming next.
             </p>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur p-6 rounded-lg">
-            <div className="text-4xl mb-4">⏱️</div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+          <div className="bg-white/[0.02] border border-white/5 p-5 rounded-lg">
+            <div className="text-2xl mb-3">⏱️</div>
+            <h3 className="text-sm font-medium text-neutral-200 mb-2">
               Timing Control
             </h3>
-            <p className="text-gray-400">
+            <p className="text-neutral-500 text-xs">
               Fine-tune the speed and stagger of each blind to create the
               perfect dramatic timing for your content.
             </p>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur p-6 rounded-lg">
-            <div className="text-4xl mb-4">🎨</div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+          <div className="bg-white/[0.02] border border-white/5 p-5 rounded-lg">
+            <div className="text-2xl mb-3">🎨</div>
+            <h3 className="text-sm font-medium text-neutral-200 mb-2">
               Visual Impact
             </h3>
-            <p className="text-gray-400">
+            <p className="text-neutral-500 text-xs">
               The blind effect adds a premium, polished feel to transitions,
               elevating the perceived quality of your application.
             </p>
           </div>
         </div>
 
-        <div className="mt-12 bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-lg text-center">
-          <h3 className="text-2xl font-bold text-white mb-3">
+        <div className="mt-10 bg-white/[0.02] border border-white/10 p-6 rounded-lg text-center">
+          <h3 className="text-base font-medium text-neutral-100 mb-2">
             Create Your Own Drama
           </h3>
-          <p className="text-gray-100 mb-6">
+          <p className="text-neutral-400 text-sm mb-5">
             Transform ordinary page transitions into memorable experiences
           </p>
-          <button className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+          <button className="px-5 py-2 bg-white text-neutral-900 text-sm rounded-lg hover:bg-neutral-200 transition-colors">
             Get Started with blind
           </button>
         </div>
@@ -247,10 +236,7 @@ function FinalePage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/blind/finale"
-      className="bg-gradient-to-br from-gray-900 via-yellow-950 to-gray-900 min-h-full"
-    >
+    <DemoPage path="/blind/finale" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto flex flex-col items-center justify-center min-h-full",
@@ -260,58 +246,52 @@ function FinalePage() {
         <div className="text-center space-y-6">
           <h1
             className={cn(
-              "font-bold text-white mb-6",
-              isMobile ? "text-3xl" : "text-5xl sm:text-6xl",
+              "font-medium text-neutral-100 mb-4",
+              isMobile ? "text-2xl" : "text-4xl",
             )}
           >
-            <span className="text-gradient bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-              The Grand Finale
-            </span>
+            The Grand Finale
           </h1>
 
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+          <p className="text-sm text-neutral-400 max-w-2xl mx-auto mb-6">
             Every great show deserves an unforgettable ending
           </p>
 
-          <div className="space-y-4 max-w-xl mx-auto">
-            <div className="bg-gray-800/50 backdrop-blur p-4 rounded-lg text-left">
-              <code className="text-sm text-gray-300">
-                <span className="text-blue-400">import</span>{" "}
-                <span className="text-yellow-400">{"{ blind }"}</span>{" "}
-                <span className="text-blue-400">from</span>{" "}
-                <span className="text-green-400">
+          <div className="space-y-3 max-w-xl mx-auto">
+            <div className="bg-[#111] border border-white/5 p-4 rounded-lg text-left">
+              <code className="text-xs text-neutral-400">
+                <span className="text-neutral-300">import</span>{" "}
+                <span className="text-neutral-200">{"{ blind }"}</span>{" "}
+                <span className="text-neutral-300">from</span>{" "}
+                <span className="text-neutral-400">
                   &apos;@ssgoi/react/view-transitions&apos;
                 </span>
                 ;
               </code>
             </div>
 
-            <div className="bg-gray-800/50 backdrop-blur p-4 rounded-lg text-left">
-              <code className="text-sm text-gray-300">
-                <span className="text-blue-400">const</span> config = {"{"}
+            <div className="bg-[#111] border border-white/5 p-4 rounded-lg text-left">
+              <code className="text-xs text-neutral-400">
+                <span className="text-neutral-300">const</span> config = {"{"}
                 <br />
                 {"  "}defaultTransition:{" "}
-                <span className="text-yellow-400">blind</span>()
+                <span className="text-neutral-200">blind</span>()
                 <br />
                 {"}"};
               </code>
             </div>
           </div>
 
-          <div className="pt-8">
-            <div className="flex justify-center gap-8 mb-8">
+          <div className="pt-6">
+            <div className="flex justify-center gap-6 mb-6">
               {["🎭", "🎪", "🎨", "✨", "🎬"].map((emoji, idx) => (
-                <div
-                  key={idx}
-                  className="text-4xl animate-bounce"
-                  style={{ animationDelay: `${idx * 0.1}s` }}
-                >
+                <div key={idx} className="text-2xl">
                   {emoji}
                 </div>
               ))}
             </div>
 
-            <p className="text-gray-400 text-sm">
+            <p className="text-neutral-500 text-xs">
               Thank you for watching the blind Transition Demo
             </p>
           </div>
@@ -344,9 +324,8 @@ export function BlindDemo() {
       blindCount: 10,
       inSpring: { stiffness: 200, damping: 20 },
       outSpring: { stiffness: 200, damping: 20 },
-      staggerDelay: 100,
       direction: "horizontal",
-      blindColor: "lab(8.11897% .811279 -12.254)",
+      blindColor: "#131313",
     }),
   };
 
@@ -393,14 +372,14 @@ const DemoLayout = memo(
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
-        <header className="bg-gray-900 border-b border-gray-700">
+        <header className="bg-[#121212] border-b border-white/5">
           <div className={cn("mx-auto", isMobile ? "px-3" : "max-w-6xl px-4")}>
-            <div className="flex items-center justify-between h-14">
+            <div className="flex items-center justify-between h-12">
               <div className="flex items-center gap-4">
                 <h1
                   className={cn(
-                    "font-bold text-white flex items-center gap-2",
-                    isMobile ? "text-base" : "text-xl",
+                    "font-medium text-neutral-200 flex items-center gap-2",
+                    isMobile ? "text-sm" : "text-base",
                   )}
                 >
                   <span>{logo}</span>
@@ -412,11 +391,11 @@ const DemoLayout = memo(
                       key={route.path}
                       onClick={() => navigate(route.path)}
                       className={cn(
-                        "rounded-md font-medium transition-all",
-                        isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
+                        "rounded-md transition-all",
+                        isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs",
                         currentPath === route.path
-                          ? "bg-red-900/50 text-white border border-red-700"
-                          : "text-gray-300 hover:bg-gray-800 hover:text-white",
+                          ? "bg-white/5 text-neutral-100"
+                          : "text-neutral-500 hover:bg-white/5 hover:text-neutral-300",
                       )}
                     >
                       {route.label}

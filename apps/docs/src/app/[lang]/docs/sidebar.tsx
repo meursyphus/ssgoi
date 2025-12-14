@@ -29,8 +29,8 @@ export function Sidebar({ navigation, lang }: SidebarProps) {
   return (
     <div className="hidden md:block">
       <div className="space-y-1">
-        <div className="mb-4 pb-4 border-b border-zinc-800">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+        <div className="mb-4 pb-4 border-b border-white/5">
+          <h2 className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">
             Documentation
           </h2>
         </div>

@@ -36,7 +36,7 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
   if (!post) {
     return (
       <SsgoiTransition id={`/demo/profile/${postId}`}>
-        <div className=" bg-gray-950 px-4 py-8">
+        <div className=" bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
       </SsgoiTransition>
@@ -45,7 +45,7 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
 
   return (
     <SsgoiTransition className="" id={`/demo/profile/${postId}`}>
-      <div className="bg-gray-950 min-h-[760px]">
+      <div className="bg-[#121212] min-h-[760px]">
         {/* Content */}
         <div>
           {/* Image with overlays */}
@@ -60,11 +60,11 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
             {/* Back button overlay */}
             <button
               onClick={onBack || (() => router.goto("/demo/profile"))}
-              className="absolute top-3 left-3 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors"
+              className="absolute top-2 left-2 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors"
             >
               <svg
-                width="20"
-                height="20"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -77,13 +77,13 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
           </div>
 
           {/* Details below image */}
-          <div className="p-4">
+          <div className="p-3">
             {/* Like section */}
-            <div className="flex items-center gap-3 mb-3">
-              <button className="text-white hover:text-gray-300 transition-colors">
+            <div className="flex items-center gap-2.5 mb-2">
+              <button className="text-white hover:text-neutral-300 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -92,10 +92,10 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-white hover:text-neutral-300 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -104,10 +104,10 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-white hover:text-neutral-300 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -118,48 +118,46 @@ export default function FeedDetail({ onBack }: FeedDetailProps) {
               </button>
             </div>
 
-            <p className="text-white font-semibold text-sm mb-2">
+            <p className="text-white font-medium text-xs mb-2">
               {post.likes.toLocaleString()} likes
             </p>
 
             {/* Caption */}
-            <div className="mb-3">
-              <p className="text-white text-sm">
-                <span className="font-semibold">alexchen</span> {post.title}
+            <div className="mb-2">
+              <p className="text-white text-xs">
+                <span className="font-medium">alexchen</span> {post.title}
               </p>
-              <p className="text-gray-400 text-sm mt-1">{post.excerpt}</p>
+              <p className="text-neutral-400 text-xs mt-0.5">{post.excerpt}</p>
             </div>
 
             {/* Comments */}
-            <div className="space-y-2 mb-4">
-              <p className="text-gray-400 text-xs">
+            <div className="space-y-1.5 mb-3">
+              <p className="text-neutral-400 text-xs">
                 View all {post.comments} comments
               </p>
-              <div className="space-y-1.5">
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user1</span> Amazing! 😍
+              <div className="space-y-1">
+                <p className="text-white text-xs">
+                  <span className="font-medium">user1</span> Amazing! 😍
                 </p>
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user2</span> Love this!
+                <p className="text-white text-xs">
+                  <span className="font-medium">user2</span> Love this!
                 </p>
               </div>
             </div>
 
             {/* Time */}
-            <p className="text-gray-500 text-xs uppercase">
+            <p className="text-neutral-500 text-xs uppercase">
               {post.publishedAt}
             </p>
 
             {/* Comment input */}
-            <div className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-3">
+            <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
               <input
                 type="text"
                 placeholder="Add a comment..."
-                className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
+                className="flex-1 bg-transparent text-white text-xs outline-none placeholder-neutral-500"
               />
-              <button className="text-blue-500 text-sm font-semibold">
-                Post
-              </button>
+              <button className="text-white text-xs font-medium">Post</button>
             </div>
           </div>
         </div>

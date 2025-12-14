@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import { pinterest } from "@ssgoi/react/view-transitions";
 import {
   BrowserMockup,
@@ -14,91 +15,81 @@ import type { RouteConfig } from "../browser-mockup";
 const pinterestItems = [
   {
     id: "pin-1",
-    image: "/demo/pinterest/10-400x400.jpg",
-    title: "Modern Architecture",
-    author: "Alex Chen",
-    authorAvatar: "/demo/pinterest/avatar-1.jpg",
+    image: "/images/john-towner-JgOeRuGD_Y4-unsplash.jpg",
+    title: "Mountain Vista",
+    author: "John Towner",
     likes: 234,
     height: "h-48",
   },
   {
     id: "pin-2",
-    image: "/demo/pinterest/11-400x667.jpg",
-    title: "Nature Photography",
-    author: "Sarah Miller",
-    authorAvatar: "/demo/pinterest/avatar-2.jpg",
+    image: "/images/jeremy-bishop-8xznAGy4HcY-unsplash.jpg",
+    title: "Ocean Waves",
+    author: "Jeremy Bishop",
     likes: 512,
     height: "h-64",
   },
   {
     id: "pin-3",
-    image: "/demo/pinterest/12-400x800.jpg",
-    title: "Urban Exploration",
-    author: "Mike Johnson",
-    authorAvatar: "/demo/pinterest/avatar-3.jpg",
+    image: "/images/stormseeker-rX12B5uX7QM-unsplash.jpg",
+    title: "Storm Chasing",
+    author: "Stormseeker",
     likes: 189,
     height: "h-72",
   },
   {
     id: "pin-4",
-    image: "/demo/pinterest/13-400x533.jpg",
-    title: "Minimalist Design",
-    author: "Emily Davis",
-    authorAvatar: "/demo/pinterest/avatar-4.jpg",
+    image: "/images/rosie-sun-1L71sPT5XKc-unsplash.jpg",
+    title: "Golden Hour",
+    author: "Rosie Sun",
     likes: 892,
     height: "h-56",
   },
   {
     id: "pin-5",
-    image: "/demo/pinterest/14-400x1000.jpg",
-    title: "Abstract Art",
-    author: "David Lee",
-    authorAvatar: "/demo/pinterest/avatar-5.jpg",
+    image: "/images/leonardo-yip-NcWnJmeVtcw-unsplash.jpg",
+    title: "Nature Walk",
+    author: "Leonardo Yip",
     likes: 445,
     height: "h-80",
   },
   {
     id: "pin-6",
-    image: "/demo/pinterest/15-400x800.jpg",
-    title: "Street Photography",
-    author: "Alex Chen",
-    authorAvatar: "/demo/pinterest/avatar-1.jpg",
+    image: "/images/m-wrona-pCgxm-HDMNs-unsplash.jpg",
+    title: "Urban Exploration",
+    author: "M. Wrona",
     likes: 667,
     height: "h-72",
   },
   {
     id: "pin-7",
-    image: "/demo/pinterest/16-400x600.jpg",
-    title: "Landscape Vista",
-    author: "Sarah Miller",
-    authorAvatar: "/demo/pinterest/avatar-2.jpg",
+    image: "/images/jeremy-bishop-G9i_plbfDgk-unsplash.jpg",
+    title: "Sunset Beach",
+    author: "Jeremy Bishop",
     likes: 334,
     height: "h-60",
   },
   {
     id: "pin-8",
-    image: "/demo/pinterest/17-400x667.jpg",
-    title: "Creative Spaces",
-    author: "Mike Johnson",
-    authorAvatar: "/demo/pinterest/avatar-3.jpg",
+    image: "/images/karsten-wurth-7BjhtdogU3A-unsplash.jpg",
+    title: "Road Trip",
+    author: "Karsten Wurth",
     likes: 778,
     height: "h-64",
   },
   {
     id: "pin-9",
-    image: "/demo/pinterest/18-400x400.jpg",
-    title: "Geometric Patterns",
-    author: "Emily Davis",
-    authorAvatar: "/demo/pinterest/avatar-4.jpg",
+    image: "/images/elliott-engelmann-DjlKxYFJlTc-unsplash.jpg",
+    title: "Winter Wonderland",
+    author: "Elliott Engelmann",
     likes: 223,
     height: "h-48",
   },
   {
     id: "pin-10",
-    image: "/demo/pinterest/19-400x667.jpg",
-    title: "Color Theory",
-    author: "David Lee",
-    authorAvatar: "/demo/pinterest/avatar-5.jpg",
+    image: "/images/clay-banks-u27Rrbs9Dwc-unsplash.jpg",
+    title: "Forest Path",
+    author: "Clay Banks",
     likes: 556,
     height: "h-64",
   },
@@ -108,11 +99,26 @@ const pinterestItems = [
 function PinterestGridPage() {
   return (
     <DemoPage path="/pinterest/gallery">
+      {/* Preload detail images (hidden) */}
+      <div className="hidden">
+        {pinterestItems.map((item) => (
+          <Image
+            key={`preload-${item.id}`}
+            src={item.image}
+            alt=""
+            width={800}
+            height={1200}
+            priority
+          />
+        ))}
+      </div>
       <div className="min-h-screen p-4">
         {/* Header */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Discover Ideas</h1>
-          <p className="text-gray-400 text-sm">
+          <h1 className="text-2xl font-bold text-neutral-100 mb-2">
+            Discover Ideas
+          </h1>
+          <p className="text-neutral-400 text-sm">
             Click any pin to see the Pinterest-style expand effect
           </p>
         </div>
@@ -125,50 +131,17 @@ function PinterestGridPage() {
               to={`/pinterest/gallery/${item.id}`}
               className="break-inside-avoid block no-underline"
             >
-              <article className="relative group cursor-pointer">
-                {/* Pin container with Pinterest transition */}
-                <div className="relative bg-gray-800 rounded-lg overflow-hidden transition-transform duration-200 hover:scale-[1.02]">
-                  {/* Image */}
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-auto object-cover"
-                    data-pinterest-gallery-key={item.id}
-                  />
-
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {/* Save button visual (not clickable since parent is a link) */}
-                    <div className="absolute top-2 right-2 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-full opacity-0 group-hover:opacity-100 transform -translate-y-2 group-hover:translate-y-0 transition-all duration-200">
-                      Save
-                    </div>
-
-                    {/* Bottom info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-2">
-                      <h3 className="text-white font-semibold text-xs mb-1 line-clamp-1">
-                        {item.title}
-                      </h3>
-                      <div className="flex items-center gap-1">
-                        <img
-                          src={item.authorAvatar}
-                          alt={item.author}
-                          className="w-4 h-4 rounded-full"
-                        />
-                        <span className="text-gray-300 text-[10px]">
-                          {item.author}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Like count (always visible) */}
-                  <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/50 backdrop-blur-sm rounded">
-                    <span className="text-white text-[10px] font-medium">
-                      ❤️ {item.likes}
-                    </span>
-                  </div>
-                </div>
-              </article>
+              <div className="rounded-lg overflow-hidden">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={400}
+                  height={600}
+                  className="w-full h-auto object-cover"
+                  data-pinterest-gallery-key={item.id}
+                  priority
+                />
+              </div>
             </DemoLink>
           ))}
         </div>
@@ -195,14 +168,16 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
 
   return (
     <DemoPage path={`/pinterest/gallery/${item.id}`}>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#121212]">
         {/* Content */}
         <div>
           {/* Image with overlays */}
-          <div className="relative bg-gray-800">
-            <img
+          <div className="relative">
+            <Image
               src={item.image}
               alt={item.title}
+              width={800}
+              height={1200}
               className="w-full h-auto"
               data-pinterest-detail-key={item.id}
             />
@@ -210,7 +185,7 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
             {/* Back button overlay */}
             <DemoLink
               to="/pinterest/gallery"
-              className="absolute top-3 left-3 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors no-underline"
+              className="absolute top-3 left-3 p-2 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full transition-colors no-underline"
             >
               <svg
                 width="20"
@@ -219,82 +194,87 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-white"
+                className="text-neutral-200"
               >
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
             </DemoLink>
 
             {/* Save button overlay */}
-            <button className="absolute top-3 right-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-full transition-colors">
+            <button className="absolute top-3 right-3 px-4 py-1.5 bg-black/50 backdrop-blur-sm hover:bg-black/70 text-neutral-200 text-sm font-medium rounded-full transition-colors">
               Save
             </button>
-
-            {/* Like count overlay */}
-            <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-              <span className="text-white text-sm font-medium">
-                ❤️ {item.likes}
-              </span>
-            </div>
           </div>
 
           {/* Details below image */}
           <div className="p-4">
-            <h1 className="text-xl font-bold text-white mb-3">{item.title}</h1>
+            <h1 className="text-lg font-semibold text-neutral-100 mb-3">
+              {item.title}
+            </h1>
 
             {/* Author section */}
-            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-800">
-              <img
-                src={item.authorAvatar}
-                alt={item.author}
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="flex-1">
-                <p className="text-white font-medium">{item.author}</p>
-                <p className="text-gray-400 text-sm">2.3k followers</p>
+            <div className="flex items-center gap-3 mb-5 pb-5 border-b border-white/10">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <span className="text-sm text-white font-medium">
+                  {item.author.charAt(0)}
+                </span>
               </div>
-              <button className="px-4 py-1.5 bg-gray-800 text-white text-sm font-medium rounded-full hover:bg-gray-700 transition-colors">
+              <div className="flex-1">
+                <p className="text-neutral-200 font-medium text-sm">
+                  {item.author}
+                </p>
+                <p className="text-neutral-500 text-xs">2.3k followers</p>
+              </div>
+              <button className="px-3 py-1 bg-white/10 hover:bg-white/15 text-neutral-200 text-xs font-medium rounded-full transition-colors">
                 Follow
               </button>
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-6 mb-6 text-sm text-gray-400">
-              <span>💬 42 comments</span>
-              <span>🔗 15 shares</span>
-              <span>👁 1.2k views</span>
+            <div className="flex items-center gap-4 mb-5 text-xs text-neutral-500">
+              <span>{item.likes} likes</span>
+              <span>42 comments</span>
+              <span>15 shares</span>
             </div>
 
             {/* Comments section */}
-            <div className="space-y-4 mb-6">
-              <h3 className="text-white font-semibold">Comments</h3>
+            <div className="space-y-3 mb-5">
+              <h3 className="text-neutral-300 font-medium text-sm">Comments</h3>
               <div className="space-y-3">
-                <div className="flex gap-3">
-                  <img
-                    src="/demo/pinterest/avatar-2.jpg"
-                    alt="Commenter"
-                    className="w-8 h-8 rounded-full"
-                  />
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] text-white font-medium">
+                      S
+                    </span>
+                  </div>
                   <div className="flex-1">
-                    <p className="text-white text-sm">
-                      <span className="font-semibold">Sarah M.</span> Beautiful
-                      composition! Love the colors 🎨
+                    <p className="text-neutral-300 text-xs">
+                      <span className="font-medium text-neutral-200">
+                        Sarah M.
+                      </span>{" "}
+                      Beautiful composition!
                     </p>
-                    <p className="text-gray-500 text-xs mt-1">2h ago</p>
+                    <p className="text-neutral-600 text-[10px] mt-0.5">
+                      2h ago
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <img
-                    src="/demo/pinterest/avatar-3.jpg"
-                    alt="Commenter"
-                    className="w-8 h-8 rounded-full"
-                  />
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] text-white font-medium">
+                      M
+                    </span>
+                  </div>
                   <div className="flex-1">
-                    <p className="text-white text-sm">
-                      <span className="font-semibold">Mike J.</span> Where was
-                      this taken? Stunning view!
+                    <p className="text-neutral-300 text-xs">
+                      <span className="font-medium text-neutral-200">
+                        Mike J.
+                      </span>{" "}
+                      Where was this taken?
                     </p>
-                    <p className="text-gray-500 text-xs mt-1">5h ago</p>
+                    <p className="text-neutral-600 text-[10px] mt-0.5">
+                      5h ago
+                    </p>
                   </div>
                 </div>
               </div>
@@ -302,12 +282,14 @@ function PinterestDetailPage({ item }: { item: (typeof pinterestItems)[0] }) {
 
             {/* Related pins */}
             <div>
-              <h3 className="text-white font-semibold mb-4">More like this</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
-                <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
-                <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
-                <div className="bg-gray-800 rounded-lg aspect-[4/5]"></div>
+              <h3 className="text-neutral-300 font-medium text-sm mb-3">
+                More like this
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-white/[0.03] rounded-lg aspect-[4/5]"></div>
+                <div className="bg-white/[0.03] rounded-lg aspect-[4/5]"></div>
+                <div className="bg-white/[0.03] rounded-lg aspect-[4/5]"></div>
+                <div className="bg-white/[0.03] rounded-lg aspect-[4/5]"></div>
               </div>
             </div>
           </div>
@@ -337,7 +319,7 @@ const pinterestRoutes: RouteConfig[] = [
 // Custom layout for Pinterest demo
 function PinterestLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-gray-950 min-h-full">
+    <div className="bg-[#121212] min-h-full">
       {/* Constrain width at layout level */}
       <div className="max-w-md mx-auto overflow-hidden">
         {/* Critical: relative z-0 wrapper for proper transition layering */}

@@ -6,9 +6,9 @@ export const Badge = ({
   variant?: "default" | "success" | "warning";
 }) => {
   const styles = {
-    default: "bg-zinc-800 text-zinc-200",
-    success: "bg-green-500/20 text-green-400",
-    warning: "bg-yellow-500/20 text-yellow-400",
+    default: "bg-zinc-800 text-zinc-300",
+    success: "bg-zinc-800 text-zinc-300",
+    warning: "bg-zinc-700 text-zinc-300",
   };
 
   return (
