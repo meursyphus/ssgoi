@@ -129,14 +129,14 @@ Animate specific elements during mount/unmount:
 ```svelte
 <script>
   import { transition } from "@ssgoi/svelte";
-  import { fadeIn, slideUp } from "@ssgoi/svelte/transitions";
+  import { fade, slide } from "@ssgoi/svelte/transitions";
 </script>
 
 <div
   use:transition={{
     key: "card",
-    in: fadeIn(),
-    out: slideUp(),
+    in: fade(),
+    out: slide({ direction: 'up' }),
   }}
 >
   <h2>Animated Card</h2>
@@ -210,8 +210,8 @@ Apply transitions to individual elements.
 <div
   use:transition={{
     key: "unique-key",
-    in: fadeIn(),
-    out: fadeOut(),
+    in: fade(),
+    out: fade(),
   }}
 >
   Content
@@ -246,9 +246,9 @@ Access transition state.
 
 ### Element Transitions (`@ssgoi/svelte/transitions`)
 
-- `fadeIn()` / `fadeOut()`
-- `slideUp()` / `slideDown()` / `slideLeft()` / `slideRight()`
-- `scaleIn()` / `scaleOut()`
+- `fade()`
+- `slide({ direction: 'up' | 'down' | 'left' | 'right' })`
+- `scale()`
 - `bounce()`
 - `blur()`
 - `rotate()`

@@ -1,0 +1,276 @@
+---
+title: "React Auto Key Plugin"
+description: "transition() 호출 시 key를 자동 생성해주는 빌드 플러그인"
+nav-title: "React Plugin"
+---
+
+## 개요
+
+`@ssgoi/react`의 Auto Key Plugin은 `transition()` 함수 호출 시 고유한 `key`를 자동으로 생성해주는 빌드 타임 플러그인입니다.
+
+### 왜 key가 필요한가?
+
+SSGOI는 요소의 애니메이션 상태를 추적하기 위해 고유한 `key`가 필요합니다. key가 없으면:
+- 같은 트랜지션을 사용하는 요소들을 구분할 수 없음
+- 페이지 이동 후 돌아왔을 때 애니메이션 상태가 유지되지 않음
+- 요소가 마운트/언마운트될 때 예상치 못한 동작 발생
+
+### 플러그인의 역할
+
+빌드 시점에 모든 `transition()` 호출을 분석하여 **파일명:라인:컬럼** 기반의 고유한 key를 자동 주입합니다.
+
+```tsx
+// 작성한 코드
+<div ref={transition(fade())}>Content</div>
+
+// 빌드 후 변환된 코드
+<div ref={transition({ ...fade(), key: "page.tsx:15:6" })}>Content</div>
+```
+
+## 설치 및 설정
+
+플러그인은 `@ssgoi/react` 패키지에 포함되어 있습니다. 별도 설치가 필요 없습니다.
+
+### Next.js (Webpack)
+
+```ts
+// next.config.ts
+import type { NextConfig } from "next";
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig: NextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey());
+    return config;
+  },
+};
+
+export default nextConfig;
+```
+
+### Vite
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import SsgoiAutoKey from "@ssgoi/react/unplugin/vite";
+
+export default defineConfig({
+  plugins: [react(), SsgoiAutoKey()],
+});
+```
+
+### Rollup
+
+```ts
+// rollup.config.js
+import SsgoiAutoKey from "@ssgoi/react/unplugin/rollup";
+
+export default {
+  plugins: [SsgoiAutoKey()],
+};
+```
+
+### esbuild
+
+```ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/esbuild";
+
+await esbuild.build({
+  plugins: [SsgoiAutoKey()],
+});
+```
+
+## 사용법
+
+### 기본 사용 (플러그인 O)
+
+플러그인이 설정되어 있으면 key를 생략할 수 있습니다.
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { fade, scale } from '@ssgoi/react/transitions';
+
+function MyComponent() {
+  return (
+    <>
+      {/* key 생략 가능 - 자동 생성됨 */}
+      <div ref={transition(fade())}>
+        Fade 효과
+      </div>
+
+      <div ref={transition(scale())}>
+        Scale 효과
+      </div>
+    </>
+  );
+}
+```
+
+### 명시적 key 사용
+
+특별한 경우 명시적으로 key를 지정할 수 있습니다. 플러그인은 이미 key가 있는 경우 건너뜁니다.
+
+```tsx
+<div ref={transition({
+  key: "my-custom-key",  // 명시적 key 사용
+  ...fade()
+})}>
+  Content
+</div>
+```
+
+### 리스트에서 사용 (.map)
+
+`.map()`으로 렌더링되는 리스트에서는 **JSX key만 있으면 됩니다**. 플러그인이 JSX key를 읽어서 `파일:라인:컬럼:${jsxKey}` 형태로 자동 생성합니다.
+
+```tsx
+function ItemList({ items }) {
+  return (
+    <ul>
+      {items.map((item) => (
+        <li
+          key={item.id}  // JSX key만 있으면 충분!
+          ref={transition(fade())}  // 플러그인이 자동 처리
+        >
+          {item.name}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+생성되는 key 예시: `ItemList.tsx:8:10:item-1`, `ItemList.tsx:8:10:item-2`, ...
+
+## 플러그인 없이 사용
+
+플러그인을 사용하지 않는 경우, 반드시 고유한 key를 직접 지정해야 합니다.
+
+```tsx
+// 플러그인 없이 사용 시 - key 필수!
+<div ref={transition({
+  key: "unique-key-1",
+  ...fade()
+})}>
+  Content
+</div>
+
+// 리스트에서도 key 필수
+{items.map((item) => (
+  <li
+    key={item.id}
+    ref={transition({
+      key: `item-${item.id}`,  // transition key도 필요
+      ...fade()
+    })}
+  >
+    {item.name}
+  </li>
+))}
+```
+
+## 작동 원리
+
+### 1. 코드 분석
+
+플러그인은 `.tsx`, `.jsx` 파일에서 `transition()` 함수 호출을 찾습니다.
+
+### 2. 위치 기반 key 생성
+
+각 호출의 소스 코드 위치(파일명, 라인, 컬럼)를 기반으로 고유한 key를 생성합니다.
+
+```
+파일명:라인:컬럼
+예: MyComponent.tsx:25:8
+```
+
+### 3. JSX key 결합 (리스트)
+
+`.map()` 내부의 요소인 경우, 상위 JSX 요소의 `key` prop을 찾아 결합합니다.
+
+```
+파일명:라인:컬럼:${jsxKey}
+예: ItemList.tsx:8:10:item-123
+```
+
+### 4. 코드 변환
+
+원본 코드를 변환하여 key를 주입합니다.
+
+```tsx
+// Before
+transition(fade())
+
+// After
+transition({ ...fade(), key: "MyComponent.tsx:25:8" })
+```
+
+## 플러그인 옵션
+
+```ts
+interface SsgoiAutoKeyOptions {
+  /**
+   * 처리할 파일 확장자
+   * @default ['.tsx', '.jsx']
+   */
+  include?: string[];
+
+  /**
+   * 제외할 파일 패턴
+   * @default [/node_modules/]
+   */
+  exclude?: (string | RegExp)[];
+}
+```
+
+### 사용 예시
+
+```ts
+// next.config.ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey({
+      include: ['.tsx'],  // .tsx 파일만 처리
+      exclude: [/node_modules/, /\.test\.tsx$/],  // 테스트 파일 제외
+    }));
+    return config;
+  },
+};
+```
+
+## 주의사항
+
+<Note type="info">
+이 플러그인은 **React 전용**입니다. Svelte, Vue, Angular 등 다른 프레임워크에서는 사용할 수 없습니다.
+</Note>
+
+<Note type="warning">
+**조건부 렌더링 주의**: 같은 위치에서 조건에 따라 다른 요소가 렌더링되는 경우, 동일한 key가 생성될 수 있습니다. 이런 경우 명시적 key를 사용하세요.
+</Note>
+
+```tsx
+// ⚠️ 주의: 같은 위치에서 조건부 렌더링
+{isLoading
+  ? <div ref={transition(fade())}>Loading...</div>  // key: file:10:6
+  : <div ref={transition(fade())}>Content</div>     // key: file:11:6 (다른 줄이라 OK)
+}
+
+// ✅ 같은 줄이면 명시적 key 사용
+{isLoading
+  ? <div ref={transition({ key: "loading", ...fade() })}>Loading...</div>
+  : <div ref={transition({ key: "content", ...fade() })}>Content</div>
+}
+```
+
+## 디버깅
+
+개발 중 생성된 key를 확인하려면 브라우저 개발자 도구에서 빌드된 코드를 확인하거나, 다음과 같이 로깅할 수 있습니다:
+
+```tsx
+const myTransition = transition(fade());
+console.log(myTransition);  // key 값 확인 가능
+```

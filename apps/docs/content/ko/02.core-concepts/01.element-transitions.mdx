@@ -14,60 +14,83 @@ nav-title: "요소 애니메이션"
     import { transition } from '@ssgoi/react';
     import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/react/transitions';
 
+    /**
+     * [React] Auto Key Plugin
+     *
+     * 플러그인 사용 시 key를 생략할 수 있습니다.
+     * 파일:라인:컬럼 기반으로 고유 key가 자동 생성됩니다.
+     *
+     * Next.js 설정:
+     * ```ts
+     * // next.config.ts
+     * import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+     *
+     * const nextConfig = {
+     *   webpack: (config) => {
+     *     config.plugins.push(SsgoiAutoKey());
+     *     return config;
+     *   },
+     * };
+     * ```
+     *
+     * ⚠️ 주의: .map() 리스트에서는 JSX key만 있으면 됨 - 플러그인이 자동으로 처리
+     *
+     * 예시:
+     * // .map() 리스트에서는 JSX key만 있으면 됨
+     * // 플러그인이 자동으로 file:line:col:${jsxKey} 형태로 생성
+     * {items.map((item) => (
+     *   <div
+     *     key={item.id}  // JSX key만 있으면 충분
+     *     ref={transition(fade())}
+     *   >
+     *     {item.name}
+     *   </div>
+     * ))}
+     *
+     * 플러그인 없이 사용 시에는 key가 필수입니다.
+     */
+
     // Fade 트랜지션
-    <div ref={transition({
-      key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
       Fade 효과
     </div>
 
     // Scale 트랜지션
+    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
+      Scale 효과
+    </div>
+
+    // Blur 트랜지션
+    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
+      Blur 효과
+    </div>
+
+    // Slide 트랜지션 (방향 지정)
+    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
+      Slide 효과
+    </div>
+
+    // Fly 트랜지션 (커스텀 위치)
+    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
+      Fly 효과
+    </div>
+
+    // Rotate 트랜지션
+    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
+      Rotate 효과
+    </div>
+
+    // Bounce 트랜지션
+    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
+      Bounce 효과
+    </div>
+
+    // 명시적 key 사용 (플러그인 없이 사용 시 필수)
     <div ref={transition({
       key: "scale-element",
       ...scale({ spring: { stiffness: 300, damping: 30 } })
     })}>
       Scale 효과
-    </div>
-
-    // Blur 트랜지션
-    <div ref={transition({
-      key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-    })}>
-      Blur 효과
-    </div>
-
-    // Slide 트랜지션 (방향 지정)
-    <div ref={transition({
-      key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-    })}>
-      Slide 효과
-    </div>
-
-    // Fly 트랜지션 (커스텀 위치)
-    <div ref={transition({
-      key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-    })}>
-      Fly 효과
-    </div>
-
-    // Rotate 트랜지션
-    <div ref={transition({
-      key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
-    })}>
-      Rotate 효과
-    </div>
-
-    // Bounce 트랜지션
-    <div ref={transition({
-      key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
-    })}>
-      Bounce 효과
     </div>
     ```
 
@@ -556,8 +579,12 @@ import { fade, scale /** 등등 */ } from "@ssgoi/react/transitions";
 
 ### key
 
-- `key`는 페이지 내에서 고유해야 함 (DOM이 생성되거나 삭제될 때도 애니메이션 상태를 추적할 수 있도록)
-- `key`를 설정하지 않으면 기본적으로 호출 위치 기반의 자동 키가 생성됨
+`key`는 SSGOI가 각 요소의 애니메이션 상태를 추적하는 데 사용하는 고유 식별자입니다:
+
+- **고유성**: 페이지 내에서 각 `transition()` 호출마다 고유한 key가 필요합니다
+- **상태 추적**: DOM 요소가 생성되거나 삭제될 때도 애니메이션 상태를 유지할 수 있도록 합니다
+- **React 자동 생성**: React에서는 Auto Key Plugin을 사용하면 key를 수동으로 지정하지 않아도 됩니다 (설정 방법은 위 React 탭의 주석 참조)
+- **수동 지정**: 다른 프레임워크에서는 명시적으로 key를 지정해야 합니다
 
 ### in 애니메이션
 

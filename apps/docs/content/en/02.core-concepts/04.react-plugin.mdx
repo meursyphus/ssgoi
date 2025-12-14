@@ -1,0 +1,276 @@
+---
+title: "React Auto Key Plugin"
+description: "Build plugin that auto-generates keys for transition() calls"
+nav-title: "React Plugin"
+---
+
+## Overview
+
+The Auto Key Plugin for `@ssgoi/react` is a build-time plugin that automatically generates unique `key` values for `transition()` function calls.
+
+### Why Keys Are Needed
+
+SSGOI requires unique `key` values to track element animation states. Without keys:
+- Cannot distinguish between elements using the same transition
+- Animation states are not preserved after page navigation
+- Unexpected behavior when elements mount/unmount
+
+### What the Plugin Does
+
+At build time, it analyzes all `transition()` calls and injects unique keys based on **filename:line:column**.
+
+```tsx
+// Your code
+<div ref={transition(fade())}>Content</div>
+
+// Transformed code after build
+<div ref={transition({ ...fade(), key: "page.tsx:15:6" })}>Content</div>
+```
+
+## Installation & Setup
+
+The plugin is included in the `@ssgoi/react` package. No separate installation needed.
+
+### Next.js (Webpack)
+
+```ts
+// next.config.ts
+import type { NextConfig } from "next";
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig: NextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey());
+    return config;
+  },
+};
+
+export default nextConfig;
+```
+
+### Vite
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import SsgoiAutoKey from "@ssgoi/react/unplugin/vite";
+
+export default defineConfig({
+  plugins: [react(), SsgoiAutoKey()],
+});
+```
+
+### Rollup
+
+```ts
+// rollup.config.js
+import SsgoiAutoKey from "@ssgoi/react/unplugin/rollup";
+
+export default {
+  plugins: [SsgoiAutoKey()],
+};
+```
+
+### esbuild
+
+```ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/esbuild";
+
+await esbuild.build({
+  plugins: [SsgoiAutoKey()],
+});
+```
+
+## Usage
+
+### Basic Usage (With Plugin)
+
+When the plugin is configured, you can omit the key.
+
+```tsx
+import { transition } from '@ssgoi/react';
+import { fade, scale } from '@ssgoi/react/transitions';
+
+function MyComponent() {
+  return (
+    <>
+      {/* key can be omitted - auto-generated */}
+      <div ref={transition(fade())}>
+        Fade effect
+      </div>
+
+      <div ref={transition(scale())}>
+        Scale effect
+      </div>
+    </>
+  );
+}
+```
+
+### Explicit Key
+
+You can still specify an explicit key when needed. The plugin skips calls that already have a key.
+
+```tsx
+<div ref={transition({
+  key: "my-custom-key",  // explicit key
+  ...fade()
+})}>
+  Content
+</div>
+```
+
+### Lists (.map)
+
+For lists rendered with `.map()`, **JSX key is enough**. The plugin reads the JSX key and generates `filename:line:column:${jsxKey}`.
+
+```tsx
+function ItemList({ items }) {
+  return (
+    <ul>
+      {items.map((item) => (
+        <li
+          key={item.id}  // JSX key is sufficient!
+          ref={transition(fade())}  // plugin handles it
+        >
+          {item.name}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+Generated key example: `ItemList.tsx:8:10:item-1`, `ItemList.tsx:8:10:item-2`, ...
+
+## Without Plugin
+
+If not using the plugin, you must manually specify unique keys.
+
+```tsx
+// Without plugin - key is required!
+<div ref={transition({
+  key: "unique-key-1",
+  ...fade()
+})}>
+  Content
+</div>
+
+// Lists also require explicit keys
+{items.map((item) => (
+  <li
+    key={item.id}
+    ref={transition({
+      key: `item-${item.id}`,  // transition key also needed
+      ...fade()
+    })}
+  >
+    {item.name}
+  </li>
+))}
+```
+
+## How It Works
+
+### 1. Code Analysis
+
+The plugin scans `.tsx` and `.jsx` files for `transition()` function calls.
+
+### 2. Location-Based Key Generation
+
+Generates unique keys based on source code location (filename, line, column).
+
+```
+filename:line:column
+e.g., MyComponent.tsx:25:8
+```
+
+### 3. JSX Key Combination (Lists)
+
+For elements inside `.map()`, it finds the parent JSX element's `key` prop and combines it.
+
+```
+filename:line:column:${jsxKey}
+e.g., ItemList.tsx:8:10:item-123
+```
+
+### 4. Code Transformation
+
+Transforms the original code to inject the key.
+
+```tsx
+// Before
+transition(fade())
+
+// After
+transition({ ...fade(), key: "MyComponent.tsx:25:8" })
+```
+
+## Plugin Options
+
+```ts
+interface SsgoiAutoKeyOptions {
+  /**
+   * File extensions to process
+   * @default ['.tsx', '.jsx']
+   */
+  include?: string[];
+
+  /**
+   * File patterns to exclude
+   * @default [/node_modules/]
+   */
+  exclude?: (string | RegExp)[];
+}
+```
+
+### Example
+
+```ts
+// next.config.ts
+import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
+
+const nextConfig = {
+  webpack: (config) => {
+    config.plugins.push(SsgoiAutoKey({
+      include: ['.tsx'],  // only .tsx files
+      exclude: [/node_modules/, /\.test\.tsx$/],  // exclude test files
+    }));
+    return config;
+  },
+};
+```
+
+## Important Notes
+
+<Note type="info">
+This plugin is **React-only**. It cannot be used with Svelte, Vue, Angular, or other frameworks.
+</Note>
+
+<Note type="warning">
+**Conditional Rendering**: When different elements render at the same location based on conditions, they may get the same key. Use explicit keys in such cases.
+</Note>
+
+```tsx
+// ⚠️ Caution: conditional rendering at same location
+{isLoading
+  ? <div ref={transition(fade())}>Loading...</div>  // key: file:10:6
+  : <div ref={transition(fade())}>Content</div>     // key: file:11:6 (different line, OK)
+}
+
+// ✅ Same line? Use explicit keys
+{isLoading
+  ? <div ref={transition({ key: "loading", ...fade() })}>Loading...</div>
+  : <div ref={transition({ key: "content", ...fade() })}>Content</div>
+}
+```
+
+## Debugging
+
+To check generated keys during development, inspect the built code in browser devtools or log the transition:
+
+```tsx
+const myTransition = transition(fade());
+console.log(myTransition);  // check key value
+```

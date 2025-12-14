@@ -77,7 +77,7 @@ The value you pass to `[ssgoiTransition]` should uniquely identify the view (com
 ```typescript
 import { Component } from "@angular/core";
 import { TransitionDirective } from "@ssgoi/angular";
-import { fadeIn, fadeOut } from "@ssgoi/angular/transitions";
+import { fade } from "@ssgoi/angular/transitions";
 
 @Component({
   selector: "app-call-to-action",
@@ -87,8 +87,8 @@ import { fadeIn, fadeOut } from "@ssgoi/angular/transitions";
     <button
       [transition]="{
         key: 'cta',
-        in: fadeIn({ duration: 220 }),
-        out: fadeOut({ duration: 180 })
+        in: fade({ duration: 220 }),
+        out: fade({ duration: 180 })
       }"
     >
       Get Started
@@ -128,14 +128,9 @@ Element-level factories:
 
 ```typescript
 import {
-  fadeIn,
-  fadeOut,
-  slideUp,
-  slideDown,
-  slideLeft,
-  slideRight,
-  scaleIn,
-  scaleOut,
+  fade,
+  slide,
+  scale,
   bounce,
   blur,
   rotate,

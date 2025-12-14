@@ -777,35 +777,40 @@ export default function Home() {
               >
                 {[
                   {
+                    id: "1",
                     color: "#ff6b6b",
                     effect: fade({ spring: gentle }),
                     label: "fade",
                   },
                   {
+                    id: "2",
                     color: "#4ecdc4",
                     effect: scale({ spring: gentle }),
                     label: "scale",
                   },
                   {
+                    id: "3",
                     color: "#45b7d1",
                     effect: blur({ spring: gentle }),
                     label: "blur",
                   },
                   {
+                    id: "4",
                     color: "#96ceb4",
                     effect: rotate({ spring: gentle }),
                     label: "rotate",
                   },
                   {
+                    id: "5",
                     color: "#feca57",
                     effect: bounce({ spring: gentle }),
                     label: "bounce",
                   },
                 ].map(
-                  (item, index) =>
+                  (item) =>
                     showListItems && (
                       <div
-                        key={index}
+                        key={item.id}
                         ref={transition(item.effect)}
                         style={{
                           width: "32px",
