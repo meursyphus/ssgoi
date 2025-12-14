@@ -14,6 +14,7 @@ import type {
 } from "../types";
 import type { TransitionKey } from "../types";
 import { watchUnmount } from "./unmount-observer";
+import { randomUUID } from "crypto";
 
 /**
  * Centralized transition management
@@ -85,26 +86,6 @@ function unregisterTransition(key: TransitionKey): void {
   refCallbacks.delete(key);
 }
 
-// ---------------------------------------------
-// Auto key generation (DOM-based)
-// ---------------------------------------------
-
-const SSGOI_KEY_ATTRIBUTE = "data-ssgoi-key";
-let __autoKeyCounter = 0;
-
-/**
- * Gets or creates a unique key for an element using data attribute.
- * This approach is browser-independent and works reliably across all environments.
- */
-function getOrCreateElementKey(element: HTMLElement): TransitionKey {
-  let key = element.getAttribute(SSGOI_KEY_ATTRIBUTE);
-  if (!key) {
-    key = `ssgoi_${__autoKeyCounter++}`;
-    element.setAttribute(SSGOI_KEY_ATTRIBUTE, key);
-  }
-  return key;
-}
-
 type TransitionOptionsWithStrategy = TransitionOptions<undefined> & {
   [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
 };
@@ -163,38 +144,49 @@ export function transition(
   options: TransitionOptionsWithStrategy,
   mode: TransitionMode = "manual",
 ): TransitionCallback | RefCallback {
-  const refCallback = (element: HTMLElement | null): (() => void) | void => {
-    if (!element) return;
+  const resolvedKey = options.key ?? generateAutoKey(element);
 
-    // Use explicit key or generate from DOM element
-    const key = options.key ?? getOrCreateElementKey(element);
-
-    const callback = registerTransition(
-      key,
-      {
-        in: options.in,
-        out: options.out,
-      },
-      {
-        strategy: options[TRANSITION_STRATEGY],
-        scope: options.scope,
-      },
-    );
-
-    return callback(element);
-  };
+  const callback = registerTransition(
+    resolvedKey,
+    {
+      in: options.in,
+      out: options.out,
+    },
+    {
+      strategy: options[TRANSITION_STRATEGY],
+      scope: options.scope,
+    },
+  );
 
   if (mode === "manual") {
-    return refCallback as TransitionCallback;
+    return callback;
   }
 
-  // Auto mode: wrap with MutationObserver
-  return (element: HTMLElement | null) => {
+  // Auto mode: return cached ref callback with MutationObserver integration
+  let refCallback = refCallbacks.get(resolvedKey);
+  if (refCallback) {
+    return refCallback;
+  }
+
+  refCallback = (element: HTMLElement | null) => {
     if (element) {
-      const cleanup = refCallback(element);
+      const cleanup = callback(element);
       if (cleanup) {
         watchUnmount(element, cleanup);
       }
     }
   };
+
+  refCallbacks.set(resolvedKey, refCallback);
+  return refCallback;
+}
+
+function generateAutoKey(element: Element): TransitionKey {
+  const existKey = element.getAttribute("data-ssgoi-transition-key");
+  if (existKey) {
+    return existKey;
+  }
+  const key = randomUUID();
+  element.setAttribute("data-ssgoi-transition-key", key);
+  return key;
 }
