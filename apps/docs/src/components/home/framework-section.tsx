@@ -84,22 +84,19 @@ export async function FrameworkSection({ lang }: FrameworkSectionProps) {
             </span>
           </div>
 
-          {/* SolidJS - 지원 예정 */}
-          <div className="group flex flex-col items-center gap-3 opacity-50">
-            <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4">
+          {/* SolidJS */}
+          <div className="group flex flex-col items-center gap-3">
+            <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 p-4 transition-all group-hover:bg-white/20 group-hover:scale-110">
               <Image
                 src="/icons/solidjs.svg"
                 alt="SolidJS"
                 width={48}
                 height={48}
-                className="h-12 w-12 opacity-50"
+                className="h-12 w-12"
               />
             </div>
             <span className="text-sm font-medium text-muted-foreground">
               SolidJS
-              <span className="block text-xs">
-                {t("frameworks.comingSoon")}
-              </span>
             </span>
           </div>
 

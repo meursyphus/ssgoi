@@ -33,7 +33,7 @@ export const home: HomeMessages = {
     svelte: "Svelte",
     vue: "Vue",
     angular: "Angular",
-    solidjs: "SolidJS (Coming Soon)",
+    solidjs: "SolidJS",
     qwik: "Qwik (Coming Soon)",
   },
   floatingBadges: {
@@ -291,8 +291,7 @@ export const home: HomeMessages = {
       },
       frameworkAgnostic: {
         title: "Framework Agnostic",
-        description:
-          "Works with React, Svelte, Vue. Solid and Qwik coming soon",
+        description: "Works with React, Svelte, Vue, Solid. Qwik coming soon",
       },
       sharedElements: {
         title: "Shared Element Transitions",

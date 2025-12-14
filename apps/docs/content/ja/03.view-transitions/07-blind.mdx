@@ -54,7 +54,7 @@ nav-title: "ブラインド"
 
 ## 基本的な使い方
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -88,6 +88,44 @@ nav-title: "ブラインド"
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { blind } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: blind()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { blind } from '@ssgoi/solid/view-transitions';
+
+    export default function App() {
+      const config = {
+        defaultTransition: blind()
+      };
+
+      return (
+        <Ssgoi config={config}>
+          {/* アプリのコンテンツ */}
+        </Ssgoi>
+      );
+    }
     ```
 
   </TabPanel>

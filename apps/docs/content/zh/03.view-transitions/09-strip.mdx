@@ -66,7 +66,7 @@ nav-title: "胶片"
 
 ## 基本用法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -132,6 +132,44 @@ nav-title: "胶片"
     }
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { strip } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { strip } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ## 实战示例
@@ -140,7 +178,7 @@ nav-title: "胶片"
 
 建议使用默认值的胶片过渡：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -181,13 +219,51 @@ nav-title: "胶片"
     }
     ```
   </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { strip } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { strip } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
 </Tabs>
 
 ### 应用于特定路由
 
 应用于顶层导航：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -266,6 +342,44 @@ nav-title: "胶片"
       };
     }
     ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { strip } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { strip } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
   </TabPanel>
 </Tabs>
 

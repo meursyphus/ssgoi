@@ -6,26 +6,33 @@ nav-title: "빠른 시작"
 
 ## 패키지 설치
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```bash
-    npm install @ssgoi/react 
-    # 또는 yarn add @ssgoi/react 
+    npm install @ssgoi/react
+    # 또는 yarn add @ssgoi/react
     # 또는 pnpm add @ssgoi/react
     ```
   </TabPanel>
   <TabPanel value="svelte">
     ```bash
-    npm install @ssgoi/svelte 
-    # 또는 yarn add @ssgoi/svelte 
+    npm install @ssgoi/svelte
+    # 또는 yarn add @ssgoi/svelte
     # 또는 pnpm add @ssgoi/svelte
     ```
   </TabPanel>
   <TabPanel value="vue">
     ```bash
-    npm install @ssgoi/vue 
-    # 또는 yarn add @ssgoi/vue 
+    npm install @ssgoi/vue
+    # 또는 yarn add @ssgoi/vue
     # 또는 pnpm add @ssgoi/vue
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```bash
+    npm install @ssgoi/solid
+    # 또는 yarn add @ssgoi/solid
+    # 또는 pnpm add @ssgoi/solid
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -39,7 +46,7 @@ nav-title: "빠른 시작"
 
 ## 기본 설정 (2분)
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ### 1. 루트 레이아웃 설정 (Next.js App Router)
     ```tsx
@@ -209,6 +216,65 @@ nav-title: "빠른 시작"
     ```
 
   </TabPanel>
+  <TabPanel value="solid">
+    ### 1. 루트 레이아웃 설정 (SolidStart)
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { fade } from "@ssgoi/solid/view-transitions";
+
+    export default function Root() {
+      const config = {
+        defaultTransition: fade()
+      };
+
+      return (
+        <html>
+          <body>
+            <Ssgoi config={config}>
+              {/* ⚠️ 중요: position: relative 필수! */}
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                {/* 앱 콘텐츠 */}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
+
+    > **왜 position: relative가 필요한가요?**
+    > 페이지가 out 애니메이션될 때 `position: absolute`가 적용됩니다. 상위 요소에 `position: relative`가 없으면 페이지가 잘못된 위치로 이동할 수 있습니다.
+
+    ### 2. 페이지 래핑
+    ```tsx
+    // src/routes/index.tsx
+    import { SsgoiTransition } from "@ssgoi/solid";
+
+    export default function HomePage() {
+      return (
+        <SsgoiTransition id="/">
+          <main>
+            <h1>홈 페이지</h1>
+            {/* 페이지 내용 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+
+    // src/routes/about.tsx
+    export default function AboutPage() {
+      return (
+        <SsgoiTransition id="/about">
+          <main>
+            <h1>소개 페이지</h1>
+            {/* 페이지 내용 */}
+          </main>
+        </SsgoiTransition>
+      );
+    }
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ### 1. 루트 컴포넌트 설정 (Angular 20+)
 
@@ -292,7 +358,7 @@ nav-title: "빠른 시작"
 
 ## 다양한 트랜지션 적용
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     // app/layout.tsx
@@ -378,6 +444,38 @@ nav-title: "빠른 시작"
     </script>
     ```
 
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    // src/root.tsx
+    import { Ssgoi } from "@ssgoi/solid";
+    import { scroll, fade, drill } from "@ssgoi/solid/view-transitions";
+
+    export default function Root() {
+      const config = {
+        transitions: [
+          // 홈 → 소개: 위로 스크롤
+          { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
+          // 소개 → 홈: 아래로 스크롤
+          { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+          // 목록 → 상세: 드릴 (진입)
+          { from: "/list", to: "/detail/*", transition: drill({ direction: "enter" }) },
+        ],
+      };
+
+      return (
+        <html>
+          <body>
+            <Ssgoi config={config}>
+              <div style={{ position: "relative", "min-height": "100vh" }}>
+                {/* 앱 콘텐츠 */}
+              </div>
+            </Ssgoi>
+          </body>
+        </html>
+      );
+    }
+    ```
   </TabPanel>
   <TabPanel value="angular">
     ```typescript

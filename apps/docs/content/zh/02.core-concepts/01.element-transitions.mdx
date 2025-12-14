@@ -8,7 +8,7 @@ nav-title: "元素动画"
 
 如何使用各种过渡效果：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from '@ssgoi/react';
@@ -201,6 +201,68 @@ nav-title: "元素动画"
     </script>
     ```
   </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from '@ssgoi/solid';
+    import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/solid/transitions';
+
+    // Fade过渡
+    <div ref={transition({
+      key: "fade-element",
+      ...fade({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fade效果
+    </div>
+
+    // Scale过渡
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Scale效果
+    </div>
+
+    // Blur过渡
+    <div ref={transition({
+      key: "blur-element",
+      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Blur效果
+    </div>
+
+    // Slide过渡（方向指定）
+    <div ref={transition({
+      key: "slide-element",
+      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Slide效果
+    </div>
+
+    // Fly过渡（自定义位置）
+    <div ref={transition({
+      key: "fly-element",
+      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Fly效果
+    </div>
+
+    // Rotate过渡
+    <div ref={transition({
+      key: "rotate-element",
+      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Rotate效果
+    </div>
+
+    // Bounce过渡
+    <div ref={transition({
+      key: "bounce-element",
+      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+    })}>
+      Bounce效果
+    </div>
+    ```
+  </TabPanel>
   <TabPanel value="angular">
     ```typescript
     import { Component } from '@angular/core';
@@ -351,7 +413,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
 
 ## 框架特定用法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```jsx
     import { transition } from "@ssgoi/react";
@@ -376,7 +438,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     </div>
     ```
   </TabPanel>
-  
+
   <TabPanel value="svelte">
     ```svelte
     <script>
@@ -401,7 +463,7 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     </div>
     ```
   </TabPanel>
-  
+
   <TabPanel value="vue">
     ```vue
     <template>
@@ -426,6 +488,30 @@ import { fade, scale /** etc */ } from "@ssgoi/react/transitions";
     <script setup>
     import { transition } from '@ssgoi/vue';
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { transition } from "@ssgoi/solid";
+
+    <div
+      ref={transition({
+        key: "unique-key",
+        in: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = progress;
+            element.style.transform = `translateY(${20 * (1 - progress)}px)`;
+          },
+        }),
+        out: (element) => ({
+          tick: (progress) => {
+            element.style.opacity = 1 - progress;
+          },
+        }),
+      })}
+    >
+      内容
+    </div>
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -543,7 +629,7 @@ interface TransitionOptions {
 
 ### 使用示例
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }]}>
   <TabPanel value="react">
     ```tsx
     import { TransitionScope, transition } from '@ssgoi/react';
@@ -692,6 +778,60 @@ interface TransitionOptions {
 
     const show = ref(true);
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { TransitionScope, transition } from '@ssgoi/solid';
+    import { createSignal, Show } from 'solid-js';
+
+    function MyComponent() {
+      const [show, setShow] = createSignal(true);
+
+      return (
+        <>
+          <button onClick={() => setShow(!show())}>Toggle</button>
+
+          <Show when={show()}>
+            <TransitionScope>
+              <div style={{ padding: '2rem', border: '1px dashed #ccc' }}>
+                {/* local: 与Scope同时挂载/卸载时跳过动画 */}
+                <div
+                  ref={transition({
+                    key: 'local-child',
+                    scope: 'local',
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Local Scope（与Scope一起显示/隐藏）
+                </div>
+
+                {/* global: 始终执行动画 */}
+                <div
+                  ref={transition({
+                    key: 'global-child',
+                    // scope: 'global'是默认值
+                    in: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                    out: () => ({
+                      css: (p) => ({ opacity: p, transform: `scale(${0.5 + p * 0.5})` }),
+                    }),
+                  })}
+                >
+                  Global Scope（始终动画）
+                </div>
+              </div>
+            </TransitionScope>
+          </Show>
+        </>
+      );
+    }
     ```
   </TabPanel>
 </Tabs>

@@ -66,7 +66,7 @@ nav-title: "스트립"
 
 ## 기본 사용법
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -102,6 +102,42 @@ nav-title: "스트립"
     </Ssgoi>
     ```
 
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { strip } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: strip()
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { strip } from '@ssgoi/solid/view-transitions';
+
+    export default function App() {
+      const config = {
+        defaultTransition: strip()
+      };
+
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
   </TabPanel>
   <TabPanel value="angular">
     ```typescript
@@ -140,7 +176,7 @@ nav-title: "스트립"
 
 strip 전환은 기본값으로 사용하는 것을 권장합니다:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -187,7 +223,7 @@ strip 전환은 기본값으로 사용하는 것을 권장합니다:
 
 최상위 네비게이션에 적용:
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {

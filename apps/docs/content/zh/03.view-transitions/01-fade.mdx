@@ -64,7 +64,7 @@ nav-title: "淡入淡出"
 
 ## 基本用法
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
@@ -98,6 +98,44 @@ nav-title: "淡入淡出"
     <Ssgoi {config}>
       <slot />
     </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { fade } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+    </script>
+
+    <template>
+      <Ssgoi :config="config">
+        <!-- 应用内容 -->
+      </Ssgoi>
+    </template>
+    ```
+
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { fade } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: fade()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
     ```
 
   </TabPanel>
@@ -138,7 +176,7 @@ nav-title: "淡入淡出"
 
 底部标签栏或顶部标签中主要部分之间的移动：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -179,6 +217,48 @@ nav-title: "淡入淡出"
         ]
       };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/profile',
+          transition: fade(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/home',
+          to: '/profile',
+          transition: fade(),
+          symmetric: true
+        },
+        {
+          from: '/home',
+          to: '/settings',
+          transition: fade(),
+          symmetric: true
+        }
+      ]
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -224,7 +304,7 @@ nav-title: "淡入淡出"
 
 需要快速响应用户操作时：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -257,6 +337,40 @@ nav-title: "淡入淡出"
         })
      };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+       defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         },
+         outSpring: { // 离开页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         }
+       })
+     };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    const config = {
+       defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         },
+         outSpring: { // 离开页面时应用。
+           stiffness: 400,  // 快速过渡
+           damping: 35      // 平滑结束
+         }
+       })
+     };
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -298,7 +412,7 @@ nav-title: "淡入淡出"
 
 品牌体验重要的页面：
 
-<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     const config = {
@@ -331,6 +445,40 @@ nav-title: "淡入淡出"
         })
     };
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    const config = {
+      defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+            stiffness: 150,  // 缓慢过渡
+            damping: 25      // 平滑减速
+          },
+          outSpring: { // 离开页面时应用。
+           stiffness: 150,  // 缓慢过渡
+           damping: 25      // 平滑减速
+          }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    const config = {
+      defaultTransition: fade({
+         inSpring: { // 进入页面时应用。
+            stiffness: 150,  // 缓慢过渡
+            damping: 25      // 平滑减速
+          },
+          outSpring: { // 离开页面时应用。
+           stiffness: 150,  // 缓慢过渡
+           damping: 25      // 平滑减速
+          }
+      })
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
