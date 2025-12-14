@@ -1,0 +1,449 @@
+---
+title: "로테이트 전환"
+description: "회전 효과를 활용한 인상적인 페이지 전환"
+nav-title: "로테이트"
+---
+
+# 로테이트 전환
+
+로테이트 전환은 페이지가 회전하며 뒤집히는 듯한 극적인 효과를 제공합니다. 나가는 페이지가 180도 회전하며 사라지고, 새로운 페이지가 반대 방향에서 회전하며 등장합니다. 마치 카드를 뒤집는 듯한 이 모션은 강렬한 브랜드 경험을 전달하고자 할 때 효과적입니다.
+
+> 이 전환 효과는 [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor)에서 영감을 받았습니다.
+
+## 데모
+
+<ViewTransitionDemo type="rotate" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+로테이트 전환은 **최상위 레벨(Top-level)** 네비게이션에서 임팩트 있는 전환이 필요할 때 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "최상위 레벨",
+      suitable: "yes",
+      description: "주요 섹션 간 이동에서 브랜드 임팩트를 줄 때",
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "동일 레벨의 일반적인 콘텐츠 이동에는 과한 효과",
+    },
+    {
+      label: "계층 이동",
+      suitable: "no",
+      description: "부모-자식 구조는 drill이나 hero 사용 권장",
+    },
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **브랜드 랜딩 페이지**: 포트폴리오, 에이전시, 크리에이티브 스튜디오 사이트
+- **인트로/아웃트로**: 메인 콘텐츠 진입 전 브랜드 노출
+- **갤러리/쇼케이스**: 풀스크린 이미지 전환에서 극적인 효과
+- **이벤트/캠페인 페이지**: 특별한 경험을 강조하고 싶을 때
+
+### 왜 이렇게 동작하나요?
+
+1. **강렬한 인상**: 회전하는 모션은 사용자의 시선을 사로잡고 기억에 남는 경험을 제공합니다
+2. **공간감**: 2D 화면에서 3D 같은 깊이감을 느끼게 하여 몰입도를 높입니다
+3. **명확한 전환**: 완전한 회전을 통해 이전 콘텐츠와 새 콘텐츠 사이의 경계가 분명합니다
+
+### 모션 디자인
+
+```
+나가는 화면: 0deg → 180deg (회전하며 페이드 아웃)
+들어오는 화면: -180deg → 0deg (회전하며 페이드 인)
+90도 지점에서 투명도 전환 (자연스러운 뒤집기 효과)
+```
+
+회전이 90도를 넘어가는 순간 투명도가 전환되어, 마치 물리적으로 카드를 뒤집는 것 같은 자연스러운 효과를 만들어냅니다.
+
+## 최적의 활용법: 풀스크린 이미지
+
+로테이트 전환은 **화면 전체를 채우는 이미지**와 함께 사용할 때 가장 수려한 효과를 볼 수 있습니다. 전체 화면이 하나의 캔버스처럼 회전하면서, 마치 거대한 작품이 뒤집히는 듯한 인상적인 경험을 선사합니다.
+
+### 풀스크린 이미지 스타일 예시
+
+```css
+.fullscreen-image {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+```
+
+## 기본 사용법
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: rotate()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: rotate()
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 실전 활용 예시
+
+### 1. 크리에이티브 포트폴리오
+
+풀스크린 프로젝트 이미지 간 전환:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/projects/*',
+          to: '/projects/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // 페이지 컴포넌트
+    function ProjectPage({ project }) {
+      return (
+        <div className="fullscreen-project">
+          <img
+            src={project.heroImage}
+            alt={project.title}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover'
+            }}
+          />
+          <div className="project-info">
+            <h1>{project.title}</h1>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- 페이지 컴포넌트 -->
+    <div class="fullscreen-project">
+      <img
+        src={project.heroImage}
+        alt={project.title}
+        style="width: 100vw; height: 100vh; object-fit: cover;"
+      />
+      <div class="project-info">
+        <h1>{project.title}</h1>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 브랜드 랜딩 시퀀스
+
+인트로에서 메인 콘텐츠로 진입:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/intro',
+          to: '/home',
+          transition: rotate()
+        },
+        {
+          from: '/home',
+          to: '/intro',
+          transition: rotate()
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 이미지 갤러리 쇼케이스
+
+풀스크린 갤러리에서 이미지 간 전환:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/*',
+          to: '/gallery/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // 갤러리 아이템 페이지
+    function GalleryItem({ image }) {
+      return (
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          background: `url(${image.src}) center/cover`
+        }}>
+          <div className="caption">
+            <h2>{image.title}</h2>
+            <p>{image.description}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- 갤러리 아이템 페이지 -->
+    <div style="width: 100vw; height: 100vh; background: url({image.src}) center/cover;">
+      <div class="caption">
+        <h2>{image.title}</h2>
+        <p>{image.description}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 앱 내용 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 접근성
+
+- `prefers-reduced-motion` 설정 시 자동으로 애니메이션 비활성화
+- 회전 효과는 일부 사용자에게 어지러움을 유발할 수 있으므로, 필수적이지 않은 경우 대안을 제공하는 것이 좋습니다
+- 스크린 리더는 전환 중에도 콘텐츠 변경을 올바르게 인식
+
+## 모범 사례
+
+### ✅ DO
+
+- 풀스크린 이미지나 비주얼 중심 콘텐츠에 사용
+- 브랜드 경험이 중요한 크리에이티브 사이트에 적용
+- 특별한 순간(인트로, 쇼케이스)에 임팩트를 줄 때 사용
+- 최상위 레벨 네비게이션에서 선택적으로 사용
+
+### ❌ DON'T
+
+- 일반적인 페이지 전환에 남용하지 마세요 (피로감 유발)
+- 텍스트 위주의 콘텐츠 전환에는 사용하지 마세요
+- 계층 구조 네비게이션(리스트 → 상세)에는 사용하지 마세요
+- 빈번한 네비게이션이 예상되는 곳에는 피하세요

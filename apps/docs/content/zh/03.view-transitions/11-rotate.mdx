@@ -1,0 +1,449 @@
+---
+title: "旋转过渡"
+description: "利用旋转效果打造令人印象深刻的页面过渡"
+nav-title: "旋转"
+---
+
+# 旋转过渡
+
+旋转过渡提供页面旋转翻转的戏剧性效果。离开的页面旋转180度消失,新页面从相反方向旋转出现。这种如同翻转卡片般的动效,在需要传递强烈品牌体验时非常有效。
+
+> 此过渡效果灵感来自 [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor)。
+
+## 演示
+
+<ViewTransitionDemo type="rotate" />
+
+## UX 原则
+
+### 何时使用?
+
+旋转过渡适用于**顶层(Top-level)**导航中需要富有冲击力过渡的场景。
+
+#### 按内容关系划分的适用性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "顶层",
+      suitable: "yes",
+      description: "在主要板块间移动时营造品牌冲击力",
+    },
+    {
+      label: "同级关系",
+      suitable: "no",
+      description: "对于同级别的常规内容移动效果过于强烈",
+    },
+    {
+      label: "层级移动",
+      suitable: "no",
+      description: "父子结构建议使用 drill 或 hero",
+    },
+  ]}
+/>
+
+#### 主要使用场景
+
+- **品牌落地页**: 作品集、代理机构、创意工作室网站
+- **片头/片尾**: 进入主要内容前的品牌展示
+- **画廊/展示**: 全屏图片切换中的戏剧性效果
+- **活动/宣传页面**: 想要强调特殊体验时
+
+### 为什么这样工作?
+
+1. **强烈印象**: 旋转动效吸引用户视线并提供令人难忘的体验
+2. **空间感**: 在2D屏幕上营造类似3D的深度感,提升沉浸感
+3. **清晰过渡**: 通过完整的旋转,前后内容之间的界限非常明确
+
+### 动效设计
+
+```
+离开画面: 0deg → 180deg (旋转并淡出)
+进入画面: -180deg → 0deg (旋转并淡入)
+在90度处切换透明度 (自然的翻转效果)
+```
+
+当旋转超过90度时透明度发生切换,创造出如同物理翻转卡片般自然的效果。
+
+## 最佳实践: 全屏图片
+
+旋转过渡与**填充整个屏幕的图片**配合使用时效果最佳。整个屏幕如同画布般旋转,营造出巨大作品翻转的震撼体验。
+
+### 全屏图片样式示例
+
+```css
+.fullscreen-image {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+```
+
+## 基本用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 应用内容 */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: rotate()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: rotate()
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 实战应用示例
+
+### 1. 创意作品集
+
+全屏项目图片间的切换:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/projects/*',
+          to: '/projects/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // 页面组件
+    function ProjectPage({ project }) {
+      return (
+        <div className="fullscreen-project">
+          <img
+            src={project.heroImage}
+            alt={project.title}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover'
+            }}
+          />
+          <div className="project-info">
+            <h1>{project.title}</h1>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- 页面组件 -->
+    <div class="fullscreen-project">
+      <img
+        src={project.heroImage}
+        alt={project.title}
+        style="width: 100vw; height: 100vh; object-fit: cover;"
+      />
+      <div class="project-info">
+        <h1>{project.title}</h1>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 应用内容 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 品牌落地序列
+
+从片头进入主要内容:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/intro',
+          to: '/home',
+          transition: rotate()
+        },
+        {
+          from: '/home',
+          to: '/intro',
+          transition: rotate()
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 应用内容 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 图片画廊展示
+
+全屏画廊中图片间的切换:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/*',
+          to: '/gallery/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // 画廊项目页面
+    function GalleryItem({ image }) {
+      return (
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          background: `url(${image.src}) center/cover`
+        }}>
+          <div className="caption">
+            <h2>{image.title}</h2>
+            <p>{image.description}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- 画廊项目页面 -->
+    <div style="width: 100vw; height: 100vh; background: url({image.src}) center/cover;">
+      <div class="caption">
+        <h2>{image.title}</h2>
+        <p>{image.description}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- 应用内容 -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 无障碍访问
+
+- 启用 `prefers-reduced-motion` 设置时自动禁用动画
+- 旋转效果可能会让部分用户感到眩晕,如果不是必需的情况下建议提供替代方案
+- 屏幕阅读器在过渡期间能正确识别内容变化
+
+## 最佳实践
+
+### ✅ DO
+
+- 用于全屏图片或视觉中心内容
+- 应用于品牌体验重要的创意网站
+- 在特殊时刻(片头、展示)营造冲击力
+- 在顶层导航中有选择性地使用
+
+### ❌ DON'T
+
+- 不要在常规页面过渡中滥用(会导致疲劳感)
+- 不要用于以文字为主的内容切换
+- 不要用于层级结构导航(列表 → 详情)
+- 避免在频繁导航的位置使用

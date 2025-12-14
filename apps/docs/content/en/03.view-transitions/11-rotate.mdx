@@ -1,0 +1,449 @@
+---
+title: "Rotate Transition"
+description: "Impressive page transitions with rotation effects"
+nav-title: "Rotate"
+---
+
+# Rotate Transition
+
+The rotate transition provides a dramatic effect where pages flip and rotate. The outgoing page rotates 180 degrees and disappears, while the new page emerges rotating from the opposite direction. This card-flipping motion is effective when you want to deliver a powerful brand experience.
+
+> This transition effect was inspired by [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor).
+
+## Demo
+
+<ViewTransitionDemo type="rotate" />
+
+## UX Principles
+
+### When to Use?
+
+The rotate transition is used when you need an impactful transition in **top-level** navigation.
+
+#### Suitability by Content Relationship
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Top-level",
+      suitable: "yes",
+      description: "When providing brand impact between major sections",
+    },
+    {
+      label: "Sibling",
+      suitable: "no",
+      description: "Too much effect for general same-level content navigation",
+    },
+    {
+      label: "Hierarchical",
+      suitable: "no",
+      description: "Use drill or hero for parent-child structures",
+    },
+  ]}
+/>
+
+#### Main Use Cases
+
+- **Brand Landing Pages**: Portfolio, agency, creative studio sites
+- **Intro/Outro**: Brand exposure before entering main content
+- **Gallery/Showcase**: Dramatic effect in fullscreen image transitions
+- **Event/Campaign Pages**: When you want to emphasize a special experience
+
+### Why Does It Work This Way?
+
+1. **Strong Impression**: Rotating motion captures users' attention and provides memorable experiences
+2. **Sense of Space**: Creates depth perception like 3D on a 2D screen, enhancing immersion
+3. **Clear Transition**: Complete rotation creates a clear boundary between old and new content
+
+### Motion Design
+
+```
+Outgoing screen: 0deg → 180deg (rotate with fade out)
+Incoming screen: -180deg → 0deg (rotate with fade in)
+Opacity transition at 90-degree point (natural flip effect)
+```
+
+When the rotation passes 90 degrees, the opacity transitions, creating a natural effect like physically flipping a card.
+
+## Best Practice: Fullscreen Images
+
+The rotate transition shows its most beautiful effect when used with **images that fill the entire screen**. As the entire screen rotates like a single canvas, it creates an impressive experience as if a massive artwork is being flipped.
+
+### Fullscreen Image Style Example
+
+```css
+.fullscreen-image {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+```
+
+## Basic Usage
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: rotate()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: rotate()
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## Practical Examples
+
+### 1. Creative Portfolio
+
+Transitions between fullscreen project images:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/projects/*',
+          to: '/projects/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // Page component
+    function ProjectPage({ project }) {
+      return (
+        <div className="fullscreen-project">
+          <img
+            src={project.heroImage}
+            alt={project.title}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover'
+            }}
+          />
+          <div className="project-info">
+            <h1>{project.title}</h1>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- Page component -->
+    <div class="fullscreen-project">
+      <img
+        src={project.heroImage}
+        alt={project.title}
+        style="width: 100vw; height: 100vh; object-fit: cover;"
+      />
+      <div class="project-info">
+        <h1>{project.title}</h1>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Brand Landing Sequence
+
+From intro to main content:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/intro',
+          to: '/home',
+          transition: rotate()
+        },
+        {
+          from: '/home',
+          to: '/intro',
+          transition: rotate()
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. Image Gallery Showcase
+
+Transitions between images in fullscreen gallery:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/*',
+          to: '/gallery/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // Gallery item page
+    function GalleryItem({ image }) {
+      return (
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          background: `url(${image.src}) center/cover`
+        }}>
+          <div className="caption">
+            <h2>{image.title}</h2>
+            <p>{image.description}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- Gallery item page -->
+    <div style="width: 100vw; height: 100vh; background: url({image.src}) center/cover;">
+      <div class="caption">
+        <h2>{image.title}</h2>
+        <p>{image.description}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- App content -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## Accessibility
+
+- Animations automatically disabled when `prefers-reduced-motion` is set
+- Rotation effects may cause dizziness for some users, so providing alternatives is recommended when not essential
+- Screen readers correctly recognize content changes during transitions
+
+## Best Practices
+
+### ✅ DO
+
+- Use with fullscreen images or visual-centric content
+- Apply to creative sites where brand experience is important
+- Use for special moments (intro, showcase) to create impact
+- Use selectively in top-level navigation
+
+### ❌ DON'T
+
+- Don't overuse in general page transitions (causes fatigue)
+- Don't use for text-heavy content transitions
+- Don't use for hierarchical navigation (list → detail)
+- Avoid in places where frequent navigation is expected

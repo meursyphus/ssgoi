@@ -6,6 +6,7 @@ export * from "./hero";
 export * from "./instagram";
 export { jaemin } from "./jaemin";
 export * from "./pinterest";
+export * from "./rotate";
 export * from "./scroll";
 export * from "./slide";
 export * from "./strip";

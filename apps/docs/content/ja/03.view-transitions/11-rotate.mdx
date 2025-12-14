@@ -1,0 +1,449 @@
+---
+title: "ローテート遷移"
+description: "回転効果を活用した印象的なページ遷移"
+nav-title: "ローテート"
+---
+
+# ローテート遷移
+
+ローテート遷移は、ページが回転して裏返るような劇的な効果を提供します。退出するページが180度回転して消え、新しいページが反対方向から回転して登場します。カードを裏返すようなこのモーションは、強烈なブランド体験を提供したいときに効果的です。
+
+> この遷移効果は [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor)からインスピレーションを得ました。
+
+## デモ
+
+<ViewTransitionDemo type="rotate" />
+
+## UX原則
+
+### いつ使用するか?
+
+ローテート遷移は**トップレベル**ナビゲーションでインパクトのある遷移が必要なときに使用されます。
+
+#### コンテンツ関係別の適合性
+
+<SuitabilityTable
+  items={[
+    {
+      label: "トップレベル",
+      suitable: "yes",
+      description: "主要セクション間の移動でブランドインパクトを与えるとき",
+    },
+    {
+      label: "兄弟関係",
+      suitable: "no",
+      description: "同レベルの一般的なコンテンツ移動には過度な効果",
+    },
+    {
+      label: "階層移動",
+      suitable: "no",
+      description: "親子構造はdrillまたはheroの使用を推奨",
+    },
+  ]}
+/>
+
+#### 主な使用ケース
+
+- **ブランドランディングページ**: ポートフォリオ、エージェンシー、クリエイティブスタジオサイト
+- **イントロ/アウトロ**: メインコンテンツ進入前のブランド露出
+- **ギャラリー/ショーケース**: フルスクリーン画像遷移での劇的な効果
+- **イベント/キャンペーンページ**: 特別な体験を強調したいとき
+
+### なぜこのように動作するのか?
+
+1. **強烈な印象**: 回転するモーションはユーザーの視線を捉え、記憶に残る体験を提供します
+2. **空間感**: 2D画面で3Dのような奥行き感を感じさせ、没入度を高めます
+3. **明確な遷移**: 完全な回転により、前のコンテンツと新しいコンテンツの境界が明確です
+
+### モーションデザイン
+
+```
+退出画面: 0deg → 180deg (回転してフェードアウト)
+進入画面: -180deg → 0deg (回転してフェードイン)
+90度地点で透明度遷移 (自然な裏返り効果)
+```
+
+回転が90度を超える瞬間に透明度が遷移し、まるで物理的にカードを裏返すような自然な効果を生み出します。
+
+## 最適な活用法: フルスクリーン画像
+
+ローテート遷移は**画面全体を満たす画像**と一緒に使用するときに最も美しい効果が得られます。画面全体が一つのキャンバスのように回転することで、まるで巨大な作品が裏返るような印象的な体験を提供します。
+
+### フルスクリーン画像スタイル例
+
+```css
+.fullscreen-image {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+```
+
+## 基本的な使用法
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { rotate } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      defaultTransition: rotate()
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* アプリコンテンツ */}
+        </Ssgoi>
+      );
+    }
+    ```
+
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { rotate } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        defaultTransition: rotate()
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        defaultTransition: rotate()
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 実践活用例
+
+### 1. クリエイティブポートフォリオ
+
+フルスクリーンプロジェクト画像間の遷移:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/projects/*',
+          to: '/projects/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // ページコンポーネント
+    function ProjectPage({ project }) {
+      return (
+        <div className="fullscreen-project">
+          <img
+            src={project.heroImage}
+            alt={project.title}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover'
+            }}
+          />
+          <div className="project-info">
+            <h1>{project.title}</h1>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- ページコンポーネント -->
+    <div class="fullscreen-project">
+      <img
+        src={project.heroImage}
+        alt={project.title}
+        style="width: 100vw; height: 100vh; object-fit: cover;"
+      />
+      <div class="project-info">
+        <h1>{project.title}</h1>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- アプリコンテンツ -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/projects/*',
+            to: '/projects/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. ブランドランディングシーケンス
+
+イントロからメインコンテンツへの進入:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/intro',
+          to: '/home',
+          transition: rotate()
+        },
+        {
+          from: '/home',
+          to: '/intro',
+          transition: rotate()
+        }
+      ]
+    };
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- アプリコンテンツ -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/intro',
+            to: '/home',
+            transition: rotate()
+          },
+          {
+            from: '/home',
+            to: '/intro',
+            transition: rotate()
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 3. 画像ギャラリーショーケース
+
+フルスクリーンギャラリーでの画像間遷移:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    const config = {
+      transitions: [
+        {
+          from: '/gallery/*',
+          to: '/gallery/*',
+          transition: rotate(),
+          symmetric: true
+        }
+      ]
+    };
+
+    // ギャラリーアイテムページ
+    function GalleryItem({ image }) {
+      return (
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          background: `url(${image.src}) center/cover`
+        }}>
+          <div className="caption">
+            <h2>{image.title}</h2>
+            <p>{image.description}</p>
+          </div>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      const config = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    </script>
+
+    <!-- ギャラリーアイテムページ -->
+    <div style="width: 100vw; height: 100vh; background: url({image.src}) center/cover;">
+      <div class="caption">
+        <h2>{image.title}</h2>
+        <p>{image.description}</p>
+      </div>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { rotate } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [Ssgoi],
+      template: `
+        <div ssgoi [config]="config">
+          <!-- アプリコンテンツ -->
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/gallery/*',
+            to: '/gallery/*',
+            transition: rotate(),
+            symmetric: true
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## アクセシビリティ
+
+- `prefers-reduced-motion`設定時は自動的にアニメーションを無効化
+- 回転効果は一部のユーザーにめまいを引き起こす可能性があるため、必須でない場合は代替手段を提供することをお勧めします
+- スクリーンリーダーは遷移中もコンテンツ変更を正しく認識
+
+## ベストプラクティス
+
+### ✅ DO
+
+- フルスクリーン画像やビジュアル中心のコンテンツに使用
+- ブランド体験が重要なクリエイティブサイトに適用
+- 特別な瞬間(イントロ、ショーケース)にインパクトを与えるときに使用
+- トップレベルナビゲーションで選択的に使用
+
+### ❌ DON'T
+
+- 一般的なページ遷移に乱用しないでください (疲労感を誘発)
+- テキスト中心のコンテンツ遷移には使用しないでください
+- 階層構造ナビゲーション(リスト → 詳細)には使用しないでください
+- 頻繁なナビゲーションが予想される場所では避けてください
