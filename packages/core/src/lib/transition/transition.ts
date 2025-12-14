@@ -13,7 +13,6 @@ import type {
   TransitionScope,
 } from "../types";
 import type { TransitionKey } from "../types";
-import { parseCallerLocation } from "../utils/parse-caller-location";
 import { watchUnmount } from "./unmount-observer";
 
 /**
@@ -86,40 +85,6 @@ function unregisterTransition(key: TransitionKey): void {
   refCallbacks.delete(key);
 }
 
-// ---------------------------------------------
-// Auto key generation
-// ---------------------------------------------
-
-export function generateAutoKey(): TransitionKey {
-  const location = parseCallerLocation(new Error().stack);
-  if (location) {
-    const key =
-      `auto_${location.file}_${location.line}_${location.column}` as const;
-    return key;
-  }
-
-  const key = Symbol(`ssgoi_auto_${Date.now()}`);
-  return key;
-}
-
-// Optional GC-based cleanup registry
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry as
-  | (new (cb: (heldValue: TransitionKey) => void) => {
-      register: (target: object, heldValue: TransitionKey) => void;
-    })
-  | undefined;
-const __cleanupRegistry = FinalizationRegistryCtor
-  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (new (FinalizationRegistryCtor as any)((key: TransitionKey) => {
-      try {
-        unregisterTransition(key);
-      } catch {
-        // Ignore cleanup errors
-      }
-    }) as { register: (target: object, heldValue: TransitionKey) => void })
-  : undefined;
-
 type TransitionOptionsWithStrategy = TransitionOptions<undefined> & {
   [TRANSITION_STRATEGY]?: (context: StrategyContext) => TransitionStrategy;
 };
@@ -178,18 +143,8 @@ export function transition(
   options: TransitionOptionsWithStrategy,
   mode: TransitionMode = "manual",
 ): TransitionCallback | RefCallback {
-  const resolvedKey = options.key ?? generateAutoKey();
-
-  if (options.ref && __cleanupRegistry) {
-    try {
-      __cleanupRegistry.register(options.ref, resolvedKey);
-    } catch {
-      // Ignore registration errors
-    }
-  }
-
   const callback = registerTransition(
-    resolvedKey,
+    options.key,
     {
       in: options.in,
       out: options.out,
@@ -205,7 +160,7 @@ export function transition(
   }
 
   // Auto mode: return cached ref callback with MutationObserver integration
-  let refCallback = refCallbacks.get(resolvedKey);
+  let refCallback = refCallbacks.get(options.key);
   if (refCallback) {
     return refCallback;
   }
@@ -219,6 +174,6 @@ export function transition(
     }
   };
 
-  refCallbacks.set(resolvedKey, refCallback);
+  refCallbacks.set(options.key, refCallback);
   return refCallback;
 }
