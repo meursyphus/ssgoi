@@ -114,7 +114,6 @@ Animate specific elements during mount/unmount:
 ```vue
 <template>
   <div v-transition="{
-    key: 'card',
     in: fadeIn(),
     out: slideUp()
   }">
@@ -164,7 +163,6 @@ let cleanup;
 
 onMounted(() => {
   cleanup = transition({
-    key: 'card',
     in: fadeIn(),
     out: slideUp()
   })(cardRef.value);
@@ -255,7 +253,6 @@ Apply transitions to individual elements.
 
 ```vue
 <div v-transition="{
-  key: 'unique-key',
   in: fadeIn(),
   out: fadeOut()
 }">
@@ -270,7 +267,6 @@ Apply transitions programmatically.
 
 ```javascript
 const cleanup = transition({
-  key: 'unique-key',
   in: fadeIn(),
   out: fadeOut()
 })(element);

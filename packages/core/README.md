@@ -111,7 +111,6 @@ import { fadeIn, slideUp } from '@ssgoi/react/transitions';
 function Card() {
   return (
     <div ref={transition({
-      key: 'card',
       in: fadeIn(),
       out: slideUp()
     })}>

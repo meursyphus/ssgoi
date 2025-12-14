@@ -134,7 +134,6 @@ Animate specific elements during mount/unmount:
 
 <div
   use:transition={{
-    key: "card",
     in: fadeIn(),
     out: slideUp(),
   }}
@@ -209,7 +208,6 @@ Apply transitions to individual elements.
 ```svelte
 <div
   use:transition={{
-    key: "unique-key",
     in: fadeIn(),
     out: fadeOut(),
   }}

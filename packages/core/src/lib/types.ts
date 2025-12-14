@@ -283,7 +283,6 @@ export type TransitionScope = "global" | "local";
 
 export type TransitionOptions<TContext = undefined> = Transition<TContext> & {
   key?: TransitionKey;
-  ref?: object;
   /**
    * Controls animation behavior relative to TransitionScope
    * - 'global' (default): Always run IN/OUT animations

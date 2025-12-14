@@ -20,10 +20,7 @@ nav-title: "模糊"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...blur()
-        })}>
+        <div ref={transition(blur())}>
           Blur me!
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "模糊"
       import { blur } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...blur()
-    }}>
+    <div use:transition={blur()}>
       Blur me!
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "模糊"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...blur()
-      }">
+      <div v-transition="blur()">
         Blur me!
       </div>
     </template>
@@ -94,10 +85,7 @@ nav-title: "模糊"
       `
     })
     export class AppComponent {
-      blurTransition = {
-        key: 'my-element',
-        ...blur(),
-      };
+      blurTransition = blur();
     }
     ```
   </TabPanel>
