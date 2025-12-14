@@ -324,9 +324,8 @@ export function BlindDemo() {
       blindCount: 10,
       inSpring: { stiffness: 200, damping: 20 },
       outSpring: { stiffness: 200, damping: 20 },
-      staggerDelay: 100,
       direction: "horizontal",
-      blindColor: "lab(8.11897% .811279 -12.254)",
+      blindColor: "#131313",
     }),
   };
 

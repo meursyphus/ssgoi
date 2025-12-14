@@ -58,7 +58,7 @@ export function Header() {
       </button>
 
       {/* Desktop Header - Center floating */}
-      <header className="hidden md:block fixed top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10">
+      <header className="hidden md:flex justify-center fixed w-[660px]  top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10">
         <div className="flex items-center gap-2 px-2">
           {/* Logo */}
           <Link
