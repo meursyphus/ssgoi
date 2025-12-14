@@ -137,66 +137,61 @@ function HomePage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/jaemin"
-      className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-full"
-    >
+    <DemoPage path="/jaemin" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
           isMobile ? "px-3 py-6" : "max-w-6xl px-4 py-12 sm:py-20",
         )}
       >
-        <div className="text-center space-y-6">
-          <div className="inline-block p-3 bg-purple-500/10 rounded-full mb-4">
-            <span className="text-purple-400 text-sm font-semibold">
+        <div className="text-center space-y-5">
+          <div className="inline-block px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mb-4">
+            <span className="text-neutral-400 text-xs font-medium tracking-wider">
               {content.home.badge}
             </span>
           </div>
           <h1
             className={cn(
-              "font-bold text-white",
-              isMobile ? "text-3xl" : "text-5xl sm:text-7xl",
+              "font-medium text-neutral-100",
+              isMobile ? "text-3xl" : "text-5xl sm:text-6xl",
             )}
           >
-            <span className="text-gradient bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
-              {content.home.title}
-            </span>
+            {content.home.title}
           </h1>
           <h2
             className={cn(
-              "text-gray-200 font-semibold",
-              isMobile ? "text-lg" : "text-2xl sm:text-3xl",
+              "text-neutral-300",
+              isMobile ? "text-base" : "text-lg",
             )}
           >
             {content.home.subtitle}
           </h2>
           <p
             className={cn(
-              "text-gray-300 max-w-2xl mx-auto",
-              isMobile ? "text-base" : "text-xl",
+              "text-neutral-500 max-w-2xl mx-auto",
+              isMobile ? "text-sm" : "text-sm",
             )}
           >
             {content.home.description}
           </p>
-          <div className="pt-8">
-            <button className="px-8 py-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-lg font-semibold">
+          <div className="pt-6">
+            <button className="px-6 py-2.5 bg-white text-neutral-900 text-sm rounded-lg hover:bg-neutral-200 transition-colors">
               {content.home.cta}
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-20">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16">
           {content.home.features.map((feature, idx) => (
             <div
               key={idx}
-              className="bg-gray-800/50 p-6 rounded-lg backdrop-blur"
+              className="bg-white/[0.02] border border-white/5 p-5 rounded-lg"
             >
-              <div className="text-4xl mb-4">{feature.icon}</div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <div className="text-2xl mb-3">{feature.icon}</div>
+              <h3 className="text-sm font-medium text-neutral-200 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-400 text-sm">{feature.description}</p>
+              <p className="text-neutral-500 text-xs">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -210,60 +205,57 @@ function PremiumPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/jaemin/premium"
-      className="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 min-h-full"
-    >
+    <DemoPage path="/jaemin/premium" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
           isMobile ? "px-3 py-6" : "max-w-4xl px-4 py-12",
         )}
       >
-        <div className="text-center mb-12">
-          <div className="inline-block p-3 bg-indigo-500/10 rounded-full mb-4">
-            <span className="text-indigo-400 text-sm font-semibold">
+        <div className="text-center mb-10">
+          <div className="inline-block px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mb-4">
+            <span className="text-neutral-400 text-xs font-medium tracking-wider">
               {content.premium.badge}
             </span>
           </div>
           <h1
             className={cn(
-              "font-bold text-white mb-4",
-              isMobile ? "text-2xl" : "text-4xl",
+              "font-medium text-neutral-100 mb-3",
+              isMobile ? "text-2xl" : "text-3xl",
             )}
           >
             {content.premium.title}
           </h1>
           <h2
             className={cn(
-              "text-indigo-300 mb-4",
-              isMobile ? "text-lg" : "text-xl",
+              "text-neutral-300 mb-3",
+              isMobile ? "text-sm" : "text-base",
             )}
           >
             {content.premium.subtitle}
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
+          <p className="text-neutral-500 text-sm max-w-2xl mx-auto">
             {content.premium.description}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
           {content.premium.features.map((feature, idx) => (
             <div
               key={idx}
-              className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-6 rounded-lg backdrop-blur border border-indigo-500/20"
+              className="bg-white/[0.02] p-5 rounded-lg border border-white/5"
             >
-              <div className="text-3xl mb-3">{feature.icon}</div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <div className="text-2xl mb-3">{feature.icon}</div>
+              <h3 className="text-sm font-medium text-neutral-200 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-300 text-sm">{feature.description}</p>
+              <p className="text-neutral-500 text-xs">{feature.description}</p>
             </div>
           ))}
         </div>
 
         <div className="text-center">
-          <button className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all text-lg font-semibold">
+          <button className="px-6 py-2.5 bg-white text-neutral-900 text-sm rounded-lg hover:bg-neutral-200 transition-colors">
             {content.premium.cta}
           </button>
         </div>
@@ -277,10 +269,7 @@ function AchievementPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/jaemin/achievement"
-      className="bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 min-h-full"
-    >
+    <DemoPage path="/jaemin/achievement" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto text-center",
@@ -288,58 +277,58 @@ function AchievementPage() {
         )}
       >
         <div className="mb-8">
-          <div className="inline-block p-3 bg-emerald-500/10 rounded-full mb-4">
-            <span className="text-emerald-400 text-sm font-semibold">
+          <div className="inline-block px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mb-4">
+            <span className="text-neutral-400 text-xs font-medium tracking-wider">
               {content.achievement.badge}
             </span>
           </div>
-          <div className="text-6xl mb-4">🏆</div>
+          <div className="text-4xl mb-4">🏆</div>
           <h1
             className={cn(
-              "font-bold text-white mb-2",
-              isMobile ? "text-2xl" : "text-4xl",
+              "font-medium text-neutral-100 mb-2",
+              isMobile ? "text-2xl" : "text-3xl",
             )}
           >
             {content.achievement.title}
           </h1>
           <h2
             className={cn(
-              "text-emerald-300 mb-4",
-              isMobile ? "text-lg" : "text-xl",
+              "text-neutral-300 mb-3",
+              isMobile ? "text-sm" : "text-base",
             )}
           >
             {content.achievement.subtitle}
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
+          <p className="text-neutral-500 text-sm max-w-2xl mx-auto">
             {content.achievement.description}
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-12">
+        <div className="grid grid-cols-3 gap-3 mb-10">
           {content.achievement.stats.map((stat, idx) => (
             <div
               key={idx}
-              className="bg-emerald-500/10 p-4 rounded-lg border border-emerald-500/20"
+              className="bg-white/[0.02] p-4 rounded-lg border border-white/5"
             >
-              <div className="text-2xl font-bold text-emerald-400 mb-1">
+              <div className="text-lg font-medium text-neutral-200 mb-1">
                 {stat.value}
               </div>
-              <div className="text-gray-400 text-sm">{stat.label}</div>
+              <div className="text-neutral-500 text-xs">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {content.achievement.rewards.map((reward, idx) => (
             <div
               key={idx}
-              className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-6 rounded-lg backdrop-blur border border-emerald-500/20"
+              className="bg-white/[0.02] p-5 rounded-lg border border-white/5"
             >
-              <div className="text-3xl mb-3">{reward.icon}</div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <div className="text-2xl mb-3">{reward.icon}</div>
+              <h3 className="text-sm font-medium text-neutral-200 mb-2">
                 {reward.title}
               </h3>
-              <p className="text-gray-300 text-sm">{reward.description}</p>
+              <p className="text-neutral-500 text-xs">{reward.description}</p>
             </div>
           ))}
         </div>
@@ -353,10 +342,7 @@ function SettingsPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/jaemin/settings"
-      className="bg-gradient-to-br from-slate-900 to-gray-900 min-h-full"
-    >
+    <DemoPage path="/jaemin/settings" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -365,32 +351,32 @@ function SettingsPage() {
       >
         <h1
           className={cn(
-            "font-bold text-white mb-8",
-            isMobile ? "text-2xl" : "text-4xl",
+            "font-medium text-neutral-100 mb-8",
+            isMobile ? "text-xl" : "text-2xl",
           )}
         >
           {content.settings.title}
         </h1>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {content.settings.sections.map((section, sectionIdx) => (
             <div key={sectionIdx}>
-              <h2 className="text-xl font-semibold text-gray-200 mb-4">
+              <h2 className="text-sm font-medium text-neutral-300 mb-3">
                 {section.title}
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {section.items.map((item, itemIdx) => (
                   <div
                     key={itemIdx}
-                    className="bg-gray-800/50 p-4 rounded-lg backdrop-blur border border-gray-700/50 hover:border-gray-600/50 transition-colors cursor-pointer"
+                    className="bg-white/[0.02] p-4 rounded-lg border border-white/5 hover:bg-white/[0.04] transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-2xl">{item.icon}</div>
+                      <div className="text-xl">{item.icon}</div>
                       <div className="flex-1">
-                        <h3 className="text-white font-medium mb-1">
+                        <h3 className="text-neutral-200 text-sm mb-0.5">
                           {item.title}
                         </h3>
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-neutral-500 text-xs">
                           {item.description}
                         </p>
                       </div>
@@ -503,14 +489,14 @@ const DemoLayout = memo(({ children }: DemoLayoutProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-[#121212] border-b border-white/5">
         <div className={cn("mx-auto", isMobile ? "px-3" : "max-w-6xl px-4")}>
-          <div className="flex items-center justify-between h-14">
+          <div className="flex items-center justify-between h-12">
             <div className="flex items-center gap-4">
               <h1
                 className={cn(
-                  "font-bold text-white flex items-center gap-2",
-                  isMobile ? "text-base" : "text-xl",
+                  "font-medium text-neutral-200 flex items-center gap-2",
+                  isMobile ? "text-sm" : "text-base",
                 )}
               >
                 <span>⭐</span>
@@ -522,11 +508,11 @@ const DemoLayout = memo(({ children }: DemoLayoutProps) => {
                     key={route.path}
                     onClick={() => navigate(route.path)}
                     className={cn(
-                      "rounded-md font-medium transition-all",
-                      isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
+                      "rounded-md transition-all",
+                      isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs",
                       currentPath === route.path
-                        ? "bg-gray-700 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                        ? "bg-white/5 text-neutral-100"
+                        : "text-neutral-500 hover:bg-white/5 hover:text-neutral-300",
                     )}
                   >
                     {content.layout[

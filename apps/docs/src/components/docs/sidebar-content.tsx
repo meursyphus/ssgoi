@@ -103,8 +103,8 @@ export function SidebarContent({
               ${level > 0 ? "ml-" + level * 4 : ""}
               ${
                 isActive
-                  ? "bg-white/5 text-white border-l-2 border-white pl-1.5"
-                  : "text-neutral-500 hover:text-white border-l-2 border-transparent"
+                  ? "text-neutral-100"
+                  : "text-neutral-500 hover:text-neutral-300"
               }
             `}
           >

@@ -313,103 +313,101 @@ body {
   box-shadow: 0 20px 40px -15px rgba(255, 255, 255, 0.05);
 }
 
-/* Custom Syntax Highlighting - Minimal Monochrome Theme */
+/* Custom Syntax Highlighting - Minimal Pastel Theme */
 .hljs {
   background: #111 !important;
   color: #a3a3a3 !important;
 }
 
-/* Keywords, types - subtle white */
+/* Keywords, types - muted blue */
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-type {
-  color: #e5e5e5 !important;
-  font-weight: 500;
+  color: #93a5cf !important;
 }
 
-/* Strings - muted sage */
+/* Strings - muted green */
 .hljs-string,
 .hljs-selector-attr,
-.hljs-selector-pseudo,
-.hljs-addition {
-  color: #9ca38f !important;
+.hljs-selector-pseudo {
+  color: #a3b899 !important;
 }
 
 /* Comments - dim gray */
 .hljs-comment,
 .hljs-quote {
-  color: #525252 !important;
+  color: #5a5a5a !important;
   font-style: italic;
 }
 
-/* Functions, methods - light gray */
+/* Functions, methods - muted lavender */
 .hljs-title,
 .hljs-section {
-  color: #d4d4d4 !important;
+  color: #b8a4c9 !important;
 }
 
-/* Variables, parameters - warm gray */
+/* Variables, parameters - muted cyan */
 .hljs-variable,
 .hljs-template-variable,
 .hljs-params {
-  color: #b8b8b8 !important;
+  color: #8fb8b8 !important;
 }
 
-/* Numbers, constants - cool gray */
+/* Numbers, constants - muted orange */
 .hljs-number,
 .hljs-literal,
 .hljs-symbol,
 .hljs-bullet {
-  color: #a8a8a8 !important;
+  color: #c9a87c !important;
 }
 
-/* Attributes, properties - soft white */
+/* Attributes, properties - muted yellow */
 .hljs-attr,
 .hljs-attribute,
 .hljs-property {
-  color: #c9c9c9 !important;
+  color: #c9c093 !important;
 }
 
-/* Tags, components - brighter for structure */
+/* Tags, components - muted pink */
 .hljs-tag,
 .hljs-name,
 .hljs-selector-id,
 .hljs-selector-class {
-  color: #d4d4d4 !important;
+  color: #c9a3a3 !important;
 }
 
-/* Built-in, meta */
+/* Built-in, meta - muted teal */
 .hljs-built_in,
 .hljs-meta {
-  color: #b0b0b0 !important;
+  color: #8fb8a8 !important;
 }
 
-/* Deletion - subtle red tint */
+/* Deletion - muted red */
 .hljs-deletion {
-  color: #c9a8a8 !important;
+  color: #c9a3a3 !important;
 }
 
-/* Addition - subtle green tint */
+/* Addition - muted green */
 .hljs-addition {
-  color: #a8c9a8 !important;
+  color: #a3c9a3 !important;
 }
 
 /* Bold */
 .hljs-strong {
   font-weight: 600;
-  color: #e5e5e5 !important;
+  color: #d4d4d4 !important;
 }
 
 /* Emphasis */
 .hljs-emphasis {
   font-style: italic;
-  color: #c0c0c0 !important;
+  color: #b8b8b8 !important;
 }
 
 /* Punctuation and operators */
 .hljs-punctuation,
 .hljs-operator {
-  color: #737373 !important;
+  color: #808080 !important;
 }
 
 /* Landing page animations */

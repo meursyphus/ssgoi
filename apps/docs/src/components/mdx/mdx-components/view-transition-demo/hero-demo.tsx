@@ -91,11 +91,13 @@ const galleryItems = [
 function GalleryListPage() {
   return (
     <DemoPage path="/gallery">
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 p-6">
+      <div className="min-h-screen bg-[#121212] p-6">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Photo Gallery</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-neutral-100 mb-2">
+            Photo Gallery
+          </h1>
+          <p className="text-neutral-400">
             Click any image to see the hero transition effect
           </p>
         </div>
@@ -109,7 +111,7 @@ function GalleryListPage() {
               className="group cursor-pointer block no-underline"
             >
               <article>
-                <div className="relative bg-gray-800 rounded-lg transition-transform duration-300 hover:scale-105">
+                <div className="relative bg-white/[0.02] border border-white/5 rounded-lg transition-all duration-300 hover:bg-white/5">
                   {/* Hero transition element - no overflow hidden here */}
                   <div
                     data-hero-key={item.id}
@@ -123,10 +125,10 @@ function GalleryListPage() {
                     {/* Overlay on hover with rounded corners */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <span className="text-xs text-teal-400 font-medium uppercase tracking-wider">
+                        <span className="text-xs text-neutral-400 font-medium uppercase tracking-wider">
                           {item.category}
                         </span>
-                        <h3 className="text-white font-semibold text-lg mt-1">
+                        <h3 className="text-neutral-100 font-semibold text-lg mt-1">
                           {item.title}
                         </h3>
                       </div>
@@ -169,12 +171,12 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
             className="w-full h-full object-cover"
           />
 
-          {/* Top navigation bar ovÒerlaying the image */}
+          {/* Top navigation bar overlaying the image */}
           <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
               <DemoLink
                 to="/hero/gallery"
-                className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg text-neutral-100 hover:bg-white/20 transition-all no-underline"
               >
                 <svg
                   width="20"
@@ -191,12 +193,12 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
 
               {/* Close button with ESC hint */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 hidden md:block">
+                <span className="text-xs text-neutral-400 hidden md:block">
                   Press ESC
                 </span>
                 <DemoLink
                   to="/hero/gallery"
-                  className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 no-underline"
+                  className="p-2 bg-white/10 backdrop-blur-md rounded-full text-neutral-100 hover:bg-white/20 transition-all no-underline"
                   aria-label="Close"
                 >
                   <svg
@@ -217,33 +219,37 @@ function GalleryDetailPage({ item }: { item: (typeof galleryItems)[0] }) {
           {/* Image info overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent p-8">
             <div className="max-w-4xl mx-auto">
-              <span className="text-sm text-teal-400 font-medium uppercase tracking-wider">
+              <span className="text-sm text-neutral-400 font-medium uppercase tracking-wider">
                 {item.category}
               </span>
-              <h1 className="text-4xl font-bold text-white mt-2 mb-4">
+              <h1 className="text-4xl font-bold text-neutral-100 mt-2 mb-4">
                 {item.title}
               </h1>
-              <p className="text-gray-300 text-lg mb-6 max-w-2xl">
+              <p className="text-neutral-300 text-lg mb-6 max-w-2xl">
                 {item.description}
               </p>
 
               {/* Metadata */}
               <div className="flex flex-wrap gap-6 text-sm">
                 <div>
-                  <span className="text-gray-500">Photographer</span>
-                  <p className="text-white font-medium">{item.photographer}</p>
+                  <span className="text-neutral-500">Photographer</span>
+                  <p className="text-neutral-100 font-medium">
+                    {item.photographer}
+                  </p>
                 </div>
                 <div>
-                  <span className="text-gray-500">Location</span>
-                  <p className="text-white font-medium">{item.location}</p>
+                  <span className="text-neutral-500">Location</span>
+                  <p className="text-neutral-100 font-medium">
+                    {item.location}
+                  </p>
                 </div>
                 <div>
-                  <span className="text-gray-500">Tags</span>
+                  <span className="text-neutral-500">Tags</span>
                   <div className="flex gap-2 mt-1">
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-1 bg-white/10 rounded text-xs text-white"
+                        className="px-2 py-1 bg-white/10 rounded text-xs text-neutral-100"
                       >
                         #{tag}
                       </span>

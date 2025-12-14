@@ -186,11 +186,13 @@ const blogPosts = [
 function PostsListPage() {
   return (
     <DemoPage path="/posts">
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 p-6">
+      <div className="min-h-screen bg-[#121212] p-6">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Blog Posts</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-neutral-100 mb-2">
+            Blog Posts
+          </h1>
+          <p className="text-neutral-400">
             Experience the drill transition effect when navigating between posts
           </p>
         </div>
@@ -203,7 +205,7 @@ function PostsListPage() {
               to={`/posts/${post.id}`}
               className="block no-underline"
             >
-              <article className="bg-gray-800 rounded-lg p-4 transition-all duration-300 hover:bg-gray-750 hover:shadow-lg hover:translate-x-1 cursor-pointer">
+              <article className="bg-white/[0.02] border border-white/5 rounded-lg p-4 transition-all duration-300 hover:bg-white/5 cursor-pointer">
                 <div className="flex gap-4">
                   {/* Cover Image */}
                   <div className="flex-shrink-0">
@@ -217,17 +219,19 @@ function PostsListPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-xs text-teal-400 font-medium uppercase tracking-wider">
+                      <span className="text-xs text-neutral-400 font-medium uppercase tracking-wider">
                         {post.category}
                       </span>
-                      <span className="text-xs text-gray-500">{post.date}</span>
+                      <span className="text-xs text-neutral-500">
+                        {post.date}
+                      </span>
                     </div>
 
-                    <h2 className="text-xl font-semibold text-white mb-2 line-clamp-1">
+                    <h2 className="text-xl font-semibold text-neutral-100 mb-2 line-clamp-1">
                       {post.title}
                     </h2>
 
-                    <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                    <p className="text-neutral-400 text-sm mb-3 line-clamp-2">
                       {post.excerpt}
                     </p>
 
@@ -239,12 +243,12 @@ function PostsListPage() {
                           alt={post.author.name}
                           className="w-5 h-5 rounded-full"
                         />
-                        <span className="text-xs text-gray-300">
+                        <span className="text-xs text-neutral-300">
                           {post.author.name}
                         </span>
                       </div>
-                      <span className="text-xs text-gray-600">•</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-neutral-500">•</span>
+                      <span className="text-xs text-neutral-500">
                         {post.readTime} min read
                       </span>
                     </div>
@@ -277,13 +281,13 @@ function PostDetailPage({ post }: { post: (typeof blogPosts)[0] }) {
 
   return (
     <DemoPage path={`/posts/${post.id}`}>
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-[#121212]">
         {/* Header with Back Button */}
-        <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
+        <div className="sticky top-0 z-10 bg-[#121212]/80 backdrop-blur-md border-b border-white/5">
           <div className="max-w-4xl mx-auto p-4">
             <DemoLink
               to="/drill/posts"
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors no-underline"
+              className="inline-flex items-center gap-2 text-neutral-400 hover:text-neutral-300 transition-colors no-underline"
             >
               <svg
                 width="20"
@@ -309,53 +313,57 @@ function PostDetailPage({ post }: { post: (typeof blogPosts)[0] }) {
               alt={post.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/20 to-transparent" />
           </div>
 
           {/* Article Header */}
           <header className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-sm text-teal-400 font-medium uppercase tracking-wider">
+              <span className="text-sm text-neutral-400 font-medium uppercase tracking-wider">
                 {post.category}
               </span>
-              <span className="text-sm text-gray-500">•</span>
-              <span className="text-sm text-gray-500">{post.date}</span>
-              <span className="text-sm text-gray-500">•</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-neutral-500">•</span>
+              <span className="text-sm text-neutral-500">{post.date}</span>
+              <span className="text-sm text-neutral-500">•</span>
+              <span className="text-sm text-neutral-500">
                 {post.readTime} min read
               </span>
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-6">{post.title}</h1>
+            <h1 className="text-4xl font-bold text-neutral-100 mb-6">
+              {post.title}
+            </h1>
 
-            <p className="text-xl text-gray-400 mb-6">{post.excerpt}</p>
+            <p className="text-xl text-neutral-400 mb-6">{post.excerpt}</p>
 
             {/* Author Info */}
-            <div className="flex items-center gap-4 pb-6 border-b border-gray-800">
+            <div className="flex items-center gap-4 pb-6 border-b border-white/5">
               <img
                 src={post.author.avatar}
                 alt={post.author.name}
                 className="w-12 h-12 rounded-full"
               />
               <div>
-                <p className="text-white font-medium">{post.author.name}</p>
-                <p className="text-sm text-gray-500">Author</p>
+                <p className="text-neutral-100 font-medium">
+                  {post.author.name}
+                </p>
+                <p className="text-sm text-neutral-500">Author</p>
               </div>
             </div>
           </header>
 
           {/* Article Content */}
           <div className="prose prose-invert max-w-none">
-            <div className="text-gray-300 leading-relaxed whitespace-pre-line">
+            <div className="text-neutral-300 leading-relaxed whitespace-pre-line">
               {post.content}
             </div>
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 pt-8 border-t border-gray-800">
+          <footer className="mt-12 pt-8 border-t border-white/5">
             <DemoLink
               to="/drill/posts"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors no-underline"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/[0.02] border border-white/5 hover:bg-white/5 rounded-lg text-neutral-100 transition-colors no-underline"
             >
               <svg
                 width="20"
@@ -392,7 +400,7 @@ const drillRoutes: RouteConfig[] = [
 // Custom layout for Drill demo
 function DrillLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-gray-950 min-h-full">
+    <div className="bg-[#121212] min-h-full">
       {/* Constrain width at layout level */}
       <div className="max-w-md mx-auto overflow-hidden">
         {/* Critical: relative z-0 wrapper for proper transition layering */}

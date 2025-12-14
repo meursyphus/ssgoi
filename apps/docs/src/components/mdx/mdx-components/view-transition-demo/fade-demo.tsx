@@ -12,10 +12,7 @@ function HomePage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/fade"
-      className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
-    >
+    <DemoPage path="/fade" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -23,25 +20,22 @@ function HomePage() {
         )}
       >
         <div className="text-center space-y-6">
-          <div className="inline-block p-3 bg-blue-500/10 rounded-full mb-4">
-            <span className="text-blue-400 text-sm font-semibold">
+          <div className="inline-block p-3 bg-white/5 rounded-full mb-4">
+            <span className="text-neutral-400 text-sm font-semibold">
               SMOOTH TRANSITIONS
             </span>
           </div>
           <h1
             className={cn(
-              "font-bold text-white",
+              "font-bold text-neutral-100",
               isMobile ? "text-2xl" : "text-4xl sm:text-6xl",
             )}
           >
-            Welcome to{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              SSGOI
-            </span>
+            Welcome to <span className="text-neutral-300">SSGOI</span>
           </h1>
           <p
             className={cn(
-              "text-gray-300 max-w-2xl mx-auto",
+              "text-neutral-400 max-w-2xl mx-auto",
               isMobile ? "text-base" : "text-xl sm:text-2xl",
             )}
           >
@@ -49,38 +43,40 @@ function HomePage() {
             pages into smooth, delightful experiences.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <button className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            <button className="px-8 py-3 bg-white/5 text-neutral-100 rounded-lg hover:bg-white/10 border border-white/10 transition-colors">
               Get Started
             </button>
-            <button className="px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+            <button className="px-8 py-3 bg-white/[0.02] border border-white/5 text-neutral-300 rounded-lg hover:bg-white/5 transition-colors">
               View Docs
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-20">
-          <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
             <div className="text-3xl mb-3">🌍</div>
-            <h3 className="text-lg font-semibold text-white mb-2">
+            <h3 className="text-lg font-semibold text-neutral-100 mb-2">
               Works Everywhere
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-neutral-400 text-sm">
               Unlike View Transition API, works in all modern browsers
             </p>
           </div>
-          <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
             <div className="text-3xl mb-3">🚀</div>
-            <h3 className="text-lg font-semibold text-white mb-2">SSR Ready</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-lg font-semibold text-neutral-100 mb-2">
+              SSR Ready
+            </h3>
+            <p className="text-neutral-400 text-sm">
               Perfect with Next.js, Nuxt, SvelteKit. SEO-friendly
             </p>
           </div>
-          <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
             <div className="text-3xl mb-3">🎯</div>
-            <h3 className="text-lg font-semibold text-white mb-2">
+            <h3 className="text-lg font-semibold text-neutral-100 mb-2">
               Any Router
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-neutral-400 text-sm">
               Keep your existing routing solution
             </p>
           </div>
@@ -95,10 +91,7 @@ function FeaturesPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/fade/features"
-      className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
-    >
+    <DemoPage path="/fade/features" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -107,7 +100,7 @@ function FeaturesPage() {
       >
         <h1
           className={cn(
-            "font-bold text-white mb-8",
+            "font-bold text-neutral-100 mb-8",
             isMobile ? "text-2xl" : "text-4xl",
           )}
         >
@@ -115,11 +108,11 @@ function FeaturesPage() {
         </h1>
 
         <div className="space-y-6">
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               🎨 Built-in Transitions
             </h2>
-            <p className="text-gray-300 mb-4">
+            <p className="text-neutral-300 mb-4">
               Choose from a variety of pre-built transitions or create your own.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -127,7 +120,7 @@ function FeaturesPage() {
                 (transition) => (
                   <div
                     key={transition}
-                    className="bg-gray-700 px-3 py-2 rounded text-center text-sm text-gray-300"
+                    className="bg-white/5 px-3 py-2 rounded text-center text-sm text-neutral-300"
                   >
                     {transition}()
                   </div>
@@ -136,16 +129,16 @@ function FeaturesPage() {
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               ⚙️ Route-based Config
             </h2>
-            <p className="text-gray-300 mb-4">
+            <p className="text-neutral-300 mb-4">
               Define different transitions for different routes with wildcards
               support.
             </p>
-            <pre className="bg-gray-900 p-4 rounded text-xs overflow-x-auto">
-              <code className="text-gray-300">{`{
+            <pre className="bg-black/20 p-4 rounded text-xs overflow-x-auto">
+              <code className="text-neutral-300">{`{
   from: '/products',
   to: '/products/*',
   transition: scale()
@@ -153,11 +146,11 @@ function FeaturesPage() {
             </pre>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               💾 State Persistence
             </h2>
-            <p className="text-gray-300">
+            <p className="text-neutral-300">
               Animation state persists during navigation, even with browser
               back/forward buttons. No jarring jumps or broken animations.
             </p>
@@ -200,10 +193,7 @@ function ExamplesPage() {
   ];
 
   return (
-    <DemoPage
-      path="/fade/examples"
-      className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
-    >
+    <DemoPage path="/fade/examples" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -212,7 +202,7 @@ function ExamplesPage() {
       >
         <h1
           className={cn(
-            "font-bold text-white mb-8",
+            "font-bold text-neutral-100 mb-8",
             isMobile ? "text-2xl" : "text-4xl",
           )}
         >
@@ -223,21 +213,21 @@ function ExamplesPage() {
           {examples.map((example, idx) => (
             <div
               key={idx}
-              className="bg-gray-800 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300"
+              className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden hover:bg-white/5 transition-all duration-300"
             >
-              <div className="h-32 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-5xl">
+              <div className="h-32 bg-white/[0.02] flex items-center justify-center text-5xl">
                 {example.icon}
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-neutral-100 mb-2">
                   {example.title}
                 </h3>
-                <p className="text-gray-400 mb-4">{example.description}</p>
+                <p className="text-neutral-400 mb-4">{example.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {example.transitions.map((transition) => (
                     <span
                       key={transition}
-                      className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm"
+                      className="px-3 py-1 bg-white/5 text-neutral-300 rounded-full text-sm"
                     >
                       {transition}()
                     </span>
@@ -257,10 +247,7 @@ function GettingStartedPage() {
   const isMobile = useMobile();
 
   return (
-    <DemoPage
-      path="/fade/start"
-      className="bg-gradient-to-br from-gray-900 to-gray-800 min-h-full"
-    >
+    <DemoPage path="/fade/start" className="bg-[#121212] min-h-full">
       <div
         className={cn(
           "mx-auto",
@@ -269,7 +256,7 @@ function GettingStartedPage() {
       >
         <h1
           className={cn(
-            "font-bold text-white mb-8",
+            "font-bold text-neutral-100 mb-8",
             isMobile ? "text-2xl" : "text-4xl",
           )}
         >
@@ -277,21 +264,21 @@ function GettingStartedPage() {
         </h1>
 
         <div className="space-y-8">
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               1. Install SSGOI
             </h2>
-            <pre className="bg-gray-900 p-4 rounded overflow-x-auto">
-              <code className="text-gray-300 text-sm">{`npm install @ssgoi/react`}</code>
+            <pre className="bg-black/20 p-4 rounded overflow-x-auto">
+              <code className="text-neutral-300 text-sm">{`npm install @ssgoi/react`}</code>
             </pre>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               2. Wrap Your App
             </h2>
-            <pre className="bg-gray-900 p-4 rounded overflow-x-auto">
-              <code className="text-gray-300 text-sm">{`import { Ssgoi } from '@ssgoi/react';
+            <pre className="bg-black/20 p-4 rounded overflow-x-auto">
+              <code className="text-neutral-300 text-sm">{`import { Ssgoi } from '@ssgoi/react';
 import { fade } from '@ssgoi/react/view-transitions';
 
 export default function App() {
@@ -304,12 +291,12 @@ export default function App() {
             </pre>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-white/[0.02] border border-white/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-neutral-100 mb-4">
               3. Add Transitions to Pages
             </h2>
-            <pre className="bg-gray-900 p-4 rounded overflow-x-auto">
-              <code className="text-gray-300 text-sm">{`import { SsgoiTransition } from '@ssgoi/react';
+            <pre className="bg-black/20 p-4 rounded overflow-x-auto">
+              <code className="text-neutral-300 text-sm">{`import { SsgoiTransition } from '@ssgoi/react';
 
 export default function HomePage() {
   return (
@@ -324,7 +311,7 @@ export default function HomePage() {
           <div className="text-center pt-8">
             <a
               href="https://ssgoi.dev"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 text-neutral-100 rounded-lg hover:bg-white/10 transition-colors"
             >
               View Full Documentation
               <svg
@@ -362,7 +349,7 @@ function HeaderActions() {
     <>
       <a
         href="https://github.com/meursyphus/ssgoi"
-        className="text-gray-300 hover:text-white transition-colors"
+        className="text-neutral-400 hover:text-neutral-300 transition-colors"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -372,7 +359,7 @@ function HeaderActions() {
       </a>
       <a
         href="https://www.npmjs.com/package/@ssgoi/react"
-        className="text-gray-300 hover:text-white transition-colors"
+        className="text-neutral-400 hover:text-neutral-300 transition-colors"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -428,13 +415,13 @@ const DemoLayout = memo(
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
-        <header className="bg-gray-800 border-b border-gray-700">
+        <header className="bg-white/[0.02] border-b border-white/5">
           <div className={cn("mx-auto", isMobile ? "px-3" : "max-w-6xl px-4")}>
             <div className="flex items-center justify-between h-14">
               <div className="flex items-center gap-4">
                 <h1
                   className={cn(
-                    "font-bold text-white flex items-center gap-2",
+                    "font-bold text-neutral-100 flex items-center gap-2",
                     isMobile ? "text-base" : "text-xl",
                   )}
                 >
@@ -450,8 +437,8 @@ const DemoLayout = memo(
                         "rounded-md font-medium transition-all",
                         isMobile ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm",
                         currentPath === route.path
-                          ? "bg-gray-700 text-white"
-                          : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          ? "bg-white/5 text-neutral-100"
+                          : "text-neutral-400 hover:bg-white/5 hover:text-neutral-300",
                       )}
                     >
                       {route.label}

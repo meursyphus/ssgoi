@@ -24,13 +24,13 @@ function ClothingPage() {
 
   return (
     <DemoPage path="/slide/clothing">
-      <div className="h-full bg-white">
+      <div className="h-full bg-[#121212]">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+            <h2 className="text-xl md:text-2xl font-bold text-neutral-100">
               Clothing
             </h2>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-neutral-400">
               {products.length} items
             </span>
           </div>
@@ -38,18 +38,18 @@ function ClothingPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow"
+                className="bg-white/[0.02] border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all"
               >
-                <div className="bg-blue-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
+                <div className="bg-white/[0.02] rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                <h3 className="font-medium text-sm text-neutral-100 mb-1">
                   {product.name}
                 </h3>
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-lg font-bold text-neutral-200">
                   {product.price}
                 </p>
-                <button className="mt-2 w-full bg-blue-600 text-white text-sm py-1.5 rounded hover:bg-blue-700 transition-colors">
+                <button className="mt-2 w-full bg-white/5 border border-white/10 text-neutral-100 text-sm py-1.5 rounded hover:bg-white/10 transition-colors">
                   Add to Cart
                 </button>
               </div>
@@ -74,13 +74,13 @@ function ShoesPage() {
 
   return (
     <DemoPage path="/slide/shoes">
-      <div className="h-full bg-white">
+      <div className="h-full bg-[#121212]">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+            <h2 className="text-xl md:text-2xl font-bold text-neutral-100">
               Shoes
             </h2>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-neutral-400">
               {products.length} items
             </span>
           </div>
@@ -88,23 +88,23 @@ function ShoesPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative"
+                className="bg-white/[0.02] border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all relative"
               >
                 {product.tag && (
-                  <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                  <span className="absolute top-2 right-2 bg-white/10 border border-white/20 text-neutral-100 text-xs px-2 py-1 rounded">
                     {product.tag}
                   </span>
                 )}
-                <div className="bg-green-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
+                <div className="bg-white/[0.02] rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                <h3 className="font-medium text-sm text-neutral-100 mb-1">
                   {product.name}
                 </h3>
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-lg font-bold text-neutral-200">
                   {product.price}
                 </p>
-                <button className="mt-2 w-full bg-green-600 text-white text-sm py-1.5 rounded hover:bg-green-700 transition-colors">
+                <button className="mt-2 w-full bg-white/5 border border-white/10 text-neutral-100 text-sm py-1.5 rounded hover:bg-white/10 transition-colors">
                   Add to Cart
                 </button>
               </div>
@@ -131,13 +131,13 @@ function AccessoriesPage() {
 
   return (
     <DemoPage path="/slide/accessories">
-      <div className="h-full bg-white">
+      <div className="h-full bg-[#121212]">
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+            <h2 className="text-xl md:text-2xl font-bold text-neutral-100">
               Accessories
             </h2>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-neutral-400">
               {products.length} items
             </span>
           </div>
@@ -145,23 +145,23 @@ function AccessoriesPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow relative"
+                className="bg-white/[0.02] border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all relative"
               >
                 {product.tag && (
-                  <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                  <span className="absolute top-2 right-2 bg-white/10 border border-white/20 text-neutral-100 text-xs px-2 py-1 rounded">
                     {product.tag}
                   </span>
                 )}
-                <div className="bg-orange-50 rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
+                <div className="bg-white/[0.02] rounded-lg h-24 md:h-32 flex items-center justify-center mb-3">
                   <span className="text-3xl md:text-4xl">{product.image}</span>
                 </div>
-                <h3 className="font-medium text-sm text-gray-900 mb-1">
+                <h3 className="font-medium text-sm text-neutral-100 mb-1">
                   {product.name}
                 </h3>
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-lg font-bold text-neutral-200">
                   {product.price}
                 </p>
-                <button className="mt-2 w-full bg-orange-600 text-white text-sm py-1.5 rounded hover:bg-orange-700 transition-colors">
+                <button className="mt-2 w-full bg-white/5 border border-white/10 text-neutral-100 text-sm py-1.5 rounded hover:bg-white/10 transition-colors">
                   Add to Cart
                 </button>
               </div>
@@ -189,22 +189,22 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
   const { currentPath, navigate } = useBrowserNavigation();
 
   return (
-    <div className="h-full bg-gray-100 p-4 md:p-6">
+    <div className="h-full bg-[#121212] p-4 md:p-6">
       {/* App Container */}
-      <div className="h-full max-w-4xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden">
+      <div className="h-full max-w-4xl mx-auto bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
         {/* App Header */}
-        <div className="bg-white px-4 py-3 md:px-6 md:py-4 border-b border-gray-200">
+        <div className="bg-white/[0.02] px-4 py-3 md:px-6 md:py-4 border-b border-white/5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-gray-900 text-lg md:text-xl font-bold">
+              <h1 className="text-neutral-100 text-lg md:text-xl font-bold">
                 Shop Collection
               </h1>
-              <p className="text-gray-500 text-xs md:text-sm mt-0.5">
+              <p className="text-neutral-400 text-xs md:text-sm mt-0.5">
                 2024 Summer Collection
               </p>
             </div>
             <div className="flex items-center space-x-3">
-              <button className="p-2 text-gray-600 hover:text-gray-900">
+              <button className="p-2 text-neutral-400 hover:text-neutral-300">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -219,7 +219,7 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
                   />
                 </svg>
               </button>
-              <button className="p-2 text-gray-600 hover:text-gray-900 relative">
+              <button className="p-2 text-neutral-400 hover:text-neutral-300 relative">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -233,7 +233,7 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                   />
                 </svg>
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-white/10 border border-white/20 text-neutral-100 text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   3
                 </span>
               </button>
@@ -242,7 +242,7 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Tab Navigation inside the app */}
-        <div className="bg-gray-50 border-b border-gray-200">
+        <div className="bg-white/[0.02] border-b border-white/5">
           <nav className="flex">
             <div className="flex w-full">
               {slideRoutes.map((route, index) => {
@@ -256,8 +256,8 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
                         transition-colors duration-200
                         ${
                           isActive
-                            ? "text-blue-600"
-                            : "text-gray-600 hover:text-gray-900"
+                            ? "text-neutral-100"
+                            : "text-neutral-400 hover:text-neutral-300"
                         }
                       `}
                     >
@@ -265,7 +265,7 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
                     </button>
                     {isActive && (
                       <motion.div
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-300"
                         layoutId="tabUnderline"
                         transition={{
                           type: "spring",
@@ -283,7 +283,7 @@ function SlideLayout({ children }: { children: React.ReactNode }) {
 
         {/* Content Area with relative positioning for transitions */}
         <div
-          className="flex-1 overflow-hidden bg-gray-50"
+          className="flex-1 overflow-hidden bg-[#121212]"
           style={{ height: "calc(100% - 140px)" }}
         >
           <div className="relative h-full z-0">{children}</div>

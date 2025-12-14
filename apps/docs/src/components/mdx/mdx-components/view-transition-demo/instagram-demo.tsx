@@ -90,11 +90,15 @@ const instagramItems = [
 function InstagramGridPage() {
   return (
     <DemoPage path="/instagram/gallery">
-      <div className="min-h-screen bg-gray-950 p-1">
+      <div className="min-h-screen bg-[#121212] p-1">
         {/* Header */}
         <div className="mb-3 px-3 pt-3 text-center">
-          <h1 className="text-xl font-bold text-white mb-1">Gallery</h1>
-          <p className="text-gray-400 text-xs">Tap any photo to view details</p>
+          <h1 className="text-base font-medium text-neutral-100 mb-1">
+            Gallery
+          </h1>
+          <p className="text-neutral-500 text-xs">
+            Tap any photo to view details
+          </p>
         </div>
 
         {/* Instagram 3-Column Masonry Grid */}
@@ -137,7 +141,7 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
 
   return (
     <DemoPage path={`/instagram/gallery/${item.id}`}>
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-[#121212]">
         {/* Content */}
         <div>
           {/* Image with overlays */}
@@ -161,7 +165,7 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-white"
+                className="text-neutral-200"
               >
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
@@ -172,10 +176,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
           <div className="p-4">
             {/* Like section */}
             <div className="flex items-center gap-3 mb-3">
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -184,10 +188,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -196,10 +200,10 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                 </svg>
               </button>
-              <button className="text-white hover:text-gray-300 transition-colors">
+              <button className="text-neutral-200 hover:text-neutral-400 transition-colors">
                 <svg
-                  width="24"
-                  height="24"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -210,42 +214,44 @@ function InstagramDetailPage({ item }: { item: (typeof instagramItems)[0] }) {
               </button>
             </div>
 
-            <p className="text-white font-semibold text-sm mb-2">
+            <p className="text-neutral-200 font-medium text-sm mb-2">
               {item.likes.toLocaleString()} likes
             </p>
 
             {/* Caption */}
             <div className="mb-3">
-              <p className="text-white text-sm">
-                <span className="font-semibold">username</span> Beautiful moment
-                captured! ✨
+              <p className="text-neutral-300 text-sm">
+                <span className="font-medium text-neutral-200">username</span>{" "}
+                Beautiful moment captured! ✨
               </p>
             </div>
 
             {/* Comments */}
             <div className="space-y-2 mb-4">
-              <p className="text-gray-400 text-xs">View all 23 comments</p>
+              <p className="text-neutral-500 text-xs">View all 23 comments</p>
               <div className="space-y-1.5">
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user1</span> Amazing! 😍
+                <p className="text-neutral-300 text-sm">
+                  <span className="font-medium text-neutral-200">user1</span>{" "}
+                  Amazing! 😍
                 </p>
-                <p className="text-white text-sm">
-                  <span className="font-semibold">user2</span> Love this!
+                <p className="text-neutral-300 text-sm">
+                  <span className="font-medium text-neutral-200">user2</span>{" "}
+                  Love this!
                 </p>
               </div>
             </div>
 
             {/* Time */}
-            <p className="text-gray-500 text-xs uppercase">2 hours ago</p>
+            <p className="text-neutral-600 text-xs uppercase">2 hours ago</p>
 
             {/* Comment input */}
-            <div className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-3">
+            <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
               <input
                 type="text"
                 placeholder="Add a comment..."
-                className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
+                className="flex-1 bg-transparent text-neutral-200 text-sm outline-none placeholder-neutral-600"
               />
-              <button className="text-blue-500 text-sm font-semibold">
+              <button className="text-neutral-400 text-sm font-medium hover:text-neutral-200 transition-colors">
                 Post
               </button>
             </div>
@@ -276,7 +282,7 @@ const instagramRoutes: RouteConfig[] = [
 // Custom layout for Instagram demo
 function InstagramLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-gray-950 min-h-full">
+    <div className="bg-[#121212] min-h-full">
       {/* Constrain width at layout level */}
       <div className="max-w-md mx-auto overflow-hidden">
         {/* Critical: relative z-0 wrapper for proper transition layering */}
