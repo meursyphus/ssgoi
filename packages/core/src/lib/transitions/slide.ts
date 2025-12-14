@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface SlideOptions {
   direction?: "left" | "right" | "up" | "down";
@@ -13,16 +13,21 @@ interface SlideOptions {
   key?: TransitionKey;
 }
 
-export const slide = (options: SlideOptions = {}) => {
+export const slide = (options: SlideOptions = {}): Transition => {
   const {
     direction,
     distance = 100,
     opacity = 0,
     fade = true,
     axis,
-    spring = { stiffness: 400, damping: 35 },
+    spring: springOption,
     key,
   } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 400,
+    damping: springOption?.damping ?? 35,
+  };
 
   // Determine actual direction based on axis parameter
   const getActualDirection = (): "left" | "right" | "up" | "down" => {

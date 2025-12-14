@@ -1,4 +1,4 @@
-import type { StyleObject, TransitionKey } from "../types";
+import type { StyleObject, Transition, TransitionKey } from "../types";
 
 interface MaskOptions {
   shape?: "circle" | "ellipse" | "square";
@@ -21,15 +21,20 @@ interface MaskOptions {
   key?: TransitionKey;
 }
 
-export const mask = (options: MaskOptions = {}) => {
+export const mask = (options: MaskOptions = {}): Transition => {
   const {
     shape = "circle",
     origin = "center",
     scale = 1.5,
     fade = false,
-    spring = { stiffness: 300, damping: 30 },
+    spring: springOption,
     key,
   } = options;
+
+  const spring = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+  };
 
   const getOriginPosition = (): string => {
     switch (origin) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SsgoiTransition, transition, TransitionScope } from "@ssgoi/react";
 import { fade, scale, blur, rotate, bounce } from "@ssgoi/react/transitions";
+import { gentle } from "@ssgoi/react/presets";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -775,11 +776,31 @@ export default function Home() {
                 }}
               >
                 {[
-                  { color: "#ff6b6b", effect: fade(), label: "fade" },
-                  { color: "#4ecdc4", effect: scale(), label: "scale" },
-                  { color: "#45b7d1", effect: blur(), label: "blur" },
-                  { color: "#96ceb4", effect: rotate(), label: "rotate" },
-                  { color: "#feca57", effect: bounce(), label: "bounce" },
+                  {
+                    color: "#ff6b6b",
+                    effect: fade({ spring: gentle }),
+                    label: "fade",
+                  },
+                  {
+                    color: "#4ecdc4",
+                    effect: scale({ spring: gentle }),
+                    label: "scale",
+                  },
+                  {
+                    color: "#45b7d1",
+                    effect: blur({ spring: gentle }),
+                    label: "blur",
+                  },
+                  {
+                    color: "#96ceb4",
+                    effect: rotate({ spring: gentle }),
+                    label: "rotate",
+                  },
+                  {
+                    color: "#feca57",
+                    effect: bounce({ spring: gentle }),
+                    label: "bounce",
+                  },
                 ].map(
                   (item, index) =>
                     showListItems && (
