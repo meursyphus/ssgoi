@@ -6,7 +6,7 @@ import {
 } from "@ssgoi/core";
 
 type TransitionParams = Transition<undefined> & {
-  key?: TransitionKey;
+  key: TransitionKey;
   scope?: TransitionScope;
 };
 
@@ -19,22 +19,20 @@ type TransitionParams = Transition<undefined> & {
  */
 export const transition = (node: HTMLElement, params: TransitionParams) => {
   let callback = _transition({
-    key: params?.key,
-    in: params?.in,
-    out: params?.out,
-    ref: node,
-    scope: params?.scope,
+    key: params.key,
+    in: params.in,
+    out: params.out,
+    scope: params.scope,
   });
   let cleanup = callback(node);
 
   return {
     update(newParams: TransitionParams) {
       callback = _transition({
-        key: newParams?.key,
-        in: newParams?.in,
-        out: newParams?.out,
-        ref: node,
-        scope: newParams?.scope,
+        key: newParams.key,
+        in: newParams.in,
+        out: newParams.out,
+        scope: newParams.scope,
       });
       cleanup = callback(node);
     },

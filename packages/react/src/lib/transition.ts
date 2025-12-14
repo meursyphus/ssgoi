@@ -8,9 +8,8 @@ import {
 } from "@ssgoi/core";
 
 type TransitionOptions = Transition<undefined> & {
-  key?: TransitionKey;
+  key: TransitionKey;
   scope?: TransitionScope;
-  ref?: object;
 };
 
 /**
