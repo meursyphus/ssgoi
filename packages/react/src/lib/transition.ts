@@ -37,8 +37,8 @@ export const transition = (options: TransitionOptions) => {
   if (!options.key) {
     throw new Error(
       "[ssgoi] transition() requires a 'key' property. " +
-        "Either provide it manually or use babel-plugin-ssgoi for auto-injection. " +
-        "See: https://ssgoi.dev/docs/babel-plugin",
+        "Either provide it manually or use plugin for auto-injection. " +
+        "import plugin from @ssgoi/react/unplugin/webpack; ",
     );
   }
 

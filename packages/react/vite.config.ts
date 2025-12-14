@@ -10,11 +10,13 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       outDir: "dist",
-      include: ["src/lib/**/*"],
+      include: ["src/lib/**/*", "src/unplugin/**/*"],
       exclude: ["src/vite-env.d.ts"],
       tsconfigPath: "./tsconfig.app.json",
       beforeWriteFile: (filePath, content) => ({
-        filePath: filePath.replace("/src/lib", ""),
+        filePath: filePath
+          .replace("/src/lib", "")
+          .replace("/src/unplugin", "/unplugin"),
         content,
       }),
     }),
@@ -30,6 +32,11 @@ export default defineConfig({
         ),
         types: resolve(__dirname, "src/lib/types.ts"),
         "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),
+        "unplugin/index": resolve(__dirname, "src/unplugin/index.ts"),
+        "unplugin/webpack": resolve(__dirname, "src/unplugin/webpack.ts"),
+        "unplugin/vite": resolve(__dirname, "src/unplugin/vite.ts"),
+        "unplugin/rollup": resolve(__dirname, "src/unplugin/rollup.ts"),
+        "unplugin/esbuild": resolve(__dirname, "src/unplugin/esbuild.ts"),
       },
       formats: ["es", "cjs"],
     },
@@ -42,6 +49,8 @@ export default defineConfig({
         "@ssgoi/core/view-transitions",
         "@ssgoi/core/transitions",
         "@ssgoi/core/presets",
+        "unplugin",
+        "@babel/core",
       ],
       output: {
         preserveModules: true,
