@@ -3,78 +3,77 @@
 /* Custom Scrollbar Styles */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #4b5563 #1f2937;
+  scrollbar-color: #2a2a2a #121212;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #1f2937;
-  border-radius: 4px;
+  background: #121212;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 4px;
+  background: #2a2a2a;
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #404040;
 }
 
 /* Browser mockup specific scrollbar */
 .browser-content.custom-scrollbar::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 .browser-content.custom-scrollbar::-webkit-scrollbar-track {
-  background: #111827;
+  background: #121212;
 }
 
 .browser-content.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 5px;
+  background: #2a2a2a;
+  border-radius: 3px;
 }
 
 .browser-content.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: #404040;
 }
 
 @theme {
-  /* 다크 테마 기본 색상 */
-  --color-background: #0a0a0a;
-  --color-foreground: #ffffff;
-  --color-card: #141414;
-  --color-card-foreground: #ffffff;
-  --color-popover: #141414;
-  --color-popover-foreground: #ffffff;
-  --color-primary: #ff6b35; /* 비비드한 주황색 */
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #3b82f6; /* 밝은 파란색 */
-  --color-secondary-foreground: #ffffff;
-  --color-muted: #27272a;
-  --color-muted-foreground: #a1a1aa;
-  --color-accent: #8b5cf6; /* 보라색 */
-  --color-accent-foreground: #ffffff;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #27272a;
-  --color-input: #27272a;
-  --color-ring: #ff6b35;
-  
-  /* 비비드한 색상 팔레트 */
-  --color-vivid-orange: #ff6b35;
-  --color-vivid-blue: #3b82f6;
-  --color-vivid-purple: #8b5cf6;
-  --color-vivid-pink: #ec4899;
-  --color-vivid-green: #10b981;
-  --color-vivid-yellow: #eab308;
-  --color-vivid-cyan: #06b6d4;
-  --color-vivid-red: #ef4444;
-  
+  /* 다크 테마 기본 색상 - 미니멀 톤 */
+  --color-background: #121212;
+  --color-foreground: #fafafa;
+  --color-card: #111111;
+  --color-card-foreground: #fafafa;
+  --color-popover: #111111;
+  --color-popover-foreground: #fafafa;
+  --color-primary: #fafafa;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #262626;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #171717;
+  --color-muted-foreground: #a3a3a3;
+  --color-accent: #262626;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #fafafa;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #fafafa;
+
+  /* 미니멀 색상 팔레트 */
+  --color-vivid-orange: #fafafa;
+  --color-vivid-blue: #fafafa;
+  --color-vivid-purple: #fafafa;
+  --color-vivid-pink: #fafafa;
+  --color-vivid-green: #22c55e;
+  --color-vivid-yellow: #fafafa;
+  --color-vivid-cyan: #fafafa;
+  --color-vivid-red: #dc2626;
+
   --radius-lg: 0.5rem;
   --radius-md: calc(0.5rem - 2px);
   --radius-sm: calc(0.5rem - 4px);
@@ -87,7 +86,7 @@ body {
 
 .page {
   padding-top: 80px;
-  background-color: var(--color-background);
+  background-color: #121212;
 }
 
 /* 그라데이션 텍스트 효과 */
@@ -140,7 +139,7 @@ body {
   transition: opacity 0.5s;
   background: radial-gradient(
     600px circle at var(--x) var(--y),
-    rgba(255, 107, 53, 0.15),
+    rgba(255, 255, 255, 0.05),
     transparent 40%
   );
 }
@@ -264,9 +263,9 @@ body {
 
 /* 버튼 효과 */
 .btn-primary {
-  background: var(--color-vivid-orange);
-  color: white;
-  font-weight: 600;
+  background: #fafafa;
+  color: #0a0a0a;
+  font-weight: 500;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   transition: all 0.2s;
@@ -276,15 +275,15 @@ body {
 }
 
 .btn-primary:hover {
-  background: var(--color-vivid-orange);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(255, 107, 53, 0.3);
+  background: #e5e5e5;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.1);
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--color-foreground);
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: 1px solid var(--color-border);
@@ -295,8 +294,8 @@ body {
 }
 
 .btn-secondary:hover {
-  border-color: var(--color-vivid-orange);
-  color: var(--color-vivid-orange);
+  border-color: #525252;
+  color: #fafafa;
 }
 
 /* 카드 효과 */
@@ -309,94 +308,108 @@ body {
 }
 
 .feature-card:hover {
-  border-color: var(--color-vivid-orange);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -15px rgba(255, 107, 53, 0.2);
+  border-color: #404040;
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -15px rgba(255, 255, 255, 0.05);
 }
 
-/* Custom Syntax Highlighting for Dark Theme */
+/* Custom Syntax Highlighting - Minimal Monochrome Theme */
 .hljs {
-  background: #18181b !important;
-  color: #e4e4e7 !important;
+  background: #111 !important;
+  color: #a3a3a3 !important;
 }
 
-/* Keywords, types */
+/* Keywords, types - subtle white */
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-type {
-  color: #ff6b35 !important;
+  color: #e5e5e5 !important;
+  font-weight: 500;
 }
 
-/* Strings */
+/* Strings - muted sage */
 .hljs-string,
 .hljs-selector-attr,
 .hljs-selector-pseudo,
 .hljs-addition {
-  color: #10b981 !important;
+  color: #9ca38f !important;
 }
 
-/* Comments */
+/* Comments - dim gray */
 .hljs-comment,
 .hljs-quote {
-  color: #71717a !important;
+  color: #525252 !important;
   font-style: italic;
 }
 
-/* Functions, methods */
+/* Functions, methods - light gray */
 .hljs-title,
 .hljs-section {
-  color: #3b82f6 !important;
+  color: #d4d4d4 !important;
 }
 
-/* Variables, parameters */
+/* Variables, parameters - warm gray */
 .hljs-variable,
 .hljs-template-variable,
 .hljs-params {
-  color: #8b5cf6 !important;
+  color: #b8b8b8 !important;
 }
 
-/* Numbers, constants */
+/* Numbers, constants - cool gray */
 .hljs-number,
 .hljs-literal,
 .hljs-symbol,
 .hljs-bullet {
-  color: #06b6d4 !important;
+  color: #a8a8a8 !important;
 }
 
-/* Attributes, properties */
+/* Attributes, properties - soft white */
 .hljs-attr,
 .hljs-attribute,
 .hljs-property {
-  color: #eab308 !important;
+  color: #c9c9c9 !important;
 }
 
-/* Tags, components */
+/* Tags, components - brighter for structure */
 .hljs-tag,
 .hljs-name,
 .hljs-selector-id,
 .hljs-selector-class {
-  color: #ec4899 !important;
+  color: #d4d4d4 !important;
 }
 
 /* Built-in, meta */
 .hljs-built_in,
 .hljs-meta {
-  color: #f59e0b !important;
+  color: #b0b0b0 !important;
 }
 
-/* Deletion */
+/* Deletion - subtle red tint */
 .hljs-deletion {
-  color: #ef4444 !important;
+  color: #c9a8a8 !important;
+}
+
+/* Addition - subtle green tint */
+.hljs-addition {
+  color: #a8c9a8 !important;
 }
 
 /* Bold */
 .hljs-strong {
-  font-weight: bold;
+  font-weight: 600;
+  color: #e5e5e5 !important;
 }
 
 /* Emphasis */
 .hljs-emphasis {
   font-style: italic;
+  color: #c0c0c0 !important;
+}
+
+/* Punctuation and operators */
+.hljs-punctuation,
+.hljs-operator {
+  color: #737373 !important;
 }
 
 /* Landing page animations */

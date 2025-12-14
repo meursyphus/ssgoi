@@ -99,20 +99,20 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     [],
   );
   return (
-    <div className="h-full bg-gray-900 flex z-0">
+    <div className="h-full bg-[#121212] flex z-0">
       {/* Mobile Frame */}
-      <div className="w-full bg-black flex flex-col overflow-hidden relative">
+      <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main
           ref={mainRef}
           id="demo-content"
-          className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-gray-950 ${styles.scrollContainer}`}
+          className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] ${styles.scrollContainer}`}
         >
           <Ssgoi config={config}>{children}</Ssgoi>
         </main>
 
         {/* Bottom Navigation */}
-        <nav className="flex justify-around items-center bg-gray-950 border-t border-gray-800 py-2 flex-shrink-0">
+        <nav className="flex justify-around items-center bg-[#121212] border-t border-white/5 py-2 flex-shrink-0">
           <NavItem
             label="Posts"
             onClick={() => router.goto("/demo/posts")}
@@ -206,10 +206,10 @@ function NavItem({ label, icon, onClick, isActive }: NavItemProps) {
     <button
       onClick={onClick}
       className={`flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 ${
-        isActive ? "text-blue-500" : "text-gray-500 hover:text-gray-300"
+        isActive ? "text-white" : "text-neutral-500 hover:text-neutral-400"
       }`}
     >
-      <div className="w-6 h-6">{icon}</div>
+      <div className="w-5 h-5">{icon}</div>
       <span>{label}</span>
     </button>
   );

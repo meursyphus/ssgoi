@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Zap, CheckCircle } from "lucide-react";
-import IPhone3D from "@/components/home/iphone";
+import IPhone3D from "@/components/home/v1/iphone";
 import Demo from "@/components/demo";
 import { getServerTranslations } from "@/i18n";
 

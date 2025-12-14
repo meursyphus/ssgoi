@@ -230,13 +230,13 @@ function IPhoneModel({
             rotation={[Math.PI / 2, 0, 0]}
             position={[-0.3 - i * 0.04, 0, 0]}
           >
-            <meshStandardMaterial color="#0a0a0a" />
+            <meshStandardMaterial color="#121212" />
           </Cylinder>
         ))}
 
         {/* Charging port *\/}
         <RoundedBox args={[0.22, 0.02, 0.1]} radius={0.01} position={[0, 0, 0]}>
-          <meshStandardMaterial color="#0a0a0a" />
+          <meshStandardMaterial color="#121212" />
         </RoundedBox>
 
         {/* Right speaker *\/}
@@ -247,7 +247,7 @@ function IPhoneModel({
             rotation={[Math.PI / 2, 0, 0]}
             position={[0.3 + i * 0.04, 0, 0]}
           >
-            <meshStandardMaterial color="#0a0a0a" />
+            <meshStandardMaterial color="#121212" />
           </Cylinder>
         ))}
       </group>

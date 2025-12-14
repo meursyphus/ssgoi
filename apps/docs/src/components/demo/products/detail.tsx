@@ -21,7 +21,7 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
   if (!product) {
     return (
       <SsgoiTransition id={`/demo/products/${productId}`}>
-        <div className="min-h-screen bg-gray-950 px-4 py-8">
+        <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Product not found</p>
         </div>
       </SsgoiTransition>
@@ -34,16 +34,16 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
 
   return (
     <SsgoiTransition id={`/demo/products/${productId}`}>
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">
           <button
             onClick={onBack || (() => router.goto("/demo/products"))}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-xs"
           >
             <svg
-              width="20"
-              height="20"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -56,26 +56,20 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
         </div>
 
         {/* Product content */}
-        <div className="px-4 pb-8">
+        <div className="px-4 pb-6">
           {/* Product image with hero transition */}
           <div
             data-hero-key={product.id}
-            className="relative aspect-square rounded-xl overflow-hidden mb-6"
+            className="relative aspect-square rounded-lg overflow-hidden mb-4"
           >
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover bg-gray-800"
+              className="w-full h-full object-cover bg-[#111]"
             />
             {product.badge && (
               <span
-                className={`absolute top-4 left-4 px-3 py-1.5 rounded-md text-sm font-semibold uppercase ${
-                  product.badge === "new"
-                    ? "bg-teal-500 text-white"
-                    : product.badge === "sale"
-                      ? "bg-red-500 text-white"
-                      : "bg-yellow-400 text-gray-900"
-                }`}
+                className={`absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium uppercase bg-white/10 text-white`}
               >
                 {product.badge}
               </span>
@@ -84,38 +78,40 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
 
           {/* Product info */}
           <div>
-            <span className="text-sm text-gray-500 uppercase tracking-wider">
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">
               {product.category}
             </span>
-            <h1 className="text-2xl font-bold text-white mt-2 mb-4">
+            <h1 className="text-base font-medium text-white mt-1 mb-3">
               {product.name}
             </h1>
 
             {/* Rating */}
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-yellow-400 text-lg">★★★★★</span>
-              <span className="font-semibold text-white">{product.rating}</span>
-              <span className="text-gray-500 text-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-neutral-400 text-xs">★★★★★</span>
+              <span className="text-xs font-medium text-white">
+                {product.rating}
+              </span>
+              <span className="text-neutral-500 text-xs">
                 ({product.reviews} reviews)
               </span>
             </div>
 
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <p className="text-xs text-neutral-300 mb-4 leading-relaxed">
               {product.description}
             </p>
 
             {/* Price section */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-white">
+            <div className="mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-medium text-white">
                   ${product.price}
                 </span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-xl text-gray-500 line-through">
+                    <span className="text-sm text-neutral-500 line-through">
                       ${product.originalPrice}
                     </span>
-                    <span className="bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
+                    <span className="bg-white/10 text-white px-1.5 py-0.5 rounded text-xs font-medium">
                       -{discountPercentage}%
                     </span>
                   </>
@@ -125,17 +121,17 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
 
             {/* Features */}
             {product.features && (
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-white mb-3">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-white mb-2">
                   Key Features
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   {product.features.map((feature, index) => (
                     <li
                       key={index}
-                      className="flex items-start gap-2 text-gray-300"
+                      className="flex items-start gap-2 text-neutral-300 text-xs"
                     >
-                      <span className="text-teal-400 mt-0.5">•</span>
+                      <span className="text-neutral-500 mt-0.5">•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -144,26 +140,26 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
             )}
 
             {/* Purchase section */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {product.inStock ? (
                 <>
                   {/* Quantity selector */}
-                  <div className="flex items-center gap-4">
-                    <span className="text-gray-400">Quantity:</span>
-                    <div className="flex items-center border border-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-neutral-400">Quantity:</span>
+                    <div className="flex items-center border border-white/10 rounded">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         disabled={quantity <= 1}
-                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs"
                       >
                         -
                       </button>
-                      <span className="w-12 text-center font-semibold text-white">
+                      <span className="w-10 text-center text-xs font-medium text-white">
                         {quantity}
                       </span>
                       <button
                         onClick={() => setQuantity(quantity + 1)}
-                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-gray-800 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/5 transition-colors text-xs"
                       >
                         +
                       </button>
@@ -171,19 +167,19 @@ export default function ProductDetail({ onBack }: ProductDetailProps) {
                   </div>
 
                   {/* Action buttons */}
-                  <button className="w-full py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-black transition-colors">
+                  <button className="w-full py-2.5 border border-white/10 text-white rounded text-xs font-medium hover:bg-white/5 transition-colors">
                     Add to Cart
                   </button>
-                  <button className="w-full py-3 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 transition-colors">
+                  <button className="w-full py-2.5 bg-white text-black rounded text-xs font-medium hover:bg-neutral-200 transition-colors">
                     Buy Now
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-center text-gray-500 font-medium mb-4">
+                  <p className="text-center text-neutral-500 text-xs mb-3">
                     Out of Stock
                   </p>
-                  <button className="w-full py-3 bg-gray-800 text-gray-300 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                  <button className="w-full py-2.5 bg-white/5 text-neutral-300 rounded text-xs font-medium hover:bg-white/10 transition-colors">
                     Notify When Available
                   </button>
                 </>

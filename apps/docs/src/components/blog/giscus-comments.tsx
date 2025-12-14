@@ -11,7 +11,7 @@ interface GiscusCommentsProps {
 
 export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
   return (
-    <div className="mt-16 pt-8 border-t border-gray-700">
+    <div className="mt-16 pt-6 border-t border-white/5">
       <Giscus
         id="comments"
         repo="meursyphus/ssgoi"

@@ -68,24 +68,20 @@ export function SidebarContent({
     const isActive = pathname === itemPath;
 
     return (
-      <li key={item.path} className={level === 0 ? "mb-1" : ""}>
+      <li key={item.path} className={level === 0 ? "mb-0.5" : ""}>
         {hasChildren ? (
           <div>
             <button
               onClick={() => toggleExpanded(item.path)}
               className={`
-                w-full text-left px-3 py-2 flex items-center justify-between rounded-md
-                text-gray-300 hover:text-white hover:bg-zinc-800/50 transition-colors
-                ${level > 0 ? "ml-" + level * 6 : ""}
+                w-full text-left px-2 py-1.5 flex items-center justify-between rounded
+                text-neutral-400 hover:text-white transition-colors
+                ${level > 0 ? "ml-" + level * 4 : ""}
               `}
             >
-              <span
-                className={`font-medium ${level > 0 ? "text-[13px]" : "text-sm"}`}
-              >
-                {item.navTitle}
-              </span>
+              <span className="text-xs font-medium">{item.navTitle}</span>
               <ChevronRight
-                className={`w-4 h-4 transition-transform duration-300 text-gray-500 ${isExpanded ? "rotate-90" : ""}`}
+                className={`w-3 h-3 transition-transform duration-300 text-neutral-600 ${isExpanded ? "rotate-90" : ""}`}
               />
             </button>
             <div
@@ -93,7 +89,7 @@ export function SidebarContent({
                 isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <ul className="mt-1 space-y-0.5 border-l border-zinc-800 ml-3">
+              <ul className="mt-0.5 space-y-0 border-l border-white/5 ml-2">
                 {item.children?.map((child) => renderNavItem(child, level + 1))}
               </ul>
             </div>
@@ -103,14 +99,13 @@ export function SidebarContent({
             href={itemPath}
             onClick={onLinkClick}
             className={`
-              block px-3 py-2 rounded-md transition-all text-sm relative
-              ${level > 0 ? "ml-" + level * 6 : ""}
+              block px-2 py-1.5 rounded text-xs relative transition-colors
+              ${level > 0 ? "ml-" + level * 4 : ""}
               ${
                 isActive
-                  ? "bg-gradient-to-r from-orange-500/20 to-orange-500/5 text-orange-400 font-medium border-l-2 border-orange-400 pl-2.5"
-                  : "text-gray-400 hover:text-white hover:bg-zinc-800/50 border-l-2 border-transparent hover:pl-2.5"
+                  ? "bg-white/5 text-white border-l-2 border-white pl-1.5"
+                  : "text-neutral-500 hover:text-white border-l-2 border-transparent"
               }
-              ${level > 0 ? "text-[13px]" : ""}
             `}
           >
             {item.navTitle}

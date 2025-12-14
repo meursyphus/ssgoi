@@ -24,9 +24,9 @@ export function ShowcaseCard({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative block overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 transition-all hover:border-zinc-700 hover:shadow-xl hover:shadow-black/20"
+      className="group block overflow-hidden rounded-lg border border-white/5 bg-white/[0.02] transition-all hover:border-white/10"
     >
-      <div className="aspect-[16/10] w-full overflow-hidden bg-zinc-800">
+      <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-900">
         <Image
           src={thumbnail}
           alt={title}
@@ -36,22 +36,24 @@ export function ShowcaseCard({
         />
       </div>
 
-      <div className="p-6">
+      <div className="p-4">
         <div className="mb-2 flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-gray-100 group-hover:text-orange-400 transition-colors">
+          <h3 className="text-sm font-medium text-white group-hover:text-neutral-300 transition-colors">
             {title}
           </h3>
-          <ExternalLink className="h-4 w-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100" />
+          <ExternalLink className="h-3.5 w-3.5 text-neutral-500 opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
 
-        <p className="mb-4 text-sm text-gray-400 line-clamp-2">{description}</p>
+        <p className="mb-3 text-xs text-neutral-500 line-clamp-2">
+          {description}
+        </p>
 
         {tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-block rounded-full bg-zinc-800 px-3 py-1 text-xs text-gray-300"
+                className="inline-block rounded px-2 py-0.5 text-[10px] text-neutral-400 bg-white/5 border border-white/5"
               >
                 {tag}
               </span>
@@ -59,8 +61,6 @@ export function ShowcaseCard({
           </div>
         )}
       </div>
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none" />
     </Link>
   );
 }
