@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import remarkGfm from "remark-gfm";
 import { mdxComponents } from "./mdx-components";
 import svelte from "@/lib/highlights/svelte";
 import vue from "@/lib/highlights/vue";
@@ -117,6 +118,7 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
       }}
       options={{
         mdxOptions: {
+          remarkPlugins: [remarkGfm],
           rehypePlugins: [
             [
               rehypeHighlight,

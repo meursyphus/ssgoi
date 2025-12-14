@@ -1,75 +1,75 @@
 ---
-title: "로테이트 전환"
-description: "회전 효과를 활용한 인상적인 페이지 전환"
-nav-title: "로테이트"
+title: "旋转过渡"
+description: "利用旋转效果打造令人印象深刻的页面过渡"
+nav-title: "旋转"
 ---
 
-# 로테이트 전환
+# 旋转过渡
 
-로테이트 전환은 페이지가 회전하며 뒤집히는 듯한 극적인 효과를 제공합니다. 나가는 페이지가 180도 회전하며 사라지고, 새로운 페이지가 반대 방향에서 회전하며 등장합니다. 마치 카드를 뒤집는 듯한 이 모션은 강렬한 브랜드 경험을 전달하고자 할 때 효과적입니다.
+旋转过渡提供页面旋转翻转的戏剧性效果。离开的页面旋转180度消失,新页面从相反方向旋转出现。这种如同翻转卡片般的动效,在需要传递强烈品牌体验时非常有效。
 
-> 이 전환 효과는 [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor)에서 영감을 받았습니다.
+> 此过渡效果灵感来自 [Finely Crafted - Explore the Studio Floor](https://www.awwwards.com/inspiration/finely-crafted-explore-the-studio-floor)。
 
-## 데모
+## 演示
 
 <ViewTransitionDemo type="rotate" />
 
-## UX 원칙
+## UX 原则
 
-### 언제 사용하나요?
+### 何时使用?
 
-로테이트 전환은 **최상위 레벨(Top-level)** 네비게이션에서 임팩트 있는 전환이 필요할 때 사용됩니다.
+旋转过渡适用于**顶层(Top-level)**导航中需要富有冲击力过渡的场景。
 
-#### 콘텐츠 관계별 적합성
+#### 按内容关系划分的适用性
 
 <SuitabilityTable
   items={[
     {
-      label: "최상위 레벨",
+      label: "顶层",
       suitable: "yes",
-      description: "주요 섹션 간 이동에서 브랜드 임팩트를 줄 때",
+      description: "在主要板块间移动时营造品牌冲击力",
     },
     {
-      label: "형제 관계",
+      label: "同级关系",
       suitable: "no",
-      description: "동일 레벨의 일반적인 콘텐츠 이동에는 과한 효과",
+      description: "对于同级别的常规内容移动效果过于强烈",
     },
     {
-      label: "계층 이동",
+      label: "层级移动",
       suitable: "no",
-      description: "부모-자식 구조는 drill이나 hero 사용 권장",
+      description: "父子结构建议使用 drill 或 hero",
     },
   ]}
 />
 
-#### 주요 사용 케이스
+#### 主要使用场景
 
-- **브랜드 랜딩 페이지**: 포트폴리오, 에이전시, 크리에이티브 스튜디오 사이트
-- **인트로/아웃트로**: 메인 콘텐츠 진입 전 브랜드 노출
-- **갤러리/쇼케이스**: 풀스크린 이미지 전환에서 극적인 효과
-- **이벤트/캠페인 페이지**: 특별한 경험을 강조하고 싶을 때
+- **品牌落地页**: 作品集、代理机构、创意工作室网站
+- **片头/片尾**: 进入主要内容前的品牌展示
+- **画廊/展示**: 全屏图片切换中的戏剧性效果
+- **活动/宣传页面**: 想要强调特殊体验时
 
-### 왜 이렇게 동작하나요?
+### 为什么这样工作?
 
-1. **강렬한 인상**: 회전하는 모션은 사용자의 시선을 사로잡고 기억에 남는 경험을 제공합니다
-2. **공간감**: 2D 화면에서 3D 같은 깊이감을 느끼게 하여 몰입도를 높입니다
-3. **명확한 전환**: 완전한 회전을 통해 이전 콘텐츠와 새 콘텐츠 사이의 경계가 분명합니다
+1. **强烈印象**: 旋转动效吸引用户视线并提供令人难忘的体验
+2. **空间感**: 在2D屏幕上营造类似3D的深度感,提升沉浸感
+3. **清晰过渡**: 通过完整的旋转,前后内容之间的界限非常明确
 
-### 모션 디자인
+### 动效设计
 
 ```
-나가는 화면: 0deg → 180deg (회전하며 페이드 아웃)
-들어오는 화면: -180deg → 0deg (회전하며 페이드 인)
-90도 지점에서 투명도 전환 (자연스러운 뒤집기 효과)
+离开画面: 0deg → 180deg (旋转并淡出)
+进入画面: -180deg → 0deg (旋转并淡入)
+在90度处切换透明度 (自然的翻转效果)
 ```
 
-회전이 90도를 넘어가는 순간 투명도가 전환되어, 마치 물리적으로 카드를 뒤집는 것 같은 자연스러운 효과를 만들어냅니다.
+当旋转超过90度时透明度发生切换,创造出如同物理翻转卡片般自然的效果。
 
-## 최적의 활용법: 풀스크린 이미지
+## 最佳实践: 全屏图片
 
-로테이트 전환은 **화면 전체를 채우는 이미지**와 함께 사용할 때 가장 수려한 효과를 볼 수 있습니다. 전체 화면이 하나의 캔버스처럼 회전하면서, 마치 거대한 작품이 뒤집히는 듯한 인상적인 경험을 선사합니다.
+旋转过渡与**填充整个屏幕的图片**配合使用时效果最佳。整个屏幕如同画布般旋转,营造出巨大作品翻转的震撼体验。
 
-### 풀스크린 이미지 스타일 예시
+### 全屏图片样式示例
 
 ```css
 .fullscreen-image {
@@ -82,7 +82,7 @@ nav-title: "로테이트"
 }
 ```
 
-## 기본 사용법
+## 基本用法
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -97,7 +97,7 @@ nav-title: "로테이트"
     export default function App() {
       return (
         <Ssgoi config={config}>
-          {/* 앱 내용 */}
+          {/* 应用内容 */}
         </Ssgoi>
       );
     }
@@ -152,11 +152,11 @@ nav-title: "로테이트"
   </TabPanel>
 </Tabs>
 
-## 실전 활용 예시
+## 实战应用示例
 
-### 1. 크리에이티브 포트폴리오
+### 1. 创意作品集
 
-풀스크린 프로젝트 이미지 간 전환:
+全屏项目图片间的切换:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -172,7 +172,7 @@ nav-title: "로테이트"
       ]
     };
 
-    // 페이지 컴포넌트
+    // 页面组件
     function ProjectPage({ project }) {
       return (
         <div className="fullscreen-project">
@@ -208,7 +208,7 @@ nav-title: "로테이트"
       };
     </script>
 
-    <!-- 페이지 컴포넌트 -->
+    <!-- 页面组件 -->
     <div class="fullscreen-project">
       <img
         src={project.heroImage}
@@ -234,7 +234,7 @@ nav-title: "로테이트"
       imports: [Ssgoi],
       template: `
         <div ssgoi [config]="config">
-          <!-- 앱 내용 -->
+          <!-- 应用内容 -->
         </div>
       `
     })
@@ -254,9 +254,9 @@ nav-title: "로테이트"
   </TabPanel>
 </Tabs>
 
-### 2. 브랜드 랜딩 시퀀스
+### 2. 品牌落地序列
 
-인트로에서 메인 콘텐츠로 진입:
+从片头进入主要内容:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -310,7 +310,7 @@ nav-title: "로테이트"
       imports: [Ssgoi],
       template: `
         <div ssgoi [config]="config">
-          <!-- 앱 내용 -->
+          <!-- 应用内容 -->
         </div>
       `
     })
@@ -334,9 +334,9 @@ nav-title: "로테이트"
   </TabPanel>
 </Tabs>
 
-### 3. 이미지 갤러리 쇼케이스
+### 3. 图片画廊展示
 
-풀스크린 갤러리에서 이미지 간 전환:
+全屏画廊中图片间的切换:
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -352,7 +352,7 @@ nav-title: "로테이트"
       ]
     };
 
-    // 갤러리 아이템 페이지
+    // 画廊项目页面
     function GalleryItem({ image }) {
       return (
         <div style={{
@@ -384,7 +384,7 @@ nav-title: "로테이트"
       };
     </script>
 
-    <!-- 갤러리 아이템 페이지 -->
+    <!-- 画廊项目页面 -->
     <div style="width: 100vw; height: 100vh; background: url({image.src}) center/cover;">
       <div class="caption">
         <h2>{image.title}</h2>
@@ -406,7 +406,7 @@ nav-title: "로테이트"
       imports: [Ssgoi],
       template: `
         <div ssgoi [config]="config">
-          <!-- 앱 내용 -->
+          <!-- 应用内容 -->
         </div>
       `
     })
@@ -426,24 +426,24 @@ nav-title: "로테이트"
   </TabPanel>
 </Tabs>
 
-## 접근성
+## 无障碍访问
 
-- `prefers-reduced-motion` 설정 시 자동으로 애니메이션 비활성화
-- 회전 효과는 일부 사용자에게 어지러움을 유발할 수 있으므로, 필수적이지 않은 경우 대안을 제공하는 것이 좋습니다
-- 스크린 리더는 전환 중에도 콘텐츠 변경을 올바르게 인식
+- 启用 `prefers-reduced-motion` 设置时自动禁用动画
+- 旋转效果可能会让部分用户感到眩晕,如果不是必需的情况下建议提供替代方案
+- 屏幕阅读器在过渡期间能正确识别内容变化
 
-## 모범 사례
+## 最佳实践
 
 ### ✅ DO
 
-- 풀스크린 이미지나 비주얼 중심 콘텐츠에 사용
-- 브랜드 경험이 중요한 크리에이티브 사이트에 적용
-- 특별한 순간(인트로, 쇼케이스)에 임팩트를 줄 때 사용
-- 최상위 레벨 네비게이션에서 선택적으로 사용
+- 用于全屏图片或视觉中心内容
+- 应用于品牌体验重要的创意网站
+- 在特殊时刻(片头、展示)营造冲击力
+- 在顶层导航中有选择性地使用
 
 ### ❌ DON'T
 
-- 일반적인 페이지 전환에 남용하지 마세요 (피로감 유발)
-- 텍스트 위주의 콘텐츠 전환에는 사용하지 마세요
-- 계층 구조 네비게이션(리스트 → 상세)에는 사용하지 마세요
-- 빈번한 네비게이션이 예상되는 곳에는 피하세요
+- 不要在常规页面过渡中滥用(会导致疲劳感)
+- 不要用于以文字为主的内容切换
+- 不要用于层级结构导航(列表 → 详情)
+- 避免在频繁导航的位置使用
