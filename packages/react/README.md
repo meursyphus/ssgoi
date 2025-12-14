@@ -111,7 +111,6 @@ import { fadeIn, slideUp } from '@ssgoi/react/transitions';
 function Card() {
   return (
     <div ref={transition({
-      key: 'card',
       in: fadeIn(),
       out: slideUp()
     })}>
@@ -194,7 +193,6 @@ Apply transitions to individual elements.
 
 ```tsx
 <div ref={transition({
-  key: 'unique-key',
   in: fadeIn(),
   out: fadeOut()
 })}>

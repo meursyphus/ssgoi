@@ -237,7 +237,7 @@ transition({
       };
     </script>
 
-    <div use:transition={{ key: 'fade-in', ...fadeIn }}>
+    <div use:transition={fadeIn}>
       内容
     </div>
     ```
@@ -258,7 +258,7 @@ transition({
     </script>
 
     <template>
-      <div v-transition="{ key: 'fade-in', ...fadeTransition }">
+      <div v-transition="fadeTransition">
         内容
       </div>
     </template>

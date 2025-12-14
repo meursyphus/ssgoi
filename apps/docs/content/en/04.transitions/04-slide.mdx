@@ -20,10 +20,7 @@ The Slide animation creates effects where elements are pushed out or pulled in f
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...slide()
-        })}>
+        <div ref={transition(slide())}>
           Slide me!
         </div>
       );
@@ -37,10 +34,7 @@ The Slide animation creates effects where elements are pushed out or pulled in f
       import { slide } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...slide()
-    }}>
+    <div use:transition={slide()}>
       Slide me!
     </div>
     ```
@@ -52,10 +46,7 @@ The Slide animation creates effects where elements are pushed out or pulled in f
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...slide()
-      }">
+      <div v-transition="slide()">
         Slide me!
       </div>
     </template>
@@ -77,10 +68,7 @@ The Slide animation creates effects where elements are pushed out or pulled in f
       `
     })
     export class AppComponent {
-      slideTransition = {
-        key: 'my-element',
-        ...slide(),
-      };
+      slideTransition = slide();
     }
     ```
   </TabPanel>

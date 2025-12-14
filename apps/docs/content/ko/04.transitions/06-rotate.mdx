@@ -20,10 +20,7 @@ nav-title: "회전"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...rotate()
-        })}>
+        <div ref={transition(rotate())}>
           Rotate me!
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "회전"
       import { rotate } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...rotate()
-    }}>
+    <div use:transition={rotate()}>
       Rotate me!
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "회전"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...rotate()
-      }">
+      <div v-transition="rotate()">
         Rotate me!
       </div>
     </template>
@@ -77,10 +68,7 @@ nav-title: "회전"
       `
     })
     export class AppComponent {
-      rotateTransition = {
-        key: 'my-element',
-        ...rotate(),
-      };
+      rotateTransition = rotate();
     }
     ```
   </TabPanel>

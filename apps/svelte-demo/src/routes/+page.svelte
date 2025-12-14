@@ -148,7 +148,6 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "svelte-fade",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -174,7 +173,6 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "svelte-scale-rotate",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -202,7 +200,6 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "svelte-slide-in",
                   in: (element) => ({
                     spring: { stiffness, damping },
                     tick: (progress) => {
@@ -234,7 +231,6 @@
             {#if showShapes}
               <div
                 use:transition={{
-                  key: "svelte-bounce-scale",
                   in: (element) => ({
                     spring: {
                       stiffness: stiffness * 0.8,
@@ -324,7 +320,6 @@
                 {#if showLocalChild}
                   <div
                     use:transition={{
-                      key: "svelte-scope-local-child",
                       scope: "local",
                       in: (element) => ({
                         spring: { stiffness: 300, damping: 25 },
@@ -358,7 +353,6 @@
                 {#if showGlobalChild}
                   <div
                     use:transition={{
-                      key: "svelte-scope-global-child",
                       in: (element) => ({
                         spring: { stiffness: 300, damping: 25 },
                         css: (progress) => ({

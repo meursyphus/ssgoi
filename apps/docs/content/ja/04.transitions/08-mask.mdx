@@ -20,10 +20,7 @@ nav-title: "マスク"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...mask()
-        })}>
+        <div ref={transition(mask())}>
           マスクエフェクト！
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "マスク"
       import { mask } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...mask()
-    }}>
+    <div use:transition={mask()}>
       マスクエフェクト！
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "マスク"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...mask()
-      }">
+      <div v-transition="mask()">
         マスクエフェクト！
       </div>
     </template>
@@ -77,10 +68,7 @@ nav-title: "マスク"
       `
     })
     export class AppComponent {
-      maskTransition = {
-        key: 'my-element',
-        ...mask(),
-      };
+      maskTransition = mask();
     }
     ```
   </TabPanel>

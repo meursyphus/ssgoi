@@ -20,10 +20,7 @@ nav-title: "滑动"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...slide()
-        })}>
+        <div ref={transition(slide())}>
           Slide me!
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "滑动"
       import { slide } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...slide()
-    }}>
+    <div use:transition={slide()}>
       Slide me!
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "滑动"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...slide()
-      }">
+      <div v-transition="slide()">
         Slide me!
       </div>
     </template>
@@ -77,10 +68,7 @@ nav-title: "滑动"
       `
     })
     export class AppComponent {
-      slideTransition = {
-        key: 'my-element',
-        ...slide(),
-      };
+      slideTransition = slide();
     }
     ```
   </TabPanel>

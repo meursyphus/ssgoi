@@ -20,10 +20,7 @@ nav-title: "淡入淡出"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...fade()
-        })}>
+        <div ref={transition(fade())}>
           Fade me!
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "淡入淡出"
       import { fade } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...fade()
-    }}>
+    <div use:transition={fade()}>
       Fade me!
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "淡入淡出"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...fade()
-      }">
+      <div v-transition="fade()">
         Fade me!
       </div>
     </template>
@@ -77,10 +68,7 @@ nav-title: "淡入淡出"
       `
     })
     export class AppComponent {
-      fadeTransition = {
-        key: 'my-element',
-        ...fade()
-      };
+      fadeTransition = fade();
     }
     ```
   </TabPanel>

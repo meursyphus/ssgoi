@@ -20,10 +20,7 @@ nav-title: "飞入"
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...fly()
-        })}>
+        <div ref={transition(fly())}>
           Fly me!
         </div>
       );
@@ -37,10 +34,7 @@ nav-title: "飞入"
       import { fly } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...fly()
-    }}>
+    <div use:transition={fly()}>
       Fly me!
     </div>
     ```
@@ -52,10 +46,7 @@ nav-title: "飞入"
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...fly()
-      }">
+      <div v-transition="fly()">
         Fly me!
       </div>
     </template>
@@ -77,10 +68,7 @@ nav-title: "飞入"
       `
     })
     export class AppComponent {
-      flyTransition = {
-        key: 'my-element',
-        ...fly(),
-      };
+      flyTransition = fly();
     }
     ```
   </TabPanel>

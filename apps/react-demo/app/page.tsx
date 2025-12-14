@@ -212,7 +212,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "fade",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       tick: (progress) => {
@@ -235,7 +234,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "scale-rotate",
                     in: (element) => ({
                       spring: { stiffness, damping },
 
@@ -261,7 +259,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "slide-in",
                     in: (element) => ({
                       spring: { stiffness, damping },
                       css: (progress) => ({
@@ -286,7 +283,6 @@ export default function Home() {
               {showShapes && (
                 <div
                   ref={transition({
-                    key: "bounce-scale",
                     in: (element) => ({
                       spring: {
                         stiffness: stiffness * 0.8,
@@ -318,8 +314,8 @@ export default function Home() {
         <div className={styles.examplesSection}>
           <h2 className={styles.sectionTitle}>TransitionScope Demo</h2>
           <p style={{ color: "#666", marginBottom: "1.5rem", lineHeight: 1.6 }}>
-            <strong>Local scope:</strong> Skip animation when mounting/unmounting
-            with parent scope.
+            <strong>Local scope:</strong> Skip animation when
+            mounting/unmounting with parent scope.
             <br />
             <strong>Global scope (default):</strong> Always run animation.
           </p>
@@ -330,7 +326,9 @@ export default function Home() {
               onClick={() => setShowScopeContainer(!showScopeContainer)}
               style={{ marginRight: "0.5rem" }}
             >
-              {showScopeContainer ? "Hide Scope Container" : "Show Scope Container"}
+              {showScopeContainer
+                ? "Hide Scope Container"
+                : "Show Scope Container"}
             </button>
             <button
               className={styles.toggleButton}
@@ -383,7 +381,6 @@ export default function Home() {
                     {showLocalChild && (
                       <div
                         ref={transition({
-                          key: "scope-local-child",
                           scope: "local",
                           in: (element) => ({
                             spring: { stiffness: 300, damping: 25 },
@@ -409,7 +406,13 @@ export default function Home() {
                         }}
                       />
                     )}
-                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "#888",
+                        marginTop: "0.5rem",
+                      }}
+                    >
                       Skips when scope unmounts
                     </p>
                   </div>
@@ -427,7 +430,6 @@ export default function Home() {
                     {showGlobalChild && (
                       <div
                         ref={transition({
-                          key: "scope-global-child",
                           // scope: "global" is default
                           in: (element) => ({
                             spring: { stiffness: 300, damping: 25 },
@@ -453,7 +455,13 @@ export default function Home() {
                         }}
                       />
                     )}
-                    <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "#888",
+                        marginTop: "0.5rem",
+                      }}
+                    >
                       Always animates
                     </p>
                   </div>

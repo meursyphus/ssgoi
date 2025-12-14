@@ -15,58 +15,37 @@ nav-title: "요소 애니메이션"
     import { fade, scale, blur, slide, fly, rotate, bounce } from '@ssgoi/react/transitions';
 
     // Fade 트랜지션
-    <div ref={transition({
-      key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
       Fade 효과
     </div>
 
     // Scale 트랜지션
-    <div ref={transition({
-      key: "scale-element",
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
       Scale 효과
     </div>
 
     // Blur 트랜지션
-    <div ref={transition({
-      key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
       Blur 효과
     </div>
 
     // Slide 트랜지션 (방향 지정)
-    <div ref={transition({
-      key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
       Slide 효과
     </div>
 
     // Fly 트랜지션 (커스텀 위치)
-    <div ref={transition({
-      key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
       Fly 효과
     </div>
 
     // Rotate 트랜지션
-    <div ref={transition({
-      key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
       Rotate 효과
     </div>
 
     // Bounce 트랜지션
-    <div ref={transition({
-      key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
-    })}>
+    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
       Bounce 효과
     </div>
     ```
@@ -80,58 +59,37 @@ nav-title: "요소 애니메이션"
     </script>
 
     <!-- Fade 트랜지션 -->
-    <div use:transition={{
-      key: 'fade-element',
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={fade({ spring: { stiffness: 300, damping: 30 } })}>
       Fade 효과
     </div>
 
     <!-- Scale 트랜지션 -->
-    <div use:transition={{
-      key: 'scale-element',
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={scale({ spring: { stiffness: 300, damping: 30 } })}>
       Scale 효과
     </div>
 
     <!-- Blur 트랜지션 -->
-    <div use:transition={{
-      key: 'blur-element',
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })}>
       Blur 효과
     </div>
 
     <!-- Slide 트랜지션 (방향 지정) -->
-    <div use:transition={{
-      key: 'slide-element',
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })}>
       Slide 효과
     </div>
 
     <!-- Fly 트랜지션 (커스텀 위치) -->
-    <div use:transition={{
-      key: 'fly-element',
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })}>
       Fly 효과
     </div>
 
     <!-- Rotate 트랜지션 -->
-    <div use:transition={{
-      key: 'rotate-element',
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={rotate({ spring: { stiffness: 300, damping: 30 } })}>
       Rotate 효과
     </div>
 
     <!-- Bounce 트랜지션 -->
-    <div use:transition={{
-      key: 'bounce-element',
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
-    }}>
+    <div use:transition={bounce({ spring: { stiffness: 300, damping: 30 } })}>
       Bounce 효과
     </div>
     ```
@@ -140,58 +98,37 @@ nav-title: "요소 애니메이션"
     ```vue
     <template>
       <!-- Fade 트랜지션 -->
-      <div v-transition="{
-        key: 'fade-element',
-        ...fade({ spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="fade({ spring: { stiffness: 300, damping: 30 } })">
         Fade 효과
       </div>
 
       <!-- Scale 트랜지션 -->
-      <div v-transition="{
-        key: 'scale-element',
-        ...scale({ spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="scale({ spring: { stiffness: 300, damping: 30 } })">
         Scale 효과
       </div>
 
       <!-- Blur 트랜지션 -->
-      <div v-transition="{
-        key: 'blur-element',
-        ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })">
         Blur 효과
       </div>
 
       <!-- Slide 트랜지션 (방향 지정) -->
-      <div v-transition="{
-        key: 'slide-element',
-        ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })">
         Slide 효과
       </div>
 
       <!-- Fly 트랜지션 (커스텀 위치) -->
-      <div v-transition="{
-        key: 'fly-element',
-        ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })">
         Fly 효과
       </div>
 
       <!-- Rotate 트랜지션 -->
-      <div v-transition="{
-        key: 'rotate-element',
-        ...rotate({ spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="rotate({ spring: { stiffness: 300, damping: 30 } })">
         Rotate 효과
       </div>
 
       <!-- Bounce 트랜지션 -->
-      <div v-transition="{
-        key: 'bounce-element',
-        ...bounce({ spring: { stiffness: 300, damping: 30 } })
-      }">
+      <div v-transition="bounce({ spring: { stiffness: 300, damping: 30 } })">
         Bounce 효과
       </div>
     </template>
@@ -250,13 +187,13 @@ nav-title: "요소 애니메이션"
       `
     })
     export class ElementTransitionsComponent {
-      fadeTransition = { key: 'fade-element', ...fade({ spring: { stiffness: 300, damping: 30 } }) };
-      scaleTransition = { key: 'scale-element', ...scale({ spring: { stiffness: 300, damping: 30 } }) };
-      blurTransition = { key: 'blur-element', ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }) };
-      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }) };
-      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }) };
-      rotateTransition = { key: 'rotate-element', ...rotate({ spring: { stiffness: 300, damping: 30 } }) };
-      bounceTransition = { key: 'bounce-element', ...bounce({ spring: { stiffness: 300, damping: 30 } }) };
+      fadeTransition = fade({ spring: { stiffness: 300, damping: 30 } });
+      scaleTransition = scale({ spring: { stiffness: 300, damping: 30 } });
+      blurTransition = blur({ amount: 10, spring: { stiffness: 300, damping: 30 } });
+      slideTransition = slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } });
+      flyTransition = fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } });
+      rotateTransition = rotate({ spring: { stiffness: 300, damping: 30 } });
+      bounceTransition = bounce({ spring: { stiffness: 300, damping: 30 } });
     }
     ```
   </TabPanel>

@@ -20,10 +20,7 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'my-element',
-          ...bounce()
-        })}>
+        <div ref={transition(bounce())}>
           Bounce me!
         </div>
       );
@@ -37,10 +34,7 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
       import { bounce } from '@ssgoi/svelte/transitions';
     </script>
 
-    <div use:transition={{
-      key: 'my-element',
-      ...bounce()
-    }}>
+    <div use:transition={bounce()}>
       Bounce me!
     </div>
     ```
@@ -52,10 +46,7 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
     </script>
 
     <template>
-      <div v-transition="{
-        key: 'my-element',
-        ...bounce()
-      }">
+      <div v-transition="bounce()">
         Bounce me!
       </div>
     </template>
@@ -77,10 +68,7 @@ The Bounce animation creates a lively bouncing effect that adds playfulness to e
       `
     })
     export class AppComponent {
-      bounceTransition = {
-        key: 'my-element',
-        ...bounce(),
-      };
+      bounceTransition = bounce();
     }
     ```
   </TabPanel>

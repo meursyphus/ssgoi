@@ -119,7 +119,6 @@ import { fadeIn, slideUp } from '@ssgoi/react/transitions';
 function Card() {
   return (
     <div ref={transition({
-      key: 'card',
       in: fadeIn(),
       out: slideUp()
     })}>
@@ -142,11 +141,11 @@ function Modal({ show }) {
     <TransitionScope>
       <div className="modal">
         {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
-        <div ref={transition({ ...fade(), scope: 'local' })}>
+        <div ref={transition(fade({ scope: 'local' }))}>
           This won't animate when modal opens/closes
         </div>
         {/* scope: 'global' (default) - always animates */}
-        <div ref={transition({ ...fade() })}>
+        <div ref={transition(fade())}>
           This always animates
         </div>
       </div>
