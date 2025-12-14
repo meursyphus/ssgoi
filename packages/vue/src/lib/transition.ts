@@ -5,7 +5,7 @@ import type { Transition, TransitionKey, TransitionScope } from "@ssgoi/core";
 export const transition = _transition;
 
 type TransitionConfig = Transition & {
-  key?: TransitionKey;
+  key: TransitionKey;
   scope?: TransitionScope;
 };
 
@@ -27,7 +27,6 @@ export const vTransition: Directive<HTMLElement, TransitionConfig | undefined> =
           key: transitionConfig.key,
           in: transitionConfig.in,
           out: transitionConfig.out,
-          ref: el,
           scope: transitionConfig.scope,
         })(el);
 
