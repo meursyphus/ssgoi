@@ -90,16 +90,40 @@ function unregisterTransition(key: TransitionKey): void {
 // Auto key generation
 // ---------------------------------------------
 
+// Fallback counter for when stack parsing fails
+let __fallbackCounter = 0;
+
+// Track if we've already warned about auto key fallback
+let __hasWarnedAboutFallback = false;
+
 export function generateAutoKey(): TransitionKey {
-  const location = parseCallerLocation(new Error().stack);
+  const stack = new Error().stack;
+  const location = parseCallerLocation(stack);
+
   if (location) {
     const key =
       `auto_${location.file}_${location.line}_${location.column}` as const;
     return key;
   }
 
-  const key = Symbol(`ssgoi_auto_${Date.now()}`);
-  return key;
+  // Fallback: use sequential counter with timestamp prefix for uniqueness across sessions
+  // This is more stable than Symbol because it produces consistent string keys
+  const fallbackKey = `ssgoi_fallback_${__fallbackCounter++}`;
+
+  // Warn developers about the fallback (only once to avoid spam)
+  if (!__hasWarnedAboutFallback) {
+    __hasWarnedAboutFallback = true;
+    console.warn(
+      `[SSGOI] Auto key generation failed - could not parse call location from stack trace.\n` +
+        `This may happen in production builds or certain bundler configurations.\n` +
+        `For reliable behavior, please provide an explicit 'key' property:\n\n` +
+        `  transition({ key: 'my-unique-key', in: ..., out: ... })\n\n` +
+        `Using fallback key: "${fallbackKey}"\n` +
+        `Stack trace for debugging:\n${stack}`,
+    );
+  }
+
+  return fallbackKey;
 }
 
 // Optional GC-based cleanup registry
@@ -178,7 +202,7 @@ export function transition(
   options: TransitionOptionsWithStrategy,
   mode: TransitionMode = "manual",
 ): TransitionCallback | RefCallback {
-  const resolvedKey = options.key ?? generateAutoKey();
+  const resolvedKey = options.key || generateAutoKey();
 
   if (options.ref && __cleanupRegistry) {
     try {
