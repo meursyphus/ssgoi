@@ -190,7 +190,7 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const animation = element.animate(keyframes, {
     duration,
     fill: "forwards",
-    easing: "linear", // Spring physics already applied in keyframes
+    easing: "ease-in", // Slight slowdown at start, smooth deceleration at end
   });
 
   let isActive = true;
