@@ -3,10 +3,24 @@
 import React, { memo, useState } from "react";
 import Image from "next/image";
 import { blind } from "@ssgoi/react/view-transitions";
-import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
+import {
+  BrowserContext,
+  BrowserMockup,
+  DemoPage,
+  useBrowserNavigation,
+} from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";
 import { useMobile } from "../../../../lib/use-mobile";
+
+// Helper to get next route path
+function useNextRoute() {
+  const { currentPath, navigate, routes } = useBrowserNavigation();
+  const currentIndex = routes.findIndex((r) => r.path === currentPath);
+  const nextIndex = (currentIndex + 1) % routes.length;
+  const nextPath = routes[nextIndex]?.path || routes[0]?.path;
+  return { navigateNext: () => navigate(nextPath) };
+}
 
 // Image data - cinematic theme
 const images = {
@@ -19,6 +33,7 @@ const images = {
 // Opening Scene
 function OpeningPage() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/blind" className="relative h-full overflow-hidden">
@@ -37,13 +52,19 @@ function OpeningPage() {
 
       {/* Content - centered */}
       <div className="relative h-full flex items-center justify-center">
-        <div className={cn("text-center", isMobile ? "px-6" : "px-12")}>
-          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">
+        <button
+          onClick={navigateNext}
+          className={cn(
+            "text-center group cursor-pointer transition-transform duration-300 hover:scale-[1.02]",
+            isMobile ? "px-6" : "px-12",
+          )}
+        >
+          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4 group-hover:text-white/70 transition-colors">
             The curtain rises
           </p>
           <h1
             className={cn(
-              "font-light text-white leading-[0.9] tracking-tight",
+              "font-light text-white leading-[0.9] tracking-tight group-hover:text-white transition-colors",
               isMobile ? "text-4xl" : "text-6xl",
             )}
           >
@@ -53,13 +74,13 @@ function OpeningPage() {
           </h1>
           <p
             className={cn(
-              "text-white/60 mt-6 max-w-md mx-auto leading-relaxed",
+              "text-white/60 mt-6 max-w-md mx-auto leading-relaxed group-hover:text-white/80 transition-colors",
               isMobile ? "text-sm" : "text-base",
             )}
           >
             Like theater blinds revealing a new scene
           </p>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
@@ -68,6 +89,7 @@ function OpeningPage() {
 // Act I - The Drama
 function Act1Page() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/blind/act1" className="relative h-full overflow-hidden">
@@ -85,13 +107,19 @@ function Act1Page() {
 
       {/* Content - centered */}
       <div className="relative h-full flex items-center justify-center">
-        <div className={cn("text-center", isMobile ? "px-6" : "px-12")}>
-          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">
+        <button
+          onClick={navigateNext}
+          className={cn(
+            "text-center group cursor-pointer transition-transform duration-300 hover:scale-[1.02]",
+            isMobile ? "px-6" : "px-12",
+          )}
+        >
+          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4 group-hover:text-white/70 transition-colors">
             Act I
           </p>
           <h1
             className={cn(
-              "font-light text-white leading-[0.9] tracking-tight",
+              "font-light text-white leading-[0.9] tracking-tight group-hover:text-white transition-colors",
               isMobile ? "text-4xl" : "text-6xl",
             )}
           >
@@ -102,19 +130,19 @@ function Act1Page() {
           {/* Stats */}
           <div className="flex justify-center gap-8 mt-8">
             <div>
-              <p className="text-white/40 text-xs uppercase tracking-wider">
+              <p className="text-white/40 text-xs uppercase tracking-wider group-hover:text-white/60 transition-colors">
                 Strips
               </p>
               <p className="text-white text-2xl font-light">10</p>
             </div>
             <div>
-              <p className="text-white/40 text-xs uppercase tracking-wider">
+              <p className="text-white/40 text-xs uppercase tracking-wider group-hover:text-white/60 transition-colors">
                 Direction
               </p>
               <p className="text-white text-2xl font-light">Horizontal</p>
             </div>
           </div>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
@@ -123,6 +151,7 @@ function Act1Page() {
 // Act II - The Mystery
 function Act2Page() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/blind/act2" className="relative h-full overflow-hidden">
@@ -140,13 +169,19 @@ function Act2Page() {
 
       {/* Content - centered */}
       <div className="relative h-full flex items-center justify-center">
-        <div className={cn("text-center", isMobile ? "px-6" : "px-12")}>
-          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">
+        <button
+          onClick={navigateNext}
+          className={cn(
+            "text-center group cursor-pointer transition-transform duration-300 hover:scale-[1.02]",
+            isMobile ? "px-6" : "px-12",
+          )}
+        >
+          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4 group-hover:text-white/70 transition-colors">
             Act II
           </p>
           <h1
             className={cn(
-              "font-light text-white leading-[0.9] tracking-tight",
+              "font-light text-white leading-[0.9] tracking-tight group-hover:text-white transition-colors",
               isMobile ? "text-4xl" : "text-6xl",
             )}
           >
@@ -154,10 +189,10 @@ function Act2Page() {
             <br />
             <span className="font-semibold">Mystery</span>
           </h1>
-          <p className="text-white/50 text-sm mt-8">
+          <p className="text-white/50 text-sm mt-8 group-hover:text-white/70 transition-colors">
             Tension builds with each strip
           </p>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
@@ -166,6 +201,7 @@ function Act2Page() {
 // Finale
 function FinalePage() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/blind/finale" className="relative h-full overflow-hidden">
@@ -183,13 +219,16 @@ function FinalePage() {
 
       {/* Content - center */}
       <div className="relative h-full flex items-center justify-center text-center">
-        <div className="p-6">
-          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">
+        <button
+          onClick={navigateNext}
+          className="p-6 group cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
+        >
+          <p className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4 group-hover:text-white/70 transition-colors">
             The grand finale
           </p>
           <h1
             className={cn(
-              "font-light text-white leading-[0.9] tracking-tight",
+              "font-light text-white leading-[0.9] tracking-tight group-hover:text-white transition-colors",
               isMobile ? "text-4xl" : "text-7xl",
             )}
           >
@@ -199,13 +238,13 @@ function FinalePage() {
           </h1>
           <p
             className={cn(
-              "text-white/60 mt-8 max-w-sm mx-auto",
+              "text-white/60 mt-8 max-w-sm mx-auto group-hover:text-white/80 transition-colors",
               isMobile ? "text-sm" : "text-base",
             )}
           >
             Every transition tells a story. Every reveal holds magic.
           </p>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
