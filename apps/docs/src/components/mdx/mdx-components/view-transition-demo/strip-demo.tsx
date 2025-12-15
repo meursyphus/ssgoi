@@ -2,14 +2,29 @@
 
 import React, { memo } from "react";
 import { strip } from "@ssgoi/react/view-transitions";
-import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
+import {
+  BrowserContext,
+  BrowserMockup,
+  DemoPage,
+  useBrowserNavigation,
+} from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";
 import { useMobile } from "../../../../lib/use-mobile";
 
+// Helper to get next route path
+function useNextRoute() {
+  const { currentPath, navigate, routes } = useBrowserNavigation();
+  const currentIndex = routes.findIndex((r) => r.path === currentPath);
+  const nextIndex = (currentIndex + 1) % routes.length;
+  const nextPath = routes[nextIndex]?.path || routes[0]?.path;
+  return { navigateNext: () => navigate(nextPath) };
+}
+
 // Page 1 - Bold Typography
 function SpeakingPage() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/strip" className="bg-[#121212] min-h-full">
@@ -19,19 +34,22 @@ function SpeakingPage() {
           isMobile ? "px-6 py-12" : "max-w-6xl px-8 py-20",
         )}
       >
-        <div className="space-y-6">
+        <button
+          onClick={navigateNext}
+          className="space-y-6 text-left group cursor-pointer transition-transform duration-300 hover:scale-[1.01]"
+        >
           <h1
             className={cn(
               "font-light leading-none",
               isMobile ? "text-5xl" : "text-[8rem]",
-              "text-neutral-100 tracking-tight",
+              "text-neutral-100 tracking-tight group-hover:text-white transition-colors",
             )}
           >
             SPEAKING
           </h1>
           <p
             className={cn(
-              "text-neutral-400",
+              "text-neutral-400 group-hover:text-neutral-300 transition-colors",
               isMobile ? "text-sm max-w-sm" : "text-base max-w-2xl",
             )}
           >
@@ -39,14 +57,14 @@ function SpeakingPage() {
             inspire.
           </p>
           <div className="flex gap-3 pt-4">
-            <button className="px-5 py-2.5 bg-white text-neutral-900 text-sm rounded-full hover:bg-neutral-200 transition-colors">
+            <span className="px-5 py-2.5 bg-white text-neutral-900 text-sm rounded-full group-hover:bg-neutral-200 transition-colors">
               Start Now
-            </button>
-            <button className="px-5 py-2.5 bg-white/5 text-neutral-300 text-sm border border-white/10 rounded-full hover:bg-white/10 transition-colors">
+            </span>
+            <span className="px-5 py-2.5 bg-white/5 text-neutral-300 text-sm border border-white/10 rounded-full group-hover:bg-white/10 transition-colors">
               Learn More
-            </button>
+            </span>
           </div>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
@@ -55,6 +73,7 @@ function SpeakingPage() {
 // Page 2 - Creative Layout
 function CreatingPage() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/strip/creating" className="bg-[#121212] min-h-full">
@@ -64,13 +83,16 @@ function CreatingPage() {
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >
-        <div className="text-center space-y-10">
+        <button
+          onClick={navigateNext}
+          className="text-center space-y-10 group cursor-pointer transition-transform duration-300 hover:scale-[1.01]"
+        >
           <div className="relative">
             <h1
               className={cn(
                 "font-light",
                 isMobile ? "text-5xl" : "text-[8rem]",
-                "text-neutral-100",
+                "text-neutral-100 group-hover:text-white transition-colors",
                 "tracking-tight leading-none",
               )}
             >
@@ -81,28 +103,34 @@ function CreatingPage() {
           <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="text-center">
               <div className="text-2xl mb-2">✨</div>
-              <p className="text-neutral-400 text-xs">Innovate</p>
+              <p className="text-neutral-400 text-xs group-hover:text-neutral-300 transition-colors">
+                Innovate
+              </p>
             </div>
             <div className="text-center">
               <div className="text-2xl mb-2">🎯</div>
-              <p className="text-neutral-400 text-xs">Execute</p>
+              <p className="text-neutral-400 text-xs group-hover:text-neutral-300 transition-colors">
+                Execute
+              </p>
             </div>
             <div className="text-center">
               <div className="text-2xl mb-2">🚀</div>
-              <p className="text-neutral-400 text-xs">Launch</p>
+              <p className="text-neutral-400 text-xs group-hover:text-neutral-300 transition-colors">
+                Launch
+              </p>
             </div>
           </div>
 
           <p
             className={cn(
-              "text-neutral-400 max-w-xl mx-auto",
+              "text-neutral-400 max-w-xl mx-auto group-hover:text-neutral-300 transition-colors",
               isMobile ? "text-sm" : "text-base",
             )}
           >
             Where imagination meets execution. Build something extraordinary
             today.
           </p>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
@@ -111,6 +139,7 @@ function CreatingPage() {
 // Page 3 - Minimal Impact
 function ImpactPage() {
   const isMobile = useMobile();
+  const { navigateNext } = useNextRoute();
 
   return (
     <DemoPage path="/strip/impact" className="bg-[#121212] min-h-full">
@@ -120,16 +149,19 @@ function ImpactPage() {
           isMobile ? "px-6 py-12" : "px-8 py-20",
         )}
       >
-        <div className="space-y-12">
+        <button
+          onClick={navigateNext}
+          className="space-y-12 text-left group cursor-pointer transition-transform duration-300 hover:scale-[1.01]"
+        >
           <div>
-            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-4">
+            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-4 group-hover:text-neutral-400 transition-colors">
               Make a Difference
             </p>
             <h1
               className={cn(
                 "font-light",
                 isMobile ? "text-5xl" : "text-[7rem]",
-                "text-neutral-100 leading-none tracking-tight",
+                "text-neutral-100 leading-none tracking-tight group-hover:text-white transition-colors",
               )}
             >
               IMPACT
@@ -137,22 +169,28 @@ function ImpactPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border-l border-white/20 pl-5">
+            <div className="border-l border-white/20 pl-5 group-hover:border-white/40 transition-colors">
               <h3 className="text-neutral-100 font-medium text-xl mb-1">
                 100M+
               </h3>
-              <p className="text-neutral-500 text-xs">Lives Changed</p>
+              <p className="text-neutral-500 text-xs group-hover:text-neutral-400 transition-colors">
+                Lives Changed
+              </p>
             </div>
-            <div className="border-l border-white/20 pl-5">
+            <div className="border-l border-white/20 pl-5 group-hover:border-white/40 transition-colors">
               <h3 className="text-neutral-100 font-medium text-xl mb-1">50+</h3>
-              <p className="text-neutral-500 text-xs">Countries Reached</p>
+              <p className="text-neutral-500 text-xs group-hover:text-neutral-400 transition-colors">
+                Countries Reached
+              </p>
             </div>
-            <div className="border-l border-white/20 pl-5">
+            <div className="border-l border-white/20 pl-5 group-hover:border-white/40 transition-colors">
               <h3 className="text-neutral-100 font-medium text-xl mb-1">∞</h3>
-              <p className="text-neutral-500 text-xs">Possibilities</p>
+              <p className="text-neutral-500 text-xs group-hover:text-neutral-400 transition-colors">
+                Possibilities
+              </p>
             </div>
           </div>
-        </div>
+        </button>
       </div>
     </DemoPage>
   );
