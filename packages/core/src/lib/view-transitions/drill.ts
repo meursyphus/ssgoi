@@ -2,12 +2,12 @@ import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER_SPRING: SpringConfig = {
-  stiffness: 150,
+  stiffness: 117,
   damping: 20,
 };
 
 const EXIT_SPRING: SpringConfig = {
-  stiffness: 100,
+  stiffness: 120,
   damping: 20,
 };
 
