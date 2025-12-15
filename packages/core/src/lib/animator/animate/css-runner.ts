@@ -190,7 +190,7 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const animation = element.animate(keyframes, {
     duration,
     fill: "forwards",
-    easing: "ease-in", // Slight slowdown at start, smooth deceleration at end
+    easing: "ease-in",
   });
 
   let isActive = true;
