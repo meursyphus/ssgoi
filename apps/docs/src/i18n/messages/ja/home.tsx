@@ -448,5 +448,29 @@ export const home: HomeMessages = {
       license: "MIT License",
       builtWith: "Built with care",
     },
+    demoShowcase: {
+      sectionLabel: "インタラクティブデモ",
+      title: "実際に体験してみよう",
+      description:
+        "デモをクリックして、様々なビュートランジションを体験してください",
+      demos: {
+        fade: {
+          label: "フェード",
+          description: "滑らかなページ切り替え",
+        },
+        rotate: {
+          label: "ローテート",
+          description: "3D回転エフェクト",
+        },
+        strip: {
+          label: "ストリップ",
+          description: "ブラインドスタイルの表示",
+        },
+        blind: {
+          label: "ブラインド",
+          description: "シアターカーテンエフェクト",
+        },
+      },
+    },
   },
 };

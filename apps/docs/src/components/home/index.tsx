@@ -2,7 +2,7 @@ import { SsgoiTransition } from "@ssgoi/react";
 import { HeroSection } from "./hero-section";
 import { ElementTransitionSection } from "./element-transition-section";
 import { FeaturesSection } from "./features-section";
-import { CodeSection } from "./code-section";
+import { DemoShowcaseSection } from "./demo-showcase-section";
 import { FrameworksSection } from "./frameworks-section";
 import { CTASection } from "./cta-section";
 import { Footer } from "./footer";
@@ -20,8 +20,8 @@ export function HomePageContent({ lang }: HomePageContentProps) {
     >
       <HeroSection lang={lang} />
       <FeaturesSection />
+      <DemoShowcaseSection />
       <ElementTransitionSection />
-      <CodeSection />
       <FrameworksSection />
       <CTASection lang={lang} />
       <Footer />

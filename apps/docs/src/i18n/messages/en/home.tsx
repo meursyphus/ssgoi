@@ -457,5 +457,29 @@ export const home: HomeMessages = {
       license: "MIT License",
       builtWith: "Built with care",
     },
+    demoShowcase: {
+      sectionLabel: "Interactive Demo",
+      title: "See It In Action",
+      description:
+        "Click through the demos to experience different view transitions",
+      demos: {
+        fade: {
+          label: "Fade",
+          description: "Smooth crossfade between pages",
+        },
+        rotate: {
+          label: "Rotate",
+          description: "3D rotation effect",
+        },
+        strip: {
+          label: "Strip",
+          description: "Blinds-style reveal",
+        },
+        blind: {
+          label: "Blind",
+          description: "Theater curtain effect",
+        },
+      },
+    },
   },
 };

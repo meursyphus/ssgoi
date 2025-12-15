@@ -443,5 +443,28 @@ export const home: HomeMessages = {
       license: "MIT License",
       builtWith: "Built with care",
     },
+    demoShowcase: {
+      sectionLabel: "인터랙티브 데모",
+      title: "직접 체험해보세요",
+      description: "데모를 클릭해서 다양한 뷰 트랜지션을 경험하세요",
+      demos: {
+        fade: {
+          label: "페이드",
+          description: "부드러운 페이지 전환",
+        },
+        rotate: {
+          label: "회전",
+          description: "3D 회전 효과",
+        },
+        strip: {
+          label: "스트립",
+          description: "블라인드 스타일 전환",
+        },
+        blind: {
+          label: "블라인드",
+          description: "극장 커튼 효과",
+        },
+      },
+    },
   },
 };

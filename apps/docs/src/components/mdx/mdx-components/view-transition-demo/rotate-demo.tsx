@@ -64,12 +64,12 @@ const rotateRoutes: RouteConfig[] = [
 const FullscreenMenuLayout = memo(
   ({ children }: { children: React.ReactNode }) => {
     const context = React.useContext(BrowserContext);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(true);
     const isMobile = useMobile();
 
     if (!context) return <>{children}</>;
 
-    const { navigate, routes } = context;
+    const { currentPath, navigate, routes } = context;
 
     const handleNavigate = (path: string) => {
       setIsMenuOpen(false);
@@ -116,33 +116,42 @@ const FullscreenMenuLayout = memo(
                 isMobile ? "px-6" : "px-12",
               )}
             >
-              {routes.map((route, index) => (
-                <button
-                  key={route.path}
-                  onClick={() => handleNavigate(route.path)}
-                  className={cn(
-                    "group flex items-baseline gap-6 text-left transition-colors",
-                    "text-white hover:text-yellow-500",
-                  )}
-                >
-                  <span
+              {routes.map((route, index) => {
+                const isActive = currentPath === route.path;
+                return (
+                  <button
+                    key={route.path}
+                    onClick={() => !isActive && handleNavigate(route.path)}
+                    disabled={isActive}
                     className={cn(
-                      "font-bold text-white group-hover:text-yellow-600/70",
-                      isMobile ? "text-base" : "text-xl",
+                      "group flex items-baseline gap-6 text-left transition-colors",
+                      isActive
+                        ? "text-yellow-500 cursor-default"
+                        : "text-white hover:text-yellow-500 cursor-pointer",
                     )}
                   >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    className={cn(
-                      "font-light tracking-tight",
-                      isMobile ? "text-6xl" : "text-8xl",
-                    )}
-                  >
-                    {route.label}
-                  </span>
-                </button>
-              ))}
+                    <span
+                      className={cn(
+                        "font-bold transition-colors",
+                        isActive
+                          ? "text-yellow-600/70"
+                          : "text-white group-hover:text-yellow-600/70",
+                        isMobile ? "text-base" : "text-xl",
+                      )}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={cn(
+                        "font-light tracking-tight",
+                        isMobile ? "text-6xl" : "text-8xl",
+                      )}
+                    >
+                      {route.label}
+                    </span>
+                  </button>
+                );
+              })}
             </nav>
           </div>
         )}
