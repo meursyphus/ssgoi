@@ -443,11 +443,11 @@ export const home: HomeMessages = {
         },
         rotate: {
           label: "旋转",
-          description: "3D旋转效果",
+          description: "360°页面旋转",
         },
         strip: {
           label: "条纹",
-          description: "百叶窗式过渡",
+          description: "3D条纹翻转效果",
         },
         blind: {
           label: "百叶窗",

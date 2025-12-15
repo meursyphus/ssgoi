@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import Image from "next/image";
 import { fade } from "@ssgoi/react/view-transitions";
 import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
@@ -223,47 +223,80 @@ const fadeRoutes: RouteConfig[] = [
 const MinimalLayout = memo(({ children }: { children: React.ReactNode }) => {
   const context = React.useContext(BrowserContext);
   const isMobile = useMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (!context) return <>{children}</>;
 
   const { currentPath, navigate, routes } = context;
 
+  const handleNavigate = (path: string) => {
+    setMobileMenuOpen(false);
+    navigate(path);
+  };
+
   return (
     <div className="flex flex-col h-full bg-black">
       {/* Header - in flow, not absolute */}
       <header
-        className={cn("flex-shrink-0", isMobile ? "px-4 py-3" : "px-6 py-4")}
+        className={cn(
+          "flex-shrink-0 relative z-20",
+          isMobile ? "px-3 py-2" : "px-6 py-4",
+        )}
       >
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <span className="text-white/90 text-xs font-medium tracking-[0.2em] uppercase">
+          <span
+            className={cn(
+              "text-white/90 font-medium tracking-[0.2em] uppercase",
+              isMobile ? "text-[10px]" : "text-xs",
+            )}
+          >
             Voyage
           </span>
 
-          {/* Text Navigation */}
-          <nav
-            className={cn("flex items-center", isMobile ? "gap-3" : "gap-6")}
-          >
-            {routes.map((route) => (
-              <button
-                key={route.path}
-                onClick={() => navigate(route.path)}
-                className={cn(
-                  "text-xs tracking-wide transition-all duration-300",
-                  currentPath === route.path
-                    ? "text-white"
-                    : "text-white/40 hover:text-white/70",
-                )}
-              >
-                {route.label}
-              </button>
-            ))}
-          </nav>
+          {/* Text Navigation - hidden on mobile */}
+          {!isMobile && (
+            <nav className="flex items-center gap-6">
+              {routes.map((route) => (
+                <button
+                  key={route.path}
+                  onClick={() => navigate(route.path)}
+                  className={cn(
+                    "text-xs tracking-wide transition-all duration-300",
+                    currentPath === route.path
+                      ? "text-white"
+                      : "text-white/40 hover:text-white/70",
+                  )}
+                >
+                  {route.label}
+                </button>
+              ))}
+            </nav>
+          )}
+
+          {/* Mobile: dot navigation */}
+          {isMobile && (
+            <div className="flex items-center gap-1.5">
+              {routes.map((route) => (
+                <button
+                  key={route.path}
+                  onClick={() => handleNavigate(route.path)}
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full transition-all",
+                    currentPath === route.path ? "bg-white" : "bg-white/30",
+                  )}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Menu icon */}
-          <button className="text-white/50 hover:text-white/80 transition-colors">
+          <button
+            onClick={() => isMobile && setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-white/50 hover:text-white/80 transition-colors"
+          >
             <svg
-              className="w-4 h-4"
+              className={cn(isMobile ? "w-3.5 h-3.5" : "w-4 h-4")}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -272,11 +305,31 @@ const MinimalLayout = memo(({ children }: { children: React.ReactNode }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M4 6h16M4 12h16"
+                d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16"}
               />
             </svg>
           </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobile && mobileMenuOpen && (
+          <nav className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10 py-2">
+            {routes.map((route) => (
+              <button
+                key={route.path}
+                onClick={() => handleNavigate(route.path)}
+                className={cn(
+                  "w-full text-left px-4 py-2 text-xs transition-colors",
+                  currentPath === route.path
+                    ? "text-white bg-white/10"
+                    : "text-white/60 hover:text-white hover:bg-white/5",
+                )}
+              >
+                {route.label}
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
 
       {/* Main Content */}

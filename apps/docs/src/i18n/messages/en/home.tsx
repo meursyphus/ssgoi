@@ -469,11 +469,11 @@ export const home: HomeMessages = {
         },
         rotate: {
           label: "Rotate",
-          description: "3D rotation effect",
+          description: "360° page rotation",
         },
         strip: {
           label: "Strip",
-          description: "Blinds-style reveal",
+          description: "3D strip flip effect",
         },
         blind: {
           label: "Blind",

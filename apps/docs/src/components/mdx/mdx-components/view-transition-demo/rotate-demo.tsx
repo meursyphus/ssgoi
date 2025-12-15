@@ -83,17 +83,21 @@ const FullscreenMenuLayout = memo(
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={cn(
-            "absolute top-4 right-4 z-[60] flex items-center gap-3 px-4 py-2",
-            "backdrop-blur-xl bg-black/40 border border-yellow-600/30 rounded-full",
+            "absolute z-[60] flex items-center rounded-full",
+            "backdrop-blur-xl bg-black/40 border border-yellow-600/30",
             "text-yellow-600/80 hover:text-yellow-500 hover:border-yellow-500/50 transition-all",
-            "text-xs tracking-[0.2em] uppercase font-light",
+            "uppercase font-light",
+            isMobile
+              ? "top-2 right-2 gap-2 px-2.5 py-1.5 text-[10px] tracking-[0.15em]"
+              : "top-4 right-4 gap-3 px-4 py-2 text-xs tracking-[0.2em]",
           )}
         >
           <span>{isMenuOpen ? "Close" : "Menu"}</span>
           <span
             className={cn(
-              "w-2 h-2 rounded-full transition-colors",
+              "rounded-full transition-colors",
               isMenuOpen ? "bg-yellow-500" : "bg-yellow-600/60",
+              isMobile ? "w-1.5 h-1.5" : "w-2 h-2",
             )}
           />
         </button>
@@ -108,12 +112,15 @@ const FullscreenMenuLayout = memo(
                 y: -30,
               }),
             )}
-            className="absolute -top-[100px] inset-0 z-50 flex items-center justify-center pointer-events-none"
+            className={cn(
+              "absolute inset-0 z-50 flex items-center justify-center pointer-events-none",
+              isMobile ? "-top-[50px]" : "-top-[100px]",
+            )}
           >
             <nav
               className={cn(
-                "flex flex-col gap-2 pointer-events-auto",
-                isMobile ? "px-6" : "px-12",
+                "flex flex-col pointer-events-auto",
+                isMobile ? "gap-1 px-4" : "gap-2 px-12",
               )}
             >
               {routes.map((route, index) => {
@@ -124,10 +131,11 @@ const FullscreenMenuLayout = memo(
                     onClick={() => !isActive && handleNavigate(route.path)}
                     disabled={isActive}
                     className={cn(
-                      "group flex items-baseline gap-6 text-left transition-colors",
+                      "group flex items-baseline text-left transition-colors",
                       isActive
                         ? "text-yellow-500 cursor-default"
                         : "text-white hover:text-yellow-500 cursor-pointer",
+                      isMobile ? "gap-3" : "gap-6",
                     )}
                   >
                     <span
@@ -136,7 +144,7 @@ const FullscreenMenuLayout = memo(
                         isActive
                           ? "text-yellow-600/70"
                           : "text-white group-hover:text-yellow-600/70",
-                        isMobile ? "text-base" : "text-xl",
+                        isMobile ? "text-xs" : "text-xl",
                       )}
                     >
                       {String(index + 1).padStart(2, "0")}
@@ -144,7 +152,7 @@ const FullscreenMenuLayout = memo(
                     <span
                       className={cn(
                         "font-light tracking-tight",
-                        isMobile ? "text-6xl" : "text-8xl",
+                        isMobile ? "text-3xl" : "text-8xl",
                       )}
                     >
                       {route.label}

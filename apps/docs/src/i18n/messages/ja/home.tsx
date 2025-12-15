@@ -460,11 +460,11 @@ export const home: HomeMessages = {
         },
         rotate: {
           label: "ローテート",
-          description: "3D回転エフェクト",
+          description: "360°ページ回転",
         },
         strip: {
           label: "ストリップ",
-          description: "ブラインドスタイルの表示",
+          description: "3Dストリップフリップ効果",
         },
         blind: {
           label: "ブラインド",

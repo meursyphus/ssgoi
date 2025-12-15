@@ -73,12 +73,12 @@ export function DemoShowcaseSection() {
         </div>
 
         {/* Demo Selector */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
           {demoKeys.map((demoType) => (
             <button
               key={demoType}
               onClick={() => setActiveDemo(demoType)}
-              className={`px-4 py-2 text-xs rounded-lg transition-all ${
+              className={`flex-shrink-0 px-4 py-2 text-xs rounded-lg transition-all ${
                 activeDemo === demoType
                   ? "bg-white/10 text-white border border-white/20"
                   : "text-neutral-500 border border-transparent hover:text-neutral-300 hover:bg-white/5"
@@ -91,8 +91,8 @@ export function DemoShowcaseSection() {
 
         {/* Demo Container */}
         <div className="relative">
-          {/* Main demo - large */}
-          <div className="aspect-[16/10] rounded-xl overflow-hidden border border-white/10 bg-neutral-900">
+          {/* Main demo - responsive aspect ratio: mobile (9:16) / desktop (16:10) */}
+          <div className="aspect-[9/16] md:aspect-[16/10] rounded-xl overflow-hidden border border-white/10 bg-neutral-900">
             <Suspense fallback={<DemoLoading />}>{renderDemo()}</Suspense>
           </div>
 

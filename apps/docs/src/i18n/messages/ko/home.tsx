@@ -454,11 +454,11 @@ export const home: HomeMessages = {
         },
         rotate: {
           label: "회전",
-          description: "3D 회전 효과",
+          description: "360° 페이지 회전",
         },
         strip: {
           label: "스트립",
-          description: "블라인드 스타일 전환",
+          description: "3D 스트립 플립 효과",
         },
         blind: {
           label: "블라인드",
