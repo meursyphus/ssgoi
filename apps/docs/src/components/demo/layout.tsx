@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
-import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
+import { Ssgoi } from "@ssgoi/react";
 import {
   drill,
   hero,
@@ -60,8 +60,12 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     previousPath.current = currentPath;
   }, [currentPath]);
 
-  const config: SsgoiConfig = useMemo(
+  const config = useMemo(
     () => ({
+      defaultTransition: fade({
+        inSpring: { stiffness: 350, damping: 30 },
+        outSpring: { stiffness: 300, damping: 30 },
+      }),
       transitions: [
         // Pinterest transitions
         {
