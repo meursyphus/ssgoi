@@ -43,49 +43,24 @@ export function useBrowserNavigation() {
 
 export { BrowserContext };
 
-// Browser header component
+// Browser header component - ultra thin
 const BrowserHeader = memo(() => {
   const { currentPath } = useBrowserNavigation();
 
   return (
-    <div className="browser-header bg-white/[0.02] border-b border-white/5 px-4 py-3 flex items-center gap-3">
-      {/* Traffic lights - minimal neutral design */}
-      <div className="flex items-center gap-1.5">
-        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-        <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-      </div>
-
-      {/* Address bar */}
-      <div className="flex-1 flex items-center">
-        <div className="flex-1 max-w-md mx-auto">
-          <div className="bg-white/[0.02] border border-white/5 rounded-lg px-3 py-1.5 text-sm text-neutral-300 flex items-center gap-2 overflow-hidden">
-            <svg
-              className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-            <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-              <span className="text-neutral-500">localhost:3000</span>
-              <span className="text-neutral-200">{currentPath}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Browser actions */}
+    <div className="browser-header bg-neutral-900/80 border-b border-white/5 px-3 py-1.5 flex items-center gap-2">
+      {/* Traffic lights - tiny */}
       <div className="flex items-center gap-1">
-        <button className="p-1.5 hover:bg-white/5 rounded transition-colors">
+        <div className="w-2 h-2 rounded-full bg-white/10" />
+        <div className="w-2 h-2 rounded-full bg-white/10" />
+        <div className="w-2 h-2 rounded-full bg-white/10" />
+      </div>
+
+      {/* Address bar - compact */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="bg-white/[0.03] border border-white/5 rounded px-2.5 py-0.5 text-[10px] text-neutral-400 flex items-center gap-1.5 max-w-[200px]">
           <svg
-            className="w-3.5 h-3.5 text-neutral-500"
+            className="w-2.5 h-2.5 text-neutral-500 flex-shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -94,11 +69,18 @@ const BrowserHeader = memo(() => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
             />
           </svg>
-        </button>
+          <span className="truncate">
+            <span className="text-neutral-500">ssgoi.dev</span>
+            <span className="text-neutral-300">{currentPath}</span>
+          </span>
+        </div>
       </div>
+
+      {/* Spacer for balance */}
+      <div className="w-[52px]" />
     </div>
   );
 });

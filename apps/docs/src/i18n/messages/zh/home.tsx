@@ -432,5 +432,28 @@ export const home: HomeMessages = {
       license: "MIT License",
       builtWith: "Built with care",
     },
+    demoShowcase: {
+      sectionLabel: "互动演示",
+      title: "亲自体验",
+      description: "点击演示，体验不同的视图过渡效果",
+      demos: {
+        fade: {
+          label: "淡入淡出",
+          description: "平滑的页面切换",
+        },
+        rotate: {
+          label: "旋转",
+          description: "360°页面旋转",
+        },
+        strip: {
+          label: "条纹",
+          description: "3D条纹翻转效果",
+        },
+        blind: {
+          label: "百叶窗",
+          description: "剧院幕布效果",
+        },
+      },
+    },
   },
 };

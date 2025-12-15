@@ -393,5 +393,28 @@ export type HomeMessages = {
       license: string;
       builtWith: string;
     };
+    demoShowcase: {
+      sectionLabel: string;
+      title: string;
+      description: string;
+      demos: {
+        fade: {
+          label: string;
+          description: string;
+        };
+        rotate: {
+          label: string;
+          description: string;
+        };
+        strip: {
+          label: string;
+          description: string;
+        };
+        blind: {
+          label: string;
+          description: string;
+        };
+      };
+    };
   };
 };
