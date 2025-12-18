@@ -3,12 +3,12 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep, withResolvers } from "../utils";
 
 const DEFAULT_OUT_SPRING: SpringConfig = {
-  stiffness: 120,
-  damping: 15,
+  stiffness: 180,
+  damping: 20,
   doubleSpring: true,
 };
 const DEFAULT_IN_SPRING: SpringConfig = {
-  stiffness: 100,
+  stiffness: 170,
   damping: 20,
   doubleSpring: true,
 };

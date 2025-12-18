@@ -62,10 +62,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
-      defaultTransition: fade({
-        inSpring: { stiffness: 350, damping: 30 },
-        outSpring: { stiffness: 300, damping: 30 },
-      }),
+      defaultTransition: fade(),
       transitions: [
         // Pinterest transitions
         {
