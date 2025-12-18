@@ -1,21 +1,24 @@
-import type { StyleObject, Transition, TransitionKey } from "../types";
+import type {
+  SpringConfig,
+  StyleObject,
+  Transition,
+  TransitionKey,
+} from "../types";
 
 interface FadeOptions {
   from?: number;
   to?: number;
-  spring?: {
-    stiffness?: number;
-    damping?: number;
-  };
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
 }
 
 export const fade = (options: FadeOptions = {}): Transition => {
   const { from = 0, to = 1, spring: springOption, key } = options;
 
-  const spring = {
+  const spring: SpringConfig = {
     stiffness: springOption?.stiffness ?? 300,
     damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   return {

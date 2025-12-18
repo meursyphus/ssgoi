@@ -1,14 +1,16 @@
-import type { StyleObject, Transition, TransitionKey } from "../types";
+import type {
+  SpringConfig,
+  StyleObject,
+  Transition,
+  TransitionKey,
+} from "../types";
 
 interface BlurOptions {
   amount?: number | string;
   opacity?: number;
   scale?: boolean;
   fade?: boolean;
-  spring?: {
-    stiffness?: number;
-    damping?: number;
-  };
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
 }
 
@@ -22,9 +24,10 @@ export const blur = (options: BlurOptions = {}): Transition => {
     key,
   } = options;
 
-  const spring = {
+  const spring: SpringConfig = {
     stiffness: springOption?.stiffness ?? 300,
     damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   const getCss = (progress: number): StyleObject => {
