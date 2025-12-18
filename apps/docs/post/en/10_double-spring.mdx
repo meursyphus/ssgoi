@@ -1,0 +1,148 @@
+---
+title: "Double Spring: Natural Ease-In-Out"
+description: "How to create S-curves in spring animations. Learn why double spring creates smooth starts and endings."
+thumbnail: "/post/double-spring/thumbnail.png"
+date: "2025-12-18"
+thumbnailWidth: 1200
+thumbnailHeight: 800
+author: "Daeseung Moon"
+tags: ["spring", "animation", "easing"]
+---
+
+## The Limitation of Single Spring
+
+Think about a typical spring animation. An object attached to a spring moves toward its target.
+
+```
+Force = -stiffness × (currentPosition - target)
+```
+
+**The problem is at the start**. At t=0, the distance between current position and target is at its maximum, so the force is maximum. The object accelerates sharply from the very beginning.
+
+```
+Start ●━━━━━━━━━━━━━━━━━━━━━━━━━━━━● Target
+      ↑
+      Maximum distance = Maximum force = Sudden start!
+```
+
+This is why spring animations only give an "ease-out" feel. They start fast and end slowly.
+
+## The Double Spring Solution
+
+Double spring connects two springs:
+
+```
+Target ←―[Leader Spring]―← Leader ←―[Follower Spring]―← Me(Output)
+```
+
+- **Leader**: Directly tracks the target
+- **Follower(Me)**: Tracks the leader (this is the actual output)
+
+### Behavior Over Time
+
+**t=0 (Start)**
+```
+Target      Leader    Me
+  ●━━━━━━━━━━●━━━━━━●
+              ↑
+        Leader starts first
+        Distance between me and leader = small
+        → Force on me = small
+        → Slow start! (ease-in)
+```
+
+**t=middle**
+```
+Target    Leader              Me
+  ●━━━━━━●━━━━━━━━━━━━━━━━●
+          ←――――――――――――→
+          Distance increases
+          → Force increases
+          → Acceleration!
+```
+
+**t=end**
+```
+Target/Leader              Me
+  ●━━━━━━━━━━━━━━━━━━━━●
+   ↑
+   Leader arrives first and slows down
+   Distance between me and leader = decreases again
+   → I also decelerate (ease-out)
+```
+
+## Understanding Through Analogy
+
+**Single Spring** = Directly connected to target with a rubber band
+- The rubber band is maximally stretched at the start, causing a **sudden** pull
+
+**Double Spring** = There's a guide ahead, and I follow the guide
+- Even if the guide starts first, the distance between me and the guide is small initially
+- As the guide gets ahead, I'm gradually pulled
+- When the guide slows down near the destination, I naturally decelerate too
+
+## In Code
+
+```typescript
+// Every frame:
+
+// Step 1: Leader chases the target
+leader = stepSpring(leader, target, constants)
+
+// Step 2: I(follower) chase the leader (not the target!)
+follower = stepSpring(follower, leader.position, constants)
+
+// follower.position is the actual output
+```
+
+The key is that **from the follower's perspective, the target is a "moving target (leader)"**. Since the leader starts slowly, I start slowly too. When the leader speeds up in the middle, I speed up. When the leader slows down at the end, I slow down too.
+
+## Using in SSGOI
+
+```typescript
+// Basic double spring (same stiffness)
+{
+  stiffness: 180,
+  damping: 22,
+  doubleSpring: true
+}
+
+// Strong ease-in (follower stiffness is half)
+{
+  stiffness: 180,
+  damping: 22,
+  doubleSpring: 0.5
+}
+
+// Even stronger ease-in
+{
+  stiffness: 180,
+  damping: 22,
+  doubleSpring: 0.3
+}
+```
+
+The smaller the `doubleSpring` value, the lower the follower's stiffness, making it follow the leader more slowly. This creates a stronger ease-in effect.
+
+## When Should You Use It?
+
+| Situation | Recommendation |
+|-----------|----------------|
+| Quick response is important | Single spring |
+| Smooth start/end is important | Double spring |
+| Premium UI transitions | Double spring |
+| Game character movement | Single spring |
+
+Use double spring where a **"designed" feel** matters, like page transitions or modal animations.
+
+## Mathematical Background
+
+The response of a single spring is exponential decay:
+
+```
+x(t) = 1 - (1 + γt)e^(-γt)
+```
+
+Double spring is equivalent to **applying this response twice (convolution)**. The result is an exponential decay multiplied by a higher-order polynomial, creating the S-curve characteristic.
+
+Physically, it's like connecting two mass-spring systems in series. The first spring absorbs external forces, and the second spring only receives the dampened force.
