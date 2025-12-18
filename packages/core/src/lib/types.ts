@@ -3,6 +3,20 @@ export type TransitionKey = string | symbol;
 export type SpringConfig = {
   stiffness: number;
   damping: number;
+  /**
+   * Enable double spring for ease-in-out effect (Chained/Lagged Spring)
+   *
+   * - true: same stiffness for both springs
+   * - number (0-1): follower stiffness ratio (smaller = stronger ease-in)
+   *   - 1.0: same as true
+   *   - 0.5: follower has half stiffness → stronger ease-in
+   *   - 0.3: even stronger ease-in
+   *
+   * Creates a two-spring system:
+   * - Leader spring: tracks the target directly
+   * - Follower spring: tracks the leader's position (this is the output)
+   */
+  doubleSpring?: boolean | number;
 };
 
 /**

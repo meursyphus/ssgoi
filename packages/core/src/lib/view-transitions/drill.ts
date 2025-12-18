@@ -2,13 +2,15 @@ import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER_SPRING: SpringConfig = {
-  stiffness: 117,
+  stiffness: 125,
   damping: 20,
+  doubleSpring: 0.8,
 };
 
 const EXIT_SPRING: SpringConfig = {
-  stiffness: 120,
+  stiffness: 130,
   damping: 20,
+  doubleSpring: 0.8,
 };
 
 interface DrillOptions {
@@ -23,6 +25,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? defaultSpring.stiffness,
     damping: options.spring?.damping ?? defaultSpring.damping,
+    doubleSpring: options.spring?.doubleSpring ?? defaultSpring.doubleSpring,
   };
 
   if (direction === "enter") {

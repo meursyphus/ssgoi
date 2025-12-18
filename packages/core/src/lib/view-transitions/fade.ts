@@ -2,8 +2,16 @@ import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep, withResolvers } from "../utils";
 
-const DEFAULT_OUT_SPRING = { stiffness: 120, damping: 15 };
-const DEFAULT_IN_SPRING = { stiffness: 100, damping: 20 };
+const DEFAULT_OUT_SPRING: SpringConfig = {
+  stiffness: 180,
+  damping: 20,
+  doubleSpring: true,
+};
+const DEFAULT_IN_SPRING: SpringConfig = {
+  stiffness: 170,
+  damping: 20,
+  doubleSpring: true,
+};
 const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
