@@ -249,6 +249,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 150,
     damping: options.spring?.damping ?? 20,
+    doubleSpring: options.spring?.doubleSpring ?? true,
   };
   const timeout = options.timeout ?? 300;
 

@@ -9,6 +9,7 @@ interface SlideOptions {
 const DEFAULT_SPRING: SpringConfig = {
   stiffness: 15,
   damping: 7,
+  doubleSpring: true,
 };
 
 export const slide = (options: SlideOptions = {}): SggoiTransition => {
@@ -16,6 +17,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
     damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
+    doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
   };
 
   const isLeft = direction === "left";

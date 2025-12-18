@@ -339,6 +339,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
     stiffness: options.spring?.stiffness ?? 30,
     damping: options.spring?.damping ?? 10,
+    doubleSpring: options.spring?.doubleSpring ?? true,
   };
   const timeout = options.timeout ?? 300;
 
