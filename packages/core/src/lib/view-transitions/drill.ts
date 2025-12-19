@@ -3,14 +3,14 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER_SPRING: SpringConfig = {
   stiffness: 125,
-  damping: 20,
-  doubleSpring: 0.8,
+  damping: 14,
+  doubleSpring: 0.5,
 };
 
 const EXIT_SPRING: SpringConfig = {
-  stiffness: 130,
-  damping: 20,
-  doubleSpring: 0.8,
+  stiffness: 128,
+  damping: 14,
+  doubleSpring: 0.5,
 };
 
 interface DrillOptions {
