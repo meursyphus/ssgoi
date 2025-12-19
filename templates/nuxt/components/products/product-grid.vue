@@ -5,7 +5,7 @@
         <p class="text-neutral-500 text-sm">No products in this category</p>
       </div>
       <div v-else class="grid grid-cols-2 gap-3">
-        <ProductCard v-for="product in products" :key="product.id" :product="product" />
+        <ProductsProductCard v-for="product in products" :key="product.id" :product="product" />
       </div>
     </div>
   </SsgoiTransition>

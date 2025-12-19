@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#121212] flex flex-col">
+  <SsgoiTransition id="/products" class="min-h-screen bg-[#121212] flex flex-col">
     <!-- Header - Fixed -->
     <div class="px-4 pt-6 pb-3 flex-shrink-0">
       <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
@@ -31,13 +31,13 @@
         <NuxtPage />
       </Ssgoi>
     </div>
-  </div>
+  </SsgoiTransition>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { Ssgoi } from '@ssgoi/vue';
+import { Ssgoi, SsgoiTransition } from '@ssgoi/vue';
 import type { SsgoiConfig } from '@ssgoi/vue';
 import { slide } from '@ssgoi/vue/view-transitions';
 
@@ -81,13 +81,4 @@ const config: SsgoiConfig = {
   },
 };
 
-definePageMeta({
-  redirect: () => {
-    // Only redirect if on /products exactly
-    const route = useRoute();
-    if (route.path === '/products') {
-      return '/products/all';
-    }
-  },
-});
 </script>
