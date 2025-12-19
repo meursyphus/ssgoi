@@ -1,286 +1,423 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { transition } from "@ssgoi/react";
-import * as transitions from "@ssgoi/react/transitions";
-import { config as springPresets } from "@ssgoi/react/presets";
+import {
+  fade,
+  scale,
+  blur,
+  slide,
+  fly,
+  rotate,
+  bounce,
+  mask,
+} from "@ssgoi/react/transitions";
 
-interface TransitionDemoProps {
-  type: keyof typeof transitions;
-  options?: Record<string, any>;
+type TransitionType =
+  | "fade"
+  | "scale"
+  | "blur"
+  | "slide"
+  | "fly"
+  | "rotate"
+  | "bounce"
+  | "mask";
+
+interface TransitionParams {
+  fade: { duration: number };
+  scale: { start: number; duration: number };
+  blur: { amount: number; duration: number };
+  slide: {
+    direction: "up" | "down" | "left" | "right";
+    distance: number;
+    duration: number;
+  };
+  fly: { x: number; y: number; duration: number };
+  rotate: { degrees: number; duration: number };
+  bounce: { stiffness: number; damping: number };
+  mask: { duration: number };
 }
 
-// Transition-specific option configurations
-const transitionOptions = {
-  scale: [
-    { name: "start", type: "range", min: 0, max: 2, step: 0.1, default: 0 },
-    { name: "opacity", type: "range", min: 0, max: 1, step: 0.1, default: 0 },
-    {
-      name: "axis",
-      type: "select",
-      options: ["both", "x", "y"],
-      default: "both",
-    },
-  ],
-  fade: [
-    { name: "from", type: "range", min: 0, max: 1, step: 0.1, default: 0 },
-    { name: "to", type: "range", min: 0, max: 1, step: 0.1, default: 1 },
-  ],
-  rotate: [
-    {
-      name: "degrees",
-      type: "range",
-      min: 0,
-      max: 720,
-      step: 45,
-      default: 360,
-    },
-    { name: "clockwise", type: "toggle", default: true },
-    { name: "scale", type: "toggle", default: false },
-    { name: "fade", type: "toggle", default: true },
-    {
-      name: "axis",
-      type: "select",
-      options: ["2d", "x", "y", "z"],
-      default: "2d",
-    },
-    {
-      name: "perspective",
-      type: "range",
-      min: 100,
-      max: 2000,
-      step: 100,
-      default: 800,
-    },
-    {
-      name: "origin",
-      type: "select",
-      options: [
-        "center",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "top left",
-        "top right",
-        "bottom left",
-        "bottom right",
-      ],
-      default: "center",
-    },
-  ],
-  slide: [
-    {
-      name: "direction",
-      type: "select",
-      options: ["left", "right", "up", "down"],
-      default: "left",
-    },
-    {
-      name: "distance",
-      type: "range",
-      min: 0,
-      max: 500,
-      step: 10,
-      default: 100,
-    },
-    { name: "opacity", type: "range", min: 0, max: 1, step: 0.1, default: 0 },
-    { name: "fade", type: "toggle", default: true },
-  ],
-  bounce: [
-    { name: "height", type: "range", min: 0, max: 100, step: 5, default: 20 },
-    { name: "bounces", type: "range", min: 1, max: 10, step: 1, default: 3 },
-    { name: "fade", type: "toggle", default: true },
-  ],
-  blur: [
-    { name: "amount", type: "range", min: 0, max: 20, step: 1, default: 10 },
-    { name: "opacity", type: "range", min: 0, max: 1, step: 0.1, default: 0 },
-  ],
-  fly: [
-    { name: "y", type: "range", min: -500, max: 500, step: 10, default: -100 },
-    { name: "x", type: "range", min: -500, max: 500, step: 10, default: 0 },
-    { name: "opacity", type: "range", min: 0, max: 1, step: 0.1, default: 0 },
-  ],
-  mask: [
-    {
-      name: "shape",
-      type: "select",
-      options: ["circle", "ellipse", "square"],
-      default: "circle",
-    },
-    {
-      name: "origin",
-      type: "select",
-      options: [
-        "center",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "top-left",
-        "top-right",
-        "bottom-left",
-        "bottom-right",
-      ],
-      default: "center",
-    },
-    { name: "scale", type: "range", min: 0.5, max: 3, step: 0.1, default: 1.5 },
-    { name: "fade", type: "toggle", default: false },
-  ],
-} as const;
+const defaultParams: TransitionParams = {
+  fade: { duration: 300 },
+  scale: { start: 0.8, duration: 300 },
+  blur: { amount: 10, duration: 300 },
+  slide: { direction: "down", distance: 20, duration: 300 },
+  fly: { x: 0, y: 50, duration: 300 },
+  rotate: { degrees: 90, duration: 300 },
+  bounce: { stiffness: 300, damping: 20 },
+  mask: { duration: 300 },
+};
 
-export function TransitionDemo({ type, options = {} }: TransitionDemoProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const [springPreset, setSpringPreset] =
-    useState<keyof typeof springPresets>("default");
-  const [customOptions, setCustomOptions] = useState<Record<string, any>>({});
+function ControlPanel({
+  type,
+  params,
+  onChange,
+}: {
+  type: TransitionType;
+  params: TransitionParams[TransitionType];
+  onChange: (params: TransitionParams[TransitionType]) => void;
+}) {
+  const update = (key: string, value: number | string) => {
+    onChange({ ...params, [key]: value });
+  };
 
-  // Get the transition function
-  const transitionFn = transitions[type];
-  if (!transitionFn) {
-    return <div>Unknown transition type: {type}</div>;
+  const renderSlider = (
+    label: string,
+    key: string,
+    value: number,
+    min: number,
+    max: number,
+    step: number = 1,
+    unit: string = "",
+  ) => (
+    <div className="flex items-center gap-3">
+      <label className="text-neutral-500 text-xs w-20 flex-shrink-0">
+        {label}
+      </label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => update(key, parseFloat(e.target.value))}
+        className="flex-1 h-1 bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-neutral-300 [&::-webkit-slider-thumb]:rounded-full"
+      />
+      <span className="text-neutral-400 text-xs w-14 text-right">
+        {value}
+        {unit}
+      </span>
+    </div>
+  );
+
+  const renderSelect = (
+    label: string,
+    key: string,
+    value: string,
+    options: string[],
+  ) => (
+    <div className="flex items-center gap-3">
+      <label className="text-neutral-500 text-xs w-20 flex-shrink-0">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => update(key, e.target.value)}
+        className="flex-1 px-2 py-1 bg-neutral-800 text-neutral-300 rounded border border-neutral-700 text-xs"
+      >
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  switch (type) {
+    case "fade":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["fade"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "scale":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Start",
+            "start",
+            (params as TransitionParams["scale"]).start,
+            0,
+            1,
+            0.1,
+          )}
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["scale"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "blur":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Amount",
+            "amount",
+            (params as TransitionParams["blur"]).amount,
+            0,
+            30,
+            1,
+            "px",
+          )}
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["blur"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "slide":
+      return (
+        <div className="space-y-2">
+          {renderSelect(
+            "Direction",
+            "direction",
+            (params as TransitionParams["slide"]).direction,
+            ["up", "down", "left", "right"],
+          )}
+          {renderSlider(
+            "Distance",
+            "distance",
+            (params as TransitionParams["slide"]).distance,
+            10,
+            100,
+            5,
+            "px",
+          )}
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["slide"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "fly":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "X",
+            "x",
+            (params as TransitionParams["fly"]).x,
+            -100,
+            100,
+            10,
+            "px",
+          )}
+          {renderSlider(
+            "Y",
+            "y",
+            (params as TransitionParams["fly"]).y,
+            -100,
+            100,
+            10,
+            "px",
+          )}
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["fly"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "rotate":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Degrees",
+            "degrees",
+            (params as TransitionParams["rotate"]).degrees,
+            0,
+            360,
+            15,
+            "°",
+          )}
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["rotate"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    case "bounce":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Stiffness",
+            "stiffness",
+            (params as TransitionParams["bounce"]).stiffness,
+            100,
+            500,
+            20,
+          )}
+          {renderSlider(
+            "Damping",
+            "damping",
+            (params as TransitionParams["bounce"]).damping,
+            5,
+            40,
+            1,
+          )}
+        </div>
+      );
+    case "mask":
+      return (
+        <div className="space-y-2">
+          {renderSlider(
+            "Duration",
+            "duration",
+            (params as TransitionParams["mask"]).duration,
+            100,
+            1000,
+            50,
+            "ms",
+          )}
+        </div>
+      );
+    default:
+      return null;
   }
+}
 
-  // Merge default options with custom options
-  const mergedOptions = { ...options, ...customOptions };
+function createTransition(
+  type: TransitionType,
+  params: TransitionParams[TransitionType],
+) {
+  switch (type) {
+    case "fade":
+      return fade({ duration: (params as TransitionParams["fade"]).duration });
+    case "scale":
+      const scaleParams = params as TransitionParams["scale"];
+      return scale({
+        start: scaleParams.start,
+        duration: scaleParams.duration,
+      });
+    case "blur":
+      const blurParams = params as TransitionParams["blur"];
+      return blur({ amount: blurParams.amount, duration: blurParams.duration });
+    case "slide":
+      const slideParams = params as TransitionParams["slide"];
+      return slide({
+        direction: slideParams.direction,
+        distance: slideParams.distance,
+        duration: slideParams.duration,
+      });
+    case "fly":
+      const flyParams = params as TransitionParams["fly"];
+      return fly({
+        x: flyParams.x,
+        y: flyParams.y,
+        duration: flyParams.duration,
+      });
+    case "rotate":
+      const rotateParams = params as TransitionParams["rotate"];
+      return rotate({
+        degrees: rotateParams.degrees,
+        duration: rotateParams.duration,
+      });
+    case "bounce":
+      const bounceParams = params as TransitionParams["bounce"];
+      return bounce({
+        stiffness: bounceParams.stiffness,
+        damping: bounceParams.damping,
+      });
+    case "mask":
+      return mask({ duration: (params as TransitionParams["mask"]).duration });
+  }
+}
 
-  // Apply the transition with spring preset
-  const transitionConfig = transitionFn({
-    ...mergedOptions,
-    spring: springPresets[springPreset],
-  });
+export function TransitionDemo() {
+  const [selectedType, setSelectedType] = useState<TransitionType>("fade");
+  const [isVisible, setIsVisible] = useState(true);
+  const [params, setParams] = useState<TransitionParams>(defaultParams);
+
+  const currentParams = params[selectedType];
+  const currentTransition = useMemo(
+    () => createTransition(selectedType, currentParams),
+    [selectedType, currentParams],
+  );
+
+  const handleParamsChange = (newParams: TransitionParams[TransitionType]) => {
+    setParams((prev) => ({ ...prev, [selectedType]: newParams }));
+  };
 
   return (
-    <div className="w-full space-y-4 p-5 bg-white/[0.02] rounded-xl border border-white/5">
-      {/* Preview Area */}
-      <div className="relative flex justify-center items-center h-48 bg-[#111] rounded-lg border border-white/5">
-        {isVisible && (
-          <div
-            ref={transition({
-              key: `demo-${type}`,
-              ...transitionConfig,
-            })}
-            className="w-28 h-28 bg-neutral-300 rounded-xl flex items-center justify-center text-neutral-700 font-medium text-base"
+    <div className="w-full max-w-xl mx-auto my-8">
+      <div className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden">
+        {/* Header with selector */}
+        <div className="px-4 py-3 border-b border-neutral-800 flex items-center gap-3">
+          <span className="text-neutral-500 text-xs">Type</span>
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value as TransitionType)}
+            className="flex-1 px-3 py-1.5 bg-neutral-800 text-neutral-200 rounded-lg border border-neutral-700 focus:border-neutral-600 focus:outline-none text-sm"
           >
-            SSGOI
-          </div>
-        )}
-
-        {/* Toggle Button - positioned at bottom of preview */}
-        <button
-          onClick={() => setIsVisible(!isVisible)}
-          className={`absolute bottom-4 px-5 py-2 text-sm rounded-lg transition-all ${
-            isVisible
-              ? "bg-white/10 border border-white/20 hover:bg-white/15 text-neutral-300"
-              : "bg-white hover:bg-neutral-200 text-neutral-900"
-          }`}
-        >
-          {isVisible ? "Hide" : "Show"}
-        </button>
-      </div>
-
-      {/* Transition-specific Options */}
-      {transitionOptions[type as keyof typeof transitionOptions] && (
-        <div className="space-y-3 p-4 bg-[#111] rounded-lg border border-white/5">
-          <h3 className="text-xs font-medium text-neutral-400 mb-2">Options</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {transitionOptions[type as keyof typeof transitionOptions].map(
-              (option) => {
-                const currentValue =
-                  customOptions[option.name] ?? option.default;
-
-                return (
-                  <div key={option.name} className="space-y-1">
-                    <label className="text-xs text-neutral-500 capitalize">
-                      {option.name.replace(/([A-Z])/g, " $1").trim()}
-                    </label>
-
-                    {option.type === "range" && (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="range"
-                          min={option.min}
-                          max={option.max}
-                          step={option.step}
-                          value={currentValue}
-                          onChange={(e) =>
-                            setCustomOptions({
-                              ...customOptions,
-                              [option.name]: parseFloat(e.target.value),
-                            })
-                          }
-                          className="flex-1 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-neutral-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
-                        />
-                        <span className="text-xs text-neutral-500 w-12 text-right">
-                          {currentValue}
-                        </span>
-                      </div>
-                    )}
-
-                    {option.type === "select" && (
-                      <select
-                        value={currentValue}
-                        onChange={(e) =>
-                          setCustomOptions({
-                            ...customOptions,
-                            [option.name]: e.target.value,
-                          })
-                        }
-                        className="w-full px-2 py-1 text-xs bg-white/5 text-neutral-300 rounded-md border border-white/10 focus:border-white/20 focus:outline-none"
-                      >
-                        {option.options.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-
-                    {option.type === "toggle" && (
-                      <button
-                        onClick={() =>
-                          setCustomOptions({
-                            ...customOptions,
-                            [option.name]: !currentValue,
-                          })
-                        }
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                          currentValue ? "bg-neutral-400" : "bg-white/10"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                            currentValue ? "translate-x-5" : "translate-x-1"
-                          }`}
-                        />
-                      </button>
-                    )}
-                  </div>
-                );
-              },
-            )}
-          </div>
+            <option value="fade">fade</option>
+            <option value="scale">scale</option>
+            <option value="blur">blur</option>
+            <option value="slide">slide</option>
+            <option value="fly">fly</option>
+            <option value="rotate">rotate</option>
+            <option value="bounce">bounce</option>
+            <option value="mask">mask</option>
+          </select>
         </div>
-      )}
 
-      {/* Spring Preset Controls */}
-      <div className="flex gap-2 flex-wrap justify-center">
-        {(
-          ["default", "gentle", "wobbly", "stiff", "slow", "molasses"] as const
-        ).map((preset) => (
+        {/* Control panel */}
+        <div className="px-4 py-3 border-b border-neutral-800 bg-neutral-900/50">
+          <ControlPanel
+            type={selectedType}
+            params={currentParams}
+            onChange={handleParamsChange}
+          />
+        </div>
+
+        {/* Preview area */}
+        <div className="relative flex items-center justify-center h-[180px] bg-neutral-950">
+          {isVisible && (
+            <div
+              ref={transition({
+                key: `transition-demo-${selectedType}-${JSON.stringify(currentParams)}`,
+                ...currentTransition,
+              })}
+              className="w-20 h-20 bg-neutral-100 rounded-lg flex items-center justify-center shadow-lg"
+            >
+              <span className="text-neutral-900 font-medium text-xs">
+                SSGOI
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Footer with toggle button */}
+        <div className="px-4 py-3 border-t border-neutral-800 flex justify-center">
           <button
-            key={preset}
-            onClick={() => setSpringPreset(preset)}
-            className={`px-3 py-1.5 text-xs rounded-md transition-all ${
-              springPreset === preset
-                ? "bg-white text-neutral-900"
-                : "bg-white/5 text-neutral-500 hover:bg-white/10 hover:text-neutral-300"
-            }`}
+            onClick={() => setIsVisible(!isVisible)}
+            className="px-5 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg transition-colors text-sm"
           >
-            {preset.charAt(0).toUpperCase() + preset.slice(1)}
+            {isVisible ? "Hide" : "Show"}
           </button>
-        ))}
+        </div>
       </div>
     </div>
   );
