@@ -1,4 +1,4 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 import { createTransitionScope } from "@ssgoi/core";
 
 /**
@@ -24,8 +24,18 @@ import { createTransitionScope } from "@ssgoi/core";
  * ```
  */
 export const TransitionScope = component$(() => {
+  const elementRef = useSignal<HTMLElement>();
+
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(() => {
+    const element = elementRef.value;
+    if (element) {
+      createTransitionScope()(element);
+    }
+  });
+
   return (
-    <div ref={createTransitionScope()} style={{ display: "contents" }}>
+    <div ref={elementRef} style={{ display: "contents" }}>
       <Slot />
     </div>
   );

@@ -1,12 +1,10 @@
 import { defineConfig } from "vite";
-import { qwikVite } from "@builder.io/qwik/optimizer";
 import { resolve } from "path";
 import pkg from "./package.json";
+import { qwikVite } from "@builder.io/qwik/optimizer";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-const { dependencies = {}, peerDependencies = {} } = pkg as Record<
-  string,
-  Record<string, string>
->;
+const { dependencies = {}, peerDependencies = {} } = pkg as any;
 const makeRegex = (dep: string) => new RegExp(`^${dep}(/.*)?$`);
 const excludeAll = (obj: Record<string, string>) =>
   Object.keys(obj).map(makeRegex);
@@ -45,6 +43,6 @@ export default defineConfig(() => {
         ],
       },
     },
-    plugins: [qwikVite()],
+    plugins: [qwikVite(), tsconfigPaths({ root: "." })],
   };
 });

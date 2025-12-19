@@ -28,17 +28,16 @@ type TransitionOptions = Transition<undefined> & {
  * ```
  */
 export const transition = (options: TransitionOptions) => {
-  const callback = _transition(options);
-
   // Return ref callback
-  // Use MutationObserver to detect unmount and trigger OUT transition
+  // Guard against SSR - only run in browser
   return (element: HTMLElement | undefined) => {
-    if (element) {
-      const cleanup = callback(element);
-      if (cleanup) {
-        // Register cleanup with MutationObserver for automatic OUT transition
-        watchUnmount(element, cleanup);
-      }
+    if (typeof window === "undefined" || !element) return;
+
+    const callback = _transition(options);
+    const cleanup = callback(element);
+    if (cleanup) {
+      // Register cleanup with MutationObserver for automatic OUT transition
+      watchUnmount(element, cleanup);
     }
   };
 };

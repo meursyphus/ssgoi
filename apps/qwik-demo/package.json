@@ -1,19 +1,43 @@
 {
   "name": "qwik-demo",
   "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "vite --port 3002",
-    "build": "qwik build",
-    "preview": "vite preview"
+  "description": "Qwik City demo app for SSGOI page transitions",
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
   },
-  "dependencies": {
-    "@builder.io/qwik": "^1.17.2",
-    "@builder.io/qwik-city": "^1.17.2",
-    "@ssgoi/qwik": "workspace:*"
+  "engines-annotation": "Mostly required by sharp which needs a Node-API v9 compatible runtime",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "build.client": "vite build",
+    "build.preview": "vite build --ssr src/entry.preview.tsx",
+    "build.types": "tsc --incremental --noEmit",
+    "deploy": "echo 'Run \"npm run qwik add\" to install a server adapter'",
+    "dev": "vite --mode ssr",
+    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
+    "fmt": "prettier --write .",
+    "fmt.check": "prettier --check .",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "preview": "qwik build preview && vite preview --open",
+    "start": "vite --open --mode ssr",
+    "qwik": "qwik"
   },
   "devDependencies": {
-    "vite": "^5.4.0",
-    "typescript": "^5"
+    "@ssgoi/qwik": "workspace:*",
+    "@builder.io/qwik": "^1.17.2",
+    "@builder.io/qwik-city": "^1.17.2",
+    "@eslint/js": "latest",
+    "@types/node": "20.19.0",
+    "eslint": "9.32.0",
+    "eslint-plugin-qwik": "^1.17.2",
+    "globals": "16.4.0",
+    "prettier": "3.6.2",
+    "typescript": "5.4.5",
+    "typescript-eslint": "8.38.0",
+    "typescript-plugin-css-modules": "latest",
+    "undici": "*",
+    "vite": "7.1.11",
+    "vite-tsconfig-paths": "^4.2.1"
   }
 }
