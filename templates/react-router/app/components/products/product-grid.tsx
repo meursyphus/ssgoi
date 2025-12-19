@@ -1,6 +1,6 @@
 import React from "react";
 import { SsgoiTransition } from "@ssgoi/react";
-import { Product } from "./mock-data";
+import type { Product } from "./mock-data";
 
 interface ProductGridProps {
   products: Product[];

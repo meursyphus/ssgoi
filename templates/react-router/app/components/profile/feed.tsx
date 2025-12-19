@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
-import { posts, Post } from "./mock-data";
+import { posts } from "./mock-data";
+import type { Post } from "./mock-data";
 
 export function Feed() {
   return (

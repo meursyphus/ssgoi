@@ -9,7 +9,7 @@ export default function DemoWrapper({
   return (
     <div className="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] md:pt-20 relative overflow-hidden">
       {/* Subtle gradient accent */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neutral-800/50 rounded-full blur-[150px]" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-neutral-700/30 rounded-full blur-[150px]" />
       </div>

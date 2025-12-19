@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
-import { pinterestItems, PinterestItem } from "./mock-data";
+import { pinterestItems } from "./mock-data";
+import type { PinterestItem } from "./mock-data";
 import { SsgoiTransition } from "@ssgoi/react";
 
 export default function PinterestDemo() {

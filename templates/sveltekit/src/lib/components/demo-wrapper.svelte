@@ -8,7 +8,7 @@
 	class="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] md:pt-20 relative overflow-hidden"
 >
 	<!-- Subtle gradient accent -->
-	<div class="absolute inset-0 opacity-30">
+	<div class="absolute inset-0 opacity-30 pointer-events-none">
 		<div
 			class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neutral-800/50 rounded-full blur-[150px]"
 		></div>

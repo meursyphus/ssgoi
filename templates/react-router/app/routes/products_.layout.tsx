@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Link, Outlet, useLocation } from "react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import { slide } from "@ssgoi/react/view-transitions";
 
 const categories = [
@@ -44,11 +44,14 @@ export default function ProductsLayout() {
         return { from, to };
       },
     }),
-    []
+    [],
   );
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col">
+    <SsgoiTransition
+      id="/products"
+      className="min-h-screen bg-[#121212] flex flex-col"
+    >
       {/* Header - Fixed */}
       <div className="px-4 pt-6 pb-3 flex-shrink-0">
         <h1 className="text-sm font-medium text-white mb-1">Shop</h1>
@@ -82,6 +85,6 @@ export default function ProductsLayout() {
           <Outlet />
         </Ssgoi>
       </div>
-    </div>
+    </SsgoiTransition>
   );
 }
