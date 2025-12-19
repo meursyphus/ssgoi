@@ -186,6 +186,10 @@ const authorBios = [
   "Fashion stylist curating looks for every occasion",
 ];
 
+// Fixed values to avoid hydration mismatch
+const savesValues = [1234, 2456, 3678, 890, 4123, 567, 2890, 1567, 3234, 789, 4567, 1890, 2345, 678, 3456];
+const followersValues = [5432, 8765, 3210, 9876, 6543, 4321, 7654, 2109, 8901, 5678, 3456, 7890, 1234, 6789, 4567];
+
 export const pinterestItems: PinterestItem[] = localImageData.map(
   (imageData, index) => {
     const category = categories[index % categories.length];
@@ -199,19 +203,17 @@ export const pinterestItems: PinterestItem[] = localImageData.map(
       image: `/demo/pinterest/${imageData.id}-${imageData.width}x${imageData.height}.jpg`,
       aspectRatio: aspectRatios[index % aspectRatios.length],
       category,
-      saves: Math.floor(Math.random() * 5000) + 100,
+      saves: savesValues[index % savesValues.length],
       author: {
         name: ["Emma Wilson", "Alex Chen", "Sarah Kim", "Mike Davis", "Lisa Park"][
           index % 5
         ],
         avatar: `/demo/pinterest/avatar-${(index % 5) + 1}.jpg`,
-        followers: Math.floor(Math.random() * 10000) + 1000,
+        followers: followersValues[index % followersValues.length],
         bio: authorBios[index % authorBios.length],
       },
-      tags: getRandomTags(category),
-      createdAt: new Date(
-        Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000
-      ).toISOString(),
+      tags: getTags(category),
+      createdAt: "2024-01-15T00:00:00.000Z",
       ...("ingredients" in contentData && { ingredients: contentData.ingredients }),
       ...("materials" in contentData && { materials: contentData.materials }),
       ...("steps" in contentData && { steps: contentData.steps }),
@@ -219,20 +221,19 @@ export const pinterestItems: PinterestItem[] = localImageData.map(
   }
 );
 
-function getRandomTags(category: string): string[] {
+function getTags(category: string): string[] {
   const tagsByCategory: Record<string, string[]> = {
-    Design: ["minimal", "modern", "creative", "inspiration", "ui", "ux"],
-    Art: ["painting", "digital", "illustration", "abstract", "contemporary"],
-    Photography: ["portrait", "landscape", "street", "nature", "black-white"],
-    Fashion: ["style", "outfit", "trend", "vintage", "streetwear"],
-    Food: ["recipe", "healthy", "dessert", "vegan", "cooking"],
-    Travel: ["adventure", "wanderlust", "destination", "explore", "vacation"],
-    DIY: ["craft", "handmade", "tutorial", "upcycle", "home-decor"],
-    Home: ["interior", "decor", "organization", "cozy", "renovation"],
+    Design: ["minimal", "modern", "creative"],
+    Art: ["painting", "digital", "illustration"],
+    Photography: ["portrait", "landscape", "street"],
+    Fashion: ["style", "outfit", "trend"],
+    Food: ["recipe", "healthy", "dessert"],
+    Travel: ["adventure", "wanderlust", "destination"],
+    DIY: ["craft", "handmade", "tutorial"],
+    Home: ["interior", "decor", "organization"],
   };
 
-  const tags = tagsByCategory[category] || ["inspiration", "ideas", "creative"];
-  return tags.sort(() => Math.random() - 0.5).slice(0, 3);
+  return tagsByCategory[category] || ["inspiration", "ideas", "creative"];
 }
 
 export function getPinterestItem(id: string): PinterestItem | undefined {
@@ -250,9 +251,9 @@ export function getRelatedPins(
     (item) => item.id !== currentId && item.category === currentPin.category
   );
 
-  const otherPins = pinterestItems
-    .filter((item) => item.id !== currentId && item.category !== currentPin.category)
-    .sort(() => Math.random() - 0.5);
+  const otherPins = pinterestItems.filter(
+    (item) => item.id !== currentId && item.category !== currentPin.category
+  );
 
   return [...sameCategoryPins, ...otherPins].slice(0, limit);
 }

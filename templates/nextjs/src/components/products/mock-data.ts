@@ -267,9 +267,9 @@ export function getRelatedProducts(
     (p) => p.id !== currentId && p.category === currentProduct.category
   );
 
-  const otherProducts = products
-    .filter((p) => p.id !== currentId && p.category !== currentProduct.category)
-    .sort(() => Math.random() - 0.5);
+  const otherProducts = products.filter(
+    (p) => p.id !== currentId && p.category !== currentProduct.category
+  );
 
   return [...sameCategoryProducts, ...otherProducts].slice(0, limit);
 }

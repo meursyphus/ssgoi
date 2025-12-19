@@ -156,6 +156,11 @@ const postTitles = [
 
 const categories = ['Development', 'Design', 'Photography', 'Technology'];
 
+const readTimeValues = [5, 8, 6, 10, 7, 4, 9, 5, 8, 6];
+const likesValues = [234, 456, 567, 345, 789, 432, 892, 623, 1234, 745, 934, 512, 1098, 678, 1456, 823, 1267, 945];
+const commentsValues = [45, 67, 89, 56, 134, 78, 112, 89, 156, 92, 124, 67, 145, 94, 189, 107, 163, 128];
+const sharesValues = [89, 123, 234, 178, 456, 210, 345, 234, 478, 287, 356, 198, 423, 267, 534, 312, 489, 378];
+
 export const profilePosts: ProfilePost[] = postImages.map((img, index) => ({
   id: `post-${index + 1}`,
   title: postTitles[index],
@@ -163,13 +168,11 @@ export const profilePosts: ProfilePost[] = postImages.map((img, index) => ({
   content: `Detailed content about ${postTitles[index].toLowerCase()}.`,
   coverImage: img,
   category: categories[index % categories.length],
-  readTime: Math.floor(Math.random() * 8) + 4,
-  publishedAt: new Date(
-    Date.now() - index * 2 * 24 * 60 * 60 * 1000
-  ).toISOString(),
-  likes: Math.floor(Math.random() * 1000) + 200,
-  comments: Math.floor(Math.random() * 150) + 40,
-  shares: Math.floor(Math.random() * 400) + 100,
+  readTime: readTimeValues[index % readTimeValues.length],
+  publishedAt: "2024-01-15T00:00:00.000Z",
+  likes: likesValues[index % likesValues.length],
+  comments: commentsValues[index % commentsValues.length],
+  shares: sharesValues[index % sharesValues.length],
 }));
 
 export function useProfilePost(id: string) {
@@ -193,8 +196,7 @@ export function useRelatedProfilePosts(currentId: string, limit: number = 3) {
   );
 
   const otherPosts = profilePosts
-    .filter((p) => p.id !== currentId && p.category !== currentPost.category)
-    .sort(() => Math.random() - 0.5);
+    .filter((p) => p.id !== currentId && p.category !== currentPost.category);
 
   return [...sameCategoryPosts, ...otherPosts].slice(0, limit);
 }

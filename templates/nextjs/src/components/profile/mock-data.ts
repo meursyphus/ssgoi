@@ -387,9 +387,9 @@ export function getRelatedPosts(currentId: string, limit: number = 3): Post[] {
     (p) => p.id !== currentId && p.category === currentPost.category
   );
 
-  const otherPosts = posts
-    .filter((p) => p.id !== currentId && p.category !== currentPost.category)
-    .sort(() => Math.random() - 0.5);
+  const otherPosts = posts.filter(
+    (p) => p.id !== currentId && p.category !== currentPost.category
+  );
 
   return [...sameCategoryPosts, ...otherPosts].slice(0, limit);
 }

@@ -33,6 +33,8 @@
     "template:react-router:build": "pnpm --filter ssgoi-react-router-template build",
     "template:sveltekit": "pnpm --filter ssgoi-sveltekit-template dev",
     "template:sveltekit:build": "pnpm --filter ssgoi-sveltekit-template build",
+    "template:solid": "pnpm --filter ssgoi-solid-start-template dev",
+    "template:solid:build": "pnpm --filter ssgoi-solid-start-template build",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
