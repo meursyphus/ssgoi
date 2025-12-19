@@ -45,13 +45,13 @@
 
 <SsgoiTransition id="/products" class="min-h-screen bg-[#121212] flex flex-col">
   <!-- Header - Fixed -->
-  <div class="px-4 pt-6 pb-3 flex-shrink-0">
+  <div class="px-4 pt-6 pb-3 shrink-0">
     <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
     <p class="text-xs text-neutral-500">Discover our curated collection</p>
   </div>
 
   <!-- Category Tabs - Fixed -->
-  <div class="px-4 mb-4 flex-shrink-0">
+  <div class="px-4 mb-4 shrink-0">
     <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
       {#each categories as cat}
         <a
