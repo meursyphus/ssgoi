@@ -22,17 +22,11 @@ export const vTransition: Directive<HTMLElement, TransitionConfig | undefined> =
 
       const transitionConfig = binding.value;
 
-      setTimeout(() => {
-        const cleanup = transition({
-          key: transitionConfig.key,
-          in: transitionConfig.in,
-          out: transitionConfig.out,
-          scope: transitionConfig.scope,
-        })(el);
+      // Pass the entire config including [TRANSITION_STRATEGY] symbol
+      const cleanup = transition(transitionConfig)(el);
 
-        // Store cleanup function on element for unmounted hook
-        (el as any)._ssgoiCleanup = cleanup;
-      }, 0);
+      // Store cleanup function on element for unmounted hook
+      (el as any)._ssgoiCleanup = cleanup;
     },
     unmounted(el) {
       // Call cleanup if it exists

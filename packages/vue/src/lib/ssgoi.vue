@@ -16,7 +16,13 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const contextValue = computed(() => createSggoiTransitionContext(props.config));
+const contextValue = computed(() =>
+  createSggoiTransitionContext(props.config, {
+    // Vue directive uses unmounted hook for cleanup,
+    // so OUT and IN can arrive in any order
+    outFirst: false,
+  }),
+);
 
 // Provide the context value reactively
 watchEffect(() => {
