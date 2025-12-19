@@ -1,4 +1,9 @@
-import type { StyleObject, Transition, TransitionKey } from "../types";
+import type {
+  SpringConfig,
+  StyleObject,
+  Transition,
+  TransitionKey,
+} from "../types";
 
 interface SlideOptions {
   direction?: "left" | "right" | "up" | "down";
@@ -6,10 +11,7 @@ interface SlideOptions {
   opacity?: number;
   fade?: boolean;
   axis?: "x" | "y";
-  spring?: {
-    stiffness?: number;
-    damping?: number;
-  };
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
 }
 
@@ -24,9 +26,10 @@ export const slide = (options: SlideOptions = {}): Transition => {
     key,
   } = options;
 
-  const spring = {
+  const spring: SpringConfig = {
     stiffness: springOption?.stiffness ?? 400,
     damping: springOption?.damping ?? 35,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   // Determine actual direction based on axis parameter

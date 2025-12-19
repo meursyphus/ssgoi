@@ -1,4 +1,9 @@
-import type { StyleObject, Transition, TransitionKey } from "../types";
+import type {
+  SpringConfig,
+  StyleObject,
+  Transition,
+  TransitionKey,
+} from "../types";
 
 interface BounceOptions {
   height?: number;
@@ -6,10 +11,7 @@ interface BounceOptions {
   scale?: boolean;
   fade?: boolean;
   direction?: "up" | "down";
-  spring?: {
-    stiffness?: number;
-    damping?: number;
-  };
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
 }
 
@@ -24,9 +26,10 @@ export const bounce = (options: BounceOptions = {}): Transition => {
     key,
   } = options;
 
-  const spring = {
+  const spring: SpringConfig = {
     stiffness: springOption?.stiffness ?? 800,
     damping: springOption?.damping ?? 15,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   const getCss = (progress: number): StyleObject => {

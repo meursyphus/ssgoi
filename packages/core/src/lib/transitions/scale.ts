@@ -1,13 +1,15 @@
-import type { StyleObject, Transition, TransitionKey } from "../types";
+import type {
+  SpringConfig,
+  StyleObject,
+  Transition,
+  TransitionKey,
+} from "../types";
 
 interface ScaleOptions {
   start?: number;
   opacity?: number;
   axis?: "x" | "y" | "both";
-  spring?: {
-    stiffness?: number;
-    damping?: number;
-  };
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
 }
 
@@ -20,9 +22,10 @@ export const scale = (options: ScaleOptions = {}): Transition => {
     key,
   } = options;
 
-  const spring = {
+  const spring: SpringConfig = {
     stiffness: springOption?.stiffness ?? 300,
     damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   const getScaleTransform = (value: number): string => {

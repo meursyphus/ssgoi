@@ -12,6 +12,7 @@ import {
 } from "@ssgoi/react/transitions";
 import { CodeBlock } from "@/components/ui/code-block";
 import { useTranslations } from "@/i18n/use-translations";
+import { SpringConfig } from "@ssgoi/core/types";
 
 type TransitionType = "fade" | "scale" | "slide" | "rotate" | "blur" | "bounce";
 
@@ -112,6 +113,12 @@ const codeExamples: Record<TransitionType, string> = {
 </div>`,
 };
 
+const spring: SpringConfig = {
+  stiffness: 300,
+  damping: 30,
+  doubleSpring: true,
+};
+
 export function ElementTransitionSection() {
   const [show, setShow] = useState(true);
   const [activeCode, setActiveCode] = useState<TransitionType>("scale");
@@ -138,7 +145,7 @@ export function ElementTransitionSection() {
           <div className="w-10 h-10 flex items-center justify-center">
             {show && (
               <div
-                ref={transition({ key: "demo-fade", ...fade() })}
+                ref={transition({ key: "demo-fade", ...fade({ spring }) })}
                 className="w-10 h-10 bg-white rounded-lg"
               />
             )}
@@ -146,7 +153,7 @@ export function ElementTransitionSection() {
           <div className="w-10 h-10 flex items-center justify-center">
             {show && (
               <div
-                ref={transition({ key: "demo-scale", ...scale() })}
+                ref={transition({ key: "demo-scale", ...scale({ spring }) })}
                 className="w-10 h-10 bg-emerald-500 rounded-lg"
               />
             )}
@@ -156,7 +163,7 @@ export function ElementTransitionSection() {
               <div
                 ref={transition({
                   key: "demo-slide",
-                  ...slide({ direction: "up" }),
+                  ...slide({ direction: "up", spring }),
                 })}
                 className="w-10 h-10 bg-blue-500 rounded-lg"
               />
@@ -165,7 +172,7 @@ export function ElementTransitionSection() {
           <div className="w-10 h-10 flex items-center justify-center">
             {show && (
               <div
-                ref={transition({ key: "demo-rotate", ...rotate() })}
+                ref={transition({ key: "demo-rotate", ...rotate({ spring }) })}
                 className="w-10 h-10 bg-amber-500 rounded-lg"
               />
             )}
@@ -173,7 +180,7 @@ export function ElementTransitionSection() {
           <div className="w-10 h-10 flex items-center justify-center">
             {show && (
               <div
-                ref={transition({ key: "demo-blur", ...blur() })}
+                ref={transition({ key: "demo-blur", ...blur({ spring }) })}
                 className="w-10 h-10 bg-purple-500 rounded-lg"
               />
             )}
@@ -181,7 +188,7 @@ export function ElementTransitionSection() {
           <div className="w-10 h-10 flex items-center justify-center">
             {show && (
               <div
-                ref={transition({ key: "demo-bounce", ...bounce() })}
+                ref={transition({ key: "demo-bounce", ...bounce({ spring }) })}
                 className="w-10 h-10 bg-pink-500 rounded-lg"
               />
             )}
