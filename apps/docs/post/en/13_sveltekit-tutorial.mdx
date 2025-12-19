@@ -1,0 +1,480 @@
+---
+title: "Building Native App-like Web Apps with SvelteKit"
+description: "Learn step-by-step how to implement native app-like page transitions using SvelteKit and SSGOI."
+thumbnail: "/post/sveltekit-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "Daeseung Moon"
+tags: ["ssgoi", "sveltekit", "svelte", "page-transition", "tutorial"]
+---
+
+## Want to Build Apps with Web Technology?
+
+Did you know you can create apps using web technologies? Build a web app with SvelteKit, wrap it with Expo or Flutter's webview, and you can publish it to app stores.
+
+But web apps have one major weakness: **awkward page transitions**.
+
+Native apps have smooth screen transitions. When you navigate from a list to a detail view, it slides naturally. When you tap an image, it expands beautifully. But on the web? Pages just snap from one to another.
+
+**What if you could have native-like page transitions on the web?** Your web app would feel like a real app.
+
+Today, we'll build a **SvelteKit web app with native app-like page transitions**.
+
+## What is SSGOI?
+
+SSGOI (pronounced "ssgoi") is a page transition library that **works in all browsers**.
+
+Chrome has the View Transition API, but it doesn't work in Safari and Firefox. SSGOI solves this problem.
+
+**SSGOI Benefits:**
+
+- All modern browser support (Chrome, Firefox, Safari, Edge)
+- Full SSR/SSG compatibility
+- Natural movement with spring-based physics animations
+- Various built-in transitions (Drill, Slide, Pinterest, Instagram, etc.)
+
+## Getting Started
+
+Let's start with the official SSGOI template.
+
+```bash
+# Clone the repository
+git clone https://github.com/meursyphus/ssgoi
+
+# Install dependencies from root (important!)
+pnpm install
+
+# Navigate to SvelteKit template folder
+cd templates/sveltekit
+
+# Run development server
+pnpm run dev
+```
+
+> **Note**: You must run `pnpm install` from the **root path**. It's a monorepo structure, so all dependencies are installed from the root.
+
+Open `http://localhost:5173` in your browser to see the template demo.
+
+{/* demo-overview.gif - to be added later */}
+
+## Exploring the Folder Structure
+
+Here's the `templates/sveltekit/` folder structure.
+
+```
+templates/sveltekit/
+├── src/
+│   ├── routes/
+│   │   ├── +layout.svelte        # Root layout
+│   │   ├── posts/                # Drill transition example
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   ├── pinterest/            # Pinterest transition example
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   ├── profile/              # Instagram transition example
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   └── products/             # Slide transition example
+│   │       ├── +layout.svelte
+│   │       └── [category]/+page.svelte
+│   └── lib/
+│       ├── components/
+│       │   ├── demo-layout.svelte  # Ssgoi configuration (core!)
+│       │   └── demo-wrapper.svelte # Mobile frame UI
+│       └── data/
+```
+
+The key file is `src/lib/components/demo-layout.svelte`. All transition configurations are here.
+
+## Configuring Ssgoi
+
+Open `src/lib/components/demo-layout.svelte`.
+
+```svelte
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { drill, pinterest, instagram } from '@ssgoi/svelte/view-transitions';
+  import { page } from '$app/stores';
+
+  let { children } = $props();
+
+  const config = {
+    transitions: [
+      // Pinterest transition
+      {
+        from: '/pinterest/*',
+        to: '/pinterest',
+        transition: pinterest(),
+        symmetric: true,
+      },
+      // Posts - Drill transition
+      {
+        from: '/posts',
+        to: '/posts/*',
+        transition: drill({ direction: 'enter' }),
+      },
+      {
+        from: '/posts/*',
+        to: '/posts',
+        transition: drill({ direction: 'exit' }),
+      },
+      // Profile - Instagram transition
+      {
+        from: '/profile',
+        to: '/profile/*',
+        transition: instagram(),
+        symmetric: true,
+      },
+    ],
+  };
+</script>
+
+<main>
+  <Ssgoi {config}>
+    {@render children()}
+  </Ssgoi>
+</main>
+```
+
+**config structure:**
+
+- `from`: Starting path (`*` is a wildcard)
+- `to`: Destination path
+- `transition`: Transition to use
+- `symmetric`: Apply the same transition in reverse
+
+## Wrapping Pages with SsgoiTransition
+
+Each page must be wrapped with `SsgoiTransition` and given a **unique id**.
+
+Looking at `src/routes/posts/+page.svelte`:
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getAllPosts } from '$lib/data/posts';
+
+  const posts = getAllPosts();
+</script>
+
+<SsgoiTransition id="/posts">
+  <div class="min-h-full bg-[#121212] px-4 py-6">
+    <!-- Post list -->
+  </div>
+</SsgoiTransition>
+```
+
+Looking at `src/routes/posts/[id]/+page.svelte`:
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPost } from '$lib/data/posts';
+  import { page } from '$app/stores';
+
+  const postId = $page.params.id;
+  const post = getPost(postId);
+</script>
+
+<SsgoiTransition id="/posts/{postId}">
+  <div class="min-h-screen bg-[#121212]">
+    <!-- Post detail -->
+  </div>
+</SsgoiTransition>
+```
+
+> **Key point**: The `id` must match the `from`/`to` in the config for SSGOI to apply the transition.
+
+## Drill Transition
+
+A transition that feels like drilling from a list into detail.
+
+![Drill transition - entering and exiting from list to detail](/post/tutorial/drill.gif)
+
+**Template location**: `src/routes/posts/`
+
+```svelte
+<script lang="ts">
+  import { drill } from '@ssgoi/svelte/view-transitions';
+
+  // List → Detail (entering)
+  drill({ direction: 'enter' });
+
+  // Detail → List (exiting)
+  drill({ direction: 'exit' });
+</script>
+```
+
+**config setup:**
+
+```svelte
+{
+  from: '/posts',
+  to: '/posts/*',
+  transition: drill({ direction: 'enter' }),
+},
+{
+  from: '/posts/*',
+  to: '/posts',
+  transition: drill({ direction: 'exit' }),
+},
+```
+
+**Options:**
+
+- `direction`: `"enter"` | `"exit"`
+- `opacity`: `true` adds fade effect
+
+## Slide Transition
+
+Horizontal slide effect for tab UI.
+
+![Slide transition - horizontal slide when clicking tabs](/post/tutorial/slide.gif)
+
+**Template location**: `src/routes/products/+layout.svelte`
+
+```svelte
+<script lang="ts">
+  import { slide } from '@ssgoi/svelte/view-transitions';
+
+  // Slide left
+  slide({ direction: 'left' });
+
+  // Slide right
+  slide({ direction: 'right' });
+</script>
+```
+
+In `products/+layout.svelte`, we use a nested `Ssgoi` to transition only the tab area:
+
+```svelte
+<script lang="ts">
+  import { Ssgoi, SsgoiTransition } from '@ssgoi/svelte';
+  import { slide } from '@ssgoi/svelte/view-transitions';
+  import { page } from '$app/stores';
+
+  let { children } = $props();
+
+  const config = {
+    transitions: [
+      {
+        from: '/products/tab/left',
+        to: '/products/tab/right',
+        transition: slide({ direction: 'left' }),
+      },
+      {
+        from: '/products/tab/right',
+        to: '/products/tab/left',
+        transition: slide({ direction: 'right' }),
+      },
+    ],
+  };
+</script>
+
+<SsgoiTransition id="/products">
+  <!-- Header, tab buttons -->
+  <div class="flex-1 overflow-hidden">
+    <Ssgoi {config}>
+      {@render children()}
+    </Ssgoi>
+  </div>
+</SsgoiTransition>
+```
+
+## Pinterest Transition
+
+Gallery images expand and transition to detail view.
+
+![Pinterest transition - image expands to detail view](/post/tutorial/pinterest.gif)
+
+**Template location**: `src/routes/pinterest/`
+
+### Setting Data Attributes (Required!)
+
+Pinterest transition requires **data attributes** to specify which images are connected.
+
+`src/routes/pinterest/+page.svelte` (gallery):
+
+```svelte
+<script lang="ts">
+  import { pinterestItems } from '$lib/data/pinterest';
+</script>
+
+{#each pinterestItems as item (item.id)}
+  <a href="/pinterest/{item.id}">
+    <div class="relative" style="aspect-ratio: {item.aspectRatio}">
+      <img
+        src={item.image}
+        alt={item.title}
+        class="w-full h-full object-cover"
+        data-pinterest-gallery-key={item.id}
+      />
+    </div>
+  </a>
+{/each}
+```
+
+`src/routes/pinterest/[id]/+page.svelte` (detail):
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPinterestItem } from '$lib/data/pinterest';
+  import { page } from '$app/stores';
+
+  const pinId = $page.params.id;
+  const item = getPinterestItem(pinId);
+</script>
+
+<SsgoiTransition id="/pinterest/{pinId}">
+  <img
+    src={item.image}
+    alt={item.title}
+    style="aspect-ratio: {item.aspectRatio}"
+    data-pinterest-detail-key={item.id}
+  />
+</SsgoiTransition>
+```
+
+> **Key point**: `data-pinterest-gallery-key` and `data-pinterest-detail-key` must have the **same id** for SSGOI to recognize the connection.
+
+**config setup:**
+
+```svelte
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagram Transition
+
+Profile feed grid transitions to detail view. Similar to Pinterest, but the gallery remains visible.
+
+![Instagram transition - grid to detail transition, gallery remains](/post/tutorial/insta.gif)
+
+**Template location**: `src/routes/profile/`
+
+### Setting Data Attributes
+
+`src/routes/profile/+page.svelte` (grid):
+
+```svelte
+<script lang="ts">
+  import { posts } from '$lib/data/profile';
+</script>
+
+{#each posts as post (post.id)}
+  <a href="/profile/{post.id}">
+    <img
+      src={post.coverImage.url}
+      alt={post.title}
+      class="w-full h-auto object-cover"
+      data-instagram-gallery-key={post.id}
+    />
+  </a>
+{/each}
+```
+
+`src/routes/profile/[id]/+page.svelte` (detail):
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPost } from '$lib/data/profile';
+  import { page } from '$app/stores';
+
+  const postId = $page.params.id;
+  const post = getPost(postId);
+</script>
+
+<SsgoiTransition id="/profile/{postId}">
+  <img
+    src={post.coverImage.url}
+    alt={post.title}
+    style="aspect-ratio: {post.coverImage.aspectRatio}"
+    data-instagram-detail-key={post.id}
+  />
+</SsgoiTransition>
+```
+
+**config setup:**
+
+```svelte
+{
+  from: '/profile',
+  to: '/profile/*',
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## Adjusting Timing with Spring Options
+
+All transitions use **spring-based physics animations**. You can adjust speed and feel with `spring` options.
+
+```svelte
+<script lang="ts">
+  drill({
+    direction: 'enter',
+    spring: {
+      stiffness: 200, // Higher = faster
+      damping: 20, // Higher = less bouncy
+      doubleSpring: true, // Enable ease-in-out effect
+    },
+  });
+</script>
+```
+
+### Spring Options Explained
+
+| Option         | Description  | Effect                                  |
+| -------------- | ------------ | --------------------------------------- |
+| `stiffness`    | Stiffness    | Higher = faster and more responsive     |
+| `damping`      | Damping      | Higher = less bouncy and smoother       |
+| `doubleSpring` | Double Spring| `true`/`false` - ease-in-out effect     |
+
+> **What is doubleSpring?** It creates a smooth start and end effect like CSS ease-in-out. For more details, see the [Double Spring blog post](https://ssgoi.dev/en/blog/double-spring).
+
+## Useful Options
+
+### symmetric Option
+
+Automatically configures bidirectional transitions.
+
+```svelte
+// Set just this one
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// Reverse direction is automatically applied
+```
+
+### Wildcard Routes
+
+Use `*` to match all child paths.
+
+```svelte
+// Matches /posts/1, /posts/abc, etc.
+{ from: '/posts', to: '/posts/*', ... }
+```
+
+## Conclusion
+
+Now you can add native app-like page transitions to your SvelteKit web app!
+
+### Resources
+
+- **GitHub**: https://github.com/meursyphus/ssgoi
+- **Official Documentation**: https://ssgoi.dev
+- **SvelteKit Template**: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
+
+Wrap it in a webview and turn it into a real app!

@@ -1,17 +1,17 @@
 ---
-title: "Next.js로 네이티브 앱 같은 웹앱 만들기"
-description: "Next.js App Router와 SSGOI를 사용해 네이티브 앱 같은 페이지 전환 효과를 구현하는 방법을 단계별로 알아봅니다."
-thumbnail: "/post/nextjs-tutorial/thumbnail.jpg"
+title: "React Router로 네이티브 앱 같은 웹앱 만들기"
+description: "React Router와 SSGOI를 사용해 네이티브 앱 같은 페이지 전환 효과를 구현하는 방법을 단계별로 알아봅니다."
+thumbnail: "/post/react-router-tutorial/thumbnail.jpg"
 date: "2025-12-20"
 thumbnailWidth: 400
 thumbnailHeight: 300
 author: "문대승"
-tags: ["ssgoi", "nextjs", "react", "page-transition", "tutorial"]
+tags: ["ssgoi", "react-router", "react", "page-transition", "tutorial"]
 ---
 
 ## 웹으로 앱을 만들고 싶다면?
 
-웹 기술로 앱을 만들 수 있다는 거 알고 계셨나요? Next.js로 웹앱을 만들고, Expo나 Flutter의 웹뷰로 감싸면 바로 앱스토어에 출시할 수 있습니다.
+웹 기술로 앱을 만들 수 있다는 거 알고 계셨나요? React Router로 웹앱을 만들고, Expo나 Flutter의 웹뷰로 감싸면 바로 앱스토어에 출시할 수 있습니다.
 
 하지만 웹앱의 가장 큰 약점이 있습니다. 바로 **페이지 전환이 어색하다**는 것.
 
@@ -19,7 +19,7 @@ tags: ["ssgoi", "nextjs", "react", "page-transition", "tutorial"]
 
 **만약 웹에서도 네이티브 같은 페이지 전환이 가능하다면?** 그 웹앱은 진짜 앱처럼 느껴질 겁니다.
 
-오늘은 Next.js로 **네이티브 앱 같은 페이지 트랜지션이 들어간 웹앱**을 만들어봅니다.
+오늘은 React Router로 **네이티브 앱 같은 페이지 트랜지션이 들어간 웹앱**을 만들어봅니다.
 
 ## SSGOI란?
 
@@ -45,8 +45,8 @@ git clone https://github.com/meursyphus/ssgoi
 # 루트에서 의존성 설치 (중요!)
 pnpm install
 
-# Next.js 템플릿 폴더로 이동
-cd templates/nextjs
+# React Router 템플릿 폴더로 이동
+cd templates/react-router
 
 # 개발 서버 실행
 pnpm run dev
@@ -54,31 +54,30 @@ pnpm run dev
 
 > **주의**: `pnpm install`은 반드시 **루트 경로**에서 실행해야 합니다. 모노레포 구조라서 루트에서 전체 의존성을 설치합니다.
 
-브라우저에서 `http://localhost:3000`을 열면 템플릿 데모를 확인할 수 있습니다.
+브라우저에서 `http://localhost:5173`을 열면 템플릿 데모를 확인할 수 있습니다.
 
 {/* demo-overview.gif - 추후 추가 예정 */}
 
 ## 폴더 구조 살펴보기
 
-`templates/nextjs/` 폴더 구조입니다.
+`templates/react-router/` 폴더 구조입니다.
 
 ```
-templates/nextjs/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx          # 루트 레이아웃
-│   │   ├── posts/              # Drill 트랜지션 예제
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/page.tsx
-│   │   ├── pinterest/          # Pinterest 트랜지션 예제
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/page.tsx
-│   │   ├── profile/            # Instagram 트랜지션 예제
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/page.tsx
-│   │   └── products/           # Slide 트랜지션 예제
-│   │       ├── layout.tsx
-│   │       └── [category]/page.tsx
+templates/react-router/
+├── app/
+│   ├── root.tsx                # 루트 레이아웃
+│   ├── routes.ts               # 라우트 정의
+│   ├── routes/                 # 페이지 라우트
+│   │   ├── home.tsx
+│   │   ├── posts.tsx           # Drill 트랜지션 예제
+│   │   ├── posts.$postId.tsx
+│   │   ├── pinterest.tsx       # Pinterest 트랜지션 예제
+│   │   ├── pinterest.$pinId.tsx
+│   │   ├── profile.tsx         # Instagram 트랜지션 예제
+│   │   ├── profile.$postId.tsx
+│   │   ├── products.tsx
+│   │   ├── products_.layout.tsx # Slide 트랜지션 예제
+│   │   └── products_*.tsx
 │   └── components/
 │       ├── demo-layout.tsx     # Ssgoi 설정 (핵심!)
 │       ├── demo-wrapper.tsx    # 모바일 프레임 UI
@@ -92,20 +91,22 @@ templates/nextjs/
 
 ## Ssgoi 설정하기
 
-`src/components/demo-layout.tsx`를 열어보세요.
+`app/components/demo-layout.tsx`를 열어보세요.
 
 ```tsx
-"use client";
-
+import React, { useMemo } from "react";
+import { Link, useLocation } from "react-router";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, pinterest, instagram } from "@ssgoi/react/view-transitions";
-import { useMemo } from "react";
+import {
+  drill,
+  pinterest,
+  instagram,
+} from "@ssgoi/react/view-transitions";
 
-export default function DemoLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DemoLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+
   const config = useMemo(
     () => ({
       transitions: [
@@ -140,9 +141,14 @@ export default function DemoLayout({
   );
 
   return (
-    <main>
-      <Ssgoi config={config}>{children}</Ssgoi>
-    </main>
+    <div className="h-full bg-[#121212] flex z-0">
+      <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
+        <main className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212]">
+          <Ssgoi config={config}>{children}</Ssgoi>
+        </main>
+        {/* 네비게이션 바 */}
+      </div>
+    </div>
   );
 }
 ```
@@ -158,15 +164,16 @@ export default function DemoLayout({
 
 각 페이지는 `SsgoiTransition`으로 감싸고 **고유한 id**를 부여해야 합니다.
 
-`src/components/posts/index.tsx`를 보면:
+`app/components/posts/index.tsx`를 보면:
 
 ```tsx
 import { SsgoiTransition } from "@ssgoi/react";
+import { Link } from "react-router";
 
 export default function PostsDemo() {
   return (
     <SsgoiTransition id="/posts">
-      <div className="min-h-screen bg-[#121212] px-4 py-6">
+      <div className="min-h-full bg-[#121212] px-4 py-6">
         {/* 포스트 목록 */}
       </div>
     </SsgoiTransition>
@@ -174,7 +181,7 @@ export default function PostsDemo() {
 }
 ```
 
-`src/components/posts/detail.tsx`를 보면:
+`app/components/posts/detail.tsx`를 보면:
 
 ```tsx
 export default function PostDetail({ postId }: { postId: string }) {
@@ -194,7 +201,7 @@ export default function PostDetail({ postId }: { postId: string }) {
 
 ![Drill 트랜지션 - 리스트에서 상세로 들어갔다가 나오기](/post/tutorial/drill.gif)
 
-**템플릿 위치**: `src/components/posts/`
+**템플릿 위치**: `app/components/posts/`
 
 ```tsx
 import { drill } from "@ssgoi/react/view-transitions";
@@ -232,7 +239,7 @@ drill({ direction: "exit" });
 
 ![Slide 트랜지션 - 탭 클릭 시 좌우 슬라이드](/post/tutorial/slide.gif)
 
-**템플릿 위치**: `src/app/products/layout.tsx`
+**템플릿 위치**: `app/routes/products_.layout.tsx`
 
 ```tsx
 import { slide } from "@ssgoi/react/view-transitions";
@@ -244,14 +251,17 @@ slide({ direction: "left" });
 slide({ direction: "right" });
 ```
 
-`products/layout.tsx`에서는 중첩된 `Ssgoi`를 사용해 탭 영역만 트랜지션합니다:
+`products_.layout.tsx`에서는 중첩된 `Ssgoi`를 사용해 탭 영역만 트랜지션합니다:
 
 ```tsx
-export default function ProductsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { Outlet, useLocation } from "react-router";
+import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
+import { slide } from "@ssgoi/react/view-transitions";
+
+export default function ProductsLayout() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
   const config = useMemo(
     () => ({
       transitions: [
@@ -266,6 +276,20 @@ export default function ProductsLayout({
           transition: slide({ direction: "right" }),
         },
       ],
+      middleware: (from: string, to: string) => {
+        const fromIndex = categories.findIndex((c) => c.path === from);
+        const toIndex = categories.findIndex((c) => c.path === to);
+
+        if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+          if (fromIndex < toIndex) {
+            return { from: "/products/tab/left", to: "/products/tab/right" };
+          } else {
+            return { from: "/products/tab/right", to: "/products/tab/left" };
+          }
+        }
+
+        return { from, to };
+      },
     }),
     [],
   );
@@ -274,7 +298,9 @@ export default function ProductsLayout({
     <SsgoiTransition id="/products">
       {/* 헤더, 탭 버튼 */}
       <div className="flex-1 overflow-hidden">
-        <Ssgoi config={config}>{children}</Ssgoi>
+        <Ssgoi config={config}>
+          <Outlet />
+        </Ssgoi>
       </div>
     </SsgoiTransition>
   );
@@ -287,18 +313,18 @@ export default function ProductsLayout({
 
 ![Pinterest 트랜지션 - 이미지가 확대되면서 상세로 전환](/post/tutorial/pinterest.gif)
 
-**템플릿 위치**: `src/components/pinterest/`
+**템플릿 위치**: `app/components/pinterest/`
 
 ### Data 어트리뷰트 설정 (필수!)
 
 Pinterest 트랜지션은 **data 어트리뷰트**로 어떤 이미지끼리 연결되는지 지정해야 합니다.
 
-`src/components/pinterest/index.tsx` (갤러리):
+`app/components/pinterest/index.tsx` (갤러리):
 
 ```tsx
 function PinCard({ item }: { item: PinterestItem }) {
   return (
-    <Link href={`/pinterest/${item.id}`}>
+    <Link to={`/pinterest/${item.id}`}>
       <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
         <img
           src={item.image}
@@ -312,7 +338,7 @@ function PinCard({ item }: { item: PinterestItem }) {
 }
 ```
 
-`src/components/pinterest/detail.tsx` (상세):
+`app/components/pinterest/detail.tsx` (상세):
 
 ```tsx
 export default function PinterestDetail({ pinId }: { pinId: string }) {
@@ -350,16 +376,16 @@ export default function PinterestDetail({ pinId }: { pinId: string }) {
 
 ![Instagram 트랜지션 - 그리드에서 상세로 전환, 갤러리 유지](/post/tutorial/insta.gif)
 
-**템플릿 위치**: `src/components/profile/`
+**템플릿 위치**: `app/components/profile/`
 
 ### Data 어트리뷰트 설정
 
-`src/components/profile/feed.tsx` (그리드):
+`app/components/profile/feed.tsx` (그리드):
 
 ```tsx
 function PostCard({ post }: { post: Post }) {
   return (
-    <Link href={`/profile/${post.id}`}>
+    <Link to={`/profile/${post.id}`}>
       <img
         src={post.coverImage.url}
         alt={post.title}
@@ -371,7 +397,7 @@ function PostCard({ post }: { post: Post }) {
 }
 ```
 
-`src/components/profile/feed-detail.tsx` (상세):
+`app/components/profile/feed-detail.tsx` (상세):
 
 ```tsx
 export default function FeedDetail({ postId }: { postId: string }) {
@@ -454,12 +480,12 @@ drill({
 
 ## 마무리
 
-이제 여러분도 Next.js 웹앱에 네이티브 같은 페이지 트랜지션을 적용할 수 있습니다!
+이제 여러분도 React Router 웹앱에 네이티브 같은 페이지 트랜지션을 적용할 수 있습니다!
 
 ### 리소스
 
 - **GitHub**: https://github.com/meursyphus/ssgoi
 - **공식 문서**: https://ssgoi.dev
-- **Next.js 템플릿**: https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs
+- **React Router 템플릿**: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
 
 웹뷰로 감싸서 진짜 앱으로 만들어보세요!

@@ -427,7 +427,7 @@ function createTransition(
     }
     case "mask": {
       const p = params as TransitionParams["mask"];
-      return mask({ shape: p.shape, origin: p.origin, spring: springConfig });
+      return mask({ shape: p.shape, spring: springConfig });
     }
   }
 }
