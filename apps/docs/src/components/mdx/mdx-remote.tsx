@@ -113,6 +113,11 @@ const defaultComponents = {
   td: (props: any) => (
     <td className="px-4 py-2 text-xs text-neutral-400" {...props} />
   ),
+  img: (props: any) => (
+    <span className="flex justify-center my-6">
+      <img className="rounded-lg max-w-full h-auto" {...props} />
+    </span>
+  ),
 };
 
 export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {

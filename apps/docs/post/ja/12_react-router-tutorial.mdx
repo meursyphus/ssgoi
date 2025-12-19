@@ -1,0 +1,491 @@
+---
+title: "React Routerでネイティブアプリのようなウェブアプリを作る"
+description: "React RouterとSSGOIを使用して、ネイティブアプリのようなページ遷移効果を実装する方法をステップバイステップで学びます。"
+thumbnail: "/post/react-router-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "ムン・デスン"
+tags: ["ssgoi", "react-router", "react", "page-transition", "tutorial"]
+---
+
+## ウェブでアプリを作りたいなら?
+
+ウェブ技術でアプリを作れることをご存知でしたか?React Routerでウェブアプリを作り、ExpoやFlutterのWebViewでラップすれば、すぐにApp Storeにリリースできます。
+
+しかし、ウェブアプリには最大の弱点があります。それは**ページ遷移が不自然**だということです。
+
+ネイティブアプリは画面遷移が自然です。リストから詳細へ入るときはスライドし、画像をタップすると拡大しながら開きます。しかしウェブは?ページがただパッと切り替わります。
+
+**もしウェブでもネイティブのようなページ遷移が可能なら?**そのウェブアプリは本物のアプリのように感じられるでしょう。
+
+今日はReact Routerで**ネイティブアプリのようなページトランジションを持つウェブアプリ**を作ってみます。
+
+## SSGOIとは?
+
+SSGOI(スゴイ)は**すべてのブラウザで動作**するページトランジションライブラリです。
+
+ChromeのView Transition APIがありますが、SafariとFirefoxでは動作しません。SSGOIはこの問題を解決します。
+
+**SSGOIの利点:**
+
+- すべてのモダンブラウザをサポート(Chrome、Firefox、Safari、Edge)
+- SSR/SSG完全対応
+- スプリングベースの物理アニメーションで自然な動き
+- 多様なビルトイントランジション(Drill、Slide、Pinterest、Instagramなど)
+
+## はじめに
+
+SSGOI公式テンプレートから始めましょう。
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/meursyphus/ssgoi
+
+# ルートで依存関係をインストール(重要!)
+pnpm install
+
+# React Routerテンプレートフォルダへ移動
+cd templates/react-router
+
+# 開発サーバーを起動
+pnpm run dev
+```
+
+> **注意**: `pnpm install`は必ず**ルートパス**で実行してください。モノレポ構造のため、ルートで全体の依存関係をインストールします。
+
+ブラウザで`http://localhost:5173`を開くと、テンプレートデモを確認できます。
+
+{/* demo-overview.gif - 後日追加予定 */}
+
+## フォルダ構造を見る
+
+`templates/react-router/`フォルダ構造です。
+
+```
+templates/react-router/
+├── app/
+│   ├── root.tsx                # ルートレイアウト
+│   ├── routes.ts               # ルート定義
+│   ├── routes/                 # ページルート
+│   │   ├── home.tsx
+│   │   ├── posts.tsx           # Drillトランジション例
+│   │   ├── posts.$postId.tsx
+│   │   ├── pinterest.tsx       # Pinterestトランジション例
+│   │   ├── pinterest.$pinId.tsx
+│   │   ├── profile.tsx         # Instagramトランジション例
+│   │   ├── profile.$postId.tsx
+│   │   ├── products.tsx
+│   │   ├── products_.layout.tsx # Slideトランジション例
+│   │   └── products_*.tsx
+│   └── components/
+│       ├── demo-layout.tsx     # Ssgoi設定(核心!)
+│       ├── demo-wrapper.tsx    # モバイルフレームUI
+│       ├── posts/
+│       ├── pinterest/
+│       ├── profile/
+│       └── products/
+```
+
+核心ファイルは`demo-layout.tsx`です。すべてのトランジション設定がここにあります。
+
+## Ssgoiを設定する
+
+`app/components/demo-layout.tsx`を開いてください。
+
+```tsx
+import React, { useMemo } from "react";
+import { Link, useLocation } from "react-router";
+import { Ssgoi } from "@ssgoi/react";
+import {
+  drill,
+  pinterest,
+  instagram,
+} from "@ssgoi/react/view-transitions";
+
+export default function DemoLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const config = useMemo(
+    () => ({
+      transitions: [
+        // Pinterestトランジション
+        {
+          from: "/pinterest/*",
+          to: "/pinterest",
+          transition: pinterest(),
+          symmetric: true,
+        },
+        // Posts - Drillトランジション
+        {
+          from: "/posts",
+          to: "/posts/*",
+          transition: drill({ direction: "enter" }),
+        },
+        {
+          from: "/posts/*",
+          to: "/posts",
+          transition: drill({ direction: "exit" }),
+        },
+        // Profile - Instagramトランジション
+        {
+          from: "/profile",
+          to: "/profile/*",
+          transition: instagram(),
+          symmetric: true,
+        },
+      ],
+    }),
+    [],
+  );
+
+  return (
+    <div className="h-full bg-[#121212] flex z-0">
+      <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
+        <main className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212]">
+          <Ssgoi config={config}>{children}</Ssgoi>
+        </main>
+        {/* ナビゲーションバー */}
+      </div>
+    </div>
+  );
+}
+```
+
+**config構成:**
+
+- `from`: 出発パス(`*`はワイルドカード)
+- `to`: 到着パス
+- `transition`: 使用するトランジション
+- `symmetric`: 逆方向も同じトランジションを適用
+
+## SsgoiTransitionでページをラップする
+
+各ページは`SsgoiTransition`でラップし、**固有のid**を付与する必要があります。
+
+`app/components/posts/index.tsx`を見ると:
+
+```tsx
+import { SsgoiTransition } from "@ssgoi/react";
+import { Link } from "react-router";
+
+export default function PostsDemo() {
+  return (
+    <SsgoiTransition id="/posts">
+      <div className="min-h-full bg-[#121212] px-4 py-6">
+        {/* ポストリスト */}
+      </div>
+    </SsgoiTransition>
+  );
+}
+```
+
+`app/components/posts/detail.tsx`を見ると:
+
+```tsx
+export default function PostDetail({ postId }: { postId: string }) {
+  return (
+    <SsgoiTransition id={`/posts/${postId}`}>
+      <div className="min-h-screen bg-[#121212]">{/* ポスト詳細 */}</div>
+    </SsgoiTransition>
+  );
+}
+```
+
+> **核心**: `id`はconfigの`from`/`to`とマッチする必要があり、SSGOIがトランジションを適用します。
+
+## Drillトランジション
+
+リストから詳細へ入る感じのトランジションです。
+
+![Drillトランジション - リストから詳細へ入って出る](/post/tutorial/drill.gif)
+
+**テンプレート位置**: `app/components/posts/`
+
+```tsx
+import { drill } from "@ssgoi/react/view-transitions";
+
+// リスト → 詳細(入るとき)
+drill({ direction: "enter" });
+
+// 詳細 → リスト(出るとき)
+drill({ direction: "exit" });
+```
+
+**config設定:**
+
+```tsx
+{
+  from: "/posts",
+  to: "/posts/*",
+  transition: drill({ direction: "enter" }),
+},
+{
+  from: "/posts/*",
+  to: "/posts",
+  transition: drill({ direction: "exit" }),
+},
+```
+
+**オプション:**
+
+- `direction`: `"enter"` | `"exit"`
+- `opacity`: `true`ならフェード効果を追加
+
+## Slideトランジション
+
+タブUIで左右にスライドする効果です。
+
+![Slideトランジション - タブクリック時に左右スライド](/post/tutorial/slide.gif)
+
+**テンプレート位置**: `app/routes/products_.layout.tsx`
+
+```tsx
+import { slide } from "@ssgoi/react/view-transitions";
+
+// 左へスライド
+slide({ direction: "left" });
+
+// 右へスライド
+slide({ direction: "right" });
+```
+
+`products_.layout.tsx`では、ネストされた`Ssgoi`を使用してタブ領域のみトランジションします:
+
+```tsx
+import { Outlet, useLocation } from "react-router";
+import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
+import { slide } from "@ssgoi/react/view-transitions";
+
+export default function ProductsLayout() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const config = useMemo(
+    () => ({
+      transitions: [
+        {
+          from: "/products/tab/left",
+          to: "/products/tab/right",
+          transition: slide({ direction: "left" }),
+        },
+        {
+          from: "/products/tab/right",
+          to: "/products/tab/left",
+          transition: slide({ direction: "right" }),
+        },
+      ],
+      middleware: (from: string, to: string) => {
+        const fromIndex = categories.findIndex((c) => c.path === from);
+        const toIndex = categories.findIndex((c) => c.path === to);
+
+        if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+          if (fromIndex < toIndex) {
+            return { from: "/products/tab/left", to: "/products/tab/right" };
+          } else {
+            return { from: "/products/tab/right", to: "/products/tab/left" };
+          }
+        }
+
+        return { from, to };
+      },
+    }),
+    [],
+  );
+
+  return (
+    <SsgoiTransition id="/products">
+      {/* ヘッダー、タブボタン */}
+      <div className="flex-1 overflow-hidden">
+        <Ssgoi config={config}>
+          <Outlet />
+        </Ssgoi>
+      </div>
+    </SsgoiTransition>
+  );
+}
+```
+
+## Pinterestトランジション
+
+ギャラリー画像が拡大しながら詳細へ遷移する効果です。
+
+![Pinterestトランジション - 画像が拡大しながら詳細へ遷移](/post/tutorial/pinterest.gif)
+
+**テンプレート位置**: `app/components/pinterest/`
+
+### Data属性設定(必須!)
+
+Pinterestトランジションは**data属性**でどの画像同士が接続されるかを指定する必要があります。
+
+`app/components/pinterest/index.tsx`(ギャラリー):
+
+```tsx
+function PinCard({ item }: { item: PinterestItem }) {
+  return (
+    <Link to={`/pinterest/${item.id}`}>
+      <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
+        <img
+          src={item.image}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          data-pinterest-gallery-key={item.id}
+        />
+      </div>
+    </Link>
+  );
+}
+```
+
+`app/components/pinterest/detail.tsx`(詳細):
+
+```tsx
+export default function PinterestDetail({ pinId }: { pinId: string }) {
+  const item = getPinterestItem(pinId);
+
+  return (
+    <SsgoiTransition id={`/pinterest/${pinId}`}>
+      <img
+        src={item.image}
+        alt={item.title}
+        style={{ aspectRatio: item.aspectRatio }}
+        data-pinterest-detail-key={item.id}
+      />
+    </SsgoiTransition>
+  );
+}
+```
+
+> **核心**: `data-pinterest-gallery-key`と`data-pinterest-detail-key`に**同じid**を入れる必要があり、SSGOIが接続を認識します。
+
+**config設定:**
+
+```tsx
+{
+  from: "/pinterest/*",
+  to: "/pinterest",
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagramトランジション
+
+プロフィールフィードグリッドから詳細へ遷移する効果です。Pinterestと似ていますが、ギャラリーがそのまま維持されます。
+
+![Instagramトランジション - グリッドから詳細へ遷移、ギャラリー維持](/post/tutorial/insta.gif)
+
+**テンプレート位置**: `app/components/profile/`
+
+### Data属性設定
+
+`app/components/profile/feed.tsx`(グリッド):
+
+```tsx
+function PostCard({ post }: { post: Post }) {
+  return (
+    <Link to={`/profile/${post.id}`}>
+      <img
+        src={post.coverImage.url}
+        alt={post.title}
+        className="w-full h-auto object-cover"
+        data-instagram-gallery-key={post.id}
+      />
+    </Link>
+  );
+}
+```
+
+`app/components/profile/feed-detail.tsx`(詳細):
+
+```tsx
+export default function FeedDetail({ postId }: { postId: string }) {
+  const post = getPost(postId);
+
+  return (
+    <SsgoiTransition id={`/profile/${postId}`}>
+      <img
+        src={post.coverImage.url}
+        alt={post.title}
+        data-instagram-detail-key={post.id}
+      />
+    </SsgoiTransition>
+  );
+}
+```
+
+**config設定:**
+
+```tsx
+{
+  from: "/profile",
+  to: "/profile/*",
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## Springオプションでタイミングを調整する
+
+すべてのトランジションは**スプリングベースの物理アニメーション**を使用します。`spring`オプションで速度と感触を調整できます。
+
+```tsx
+drill({
+  direction: "enter",
+  spring: {
+    stiffness: 200, // 高いほど速い
+    damping: 20, // 高いほど跳ねにくい
+    doubleSpring: true, // ease-in-out効果をオン
+  },
+});
+```
+
+### Springオプション説明
+
+| オプション     | 説明           | 効果                              |
+| -------------- | -------------- | --------------------------------- |
+| `stiffness`    | 剛性           | 高いほど速く即座に               |
+| `damping`      | 減衰           | 高いほど跳ねにくく滑らか         |
+| `doubleSpring` | ダブルスプリング | `true`/`false` - ease-in-out効果 |
+
+> **doubleSpringとは?** CSSのease-in-outのように開始と終了が滑らかな効果です。詳細は[Double Springブログ記事](https://ssgoi.dev/ko/blog/double-spring)を参照してください。
+
+## 便利なオプション
+
+### symmetricオプション
+
+双方向トランジションを自動設定します。
+
+```tsx
+// このように1つだけ設定すれば
+{
+  from: "/pinterest/*",
+  to: "/pinterest",
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// 逆方向も自動適用されます
+```
+
+### ワイルドカードルート
+
+`*`ですべてのサブパスをマッチングします。
+
+```tsx
+// /posts/1, /posts/abc すべてマッチ
+{ from: "/posts", to: "/posts/*", ... }
+```
+
+## まとめ
+
+これで皆さんもReact Routerウェブアプリにネイティブのようなページトランジションを適用できます!
+
+### リソース
+
+- **GitHub**: https://github.com/meursyphus/ssgoi
+- **公式ドキュメント**: https://ssgoi.dev
+- **React Routerテンプレート**: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
+
+WebViewでラップして本物のアプリにしてみてください!

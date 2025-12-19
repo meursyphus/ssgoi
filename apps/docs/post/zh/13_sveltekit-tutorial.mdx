@@ -1,0 +1,480 @@
+---
+title: "使用 SvelteKit 打造原生应用般的 Web 应用"
+description: "逐步学习如何使用 SvelteKit 和 SSGOI 实现原生应用般的页面过渡效果。"
+thumbnail: "/post/sveltekit-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "文大承"
+tags: ["ssgoi", "sveltekit", "svelte", "page-transition", "tutorial"]
+---
+
+## 想用 Web 技术打造应用？
+
+你知道可以用 Web 技术来开发应用吗？使用 SvelteKit 创建 Web 应用，再用 Expo 或 Flutter 的 WebView 包装，就可以直接上架应用商店。
+
+但是 Web 应用有一个最大的弱点：**页面过渡很生硬**。
+
+原生应用的屏幕切换非常自然。从列表进入详情时会滑动，点击图片时会放大展开。但是 Web 呢？页面就是生硬地切换。
+
+**如果 Web 也能实现原生般的页面过渡呢？** 那么这个 Web 应用就会给人真正的应用体验。
+
+今天我们将使用 SvelteKit 打造一个**具有原生应用般页面过渡效果的 Web 应用**。
+
+## 什么是 SSGOI？
+
+SSGOI（쓱오이）是一个**在所有浏览器上都能运行**的页面过渡库。
+
+虽然 Chrome 有 View Transition API，但它在 Safari 和 Firefox 上无法运行。SSGOI 解决了这个问题。
+
+**SSGOI 的优势：**
+
+- 支持所有现代浏览器（Chrome、Firefox、Safari、Edge）
+- 完美兼容 SSR/SSG
+- 基于弹簧物理动画，动作自然流畅
+- 丰富的内置过渡效果（Drill、Slide、Pinterest、Instagram 等）
+
+## 开始使用
+
+让我们从 SSGOI 官方模板开始。
+
+```bash
+# 克隆仓库
+git clone https://github.com/meursyphus/ssgoi
+
+# 在根目录安装依赖（重要！）
+pnpm install
+
+# 进入 SvelteKit 模板目录
+cd templates/sveltekit
+
+# 运行开发服务器
+pnpm run dev
+```
+
+> **注意**：`pnpm install` 必须在**根目录**执行。因为是 monorepo 结构，需要在根目录安装所有依赖。
+
+在浏览器打开 `http://localhost:5173` 即可查看模板演示。
+
+{/* demo-overview.gif - 待添加 */}
+
+## 了解文件夹结构
+
+`templates/sveltekit/` 的文件夹结构如下：
+
+```
+templates/sveltekit/
+├── src/
+│   ├── routes/
+│   │   ├── +layout.svelte        # 根布局
+│   │   ├── posts/                # Drill 过渡示例
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   ├── pinterest/            # Pinterest 过渡示例
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   ├── profile/              # Instagram 过渡示例
+│   │   │   ├── +page.svelte
+│   │   │   └── [id]/+page.svelte
+│   │   └── products/             # Slide 过渡示例
+│   │       ├── +layout.svelte
+│   │       └── [category]/+page.svelte
+│   └── lib/
+│       ├── components/
+│       │   ├── demo-layout.svelte  # Ssgoi 配置（核心！）
+│       │   └── demo-wrapper.svelte # 移动端框架 UI
+│       └── data/
+```
+
+核心文件是 `src/lib/components/demo-layout.svelte`。所有过渡配置都在这里。
+
+## 配置 Ssgoi
+
+打开 `src/lib/components/demo-layout.svelte`。
+
+```svelte
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { drill, pinterest, instagram } from '@ssgoi/svelte/view-transitions';
+  import { page } from '$app/stores';
+
+  let { children } = $props();
+
+  const config = {
+    transitions: [
+      // Pinterest 过渡
+      {
+        from: '/pinterest/*',
+        to: '/pinterest',
+        transition: pinterest(),
+        symmetric: true,
+      },
+      // Posts - Drill 过渡
+      {
+        from: '/posts',
+        to: '/posts/*',
+        transition: drill({ direction: 'enter' }),
+      },
+      {
+        from: '/posts/*',
+        to: '/posts',
+        transition: drill({ direction: 'exit' }),
+      },
+      // Profile - Instagram 过渡
+      {
+        from: '/profile',
+        to: '/profile/*',
+        transition: instagram(),
+        symmetric: true,
+      },
+    ],
+  };
+</script>
+
+<main>
+  <Ssgoi {config}>
+    {@render children()}
+  </Ssgoi>
+</main>
+```
+
+**config 配置说明：**
+
+- `from`：起始路径（`*` 为通配符）
+- `to`：目标路径
+- `transition`：要使用的过渡效果
+- `symmetric`：为反向导航应用相同的过渡
+
+## 使用 SsgoiTransition 包装页面
+
+每个页面都需要用 `SsgoiTransition` 包装，并赋予**唯一的 id**。
+
+查看 `src/routes/posts/+page.svelte`：
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getAllPosts } from '$lib/data/posts';
+
+  const posts = getAllPosts();
+</script>
+
+<SsgoiTransition id="/posts">
+  <div class="min-h-full bg-[#121212] px-4 py-6">
+    <!-- 文章列表 -->
+  </div>
+</SsgoiTransition>
+```
+
+查看 `src/routes/posts/[id]/+page.svelte`：
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPost } from '$lib/data/posts';
+  import { page } from '$app/stores';
+
+  const postId = $page.params.id;
+  const post = getPost(postId);
+</script>
+
+<SsgoiTransition id="/posts/{postId}">
+  <div class="min-h-screen bg-[#121212]">
+    <!-- 文章详情 -->
+  </div>
+</SsgoiTransition>
+```
+
+> **关键**：`id` 必须与 config 中的 `from`/`to` 匹配，SSGOI 才能应用过渡效果。
+
+## Drill 过渡
+
+这是一种从列表进入详情的过渡效果。
+
+![Drill 过渡 - 从列表进入详情再返回](/post/tutorial/drill.gif)
+
+**模板位置**：`src/routes/posts/`
+
+```svelte
+<script lang="ts">
+  import { drill } from '@ssgoi/svelte/view-transitions';
+
+  // 列表 → 详情（进入时）
+  drill({ direction: 'enter' });
+
+  // 详情 → 列表（退出时）
+  drill({ direction: 'exit' });
+</script>
+```
+
+**config 配置：**
+
+```svelte
+{
+  from: '/posts',
+  to: '/posts/*',
+  transition: drill({ direction: 'enter' }),
+},
+{
+  from: '/posts/*',
+  to: '/posts',
+  transition: drill({ direction: 'exit' }),
+},
+```
+
+**选项：**
+
+- `direction`：`"enter"` | `"exit"`
+- `opacity`：如果为 `true`，添加淡入淡出效果
+
+## Slide 过渡
+
+用于标签页 UI 的左右滑动效果。
+
+![Slide 过渡 - 点击标签时左右滑动](/post/tutorial/slide.gif)
+
+**模板位置**：`src/routes/products/+layout.svelte`
+
+```svelte
+<script lang="ts">
+  import { slide } from '@ssgoi/svelte/view-transitions';
+
+  // 向左滑动
+  slide({ direction: 'left' });
+
+  // 向右滑动
+  slide({ direction: 'right' });
+</script>
+```
+
+在 `products/+layout.svelte` 中使用嵌套的 `Ssgoi` 来仅对标签区域应用过渡：
+
+```svelte
+<script lang="ts">
+  import { Ssgoi, SsgoiTransition } from '@ssgoi/svelte';
+  import { slide } from '@ssgoi/svelte/view-transitions';
+  import { page } from '$app/stores';
+
+  let { children } = $props();
+
+  const config = {
+    transitions: [
+      {
+        from: '/products/tab/left',
+        to: '/products/tab/right',
+        transition: slide({ direction: 'left' }),
+      },
+      {
+        from: '/products/tab/right',
+        to: '/products/tab/left',
+        transition: slide({ direction: 'right' }),
+      },
+    ],
+  };
+</script>
+
+<SsgoiTransition id="/products">
+  <!-- 头部、标签按钮 -->
+  <div class="flex-1 overflow-hidden">
+    <Ssgoi {config}>
+      {@render children()}
+    </Ssgoi>
+  </div>
+</SsgoiTransition>
+```
+
+## Pinterest 过渡
+
+画廊图片放大并转换到详情的效果。
+
+![Pinterest 过渡 - 图片放大并转换到详情](/post/tutorial/pinterest.gif)
+
+**模板位置**：`src/routes/pinterest/`
+
+### 设置 Data 属性（必需！）
+
+Pinterest 过渡需要通过 **data 属性**来指定哪些图片之间建立连接。
+
+`src/routes/pinterest/+page.svelte`（画廊）：
+
+```svelte
+<script lang="ts">
+  import { pinterestItems } from '$lib/data/pinterest';
+</script>
+
+{#each pinterestItems as item (item.id)}
+  <a href="/pinterest/{item.id}">
+    <div class="relative" style="aspect-ratio: {item.aspectRatio}">
+      <img
+        src={item.image}
+        alt={item.title}
+        class="w-full h-full object-cover"
+        data-pinterest-gallery-key={item.id}
+      />
+    </div>
+  </a>
+{/each}
+```
+
+`src/routes/pinterest/[id]/+page.svelte`（详情）：
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPinterestItem } from '$lib/data/pinterest';
+  import { page } from '$app/stores';
+
+  const pinId = $page.params.id;
+  const item = getPinterestItem(pinId);
+</script>
+
+<SsgoiTransition id="/pinterest/{pinId}">
+  <img
+    src={item.image}
+    alt={item.title}
+    style="aspect-ratio: {item.aspectRatio}"
+    data-pinterest-detail-key={item.id}
+  />
+</SsgoiTransition>
+```
+
+> **关键**：`data-pinterest-gallery-key` 和 `data-pinterest-detail-key` 必须设置**相同的 id**，SSGOI 才能识别连接关系。
+
+**config 配置：**
+
+```svelte
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagram 过渡
+
+从个人资料的网格画廊转换到详情的效果。与 Pinterest 类似，但画廊保持不变。
+
+![Instagram 过渡 - 从网格转换到详情，画廊保持不变](/post/tutorial/insta.gif)
+
+**模板位置**：`src/routes/profile/`
+
+### 设置 Data 属性
+
+`src/routes/profile/+page.svelte`（网格）：
+
+```svelte
+<script lang="ts">
+  import { posts } from '$lib/data/profile';
+</script>
+
+{#each posts as post (post.id)}
+  <a href="/profile/{post.id}">
+    <img
+      src={post.coverImage.url}
+      alt={post.title}
+      class="w-full h-auto object-cover"
+      data-instagram-gallery-key={post.id}
+    />
+  </a>
+{/each}
+```
+
+`src/routes/profile/[id]/+page.svelte`（详情）：
+
+```svelte
+<script lang="ts">
+  import { SsgoiTransition } from '@ssgoi/svelte';
+  import { getPost } from '$lib/data/profile';
+  import { page } from '$app/stores';
+
+  const postId = $page.params.id;
+  const post = getPost(postId);
+</script>
+
+<SsgoiTransition id="/profile/{postId}">
+  <img
+    src={post.coverImage.url}
+    alt={post.title}
+    style="aspect-ratio: {post.coverImage.aspectRatio}"
+    data-instagram-detail-key={post.id}
+  />
+</SsgoiTransition>
+```
+
+**config 配置：**
+
+```svelte
+{
+  from: '/profile',
+  to: '/profile/*',
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## 使用 Spring 选项调整时序
+
+所有过渡都使用**基于弹簧的物理动画**。可以通过 `spring` 选项调整速度和效果。
+
+```svelte
+<script lang="ts">
+  drill({
+    direction: 'enter',
+    spring: {
+      stiffness: 200, // 值越高越快
+      damping: 20, // 值越高弹跳越少
+      doubleSpring: true, // 开启 ease-in-out 效果
+    },
+  });
+</script>
+```
+
+### Spring 选项说明
+
+| 选项           | 说明     | 效果                               |
+| -------------- | -------- | ---------------------------------- |
+| `stiffness`    | 刚度     | 值越高越快速和即时                 |
+| `damping`      | 阻尼     | 值越高越少弹跳，越平滑             |
+| `doubleSpring` | 双弹簧   | `true`/`false` - ease-in-out 效果 |
+
+> **什么是 doubleSpring？** 类似 CSS 的 ease-in-out，起始和结束都很平滑的效果。详情请参考 [Double Spring 博客文章](https://ssgoi.dev/ko/blog/double-spring)。
+
+## 实用选项
+
+### symmetric 选项
+
+自动配置双向过渡。
+
+```svelte
+// 只需要这样配置一个
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// 反向也会自动应用
+```
+
+### 通配符路由
+
+使用 `*` 匹配所有子路径。
+
+```svelte
+// 匹配 /posts/1、/posts/abc 等所有子路径
+{ from: '/posts', to: '/posts/*', ... }
+```
+
+## 总结
+
+现在你也可以为 SvelteKit Web 应用添加原生般的页面过渡效果了！
+
+### 资源
+
+- **GitHub**：https://github.com/meursyphus/ssgoi
+- **官方文档**：https://ssgoi.dev
+- **SvelteKit 模板**：https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
+
+试着用 WebView 包装成真正的应用吧！

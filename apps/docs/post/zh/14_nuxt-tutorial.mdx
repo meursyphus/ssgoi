@@ -1,0 +1,532 @@
+---
+title: "使用 Nuxt 创建原生应用般的 Web 应用"
+description: "通过 Nuxt 和 SSGOI 一步步学习如何实现原生应用般的页面转场效果。"
+thumbnail: "/post/nuxt-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "文大承"
+tags: ["ssgoi", "nuxt", "vue", "page-transition", "tutorial"]
+---
+
+## 想用 Web 创建应用吗?
+
+你知道可以用 Web 技术创建应用吗? 用 Nuxt 创建 Web 应用,再用 Expo 或 Flutter 的 WebView 包裹,就可以直接发布到应用商店。
+
+但是 Web 应用有一个最大的弱点。那就是**页面转场很生硬**。
+
+原生应用的屏幕转场非常自然。从列表进入详情页时会滑动,点击图片时会放大并打开。但是 Web 呢? 页面只是突然切换。
+
+**如果 Web 也能实现原生般的页面转场呢?** 那样的 Web 应用会让人感觉像真正的应用。
+
+今天我们用 Nuxt 创建一个**具有原生应用般页面转场效果的 Web 应用**。
+
+## 什么是 SSGOI?
+
+SSGOI(쓱오이)是一个**在所有浏览器中都能运行**的页面转场库。
+
+虽然 Chrome 有 View Transition API,但它在 Safari 和 Firefox 中无法运行。SSGOI 解决了这个问题。
+
+**SSGOI 的优势:**
+
+- 支持所有现代浏览器 (Chrome, Firefox, Safari, Edge)
+- 完美兼容 SSR/SSG
+- 基于弹簧的物理动画,动作自然流畅
+- 丰富的内置转场效果 (Drill, Slide, Pinterest, Instagram 等)
+
+## 开始使用
+
+让我们从 SSGOI 官方模板开始。
+
+```bash
+# 克隆仓库
+git clone https://github.com/meursyphus/ssgoi
+
+# 在根目录安装依赖 (重要!)
+pnpm install
+
+# 进入 Nuxt 模板文件夹
+cd templates/nuxt
+
+# 运行开发服务器
+pnpm run dev
+```
+
+> **注意**: `pnpm install` 必须在**根路径**执行。因为是 monorepo 结构,需要在根目录安装全部依赖。
+
+在浏览器中打开 `http://localhost:3000` 即可查看模板演示。
+
+{/* demo-overview.gif - 后续添加 */}
+
+## 了解文件夹结构
+
+`templates/nuxt/` 文件夹结构如下。
+
+```
+templates/nuxt/
+├── app.vue                  # 根应用组件
+├── pages/
+│   ├── posts/               # Drill 转场示例
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   ├── pinterest/           # Pinterest 转场示例
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   ├── profile/             # Instagram 转场示例
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   └── products.vue         # Slide 转场示例
+│       ├── all.vue
+│       ├── electronics.vue
+│       ├── fashion.vue
+│       ├── home.vue
+│       └── beauty.vue
+├── components/
+│   ├── demo-layout.vue      # Ssgoi 配置 (核心!)
+│   ├── demo-wrapper.vue     # 移动端框架 UI
+│   ├── pin-card.vue
+│   ├── post-card.vue
+│   ├── profile-feed.vue
+│   └── products/
+└── composables/             # 数据管理
+    ├── use-posts.ts
+    ├── use-pinterest.ts
+    ├── use-profile.ts
+    └── use-products.ts
+```
+
+核心文件是 `components/demo-layout.vue`。所有转场配置都在这里。
+
+## 配置 Ssgoi
+
+打开 `components/demo-layout.vue`。
+
+```vue
+<template>
+  <main>
+    <Ssgoi :config="config">
+      <slot />
+    </Ssgoi>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi } from '@ssgoi/vue';
+import type { SsgoiConfig } from '@ssgoi/vue';
+import {
+  drill,
+  pinterest,
+  instagram,
+} from '@ssgoi/vue/view-transitions';
+
+const config: SsgoiConfig = {
+  transitions: [
+    // Pinterest 转场
+    {
+      from: '/pinterest/*',
+      to: '/pinterest',
+      transition: pinterest(),
+      symmetric: true,
+    },
+    // Posts - Drill 转场
+    {
+      from: '/posts',
+      to: '/posts/*',
+      transition: drill({ direction: 'enter' }),
+    },
+    {
+      from: '/posts/*',
+      to: '/posts',
+      transition: drill({ direction: 'exit' }),
+    },
+    // Profile - Instagram 转场
+    {
+      from: '/profile',
+      to: '/profile/*',
+      transition: instagram(),
+      symmetric: true,
+    },
+  ],
+};
+</script>
+```
+
+**config 组成:**
+
+- `from`: 出发路径 (`*` 是通配符)
+- `to`: 到达路径
+- `transition`: 使用的转场效果
+- `symmetric`: 反向也应用相同的转场效果
+
+## 用 SsgoiTransition 包裹页面
+
+每个页面都需要用 `SsgoiTransition` 包裹,并指定**唯一的 id**。
+
+查看 `pages/posts/index.vue`:
+
+```vue
+<template>
+  <SsgoiTransition id="/posts">
+    <div class="min-h-full bg-[#121212] px-4 py-6">
+      <!-- 文章列表 -->
+      <div class="space-y-2">
+        <NuxtLink
+          v-for="post in posts"
+          :key="post.id"
+          :to="`/posts/${post.id}`"
+        >
+          <!-- 文章卡片 -->
+        </NuxtLink>
+      </div>
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const posts = useAllPosts();
+</script>
+```
+
+查看 `pages/posts/[id].vue`:
+
+```vue
+<template>
+  <SsgoiTransition :id="`/posts/${id}`">
+    <div class="min-h-screen bg-[#121212]">
+      <!-- 文章详情 -->
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const post = usePost(id);
+</script>
+```
+
+> **核心**: `id` 必须与 config 的 `from`/`to` 匹配,SSGOI 才会应用转场效果。
+
+## Drill 转场
+
+从列表进入详情的转场效果。
+
+![Drill 转场 - 从列表进入详情再返回](/post/tutorial/drill.gif)
+
+**模板位置**: `pages/posts/`
+
+```typescript
+import { drill } from '@ssgoi/vue/view-transitions';
+
+// 列表 → 详情 (进入时)
+drill({ direction: 'enter' });
+
+// 详情 → 列表 (退出时)
+drill({ direction: 'exit' });
+```
+
+**config 配置:**
+
+```typescript
+{
+  from: '/posts',
+  to: '/posts/*',
+  transition: drill({ direction: 'enter' }),
+},
+{
+  from: '/posts/*',
+  to: '/posts',
+  transition: drill({ direction: 'exit' }),
+},
+```
+
+**选项:**
+
+- `direction`: `"enter"` | `"exit"`
+- `opacity`: `true` 时添加淡入淡出效果
+
+## Slide 转场
+
+标签页 UI 中左右滑动的效果。
+
+![Slide 转场 - 点击标签时左右滑动](/post/tutorial/slide.gif)
+
+**模板位置**: `pages/products.vue`
+
+```typescript
+import { slide } from '@ssgoi/vue/view-transitions';
+
+// 向左滑动
+slide({ direction: 'left' });
+
+// 向右滑动
+slide({ direction: 'right' });
+```
+
+`pages/products.vue` 中使用嵌套的 `Ssgoi` 仅对标签区域应用转场:
+
+```vue
+<template>
+  <SsgoiTransition id="/products">
+    <!-- 头部、标签按钮 -->
+    <div class="flex-1 overflow-hidden">
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi, SsgoiTransition } from '@ssgoi/vue';
+import type { SsgoiConfig } from '@ssgoi/vue';
+import { slide } from '@ssgoi/vue/view-transitions';
+
+const categories = [
+  { id: 'all', label: 'All', path: '/products/all' },
+  { id: 'electronics', label: 'Tech', path: '/products/electronics' },
+  { id: 'fashion', label: 'Fashion', path: '/products/fashion' },
+  { id: 'home', label: 'Home', path: '/products/home' },
+  { id: 'beauty', label: 'Beauty', path: '/products/beauty' },
+];
+
+const config: SsgoiConfig = {
+  transitions: [
+    {
+      from: '/products/tab/left',
+      to: '/products/tab/right',
+      transition: slide({ direction: 'left' }),
+    },
+    {
+      from: '/products/tab/right',
+      to: '/products/tab/left',
+      transition: slide({ direction: 'right' }),
+    },
+  ],
+  middleware: (from: string, to: string) => {
+    const fromIndex = categories.findIndex((c) => c.path === from);
+    const toIndex = categories.findIndex((c) => c.path === to);
+
+    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+      if (fromIndex < toIndex) {
+        return { from: '/products/tab/left', to: '/products/tab/right' };
+      } else {
+        return { from: '/products/tab/right', to: '/products/tab/left' };
+      }
+    }
+
+    return { from, to };
+  },
+};
+</script>
+```
+
+## Pinterest 转场
+
+画廊图片放大并转换到详情的效果。
+
+![Pinterest 转场 - 图片放大并转换到详情](/post/tutorial/pinterest.gif)
+
+**模板位置**: `pages/pinterest/`
+
+### 设置 Data 属性 (必需!)
+
+Pinterest 转场需要通过 **data 属性**指定哪些图片之间建立连接。
+
+`components/pin-card.vue` (画廊):
+
+```vue
+<template>
+  <NuxtLink :to="`/pinterest/${item.id}`">
+    <div class="relative" :style="{ aspectRatio: item.aspectRatio }">
+      <img
+        :src="item.image"
+        :alt="item.title"
+        class="w-full h-full object-cover"
+        :data-pinterest-gallery-key="item.id"
+      />
+    </div>
+  </NuxtLink>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  item: PinterestItem;
+}>();
+</script>
+```
+
+`pages/pinterest/[id].vue` (详情):
+
+```vue
+<template>
+  <SsgoiTransition :id="`/pinterest/${id}`">
+    <div v-if="item">
+      <img
+        :src="item.image"
+        :alt="item.title"
+        :style="{ aspectRatio: item.aspectRatio }"
+        :data-pinterest-detail-key="item.id"
+      />
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const item = usePinterestItem(id);
+</script>
+```
+
+> **核心**: `data-pinterest-gallery-key` 和 `data-pinterest-detail-key` 需要设置**相同的 id**,SSGOI 才能识别连接关系。
+
+**config 配置:**
+
+```typescript
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagram 转场
+
+从个人资料页面的网格进入详情的转场效果。与 Pinterest 类似,但画廊保持不变。
+
+![Instagram 转场 - 从网格转换到详情,画廊保持不变](/post/tutorial/insta.gif)
+
+**模板位置**: `pages/profile/`
+
+### 设置 Data 属性
+
+`components/post-card.vue` (网格):
+
+```vue
+<template>
+  <NuxtLink :to="`/profile/${post.id}`">
+    <img
+      :src="post.coverImage.url"
+      :alt="post.title"
+      class="w-full h-auto object-cover"
+      :data-instagram-gallery-key="post.id"
+    />
+  </NuxtLink>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  post: ProfilePost;
+}>();
+</script>
+```
+
+`pages/profile/[id].vue` (详情):
+
+```vue
+<template>
+  <SsgoiTransition :id="`/profile/${id}`">
+    <div v-if="post">
+      <img
+        :src="post.coverImage.url"
+        :alt="post.title"
+        :data-instagram-detail-key="post.id"
+      />
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const post = useProfilePost(id);
+</script>
+```
+
+**config 配置:**
+
+```typescript
+{
+  from: '/profile',
+  to: '/profile/*',
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## 使用 Spring 选项调节时间
+
+所有转场都使用**基于弹簧的物理动画**。可以使用 `spring` 选项调节速度和效果。
+
+```typescript
+drill({
+  direction: 'enter',
+  spring: {
+    stiffness: 200, // 越高越快
+    damping: 20, // 越高弹跳越少
+    doubleSpring: true, // 开启 ease-in-out 效果
+  },
+});
+```
+
+### Spring 选项说明
+
+| 选项           | 说明      | 效果                          |
+| -------------- | --------- | ----------------------------- |
+| `stiffness`    | 刚度      | 越高越快速、越直接            |
+| `damping`      | 阻尼      | 越高弹跳越少、越平滑          |
+| `doubleSpring` | 双弹簧    | `true`/`false` - ease-in-out 效果 |
+
+> **什么是 doubleSpring?** 像 CSS 的 ease-in-out 一样,开始和结束都很平滑。详细内容请参考 [Double Spring 博客文章](https://ssgoi.dev/ko/blog/double-spring)。
+
+## 实用选项
+
+### symmetric 选项
+
+自动设置双向转场。
+
+```typescript
+// 只需这样设置一次
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// 反向也会自动应用
+```
+
+### 通配符路由
+
+使用 `*` 匹配所有子路径。
+
+```typescript
+// 匹配 /posts/1, /posts/abc 等所有路径
+{ from: '/posts', to: '/posts/*', ... }
+```
+
+## 总结
+
+现在你也可以为 Nuxt Web 应用添加原生般的页面转场效果了!
+
+### 资源
+
+- **GitHub**: https://github.com/meursyphus/ssgoi
+- **官方文档**: https://ssgoi.dev
+- **Nuxt 模板**: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+
+用 WebView 包裹后制作成真正的应用吧!
