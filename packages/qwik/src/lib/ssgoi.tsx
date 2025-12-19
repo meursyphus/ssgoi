@@ -3,10 +3,11 @@ import {
   Slot,
   useContextProvider,
   useSignal,
-  useVisibleTask$,
+  useTask$,
   noSerialize,
   type NoSerialize,
 } from "@builder.io/qwik";
+import { isServer } from "@builder.io/qwik/build";
 import type { SsgoiConfig, SsgoiContext } from "./types";
 import { SsgoiContextId } from "./context";
 import { createSggoiTransitionContext } from "@ssgoi/core";
@@ -20,19 +21,21 @@ export const Ssgoi = component$<SsgoiProps>(({ config }) => {
 
   useContextProvider(SsgoiContextId, contextValue);
 
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(
-    () => {
-      if (config) {
-        contextValue.value = noSerialize(
-          createSggoiTransitionContext(config, {
-            outFirst: false,
-          }),
-        );
-      }
-    },
-    { strategy: "document-ready" },
-  );
+  // useTask$ runs immediately on both server and client
+  // We only initialize on client side
+  useTask$(({ track }) => {
+    track(() => config);
+
+    if (isServer) return;
+
+    if (config) {
+      contextValue.value = noSerialize(
+        createSggoiTransitionContext(config, {
+          outFirst: true,
+        }),
+      );
+    }
+  });
 
   return <Slot />;
 });

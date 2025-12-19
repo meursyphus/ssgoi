@@ -4,7 +4,7 @@ type SsgoiTransitionProps = {
 };
 /**
  * Page-level transition wrapper that gets transition config from Ssgoi context.
- * Uses Transition component internally with noSerialize functions.
+ * Passes context signal directly to Transition for reactive updates.
  */
 export declare const SsgoiTransition: import("@builder.io/qwik").Component<SsgoiTransitionProps>;
 export {};

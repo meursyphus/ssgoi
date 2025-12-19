@@ -1,5 +1,6 @@
-import { type QRL, type NoSerialize } from "@builder.io/qwik";
+import { type QRL, type NoSerialize, type Signal } from "@builder.io/qwik";
 import { type TransitionConfig, type TransitionScope } from "@ssgoi/core";
+import type { SsgoiContext } from "./types";
 type GetTransitionConfig = (
   element: HTMLElement,
 ) => TransitionConfig | Promise<TransitionConfig>;
@@ -18,6 +19,10 @@ export type TransitionProps = {
   outFn?: NoSerialize<GetTransitionConfig>;
   /** CSS class for the wrapper element */
   class?: string;
+  /** Context signal for page transitions (used by SsgoiTransition) */
+  contextSignal?: Signal<NoSerialize<SsgoiContext> | null>;
+  /** Page ID for getting transition config from context */
+  pageId?: string;
 };
 /**
  * Qwik component wrapper for element transitions

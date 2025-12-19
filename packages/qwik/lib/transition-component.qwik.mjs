@@ -1,24 +1,34 @@
 import { jsx } from "@builder.io/qwik/jsx-runtime";
 import { component$, useSignal, useVisibleTask$, Slot } from "@builder.io/qwik";
 import { transition } from "@ssgoi/core";
-const Transition = component$(({ transitionKey, scope, in$, out$, inFn, outFn, class: className }) => {
+const TransitionInternal = component$(({ transitionKey, scope, in$, out$, inFn, outFn, class: className, contextSignal, pageId }) => {
   const elementRef = useSignal();
   useVisibleTask$(async ({ cleanup, track }) => {
     const element = elementRef.value;
     track(elementRef);
+    const context = contextSignal ? track(() => contextSignal.value) : null;
     if (!element) return;
-    const resolvedIn = in$ ? await in$.resolve() : inFn;
-    const resolvedOut = out$ ? await out$.resolve() : outFn;
+    let resolvedIn;
+    let resolvedOut;
+    if (context && pageId) {
+      const options = context(pageId);
+      resolvedIn = options.in;
+      resolvedOut = options.out;
+    } else {
+      resolvedIn = in$ ? await in$.resolve() : inFn;
+      resolvedOut = out$ ? await out$.resolve() : outFn;
+    }
     if (!resolvedIn && !resolvedOut) return;
+    const key = transitionKey || `qwik-transition-${Math.random().toString(36).slice(2)}`;
     const callback = transition({
-      key: transitionKey,
+      key,
       scope,
       in: resolvedIn,
       out: resolvedOut
     });
-    const cleanupFn = callback(element);
+    const transitionCleanup = callback(element);
     cleanup(() => {
-      cleanupFn?.();
+      transitionCleanup?.();
     });
   }, {
     strategy: "document-ready"
@@ -29,6 +39,17 @@ const Transition = component$(({ transitionKey, scope, in$, out$, inFn, outFn, c
     children: /* @__PURE__ */ jsx(Slot, {})
   });
 });
+const Transition = component$(({ transitionKey, scope, in$, out$, class: className }) => {
+  return /* @__PURE__ */ jsx(TransitionInternal, {
+    transitionKey,
+    scope,
+    in$,
+    out$,
+    class: className,
+    children: /* @__PURE__ */ jsx(Slot, {})
+  });
+});
 export {
-  Transition
+  Transition,
+  TransitionInternal
 };
