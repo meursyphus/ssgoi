@@ -2,6 +2,12 @@ import type { SpringConfig, SggoiTransition } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+const DEFAULT_SPRING: SpringConfig = {
+  stiffness: 140,
+  damping: 19,
+  doubleSpring: 0.8,
+};
+
 interface InstagramOptions {
   spring?: Partial<SpringConfig>;
   timeout?: number;
@@ -247,9 +253,9 @@ function createAnimationConfig(
 
 export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
   const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 150,
-    damping: options.spring?.damping ?? 20,
-    doubleSpring: options.spring?.doubleSpring ?? true,
+    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
+    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
+    doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
   };
   const timeout = options.timeout ?? 300;
 
