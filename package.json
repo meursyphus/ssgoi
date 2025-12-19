@@ -25,6 +25,8 @@
     "solid-demo": "pnpm --filter solid-demo dev",
     "svelte-demo": "pnpm --filter svelte-demo dev",
     "vue-demo": "pnpm --filter vue-demo dev",
+    "template:nextjs": "pnpm --filter ssgoi-nextjs-template dev",
+    "template:nextjs:build": "pnpm --filter ssgoi-nextjs-template build",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
