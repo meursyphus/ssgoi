@@ -4,6 +4,8 @@ export const sidebar: SidebarMessages = {
   categories: {
     "getting-started": "はじめに",
     "core-concepts": "コアコンセプト",
+    "mobile-transitions": "モバイルトランジション",
+    "desktop-transitions": "デスクトップトランジション",
     "view-transitions": "ビュートランジション",
     transitions: "トランジション",
   },

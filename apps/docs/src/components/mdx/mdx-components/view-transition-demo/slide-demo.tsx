@@ -337,6 +337,11 @@ export function SlideDemo() {
   };
 
   return (
-    <BrowserMockup routes={slideRoutes} config={config} layout={SlideLayout} />
+    <BrowserMockup
+      routes={slideRoutes}
+      config={config}
+      layout={SlideLayout}
+      deviceType="mobile"
+    />
   );
 }

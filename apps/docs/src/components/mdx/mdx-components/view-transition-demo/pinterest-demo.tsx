@@ -349,6 +349,7 @@ export function PinterestDemo() {
       config={config}
       layout={PinterestLayout}
       initialPath="/pinterest/gallery"
+      deviceType="mobile"
     />
   );
 }
