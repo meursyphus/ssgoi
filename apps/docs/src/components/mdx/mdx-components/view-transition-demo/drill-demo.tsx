@@ -433,6 +433,7 @@ export function DrillDemo() {
       config={config}
       layout={DrillLayout}
       initialPath="/posts"
+      deviceType="mobile"
     />
   );
 }

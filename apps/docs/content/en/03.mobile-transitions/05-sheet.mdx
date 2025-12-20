@@ -1,0 +1,1357 @@
+---
+title: "Sheet Transition"
+description: "Mobile-optimized bottom sheet style transition"
+nav-title: "Sheet"
+---
+
+# Sheet Transition
+
+The Sheet transition is a **mobile-optimized transition** with a bottom sheet style. The background page recedes and shrinks, while the new screen slides up from the bottom. This is commonly used when transitioning from a FAB button to a compose screen.
+
+## Demo
+
+<ViewTransitionDemo type="sheet" />
+
+## UX Principles
+
+### When to Use?
+
+The Sheet transition is used for **transitions from FAB or compose buttons to full-screen input mode**.
+
+#### Content Relationship Suitability
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated Content",
+      suitable: "no",
+      description: "Not suitable between independent sections"
+    },
+    {
+      label: "Sibling Relationship",
+      suitable: "no",
+      description: "Use slide for navigation between same-level pages"
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "yes",
+      description: "Optimal for creating new context like list→compose, feed→post creation"
+    }
+  ]}
+/>
+
+#### Primary Use Cases
+
+- **Social Media**: Creating new posts from feed
+- **Email Apps**: Composing new mail from inbox
+- **Note Apps**: Creating new note from note list
+- **Todo Apps**: Adding new task from list
+- **Chat Apps**: Composing new message from conversation list
+
+### Why Does It Work This Way?
+
+1. **Context Preservation**: Background shrinks and remains, making it clear where you came from
+2. **Space Expansion Metaphor**: Natural feeling of new workspace rising from below
+3. **Focus Direction**: Background page blurs and shrinks to focus on compose screen
+4. **Mobile Native Pattern**: Similar to modal transitions in iOS and Android native apps
+5. **Easy Return**: Background naturally expands again on back navigation
+
+### Motion Design
+
+```
+Forward Process (List → Compose):
+1. Background page starts shrinking (scale: 1 → 0.8)
+2. Simultaneously opacity decreases (opacity: 1 → 0)
+3. Compose page slides up from bottom (translateY: 100% → 0)
+4. Background placed behind with z-index: -1
+5. Compose page placed in front with z-index: 100
+
+Backward Process (Compose → List):
+1. Compose page slides down to bottom (translateY: 0 → 100%)
+2. Simultaneously background page expands (scale: 0.8 → 1)
+3. Background opacity restores (opacity: 0 → 1)
+4. Center point fixed to viewport center
+```
+
+## Basic Usage
+
+### 1. Transition Configuration
+
+The sheet transition explicitly sets forward/backward directions with the `direction` option:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { sheet } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/feed',
+          to: '/compose',
+          transition: sheet({ direction: 'enter' })  // Forward: sheet slides up
+        },
+        {
+          from: '/compose',
+          to: '/feed',
+          transition: sheet({ direction: 'exit' })   // Backward: sheet slides down
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { sheet } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { sheet } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/feed',
+          to: '/compose',
+          transition: sheet({ direction: 'enter' })
+        },
+        {
+          from: '/compose',
+          to: '/feed',
+          transition: sheet({ direction: 'exit' })
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { sheet } from '@ssgoi/solid/view-transitions';
+
+    export default function App() {
+      const config = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+
+      return (
+        <Ssgoi config={config}>
+          {/* App content */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { sheet } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Page Structure
+
+Feed page with FAB button and compose page:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Feed page
+    function Feed() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700">
+            <h1 className="text-xl font-bold">Feed</h1>
+          </header>
+
+          <main className="p-4 space-y-4">
+            {posts.map(post => (
+              <article
+                key={post.id}
+                className="bg-gray-800 rounded-lg p-4"
+              >
+                <h2 className="font-semibold">{post.title}</h2>
+                <p className="text-gray-400 text-sm mt-2">{post.excerpt}</p>
+              </article>
+            ))}
+          </main>
+
+          {/* FAB */}
+          <button
+            onClick={() => navigate('/compose')}
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center
+                       hover:bg-blue-600 transition-colors"
+          >
+            <span className="text-2xl text-white">+</span>
+          </button>
+        </div>
+      );
+    }
+
+    // Compose page
+    function Compose() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700 flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-400 hover:text-gray-200"
+            >
+              Cancel
+            </button>
+            <h1 className="text-xl font-bold flex-1">New Post</h1>
+            <button className="text-blue-500 font-semibold">
+              Publish
+            </button>
+          </header>
+
+          <main className="p-4">
+            <input
+              type="text"
+              placeholder="Title"
+              className="w-full bg-gray-800 border border-gray-700
+                         rounded-lg px-4 py-3 mb-4"
+            />
+            <textarea
+              placeholder="Write your content..."
+              rows={10}
+              className="w-full bg-gray-800 border border-gray-700
+                         rounded-lg px-4 py-3 resize-none"
+            />
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Feed page -->
+    <script>
+      import { goto } from '$app/navigation';
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700">
+        <h1 class="text-xl font-bold">Feed</h1>
+      </header>
+
+      <main class="p-4 space-y-4">
+        {#each posts as post}
+          <article class="bg-gray-800 rounded-lg p-4">
+            <h2 class="font-semibold">{post.title}</h2>
+            <p class="text-gray-400 text-sm mt-2">{post.excerpt}</p>
+          </article>
+        {/each}
+      </main>
+
+      <!-- FAB -->
+      <button
+        on:click={() => goto('/compose')}
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center
+               hover:bg-blue-600 transition-colors"
+      >
+        <span class="text-2xl text-white">+</span>
+      </button>
+    </div>
+
+    <!-- Compose page -->
+    <script>
+      import { goto } from '$app/navigation';
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700 flex items-center gap-4">
+        <button
+          on:click={() => history.back()}
+          class="text-gray-400 hover:text-gray-200"
+        >
+          Cancel
+        </button>
+        <h1 class="text-xl font-bold flex-1">New Post</h1>
+        <button class="text-blue-500 font-semibold">
+          Publish
+        </button>
+      </header>
+
+      <main class="p-4">
+        <input
+          type="text"
+          placeholder="Title"
+          class="w-full bg-gray-800 border border-gray-700
+                 rounded-lg px-4 py-3 mb-4"
+        />
+        <textarea
+          placeholder="Write your content..."
+          rows="10"
+          class="w-full bg-gray-800 border border-gray-700
+                 rounded-lg px-4 py-3 resize-none"
+        />
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+
+    interface Post {
+      id: string;
+      title: string;
+      excerpt: string;
+    }
+
+    // Feed Page
+    @Component({
+      selector: "app-feed",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700">
+            <h1 class="text-xl font-bold">Feed</h1>
+          </header>
+
+          <main class="p-4 space-y-4">
+            <article
+              *ngFor="let post of posts"
+              class="bg-gray-800 rounded-lg p-4"
+            >
+              <h2 class="font-semibold">{{ post.title }}</h2>
+              <p class="text-gray-400 text-sm mt-2">{{ post.excerpt }}</p>
+            </article>
+          </main>
+
+          <!-- FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center
+                   hover:bg-blue-600 transition-colors"
+          >
+            <span class="text-2xl text-white">+</span>
+          </button>
+        </div>
+      `
+    })
+    export class FeedComponent {
+      posts: Post[] = POSTS; // Provide posts data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose']);
+      }
+    }
+
+    // Compose Page
+    @Component({
+      selector: "app-compose",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700 flex items-center gap-4">
+            <button
+              (click)="goBack()"
+              class="text-gray-400 hover:text-gray-200"
+            >
+              Cancel
+            </button>
+            <h1 class="text-xl font-bold flex-1">New Post</h1>
+            <button class="text-blue-500 font-semibold">
+              Publish
+            </button>
+          </header>
+
+          <main class="p-4">
+            <input
+              type="text"
+              placeholder="Title"
+              class="w-full bg-gray-800 border border-gray-700
+                     rounded-lg px-4 py-3 mb-4"
+            />
+            <textarea
+              placeholder="Write your content..."
+              rows="10"
+              class="w-full bg-gray-800 border border-gray-700
+                     rounded-lg px-4 py-3 resize-none"
+            ></textarea>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeComponent {
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## Real-World Examples
+
+### 1. Social Media Post Composition
+
+Twitter/X style new post creation:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Timeline page
+    function Timeline() {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <header className="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                             border-b border-gray-700">
+            <h1 className="text-xl font-bold text-gray-100">Timeline</h1>
+          </header>
+
+          <main>
+            {tweets.map(tweet => (
+              <article
+                key={tweet.id}
+                className="p-4 border-b border-gray-800 hover:bg-gray-800/50"
+              >
+                <div className="flex gap-3">
+                  <img
+                    src={tweet.avatar}
+                    alt={tweet.author}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-100">
+                        {tweet.author}
+                      </span>
+                      <span className="text-gray-500 text-sm">
+                        @{tweet.handle}
+                      </span>
+                      <span className="text-gray-500 text-sm">
+                        · {tweet.time}
+                      </span>
+                    </div>
+                    <p className="text-gray-200 mt-1">{tweet.content}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </main>
+
+          {/* Compose FAB */}
+          <Link
+            to="/compose"
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center
+                       hover:bg-blue-600 active:scale-95
+                       transition-all"
+          >
+            <svg className="w-6 h-6 text-white" fill="currentColor">
+              <path d="M8 2v12m-6-6h12" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </Link>
+        </div>
+      );
+    }
+
+    // Compose page
+    function ComposeTweet() {
+      const [content, setContent] = useState('');
+      const navigate = useNavigate();
+
+      const handlePost = () => {
+        // Post logic
+        navigate(-1);
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700
+                             flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-400 hover:text-gray-200 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePost}
+              disabled={!content.trim()}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full
+                         font-semibold disabled:opacity-50
+                         disabled:cursor-not-allowed"
+            >
+              Post
+            </button>
+          </header>
+
+          <main className="p-4">
+            <div className="flex gap-3">
+              <img
+                src="/current-user-avatar.jpg"
+                alt="You"
+                className="w-12 h-12 rounded-full"
+              />
+              <textarea
+                autoFocus
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="What's happening?"
+                className="flex-1 bg-transparent text-xl
+                           text-gray-100 placeholder-gray-500
+                           resize-none outline-none min-h-[200px]"
+              />
+            </div>
+
+            {/* Character counter */}
+            <div className="mt-4 flex items-center justify-between
+                           px-4 py-2 border-t border-gray-700">
+              <div className="flex gap-2">
+                <button className="text-blue-500 p-2 hover:bg-blue-500/10
+                                   rounded-full">
+                  <span>📷</span>
+                </button>
+                <button className="text-blue-500 p-2 hover:bg-blue-500/10
+                                   rounded-full">
+                  <span>😊</span>
+                </button>
+              </div>
+              <span className={`text-sm ${content.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                {content.length} / 280
+              </span>
+            </div>
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Timeline page -->
+    <script>
+      export let tweets;
+    </script>
+
+    <div class="min-h-screen bg-gray-900">
+      <header class="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                     border-b border-gray-700">
+        <h1 class="text-xl font-bold text-gray-100">Timeline</h1>
+      </header>
+
+      <main>
+        {#each tweets as tweet}
+          <article class="p-4 border-b border-gray-800 hover:bg-gray-800/50">
+            <div class="flex gap-3">
+              <img
+                src={tweet.avatar}
+                alt={tweet.author}
+                class="w-12 h-12 rounded-full"
+              />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-gray-100">
+                    {tweet.author}
+                  </span>
+                  <span class="text-gray-500 text-sm">
+                    @{tweet.handle}
+                  </span>
+                  <span class="text-gray-500 text-sm">
+                    · {tweet.time}
+                  </span>
+                </div>
+                <p class="text-gray-200 mt-1">{tweet.content}</p>
+              </div>
+            </div>
+          </article>
+        {/each}
+      </main>
+
+      <!-- Compose FAB -->
+      <a
+        href="/compose"
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center
+               hover:bg-blue-600 active:scale-95
+               transition-all"
+      >
+        <svg class="w-6 h-6 text-white" fill="currentColor">
+          <path d="M8 2v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Compose page -->
+    <script>
+      import { goto } from '$app/navigation';
+
+      let content = '';
+
+      function handlePost() {
+        // Post logic
+        history.back();
+      }
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700
+                     flex items-center justify-between">
+        <button
+          on:click={() => history.back()}
+          class="text-gray-400 hover:text-gray-200 font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          on:click={handlePost}
+          disabled={!content.trim()}
+          class="bg-blue-500 text-white px-4 py-2 rounded-full
+                 font-semibold disabled:opacity-50
+                 disabled:cursor-not-allowed"
+        >
+          Post
+        </button>
+      </header>
+
+      <main class="p-4">
+        <div class="flex gap-3">
+          <img
+            src="/current-user-avatar.jpg"
+            alt="You"
+            class="w-12 h-12 rounded-full"
+          />
+          <textarea
+            autofocus
+            bind:value={content}
+            placeholder="What's happening?"
+            class="flex-1 bg-transparent text-xl
+                   text-gray-100 placeholder-gray-500
+                   resize-none outline-none min-h-[200px]"
+          />
+        </div>
+
+        <!-- Character counter -->
+        <div class="mt-4 flex items-center justify-between
+                   px-4 py-2 border-t border-gray-700">
+          <div class="flex gap-2">
+            <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                           rounded-full">
+              <span>📷</span>
+            </button>
+            <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                           rounded-full">
+              <span>😊</span>
+            </button>
+          </div>
+          <span class={`text-sm ${content.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+            {content.length} / 280
+          </span>
+        </div>
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor, NgClass } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+    import { FormsModule } from "@angular/forms";
+
+    interface Tweet {
+      id: string;
+      author: string;
+      handle: string;
+      avatar: string;
+      content: string;
+      time: string;
+    }
+
+    // Timeline Page
+    @Component({
+      selector: "app-timeline",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <header class="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                         border-b border-gray-700">
+            <h1 class="text-xl font-bold text-gray-100">Timeline</h1>
+          </header>
+
+          <main>
+            <article
+              *ngFor="let tweet of tweets"
+              class="p-4 border-b border-gray-800 hover:bg-gray-800/50"
+            >
+              <div class="flex gap-3">
+                <img
+                  [src]="tweet.avatar"
+                  [alt]="tweet.author"
+                  class="w-12 h-12 rounded-full"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-100">
+                      {{ tweet.author }}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                      {{ '@' + tweet.handle }}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                      · {{ tweet.time }}
+                    </span>
+                  </div>
+                  <p class="text-gray-200 mt-1">{{ tweet.content }}</p>
+                </div>
+              </div>
+            </article>
+          </main>
+
+          <!-- Compose FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center
+                   hover:bg-blue-600 active:scale-95
+                   transition-all"
+          >
+            <svg class="w-6 h-6 text-white" fill="currentColor">
+              <path d="M8 2v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      `
+    })
+    export class TimelineComponent {
+      tweets: Tweet[] = TWEETS; // Provide tweets data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose']);
+      }
+    }
+
+    // Compose Page
+    @Component({
+      selector: "app-compose-tweet",
+      standalone: true,
+      imports: [FormsModule, NgClass],
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700
+                         flex items-center justify-between">
+            <button
+              (click)="goBack()"
+              class="text-gray-400 hover:text-gray-200 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="handlePost()"
+              [disabled]="!content.trim()"
+              class="bg-blue-500 text-white px-4 py-2 rounded-full
+                     font-semibold disabled:opacity-50
+                     disabled:cursor-not-allowed"
+            >
+              Post
+            </button>
+          </header>
+
+          <main class="p-4">
+            <div class="flex gap-3">
+              <img
+                src="/current-user-avatar.jpg"
+                alt="You"
+                class="w-12 h-12 rounded-full"
+              />
+              <textarea
+                autofocus
+                [(ngModel)]="content"
+                placeholder="What's happening?"
+                class="flex-1 bg-transparent text-xl
+                       text-gray-100 placeholder-gray-500
+                       resize-none outline-none min-h-[200px]"
+              ></textarea>
+            </div>
+
+            <!-- Character counter -->
+            <div class="mt-4 flex items-center justify-between
+                       px-4 py-2 border-t border-gray-700">
+              <div class="flex gap-2">
+                <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                               rounded-full">
+                  <span>📷</span>
+                </button>
+                <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                               rounded-full">
+                  <span>😊</span>
+                </button>
+              </div>
+              <span [ngClass]="content.length > 280 ? 'text-red-500' : 'text-gray-500'"
+                    class="text-sm">
+                {{ content.length }} / 280
+              </span>
+            </div>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeTweetComponent {
+      content = '';
+
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+
+      handlePost() {
+        // Post logic
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. Email Composition
+
+Composing new mail from inbox:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // Inbox
+    function Inbox() {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <header className="p-4 border-b border-gray-700">
+            <h1 className="text-xl font-bold text-gray-100">Inbox</h1>
+          </header>
+
+          <main>
+            {emails.map(email => (
+              <article
+                key={email.id}
+                className="p-4 border-b border-gray-800
+                           hover:bg-gray-800/50 cursor-pointer"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500
+                                  flex items-center justify-center
+                                  text-white font-semibold">
+                    {email.sender[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-gray-100">
+                        {email.sender}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {email.time}
+                      </span>
+                    </div>
+                    <h3 className="text-gray-100 font-medium mb-1 truncate">
+                      {email.subject}
+                    </h3>
+                    <p className="text-gray-400 text-sm truncate">
+                      {email.preview}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </main>
+
+          {/* Compose FAB */}
+          <Link
+            to="/compose-email"
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center"
+          >
+            <span className="text-white text-2xl">✉️</span>
+          </Link>
+        </div>
+      );
+    }
+
+    // Compose email
+    function ComposeEmail() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700
+                             flex items-center justify-between">
+            <button onClick={() => navigate(-1)}>Cancel</button>
+            <h1 className="text-lg font-semibold">New Email</h1>
+            <button className="text-blue-500 font-semibold">Send</button>
+          </header>
+
+          <main className="divide-y divide-gray-800">
+            <input
+              type="email"
+              placeholder="To"
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="Subject"
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500"
+            />
+            <textarea
+              placeholder="Email content"
+              rows={15}
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500
+                         resize-none outline-none"
+            />
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- Inbox -->
+    <div class="min-h-screen bg-gray-900">
+      <header class="p-4 border-b border-gray-700">
+        <h1 class="text-xl font-bold text-gray-100">Inbox</h1>
+      </header>
+
+      <main>
+        {#each emails as email}
+          <article
+            class="p-4 border-b border-gray-800
+                   hover:bg-gray-800/50 cursor-pointer"
+          >
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full bg-blue-500
+                          flex items-center justify-center
+                          text-white font-semibold">
+                {email.sender[0]}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-semibold text-gray-100">
+                    {email.sender}
+                  </span>
+                  <span class="text-xs text-gray-500">
+                    {email.time}
+                  </span>
+                </div>
+                <h3 class="text-gray-100 font-medium mb-1 truncate">
+                  {email.subject}
+                </h3>
+                <p class="text-gray-400 text-sm truncate">
+                  {email.preview}
+                </p>
+              </div>
+            </div>
+          </article>
+        {/each}
+      </main>
+
+      <!-- Compose FAB -->
+      <a
+        href="/compose-email"
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center"
+      >
+        <span class="text-white text-2xl">✉️</span>
+      </a>
+    </div>
+
+    <!-- Compose email -->
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700
+                     flex items-center justify-between">
+        <button on:click={() => history.back()}>Cancel</button>
+        <h1 class="text-lg font-semibold">New Email</h1>
+        <button class="text-blue-500 font-semibold">Send</button>
+      </header>
+
+      <main class="divide-y divide-gray-800">
+        <input
+          type="email"
+          placeholder="To"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500"
+        />
+        <input
+          type="text"
+          placeholder="Subject"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500"
+        />
+        <textarea
+          placeholder="Email content"
+          rows="15"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500
+                 resize-none outline-none"
+        />
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+
+    interface Email {
+      id: string;
+      sender: string;
+      subject: string;
+      preview: string;
+      time: string;
+    }
+
+    // Inbox
+    @Component({
+      selector: "app-inbox",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <header class="p-4 border-b border-gray-700">
+            <h1 class="text-xl font-bold text-gray-100">Inbox</h1>
+          </header>
+
+          <main>
+            <article
+              *ngFor="let email of emails"
+              class="p-4 border-b border-gray-800
+                     hover:bg-gray-800/50 cursor-pointer"
+            >
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-500
+                            flex items-center justify-center
+                            text-white font-semibold">
+                  {{ email.sender[0] }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold text-gray-100">
+                      {{ email.sender }}
+                    </span>
+                    <span class="text-xs text-gray-500">
+                      {{ email.time }}
+                    </span>
+                  </div>
+                  <h3 class="text-gray-100 font-medium mb-1 truncate">
+                    {{ email.subject }}
+                  </h3>
+                  <p class="text-gray-400 text-sm truncate">
+                    {{ email.preview }}
+                  </p>
+                </div>
+              </div>
+            </article>
+          </main>
+
+          <!-- Compose FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center"
+          >
+            <span class="text-white text-2xl">✉️</span>
+          </button>
+        </div>
+      `
+    })
+    export class InboxComponent {
+      emails: Email[] = EMAILS; // Provide emails data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose-email']);
+      }
+    }
+
+    // Compose Email
+    @Component({
+      selector: "app-compose-email",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700
+                         flex items-center justify-between">
+            <button (click)="goBack()">Cancel</button>
+            <h1 class="text-lg font-semibold">New Email</h1>
+            <button class="text-blue-500 font-semibold">Send</button>
+          </header>
+
+          <main class="divide-y divide-gray-800">
+            <input
+              type="email"
+              placeholder="To"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="Subject"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500"
+            />
+            <textarea
+              placeholder="Email content"
+              rows="15"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500
+                     resize-none outline-none"
+            ></textarea>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeEmailComponent {
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## Customization
+
+### direction Option
+
+Specifies the direction of the sheet transition:
+
+```typescript
+// Forward direction (list → compose): sheet slides up from bottom
+sheet({ direction: 'enter' })
+
+// Backward direction (compose → list): sheet slides down to bottom
+sheet({ direction: 'exit' })
+```
+
+**Important**: `direction: 'enter'` and `direction: 'exit'` have different z-index handling:
+- `enter`: Entering sheet naturally appears in front
+- `exit`: Exiting sheet stays in front with `z-index: 100` while sliding down
+
+### Spring Configuration
+
+Adjust animation elasticity and speed:
+
+```typescript
+sheet({
+  direction: 'enter',
+  spring: {
+    stiffness: 140,  // Lower = smoother (default: 140)
+    damping: 18,     // Higher = faster settling (default: 18)
+    doubleSpring: 0.5 // Spring strength multiplier for OUT animation (default: 0.5)
+  }
+})
+```
+
+### Smooth Transition
+
+More gentle and relaxed transition:
+
+```typescript
+sheet({
+  spring: {
+    stiffness: 100,
+    damping: 20,
+    doubleSpring: 0.6
+  }
+})
+```
+
+### Fast Transition
+
+Faster and more responsive transition:
+
+```typescript
+sheet({
+  spring: {
+    stiffness: 180,
+    damping: 16,
+    doubleSpring: 0.4
+  }
+})
+```
+
+## Important Notes
+
+### Performance Optimization
+
+- GPU acceleration used (`transform`, `opacity`)
+- Automatic `will-change` setup and cleanup
+- `backfaceVisibility: hidden` prevents flickering
+- Prevents layout recalculation
+
+### z-index Management
+
+- Compose page: `z-index: 100` (displayed in front)
+- Background page: `z-index: -1` (placed behind)
+- Automatically managed, no manual setup needed
+
+### Mobile Optimization
+
+- Optimized timing for mobile devices
+- Natural integration with touch gestures
+- Guaranteed 60fps smooth animation
+
+## Accessibility
+
+- Transition disabled when `prefers-reduced-motion` is set
+- Full keyboard navigation support
+- ESC key support to close compose page
+- Focus trap improves keyboard accessibility
+
+## Best Practices
+
+### ✅ DO
+
+- Use for transitions from FAB button to full-screen compose mode
+- Apply when creating new content in social media, mail, notes, etc.
+- Set both `direction: 'enter'` and `direction: 'exit'` for bidirectional consistency
+- Use full-screen layout for compose page
+- Provide clear cancel and complete buttons
+
+### ❌ DON'T
+
+- Don't use for general page-to-page navigation
+- Not suitable for read-only content viewing (use Instagram or Hero instead)
+- Don't use for tab navigation (use Slide instead)
+- Not suitable for navigation between pages without hierarchy
+- Consider modals or other transitions for desktop environments
+
+## Related Transitions
+
+- **Drill**: Suitable for hierarchical content navigation
+- **Slide**: Suitable for horizontal tab navigation
+- **Instagram**: Suitable for image zoom viewing
+- **Fade**: Suitable for general page transitions
+
+## Browser Compatibility
+
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
+- All modern mobile browsers

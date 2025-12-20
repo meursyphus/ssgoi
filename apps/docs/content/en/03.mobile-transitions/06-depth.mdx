@@ -1,0 +1,154 @@
+---
+title: "Depth Transition"
+description: "Transition that expresses hierarchical movement along the Z-axis"
+nav-title: "Depth"
+---
+
+# Depth Transition
+
+The depth transition expresses **hierarchical movement along the Z-axis**. It's the same concept as Material Design's Shared Z-Axis transition, where two screens combine scale and fade in the same direction to create a sense of "depth".
+
+## Demo
+
+<ViewTransitionDemo type="depth" />
+
+## UX Principles
+
+### When to Use?
+
+Use the depth transition when **moving one level up or down in your app's hierarchy**. It naturally creates an experience of expanding from a small trigger (icon, button) to a full screen.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Unrelated content",
+      suitable: "no",
+      description: "Not suitable for navigation between independent sections as it doesn't convey hierarchical connection."
+    },
+    {
+      label: "Top-level transition",
+      suitable: "no",
+      description: "For navigation between equal-level items like bottom navigation, swap transition is more appropriate."
+    },
+    {
+      label: "Hierarchical relationship",
+      suitable: "yes",
+      description: "Optimal when moving from icon to full screen, or from parent level to child level."
+    }
+  ]}
+/>
+
+#### Key Use Cases
+- Search icon → Search screen (from small icon to full screen)
+- Settings icon → Settings screen (from trigger to detail screen)
+- Notification icon → Notification list (from summary to detail)
+- Category → Subcategory (hierarchical navigation)
+- Product list → Product detail (diving deeper from list)
+
+### Why Does It Work This Way?
+
+1. **Forward movement (enter)**: The new screen starts small in the front and expands while appearing, while the previous screen is pushed back and expands as it disappears. This gives a sense of "diving deeper".
+
+2. **Backward movement (exit)**: The current screen shrinks towards the front and disappears, while the previous screen appears from behind while shrinking. This gives a sense of "emerging from depth".
+
+3. **Hierarchical understanding**: The consistent direction of scale movement allows users to intuitively understand which hierarchical level they're currently at.
+
+### Motion Design
+
+**Forward (enter) motion**:
+- **Outgoing page**: scale 1 → 1.05 + fade out (expands backward and disappears)
+- **Incoming page**: scale 0.95 → 1 + fade in (comes forward and appears)
+
+**Backward (exit) motion**:
+- **Outgoing page**: scale 1 → 0.95 + fade out (shrinks forward and disappears)
+- **Incoming page**: scale 1.05 → 1 + fade in (appears from back to front)
+
+## Basic Usage
+
+### Transition Setup
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { depth } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true // Automatically applies exit direction on back navigation
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { depth } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+### Direction Setting
+
+Use the `direction` option to specify the hierarchical movement direction:
+
+- **`enter`**: Dive deeper (default)
+- **`exit`**: Emerge from depth
+
+```typescript
+// When entering a child level
+depth({ direction: 'enter' })
+
+// When returning to a parent level
+depth({ direction: 'exit' })
+
+// Using symmetric: true automatically creates the opposite direction
+```
+
+## Best Practices
+
+### Good Examples
+
+- Search icon → Search full screen
+- Product card → Product detail page
+- Settings button → Settings screen
+- Notification bell → Notification list
+- Category → Subcategory
+
+### Bad Examples
+
+- Navigation between bottom navigation tabs → Use swap
+- Navigation between independent sections → Use fade
+- Opening a modal → Use sheet transition
+
+## Related Transitions
+
+- **[Drill](/en/mobile-transitions/drill)**: Unidirectional expand/shrink
+- **[Sheet](/en/mobile-transitions/sheet)**: Bottom sheet rising from the bottom
+- **[Swap](/en/mobile-transitions/swap)**: Transition between top-level screens
+- **[Fade](/en/basic-transitions/fade)**: Smooth transition between unrelated screens

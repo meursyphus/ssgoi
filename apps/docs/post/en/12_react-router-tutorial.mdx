@@ -1,0 +1,491 @@
+---
+title: "Building Native App-Like Web Apps with React Router"
+description: "Learn how to implement native app-like page transition effects using React Router and SSGOI with step-by-step instructions."
+thumbnail: "/post/react-router-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "Daeseung Moon"
+tags: ["ssgoi", "react-router", "react", "page-transition", "tutorial"]
+---
+
+## Want to Build Apps with Web Technologies?
+
+Did you know you can build apps using web technologies? Create a web app with React Router, wrap it with Expo or Flutter's webview, and you can publish it to the app store immediately.
+
+But web apps have a major weakness: **awkward page transitions**.
+
+Native apps have smooth screen transitions. When navigating from a list to details, it slides naturally. When you tap an image, it expands smoothly. But on the web? Pages just... jump.
+
+**What if web apps could have native-like page transitions?** That web app would feel like a real app.
+
+Today, we'll build a web app with **native app-like page transitions** using React Router.
+
+## What is SSGOI?
+
+SSGOI is a page transition library that **works on all browsers**.
+
+Chrome has the View Transition API, but it doesn't work on Safari and Firefox. SSGOI solves this problem.
+
+**SSGOI's advantages:**
+
+- Supports all modern browsers (Chrome, Firefox, Safari, Edge)
+- Perfect SSR/SSG compatibility
+- Natural motion with spring-based physics animations
+- Various built-in transitions (Drill, Slide, Pinterest, Instagram, etc.)
+
+## Getting Started
+
+Let's start with the official SSGOI template.
+
+```bash
+# Clone the repository
+git clone https://github.com/meursyphus/ssgoi
+
+# Install dependencies from root (important!)
+pnpm install
+
+# Navigate to React Router template folder
+cd templates/react-router
+
+# Start development server
+pnpm run dev
+```
+
+> **Note**: You must run `pnpm install` from the **root path**. Since it's a monorepo structure, you need to install all dependencies from the root.
+
+Open `http://localhost:5173` in your browser to see the template demo.
+
+{/* demo-overview.gif - to be added later */}
+
+## Understanding the Folder Structure
+
+The `templates/react-router/` folder structure:
+
+```
+templates/react-router/
+├── app/
+│   ├── root.tsx                # Root layout
+│   ├── routes.ts               # Route definitions
+│   ├── routes/                 # Page routes
+│   │   ├── home.tsx
+│   │   ├── posts.tsx           # Drill transition example
+│   │   ├── posts.$postId.tsx
+│   │   ├── pinterest.tsx       # Pinterest transition example
+│   │   ├── pinterest.$pinId.tsx
+│   │   ├── profile.tsx         # Instagram transition example
+│   │   ├── profile.$postId.tsx
+│   │   ├── products.tsx
+│   │   ├── products_.layout.tsx # Slide transition example
+│   │   └── products_*.tsx
+│   └── components/
+│       ├── demo-layout.tsx     # Ssgoi configuration (key!)
+│       ├── demo-wrapper.tsx    # Mobile frame UI
+│       ├── posts/
+│       ├── pinterest/
+│       ├── profile/
+│       └── products/
+```
+
+The key file is `demo-layout.tsx`. All transition configurations are here.
+
+## Configuring Ssgoi
+
+Open `app/components/demo-layout.tsx`.
+
+```tsx
+import React, { useMemo } from "react";
+import { Link, useLocation } from "react-router";
+import { Ssgoi } from "@ssgoi/react";
+import {
+  drill,
+  pinterest,
+  instagram,
+} from "@ssgoi/react/view-transitions";
+
+export default function DemoLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const config = useMemo(
+    () => ({
+      transitions: [
+        // Pinterest transition
+        {
+          from: "/pinterest/*",
+          to: "/pinterest",
+          transition: pinterest(),
+          symmetric: true,
+        },
+        // Posts - Drill transition
+        {
+          from: "/posts",
+          to: "/posts/*",
+          transition: drill({ direction: "enter" }),
+        },
+        {
+          from: "/posts/*",
+          to: "/posts",
+          transition: drill({ direction: "exit" }),
+        },
+        // Profile - Instagram transition
+        {
+          from: "/profile",
+          to: "/profile/*",
+          transition: instagram(),
+          symmetric: true,
+        },
+      ],
+    }),
+    [],
+  );
+
+  return (
+    <div className="h-full bg-[#121212] flex z-0">
+      <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
+        <main className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212]">
+          <Ssgoi config={config}>{children}</Ssgoi>
+        </main>
+        {/* Navigation bar */}
+      </div>
+    </div>
+  );
+}
+```
+
+**Config structure:**
+
+- `from`: Source path (`*` is a wildcard)
+- `to`: Destination path
+- `transition`: Transition to use
+- `symmetric`: Apply same transition in reverse direction
+
+## Wrapping Pages with SsgoiTransition
+
+Each page must be wrapped with `SsgoiTransition` and given a **unique id**.
+
+Looking at `app/components/posts/index.tsx`:
+
+```tsx
+import { SsgoiTransition } from "@ssgoi/react";
+import { Link } from "react-router";
+
+export default function PostsDemo() {
+  return (
+    <SsgoiTransition id="/posts">
+      <div className="min-h-full bg-[#121212] px-4 py-6">
+        {/* Post list */}
+      </div>
+    </SsgoiTransition>
+  );
+}
+```
+
+Looking at `app/components/posts/detail.tsx`:
+
+```tsx
+export default function PostDetail({ postId }: { postId: string }) {
+  return (
+    <SsgoiTransition id={`/posts/${postId}`}>
+      <div className="min-h-screen bg-[#121212]">{/* Post details */}</div>
+    </SsgoiTransition>
+  );
+}
+```
+
+> **Key point**: The `id` must match the `from`/`to` in the config for SSGOI to apply the transition.
+
+## Drill Transition
+
+A transition that creates the feeling of drilling from a list into details.
+
+![Drill transition - Entering from list to details and back](/post/tutorial/drill.gif)
+
+**Template location**: `app/components/posts/`
+
+```tsx
+import { drill } from "@ssgoi/react/view-transitions";
+
+// List → Details (entering)
+drill({ direction: "enter" });
+
+// Details → List (exiting)
+drill({ direction: "exit" });
+```
+
+**Config setup:**
+
+```tsx
+{
+  from: "/posts",
+  to: "/posts/*",
+  transition: drill({ direction: "enter" }),
+},
+{
+  from: "/posts/*",
+  to: "/posts",
+  transition: drill({ direction: "exit" }),
+},
+```
+
+**Options:**
+
+- `direction`: `"enter"` | `"exit"`
+- `opacity`: Adds fade effect if `true`
+
+## Slide Transition
+
+A sliding effect that moves left/right in tab UIs.
+
+![Slide transition - Sliding left/right when clicking tabs](/post/tutorial/slide.gif)
+
+**Template location**: `app/routes/products_.layout.tsx`
+
+```tsx
+import { slide } from "@ssgoi/react/view-transitions";
+
+// Slide to the left
+slide({ direction: "left" });
+
+// Slide to the right
+slide({ direction: "right" });
+```
+
+`products_.layout.tsx` uses a nested `Ssgoi` to transition only the tab area:
+
+```tsx
+import { Outlet, useLocation } from "react-router";
+import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
+import { slide } from "@ssgoi/react/view-transitions";
+
+export default function ProductsLayout() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const config = useMemo(
+    () => ({
+      transitions: [
+        {
+          from: "/products/tab/left",
+          to: "/products/tab/right",
+          transition: slide({ direction: "left" }),
+        },
+        {
+          from: "/products/tab/right",
+          to: "/products/tab/left",
+          transition: slide({ direction: "right" }),
+        },
+      ],
+      middleware: (from: string, to: string) => {
+        const fromIndex = categories.findIndex((c) => c.path === from);
+        const toIndex = categories.findIndex((c) => c.path === to);
+
+        if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+          if (fromIndex < toIndex) {
+            return { from: "/products/tab/left", to: "/products/tab/right" };
+          } else {
+            return { from: "/products/tab/right", to: "/products/tab/left" };
+          }
+        }
+
+        return { from, to };
+      },
+    }),
+    [],
+  );
+
+  return (
+    <SsgoiTransition id="/products">
+      {/* Header, tab buttons */}
+      <div className="flex-1 overflow-hidden">
+        <Ssgoi config={config}>
+          <Outlet />
+        </Ssgoi>
+      </div>
+    </SsgoiTransition>
+  );
+}
+```
+
+## Pinterest Transition
+
+An effect where gallery images expand into detail view.
+
+![Pinterest transition - Images expand into detail view](/post/tutorial/pinterest.gif)
+
+**Template location**: `app/components/pinterest/`
+
+### Setting Data Attributes (Required!)
+
+Pinterest transitions require **data attributes** to specify which images connect to each other.
+
+`app/components/pinterest/index.tsx` (gallery):
+
+```tsx
+function PinCard({ item }: { item: PinterestItem }) {
+  return (
+    <Link to={`/pinterest/${item.id}`}>
+      <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
+        <img
+          src={item.image}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          data-pinterest-gallery-key={item.id}
+        />
+      </div>
+    </Link>
+  );
+}
+```
+
+`app/components/pinterest/detail.tsx` (details):
+
+```tsx
+export default function PinterestDetail({ pinId }: { pinId: string }) {
+  const item = getPinterestItem(pinId);
+
+  return (
+    <SsgoiTransition id={`/pinterest/${pinId}`}>
+      <img
+        src={item.image}
+        alt={item.title}
+        style={{ aspectRatio: item.aspectRatio }}
+        data-pinterest-detail-key={item.id}
+      />
+    </SsgoiTransition>
+  );
+}
+```
+
+> **Key point**: `data-pinterest-gallery-key` and `data-pinterest-detail-key` must have **the same id** for SSGOI to recognize the connection.
+
+**Config setup:**
+
+```tsx
+{
+  from: "/pinterest/*",
+  to: "/pinterest",
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagram Transition
+
+An effect transitioning from profile feed grid to details. Similar to Pinterest, but the gallery remains visible.
+
+![Instagram transition - Transitioning from grid to details, gallery maintained](/post/tutorial/insta.gif)
+
+**Template location**: `app/components/profile/`
+
+### Setting Data Attributes
+
+`app/components/profile/feed.tsx` (grid):
+
+```tsx
+function PostCard({ post }: { post: Post }) {
+  return (
+    <Link to={`/profile/${post.id}`}>
+      <img
+        src={post.coverImage.url}
+        alt={post.title}
+        className="w-full h-auto object-cover"
+        data-instagram-gallery-key={post.id}
+      />
+    </Link>
+  );
+}
+```
+
+`app/components/profile/feed-detail.tsx` (details):
+
+```tsx
+export default function FeedDetail({ postId }: { postId: string }) {
+  const post = getPost(postId);
+
+  return (
+    <SsgoiTransition id={`/profile/${postId}`}>
+      <img
+        src={post.coverImage.url}
+        alt={post.title}
+        data-instagram-detail-key={post.id}
+      />
+    </SsgoiTransition>
+  );
+}
+```
+
+**Config setup:**
+
+```tsx
+{
+  from: "/profile",
+  to: "/profile/*",
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## Adjusting Timing with Spring Options
+
+All transitions use **spring-based physics animations**. You can adjust speed and feel with the `spring` option.
+
+```tsx
+drill({
+  direction: "enter",
+  spring: {
+    stiffness: 200, // Higher = faster
+    damping: 20, // Higher = less bouncy
+    doubleSpring: true, // Enable ease-in-out effect
+  },
+});
+```
+
+### Spring Options Explained
+
+| Option         | Description  | Effect                                 |
+| -------------- | ------------ | -------------------------------------- |
+| `stiffness`    | Stiffness    | Higher = faster and more responsive    |
+| `damping`      | Damping      | Higher = less bouncy and smoother      |
+| `doubleSpring` | Double Spring| `true`/`false` - ease-in-out effect    |
+
+> **What is doubleSpring?** Like CSS's ease-in-out, it creates a smooth start and end effect. For more details, see the [Double Spring blog post](https://ssgoi.dev/en/blog/double-spring).
+
+## Useful Options
+
+### symmetric Option
+
+Automatically sets up bidirectional transitions.
+
+```tsx
+// Setting this once
+{
+  from: "/pinterest/*",
+  to: "/pinterest",
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// Automatically applies reverse direction too
+```
+
+### Wildcard Routes
+
+Use `*` to match all sub-paths.
+
+```tsx
+// Matches /posts/1, /posts/abc, etc.
+{ from: "/posts", to: "/posts/*", ... }
+```
+
+## Conclusion
+
+Now you can add native app-like page transitions to your React Router web apps!
+
+### Resources
+
+- **GitHub**: https://github.com/meursyphus/ssgoi
+- **Official Docs**: https://ssgoi.dev
+- **React Router Template**: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
+
+Try wrapping it in a webview and turn it into a real app!

@@ -318,6 +318,7 @@ export function InstagramDemo() {
       config={config}
       layout={InstagramLayout}
       initialPath="/instagram/gallery"
+      deviceType="mobile"
     />
   );
 }

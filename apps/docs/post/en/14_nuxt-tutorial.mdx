@@ -1,0 +1,532 @@
+---
+title: "Building Native App-like Web Apps with Nuxt"
+description: "Learn step-by-step how to implement native app-like page transitions using Nuxt and SSGOI."
+thumbnail: "/post/nuxt-tutorial/thumbnail.jpg"
+date: "2025-12-20"
+thumbnailWidth: 400
+thumbnailHeight: 300
+author: "Daeseung Moon"
+tags: ["ssgoi", "nuxt", "vue", "page-transition", "tutorial"]
+---
+
+## Want to Build an App with Web Technologies?
+
+Did you know you can build apps using web technologies? Create a web app with Nuxt, wrap it with Expo or Flutter's webview, and you can publish it directly to app stores.
+
+But web apps have one major weakness: **page transitions feel awkward**.
+
+Native apps have smooth screen transitions. When going from a list to detail, it slides in; when tapping an image, it expands open. But on the web? Pages just abruptly change.
+
+**What if web apps could have native-like page transitions?** That web app would feel like a real app.
+
+Today, we'll build a **web app with native app-like page transitions** using Nuxt.
+
+## What is SSGOI?
+
+SSGOI is a page transition library that **works in all browsers**.
+
+Chrome has the View Transition API, but it doesn't work in Safari and Firefox. SSGOI solves this problem.
+
+**SSGOI's advantages:**
+
+- All modern browser support (Chrome, Firefox, Safari, Edge)
+- Perfect SSR/SSG compatibility
+- Natural motion with spring-based physics animations
+- Various built-in transitions (Drill, Slide, Pinterest, Instagram, etc.)
+
+## Getting Started
+
+Let's start with the official SSGOI template.
+
+```bash
+# Clone the repository
+git clone https://github.com/meursyphus/ssgoi
+
+# Install dependencies from root (Important!)
+pnpm install
+
+# Navigate to Nuxt template folder
+cd templates/nuxt
+
+# Run dev server
+pnpm run dev
+```
+
+> **Note**: `pnpm install` must be run from the **root path**. It's a monorepo structure, so install all dependencies from the root.
+
+Open `http://localhost:3000` in your browser to see the template demo.
+
+{/* demo-overview.gif - to be added later */}
+
+## Exploring the Folder Structure
+
+Here's the `templates/nuxt/` folder structure.
+
+```
+templates/nuxt/
+├── app.vue                  # Root app component
+├── pages/
+│   ├── posts/               # Drill transition example
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   ├── pinterest/           # Pinterest transition example
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   ├── profile/             # Instagram transition example
+│   │   ├── index.vue
+│   │   └── [id].vue
+│   └── products.vue         # Slide transition example
+│       ├── all.vue
+│       ├── electronics.vue
+│       ├── fashion.vue
+│       ├── home.vue
+│       └── beauty.vue
+├── components/
+│   ├── demo-layout.vue      # Ssgoi configuration (Core!)
+│   ├── demo-wrapper.vue     # Mobile frame UI
+│   ├── pin-card.vue
+│   ├── post-card.vue
+│   ├── profile-feed.vue
+│   └── products/
+└── composables/             # Data management
+    ├── use-posts.ts
+    ├── use-pinterest.ts
+    ├── use-profile.ts
+    └── use-products.ts
+```
+
+The core file is `components/demo-layout.vue`. All transition configurations are here.
+
+## Configuring Ssgoi
+
+Open `components/demo-layout.vue`.
+
+```vue
+<template>
+  <main>
+    <Ssgoi :config="config">
+      <slot />
+    </Ssgoi>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi } from '@ssgoi/vue';
+import type { SsgoiConfig } from '@ssgoi/vue';
+import {
+  drill,
+  pinterest,
+  instagram,
+} from '@ssgoi/vue/view-transitions';
+
+const config: SsgoiConfig = {
+  transitions: [
+    // Pinterest transition
+    {
+      from: '/pinterest/*',
+      to: '/pinterest',
+      transition: pinterest(),
+      symmetric: true,
+    },
+    // Posts - Drill transition
+    {
+      from: '/posts',
+      to: '/posts/*',
+      transition: drill({ direction: 'enter' }),
+    },
+    {
+      from: '/posts/*',
+      to: '/posts',
+      transition: drill({ direction: 'exit' }),
+    },
+    // Profile - Instagram transition
+    {
+      from: '/profile',
+      to: '/profile/*',
+      transition: instagram(),
+      symmetric: true,
+    },
+  ],
+};
+</script>
+```
+
+**Config structure:**
+
+- `from`: Starting path (`*` is a wildcard)
+- `to`: Destination path
+- `transition`: Transition to use
+- `symmetric`: Apply same transition in reverse
+
+## Wrapping Pages with SsgoiTransition
+
+Each page must be wrapped with `SsgoiTransition` and given a **unique id**.
+
+Looking at `pages/posts/index.vue`:
+
+```vue
+<template>
+  <SsgoiTransition id="/posts">
+    <div class="min-h-full bg-[#121212] px-4 py-6">
+      <!-- Post list -->
+      <div class="space-y-2">
+        <NuxtLink
+          v-for="post in posts"
+          :key="post.id"
+          :to="`/posts/${post.id}`"
+        >
+          <!-- Post card -->
+        </NuxtLink>
+      </div>
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const posts = useAllPosts();
+</script>
+```
+
+Looking at `pages/posts/[id].vue`:
+
+```vue
+<template>
+  <SsgoiTransition :id="`/posts/${id}`">
+    <div class="min-h-screen bg-[#121212]">
+      <!-- Post detail -->
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const post = usePost(id);
+</script>
+```
+
+> **Key point**: The `id` must match the `from`/`to` in config for SSGOI to apply the transition.
+
+## Drill Transition
+
+A transition that feels like drilling from a list into detail.
+
+![Drill transition - entering from list to detail and back](/post/tutorial/drill.gif)
+
+**Template location**: `pages/posts/`
+
+```typescript
+import { drill } from '@ssgoi/vue/view-transitions';
+
+// List → Detail (entering)
+drill({ direction: 'enter' });
+
+// Detail → List (exiting)
+drill({ direction: 'exit' });
+```
+
+**Config setup:**
+
+```typescript
+{
+  from: '/posts',
+  to: '/posts/*',
+  transition: drill({ direction: 'enter' }),
+},
+{
+  from: '/posts/*',
+  to: '/posts',
+  transition: drill({ direction: 'exit' }),
+},
+```
+
+**Options:**
+
+- `direction`: `"enter"` | `"exit"`
+- `opacity`: If `true`, adds fade effect
+
+## Slide Transition
+
+A left/right sliding effect for tab UI.
+
+![Slide transition - sliding left/right on tab click](/post/tutorial/slide.gif)
+
+**Template location**: `pages/products.vue`
+
+```typescript
+import { slide } from '@ssgoi/vue/view-transitions';
+
+// Slide left
+slide({ direction: 'left' });
+
+// Slide right
+slide({ direction: 'right' });
+```
+
+`pages/products.vue` uses nested `Ssgoi` to transition only the tab area:
+
+```vue
+<template>
+  <SsgoiTransition id="/products">
+    <!-- Header, tab buttons -->
+    <div class="flex-1 overflow-hidden">
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi, SsgoiTransition } from '@ssgoi/vue';
+import type { SsgoiConfig } from '@ssgoi/vue';
+import { slide } from '@ssgoi/vue/view-transitions';
+
+const categories = [
+  { id: 'all', label: 'All', path: '/products/all' },
+  { id: 'electronics', label: 'Tech', path: '/products/electronics' },
+  { id: 'fashion', label: 'Fashion', path: '/products/fashion' },
+  { id: 'home', label: 'Home', path: '/products/home' },
+  { id: 'beauty', label: 'Beauty', path: '/products/beauty' },
+];
+
+const config: SsgoiConfig = {
+  transitions: [
+    {
+      from: '/products/tab/left',
+      to: '/products/tab/right',
+      transition: slide({ direction: 'left' }),
+    },
+    {
+      from: '/products/tab/right',
+      to: '/products/tab/left',
+      transition: slide({ direction: 'right' }),
+    },
+  ],
+  middleware: (from: string, to: string) => {
+    const fromIndex = categories.findIndex((c) => c.path === from);
+    const toIndex = categories.findIndex((c) => c.path === to);
+
+    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+      if (fromIndex < toIndex) {
+        return { from: '/products/tab/left', to: '/products/tab/right' };
+      } else {
+        return { from: '/products/tab/right', to: '/products/tab/left' };
+      }
+    }
+
+    return { from, to };
+  },
+};
+</script>
+```
+
+## Pinterest Transition
+
+An effect where gallery images expand into detail view.
+
+![Pinterest transition - image expanding into detail](/post/tutorial/pinterest.gif)
+
+**Template location**: `pages/pinterest/`
+
+### Setting Data Attributes (Required!)
+
+Pinterest transition requires **data attributes** to specify which images connect.
+
+`components/pin-card.vue` (gallery):
+
+```vue
+<template>
+  <NuxtLink :to="`/pinterest/${item.id}`">
+    <div class="relative" :style="{ aspectRatio: item.aspectRatio }">
+      <img
+        :src="item.image"
+        :alt="item.title"
+        class="w-full h-full object-cover"
+        :data-pinterest-gallery-key="item.id"
+      />
+    </div>
+  </NuxtLink>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  item: PinterestItem;
+}>();
+</script>
+```
+
+`pages/pinterest/[id].vue` (detail):
+
+```vue
+<template>
+  <SsgoiTransition :id="`/pinterest/${id}`">
+    <div v-if="item">
+      <img
+        :src="item.image"
+        :alt="item.title"
+        :style="{ aspectRatio: item.aspectRatio }"
+        :data-pinterest-detail-key="item.id"
+      />
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const item = usePinterestItem(id);
+</script>
+```
+
+> **Key point**: `data-pinterest-gallery-key` and `data-pinterest-detail-key` must have the **same id** for SSGOI to recognize the connection.
+
+**Config setup:**
+
+```typescript
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+```
+
+## Instagram Transition
+
+An effect that transitions from a profile feed grid to detail. Similar to Pinterest, but the gallery remains visible.
+
+![Instagram transition - grid to detail transition, gallery remains](/post/tutorial/insta.gif)
+
+**Template location**: `pages/profile/`
+
+### Setting Data Attributes
+
+`components/post-card.vue` (grid):
+
+```vue
+<template>
+  <NuxtLink :to="`/profile/${post.id}`">
+    <img
+      :src="post.coverImage.url"
+      :alt="post.title"
+      class="w-full h-auto object-cover"
+      :data-instagram-gallery-key="post.id"
+    />
+  </NuxtLink>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  post: ProfilePost;
+}>();
+</script>
+```
+
+`pages/profile/[id].vue` (detail):
+
+```vue
+<template>
+  <SsgoiTransition :id="`/profile/${id}`">
+    <div v-if="post">
+      <img
+        :src="post.coverImage.url"
+        :alt="post.title"
+        :data-instagram-detail-key="post.id"
+      />
+    </div>
+  </SsgoiTransition>
+</template>
+
+<script setup lang="ts">
+import { SsgoiTransition } from '@ssgoi/vue';
+
+const route = useRoute();
+const id = route.params.id as string;
+
+const post = useProfilePost(id);
+</script>
+```
+
+**Config setup:**
+
+```typescript
+{
+  from: '/profile',
+  to: '/profile/*',
+  transition: instagram(),
+  symmetric: true,
+}
+```
+
+## Controlling Timing with Spring Options
+
+All transitions use **spring-based physics animations**. You can adjust speed and feel with the `spring` option.
+
+```typescript
+drill({
+  direction: 'enter',
+  spring: {
+    stiffness: 200, // Higher = faster
+    damping: 20, // Higher = less bouncy
+    doubleSpring: true, // Enable ease-in-out effect
+  },
+});
+```
+
+### Spring Options Explained
+
+| Option         | Description  | Effect                                   |
+| -------------- | ------------ | ---------------------------------------- |
+| `stiffness`    | Stiffness    | Higher = faster and more responsive      |
+| `damping`      | Damping      | Higher = less bouncy, smoother           |
+| `doubleSpring` | Double Spring | `true`/`false` - ease-in-out effect     |
+
+> **What is doubleSpring?** Like CSS's ease-in-out, it provides smooth starts and ends. For more details, see the [Double Spring blog post](https://ssgoi.dev/en/blog/double-spring).
+
+## Useful Options
+
+### symmetric Option
+
+Automatically sets up bidirectional transitions.
+
+```typescript
+// Just set one like this
+{
+  from: '/pinterest/*',
+  to: '/pinterest',
+  transition: pinterest(),
+  symmetric: true,
+}
+
+// Reverse direction is automatically applied
+```
+
+### Wildcard Routes
+
+Use `*` to match all sub-paths.
+
+```typescript
+// Matches /posts/1, /posts/abc, etc.
+{ from: '/posts', to: '/posts/*', ... }
+```
+
+## Conclusion
+
+Now you can apply native-like page transitions to your Nuxt web apps!
+
+### Resources
+
+- **GitHub**: https://github.com/meursyphus/ssgoi
+- **Official Docs**: https://ssgoi.dev
+- **Nuxt Template**: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+
+Try wrapping it in a webview to turn it into a real app!

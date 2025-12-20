@@ -7,9 +7,9 @@ interface SlideOptions {
 }
 
 const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 15,
-  damping: 7,
-  doubleSpring: true,
+  stiffness: 140,
+  damping: 19,
+  doubleSpring: 0.8,
 };
 
 export const slide = (options: SlideOptions = {}): SggoiTransition => {

@@ -1,10 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
+import React, {
+  ReactNode,
+  useState,
+  useRef,
+  memo,
+  useEffect,
+  useMemo,
+} from "react";
 import { cn } from "../../../lib/utils";
 import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
+import {
+  SandpackProvider,
+  SandpackPreview,
+  SandpackLayout,
+} from "@codesandbox/sandpack-react";
 
 // Route configuration
 export interface RouteConfig {
@@ -22,6 +34,13 @@ export interface BrowserMockupProps {
   className?: string;
   onNavigate?: (path: string) => void;
   layout?: React.ComponentType<{ children: React.ReactNode }>;
+  deviceType?: "desktop" | "mobile";
+  /** Enable Sandpack mode for true iframe isolation */
+  useSandpack?: boolean;
+  /** Files to pass to Sandpack (required if useSandpack is true) */
+  sandpackFiles?: Record<string, string>;
+  /** Additional Sandpack dependencies */
+  sandpackDependencies?: Record<string, string>;
 }
 
 // Browser context for nested components
@@ -87,6 +106,100 @@ const BrowserHeader = memo(() => {
 
 BrowserHeader.displayName = "BrowserHeader";
 
+// Mobile header component - iPhone style with dynamic island
+const MobileHeader = memo(() => {
+  const { currentPath } = useBrowserNavigation();
+
+  return (
+    <div className="mobile-header bg-neutral-900/95 relative">
+      {/* Dynamic Island / Notch */}
+      <div className="flex justify-center pt-2 pb-1">
+        <div className="w-28 h-7 bg-black rounded-full border border-white/10 flex items-center justify-center gap-3 px-3">
+          {/* Camera */}
+          <div className="w-2 h-2 rounded-full bg-neutral-800 ring-1 ring-white/20" />
+          {/* Spacer */}
+          <div className="flex-1" />
+          {/* Face ID dots */}
+          <div className="flex gap-0.5">
+            <div className="w-0.5 h-0.5 rounded-full bg-red-500/60" />
+            <div className="w-0.5 h-0.5 rounded-full bg-red-500/40" />
+          </div>
+        </div>
+      </div>
+
+      {/* Status bar */}
+      <div className="flex items-center justify-between px-4 py-1">
+        {/* Time */}
+        <div className="text-[11px] font-medium text-white/90">9:41</div>
+
+        {/* Right icons */}
+        <div className="flex items-center gap-1">
+          {/* Signal */}
+          <div className="flex items-end gap-[1px]">
+            <div className="w-0.5 h-1.5 bg-white/90 rounded-full" />
+            <div className="w-0.5 h-2 bg-white/90 rounded-full" />
+            <div className="w-0.5 h-2.5 bg-white/90 rounded-full" />
+            <div className="w-0.5 h-3 bg-white/90 rounded-full" />
+          </div>
+          {/* WiFi */}
+          <svg
+            className="w-3.5 h-3.5 text-white/90"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 18c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0-4c1.66 0 3.16.64 4.29 1.68l1.42-1.42C16.08 12.63 14.13 12 12 12s-4.08.63-5.71 2.26l1.42 1.42C8.84 14.64 10.34 14 12 14zm0-4c2.76 0 5.26 1.12 7.07 2.93l1.42-1.42C18.28 9.3 15.26 8 12 8s-6.28 1.3-8.49 3.51l1.42 1.42C6.74 11.12 9.24 10 12 10z" />
+          </svg>
+          {/* Battery */}
+          <div className="flex items-center gap-0.5">
+            <div className="w-5 h-2.5 border border-white/90 rounded-sm relative">
+              <div className="absolute inset-0.5 bg-white/90 rounded-[1px]" />
+            </div>
+            <div className="w-0.5 h-1.5 bg-white/90 rounded-r-sm" />
+          </div>
+        </div>
+      </div>
+
+      {/* Address bar */}
+      <div className="px-3 pb-2">
+        <div className="bg-neutral-800/80 border border-white/10 rounded-lg px-3 py-2 text-[11px] text-neutral-400 flex items-center gap-2">
+          <svg
+            className="w-3 h-3 text-neutral-500 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+          <span className="truncate flex-1">
+            <span className="text-neutral-500">ssgoi.dev</span>
+            <span className="text-neutral-300">{currentPath}</span>
+          </span>
+          <svg
+            className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+MobileHeader.displayName = "MobileHeader";
+
 // Route content component
 interface RouteContentProps {
   route: RouteConfig | undefined;
@@ -101,6 +214,101 @@ const RouteContent = memo(({ route }: RouteContentProps) => {
 
 RouteContent.displayName = "RouteContent";
 
+// Sandpack styles
+const SANDPACK_LAYOUT_STYLE = { height: "100%", flex: 1 } as const;
+const SANDPACK_PREVIEW_STYLE = { height: "100%", flex: 1 } as const;
+
+// Sandpack content - completely static, never re-renders on navigation
+const SandpackContent = memo(
+  ({
+    files,
+    dependencies,
+    externalResources = [],
+  }: {
+    files: Record<string, string>;
+    dependencies: Record<string, string>;
+    externalResources?: string[];
+  }) => {
+    const customSetup = useMemo(
+      () => ({
+        dependencies:
+          Object.keys(dependencies).length > 0 ? dependencies : undefined,
+      }),
+      [dependencies],
+    );
+    const sandpackOptions = useMemo(
+      () => ({
+        externalResources: [
+          "https://cdn.tailwindcss.com",
+          ...externalResources,
+        ],
+        autoResize: false,
+      }),
+      [externalResources],
+    );
+
+    return (
+      <div className="flex-1 min-h-0 overflow-hidden bg-[#121212] sandpack-container">
+        <style>{`
+        .sandpack-container {
+          display: flex;
+          flex-direction: column;
+        }
+        .sandpack-container .sp-wrapper {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        .sandpack-container .sp-layout {
+          flex: 1 !important;
+          min-height: 0 !important;
+          height: 100% !important;
+          border: none !important;
+          border-radius: 0 !important;
+        }
+        .sandpack-container .sp-stack {
+          height: 100% !important;
+        }
+        .sandpack-container .sp-preview {
+          height: 100% !important;
+          flex: 1 !important;
+        }
+        .sandpack-container .sp-preview-container {
+          height: 100% !important;
+        }
+        .sandpack-container .sp-preview-iframe {
+          height: 100% !important;
+          background-color: #121212 !important;
+        }
+        .sandpack-container iframe {
+          height: 100% !important;
+          background-color: #121212 !important;
+        }
+      `}</style>
+        <SandpackProvider
+          template="react-ts"
+          files={files}
+          customSetup={customSetup}
+          options={sandpackOptions}
+          theme="dark"
+        >
+          <SandpackLayout style={SANDPACK_LAYOUT_STYLE}>
+            <SandpackPreview
+              showOpenInCodeSandbox={false}
+              showRefreshButton={false}
+              showSandpackErrorOverlay={false}
+              style={SANDPACK_PREVIEW_STYLE}
+            />
+          </SandpackLayout>
+        </SandpackProvider>
+      </div>
+    );
+  },
+);
+
+SandpackContent.displayName = "SandpackContent";
+
 export function BrowserMockup({
   routes,
   config,
@@ -108,14 +316,19 @@ export function BrowserMockup({
   className,
   onNavigate,
   layout: Layout,
+  deviceType = "desktop",
+  useSandpack = false,
+  sandpackFiles,
+  sandpackDependencies = {},
 }: BrowserMockupProps) {
   const [currentPath, setCurrentPath] = useState(
     initialPath || routes[0]?.path || "/",
   );
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const isMobile = deviceType === "mobile";
 
-  // Handle navigation
+  // Handle navigation (for non-Sandpack mode)
   const navigate = (path: string) => {
     if (path === currentPath) return;
 
@@ -128,7 +341,20 @@ export function BrowserMockup({
     }
   };
 
-  // Find current route
+  // Listen for navigation updates from Sandpack iframe via postMessage
+  useEffect(() => {
+    if (!useSandpack) return;
+
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === "SSGOI_NAVIGATION") {
+        setCurrentPath(e.data.path);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [useSandpack]);
+
+  // Find current route (for non-Sandpack mode)
   const currentRoute =
     routes.find((route) => route.path === currentPath) || routes[0];
 
@@ -136,29 +362,43 @@ export function BrowserMockup({
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         className={cn(
-          "browser-mockup w-full rounded-xl overflow-hidden border border-white/10 bg-white/[0.02]",
-          "h-[500px] md:h-[800px]", // Fixed heights for mobile and desktop
+          "browser-mockup overflow-hidden bg-white/[0.02] relative flex flex-col",
+          isMobile
+            ? "w-[340px] mx-auto rounded-[3rem] border-[14px] border-neutral-900 h-[736px] shadow-2xl shadow-black/50"
+            : "w-full rounded-xl border border-white/10 h-[500px] md:h-[800px]",
           className,
         )}
       >
-        {/* Browser Header */}
-        <BrowserHeader />
+        {/* Header - Desktop or Mobile (common for both modes) */}
+        {isMobile ? <MobileHeader /> : <BrowserHeader />}
 
-        {/* Browser Content */}
-        <div
-          ref={contentRef}
-          className="browser-content bg-[#121212] flex-1 overflow-auto h-full custom-scrollbar"
-        >
-          <Ssgoi config={config}>
-            {Layout ? (
-              <Layout>
+        {/* Content - Sandpack or Regular */}
+        {useSandpack && sandpackFiles ? (
+          <SandpackContent
+            files={sandpackFiles}
+            dependencies={sandpackDependencies}
+          />
+        ) : (
+          <div
+            ref={contentRef}
+            className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto custom-scrollbar"
+          >
+            <Ssgoi config={config}>
+              {Layout ? (
+                <Layout>
+                  <RouteContent route={currentRoute} />
+                </Layout>
+              ) : (
                 <RouteContent route={currentRoute} />
-              </Layout>
-            ) : (
-              <RouteContent route={currentRoute} />
-            )}
-          </Ssgoi>
-        </div>
+              )}
+            </Ssgoi>
+          </div>
+        )}
+
+        {/* iPhone Home Indicator */}
+        {isMobile && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full" />
+        )}
       </div>
     </BrowserContext.Provider>
   );
