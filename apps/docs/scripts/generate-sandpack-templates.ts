@@ -221,7 +221,7 @@ export default function App() {
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         ref={contentRef}
-        className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto min-h-screen custom-scrollbar"
+        className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto min-h-screen"
       >
         <Ssgoi config={config}>
           <DemoLayout>
@@ -358,48 +358,17 @@ body {
   padding: 0;
   background: #121212;
   min-height: 100vh;
+  overflow: hidden;
 }
 
-/* Custom Scrollbar Styles - hide scrollbar on mobile mockup */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #2a2a2a #121212;
+/* Hide scrollbar */
+body::-webkit-scrollbar {
+  display: none;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #121212;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #404040;
-}
-
-/* Browser mockup specific scrollbar */
-.browser-content.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.browser-content.custom-scrollbar::-webkit-scrollbar-track {
-  background: #121212;
-}
-
-.browser-content.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 3px;
-}
-
-.browser-content.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 `;
 
