@@ -358,17 +358,12 @@ body {
   padding: 0;
   background: #121212;
   min-height: 100vh;
-  overflow: hidden;
-}
-
-/* Hide scrollbar */
-body::-webkit-scrollbar {
-  display: none;
-}
-
-body {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 `;
 
