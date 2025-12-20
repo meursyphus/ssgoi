@@ -354,10 +354,10 @@ function processDemoFolder(demoName: string): Record<string, string> | null {
   // Add styles
   files["/styles.css"] = `
 /* Styles are loaded via Tailwind CDN */
-body {
+html, body, #root {
   margin: 0;
   padding: 0;
-  background: #121212;
+  background: #121212 !important;
   min-height: 100vh;
 }
 

@@ -1,0 +1,157 @@
+---
+title: "Swap Transition"
+description: "Transition for switching between top-level screens"
+nav-title: "Swap"
+---
+
+# Swap Transition
+
+Swap transition is designed for **switching between top-level screens**. Similar to Material Design's Fade Through pattern, it creates a natural transition where the previous screen fades out, then the new screen appears from a smaller state, growing to full size.
+
+## Demo
+
+<ViewTransitionDemo type="swap" />
+
+## UX Principles
+
+### When to Use?
+
+Use swap transition when **navigating between independent sections at the top level**. It's primarily optimized for bottom navigation, tab switching, and top-level menu transitions.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "For parent/child level navigation, depth transition is more appropriate."
+    },
+    {
+      label: "Top-level Switching",
+      suitable: "yes",
+      description: "Perfect for switching between independent sections like bottom navigation or tab bars."
+    },
+    {
+      label: "Independent Sections",
+      suitable: "yes",
+      description: "Works naturally for navigating between unrelated top-level content."
+    }
+  ]}
+/>
+
+#### Key Use Cases
+- Bottom navigation tab switching (Home ↔ Search ↔ Profile)
+- Top-level menu switching (Dashboard ↔ Settings ↔ Notifications)
+- Independent section switching (News ↔ Weather ↔ Sports)
+
+### Why Does It Work This Way?
+
+1. **Previous Screen Fade Out**: The current screen simply fades out with transparency. It exits smoothly without any scale changes.
+
+2. **New Screen Fade In + Scale Up**: After the previous screen completely disappears, the new screen starts from a slightly smaller state (0.95 scale) and grows to normal size (1.0 scale) while appearing.
+
+3. **Sequential Execution**: The IN animation starts after the OUT animation completes, ensuring the two screens don't overlap and the switch is clear.
+
+### Motion Design
+
+**OUT (Departing Page)**:
+- **opacity**: 1 → 0 (fade out only)
+- **scale**: no change
+
+**IN (Arriving Page)**:
+- **opacity**: 0 → 1 (fade in)
+- **scale**: 0.95 → 1 (starts small, grows to normal size)
+- **Start timing**: After OUT animation completes
+
+## Basic Usage
+
+### Bottom Navigation Setup
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { swap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { swap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+## Best Practices
+
+### Good Examples
+
+- Switching between bottom navigation tabs
+- Navigating between top-level menu sections
+- Switching between independent dashboard views
+
+### Bad Examples
+
+- List → Detail page → Use depth transition
+- Modal or bottom sheet → Use sheet transition
+- Hierarchical navigation → Use depth transition
+
+## Related Transitions
+
+- **[Depth](/en/mobile-transitions/depth)**: For navigating between screens with hierarchical relationships
+- **[Fade](/en/basic-transitions/fade)**: When you only need a simple fade
+- **[Sheet](/en/mobile-transitions/sheet)**: For modals or bottom sheets

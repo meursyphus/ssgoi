@@ -1,0 +1,157 @@
+---
+title: "切换转场"
+description: "用于顶级屏幕之间切换的转场"
+nav-title: "切换"
+---
+
+# 切换转场
+
+切换转场是用于**顶级屏幕之间切换**的转场。它类似于 Material Design 的 Fade Through 模式,旧屏幕消失后,新屏幕从较小的状态放大显示,创造自然流畅的转场效果。
+
+## 演示
+
+<ViewTransitionDemo type="swap" />
+
+## UX 原则
+
+### 何时使用?
+
+切换转场用于**在顶级独立部分之间导航**。主要针对底部导航、标签切换和顶级菜单切换进行优化。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "上下级导航更适合使用深度转场。"
+    },
+    {
+      label: "顶级切换",
+      suitable: "yes",
+      description: "最适合底部导航、标签栏等独立部分之间的切换。"
+    },
+    {
+      label: "独立部分",
+      suitable: "yes",
+      description: "在不相关的顶级内容之间导航时也能自然运作。"
+    }
+  ]}
+/>
+
+#### 主要用例
+- 底部导航标签切换(首页 ↔ 搜索 ↔ 个人资料)
+- 顶级菜单切换(仪表盘 ↔ 设置 ↔ 通知)
+- 独立部分切换(新闻 ↔ 天气 ↔ 体育)
+
+### 为什么这样运作?
+
+1. **旧屏幕淡出**:当前屏幕简单地变透明并消失。没有缩放变化,平滑退场。
+
+2. **新屏幕淡入 + 放大**:旧屏幕完全消失后,新屏幕从稍小的状态(0.95 缩放)开始,放大到正常大小(1.0 缩放)并显示。
+
+3. **顺序执行**: OUT 动画完成后才开始 IN 动画,两个屏幕不会重叠,实现清晰的切换。
+
+### 动效设计
+
+**OUT(离开的页面)**:
+- **opacity**: 1 → 0(仅淡出)
+- **scale**: 无变化
+
+**IN(进入的页面)**:
+- **opacity**: 0 → 1(淡入)
+- **scale**: 0.95 → 1(从小到正常大小)
+- **开始时机**: OUT 动画完成后
+
+## 基本用法
+
+### 底部导航设置
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { swap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { swap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+## 最佳实践
+
+### 良好示例
+
+- 底部导航标签之间的切换
+- 顶级菜单部分之间的导航
+- 独立仪表盘视图之间的切换
+
+### 不良示例
+
+- 列表 → 详情页面 → 使用深度转场
+- 模态框或底部抽屉 → 使用抽屉转场
+- 层级导航 → 使用深度转场
+
+## 相关转场
+
+- **[深度](/zh/mobile-transitions/depth)**: 层级关系的屏幕之间导航
+- **[淡入淡出](/zh/basic-transitions/fade)**: 只需要简单淡入淡出时
+- **[抽屉](/zh/mobile-transitions/sheet)**: 模态框或底部抽屉

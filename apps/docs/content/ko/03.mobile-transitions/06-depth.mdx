@@ -1,0 +1,154 @@
+---
+title: "뎁스 전환"
+description: "Z축 계층 이동을 표현하는 전환"
+nav-title: "뎁스"
+---
+
+# 뎁스 전환
+
+뎁스 전환은 **Z축 계층 이동**을 표현하는 전환입니다. Material Design의 Shared Z-Axis transition과 동일한 개념으로, 두 화면이 같은 방향으로 scale과 fade를 조합하여 "깊이감"을 만들어냅니다.
+
+## 데모
+
+<ViewTransitionDemo type="depth" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+뎁스 전환은 **앱의 계층 구조에서 한 단계 위 또는 아래로 이동**할 때 사용합니다. 작은 트리거(아이콘, 버튼)에서 전체 화면으로 확장되는 경험을 자연스럽게 만들어줍니다.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "no",
+      description: "독립적인 섹션 간 이동에는 계층적 연결이 느껴지지 않아 부적합합니다."
+    },
+    {
+      label: "탑레벨 전환",
+      suitable: "no",
+      description: "바텀 네비게이션 등 동등한 레벨 간 이동에는 스왑 전환이 더 적합합니다."
+    },
+    {
+      label: "계층 관계",
+      suitable: "yes",
+      description: "아이콘에서 전체 화면으로, 또는 상위 레벨에서 하위 레벨로 이동할 때 최적입니다."
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+- 검색 아이콘 → 검색 화면 (작은 아이콘에서 전체 화면으로)
+- 설정 아이콘 → 설정 화면 (트리거에서 상세 화면으로)
+- 알림 아이콘 → 알림 목록 (요약에서 상세로)
+- 카테고리 → 하위 카테고리 (계층적 네비게이션)
+- 상품 목록 → 상품 상세 (목록에서 깊이 들어가기)
+
+### 왜 이렇게 동작하나요?
+
+1. **전진 이동 (enter)**: 새 화면이 앞쪽에서 작게 시작하여 확대되며 나타나고, 이전 화면은 뒤쪽으로 밀려나며 확대되어 사라집니다. 이는 "깊이 들어가는" 느낌을 줍니다.
+
+2. **후진 이동 (exit)**: 현재 화면이 앞쪽으로 축소되며 사라지고, 이전 화면은 뒤에서 축소되어 나타납니다. 이는 "깊이에서 빠져나오는" 느낌을 줍니다.
+
+3. **계층적 이해**: Scale의 방향이 일관되게 움직여 사용자가 현재 어느 계층에 있는지 직관적으로 파악할 수 있습니다.
+
+### 모션 디자인
+
+**전진 (enter) 동작**:
+- **나가는 페이지**: scale 1 → 1.05 + fade out (뒤로 확대되며 사라짐)
+- **들어오는 페이지**: scale 0.95 → 1 + fade in (앞으로 나오며 나타남)
+
+**후진 (exit) 동작**:
+- **나가는 페이지**: scale 1 → 0.95 + fade out (앞으로 축소되며 사라짐)
+- **들어오는 페이지**: scale 1.05 → 1 + fade in (뒤에서 앞으로 나타남)
+
+## 기본 사용법
+
+### 전환 설정
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { depth } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true // 뒤로가기 시 자동으로 exit 방향 적용
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { depth } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+### 방향 설정
+
+`direction` 옵션으로 계층 이동 방향을 지정합니다:
+
+- **`enter`**: 깊이 들어가기 (기본값)
+- **`exit`**: 깊이에서 나오기
+
+```typescript
+// 하위 레벨로 들어갈 때
+depth({ direction: 'enter' })
+
+// 상위 레벨로 돌아갈 때
+depth({ direction: 'exit' })
+
+// symmetric: true를 사용하면 자동으로 반대 방향 생성
+```
+
+## 모범 사례
+
+### 좋은 예
+
+- 검색 아이콘 → 검색 전체 화면
+- 상품 카드 → 상품 상세 페이지
+- 설정 버튼 → 설정 화면
+- 알림 벨 → 알림 목록
+- 카테고리 → 하위 카테고리
+
+### 나쁜 예
+
+- 바텀 네비게이션 탭 간 이동 → 스왑 사용
+- 독립적인 섹션 간 이동 → 페이드 사용
+- 모달 열기 → 시트 전환 사용
+
+## 관련 전환
+
+- **[드릴](/ko/mobile-transitions/drill)**: 단방향 확대/축소
+- **[시트](/ko/mobile-transitions/sheet)**: 하단에서 올라오는 바텀 시트
+- **[스왑](/ko/mobile-transitions/swap)**: 탑레벨 화면 간 전환
+- **[페이드](/ko/basic-transitions/fade)**: 관련 없는 화면 간 부드러운 전환

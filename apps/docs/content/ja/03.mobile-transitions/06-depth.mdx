@@ -1,0 +1,154 @@
+---
+title: "デプストランジション"
+description: "Z軸階層移動を表現するトランジション"
+nav-title: "デプス"
+---
+
+# デプストランジション
+
+デプストランジションは**Z軸階層移動**を表現するトランジションです。Material DesignのShared Z-Axis transitionと同じ概念で、2つの画面が同じ方向にscaleとfadeを組み合わせて「奥行き感」を作り出します。
+
+## デモ
+
+<ViewTransitionDemo type="depth" />
+
+## UX原則
+
+### いつ使用しますか?
+
+デプストランジションは**アプリの階層構造で1段階上または下に移動**するときに使用します。小さなトリガー(アイコン、ボタン)から全画面に拡張される体験を自然に作り出します。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "関連のないコンテンツ",
+      suitable: "no",
+      description: "独立したセクション間の移動には階層的なつながりが感じられず不適切です。"
+    },
+    {
+      label: "トップレベル切り替え",
+      suitable: "no",
+      description: "ボトムナビゲーションなど同等レベル間の移動にはスワップトランジションがより適切です。"
+    },
+    {
+      label: "階層関係",
+      suitable: "yes",
+      description: "アイコンから全画面へ、または上位レベルから下位レベルへ移動するときに最適です。"
+    }
+  ]}
+/>
+
+#### 主な使用ケース
+- 検索アイコン → 検索画面(小さなアイコンから全画面へ)
+- 設定アイコン → 設定画面(トリガーから詳細画面へ)
+- 通知アイコン → 通知リスト(要約から詳細へ)
+- カテゴリ → サブカテゴリ(階層的ナビゲーション)
+- 商品リスト → 商品詳細(リストから深く入る)
+
+### なぜこのように動作しますか?
+
+1. **前進移動(enter)**: 新しい画面が前方で小さく始まり拡大しながら現れ、前の画面は後方に押し出されながら拡大して消えます。これは「深く入っていく」感覚を与えます。
+
+2. **後退移動(exit)**: 現在の画面が前方へ縮小しながら消え、前の画面は後ろから縮小して現れます。これは「深さから抜け出す」感覚を与えます。
+
+3. **階層的理解**: Scaleの方向が一貫して動くため、ユーザーが現在どの階層にいるか直感的に把握できます。
+
+### モーションデザイン
+
+**前進(enter)動作**:
+- **出ていくページ**: scale 1 → 1.05 + fade out(後ろに拡大しながら消える)
+- **入ってくるページ**: scale 0.95 → 1 + fade in(前に出ながら現れる)
+
+**後退(exit)動作**:
+- **出ていくページ**: scale 1 → 0.95 + fade out(前に縮小しながら消える)
+- **入ってくるページ**: scale 1.05 → 1 + fade in(後ろから前へ現れる)
+
+## 基本的な使い方
+
+### トランジション設定
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { depth } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true // 戻るときに自動的にexit方向を適用
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { depth } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+### 方向設定
+
+`direction`オプションで階層移動の方向を指定します:
+
+- **`enter`**: 深く入る(デフォルト)
+- **`exit`**: 深さから出る
+
+```typescript
+// 下位レベルに入るとき
+depth({ direction: 'enter' })
+
+// 上位レベルに戻るとき
+depth({ direction: 'exit' })
+
+// symmetric: trueを使用すると自動的に反対方向を生成
+```
+
+## ベストプラクティス
+
+### 良い例
+
+- 検索アイコン → 検索全画面
+- 商品カード → 商品詳細ページ
+- 設定ボタン → 設定画面
+- 通知ベル → 通知リスト
+- カテゴリ → サブカテゴリ
+
+### 悪い例
+
+- ボトムナビゲーションタブ間の移動 → スワップを使用
+- 独立したセクション間の移動 → フェードを使用
+- モーダルを開く → シートトランジションを使用
+
+## 関連トランジション
+
+- **[ドリル](/ja/mobile-transitions/drill)**: 単方向の拡大/縮小
+- **[シート](/ja/mobile-transitions/sheet)**: 下から上がってくるボトムシート
+- **[スワップ](/ja/mobile-transitions/swap)**: トップレベル画面間の切り替え
+- **[フェード](/ja/basic-transitions/fade)**: 関連のない画面間のスムーズな切り替え

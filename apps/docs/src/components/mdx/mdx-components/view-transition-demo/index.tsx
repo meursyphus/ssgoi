@@ -44,6 +44,12 @@ const SheetDemo = lazy(() =>
 const FilmDemo = lazy(() =>
   import("./film-demo").then((m) => ({ default: m.FilmDemo })),
 );
+const DepthDemo = lazy(() =>
+  import("./depth-demo").then((m) => ({ default: m.DepthDemo })),
+);
+const SwapDemo = lazy(() =>
+  import("./swap-demo").then((m) => ({ default: m.SwapDemo })),
+);
 
 export interface ViewTransitionDemoProps {
   type:
@@ -59,7 +65,9 @@ export interface ViewTransitionDemoProps {
     | "jaemin"
     | "rotate"
     | "sheet"
-    | "film";
+    | "film"
+    | "depth"
+    | "swap";
 }
 
 // Loading component
@@ -103,6 +111,10 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <SheetDemo />;
       case "film":
         return <FilmDemo />;
+      case "depth":
+        return <DepthDemo />;
+      case "swap":
+        return <SwapDemo />;
       default:
         return null;
     }
