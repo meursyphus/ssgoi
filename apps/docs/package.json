@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "generate:sandpack": "tsx scripts/generate-sandpack-templates.ts",
+    "prepare": "pnpm generate:sandpack",
     "prebuild": "pnpm generate:sandpack"
   },
   "dependencies": {
