@@ -1,11 +1,12 @@
 "use client";
 
 import React, { memo } from "react";
-import { jaeminInternal } from "@ssgoi/core";
+import { jaemin } from "@ssgoi/react/view-transitions";
 import { BrowserContext, BrowserMockup, DemoPage } from "../browser-mockup";
 import type { RouteConfig } from "../browser-mockup";
 import { cn } from "../../../../lib/utils";
 import { useMobile } from "../../../../lib/use-mobile";
+import { jaemindemoFiles, ssgoiLocalPackages } from "../demo-templates";
 
 // English content
 const content = {
@@ -433,25 +434,42 @@ function HeaderActions() {
 }
 
 export function JaeminDemo() {
+  // Use Sandpack mode for true iframe isolation
+  return (
+    <BrowserMockup
+      routes={jaeminRoutes}
+      config={{}}
+      useSandpack={true}
+      sandpackFiles={jaemindemoFiles}
+      sandpackDependencies={{
+        "@ssgoi/react": "latest",
+        "@ssgoi/core": "latest",
+      }}
+    />
+  );
+}
+
+// Legacy non-Sandpack version (kept for reference/fallback)
+export function JaeminDemoLegacy() {
   const config = {
     transitions: [
       // Use jaemin transition for all special pages (excluding settings)
       {
         from: "/jaemin",
         to: "/jaemin/premium",
-        transition: jaeminInternal({ containerMode: "positioned-parent" }),
+        transition: jaemin(),
         symmetric: true,
       },
       {
         from: "/jaemin",
         to: "/jaemin/achievement",
-        transition: jaeminInternal({ containerMode: "positioned-parent" }),
+        transition: jaemin(),
         symmetric: true,
       },
       {
         from: "/jaemin/premium",
         to: "/jaemin/achievement",
-        transition: jaeminInternal({ containerMode: "positioned-parent" }),
+        transition: jaemin(),
         symmetric: true,
       },
       // Settings uses standard browser navigation (not special)

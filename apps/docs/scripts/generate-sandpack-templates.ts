@@ -79,14 +79,30 @@ function readFileIfExists(filePath: string): string | null {
 }
 
 function generateDemoTemplate(demoName: string): string | null {
+  // First, check for a self-contained -sandpack.tsx version
+  const sandpackFilePath = path.join(
+    DEMO_DIR,
+    `${demoName.replace("-demo", "")}-sandpack.tsx`,
+  );
+  let content = readFileIfExists(sandpackFilePath);
+
+  if (content) {
+    console.log(`  Using sandpack version: ${sandpackFilePath}`);
+    return content;
+  }
+
+  // Fall back to regular demo file
   const filePath = path.join(DEMO_DIR, `${demoName}.tsx`);
-  const content = readFileIfExists(filePath);
+  content = readFileIfExists(filePath);
 
   if (!content) {
     console.warn(`Warning: Demo file not found: ${filePath}`);
     return null;
   }
 
+  console.log(
+    `  Warning: ${demoName} has no -sandpack.tsx version, using original (may not work in Sandpack)`,
+  );
   return content;
 }
 
