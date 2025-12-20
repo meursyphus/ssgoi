@@ -234,7 +234,7 @@ export function BrowserMockup({
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         className={cn(
-          "browser-mockup overflow-hidden bg-white/[0.02] relative",
+          "browser-mockup overflow-hidden bg-white/[0.02] relative flex flex-col",
           isMobile
             ? "w-[375px] mx-auto rounded-[3rem] border-[14px] border-neutral-900 h-[667px] shadow-2xl shadow-black/50"
             : "w-full rounded-xl border border-white/10 h-[500px] md:h-[800px]",
@@ -247,7 +247,7 @@ export function BrowserMockup({
         {/* Browser Content */}
         <div
           ref={contentRef}
-          className="browser-content bg-[#121212] flex-1 overflow-auto h-full custom-scrollbar"
+          className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto custom-scrollbar"
         >
           <Ssgoi config={config}>
             {Layout ? (

@@ -8,6 +8,7 @@ export { jaemin } from "./jaemin";
 export * from "./pinterest";
 export * from "./rotate";
 export * from "./scroll";
+export * from "./sheet";
 export * from "./slide";
 export * from "./strip";
 export * from "./curtain-reveal";
