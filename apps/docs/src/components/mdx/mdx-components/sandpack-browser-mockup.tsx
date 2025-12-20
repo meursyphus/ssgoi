@@ -197,12 +197,29 @@ export function SandpackBrowserMockup({
       )}
 
       {/* Sandpack Preview - renders in iframe */}
-      <div className="flex-1 overflow-hidden bg-[#121212]">
+      <div className="flex-1 overflow-hidden bg-[#121212] sandpack-container">
+        <style>{`
+          .sandpack-container .sp-layout {
+            height: 100% !important;
+            border: none !important;
+            border-radius: 0 !important;
+          }
+          .sandpack-container .sp-preview {
+            height: 100% !important;
+          }
+          .sandpack-container .sp-preview-container {
+            height: 100% !important;
+          }
+          .sandpack-container iframe {
+            height: 100% !important;
+          }
+        `}</style>
         <SandpackProvider
           template="react-ts"
           files={files}
           customSetup={{
-            dependencies,
+            dependencies:
+              Object.keys(dependencies).length > 0 ? dependencies : undefined,
           }}
           options={{
             externalResources: [
@@ -213,12 +230,11 @@ export function SandpackBrowserMockup({
           }}
           theme="dark"
         >
-          <SandpackLayout className="h-full">
+          <SandpackLayout style={{ height: "100%" }}>
             <SandpackPreview
               showOpenInCodeSandbox={false}
               showRefreshButton={false}
-              className="h-full"
-              style={{ height: "100%" }}
+              style={{ height: "100%", flex: 1 }}
             />
           </SandpackLayout>
         </SandpackProvider>

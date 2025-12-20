@@ -42,26 +42,10 @@ const DEMO_FILES = [
   "instagram-demo",
 ];
 
-// SSGOI package paths for local dependencies
-const SSGOI_PACKAGES = {
-  "@ssgoi/core": path.join(ROOT_DIR, "packages/core/dist/index.js"),
-  "@ssgoi/core/transitions": path.join(
-    ROOT_DIR,
-    "packages/core/dist/transitions/index.js",
-  ),
-  "@ssgoi/core/view-transitions": path.join(
-    ROOT_DIR,
-    "packages/core/dist/view-transitions/index.js",
-  ),
-  "@ssgoi/react": path.join(ROOT_DIR, "packages/react/dist/index.js"),
-  "@ssgoi/react/view-transitions": path.join(
-    ROOT_DIR,
-    "packages/react/dist/view-transitions/index.js",
-  ),
-  "@ssgoi/react/transitions": path.join(
-    ROOT_DIR,
-    "packages/react/dist/transitions/index.js",
-  ),
+// SSGOI package directories to scan
+const SSGOI_PACKAGE_DIRS = {
+  "@ssgoi/core": path.join(ROOT_DIR, "packages/core/dist"),
+  "@ssgoi/react": path.join(ROOT_DIR, "packages/react/dist"),
 };
 
 function ensureDir(dir: string) {
@@ -106,23 +90,80 @@ function generateDemoTemplate(demoName: string): string | null {
   return content;
 }
 
+/**
+ * Recursively get all .js files in a directory
+ */
+function getAllJsFiles(dir: string, files: string[] = []): string[] {
+  if (!fs.existsSync(dir)) return files;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      getAllJsFiles(fullPath, files);
+    } else if (entry.name.endsWith(".js")) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
 function loadSsgoiPackages(): Record<string, string> {
   const packages: Record<string, string> = {};
+  let totalFiles = 0;
 
-  for (const [pkgName, pkgPath] of Object.entries(SSGOI_PACKAGES)) {
-    const content = readFileIfExists(pkgPath);
-    if (content) {
-      // Convert to node_modules path format
-      const nodeModulesPath = `/node_modules/${pkgName}/index.js`;
-      packages[nodeModulesPath] = content;
-    } else {
-      console.warn(`Warning: Package dist not found: ${pkgPath}`);
+  for (const [pkgName, distDir] of Object.entries(SSGOI_PACKAGE_DIRS)) {
+    if (!fs.existsSync(distDir)) {
+      console.warn(`Warning: Package dist not found: ${distDir}`);
       console.warn(
         `  Run 'pnpm build' in the root directory to build packages first.`,
       );
+      continue;
+    }
+
+    // Add package.json for Sandpack module resolution
+    const packageJsonPath = `/node_modules/${pkgName}/package.json`;
+    const subExports: Record<string, { import: string }> = {
+      ".": { import: "./index.js" },
+    };
+
+    // Scan for subpath exports (directories with index.js)
+    const entries = fs.readdirSync(distDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const subIndexPath = path.join(distDir, entry.name, "index.js");
+        if (fs.existsSync(subIndexPath)) {
+          subExports[`./${entry.name}`] = {
+            import: `./${entry.name}/index.js`,
+          };
+        }
+      }
+    }
+
+    packages[packageJsonPath] = JSON.stringify({
+      name: pkgName,
+      type: "module",
+      main: "./index.js",
+      module: "./index.js",
+      exports: subExports,
+    });
+
+    const jsFiles = getAllJsFiles(distDir);
+    for (const filePath of jsFiles) {
+      const relativePath = path.relative(distDir, filePath);
+      // Convert to node_modules path format
+      const nodeModulesPath = `/node_modules/${pkgName}/${relativePath}`;
+      const content = readFileIfExists(filePath);
+      if (content) {
+        packages[nodeModulesPath] = content;
+        totalFiles++;
+      }
     }
   }
 
+  console.log(
+    `  Loaded ${totalFiles} files from ${Object.keys(SSGOI_PACKAGE_DIRS).length} packages`,
+  );
   return packages;
 }
 
@@ -183,13 +224,10 @@ async function main() {
   // Ensure output directory exists
   ensureDir(OUTPUT_DIR);
 
-  // Load SSGOI packages
+  // Load SSGOI packages (all files from dist directories)
   console.log("Loading SSGOI package dist files...");
   const ssgoiPackages = loadSsgoiPackages();
-  const loadedCount = Object.keys(ssgoiPackages).length;
-  console.log(
-    `  Loaded ${loadedCount}/${Object.keys(SSGOI_PACKAGES).length} packages\n`,
-  );
+  console.log("");
 
   // Process demo files
   const processedDemos: string[] = [];
@@ -219,7 +257,7 @@ async function main() {
 
   console.log(`\nDone! Generated ${processedDemos.length} templates.`);
 
-  if (loadedCount === 0) {
+  if (Object.keys(ssgoiPackages).length === 0) {
     console.log("\nNote: No SSGOI packages were loaded.");
     console.log(
       "Run 'pnpm build' in the root directory to build packages first.",

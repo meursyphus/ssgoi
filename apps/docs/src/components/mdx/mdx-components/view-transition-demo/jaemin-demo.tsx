@@ -434,17 +434,19 @@ function HeaderActions() {
 }
 
 export function JaeminDemo() {
-  // Use Sandpack mode for true iframe isolation
+  // Merge demo files with local SSGOI packages for true iframe isolation
+  // This allows SSGOI to run without fetching from npm
+  const allFiles = {
+    ...jaemindemoFiles,
+    ...ssgoiLocalPackages,
+  };
+
   return (
     <BrowserMockup
       routes={jaeminRoutes}
       config={{}}
       useSandpack={true}
-      sandpackFiles={jaemindemoFiles}
-      sandpackDependencies={{
-        "@ssgoi/react": "latest",
-        "@ssgoi/core": "latest",
-      }}
+      sandpackFiles={allFiles}
     />
   );
 }
