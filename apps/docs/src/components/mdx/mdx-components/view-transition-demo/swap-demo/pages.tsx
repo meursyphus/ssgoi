@@ -18,44 +18,54 @@ export const HomePage = memo(() => {
     <DemoPage path="/home">
       <div className="min-h-[600px] bg-[#121212] pb-20 flex flex-col">
         {/* Header */}
-        <header className="px-6 py-4 border-b border-gray-800">
-          <h1 className="text-xl font-semibold text-gray-100">Home</h1>
+        <header className="px-5 py-4 border-b border-white/10">
+          <h1 className="text-xl font-semibold text-white">Home</h1>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-6 py-8">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <section>
-              <h2 className="text-lg font-medium text-gray-200 mb-4">
-                Welcome
+        <main className="flex-1 px-5 py-5">
+          <div className="space-y-6">
+            {/* Welcome Card */}
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+              <h2 className="text-base font-medium text-white mb-2">
+                Swap Transition Demo
               </h2>
-              <p className="text-gray-400 leading-relaxed">
-                This demo showcases the swap transition effect. Navigate between
-                tabs using the bottom navigation to see smooth horizontal
-                transitions between pages.
+              <p className="text-sm text-neutral-400 leading-relaxed">
+                Navigate between tabs to see smooth horizontal transitions. The
+                direction changes based on tab order.
               </p>
-            </section>
+            </div>
 
+            {/* Activity Section */}
             <section>
-              <h3 className="text-base font-medium text-gray-200 mb-3">
-                Recent Activity
+              <h3 className="text-sm font-medium text-neutral-300 mb-3">
+                Today's Schedule
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {[
-                  { title: "Morning workout", time: "8:00 AM" },
-                  { title: "Team meeting", time: "10:30 AM" },
-                  { title: "Lunch break", time: "12:00 PM" },
-                  { title: "Project review", time: "2:00 PM" },
+                  { title: "Team standup", time: "9:00 AM", status: "done" },
+                  { title: "Design review", time: "11:00 AM", status: "done" },
+                  {
+                    title: "Client meeting",
+                    time: "2:00 PM",
+                    status: "upcoming",
+                  },
+                  { title: "Code review", time: "4:00 PM", status: "upcoming" },
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-gray-800 rounded-lg border border-gray-700"
+                    className="p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/[0.08] transition-colors"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="text-gray-200 font-medium">
-                        {item.title}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${item.status === "done" ? "bg-emerald-500" : "bg-amber-500"}`}
+                        />
+                        <span className="text-sm text-white">{item.title}</span>
                       </div>
-                      <div className="text-sm text-gray-500">{item.time}</div>
+                      <span className="text-xs text-neutral-500">
+                        {item.time}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -75,78 +85,90 @@ export const SearchPage = memo(() => {
     <DemoPage path="/search">
       <div className="min-h-[600px] bg-[#121212] pb-20 flex flex-col">
         {/* Header */}
-        <header className="px-6 py-4 border-b border-gray-800">
-          <h1 className="text-xl font-semibold text-gray-100">Search</h1>
+        <header className="px-5 py-4 border-b border-white/10">
+          <h1 className="text-xl font-semibold text-white">Search</h1>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-6 py-8">
-          <div className="max-w-2xl mx-auto space-y-6">
+        <main className="flex-1 px-5 py-5">
+          <div className="space-y-5">
             {/* Search Input */}
             <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
               <input
                 type="text"
-                placeholder="Search for anything..."
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600"
+                placeholder="Search anything..."
+                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 focus:bg-white/[0.08] transition-all"
               />
             </div>
 
-            {/* Trending Topics */}
+            {/* Categories */}
             <section>
-              <h3 className="text-base font-medium text-gray-200 mb-3">
-                Trending Topics
+              <h3 className="text-sm font-medium text-neutral-300 mb-3">
+                Categories
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
-                  "Web Development",
-                  "React",
-                  "TypeScript",
-                  "Design Systems",
-                  "Animations",
-                  "UI/UX",
-                ].map((topic, index) => (
+                  { name: "Development", icon: "💻", count: 24 },
+                  { name: "Design", icon: "🎨", count: 18 },
+                  { name: "Marketing", icon: "📈", count: 12 },
+                  { name: "Business", icon: "💼", count: 9 },
+                ].map((cat, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-full text-sm text-gray-200 hover:border-gray-600 transition-colors"
+                    className="p-3 bg-white/5 border border-white/10 rounded-lg text-left hover:bg-white/[0.08] transition-colors"
                   >
-                    {topic}
+                    <div className="text-lg mb-1">{cat.icon}</div>
+                    <div className="text-sm text-white">{cat.name}</div>
+                    <div className="text-xs text-neutral-500">
+                      {cat.count} items
+                    </div>
                   </button>
                 ))}
               </div>
             </section>
 
-            {/* Recent Searches */}
+            {/* Recent */}
             <section>
-              <h3 className="text-base font-medium text-gray-200 mb-3">
+              <h3 className="text-sm font-medium text-neutral-300 mb-3">
                 Recent Searches
               </h3>
-              <div className="space-y-2">
-                {[
-                  "SSGOI transitions",
-                  "Page animations",
-                  "React hooks",
-                  "Tailwind CSS",
-                ].map((search, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 px-4 py-3 bg-gray-800 rounded-lg border border-gray-700"
-                  >
-                    <svg
-                      className="w-4 h-4 text-gray-500 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+              <div className="space-y-1">
+                {["Page transitions", "Animation library", "React hooks"].map(
+                  (search, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-200">{search}</span>
-                  </div>
-                ))}
+                      <svg
+                        className="w-4 h-4 text-neutral-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-sm text-neutral-300">{search}</span>
+                    </div>
+                  ),
+                )}
               </div>
             </section>
           </div>
@@ -163,65 +185,93 @@ export const ProfilePage = memo(() => {
     <DemoPage path="/profile">
       <div className="min-h-[600px] bg-[#121212] pb-20 flex flex-col">
         {/* Header */}
-        <header className="px-6 py-4 border-b border-gray-800">
-          <h1 className="text-xl font-semibold text-gray-100">Profile</h1>
+        <header className="px-5 py-4 border-b border-white/10">
+          <h1 className="text-xl font-semibold text-white">Profile</h1>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-6 py-8">
-          <div className="max-w-2xl mx-auto space-y-6">
-            {/* Profile Info */}
-            <section className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-3xl">👤</span>
+        <main className="flex-1 px-5 py-5">
+          <div className="space-y-5">
+            {/* Profile Card */}
+            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+              <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                JD
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-100">
-                  Demo User
-                </h2>
-                <p className="text-sm text-gray-400">demo@ssgoi.dev</p>
+                <h2 className="text-base font-semibold text-white">John Doe</h2>
+                <p className="text-sm text-neutral-400">Product Designer</p>
               </div>
-            </section>
+            </div>
 
             {/* Stats */}
-            <section className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { label: "Posts", value: "42" },
+                { label: "Projects", value: "24" },
                 { label: "Followers", value: "1.2K" },
-                { label: "Following", value: "328" },
+                { label: "Following", value: "312" },
               ].map((stat, index) => (
                 <div
                   key={index}
-                  className="p-4 bg-gray-800 rounded-lg border border-gray-700 text-center"
+                  className="p-3 bg-white/5 rounded-lg border border-white/10 text-center"
                 >
-                  <div className="text-2xl font-bold text-gray-100">
+                  <div className="text-lg font-semibold text-white">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+                  <div className="text-xs text-neutral-500 mt-0.5">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
-            </section>
+            </div>
 
-            {/* Settings */}
+            {/* Menu */}
             <section>
-              <h3 className="text-base font-medium text-gray-200 mb-3">
+              <h3 className="text-sm font-medium text-neutral-300 mb-3">
                 Settings
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {[
-                  "Edit Profile",
-                  "Notifications",
-                  "Privacy & Security",
-                  "Help & Support",
-                  "About",
+                  {
+                    name: "Edit Profile",
+                    icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                  },
+                  {
+                    name: "Notifications",
+                    icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+                  },
+                  {
+                    name: "Privacy",
+                    icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+                  },
+                  {
+                    name: "Help Center",
+                    icon: "M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  },
                 ].map((item, index) => (
                   <button
                     key={index}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors text-left"
+                    className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
                   >
-                    <span className="text-gray-200">{item}</span>
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className="w-5 h-5 text-neutral-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d={item.icon}
+                        />
+                      </svg>
+                      <span className="text-sm text-neutral-200">
+                        {item.name}
+                      </span>
+                    </div>
                     <svg
-                      className="w-5 h-5 text-gray-500"
+                      className="w-4 h-4 text-neutral-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

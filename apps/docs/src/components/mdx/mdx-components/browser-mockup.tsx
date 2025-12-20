@@ -364,7 +364,7 @@ export function BrowserMockup({
         className={cn(
           "browser-mockup overflow-hidden bg-white/[0.02] relative flex flex-col",
           isMobile
-            ? "w-[375px] mx-auto rounded-[3rem] border-[14px] border-neutral-900 h-[667px] shadow-2xl shadow-black/50"
+            ? "w-[340px] mx-auto rounded-[3rem] border-[14px] border-neutral-900 h-[736px] shadow-2xl shadow-black/50"
             : "w-full rounded-xl border border-white/10 h-[500px] md:h-[800px]",
           className,
         )}

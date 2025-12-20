@@ -22,7 +22,7 @@ export function SentEmailsPage() {
 
   return (
     <>
-      {/* FAB - Compose Button - fixed positioning for Sandpack */}
+      {/* FAB - Compose Button */}
       <button
         ref={transition({
           scope: "local",
@@ -30,7 +30,7 @@ export function SentEmailsPage() {
           ...fade(),
         })}
         onClick={() => navigate("/compose")}
-        className="fixed bottom-4 right-4 w-14 h-14 bg-blue-500 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all z-10"
+        className="fixed bottom-5 right-5 w-14 h-14 bg-blue-500 rounded-full shadow-lg shadow-blue-500/25 flex items-center justify-center hover:bg-blue-400 active:scale-95 transition-all z-10"
       >
         <svg
           className="w-6 h-6 text-white"
@@ -49,42 +49,42 @@ export function SentEmailsPage() {
       <DemoPage path="/sent">
         <div className="flex flex-col bg-[#121212] min-h-screen">
           {/* Header */}
-          <div className="flex-shrink-0 bg-[#121212] border-b border-white/5">
-            <div className="px-4 py-3">
-              <h1 className="text-lg font-semibold text-neutral-100">Sent</h1>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                {sentEmails.length} emails
+          <div className="flex-shrink-0 border-b border-white/10">
+            <div className="px-5 py-4">
+              <h1 className="text-xl font-semibold text-white">Sent</h1>
+              <p className="text-sm text-neutral-400 mt-0.5">
+                {sentEmails.length} messages
               </p>
             </div>
           </div>
 
-          {/* Email List - Scrollable area */}
+          {/* Email List */}
           <div className="divide-y divide-white/5">
             {sentEmails.map((email) => (
               <div
                 key={email.id}
-                className="px-4 py-3 hover:bg-white/[0.02] transition-colors"
+                className="px-5 py-4 hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <div className="flex items-start gap-3">
                   {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                     {email.to[0]}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-sm font-medium text-neutral-100">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium text-white">
                         {email.to}
                       </span>
-                      <span className="text-[10px] text-neutral-500">
+                      <span className="text-xs text-neutral-500">
                         {email.date}
                       </span>
                     </div>
-                    <h3 className="text-sm text-neutral-300 truncate mb-0.5">
+                    <h3 className="text-sm text-neutral-300 truncate">
                       {email.subject}
                     </h3>
-                    <p className="text-xs text-neutral-500 truncate">
+                    <p className="text-sm text-neutral-500 truncate mt-0.5">
                       {email.preview}
                     </p>
                   </div>
@@ -106,7 +106,6 @@ export function ComposeEmailPage() {
   const [body, setBody] = useState("");
 
   const handleSend = () => {
-    // Simulate sending
     navigate("/sent");
   };
 
@@ -115,21 +114,21 @@ export function ComposeEmailPage() {
       <DemoPage path="/compose">
         <div className="min-h-screen bg-[#121212] flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-[#121212]/95 backdrop-blur-md border-b border-white/5">
+          <div className="sticky top-0 z-10 bg-[#121212]/95 backdrop-blur-md border-b border-white/10">
             <div className="px-4 py-3 flex items-center justify-between">
               <button
                 onClick={() => navigate("/sent")}
-                className="text-sm text-neutral-400 hover:text-neutral-200 transition-colors"
+                className="text-sm text-neutral-400 hover:text-white transition-colors"
               >
                 Cancel
               </button>
-              <h1 className="text-base font-semibold text-neutral-100">
+              <h1 className="text-base font-semibold text-white">
                 New Message
               </h1>
               <button
                 onClick={handleSend}
                 disabled={!to.trim()}
-                className="text-sm font-medium text-blue-500 hover:text-blue-400 disabled:text-neutral-600 disabled:cursor-not-allowed transition-colors"
+                className="text-sm font-medium text-blue-400 hover:text-blue-300 disabled:text-neutral-600 disabled:cursor-not-allowed transition-colors"
               >
                 Send
               </button>
@@ -140,25 +139,25 @@ export function ComposeEmailPage() {
           <div className="flex-1 flex flex-col">
             {/* To Field */}
             <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3">
-              <span className="text-sm text-neutral-500 w-8">To</span>
+              <span className="text-sm text-neutral-500 w-14">To:</span>
               <input
                 type="email"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                placeholder="Enter email address"
-                className="flex-1 bg-transparent text-sm text-neutral-100 placeholder-neutral-600 outline-none"
+                placeholder="recipient@email.com"
+                className="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 outline-none"
               />
             </div>
 
             {/* Subject Field */}
             <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3">
-              <span className="text-sm text-neutral-500 w-8">Subj</span>
+              <span className="text-sm text-neutral-500 w-14">Subject:</span>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Subject"
-                className="flex-1 bg-transparent text-sm text-neutral-100 placeholder-neutral-600 outline-none"
+                placeholder="Email subject"
+                className="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 outline-none"
               />
             </div>
 
@@ -167,14 +166,14 @@ export function ComposeEmailPage() {
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Compose your message..."
-                className="w-full h-full min-h-[200px] bg-transparent text-sm text-neutral-100 placeholder-neutral-600 outline-none resize-none leading-relaxed"
+                placeholder="Write your message..."
+                className="w-full h-full min-h-[200px] bg-transparent text-sm text-white placeholder-neutral-600 outline-none resize-none leading-relaxed"
               />
             </div>
 
             {/* Toolbar */}
-            <div className="border-t border-white/5 px-4 py-3 flex items-center gap-4">
-              <button className="text-neutral-500 hover:text-neutral-300 transition-colors">
+            <div className="border-t border-white/10 px-4 py-3 flex items-center gap-4 bg-[#0a0a0a]">
+              <button className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -189,7 +188,7 @@ export function ComposeEmailPage() {
                   />
                 </svg>
               </button>
-              <button className="text-neutral-500 hover:text-neutral-300 transition-colors">
+              <button className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -204,7 +203,7 @@ export function ComposeEmailPage() {
                   />
                 </svg>
               </button>
-              <button className="text-neutral-500 hover:text-neutral-300 transition-colors">
+              <button className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -215,7 +214,7 @@ export function ComposeEmailPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={1.5}
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                   />
                 </svg>
               </button>
