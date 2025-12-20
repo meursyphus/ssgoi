@@ -222,7 +222,7 @@ export default function App() {
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
       <div
         ref={contentRef}
-        className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto min-h-screen"
+        className="browser-content z-0 relative bg-[#121212] h-screen overflow-y-scroll"
       >
         <Ssgoi config={config}>
           <DemoLayout>
@@ -359,12 +359,42 @@ body {
   padding: 0;
   background: #121212;
   min-height: 100vh;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
-body::-webkit-scrollbar {
-  display: none;
+/* Custom scrollbar for desktop */
+.browser-content {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a #121212;
+}
+
+.browser-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.browser-content::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+.browser-content::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+
+.browser-content::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Hide scrollbar on mobile */
+@media (max-width: 768px) {
+  .browser-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .browser-content::-webkit-scrollbar {
+    display: none;
+  }
 }
 `;
 
