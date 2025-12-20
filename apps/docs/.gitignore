@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# auto-generated sandpack templates
+/src/components/mdx/mdx-components/demo-templates/

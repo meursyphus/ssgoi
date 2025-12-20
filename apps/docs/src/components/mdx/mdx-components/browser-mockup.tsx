@@ -1,10 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
+import React, {
+  ReactNode,
+  useState,
+  useRef,
+  memo,
+  useEffect,
+  useMemo,
+} from "react";
 import { cn } from "../../../lib/utils";
 import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
+import {
+  SandpackProvider,
+  SandpackPreview,
+  SandpackLayout,
+} from "@codesandbox/sandpack-react";
 
 // Route configuration
 export interface RouteConfig {
@@ -23,6 +35,12 @@ export interface BrowserMockupProps {
   onNavigate?: (path: string) => void;
   layout?: React.ComponentType<{ children: React.ReactNode }>;
   deviceType?: "desktop" | "mobile";
+  /** Enable Sandpack mode for true iframe isolation */
+  useSandpack?: boolean;
+  /** Files to pass to Sandpack (required if useSandpack is true) */
+  sandpackFiles?: Record<string, string>;
+  /** Additional Sandpack dependencies */
+  sandpackDependencies?: Record<string, string>;
 }
 
 // Browser context for nested components
@@ -196,6 +214,99 @@ const RouteContent = memo(({ route }: RouteContentProps) => {
 
 RouteContent.displayName = "RouteContent";
 
+// Sandpack styles
+const SANDPACK_LAYOUT_STYLE = { height: "100%", flex: 1 } as const;
+const SANDPACK_PREVIEW_STYLE = { height: "100%", flex: 1 } as const;
+
+// Sandpack content - completely static, never re-renders on navigation
+const SandpackContent = memo(
+  ({
+    files,
+    dependencies,
+    externalResources = [],
+  }: {
+    files: Record<string, string>;
+    dependencies: Record<string, string>;
+    externalResources?: string[];
+  }) => {
+    const customSetup = useMemo(
+      () => ({
+        dependencies:
+          Object.keys(dependencies).length > 0 ? dependencies : undefined,
+      }),
+      [dependencies],
+    );
+    const sandpackOptions = useMemo(
+      () => ({
+        externalResources: [
+          "https://cdn.tailwindcss.com",
+          ...externalResources,
+        ],
+        autoResize: false,
+      }),
+      [externalResources],
+    );
+
+    return (
+      <div className="flex-1 min-h-0 overflow-hidden bg-[#121212] sandpack-container">
+        <style>{`
+        .sandpack-container {
+          display: flex;
+          flex-direction: column;
+        }
+        .sandpack-container .sp-wrapper {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        .sandpack-container .sp-layout {
+          flex: 1 !important;
+          min-height: 0 !important;
+          height: 100% !important;
+          border: none !important;
+          border-radius: 0 !important;
+        }
+        .sandpack-container .sp-stack {
+          height: 100% !important;
+        }
+        .sandpack-container .sp-preview {
+          height: 100% !important;
+          flex: 1 !important;
+        }
+        .sandpack-container .sp-preview-container {
+          height: 100% !important;
+        }
+        .sandpack-container .sp-preview-iframe {
+          height: 100% !important;
+        }
+        .sandpack-container iframe {
+          height: 100% !important;
+        }
+      `}</style>
+        <SandpackProvider
+          template="react-ts"
+          files={files}
+          customSetup={customSetup}
+          options={sandpackOptions}
+          theme="dark"
+        >
+          <SandpackLayout style={SANDPACK_LAYOUT_STYLE}>
+            <SandpackPreview
+              showOpenInCodeSandbox={false}
+              showRefreshButton={false}
+              showSandpackErrorOverlay={false}
+              style={SANDPACK_PREVIEW_STYLE}
+            />
+          </SandpackLayout>
+        </SandpackProvider>
+      </div>
+    );
+  },
+);
+
+SandpackContent.displayName = "SandpackContent";
+
 export function BrowserMockup({
   routes,
   config,
@@ -204,14 +315,18 @@ export function BrowserMockup({
   onNavigate,
   layout: Layout,
   deviceType = "desktop",
+  useSandpack = false,
+  sandpackFiles,
+  sandpackDependencies = {},
 }: BrowserMockupProps) {
   const [currentPath, setCurrentPath] = useState(
     initialPath || routes[0]?.path || "/",
   );
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const isMobile = deviceType === "mobile";
 
-  // Handle navigation
+  // Handle navigation (for non-Sandpack mode)
   const navigate = (path: string) => {
     if (path === currentPath) return;
 
@@ -224,11 +339,22 @@ export function BrowserMockup({
     }
   };
 
-  // Find current route
+  // Listen for navigation updates from Sandpack iframe via postMessage
+  useEffect(() => {
+    if (!useSandpack) return;
+
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === "SSGOI_NAVIGATION") {
+        setCurrentPath(e.data.path);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [useSandpack]);
+
+  // Find current route (for non-Sandpack mode)
   const currentRoute =
     routes.find((route) => route.path === currentPath) || routes[0];
-
-  const isMobile = deviceType === "mobile";
 
   return (
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
@@ -241,24 +367,31 @@ export function BrowserMockup({
           className,
         )}
       >
-        {/* Header - Desktop or Mobile */}
+        {/* Header - Desktop or Mobile (common for both modes) */}
         {isMobile ? <MobileHeader /> : <BrowserHeader />}
 
-        {/* Browser Content */}
-        <div
-          ref={contentRef}
-          className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto custom-scrollbar"
-        >
-          <Ssgoi config={config}>
-            {Layout ? (
-              <Layout>
+        {/* Content - Sandpack or Regular */}
+        {useSandpack && sandpackFiles ? (
+          <SandpackContent
+            files={sandpackFiles}
+            dependencies={sandpackDependencies}
+          />
+        ) : (
+          <div
+            ref={contentRef}
+            className="browser-content z-0 relative bg-[#121212] flex-1 overflow-auto custom-scrollbar"
+          >
+            <Ssgoi config={config}>
+              {Layout ? (
+                <Layout>
+                  <RouteContent route={currentRoute} />
+                </Layout>
+              ) : (
                 <RouteContent route={currentRoute} />
-              </Layout>
-            ) : (
-              <RouteContent route={currentRoute} />
-            )}
-          </Ssgoi>
-        </div>
+              )}
+            </Ssgoi>
+          </div>
+        )}
 
         {/* iPhone Home Indicator */}
         {isMobile && (
