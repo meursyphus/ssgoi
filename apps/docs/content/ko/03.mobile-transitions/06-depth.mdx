@@ -1,12 +1,12 @@
 ---
-title: "뎁스(Depth) 전환"
+title: "뎁스 전환"
 description: "Z축 계층 이동을 표현하는 전환"
-nav-title: "뎁스(Depth)"
+nav-title: "뎁스"
 ---
 
-# 뎁스(Depth) 전환
+# 뎁스 전환
 
-뎁스(Depth) 전환은 **Z축 계층 이동**을 표현하는 전환입니다. Material Design의 Shared Z-Axis transition과 동일한 개념으로, 두 화면이 같은 방향으로 scale과 fade를 조합하여 "깊이감"을 만들어냅니다.
+뎁스 전환은 **Z축 계층 이동**을 표현하는 전환입니다. Material Design의 Shared Z-Axis transition과 동일한 개념으로, 두 화면이 같은 방향으로 scale과 fade를 조합하여 "깊이감"을 만들어냅니다.
 
 ## 데모
 
@@ -26,9 +26,9 @@ nav-title: "뎁스(Depth)"
       description: "독립적인 섹션 간 이동에는 계층적 연결이 느껴지지 않아 부적합합니다."
     },
     {
-      label: "형제 관계",
+      label: "탑레벨 전환",
       suitable: "no",
-      description: "동일 레벨의 탭 네비게이션에는 슬라이드 전환이 더 적합합니다."
+      description: "바텀 네비게이션 등 동등한 레벨 간 이동에는 스왑 전환이 더 적합합니다."
     },
     {
       label: "계층 관계",
@@ -56,18 +56,16 @@ nav-title: "뎁스(Depth)"
 ### 모션 디자인
 
 **전진 (enter) 동작**:
-- **나가는 페이지**: scale 1 → 1.2 + fade out (뒤로 확대되며 사라짐)
-- **들어오는 페이지**: scale 0.8 → 1 + fade in (앞으로 나오며 나타남)
+- **나가는 페이지**: scale 1 → 1.05 + fade out (뒤로 확대되며 사라짐)
+- **들어오는 페이지**: scale 0.95 → 1 + fade in (앞으로 나오며 나타남)
 
 **후진 (exit) 동작**:
-- **나가는 페이지**: scale 1 → 0.8 + fade out (앞으로 축소되며 사라짐)
-- **들어오는 페이지**: scale 1.2 → 1 + fade in (뒤에서 앞으로 나타남)
-
-이 모션은 **물리적 깊이감**을 시뮬레이션하여 사용자에게 공간적 맥락을 제공합니다.
+- **나가는 페이지**: scale 1 → 0.95 + fade out (앞으로 축소되며 사라짐)
+- **들어오는 페이지**: scale 1.05 → 1 + fade in (뒤에서 앞으로 나타남)
 
 ## 기본 사용법
 
-### 1. 전환 설정
+### 전환 설정
 
 ::code-group
 
@@ -79,16 +77,10 @@ import { depth } from '@ssgoi/react/view-transitions';
   config={{
     transitions: [
       {
-        from: '/search-icon',
+        from: '/home',
         to: '/search',
         transition: depth({ direction: 'enter' }),
         symmetric: true // 뒤로가기 시 자동으로 exit 방향 적용
-      },
-      {
-        from: '/settings-icon',
-        to: '/settings',
-        transition: depth({ direction: 'enter' }),
-        symmetric: true
       }
     ]
   }}
@@ -107,14 +99,8 @@ import { depth } from '@ssgoi/react/view-transitions';
   config={{
     transitions: [
       {
-        from: '/search-icon',
+        from: '/home',
         to: '/search',
-        transition: depth({ direction: 'enter' }),
-        symmetric: true
-      },
-      {
-        from: '/settings-icon',
-        to: '/settings',
         transition: depth({ direction: 'enter' }),
         symmetric: true
       }
@@ -127,16 +113,12 @@ import { depth } from '@ssgoi/react/view-transitions';
 
 ::
 
-### 2. 방향 설정
+### 방향 설정
 
 `direction` 옵션으로 계층 이동 방향을 지정합니다:
 
 - **`enter`**: 깊이 들어가기 (기본값)
-  - 새 화면이 앞에서 확대, 이전 화면은 뒤로 확대
-  - 하위 레벨로 이동할 때 사용
 - **`exit`**: 깊이에서 나오기
-  - 현재 화면이 앞으로 축소, 이전 화면은 뒤에서 축소
-  - 상위 레벨로 돌아갈 때 사용
 
 ```typescript
 // 하위 레벨로 들어갈 때
@@ -148,93 +130,9 @@ depth({ direction: 'exit' })
 // symmetric: true를 사용하면 자동으로 반대 방향 생성
 ```
 
-## 커스터마이징
-
-### 스프링 물리 설정
-
-뎁스 전환의 스프링 애니메이션을 커스터마이징할 수 있습니다:
-
-```typescript
-depth({
-  direction: 'enter',
-  spring: {
-    stiffness: 300,  // 스프링 강성 (높을수록 빠름)
-    damping: 25,     // 감쇠 (높을수록 덜 튐)
-    mass: 1          // 질량 (높을수록 느림)
-  }
-})
-```
-
-### Scale 범위 조정
-
-Scale의 시작/종료 값을 조정하여 깊이감의 강도를 변경할 수 있습니다:
-
-```typescript
-// 더 강한 깊이감
-depth({
-  direction: 'enter',
-  scaleRange: { min: 0.7, max: 1.3 }
-})
-
-// 더 부드러운 깊이감
-depth({
-  direction: 'enter',
-  scaleRange: { min: 0.9, max: 1.1 }
-})
-```
-
-## 주의사항
-
-### symmetric 옵션 활용
-
-뎁스 전환은 양방향으로 동작하므로 `symmetric: true`를 사용하면 편리합니다:
-
-```typescript
-{
-  from: '/list',
-  to: '/detail',
-  transition: depth({ direction: 'enter' }),
-  symmetric: true
-  // 자동으로 /detail → /list는 exit 방향으로 동작
-}
-```
-
-### 계층 구조 명확히
-
-뎁스 전환은 **명확한 계층 관계**가 있을 때만 사용하세요. 동일 레벨의 화면 간 이동에는 슬라이드나 페이드가 더 적합합니다.
-
-### 성능 고려
-
-Scale과 opacity 애니메이션은 GPU 가속을 받지만, 복잡한 레이아웃에서는 성능 테스트가 필요합니다.
-
-## 접근성
-
-### 모션 감소 설정
-
-사용자의 모션 감소 설정을 존중하세요:
-
-```css
-/* 사용자가 모션 감소를 선호하는 경우 */
-@media (prefers-reduced-motion: reduce) {
-  /* SSGOI는 자동으로 전환 시간을 단축합니다 */
-}
-```
-
-### 포커스 관리
-
-페이지 전환 후 적절한 요소로 포커스를 이동시키세요:
-
-```typescript
-// 새 페이지 로드 후
-useEffect(() => {
-  // 메인 콘텐츠로 포커스 이동
-  document.querySelector('h1')?.focus();
-}, []);
-```
-
 ## 모범 사례
 
-### ✅ 좋은 예
+### 좋은 예
 
 - 검색 아이콘 → 검색 전체 화면
 - 상품 카드 → 상품 상세 페이지
@@ -242,27 +140,15 @@ useEffect(() => {
 - 알림 벨 → 알림 목록
 - 카테고리 → 하위 카테고리
 
-### ❌ 나쁜 예
+### 나쁜 예
 
-- 탭 간 이동 (형제 관계) - 슬라이드 사용
-- 독립적인 섹션 간 이동 - 페이드 사용
-- 모달 열기 - 시트 전환 사용
-- 뒤로가기 없는 일회성 화면 - 드릴 사용
+- 바텀 네비게이션 탭 간 이동 → 스왑 사용
+- 독립적인 섹션 간 이동 → 페이드 사용
+- 모달 열기 → 시트 전환 사용
 
 ## 관련 전환
 
-- **[드릴(Drill)](/ko/mobile-transitions/drill)**: 단방향 확대/축소, 복귀가 없는 경우
-- **[시트(Sheet)](/ko/mobile-transitions/sheet)**: 하단에서 올라오는 바텀 시트
-- **[페이드(Fade)](/ko/basic-transitions/fade)**: 관련 없는 화면 간 부드러운 전환
-- **[슬라이드(Slide)](/ko/mobile-transitions/slide)**: 형제 관계의 화면 간 이동
-
-## 브라우저 호환성
-
-뎁스 전환은 모든 모던 브라우저에서 동작합니다:
-
-- ✅ Chrome/Edge (최신 버전)
-- ✅ Firefox (최신 버전)
-- ✅ Safari (최신 버전)
-- ✅ 모바일 브라우저 전체 지원
-
-GPU 가속을 활용하여 60fps의 부드러운 애니메이션을 제공합니다.
+- **[드릴](/ko/mobile-transitions/drill)**: 단방향 확대/축소
+- **[시트](/ko/mobile-transitions/sheet)**: 하단에서 올라오는 바텀 시트
+- **[스왑](/ko/mobile-transitions/swap)**: 탑레벨 화면 간 전환
+- **[페이드](/ko/basic-transitions/fade)**: 관련 없는 화면 간 부드러운 전환

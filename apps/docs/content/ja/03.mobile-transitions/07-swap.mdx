@@ -1,0 +1,157 @@
+---
+title: "スワップトランジション"
+description: "トップレベル画面間の切り替えのためのトランジション"
+nav-title: "スワップ"
+---
+
+# スワップトランジション
+
+スワップトランジションは**トップレベル画面間の切り替え**のためのトランジションです。Material DesignのFade Throughパターンに類似しており、前の画面が消えた後、新しい画面が小さい状態から大きくなって現れ、自然なトランジションを作り出します。
+
+## デモ
+
+<ViewTransitionDemo type="swap" />
+
+## UX原則
+
+### いつ使用しますか?
+
+スワップトランジションは**トップレベルで独立したセクション間を移動**するときに使用します。主にボトムナビゲーション、タブ切り替え、トップレベルメニュー切り替えに最適化されています。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "上位/下位レベルの移動にはデプストランジションがより適切です。"
+    },
+    {
+      label: "トップレベル切り替え",
+      suitable: "yes",
+      description: "ボトムナビゲーション、タブバーなど独立したセクション間の切り替えに最適です。"
+    },
+    {
+      label: "独立したセクション",
+      suitable: "yes",
+      description: "関連のないトップレベルコンテンツ間の移動にも自然に動作します。"
+    }
+  ]}
+/>
+
+#### 主な使用ケース
+- ボトムナビゲーションタブ切り替え (ホーム ↔ 検索 ↔ プロフィール)
+- トップレベルメニュー切り替え (ダッシュボード ↔ 設定 ↔ 通知)
+- 独立したセクション切り替え (ニュース ↔ 天気 ↔ スポーツ)
+
+### なぜこのように動作しますか?
+
+1. **前の画面フェードアウト**: 現在の画面が単に透明になって消えます。スケール変化なしでスムーズに退場します。
+
+2. **新しい画面フェードイン + スケールアップ**: 前の画面が完全に消えた後、新しい画面が少し小さい状態(0.95 scale)から始まり、通常サイズ(1.0 scale)に拡大して現れます。
+
+3. **順次実行**: OUTアニメーションが完了した後、INアニメーションが開始され、2つの画面が重ならず明確に切り替わります。
+
+### モーションデザイン
+
+**OUT (出て行くページ)**:
+- **opacity**: 1 → 0 (フェードアウトのみ)
+- **scale**: 変化なし
+
+**IN (入ってくるページ)**:
+- **opacity**: 0 → 1 (フェードイン)
+- **scale**: 0.95 → 1 (小さく始まって通常サイズへ)
+- **開始時点**: OUTアニメーション完了後
+
+## 基本的な使い方
+
+### ボトムナビゲーション設定
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { swap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { swap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+## ベストプラクティス
+
+### 良い例
+
+- ボトムナビゲーションタブ間の切り替え
+- トップレベルメニューセクション間の移動
+- 独立したダッシュボードビュー間の切り替え
+
+### 悪い例
+
+- リスト → 詳細ページ → デプストランジションを使用
+- モーダルまたはボトムシート → シートトランジションを使用
+- 階層的ナビゲーション → デプストランジションを使用
+
+## 関連トランジション
+
+- **[デプス](/ja/mobile-transitions/depth)**: 階層的関係の画面間移動
+- **[フェード](/ja/basic-transitions/fade)**: 単純なフェードのみが必要な場合
+- **[シート](/ja/mobile-transitions/sheet)**: モーダルやボトムシート

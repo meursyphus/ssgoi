@@ -1,0 +1,157 @@
+---
+title: "스왑 전환"
+description: "탑레벨 화면 간 교체를 위한 전환"
+nav-title: "스왑"
+---
+
+# 스왑 전환
+
+스왑 전환은 **탑레벨 화면 간 교체**를 위한 전환입니다. Material Design의 Fade Through 패턴과 유사하며, 이전 화면이 사라진 후 새 화면이 작은 상태에서 커지며 나타나 자연스러운 전환을 만들어냅니다.
+
+## 데모
+
+<ViewTransitionDemo type="swap" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+스왑 전환은 **탑레벨에서 독립적인 섹션 간 이동**할 때 사용합니다. 주로 바텀 네비게이션, 탭 전환, 톱레벨 메뉴 전환에 최적화되어 있습니다.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "상위/하위 레벨 이동에는 뎁스 전환이 더 적합합니다."
+    },
+    {
+      label: "탑레벨 전환",
+      suitable: "yes",
+      description: "바텀 네비게이션, 탭 바 등 독립적인 섹션 간 전환에 최적입니다."
+    },
+    {
+      label: "독립적 섹션",
+      suitable: "yes",
+      description: "관련 없는 톱레벨 콘텐츠 간 이동에도 자연스럽게 동작합니다."
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+- 바텀 네비게이션 탭 전환 (홈 ↔ 검색 ↔ 프로필)
+- 톱레벨 메뉴 전환 (대시보드 ↔ 설정 ↔ 알림)
+- 독립적인 섹션 전환 (뉴스 ↔ 날씨 ↔ 스포츠)
+
+### 왜 이렇게 동작하나요?
+
+1. **이전 화면 페이드 아웃**: 현재 화면이 단순히 투명해지며 사라집니다. Scale 변화 없이 부드럽게 퇴장합니다.
+
+2. **새 화면 페이드 인 + 스케일 업**: 이전 화면이 완전히 사라진 후, 새 화면이 약간 작은 상태(0.95 scale)에서 시작하여 정상 크기(1.0 scale)로 확대되며 나타납니다.
+
+3. **순차적 실행**: OUT 애니메이션이 완료된 후 IN 애니메이션이 시작되어 두 화면이 겹치지 않고 명확하게 교체됩니다.
+
+### 모션 디자인
+
+**OUT (나가는 페이지)**:
+- **opacity**: 1 → 0 (페이드 아웃만)
+- **scale**: 변화 없음
+
+**IN (들어오는 페이지)**:
+- **opacity**: 0 → 1 (페이드 인)
+- **scale**: 0.95 → 1 (작게 시작해서 정상 크기로)
+- **시작 시점**: OUT 애니메이션 완료 후
+
+## 기본 사용법
+
+### 바텀 네비게이션 설정
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { swap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { swap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/home',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      },
+      {
+        from: '/search',
+        to: '/profile',
+        transition: swap(),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+## 모범 사례
+
+### 좋은 예
+
+- 바텀 네비게이션 탭 간 전환
+- 톱레벨 메뉴 섹션 간 이동
+- 독립적인 대시보드 뷰 간 전환
+
+### 나쁜 예
+
+- 목록 → 상세 페이지 → 뎁스 전환 사용
+- 모달 또는 바텀 시트 → 시트 전환 사용
+- 계층적 네비게이션 → 뎁스 전환 사용
+
+## 관련 전환
+
+- **[뎁스](/ko/mobile-transitions/depth)**: 계층적 관계의 화면 간 이동
+- **[페이드](/ko/basic-transitions/fade)**: 단순한 페이드만 필요한 경우
+- **[시트](/ko/mobile-transitions/sheet)**: 모달이나 바텀 시트

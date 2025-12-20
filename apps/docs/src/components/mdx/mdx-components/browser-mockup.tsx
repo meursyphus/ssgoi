@@ -279,9 +279,11 @@ const SandpackContent = memo(
         }
         .sandpack-container .sp-preview-iframe {
           height: 100% !important;
+          background-color: #121212 !important;
         }
         .sandpack-container iframe {
           height: 100% !important;
+          background-color: #121212 !important;
         }
       `}</style>
         <SandpackProvider

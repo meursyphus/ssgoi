@@ -13,3 +13,4 @@ export * from "./scroll";
 export * from "./sheet";
 export * from "./slide";
 export * from "./strip";
+export * from "./swap";

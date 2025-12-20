@@ -1,0 +1,154 @@
+---
+title: "深度过渡"
+description: "表现Z轴层级移动的过渡效果"
+nav-title: "深度"
+---
+
+# 深度过渡
+
+深度过渡是表现**Z轴层级移动**的过渡效果。与Material Design的Shared Z-Axis transition概念相同,两个屏幕通过组合相同方向的缩放和淡入淡出来营造"深度感"。
+
+## 演示
+
+<ViewTransitionDemo type="depth" />
+
+## 用户体验原则
+
+### 何时使用?
+
+深度过渡用于**在应用的层级结构中向上或向下移动一个层级**。它能够自然地实现从小型触发器(图标、按钮)扩展到全屏的体验。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "无关内容",
+      suitable: "no",
+      description: "在独立部分之间移动时,无法感受到层级连接,因此不适合。"
+    },
+    {
+      label: "顶级过渡",
+      suitable: "no",
+      description: "在底部导航等同级之间移动时,交换过渡更合适。"
+    },
+    {
+      label: "层级关系",
+      suitable: "yes",
+      description: "从图标到全屏,或从上级到下级移动时最为理想。"
+    }
+  ]}
+/>
+
+#### 主要使用场景
+- 搜索图标 → 搜索屏幕(从小图标到全屏)
+- 设置图标 → 设置屏幕(从触发器到详细屏幕)
+- 通知图标 → 通知列表(从摘要到详情)
+- 分类 → 子分类(层级导航)
+- 商品列表 → 商品详情(从列表深入)
+
+### 为什么这样工作?
+
+1. **前进移动(enter)**: 新屏幕从前方以较小尺寸开始放大出现,前一个屏幕被推向后方并放大消失。这给人"深入"的感觉。
+
+2. **后退移动(exit)**: 当前屏幕向前方缩小消失,前一个屏幕从后方缩小出现。这给人"从深处退出"的感觉。
+
+3. **层级理解**: 缩放方向一致移动,让用户能够直观地了解当前所处的层级。
+
+### 动效设计
+
+**前进(enter)动作**:
+- **离开的页面**: scale 1 → 1.05 + fade out(向后放大消失)
+- **进入的页面**: scale 0.95 → 1 + fade in(向前出现)
+
+**后退(exit)动作**:
+- **离开的页面**: scale 1 → 0.95 + fade out(向前缩小消失)
+- **进入的页面**: scale 1.05 → 1 + fade in(从后向前出现)
+
+## 基本用法
+
+### 过渡配置
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { depth } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true // 返回时自动应用exit方向
+      }
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { depth } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      {
+        from: '/home',
+        to: '/search',
+        transition: depth({ direction: 'enter' }),
+        symmetric: true
+      }
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+### 方向设置
+
+使用`direction`选项指定层级移动方向:
+
+- **`enter`**: 深入(默认值)
+- **`exit`**: 退出
+
+```typescript
+// 进入下级时
+depth({ direction: 'enter' })
+
+// 返回上级时
+depth({ direction: 'exit' })
+
+// 使用symmetric: true会自动生成相反方向
+```
+
+## 最佳实践
+
+### 良好示例
+
+- 搜索图标 → 搜索全屏
+- 商品卡片 → 商品详情页
+- 设置按钮 → 设置屏幕
+- 通知铃 → 通知列表
+- 分类 → 子分类
+
+### 不良示例
+
+- 底部导航标签间移动 → 使用交换
+- 独立部分间移动 → 使用淡入淡出
+- 打开模态框 → 使用底部表单过渡
+
+## 相关过渡
+
+- **[钻取](/zh/mobile-transitions/drill)**: 单向放大/缩小
+- **[底部表单](/zh/mobile-transitions/sheet)**: 从底部上滑的底部表单
+- **[交换](/zh/mobile-transitions/swap)**: 顶级屏幕间过渡
+- **[淡入淡出](/zh/basic-transitions/fade)**: 无关屏幕间的平滑过渡
