@@ -197,17 +197,36 @@ export function SandpackBrowserMockup({
       )}
 
       {/* Sandpack Preview - renders in iframe */}
-      <div className="flex-1 overflow-hidden bg-[#121212] sandpack-container">
+      <div className="flex-1 min-h-0 overflow-hidden bg-[#121212] sandpack-container">
         <style>{`
+          .sandpack-container {
+            display: flex;
+            flex-direction: column;
+          }
+          .sandpack-container .sp-wrapper {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+          }
           .sandpack-container .sp-layout {
+            flex: 1 !important;
+            min-height: 0 !important;
             height: 100% !important;
             border: none !important;
             border-radius: 0 !important;
           }
-          .sandpack-container .sp-preview {
+          .sandpack-container .sp-stack {
             height: 100% !important;
           }
+          .sandpack-container .sp-preview {
+            height: 100% !important;
+            flex: 1 !important;
+          }
           .sandpack-container .sp-preview-container {
+            height: 100% !important;
+          }
+          .sandpack-container .sp-preview-iframe {
             height: 100% !important;
           }
           .sandpack-container iframe {
@@ -230,7 +249,7 @@ export function SandpackBrowserMockup({
           }}
           theme="dark"
         >
-          <SandpackLayout style={{ height: "100%" }}>
+          <SandpackLayout style={{ height: "100%", flex: 1 }}>
             <SandpackPreview
               showOpenInCodeSandbox={false}
               showRefreshButton={false}
