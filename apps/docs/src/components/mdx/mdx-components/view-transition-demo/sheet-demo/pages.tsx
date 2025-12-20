@@ -1,82 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import { sheet } from "@ssgoi/react/view-transitions";
-import {
-  BrowserMockup,
-  DemoPage,
-  DemoLink,
-  useBrowserNavigation,
-} from "../browser-mockup";
-import type { RouteConfig } from "../browser-mockup";
-import { TransitionScope, transition } from "@ssgoi/react";
+import { SsgoiTransition, transition } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/transitions";
+import { useBrowserNavigation } from "../../browser-mockup";
+import { sentEmails } from "./content";
 
-// Mock data for sent emails
-const sentEmails = [
-  {
-    id: "1",
-    to: "John Smith",
-    email: "john@example.com",
-    subject: "Project status update",
-    preview: "Hi team, here's a quick update on where we stand with...",
-    date: "Today",
-    time: "10:32 AM",
-  },
-  {
-    id: "2",
-    to: "Sarah Johnson",
-    email: "sarah@example.com",
-    subject: "Re: Design review feedback",
-    preview: "Thanks for sharing! Overall looks great, just a few minor...",
-    date: "Today",
-    time: "9:15 AM",
-  },
-  {
-    id: "3",
-    to: "Mike Chen",
-    email: "mike@example.com",
-    subject: "Weekly report attached",
-    preview: "Please find attached the weekly progress report with...",
-    date: "Yesterday",
-    time: "5:48 PM",
-  },
-  {
-    id: "4",
-    to: "Emily Davis",
-    email: "emily@example.com",
-    subject: "Meeting confirmation request",
-    preview: "Could you please confirm if Tuesday 2 PM works for...",
-    date: "Yesterday",
-    time: "3:22 PM",
-  },
-  {
-    id: "5",
-    to: "Alex Kim",
-    email: "alex@example.com",
-    subject: "API docs updated",
-    preview: "I've finished updating the API documentation with all...",
-    date: "Dec 18",
-    time: "1:05 PM",
-  },
-  {
-    id: "6",
-    to: "Lisa Park",
-    email: "lisa@example.com",
-    subject: "Vacation request",
-    preview: "I'd like to request time off from December 24th to 27th...",
-    date: "Dec 17",
-    time: "11:30 AM",
-  },
-];
+// DemoPage wrapper with SsgoiTransition
+interface DemoPageProps {
+  children: React.ReactNode;
+  path: string;
+}
+
+function DemoPage({ children, path }: DemoPageProps) {
+  return <SsgoiTransition id={path}>{children}</SsgoiTransition>;
+}
 
 // Sent emails list page
-function SentEmailsPage() {
+export function SentEmailsPage() {
   const { navigate } = useBrowserNavigation();
 
   return (
     <>
-      {/* FAB - Compose Button */}
+      {/* FAB - Compose Button - fixed positioning for Sandpack */}
       <button
         ref={transition({
           scope: "local",
@@ -84,7 +30,7 @@ function SentEmailsPage() {
           ...fade(),
         })}
         onClick={() => navigate("/compose")}
-        className="absolute bottom-4 right-4 w-14 h-14 bg-blue-500 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all z-10"
+        className="fixed bottom-4 right-4 w-14 h-14 bg-blue-500 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all z-10"
       >
         <svg
           className="w-6 h-6 text-white"
@@ -101,7 +47,7 @@ function SentEmailsPage() {
         </svg>
       </button>
       <DemoPage path="/sent">
-        <div className="flex flex-col bg-[#121212]">
+        <div className="flex flex-col bg-[#121212] min-h-screen">
           {/* Header */}
           <div className="flex-shrink-0 bg-[#121212] border-b border-white/5">
             <div className="px-4 py-3">
@@ -153,7 +99,7 @@ function SentEmailsPage() {
 }
 
 // Compose email page
-function ComposeEmailPage() {
+export function ComposeEmailPage() {
   const { navigate } = useBrowserNavigation();
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
@@ -278,48 +224,5 @@ function ComposeEmailPage() {
         </div>
       </DemoPage>
     </>
-  );
-}
-
-// Route configuration
-const sheetRoutes: RouteConfig[] = [
-  { path: "/sent", component: SentEmailsPage, label: "Sent" },
-  { path: "/compose", component: ComposeEmailPage, label: "New Message" },
-];
-
-// Custom layout for Sheet demo
-function SheetLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="z-0">
-      <TransitionScope>{children}</TransitionScope>;
-    </div>
-  );
-}
-
-// Main Sheet Demo Component
-export function SheetDemo() {
-  const config = {
-    transitions: [
-      {
-        from: "/sent",
-        to: "/compose",
-        transition: sheet({ direction: "enter" }),
-      },
-      {
-        from: "/compose",
-        to: "/sent",
-        transition: sheet({ direction: "exit" }),
-      },
-    ],
-  };
-
-  return (
-    <BrowserMockup
-      routes={sheetRoutes}
-      config={config}
-      layout={SheetLayout}
-      initialPath="/sent"
-      deviceType="mobile"
-    />
   );
 }
