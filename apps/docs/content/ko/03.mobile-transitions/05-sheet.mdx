@@ -1,0 +1,1357 @@
+---
+title: "시트(Sheet) 전환"
+description: "바텀 시트 스타일의 모바일 최적화 전환"
+nav-title: "시트(Sheet)"
+---
+
+# 시트(Sheet) 전환
+
+시트(Sheet) 전환은 바텀 시트 스타일의 **모바일 최적화 전환**입니다. 백그라운드 페이지는 뒤로 물러나며 축소되고, 새로운 화면이 하단에서 슬라이드 업되어 나타납니다. FAB 버튼에서 작성 화면으로 전환할 때 자주 사용됩니다.
+
+## 데모
+
+<ViewTransitionDemo type="sheet" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+시트(Sheet) 전환은 **FAB이나 작성 버튼에서 전체 화면 입력 모드로의 전환** 시 사용됩니다.
+
+#### 콘텐츠 관계별 적합성
+
+<SuitabilityTable
+  items={[
+    {
+      label: "관련 없는 콘텐츠",
+      suitable: "no",
+      description: "독립적인 섹션 간에는 부적합"
+    },
+    {
+      label: "형제 관계",
+      suitable: "no",
+      description: "동일 레벨의 페이지 간 이동에는 슬라이드 사용 권장"
+    },
+    {
+      label: "계층 관계",
+      suitable: "yes",
+      description: "목록→작성, 피드→포스트 작성 등 새 컨텍스트 생성 시 최적"
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+
+- **소셜 미디어**: 피드에서 새 포스트 작성
+- **이메일 앱**: 받은편지함에서 새 메일 작성
+- **메모 앱**: 노트 목록에서 새 노트 작성
+- **할 일 앱**: 목록에서 새 작업 추가
+- **채팅 앱**: 대화 목록에서 새 메시지 작성
+
+### 왜 이렇게 동작하나요?
+
+1. **컨텍스트 보존**: 백그라운드가 축소되며 유지되어 사용자가 어디서 왔는지 명확함
+2. **공간 확장 메타포**: 새로운 작업 공간이 아래에서 올라오는 자연스러운 느낌
+3. **집중 유도**: 백그라운드 페이지가 흐려지고 축소되어 작성 화면에 집중
+4. **모바일 네이티브 패턴**: iOS와 Android 네이티브 앱의 모달 전환과 유사
+5. **쉬운 복귀**: 뒤로가기 시 백그라운드가 다시 확대되며 자연스럽게 복귀
+
+### 모션 디자인
+
+```
+전진 과정 (목록 → 작성):
+1. 백그라운드 페이지 축소 시작 (scale: 1 → 0.8)
+2. 동시에 투명도 감소 (opacity: 1 → 0)
+3. 작성 페이지가 하단에서 슬라이드 업 (translateY: 100% → 0)
+4. 백그라운드는 z-index: -1로 뒤에 배치
+5. 작성 페이지는 z-index: 100으로 앞에 배치
+
+후진 과정 (작성 → 목록):
+1. 작성 페이지 하단으로 슬라이드 다운 (translateY: 0 → 100%)
+2. 동시에 백그라운드 페이지 확대 (scale: 0.8 → 1)
+3. 백그라운드 투명도 복원 (opacity: 0 → 1)
+4. 중심점은 뷰포트 센터에 고정
+```
+
+## 기본 사용법
+
+### 1. 전환 설정
+
+시트 전환은 `direction` 옵션으로 전진/후진 방향을 명시적으로 설정합니다:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/react';
+    import { sheet } from '@ssgoi/react/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/feed',
+          to: '/compose',
+          transition: sheet({ direction: 'enter' })  // 전진: 시트가 올라옴
+        },
+        {
+          from: '/compose',
+          to: '/feed',
+          transition: sheet({ direction: 'exit' })   // 후진: 시트가 내려감
+        }
+      ]
+    };
+
+    export default function App() {
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <script>
+      import { Ssgoi } from '@ssgoi/svelte';
+      import { sheet } from '@ssgoi/svelte/view-transitions';
+
+      const config = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+    </script>
+
+    <Ssgoi {config}>
+      <slot />
+    </Ssgoi>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <template>
+      <Ssgoi :config="config">
+        <NuxtPage />
+      </Ssgoi>
+    </template>
+
+    <script setup>
+    import { Ssgoi } from '@ssgoi/vue';
+    import { sheet } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      transitions: [
+        {
+          from: '/feed',
+          to: '/compose',
+          transition: sheet({ direction: 'enter' })
+        },
+        {
+          from: '/compose',
+          to: '/feed',
+          transition: sheet({ direction: 'exit' })
+        }
+      ]
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { Ssgoi } from '@ssgoi/solid';
+    import { sheet } from '@ssgoi/solid/view-transitions';
+
+    export default function App() {
+      const config = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+
+      return (
+        <Ssgoi config={config}>
+          {/* 앱 내용 */}
+        </Ssgoi>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { RouterOutlet } from "@angular/router";
+    import { Ssgoi } from "@ssgoi/angular";
+    import { sheet } from "@ssgoi/angular/view-transitions";
+    import type { SsgoiConfig } from "@ssgoi/angular";
+
+    @Component({
+      selector: "app-root",
+      standalone: true,
+      imports: [RouterOutlet, Ssgoi],
+      template: `
+        <div
+          ssgoi
+          [config]="config"
+          style="position: relative; min-height: 100vh;"
+        >
+          <router-outlet />
+        </div>
+      `
+    })
+    export class AppComponent {
+      config: SsgoiConfig = {
+        transitions: [
+          {
+            from: '/feed',
+            to: '/compose',
+            transition: sheet({ direction: 'enter' })
+          },
+          {
+            from: '/compose',
+            to: '/feed',
+            transition: sheet({ direction: 'exit' })
+          }
+        ]
+      };
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 페이지 구조
+
+FAB 버튼이 있는 목록 페이지와 작성 페이지:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 피드 페이지
+    function Feed() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700">
+            <h1 className="text-xl font-bold">피드</h1>
+          </header>
+
+          <main className="p-4 space-y-4">
+            {posts.map(post => (
+              <article
+                key={post.id}
+                className="bg-gray-800 rounded-lg p-4"
+              >
+                <h2 className="font-semibold">{post.title}</h2>
+                <p className="text-gray-400 text-sm mt-2">{post.excerpt}</p>
+              </article>
+            ))}
+          </main>
+
+          {/* FAB */}
+          <button
+            onClick={() => navigate('/compose')}
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center
+                       hover:bg-blue-600 transition-colors"
+          >
+            <span className="text-2xl text-white">+</span>
+          </button>
+        </div>
+      );
+    }
+
+    // 작성 페이지
+    function Compose() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700 flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-400 hover:text-gray-200"
+            >
+              취소
+            </button>
+            <h1 className="text-xl font-bold flex-1">새 포스트</h1>
+            <button className="text-blue-500 font-semibold">
+              게시
+            </button>
+          </header>
+
+          <main className="p-4">
+            <input
+              type="text"
+              placeholder="제목"
+              className="w-full bg-gray-800 border border-gray-700
+                         rounded-lg px-4 py-3 mb-4"
+            />
+            <textarea
+              placeholder="내용을 입력하세요..."
+              rows={10}
+              className="w-full bg-gray-800 border border-gray-700
+                         rounded-lg px-4 py-3 resize-none"
+            />
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 피드 페이지 -->
+    <script>
+      import { goto } from '$app/navigation';
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700">
+        <h1 class="text-xl font-bold">피드</h1>
+      </header>
+
+      <main class="p-4 space-y-4">
+        {#each posts as post}
+          <article class="bg-gray-800 rounded-lg p-4">
+            <h2 class="font-semibold">{post.title}</h2>
+            <p class="text-gray-400 text-sm mt-2">{post.excerpt}</p>
+          </article>
+        {/each}
+      </main>
+
+      <!-- FAB -->
+      <button
+        on:click={() => goto('/compose')}
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center
+               hover:bg-blue-600 transition-colors"
+      >
+        <span class="text-2xl text-white">+</span>
+      </button>
+    </div>
+
+    <!-- 작성 페이지 -->
+    <script>
+      import { goto } from '$app/navigation';
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700 flex items-center gap-4">
+        <button
+          on:click={() => history.back()}
+          class="text-gray-400 hover:text-gray-200"
+        >
+          취소
+        </button>
+        <h1 class="text-xl font-bold flex-1">새 포스트</h1>
+        <button class="text-blue-500 font-semibold">
+          게시
+        </button>
+      </header>
+
+      <main class="p-4">
+        <input
+          type="text"
+          placeholder="제목"
+          class="w-full bg-gray-800 border border-gray-700
+                 rounded-lg px-4 py-3 mb-4"
+        />
+        <textarea
+          placeholder="내용을 입력하세요..."
+          rows="10"
+          class="w-full bg-gray-800 border border-gray-700
+                 rounded-lg px-4 py-3 resize-none"
+        />
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+
+    interface Post {
+      id: string;
+      title: string;
+      excerpt: string;
+    }
+
+    // Feed Page
+    @Component({
+      selector: "app-feed",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700">
+            <h1 class="text-xl font-bold">피드</h1>
+          </header>
+
+          <main class="p-4 space-y-4">
+            <article
+              *ngFor="let post of posts"
+              class="bg-gray-800 rounded-lg p-4"
+            >
+              <h2 class="font-semibold">{{ post.title }}</h2>
+              <p class="text-gray-400 text-sm mt-2">{{ post.excerpt }}</p>
+            </article>
+          </main>
+
+          <!-- FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center
+                   hover:bg-blue-600 transition-colors"
+          >
+            <span class="text-2xl text-white">+</span>
+          </button>
+        </div>
+      `
+    })
+    export class FeedComponent {
+      posts: Post[] = POSTS; // Provide posts data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose']);
+      }
+    }
+
+    // Compose Page
+    @Component({
+      selector: "app-compose",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700 flex items-center gap-4">
+            <button
+              (click)="goBack()"
+              class="text-gray-400 hover:text-gray-200"
+            >
+              취소
+            </button>
+            <h1 class="text-xl font-bold flex-1">새 포스트</h1>
+            <button class="text-blue-500 font-semibold">
+              게시
+            </button>
+          </header>
+
+          <main class="p-4">
+            <input
+              type="text"
+              placeholder="제목"
+              class="w-full bg-gray-800 border border-gray-700
+                     rounded-lg px-4 py-3 mb-4"
+            />
+            <textarea
+              placeholder="내용을 입력하세요..."
+              rows="10"
+              class="w-full bg-gray-800 border border-gray-700
+                     rounded-lg px-4 py-3 resize-none"
+            ></textarea>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeComponent {
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 실전 활용 예시
+
+### 1. 소셜 미디어 포스트 작성
+
+트위터/X 스타일의 새 포스트 작성:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 타임라인 페이지
+    function Timeline() {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <header className="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                             border-b border-gray-700">
+            <h1 className="text-xl font-bold text-gray-100">타임라인</h1>
+          </header>
+
+          <main>
+            {tweets.map(tweet => (
+              <article
+                key={tweet.id}
+                className="p-4 border-b border-gray-800 hover:bg-gray-800/50"
+              >
+                <div className="flex gap-3">
+                  <img
+                    src={tweet.avatar}
+                    alt={tweet.author}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-100">
+                        {tweet.author}
+                      </span>
+                      <span className="text-gray-500 text-sm">
+                        @{tweet.handle}
+                      </span>
+                      <span className="text-gray-500 text-sm">
+                        · {tweet.time}
+                      </span>
+                    </div>
+                    <p className="text-gray-200 mt-1">{tweet.content}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </main>
+
+          {/* Compose FAB */}
+          <Link
+            to="/compose"
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center
+                       hover:bg-blue-600 active:scale-95
+                       transition-all"
+          >
+            <svg className="w-6 h-6 text-white" fill="currentColor">
+              <path d="M8 2v12m-6-6h12" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </Link>
+        </div>
+      );
+    }
+
+    // 작성 페이지
+    function ComposeTweet() {
+      const [content, setContent] = useState('');
+      const navigate = useNavigate();
+
+      const handlePost = () => {
+        // 포스트 로직
+        navigate(-1);
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700
+                             flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-400 hover:text-gray-200 font-medium"
+            >
+              취소
+            </button>
+            <button
+              onClick={handlePost}
+              disabled={!content.trim()}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full
+                         font-semibold disabled:opacity-50
+                         disabled:cursor-not-allowed"
+            >
+              포스트
+            </button>
+          </header>
+
+          <main className="p-4">
+            <div className="flex gap-3">
+              <img
+                src="/current-user-avatar.jpg"
+                alt="You"
+                className="w-12 h-12 rounded-full"
+              />
+              <textarea
+                autoFocus
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="무슨 일이 일어나고 있나요?"
+                className="flex-1 bg-transparent text-xl
+                           text-gray-100 placeholder-gray-500
+                           resize-none outline-none min-h-[200px]"
+              />
+            </div>
+
+            {/* 문자 수 카운터 */}
+            <div className="mt-4 flex items-center justify-between
+                           px-4 py-2 border-t border-gray-700">
+              <div className="flex gap-2">
+                <button className="text-blue-500 p-2 hover:bg-blue-500/10
+                                   rounded-full">
+                  <span>📷</span>
+                </button>
+                <button className="text-blue-500 p-2 hover:bg-blue-500/10
+                                   rounded-full">
+                  <span>😊</span>
+                </button>
+              </div>
+              <span className={`text-sm ${content.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                {content.length} / 280
+              </span>
+            </div>
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 타임라인 페이지 -->
+    <script>
+      export let tweets;
+    </script>
+
+    <div class="min-h-screen bg-gray-900">
+      <header class="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                     border-b border-gray-700">
+        <h1 class="text-xl font-bold text-gray-100">타임라인</h1>
+      </header>
+
+      <main>
+        {#each tweets as tweet}
+          <article class="p-4 border-b border-gray-800 hover:bg-gray-800/50">
+            <div class="flex gap-3">
+              <img
+                src={tweet.avatar}
+                alt={tweet.author}
+                class="w-12 h-12 rounded-full"
+              />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-gray-100">
+                    {tweet.author}
+                  </span>
+                  <span class="text-gray-500 text-sm">
+                    @{tweet.handle}
+                  </span>
+                  <span class="text-gray-500 text-sm">
+                    · {tweet.time}
+                  </span>
+                </div>
+                <p class="text-gray-200 mt-1">{tweet.content}</p>
+              </div>
+            </div>
+          </article>
+        {/each}
+      </main>
+
+      <!-- Compose FAB -->
+      <a
+        href="/compose"
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center
+               hover:bg-blue-600 active:scale-95
+               transition-all"
+      >
+        <svg class="w-6 h-6 text-white" fill="currentColor">
+          <path d="M8 2v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- 작성 페이지 -->
+    <script>
+      import { goto } from '$app/navigation';
+
+      let content = '';
+
+      function handlePost() {
+        // 포스트 로직
+        history.back();
+      }
+    </script>
+
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700
+                     flex items-center justify-between">
+        <button
+          on:click={() => history.back()}
+          class="text-gray-400 hover:text-gray-200 font-medium"
+        >
+          취소
+        </button>
+        <button
+          on:click={handlePost}
+          disabled={!content.trim()}
+          class="bg-blue-500 text-white px-4 py-2 rounded-full
+                 font-semibold disabled:opacity-50
+                 disabled:cursor-not-allowed"
+        >
+          포스트
+        </button>
+      </header>
+
+      <main class="p-4">
+        <div class="flex gap-3">
+          <img
+            src="/current-user-avatar.jpg"
+            alt="You"
+            class="w-12 h-12 rounded-full"
+          />
+          <textarea
+            autofocus
+            bind:value={content}
+            placeholder="무슨 일이 일어나고 있나요?"
+            class="flex-1 bg-transparent text-xl
+                   text-gray-100 placeholder-gray-500
+                   resize-none outline-none min-h-[200px]"
+          />
+        </div>
+
+        <!-- 문자 수 카운터 -->
+        <div class="mt-4 flex items-center justify-between
+                   px-4 py-2 border-t border-gray-700">
+          <div class="flex gap-2">
+            <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                           rounded-full">
+              <span>📷</span>
+            </button>
+            <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                           rounded-full">
+              <span>😊</span>
+            </button>
+          </div>
+          <span class={`text-sm ${content.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+            {content.length} / 280
+          </span>
+        </div>
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component, Input } from "@angular/core";
+    import { NgFor, NgClass } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+    import { FormsModule } from "@angular/forms";
+
+    interface Tweet {
+      id: string;
+      author: string;
+      handle: string;
+      avatar: string;
+      content: string;
+      time: string;
+    }
+
+    // Timeline Page
+    @Component({
+      selector: "app-timeline",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <header class="sticky top-0 bg-gray-900/95 backdrop-blur p-4
+                         border-b border-gray-700">
+            <h1 class="text-xl font-bold text-gray-100">타임라인</h1>
+          </header>
+
+          <main>
+            <article
+              *ngFor="let tweet of tweets"
+              class="p-4 border-b border-gray-800 hover:bg-gray-800/50"
+            >
+              <div class="flex gap-3">
+                <img
+                  [src]="tweet.avatar"
+                  [alt]="tweet.author"
+                  class="w-12 h-12 rounded-full"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-100">
+                      {{ tweet.author }}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                      {{ '@' + tweet.handle }}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                      · {{ tweet.time }}
+                    </span>
+                  </div>
+                  <p class="text-gray-200 mt-1">{{ tweet.content }}</p>
+                </div>
+              </div>
+            </article>
+          </main>
+
+          <!-- Compose FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center
+                   hover:bg-blue-600 active:scale-95
+                   transition-all"
+          >
+            <svg class="w-6 h-6 text-white" fill="currentColor">
+              <path d="M8 2v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      `
+    })
+    export class TimelineComponent {
+      tweets: Tweet[] = TWEETS; // Provide tweets data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose']);
+      }
+    }
+
+    // Compose Page
+    @Component({
+      selector: "app-compose-tweet",
+      standalone: true,
+      imports: [FormsModule, NgClass],
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700
+                         flex items-center justify-between">
+            <button
+              (click)="goBack()"
+              class="text-gray-400 hover:text-gray-200 font-medium"
+            >
+              취소
+            </button>
+            <button
+              (click)="handlePost()"
+              [disabled]="!content.trim()"
+              class="bg-blue-500 text-white px-4 py-2 rounded-full
+                     font-semibold disabled:opacity-50
+                     disabled:cursor-not-allowed"
+            >
+              포스트
+            </button>
+          </header>
+
+          <main class="p-4">
+            <div class="flex gap-3">
+              <img
+                src="/current-user-avatar.jpg"
+                alt="You"
+                class="w-12 h-12 rounded-full"
+              />
+              <textarea
+                autofocus
+                [(ngModel)]="content"
+                placeholder="무슨 일이 일어나고 있나요?"
+                class="flex-1 bg-transparent text-xl
+                       text-gray-100 placeholder-gray-500
+                       resize-none outline-none min-h-[200px]"
+              ></textarea>
+            </div>
+
+            <!-- 문자 수 카운터 -->
+            <div class="mt-4 flex items-center justify-between
+                       px-4 py-2 border-t border-gray-700">
+              <div class="flex gap-2">
+                <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                               rounded-full">
+                  <span>📷</span>
+                </button>
+                <button class="text-blue-500 p-2 hover:bg-blue-500/10
+                               rounded-full">
+                  <span>😊</span>
+                </button>
+              </div>
+              <span [ngClass]="content.length > 280 ? 'text-red-500' : 'text-gray-500'"
+                    class="text-sm">
+                {{ content.length }} / 280
+              </span>
+            </div>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeTweetComponent {
+      content = '';
+
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+
+      handlePost() {
+        // 포스트 로직
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+### 2. 이메일 작성
+
+받은편지함에서 새 메일 작성:
+
+<Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
+  <TabPanel value="react">
+    ```tsx
+    // 받은편지함
+    function Inbox() {
+      return (
+        <div className="min-h-screen bg-gray-900">
+          <header className="p-4 border-b border-gray-700">
+            <h1 className="text-xl font-bold text-gray-100">받은편지함</h1>
+          </header>
+
+          <main>
+            {emails.map(email => (
+              <article
+                key={email.id}
+                className="p-4 border-b border-gray-800
+                           hover:bg-gray-800/50 cursor-pointer"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500
+                                  flex items-center justify-center
+                                  text-white font-semibold">
+                    {email.sender[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-gray-100">
+                        {email.sender}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {email.time}
+                      </span>
+                    </div>
+                    <h3 className="text-gray-100 font-medium mb-1 truncate">
+                      {email.subject}
+                    </h3>
+                    <p className="text-gray-400 text-sm truncate">
+                      {email.preview}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </main>
+
+          {/* Compose FAB */}
+          <Link
+            to="/compose-email"
+            className="fixed bottom-6 right-6 w-14 h-14
+                       bg-blue-500 rounded-full shadow-lg
+                       flex items-center justify-center"
+          >
+            <span className="text-white text-2xl">✉️</span>
+          </Link>
+        </div>
+      );
+    }
+
+    // 메일 작성
+    function ComposeEmail() {
+      const navigate = useNavigate();
+
+      return (
+        <div className="min-h-screen bg-gray-900 text-gray-100">
+          <header className="p-4 border-b border-gray-700
+                             flex items-center justify-between">
+            <button onClick={() => navigate(-1)}>취소</button>
+            <h1 className="text-lg font-semibold">새 메일</h1>
+            <button className="text-blue-500 font-semibold">전송</button>
+          </header>
+
+          <main className="divide-y divide-gray-800">
+            <input
+              type="email"
+              placeholder="받는사람"
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="제목"
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500"
+            />
+            <textarea
+              placeholder="메일 내용"
+              rows={15}
+              className="w-full bg-transparent px-4 py-3
+                         text-gray-100 placeholder-gray-500
+                         resize-none outline-none"
+            />
+          </main>
+        </div>
+      );
+    }
+    ```
+  </TabPanel>
+  <TabPanel value="svelte">
+    ```svelte
+    <!-- 받은편지함 -->
+    <div class="min-h-screen bg-gray-900">
+      <header class="p-4 border-b border-gray-700">
+        <h1 class="text-xl font-bold text-gray-100">받은편지함</h1>
+      </header>
+
+      <main>
+        {#each emails as email}
+          <article
+            class="p-4 border-b border-gray-800
+                   hover:bg-gray-800/50 cursor-pointer"
+          >
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full bg-blue-500
+                          flex items-center justify-center
+                          text-white font-semibold">
+                {email.sender[0]}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-semibold text-gray-100">
+                    {email.sender}
+                  </span>
+                  <span class="text-xs text-gray-500">
+                    {email.time}
+                  </span>
+                </div>
+                <h3 class="text-gray-100 font-medium mb-1 truncate">
+                  {email.subject}
+                </h3>
+                <p class="text-gray-400 text-sm truncate">
+                  {email.preview}
+                </p>
+              </div>
+            </div>
+          </article>
+        {/each}
+      </main>
+
+      <!-- Compose FAB -->
+      <a
+        href="/compose-email"
+        class="fixed bottom-6 right-6 w-14 h-14
+               bg-blue-500 rounded-full shadow-lg
+               flex items-center justify-center"
+      >
+        <span class="text-white text-2xl">✉️</span>
+      </a>
+    </div>
+
+    <!-- 메일 작성 -->
+    <div class="min-h-screen bg-gray-900 text-gray-100">
+      <header class="p-4 border-b border-gray-700
+                     flex items-center justify-between">
+        <button on:click={() => history.back()}>취소</button>
+        <h1 class="text-lg font-semibold">새 메일</h1>
+        <button class="text-blue-500 font-semibold">전송</button>
+      </header>
+
+      <main class="divide-y divide-gray-800">
+        <input
+          type="email"
+          placeholder="받는사람"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500"
+        />
+        <input
+          type="text"
+          placeholder="제목"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500"
+        />
+        <textarea
+          placeholder="메일 내용"
+          rows="15"
+          class="w-full bg-transparent px-4 py-3
+                 text-gray-100 placeholder-gray-500
+                 resize-none outline-none"
+        />
+      </main>
+    </div>
+    ```
+  </TabPanel>
+  <TabPanel value="angular">
+    ```typescript
+    import { Component } from "@angular/core";
+    import { NgFor } from "@angular/common";
+    import { Router } from "@angular/router";
+    import { Location } from "@angular/common";
+
+    interface Email {
+      id: string;
+      sender: string;
+      subject: string;
+      preview: string;
+      time: string;
+    }
+
+    // Inbox
+    @Component({
+      selector: "app-inbox",
+      standalone: true,
+      imports: [NgFor],
+      template: `
+        <div class="min-h-screen bg-gray-900">
+          <header class="p-4 border-b border-gray-700">
+            <h1 class="text-xl font-bold text-gray-100">받은편지함</h1>
+          </header>
+
+          <main>
+            <article
+              *ngFor="let email of emails"
+              class="p-4 border-b border-gray-800
+                     hover:bg-gray-800/50 cursor-pointer"
+            >
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-500
+                            flex items-center justify-center
+                            text-white font-semibold">
+                  {{ email.sender[0] }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold text-gray-100">
+                      {{ email.sender }}
+                    </span>
+                    <span class="text-xs text-gray-500">
+                      {{ email.time }}
+                    </span>
+                  </div>
+                  <h3 class="text-gray-100 font-medium mb-1 truncate">
+                    {{ email.subject }}
+                  </h3>
+                  <p class="text-gray-400 text-sm truncate">
+                    {{ email.preview }}
+                  </p>
+                </div>
+              </div>
+            </article>
+          </main>
+
+          <!-- Compose FAB -->
+          <button
+            (click)="openCompose()"
+            class="fixed bottom-6 right-6 w-14 h-14
+                   bg-blue-500 rounded-full shadow-lg
+                   flex items-center justify-center"
+          >
+            <span class="text-white text-2xl">✉️</span>
+          </button>
+        </div>
+      `
+    })
+    export class InboxComponent {
+      emails: Email[] = EMAILS; // Provide emails data
+
+      constructor(private readonly router: Router) {}
+
+      openCompose() {
+        this.router.navigate(['/compose-email']);
+      }
+    }
+
+    // Compose Email
+    @Component({
+      selector: "app-compose-email",
+      standalone: true,
+      template: `
+        <div class="min-h-screen bg-gray-900 text-gray-100">
+          <header class="p-4 border-b border-gray-700
+                         flex items-center justify-between">
+            <button (click)="goBack()">취소</button>
+            <h1 class="text-lg font-semibold">새 메일</h1>
+            <button class="text-blue-500 font-semibold">전송</button>
+          </header>
+
+          <main class="divide-y divide-gray-800">
+            <input
+              type="email"
+              placeholder="받는사람"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="제목"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500"
+            />
+            <textarea
+              placeholder="메일 내용"
+              rows="15"
+              class="w-full bg-transparent px-4 py-3
+                     text-gray-100 placeholder-gray-500
+                     resize-none outline-none"
+            ></textarea>
+          </main>
+        </div>
+      `
+    })
+    export class ComposeEmailComponent {
+      constructor(private readonly location: Location) {}
+
+      goBack() {
+        this.location.back();
+      }
+    }
+    ```
+  </TabPanel>
+</Tabs>
+
+## 커스터마이징
+
+### direction 옵션
+
+시트 전환의 방향을 지정합니다:
+
+```typescript
+// 전진 방향 (목록 → 작성): 시트가 아래에서 올라옴
+sheet({ direction: 'enter' })
+
+// 후진 방향 (작성 → 목록): 시트가 아래로 내려감
+sheet({ direction: 'exit' })
+```
+
+**중요**: `direction: 'enter'`와 `direction: 'exit'`는 z-index 처리가 다릅니다:
+- `enter`: 진입하는 시트가 자연스럽게 앞에 표시
+- `exit`: 나가는 시트가 `z-index: 100`으로 앞에 유지되며 내려감
+
+### 스프링 설정
+
+애니메이션의 탄성과 속도 조절:
+
+```typescript
+sheet({
+  direction: 'enter',
+  spring: {
+    stiffness: 140,  // 낮을수록 부드러움 (기본값: 140)
+    damping: 18,     // 높을수록 빠른 정착 (기본값: 18)
+    doubleSpring: 0.5 // OUT 애니메이션의 스프링 강도 배율 (기본값: 0.5)
+  }
+})
+```
+
+### 부드러운 전환
+
+더 부드럽고 여유로운 전환:
+
+```typescript
+sheet({
+  spring: {
+    stiffness: 100,
+    damping: 20,
+    doubleSpring: 0.6
+  }
+})
+```
+
+### 빠른 전환
+
+더 빠르고 반응적인 전환:
+
+```typescript
+sheet({
+  spring: {
+    stiffness: 180,
+    damping: 16,
+    doubleSpring: 0.4
+  }
+})
+```
+
+## 주의사항
+
+### 성능 최적화
+
+- GPU 가속 사용 (`transform`, `opacity` 사용)
+- `will-change` 자동 설정 및 해제
+- `backfaceVisibility: hidden` 플리커 방지
+- 레이아웃 재계산 방지
+
+### z-index 관리
+
+- 작성 페이지: `z-index: 100` (앞에 표시)
+- 백그라운드 페이지: `z-index: -1` (뒤로 배치)
+- 자동으로 관리되므로 수동 설정 불필요
+
+### 모바일 최적화
+
+- 모바일 디바이스를 위해 최적화된 타이밍
+- 터치 제스처와 자연스럽게 연동
+- 60fps 부드러운 애니메이션 보장
+
+## 접근성
+
+- `prefers-reduced-motion` 설정 시 전환 비활성화
+- 키보드 네비게이션 완벽 지원
+- ESC 키로 작성 페이지 닫기 지원
+- 포커스 트랩으로 키보드 접근성 개선
+
+## 모범 사례
+
+### ✅ DO
+
+- FAB 버튼에서 전체 화면 작성 모드로 전환 시 사용
+- 소셜 미디어, 메일, 메모 등 새 콘텐츠 작성 시 적용
+- `direction: 'enter'`와 `direction: 'exit'`를 함께 설정하여 양방향 일관성 유지
+- 작성 페이지는 전체 화면 레이아웃 사용
+- 취소 및 완료 버튼을 명확하게 제공
+
+### ❌ DON'T
+
+- 일반적인 페이지 간 네비게이션에 사용하지 마세요
+- 읽기 전용 콘텐츠 보기에는 부적합 (인스타그램이나 히어로 사용)
+- 탭 네비게이션에는 사용하지 마세요 (슬라이드 사용)
+- 계층 구조가 없는 페이지 간 이동에는 부적합
+- 데스크톱 환경에서는 모달이나 다른 전환 고려
+
+## 관련 전환
+
+- **드릴**: 계층적 콘텐츠 탐색에 적합
+- **슬라이드**: 수평적 탭 네비게이션에 적합
+- **인스타그램**: 이미지 확대 보기에 적합
+- **페이드**: 일반적인 페이지 전환에 적합
+
+## 브라우저 호환성
+
+- Chrome/Edge (최신)
+- Firefox (최신)
+- Safari (최신)
+- 모든 모던 모바일 브라우저
