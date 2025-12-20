@@ -12,6 +12,7 @@
 
 export const SANDPACK_DEMOS = [
   "jaemin-demo",
+  "film-demo",
   // Add more demos here as they are migrated to folder structure
 ] as const;
 
