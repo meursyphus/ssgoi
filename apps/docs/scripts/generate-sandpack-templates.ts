@@ -185,6 +185,7 @@ import { BrowserContext, cn } from "./helpers";
 import { config } from "./config";
 import { routes } from "./routes";
 import { DemoLayout } from "./layout";
+import "./styles.css";
 
 // RouteContent component
 interface RouteContentProps {
