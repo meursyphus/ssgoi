@@ -22,15 +22,15 @@ export const HomePage = memo(() => {
     <DemoPage path="/home">
       <div className="min-h-[600px] bg-[#121212] flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h1 className="text-xl font-semibold text-gray-100">Home</h1>
+        <header className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <h1 className="text-xl font-semibold text-white">Explore</h1>
           <button
             onClick={() => navigate("/search")}
-            className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
             aria-label="Search"
           >
             <svg
-              className="w-6 h-6 text-gray-200"
+              className="w-5 h-5 text-neutral-300"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -38,7 +38,7 @@ export const HomePage = memo(() => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
@@ -46,32 +46,69 @@ export const HomePage = memo(() => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-6 py-8">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <section>
-              <h2 className="text-lg font-medium text-gray-200 mb-4">
-                Welcome
+        <main className="flex-1 px-5 py-5">
+          <div className="space-y-6">
+            {/* Info Card */}
+            <div className="p-4 bg-gradient-to-br from-blue-500/20 to-violet-500/20 rounded-xl border border-white/10">
+              <h2 className="text-base font-medium text-white mb-2">
+                Depth Transition
               </h2>
-              <p className="text-gray-400 leading-relaxed">
-                This demo showcases the depth transition effect, inspired by
-                Material Design's Z-axis motion. Click the search icon above to
-                see the search interface expand from the navigation.
+              <p className="text-sm text-neutral-300 leading-relaxed">
+                Click the search icon to see a Z-axis depth animation. The new
+                layer appears to rise from behind.
               </p>
-            </section>
+            </div>
 
+            {/* Quick Actions */}
             <section>
-              <h3 className="text-base font-medium text-gray-200 mb-3">
+              <h3 className="text-sm font-medium text-neutral-300 mb-3">
                 Quick Actions
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                {["Documents", "Photos", "Videos", "Music"].map((item) => (
+                {[
+                  {
+                    name: "Documents",
+                    icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+                    count: 12,
+                  },
+                  {
+                    name: "Photos",
+                    icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
+                    count: 248,
+                  },
+                  {
+                    name: "Videos",
+                    icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z",
+                    count: 36,
+                  },
+                  {
+                    name: "Music",
+                    icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3",
+                    count: 89,
+                  },
+                ].map((item) => (
                   <div
-                    key={item}
-                    className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
+                    key={item.name}
+                    className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all cursor-pointer"
                   >
-                    <div className="text-gray-200 font-medium">{item}</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      Browse {item.toLowerCase()}
+                    <svg
+                      className="w-6 h-6 text-neutral-400 mb-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d={item.icon}
+                      />
+                    </svg>
+                    <div className="text-sm font-medium text-white">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-neutral-500 mt-0.5">
+                      {item.count} files
                     </div>
                   </div>
                 ))}
@@ -94,15 +131,15 @@ export const SearchPage = memo(() => {
     <DemoPage path="/search">
       <div className="min-h-[600px] bg-[#121212] flex flex-col">
         {/* Search Header */}
-        <header className="px-4 py-3 border-b border-gray-800">
+        <header className="px-4 py-3 border-b border-white/10">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/home")}
-              className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg hover:bg-white/5 transition-colors"
               aria-label="Back"
             >
               <svg
-                className="w-5 h-5 text-gray-300"
+                className="w-5 h-5 text-neutral-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -118,10 +155,10 @@ export const SearchPage = memo(() => {
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search files..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 focus:bg-white/[0.08] transition-all"
                 autoFocus
               />
             </div>
@@ -129,32 +166,46 @@ export const SearchPage = memo(() => {
         </header>
 
         {/* Search Results/Suggestions */}
-        <main className="flex-1 px-6 py-6">
+        <main className="flex-1 px-5 py-5">
           {searchQuery ? (
             <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-3">
-                Searching for "{searchQuery}"
-              </h3>
-              <div className="text-gray-500 text-sm">
-                No results found. Try a different search term.
+              <p className="text-sm text-neutral-400 mb-3">
+                Searching for "<span className="text-white">{searchQuery}</span>
+                "
+              </p>
+              <div className="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+                <svg
+                  className="w-8 h-8 text-neutral-500 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-sm text-neutral-400">No results found</p>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Recent Searches */}
               <section>
-                <h3 className="text-sm font-medium text-gray-400 mb-3">
+                <h3 className="text-sm font-medium text-neutral-300 mb-3">
                   Recent Searches
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {mockRecentSearches.map((search, index) => (
                     <button
                       key={index}
                       onClick={() => setSearchQuery(search)}
-                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-left"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-left"
                     >
                       <svg
-                        className="w-4 h-4 text-gray-500 flex-shrink-0"
+                        className="w-4 h-4 text-neutral-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -162,11 +213,11 @@ export const SearchPage = memo(() => {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <span className="text-gray-200">{search}</span>
+                      <span className="text-sm text-neutral-300">{search}</span>
                     </button>
                   ))}
                 </div>
@@ -174,7 +225,7 @@ export const SearchPage = memo(() => {
 
               {/* Suggestions */}
               <section>
-                <h3 className="text-sm font-medium text-gray-400 mb-3">
+                <h3 className="text-sm font-medium text-neutral-300 mb-3">
                   Popular Topics
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -182,7 +233,7 @@ export const SearchPage = memo(() => {
                     <button
                       key={index}
                       onClick={() => setSearchQuery(suggestion)}
-                      className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-full text-sm text-gray-200 hover:border-gray-600 transition-colors"
+                      className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-sm text-neutral-300 hover:bg-white/10 hover:border-white/20 transition-all"
                     >
                       {suggestion}
                     </button>
