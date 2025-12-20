@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { ReactNode, useState, useEffect, useRef, memo } from "react";
+import React, { ReactNode, useState, useRef, memo } from "react";
 import { cn } from "../../../lib/utils";
 import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
 import type { SsgoiConfig } from "@ssgoi/react";
+import { SandpackBrowserMockup } from "./sandpack-browser-mockup";
 
 // Route configuration
 export interface RouteConfig {
@@ -23,6 +24,12 @@ export interface BrowserMockupProps {
   onNavigate?: (path: string) => void;
   layout?: React.ComponentType<{ children: React.ReactNode }>;
   deviceType?: "desktop" | "mobile";
+  /** Enable Sandpack mode for true iframe isolation */
+  useSandpack?: boolean;
+  /** Files to pass to Sandpack (required if useSandpack is true) */
+  sandpackFiles?: Record<string, string>;
+  /** Additional Sandpack dependencies */
+  sandpackDependencies?: Record<string, string>;
 }
 
 // Browser context for nested components
@@ -204,7 +211,50 @@ export function BrowserMockup({
   onNavigate,
   layout: Layout,
   deviceType = "desktop",
+  useSandpack = false,
+  sandpackFiles,
+  sandpackDependencies,
 }: BrowserMockupProps) {
+  // If Sandpack mode is enabled, delegate to SandpackBrowserMockup
+  if (useSandpack && sandpackFiles) {
+    return (
+      <SandpackBrowserMockup
+        files={sandpackFiles}
+        dependencies={sandpackDependencies}
+        deviceType={deviceType}
+        initialPath={initialPath || routes[0]?.path || "/"}
+        className={className}
+      />
+    );
+  }
+
+  // Original implementation for non-Sandpack mode
+  return (
+    <BrowserMockupOriginal
+      routes={routes}
+      config={config}
+      initialPath={initialPath}
+      className={className}
+      onNavigate={onNavigate}
+      layout={Layout}
+      deviceType={deviceType}
+    />
+  );
+}
+
+// Original BrowserMockup implementation (without Sandpack)
+function BrowserMockupOriginal({
+  routes,
+  config,
+  initialPath,
+  className,
+  onNavigate,
+  layout: Layout,
+  deviceType = "desktop",
+}: Omit<
+  BrowserMockupProps,
+  "useSandpack" | "sandpackFiles" | "sandpackDependencies"
+>) {
   const [currentPath, setCurrentPath] = useState(
     initialPath || routes[0]?.path || "/",
   );
