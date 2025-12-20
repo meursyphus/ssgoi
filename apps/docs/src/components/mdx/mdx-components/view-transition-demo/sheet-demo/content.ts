@@ -1,0 +1,58 @@
+// Sheet demo content - Email mock data
+
+export const sentEmails = [
+  {
+    id: "1",
+    to: "John Smith",
+    email: "john@example.com",
+    subject: "Project status update",
+    preview: "Hi team, here's a quick update on where we stand with...",
+    date: "Today",
+    time: "10:32 AM",
+  },
+  {
+    id: "2",
+    to: "Sarah Johnson",
+    email: "sarah@example.com",
+    subject: "Re: Design review feedback",
+    preview: "Thanks for sharing! Overall looks great, just a few minor...",
+    date: "Today",
+    time: "9:15 AM",
+  },
+  {
+    id: "3",
+    to: "Mike Chen",
+    email: "mike@example.com",
+    subject: "Weekly report attached",
+    preview: "Please find attached the weekly progress report with...",
+    date: "Yesterday",
+    time: "5:48 PM",
+  },
+  {
+    id: "4",
+    to: "Emily Davis",
+    email: "emily@example.com",
+    subject: "Meeting confirmation request",
+    preview: "Could you please confirm if Tuesday 2 PM works for...",
+    date: "Yesterday",
+    time: "3:22 PM",
+  },
+  {
+    id: "5",
+    to: "Alex Kim",
+    email: "alex@example.com",
+    subject: "API docs updated",
+    preview: "I've finished updating the API documentation with all...",
+    date: "Dec 18",
+    time: "1:05 PM",
+  },
+  {
+    id: "6",
+    to: "Lisa Park",
+    email: "lisa@example.com",
+    subject: "Vacation request",
+    preview: "I'd like to request time off from December 24th to 27th...",
+    date: "Dec 17",
+    time: "11:30 AM",
+  },
+];

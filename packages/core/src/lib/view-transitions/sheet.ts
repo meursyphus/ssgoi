@@ -31,9 +31,8 @@ function getSheetRect(context: SggoiTransitionContext) {
   const containerRect = getRect(document.body, context.positionedParent);
   const top = context.scroll.y;
 
-  // Use positioned parent's height directly
-  const viewportHeight =
-    context.positionedParent?.clientHeight ?? window.innerHeight;
+  // Calculate viewport height considering container offset (like jaemin.ts)
+  const viewportHeight = window.innerHeight - containerRect.top;
 
   return {
     top,
