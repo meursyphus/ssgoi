@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
@@ -11,6 +11,7 @@ const DEFAULT_SPRING: SpringConfig = {
 interface InstagramOptions {
   spring?: Partial<SpringConfig>;
   timeout?: number;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -257,6 +258,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
     damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
     doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
   };
+  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
   const timeout = options.timeout ?? 300;
 
   // Closure variables to share state between in/out
@@ -292,7 +294,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         resolveHandlers = null;
         fromNode = null;
         return {
-          physics: { spring },
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -307,7 +309,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       if (!handlers) {
         fromNode = null;
         return {
-          physics: { spring },
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -316,7 +318,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       fromNode = null;
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         css: (progress) => {
           // Use inAnimation if available (enterMode), otherwise stay visible
           if (!handlers?.inAnimation) return {};
@@ -331,7 +333,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       });
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         prepare: (element) => {
           if (!handlers?.isEnterMode) {
             prepareOutgoing(element, context);

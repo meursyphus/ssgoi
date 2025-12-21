@@ -1,9 +1,10 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
 interface HeroOptions {
   spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   timeout?: number;
   maxDistance?: number;
 }
@@ -17,6 +18,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     stiffness: options.spring?.stiffness ?? 300,
     damping: options.spring?.damping ?? 30,
   };
+  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
   const timeout = options.timeout ?? 300;
   const maxDistance = options.maxDistance ?? 700;
 
@@ -32,7 +34,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
       if (heroEls.length === 0) {
         return {
-          physics: { spring },
+          physics: physicsOptions,
           tick: () => {}, // No hero elements, skip animation
         };
       }
@@ -56,7 +58,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       if (!hasFromNode || !fromNode) {
         fromNode = null;
         return {
-          physics: { spring },
+          physics: physicsOptions,
           tick: () => {}, // No fromNode, skip animation
         };
       }
@@ -122,14 +124,14 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
 
       if (heroAnimations.length === 0) {
         return {
-          physics: { spring },
+          physics: physicsOptions,
           tick: () => {}, // No matching hero elements
         };
       }
 
       return {
         springs: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
-          physics: { spring },
+          physics: physicsOptions,
           tick: (progress: number) => {
             toEl.style.transform = `translate(${(1 - progress) * dx}px, ${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           },
@@ -166,7 +168,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     },
     out: async (element) => {
       return {
-        physics: { spring },
+        physics: physicsOptions,
         onStart: () => {
           // Store fromNode
           fromNode = element;

@@ -1,9 +1,15 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type {
+  SpringConfig,
+  SggoiTransition,
+  StyleObject,
+  PhysicsOptions,
+} from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface SlideOptions {
   direction?: "left" | "right";
   spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 const DEFAULT_SPRING: SpringConfig = {
@@ -19,12 +25,13 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
     damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
     doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
   };
+  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
 
   const isLeft = direction === "left";
 
   return {
     in: (element) => ({
-      physics: { spring },
+      physics: physicsOptions,
       prepare: () => {
         // GPU acceleration hints
         element.style.willChange = "transform";
@@ -48,7 +55,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
       },
     }),
     out: (_element, context) => ({
-      physics: { spring },
+      physics: physicsOptions,
       css: (progress): StyleObject => {
         const translateX = isLeft
           ? (1 - progress) * -100

@@ -2,12 +2,14 @@ import type {
   SpringConfig,
   SggoiTransition,
   SggoiTransitionContext,
+  PhysicsOptions,
 } from "../types";
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface JaeminOptions {
   spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
@@ -44,6 +46,8 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
     stiffness: options.spring?.stiffness ?? 50,
     damping: options.spring?.damping ?? 30,
   };
+
+  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
 
   const initialRotation = options.initialRotation ?? 45;
   const initialScale = options.initialScale ?? 0.01;
@@ -83,7 +87,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       const originalZIndex = element.style.zIndex;
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         from: 0,
         to: 1,
         prepare: () => {

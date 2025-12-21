@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SpringConfig, SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
@@ -11,6 +11,7 @@ const DEFAULT_SPRING: SpringConfig = {
 interface PinterestOptions {
   spring?: Partial<SpringConfig>;
   timeout?: number;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -347,6 +348,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
     damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
     doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
   };
+  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
   const timeout = options.timeout ?? 300;
 
   // Closure variables to share state between in/out
@@ -382,7 +384,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         resolveHandlers = null;
         fromNode = null;
         return {
-          physics: { spring },
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -397,7 +399,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       if (!handlers) {
         fromNode = null;
         return {
-          physics: { spring },
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -406,7 +408,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       fromNode = null;
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         css: (progress) => {
           if (!handlers) return {};
           return handlers.inAnimation(progress);
@@ -420,7 +422,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       });
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";

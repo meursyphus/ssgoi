@@ -1,4 +1,9 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type {
+  SpringConfig,
+  SggoiTransition,
+  StyleObject,
+  PhysicsOptions,
+} from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep, withResolvers } from "../utils";
 
@@ -18,6 +23,7 @@ interface FadeOptions {
   inSpring?: SpringConfig;
   outSpring?: SpringConfig;
   transitionDelay?: number;
+  physics?: PhysicsOptions;
 }
 
 export const fade = (options: FadeOptions = {}): SggoiTransition => {
@@ -26,6 +32,12 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     outSpring = DEFAULT_OUT_SPRING,
     transitionDelay = DEFAULT_TRANSITION_DELAY,
   } = options;
+  const physicsOptions: PhysicsOptions = options.physics ?? {
+    spring: inSpring,
+  };
+  const outPhysicsOptions: PhysicsOptions = options.physics ?? {
+    spring: outSpring,
+  };
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
     withResolvers<void>();
@@ -33,7 +45,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        physics: { spring: inSpring },
+        physics: physicsOptions,
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "opacity";
@@ -59,7 +71,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     },
     out: (element, context) => {
       return {
-        physics: { spring: outSpring },
+        physics: outPhysicsOptions,
         css: (progress): StyleObject => ({
           opacity: progress,
         }),

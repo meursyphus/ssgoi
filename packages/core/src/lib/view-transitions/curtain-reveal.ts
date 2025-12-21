@@ -1,4 +1,4 @@
-import type { SggoiTransition, SpringConfig } from "../types";
+import type { SggoiTransition, SpringConfig, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 /** Defaults */
@@ -62,6 +62,7 @@ interface CurtainRevealOptions {
   inSpring?: SpringConfig;
   outSpring?: SpringConfig;
   textStyle?: Partial<CSSStyleDeclaration>;
+  physics?: PhysicsOptions;
 }
 
 function getClipPath(shape: CurtainShape, scale: number): string {
@@ -93,12 +94,19 @@ export const curtainReveal = (
     textStyle = {},
   } = options;
 
+  const inPhysicsOptions: PhysicsOptions = options.physics ?? {
+    spring: inSpring,
+  };
+  const outPhysicsOptions: PhysicsOptions = options.physics ?? {
+    spring: outSpring,
+  };
+
   return {
     out: (element, context) => {
       const originalOpacity = element.style.opacity;
 
       return {
-        physics: { spring: outSpring },
+        physics: outPhysicsOptions,
         from: 1,
         to: 0,
         prepare: (el) => {
@@ -154,7 +162,7 @@ export const curtainReveal = (
       };
 
       return {
-        physics: { spring: inSpring },
+        physics: inPhysicsOptions,
         from: 0,
         to: 1,
 
