@@ -1,9 +1,17 @@
-import { animate } from "./runner";
+import { RunnerProvider } from "./runner/provider";
 import type { AnimationControls, StyleObject } from "./runner/types";
 import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
+import {
+  IntegratorProvider,
+  SpringIntegrator,
+  type Integrator,
+} from "./integrator";
 import { Animator } from "./types";
 
 export type { StyleObject };
+
+// Default spring config
+const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
 
 export interface AnimatorOptions {
   from?: number;
@@ -20,9 +28,11 @@ export interface AnimatorOptions {
 }
 
 /**
- * Animator - Spring-based Animation Controller for single spring
+ * SingleAnimator - Spring-based Animation Controller for single spring
  *
- * Internally selects appropriate runner based on tick or css option
+ * High-level API that accepts spring config or integrator factory.
+ * Internally creates Integrator and selects appropriate runner.
+ *
  * - tick: RAF-based real-time animation
  * - css: Web Animation API based (GPU accelerated, velocity tracking via simulation data)
  */
@@ -71,26 +81,73 @@ export class SingleAnimator extends Animator {
     this.currentValue = this.options.from;
   }
 
+  /**
+   * Create Integrator from options
+   * Priority: integrator factory > spring config > default spring
+   */
+  private createIntegrator(): Integrator {
+    if (this.options.integrator) {
+      return this.options.integrator();
+    }
+
+    if (this.options.spring) {
+      return IntegratorProvider.from(this.options.spring);
+    }
+
+    return new SpringIntegrator(DEFAULT_SPRING);
+  }
+
   private runAnimation(targetValue: number) {
     this.isAnimating = true;
 
-    this.controls = animate({
-      from: this.currentValue,
-      to: targetValue,
-      spring: this.options.spring,
-      integrator: this.options.integrator,
-      velocity: this.currentVelocity,
+    const integrator = this.createIntegrator();
+    const runnerResult = RunnerProvider.from({
       tick: this.options.tick,
       css: this.options.css,
-      onStart: this.options.onStart,
-      onComplete: () => {
-        this.currentValue = targetValue;
-        this.currentVelocity = 0;
-        this.isAnimating = false;
-        this.controls = null;
-        this.options.onComplete();
-      },
     });
+
+    // No animation mode - complete immediately
+    if (!runnerResult) {
+      this.options.onStart?.();
+      this.currentValue = targetValue;
+      this.currentVelocity = 0;
+      this.isAnimating = false;
+      this.options.onComplete();
+      return;
+    }
+
+    const { runner, mode } = runnerResult;
+
+    const onComplete = () => {
+      this.currentValue = targetValue;
+      this.currentVelocity = 0;
+      this.isAnimating = false;
+      this.controls = null;
+      this.options.onComplete();
+    };
+
+    if (mode === "css" && this.options.css) {
+      this.controls = runner({
+        integrator,
+        element: this.options.css.element,
+        from: this.currentValue,
+        to: targetValue,
+        velocity: this.currentVelocity,
+        style: this.options.css.style,
+        onStart: this.options.onStart,
+        onComplete,
+      });
+    } else if (mode === "tick" && this.options.tick) {
+      this.controls = runner({
+        integrator,
+        from: this.currentValue,
+        to: targetValue,
+        velocity: this.currentVelocity,
+        onUpdate: this.options.tick,
+        onStart: this.options.onStart,
+        onComplete,
+      });
+    }
   }
 
   forward(): void {
