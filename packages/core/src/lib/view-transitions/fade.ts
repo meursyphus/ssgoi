@@ -33,7 +33,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        spring: inSpring,
+        physics: { spring: inSpring },
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "opacity";
@@ -59,7 +59,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     },
     out: (element, context) => {
       return {
-        spring: outSpring,
+        physics: { spring: outSpring },
         css: (progress): StyleObject => ({
           opacity: progress,
         }),

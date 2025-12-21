@@ -292,7 +292,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         resolveHandlers = null;
         fromNode = null;
         return {
-          spring,
+          physics: { spring },
           css: () => ({}),
         };
       }
@@ -307,7 +307,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       if (!handlers) {
         fromNode = null;
         return {
-          spring,
+          physics: { spring },
           css: () => ({}),
         };
       }
@@ -316,7 +316,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       fromNode = null;
 
       return {
-        spring,
+        physics: { spring },
         css: (progress) => {
           // Use inAnimation if available (enterMode), otherwise stay visible
           if (!handlers?.inAnimation) return {};
@@ -331,7 +331,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       });
 
       return {
-        spring,
+        physics: { spring },
         prepare: (element) => {
           if (!handlers?.isEnterMode) {
             prepareOutgoing(element, context);

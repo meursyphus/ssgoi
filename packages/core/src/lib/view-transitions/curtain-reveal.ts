@@ -98,7 +98,7 @@ export const curtainReveal = (
       const originalOpacity = element.style.opacity;
 
       return {
-        spring: outSpring,
+        physics: { spring: outSpring },
         from: 1,
         to: 0,
         prepare: (el) => {
@@ -154,7 +154,7 @@ export const curtainReveal = (
       };
 
       return {
-        spring: inSpring,
+        physics: { spring: inSpring },
         from: 0,
         to: 1,
 

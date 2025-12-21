@@ -22,4 +22,10 @@ export {
   type FollowerSpringConfig,
 } from "../animator/integrator";
 
+export {
+  InertiaIntegrator,
+  type InertiaIntegratorConfig,
+  type ResistanceType,
+} from "../animator/integrator";
+
 export { IntegratorProvider } from "../animator/integrator";

@@ -13,32 +13,44 @@ import {
 import { useTranslations } from "@/i18n/use-translations";
 import { SpringGraphPanel, DEFAULT_SPRING } from "./spring-graph";
 import type { GraphConfig } from "./spring-graph";
-import type { SpringConfig } from "@ssgoi/core/types";
+import type { SpringConfig, InertiaConfig } from "@ssgoi/core/types";
 
 export function ElementTransitionSection() {
   const [show, setShow] = useState(true);
   const [graphConfig, setGraphConfig] = useState<GraphConfig>({
     leader: { ...DEFAULT_SPRING },
     follower: null,
+    inertia: null,
   });
   const t = useTranslations("home");
 
-  // Convert graph config to spring config for transitions
-  const spring: SpringConfig = useMemo(() => {
-    if (graphConfig.follower) {
-      return {
-        stiffness: graphConfig.leader.stiffness,
-        damping: graphConfig.leader.damping,
-        doubleSpring: {
-          stiffness: graphConfig.follower.stiffness,
-          damping: graphConfig.follower.damping,
-        },
+  // Convert graph config to physics options for transitions
+  const physics = useMemo(() => {
+    // Inertia mode
+    if (graphConfig.inertia) {
+      const inertia: InertiaConfig = {
+        acceleration: graphConfig.inertia.acceleration,
+        resistance: graphConfig.inertia.resistance,
+        resistanceType: graphConfig.inertia.resistanceType,
       };
+      return { inertia };
     }
-    return {
-      stiffness: graphConfig.leader.stiffness,
-      damping: graphConfig.leader.damping,
-    };
+
+    // Spring mode (with optional doubleSpring)
+    const spring: SpringConfig = graphConfig.follower
+      ? {
+          stiffness: graphConfig.leader.stiffness,
+          damping: graphConfig.leader.damping,
+          doubleSpring: {
+            stiffness: graphConfig.follower.stiffness,
+            damping: graphConfig.follower.damping,
+          },
+        }
+      : {
+          stiffness: graphConfig.leader.stiffness,
+          damping: graphConfig.leader.damping,
+        };
+    return { spring };
   }, [graphConfig]);
 
   return (
@@ -59,57 +71,46 @@ export function ElementTransitionSection() {
 
         {/* Demo area - multiple elements with reserved positions */}
         <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-fade", ...fade({ spring }) })}
-                className="w-12 h-12 bg-white rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-scale", ...scale({ spring }) })}
-                className="w-12 h-12 bg-emerald-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({
-                  key: "demo-slide",
-                  ...slide({ direction: "up", spring }),
-                })}
-                className="w-12 h-12 bg-blue-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-rotate", ...rotate({ spring }) })}
-                className="w-12 h-12 bg-amber-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-blur", ...blur({ spring }) })}
-                className="w-12 h-12 bg-purple-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-bounce", ...bounce({ spring }) })}
-                className="w-12 h-12 bg-pink-500 rounded-lg"
-              />
-            )}
-          </div>
+          {[
+            { key: "fade", color: "bg-white", transition: fade({ physics }) },
+            {
+              key: "scale",
+              color: "bg-emerald-500",
+              transition: scale({ physics }),
+            },
+            {
+              key: "slide",
+              color: "bg-blue-500",
+              transition: slide({ direction: "up", physics }),
+            },
+            {
+              key: "rotate",
+              color: "bg-amber-500",
+              transition: rotate({ physics }),
+            },
+            {
+              key: "blur",
+              color: "bg-purple-500",
+              transition: blur({ physics }),
+            },
+            {
+              key: "bounce",
+              color: "bg-pink-500",
+              transition: bounce({ physics }),
+            },
+          ].map(({ key, color, transition: t }) => (
+            <div
+              key={key}
+              className="w-12 h-12 flex items-center justify-center"
+            >
+              {show && (
+                <div
+                  ref={transition({ key: `demo-${key}`, ...t })}
+                  className={`w-12 h-12 ${color} rounded-lg`}
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Toggle */}

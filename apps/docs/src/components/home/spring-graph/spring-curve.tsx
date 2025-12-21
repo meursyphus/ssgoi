@@ -10,17 +10,20 @@ interface SpringCurveProps {
 }
 
 const PADDING = { top: 20, right: 20, bottom: 30, left: 40 };
+const FIXED_MAX_TIME = 1000; // Fixed timeline scale at 1000ms
 
 function generatePath(
   frames: SimulationFrame[],
   graphWidth: number,
   graphHeight: number,
+  maxTime: number,
 ): string {
   if (frames.length === 0) return "";
 
-  const maxTime = frames[frames.length - 1]?.time ?? 1;
+  // Filter frames within the visible time range
+  const visibleFrames = frames.filter((frame) => frame.time <= maxTime);
 
-  const points = frames.map((frame) => {
+  const points = visibleFrames.map((frame) => {
     const x = PADDING.left + (frame.time / maxTime) * graphWidth;
     const y = PADDING.top + (1 - frame.position) * graphHeight;
     return `${x.toFixed(2)},${y.toFixed(2)}`;
@@ -98,11 +101,11 @@ export function SpringCurve({
 }: SpringCurveProps) {
   const graphWidth = width - PADDING.left - PADDING.right;
   const graphHeight = height - PADDING.top - PADDING.bottom;
-  const maxTime = frames[frames.length - 1]?.time ?? 1000;
+  const maxTime = FIXED_MAX_TIME; // Use fixed timeline scale
 
   const pathD = useMemo(
-    () => generatePath(frames, graphWidth, graphHeight),
-    [frames, graphWidth, graphHeight],
+    () => generatePath(frames, graphWidth, graphHeight, maxTime),
+    [frames, graphWidth, graphHeight, maxTime],
   );
 
   const gridLines = useMemo(

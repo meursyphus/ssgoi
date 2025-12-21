@@ -32,10 +32,46 @@ export type SpringConfig = {
 };
 
 /**
+ * Resistance type for inertia physics
+ * - linear: resistance proportional to velocity (F = -r * v)
+ * - quadratic: resistance proportional to velocity squared (F = -r * v²)
+ */
+export type ResistanceType = "linear" | "quadratic";
+
+/**
+ * Inertia configuration for ease-in effect
+ * Simulates acceleration with resistance
+ */
+export type InertiaConfig = {
+  /** Acceleration force (higher = faster acceleration) */
+  acceleration: number;
+  /** Resistance coefficient (higher = more resistance) */
+  resistance: number;
+  /** Resistance type (default: 'quadratic') */
+  resistanceType?: ResistanceType;
+};
+
+/**
  * Custom integrator factory function
  * Allows using custom physics implementations
  */
 export type IntegratorFactory = () => Integrator;
+
+/**
+ * Physics options for animations
+ * Use with & to add physics options to any config type
+ *
+ * @example
+ * type FadeOptions = { from?: number; to?: number } & PhysicsOptions;
+ */
+export type PhysicsOptions = {
+  /** Spring physics (ease-out) */
+  spring?: SpringConfig;
+  /** Inertia physics (ease-in) */
+  inertia?: InertiaConfig;
+  /** Custom integrator factory */
+  integrator?: IntegratorFactory;
+};
 
 /**
  * CSS style object type
@@ -76,20 +112,11 @@ export type BaseTransitionConfig = {
  * - css: Web Animation API with CSS string generation
  */
 export type SingleSpringConfig = BaseTransitionConfig & {
-  // Spring physics configuration
-  spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
-
   /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring config.
-   * Cannot be used together with spring option.
-   *
-   * @example
-   * ```ts
-   * integrator: () => new SpringIntegrator({ stiffness: 300, damping: 30 })
-   * ```
+   * Physics configuration for animation
+   * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
    */
-  integrator?: IntegratorFactory;
+  physics?: PhysicsOptions;
 
   // Callback for each frame with progress value (RAF-based)
   tick?: (progress: number) => void;
@@ -122,14 +149,11 @@ export type SingleSpringConfig = BaseTransitionConfig & {
  * - css: Web Animation API with CSS string generation
  */
 export type SpringItem = {
-  spring?: SpringConfig;
-
   /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring config.
-   * Cannot be used together with spring option.
+   * Physics configuration for animation
+   * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
    */
-  integrator?: IntegratorFactory;
+  physics?: PhysicsOptions;
 
   /**
    * Frame callback - called on each animation frame with progress value (RAF-based)
@@ -302,8 +326,7 @@ export async function normalizeToMultiSpring(
     onEnd: resolvedConfig.onEnd,
     springs: [
       {
-        spring: resolvedConfig.spring,
-        integrator: resolvedConfig.integrator,
+        physics: resolvedConfig.physics,
         tick: resolvedConfig.tick,
         css: resolvedConfig.css,
       },

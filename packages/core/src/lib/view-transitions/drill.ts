@@ -31,7 +31,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
   if (direction === "enter") {
     return {
       in: (element) => ({
-        spring,
+        physics: { spring },
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = opacity
@@ -58,7 +58,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         },
       }),
       out: (_element, context) => ({
-        spring,
+        physics: { spring },
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.zIndex = "-1";
@@ -84,7 +84,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
     // direction === "exit"
     return {
       in: (element) => ({
-        spring,
+        physics: { spring },
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = opacity
@@ -111,7 +111,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         },
       }),
       out: (_element, context) => ({
-        spring,
+        physics: { spring },
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.zIndex = "100";

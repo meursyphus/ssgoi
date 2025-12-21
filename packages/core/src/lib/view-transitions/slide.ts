@@ -24,7 +24,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
 
   return {
     in: (element) => ({
-      spring,
+      physics: { spring },
       prepare: () => {
         // GPU acceleration hints
         element.style.willChange = "transform";
@@ -48,7 +48,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
       },
     }),
     out: (_element, context) => ({
-      spring,
+      physics: { spring },
       css: (progress): StyleObject => {
         const translateX = isLeft
           ? (1 - progress) * -100

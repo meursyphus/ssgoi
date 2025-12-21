@@ -80,7 +80,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          spring,
+          physics: { spring },
           prepare: () => {
             element.style.opacity = "0";
             element.style.willChange = "transform, opacity";
@@ -120,7 +120,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          spring,
+          physics: { spring },
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "-1";
@@ -153,7 +153,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          spring,
+          physics: { spring },
           prepare: () => {
             element.style.opacity = "0";
             element.style.willChange = "transform, opacity";
@@ -193,7 +193,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          spring,
+          physics: { spring },
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "100";

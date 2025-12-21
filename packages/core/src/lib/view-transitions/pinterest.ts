@@ -382,7 +382,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         resolveHandlers = null;
         fromNode = null;
         return {
-          spring,
+          physics: { spring },
           css: () => ({}),
         };
       }
@@ -397,7 +397,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       if (!handlers) {
         fromNode = null;
         return {
-          spring,
+          physics: { spring },
           css: () => ({}),
         };
       }
@@ -406,7 +406,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       fromNode = null;
 
       return {
-        spring,
+        physics: { spring },
         css: (progress) => {
           if (!handlers) return {};
           return handlers.inAnimation(progress);
@@ -420,7 +420,7 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
       });
 
       return {
-        spring,
+        physics: { spring },
         prepare: (element) => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";

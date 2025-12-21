@@ -32,7 +32,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
       if (heroEls.length === 0) {
         return {
-          spring,
+          physics: { spring },
           tick: () => {}, // No hero elements, skip animation
         };
       }
@@ -56,7 +56,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       if (!hasFromNode || !fromNode) {
         fromNode = null;
         return {
-          spring,
+          physics: { spring },
           tick: () => {}, // No fromNode, skip animation
         };
       }
@@ -122,14 +122,14 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
 
       if (heroAnimations.length === 0) {
         return {
-          spring,
+          physics: { spring },
           tick: () => {}, // No matching hero elements
         };
       }
 
       return {
         springs: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
-          spring,
+          physics: { spring },
           tick: (progress: number) => {
             toEl.style.transform = `translate(${(1 - progress) * dx}px, ${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
           },
@@ -166,7 +166,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     },
     out: async (element) => {
       return {
-        spring,
+        physics: { spring },
         onStart: () => {
           // Store fromNode
           fromNode = element;

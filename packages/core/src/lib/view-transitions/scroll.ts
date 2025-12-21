@@ -49,7 +49,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
       }
 
       return {
-        spring,
+        physics: { spring },
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = "transform";
@@ -79,7 +79,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
       };
     },
     out: (element, context) => ({
-      spring,
+      physics: { spring },
       onStart: () => {
         // Capture outgoing element height at animation start (before detached)
         outElementHeight = element.offsetHeight;

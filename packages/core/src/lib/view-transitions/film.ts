@@ -68,7 +68,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         springs: [
           // Spring 1: Scale Down (1 → scale)
           {
-            spring: springs.scaleDown,
+            physics: { spring: springs.scaleDown },
             offset: OFFSETS.scaleDown,
             tick: (progress) => {
               // OUT: progress goes 1 → 0, convert to 0 → 1
@@ -79,7 +79,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           },
           // Spring 2: Translate (vertical movement)
           {
-            spring: springs.translate,
+            physics: { spring: springs.translate },
             offset: OFFSETS.translate,
             tick: (progress) => {
               // OUT: progress goes 1 → 0, convert to 0 → 1
@@ -90,7 +90,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           },
           // Spring 3: Scale Up (scale → 1)
           {
-            spring: springs.scaleUp,
+            physics: { spring: springs.scaleUp },
             offset: OFFSETS.scaleUp,
             tick: (progress) => {
               // OUT: progress goes 1 → 0, convert to 0 → 1
@@ -146,7 +146,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
         springs: [
           // Spring 1: Scale Down (1 → scale) - element starts scaled, shrinks further
           {
-            spring: springs.scaleDown,
+            physics: { spring: springs.scaleDown },
             offset: OFFSETS.scaleDown,
             tick: (progress) => {
               // IN: progress goes 0 → 1
@@ -156,7 +156,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           },
           // Spring 2: Translate (vertical movement from bottom to top)
           {
-            spring: springs.translate,
+            physics: { spring: springs.translate },
             offset: OFFSETS.translate,
             tick: (progress) => {
               // IN: progress goes 0 → 1
@@ -166,7 +166,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
           },
           // Spring 3: Scale Up (scale → 1) - element returns to full size
           {
-            spring: springs.scaleUp,
+            physics: { spring: springs.scaleUp },
             offset: OFFSETS.scaleUp,
             tick: (progress) => {
               // IN: progress goes 0 → 1

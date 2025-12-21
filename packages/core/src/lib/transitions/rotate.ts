@@ -1,11 +1,12 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
+import { getPhysics } from "./utils";
 
-interface RotateOptions {
+type RotateOptions = {
   degrees?: number;
   clockwise?: boolean;
   scale?: boolean;
@@ -13,9 +14,9 @@ interface RotateOptions {
   origin?: string;
   axis?: "2d" | "x" | "y" | "z";
   perspective?: number;
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-}
+};
 
 export const rotate = (options: RotateOptions = {}): Transition => {
   const {
@@ -26,15 +27,11 @@ export const rotate = (options: RotateOptions = {}): Transition => {
     origin = "center",
     axis = "2d",
     perspective = 800,
-    spring: springOption,
     key,
   } = options;
-
-  const spring: SpringConfig = {
-    stiffness: springOption?.stiffness ?? 500,
-    damping: springOption?.damping ?? 25,
-    doubleSpring: springOption?.doubleSpring ?? false,
-  };
+  const physics = getPhysics(options.physics, {
+    spring: { stiffness: 500, damping: 25 },
+  });
 
   const rotation = clockwise ? degrees : -degrees;
 
@@ -72,14 +69,8 @@ export const rotate = (options: RotateOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      spring,
-      css: getCss,
-    }),
-    out: () => ({
-      spring,
-      css: getCss,
-    }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

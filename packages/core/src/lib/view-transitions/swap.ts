@@ -64,7 +64,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
       const centerY = rect.top + rect.height / 2;
 
       return {
-        spring,
+        physics: { spring },
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "transform, opacity";
@@ -98,7 +98,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
     // Exiting page: fade out only (no scale)
     out: (_element, context) => {
       return {
-        spring,
+        physics: { spring },
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.willChange = "opacity";

@@ -21,5 +21,10 @@ export {
   type DoubleSpringIntegratorConfig,
   type FollowerSpringConfig,
 } from "./double-spring-integrator";
+export {
+  InertiaIntegrator,
+  type InertiaIntegratorConfig,
+  type ResistanceType,
+} from "./inertia-integrator";
 
-export { IntegratorProvider } from "./provider";
+export { IntegratorProvider, type PhysicsConfig } from "./provider";

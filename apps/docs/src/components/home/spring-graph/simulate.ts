@@ -1,6 +1,7 @@
 import {
   SpringIntegrator,
   DoubleSpringIntegrator,
+  InertiaIntegrator,
   type Integrator,
   type IntegratorState,
 } from "@ssgoi/react/transitions";
@@ -10,6 +11,16 @@ const DT = 0.016; // 16ms per frame (60fps)
 const MAX_TIME_MS = 2000; // max 2 seconds
 
 export function createIntegrator(config: GraphConfig): Integrator {
+  // Inertia mode
+  if (config.inertia) {
+    return new InertiaIntegrator({
+      acceleration: config.inertia.acceleration,
+      resistance: config.inertia.resistance,
+      resistanceType: config.inertia.resistanceType,
+    });
+  }
+
+  // Double spring mode
   if (config.follower) {
     return new DoubleSpringIntegrator({
       stiffness: config.leader.stiffness,
@@ -20,6 +31,8 @@ export function createIntegrator(config: GraphConfig): Integrator {
       },
     });
   }
+
+  // Single spring mode
   return new SpringIntegrator({
     stiffness: config.leader.stiffness,
     damping: config.leader.damping,

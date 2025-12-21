@@ -1,6 +1,6 @@
 import { RunnerProvider, type BoundRunner } from "./runner/provider";
 import type { AnimationControls, StyleObject } from "./runner/types";
-import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
+import type { AnimationState, PhysicsOptions } from "../types";
 import {
   IntegratorProvider,
   SpringIntegrator,
@@ -16,8 +16,7 @@ const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
 export interface AnimatorOptions {
   from?: number;
   to?: number;
-  spring?: SpringConfig;
-  integrator?: IntegratorFactory;
+  physics?: PhysicsOptions;
   tick?: (progress: number) => void;
   css?: {
     element: HTMLElement;
@@ -40,8 +39,7 @@ export class SingleAnimator extends Animator {
   private options: {
     from: number;
     to: number;
-    spring?: SpringConfig;
-    integrator?: IntegratorFactory;
+    physics?: PhysicsOptions;
     onComplete: () => void;
     onStart?: () => void;
   };
@@ -54,21 +52,10 @@ export class SingleAnimator extends Animator {
   constructor(options: AnimatorOptions) {
     super();
 
-    if (options.tick && options.css) {
-      throw new Error("Cannot use both 'tick' and 'css' options together");
-    }
-
-    if (options.spring && options.integrator) {
-      throw new Error(
-        "Cannot use both 'spring' and 'integrator' options together",
-      );
-    }
-
     this.options = {
       from: options.from ?? 0,
       to: options.to ?? 1,
-      spring: options.spring,
-      integrator: options.integrator,
+      physics: options.physics,
       onComplete: options.onComplete ?? (() => {}),
       onStart: options.onStart,
     };
@@ -82,16 +69,21 @@ export class SingleAnimator extends Animator {
   }
 
   /**
-   * Create Integrator from options
-   * Priority: integrator factory > spring config > default spring
+   * Create Integrator from physics options
+   * Priority: integrator factory > inertia/spring config > default spring
    */
   private createIntegrator(): Integrator {
-    if (this.options.integrator) {
-      return this.options.integrator();
+    const physics = this.options.physics;
+
+    if (physics?.integrator) {
+      return physics.integrator();
     }
 
-    if (this.options.spring) {
-      return IntegratorProvider.from(this.options.spring);
+    if (physics?.spring || physics?.inertia) {
+      return IntegratorProvider.from({
+        spring: physics.spring,
+        inertia: physics.inertia,
+      });
     }
 
     return new SpringIntegrator(DEFAULT_SPRING);

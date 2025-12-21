@@ -71,7 +71,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const viewportHeight = rect.height;
 
         return {
-          spring,
+          physics: { spring },
           prepare: () => {
             element.style.willChange = "transform";
             element.style.backfaceVisibility = "hidden";
@@ -98,7 +98,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          spring,
+          physics: { spring },
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "-1";
@@ -126,7 +126,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          spring,
+          physics: { spring },
           prepare: () => {
             element.style.willChange = "transform, opacity";
             element.style.backfaceVisibility = "hidden";
@@ -155,7 +155,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const viewportHeight = rect.height;
 
         return {
-          spring,
+          physics: { spring },
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "100";

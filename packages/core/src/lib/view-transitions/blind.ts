@@ -131,7 +131,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          spring: outSpring,
+          physics: { spring: outSpring },
           offset: 0.2,
           css: {
             // Use getter for lazy element access (evaluated after prepare)
@@ -182,7 +182,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          spring: inSpring,
+          physics: { spring: inSpring },
           offset: 0.2,
           css: {
             // Use getter for lazy element access (evaluated after prepare)
