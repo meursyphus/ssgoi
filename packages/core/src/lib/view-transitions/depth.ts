@@ -1,5 +1,5 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   SggoiTransition,
   SggoiTransitionContext,
   StyleObject,
@@ -8,16 +8,18 @@ import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
-const ENTER_SPRING: SpringConfig = {
-  stiffness: 300,
-  damping: 22,
-  doubleSpring: 0.5,
+const ENTER: PhysicsOptions = {
+  inertia: {
+    acceleration: 50,
+    resistance: 1.5,
+  },
 };
 
-const EXIT_SPRING: SpringConfig = {
-  stiffness: 300,
-  damping: 22,
-  doubleSpring: 0.5,
+const EXIT: PhysicsOptions = {
+  inertia: {
+    acceleration: 50,
+    resistance: 1,
+  },
 };
 
 /** Scale offset for depth effect (10% = 0.1) */
@@ -25,7 +27,7 @@ const SCALE_OFFSET = 0.05;
 
 interface DepthOptions {
   direction?: "enter" | "exit";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -59,12 +61,8 @@ function getDepthRect(context: SggoiTransitionContext) {
  */
 export const depth = (options: DepthOptions = {}): SggoiTransition => {
   const { direction = "enter" } = options;
-  const defaultSpring = direction === "enter" ? ENTER_SPRING : EXIT_SPRING;
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? defaultSpring.stiffness,
-    damping: options.spring?.damping ?? defaultSpring.damping,
-    doubleSpring: options.spring?.doubleSpring ?? defaultSpring.doubleSpring,
-  };
+  const physicsOptions =
+    options.physics ?? (direction === "enter" ? ENTER : EXIT);
 
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
@@ -80,7 +78,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: () => {
             element.style.opacity = "0";
             element.style.willChange = "transform, opacity";
@@ -120,7 +118,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "-1";
@@ -153,7 +151,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: () => {
             element.style.opacity = "0";
             element.style.willChange = "transform, opacity";
@@ -193,7 +191,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "100";

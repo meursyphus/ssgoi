@@ -1,5 +1,5 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   SggoiTransition,
   SggoiTransitionContext,
   StyleObject,
@@ -7,21 +7,23 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const ENTER_SPRING: SpringConfig = {
-  stiffness: 140,
-  damping: 15,
-  doubleSpring: 0.5,
+const ENTER: PhysicsOptions = {
+  inertia: {
+    acceleration: 20,
+    resistance: 1.5,
+  },
 };
 
-const EXIT_SPRING: SpringConfig = {
-  stiffness: 145,
-  damping: 15,
-  doubleSpring: 0.5,
+const EXIT: PhysicsOptions = {
+  inertia: {
+    acceleration: 20,
+    resistance: 1,
+  },
 };
 
 interface SheetOptions {
   direction?: "enter" | "exit";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -55,12 +57,8 @@ function getSheetRect(context: SggoiTransitionContext) {
  */
 export const sheet = (options: SheetOptions = {}): SggoiTransition => {
   const { direction = "enter" } = options;
-  const defaultSpring = direction === "enter" ? ENTER_SPRING : EXIT_SPRING;
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? defaultSpring.stiffness,
-    damping: options.spring?.damping ?? defaultSpring.damping,
-    doubleSpring: options.spring?.doubleSpring ?? defaultSpring.doubleSpring,
-  };
+  const physicsOptions =
+    options.physics ?? (direction === "enter" ? ENTER : EXIT);
 
   if (direction === "enter") {
     // Forward: Sheet enters from bottom, background scales down
@@ -71,7 +69,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const viewportHeight = rect.height;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: () => {
             element.style.willChange = "transform";
             element.style.backfaceVisibility = "hidden";
@@ -98,7 +96,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "-1";
@@ -126,7 +124,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const centerY = rect.top + rect.height / 2;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: () => {
             element.style.willChange = "transform, opacity";
             element.style.backfaceVisibility = "hidden";
@@ -155,7 +153,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         const viewportHeight = rect.height;
 
         return {
-          physics: { spring },
+          physics: physicsOptions,
           prepare: (el) => {
             prepareOutgoing(el, context);
             el.style.zIndex = "100";

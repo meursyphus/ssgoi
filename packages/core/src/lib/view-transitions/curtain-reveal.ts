@@ -1,9 +1,13 @@
-import type { SggoiTransition, SpringConfig } from "../types";
+import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 /** Defaults */
-const DEFAULT_OUT_SPRING: SpringConfig = { stiffness: 1, damping: 1 };
-const DEFAULT_IN_SPRING: SpringConfig = { stiffness: 20, damping: 25 };
+const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 1, damping: 1 },
+};
+const DEFAULT_IN_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 20, damping: 25 },
+};
 const DEFAULT_BACKGROUND = "#000000";
 const DEFAULT_SHAPE = "circle" as const;
 const CURTAIN_REVEAL_OVERLAY_ID = "CURTAIN_REVEAL_OVERLAY_ID";
@@ -59,9 +63,8 @@ interface CurtainRevealOptions {
   background?: string;
   texts?: string[];
   shape?: CurtainShape;
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
   textStyle?: Partial<CSSStyleDeclaration>;
+  physics?: PhysicsOptions;
 }
 
 function getClipPath(shape: CurtainShape, scale: number): string {
@@ -88,17 +91,20 @@ export const curtainReveal = (
     background = DEFAULT_BACKGROUND,
     texts = [],
     shape = DEFAULT_SHAPE,
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
     textStyle = {},
   } = options;
+
+  const inPhysicsOptions: PhysicsOptions =
+    options.physics ?? DEFAULT_IN_PHYSICS;
+  const outPhysicsOptions: PhysicsOptions =
+    options.physics ?? DEFAULT_OUT_PHYSICS;
 
   return {
     out: (element, context) => {
       const originalOpacity = element.style.opacity;
 
       return {
-        physics: { spring: outSpring },
+        physics: outPhysicsOptions,
         from: 1,
         to: 0,
         prepare: (el) => {
@@ -154,7 +160,7 @@ export const curtainReveal = (
       };
 
       return {
-        physics: { spring: inSpring },
+        physics: inPhysicsOptions,
         from: 0,
         to: 1,
 

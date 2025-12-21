@@ -1,22 +1,18 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface ScrollOptions {
   direction?: "up" | "down";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 5,
-  damping: 4,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 5, damping: 4 },
 };
 
 export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "up";
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
-    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const isUp = direction === "up";
 
@@ -49,7 +45,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
       }
 
       return {
-        physics: { spring },
+        physics: physicsOptions,
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = "transform";
@@ -79,7 +75,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
       };
     },
     out: (element, context) => ({
-      physics: { spring },
+      physics: physicsOptions,
       onStart: () => {
         // Capture outgoing element height at animation start (before detached)
         outElementHeight = element.offsetHeight;

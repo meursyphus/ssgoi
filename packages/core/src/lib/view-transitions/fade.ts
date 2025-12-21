@@ -1,31 +1,25 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type { SggoiTransition, StyleObject, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep, withResolvers } from "../utils";
 
-const DEFAULT_OUT_SPRING: SpringConfig = {
-  stiffness: 180,
-  damping: 20,
-  doubleSpring: true,
+const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 180, damping: 20, doubleSpring: true },
 };
-const DEFAULT_IN_SPRING: SpringConfig = {
-  stiffness: 170,
-  damping: 20,
-  doubleSpring: true,
+const DEFAULT_IN_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 170, damping: 20, doubleSpring: true },
 };
 const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
   transitionDelay?: number;
+  physics?: PhysicsOptions;
 }
 
 export const fade = (options: FadeOptions = {}): SggoiTransition => {
-  const {
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
-    transitionDelay = DEFAULT_TRANSITION_DELAY,
-  } = options;
+  const { transitionDelay = DEFAULT_TRANSITION_DELAY } = options;
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_IN_PHYSICS;
+  const outPhysicsOptions: PhysicsOptions =
+    options.physics ?? DEFAULT_OUT_PHYSICS;
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
     withResolvers<void>();
@@ -33,7 +27,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        physics: { spring: inSpring },
+        physics: physicsOptions,
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "opacity";
@@ -59,7 +53,7 @@ export const fade = (options: FadeOptions = {}): SggoiTransition => {
     },
     out: (element, context) => {
       return {
-        physics: { spring: outSpring },
+        physics: outPhysicsOptions,
         css: (progress): StyleObject => ({
           opacity: progress,
         }),

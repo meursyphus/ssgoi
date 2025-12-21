@@ -1,22 +1,25 @@
 import type {
-  SpringConfig,
   SggoiTransition,
   MultiSpringConfig,
   StyleObject,
+  PhysicsOptions,
 } from "../types";
 import { sleep } from "../utils";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_OUT_SPRING = { stiffness: 80, damping: 25 };
-const DEFAULT_IN_SPRING = { stiffness: 75, damping: 25 };
+const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 80, damping: 25 },
+};
+const DEFAULT_IN_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 75, damping: 25 },
+};
 const DEFAULT_TRANSITION_DELAY = 300;
 const DEFAULT_BLIND_COUNT = 10;
 const DEFAULT_DIRECTION = "horizontal" as const;
 const DEFAULT_BLIND_COLOR = "#000000";
 
 interface BlindOptions {
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
+  physics?: PhysicsOptions;
   transitionDelay?: number;
   blindCount?: number;
   direction?: "horizontal" | "vertical";
@@ -25,13 +28,16 @@ interface BlindOptions {
 
 export const blind = (options: BlindOptions = {}): SggoiTransition => {
   const {
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
     transitionDelay = DEFAULT_TRANSITION_DELAY,
     blindCount = DEFAULT_BLIND_COUNT,
     direction = DEFAULT_DIRECTION,
     blindColor = DEFAULT_BLIND_COLOR,
   } = options;
+
+  const inPhysicsOptions: PhysicsOptions =
+    options.physics ?? DEFAULT_IN_PHYSICS;
+  const outPhysicsOptions: PhysicsOptions =
+    options.physics ?? DEFAULT_OUT_PHYSICS;
 
   let outAnimationComplete: Promise<void>;
   let resolveOutAnimation: (() => void) | null = null;
@@ -131,7 +137,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          physics: { spring: outSpring },
+          physics: outPhysicsOptions,
           offset: 0.2,
           css: {
             // Use getter for lazy element access (evaluated after prepare)
@@ -182,7 +188,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       // Create SpringItem for each blind with CSS mode
       const springs = Array.from({ length: blindCount }, (_, index) => {
         return {
-          physics: { spring: inSpring },
+          physics: inPhysicsOptions,
           offset: 0.2,
           css: {
             // Use getter for lazy element access (evaluated after prepare)
