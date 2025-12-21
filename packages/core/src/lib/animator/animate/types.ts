@@ -2,7 +2,7 @@
  * Animation Runner common types
  */
 
-import type { SpringConfig } from "../spring-core";
+import type { SpringConfig } from "../../types";
 
 /**
  * CSS style object type

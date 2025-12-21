@@ -6,13 +6,12 @@
 
 import { ticker } from "../ticker";
 import {
-  computeSpringConstants,
-  stepSpring,
-  isSettled,
+  type Integrator,
+  type IntegratorState,
+  IntegratorProvider,
   SETTLE_THRESHOLD,
-  type SpringState,
-  type SpringConfig,
-} from "../spring-core";
+} from "../integrator";
+import type { SpringConfig } from "../../types";
 import type { AnimationControls } from "./types";
 
 export interface TickRunnerOptions {
@@ -41,12 +40,12 @@ export function runTickAnimation(
     onStart,
   } = options;
 
-  let state: SpringState = { position: from, velocity: initialVelocity };
+  let state: IntegratorState = { position: from, velocity: initialVelocity };
   let isActive = true;
   let settleTime = 0;
   let started = false;
 
-  const constants = computeSpringConstants(spring);
+  const integrator: Integrator = IntegratorProvider.from(spring);
 
   const tickCallback = (deltaTime: number) => {
     if (!isActive) return;
@@ -57,10 +56,10 @@ export function runTickAnimation(
     }
 
     // Calculate spring step
-    state = stepSpring(state, to, constants, deltaTime);
+    state = integrator.step(state, to, deltaTime);
 
     // Check convergence
-    if (isSettled(state, to)) {
+    if (integrator.isSettled(state, to)) {
       settleTime += Math.min(deltaTime, 0.033);
 
       if (settleTime >= SETTLE_THRESHOLD) {
