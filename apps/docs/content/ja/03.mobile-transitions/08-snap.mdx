@@ -1,0 +1,165 @@
+---
+title: "スナップトランジション"
+description: "トップレベルナビゲーションのための高速で方向性のあるトランジション"
+nav-title: "スナップ"
+---
+
+# スナップトランジション
+
+スナップトランジションは、**トップレベルナビゲーション**のための高速で軽量なトランジションです。前の画面がフェードアウトし、新しい画面が方向に応じて短い距離（8px）を移動しながら現れ、「パチッ」というハプティックな感覚を与えます。
+
+## デモ
+
+<ViewTransitionDemo type="snap" />
+
+## UX原則
+
+### いつ使用しますか？
+
+スナップトランジションは、**ボトムナビゲーションやタブバー**のように、タブの順序に基づいた方向性のあるナビゲーションに最適化されています。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "方向性のあるタブ切り替え",
+      suitable: "yes",
+      description: "タブの順序に応じて左右の方向を明示的に設定します。"
+    },
+    {
+      label: "高速トランジション",
+      suitable: "yes",
+      description: "短い距離と高速スプリングで即座の反応を提供します。"
+    },
+    {
+      label: "階層関係",
+      suitable: "no",
+      description: "上位/下位レベルの移動にはデプストランジションがより適しています。"
+    }
+  ]}
+/>
+
+#### 主な使用ケース
+- 順序のあるボトムナビゲーションタブの切り替え（ホーム → 検索 → プロフィール）
+- 左右の方向性があるトップレベルメニューの切り替え
+- タブバーでの隣接タブ間の移動
+
+### なぜこのように動作するのか？
+
+1. **前の画面スライド + フェードアウト**: 現在の画面が移動方向に8pxスライドしながら消えます。
+
+2. **新しい画面スライド + フェードイン**: 前の画面が完全に消えた後、新しい画面が反対方向から8pxスライドしながら現れます。
+
+3. **方向性**: タブが右側にあれば右から、左側にあれば左から登場します。
+
+### モーションデザイン
+
+**OUT（退出するページ）**:
+- **opacity**: 1 → 0（フェードアウト）
+- **translateX**: 0 → ∓8px（移動方向にスライド）
+
+**IN（進入するページ）**:
+- **opacity**: 0 → 1（フェードイン）
+- **translateX**: ±8px → 0（反対方向から登場）
+- **開始時点**: OUTアニメーション完了後
+
+## 基本的な使い方
+
+### ボトムナビゲーションの設定
+
+スナップトランジションは方向性があるため、双方向を明示的に設定する必要があります。
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { snap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 右のタブに移動（left: 右から登場）
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 左のタブに移動（right: 左から登場）
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { snap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 右のタブに移動（left: 右から登場）
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 左のタブに移動（right: 左から登場）
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+> **注意**: `symmetric: true`を使用すると同じ方向が適用されるため、スナップトランジションでは双方向をそれぞれ明示して正しい方向性を得る必要があります。
+
+## 方向設定
+
+スナップトランジションは`direction`オプションでスライド方向を制御します:
+
+- **`left`**: 右のタブに移動する時（新しい画面が右から登場）
+- **`right`**: 左のタブに移動する時（新しい画面が左から登場）
+
+```tsx
+// ホーム → 検索（右のタブへ）: 右から登場
+snap({ direction: 'left' })
+
+// 検索 → ホーム（左のタブへ）: 左から登場
+snap({ direction: 'right' })
+```
+
+## スワップ vs スナップ
+
+| 特性 | スワップ | スナップ |
+|------|------|------|
+| IN効果 | scale + fade | slide + fade |
+| 方向性 | なし | あり（左/右） |
+| 感覚 | スムーズな切り替え | 高速トランジション |
+| 使用場所 | 一般的なタブ切り替え | 順序のあるタブ切り替え |
+
+## ベストプラクティス
+
+### 良い例
+
+- ボトムナビゲーションの隣接タブ間の切り替え
+- 左右スワイプジェスチャーとの併用
+- 順序が明確なタブバーの切り替え
+
+### 悪い例
+
+- 順序のない独立したセクション → スワップトランジションを使用
+- リスト → 詳細ページ → デプストランジションを使用
+- 階層的ナビゲーション → デプストランジションを使用
+
+## 関連トランジション
+
+- **[スワップ](/ja/mobile-transitions/swap)**: 方向性のないトップレベルトランジション
+- **[デプス](/ja/mobile-transitions/depth)**: 階層関係の画面間移動
+- **[スライド](/ja/mobile-transitions/slide)**: 全画面スライド

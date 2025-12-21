@@ -1,0 +1,165 @@
+---
+title: "Snap Transition"
+description: "Fast, directional transition for top-level navigation"
+nav-title: "Snap"
+---
+
+# Snap Transition
+
+Snap transition is a **fast and lightweight transition for top-level navigation**. The previous screen fades out, and the new screen appears with a short slide (8px) in the direction, creating a snappy, haptic-like feel.
+
+## Demo
+
+<ViewTransitionDemo type="snap" />
+
+## UX Principles
+
+### When to Use?
+
+Snap transition is optimized for **directional navigation** with ordered tabs, such as **bottom navigation or tab bars**.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "Directional Tab Switching",
+      suitable: "yes",
+      description: "Explicitly set left/right direction based on tab order."
+    },
+    {
+      label: "Quick Transitions",
+      suitable: "yes",
+      description: "Short distance and fast spring provide instant feedback."
+    },
+    {
+      label: "Hierarchical Relationship",
+      suitable: "no",
+      description: "For parent/child level navigation, depth transition is more appropriate."
+    }
+  ]}
+/>
+
+#### Key Use Cases
+- Switching between ordered bottom navigation tabs (Home → Search → Profile)
+- Top-level menu transitions with left/right directionality
+- Moving between adjacent tabs in a tab bar
+
+### Why Does It Work This Way?
+
+1. **Previous Screen Slide + Fade Out**: The current screen slides 8px in the movement direction while fading out.
+
+2. **New Screen Slide + Fade In**: After the previous screen completely disappears, the new screen slides in 8px from the opposite direction while fading in.
+
+3. **Directionality**: If the tab is on the right, it enters from the right; if on the left, it enters from the left.
+
+### Motion Design
+
+**OUT (Departing Page)**:
+- **opacity**: 1 → 0 (fade out)
+- **translateX**: 0 → ∓8px (slide in movement direction)
+
+**IN (Arriving Page)**:
+- **opacity**: 0 → 1 (fade in)
+- **translateX**: ±8px → 0 (enters from opposite direction)
+- **Start timing**: After OUT animation completes
+
+## Basic Usage
+
+### Bottom Navigation Setup
+
+Since snap transition is directional, you need to explicitly set both directions.
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { snap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      // Moving to right tab (left: enters from right)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // Moving to left tab (right: enters from left)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { snap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      // Moving to right tab (left: enters from right)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // Moving to left tab (right: enters from left)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+> **Note**: Using `symmetric: true` applies the same direction for both ways, so for snap transitions you need to explicitly set both directions to get correct directional behavior.
+
+## Direction Settings
+
+Snap transition controls slide direction with the `direction` option:
+
+- **`left`**: When moving to a right tab (new screen enters from right)
+- **`right`**: When moving to a left tab (new screen enters from left)
+
+```tsx
+// Home → Search (to right tab): enters from right
+snap({ direction: 'left' })
+
+// Search → Home (to left tab): enters from left
+snap({ direction: 'right' })
+```
+
+## Swap vs Snap
+
+| Feature | Swap | Snap |
+|---------|------|------|
+| IN effect | scale + fade | slide + fade |
+| Direction | none | yes (left/right) |
+| Feel | smooth replacement | quick transition |
+| Use case | general tab switching | ordered tab switching |
+
+## Best Practices
+
+### Good Examples
+
+- Transitions between adjacent bottom navigation tabs
+- Used with left/right swipe gestures
+- Tab bar transitions with clear order
+
+### Bad Examples
+
+- Independent sections without order → use swap transition
+- List → detail page → use depth transition
+- Hierarchical navigation → use depth transition
+
+## Related Transitions
+
+- **[Swap](/en/mobile-transitions/swap)**: Non-directional top-level transition
+- **[Depth](/en/mobile-transitions/depth)**: For hierarchical screen navigation
+- **[Slide](/en/mobile-transitions/slide)**: Full screen slide

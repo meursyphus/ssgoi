@@ -2,15 +2,47 @@
 
 import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { useDemoRouter } from "./router-provider";
-import { Ssgoi } from "@ssgoi/react";
+import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
 import {
   drill,
   hero,
   pinterest,
-  fade,
   instagram,
+  snap,
 } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
+
+/**
+ * Generate snap transitions for ordered tabs
+ * @param tabs - Array of tab paths in order (left to right)
+ * @returns Array of transition configs with correct direction
+ */
+function createSnapTransitions(tabs: string[]): SsgoiConfig["transitions"] {
+  const transitions: SsgoiConfig["transitions"] = [];
+  for (let i = 0; i < tabs.length; i++) {
+    for (let j = 0; j < tabs.length; j++) {
+      if (i !== j) {
+        // Moving to higher index = left (enters from right)
+        // Moving to lower index = right (enters from left)
+        const direction = j > i ? "left" : "right";
+        transitions.push({
+          from: tabs[i],
+          to: tabs[j],
+          transition: snap({ direction }),
+        });
+      }
+    }
+  }
+  return transitions;
+}
+
+// Tab order for snap transitions
+const TAB_ORDER = [
+  "/demo/posts",
+  "/demo/products",
+  "/demo/pinterest",
+  "/demo/profile",
+];
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -62,13 +94,14 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
-      defaultTransition: fade(),
       transitions: [
+        // Top-level tab snap transitions
+        ...createSnapTransitions(TAB_ORDER),
         // Pinterest transitions
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest({ spring: { stiffness: 150, damping: 20 } }),
+          transition: pinterest(),
           symmetric: true,
         },
         // Products transitions - hero

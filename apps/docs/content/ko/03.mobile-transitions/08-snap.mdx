@@ -1,0 +1,165 @@
+---
+title: "스냅 전환"
+description: "탑레벨 네비게이션을 위한 빠르고 방향성 있는 전환"
+nav-title: "스냅"
+---
+
+# 스냅 전환
+
+스냅 전환은 **탑레벨 네비게이션**을 위한 빠르고 가벼운 전환입니다. 이전 화면이 페이드 아웃되고, 새 화면이 방향에 따라 짧은 거리(8px)를 이동하며 나타나 "탁" 하는 햅틱 느낌을 줍니다.
+
+## 데모
+
+<ViewTransitionDemo type="snap" />
+
+## UX 원칙
+
+### 언제 사용하나요?
+
+스냅 전환은 **바텀 네비게이션이나 탭 바**처럼 탭 순서에 따른 방향성이 있는 네비게이션에 최적화되어 있습니다.
+
+<SuitabilityTable
+  items={[
+    {
+      label: "방향성 있는 탭 전환",
+      suitable: "yes",
+      description: "탭 순서에 따라 좌/우 방향을 명시적으로 설정합니다."
+    },
+    {
+      label: "빠른 전환",
+      suitable: "yes",
+      description: "짧은 거리와 빠른 스프링으로 즉각적인 반응을 제공합니다."
+    },
+    {
+      label: "계층 관계",
+      suitable: "no",
+      description: "상위/하위 레벨 이동에는 뎁스 전환이 더 적합합니다."
+    }
+  ]}
+/>
+
+#### 주요 사용 케이스
+- 순서가 있는 바텀 네비게이션 탭 전환 (홈 → 검색 → 프로필)
+- 좌우 방향성이 있는 톱레벨 메뉴 전환
+- 탭 바에서 인접한 탭 간 이동
+
+### 왜 이렇게 동작하나요?
+
+1. **이전 화면 슬라이드 + 페이드 아웃**: 현재 화면이 이동 방향으로 8px 슬라이드하며 사라집니다.
+
+2. **새 화면 슬라이드 + 페이드 인**: 이전 화면이 완전히 사라진 후, 새 화면이 반대 방향에서 8px 슬라이드하며 나타납니다.
+
+3. **방향성**: 탭이 오른쪽에 있으면 오른쪽에서, 왼쪽에 있으면 왼쪽에서 등장합니다.
+
+### 모션 디자인
+
+**OUT (나가는 페이지)**:
+- **opacity**: 1 → 0 (페이드 아웃)
+- **translateX**: 0 → ∓8px (이동 방향으로 슬라이드)
+
+**IN (들어오는 페이지)**:
+- **opacity**: 0 → 1 (페이드 인)
+- **translateX**: ±8px → 0 (반대 방향에서 등장)
+- **시작 시점**: OUT 애니메이션 완료 후
+
+## 기본 사용법
+
+### 바텀 네비게이션 설정
+
+스냅 전환은 방향성이 있기 때문에, 양방향 모두 명시적으로 설정해야 합니다.
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { snap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 오른쪽 탭으로 이동 (left: 오른쪽에서 등장)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 왼쪽 탭으로 이동 (right: 왼쪽에서 등장)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { snap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 오른쪽 탭으로 이동 (left: 오른쪽에서 등장)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 왼쪽 탭으로 이동 (right: 왼쪽에서 등장)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+> **참고**: `symmetric: true`를 사용하면 같은 방향이 적용되므로, 스냅 전환에서는 양방향을 각각 명시해야 올바른 방향성을 얻을 수 있습니다.
+
+## 방향 설정
+
+스냅 전환은 `direction` 옵션으로 슬라이드 방향을 제어합니다:
+
+- **`left`**: 오른쪽 탭으로 이동할 때 (새 화면이 오른쪽에서 등장)
+- **`right`**: 왼쪽 탭으로 이동할 때 (새 화면이 왼쪽에서 등장)
+
+```tsx
+// 홈 → 검색 (오른쪽 탭으로): 오른쪽에서 등장
+snap({ direction: 'left' })
+
+// 검색 → 홈 (왼쪽 탭으로): 왼쪽에서 등장
+snap({ direction: 'right' })
+```
+
+## 스왑 vs 스냅
+
+| 특성 | 스왑 | 스냅 |
+|------|------|------|
+| IN 효과 | scale + fade | slide + fade |
+| 방향성 | 없음 | 있음 (좌/우) |
+| 느낌 | 부드러운 교체 | 빠른 전환 |
+| 사용처 | 일반 탭 전환 | 순서있는 탭 전환 |
+
+## 모범 사례
+
+### 좋은 예
+
+- 바텀 네비게이션의 인접한 탭 간 전환
+- 좌우 스와이프 제스처와 함께 사용
+- 순서가 명확한 탭 바 전환
+
+### 나쁜 예
+
+- 순서 없는 독립적인 섹션 → 스왑 전환 사용
+- 목록 → 상세 페이지 → 뎁스 전환 사용
+- 계층적 네비게이션 → 뎁스 전환 사용
+
+## 관련 전환
+
+- **[스왑](/ko/mobile-transitions/swap)**: 방향성 없는 탑레벨 전환
+- **[뎁스](/ko/mobile-transitions/depth)**: 계층적 관계의 화면 간 이동
+- **[슬라이드](/ko/mobile-transitions/slide)**: 전체 화면 슬라이드
