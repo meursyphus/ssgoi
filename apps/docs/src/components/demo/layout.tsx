@@ -101,7 +101,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {
           from: "/demo/pinterest/*",
           to: "/demo/pinterest",
-          transition: pinterest({ spring: { stiffness: 150, damping: 20 } }),
+          transition: pinterest(),
           symmetric: true,
         },
         // Products transitions - hero
