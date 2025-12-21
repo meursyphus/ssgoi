@@ -1,6 +1,6 @@
 import { animate } from "./animate";
 import type { AnimationControls, StyleObject } from "./animate/types";
-import type { SpringConfig, AnimationState } from "../types";
+import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
 import { Animation } from "./animation";
 
 export type { StyleObject };
@@ -9,6 +9,7 @@ export interface AnimatorOptions {
   from?: number;
   to?: number;
   spring?: SpringConfig;
+  integrator?: IntegratorFactory;
   tick?: (progress: number) => void;
   css?: {
     element: HTMLElement;
@@ -29,7 +30,8 @@ export class Animator extends Animation {
   private options: {
     from: number;
     to: number;
-    spring: SpringConfig;
+    spring?: SpringConfig;
+    integrator?: IntegratorFactory;
     tick?: (progress: number) => void;
     css?: {
       element: HTMLElement;
@@ -50,10 +52,17 @@ export class Animator extends Animation {
       throw new Error("Cannot use both 'tick' and 'css' options together");
     }
 
+    if (options.spring && options.integrator) {
+      throw new Error(
+        "Cannot use both 'spring' and 'integrator' options together",
+      );
+    }
+
     this.options = {
       from: options.from ?? 0,
       to: options.to ?? 1,
-      spring: options.spring ?? { stiffness: 300, damping: 30 },
+      spring: options.spring,
+      integrator: options.integrator,
       tick: options.tick,
       css: options.css,
       onComplete: options.onComplete ?? (() => {}),
@@ -69,6 +78,7 @@ export class Animator extends Animation {
       from: this.currentValue,
       to: targetValue,
       spring: this.options.spring,
+      integrator: this.options.integrator,
       velocity: this.currentVelocity,
       tick: this.options.tick,
       css: this.options.css,

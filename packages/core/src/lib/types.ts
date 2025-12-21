@@ -303,6 +303,7 @@ export async function normalizeToMultiSpring(
     springs: [
       {
         spring: resolvedConfig.spring,
+        integrator: resolvedConfig.integrator,
         tick: resolvedConfig.tick,
         css: resolvedConfig.css,
       },
