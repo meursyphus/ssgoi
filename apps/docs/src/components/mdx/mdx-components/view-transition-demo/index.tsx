@@ -50,6 +50,9 @@ const DepthDemo = lazy(() =>
 const SwapDemo = lazy(() =>
   import("./swap-demo").then((m) => ({ default: m.SwapDemo })),
 );
+const SnapDemo = lazy(() =>
+  import("./snap-demo").then((m) => ({ default: m.SnapDemo })),
+);
 
 export interface ViewTransitionDemoProps {
   type:
@@ -67,7 +70,8 @@ export interface ViewTransitionDemoProps {
     | "sheet"
     | "film"
     | "depth"
-    | "swap";
+    | "swap"
+    | "snap";
 }
 
 // Loading component
@@ -115,6 +119,8 @@ export function ViewTransitionDemo({ type }: ViewTransitionDemoProps) {
         return <DepthDemo />;
       case "swap":
         return <SwapDemo />;
+      case "snap":
+        return <SnapDemo />;
       default:
         return null;
     }
