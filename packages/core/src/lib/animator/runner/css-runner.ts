@@ -9,20 +9,17 @@
  */
 
 import {
-  computeSpringConstants,
-  stepSpring,
-  isSettled,
+  type Integrator,
+  type IntegratorState,
   SETTLE_THRESHOLD,
-  type SpringState,
-  type SpringConfig,
-} from "../spring-core";
+} from "../integrator";
 import type { AnimationControls, StyleObject } from "./types";
 
 export interface CssRunnerOptions {
+  integrator: Integrator;
   element: HTMLElement;
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   style: (progress: number) => StyleObject;
   onComplete: () => void;
@@ -41,19 +38,18 @@ interface SimulationFrame {
 const FRAME_TIME = 1000 / 60; // ~16.67ms per frame
 
 /**
- * Full spring simulation (synchronous)
+ * Full simulation (synchronous)
  * Records position and velocity over time
  */
-function simulateSpring(
+function simulate(
+  integrator: Integrator,
   from: number,
   to: number,
-  spring: SpringConfig,
   initialVelocity = 0,
 ): SimulationFrame[] {
-  const constants = computeSpringConstants(spring);
   const MAX_FRAMES = 600; // Max 10 seconds
 
-  let state: SpringState = { position: from, velocity: initialVelocity };
+  let state: IntegratorState = { position: from, velocity: initialVelocity };
   let settleTime = 0;
   const frames: SimulationFrame[] = [];
 
@@ -68,10 +64,10 @@ function simulateSpring(
     });
 
     // Spring step (convert to seconds)
-    state = stepSpring(state, to, constants, FRAME_TIME / 1000);
+    state = integrator.step(state, to, FRAME_TIME / 1000);
 
     // Check convergence
-    if (isSettled(state, to)) {
+    if (integrator.isSettled(state, to)) {
       settleTime += FRAME_TIME / 1000;
       if (settleTime >= SETTLE_THRESHOLD) {
         // Final frame - exact target value
@@ -156,10 +152,10 @@ function framesToKeyframes(
  */
 export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const {
+    integrator,
     element,
     from,
     to,
-    spring,
     velocity: initialVelocity = 0,
     style: styleFn,
     onComplete,
@@ -167,7 +163,7 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   } = options;
 
   // Phase 1: Simulation (record position, velocity over time)
-  const frames = simulateSpring(from, to, spring, initialVelocity);
+  const frames = simulate(integrator, from, to, initialVelocity);
 
   // Handle empty frames
   if (frames.length === 0) {

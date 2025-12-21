@@ -4,21 +4,18 @@
  * Executes real-time spring animation using requestAnimationFrame
  */
 
-import { ticker } from "../ticker";
+import { ticker } from "./ticker";
 import {
-  computeSpringConstants,
-  stepSpring,
-  isSettled,
+  type Integrator,
+  type IntegratorState,
   SETTLE_THRESHOLD,
-  type SpringState,
-  type SpringConfig,
-} from "../spring-core";
+} from "../integrator";
 import type { AnimationControls } from "./types";
 
 export interface TickRunnerOptions {
+  integrator: Integrator;
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   onUpdate: (value: number) => void;
   onComplete: () => void;
@@ -32,21 +29,19 @@ export function runTickAnimation(
   options: TickRunnerOptions,
 ): AnimationControls {
   const {
+    integrator,
     from,
     to,
-    spring,
     velocity: initialVelocity = 0,
     onUpdate,
     onComplete,
     onStart,
   } = options;
 
-  let state: SpringState = { position: from, velocity: initialVelocity };
+  let state: IntegratorState = { position: from, velocity: initialVelocity };
   let isActive = true;
   let settleTime = 0;
   let started = false;
-
-  const constants = computeSpringConstants(spring);
 
   const tickCallback = (deltaTime: number) => {
     if (!isActive) return;
@@ -57,10 +52,10 @@ export function runTickAnimation(
     }
 
     // Calculate spring step
-    state = stepSpring(state, to, constants, deltaTime);
+    state = integrator.step(state, to, deltaTime);
 
     // Check convergence
-    if (isSettled(state, to)) {
+    if (integrator.isSettled(state, to)) {
       settleTime += Math.min(deltaTime, 0.033);
 
       if (settleTime >= SETTLE_THRESHOLD) {

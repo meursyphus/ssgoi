@@ -6,7 +6,7 @@ import type { AnimationState } from "../types";
  * Provides common interface for both single and multi-spring animations.
  * Subclasses implement the actual animation logic.
  */
-export abstract class Animation {
+export abstract class Animator {
   /**
    * Start animation moving forward (from → to)
    * For IN transitions: 0 → 1
