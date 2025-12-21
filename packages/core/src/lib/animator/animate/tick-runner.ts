@@ -8,16 +8,14 @@ import { ticker } from "../ticker";
 import {
   type Integrator,
   type IntegratorState,
-  IntegratorProvider,
   SETTLE_THRESHOLD,
 } from "../integrator";
-import type { SpringConfig } from "../../types";
 import type { AnimationControls } from "./types";
 
 export interface TickRunnerOptions {
+  integrator: Integrator;
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   onUpdate: (value: number) => void;
   onComplete: () => void;
@@ -31,9 +29,9 @@ export function runTickAnimation(
   options: TickRunnerOptions,
 ): AnimationControls {
   const {
+    integrator,
     from,
     to,
-    spring,
     velocity: initialVelocity = 0,
     onUpdate,
     onComplete,
@@ -44,8 +42,6 @@ export function runTickAnimation(
   let isActive = true;
   let settleTime = 0;
   let started = false;
-
-  const integrator: Integrator = IntegratorProvider.from(spring);
 
   const tickCallback = (deltaTime: number) => {
     if (!isActive) return;

@@ -11,17 +11,15 @@
 import {
   type Integrator,
   type IntegratorState,
-  IntegratorProvider,
   SETTLE_THRESHOLD,
 } from "../integrator";
-import type { SpringConfig } from "../../types";
 import type { AnimationControls, StyleObject } from "./types";
 
 export interface CssRunnerOptions {
+  integrator: Integrator;
   element: HTMLElement;
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   style: (progress: number) => StyleObject;
   onComplete: () => void;
@@ -154,18 +152,15 @@ function framesToKeyframes(
  */
 export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const {
+    integrator,
     element,
     from,
     to,
-    spring,
     velocity: initialVelocity = 0,
     style: styleFn,
     onComplete,
     onStart,
   } = options;
-
-  // Create integrator from config
-  const integrator = IntegratorProvider.from(spring);
 
   // Phase 1: Simulation (record position, velocity over time)
   const frames = simulateSpring(integrator, from, to, initialVelocity);

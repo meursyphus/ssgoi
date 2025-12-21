@@ -7,6 +7,7 @@
 
 import { runTickAnimation } from "./tick-runner";
 import { runCssAnimation } from "./css-runner";
+import { IntegratorProvider } from "../integrator";
 import type { AnimationControls, AnimationOptions } from "./types";
 
 export type { AnimationControls, AnimationOptions };
@@ -70,13 +71,16 @@ export function animate(options: AnimationOptions): AnimationControls {
     };
   }
 
+  // Create integrator from spring config
+  const integrator = IntegratorProvider.from(spring);
+
   // CSS mode
   if (css) {
     return runCssAnimation({
+      integrator,
       element: css.element,
       from,
       to,
-      spring,
       velocity,
       style: css.style,
       onComplete,
@@ -86,9 +90,9 @@ export function animate(options: AnimationOptions): AnimationControls {
 
   // Tick mode
   return runTickAnimation({
+    integrator,
     from,
     to,
-    spring,
     velocity,
     onUpdate: tick!,
     onComplete,
