@@ -19,6 +19,7 @@ export {
 export {
   DoubleSpringIntegrator,
   type DoubleSpringIntegratorConfig,
+  type FollowerSpringConfig,
 } from "./double-spring-integrator";
 
 export { IntegratorProvider } from "./provider";

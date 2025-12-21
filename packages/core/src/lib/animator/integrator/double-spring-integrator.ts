@@ -15,14 +15,21 @@ import {
   type SpringIntegratorConfig,
 } from "./spring-integrator";
 
+/**
+ * Follower spring configuration
+ */
+export interface FollowerSpringConfig {
+  stiffness: number;
+  damping: number;
+}
+
 export interface DoubleSpringIntegratorConfig extends SpringIntegratorConfig {
   /**
-   * Follower stiffness ratio (0-1)
-   * - 1.0: same stiffness as leader
-   * - 0.5: follower has half stiffness → stronger ease-in
-   * - 0.3: even stronger ease-in
+   * Follower spring configuration
+   * - number (0-1): stiffness ratio (smaller = stronger ease-in)
+   * - { stiffness, damping }: custom follower spring config
    */
-  ratio?: number;
+  follower?: number | FollowerSpringConfig;
 }
 
 /** Extended state that includes leader position */
@@ -35,16 +42,32 @@ export class DoubleSpringIntegrator implements Integrator {
   private readonly follower: SpringIntegrator;
 
   constructor(config: DoubleSpringIntegratorConfig) {
-    const ratio = config.ratio ?? 1;
-
     this.leader = new SpringIntegrator({
       stiffness: config.stiffness,
       damping: config.damping,
     });
 
+    // Determine follower config
+    let followerStiffness: number;
+    let followerDamping: number;
+
+    if (typeof config.follower === "number") {
+      // Ratio mode
+      followerStiffness = config.stiffness * config.follower;
+      followerDamping = config.damping;
+    } else if (config.follower) {
+      // Custom config mode
+      followerStiffness = config.follower.stiffness;
+      followerDamping = config.follower.damping;
+    } else {
+      // Default: same as leader
+      followerStiffness = config.stiffness;
+      followerDamping = config.damping;
+    }
+
     this.follower = new SpringIntegrator({
-      stiffness: config.stiffness * ratio,
-      damping: config.damping,
+      stiffness: followerStiffness,
+      damping: followerDamping,
     });
   }
 

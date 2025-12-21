@@ -7,10 +7,13 @@
 
 import { runTickAnimation } from "./tick-runner";
 import { runCssAnimation } from "./css-runner";
-import { IntegratorProvider } from "../integrator";
+import { IntegratorProvider, SpringIntegrator } from "../integrator";
 import type { AnimationControls, AnimationOptions } from "./types";
 
 export type { AnimationControls, AnimationOptions };
+
+// Default spring config
+const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
 
 /**
  * Run spring animation
@@ -20,7 +23,7 @@ export type { AnimationControls, AnimationOptions };
  *
  * @example
  * ```ts
- * // Tick mode (RAF)
+ * // Tick mode (RAF) with spring config
  * const controls = animate({
  *   from: 0,
  *   to: 1,
@@ -44,6 +47,15 @@ export type { AnimationControls, AnimationOptions };
  *   onComplete: () => console.log('done'),
  * });
  *
+ * // Custom integrator
+ * const controls = animate({
+ *   from: 0,
+ *   to: 1,
+ *   integrator: () => new SpringIntegrator({ stiffness: 500, damping: 25 }),
+ *   tick: (value) => element.style.opacity = String(value),
+ *   onComplete: () => console.log('done'),
+ * });
+ *
  * // Stop mid-animation and check state
  * controls.stop();
  * console.log(controls.getPosition()); // Current position
@@ -51,12 +63,28 @@ export type { AnimationControls, AnimationOptions };
  * ```
  */
 export function animate(options: AnimationOptions): AnimationControls {
-  const { from, to, spring, velocity, onComplete, onStart, tick, css } =
-    options;
+  const {
+    from,
+    to,
+    spring,
+    integrator: integratorFactory,
+    velocity,
+    onComplete,
+    onStart,
+    tick,
+    css,
+  } = options;
 
-  // Validation
+  // Validation: tick and css are mutually exclusive
   if (tick && css) {
     throw new Error("Cannot use both 'tick' and 'css' options together");
+  }
+
+  // Validation: spring and integrator are mutually exclusive
+  if (spring && integratorFactory) {
+    throw new Error(
+      "Cannot use both 'spring' and 'integrator' options together",
+    );
   }
 
   // No animation mode - complete immediately
@@ -71,8 +99,12 @@ export function animate(options: AnimationOptions): AnimationControls {
     };
   }
 
-  // Create integrator from spring config
-  const integrator = IntegratorProvider.from(spring);
+  // Create integrator: use factory if provided, otherwise use spring config
+  const integrator = integratorFactory
+    ? integratorFactory()
+    : spring
+      ? IntegratorProvider.from(spring)
+      : new SpringIntegrator(DEFAULT_SPRING);
 
   // CSS mode
   if (css) {

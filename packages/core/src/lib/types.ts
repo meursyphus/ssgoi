@@ -1,4 +1,15 @@
+import type { Integrator } from "./animator/integrator";
+
 export type TransitionKey = string | symbol;
+
+/**
+ * Double spring follower configuration
+ * Allows customizing the follower spring independently
+ */
+export type DoubleSpringFollowerConfig = {
+  stiffness: number;
+  damping: number;
+};
 
 export type SpringConfig = {
   stiffness: number;
@@ -11,13 +22,20 @@ export type SpringConfig = {
    *   - 1.0: same as true
    *   - 0.5: follower has half stiffness → stronger ease-in
    *   - 0.3: even stronger ease-in
+   * - { stiffness, damping }: custom follower spring config
    *
    * Creates a two-spring system:
    * - Leader spring: tracks the target directly
    * - Follower spring: tracks the leader's position (this is the output)
    */
-  doubleSpring?: boolean | number;
+  doubleSpring?: boolean | number | DoubleSpringFollowerConfig;
 };
+
+/**
+ * Custom integrator factory function
+ * Allows using custom physics implementations
+ */
+export type IntegratorFactory = () => Integrator;
 
 /**
  * CSS style object type
@@ -61,6 +79,18 @@ export type SingleSpringConfig = BaseTransitionConfig & {
   // Spring physics configuration
   spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
+  /**
+   * Custom integrator factory function
+   * When provided, uses this instead of spring config.
+   * Cannot be used together with spring option.
+   *
+   * @example
+   * ```ts
+   * integrator: () => new SpringIntegrator({ stiffness: 300, damping: 30 })
+   * ```
+   */
+  integrator?: IntegratorFactory;
+
   // Callback for each frame with progress value (RAF-based)
   tick?: (progress: number) => void;
 
@@ -93,6 +123,13 @@ export type SingleSpringConfig = BaseTransitionConfig & {
  */
 export type SpringItem = {
   spring?: SpringConfig;
+
+  /**
+   * Custom integrator factory function
+   * When provided, uses this instead of spring config.
+   * Cannot be used together with spring option.
+   */
+  integrator?: IntegratorFactory;
 
   /**
    * Frame callback - called on each animation frame with progress value (RAF-based)

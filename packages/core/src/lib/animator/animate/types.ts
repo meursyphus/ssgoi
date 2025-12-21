@@ -2,7 +2,7 @@
  * Animation Runner common types
  */
 
-import type { SpringConfig } from "../../types";
+import type { SpringConfig, IntegratorFactory } from "../../types";
 
 /**
  * CSS style object type
@@ -21,14 +21,28 @@ export interface AnimationControls {
 
 /**
  * Animation Options - Unified options
+ *
+ * Must provide either `spring` or `integrator` (not both)
  */
 export interface AnimationOptions {
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   onComplete: () => void;
   onStart?: () => void;
+
+  /**
+   * Spring physics configuration
+   * Cannot be used together with integrator option
+   */
+  spring?: SpringConfig;
+
+  /**
+   * Custom integrator factory function
+   * When provided, uses this instead of spring config
+   * Cannot be used together with spring option
+   */
+  integrator?: IntegratorFactory;
 
   // Use only one of these
   tick?: (value: number) => void;

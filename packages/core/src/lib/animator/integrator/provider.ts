@@ -19,13 +19,27 @@ export class IntegratorProvider {
    */
   static from(config: SpringConfig): Integrator {
     if (config.doubleSpring) {
-      const ratio =
-        typeof config.doubleSpring === "number" ? config.doubleSpring : 1;
+      const doubleSpring = config.doubleSpring;
+
+      // Determine follower config
+      let follower: number | { stiffness: number; damping: number } | undefined;
+
+      if (typeof doubleSpring === "number") {
+        // Ratio mode
+        follower = doubleSpring;
+      } else if (typeof doubleSpring === "object") {
+        // Custom follower config
+        follower = {
+          stiffness: doubleSpring.stiffness,
+          damping: doubleSpring.damping,
+        };
+      }
+      // else: true → undefined (same as leader)
 
       return new DoubleSpringIntegrator({
         stiffness: config.stiffness,
         damping: config.damping,
-        ratio,
+        follower,
       });
     }
 
