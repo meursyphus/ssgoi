@@ -38,10 +38,10 @@ interface SimulationFrame {
 const FRAME_TIME = 1000 / 60; // ~16.67ms per frame
 
 /**
- * Full spring simulation (synchronous)
+ * Full simulation (synchronous)
  * Records position and velocity over time
  */
-function simulateSpring(
+function simulate(
   integrator: Integrator,
   from: number,
   to: number,
@@ -163,7 +163,7 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   } = options;
 
   // Phase 1: Simulation (record position, velocity over time)
-  const frames = simulateSpring(integrator, from, to, initialVelocity);
+  const frames = simulate(integrator, from, to, initialVelocity);
 
   // Handle empty frames
   if (frames.length === 0) {

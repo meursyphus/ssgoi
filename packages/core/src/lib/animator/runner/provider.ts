@@ -2,12 +2,13 @@
  * Runner Provider
  *
  * Static class that selects appropriate animation runner based on options.
- * Returns runner function for tick-based or CSS-based animation.
+ * Returns bound runner function with mode-specific options pre-applied.
  */
 
-import { runTickAnimation, type TickRunnerOptions } from "./tick-runner";
-import { runCssAnimation, type CssRunnerOptions } from "./css-runner";
+import { runTickAnimation } from "./tick-runner";
+import { runCssAnimation } from "./css-runner";
 import type { AnimationControls, StyleObject } from "./types";
+import type { Integrator } from "../integrator";
 
 export type RunnerOptions = {
   tick?: (value: number) => void;
@@ -17,21 +18,32 @@ export type RunnerOptions = {
   };
 };
 
-export type Runner = (
-  options: TickRunnerOptions | CssRunnerOptions,
-) => AnimationControls;
+/**
+ * Common options passed to bound runner
+ */
+export interface BoundRunnerOptions {
+  integrator: Integrator;
+  from: number;
+  to: number;
+  velocity?: number;
+  onComplete: () => void;
+  onStart?: () => void;
+}
+
+/**
+ * Bound runner - mode-specific options already applied
+ */
+export type BoundRunner = (options: BoundRunnerOptions) => AnimationControls;
 
 export class RunnerProvider {
   /**
-   * Get appropriate runner based on animation mode
+   * Get bound runner based on animation mode
    *
    * @param options Animation mode options (tick or css)
-   * @returns Runner function or null if no animation mode specified
+   * @returns Bound runner function or null if no animation mode specified
    * @throws Error if both tick and css are provided
    */
-  static from(
-    options: RunnerOptions,
-  ): { runner: Runner; mode: "tick" | "css" } | null {
+  static from(options: RunnerOptions): BoundRunner | null {
     const { tick, css } = options;
 
     if (tick && css) {
@@ -39,17 +51,20 @@ export class RunnerProvider {
     }
 
     if (css) {
-      return {
-        runner: runCssAnimation as Runner,
-        mode: "css",
-      };
+      return (commonOpts) =>
+        runCssAnimation({
+          ...commonOpts,
+          element: css.element,
+          style: css.style,
+        });
     }
 
     if (tick) {
-      return {
-        runner: runTickAnimation as Runner,
-        mode: "tick",
-      };
+      return (commonOpts) =>
+        runTickAnimation({
+          ...commonOpts,
+          onUpdate: tick,
+        });
     }
 
     return null;

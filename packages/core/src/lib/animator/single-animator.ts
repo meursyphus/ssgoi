@@ -1,4 +1,4 @@
-import { RunnerProvider } from "./runner/provider";
+import { RunnerProvider, type BoundRunner } from "./runner/provider";
 import type { AnimationControls, StyleObject } from "./runner/types";
 import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
 import {
@@ -42,14 +42,10 @@ export class SingleAnimator extends Animator {
     to: number;
     spring?: SpringConfig;
     integrator?: IntegratorFactory;
-    tick?: (progress: number) => void;
-    css?: {
-      element: HTMLElement;
-      style: (progress: number) => StyleObject;
-    };
     onComplete: () => void;
     onStart?: () => void;
   };
+  private runner: BoundRunner | null;
   private controls: AnimationControls | null = null;
   private isAnimating = false;
   private currentValue: number;
@@ -73,12 +69,16 @@ export class SingleAnimator extends Animator {
       to: options.to ?? 1,
       spring: options.spring,
       integrator: options.integrator,
-      tick: options.tick,
-      css: options.css,
       onComplete: options.onComplete ?? (() => {}),
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
+
+    // Create bound runner at construction time
+    this.runner = RunnerProvider.from({
+      tick: options.tick,
+      css: options.css,
+    });
   }
 
   /**
@@ -100,14 +100,8 @@ export class SingleAnimator extends Animator {
   private runAnimation(targetValue: number) {
     this.isAnimating = true;
 
-    const integrator = this.createIntegrator();
-    const runnerResult = RunnerProvider.from({
-      tick: this.options.tick,
-      css: this.options.css,
-    });
-
     // No animation mode - complete immediately
-    if (!runnerResult) {
+    if (!this.runner) {
       this.options.onStart?.();
       this.currentValue = targetValue;
       this.currentVelocity = 0;
@@ -116,38 +110,20 @@ export class SingleAnimator extends Animator {
       return;
     }
 
-    const { runner, mode } = runnerResult;
-
-    const onComplete = () => {
-      this.currentValue = targetValue;
-      this.currentVelocity = 0;
-      this.isAnimating = false;
-      this.controls = null;
-      this.options.onComplete();
-    };
-
-    if (mode === "css" && this.options.css) {
-      this.controls = runner({
-        integrator,
-        element: this.options.css.element,
-        from: this.currentValue,
-        to: targetValue,
-        velocity: this.currentVelocity,
-        style: this.options.css.style,
-        onStart: this.options.onStart,
-        onComplete,
-      });
-    } else if (mode === "tick" && this.options.tick) {
-      this.controls = runner({
-        integrator,
-        from: this.currentValue,
-        to: targetValue,
-        velocity: this.currentVelocity,
-        onUpdate: this.options.tick,
-        onStart: this.options.onStart,
-        onComplete,
-      });
-    }
+    this.controls = this.runner({
+      integrator: this.createIntegrator(),
+      from: this.currentValue,
+      to: targetValue,
+      velocity: this.currentVelocity,
+      onStart: this.options.onStart,
+      onComplete: () => {
+        this.currentValue = targetValue;
+        this.currentVelocity = 0;
+        this.isAnimating = false;
+        this.controls = null;
+        this.options.onComplete();
+      },
+    });
   }
 
   forward(): void {
