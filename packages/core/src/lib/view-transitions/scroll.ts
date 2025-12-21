@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition, PhysicsOptions } from "../types";
+import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface ScrollOptions {
@@ -6,16 +6,13 @@ interface ScrollOptions {
   physics?: PhysicsOptions;
 }
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 5,
-  damping: 4,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 5, damping: 4 },
 };
 
 export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "up";
-  const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: DEFAULT_SPRING,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const isUp = direction === "up";
 

@@ -1,9 +1,4 @@
-import type {
-  SpringConfig,
-  SggoiTransition,
-  StyleObject,
-  PhysicsOptions,
-} from "../types";
+import type { SggoiTransition, StyleObject, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface SlideOptions {
@@ -11,17 +6,17 @@ interface SlideOptions {
   physics?: PhysicsOptions;
 }
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 140,
-  damping: 19,
-  doubleSpring: 0.8,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: {
+    stiffness: 140,
+    damping: 19,
+    doubleSpring: 0.8,
+  },
 };
 
 export const slide = (options: SlideOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "left";
-  const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: DEFAULT_SPRING,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const isLeft = direction === "left";
 

@@ -1,16 +1,16 @@
 import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_SPRING = { stiffness: 100, damping: 30 };
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 100, damping: 30 },
+};
 
 export interface RotateOptions {
   physics?: PhysicsOptions;
 }
 
 export const rotate = (options: RotateOptions = {}): SggoiTransition => {
-  const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: DEFAULT_SPRING,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   return {
     in: (element) => {
       return {

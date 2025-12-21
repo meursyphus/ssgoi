@@ -1,11 +1,9 @@
-import type { SggoiTransition, PhysicsOptions, SpringConfig } from "../types";
+import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 140,
-  damping: 19,
-  doubleSpring: 0.7,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 140, damping: 19, doubleSpring: 0.7 },
 };
 
 interface PinterestOptions {
@@ -342,9 +340,7 @@ function createAnimationConfig(
 }
 
 export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
-  const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: DEFAULT_SPRING,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   const timeout = options.timeout ?? 300;
 
   // Closure variables to share state between in/out

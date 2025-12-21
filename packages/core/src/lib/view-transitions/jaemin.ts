@@ -1,5 +1,4 @@
 import type {
-  SpringConfig,
   SggoiTransition,
   SggoiTransitionContext,
   PhysicsOptions,
@@ -7,7 +6,9 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_SPRING: SpringConfig = { stiffness: 50, damping: 30 };
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 50, damping: 30 },
+};
 
 interface JaeminOptions {
   physics?: PhysicsOptions;
@@ -43,9 +44,7 @@ function getJaeminRect(context: SggoiTransitionContext) {
  * Created by Jaemin
  */
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
-  const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: DEFAULT_SPRING,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const initialRotation = options.initialRotation ?? 45;
   const initialScale = options.initialScale ?? 0.01;
