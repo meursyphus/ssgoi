@@ -1,4 +1,4 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
@@ -6,15 +6,16 @@ const TRANSLATE_OFFSET = 6; // px
 const OUT_OPACITY_MIN = 0; // OUT: 1 → this value
 const IN_OPACITY_START = 1; // IN: this value → 1
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 3050,
-  damping: 42,
-  doubleSpring: 0.5,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  inertia: {
+    acceleration: 50,
+    resistance: 1.5,
+  },
 };
 
 interface SnapOptions {
   direction?: "left" | "right";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -25,11 +26,7 @@ interface SnapOptions {
  */
 export const snap = (options: SnapOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "left";
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
-    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
-    doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
-  };
+  const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const isLeft = direction === "left";
 
@@ -41,7 +38,7 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
     // Entering page: fades in + slides from opposite direction
     in: (element) => {
       return {
-        spring,
+        physics: physicsOptions,
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "transform, opacity";
@@ -86,7 +83,7 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
     // Exiting page: fade out + slide in same direction as navigation
     out: (element, context) => {
       return {
-        spring,
+        physics: physicsOptions,
         prepare: () => {
           prepareOutgoing(element, context);
           element.style.willChange = "transform, opacity";
