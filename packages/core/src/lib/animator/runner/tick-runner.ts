@@ -4,7 +4,7 @@
  * Executes real-time spring animation using requestAnimationFrame
  */
 
-import { ticker } from "../ticker";
+import { ticker } from "./ticker";
 import {
   type Integrator,
   type IntegratorState,

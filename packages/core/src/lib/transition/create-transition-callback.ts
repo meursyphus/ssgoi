@@ -1,7 +1,7 @@
 import type { Transition, TransitionCallback, TransitionScope } from "../types";
 import { normalizeToMultiSpring, normalizeMultiSpringSchedule } from "../types";
 import { MultiAnimator } from "../animator/multi-animator";
-import { Animation } from "../animator/animation";
+import { Animator } from "../animator/types";
 import {
   createDefaultStrategy,
   type StrategyContext,
@@ -19,7 +19,7 @@ export function createTransitionCallback(
   },
 ): TransitionCallback {
   let currentAnimation: {
-    controller: Animation;
+    controller: Animator;
     direction: "in" | "out";
   } | null = null;
   let currentClone: HTMLElement | null = null;

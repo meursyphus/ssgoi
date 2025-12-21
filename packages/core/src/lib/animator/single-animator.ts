@@ -1,7 +1,7 @@
-import { animate } from "./animate";
-import type { AnimationControls, StyleObject } from "./animate/types";
+import { animate } from "./runner";
+import type { AnimationControls, StyleObject } from "./runner/types";
 import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
-import { Animation } from "./animation";
+import { Animator } from "./types";
 
 export type { StyleObject };
 
@@ -26,7 +26,7 @@ export interface AnimatorOptions {
  * - tick: RAF-based real-time animation
  * - css: Web Animation API based (GPU accelerated, velocity tracking via simulation data)
  */
-export class Animator extends Animation {
+export class SingleAnimator extends Animator {
   private options: {
     from: number;
     to: number;
@@ -161,8 +161,8 @@ export class Animator extends Animation {
   static fromState(
     state: { position: number; velocity: number },
     options: AnimatorOptions,
-  ): Animator {
-    const animator = new Animator(options);
+  ): SingleAnimator {
+    const animator = new SingleAnimator(options);
     animator.setValue(state.position);
     animator.setVelocity(state.velocity);
     return animator;
