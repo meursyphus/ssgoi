@@ -2,8 +2,9 @@ import type { SpringConfig, SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+const DEFAULT_SPRING: SpringConfig = { stiffness: 300, damping: 30 };
+
 interface HeroOptions {
-  spring?: Partial<SpringConfig>;
   physics?: PhysicsOptions;
   timeout?: number;
   maxDistance?: number;
@@ -14,11 +15,9 @@ function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
 }
 
 export const hero = (options: HeroOptions = {}): SggoiTransition => {
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 300,
-    damping: options.spring?.damping ?? 30,
+  const physicsOptions: PhysicsOptions = options.physics ?? {
+    spring: DEFAULT_SPRING,
   };
-  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
   const timeout = options.timeout ?? 300;
   const maxDistance = options.maxDistance ?? 700;
 

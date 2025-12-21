@@ -1,5 +1,4 @@
 import type {
-  SpringConfig,
   SggoiTransition,
   MultiSpringConfig,
   StyleObject,
@@ -16,8 +15,6 @@ const DEFAULT_DIRECTION = "horizontal" as const;
 const DEFAULT_BLIND_COLOR = "#000000";
 
 interface BlindOptions {
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
   physics?: PhysicsOptions;
   transitionDelay?: number;
   blindCount?: number;
@@ -27,8 +24,6 @@ interface BlindOptions {
 
 export const blind = (options: BlindOptions = {}): SggoiTransition => {
   const {
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
     transitionDelay = DEFAULT_TRANSITION_DELAY,
     blindCount = DEFAULT_BLIND_COUNT,
     direction = DEFAULT_DIRECTION,
@@ -36,10 +31,10 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   } = options;
 
   const inPhysicsOptions: PhysicsOptions = options.physics ?? {
-    spring: inSpring,
+    spring: DEFAULT_IN_SPRING,
   };
   const outPhysicsOptions: PhysicsOptions = options.physics ?? {
-    spring: outSpring,
+    spring: DEFAULT_OUT_SPRING,
   };
 
   let outAnimationComplete: Promise<void>;

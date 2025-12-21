@@ -1,8 +1,8 @@
 import type {
-  SpringConfig,
   SggoiTransition,
   StyleObject,
   PhysicsOptions,
+  SpringConfig,
 } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { sleep, withResolvers } from "../utils";
@@ -20,23 +20,17 @@ const DEFAULT_IN_SPRING: SpringConfig = {
 const DEFAULT_TRANSITION_DELAY = 0;
 
 interface FadeOptions {
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
   transitionDelay?: number;
   physics?: PhysicsOptions;
 }
 
 export const fade = (options: FadeOptions = {}): SggoiTransition => {
-  const {
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
-    transitionDelay = DEFAULT_TRANSITION_DELAY,
-  } = options;
+  const { transitionDelay = DEFAULT_TRANSITION_DELAY } = options;
   const physicsOptions: PhysicsOptions = options.physics ?? {
-    spring: inSpring,
+    spring: DEFAULT_IN_SPRING,
   };
   const outPhysicsOptions: PhysicsOptions = options.physics ?? {
-    spring: outSpring,
+    spring: DEFAULT_OUT_SPRING,
   };
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =

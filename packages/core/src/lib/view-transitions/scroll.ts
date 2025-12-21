@@ -3,7 +3,6 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface ScrollOptions {
   direction?: "up" | "down";
-  spring?: Partial<SpringConfig>;
   physics?: PhysicsOptions;
 }
 
@@ -14,11 +13,9 @@ const DEFAULT_SPRING: SpringConfig = {
 
 export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "up";
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
-    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
+  const physicsOptions: PhysicsOptions = options.physics ?? {
+    spring: DEFAULT_SPRING,
   };
-  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
 
   const isUp = direction === "up";
 

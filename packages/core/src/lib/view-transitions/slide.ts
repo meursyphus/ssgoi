@@ -8,7 +8,6 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 interface SlideOptions {
   direction?: "left" | "right";
-  spring?: Partial<SpringConfig>;
   physics?: PhysicsOptions;
 }
 
@@ -20,12 +19,9 @@ const DEFAULT_SPRING: SpringConfig = {
 
 export const slide = (options: SlideOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "left";
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
-    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
-    doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
+  const physicsOptions: PhysicsOptions = options.physics ?? {
+    spring: DEFAULT_SPRING,
   };
-  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
 
   const isLeft = direction === "left";
 

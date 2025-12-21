@@ -59,8 +59,6 @@ interface CurtainRevealOptions {
   background?: string;
   texts?: string[];
   shape?: CurtainShape;
-  inSpring?: SpringConfig;
-  outSpring?: SpringConfig;
   textStyle?: Partial<CSSStyleDeclaration>;
   physics?: PhysicsOptions;
 }
@@ -89,16 +87,14 @@ export const curtainReveal = (
     background = DEFAULT_BACKGROUND,
     texts = [],
     shape = DEFAULT_SHAPE,
-    inSpring = DEFAULT_IN_SPRING,
-    outSpring = DEFAULT_OUT_SPRING,
     textStyle = {},
   } = options;
 
   const inPhysicsOptions: PhysicsOptions = options.physics ?? {
-    spring: inSpring,
+    spring: DEFAULT_IN_SPRING,
   };
   const outPhysicsOptions: PhysicsOptions = options.physics ?? {
-    spring: outSpring,
+    spring: DEFAULT_OUT_SPRING,
   };
 
   return {

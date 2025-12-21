@@ -7,8 +7,9 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
+const DEFAULT_SPRING: SpringConfig = { stiffness: 50, damping: 30 };
+
 interface JaeminOptions {
-  spring?: Partial<SpringConfig>;
   physics?: PhysicsOptions;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
@@ -42,12 +43,9 @@ function getJaeminRect(context: SggoiTransitionContext) {
  * Created by Jaemin
  */
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 50,
-    damping: options.spring?.damping ?? 30,
+  const physicsOptions: PhysicsOptions = options.physics ?? {
+    spring: DEFAULT_SPRING,
   };
-
-  const physicsOptions: PhysicsOptions = options.physics ?? { spring };
 
   const initialRotation = options.initialRotation ?? 45;
   const initialScale = options.initialScale ?? 0.01;
