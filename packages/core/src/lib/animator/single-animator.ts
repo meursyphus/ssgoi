@@ -1,6 +1,11 @@
 import { RunnerProvider, type BoundRunner } from "./runner/provider";
 import type { AnimationControls, StyleObject } from "./runner/types";
-import type { SpringConfig, AnimationState, IntegratorFactory } from "../types";
+import type {
+  SpringConfig,
+  InertiaConfig,
+  AnimationState,
+  IntegratorFactory,
+} from "../types";
 import {
   IntegratorProvider,
   SpringIntegrator,
@@ -17,6 +22,7 @@ export interface AnimatorOptions {
   from?: number;
   to?: number;
   spring?: SpringConfig;
+  inertia?: InertiaConfig;
   integrator?: IntegratorFactory;
   tick?: (progress: number) => void;
   css?: {
@@ -41,6 +47,7 @@ export class SingleAnimator extends Animator {
     from: number;
     to: number;
     spring?: SpringConfig;
+    inertia?: InertiaConfig;
     integrator?: IntegratorFactory;
     onComplete: () => void;
     onStart?: () => void;
@@ -54,13 +61,9 @@ export class SingleAnimator extends Animator {
   constructor(options: AnimatorOptions) {
     super();
 
-    if (options.tick && options.css) {
-      throw new Error("Cannot use both 'tick' and 'css' options together");
-    }
-
-    if (options.spring && options.integrator) {
+    if (options.integrator && (options.spring || options.inertia)) {
       throw new Error(
-        "Cannot use both 'spring' and 'integrator' options together",
+        "Cannot use 'integrator' together with 'spring' or 'inertia' options",
       );
     }
 
@@ -68,6 +71,7 @@ export class SingleAnimator extends Animator {
       from: options.from ?? 0,
       to: options.to ?? 1,
       spring: options.spring,
+      inertia: options.inertia,
       integrator: options.integrator,
       onComplete: options.onComplete ?? (() => {}),
       onStart: options.onStart,
@@ -83,15 +87,19 @@ export class SingleAnimator extends Animator {
 
   /**
    * Create Integrator from options
-   * Priority: integrator factory > spring config > default spring
+   * Priority: integrator factory > inertia/spring config > default spring
    */
   private createIntegrator(): Integrator {
     if (this.options.integrator) {
       return this.options.integrator();
     }
 
-    if (this.options.spring) {
-      return IntegratorProvider.from(this.options.spring);
+    // Use IntegratorProvider which handles spring/inertia validation
+    if (this.options.spring || this.options.inertia) {
+      return IntegratorProvider.from({
+        spring: this.options.spring,
+        inertia: this.options.inertia,
+      });
     }
 
     return new SpringIntegrator(DEFAULT_SPRING);

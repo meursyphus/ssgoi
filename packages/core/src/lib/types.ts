@@ -32,10 +32,46 @@ export type SpringConfig = {
 };
 
 /**
+ * Resistance type for inertia physics
+ * - linear: resistance proportional to velocity (F = -r * v)
+ * - quadratic: resistance proportional to velocity squared (F = -r * v²)
+ */
+export type ResistanceType = "linear" | "quadratic";
+
+/**
+ * Inertia configuration for ease-in effect
+ * Simulates acceleration with resistance
+ */
+export type InertiaConfig = {
+  /** Acceleration force (higher = faster acceleration) */
+  acceleration: number;
+  /** Resistance coefficient (higher = more resistance) */
+  resistance: number;
+  /** Resistance type (default: 'quadratic') */
+  resistanceType?: ResistanceType;
+};
+
+/**
  * Custom integrator factory function
  * Allows using custom physics implementations
  */
 export type IntegratorFactory = () => Integrator;
+
+/**
+ * Physics options for animations
+ * Use with & to add physics options to any config type
+ *
+ * @example
+ * type FadeOptions = { from?: number; to?: number } & PhysicsOptions;
+ */
+export type PhysicsOptions = {
+  /** Spring physics (ease-out) */
+  spring?: SpringConfig;
+  /** Inertia physics (ease-in) */
+  inertia?: InertiaConfig;
+  /** Custom integrator factory */
+  integrator?: IntegratorFactory;
+};
 
 /**
  * CSS style object type
@@ -80,9 +116,15 @@ export type SingleSpringConfig = BaseTransitionConfig & {
   spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
 
   /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring config.
+   * Inertia physics configuration for ease-in effect
    * Cannot be used together with spring option.
+   */
+  inertia?: InertiaConfig;
+
+  /**
+   * Custom integrator factory function
+   * When provided, uses this instead of spring/inertia config.
+   * Cannot be used together with spring or inertia option.
    *
    * @example
    * ```ts
@@ -125,9 +167,15 @@ export type SpringItem = {
   spring?: SpringConfig;
 
   /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring config.
+   * Inertia physics configuration for ease-in effect
    * Cannot be used together with spring option.
+   */
+  inertia?: InertiaConfig;
+
+  /**
+   * Custom integrator factory function
+   * When provided, uses this instead of spring/inertia config.
+   * Cannot be used together with spring or inertia option.
    */
   integrator?: IntegratorFactory;
 
@@ -303,6 +351,7 @@ export async function normalizeToMultiSpring(
     springs: [
       {
         spring: resolvedConfig.spring,
+        inertia: resolvedConfig.inertia,
         integrator: resolvedConfig.integrator,
         tick: resolvedConfig.tick,
         css: resolvedConfig.css,

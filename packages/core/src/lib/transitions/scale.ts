@@ -1,32 +1,23 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
+import { getPhysics } from "./utils";
 
-interface ScaleOptions {
+type ScaleOptions = {
   start?: number;
   opacity?: number;
   axis?: "x" | "y" | "both";
-  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-}
+} & PhysicsOptions;
 
 export const scale = (options: ScaleOptions = {}): Transition => {
-  const {
-    start = 0,
-    opacity = 0,
-    axis = "both",
-    spring: springOption,
-    key,
-  } = options;
-
-  const spring: SpringConfig = {
-    stiffness: springOption?.stiffness ?? 300,
-    damping: springOption?.damping ?? 30,
-    doubleSpring: springOption?.doubleSpring ?? false,
-  };
+  const { start = 0, opacity = 0, axis = "both", key } = options;
+  const physics = getPhysics(options, {
+    spring: { stiffness: 300, damping: 30 },
+  });
 
   const getScaleTransform = (value: number): string => {
     switch (axis) {
@@ -49,14 +40,8 @@ export const scale = (options: ScaleOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      spring,
-      css: getCss,
-    }),
-    out: () => ({
-      spring,
-      css: getCss,
-    }),
+    in: () => ({ ...physics, css: getCss }),
+    out: () => ({ ...physics, css: getCss }),
     ...(key && { key }),
   };
 };

@@ -1,35 +1,32 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
+import { getPhysics } from "./utils";
 
-interface FadeOptions {
+type FadeOptions = {
   from?: number;
   to?: number;
-  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-}
+} & PhysicsOptions;
 
 export const fade = (options: FadeOptions = {}): Transition => {
-  const { from = 0, to = 1, spring: springOption, key } = options;
-
-  const spring: SpringConfig = {
-    stiffness: springOption?.stiffness ?? 300,
-    damping: springOption?.damping ?? 30,
-    doubleSpring: springOption?.doubleSpring ?? false,
-  };
+  const { from = 0, to = 1, key } = options;
+  const physics = getPhysics(options, {
+    spring: { stiffness: 300, damping: 30 },
+  });
 
   return {
     in: () => ({
-      spring,
+      ...physics,
       css: (progress: number): StyleObject => ({
         opacity: from + (to - from) * progress,
       }),
     }),
     out: () => ({
-      spring,
+      ...physics,
       css: (progress: number): StyleObject => ({
         opacity: from + (to - from) * progress,
       }),
