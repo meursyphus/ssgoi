@@ -12,8 +12,9 @@ type BounceOptions = {
   scale?: boolean;
   fade?: boolean;
   direction?: "up" | "down";
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-} & PhysicsOptions;
+};
 
 export const bounce = (options: BounceOptions = {}): Transition => {
   const {
@@ -24,7 +25,7 @@ export const bounce = (options: BounceOptions = {}): Transition => {
     direction = "up",
     key,
   } = options;
-  const physics = getPhysics(options, {
+  const physics = getPhysics(options.physics, {
     spring: { stiffness: 800, damping: 15 },
   });
 
@@ -58,14 +59,8 @@ export const bounce = (options: BounceOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      ...physics,
-      css: getCss,
-    }),
-    out: () => ({
-      ...physics,
-      css: getCss,
-    }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

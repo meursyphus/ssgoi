@@ -54,9 +54,11 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       const originalOpacity = element.style.opacity;
 
       return {
-        spring: {
-          stiffness: 80,
-          damping: 25,
+        physics: {
+          spring: {
+            stiffness: 80,
+            damping: 25,
+          },
         },
         from: 1,
         to: 0,
@@ -81,7 +83,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       const originalZIndex = element.style.zIndex;
 
       return {
-        spring,
+        physics: { spring },
         from: 0,
         to: 1,
         prepare: () => {

@@ -13,7 +13,7 @@ export const strip = (): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: { spring: DEFAULT_SPRING },
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = "transform";
@@ -52,7 +52,7 @@ export const strip = (): SggoiTransition => {
       });
 
       return {
-        spring: DEFAULT_SPRING,
+        physics: { spring: DEFAULT_SPRING },
         prepare: (el) => {
           prepareOutgoing(el, context);
           // GPU acceleration hints

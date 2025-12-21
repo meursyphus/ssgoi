@@ -12,8 +12,9 @@ type SlideOptions = {
   opacity?: number;
   fade?: boolean;
   axis?: "x" | "y";
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-} & PhysicsOptions;
+};
 
 export const slide = (options: SlideOptions = {}): Transition => {
   const {
@@ -24,7 +25,7 @@ export const slide = (options: SlideOptions = {}): Transition => {
     axis,
     key,
   } = options;
-  const physics = getPhysics(options, {
+  const physics = getPhysics(options.physics, {
     spring: { stiffness: 400, damping: 35 },
   });
 
@@ -78,8 +79,8 @@ export const slide = (options: SlideOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({ ...physics, css: getCss }),
-    out: () => ({ ...physics, css: getCss }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

@@ -7,7 +7,7 @@ export const rotate = (): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: { spring: DEFAULT_SPRING },
         prepare: () => {
           element.style.opacity = "0";
           element.style.transform = "rotate(-180deg)";
@@ -29,7 +29,7 @@ export const rotate = (): SggoiTransition => {
     },
     out: (element, context) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: { spring: DEFAULT_SPRING },
         prepare: () => {
           prepareOutgoing(element, context);
           element.style.transformOrigin = "center center";

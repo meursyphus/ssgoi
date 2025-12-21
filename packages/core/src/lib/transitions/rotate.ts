@@ -14,8 +14,9 @@ type RotateOptions = {
   origin?: string;
   axis?: "2d" | "x" | "y" | "z";
   perspective?: number;
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-} & PhysicsOptions;
+};
 
 export const rotate = (options: RotateOptions = {}): Transition => {
   const {
@@ -28,7 +29,7 @@ export const rotate = (options: RotateOptions = {}): Transition => {
     perspective = 800,
     key,
   } = options;
-  const physics = getPhysics(options, {
+  const physics = getPhysics(options.physics, {
     spring: { stiffness: 500, damping: 25 },
   });
 
@@ -68,8 +69,8 @@ export const rotate = (options: RotateOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({ ...physics, css: getCss }),
-    out: () => ({ ...physics, css: getCss }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

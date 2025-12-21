@@ -65,9 +65,7 @@ export class MultiAnimator extends Animator {
       const animator = new SingleAnimator({
         from: this.from,
         to: this.to,
-        spring: item.spring,
-        inertia: item.inertia,
-        integrator: item.integrator,
+        physics: item.physics,
         tick: item.tick,
         css: item.css,
         onComplete: () => this.onAnimatorComplete(id),
@@ -255,9 +253,7 @@ export class MultiAnimator extends Animator {
           {
             from: this.to,
             to: this.from,
-            spring: entry.item.spring,
-            inertia: entry.item.inertia,
-            integrator: entry.item.integrator,
+            physics: entry.item.physics,
             tick: entry.item.tick,
             css: entry.item.css,
             onComplete: () => this.onAnimatorComplete(entry.id),

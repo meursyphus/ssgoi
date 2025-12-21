@@ -112,26 +112,11 @@ export type BaseTransitionConfig = {
  * - css: Web Animation API with CSS string generation
  */
 export type SingleSpringConfig = BaseTransitionConfig & {
-  // Spring physics configuration
-  spring?: SpringConfig; // Default: { stiffness: 300, damping: 30 }
-
   /**
-   * Inertia physics configuration for ease-in effect
-   * Cannot be used together with spring option.
+   * Physics configuration for animation
+   * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
    */
-  inertia?: InertiaConfig;
-
-  /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring/inertia config.
-   * Cannot be used together with spring or inertia option.
-   *
-   * @example
-   * ```ts
-   * integrator: () => new SpringIntegrator({ stiffness: 300, damping: 30 })
-   * ```
-   */
-  integrator?: IntegratorFactory;
+  physics?: PhysicsOptions;
 
   // Callback for each frame with progress value (RAF-based)
   tick?: (progress: number) => void;
@@ -164,20 +149,11 @@ export type SingleSpringConfig = BaseTransitionConfig & {
  * - css: Web Animation API with CSS string generation
  */
 export type SpringItem = {
-  spring?: SpringConfig;
-
   /**
-   * Inertia physics configuration for ease-in effect
-   * Cannot be used together with spring option.
+   * Physics configuration for animation
+   * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
    */
-  inertia?: InertiaConfig;
-
-  /**
-   * Custom integrator factory function
-   * When provided, uses this instead of spring/inertia config.
-   * Cannot be used together with spring or inertia option.
-   */
-  integrator?: IntegratorFactory;
+  physics?: PhysicsOptions;
 
   /**
    * Frame callback - called on each animation frame with progress value (RAF-based)
@@ -350,9 +326,7 @@ export async function normalizeToMultiSpring(
     onEnd: resolvedConfig.onEnd,
     springs: [
       {
-        spring: resolvedConfig.spring,
-        inertia: resolvedConfig.inertia,
-        integrator: resolvedConfig.integrator,
+        physics: resolvedConfig.physics,
         tick: resolvedConfig.tick,
         css: resolvedConfig.css,
       },

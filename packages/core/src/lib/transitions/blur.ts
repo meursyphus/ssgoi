@@ -11,12 +11,13 @@ type BlurOptions = {
   opacity?: number;
   scale?: boolean;
   fade?: boolean;
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-} & PhysicsOptions;
+};
 
 export const blur = (options: BlurOptions = {}): Transition => {
   const { amount = 10, opacity = 0, scale = false, fade = true, key } = options;
-  const physics = getPhysics(options, {
+  const physics = getPhysics(options.physics, {
     spring: { stiffness: 300, damping: 30 },
   });
 
@@ -42,14 +43,8 @@ export const blur = (options: BlurOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      ...physics,
-      css: getCss,
-    }),
-    out: () => ({
-      ...physics,
-      css: getCss,
-    }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

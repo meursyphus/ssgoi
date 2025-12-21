@@ -10,12 +10,13 @@ type ScaleOptions = {
   start?: number;
   opacity?: number;
   axis?: "x" | "y" | "both";
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-} & PhysicsOptions;
+};
 
 export const scale = (options: ScaleOptions = {}): Transition => {
   const { start = 0, opacity = 0, axis = "both", key } = options;
-  const physics = getPhysics(options, {
+  const physics = getPhysics(options.physics, {
     spring: { stiffness: 300, damping: 30 },
   });
 
@@ -40,8 +41,8 @@ export const scale = (options: ScaleOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({ ...physics, css: getCss }),
-    out: () => ({ ...physics, css: getCss }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

@@ -72,27 +72,31 @@ export function ElementTransitionSection() {
         {/* Demo area - multiple elements with reserved positions */}
         <div className="flex items-center justify-center gap-4 mb-6">
           {[
-            { key: "fade", color: "bg-white", transition: fade(physics) },
+            { key: "fade", color: "bg-white", transition: fade({ physics }) },
             {
               key: "scale",
               color: "bg-emerald-500",
-              transition: scale(physics),
+              transition: scale({ physics }),
             },
             {
               key: "slide",
               color: "bg-blue-500",
-              transition: slide({ direction: "up", ...physics }),
+              transition: slide({ direction: "up", physics }),
             },
             {
               key: "rotate",
               color: "bg-amber-500",
-              transition: rotate(physics),
+              transition: rotate({ physics }),
             },
-            { key: "blur", color: "bg-purple-500", transition: blur(physics) },
+            {
+              key: "blur",
+              color: "bg-purple-500",
+              transition: blur({ physics }),
+            },
             {
               key: "bounce",
               color: "bg-pink-500",
-              transition: bounce(physics),
+              transition: bounce({ physics }),
             },
           ].map(({ key, color, transition: t }) => (
             <div
