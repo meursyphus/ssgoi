@@ -12,5 +12,6 @@ export * from "./rotate";
 export * from "./scroll";
 export * from "./sheet";
 export * from "./slide";
+export * from "./snap";
 export * from "./strip";
 export * from "./swap";

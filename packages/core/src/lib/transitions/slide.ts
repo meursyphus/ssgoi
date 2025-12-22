@@ -1,19 +1,20 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
+import { getPhysics } from "./utils";
 
-interface SlideOptions {
+type SlideOptions = {
   direction?: "left" | "right" | "up" | "down";
   distance?: number | string;
   opacity?: number;
   fade?: boolean;
   axis?: "x" | "y";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-}
+};
 
 export const slide = (options: SlideOptions = {}): Transition => {
   const {
@@ -22,15 +23,11 @@ export const slide = (options: SlideOptions = {}): Transition => {
     opacity = 0,
     fade = true,
     axis,
-    spring: springOption,
     key,
   } = options;
-
-  const spring: SpringConfig = {
-    stiffness: springOption?.stiffness ?? 400,
-    damping: springOption?.damping ?? 35,
-    doubleSpring: springOption?.doubleSpring ?? false,
-  };
+  const physics = getPhysics(options.physics, {
+    spring: { stiffness: 400, damping: 35 },
+  });
 
   // Determine actual direction based on axis parameter
   const getActualDirection = (): "left" | "right" | "up" | "down" => {
@@ -82,14 +79,8 @@ export const slide = (options: SlideOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      spring,
-      css: getCss,
-    }),
-    out: () => ({
-      spring,
-      css: getCss,
-    }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

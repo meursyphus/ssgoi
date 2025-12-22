@@ -1,11 +1,18 @@
-import type { SggoiTransition, StyleObject } from "../types";
+import type { SggoiTransition, StyleObject, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_SPRING = { stiffness: 17, damping: 6 };
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 17, damping: 6 },
+};
 const ROTATE_Y = 20;
 const PERSPECTIVE = 800;
 
-export const strip = (): SggoiTransition => {
+interface StripOptions {
+  physics?: PhysicsOptions;
+}
+
+export const strip = (options: StripOptions = {}): SggoiTransition => {
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   // Shared promise for coordinating OUT and IN animations
   let outAnimationComplete: Promise<void>;
   let resolveOutAnimation: (() => void) | null = null;
@@ -13,7 +20,7 @@ export const strip = (): SggoiTransition => {
   return {
     in: (element) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: physicsOptions,
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = "transform";
@@ -52,7 +59,7 @@ export const strip = (): SggoiTransition => {
       });
 
       return {
-        spring: DEFAULT_SPRING,
+        physics: physicsOptions,
         prepare: (el) => {
           prepareOutgoing(el, context);
           // GPU acceleration hints

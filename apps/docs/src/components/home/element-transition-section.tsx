@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { transition } from "@ssgoi/react";
 import {
   fade,
@@ -10,119 +10,48 @@ import {
   blur,
   bounce,
 } from "@ssgoi/react/transitions";
-import { CodeBlock } from "@/components/ui/code-block";
 import { useTranslations } from "@/i18n/use-translations";
-import { SpringConfig } from "@ssgoi/core/types";
-
-type TransitionType = "fade" | "scale" | "slide" | "rotate" | "blur" | "bounce";
-
-const codeExamples: Record<TransitionType, string> = {
-  fade: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p
-    })
-  }),
-})}>
-  Content
-</div>`,
-  scale: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`scale(\${p})\`
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`scale(\${p})\`
-    })
-  }),
-})}>
-  Content
-</div>`,
-  slide: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`translateY(\${(1 - p) * 20}px)\`
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`translateY(\${(1 - p) * 20}px)\`
-    })
-  }),
-})}>
-  Content
-</div>`,
-  rotate: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`rotate(\${(1 - p) * 90}deg)\`
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`rotate(\${(1 - p) * 90}deg)\`
-    })
-  }),
-})}>
-  Content
-</div>`,
-  blur: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p,
-      filter: \`blur(\${(1 - p) * 10}px)\`
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p,
-      filter: \`blur(\${(1 - p) * 10}px)\`
-    })
-  }),
-})}>
-  Content
-</div>`,
-  bounce: `<div ref={transition({
-  in: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`translateY(\${Math.sin((1-p) * Math.PI) * -20}px)\`
-    })
-  }),
-  out: () => ({
-    css: (p) => ({
-      opacity: p,
-      transform: \`translateY(\${Math.sin((1-p) * Math.PI) * -20}px)\`
-    })
-  }),
-})}>
-  Content
-</div>`,
-};
-
-const spring: SpringConfig = {
-  stiffness: 300,
-  damping: 30,
-  doubleSpring: true,
-};
+import { SpringGraphPanel, DEFAULT_SPRING } from "./spring-graph";
+import type { GraphConfig } from "./spring-graph";
+import type { SpringConfig, InertiaConfig } from "@ssgoi/core/types";
 
 export function ElementTransitionSection() {
   const [show, setShow] = useState(true);
-  const [activeCode, setActiveCode] = useState<TransitionType>("scale");
+  const [graphConfig, setGraphConfig] = useState<GraphConfig>({
+    leader: { ...DEFAULT_SPRING },
+    follower: null,
+    inertia: null,
+  });
   const t = useTranslations("home");
+
+  // Convert graph config to physics options for transitions
+  const physics = useMemo(() => {
+    // Inertia mode
+    if (graphConfig.inertia) {
+      const inertia: InertiaConfig = {
+        acceleration: graphConfig.inertia.acceleration,
+        resistance: graphConfig.inertia.resistance,
+        resistanceType: graphConfig.inertia.resistanceType,
+      };
+      return { inertia };
+    }
+
+    // Spring mode (with optional doubleSpring)
+    const spring: SpringConfig = graphConfig.follower
+      ? {
+          stiffness: graphConfig.leader.stiffness,
+          damping: graphConfig.leader.damping,
+          doubleSpring: {
+            stiffness: graphConfig.follower.stiffness,
+            damping: graphConfig.follower.damping,
+          },
+        }
+      : {
+          stiffness: graphConfig.leader.stiffness,
+          damping: graphConfig.leader.damping,
+        };
+    return { spring };
+  }, [graphConfig]);
 
   return (
     <section className="py-24 px-6 border-t border-white/5">
@@ -142,57 +71,46 @@ export function ElementTransitionSection() {
 
         {/* Demo area - multiple elements with reserved positions */}
         <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-fade", ...fade({ spring }) })}
-                className="w-10 h-10 bg-white rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-scale", ...scale({ spring }) })}
-                className="w-10 h-10 bg-emerald-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({
-                  key: "demo-slide",
-                  ...slide({ direction: "up", spring }),
-                })}
-                className="w-10 h-10 bg-blue-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-rotate", ...rotate({ spring }) })}
-                className="w-10 h-10 bg-amber-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-blur", ...blur({ spring }) })}
-                className="w-10 h-10 bg-purple-500 rounded-lg"
-              />
-            )}
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center">
-            {show && (
-              <div
-                ref={transition({ key: "demo-bounce", ...bounce({ spring }) })}
-                className="w-10 h-10 bg-pink-500 rounded-lg"
-              />
-            )}
-          </div>
+          {[
+            { key: "fade", color: "bg-white", transition: fade({ physics }) },
+            {
+              key: "scale",
+              color: "bg-emerald-500",
+              transition: scale({ physics }),
+            },
+            {
+              key: "slide",
+              color: "bg-blue-500",
+              transition: slide({ direction: "up", physics }),
+            },
+            {
+              key: "rotate",
+              color: "bg-amber-500",
+              transition: rotate({ physics }),
+            },
+            {
+              key: "blur",
+              color: "bg-purple-500",
+              transition: blur({ physics }),
+            },
+            {
+              key: "bounce",
+              color: "bg-pink-500",
+              transition: bounce({ physics }),
+            },
+          ].map(({ key, color, transition: t }) => (
+            <div
+              key={key}
+              className="w-12 h-12 flex items-center justify-center"
+            >
+              {show && (
+                <div
+                  ref={transition({ key: `demo-${key}`, ...t })}
+                  className={`w-12 h-12 ${color} rounded-lg`}
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Toggle */}
@@ -207,27 +125,8 @@ export function ElementTransitionSection() {
           </button>
         </div>
 
-        {/* Code selector */}
-        <div className="flex justify-center gap-2 mb-4">
-          {(
-            ["fade", "scale", "slide", "rotate", "blur", "bounce"] as const
-          ).map((type) => (
-            <button
-              key={type}
-              onClick={() => setActiveCode(type)}
-              className={`px-3 py-1.5 text-xs rounded-md transition-all ${
-                activeCode === type
-                  ? "bg-white/10 text-white border border-white/20"
-                  : "text-neutral-500 border border-transparent hover:text-neutral-300"
-              }`}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-
-        {/* Code */}
-        <CodeBlock language="tsx" code={codeExamples[activeCode]} />
+        {/* Spring Graph Panel */}
+        <SpringGraphPanel config={graphConfig} onChange={setGraphConfig} />
       </div>
     </section>
   );

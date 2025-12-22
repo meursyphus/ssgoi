@@ -1,13 +1,17 @@
 import type {
-  SpringConfig,
   SggoiTransition,
   SggoiTransitionContext,
+  PhysicsOptions,
 } from "../types";
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 50, damping: 30 },
+};
+
 interface JaeminOptions {
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor
   rotationTriggerPoint?: number; // Progress point where rotation starts (0-1)
@@ -40,10 +44,7 @@ function getJaeminRect(context: SggoiTransitionContext) {
  * Created by Jaemin
  */
 export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? 50,
-    damping: options.spring?.damping ?? 30,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const initialRotation = options.initialRotation ?? 45;
   const initialScale = options.initialScale ?? 0.01;
@@ -54,9 +55,11 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       const originalOpacity = element.style.opacity;
 
       return {
-        spring: {
-          stiffness: 80,
-          damping: 25,
+        physics: {
+          spring: {
+            stiffness: 80,
+            damping: 25,
+          },
         },
         from: 1,
         to: 0,
@@ -81,7 +84,7 @@ export const jaemin = (options: JaeminOptions = {}): SggoiTransition => {
       const originalZIndex = element.style.zIndex;
 
       return {
-        spring,
+        physics: physicsOptions,
         from: 0,
         to: 1,
         prepare: () => {

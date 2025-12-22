@@ -1,19 +1,20 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
+import { getPhysics } from "./utils";
 
-interface BounceOptions {
+type BounceOptions = {
   height?: number;
   intensity?: number;
   scale?: boolean;
   fade?: boolean;
   direction?: "up" | "down";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
   key?: TransitionKey;
-}
+};
 
 export const bounce = (options: BounceOptions = {}): Transition => {
   const {
@@ -22,15 +23,11 @@ export const bounce = (options: BounceOptions = {}): Transition => {
     scale = true,
     fade = true,
     direction = "up",
-    spring: springOption,
     key,
   } = options;
-
-  const spring: SpringConfig = {
-    stiffness: springOption?.stiffness ?? 800,
-    damping: springOption?.damping ?? 15,
-    doubleSpring: springOption?.doubleSpring ?? false,
-  };
+  const physics = getPhysics(options.physics, {
+    spring: { stiffness: 800, damping: 15 },
+  });
 
   const getCss = (progress: number): StyleObject => {
     const style: StyleObject = {};
@@ -62,14 +59,8 @@ export const bounce = (options: BounceOptions = {}): Transition => {
   };
 
   return {
-    in: () => ({
-      spring,
-      css: getCss,
-    }),
-    out: () => ({
-      spring,
-      css: getCss,
-    }),
+    in: () => ({ physics, css: getCss }),
+    out: () => ({ physics, css: getCss }),
     ...(key && { key }),
   };
 };

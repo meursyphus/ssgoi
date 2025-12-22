@@ -1,14 +1,22 @@
-import { animate } from "./animate";
-import type { AnimationControls, StyleObject } from "./animate/types";
-import type { SpringConfig, AnimationState } from "../types";
-import { Animation } from "./animation";
+import { RunnerProvider, type BoundRunner } from "./runner/provider";
+import type { AnimationControls, StyleObject } from "./runner/types";
+import type { AnimationState, PhysicsOptions } from "../types";
+import {
+  IntegratorProvider,
+  SpringIntegrator,
+  type Integrator,
+} from "./integrator";
+import { Animator } from "./types";
 
 export type { StyleObject };
+
+// Default spring config
+const DEFAULT_SPRING = { stiffness: 300, damping: 30 };
 
 export interface AnimatorOptions {
   from?: number;
   to?: number;
-  spring?: SpringConfig;
+  physics?: PhysicsOptions;
   tick?: (progress: number) => void;
   css?: {
     element: HTMLElement;
@@ -19,25 +27,23 @@ export interface AnimatorOptions {
 }
 
 /**
- * Animator - Spring-based Animation Controller for single spring
+ * SingleAnimator - Spring-based Animation Controller for single spring
  *
- * Internally selects appropriate runner based on tick or css option
+ * High-level API that accepts spring config or integrator factory.
+ * Internally creates Integrator and selects appropriate runner.
+ *
  * - tick: RAF-based real-time animation
  * - css: Web Animation API based (GPU accelerated, velocity tracking via simulation data)
  */
-export class Animator extends Animation {
+export class SingleAnimator extends Animator {
   private options: {
     from: number;
     to: number;
-    spring: SpringConfig;
-    tick?: (progress: number) => void;
-    css?: {
-      element: HTMLElement;
-      style: (progress: number) => StyleObject;
-    };
+    physics?: PhysicsOptions;
     onComplete: () => void;
     onStart?: () => void;
   };
+  private runner: BoundRunner | null;
   private controls: AnimationControls | null = null;
   private isAnimating = false;
   private currentValue: number;
@@ -46,32 +52,61 @@ export class Animator extends Animation {
   constructor(options: AnimatorOptions) {
     super();
 
-    if (options.tick && options.css) {
-      throw new Error("Cannot use both 'tick' and 'css' options together");
-    }
-
     this.options = {
       from: options.from ?? 0,
       to: options.to ?? 1,
-      spring: options.spring ?? { stiffness: 300, damping: 30 },
-      tick: options.tick,
-      css: options.css,
+      physics: options.physics,
       onComplete: options.onComplete ?? (() => {}),
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
+
+    // Create bound runner at construction time
+    this.runner = RunnerProvider.from({
+      tick: options.tick,
+      css: options.css,
+    });
+  }
+
+  /**
+   * Create Integrator from physics options
+   * Priority: integrator factory > inertia/spring config > default spring
+   */
+  private createIntegrator(): Integrator {
+    const physics = this.options.physics;
+
+    if (physics?.integrator) {
+      return physics.integrator();
+    }
+
+    if (physics?.spring || physics?.inertia) {
+      return IntegratorProvider.from({
+        spring: physics.spring,
+        inertia: physics.inertia,
+      });
+    }
+
+    return new SpringIntegrator(DEFAULT_SPRING);
   }
 
   private runAnimation(targetValue: number) {
     this.isAnimating = true;
 
-    this.controls = animate({
+    // No animation mode - complete immediately
+    if (!this.runner) {
+      this.options.onStart?.();
+      this.currentValue = targetValue;
+      this.currentVelocity = 0;
+      this.isAnimating = false;
+      this.options.onComplete();
+      return;
+    }
+
+    this.controls = this.runner({
+      integrator: this.createIntegrator(),
       from: this.currentValue,
       to: targetValue,
-      spring: this.options.spring,
       velocity: this.currentVelocity,
-      tick: this.options.tick,
-      css: this.options.css,
       onStart: this.options.onStart,
       onComplete: () => {
         this.currentValue = targetValue;
@@ -151,8 +186,8 @@ export class Animator extends Animation {
   static fromState(
     state: { position: number; velocity: number },
     options: AnimatorOptions,
-  ): Animator {
-    const animator = new Animator(options);
+  ): SingleAnimator {
+    const animator = new SingleAnimator(options);
     animator.setValue(state.position);
     animator.setVelocity(state.velocity);
     return animator;

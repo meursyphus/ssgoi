@@ -1,15 +1,174 @@
 ---
-title: Spring Presets
-description: Pre-configured spring settings for different animation feels
+title: Physics Options
+description: Natural animations through various physics engines including spring and inertia
 ---
 
-# Spring Presets
+# Physics Options
 
-SSGOI provides pre-configured spring settings to easily create different animation feels without manually tuning physics values.
+SSGOI 4.0 supports various physics engines to create natural and smooth animations. From spring physics to inertia-based animations, you can choose the optimal motion for each situation.
 
-## Usage
+## PhysicsOptions Interface
 
-You can import spring presets from the `presets` module:
+All transitions can be configured with physics engines through the `physics` option:
+
+```typescript
+type PhysicsOptions = {
+  spring?: SpringConfig;           // Spring physics (ease-out effect)
+  inertia?: InertiaConfig;         // Inertia physics (ease-in effect)
+  integrator?: () => Integrator;   // Custom integrator
+};
+```
+
+Each physics engine provides different animation characteristics, and you can choose according to your needs.
+
+## Spring Physics
+
+Spring physics generates **ease-out** effects and is suitable for most UI animations.
+
+### Basic Usage
+
+```typescript
+import { fade } from '@ssgoi/react/view-transitions';
+
+// Basic spring configuration
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30
+    }
+  }
+})
+```
+
+### Spring Configuration Options
+
+```typescript
+type SpringConfig = {
+  stiffness: number;        // Spring stiffness (higher = faster animation)
+  damping: number;          // Damping coefficient (higher = less oscillation)
+  doubleSpring?: boolean | number | {
+    stiffness: number;
+    damping: number;
+  };
+};
+```
+
+- **stiffness**: Controls the spring's tension. Higher values create faster animations.
+- **damping**: Controls the resistance. Higher values reduce oscillation and create smoother stops.
+- **doubleSpring**: Double spring configuration for ease-in-out effect
+
+### Double Spring
+
+Using the `doubleSpring` option, you can chain two springs to create an **ease-in-out** effect:
+
+```typescript
+// Automatic configuration (true)
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: true  // Follower spring is automatically configured
+    }
+  }
+})
+
+// Ratio configuration (0~1)
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: 0.5  // Follower spring stiffness ratio (lower = stronger ease-in)
+    }
+  }
+})
+
+// Manual configuration
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: {
+        stiffness: 150,   // Follower spring configuration
+        damping: 20
+      }
+    }
+  }
+})
+```
+
+## Inertia Physics
+
+Inertia physics generates **ease-in** effects and is suitable for directional transitions (drill, slide, etc.).
+
+### Basic Usage
+
+```typescript
+import { drill } from '@ssgoi/react/view-transitions';
+
+drill({
+  direction: 'enter',
+  physics: {
+    inertia: {
+      acceleration: 20,
+      resistance: 1.5
+    }
+  }
+})
+```
+
+### Inertia Configuration Options
+
+```typescript
+type InertiaConfig = {
+  acceleration: number;              // Acceleration force (higher = faster acceleration)
+  resistance: number;                // Resistance coefficient (higher = lower final velocity)
+  resistanceType?: 'linear' | 'quadratic';  // Resistance type
+};
+```
+
+- **acceleration**: Controls the acceleration force. Higher values mean faster acceleration.
+- **resistance**: Controls the resistance coefficient. Higher values result in lower final velocity.
+- **resistanceType**: Resistance type (linear: linear, quadratic: quadratic function)
+
+### Usage Examples
+
+```typescript
+import { slide } from '@ssgoi/react/view-transitions';
+
+// Smooth ease-in effect
+slide({
+  direction: 'up',
+  physics: {
+    inertia: {
+      acceleration: 15,
+      resistance: 1.2,
+      resistanceType: 'linear'
+    }
+  }
+})
+
+// Fast ease-in effect
+slide({
+  direction: 'down',
+  physics: {
+    inertia: {
+      acceleration: 30,
+      resistance: 2.0,
+      resistanceType: 'quadratic'
+    }
+  }
+})
+```
+
+## Spring Presets
+
+Pre-defined spring configurations are provided to easily create various animation feels without manually adjusting physics values.
+
+### Importing Presets
 
 ```typescript
 import { config } from '@ssgoi/react/presets';
@@ -20,9 +179,9 @@ import { config } from '@ssgoi/angular/presets';
 
 // Use in transitions
 transition({
-  spring: config.gentle,
+  physics: { spring: config.gentle },
   tick: (progress) => {
-    // Your animation logic
+    // Animation logic
   }
 })
 ```
@@ -33,7 +192,7 @@ You can also import individual presets:
 import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
 
 transition({
-  spring: gentle,
+  physics: { spring: gentle },
   // ...
 })
 ```
@@ -76,43 +235,102 @@ Very slow and viscous movement.
 - **damping**: 60
 - **Use case**: Dramatic effects, loading states
 
-## Custom Spring Configuration
+## Custom Physics Configuration
 
-You can always create your own spring configuration:
+You can create your own physics configuration instead of using presets:
+
+### Custom Spring
 
 ```typescript
 transition({
-  spring: {
-    stiffness: 150,
-    damping: 15
+  physics: {
+    spring: {
+      stiffness: 150,
+      damping: 15
+    }
   },
   // ...
 })
 ```
 
-## Physics Values Explained
+### Custom Inertia
 
-- **stiffness**: Controls the spring's tension. Higher values create faster animations.
-- **damping**: Controls the resistance. Higher values reduce oscillation and create smoother stops.
+```typescript
+transition({
+  physics: {
+    inertia: {
+      acceleration: 25,
+      resistance: 1.8,
+      resistanceType: 'linear'
+    }
+  },
+  // ...
+})
+```
+
+### Combining Physics Engines
+
+Some transitions allow using different physics engines for IN and OUT animations:
+
+```typescript
+fade({
+  inPhysics: {
+    spring: {
+      stiffness: 300,
+      damping: 30
+    }
+  },
+  outPhysics: {
+    inertia: {
+      acceleration: 20,
+      resistance: 1.5
+    }
+  }
+})
+```
 
 ## Examples
 
-### Using presets in view transitions
+### Using Physics Options in View Transitions
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
     import { config } from '@ssgoi/react/presets';
-    import { fade } from '@ssgoi/react/view-transitions';
+    import { fade, drill } from '@ssgoi/react/view-transitions';
 
-    const config = {
-      defaultTransition: fade({ spring: config.gentle }),
+    const ssgoiConfig = {
+      // Using spring preset
+      defaultTransition: fade({
+        physics: { spring: config.gentle }
+      }),
       transitions: [
         {
           from: '/home',
           to: '/about',
-          transition: slide({ spring: config.wobbly })
+          transition: fade({
+            physics: {
+              spring: {
+                stiffness: 300,
+                damping: 30,
+                doubleSpring: true  // ease-in-out effect
+              }
+            }
+          })
+        },
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: drill({
+            direction: 'enter',
+            physics: {
+              inertia: {
+                acceleration: 20,
+                resistance: 1.5
+              }
+            }
+          })
         }
       ]
     };
@@ -123,21 +341,45 @@ transition({
     <script>
       import { Ssgoi } from '@ssgoi/svelte';
       import { config } from '@ssgoi/svelte/presets';
-      import { fade, slide } from '@ssgoi/svelte/view-transitions';
+      import { fade, drill } from '@ssgoi/svelte/view-transitions';
 
-      const config = {
-        defaultTransition: fade({ spring: config.gentle }),
+      const ssgoiConfig = {
+        // Using spring preset
+        defaultTransition: fade({
+          physics: { spring: config.gentle }
+        }),
         transitions: [
           {
             from: '/home',
             to: '/about',
-            transition: slide({ spring: config.wobbly })
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
           }
         ]
       };
     </script>
 
-    <Ssgoi {config}>
+    <Ssgoi config={ssgoiConfig}>
       <slot />
     </Ssgoi>
     ```
@@ -147,20 +389,43 @@ transition({
     <script setup>
     import { Ssgoi } from '@ssgoi/vue';
     import { config } from '@ssgoi/vue/presets';
-    import { fade, slide } from '@ssgoi/vue/view-transitions';
+    import { fade, drill } from '@ssgoi/vue/view-transitions';
 
     const transitionConfig = {
-      defaultTransition: fade({ spring: config.gentle }),
+      defaultTransition: fade({
+        physics: { spring: config.gentle }
+      }),
       transitions: [
         {
           from: '/home',
           to: '/about',
-          transition: slide({ spring: config.wobbly })
+          transition: fade({
+            physics: {
+              spring: {
+                stiffness: 300,
+                damping: 30,
+                doubleSpring: true
+              }
+            }
+          })
+        },
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: drill({
+            direction: 'enter',
+            physics: {
+              inertia: {
+                acceleration: 20,
+                resistance: 1.5
+              }
+            }
+          })
         }
       ]
     };
     </script>
-    
+
     <template>
       <Ssgoi :config="transitionConfig">
         <slot />
@@ -172,22 +437,45 @@ transition({
     ```tsx
     import { Ssgoi } from '@ssgoi/solid';
     import { config } from '@ssgoi/solid/presets';
-    import { fade, slide } from '@ssgoi/solid/view-transitions';
+    import { fade, drill } from '@ssgoi/solid/view-transitions';
 
-    const transitionConfig = {
-      defaultTransition: fade({ spring: config.gentle }),
-      transitions: [
-        {
-          from: '/home',
-          to: '/about',
-          transition: slide({ spring: config.wobbly })
-        }
-      ]
-    };
+    export default function Root() {
+      const ssgoiConfig = {
+        defaultTransition: fade({
+          physics: { spring: config.gentle }
+        }),
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
+          }
+        ]
+      };
 
-    export default function App() {
       return (
-        <Ssgoi config={transitionConfig}>
+        <Ssgoi config={ssgoiConfig}>
           {/* App content */}
         </Ssgoi>
       );
@@ -199,7 +487,7 @@ transition({
     import { Component } from "@angular/core";
     import { Ssgoi } from "@ssgoi/angular";
     import { config } from "@ssgoi/angular/presets";
-    import { fade, slide } from "@ssgoi/angular/view-transitions";
+    import { fade, drill } from "@ssgoi/angular/view-transitions";
     import type { SsgoiConfig } from "@ssgoi/angular";
 
     @Component({
@@ -215,14 +503,35 @@ transition({
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-         inSpring: config.gentle,
-         outSpring: config.slow,
+          inPhysics: { spring: config.gentle },
+          outPhysics: { spring: config.slow },
         }),
         transitions: [
           {
             from: '/home',
             to: '/about',
-            transition: slide({ spring: config.wobbly })
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
           }
         ]
       };
@@ -231,7 +540,7 @@ transition({
   </TabPanel>
 </Tabs>
 
-### Using presets in element transitions
+### Using Physics Options in Element Transitions
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -239,11 +548,27 @@ transition({
     import { transition } from '@ssgoi/react';
     import { config } from '@ssgoi/react/presets';
 
+    // Using spring preset
     const fadeIn = transition({
-      spring: config.slow,
+      physics: { spring: config.slow },
       tick: (progress) => ({
         opacity: progress,
         transform: `translateY(${(1 - progress) * 20}px)`
+      })
+    });
+
+    // Using custom spring
+    const slideIn = transition({
+      physics: {
+        spring: {
+          stiffness: 200,
+          damping: 25,
+          doubleSpring: 0.4  // ease-in-out effect
+        }
+      },
+      tick: (progress) => ({
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * 50}px)`
       })
     });
     ```
@@ -254,11 +579,27 @@ transition({
       import { transition } from '@ssgoi/svelte';
       import { config } from '@ssgoi/svelte/presets';
 
+      // Using spring preset
       const fadeIn = {
-        spring: config.slow,
+        physics: { spring: config.slow },
         tick: (progress) => ({
           opacity: progress,
           transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+
+      // Using custom spring
+      const slideIn = {
+        physics: {
+          spring: {
+            stiffness: 200,
+            damping: 25,
+            doubleSpring: 0.4
+          }
+        },
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateX(${(1 - progress) * 50}px)`
         })
       };
     </script>
@@ -274,11 +615,27 @@ transition({
     import { config } from '@ssgoi/vue/presets';
     import { fadeIn } from '@ssgoi/vue/transitions';
 
+    // Using spring preset
     const fadeTransition = {
-      spring: config.slow,
+      physics: { spring: config.slow },
       tick: (progress) => ({
         opacity: progress,
         transform: `translateY(${(1 - progress) * 20}px)`
+      })
+    };
+
+    // Using custom spring
+    const slideTransition = {
+      physics: {
+        spring: {
+          stiffness: 200,
+          damping: 25,
+          doubleSpring: 0.4
+        }
+      },
+      tick: (progress) => ({
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * 50}px)`
       })
     };
     </script>
@@ -295,18 +652,39 @@ transition({
     import { transition } from '@ssgoi/solid';
     import { config } from '@ssgoi/solid/presets';
 
-    function MyComponent() {
+    function Component() {
       return (
-        <div ref={transition({
-          key: 'fade-in',
-          spring: config.slow,
-          tick: (progress) => ({
-            opacity: progress,
-            transform: `translateY(${(1 - progress) * 20}px)`
-          })
-        })}>
-          Content
-        </div>
+        <>
+          {/* Using spring preset */}
+          <div ref={transition({
+            key: 'fade-in',
+            physics: { spring: config.slow },
+            tick: (progress) => ({
+              opacity: progress,
+              transform: `translateY(${(1 - progress) * 20}px)`
+            })
+          })}>
+            Content
+          </div>
+
+          {/* Using custom spring */}
+          <div ref={transition({
+            key: 'slide-in',
+            physics: {
+              spring: {
+                stiffness: 200,
+                damping: 25,
+                doubleSpring: 0.4
+              }
+            },
+            tick: (progress) => ({
+              opacity: progress,
+              transform: `translateX(${(1 - progress) * 50}px)`
+            })
+          })}>
+            Content
+          </div>
+        </>
       );
     }
     ```
@@ -329,14 +707,99 @@ transition({
       `
     })
     export class MyComponent {
+      // Using spring preset
       fadeInConfig: TransitionDirectiveConfig = {
-        spring: config.slow,
+        physics: { spring: config.slow },
         tick: (progress) => ({
           opacity: progress,
           transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+
+      // Using custom spring
+      slideInConfig: TransitionDirectiveConfig = {
+        physics: {
+          spring: {
+            stiffness: 200,
+            damping: 25,
+            doubleSpring: 0.4
+          }
+        },
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateX(${(1 - progress) * 50}px)`
         })
       };
     }
     ```
   </TabPanel>
 </Tabs>
+
+## Physics Engine Selection Guide
+
+Each physics engine provides different animation feels:
+
+### Spring Physics
+- **Effect**: ease-out (starts fast, ends slowly)
+- **Suitable for**:
+  - Fade in/out
+  - Modal open/close
+  - Tooltip display
+  - Element appear/disappear
+- **Advantages**: Natural and smooth deceleration, most widely used in UI
+
+### Double Spring
+- **Effect**: ease-in-out (starts slow, progresses fast, ends slowly)
+- **Suitable for**:
+  - Long distance movements
+  - Page transitions
+  - Important state changes
+- **Advantages**: Elegant and refined feel, smooth start and end
+
+### Inertia Physics
+- **Effect**: ease-in (starts slow, ends fast)
+- **Suitable for**:
+  - Drill transitions (zoom in/out)
+  - Slide transitions (directional movement)
+  - Scroll effects
+- **Advantages**: Feels like user-initiated motion, expresses physical inertia
+
+## Tips and Best Practices
+
+### 1. Use Spring by Default
+Spring physics is most suitable for most UI animations:
+```typescript
+fade({ physics: { spring: config.default } })
+```
+
+### 2. Use Inertia for Directional Transitions
+When pages move in a specific direction, inertia physics feels more natural:
+```typescript
+drill({ direction: 'enter', physics: { inertia: { acceleration: 20, resistance: 1.5 } } })
+```
+
+### 3. Add Elegance with Double Spring
+Use `doubleSpring` for important page transitions to create a more refined feel:
+```typescript
+fade({ physics: { spring: { ...config.gentle, doubleSpring: true } } })
+```
+
+### 4. Start with Presets
+Try presets before setting custom values:
+```typescript
+// Start with preset
+physics: { spring: config.gentle }
+
+// Adjust if needed
+physics: { spring: { ...config.gentle, stiffness: 250 } }
+```
+
+### 5. Maintain Consistency
+Use the same physics configuration for similar animations throughout your app:
+```typescript
+const appPhysics = {
+  modal: { spring: config.stiff },
+  page: { spring: { ...config.gentle, doubleSpring: true } },
+  element: { spring: config.default }
+};
+```

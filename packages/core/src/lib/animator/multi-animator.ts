@@ -1,5 +1,5 @@
-import { Animator } from ".";
-import { Animation } from "./animation";
+import { SingleAnimator } from "./single-animator";
+import { Animator } from "./types";
 import type {
   NormalizedMultiSpringConfig,
   NormalizedSpringItem,
@@ -12,7 +12,7 @@ import type {
 type AnimatorEntry = {
   id: string;
   item: NormalizedSpringItem;
-  animator: Animator;
+  animator: SingleAnimator;
   started: boolean;
 };
 
@@ -35,7 +35,7 @@ export interface MultiAnimatorOptions {
  *
  * Config must be pre-normalized using normalizeMultiSpringSchedule()
  */
-export class MultiAnimator extends Animation {
+export class MultiAnimator extends Animator {
   private config: NormalizedMultiSpringConfig;
   private animators: Map<string, AnimatorEntry> = new Map();
   private springOrder: string[] = [];
@@ -62,10 +62,10 @@ export class MultiAnimator extends Animation {
   private initializeAnimators(): void {
     this.config.springs.forEach((item) => {
       const id = this.generateId();
-      const animator = new Animator({
+      const animator = new SingleAnimator({
         from: this.from,
         to: this.to,
-        spring: item.spring,
+        physics: item.physics,
         tick: item.tick,
         css: item.css,
         onComplete: () => this.onAnimatorComplete(id),
@@ -191,7 +191,7 @@ export class MultiAnimator extends Animation {
     }
   }
 
-  private getFirstAnimator(): Animator | null {
+  private getFirstAnimator(): SingleAnimator | null {
     const firstId = this.springOrder[0];
     if (!firstId) return null;
     return this.animators.get(firstId)?.animator ?? null;
@@ -248,12 +248,12 @@ export class MultiAnimator extends Animation {
 
       if (isCompleted) {
         // Reverse completed animation: swap from/to
-        const newAnimator = Animator.fromState(
+        const newAnimator = SingleAnimator.fromState(
           { position: this.to, velocity: 0 },
           {
             from: this.to,
             to: this.from,
-            spring: entry.item.spring,
+            physics: entry.item.physics,
             tick: entry.item.tick,
             css: entry.item.css,
             onComplete: () => this.onAnimatorComplete(entry.id),

@@ -216,9 +216,11 @@ nav-title: "드릴"
 interface DrillOptions {
   opacity?: boolean;           // 투명도 효과 (기본값: false)
   direction?: 'enter' | 'exit'; // 드릴 방향 (기본값: 'enter')
-  spring?: {
-    stiffness?: number;         // 스프링 강도 (기본값: 150)
-    damping?: number;           // 감쇠 계수 (기본값: 20)
+  physics?: {
+    inertia?: {
+      acceleration?: number;    // 관성 가속도 (기본값: 20)
+      resistance?: number;      // 저항 계수 (기본값: 1.5)
+    };
   };
 }
 ```
@@ -584,9 +586,9 @@ interface DrillOptions {
           {
             from: '/files/*',
             to: '/files/*/*',
-            transition: drill({ 
+            transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -627,15 +629,15 @@ interface DrillOptions {
     ```svelte
     <script>
       export let path;
-      
+
       const config = {
         transitions: [
           {
             from: '/files/*',
             to: '/files/*/*',
-            transition: drill({ 
+            transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -719,7 +721,7 @@ interface DrillOptions {
             to: '/files/*/*',
             transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -753,9 +755,9 @@ interface DrillOptions {
 
 ```typescript
 // 콘텐츠가 페이드되며 드릴
-drill({ 
+drill({
   opacity: true,
-  spring: { stiffness: 120, damping: 18 }
+  physics: { inertia: { acceleration: 15, resistance: 1.8 } }
 })
 ```
 
@@ -769,17 +771,17 @@ drill({ direction: 'enter' })
 drill({ direction: 'exit' })
 ```
 
-### 스프링 물리 조정
+### 관성 물리 조정
 
 ```typescript
 // 빠른 드릴
-drill({ 
-  spring: { stiffness: 200, damping: 25 }
+drill({
+  physics: { inertia: { acceleration: 30, resistance: 1.2 } }
 })
 
 // 부드러운 드릴
-drill({ 
-  spring: { stiffness: 100, damping: 15 }
+drill({
+  physics: { inertia: { acceleration: 15, resistance: 2.0 } }
 })
 ```
 

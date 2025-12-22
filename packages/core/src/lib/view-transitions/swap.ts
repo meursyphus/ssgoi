@@ -1,5 +1,5 @@
 import type {
-  SpringConfig,
+  PhysicsOptions,
   SggoiTransition,
   SggoiTransitionContext,
   StyleObject,
@@ -8,17 +8,18 @@ import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
-const SPRING: SpringConfig = {
-  stiffness: 300,
-  damping: 22,
-  doubleSpring: 0.5,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  inertia: {
+    acceleration: 50,
+    resistance: 1.5,
+  },
 };
 
 /** Scale offset for swap effect (5% = 0.05) */
 const SCALE_OFFSET = 0.05;
 
 interface SwapOptions {
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -46,11 +47,7 @@ function getSwapRect(context: SggoiTransitionContext) {
  * - IN: Scale up from smaller + fade in (waits for OUT to complete)
  */
 export const swap = (options: SwapOptions = {}): SggoiTransition => {
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? SPRING.stiffness,
-    damping: options.spring?.damping ?? SPRING.damping,
-    doubleSpring: options.spring?.doubleSpring ?? SPRING.doubleSpring,
-  };
+  const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
@@ -64,7 +61,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
       const centerY = rect.top + rect.height / 2;
 
       return {
-        spring,
+        physics: physicsOptions,
         prepare: () => {
           element.style.opacity = "0";
           element.style.willChange = "transform, opacity";
@@ -98,7 +95,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
     // Exiting page: fade out only (no scale)
     out: (_element, context) => {
       return {
-        spring,
+        physics: physicsOptions,
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.willChange = "opacity";

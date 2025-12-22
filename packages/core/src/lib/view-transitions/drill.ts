@@ -1,37 +1,36 @@
-import type { SpringConfig, SggoiTransition, StyleObject } from "../types";
+import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const ENTER_SPRING: SpringConfig = {
-  stiffness: 125,
-  damping: 14,
-  doubleSpring: 0.5,
+const ENTER: PhysicsOptions = {
+  inertia: {
+    acceleration: 20,
+    resistance: 1.5,
+  },
 };
 
-const EXIT_SPRING: SpringConfig = {
-  stiffness: 128,
-  damping: 14,
-  doubleSpring: 0.5,
+const EXIT: PhysicsOptions = {
+  inertia: {
+    acceleration: 20,
+    resistance: 1,
+  },
 };
 
 interface DrillOptions {
   opacity?: boolean;
   direction?: "enter" | "exit";
-  spring?: Partial<SpringConfig>;
+  physics?: PhysicsOptions;
 }
 
 export const drill = (options: DrillOptions = {}): SggoiTransition => {
   const { opacity = false, direction = "enter" } = options;
-  const defaultSpring = direction === "enter" ? ENTER_SPRING : EXIT_SPRING;
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? defaultSpring.stiffness,
-    damping: options.spring?.damping ?? defaultSpring.damping,
-    doubleSpring: options.spring?.doubleSpring ?? defaultSpring.doubleSpring,
-  };
+  const physicsOptions =
+    options.physics ?? (direction === "enter" ? ENTER : EXIT);
 
   if (direction === "enter") {
     return {
       in: (element) => ({
-        spring,
+        physics: physicsOptions,
+
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = opacity
@@ -58,7 +57,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         },
       }),
       out: (_element, context) => ({
-        spring,
+        physics: physicsOptions,
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.zIndex = "-1";
@@ -84,7 +83,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
     // direction === "exit"
     return {
       in: (element) => ({
-        spring,
+        physics: physicsOptions,
         prepare: () => {
           // GPU acceleration hints
           element.style.willChange = opacity
@@ -111,7 +110,7 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
         },
       }),
       out: (_element, context) => ({
-        spring,
+        physics: physicsOptions,
         prepare: (el) => {
           prepareOutgoing(el, context);
           el.style.zIndex = "100";

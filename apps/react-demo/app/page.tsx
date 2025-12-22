@@ -779,31 +779,31 @@ export default function Home() {
                   {
                     id: "1",
                     color: "#ff6b6b",
-                    effect: fade({ spring: gentle }),
+                    effect: fade({ physics: { spring: gentle } }),
                     label: "fade",
                   },
                   {
                     id: "2",
                     color: "#4ecdc4",
-                    effect: scale({ spring: gentle }),
+                    effect: scale({ physics: { spring: gentle } }),
                     label: "scale",
                   },
                   {
                     id: "3",
                     color: "#45b7d1",
-                    effect: blur({ spring: gentle }),
+                    effect: blur({ physics: { spring: gentle } }),
                     label: "blur",
                   },
                   {
                     id: "4",
                     color: "#96ceb4",
-                    effect: rotate({ spring: gentle }),
+                    effect: rotate({ physics: { spring: gentle } }),
                     label: "rotate",
                   },
                   {
                     id: "5",
                     color: "#feca57",
-                    effect: bounce({ spring: gentle }),
+                    effect: bounce({ physics: { spring: gentle } }),
                     label: "bounce",
                   },
                 ].map(

@@ -1,13 +1,20 @@
-import type { SggoiTransition, StyleObject } from "../types";
+import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
-const DEFAULT_SPRING = { stiffness: 100, damping: 30 };
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 100, damping: 30 },
+};
 
-export const rotate = (): SggoiTransition => {
+export interface RotateOptions {
+  physics?: PhysicsOptions;
+}
+
+export const rotate = (options: RotateOptions = {}): SggoiTransition => {
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   return {
     in: (element) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: physicsOptions,
         prepare: () => {
           element.style.opacity = "0";
           element.style.transform = "rotate(-180deg)";
@@ -29,7 +36,7 @@ export const rotate = (): SggoiTransition => {
     },
     out: (element, context) => {
       return {
-        spring: DEFAULT_SPRING,
+        physics: physicsOptions,
         prepare: () => {
           prepareOutgoing(element, context);
           element.style.transformOrigin = "center center";

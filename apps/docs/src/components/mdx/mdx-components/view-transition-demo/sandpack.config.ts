@@ -16,6 +16,7 @@ export const SANDPACK_DEMOS = [
   "sheet-demo",
   "depth-demo",
   "swap-demo",
+  "snap-demo",
   // Add more demos here as they are migrated to folder structure
 ] as const;
 

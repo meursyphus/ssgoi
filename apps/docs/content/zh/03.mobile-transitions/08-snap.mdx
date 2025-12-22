@@ -1,0 +1,165 @@
+---
+title: "快闪过渡"
+description: "用于顶级导航的快速定向过渡"
+nav-title: "快闪"
+---
+
+# 快闪过渡
+
+快闪过渡是用于**顶级导航**的快速轻量级过渡。前一个屏幕淡出,新屏幕根据方向以短距离(8px)滑入,产生"咔嗒"般的触感反馈。
+
+## 演示
+
+<ViewTransitionDemo type="snap" />
+
+## UX 原则
+
+### 何时使用?
+
+快闪过渡专为具有方向性的导航(如**底部导航或标签栏**)而优化,针对标签顺序的导航进行了优化。
+
+<SuitabilityTable
+  items={[
+    {
+      label: "有方向的标签切换",
+      suitable: "yes",
+      description: "根据标签顺序明确设置左/右方向。"
+    },
+    {
+      label: "快速过渡",
+      suitable: "yes",
+      description: "短距离和快速弹性提供即时响应。"
+    },
+    {
+      label: "层级关系",
+      suitable: "no",
+      description: "对于上/下级移动,深度过渡更合适。"
+    }
+  ]}
+/>
+
+#### 主要用例
+- 有序底部导航标签切换(首页 → 搜索 → 个人资料)
+- 具有左右方向性的顶级菜单切换
+- 标签栏中相邻标签间的移动
+
+### 为什么这样运作?
+
+1. **前一个屏幕滑动 + 淡出**: 当前屏幕向移动方向滑动8px并消失。
+
+2. **新屏幕滑动 + 淡入**: 前一个屏幕完全消失后,新屏幕从相反方向滑动8px并出现。
+
+3. **方向性**: 如果标签在右侧,则从右侧出现;如果在左侧,则从左侧出现。
+
+### 动效设计
+
+**OUT(离开的页面)**:
+- **opacity**: 1 → 0(淡出)
+- **translateX**: 0 → ∓8px(向移动方向滑动)
+
+**IN(进入的页面)**:
+- **opacity**: 0 → 1(淡入)
+- **translateX**: ±8px → 0(从相反方向出现)
+- **开始时机**: OUT 动画完成后
+
+## 基本用法
+
+### 底部导航设置
+
+由于快闪过渡具有方向性,因此必须明确设置两个方向。
+
+::code-group
+
+```tsx [React]
+import { Ssgoi } from '@ssgoi/react';
+import { snap } from '@ssgoi/react/view-transitions';
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 向右侧标签移动(left: 从右侧出现)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 向左侧标签移动(right: 从左侧出现)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  {children}
+</Ssgoi>
+```
+
+```svelte [Svelte]
+<script lang="ts">
+  import { Ssgoi } from '@ssgoi/svelte';
+  import { snap } from '@ssgoi/svelte/view-transitions';
+</script>
+
+<Ssgoi
+  config={{
+    transitions: [
+      // 向右侧标签移动(left: 从右侧出现)
+      { from: '/home', to: '/search', transition: snap({ direction: 'left' }) },
+      { from: '/search', to: '/profile', transition: snap({ direction: 'left' }) },
+      { from: '/home', to: '/profile', transition: snap({ direction: 'left' }) },
+      // 向左侧标签移动(right: 从左侧出现)
+      { from: '/search', to: '/home', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/search', transition: snap({ direction: 'right' }) },
+      { from: '/profile', to: '/home', transition: snap({ direction: 'right' }) },
+    ]
+  }}
+>
+  <slot />
+</Ssgoi>
+```
+
+::
+
+> **注意**: 如果使用 `symmetric: true`,将应用相同的方向,因此在快闪过渡中,必须分别明确指定两个方向才能获得正确的方向性。
+
+## 方向设置
+
+快闪过渡使用 `direction` 选项控制滑动方向:
+
+- **`left`**: 向右侧标签移动时(新屏幕从右侧出现)
+- **`right`**: 向左侧标签移动时(新屏幕从左侧出现)
+
+```tsx
+// 首页 → 搜索(向右侧标签): 从右侧出现
+snap({ direction: 'left' })
+
+// 搜索 → 首页(向左侧标签): 从左侧出现
+snap({ direction: 'right' })
+```
+
+## 切换 vs 快闪
+
+| 特性 | 切换 | 快闪 |
+|------|------|------|
+| IN 效果 | scale + fade | slide + fade |
+| 方向性 | 无 | 有(左/右) |
+| 感觉 | 平滑切换 | 快速过渡 |
+| 用途 | 一般标签切换 | 有序标签切换 |
+
+## 最佳实践
+
+### 良好示例
+
+- 底部导航相邻标签间的切换
+- 与左右滑动手势配合使用
+- 顺序明确的标签栏切换
+
+### 不良示例
+
+- 无序的独立部分 → 使用切换过渡
+- 列表 → 详情页面 → 使用深度过渡
+- 层级导航 → 使用深度过渡
+
+## 相关过渡
+
+- **[切换](/zh/mobile-transitions/swap)**: 无方向性的顶级过渡
+- **[深度](/zh/mobile-transitions/depth)**: 层级关系的屏幕之间导航
+- **[滑动](/zh/mobile-transitions/slide)**: 全屏滑动

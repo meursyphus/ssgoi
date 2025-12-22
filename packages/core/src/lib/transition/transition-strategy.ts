@@ -1,12 +1,12 @@
 import type { MultiSpringConfig } from "../types";
-import type { Animation } from "../animator/animation";
+import type { Animator } from "../animator/types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 
 export interface StrategyContext {
   // Current animation state
   currentAnimation: {
-    controller: Animation;
+    controller: Animator;
     direction: "in" | "out";
   } | null;
 }

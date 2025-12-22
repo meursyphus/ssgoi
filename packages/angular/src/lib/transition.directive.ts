@@ -40,7 +40,6 @@ export class TransitionDirective implements OnInit, OnDestroy {
       key: config.key,
       in: config.in,
       out: config.out,
-      ref: this.el.nativeElement,
       scope: config.scope,
     })(this.el.nativeElement);
 

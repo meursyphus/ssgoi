@@ -1260,10 +1260,12 @@ sheet({ direction: 'exit' })
 ```typescript
 sheet({
   direction: 'enter',
-  spring: {
-    stiffness: 140,  // 越低越平滑（默认: 140）
-    damping: 18,     // 越高越快稳定（默认: 18）
-    doubleSpring: 0.5 // OUT 动画的弹簧强度倍数（默认: 0.5）
+  physics: {
+    spring: {
+      stiffness: 140,  // 越低越平滑（默认: 140）
+      damping: 18,     // 越高越快稳定（默认: 18）
+      doubleSpring: 0.5 // OUT 动画的弹簧强度倍数（默认: 0.5）
+    }
   }
 })
 ```
@@ -1274,10 +1276,12 @@ sheet({
 
 ```typescript
 sheet({
-  spring: {
-    stiffness: 100,
-    damping: 20,
-    doubleSpring: 0.6
+  physics: {
+    spring: {
+      stiffness: 100,
+      damping: 20,
+      doubleSpring: 0.6
+    }
   }
 })
 ```
@@ -1288,10 +1292,12 @@ sheet({
 
 ```typescript
 sheet({
-  spring: {
-    stiffness: 180,
-    damping: 16,
-    doubleSpring: 0.4
+  physics: {
+    spring: {
+      stiffness: 180,
+      damping: 16,
+      doubleSpring: 0.4
+    }
   }
 })
 ```

@@ -1,16 +1,14 @@
-import type { SpringConfig, SggoiTransition } from "../types";
+import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
-const DEFAULT_SPRING: SpringConfig = {
-  stiffness: 140,
-  damping: 19,
-  doubleSpring: 0.8,
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 140, damping: 19, doubleSpring: 0.8 },
 };
 
 interface InstagramOptions {
-  spring?: Partial<SpringConfig>;
   timeout?: number;
+  physics?: PhysicsOptions;
 }
 
 /**
@@ -252,11 +250,7 @@ function createAnimationConfig(
 }
 
 export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
-  const spring: SpringConfig = {
-    stiffness: options.spring?.stiffness ?? DEFAULT_SPRING.stiffness,
-    damping: options.spring?.damping ?? DEFAULT_SPRING.damping,
-    doubleSpring: options.spring?.doubleSpring ?? DEFAULT_SPRING.doubleSpring,
-  };
+  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   const timeout = options.timeout ?? 300;
 
   // Closure variables to share state between in/out
@@ -292,7 +286,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
         resolveHandlers = null;
         fromNode = null;
         return {
-          spring,
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -307,7 +301,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       if (!handlers) {
         fromNode = null;
         return {
-          spring,
+          physics: physicsOptions,
           css: () => ({}),
         };
       }
@@ -316,7 +310,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       fromNode = null;
 
       return {
-        spring,
+        physics: physicsOptions,
         css: (progress) => {
           // Use inAnimation if available (enterMode), otherwise stay visible
           if (!handlers?.inAnimation) return {};
@@ -331,7 +325,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
       });
 
       return {
-        spring,
+        physics: physicsOptions,
         prepare: (element) => {
           if (!handlers?.isEnterMode) {
             prepareOutgoing(element, context);

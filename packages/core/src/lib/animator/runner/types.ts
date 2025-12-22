@@ -2,7 +2,7 @@
  * Animation Runner common types
  */
 
-import type { SpringConfig } from "../spring-core";
+import type { Integrator } from "../integrator";
 
 /**
  * CSS style object type
@@ -20,12 +20,15 @@ export interface AnimationControls {
 }
 
 /**
- * Animation Options - Unified options
+ * Animation Options - Low-level runner options
+ *
+ * Receives pre-created Integrator instance.
+ * Use SingleAnimator for higher-level API with spring config.
  */
 export interface AnimationOptions {
+  integrator: Integrator;
   from: number;
   to: number;
-  spring: SpringConfig;
   velocity?: number;
   onComplete: () => void;
   onStart?: () => void;
