@@ -75,7 +75,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <BlogPostLink
             href={`/${lang}/blog`}
             fallbackHref={`/${lang}/blog`}
-            className="inline-flex items-center text-xs text-neutral-400 hover:text-white transition-colors mb-8"
+            className="inline-flex items-center text-xs text-neutral-300 hover:text-white transition-colors mb-8"
           >
             {t("backToBlog")}
           </BlogPostLink>
@@ -100,7 +100,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               {post.title}
             </h1>
 
-            <div className="flex items-center gap-3 text-xs text-neutral-500">
+            <div className="flex items-center gap-3 text-xs text-neutral-400">
               {post.date && (
                 <time dateTime={post.date}>
                   {new Date(post.date).toLocaleDateString(lang, {
@@ -124,7 +124,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 {post.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 text-xs bg-white/5 text-neutral-400 rounded border border-white/5"
+                    className="px-2 py-0.5 text-xs bg-white/5 text-neutral-300 rounded border border-white/5"
                   >
                     {tag}
                   </span>
@@ -143,7 +143,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <BlogPostLink
               href={`/${lang}/blog`}
               fallbackHref={`/${lang}/blog`}
-              className="inline-flex items-center text-xs text-neutral-400 hover:text-white transition-colors"
+              className="inline-flex items-center text-xs text-neutral-300 hover:text-white transition-colors"
             >
               {t("backToBlog")}
             </BlogPostLink>

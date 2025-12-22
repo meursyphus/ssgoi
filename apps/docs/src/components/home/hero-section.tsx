@@ -40,7 +40,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[10px] text-neutral-400 uppercase tracking-wider">
+              <span className="text-[10px] text-neutral-300 uppercase tracking-wider">
                 {t("newHome.hero.badge")}
               </span>
             </div>
@@ -49,13 +49,13 @@ export function HeroSection({ lang }: HeroSectionProps) {
             <h1 className="text-3xl sm:text-4xl font-light tracking-tight leading-tight mb-6">
               {t("newHome.hero.title.line1")}
               <br />
-              <span className="text-neutral-500">
+              <span className="text-neutral-400">
                 {t("newHome.hero.title.line2")}
               </span>
             </h1>
 
             {/* Description */}
-            <p className="text-sm text-neutral-400 leading-relaxed mb-8 max-w-md">
+            <p className="text-sm text-neutral-300 leading-relaxed mb-8 max-w-md">
               {t("newHome.hero.description")}
             </p>
 
@@ -68,7 +68,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
                   className={`px-2.5 py-1 text-[10px] rounded transition-all ${
                     activeFramework === i
                       ? "bg-white/10 text-white"
-                      : "text-neutral-500 hover:text-neutral-300"
+                      : "text-neutral-400 hover:text-neutral-200"
                   }`}
                 >
                   {fw.name}
@@ -84,7 +84,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
                 </code>
                 <button
                   onClick={handleCopy}
-                  className="text-neutral-500 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-white transition-colors"
                 >
                   {copied ? (
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -106,7 +106,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
               </Link>
               <Link
                 href={`/${lang}/demo`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs text-neutral-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs text-neutral-300 hover:text-white transition-colors"
               >
                 {t("newHome.hero.viewDemo")}
                 <ChevronRight className="w-3.5 h-3.5" />

@@ -50,7 +50,7 @@ export function Header() {
 
       {/* Mobile Menu Button */}
       <button
-        className="md:hidden fixed top-4 right-4 z-50 h-9 w-9 flex items-center justify-center rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10 text-neutral-400 hover:text-white transition-colors"
+        className="md:hidden fixed top-4 right-4 z-50 h-9 w-9 flex items-center justify-center rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10 text-neutral-300 hover:text-white transition-colors"
         onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
       >
         <Menu className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function Header() {
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
                 isActive(`/${currentLang}/docs`)
                   ? "bg-white/10 text-white"
-                  : "text-neutral-400 hover:text-white",
+                  : "text-neutral-300 hover:text-white",
               )}
             >
               {t("docs")}
@@ -94,7 +94,7 @@ export function Header() {
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
                 isActive(`/${currentLang}/blog`)
                   ? "bg-white/10 text-white"
-                  : "text-neutral-400 hover:text-white",
+                  : "text-neutral-300 hover:text-white",
               )}
             >
               {t("blog")}
@@ -105,7 +105,7 @@ export function Header() {
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
                 isActive(`/${currentLang}/demo`)
                   ? "bg-white/10 text-white"
-                  : "text-neutral-400 hover:text-white",
+                  : "text-neutral-300 hover:text-white",
               )}
             >
               {t("demo")}
@@ -116,7 +116,7 @@ export function Header() {
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
                 isActive(`/${currentLang}/showcase`)
                   ? "bg-white/10 text-white"
-                  : "text-neutral-400 hover:text-white",
+                  : "text-neutral-300 hover:text-white",
               )}
             >
               {t("showcase")}
@@ -135,7 +135,7 @@ export function Header() {
               href="https://discord.gg/9gSSWQbvX4"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-white hover:bg-white/5 transition-colors"
               aria-label="Discord"
             >
               <svg
@@ -152,7 +152,7 @@ export function Header() {
               href="https://x.com/meursyphus"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-white hover:bg-white/5 transition-colors"
               aria-label="X (Twitter)"
             >
               <svg
@@ -169,7 +169,7 @@ export function Header() {
               href="https://github.com/meursyphus/ssgoi"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-white hover:bg-white/5 transition-colors"
               aria-label={t("githubRepository")}
             >
               <Github className="h-3.5 w-3.5" />

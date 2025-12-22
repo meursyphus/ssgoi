@@ -25,9 +25,9 @@ export function DocsNavigation({ prev, next, lang }: DocsNavigationProps) {
             href={`/${lang}/docs/${prev.path}`}
             className="group flex items-center gap-3 px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/80 hover:border-zinc-700 transition-all min-w-0 flex-1"
           >
-            <ChevronLeft className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors flex-shrink-0" />
+            <ChevronLeft className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors flex-shrink-0" />
             <div className="text-left min-w-0">
-              <div className="text-xs text-zinc-500 group-hover:text-zinc-400 mb-1 transition-colors">
+              <div className="text-xs text-zinc-400 group-hover:text-zinc-300 mb-1 transition-colors">
                 Previous
               </div>
               <div className="text-white font-medium truncate">
@@ -45,14 +45,14 @@ export function DocsNavigation({ prev, next, lang }: DocsNavigationProps) {
             className="group flex items-center gap-3 px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/80 hover:border-zinc-700 transition-all min-w-0 flex-1"
           >
             <div className="text-right min-w-0 flex-1">
-              <div className="text-xs text-zinc-500 group-hover:text-zinc-400 mb-1 transition-colors">
+              <div className="text-xs text-zinc-400 group-hover:text-zinc-300 mb-1 transition-colors">
                 Next
               </div>
               <div className="text-white font-medium truncate">
                 {next.title}
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors flex-shrink-0" />
+            <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors flex-shrink-0" />
           </Link>
         ) : (
           <div className="flex-1" />

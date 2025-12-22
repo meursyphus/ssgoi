@@ -80,7 +80,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                     className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                       activeTab === "docs"
                         ? "text-white border-b-2 border-orange-500 pb-2"
-                        : "text-gray-400 hover:text-white pb-2"
+                        : "text-gray-300 hover:text-white pb-2"
                     }`}
                   >
                     <BookOpen className="h-4 w-4" />
@@ -92,7 +92,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                   className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                     activeTab === "menu"
                       ? "text-white border-b-2 border-orange-500 pb-2"
-                      : "text-gray-400 hover:text-white pb-2"
+                      : "text-gray-300 hover:text-white pb-2"
                   }`}
                 >
                   <Menu className="h-4 w-4" />
@@ -101,7 +101,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
               </div>
               <button
                 onClick={onClose}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-9 w-9 text-gray-400 hover:text-white"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-9 w-9 text-gray-300 hover:text-white"
               >
                 <X className="h-5 w-5" />
                 <span className="sr-only">{t("closeDrawer")}</span>
@@ -126,7 +126,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
             {/* 문서 탭이지만 navigation이 없는 경우 (문서 페이지가 아닐 때) */}
             {activeTab === "docs" && !navigation && (
               <div className="text-center py-8">
-                <p className="text-sm text-gray-400">{t("noDocumentPage")}</p>
+                <p className="text-sm text-gray-300">{t("noDocumentPage")}</p>
               </div>
             )}
 
@@ -135,7 +135,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
               <div className="space-y-6">
                 {/* Navigation Section */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
                     {t("navigation")}
                   </h3>
                   <nav>
@@ -203,7 +203,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
 
                 {/* Social Links Section */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
                     Community
                   </h3>
                   <nav>
@@ -271,7 +271,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
 
                 {/* Language Section */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
                     {t("language")}
                   </h3>
                   <div className="space-y-2">

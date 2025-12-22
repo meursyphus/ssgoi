@@ -58,13 +58,13 @@ export function ElementTransitionSection() {
       <div className="max-w-4xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-12">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
             {t("newHome.elementTransition.sectionLabel")}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
             {t("newHome.elementTransition.title")}
           </h2>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-400">
             {t("newHome.elementTransition.description")}
           </p>
         </div>
@@ -117,7 +117,7 @@ export function ElementTransitionSection() {
         <div className="flex justify-center mb-10">
           <button
             onClick={() => setShow(!show)}
-            className="px-4 py-1.5 text-xs text-neutral-400 border border-white/10 rounded-md hover:border-white/20 hover:text-white transition-all"
+            className="px-4 py-1.5 text-xs text-neutral-300 border border-white/10 rounded-md hover:border-white/20 hover:text-white transition-all"
           >
             {show
               ? t("newHome.elementTransition.toggleHide")

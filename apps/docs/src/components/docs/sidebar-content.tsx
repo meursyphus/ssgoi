@@ -75,13 +75,13 @@ export function SidebarContent({
               onClick={() => toggleExpanded(item.path)}
               className={`
                 w-full text-left px-2 py-1.5 flex items-center justify-between rounded
-                text-neutral-400 hover:text-white transition-colors
+                text-neutral-300 hover:text-white transition-colors
                 ${level > 0 ? "ml-" + level * 4 : ""}
               `}
             >
               <span className="text-xs font-medium">{item.navTitle}</span>
               <ChevronRight
-                className={`w-3 h-3 transition-transform duration-300 text-neutral-600 ${isExpanded ? "rotate-90" : ""}`}
+                className={`w-3 h-3 transition-transform duration-300 text-neutral-500 ${isExpanded ? "rotate-90" : ""}`}
               />
             </button>
             <div
@@ -104,7 +104,7 @@ export function SidebarContent({
               ${
                 isActive
                   ? "text-neutral-100"
-                  : "text-neutral-500 hover:text-neutral-300"
+                  : "text-neutral-400 hover:text-neutral-200"
               }
             `}
           >
