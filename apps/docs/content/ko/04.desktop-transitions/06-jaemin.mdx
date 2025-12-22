@@ -190,9 +190,11 @@ nav-title: "재민"
 
 ```typescript
 jaemin({
-  spring?: {
-    stiffness?: number;  // 애니메이션 스프링 강성 (기본값: 50)
-    damping?: number;    // 애니메이션 스프링 감쇠 (기본값: 30)
+  physics?: {
+    spring?: {
+      stiffness?: number;  // 애니메이션 스프링 강성 (기본값: 50)
+      damping?: number;    // 애니메이션 스프링 감쇠 (기본값: 30)
+    };
   };
   initialRotation?: number;      // 초기 회전 각도 (도) (기본값: 45)
   initialScale?: number;         // 초기 스케일 팩터 (기본값: 0.01)

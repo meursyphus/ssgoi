@@ -163,8 +163,10 @@ nav-title: "블라인드"
 ```typescript
 interface BlindOptions {
   // 스프링 설정
-  inSpring?: SpringConfig; // IN 애니메이션 (기본: { stiffness: 75, damping: 25 })
-  outSpring?: SpringConfig; // OUT 애니메이션 (기본: { stiffness: 80, damping: 25 })
+  physics?: {
+    inSpring?: SpringConfig;  // IN 애니메이션 (기본: { stiffness: 75, damping: 25 })
+    outSpring?: SpringConfig; // OUT 애니메이션 (기본: { stiffness: 80, damping: 25 })
+  };
 
   // 타이밍
   transitionDelay?: number; // OUT과 IN 사이 대기 (기본: 300ms)
@@ -194,8 +196,10 @@ blind({
 
 // 부드러운 전환
 blind({
-  outSpring: { stiffness: 60, damping: 20 },
-  inSpring: { stiffness: 50, damping: 18 },
+  physics: {
+    outSpring: { stiffness: 60, damping: 20 },
+    inSpring: { stiffness: 50, damping: 18 },
+  }
 });
 
 // 색상 변경

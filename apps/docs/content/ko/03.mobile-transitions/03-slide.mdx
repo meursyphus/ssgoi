@@ -269,9 +269,9 @@ RIGHT 방향 (이전으로):
         {
           from: '/gallery/photo-*',
           to: '/gallery/photo-*',
-          transition: slide({ 
+          transition: slide({
             direction: 'left',
-            spring: { stiffness: 300, damping: 30 }
+            physics: { spring: { stiffness: 300, damping: 30 } }
           })
         }
       ]
@@ -286,9 +286,9 @@ RIGHT 방향 (이전으로):
           {
             from: '/gallery/photo-*',
             to: '/gallery/photo-*',
-            transition: slide({ 
+            transition: slide({
               direction: 'left',
-              spring: { stiffness: 300, damping: 30 }
+              physics: { spring: { stiffness: 300, damping: 30 } }
             })
           }
         ]
@@ -321,7 +321,7 @@ RIGHT 방향 (이전으로):
             to: '/gallery/photo-*',
             transition: slide({
               direction: 'left',
-              spring: { stiffness: 300, damping: 30 }
+              physics: { spring: { stiffness: 300, damping: 30 } }
             })
           }
         ]

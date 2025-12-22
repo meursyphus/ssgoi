@@ -313,15 +313,13 @@ nav-title: "페이드"
     ```tsx
     const config = {
        defaultTransition: fade({
-         inSpring: { //페이지에 들어갈 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
-         },
-         outSpring: { //페이지를 떠날 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
-         }
-       })
+         physics: {
+           spring: {
+             stiffness: 400,  // 빠른 트랜지션
+             damping: 35      // 부드러운 마무리
+           }
+         }
+       })
      };
     ```
   </TabPanel>
@@ -330,15 +328,13 @@ nav-title: "페이드"
     <script>
       const config = {
         defaultTransition: fade({
-          inSpring: { //페이지에 들어갈 때 적용됩니다.
-            stiffness: 400,  // 빠른 트랜지션
-            damping: 35      // 부드러운 마무리
-          },
-          outSpring: { //페이지를 떠날 때 적용됩니다.
-            stiffness: 400,  // 빠른 트랜지션
-            damping: 35      // 부드러운 마무리
-          }
-       })
+          physics: {
+            spring: {
+              stiffness: 400,  // 빠른 트랜지션
+              damping: 35      // 부드러운 마무리
+            }
+          }
+        })
      };
     </script>
     ```
@@ -350,13 +346,11 @@ nav-title: "페이드"
 
     const config = {
        defaultTransition: fade({
-         inSpring: { //페이지에 들어갈 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
-         },
-         outSpring: { //페이지를 떠날 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
+         physics: {
+           spring: {
+             stiffness: 400,  // 빠른 트랜지션
+             damping: 35      // 부드러운 마무리
+           }
          }
        })
      };
@@ -369,13 +363,11 @@ nav-title: "페이드"
 
     const config = {
        defaultTransition: fade({
-         inSpring: { //페이지에 들어갈 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
-         },
-         outSpring: { //페이지를 떠날 때 적용됩니다.
-           stiffness: 400,  // 빠른 트랜지션
-           damping: 35      // 부드러운 마무리
+         physics: {
+           spring: {
+             stiffness: 400,  // 빠른 트랜지션
+             damping: 35      // 부드러운 마무리
+           }
          }
        })
      };
@@ -401,13 +393,11 @@ nav-title: "페이드"
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-          inSpring: { //페이지에 들어갈 때 적용됩니다.
-            stiffness: 400,  // 빠른 트랜지션
-            damping: 35      // 부드러운 마무리
-          },
-          outSpring: { //페이지를 떠날 때 적용됩니다.
-            stiffness: 400,  // 빠른 트랜지션
-            damping: 35      // 부드러운 마무리
+          physics: {
+            spring: {
+              stiffness: 400,  // 빠른 트랜지션
+              damping: 35      // 부드러운 마무리
+            }
           }
         })
       };
@@ -425,15 +415,13 @@ nav-title: "페이드"
     ```tsx
     const config = {
       defaultTransition: fade({
-         inSpring: { //페이지에 들어갈 때 적용됩니다.
-            stiffness: 150,  // 느린 트랜지션
-            damping: 25      // 부드러운 감속
-           },
-          outSpring: { //페이지를 떠날 때 적용됩니다.
-           stiffness: 150,  // 느린 트랜지션
-           damping: 25      // 부드러운 감속
-           }
-      })
+         physics: {
+           spring: {
+             stiffness: 150,  // 느린 트랜지션
+             damping: 25      // 부드러운 감속
+           }
+         }
+      })
     };
     ```
   </TabPanel>
@@ -442,17 +430,50 @@ nav-title: "페이드"
     <script>
       const config = {
         defaultTransition: fade({
-           inSpring: { //페이지에 들어갈 때 적용됩니다.
-              stiffness: 150,  // 느린 트랜지션
-              damping: 25      // 부드러운 감속
-            },
-            outSpring: { //페이지를 떠날 때 적용됩니다.
-             stiffness: 150,  // 느린 트랜지션
-             damping: 25      // 부드러운 감속
-            }
-        })
+           physics: {
+             spring: {
+               stiffness: 150,  // 느린 트랜지션
+               damping: 25      // 부드러운 감속
+             }
+           }
+        })
     };
+
     </script>
+    ```
+  </TabPanel>
+  <TabPanel value="vue">
+    ```vue
+    <script setup>
+    import { fade } from '@ssgoi/vue/view-transitions';
+
+    const config = {
+      defaultTransition: fade({
+        physics: {
+          spring: {
+            stiffness: 150,  // 느린 트랜지션
+            damping: 25      // 부드러운 감속
+          }
+        }
+      })
+    };
+    </script>
+    ```
+  </TabPanel>
+  <TabPanel value="solid">
+    ```tsx
+    import { fade } from '@ssgoi/solid/view-transitions';
+
+    const config = {
+      defaultTransition: fade({
+        physics: {
+          spring: {
+            stiffness: 150,  // 느린 트랜지션
+            damping: 25      // 부드러운 감속
+          }
+        }
+      })
+    };
     ```
   </TabPanel>
   <TabPanel value="angular">
@@ -475,13 +496,11 @@ nav-title: "페이드"
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-           inSpring: { //페이지에 들어갈 때 적용됩니다.
-            stiffness: 150,  // 느린 트랜지션
-            damping: 25      // 부드러운 감속
-          },
-          outSpring: { //페이지를 떠날 때 적용됩니다.
-           stiffness: 150,  // 느린 트랜지션
-           damping: 25      // 부드러운 감속
+          physics: {
+            spring: {
+              stiffness: 150,  // 느린 트랜지션
+              damping: 25      // 부드러운 감속
+            }
           }
         })
       };
