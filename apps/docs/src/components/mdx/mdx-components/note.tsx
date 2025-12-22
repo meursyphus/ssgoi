@@ -6,7 +6,7 @@ export const Note = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="my-4 bg-zinc-800/40 px-4 py-3 text-sm text-zinc-400">
+    <div className="my-4 bg-zinc-800/40 px-4 py-3 text-sm text-zinc-300">
       {children}
     </div>
   );

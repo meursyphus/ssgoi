@@ -18,13 +18,13 @@ export function FrameworksSection() {
     <section className="py-20 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
             {t("newHome.frameworks.sectionLabel")}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
             {t("newHome.frameworks.title")}
           </h2>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-400">
             {t("newHome.frameworks.description")}
           </p>
         </div>
@@ -36,12 +36,12 @@ export function FrameworksSection() {
               className={`px-4 py-2 rounded border text-xs ${
                 fw.status === "available"
                   ? "bg-white/[0.02] border-white/10 text-neutral-300"
-                  : "border-white/5 text-neutral-600"
+                  : "border-white/5 text-neutral-500"
               }`}
             >
               {fw.name}
               {fw.status === "soon" && (
-                <span className="ml-2 text-[10px] text-neutral-600">
+                <span className="ml-2 text-[10px] text-neutral-500">
                   {t("newHome.frameworks.soon")}
                 </span>
               )}

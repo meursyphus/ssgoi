@@ -33,7 +33,7 @@ export function FeaturesSection() {
     <section className="py-20 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
             {t("newHome.features.sectionLabel")}
           </p>
           <h2 className="text-xl font-light tracking-tight">
@@ -46,13 +46,13 @@ export function FeaturesSection() {
             <div key={i} className="group">
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded bg-white/[0.03] border border-white/10 flex items-center justify-center flex-shrink-0">
-                  <feature.icon className="w-3.5 h-3.5 text-neutral-500" />
+                  <feature.icon className="w-3.5 h-3.5 text-neutral-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-medium mb-1">
                     {t(feature.titleKey)}
                   </h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
+                  <p className="text-xs text-neutral-400 leading-relaxed">
                     {t(feature.descriptionKey)}
                   </p>
                 </div>

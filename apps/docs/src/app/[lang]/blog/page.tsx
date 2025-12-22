@@ -41,7 +41,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             <h1 className="text-2xl font-medium text-white mb-2">
               {t("pageTitle")}
             </h1>
-            <p className="text-sm text-neutral-400">{t("pageDescription")}</p>
+            <p className="text-sm text-neutral-300">{t("pageDescription")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -71,12 +71,12 @@ export default async function BlogPage({ params }: BlogPageProps) {
                     </h2>
 
                     {post.description && (
-                      <p className="text-xs text-neutral-400 mb-3 line-clamp-2">
+                      <p className="text-xs text-neutral-300 mb-3 line-clamp-2">
                         {post.description}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-xs text-neutral-500">
+                    <div className="flex items-center justify-between text-xs text-neutral-400">
                       {post.date && (
                         <time dateTime={post.date}>
                           {new Date(post.date).toLocaleDateString(lang, {
@@ -95,7 +95,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
                         {post.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2 py-0.5 text-xs bg-white/5 text-neutral-400 rounded border border-white/5"
+                            className="px-2 py-0.5 text-xs bg-white/5 text-neutral-300 rounded border border-white/5"
                           >
                             {tag}
                           </span>
@@ -110,7 +110,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
           {posts.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-sm text-neutral-400">{t("noPostsYet")}</p>
+              <p className="text-sm text-neutral-300">{t("noPostsYet")}</p>
             </div>
           )}
         </div>

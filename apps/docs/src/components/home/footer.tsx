@@ -10,9 +10,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left - License */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-neutral-600">MIT License</span>
+            <span className="text-[10px] text-neutral-500">MIT License</span>
             <span className="text-neutral-700">·</span>
-            <span className="text-[10px] text-neutral-600">
+            <span className="text-[10px] text-neutral-500">
               Free & Open Source
             </span>
           </div>
@@ -23,7 +23,7 @@ export function Footer() {
               href="https://github.com/meursyphus/ssgoi"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
+              className="flex items-center gap-1.5 text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors"
             >
               <Github className="w-3 h-3" />
               <span>GitHub</span>
@@ -32,7 +32,7 @@ export function Footer() {
               href="https://discord.gg/9gSSWQbvX4"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
+              className="flex items-center gap-1.5 text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -47,7 +47,7 @@ export function Footer() {
               href="https://x.com/meursyphus"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
+              className="flex items-center gap-1.5 text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -61,7 +61,7 @@ export function Footer() {
           </div>
 
           {/* Right - Credit */}
-          <span className="text-[10px] text-neutral-600">
+          <span className="text-[10px] text-neutral-500">
             Built with care by MeurSyphus
           </span>
         </div>
