@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/solid",
-  "version": "0.0.1",
+  "version": "4.0.0",
   "description": "Solid.js bindings for SSGOI - Native app-like page transitions for Solid applications",
   "private": false,
   "type": "module",
