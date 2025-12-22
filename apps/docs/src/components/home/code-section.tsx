@@ -43,13 +43,13 @@ import { fade } from '@ssgoi/react/view-transitions';
     <section className="py-20 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
             {t("newHome.code.sectionLabel")}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
             {t("newHome.code.title")}
           </h2>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-400">
             {t("newHome.code.description")}
           </p>
         </div>
@@ -61,7 +61,7 @@ import { fade } from '@ssgoi/react/view-transitions';
             className={`text-xs pb-2 border-b-2 transition-colors ${
               activeTab === "setup"
                 ? "text-white border-white"
-                : "text-neutral-500 border-transparent hover:text-neutral-300"
+                : "text-neutral-400 border-transparent hover:text-neutral-200"
             }`}
           >
             {t("newHome.code.tabSetup")}
@@ -71,7 +71,7 @@ import { fade } from '@ssgoi/react/view-transitions';
             className={`text-xs pb-2 border-b-2 transition-colors ${
               activeTab === "config"
                 ? "text-white border-white"
-                : "text-neutral-500 border-transparent hover:text-neutral-300"
+                : "text-neutral-400 border-transparent hover:text-neutral-200"
             }`}
           >
             {t("newHome.code.tabRouteConfig")}
@@ -106,7 +106,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="text-neutral-500 hover:text-white transition-colors"
+      className="text-neutral-400 hover:text-white transition-colors"
     >
       {copied ? (
         <Check className="w-3.5 h-3.5 text-emerald-400" />

@@ -17,7 +17,7 @@ export function CTASection({ lang }: CTASectionProps) {
         <h2 className="text-2xl font-light tracking-tight mb-4">
           {t("newHome.cta.title")}
         </h2>
-        <p className="text-sm text-neutral-500 mb-8 max-w-md mx-auto">
+        <p className="text-sm text-neutral-400 mb-8 max-w-md mx-auto">
           {t("newHome.cta.description")}
         </p>
         <div className="flex items-center justify-center gap-4">
@@ -32,7 +32,7 @@ export function CTASection({ lang }: CTASectionProps) {
             href="https://github.com/meursyphus/ssgoi"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 text-xs text-neutral-400 border border-white/10 rounded-lg hover:bg-white/[0.02] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 text-xs text-neutral-300 border border-white/10 rounded-lg hover:bg-white/[0.02] transition-colors"
           >
             <Github className="w-3.5 h-3.5" />
             GitHub

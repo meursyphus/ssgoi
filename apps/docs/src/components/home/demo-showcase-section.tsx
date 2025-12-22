@@ -61,13 +61,13 @@ export function DemoShowcaseSection() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
             {t("newHome.demoShowcase.sectionLabel")}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
             {t("newHome.demoShowcase.title")}
           </h2>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-400">
             {t("newHome.demoShowcase.description")}
           </p>
         </div>
@@ -81,7 +81,7 @@ export function DemoShowcaseSection() {
               className={`flex-shrink-0 px-4 py-2 text-xs rounded-lg transition-all ${
                 activeDemo === demoType
                   ? "bg-white/10 text-white border border-white/20"
-                  : "text-neutral-500 border border-transparent hover:text-neutral-300 hover:bg-white/5"
+                  : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-white/5"
               }`}
             >
               {t(`newHome.demoShowcase.demos.${demoType}.label`)}
@@ -97,7 +97,7 @@ export function DemoShowcaseSection() {
           </div>
 
           {/* Description */}
-          <p className="mt-4 text-xs text-neutral-500 text-center">
+          <p className="mt-4 text-xs text-neutral-400 text-center">
             {t(`newHome.demoShowcase.demos.${activeDemo}.description`)}
           </p>
         </div>
