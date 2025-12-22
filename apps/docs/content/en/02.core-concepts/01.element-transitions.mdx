@@ -55,38 +55,46 @@ How to use various transition effects:
      */
 
     // Fade transition
-    <div ref={transition(fade())}>
+    <div ref={transition(fade({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fade effect
     </div>
 
     // Scale transition
-    <div ref={transition(scale())}>
+    <div ref={transition(scale({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Scale effect
     </div>
 
     // Blur transition
-    <div ref={transition(blur({ amount: 10 }))}>
+    <div ref={transition(blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Blur effect
     </div>
 
     // Slide transition (with direction)
-    <div ref={transition(slide({ direction: 'left' }))}>
+    <div ref={transition(slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Slide effect
     </div>
 
     // Fly transition (custom position)
-    <div ref={transition(fly({ x: 200, y: -50 }))}>
+    <div ref={transition(fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fly effect
     </div>
 
     // Rotate transition
-    <div ref={transition(rotate())}>
+    <div ref={transition(rotate({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Rotate effect
     </div>
 
     // Bounce transition
-    <div ref={transition(bounce())}>
+    <div ref={transition(bounce({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Bounce effect
+    </div>
+
+    // Explicit key usage (required when not using plugin)
+    <div ref={transition({
+      key: "scale-element",
+      ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
+    })}>
+      Scale effect
     </div>
     ```
   </TabPanel>
@@ -348,9 +356,20 @@ How to use various transition effects:
 
 ```typescript
 interface TransitionConfig {
-  spring?: {
-    stiffness: number; // Spring stiffness (default: 300)
-    damping: number; // Damping coefficient (default: 30)
+  physics?: {
+    // Spring: Spring physics (ease-out effect, default)
+    spring?: {
+      stiffness: number;  // Spring stiffness (default: 300)
+      damping: number;    // Damping coefficient (default: 30)
+      doubleSpring?: boolean | number; // Double spring effect (default: false)
+    };
+    // Inertia: Inertia physics (ease-in effect)
+    inertia?: {
+      acceleration: number; // Acceleration (default: 500)
+      resistance: number;   // Resistance coefficient (default: 10)
+    };
+    // Custom Integrator: Custom physics engine
+    integrator?: () => Integrator;
   };
   // Choose one of two animation modes (cannot use both)
   tick?: (progress: number) => void; // RAF-based animation
@@ -358,6 +377,75 @@ interface TransitionConfig {
   prepare?: (element: HTMLElement) => void; // Initial setup before animation starts
   onStart?: () => void;
   onEnd?: () => void;
+}
+```
+
+### Physics Engine Options
+
+SSGOI supports various physics engines to create natural animations:
+
+#### Spring Physics
+
+Provides ease-out effects, which is the default physics engine. Animations start fast and naturally decelerate as they reach their target.
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      spring: {
+        stiffness: 300,  // Spring stiffness (higher = faster)
+        damping: 30,     // Damping coefficient (higher = less bounce)
+        doubleSpring: false  // Double spring effect
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+#### Inertia Physics
+
+Provides ease-in effects. Animations start slowly and gradually accelerate.
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      inertia: {
+        acceleration: 500,  // Acceleration (higher = faster acceleration)
+        resistance: 10      // Resistance coefficient (higher = more deceleration)
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `scale(${0.8 + progress * 0.2})`,
+    }),
+  })
+}
+```
+
+#### Custom Integrator
+
+You can implement your own physics engine.
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      integrator: () => ({
+        next: (dt, state) => {
+          // Custom physics calculation logic
+          return newState;
+        }
+      })
+    },
+    css: (progress) => ({
+      opacity: progress,
+    }),
+  })
 }
 ```
 
@@ -370,7 +458,7 @@ SSGOI supports two animation modes:
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     css: (progress) => ({
       opacity: progress,
       transform: `translateY(${(1 - progress) * 20}px)`,
@@ -389,7 +477,7 @@ SSGOI supports two animation modes:
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     tick: (progress) => {
       element.style.opacity = String(progress);
       element.style.transform = `translateY(${(1 - progress) * 20}px)`;

@@ -181,14 +181,14 @@ Create custom transitions using `css` (recommended) or `tick`:
 <div ref={transition({
   key: "custom",
   in: () => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     css: (progress) => ({
       opacity: progress,
       transform: `translateY(${(1 - progress) * 20}px)`,
     }),
   }),
   out: () => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     css: (progress) => ({
       opacity: progress,
       transform: `translateY(${(1 - progress) * 20}px)`,
@@ -202,7 +202,7 @@ Create custom transitions using `css` (recommended) or `tick`:
 <div ref={transition({
   key: "tick-example",
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     tick: (progress) => {
       element.style.opacity = String(progress);
       element.style.transform = `scale(${0.8 + progress * 0.2})`;
@@ -250,6 +250,97 @@ Use cases:
 - Modal content that appears with the container
 - Lists that mount/unmount as a group
 
+## Physics Options
+
+SSGOI supports multiple physics engines for animations:
+
+### Spring Physics (ease-out)
+
+Default physics engine with natural spring-based motion:
+
+```tsx
+<div ref={transition({
+  key: "spring",
+  in: () => ({
+    physics: {
+      spring: {
+        stiffness: 300,
+        damping: 30,
+        doubleSpring: true  // Optional: creates ease-in-out effect
+      }
+    },
+    css: (progress) => ({ opacity: progress }),
+  }),
+})}>
+  Content
+</div>
+```
+
+- `stiffness`: How quickly the spring responds (higher = faster)
+- `damping`: Resistance to motion (higher = less bouncy)
+- `doubleSpring`: Combines two springs for smooth ease-in-out effect
+
+### Inertia Physics (ease-in)
+
+Decelerating motion that starts fast and slows down:
+
+```tsx
+<div ref={transition({
+  key: "inertia",
+  in: () => ({
+    physics: {
+      inertia: {
+        acceleration: 20,
+        resistance: 1.5,
+        resistanceType: 'quadratic'  // 'linear' | 'quadratic'
+      }
+    },
+    css: (progress) => ({ opacity: progress }),
+  }),
+})}>
+  Content
+</div>
+```
+
+- `acceleration`: Initial velocity (higher = faster start)
+- `resistance`: How quickly it decelerates (higher = slower)
+- `resistanceType`: Deceleration curve (`linear` for constant, `quadratic` for exponential)
+
+### Custom Integrator
+
+Create your own physics engine:
+
+```tsx
+import type { Integrator } from '@ssgoi/core';
+
+class MyCustomIntegrator implements Integrator {
+  integrate(state, deltaTime) {
+    // Custom physics calculation
+    return {
+      position: state.position + velocity * deltaTime,
+      velocity: state.velocity,
+      done: state.position >= 1,
+    };
+  }
+
+  fromState(state) {
+    return new MyCustomIntegrator();
+  }
+}
+
+<div ref={transition({
+  key: "custom-physics",
+  in: () => ({
+    physics: {
+      integrator: () => new MyCustomIntegrator()
+    },
+    css: (progress) => ({ opacity: progress }),
+  }),
+})}>
+  Content
+</div>
+```
+
 ## Hero Transitions
 
 Shared element animations between pages:
@@ -280,7 +371,7 @@ const config = {
 ## Performance
 
 SSGOI achieves 60fps through:
-- **Web Animation API**: Spring physics pre-computed to keyframes
+- **Web Animation API**: Physics engines (Spring, Inertia) pre-computed to keyframes
 - **GPU acceleration**: Uses transform/opacity for hardware rendering
 - **Off main thread**: Animations run on compositor thread
 - **State memory**: Animation positions preserved across navigation (back/forward)

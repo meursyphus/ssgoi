@@ -242,9 +242,11 @@ nav-title: "ドリル"
 interface DrillOptions {
   opacity?: boolean;           // 透明度効果（デフォルト: false）
   direction?: 'enter' | 'exit'; // ドリル方向（デフォルト: 'enter'）
-  spring?: {
-    stiffness?: number;         // スプリング剛性（デフォルト: 150）
-    damping?: number;           // 減衰係数（デフォルト: 20）
+  physics?: {
+    inertia?: {
+      acceleration?: number;    // 慣性加速度（デフォルト: 20）
+      resistance?: number;      // 抵抗係数（デフォルト: 1.5）
+    };
   };
 }
 ```
@@ -616,7 +618,7 @@ interface DrillOptions {
             to: '/files/*/*',
             transition: drill({ 
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -665,7 +667,7 @@ interface DrillOptions {
             to: '/files/*/*',
             transition: drill({ 
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -749,7 +751,7 @@ interface DrillOptions {
             to: '/files/*/*',
             transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -785,9 +787,9 @@ interface DrillOptions {
 
 ```typescript
 // コンテンツがフェードしながらドリル
-drill({ 
+drill({
   opacity: true,
-  spring: { stiffness: 120, damping: 18 }
+  physics: { inertia: { acceleration: 15, resistance: 1.8 } }
 })
 ```
 
@@ -801,17 +803,17 @@ drill({ direction: 'enter' })
 drill({ direction: 'exit' })
 ```
 
-### スプリング物理の調整
+### 慣性物理の調整
 
 ```typescript
 // 高速ドリル
-drill({ 
-  spring: { stiffness: 200, damping: 25 }
+drill({
+  physics: { inertia: { acceleration: 30, resistance: 1.2 } }
 })
 
 // スムーズドリル
-drill({ 
-  spring: { stiffness: 100, damping: 15 }
+drill({
+  physics: { inertia: { acceleration: 15, resistance: 2.0 } }
 })
 ```
 

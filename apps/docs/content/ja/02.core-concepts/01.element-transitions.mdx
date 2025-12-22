@@ -52,44 +52,44 @@ nav-title: "要素アニメーション"
      */
 
     // Fadeトランジション
-    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(fade({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fade効果
     </div>
 
     // Scaleトランジション
-    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(scale({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Scale効果
     </div>
 
     // Blurトランジション
-    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Blur効果
     </div>
 
     // Slideトランジション（方向指定）
-    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Slide効果
     </div>
 
     // Flyトランジション（カスタム位置）
-    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fly効果
     </div>
 
     // Rotateトランジション
-    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(rotate({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Rotate効果
     </div>
 
     // Bounceトランジション
-    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(bounce({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Bounce効果
     </div>
 
     // 明示的なkey（プラグインなしの場合は必須）
     <div ref={transition({
       key: "explicit-key",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       明示的なkeyを使用
     </div>
@@ -105,7 +105,7 @@ nav-title: "要素アニメーション"
     <!-- Fadeトランジション -->
     <div use:transition={{
       key: 'fade-element',
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Fade効果
     </div>
@@ -113,7 +113,7 @@ nav-title: "要素アニメーション"
     <!-- Scaleトランジション -->
     <div use:transition={{
       key: 'scale-element',
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
+      ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Scale効果
     </div>
@@ -121,7 +121,7 @@ nav-title: "要素アニメーション"
     <!-- Blurトランジション -->
     <div use:transition={{
       key: 'blur-element',
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+      ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Blur効果
     </div>
@@ -129,7 +129,7 @@ nav-title: "要素アニメーション"
     <!-- Slideトランジション（方向指定） -->
     <div use:transition={{
       key: 'slide-element',
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+      ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Slide効果
     </div>
@@ -137,7 +137,7 @@ nav-title: "要素アニメーション"
     <!-- Flyトランジション（カスタム位置） -->
     <div use:transition={{
       key: 'fly-element',
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+      ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Fly効果
     </div>
@@ -145,7 +145,7 @@ nav-title: "要素アニメーション"
     <!-- Rotateトランジション -->
     <div use:transition={{
       key: 'rotate-element',
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+      ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Rotate効果
     </div>
@@ -153,7 +153,7 @@ nav-title: "要素アニメーション"
     <!-- Bounceトランジション -->
     <div use:transition={{
       key: 'bounce-element',
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+      ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Bounce効果
     </div>
@@ -165,7 +165,7 @@ nav-title: "要素アニメーション"
       <!-- Fadeトランジション -->
       <div v-transition="{
         key: 'fade-element',
-        ...fade({ spring: { stiffness: 300, damping: 30 } })
+        ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Fade効果
       </div>
@@ -173,7 +173,7 @@ nav-title: "要素アニメーション"
       <!-- Scaleトランジション -->
       <div v-transition="{
         key: 'scale-element',
-        ...scale({ spring: { stiffness: 300, damping: 30 } })
+        ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Scale効果
       </div>
@@ -181,7 +181,7 @@ nav-title: "要素アニメーション"
       <!-- Blurトランジション -->
       <div v-transition="{
         key: 'blur-element',
-        ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+        ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Blur効果
       </div>
@@ -189,7 +189,7 @@ nav-title: "要素アニメーション"
       <!-- Slideトランジション（方向指定） -->
       <div v-transition="{
         key: 'slide-element',
-        ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+        ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Slide効果
       </div>
@@ -197,7 +197,7 @@ nav-title: "要素アニメーション"
       <!-- Flyトランジション（カスタム位置） -->
       <div v-transition="{
         key: 'fly-element',
-        ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+        ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Fly効果
       </div>
@@ -205,7 +205,7 @@ nav-title: "要素アニメーション"
       <!-- Rotateトランジション -->
       <div v-transition="{
         key: 'rotate-element',
-        ...rotate({ spring: { stiffness: 300, damping: 30 } })
+        ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Rotate効果
       </div>
@@ -213,7 +213,7 @@ nav-title: "要素アニメーション"
       <!-- Bounceトランジション -->
       <div v-transition="{
         key: 'bounce-element',
-        ...bounce({ spring: { stiffness: 300, damping: 30 } })
+        ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Bounce効果
       </div>
@@ -233,7 +233,7 @@ nav-title: "要素アニメーション"
     // Fadeトランジション
     <div ref={transition({
       key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Fade効果
     </div>
@@ -241,7 +241,7 @@ nav-title: "要素アニメーション"
     // Scaleトランジション
     <div ref={transition({
       key: "scale-element",
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
+      ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Scale効果
     </div>
@@ -249,7 +249,7 @@ nav-title: "要素アニメーション"
     // Blurトランジション
     <div ref={transition({
       key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+      ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Blur効果
     </div>
@@ -257,7 +257,7 @@ nav-title: "要素アニメーション"
     // Slideトランジション（方向指定）
     <div ref={transition({
       key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+      ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Slide効果
     </div>
@@ -265,7 +265,7 @@ nav-title: "要素アニメーション"
     // Flyトランジション（カスタム位置）
     <div ref={transition({
       key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+      ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Fly効果
     </div>
@@ -273,7 +273,7 @@ nav-title: "要素アニメーション"
     // Rotateトランジション
     <div ref={transition({
       key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+      ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Rotate効果
     </div>
@@ -281,7 +281,7 @@ nav-title: "要素アニメーション"
     // Bounceトランジション
     <div ref={transition({
       key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+      ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Bounce効果
     </div>
@@ -335,13 +335,13 @@ nav-title: "要素アニメーション"
       `
     })
     export class ElementTransitionsComponent {
-      fadeTransition = { key: 'fade-element', ...fade({ spring: { stiffness: 300, damping: 30 } }) };
-      scaleTransition = { key: 'scale-element', ...scale({ spring: { stiffness: 300, damping: 30 } }) };
-      blurTransition = { key: 'blur-element', ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }) };
-      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }) };
-      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }) };
-      rotateTransition = { key: 'rotate-element', ...rotate({ spring: { stiffness: 300, damping: 30 } }) };
-      bounceTransition = { key: 'bounce-element', ...bounce({ spring: { stiffness: 300, damping: 30 } }) };
+      fadeTransition = { key: 'fade-element', ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      scaleTransition = { key: 'scale-element', ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      blurTransition = { key: 'blur-element', ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      rotateTransition = { key: 'rotate-element', ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      bounceTransition = { key: 'bounce-element', ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
     }
     ```
   </TabPanel>
@@ -353,9 +353,20 @@ nav-title: "要素アニメーション"
 
 ```typescript
 interface TransitionConfig {
-  spring?: {
-    stiffness: number; // スプリングの硅さ (デフォルト: 300)
-    damping: number; // 減衰係数 (デフォルト: 30)
+  physics?: {
+    // Spring: スプリング物理 (ease-out効果、デフォルト)
+    spring?: {
+      stiffness: number;  // スプリング剛性 (デフォルト: 300)
+      damping: number;    // 減衰係数 (デフォルト: 30)
+      doubleSpring?: boolean | number; // ダブルスプリング効果 (デフォルト: false)
+    };
+    // Inertia: 慣性物理 (ease-in効果)
+    inertia?: {
+      acceleration: number; // 加速度 (デフォルト: 500)
+      resistance: number;   // 抵抗係数 (デフォルト: 10)
+    };
+    // Custom Integrator: カスタム物理エンジン
+    integrator?: () => Integrator;
   };
   // 2つのアニメーションモードから1つを選択（両方は使用不可）
   tick?: (progress: number) => void; // RAFベースのアニメーション
@@ -370,12 +381,85 @@ interface TransitionConfig {
 
 SSGOIは2つのアニメーションモードをサポートしています：
 
+### 物理エンジンオプション
+
+SSGOIは様々な物理エンジンをサポートし、自然なアニメーションを実現します:
+
+#### Spring (スプリング物理)
+
+ease-out効果を提供するデフォルトの物理エンジンです。アニメーションが速く始まり、目標地点に到達すると自然に減速します。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      spring: {
+        stiffness: 300,  // スプリング剛性 (高いほど速い)
+        damping: 30,     // 減衰係数 (高いほど弾性が減少)
+        doubleSpring: false  // ダブルスプリング効果
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+#### Inertia (慣性物理)
+
+ease-in効果を提供する物理エンジンです。アニメーションがゆっくり始まり、徐々に加速します。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      inertia: {
+        acceleration: 500,  // 加速度 (高いほど速く加速)
+        resistance: 10      // 抵抗係数 (高いほど減速)
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `scale(${0.8 + progress * 0.2})`,
+    }),
+  })
+}
+```
+
+#### Custom Integrator (カスタム物理エンジン)
+
+独自の物理エンジンを実装して使用できます。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      integrator: () => ({
+        next: (dt, state) => {
+          // カスタム物理計算ロジック
+          return newState;
+        }
+      })
+    },
+    css: (progress) => ({
+      opacity: progress,
+    }),
+  })
+}
+```
+
+### アニメーションモード: `css` vs `tick`
+
+SSGOIは2つのアニメーションモードをサポートしています:
+
 #### `css`モード（推奨）
 
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     css: (progress) => ({
       opacity: progress,
       transform: `translateY(${(1 - progress) * 20}px)`,
@@ -394,7 +478,7 @@ SSGOIは2つのアニメーションモードをサポートしています：
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     tick: (progress) => {
       element.style.opacity = String(progress);
       element.style.transform = `translateY(${(1 - progress) * 20}px)`;

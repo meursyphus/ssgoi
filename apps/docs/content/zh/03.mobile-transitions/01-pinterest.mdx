@@ -741,9 +741,11 @@ Pinterest 风格瀑布流布局：
 
 ```typescript
 pinterest({
-  spring: {
-    stiffness: 200,  // 越低越平滑
-    damping: 25      // 越高越快稳定
+  physics: {
+    spring: {
+      stiffness: 200,  // 越低越平滑
+      damping: 25      // 越高越快稳定
+    }
   }
 })
 ```
