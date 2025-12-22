@@ -30,17 +30,17 @@ const defaultComponents = {
     />
   ),
   p: (props: any) => (
-    <p className="mb-4 text-sm text-neutral-400 leading-relaxed" {...props} />
+    <p className="mb-4 text-sm text-neutral-300 leading-relaxed" {...props} />
   ),
   ul: (props: any) => (
     <ul
-      className="list-disc pl-5 mb-4 text-sm text-neutral-400 space-y-1"
+      className="list-disc pl-5 mb-4 text-sm text-neutral-300 space-y-1"
       {...props}
     />
   ),
   ol: (props: any) => (
     <ol
-      className="list-decimal pl-5 mb-4 text-sm text-neutral-400 space-y-1"
+      className="list-decimal pl-5 mb-4 text-sm text-neutral-300 space-y-1"
       {...props}
     />
   ),
@@ -52,7 +52,7 @@ const defaultComponents = {
     if (isInline) {
       return (
         <code
-          className="bg-white/5 px-1.5 py-0.5 rounded text-xs text-neutral-400 font-mono border border-white/5"
+          className="bg-white/5 px-1.5 py-0.5 rounded text-xs text-neutral-300 font-mono border border-white/5"
           {...rest}
         >
           {children}
@@ -79,20 +79,20 @@ const defaultComponents = {
   },
   blockquote: (props: any) => (
     <blockquote
-      className="border-l border-neutral-700 pl-4 italic my-4 text-sm text-neutral-500"
+      className="border-l border-neutral-700 pl-4 italic my-4 text-sm text-neutral-400"
       {...props}
     />
   ),
   a: (props: any) => (
     <a
-      className="text-neutral-400 underline underline-offset-2 hover:text-neutral-200 transition-colors"
+      className="text-neutral-300 underline underline-offset-2 hover:text-neutral-100 transition-colors"
       {...props}
     />
   ),
   strong: (props: any) => (
     <strong className="font-medium text-neutral-200" {...props} />
   ),
-  em: (props: any) => <em className="italic text-neutral-500" {...props} />,
+  em: (props: any) => <em className="italic text-neutral-400" {...props} />,
   hr: (props: any) => <hr className="border-white/5 my-8" {...props} />,
   table: (props: any) => (
     <div className="overflow-x-auto mb-4">
@@ -106,12 +106,12 @@ const defaultComponents = {
   tr: (props: any) => <tr {...props} />,
   th: (props: any) => (
     <th
-      className="px-4 py-2 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+      className="px-4 py-2 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider"
       {...props}
     />
   ),
   td: (props: any) => (
-    <td className="px-4 py-2 text-xs text-neutral-400" {...props} />
+    <td className="px-4 py-2 text-xs text-neutral-300" {...props} />
   ),
   img: (props: any) => (
     <span className="flex justify-center my-6">

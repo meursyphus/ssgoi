@@ -35,7 +35,7 @@ export const Tabs = ({ items, children, defaultValue }: TabsProps) => {
               className={`px-4 py-2 text-sm font-medium transition-colors relative ${
                 activeTab === item.value
                   ? "text-white"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "text-zinc-300 hover:text-zinc-100"
               }`}
             >
               {item.label}

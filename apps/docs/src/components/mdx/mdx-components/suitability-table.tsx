@@ -57,7 +57,7 @@ export function SuitabilityTable({ items, className }: SuitabilityTableProps) {
               <td className="px-4 py-3 text-center">
                 {getSuitabilityIcon(item.suitable)}
               </td>
-              <td className="px-4 py-3 text-sm text-gray-400">
+              <td className="px-4 py-3 text-sm text-gray-300">
                 {item.description}
               </td>
             </tr>
