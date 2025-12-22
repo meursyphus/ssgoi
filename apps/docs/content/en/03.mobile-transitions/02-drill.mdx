@@ -216,9 +216,11 @@ Drill Back (Exit):
 interface DrillOptions {
   opacity?: boolean;           // Opacity effect (default: false)
   direction?: 'enter' | 'exit'; // Drill direction (default: 'enter')
-  spring?: {
-    stiffness?: number;         // Spring stiffness (default: 150)
-    damping?: number;           // Damping coefficient (default: 20)
+  physics?: {
+    inertia?: {
+      acceleration?: number;    // Inertia acceleration (default: 20)
+      resistance?: number;      // Resistance coefficient (default: 1.5)
+    };
   };
 }
 ```
@@ -658,7 +660,7 @@ Folder structure navigation:
             to: '/files/*/*',
             transition: drill({ 
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -707,7 +709,7 @@ Folder structure navigation:
             to: '/files/*/*',
             transition: drill({ 
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -827,7 +829,7 @@ Folder structure navigation:
             to: '/files/*/*',
             transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -861,9 +863,9 @@ Folder structure navigation:
 
 ```typescript
 // Content fades while drilling
-drill({ 
+drill({
   opacity: true,
-  spring: { stiffness: 120, damping: 18 }
+  physics: { inertia: { acceleration: 15, resistance: 1.8 } }
 })
 ```
 
@@ -877,17 +879,17 @@ drill({ direction: 'enter' })
 drill({ direction: 'exit' })
 ```
 
-### Spring Physics Adjustment
+### Inertia Physics Adjustment
 
 ```typescript
 // Fast drill
-drill({ 
-  spring: { stiffness: 200, damping: 25 }
+drill({
+  physics: { inertia: { acceleration: 30, resistance: 1.2 } }
 })
 
 // Smooth drill
-drill({ 
-  spring: { stiffness: 100, damping: 15 }
+drill({
+  physics: { inertia: { acceleration: 15, resistance: 2.0 } }
 })
 ```
 

@@ -309,14 +309,14 @@ nav-title: "フェード"
     ```tsx
     const config = {
        defaultTransition: fade({
-         inSpring: { //ページに入るときに適用されます。
+         inPhysics: { spring: { //ページに入るときに適用されます。
            stiffness: 400,  // 速いトランジション
            damping: 35      // スムーズな終了
-         },
-         outSpring: { //ページから離れるときに適用されます。
+         } },
+         outPhysics: { spring: { //ページから離れるときに適用されます。
            stiffness: 400,  // 速いトランジション
            damping: 35      // スムーズな終了
-         }
+         } }
        })
      };
     ```
@@ -326,13 +326,15 @@ nav-title: "フェード"
     <script>
       const config = {
         defaultTransition: fade({
-          inSpring: { //ページに入るときに適用されます。
+          inPhysics: { spring: { //ページに入るときに適用されます。
             stiffness: 400,  // 速いトランジション
             damping: 35      // スムーズな終了
+          }
           },
-          outSpring: { //ページから離れるときに適用されます。
+          outPhysics: { spring: { //ページから離れるときに適用されます。
             stiffness: 400,  // 速いトランジション
             damping: 35      // スムーズな終了
+          }
           }
         })
       };
@@ -344,13 +346,15 @@ nav-title: "フェード"
     <script setup>
     const config = {
       defaultTransition: fade({
-        inSpring: { //ページに入るときに適用されます。
+        inPhysics: { spring: { //ページに入るときに適用されます。
           stiffness: 400,  // 速いトランジション
           damping: 35      // スムーズな終了
+          }
         },
-        outSpring: { //ページから離れるときに適用されます。
+        outPhysics: { spring: { //ページから離れるときに適用されます。
           stiffness: 400,  // 速いトランジション
           damping: 35      // スムーズな終了
+          }
         }
       })
     };
@@ -361,14 +365,14 @@ nav-title: "フェード"
     ```tsx
     const config = {
        defaultTransition: fade({
-         inSpring: { //ページに入るときに適用されます。
+         inPhysics: { spring: { //ページに入るときに適用されます。
            stiffness: 400,  // 速いトランジション
            damping: 35      // スムーズな終了
-         },
-         outSpring: { //ページから離れるときに適用されます。
+         } },
+         outPhysics: { spring: { //ページから離れるときに適用されます。
            stiffness: 400,  // 速いトランジション
            damping: 35      // スムーズな終了
-         }
+         } }
        })
      };
     ```
@@ -393,13 +397,15 @@ nav-title: "フェード"
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-          inSpring: { //ページに入るときに適用されます。
+          inPhysics: { spring: { //ページに入るときに適用されます。
             stiffness: 400,  // 速いトランジション
             damping: 35      // スムーズな終了
+          }
           },
-          outSpring: { //ページから離れるときに適用されます。
+          outPhysics: { spring: { //ページから離れるときに適用されます。
             stiffness: 400,  // 速いトランジション
             damping: 35      // スムーズな終了
+          }
           }
         })
       };
@@ -417,14 +423,14 @@ nav-title: "フェード"
     ```tsx
     const config = {
         defaultTransition: fade({
-           inSpring: { //ページに入るときに適用されます。
+           inPhysics: { spring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション
               damping: 25      // スムーズな減速
-            },
-            outSpring: { //ページから離れるときに適用されます。
+         } },
+            outPhysics: { spring: { //ページから離れるときに適用されます。
              stiffness: 150,  // 遅いトランジション
              damping: 25      // スムーズな減速
-            }
+         } }
         })
       };
     ```
@@ -434,14 +440,14 @@ nav-title: "フェード"
     <script>
       const config = {
         defaultTransition: fade({
-           inSpring: { //ページに入るときに適用されます。
+           inPhysics: { spring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション
               damping: 25      // スムーズな減速
-            },
-            outSpring: { //ページから離れるときに適用されます。
+         } },
+            outPhysics: { spring: { //ページから離れるときに適用されます。
              stiffness: 150,  // 遅いトランジション
              damping: 25      // スムーズな減速
-            }
+         } }
         })
       };
     </script>
@@ -452,14 +458,14 @@ nav-title: "フェード"
     <script setup>
     const config = {
         defaultTransition: fade({
-           inSpring: { //ページに入るときに適用されます。
+           inPhysics: { spring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション
               damping: 25      // スムーズな減速
-            },
-            outSpring: { //ページから離れるときに適用されます。
+         } },
+            outPhysics: { spring: { //ページから離れるときに適用されます。
              stiffness: 150,  // 遅いトランジション
              damping: 25      // スムーズな減速
-            }
+         } }
         })
       };
     </script>
@@ -469,14 +475,14 @@ nav-title: "フェード"
     ```tsx
     const config = {
         defaultTransition: fade({
-           inSpring: { //ページに入るときに適用されます。
+           inPhysics: { spring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション
               damping: 25      // スムーズな減速
-            },
-            outSpring: { //ページから離れるときに適用されます。
+         } },
+            outPhysics: { spring: { //ページから離れるときに適用されます。
              stiffness: 150,  // 遅いトランジション
              damping: 25      // スムーズな減速
-            }
+         } }
         })
       };
     ```
@@ -501,14 +507,14 @@ nav-title: "フェード"
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-           inSpring: { //ページに入るときに適用されます。
+           inPhysics: { spring: { //ページに入るときに適用されます。
               stiffness: 150,  // 遅いトランジション
               damping: 25      // スムーズな減速
-            },
-            outSpring: { //ページから離れるときに適用されます。
+         } },
+            outPhysics: { spring: { //ページから離れるときに適用されます。
              stiffness: 150,  // 遅いトランジション
              damping: 25      // スムーズな減速
-            }
+         } }
         })
       };
     }

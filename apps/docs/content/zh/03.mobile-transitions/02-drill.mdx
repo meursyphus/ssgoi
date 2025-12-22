@@ -240,9 +240,11 @@ nav-title: "钻取"
 interface DrillOptions {
   opacity?: boolean;           // 透明度效果（默认：false）
   direction?: 'enter' | 'exit'; // 钻取方向（默认：'enter'）
-  spring?: {
-    stiffness?: number;         // 弹簧刚度（默认：150）
-    damping?: number;           // 阻尼系数（默认：20）
+  physics?: {
+    inertia?: {
+      acceleration?: number;    // 惯性加速度（默认：20）
+      resistance?: number;      // 阻力系数（默认：1.5）
+    };
   };
 }
 ```
@@ -608,9 +610,9 @@ interface DrillOptions {
           {
             from: '/files/*',
             to: '/files/*/*',
-            transition: drill({ 
+            transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -657,9 +659,9 @@ interface DrillOptions {
           {
             from: '/files/*',
             to: '/files/*/*',
-            transition: drill({ 
+            transition: drill({
               opacity: true,
-              spring: { stiffness: 180, damping: 22 }
+              physics: { inertia: { acceleration: 25, resistance: 1.2 } }
             })
           }
         ]
@@ -777,9 +779,9 @@ interface DrillOptions {
 
 ```typescript
 // 内容淡入淡出钻取
-drill({ 
+drill({
   opacity: true,
-  spring: { stiffness: 120, damping: 18 }
+  physics: { inertia: { acceleration: 15, resistance: 1.8 } }
 })
 ```
 
@@ -793,17 +795,17 @@ drill({ direction: 'enter' })
 drill({ direction: 'exit' })
 ```
 
-### 弹簧物理调整
+### 惯性物理调整
 
 ```typescript
 // 快速钻取
-drill({ 
-  spring: { stiffness: 200, damping: 25 }
+drill({
+  physics: { inertia: { acceleration: 30, resistance: 1.2 } }
 })
 
 // 平滑钻取
-drill({ 
-  spring: { stiffness: 100, damping: 15 }
+drill({
+  physics: { inertia: { acceleration: 15, resistance: 2.0 } }
 })
 ```
 

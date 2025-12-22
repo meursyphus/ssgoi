@@ -1260,7 +1260,7 @@ sheet({ direction: 'exit' })
 ```typescript
 sheet({
   direction: 'enter',
-  spring: {
+  physics: { spring: {
     stiffness: 140,  // 低いほど滑らか (デフォルト: 140)
     damping: 18,     // 高いほど速く安定 (デフォルト: 18)
     doubleSpring: 0.5 // OUTアニメーションのスプリング強度倍率 (デフォルト: 0.5)
@@ -1274,7 +1274,7 @@ sheet({
 
 ```typescript
 sheet({
-  spring: {
+  physics: { spring: {
     stiffness: 100,
     damping: 20,
     doubleSpring: 0.6
@@ -1288,7 +1288,7 @@ sheet({
 
 ```typescript
 sheet({
-  spring: {
+  physics: { spring: {
     stiffness: 180,
     damping: 16,
     doubleSpring: 0.4

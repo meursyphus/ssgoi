@@ -829,18 +829,22 @@ Product card expanding to detail page:
 
 ## Customization
 
-### Spring Settings
+### Physics Settings
 
-Adjust animation elasticity and speed:
+You can adjust the spring physics configuration through the `physics` option:
 
 ```typescript
 pinterest({
-  spring: {
-    stiffness: 200,  // Lower for smoother motion
-    damping: 25      // Higher for faster settling
+  physics: {
+    spring: {
+      stiffness: 200,  // Lower for smoother motion
+      damping: 25      // Higher for faster settling
+    }
   }
 })
 ```
+
+The default configuration uses built-in spring settings.
 
 ## Important Notes
 

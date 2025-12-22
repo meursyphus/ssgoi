@@ -1,15 +1,174 @@
 ---
-title: 弹簧预设
-description: 为不同动画效果预定义的弹簧设置
+title: 物理选项
+description: 通过弹簧、惯性等多种物理引擎实现自然动画
 ---
 
-# 弹簧预设
+# 物理选项 (Physics Options)
 
-SSGOI 提供预定义的弹簧设置，让您无需手动调整物理值即可轻松创建不同的动画效果。
+SSGOI 4.0 支持多种物理引擎,让您能够创建自然流畅的动画。从弹簧物理到惯性动画,您可以为每种情况选择最佳的运动效果。
 
-## 使用方法
+## PhysicsOptions 接口
 
-您可以从 `presets` 模块导入弹簧预设：
+所有过渡都可以通过 `physics` 选项配置物理引擎:
+
+```typescript
+type PhysicsOptions = {
+  spring?: SpringConfig;           // 弹簧物理(ease-out 效果)
+  inertia?: InertiaConfig;         // 惯性物理(ease-in 效果)
+  integrator?: () => Integrator;   // 自定义积分器
+};
+```
+
+每种物理引擎都提供不同的动画特性,您可以根据情况选择。
+
+## 弹簧物理 (Spring Physics)
+
+弹簧物理产生 **ease-out** 效果,适合大多数 UI 动画。
+
+### 基本用法
+
+```typescript
+import { fade } from '@ssgoi/react/view-transitions';
+
+// 基本弹簧配置
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30
+    }
+  }
+})
+```
+
+### 弹簧配置选项
+
+```typescript
+type SpringConfig = {
+  stiffness: number;        // 弹簧刚度(越高越快)
+  damping: number;          // 阻尼系数(越高振荡越少)
+  doubleSpring?: boolean | number | {
+    stiffness: number;
+    damping: number;
+  };
+};
+```
+
+- **stiffness**: 控制弹簧张力。值越高,动画越快。
+- **damping**: 控制阻力。值越高,振荡越少,停止越平滑。
+- **doubleSpring**: 双弹簧配置,用于 ease-in-out 效果
+
+### 双弹簧 (Double Spring)
+
+使用 `doubleSpring` 选项可以链接两个弹簧来创建 **ease-in-out** 效果:
+
+```typescript
+// 自动配置 (true)
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: true  // follower 弹簧自动配置
+    }
+  }
+})
+
+// 比例配置 (0~1)
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: 0.5  // follower 弹簧的 stiffness 比例(越小 ease-in 越强)
+    }
+  }
+})
+
+// 手动配置
+fade({
+  physics: {
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      doubleSpring: {
+        stiffness: 150,   // follower 弹簧配置
+        damping: 20
+      }
+    }
+  }
+})
+```
+
+## 惯性物理 (Inertia Physics)
+
+惯性物理产生 **ease-in** 效果,适合方向性过渡(drill、slide 等)。
+
+### 基本用法
+
+```typescript
+import { drill } from '@ssgoi/react/view-transitions';
+
+drill({
+  direction: 'enter',
+  physics: {
+    inertia: {
+      acceleration: 20,
+      resistance: 1.5
+    }
+  }
+})
+```
+
+### 惯性配置选项
+
+```typescript
+type InertiaConfig = {
+  acceleration: number;              // 加速力(越大越快)
+  resistance: number;                // 阻力系数(越大最终速度越低)
+  resistanceType?: 'linear' | 'quadratic';  // 阻力类型
+};
+```
+
+- **acceleration**: 控制加速力。值越大,加速越快。
+- **resistance**: 控制阻力系数。值越大,最终速度越低。
+- **resistanceType**: 阻力类型(linear: 线性, quadratic: 二次函数)
+
+### 使用示例
+
+```typescript
+import { slide } from '@ssgoi/react/view-transitions';
+
+// 平滑 ease-in 效果
+slide({
+  direction: 'up',
+  physics: {
+    inertia: {
+      acceleration: 15,
+      resistance: 1.2,
+      resistanceType: 'linear'
+    }
+  }
+})
+
+// 快速 ease-in 效果
+slide({
+  direction: 'down',
+  physics: {
+    inertia: {
+      acceleration: 30,
+      resistance: 2.0,
+      resistanceType: 'quadratic'
+    }
+  }
+})
+```
+
+## 弹簧预设
+
+为了让您无需手动调整物理值即可轻松创建不同的动画效果,我们提供了预定义的弹簧配置。
+
+### 导入预设
 
 ```typescript
 import { config } from '@ssgoi/react/presets';
@@ -20,20 +179,20 @@ import { config } from '@ssgoi/angular/presets';
 
 // 在过渡中使用
 transition({
-  spring: config.gentle,
+  physics: { spring: config.gentle },
   tick: (progress) => {
     // 您的动画逻辑
   }
 })
 ```
 
-您也可以导入单独的预设：
+您也可以导入单独的预设:
 
 ```typescript
 import { gentle, wobbly, stiff } from '@ssgoi/react/presets';
 
 transition({
-  spring: gentle,
+  physics: { spring: gentle },
   // ...
 })
 ```
@@ -76,43 +235,102 @@ transition({
 - **damping**: 60
 - **用例**: 戏剧性效果、加载状态
 
-## 自定义弹簧配置
+## 自定义物理配置
 
-您随时可以创建自己的弹簧配置：
+您可以创建自己的物理配置而不使用预设:
+
+### 自定义弹簧
 
 ```typescript
 transition({
-  spring: {
-    stiffness: 150,
-    damping: 15
+  physics: {
+    spring: {
+      stiffness: 150,
+      damping: 15
+    }
   },
   // ...
 })
 ```
 
-## 物理值说明
+### 自定义惯性
 
-- **stiffness**: 控制弹簧的张力。值越高，动画速度越快。
-- **damping**: 控制阻力。值越高，振荡越少，停止越平滑。
+```typescript
+transition({
+  physics: {
+    inertia: {
+      acceleration: 25,
+      resistance: 1.8,
+      resistanceType: 'linear'
+    }
+  },
+  // ...
+})
+```
+
+### 组合物理引擎
+
+某些过渡可以为 IN 和 OUT 动画使用不同的物理引擎:
+
+```typescript
+fade({
+  inPhysics: {
+    spring: {
+      stiffness: 300,
+      damping: 30
+    }
+  },
+  outPhysics: {
+    inertia: {
+      acceleration: 20,
+      resistance: 1.5
+    }
+  }
+})
+```
 
 ## 示例
 
-### 在视图过渡中使用预设
+### 在视图过渡中使用物理选项
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
     ```tsx
     import { Ssgoi } from '@ssgoi/react';
     import { config } from '@ssgoi/react/presets';
-    import { fade } from '@ssgoi/react/view-transitions';
+    import { fade, drill } from '@ssgoi/react/view-transitions';
 
-    const config = {
-      defaultTransition: fade({ spring: config.gentle }),
+    const ssgoiConfig = {
+      // 使用弹簧预设
+      defaultTransition: fade({
+        physics: { spring: config.gentle }
+      }),
       transitions: [
         {
           from: '/home',
           to: '/about',
-          transition: slide({ spring: config.wobbly })
+          transition: fade({
+            physics: {
+              spring: {
+                stiffness: 300,
+                damping: 30,
+                doubleSpring: true  // ease-in-out 效果
+              }
+            }
+          })
+        },
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: drill({
+            direction: 'enter',
+            physics: {
+              inertia: {
+                acceleration: 20,
+                resistance: 1.5
+              }
+            }
+          })
         }
       ]
     };
@@ -123,21 +341,45 @@ transition({
     <script>
       import { Ssgoi } from '@ssgoi/svelte';
       import { config } from '@ssgoi/svelte/presets';
-      import { fade, slide } from '@ssgoi/svelte/view-transitions';
+      import { fade, drill } from '@ssgoi/svelte/view-transitions';
 
-      const config = {
-        defaultTransition: fade({ spring: config.gentle }),
+      const ssgoiConfig = {
+        // 使用弹簧预设
+        defaultTransition: fade({
+          physics: { spring: config.gentle }
+        }),
         transitions: [
           {
             from: '/home',
             to: '/about',
-            transition: slide({ spring: config.wobbly })
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
           }
         ]
       };
     </script>
 
-    <Ssgoi {config}>
+    <Ssgoi config={ssgoiConfig}>
       <slot />
     </Ssgoi>
     ```
@@ -147,15 +389,38 @@ transition({
     <script setup>
     import { Ssgoi } from '@ssgoi/vue';
     import { config } from '@ssgoi/vue/presets';
-    import { fade, slide } from '@ssgoi/vue/view-transitions';
+    import { fade, drill } from '@ssgoi/vue/view-transitions';
 
     const transitionConfig = {
-      defaultTransition: fade({ spring: config.gentle }),
+      defaultTransition: fade({
+        physics: { spring: config.gentle }
+      }),
       transitions: [
         {
           from: '/home',
           to: '/about',
-          transition: slide({ spring: config.wobbly })
+          transition: fade({
+            physics: {
+              spring: {
+                stiffness: 300,
+                damping: 30,
+                doubleSpring: true
+              }
+            }
+          })
+        },
+        {
+          from: '/products',
+          to: '/products/*',
+          transition: drill({
+            direction: 'enter',
+            physics: {
+              inertia: {
+                acceleration: 20,
+                resistance: 1.5
+              }
+            }
+          })
         }
       ]
     };
@@ -172,22 +437,45 @@ transition({
     ```tsx
     import { Ssgoi } from '@ssgoi/solid';
     import { config } from '@ssgoi/solid/presets';
-    import { fade, slide } from '@ssgoi/solid/view-transitions';
-
-    const transitionConfig = {
-      defaultTransition: fade({ spring: config.gentle }),
-      transitions: [
-        {
-          from: '/home',
-          to: '/about',
-          transition: slide({ spring: config.wobbly })
-        }
-      ]
-    };
+    import { fade, drill } from '@ssgoi/solid/view-transitions';
 
     export default function Root() {
+      const ssgoiConfig = {
+        defaultTransition: fade({
+          physics: { spring: config.gentle }
+        }),
+        transitions: [
+          {
+            from: '/home',
+            to: '/about',
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
+          }
+        ]
+      };
+
       return (
-        <Ssgoi config={transitionConfig}>
+        <Ssgoi config={ssgoiConfig}>
           {/* 应用内容 */}
         </Ssgoi>
       );
@@ -199,7 +487,7 @@ transition({
     import { Component } from "@angular/core";
     import { Ssgoi } from "@ssgoi/angular";
     import { config } from "@ssgoi/angular/presets";
-    import { fade, slide } from "@ssgoi/angular/view-transitions";
+    import { fade, drill } from "@ssgoi/angular/view-transitions";
     import type { SsgoiConfig } from "@ssgoi/angular";
 
     @Component({
@@ -215,14 +503,35 @@ transition({
     export class AppComponent {
       config: SsgoiConfig = {
         defaultTransition: fade({
-         inSpring: config.gentle,
-         outSpring: config.slow,
+          inPhysics: { spring: config.gentle },
+          outPhysics: { spring: config.slow },
         }),
         transitions: [
           {
             from: '/home',
             to: '/about',
-            transition: slide({ spring: config.wobbly })
+            transition: fade({
+              physics: {
+                spring: {
+                  stiffness: 300,
+                  damping: 30,
+                  doubleSpring: true
+                }
+              }
+            })
+          },
+          {
+            from: '/products',
+            to: '/products/*',
+            transition: drill({
+              direction: 'enter',
+              physics: {
+                inertia: {
+                  acceleration: 20,
+                  resistance: 1.5
+                }
+              }
+            })
           }
         ]
       };
@@ -231,7 +540,7 @@ transition({
   </TabPanel>
 </Tabs>
 
-### 在元素过渡中使用预设
+### 在元素过渡中使用物理选项
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }, { label: "Vue", value: "vue" }, { label: "Solid.js", value: "solid" }, { label: "Angular", value: "angular" }]}>
   <TabPanel value="react">
@@ -239,11 +548,27 @@ transition({
     import { transition } from '@ssgoi/react';
     import { config } from '@ssgoi/react/presets';
 
+    // 使用弹簧预设
     const fadeIn = transition({
-      spring: config.slow,
+      physics: { spring: config.slow },
       tick: (progress) => ({
         opacity: progress,
         transform: `translateY(${(1 - progress) * 20}px)`
+      })
+    });
+
+    // 使用自定义弹簧
+    const slideIn = transition({
+      physics: {
+        spring: {
+          stiffness: 200,
+          damping: 25,
+          doubleSpring: 0.4  // ease-in-out 效果
+        }
+      },
+      tick: (progress) => ({
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * 50}px)`
       })
     });
     ```
@@ -254,11 +579,27 @@ transition({
       import { transition } from '@ssgoi/svelte';
       import { config } from '@ssgoi/svelte/presets';
 
+      // 使用弹簧预设
       const fadeIn = {
-        spring: config.slow,
+        physics: { spring: config.slow },
         tick: (progress) => ({
           opacity: progress,
           transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+
+      // 使用自定义弹簧
+      const slideIn = {
+        physics: {
+          spring: {
+            stiffness: 200,
+            damping: 25,
+            doubleSpring: 0.4
+          }
+        },
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateX(${(1 - progress) * 50}px)`
         })
       };
     </script>
@@ -274,11 +615,27 @@ transition({
     import { config } from '@ssgoi/vue/presets';
     import { fadeIn } from '@ssgoi/vue/transitions';
 
+    // 使用弹簧预设
     const fadeTransition = {
-      spring: config.slow,
+      physics: { spring: config.slow },
       tick: (progress) => ({
         opacity: progress,
         transform: `translateY(${(1 - progress) * 20}px)`
+      })
+    };
+
+    // 使用自定义弹簧
+    const slideTransition = {
+      physics: {
+        spring: {
+          stiffness: 200,
+          damping: 25,
+          doubleSpring: 0.4
+        }
+      },
+      tick: (progress) => ({
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * 50}px)`
       })
     };
     </script>
@@ -297,16 +654,37 @@ transition({
 
     function Component() {
       return (
-        <div ref={transition({
-          key: 'fade-in',
-          spring: config.slow,
-          tick: (progress) => ({
-            opacity: progress,
-            transform: `translateY(${(1 - progress) * 20}px)`
-          })
-        })}>
-          内容
-        </div>
+        <>
+          {/* 使用弹簧预设 */}
+          <div ref={transition({
+            key: 'fade-in',
+            physics: { spring: config.slow },
+            tick: (progress) => ({
+              opacity: progress,
+              transform: `translateY(${(1 - progress) * 20}px)`
+            })
+          })}>
+            内容
+          </div>
+
+          {/* 使用自定义弹簧 */}
+          <div ref={transition({
+            key: 'slide-in',
+            physics: {
+              spring: {
+                stiffness: 200,
+                damping: 25,
+                doubleSpring: 0.4
+              }
+            },
+            tick: (progress) => ({
+              opacity: progress,
+              transform: `translateX(${(1 - progress) * 50}px)`
+            })
+          })}>
+            内容
+          </div>
+        </>
       );
     }
     ```
@@ -329,14 +707,99 @@ transition({
       `
     })
     export class MyComponent {
+      // 使用弹簧预设
       fadeInConfig: TransitionDirectiveConfig = {
-        spring: config.slow,
+        physics: { spring: config.slow },
         tick: (progress) => ({
           opacity: progress,
           transform: `translateY(${(1 - progress) * 20}px)`
+        })
+      };
+
+      // 使用自定义弹簧
+      slideInConfig: TransitionDirectiveConfig = {
+        physics: {
+          spring: {
+            stiffness: 200,
+            damping: 25,
+            doubleSpring: 0.4
+          }
+        },
+        tick: (progress) => ({
+          opacity: progress,
+          transform: `translateX(${(1 - progress) * 50}px)`
         })
       };
     }
     ```
   </TabPanel>
 </Tabs>
+
+## 物理引擎选择指南
+
+每种物理引擎提供不同的动画感觉:
+
+### 弹簧物理 (Spring)
+- **效果**: ease-out(快速开始,缓慢结束)
+- **适合场景**:
+  - 淡入/淡出
+  - 模态框打开/关闭
+  - 工具提示显示
+  - 元素出现/消失
+- **优点**: 自然平滑的减速,UI 中最广泛使用
+
+### 双弹簧 (Double Spring)
+- **效果**: ease-in-out(缓慢开始,快速进行,缓慢结束)
+- **适合场景**:
+  - 长距离移动
+  - 页面过渡
+  - 重要的状态变化
+- **优点**: 优雅精致的感觉,开始和结束都平滑
+
+### 惯性物理 (Inertia)
+- **效果**: ease-in(缓慢开始,快速结束)
+- **适合场景**:
+  - drill 过渡(放大/缩小)
+  - slide 过渡(方向性移动)
+  - 滚动效果
+- **优点**: 如用户直接操作的感觉,表达物理惯性
+
+## 提示和最佳实践
+
+### 1. 默认使用弹簧
+大多数 UI 动画最适合使用弹簧物理:
+```typescript
+fade({ physics: { spring: config.default } })
+```
+
+### 2. 方向性过渡使用惯性
+当页面向特定方向移动时,惯性物理更自然:
+```typescript
+drill({ direction: 'enter', physics: { inertia: { acceleration: 20, resistance: 1.5 } } })
+```
+
+### 3. 用双弹簧增加优雅感
+在重要的页面过渡中使用 `doubleSpring` 可以创造更精致的感觉:
+```typescript
+fade({ physics: { spring: { ...config.gentle, doubleSpring: true } } })
+```
+
+### 4. 从预设开始
+在设置自定义值之前,先尝试预设:
+```typescript
+// 从预设开始
+physics: { spring: config.gentle }
+
+// 需要时调整
+physics: { spring: { ...config.gentle, stiffness: 250 } }
+```
+
+### 5. 保持一致性
+在整个应用中为类似动画使用相同的物理配置:
+```typescript
+const appPhysics = {
+  modal: { spring: config.stiff },
+  page: { spring: { ...config.gentle, doubleSpring: true } },
+  element: { spring: config.default }
+};
+```

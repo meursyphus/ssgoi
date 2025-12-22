@@ -51,44 +51,44 @@ nav-title: "元素动画"
      */
 
     // Fade过渡
-    <div ref={transition(fade({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(fade({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fade效果
     </div>
 
     // Scale过渡
-    <div ref={transition(scale({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(scale({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Scale效果
     </div>
 
     // Blur过渡
-    <div ref={transition(blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Blur效果
     </div>
 
     // Slide过渡（方向指定）
-    <div ref={transition(slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Slide效果
     </div>
 
     // Fly过渡（自定义位置）
-    <div ref={transition(fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Fly效果
     </div>
 
     // Rotate过渡
-    <div ref={transition(rotate({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(rotate({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Rotate效果
     </div>
 
     // Bounce过渡
-    <div ref={transition(bounce({ spring: { stiffness: 300, damping: 30 } }))}>
+    <div ref={transition(bounce({ physics: { spring: { stiffness: 300, damping: 30 } } }))}>
       Bounce效果
     </div>
 
     // 明确指定 key（不使用插件时必须）
     <div ref={transition({
       key: "custom-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       自定义 Key
     </div>
@@ -104,7 +104,7 @@ nav-title: "元素动画"
     <!-- Fade过渡 -->
     <div use:transition={{
       key: 'fade-element',
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Fade效果
     </div>
@@ -112,7 +112,7 @@ nav-title: "元素动画"
     <!-- Scale过渡 -->
     <div use:transition={{
       key: 'scale-element',
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
+      ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Scale效果
     </div>
@@ -120,7 +120,7 @@ nav-title: "元素动画"
     <!-- Blur过渡 -->
     <div use:transition={{
       key: 'blur-element',
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+      ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Blur效果
     </div>
@@ -128,7 +128,7 @@ nav-title: "元素动画"
     <!-- Slide过渡（方向指定） -->
     <div use:transition={{
       key: 'slide-element',
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+      ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Slide效果
     </div>
@@ -136,7 +136,7 @@ nav-title: "元素动画"
     <!-- Fly过渡（自定义位置） -->
     <div use:transition={{
       key: 'fly-element',
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+      ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Fly效果
     </div>
@@ -144,7 +144,7 @@ nav-title: "元素动画"
     <!-- Rotate过渡 -->
     <div use:transition={{
       key: 'rotate-element',
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+      ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Rotate效果
     </div>
@@ -152,7 +152,7 @@ nav-title: "元素动画"
     <!-- Bounce过渡 -->
     <div use:transition={{
       key: 'bounce-element',
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+      ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
     }}>
       Bounce效果
     </div>
@@ -164,7 +164,7 @@ nav-title: "元素动画"
       <!-- Fade过渡 -->
       <div v-transition="{
         key: 'fade-element',
-        ...fade({ spring: { stiffness: 300, damping: 30 } })
+        ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Fade效果
       </div>
@@ -172,7 +172,7 @@ nav-title: "元素动画"
       <!-- Scale过渡 -->
       <div v-transition="{
         key: 'scale-element',
-        ...scale({ spring: { stiffness: 300, damping: 30 } })
+        ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Scale效果
       </div>
@@ -180,7 +180,7 @@ nav-title: "元素动画"
       <!-- Blur过渡 -->
       <div v-transition="{
         key: 'blur-element',
-        ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+        ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Blur效果
       </div>
@@ -188,7 +188,7 @@ nav-title: "元素动画"
       <!-- Slide过渡（方向指定） -->
       <div v-transition="{
         key: 'slide-element',
-        ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+        ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Slide效果
       </div>
@@ -196,7 +196,7 @@ nav-title: "元素动画"
       <!-- Fly过渡（自定义位置） -->
       <div v-transition="{
         key: 'fly-element',
-        ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+        ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Fly效果
       </div>
@@ -204,7 +204,7 @@ nav-title: "元素动画"
       <!-- Rotate过渡 -->
       <div v-transition="{
         key: 'rotate-element',
-        ...rotate({ spring: { stiffness: 300, damping: 30 } })
+        ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Rotate效果
       </div>
@@ -212,7 +212,7 @@ nav-title: "元素动画"
       <!-- Bounce过渡 -->
       <div v-transition="{
         key: 'bounce-element',
-        ...bounce({ spring: { stiffness: 300, damping: 30 } })
+        ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
       }">
         Bounce效果
       </div>
@@ -232,7 +232,7 @@ nav-title: "元素动画"
     // Fade过渡
     <div ref={transition({
       key: "fade-element",
-      ...fade({ spring: { stiffness: 300, damping: 30 } })
+      ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Fade效果
     </div>
@@ -240,7 +240,7 @@ nav-title: "元素动画"
     // Scale过渡
     <div ref={transition({
       key: "scale-element",
-      ...scale({ spring: { stiffness: 300, damping: 30 } })
+      ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Scale效果
     </div>
@@ -248,7 +248,7 @@ nav-title: "元素动画"
     // Blur过渡
     <div ref={transition({
       key: "blur-element",
-      ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } })
+      ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Blur效果
     </div>
@@ -256,7 +256,7 @@ nav-title: "元素动画"
     // Slide过渡（方向指定）
     <div ref={transition({
       key: "slide-element",
-      ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } })
+      ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Slide效果
     </div>
@@ -264,7 +264,7 @@ nav-title: "元素动画"
     // Fly过渡（自定义位置）
     <div ref={transition({
       key: "fly-element",
-      ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } })
+      ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Fly效果
     </div>
@@ -272,7 +272,7 @@ nav-title: "元素动画"
     // Rotate过渡
     <div ref={transition({
       key: "rotate-element",
-      ...rotate({ spring: { stiffness: 300, damping: 30 } })
+      ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Rotate效果
     </div>
@@ -280,7 +280,7 @@ nav-title: "元素动画"
     // Bounce过渡
     <div ref={transition({
       key: "bounce-element",
-      ...bounce({ spring: { stiffness: 300, damping: 30 } })
+      ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } })
     })}>
       Bounce效果
     </div>
@@ -334,13 +334,13 @@ nav-title: "元素动画"
       `
     })
     export class ElementTransitionsComponent {
-      fadeTransition = { key: 'fade-element', ...fade({ spring: { stiffness: 300, damping: 30 } }) };
-      scaleTransition = { key: 'scale-element', ...scale({ spring: { stiffness: 300, damping: 30 } }) };
-      blurTransition = { key: 'blur-element', ...blur({ amount: 10, spring: { stiffness: 300, damping: 30 } }) };
-      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', spring: { stiffness: 300, damping: 30 } }) };
-      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, spring: { stiffness: 300, damping: 30 } }) };
-      rotateTransition = { key: 'rotate-element', ...rotate({ spring: { stiffness: 300, damping: 30 } }) };
-      bounceTransition = { key: 'bounce-element', ...bounce({ spring: { stiffness: 300, damping: 30 } }) };
+      fadeTransition = { key: 'fade-element', ...fade({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      scaleTransition = { key: 'scale-element', ...scale({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      blurTransition = { key: 'blur-element', ...blur({ amount: 10, physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      slideTransition = { key: 'slide-element', ...slide({ direction: 'left', physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      flyTransition = { key: 'fly-element', ...fly({ x: 200, y: -50, physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      rotateTransition = { key: 'rotate-element', ...rotate({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
+      bounceTransition = { key: 'bounce-element', ...bounce({ physics: { spring: { stiffness: 300, damping: 30 } } }) };
     }
     ```
   </TabPanel>
@@ -352,9 +352,20 @@ nav-title: "元素动画"
 
 ```typescript
 interface TransitionConfig {
-  spring?: {
-    stiffness: number; // 弹簧刚度 (默认: 300)
-    damping: number; // 阻尼系数 (默认: 30)
+  physics?: {
+    // Spring: 弹簧物理 (ease-out 效果, 默认)
+    spring?: {
+      stiffness: number;  // 弹簧刚度 (默认: 300)
+      damping: number;    // 阻尼系数 (默认: 30)
+      doubleSpring?: boolean | number; // 双弹簧效果 (默认: false)
+    };
+    // Inertia: 惯性物理 (ease-in 效果)
+    inertia?: {
+      acceleration: number; // 加速度 (默认: 500)
+      resistance: number;   // 阻力系数 (默认: 10)
+    };
+    // Custom Integrator: 自定义物理引擎
+    integrator?: () => Integrator;
   };
   // 选择两种动画模式之一（不能同时使用）
   tick?: (progress: number) => void; // 基于RAF的动画
@@ -362,6 +373,75 @@ interface TransitionConfig {
   prepare?: (element: HTMLElement) => void; // 动画开始前的初始设置
   onStart?: () => void;
   onEnd?: () => void;
+}
+```
+
+### 物理引擎选项
+
+SSGOI 支持多种物理引擎来实现自然动画:
+
+#### Spring (弹簧物理)
+
+ease-out 效果的默认物理引擎。动画快速开始，到达目标点时自然减速。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      spring: {
+        stiffness: 300,  // 弹簧刚度 (越高越快)
+        damping: 30,     // 阻尼系数 (越高弹性越小)
+        doubleSpring: false  // 双弹簧效果
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 20}px)`,
+    }),
+  })
+}
+```
+
+#### Inertia (惯性物理)
+
+提供 ease-in 效果的物理引擎。动画缓慢开始然后逐渐加速。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      inertia: {
+        acceleration: 500,  // 加速度 (越高越快加速)
+        resistance: 10      // 阻力系数 (越高越减速)
+      }
+    },
+    css: (progress) => ({
+      opacity: progress,
+      transform: `scale(${0.8 + progress * 0.2})`,
+    }),
+  })
+}
+```
+
+#### Custom Integrator (自定义物理引擎)
+
+您可以实现并使用自己的物理引擎。
+
+```typescript
+{
+  in: (element) => ({
+    physics: {
+      integrator: () => ({
+        next: (dt, state) => {
+          // 自定义物理计算逻辑
+          return newState;
+        }
+      })
+    },
+    css: (progress) => ({
+      opacity: progress,
+    }),
+  })
 }
 ```
 
@@ -374,7 +454,7 @@ SSGOI支持两种动画模式：
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     css: (progress) => ({
       opacity: progress,
       transform: `translateY(${(1 - progress) * 20}px)`,
@@ -393,7 +473,7 @@ SSGOI支持两种动画模式：
 ```typescript
 {
   in: (element) => ({
-    spring: { stiffness: 300, damping: 30 },
+    physics: { spring: { stiffness: 300, damping: 30 } },
     tick: (progress) => {
       element.style.opacity = String(progress);
       element.style.transform = `translateY(${(1 - progress) * 20}px)`;
