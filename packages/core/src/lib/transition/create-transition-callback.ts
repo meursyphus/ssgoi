@@ -136,8 +136,8 @@ export function createTransitionCallback(
 
     const config = setup.config;
 
-    config.prepare?.(element);
     insertClone();
+    config.prepare?.(element);
 
     const normalizedConfig = normalizeSchedule(
       {

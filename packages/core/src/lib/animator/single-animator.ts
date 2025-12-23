@@ -50,7 +50,7 @@ export class SingleAnimator extends Animator {
   private currentVelocity: number = 0;
   private updateFn: (progress: number) => void;
 
-  private constructor(options: AnimatorOptions) {
+  constructor(options: AnimatorOptions) {
     super();
 
     this.options = {
@@ -206,16 +206,5 @@ export class SingleAnimator extends Animator {
 
   updateOptions(newOptions: Partial<AnimatorOptions>): void {
     this.options = { ...this.options, ...newOptions } as typeof this.options;
-  }
-
-  static fromState(
-    state: { position: number; velocity: number },
-    options: AnimatorOptions,
-  ): SingleAnimator {
-    const animator = new SingleAnimator(options);
-    animator.setValue(state.position);
-    animator.setVelocity(state.velocity);
-    animator.syncState();
-    return animator;
   }
 }

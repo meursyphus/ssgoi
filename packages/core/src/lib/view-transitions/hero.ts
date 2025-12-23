@@ -142,13 +142,11 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
     out: async (element) => {
       return {
         physics: physicsOptions,
-        onStart: () => {
+        tick: () => {},
+        prepare: () => {
           // Store fromNode and resolve the waiting promise
           fromNode = element;
           fromNodeReady.resolve();
-        },
-        tick: () => {},
-        prepare: (element) => {
           prepareOutgoing(element);
           element.style.opacity = "0";
         },

@@ -275,18 +275,6 @@ export function isTickAnimation(
 }
 
 /**
- * Validate that config doesn't have both tick and css defined
- * @throws Error if both tick and css are defined
- */
-export function validateAnimationMode(config: SingleSpringConfig): void {
-  if (isCssAnimation(config) && isTickAnimation(config)) {
-    throw new Error(
-      "SingleSpringConfig cannot have both 'tick' and 'css' defined. Use one or the other.",
-    );
-  }
-}
-
-/**
  * Normalize TransitionConfig to MultiAnimationConfig
  * Converts SingleSpringConfig to MultiAnimationConfig with single animation item
  * Accepts both sync config and Promise<TransitionConfig>
@@ -298,11 +286,15 @@ export async function normalizeToMultiAnimation(
   const resolvedConfig = await config;
 
   if (isMultiAnimation(resolvedConfig)) {
-    return resolvedConfig;
+    return {
+      prepare: resolvedConfig.prepare,
+      wait: resolvedConfig.wait,
+      onStart: resolvedConfig.onStart,
+      onEnd: resolvedConfig.onEnd,
+      items: resolvedConfig.items,
+      schedule: resolvedConfig.schedule,
+    };
   }
-
-  // Validate single animation config
-  validateAnimationMode(resolvedConfig);
 
   // Convert SingleSpringConfig to MultiAnimationConfig
   return {

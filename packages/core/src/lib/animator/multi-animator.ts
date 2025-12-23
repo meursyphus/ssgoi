@@ -66,9 +66,10 @@ export class MultiAnimator extends Animator {
   }
 
   private initializeAnimators(): void {
-    this.config.items.forEach((item) => {
+    this.config.items.forEach((item, index) => {
       const id = this.generateId();
-      const animator = SingleAnimator.fromState(this.initialState, {
+
+      const animator = new SingleAnimator({
         from: this.from,
         to: this.to,
         physics: item.physics,
@@ -77,6 +78,16 @@ export class MultiAnimator extends Animator {
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
       });
+
+      // Only apply state and sync for items that start immediately
+      // First item always starts, others check offset
+      // TODO: Support per-item state array for proper interruption/resumption
+      const startsImmediately = index === 0 || item.normalizedOffset === 0;
+      if (startsImmediately) {
+        animator.setValue(this.initialState.position);
+        animator.setVelocity(this.initialState.velocity);
+        animator.syncState();
+      }
 
       this.animators.set(id, {
         id,
@@ -254,18 +265,18 @@ export class MultiAnimator extends Animator {
 
       if (isCompleted) {
         // Reverse completed animation: swap from/to
-        const newAnimator = SingleAnimator.fromState(
-          { position: this.to, velocity: 0 },
-          {
-            from: this.to,
-            to: this.from,
-            physics: entry.item.physics,
-            tick: entry.item.tick,
-            css: entry.item.css,
-            onComplete: () => this.onAnimatorComplete(entry.id),
-            onStart: entry.item.onStart,
-          },
-        );
+        const newAnimator = new SingleAnimator({
+          from: this.to,
+          to: this.from,
+          physics: entry.item.physics,
+          tick: entry.item.tick,
+          css: entry.item.css,
+          onComplete: () => this.onAnimatorComplete(entry.id),
+          onStart: entry.item.onStart,
+        });
+        newAnimator.setValue(this.to);
+        newAnimator.setVelocity(0);
+        newAnimator.syncState();
         newAnimator.forward();
         entry.animator = newAnimator;
       } else {
