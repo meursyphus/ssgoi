@@ -10,8 +10,8 @@ import { withResolvers } from "../utils";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 300,
-    damping: 24,
+    stiffness: 600,
+    damping: 40,
     restDelta: 0.1,
     restSpeed: 100000000000000,
   },

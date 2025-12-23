@@ -8,17 +8,21 @@ import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
-const ENTER: PhysicsOptions = {
-  inertia: {
-    acceleration: 50,
-    resistance: 1.5,
+const ENTER_PHYSICS: PhysicsOptions = {
+  spring: {
+    stiffness: 600,
+    damping: 40,
+    restDelta: 0.1,
+    restSpeed: 100000000000000,
   },
 };
 
-const EXIT: PhysicsOptions = {
-  inertia: {
-    acceleration: 50,
-    resistance: 1,
+const EXIT_PHYSICS: PhysicsOptions = {
+  spring: {
+    stiffness: 600,
+    damping: 40,
+    restDelta: 0.1,
+    restSpeed: 100000000000000,
   },
 };
 
@@ -62,7 +66,7 @@ function getDepthRect(context: SggoiTransitionContext) {
 export const depth = (options: DepthOptions = {}): SggoiTransition => {
   const { direction = "enter" } = options;
   const physicsOptions =
-    options.physics ?? (direction === "enter" ? ENTER : EXIT);
+    options.physics ?? (direction === "enter" ? ENTER_PHYSICS : EXIT_PHYSICS);
 
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =

@@ -6,9 +6,9 @@ const TRANSLATE_OFFSET = 8; // px
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 300,
-    damping: 5,
-    restDelta: 0.5,
+    stiffness: 600,
+    damping: 40,
+    restDelta: 0.1,
     restSpeed: 100000000000000,
   },
 };
