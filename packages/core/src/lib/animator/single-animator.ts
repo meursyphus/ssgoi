@@ -48,6 +48,7 @@ export class SingleAnimator extends Animator {
   private isAnimating = false;
   private currentValue: number;
   private currentVelocity: number = 0;
+  private updateFn: (progress: number) => void;
 
   constructor(options: AnimatorOptions) {
     super();
@@ -61,11 +62,35 @@ export class SingleAnimator extends Animator {
     };
     this.currentValue = this.options.from;
 
+    // Build updateFn from tick or css
+    if (options.tick) {
+      this.updateFn = (p) => options.tick?.(p);
+    } else if (options.css) {
+      const { element, style } = options.css;
+      this.updateFn = (progress: number) => {
+        const styleObj = style(progress);
+        for (const [key, value] of Object.entries(styleObj)) {
+          (element.style as unknown as Record<string, string>)[key] =
+            typeof value === "number" ? String(value) : value;
+        }
+      };
+    } else {
+      this.updateFn = () => {};
+    }
+
     // Create bound runner at construction time
     this.runner = RunnerProvider.from({
       tick: options.tick,
       css: options.css,
     });
+  }
+
+  /**
+   * Sync element state to current progress value
+   * Uses the update callback if provided
+   */
+  syncState(): void {
+    this.updateFn?.(this.currentValue);
   }
 
   /**
@@ -181,15 +206,5 @@ export class SingleAnimator extends Animator {
 
   updateOptions(newOptions: Partial<AnimatorOptions>): void {
     this.options = { ...this.options, ...newOptions } as typeof this.options;
-  }
-
-  static fromState(
-    state: { position: number; velocity: number },
-    options: AnimatorOptions,
-  ): SingleAnimator {
-    const animator = new SingleAnimator(options);
-    animator.setValue(state.position);
-    animator.setVelocity(state.velocity);
-    return animator;
   }
 }

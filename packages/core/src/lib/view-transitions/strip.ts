@@ -60,16 +60,16 @@ export const strip = (options: StripOptions = {}): SggoiTransition => {
 
       return {
         physics: physicsOptions,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
+        prepare: () => {
+          prepareOutgoing(element, context);
           // GPU acceleration hints
-          el.style.willChange = "transform";
-          el.style.backfaceVisibility = "hidden";
-          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          element.style.willChange = "transform";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          el.style.pointerEvents = "none";
+          element.style.pointerEvents = "none";
           // Set initial transform for css keyframe generation
-          el.style.transform = `perspective(${PERSPECTIVE}px) rotateY(0deg) translate3d(0%, 0, 0)`;
+          element.style.transform = `perspective(${PERSPECTIVE}px) rotateY(0deg) translate3d(0%, 0, 0)`;
         },
         css: (_progress): StyleObject => {
           const progress = 1 - _progress;

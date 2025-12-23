@@ -107,9 +107,9 @@ export const curtainReveal = (
         physics: outPhysicsOptions,
         from: 1,
         to: 0,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
-          el.style.opacity = "1";
+        prepare: () => {
+          prepareOutgoing(element, context);
+          element.style.opacity = "1";
         },
         tick: (progress) => {
           const opacityProgress = Math.max(0, progress - OUT_OPACITY_OFFSET);

@@ -1,6 +1,6 @@
 import type {
   SggoiTransition,
-  MultiSpringConfig,
+  MultiAnimationConfig,
   StyleObject,
   PhysicsOptions,
 } from "../types";
@@ -8,10 +8,10 @@ import { sleep } from "../utils";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 80, damping: 25 },
+  spring: { stiffness: 200, damping: 22 },
 };
 const DEFAULT_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 75, damping: 25 },
+  spring: { stiffness: 200, damping: 22 },
 };
 const DEFAULT_TRANSITION_DELAY = 300;
 const DEFAULT_BLIND_COUNT = 10;
@@ -114,7 +114,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: (): MultiSpringConfig => {
+    out: (element): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -134,8 +134,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         };
       };
 
-      // Create SpringItem for each blind with CSS mode
-      const springs = Array.from({ length: blindCount }, (_, index) => {
+      // Create AnimationItem for each blind with CSS mode
+      const items = Array.from({ length: blindCount }, (_, index) => {
         return {
           physics: outPhysicsOptions,
           offset: 0.2,
@@ -150,9 +150,9 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       });
 
       return {
-        springs,
+        items,
         schedule: "stagger",
-        prepare: (element) => {
+        prepare: () => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
 
@@ -169,7 +169,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: (): MultiSpringConfig => {
+    in: (element): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -185,8 +185,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         };
       };
 
-      // Create SpringItem for each blind with CSS mode
-      const springs = Array.from({ length: blindCount }, (_, index) => {
+      // Create AnimationItem for each blind with CSS mode
+      const items = Array.from({ length: blindCount }, (_, index) => {
         return {
           physics: inPhysicsOptions,
           offset: 0.2,
@@ -201,9 +201,9 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       });
 
       return {
-        springs,
+        items,
         schedule: "stagger",
-        prepare: (element) => {
+        prepare: () => {
           element.style.position = "relative";
           element.style.zIndex = "0";
           // Create blinds in closed state (fully covering the screen)

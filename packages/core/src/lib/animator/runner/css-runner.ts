@@ -183,10 +183,20 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   const duration = lastFrame.time;
 
   // Phase 3: Execute via Web Animation API
+  // Clear inline styles that will be animated to avoid conflicts
+  // (especially clipPath which has issues when set inline before WAAPI animation)
+  const firstKeyframe = keyframes[0];
+  if (firstKeyframe) {
+    for (const prop of Object.keys(firstKeyframe)) {
+      (element.style as unknown as Record<string, string>)[prop] = "";
+    }
+  }
+
   const animation = element.animate(keyframes, {
     duration,
     fill: "forwards",
     easing: "linear",
+    composite: "replace",
   });
 
   let isActive = true;
