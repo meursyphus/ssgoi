@@ -2,16 +2,16 @@ import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER: PhysicsOptions = {
-  spring: {
-    stiffness: 170,
-    damping: 22,
+  inertia: {
+    acceleration: 20,
+    resistance: 1.5,
   },
 };
 
 const EXIT: PhysicsOptions = {
-  spring: {
-    stiffness: 170,
-    damping: 22,
+  inertia: {
+    acceleration: 20,
+    resistance: 1,
   },
 };
 
@@ -39,7 +39,6 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          element.style.transform = "translate3d(100%, 0, 0)";
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {
@@ -68,7 +67,6 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           el.style.pointerEvents = "none"; // prevent interaction during exit
-          el.style.transform = "translate3d(0, 0, 0)";
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {
@@ -94,7 +92,6 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          element.style.transform = "translate3d(-20%, 0, 0)";
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {
@@ -123,7 +120,6 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           el.style.pointerEvents = "none";
-          el.style.transform = "translate3d(0, 0, 0)";
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {
