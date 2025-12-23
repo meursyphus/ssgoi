@@ -1,5 +1,5 @@
 import type { Transition, TransitionCallback, TransitionScope } from "../types";
-import { normalizeToMultiSpring, normalizeMultiSpringSchedule } from "../types";
+import { normalizeToMultiAnimation, normalizeSchedule } from "../types";
 import { MultiAnimator } from "../animator/multi-animator";
 import { Animator } from "../animator/types";
 import {
@@ -9,6 +9,7 @@ import {
   type InternalTransitionConfigs,
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
+import { waitPaint } from "../utils";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
@@ -53,10 +54,10 @@ export function createTransitionCallback(
     }
 
     // Normalize to multi-spring config before passing to strategy
-    // normalizeToMultiSpring accepts Promise and resolves it internally
+    // normalizeToMultiAnimation accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
-      in: normalizeToMultiSpring(inConfig),
-      out: outConfig ? normalizeToMultiSpring(outConfig) : undefined,
+      in: normalizeToMultiAnimation(inConfig),
+      out: outConfig ? normalizeToMultiAnimation(outConfig) : undefined,
     };
 
     const setup = await strategy.runIn(configs);
@@ -69,12 +70,9 @@ export function createTransitionCallback(
 
     const config = setup.config;
 
-    config.prepare?.(element);
-    if (config.wait) {
-      await config.wait();
-    }
+    config.prepare?.();
 
-    const normalizedConfig = normalizeMultiSpringSchedule(
+    const normalizedConfig = normalizeSchedule(
       {
         ...config,
         onEnd: () => {
@@ -85,6 +83,10 @@ export function createTransitionCallback(
       element,
     );
 
+    if (config.wait) {
+      await config.wait();
+    }
+
     const animator = MultiAnimator.fromState(setup.state, {
       config: normalizedConfig,
       from: setup.from,
@@ -92,6 +94,8 @@ export function createTransitionCallback(
     });
 
     currentAnimation = { controller: animator, direction: "in" };
+
+    await waitPaint(element);
 
     if (setup.direction === "forward") {
       animator.forward();
@@ -113,10 +117,10 @@ export function createTransitionCallback(
     }
 
     // Normalize to multi-spring config before passing to strategy
-    // normalizeToMultiSpring accepts Promise and resolves it internally
+    // normalizeToMultiAnimation accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
-      in: inConfig ? normalizeToMultiSpring(inConfig) : undefined,
-      out: normalizeToMultiSpring(outConfig),
+      in: inConfig ? normalizeToMultiAnimation(inConfig) : undefined,
+      out: normalizeToMultiAnimation(outConfig),
     };
 
     const setup = await strategy.runOut(configs);
@@ -133,13 +137,10 @@ export function createTransitionCallback(
 
     const config = setup.config;
 
-    config.prepare?.(element);
     insertClone();
-    if (config.wait) {
-      await config.wait();
-    }
+    config.prepare?.();
 
-    const normalizedConfig = normalizeMultiSpringSchedule(
+    const normalizedConfig = normalizeSchedule(
       {
         ...config,
         onEnd: () => {
@@ -155,6 +156,10 @@ export function createTransitionCallback(
       element,
     );
 
+    if (config.wait) {
+      await config.wait();
+    }
+
     const animator = MultiAnimator.fromState(setup.state, {
       config: normalizedConfig,
       from: setup.from,
@@ -162,6 +167,8 @@ export function createTransitionCallback(
     });
 
     currentAnimation = { controller: animator, direction: "out" };
+
+    await waitPaint(element);
 
     if (setup.direction === "forward") {
       animator.forward();

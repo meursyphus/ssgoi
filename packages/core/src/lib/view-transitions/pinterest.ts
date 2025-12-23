@@ -3,7 +3,7 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 140, damping: 19, doubleSpring: 0.7 },
+  spring: { stiffness: 200, damping: 23, doubleSpring: 1 },
 };
 
 interface PinterestOptions {
@@ -415,11 +415,9 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
 
       return {
         physics: physicsOptions,
-        prepare: (element) => {
+        prepare: () => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";
-        },
-        wait: async () => {
           // Called after insertClone() - element is now in DOM!
           fromNode = element;
 
@@ -428,7 +426,8 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
             resolver(true);
             resolver = null;
           }
-
+        },
+        wait: async () => {
           // Wait for handlers to be created by IN transition
           await handlersReady;
         },

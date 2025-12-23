@@ -1,44 +1,45 @@
 import { SingleAnimator } from "./single-animator";
 import { Animator } from "./types";
 import type {
-  NormalizedMultiSpringConfig,
-  NormalizedSpringItem,
+  NormalizedMultiAnimationConfig,
+  NormalizedAnimationItem,
   AnimationState,
 } from "../types";
 
 /**
- * Entry to track individual spring animation state
+ * Entry to track individual animation state
  */
 type AnimatorEntry = {
   id: string;
-  item: NormalizedSpringItem;
+  item: NormalizedAnimationItem;
   animator: SingleAnimator;
   started: boolean;
 };
 
 export interface MultiAnimatorOptions {
-  config: NormalizedMultiSpringConfig;
+  config: NormalizedMultiAnimationConfig;
   from: number;
   to: number;
+  state?: { position: number; velocity: number };
 }
 
 /**
- * MultiAnimator - Coordinates multiple spring animations
+ * MultiAnimator - Coordinates multiple animations
  *
  * Extends Animation base class to provide unified interface.
- * Manages the lifecycle and timing of multiple spring animations.
+ * Manages the lifecycle and timing of multiple animations.
  *
  * All scheduling is progress-based using normalizedOffset (0-1):
- * - offset 0: Start immediately with previous spring
- * - offset 1: Start after previous spring completes
- * - offset 0-1: Start when previous spring reaches this progress
+ * - offset 0: Start immediately with previous animation
+ * - offset 1: Start after previous animation completes
+ * - offset 0-1: Start when previous animation reaches this progress
  *
- * Config must be pre-normalized using normalizeMultiSpringSchedule()
+ * Config must be pre-normalized using normalizeSchedule()
  */
 export class MultiAnimator extends Animator {
-  private config: NormalizedMultiSpringConfig;
+  private config: NormalizedMultiAnimationConfig;
   private animators: Map<string, AnimatorEntry> = new Map();
-  private springOrder: string[] = [];
+  private itemOrder: string[] = [];
   private completedCount = 0;
   private completedAnimators = new Set<string>();
   private direction: "forward" | "backward" = "forward";
@@ -46,12 +47,17 @@ export class MultiAnimator extends Animator {
   private rafId: number | null = null;
   private from: number;
   private to: number;
+  private initialState: { position: number; velocity: number };
 
-  constructor(options: MultiAnimatorOptions) {
+  private constructor(options: MultiAnimatorOptions) {
     super();
     this.config = options.config;
     this.from = options.from;
     this.to = options.to;
+    this.initialState = options.state ?? {
+      position: options.from,
+      velocity: 0,
+    };
     this.initializeAnimators();
   }
 
@@ -60,8 +66,9 @@ export class MultiAnimator extends Animator {
   }
 
   private initializeAnimators(): void {
-    this.config.springs.forEach((item) => {
+    this.config.items.forEach((item, index) => {
       const id = this.generateId();
+
       const animator = new SingleAnimator({
         from: this.from,
         to: this.to,
@@ -72,13 +79,23 @@ export class MultiAnimator extends Animator {
         onStart: item.onStart,
       });
 
+      // Only apply state and sync for items that start immediately
+      // First item always starts, others check offset
+      // TODO: Support per-item state array for proper interruption/resumption
+      const startsImmediately = index === 0 || item.normalizedOffset === 0;
+      if (startsImmediately) {
+        animator.setValue(this.initialState.position);
+        animator.setVelocity(this.initialState.velocity);
+        animator.syncState();
+      }
+
       this.animators.set(id, {
         id,
         item,
         animator,
         started: false,
       });
-      this.springOrder.push(id);
+      this.itemOrder.push(id);
     });
   }
 
@@ -100,9 +117,9 @@ export class MultiAnimator extends Animator {
    */
   private getOrderedIds(): string[] {
     if (this.direction === "forward") {
-      return this.springOrder;
+      return this.itemOrder;
     }
-    return [...this.springOrder].reverse();
+    return [...this.itemOrder].reverse();
   }
 
   private onAnimatorComplete(id: string): void {
@@ -114,9 +131,9 @@ export class MultiAnimator extends Animator {
 
     this.completedCount++;
     entry.item.onComplete?.();
-    this.config.onProgress?.(this.completedCount, this.config.springs.length);
+    this.config.onProgress?.(this.completedCount, this.config.items.length);
 
-    if (this.completedCount === this.config.springs.length) {
+    if (this.completedCount === this.config.items.length) {
       this.stopScheduler();
       this.config.onEnd?.();
     }
@@ -192,7 +209,7 @@ export class MultiAnimator extends Animator {
   }
 
   private getFirstAnimator(): SingleAnimator | null {
-    const firstId = this.springOrder[0];
+    const firstId = this.itemOrder[0];
     if (!firstId) return null;
     return this.animators.get(firstId)?.animator ?? null;
   }
@@ -248,18 +265,18 @@ export class MultiAnimator extends Animator {
 
       if (isCompleted) {
         // Reverse completed animation: swap from/to
-        const newAnimator = SingleAnimator.fromState(
-          { position: this.to, velocity: 0 },
-          {
-            from: this.to,
-            to: this.from,
-            physics: entry.item.physics,
-            tick: entry.item.tick,
-            css: entry.item.css,
-            onComplete: () => this.onAnimatorComplete(entry.id),
-            onStart: entry.item.onStart,
-          },
-        );
+        const newAnimator = new SingleAnimator({
+          from: this.to,
+          to: this.from,
+          physics: entry.item.physics,
+          tick: entry.item.tick,
+          css: entry.item.css,
+          onComplete: () => this.onAnimatorComplete(entry.id),
+          onStart: entry.item.onStart,
+        });
+        newAnimator.setValue(this.to);
+        newAnimator.setVelocity(0);
+        newAnimator.syncState();
         newAnimator.forward();
         entry.animator = newAnimator;
       } else {
@@ -336,11 +353,8 @@ export class MultiAnimator extends Animator {
    */
   static fromState(
     state: { position: number; velocity: number },
-    options: MultiAnimatorOptions,
+    options: Omit<MultiAnimatorOptions, "state">,
   ): MultiAnimator {
-    const animator = new MultiAnimator(options);
-    animator.setValue(state.position);
-    animator.setVelocity(state.velocity);
-    return animator;
+    return new MultiAnimator({ ...options, state });
   }
 }

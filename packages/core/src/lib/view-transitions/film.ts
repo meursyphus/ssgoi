@@ -1,5 +1,5 @@
 import type {
-  MultiSpringConfig,
+  MultiAnimationConfig,
   PhysicsOptions,
   SggoiTransition,
   SggoiTransitionContext,
@@ -39,7 +39,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
   const borderColor = options?.border?.color ?? DEFAULT_BORDER_COLOR;
 
   return {
-    out: async (element, context): Promise<MultiSpringConfig> => {
+    out: async (element, context): Promise<MultiAnimationConfig> => {
       // 나가는 화면 애니메이션
       const rect = getFilmRect(context);
       const containerRect = getRect(document.body, context.positionedParent);
@@ -67,7 +67,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       };
 
       return {
-        springs: [
+        items: [
           // Spring 1: Scale Down (1 → scale)
           {
             physics: options?.physics ?? { spring: springs.scaleDown },
@@ -129,7 +129,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       };
     },
 
-    in: async (element, context): Promise<MultiSpringConfig> => {
+    in: async (element, context): Promise<MultiAnimationConfig> => {
       // 들어오는 화면 애니메이션
       const rect = getFilmRect(context);
 
@@ -145,7 +145,7 @@ export const film = (options?: FilmOptions): SggoiTransition => {
       };
 
       return {
-        springs: [
+        items: [
           // Spring 1: Scale Down (1 → scale) - element starts scaled, shrinks further
           {
             physics: options?.physics ?? { spring: springs.scaleDown },

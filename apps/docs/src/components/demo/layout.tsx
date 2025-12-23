@@ -9,6 +9,7 @@ import {
   pinterest,
   instagram,
   snap,
+  swap,
 } from "@ssgoi/react/view-transitions";
 import styles from "./layout.module.css";
 

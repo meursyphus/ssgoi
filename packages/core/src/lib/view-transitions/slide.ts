@@ -45,7 +45,7 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
           "";
       },
     }),
-    out: (_element, context) => ({
+    out: (element, context) => ({
       physics: physicsOptions,
       css: (progress): StyleObject => {
         const translateX = isLeft
@@ -55,14 +55,14 @@ export const slide = (options: SlideOptions = {}): SggoiTransition => {
           transform: `translate3d(${translateX}%, 0, 0)`,
         };
       },
-      prepare: (el) => {
-        prepareOutgoing(el, context);
+      prepare: () => {
+        prepareOutgoing(element, context);
         // GPU acceleration hints
-        el.style.willChange = "transform";
-        el.style.backfaceVisibility = "hidden";
-        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+        element.style.willChange = "transform";
+        element.style.backfaceVisibility = "hidden";
+        (element.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
-        el.style.pointerEvents = "none";
+        element.style.pointerEvents = "none";
       },
     }),
   };

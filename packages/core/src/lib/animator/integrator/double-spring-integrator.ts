@@ -21,6 +21,10 @@ import {
 export interface FollowerSpringConfig {
   stiffness: number;
   damping: number;
+  /** Position threshold for settling detection @default 0.01 */
+  restDelta?: number;
+  /** Velocity threshold for settling detection @default 0.01 */
+  restSpeed?: number;
 }
 
 export interface DoubleSpringIntegratorConfig extends SpringIntegratorConfig {
@@ -40,16 +44,25 @@ interface DoubleSpringState extends IntegratorState {
 export class DoubleSpringIntegrator implements Integrator {
   private readonly leader: SpringIntegrator;
   private readonly follower: SpringIntegrator;
+  private readonly restDelta: number;
+  private readonly restSpeed: number;
 
   constructor(config: DoubleSpringIntegratorConfig) {
+    this.restDelta = config.restDelta ?? POSITION_THRESHOLD;
+    this.restSpeed = config.restSpeed ?? VELOCITY_THRESHOLD;
+
     this.leader = new SpringIntegrator({
       stiffness: config.stiffness,
       damping: config.damping,
+      restDelta: this.restDelta,
+      restSpeed: this.restSpeed,
     });
 
     // Determine follower config
     let followerStiffness: number;
     let followerDamping: number;
+    let followerRestDelta: number | undefined;
+    let followerRestSpeed: number | undefined;
 
     if (typeof config.follower === "number") {
       // Ratio mode
@@ -59,6 +72,8 @@ export class DoubleSpringIntegrator implements Integrator {
       // Custom config mode
       followerStiffness = config.follower.stiffness;
       followerDamping = config.follower.damping;
+      followerRestDelta = config.follower.restDelta;
+      followerRestSpeed = config.follower.restSpeed;
     } else {
       // Default: same as leader
       followerStiffness = config.stiffness;
@@ -68,6 +83,8 @@ export class DoubleSpringIntegrator implements Integrator {
     this.follower = new SpringIntegrator({
       stiffness: followerStiffness,
       damping: followerDamping,
+      restDelta: followerRestDelta ?? this.restDelta,
+      restSpeed: followerRestSpeed ?? this.restSpeed,
     });
   }
 
@@ -105,14 +122,14 @@ export class DoubleSpringIntegrator implements Integrator {
 
     // Check follower (output) convergence
     const followerSettled =
-      Math.abs(target - state.position) < POSITION_THRESHOLD &&
-      Math.abs(state.velocity) < VELOCITY_THRESHOLD;
+      Math.abs(target - state.position) < this.restDelta &&
+      Math.abs(state.velocity) < this.restSpeed;
 
     // Also check leader if it exists
     if (internal._leader) {
       const leaderSettled =
-        Math.abs(target - internal._leader.position) < POSITION_THRESHOLD &&
-        Math.abs(internal._leader.velocity) < VELOCITY_THRESHOLD;
+        Math.abs(target - internal._leader.position) < this.restDelta &&
+        Math.abs(internal._leader.velocity) < this.restSpeed;
 
       return leaderSettled && followerSettled;
     }

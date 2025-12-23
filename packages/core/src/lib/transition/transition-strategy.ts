@@ -1,4 +1,4 @@
-import type { MultiSpringConfig } from "../types";
+import type { MultiAnimationConfig } from "../types";
 import type { Animator } from "../animator/types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
@@ -13,11 +13,11 @@ export interface StrategyContext {
 
 /**
  * Internal animation setup returned by strategy
- * Always uses MultiSpringConfig (normalized from user's Single/Multi config)
+ * Always uses MultiAnimationConfig (normalized from user's Single/Multi config)
  * @internal
  */
 export interface InternalAnimationSetup {
-  config?: MultiSpringConfig;
+  config?: MultiAnimationConfig;
   state: {
     position: number;
     velocity: number;
@@ -29,12 +29,12 @@ export interface InternalAnimationSetup {
 
 /**
  * Internal transition configs passed to strategy
- * Uses Promise<MultiSpringConfig> to allow lazy evaluation
+ * Uses Promise<MultiAnimationConfig> to allow lazy evaluation
  * @internal
  */
 export interface InternalTransitionConfigs {
-  in?: Promise<MultiSpringConfig>;
-  out?: Promise<MultiSpringConfig>;
+  in?: Promise<MultiAnimationConfig>;
+  out?: Promise<MultiAnimationConfig>;
 }
 
 export interface TransitionStrategy {

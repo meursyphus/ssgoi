@@ -9,9 +9,11 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  inertia: {
-    acceleration: 50,
-    resistance: 1.5,
+  spring: {
+    stiffness: 600,
+    damping: 40,
+    restDelta: 0.1,
+    restSpeed: 100000000000000,
   },
 };
 
@@ -93,16 +95,16 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
       };
     },
     // Exiting page: fade out only (no scale)
-    out: (_element, context) => {
+    out: (element, context) => {
       return {
         physics: physicsOptions,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
-          el.style.willChange = "opacity";
-          el.style.backfaceVisibility = "hidden";
-          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+        prepare: () => {
+          prepareOutgoing(element, context);
+          element.style.willChange = "opacity";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          el.style.pointerEvents = "none";
+          element.style.pointerEvents = "none";
         },
         css: (progress): StyleObject => ({
           opacity: progress,

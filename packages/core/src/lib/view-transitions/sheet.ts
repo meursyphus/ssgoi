@@ -90,22 +90,23 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         };
       },
       // Exiting background: scales down with fade
-      out: (_element, context) => {
+      out: (element, context) => {
         const rect = getSheetRect(context);
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
 
         return {
           physics: physicsOptions,
-          prepare: (el) => {
-            prepareOutgoing(el, context);
-            el.style.zIndex = "-1";
-            el.style.willChange = "transform, opacity";
-            el.style.backfaceVisibility = "hidden";
-            (el.style as CSSStyleDeclaration & { contain: string }).contain =
-              "layout paint";
-            el.style.pointerEvents = "none";
-            el.style.transformOrigin = `${centerX}px ${centerY}px`;
+          prepare: () => {
+            prepareOutgoing(element, context);
+            element.style.zIndex = "-1";
+            element.style.willChange = "transform, opacity";
+            element.style.backfaceVisibility = "hidden";
+            (
+              element.style as CSSStyleDeclaration & { contain: string }
+            ).contain = "layout paint";
+            element.style.pointerEvents = "none";
+            element.style.transformOrigin = `${centerX}px ${centerY}px`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${0.8 + progress * 0.2})`,
@@ -148,20 +149,21 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
         };
       },
       // Exiting sheet: slides down with high z-index
-      out: (_element, context) => {
+      out: (element, context) => {
         const rect = getSheetRect(context);
         const viewportHeight = rect.height;
 
         return {
           physics: physicsOptions,
-          prepare: (el) => {
-            prepareOutgoing(el, context);
-            el.style.zIndex = "100";
-            el.style.willChange = "transform";
-            el.style.backfaceVisibility = "hidden";
-            (el.style as CSSStyleDeclaration & { contain: string }).contain =
-              "layout paint";
-            el.style.pointerEvents = "none";
+          prepare: () => {
+            prepareOutgoing(element, context);
+            element.style.zIndex = "100";
+            element.style.willChange = "transform";
+            element.style.backfaceVisibility = "hidden";
+            (
+              element.style as CSSStyleDeclaration & { contain: string }
+            ).contain = "layout paint";
+            element.style.pointerEvents = "none";
           },
           css: (progress): StyleObject => ({
             transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,

@@ -6,16 +6,25 @@
  */
 
 import type { Integrator, IntegratorState } from "./types";
-import { POSITION_THRESHOLD, VELOCITY_THRESHOLD } from "./types";
+import {
+  POSITION_THRESHOLD as DEFAULT_POSITION_THRESHOLD,
+  VELOCITY_THRESHOLD as DEFAULT_VELOCITY_THRESHOLD,
+} from "./types";
 
 export interface SpringIntegratorConfig {
   stiffness: number;
   damping: number;
+  /** Position threshold for settling detection @default 0.01 */
+  restDelta?: number;
+  /** Velocity threshold for settling detection @default 0.01 */
+  restSpeed?: number;
 }
 
 export class SpringIntegrator implements Integrator {
   private readonly omega: number; // Angular frequency
   private readonly zeta: number; // Damping ratio
+  private readonly restDelta: number;
+  private readonly restSpeed: number;
 
   constructor(config: SpringIntegratorConfig) {
     const { stiffness, damping } = config;
@@ -23,6 +32,8 @@ export class SpringIntegrator implements Integrator {
 
     this.omega = Math.sqrt(stiffness / mass);
     this.zeta = damping / (2 * Math.sqrt(stiffness * mass));
+    this.restDelta = config.restDelta ?? DEFAULT_POSITION_THRESHOLD;
+    this.restSpeed = config.restSpeed ?? DEFAULT_VELOCITY_THRESHOLD;
   }
 
   step(state: IntegratorState, target: number, dt: number): IntegratorState {
@@ -48,6 +59,6 @@ export class SpringIntegrator implements Integrator {
     const displacement = Math.abs(target - state.position);
     const speed = Math.abs(state.velocity);
 
-    return displacement < POSITION_THRESHOLD && speed < VELOCITY_THRESHOLD;
+    return displacement < this.restDelta && speed < this.restSpeed;
   }
 }

@@ -2,14 +2,14 @@ import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
-const TRANSLATE_OFFSET = 6; // px
-const OUT_OPACITY_MIN = 0; // OUT: 1 → this value
-const IN_OPACITY_START = 1; // IN: this value → 1
+const TRANSLATE_OFFSET = 8; // px
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  inertia: {
-    acceleration: 50,
-    resistance: 1.5,
+  spring: {
+    stiffness: 600,
+    damping: 40,
+    restDelta: 0.1,
+    restSpeed: 100000000000000,
   },
 };
 
@@ -64,7 +64,7 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
             : (1 - progress) * -TRANSLATE_OFFSET;
 
           // Opacity: IN_OPACITY_START → 1
-          const opacity = IN_OPACITY_START + progress * (1 - IN_OPACITY_START);
+          const opacity = `${progress}`;
 
           return {
             transform: `translate3d(${translateX}px, 0, 0)`,
@@ -101,7 +101,7 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
             : (1 - progress) * TRANSLATE_OFFSET;
 
           // Opacity: 1 → OUT_OPACITY_MIN
-          const opacity = OUT_OPACITY_MIN + progress * (1 - OUT_OPACITY_MIN);
+          const opacity = `${progress}`;
 
           return {
             transform: `translate3d(${translateX}px, 0, 0)`,

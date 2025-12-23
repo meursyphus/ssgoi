@@ -38,6 +38,11 @@ export class IntegratorProvider {
         acceleration: config.inertia.acceleration,
         resistance: config.inertia.resistance,
         resistanceType: config.inertia.resistanceType,
+        min: config.inertia.min,
+        max: config.inertia.max,
+        bounceStiffness: config.inertia.bounceStiffness,
+        bounceDamping: config.inertia.bounceDamping,
+        restDelta: config.inertia.restDelta,
       });
     }
 
@@ -48,7 +53,15 @@ export class IntegratorProvider {
       const doubleSpring = spring.doubleSpring;
 
       // Determine follower config
-      let follower: number | { stiffness: number; damping: number } | undefined;
+      let follower:
+        | number
+        | {
+            stiffness: number;
+            damping: number;
+            restDelta?: number;
+            restSpeed?: number;
+          }
+        | undefined;
 
       if (typeof doubleSpring === "number") {
         // Ratio mode
@@ -66,12 +79,16 @@ export class IntegratorProvider {
         stiffness: spring.stiffness,
         damping: spring.damping,
         follower,
+        restDelta: spring.restDelta,
+        restSpeed: spring.restSpeed,
       });
     }
 
     return new SpringIntegrator({
       stiffness: spring.stiffness,
       damping: spring.damping,
+      restDelta: spring.restDelta,
+      restSpeed: spring.restSpeed,
     });
   }
 

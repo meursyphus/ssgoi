@@ -29,6 +29,18 @@ export type SpringConfig = {
    * - Follower spring: tracks the leader's position (this is the output)
    */
   doubleSpring?: boolean | number | DoubleSpringFollowerConfig;
+  /**
+   * Position threshold for settling detection
+   * When distance to target is below this, position is considered settled
+   * @default 0.01
+   */
+  restDelta?: number;
+  /**
+   * Velocity threshold for settling detection
+   * When speed is below this, velocity is considered settled
+   * @default 0.01
+   */
+  restSpeed?: number;
 };
 
 /**
@@ -49,6 +61,34 @@ export type InertiaConfig = {
   resistance: number;
   /** Resistance type (default: 'quadratic') */
   resistanceType?: ResistanceType;
+  /**
+   * Minimum boundary value
+   * When position goes below this, spring bounce is applied
+   */
+  min?: number;
+  /**
+   * Maximum boundary value
+   * When position goes above this, spring bounce is applied
+   */
+  max?: number;
+  /**
+   * Spring stiffness for boundary bounce effect
+   * Higher value = stiffer bounce
+   * @default 500
+   */
+  bounceStiffness?: number;
+  /**
+   * Spring damping for boundary bounce effect
+   * Higher value = faster settling
+   * @default 10
+   */
+  bounceDamping?: number;
+  /**
+   * Position threshold for settling detection
+   * When distance to target is below this, position is considered settled
+   * @default 0.01
+   */
+  restDelta?: number;
 };
 
 /**
@@ -91,7 +131,7 @@ export type ScheduleType = "parallel" | "sequential" | "stagger";
  */
 export type BaseTransitionConfig = {
   // Prepare element before animation (typically for out transitions)
-  prepare?: (element: HTMLElement) => void;
+  prepare?: () => void;
 
   // Wait before starting the animation
   wait?: () => Promise<void>;
@@ -142,13 +182,13 @@ export type SingleSpringConfig = BaseTransitionConfig & {
 };
 
 /**
- * Individual spring item in a multi-spring animation
+ * Individual animation item in a multi-animation config
  *
  * Supports two animation modes (mutually exclusive):
  * - tick: RAF-based animation with callback on each frame
  * - css: Web Animation API with CSS string generation
  */
-export type SpringItem = {
+export type AnimationItem = {
   /**
    * Physics configuration for animation
    * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
@@ -218,42 +258,42 @@ export type SpringItem = {
 };
 
 /**
- * Multi-spring configuration
+ * Multi-animation configuration
  * Used for complex transitions with multiple coordinated animations
  */
-export type MultiSpringConfig = BaseTransitionConfig & {
-  // Array of spring animations to coordinate
-  springs: SpringItem[];
+export type MultiAnimationConfig = BaseTransitionConfig & {
+  // Array of animations to coordinate
+  items: AnimationItem[];
 
-  // How to schedule multiple springs (default: 'parallel')
+  // How to schedule multiple animations (default: 'parallel')
   schedule?: ScheduleType;
 
-  // Called after each spring completes with progress count
+  // Called after each animation completes with progress count
   onProgress?: (completed: number, total: number) => void;
 };
 
 /**
- * Transition configuration - supports both single and multi-spring animations
+ * Transition configuration - supports both single and multi animations
  * Uses Union Type for type safety and backward compatibility
  */
-export type TransitionConfig = SingleSpringConfig | MultiSpringConfig;
+export type TransitionConfig = SingleSpringConfig | MultiAnimationConfig;
 
 /**
- * Type guard to check if config is single spring
+ * Type guard to check if config is single animation
  */
-export function isSingleSpring(
+export function isSingleAnimation(
   config: TransitionConfig,
 ): config is SingleSpringConfig {
-  return ("tick" in config || "css" in config) && !("springs" in config);
+  return ("tick" in config || "css" in config) && !("items" in config);
 }
 
 /**
- * Type guard to check if config is multi-spring
+ * Type guard to check if config is multi-animation
  */
-export function isMultiSpring(
+export function isMultiAnimation(
   config: TransitionConfig,
-): config is MultiSpringConfig {
-  return "springs" in config;
+): config is MultiAnimationConfig {
+  return "items" in config;
 }
 
 /**
@@ -275,56 +315,34 @@ export function isTickAnimation(
 }
 
 /**
- * Validate that config doesn't have both tick and css defined
- * @throws Error if both tick and css are defined
- */
-export function validateAnimationMode(config: SingleSpringConfig): void {
-  if (isCssAnimation(config) && isTickAnimation(config)) {
-    throw new Error(
-      "SingleSpringConfig cannot have both 'tick' and 'css' defined. Use one or the other.",
-    );
-  }
-}
-
-/**
- * Validate SpringItem doesn't have both tick and css defined
- * @throws Error if both tick and css are defined
- */
-export function validateSpringItem(item: SpringItem): void {
-  if (item.tick && item.css) {
-    throw new Error(
-      "SpringItem cannot have both 'tick' and 'css' defined. Use one or the other.",
-    );
-  }
-}
-
-/**
- * Normalize TransitionConfig to MultiSpringConfig
- * Converts SingleSpringConfig to MultiSpringConfig with single spring item
+ * Normalize TransitionConfig to MultiAnimationConfig
+ * Converts SingleSpringConfig to MultiAnimationConfig with single animation item
  * Accepts both sync config and Promise<TransitionConfig>
  * @internal
  */
-export async function normalizeToMultiSpring(
+export async function normalizeToMultiAnimation(
   config: TransitionConfig | Promise<TransitionConfig>,
-): Promise<MultiSpringConfig> {
+): Promise<MultiAnimationConfig> {
   const resolvedConfig = await config;
 
-  if (isMultiSpring(resolvedConfig)) {
-    // Validate all spring items
-    resolvedConfig.springs.forEach(validateSpringItem);
-    return resolvedConfig;
+  if (isMultiAnimation(resolvedConfig)) {
+    return {
+      prepare: resolvedConfig.prepare,
+      wait: resolvedConfig.wait,
+      onStart: resolvedConfig.onStart,
+      onEnd: resolvedConfig.onEnd,
+      items: resolvedConfig.items,
+      schedule: resolvedConfig.schedule,
+    };
   }
 
-  // Validate single spring config
-  validateAnimationMode(resolvedConfig);
-
-  // Convert SingleSpringConfig to MultiSpringConfig
+  // Convert SingleSpringConfig to MultiAnimationConfig
   return {
     prepare: resolvedConfig.prepare,
     wait: resolvedConfig.wait,
     onStart: resolvedConfig.onStart,
     onEnd: resolvedConfig.onEnd,
-    springs: [
+    items: [
       {
         physics: resolvedConfig.physics,
         tick: resolvedConfig.tick,
@@ -484,48 +502,48 @@ export type NormalizedScheduleEntry = {
 };
 
 /**
- * Normalized spring item for internal use
+ * Normalized animation item for internal use
  * - css is always in object form: { element, style }
  * - normalizedOffset is always present
  * @internal
  */
-export type NormalizedSpringItem = Omit<SpringItem, "css" | "offset"> & {
+export type NormalizedAnimationItem = Omit<AnimationItem, "css" | "offset"> & {
   css?: { element: HTMLElement; style: (progress: number) => StyleObject };
   normalizedOffset: number;
 };
 
 /**
- * Normalized multi-spring config for internal use
+ * Normalized multi-animation config for internal use
  * Schedule is always normalized to progress-based offsets
  * @internal
  */
-export type NormalizedMultiSpringConfig = Omit<
-  MultiSpringConfig,
-  "springs" | "schedule"
+export type NormalizedMultiAnimationConfig = Omit<
+  MultiAnimationConfig,
+  "items" | "schedule"
 > & {
-  springs: NormalizedSpringItem[];
+  items: NormalizedAnimationItem[];
 };
 
 /**
- * Normalize MultiSpringConfig schedule to progress-based offsets
+ * Normalize MultiAnimationConfig schedule to progress-based offsets
  *
  * Converts user-facing schedule types to unified offset values:
- * - parallel: All springs get offset 0 (start together)
- * - sequential: All springs get offset 1 (wait for previous)
- * - stagger: Use each spring's custom offset (0-1)
+ * - parallel: All items get offset 0 (start together)
+ * - sequential: All items get offset 1 (wait for previous)
+ * - stagger: Use each item's custom offset (0-1)
  *
  * Also normalizes css to object form: { element, style }
  *
  * @internal
  */
-export function normalizeMultiSpringSchedule(
-  config: MultiSpringConfig,
+export function normalizeSchedule(
+  config: MultiAnimationConfig,
   element?: HTMLElement,
-): NormalizedMultiSpringConfig {
+): NormalizedMultiAnimationConfig {
   const schedule = config.schedule ?? "parallel";
 
-  const normalizedSprings: NormalizedSpringItem[] = config.springs.map(
-    (spring) => {
+  const normalizedItems: NormalizedAnimationItem[] = config.items.map(
+    (item) => {
       let normalizedOffset: number;
 
       switch (schedule) {
@@ -539,7 +557,7 @@ export function normalizeMultiSpringSchedule(
           break;
         case "stagger":
           // Use custom offset, default to 0
-          normalizedOffset = Math.max(0, Math.min(1, spring.offset ?? 0));
+          normalizedOffset = Math.max(0, Math.min(1, item.offset ?? 0));
           break;
         default:
           normalizedOffset = 0;
@@ -547,7 +565,7 @@ export function normalizeMultiSpringSchedule(
 
       // Normalize css to object form
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { css, offset: _, ...springRest } = spring;
+      const { css, offset: _, ...itemRest } = item;
       const normalizedCss = css
         ? typeof css === "function"
           ? element
@@ -556,7 +574,7 @@ export function normalizeMultiSpringSchedule(
           : { element: css.element, style: css.style }
         : undefined;
 
-      return { ...springRest, css: normalizedCss, normalizedOffset };
+      return { ...itemRest, css: normalizedCss, normalizedOffset };
     },
   );
 
@@ -565,7 +583,7 @@ export function normalizeMultiSpringSchedule(
 
   return {
     ...rest,
-    springs: normalizedSprings,
+    items: normalizedItems,
   };
 }
 
