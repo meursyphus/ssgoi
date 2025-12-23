@@ -91,7 +91,7 @@ export type ScheduleType = "parallel" | "sequential" | "stagger";
  */
 export type BaseTransitionConfig = {
   // Prepare element before animation (typically for out transitions)
-  prepare?: (element: HTMLElement) => void;
+  prepare?: () => void;
 
   // Wait before starting the animation
   wait?: () => Promise<void>;

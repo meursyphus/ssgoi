@@ -70,7 +70,7 @@ export function createTransitionCallback(
 
     const config = setup.config;
 
-    config.prepare?.(element);
+    config.prepare?.();
 
     const normalizedConfig = normalizeSchedule(
       {
@@ -137,7 +137,7 @@ export function createTransitionCallback(
     const config = setup.config;
 
     insertClone();
-    config.prepare?.(element);
+    config.prepare?.();
 
     const normalizedConfig = normalizeSchedule(
       {

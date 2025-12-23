@@ -89,7 +89,7 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
 
         element.style.transform = `translate3d(0, ${translateY}px, 0)`;
       },
-      prepare: (el) => {
+      prepare: () => {
         // Capture outgoing element height at animation start (before detached)
         outElementHeight = element.offsetHeight;
 
@@ -97,14 +97,14 @@ export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
         if (inElementHeight !== null) {
           calculatedHeight = calculateHeight();
         }
-        prepareOutgoing(el, context);
-        el.style.zIndex = isUp ? "-1" : "1";
+        prepareOutgoing(element, context);
+        element.style.zIndex = isUp ? "-1" : "1";
         // GPU acceleration hints
-        el.style.willChange = "transform";
-        el.style.backfaceVisibility = "hidden";
-        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+        element.style.willChange = "transform";
+        element.style.backfaceVisibility = "hidden";
+        (element.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
-        el.style.pointerEvents = "none";
+        element.style.pointerEvents = "none";
       },
     }),
   };

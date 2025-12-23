@@ -326,7 +326,7 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
 
       return {
         physics: physicsOptions,
-        prepare: (element) => {
+        prepare: () => {
           if (!handlers?.isEnterMode) {
             prepareOutgoing(element, context);
             element.style.zIndex = "-1";

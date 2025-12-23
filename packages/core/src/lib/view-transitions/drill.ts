@@ -56,17 +56,19 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             "";
         },
       }),
-      out: (_element, context) => ({
+      out: (element, context) => ({
         physics: physicsOptions,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
-          el.style.zIndex = "-1";
+        prepare: () => {
+          prepareOutgoing(element, context);
+          element.style.zIndex = "-1";
           // GPU acceleration hints
-          el.style.willChange = opacity ? "transform, opacity" : "transform";
-          el.style.backfaceVisibility = "hidden";
-          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          element.style.willChange = opacity
+            ? "transform, opacity"
+            : "transform";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          el.style.pointerEvents = "none"; // prevent interaction during exit
+          element.style.pointerEvents = "none"; // prevent interaction during exit
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {
@@ -109,17 +111,19 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
             "";
         },
       }),
-      out: (_element, context) => ({
+      out: (element, context) => ({
         physics: physicsOptions,
-        prepare: (el) => {
-          prepareOutgoing(el, context);
-          el.style.zIndex = "100";
+        prepare: () => {
+          prepareOutgoing(element, context);
+          element.style.zIndex = "100";
           // GPU acceleration hints
-          el.style.willChange = opacity ? "transform, opacity" : "transform";
-          el.style.backfaceVisibility = "hidden";
-          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          element.style.willChange = opacity
+            ? "transform, opacity"
+            : "transform";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
-          el.style.pointerEvents = "none";
+          element.style.pointerEvents = "none";
         },
         css: (progress): StyleObject => {
           const style: StyleObject = {

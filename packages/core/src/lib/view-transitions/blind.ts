@@ -114,7 +114,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: (): MultiAnimationConfig => {
+    out: (element): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -152,7 +152,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       return {
         items,
         schedule: "stagger",
-        prepare: (element) => {
+        prepare: () => {
           prepareOutgoing(element);
           element.style.zIndex = "1000";
 
@@ -169,7 +169,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: (): MultiAnimationConfig => {
+    in: (element): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -203,7 +203,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       return {
         items,
         schedule: "stagger",
-        prepare: (element) => {
+        prepare: () => {
           element.style.position = "relative";
           element.style.zIndex = "0";
           // Create blinds in closed state (fully covering the screen)
