@@ -9,9 +9,11 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  inertia: {
-    acceleration: 50,
-    resistance: 1.5,
+  spring: {
+    stiffness: 300,
+    damping: 24,
+    restDelta: 0.1,
+    restSpeed: 100000000000000,
   },
 };
 
