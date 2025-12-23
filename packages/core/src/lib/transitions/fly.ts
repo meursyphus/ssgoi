@@ -46,23 +46,14 @@ export const fly = (options: FlyOptions = {}): Transition => {
     };
   };
 
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
-  };
-
   return {
-    in: (element) => ({
+    in: () => ({
       spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: (element) => ({
+    out: () => ({
       spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

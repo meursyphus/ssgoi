@@ -1,24 +1,32 @@
 import type {
-  PhysicsOptions,
+  SpringConfig,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
-import { getPhysics } from "./utils";
 
-type ScaleOptions = {
+interface ScaleOptions {
   start?: number;
   opacity?: number;
   axis?: "x" | "y" | "both";
-  physics?: PhysicsOptions;
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-};
+}
 
 export const scale = (options: ScaleOptions = {}): Transition => {
-  const { start = 0, opacity = 0, axis = "both", key } = options;
-  const physics = getPhysics(options.physics, {
-    spring: { stiffness: 300, damping: 30 },
-  });
+  const {
+    start = 0,
+    opacity = 0,
+    axis = "both",
+    spring: springOption,
+    key,
+  } = options;
+
+  const spring: SpringConfig = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
+  };
 
   const getScaleTransform = (value: number): string => {
     switch (axis) {
@@ -40,23 +48,14 @@ export const scale = (options: ScaleOptions = {}): Transition => {
     };
   };
 
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
-  };
-
   return {
-    in: (element) => ({
-      physics,
+    in: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: (element) => ({
-      physics,
+    out: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

@@ -1,25 +1,34 @@
 import type {
-  PhysicsOptions,
+  SpringConfig,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
-import { getPhysics } from "./utils";
 
-type BlurOptions = {
+interface BlurOptions {
   amount?: number | string;
   opacity?: number;
   scale?: boolean;
   fade?: boolean;
-  physics?: PhysicsOptions;
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-};
+}
 
 export const blur = (options: BlurOptions = {}): Transition => {
-  const { amount = 10, opacity = 0, scale = false, fade = true, key } = options;
-  const physics = getPhysics(options.physics, {
-    spring: { stiffness: 300, damping: 30 },
-  });
+  const {
+    amount = 10,
+    opacity = 0,
+    scale = false,
+    fade = true,
+    spring: springOption,
+    key,
+  } = options;
+
+  const spring: SpringConfig = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
+  };
 
   const getCss = (progress: number): StyleObject => {
     const blurMultiplier = 1 - progress;
@@ -42,23 +51,14 @@ export const blur = (options: BlurOptions = {}): Transition => {
     return style;
   };
 
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
-  };
-
   return {
-    in: (element) => ({
-      physics,
+    in: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: (element) => ({
-      physics,
+    out: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

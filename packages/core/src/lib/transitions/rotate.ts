@@ -1,12 +1,11 @@
 import type {
-  PhysicsOptions,
+  SpringConfig,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
-import { getPhysics } from "./utils";
 
-type RotateOptions = {
+interface RotateOptions {
   degrees?: number;
   clockwise?: boolean;
   scale?: boolean;
@@ -14,9 +13,9 @@ type RotateOptions = {
   origin?: string;
   axis?: "2d" | "x" | "y" | "z";
   perspective?: number;
-  physics?: PhysicsOptions;
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-};
+}
 
 export const rotate = (options: RotateOptions = {}): Transition => {
   const {
@@ -27,11 +26,15 @@ export const rotate = (options: RotateOptions = {}): Transition => {
     origin = "center",
     axis = "2d",
     perspective = 800,
+    spring: springOption,
     key,
   } = options;
-  const physics = getPhysics(options.physics, {
-    spring: { stiffness: 500, damping: 25 },
-  });
+
+  const spring: SpringConfig = {
+    stiffness: springOption?.stiffness ?? 500,
+    damping: springOption?.damping ?? 25,
+    doubleSpring: springOption?.doubleSpring ?? false,
+  };
 
   const rotation = clockwise ? degrees : -degrees;
 
@@ -68,23 +71,14 @@ export const rotate = (options: RotateOptions = {}): Transition => {
     return style;
   };
 
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
-  };
-
   return {
-    in: (element) => ({
-      physics,
+    in: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: (element) => ({
-      physics,
+    out: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

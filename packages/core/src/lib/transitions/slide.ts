@@ -1,20 +1,19 @@
 import type {
-  PhysicsOptions,
+  SpringConfig,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
-import { getPhysics } from "./utils";
 
-type SlideOptions = {
+interface SlideOptions {
   direction?: "left" | "right" | "up" | "down";
   distance?: number | string;
   opacity?: number;
   fade?: boolean;
   axis?: "x" | "y";
-  physics?: PhysicsOptions;
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-};
+}
 
 export const slide = (options: SlideOptions = {}): Transition => {
   const {
@@ -23,11 +22,15 @@ export const slide = (options: SlideOptions = {}): Transition => {
     opacity = 0,
     fade = true,
     axis,
+    spring: springOption,
     key,
   } = options;
-  const physics = getPhysics(options.physics, {
-    spring: { stiffness: 400, damping: 35 },
-  });
+
+  const spring: SpringConfig = {
+    stiffness: springOption?.stiffness ?? 400,
+    damping: springOption?.damping ?? 35,
+    doubleSpring: springOption?.doubleSpring ?? false,
+  };
 
   // Determine actual direction based on axis parameter
   const getActualDirection = (): "left" | "right" | "up" | "down" => {
@@ -78,23 +81,14 @@ export const slide = (options: SlideOptions = {}): Transition => {
     return style;
   };
 
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
-  };
-
   return {
-    in: (element) => ({
-      physics,
+    in: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: (element) => ({
-      physics,
+    out: () => ({
+      spring,
       css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

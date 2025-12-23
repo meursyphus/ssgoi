@@ -1,45 +1,38 @@
 import type {
-  PhysicsOptions,
+  SpringConfig,
   StyleObject,
   Transition,
   TransitionKey,
 } from "../types";
-import { getPhysics } from "./utils";
 
-type FadeOptions = {
+interface FadeOptions {
   from?: number;
   to?: number;
-  physics?: PhysicsOptions;
+  spring?: Partial<SpringConfig>;
   key?: TransitionKey;
-};
+}
 
 export const fade = (options: FadeOptions = {}): Transition => {
-  const { from = 0, to = 1, key } = options;
-  const physics = getPhysics(options.physics, {
-    spring: { stiffness: 300, damping: 30 },
-  });
+  const { from = 0, to = 1, spring: springOption, key } = options;
 
-  const getCss = (progress: number): StyleObject => ({
-    opacity: from + (to - from) * progress,
-  });
-
-  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
-    for (const [k, value] of Object.entries(style)) {
-      (element.style as unknown as Record<string, string>)[k] =
-        typeof value === "number" ? String(value) : value;
-    }
+  const spring: SpringConfig = {
+    stiffness: springOption?.stiffness ?? 300,
+    damping: springOption?.damping ?? 30,
+    doubleSpring: springOption?.doubleSpring ?? false,
   };
 
   return {
-    in: (element) => ({
-      physics,
-      css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
+    in: () => ({
+      spring,
+      css: (progress: number): StyleObject => ({
+        opacity: from + (to - from) * progress,
+      }),
     }),
-    out: (element) => ({
-      physics,
-      css: getCss,
-      update: (progress: number) => applyStyle(element, getCss(progress)),
+    out: () => ({
+      spring,
+      css: (progress: number): StyleObject => ({
+        opacity: from + (to - from) * progress,
+      }),
     }),
     ...(key && { key }),
   };
