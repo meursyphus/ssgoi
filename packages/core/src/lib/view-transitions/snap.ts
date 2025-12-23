@@ -37,33 +37,17 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
   return {
     // Entering page: fades in + slides from opposite direction
     in: (element) => {
-      const getCss = (progress: number): StyleObject => {
-        const translateX = isLeft
-          ? (1 - progress) * TRANSLATE_OFFSET
-          : (1 - progress) * -TRANSLATE_OFFSET;
-        const opacity = IN_OPACITY_START + progress * (1 - IN_OPACITY_START);
-        return {
-          transform: `translate3d(${translateX}px, 0, 0)`,
-          opacity,
-        };
-      };
-
-      const update = (progress: number): void => {
-        const style = getCss(progress);
-        element.style.transform = style.transform as string;
-        element.style.opacity = String(style.opacity);
-      };
-
       return {
         physics: physicsOptions,
         prepare: () => {
+          element.style.opacity = "0";
           element.style.willChange = "transform, opacity";
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
         },
-        update,
         wait: async () => {
+          // Wait for OUT animation to complete
           if (outAnimationComplete) {
             await outAnimationComplete;
             const newResolvers = withResolvers<void>();
@@ -71,7 +55,22 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
             resolveOutAnimation = newResolvers.resolve;
           }
         },
-        css: getCss,
+        css: (progress): StyleObject => {
+          // Slide from opposite direction
+          // If direction="left", IN page slides from right (positive → 0)
+          // If direction="right", IN page slides from left (negative → 0)
+          const translateX = isLeft
+            ? (1 - progress) * TRANSLATE_OFFSET
+            : (1 - progress) * -TRANSLATE_OFFSET;
+
+          // Opacity: IN_OPACITY_START → 1
+          const opacity = IN_OPACITY_START + progress * (1 - IN_OPACITY_START);
+
+          return {
+            transform: `translate3d(${translateX}px, 0, 0)`,
+            opacity,
+          };
+        },
         onEnd: () => {
           element.style.opacity = "1";
           element.style.willChange = "auto";
@@ -83,23 +82,6 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
     },
     // Exiting page: fade out + slide in same direction as navigation
     out: (element, context) => {
-      const getCss = (progress: number): StyleObject => {
-        const translateX = isLeft
-          ? (1 - progress) * -TRANSLATE_OFFSET
-          : (1 - progress) * TRANSLATE_OFFSET;
-        const opacity = OUT_OPACITY_MIN + progress * (1 - OUT_OPACITY_MIN);
-        return {
-          transform: `translate3d(${translateX}px, 0, 0)`,
-          opacity,
-        };
-      };
-
-      const update = (progress: number): void => {
-        const style = getCss(progress);
-        element.style.transform = style.transform as string;
-        element.style.opacity = String(style.opacity);
-      };
-
       return {
         physics: physicsOptions,
         prepare: () => {
@@ -110,9 +92,24 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
             "layout paint";
           element.style.pointerEvents = "none";
         },
-        update,
-        css: getCss,
+        css: (progress): StyleObject => {
+          // Slide in the same direction as navigation
+          // If direction="left", OUT page slides left (0 → -8px)
+          // If direction="right", OUT page slides right (0 → 8px)
+          const translateX = isLeft
+            ? (1 - progress) * -TRANSLATE_OFFSET
+            : (1 - progress) * TRANSLATE_OFFSET;
+
+          // Opacity: 1 → OUT_OPACITY_MIN
+          const opacity = OUT_OPACITY_MIN + progress * (1 - OUT_OPACITY_MIN);
+
+          return {
+            transform: `translate3d(${translateX}px, 0, 0)`,
+            opacity,
+          };
+        },
         onEnd: () => {
+          // Resolve the promise when OUT animation completes
           if (resolveOutAnimation) {
             resolveOutAnimation();
           }

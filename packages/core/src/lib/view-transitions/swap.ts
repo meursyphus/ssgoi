@@ -60,27 +60,16 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const getCss = (progress: number): StyleObject => ({
-        transform: `scale(${1 - SCALE_OFFSET + progress * SCALE_OFFSET})`,
-        opacity: progress,
-      });
-
-      const update = (progress: number): void => {
-        const style = getCss(progress);
-        element.style.transform = style.transform as string;
-        element.style.opacity = String(style.opacity);
-      };
-
       return {
         physics: physicsOptions,
         prepare: () => {
+          element.style.opacity = "0";
           element.style.willChange = "transform, opacity";
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
           element.style.transformOrigin = `${centerX}px ${centerY}px`;
         },
-        update,
         wait: async () => {
           if (outAnimationComplete) {
             await outAnimationComplete;
@@ -89,7 +78,10 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
             resolveOutAnimation = newResolvers.resolve;
           }
         },
-        css: getCss,
+        css: (progress): StyleObject => ({
+          transform: `scale(${1 - SCALE_OFFSET + progress * SCALE_OFFSET})`,
+          opacity: progress,
+        }),
         onEnd: () => {
           element.style.opacity = "1";
           element.style.willChange = "auto";
@@ -101,15 +93,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
       };
     },
     // Exiting page: fade out only (no scale)
-    out: (element, context) => {
-      const getCss = (progress: number): StyleObject => ({
-        opacity: progress,
-      });
-
-      const update = (progress: number): void => {
-        element.style.opacity = String(getCss(progress).opacity);
-      };
-
+    out: (_element, context) => {
       return {
         physics: physicsOptions,
         prepare: (el) => {
@@ -120,8 +104,9 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
             "layout paint";
           el.style.pointerEvents = "none";
         },
-        update,
-        css: getCss,
+        css: (progress): StyleObject => ({
+          opacity: progress,
+        }),
         onEnd: () => {
           if (resolveOutAnimation) {
             resolveOutAnimation();
