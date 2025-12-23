@@ -17,7 +17,6 @@ export function waitPaint(_element?: Element): Promise<void> {
   // we can use the _element parameter to leverage that API for more accurate timing.
   // For now, we use double requestAnimationFrame which works reliably across all browsers.
   return new Promise((resolve) => {
-    resolve();
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         resolve();

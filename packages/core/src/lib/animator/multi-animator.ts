@@ -20,6 +20,7 @@ export interface MultiAnimatorOptions {
   config: NormalizedMultiSpringConfig;
   from: number;
   to: number;
+  state?: { position: number; velocity: number };
 }
 
 /**
@@ -46,12 +47,17 @@ export class MultiAnimator extends Animator {
   private rafId: number | null = null;
   private from: number;
   private to: number;
+  private initialState: { position: number; velocity: number };
 
-  constructor(options: MultiAnimatorOptions) {
+  private constructor(options: MultiAnimatorOptions) {
     super();
     this.config = options.config;
     this.from = options.from;
     this.to = options.to;
+    this.initialState = options.state ?? {
+      position: options.from,
+      velocity: 0,
+    };
     this.initializeAnimators();
   }
 
@@ -62,7 +68,7 @@ export class MultiAnimator extends Animator {
   private initializeAnimators(): void {
     this.config.springs.forEach((item) => {
       const id = this.generateId();
-      const animator = new SingleAnimator({
+      const animator = SingleAnimator.fromState(this.initialState, {
         from: this.from,
         to: this.to,
         physics: item.physics,
@@ -331,28 +337,13 @@ export class MultiAnimator extends Animator {
   }
 
   /**
-   * Sync element state to current progress value
-   * Calls syncState on all child animators
-   */
-  syncState(): void {
-    this.animators.forEach((entry) => {
-      entry.animator.syncState();
-    });
-  }
-
-  /**
    * Create MultiAnimator from existing state
    * Uses first animator's state for initialization
    */
   static fromState(
     state: { position: number; velocity: number },
-    options: MultiAnimatorOptions,
+    options: Omit<MultiAnimatorOptions, "state">,
   ): MultiAnimator {
-    const animator = new MultiAnimator(options);
-    animator.setValue(state.position);
-    animator.setVelocity(state.velocity);
-    // Sync element state to match the starting position
-    animator.syncState();
-    return animator;
+    return new MultiAnimator({ ...options, state });
   }
 }

@@ -187,6 +187,7 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     duration,
     fill: "forwards",
     easing: "linear",
+    composite: "replace",
   });
 
   let isActive = true;

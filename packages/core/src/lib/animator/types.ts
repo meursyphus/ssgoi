@@ -63,10 +63,4 @@ export abstract class Animator {
    * Check if animation is currently running
    */
   abstract getIsAnimating(): boolean;
-
-  /**
-   * Sync element state to current progress value
-   * Called when animator is created from state to ensure visual consistency
-   */
-  abstract syncState(): void;
 }
