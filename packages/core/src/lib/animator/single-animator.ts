@@ -75,7 +75,7 @@ export class SingleAnimator extends Animator {
         }
       };
     } else {
-      throw new Error("tick or css is required");
+      this.updateFn = () => {};
     }
 
     // Create bound runner at construction time
