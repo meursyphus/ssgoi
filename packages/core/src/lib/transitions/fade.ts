@@ -19,18 +19,27 @@ export const fade = (options: FadeOptions = {}): Transition => {
     spring: { stiffness: 300, damping: 30 },
   });
 
+  const getCss = (progress: number): StyleObject => ({
+    opacity: from + (to - from) * progress,
+  });
+
+  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
+    for (const [k, value] of Object.entries(style)) {
+      (element.style as unknown as Record<string, string>)[k] =
+        typeof value === "number" ? String(value) : value;
+    }
+  };
+
   return {
-    in: () => ({
+    in: (element) => ({
       physics,
-      css: (progress: number): StyleObject => ({
-        opacity: from + (to - from) * progress,
-      }),
+      css: getCss,
+      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
-    out: () => ({
+    out: (element) => ({
       physics,
-      css: (progress: number): StyleObject => ({
-        opacity: from + (to - from) * progress,
-      }),
+      css: getCss,
+      update: (progress: number) => applyStyle(element, getCss(progress)),
     }),
     ...(key && { key }),
   };

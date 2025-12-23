@@ -40,9 +40,24 @@ export const scale = (options: ScaleOptions = {}): Transition => {
     };
   };
 
+  const applyStyle = (element: HTMLElement, style: StyleObject): void => {
+    for (const [k, value] of Object.entries(style)) {
+      (element.style as unknown as Record<string, string>)[k] =
+        typeof value === "number" ? String(value) : value;
+    }
+  };
+
   return {
-    in: () => ({ physics, css: getCss }),
-    out: () => ({ physics, css: getCss }),
+    in: (element) => ({
+      physics,
+      css: getCss,
+      update: (progress: number) => applyStyle(element, getCss(progress)),
+    }),
+    out: (element) => ({
+      physics,
+      css: getCss,
+      update: (progress: number) => applyStyle(element, getCss(progress)),
+    }),
     ...(key && { key }),
   };
 };

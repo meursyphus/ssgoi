@@ -93,6 +93,14 @@ export type BaseTransitionConfig = {
   // Prepare element before animation (typically for out transitions)
   prepare?: (element: HTMLElement) => void;
 
+  /**
+   * Update element style to match a specific progress value
+   * Called by animator to sync element state (e.g., at animation start or during reversal)
+   *
+   * @param progress - Progress value (0-1) to apply
+   */
+  update?: (progress: number) => void;
+
   // Wait before starting the animation
   wait?: () => Promise<void>;
 
@@ -321,6 +329,7 @@ export async function normalizeToMultiSpring(
   // Convert SingleSpringConfig to MultiSpringConfig
   return {
     prepare: resolvedConfig.prepare,
+    update: resolvedConfig.update,
     wait: resolvedConfig.wait,
     onStart: resolvedConfig.onStart,
     onEnd: resolvedConfig.onEnd,

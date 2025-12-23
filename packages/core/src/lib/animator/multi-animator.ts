@@ -331,6 +331,14 @@ export class MultiAnimator extends Animator {
   }
 
   /**
+   * Sync element state to current progress value
+   * Calls config.update if provided
+   */
+  syncState(): void {
+    this.config.update?.(this.getCurrentValue());
+  }
+
+  /**
    * Create MultiAnimator from existing state
    * Uses first animator's state for initialization
    */
@@ -341,6 +349,8 @@ export class MultiAnimator extends Animator {
     const animator = new MultiAnimator(options);
     animator.setValue(state.position);
     animator.setVelocity(state.velocity);
+    // Sync element state to match the starting position
+    animator.syncState();
     return animator;
   }
 }

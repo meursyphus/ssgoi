@@ -9,6 +9,7 @@ import {
   type InternalTransitionConfigs,
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
+import { waitPaint } from "../utils";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
@@ -93,6 +94,8 @@ export function createTransitionCallback(
 
     currentAnimation = { controller: animator, direction: "in" };
 
+    await waitPaint(element);
+
     if (setup.direction === "forward") {
       animator.forward();
     } else {
@@ -162,6 +165,8 @@ export function createTransitionCallback(
     });
 
     currentAnimation = { controller: animator, direction: "out" };
+
+    await waitPaint(element);
 
     if (setup.direction === "forward") {
       animator.forward();

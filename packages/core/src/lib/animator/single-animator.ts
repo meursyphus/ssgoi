@@ -22,6 +22,11 @@ export interface AnimatorOptions {
     element: HTMLElement;
     style: (progress: number) => StyleObject;
   };
+  /**
+   * Update callback to sync element state at a specific progress
+   * Called when animator is created from state (e.g., during reversal)
+   */
+  update?: (progress: number) => void;
   onComplete?: () => void;
   onStart?: () => void;
 }
@@ -48,6 +53,7 @@ export class SingleAnimator extends Animator {
   private isAnimating = false;
   private currentValue: number;
   private currentVelocity: number = 0;
+  private updateFn?: (progress: number) => void;
 
   constructor(options: AnimatorOptions) {
     super();
@@ -60,12 +66,21 @@ export class SingleAnimator extends Animator {
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
+    this.updateFn = options.update;
 
     // Create bound runner at construction time
     this.runner = RunnerProvider.from({
       tick: options.tick,
       css: options.css,
     });
+  }
+
+  /**
+   * Sync element state to current progress value
+   * Uses the update callback if provided
+   */
+  syncState(): void {
+    this.updateFn?.(this.currentValue);
   }
 
   /**
@@ -190,6 +205,8 @@ export class SingleAnimator extends Animator {
     const animator = new SingleAnimator(options);
     animator.setValue(state.position);
     animator.setVelocity(state.velocity);
+    // Sync element state to match the starting position
+    animator.syncState();
     return animator;
   }
 }
