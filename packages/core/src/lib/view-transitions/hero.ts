@@ -1,6 +1,7 @@
 import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
+import { withResolvers } from "../utils/with-resolvers";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 300, damping: 30 },
@@ -18,12 +19,11 @@ function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
 
 export const hero = (options: HeroOptions = {}): SggoiTransition => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  const timeout = options.timeout ?? 300;
   const maxDistance = options.maxDistance ?? 700;
 
   // Closure variables to share state between in/out
   let fromNode: HTMLElement | null = null;
-  let resolver: ((value: boolean) => void) | null = null;
+  let fromNodeReady = withResolvers<void>();
 
   return {
     in: async (element, context) => {
@@ -31,36 +31,9 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
 
       // Find all hero elements in the incoming page
       const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
-      if (heroEls.length === 0) {
-        return {
-          physics: physicsOptions,
-          tick: () => {}, // No hero elements, skip animation
-        };
-      }
 
       // Wait for fromNode to be set by out transition
-      const hasFromNode = await new Promise<boolean>((resolve) => {
-        if (fromNode) {
-          // fromNode already set by out transition
-          resolve(true);
-        } else {
-          // Store resolver for out transition to call
-          resolver = resolve;
-          // Timeout fallback
-          setTimeout(() => {
-            resolver = null;
-            resolve(false);
-          }, timeout);
-        }
-      });
-
-      if (!hasFromNode || !fromNode) {
-        fromNode = null;
-        return {
-          physics: physicsOptions,
-          tick: () => {}, // No fromNode, skip animation
-        };
-      }
+      await fromNodeReady.promise;
 
       // Calculate animations for matching hero elements
       const heroAnimations = heroEls
@@ -118,8 +91,9 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
           } => animation !== null && Math.abs(animation.dy) <= maxDistance,
         );
 
-      // Reset fromNode for next transition
+      // Reset for next transition
       fromNode = null;
+      fromNodeReady = withResolvers<void>();
 
       if (heroAnimations.length === 0) {
         return {
@@ -129,7 +103,7 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       }
 
       return {
-        springs: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
+        items: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
           physics: physicsOptions,
           tick: (progress: number) => {
             toEl.style.transform = `translate(${(1 - progress) * dx}px, ${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
@@ -169,14 +143,9 @@ export const hero = (options: HeroOptions = {}): SggoiTransition => {
       return {
         physics: physicsOptions,
         onStart: () => {
-          // Store fromNode
+          // Store fromNode and resolve the waiting promise
           fromNode = element;
-
-          // If there's a waiting resolver, resolve it
-          if (resolver) {
-            resolver(true);
-            resolver = null;
-          }
+          fromNodeReady.resolve();
         },
         tick: () => {},
         prepare: (element) => {

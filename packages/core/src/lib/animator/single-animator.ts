@@ -64,7 +64,7 @@ export class SingleAnimator extends Animator {
 
     // Build updateFn from tick or css
     if (options.tick) {
-      this.updateFn = options.tick;
+      this.updateFn = (p) => options.tick?.(p);
     } else if (options.css) {
       const { element, style } = options.css;
       this.updateFn = (progress: number) => {
@@ -75,7 +75,7 @@ export class SingleAnimator extends Animator {
         }
       };
     } else {
-      this.updateFn = () => {};
+      throw new Error("tick or css is required");
     }
 
     // Create bound runner at construction time

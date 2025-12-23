@@ -1,6 +1,6 @@
 import type {
   SggoiTransition,
-  MultiSpringConfig,
+  MultiAnimationConfig,
   StyleObject,
   PhysicsOptions,
 } from "../types";
@@ -114,7 +114,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
   };
 
   return {
-    out: (): MultiSpringConfig => {
+    out: (): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -134,8 +134,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         };
       };
 
-      // Create SpringItem for each blind with CSS mode
-      const springs = Array.from({ length: blindCount }, (_, index) => {
+      // Create AnimationItem for each blind with CSS mode
+      const items = Array.from({ length: blindCount }, (_, index) => {
         return {
           physics: outPhysicsOptions,
           offset: 0.2,
@@ -150,7 +150,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       });
 
       return {
-        springs,
+        items,
         schedule: "stagger",
         prepare: (element) => {
           prepareOutgoing(element);
@@ -169,7 +169,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         },
       };
     },
-    in: (): MultiSpringConfig => {
+    in: (): MultiAnimationConfig => {
       let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
         null;
 
@@ -185,8 +185,8 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
         };
       };
 
-      // Create SpringItem for each blind with CSS mode
-      const springs = Array.from({ length: blindCount }, (_, index) => {
+      // Create AnimationItem for each blind with CSS mode
+      const items = Array.from({ length: blindCount }, (_, index) => {
         return {
           physics: inPhysicsOptions,
           offset: 0.2,
@@ -201,7 +201,7 @@ export const blind = (options: BlindOptions = {}): SggoiTransition => {
       });
 
       return {
-        springs,
+        items,
         schedule: "stagger",
         prepare: (element) => {
           element.style.position = "relative";

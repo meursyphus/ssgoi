@@ -1,5 +1,5 @@
 import type { Transition, TransitionCallback, TransitionScope } from "../types";
-import { normalizeToMultiSpring, normalizeMultiSpringSchedule } from "../types";
+import { normalizeToMultiAnimation, normalizeSchedule } from "../types";
 import { MultiAnimator } from "../animator/multi-animator";
 import { Animator } from "../animator/types";
 import {
@@ -54,10 +54,10 @@ export function createTransitionCallback(
     }
 
     // Normalize to multi-spring config before passing to strategy
-    // normalizeToMultiSpring accepts Promise and resolves it internally
+    // normalizeToMultiAnimation accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
-      in: normalizeToMultiSpring(inConfig),
-      out: outConfig ? normalizeToMultiSpring(outConfig) : undefined,
+      in: normalizeToMultiAnimation(inConfig),
+      out: outConfig ? normalizeToMultiAnimation(outConfig) : undefined,
     };
 
     const setup = await strategy.runIn(configs);
@@ -72,7 +72,7 @@ export function createTransitionCallback(
 
     config.prepare?.(element);
 
-    const normalizedConfig = normalizeMultiSpringSchedule(
+    const normalizedConfig = normalizeSchedule(
       {
         ...config,
         onEnd: () => {
@@ -116,10 +116,10 @@ export function createTransitionCallback(
     }
 
     // Normalize to multi-spring config before passing to strategy
-    // normalizeToMultiSpring accepts Promise and resolves it internally
+    // normalizeToMultiAnimation accepts Promise and resolves it internally
     const configs: InternalTransitionConfigs = {
-      in: inConfig ? normalizeToMultiSpring(inConfig) : undefined,
-      out: normalizeToMultiSpring(outConfig),
+      in: inConfig ? normalizeToMultiAnimation(inConfig) : undefined,
+      out: normalizeToMultiAnimation(outConfig),
     };
 
     const setup = await strategy.runOut(configs);
@@ -139,7 +139,7 @@ export function createTransitionCallback(
     config.prepare?.(element);
     insertClone();
 
-    const normalizedConfig = normalizeMultiSpringSchedule(
+    const normalizedConfig = normalizeSchedule(
       {
         ...config,
         onEnd: () => {
