@@ -8,10 +8,10 @@ import { sleep } from "../utils";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 80, damping: 25 },
+  spring: { stiffness: 200, damping: 22 },
 };
 const DEFAULT_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 75, damping: 25 },
+  spring: { stiffness: 200, damping: 22 },
 };
 const DEFAULT_TRANSITION_DELAY = 300;
 const DEFAULT_BLIND_COUNT = 10;
