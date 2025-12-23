@@ -95,10 +95,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
-      defaultTransition: swap(),
       transitions: [
         // Top-level tab snap transitions
-        //...createSnapTransitions(TAB_ORDER),
+        ...createSnapTransitions(TAB_ORDER),
         // Pinterest transitions
         {
           from: "/demo/pinterest/*",
