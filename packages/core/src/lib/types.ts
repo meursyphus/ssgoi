@@ -29,6 +29,18 @@ export type SpringConfig = {
    * - Follower spring: tracks the leader's position (this is the output)
    */
   doubleSpring?: boolean | number | DoubleSpringFollowerConfig;
+  /**
+   * Position threshold for settling detection
+   * When distance to target is below this, position is considered settled
+   * @default 0.01
+   */
+  restDelta?: number;
+  /**
+   * Velocity threshold for settling detection
+   * When speed is below this, velocity is considered settled
+   * @default 0.01
+   */
+  restSpeed?: number;
 };
 
 /**
@@ -49,6 +61,34 @@ export type InertiaConfig = {
   resistance: number;
   /** Resistance type (default: 'quadratic') */
   resistanceType?: ResistanceType;
+  /**
+   * Minimum boundary value
+   * When position goes below this, spring bounce is applied
+   */
+  min?: number;
+  /**
+   * Maximum boundary value
+   * When position goes above this, spring bounce is applied
+   */
+  max?: number;
+  /**
+   * Spring stiffness for boundary bounce effect
+   * Higher value = stiffer bounce
+   * @default 500
+   */
+  bounceStiffness?: number;
+  /**
+   * Spring damping for boundary bounce effect
+   * Higher value = faster settling
+   * @default 10
+   */
+  bounceDamping?: number;
+  /**
+   * Position threshold for settling detection
+   * When distance to target is below this, position is considered settled
+   * @default 0.01
+   */
+  restDelta?: number;
 };
 
 /**
