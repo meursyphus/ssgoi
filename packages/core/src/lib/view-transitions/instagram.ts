@@ -3,7 +3,7 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 140, damping: 19, doubleSpring: 0.8 },
+  spring: { stiffness: 180, damping: 22, doubleSpring: 1 },
 };
 
 interface InstagramOptions {
@@ -136,7 +136,7 @@ function createDetailOut({
   return {
     transformOrigin,
     animate: (progress: number) => {
-      const t = 1 - progress; // 0 -> 1 for out transitions
+      const t = 1 - progress; // 0 -> 1 for out transition
       return {
         clipPath: `inset(${startTop * t}% ${startRight * t}% ${startBottom * t}% ${startLeft * t}%)`,
         transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`,

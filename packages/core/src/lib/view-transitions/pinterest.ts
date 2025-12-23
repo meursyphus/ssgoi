@@ -3,7 +3,7 @@ import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 140, damping: 19, doubleSpring: 0.7 },
+  spring: { stiffness: 180, damping: 22, doubleSpring: 1 },
 };
 
 interface PinterestOptions {

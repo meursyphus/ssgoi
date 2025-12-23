@@ -2,16 +2,16 @@ import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
 const ENTER: PhysicsOptions = {
-  inertia: {
-    acceleration: 20,
-    resistance: 1.5,
+  spring: {
+    stiffness: 170,
+    damping: 22,
   },
 };
 
 const EXIT: PhysicsOptions = {
-  inertia: {
-    acceleration: 20,
-    resistance: 1,
+  spring: {
+    stiffness: 170,
+    damping: 22,
   },
 };
 
