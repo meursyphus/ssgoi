@@ -332,10 +332,12 @@ export class MultiAnimator extends Animator {
 
   /**
    * Sync element state to current progress value
-   * Calls config.update if provided
+   * Calls syncState on all child animators
    */
   syncState(): void {
-    this.config.update?.(this.getCurrentValue());
+    this.animators.forEach((entry) => {
+      entry.animator.syncState();
+    });
   }
 
   /**
