@@ -19,20 +19,20 @@ import styles from "./layout.module.css";
  */
 function createSnapTransitions(tabs: string[]): SsgoiConfig["transitions"] {
   const transitions: SsgoiConfig["transitions"] = [];
-  // for (let i = 0; i < tabs.length; i++) {
-  //   for (let j = 0; j < tabs.length; j++) {
-  //     if (i !== j) {
-  //       // Moving to higher index = left (enters from right)
-  //       // Moving to lower index = right (enters from left)
-  //       const direction = j > i ? "left" : "right";
-  //       transitions.push({
-  //         from: tabs[i],
-  //         to: tabs[j],
-  //         transition: snap({ direction }),
-  //       });
-  //     }
-  //   }
-  // }
+  for (let i = 0; i < tabs.length; i++) {
+    for (let j = 0; j < tabs.length; j++) {
+      if (i !== j) {
+        // Moving to higher index = left (enters from right)
+        // Moving to lower index = right (enters from left)
+        const direction = j > i ? "left" : "right";
+        transitions.push({
+          from: tabs[i],
+          to: tabs[j],
+          transition: snap({ direction }),
+        });
+      }
+    }
+  }
   return transitions;
 }
 
