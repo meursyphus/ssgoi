@@ -71,9 +71,6 @@ export function createTransitionCallback(
     const config = setup.config;
 
     config.prepare?.(element);
-    if (config.wait) {
-      await config.wait();
-    }
 
     const normalizedConfig = normalizeMultiSpringSchedule(
       {
@@ -94,6 +91,9 @@ export function createTransitionCallback(
 
     currentAnimation = { controller: animator, direction: "in" };
 
+    if (config.wait) {
+      await config.wait();
+    }
     await waitPaint(element);
 
     if (setup.direction === "forward") {
@@ -138,9 +138,6 @@ export function createTransitionCallback(
 
     config.prepare?.(element);
     insertClone();
-    if (config.wait) {
-      await config.wait();
-    }
 
     const normalizedConfig = normalizeMultiSpringSchedule(
       {
@@ -165,6 +162,10 @@ export function createTransitionCallback(
     });
 
     currentAnimation = { controller: animator, direction: "out" };
+
+    if (config.wait) {
+      await config.wait();
+    }
 
     await waitPaint(element);
 
