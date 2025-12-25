@@ -1,4 +1,9 @@
-import type { SsgoiConfig, SsgoiContext, SsgoiInternalOptions } from "../types";
+import type {
+  SsgoiConfig,
+  SsgoiContext,
+  SsgoiExtendedContext,
+  SsgoiInternalOptions,
+} from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -47,8 +52,20 @@ import {
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
+  internalOptions: SsgoiInternalOptions & {
+    createNavigationDetector: NonNullable<
+      SsgoiInternalOptions["createNavigationDetector"]
+    >;
+  },
+): SsgoiExtendedContext;
+export function createSggoiTransitionContext(
+  options: SsgoiConfig,
   internalOptions?: SsgoiInternalOptions,
-): SsgoiContext {
+): SsgoiContext;
+export function createSggoiTransitionContext(
+  options: SsgoiConfig,
+  internalOptions?: SsgoiInternalOptions,
+): SsgoiContext | SsgoiExtendedContext {
   // Destructure options with defaults
   const {
     transitions = [],
@@ -142,7 +159,17 @@ export function createSggoiTransitionContext(
           return getPositionedParentElement();
         },
       };
-      return (element: HTMLElement) => result.in!(element, inContext);
+      // Wrap IN transition to restore visibility on start
+      return async (element: HTMLElement) => {
+        const config = await Promise.resolve(result.in!(element, inContext));
+        const originalOnStart = config.onStart;
+        config.onStart = () => {
+          // Restore visibility when transition actually starts
+          element.style.visibility = "visible";
+          originalOnStart?.();
+        };
+        return config;
+      };
     }
   };
 
@@ -164,6 +191,32 @@ export function createSggoiTransitionContext(
       [TRANSITION_STRATEGY]: createPageTransitionStrategy,
     };
   };
+
+  /**
+   * Check if a transition is configured for the given from/to paths
+   * Used for determining initial visibility before transition starts
+   */
+  const hasMatchingTransition = (from: string, to: string): boolean => {
+    // Apply middleware transformation
+    const { from: transformedFrom, to: transformedTo } = middleware(from, to);
+
+    // Check if there's a matching transition or default transition
+    const transition = findMatchingTransition(
+      transformedFrom,
+      transformedTo,
+      processedTransitions,
+    );
+
+    return !!(transition || defaultTransition);
+  };
+
+  // Return extended context when custom detector is provided
+  if (createNavigationDetector) {
+    return {
+      getTransition: ssgoiContext,
+      hasMatchingTransition,
+    };
+  }
 
   return ssgoiContext;
 }
