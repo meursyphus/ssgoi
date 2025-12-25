@@ -1,4 +1,5 @@
 import type { Integrator } from "./animator/integrator";
+import type { CreateNavigationDetector } from "./ssgoi-transition/navigation-detector-strategy";
 
 export type TransitionKey = string | symbol;
 
@@ -473,6 +474,12 @@ export type SsgoiInternalOptions = {
    * @default true
    */
   outFirst?: boolean;
+
+  /**
+   * Custom navigation detector factory
+   * If provided, overrides the default detector selection based on outFirst
+   */
+  createNavigationDetector?: CreateNavigationDetector;
 };
 
 export type SsgoiContext = (
