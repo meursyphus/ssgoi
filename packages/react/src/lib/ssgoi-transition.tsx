@@ -26,7 +26,6 @@ export const SsgoiTransition = <T extends ElementType = "div">({
   const elementRef = useRef<HTMLElement | null>(null);
   const isFirstRenderRef = useRef(true);
   const initialStyleRef = useRef<CSSProperties | null>(null);
-  console.log("asdf!!!@@@@@@@@@@");
   // Calculate initial style once
   if (initialStyleRef.current === null) {
     initialStyleRef.current = getInitialStyle();

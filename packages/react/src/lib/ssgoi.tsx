@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useCallback } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import type { SsgoiConfig, ReactSsgoiContext, NavigationInfo } from "./types";
 import { SsgoiProvider } from "./context";
@@ -13,16 +13,36 @@ interface SsgoiProps {
   config: SsgoiConfig;
   children: ReactNode;
   /**
-   * Function to get current navigation info (from/to paths)
-   * Used to determine initial style and navigation detection
+   * Hook to get current pathname (e.g., Next.js usePathname)
    * @example
-   * const pathname = usePathname();
-   * const prevPathname = usePrevious(pathname);
-   * const navRef = useRef({ from: prevPathname, to: pathname });
-   * navRef.current = { from: prevPathname, to: pathname };
-   * const getNavigation = useCallback(() => navRef.current, []);
+   * import { usePathname } from 'next/navigation';
+   * <Ssgoi config={config} usePathname={usePathname}>
    */
-  getNavigation?: () => NavigationInfo;
+  usePathname?: () => string;
+}
+
+/**
+ * Hook to track navigation (prev/current pathname)
+ * Returns a stable getNavigation function
+ */
+function useNavigation(pathname: string | null): () => NavigationInfo {
+  const currentRef = useRef<string | null>(null);
+  const prevRef = useRef<string | null>(null);
+
+  // Update prev only when pathname actually changes
+  if (pathname !== null && currentRef.current !== pathname) {
+    prevRef.current = currentRef.current;
+    currentRef.current = pathname;
+  }
+
+  // Keep navigation info in ref
+  const navigationRef = useRef<NavigationInfo>({ from: null, to: "" });
+  if (pathname !== null) {
+    navigationRef.current = { from: prevRef.current, to: pathname };
+  }
+
+  // Stable getNavigation function
+  return useCallback(() => navigationRef.current, []);
 }
 
 /**
@@ -47,17 +67,23 @@ function createNavigationDetector(
 }
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
-  ({ config, children, getNavigation }) => {
+  ({ config, children, usePathname }) => {
+    // Call the pathname hook if provided
+    const pathname = usePathname?.() ?? null;
+
+    // Track navigation internally
+    const getNavigation = useNavigation(pathname);
+
     const contextValue = useMemo<ReactSsgoiContext>(() => {
       const { getTransition, hasMatchingTransition } =
         createSggoiTransitionContext(config, {
-          createNavigationDetector: getNavigation
+          createNavigationDetector: usePathname
             ? () => createNavigationDetector(getNavigation)
             : createAnyOrderDetector,
         });
 
       const getInitialStyle = (): CSSProperties => {
-        if (!getNavigation) {
+        if (!usePathname) {
           return {};
         }
 
@@ -80,7 +106,7 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
         getTransition,
         getInitialStyle,
       };
-    }, [config, getNavigation]);
+    }, [config, usePathname, getNavigation]);
 
     return <SsgoiProvider value={contextValue}>{children}</SsgoiProvider>;
   },
