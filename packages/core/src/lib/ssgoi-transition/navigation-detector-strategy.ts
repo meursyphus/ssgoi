@@ -45,10 +45,17 @@ export function createOutFirstDetector(): NavigationDetector {
   let pending: PendingNavigation | null = null;
 
   function checkPair() {
-    if (pending?.from && pending?.to) {
+    // Only resolve when BOTH outResolve and inResolve are set
+    // This prevents race conditions when trigger/get calls interleave
+    if (
+      pending?.from &&
+      pending?.to &&
+      pending?.outResolve &&
+      pending?.inResolve
+    ) {
       const pair: NavigationPair = { from: pending.from, to: pending.to };
-      pending.outResolve?.(pair);
-      pending.inResolve?.(pair);
+      pending.outResolve(pair);
+      pending.inResolve(pair);
       pending = null;
     }
   }
@@ -106,10 +113,17 @@ export function createAnyOrderDetector(): NavigationDetector {
   }
 
   function checkPair() {
-    if (pending?.from && pending?.to) {
+    // Only resolve when BOTH outResolve and inResolve are set
+    // This prevents race conditions when trigger/get calls interleave
+    if (
+      pending?.from &&
+      pending?.to &&
+      pending?.outResolve &&
+      pending?.inResolve
+    ) {
       const pair: NavigationPair = { from: pending.from, to: pending.to };
-      pending.outResolve?.(pair);
-      pending.inResolve?.(pair);
+      pending.outResolve(pair);
+      pending.inResolve(pair);
       pending = null;
     }
   }
