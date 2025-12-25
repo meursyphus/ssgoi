@@ -4,6 +4,14 @@ import type { CSSProperties } from "react";
 import type { SsgoiContext } from "@ssgoi/core/types";
 
 /**
+ * Navigation info containing from/to paths
+ */
+export type NavigationInfo = {
+  from: string | null;
+  to: string;
+};
+
+/**
  * React-specific context type with style control
  */
 export type ReactSsgoiContext = {
@@ -11,7 +19,8 @@ export type ReactSsgoiContext = {
   getTransition: SsgoiContext;
   /**
    * Get initial style for an element
-   * Returns { visibility: "hidden" } if transition is configured, {} otherwise
+   * Returns { visibility: "hidden" } on first call if transition is configured, {} otherwise
+   * Subsequent calls always return {} to prevent re-hiding on rerender
    */
-  getInitialStyle: (path: string) => CSSProperties;
+  getInitialStyle: () => CSSProperties;
 };

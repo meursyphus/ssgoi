@@ -1,65 +1,75 @@
 "use client";
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import type { ReactNode, CSSProperties } from "react";
-import type { SsgoiConfig, ReactSsgoiContext } from "./types";
+import type { SsgoiConfig, ReactSsgoiContext, NavigationInfo } from "./types";
 import { SsgoiProvider } from "./context";
 import {
   createSggoiTransitionContext,
   createAnyOrderDetector,
 } from "@ssgoi/core";
-import { createPathnameDetector } from "./create-pathname-detector";
+import type { NavigationDetector, NavigationPair } from "@ssgoi/core";
 
 interface SsgoiProps {
   config: SsgoiConfig;
   children: ReactNode;
   /**
-   * Function to get current pathname
+   * Function to get current navigation info (from/to paths)
    * Used to determine initial style and navigation detection
-   * @example Next.js: () => usePathname()
+   * @example
+   * const pathname = usePathname();
+   * const prevPathname = usePrevious(pathname);
+   * const navRef = useRef({ from: prevPathname, to: pathname });
+   * navRef.current = { from: prevPathname, to: pathname };
+   * const getNavigation = useCallback(() => navRef.current, []);
    */
-  getPathname?: () => string;
+  getNavigation?: () => NavigationInfo;
+}
+
+/**
+ * Creates a NavigationDetector based on getNavigation()
+ */
+function createNavigationDetector(
+  getNavigation: () => NavigationInfo,
+): NavigationDetector {
+  return {
+    trigger() {
+      // no-op - navigation is detected via getNavigation()
+    },
+
+    get(_type): Promise<NavigationPair | null> {
+      const { from, to } = getNavigation();
+      // Ignore if no navigation or same path (rerender)
+      if (!from || !to || from === to) return Promise.resolve(null);
+
+      return Promise.resolve({ from, to });
+    },
+  };
 }
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
-  ({ config, children, getPathname }) => {
-    // Track previous pathname for style detection
-    const prevPathnameRef = useRef<string | null>(null);
-
+  ({ config, children, getNavigation }) => {
     const contextValue = useMemo<ReactSsgoiContext>(() => {
       const { getTransition, hasMatchingTransition } =
         createSggoiTransitionContext(config, {
-          // React uses MutationObserver for unmount detection,
-          // so OUT and IN can arrive in any order
-          outFirst: false,
-          // Use pathname-based detector when getPathname is provided,
-          // otherwise use default any-order detector for React
-          createNavigationDetector: getPathname
-            ? () => createPathnameDetector(getPathname)
+          createNavigationDetector: getNavigation
+            ? () => createNavigationDetector(getNavigation)
             : createAnyOrderDetector,
         });
 
-      const getInitialStyle = (path: string): CSSProperties => {
-        if (!getPathname) {
-          // No pathname detector - no style needed (no flash prevention)
+      const getInitialStyle = (): CSSProperties => {
+        if (!getNavigation) {
           return {};
         }
 
-        const currentPathname = getPathname();
+        const { from, to } = getNavigation();
 
         // First render or same path - no style needed
-        if (
-          !prevPathnameRef.current ||
-          prevPathnameRef.current === currentPathname
-        ) {
-          prevPathnameRef.current = currentPathname;
+        if (!from || from === to) {
           return {};
         }
 
         // Check if transition is configured for this navigation
-        const fromPath = prevPathnameRef.current;
-        prevPathnameRef.current = currentPathname;
-
-        if (hasMatchingTransition(fromPath, path)) {
+        if (hasMatchingTransition(from, to)) {
           return { visibility: "hidden" };
         }
 
@@ -70,7 +80,7 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
         getTransition,
         getInitialStyle,
       };
-    }, [config, getPathname]);
+    }, [config, getNavigation]);
 
     return <SsgoiProvider value={contextValue}>{children}</SsgoiProvider>;
   },
