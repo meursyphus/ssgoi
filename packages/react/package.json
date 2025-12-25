@@ -85,7 +85,7 @@
     "prepare": "pnpm run build"
   },
   "dependencies": {
-    "@ssgoi/core": "file:../core",
+    "@ssgoi/core": "workspace:^",
     "unplugin": "^2.3.2",
     "@babel/core": "^7.26.10"
   },
