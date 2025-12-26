@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useCallback, useMemo } from "react";
 import type { ReactNode, ElementType, CSSProperties } from "react";
 import { transition } from "./transition";
 import { useSsgoi } from "./context";
@@ -45,12 +45,23 @@ export const SsgoiTransition = <T extends ElementType = "div">({
     );
   }
 
-  const transitionRef = transition(getTransition(id));
-
-  const combinedRef = combineRefs<HTMLElement>((el) => {
+  const setElementRef = useCallback((el: HTMLElement | null) => {
     elementRef.current = el;
-    isFirstRenderRef.current = false;
-  }, transitionRef);
+    if (el) {
+      isFirstRenderRef.current = false;
+    }
+  }, []);
+
+  const transitionConfig = getTransition(id);
+  const transitionRef = useMemo(
+    () => transition(transitionConfig),
+    [transitionConfig],
+  );
+
+  const combinedRef = useMemo(
+    () => combineRefs<HTMLElement>(setElementRef, transitionRef),
+    [setElementRef, transitionRef],
+  );
 
   return (
     <Component
