@@ -1,4 +1,5 @@
 import type { Integrator } from "./animator/integrator";
+import type { CreateNavigationDetector } from "./ssgoi-transition/navigation-detector-strategy";
 
 export type TransitionKey = string | symbol;
 
@@ -473,11 +474,31 @@ export type SsgoiInternalOptions = {
    * @default true
    */
   outFirst?: boolean;
+
+  /**
+   * Custom navigation detector factory
+   * If provided, overrides the default detector selection based on outFirst
+   * Also returns SsgoiExtendedContext instead of SsgoiContext
+   */
+  createNavigationDetector?: CreateNavigationDetector;
 };
 
 export type SsgoiContext = (
   path: string,
 ) => Transition & { key: TransitionKey };
+
+/**
+ * Extended context with additional utilities for frameworks that need
+ * pre-transition visibility control (e.g., React with Next.js)
+ */
+export type SsgoiExtendedContext = {
+  getTransition: SsgoiContext;
+  /**
+   * Check if a transition is configured for the given from/to paths
+   * Useful for determining initial visibility before transition starts
+   */
+  hasMatchingTransition: (from: string, to: string) => boolean;
+};
 
 /**
  * Normalized schedule entry for internal processing

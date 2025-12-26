@@ -1,18 +1,21 @@
 import type {
   SsgoiConfig,
   SsgoiContext,
+  SsgoiExtendedContext,
   SsgoiInternalOptions,
-  GetTransitionConfig,
 } from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
 } from "../transition/transition-strategy";
-import type { PendingTransition } from "./types";
 import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createSwipeDetector } from "./create-swipe-detector";
 import { createContextManager } from "./create-context-manager";
 import { findMatchingTransition } from "./find-matching-transition";
+import {
+  createOutFirstDetector,
+  createAnyOrderDetector,
+} from "./navigation-detector-strategy";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -49,8 +52,20 @@ import { findMatchingTransition } from "./find-matching-transition";
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
+  internalOptions: SsgoiInternalOptions & {
+    createNavigationDetector: NonNullable<
+      SsgoiInternalOptions["createNavigationDetector"]
+    >;
+  },
+): SsgoiExtendedContext;
+export function createSggoiTransitionContext(
+  options: SsgoiConfig,
   internalOptions?: SsgoiInternalOptions,
-): SsgoiContext {
+): SsgoiContext;
+export function createSggoiTransitionContext(
+  options: SsgoiConfig,
+  internalOptions?: SsgoiInternalOptions,
+): SsgoiContext | SsgoiExtendedContext {
   // Destructure options with defaults
   const {
     transitions = [],
@@ -60,9 +75,12 @@ export function createSggoiTransitionContext(
   } = options;
 
   // Internal options (set by framework adapters)
-  const { outFirst = true } = internalOptions || {};
+  const { outFirst = true, createNavigationDetector } = internalOptions || {};
 
-  let pendingTransition: PendingTransition | null = null;
+  // Create detector (injected or default based on outFirst)
+  const detector =
+    createNavigationDetector?.() ??
+    (outFirst ? createOutFirstDetector() : createAnyOrderDetector());
 
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(transitions);
@@ -80,175 +98,80 @@ export function createSggoiTransitionContext(
   const swipeDetector = createSwipeDetector(skipOnIosSwipe);
   swipeDetector.initialize();
 
-  function checkAndResolve() {
-    if (pendingTransition?.from && pendingTransition?.to) {
-      // Apply middleware transformation
-      const { from: transformedFrom, to: transformedTo } = middleware(
-        pendingTransition.from,
-        pendingTransition.to,
-      );
+  /**
+   * Get transition config for the given path and type
+   * Uses NavigationDetector to collect out/in pairs
+   */
+  const getTransition = async (path: string, type: "out" | "in") => {
+    // Skip animations if iOS swipe-back gesture is detected
+    if (swipeDetector.isSwipePending()) {
+      swipeDetector.resetSwipeDetection();
+      return () => ({});
+    }
 
-      const transition = findMatchingTransition(
-        transformedFrom,
-        transformedTo,
-        processedTransitions,
-      );
-      const result = transition || defaultTransition;
-      const scrollOffset = calculateScrollOffset(
-        pendingTransition.from,
-        pendingTransition.to,
-      );
+    // Trigger and wait for navigation pair
+    detector.trigger(path, type);
+    const pair = await detector.get(type);
 
-      // Create context for OUT transition (from page)
+    if (!pair) return () => ({});
+
+    // Apply middleware transformation
+    const { from: transformedFrom, to: transformedTo } = middleware(
+      pair.from,
+      pair.to,
+    );
+
+    // Find matching transition
+    const transition = findMatchingTransition(
+      transformedFrom,
+      transformedTo,
+      processedTransitions,
+    );
+    const result = transition || defaultTransition;
+
+    if (!result) return () => ({});
+
+    // Calculate scroll offset
+    const scrollOffset = calculateScrollOffset(pair.from, pair.to);
+
+    if (type === "out") {
       const outContext = {
         scrollOffset,
-        scroll: getScrollPosition(pendingTransition.from),
+        scroll: getScrollPosition(pair.from),
         get scrollingElement() {
-          // Use lazy evaluation - get scrollContainer when actually accessed
           return getScrollContainer() || document.documentElement;
         },
         get positionedParent() {
-          // Use lazy evaluation - get positioned parent from context manager
           return getPositionedParentElement();
         },
       };
-
-      // Create context for IN transition (to page)
+      return (element: HTMLElement) => result.out!(element, outContext);
+    } else {
       const inContext = {
         scrollOffset,
         get scroll() {
-          if (!pendingTransition) return { x: 0, y: 0 };
-          return getScrollPosition(pendingTransition.to);
+          return getScrollPosition(pair.to);
         },
         get scrollingElement() {
-          // Use lazy evaluation - get scrollContainer when actually accessed
           return getScrollContainer() || document.documentElement;
         },
         get positionedParent() {
-          // Use lazy evaluation - get positioned parent from context manager
           return getPositionedParentElement();
         },
       };
-
-      if (result) {
-        if (result.out && pendingTransition.outResolve) {
-          pendingTransition.outResolve((element) =>
-            result.out!(element, outContext),
-          );
-        }
-        if (result.in && pendingTransition.inResolve) {
-          pendingTransition.inResolve((element) =>
-            result.in!(element, inContext),
-          );
-        }
-      }
-
-      pendingTransition = null;
-    }
-  }
-
-  // Helper to cancel previous pending transition (observer mode only)
-  function cancelPendingTransition() {
-    if (!pendingTransition) return;
-
-    // Resolve any waiting promises with empty config to clean them up
-    if (pendingTransition.inResolve) {
-      pendingTransition.inResolve(() => ({}));
-    }
-    if (pendingTransition.outResolve) {
-      pendingTransition.outResolve(() => ({}));
-    }
-
-    pendingTransition = null;
-  }
-
-  /**
-   * Default mode: OUT must arrive before IN
-   * Original behavior for frameworks with native destroy callbacks
-   */
-  const getTransitionOutFirst = async (path: string, type: "out" | "in") => {
-    // Skip animations if iOS swipe-back gesture is detected
-    if (swipeDetector.isSwipePending()) {
-      swipeDetector.resetSwipeDetection();
-      return () => ({}); // Return empty transition
-    }
-
-    if (type === "in") {
-      // If IN is called but no OUT is pending, no transition occurs (e.g., page refresh)
-      if (!pendingTransition || !pendingTransition.from) {
-        return () => ({}); // Return empty transition
-      }
-    }
-
-    if (!pendingTransition) {
-      pendingTransition = {};
-    }
-
-    if (type === "out") {
-      pendingTransition.from = path;
-      return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.outResolve = resolve;
-        checkAndResolve();
-      });
-    } else {
-      pendingTransition.to = path;
-      return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.inResolve = resolve;
-        checkAndResolve();
-      });
+      // Wrap IN transition to restore visibility on start
+      return async (element: HTMLElement) => {
+        const config = await Promise.resolve(result.in!(element, inContext));
+        const originalOnStart = config.onStart;
+        config.onStart = () => {
+          // Restore visibility when transition actually starts
+          element.style.visibility = "visible";
+          originalOnStart?.();
+        };
+        return config;
+      };
     }
   };
-
-  /**
-   * Observer mode: OUT and IN can arrive in any order
-   * For frameworks using MutationObserver for unmount detection
-   */
-  const getTransitionAnyOrder = async (path: string, type: "out" | "in") => {
-    // Skip animations if iOS swipe-back gesture is detected
-    if (swipeDetector.isSwipePending()) {
-      swipeDetector.resetSwipeDetection();
-      return () => ({}); // Return empty transition
-    }
-
-    // If this is a new transition (different path), cancel previous one
-    const isNewTransition =
-      pendingTransition &&
-      ((type === "out" &&
-        pendingTransition.from &&
-        pendingTransition.from !== path) ||
-        (type === "in" &&
-          pendingTransition.to &&
-          pendingTransition.to !== path));
-
-    if (isNewTransition) {
-      cancelPendingTransition();
-    }
-
-    if (!pendingTransition) {
-      pendingTransition = {};
-    }
-
-    if (type === "out") {
-      pendingTransition.from = path;
-      return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.outResolve = resolve;
-        checkAndResolve();
-        // Wait indefinitely for IN
-      });
-    } else {
-      pendingTransition.to = path;
-      return new Promise<GetTransitionConfig>((resolve) => {
-        pendingTransition!.inResolve = resolve;
-        checkAndResolve();
-        // Wait indefinitely for OUT
-      });
-    }
-  };
-
-  // Select the appropriate getTransition based on mode
-  const getTransition = outFirst
-    ? getTransitionOutFirst
-    : getTransitionAnyOrder;
 
   const ssgoiContext = (path: string) => {
     return {
@@ -268,6 +191,32 @@ export function createSggoiTransitionContext(
       [TRANSITION_STRATEGY]: createPageTransitionStrategy,
     };
   };
+
+  /**
+   * Check if a transition is configured for the given from/to paths
+   * Used for determining initial visibility before transition starts
+   */
+  const hasMatchingTransition = (from: string, to: string): boolean => {
+    // Apply middleware transformation
+    const { from: transformedFrom, to: transformedTo } = middleware(from, to);
+
+    // Check if there's a matching transition or default transition
+    const transition = findMatchingTransition(
+      transformedFrom,
+      transformedTo,
+      processedTransitions,
+    );
+
+    return !!(transition || defaultTransition);
+  };
+
+  // Return extended context when custom detector is provided
+  if (createNavigationDetector) {
+    return {
+      getTransition: ssgoiContext,
+      hasMatchingTransition,
+    };
+  }
 
   return ssgoiContext;
 }
