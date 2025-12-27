@@ -18,13 +18,9 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: ["popmotion"],
       output: {
         preserveModules: false,
         exports: "named",
-        globals: {
-          popmotion: "popmotion",
-        },
       },
     },
   },
