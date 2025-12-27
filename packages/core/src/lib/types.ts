@@ -334,6 +334,7 @@ export async function normalizeToMultiAnimation(
     return {
       prepare: resolvedConfig.prepare,
       wait: resolvedConfig.wait,
+      onReady: resolvedConfig.onReady,
       onStart: resolvedConfig.onStart,
       onEnd: resolvedConfig.onEnd,
       items: resolvedConfig.items,
@@ -345,6 +346,7 @@ export async function normalizeToMultiAnimation(
   return {
     prepare: resolvedConfig.prepare,
     wait: resolvedConfig.wait,
+    onReady: resolvedConfig.onReady,
     onStart: resolvedConfig.onStart,
     onEnd: resolvedConfig.onEnd,
     items: [
