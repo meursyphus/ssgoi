@@ -21,9 +21,14 @@ const EXIT: PhysicsOptions = {
   },
 };
 
+/** Default scale offset for sheet effect (20% = 0.2) */
+const DEFAULT_SCALE_OFFSET = 0.2;
+
 interface SheetOptions {
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;
+  /** Scale offset as a fraction (default: 0.2 = 20%) */
+  scaleOffset?: number;
 }
 
 /**
@@ -59,6 +64,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
   const { direction = "enter" } = options;
   const physicsOptions =
     options.physics ?? (direction === "enter" ? ENTER : EXIT);
+  const scaleOffset = options.scaleOffset ?? DEFAULT_SCALE_OFFSET;
 
   if (direction === "enter") {
     // Forward: Sheet enters from bottom, background scales down
@@ -109,7 +115,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${0.8 + progress * 0.2})`,
+            transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
             opacity: progress,
           }),
         };
@@ -135,7 +141,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${0.8 + progress * 0.2})`,
+            transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
             opacity: progress,
           }),
           onEnd: () => {
