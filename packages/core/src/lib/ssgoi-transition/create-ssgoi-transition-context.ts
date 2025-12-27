@@ -106,6 +106,15 @@ export function createSggoiTransitionContext(
     // Skip animations if iOS swipe-back gesture is detected
     if (swipeDetector.isSwipePending()) {
       swipeDetector.resetSwipeDetection();
+      if (type === "in") {
+        // Return config with only onStart to restore visibility
+        // This ensures the page becomes visible even without animation
+        return async (element: HTMLElement) => ({
+          onStart: () => {
+            element.style.visibility = "visible";
+          },
+        });
+      }
       return () => ({});
     }
 
