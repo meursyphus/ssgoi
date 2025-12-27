@@ -95,6 +95,8 @@ export function createTransitionCallback(
 
     currentAnimation = { controller: animator, direction: "in" };
 
+    config.onReady?.();
+
     await waitPaint(element);
 
     if (setup.direction === "forward") {
@@ -167,6 +169,8 @@ export function createTransitionCallback(
     });
 
     currentAnimation = { controller: animator, direction: "out" };
+
+    config.onReady?.();
 
     await waitPaint(element);
 

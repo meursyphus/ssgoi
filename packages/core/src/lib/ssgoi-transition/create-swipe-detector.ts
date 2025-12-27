@@ -76,11 +76,13 @@ export function createSwipeDetector(enabled: boolean) {
 
   let swipeResetCounter = 0;
   const resetSwipeDetection = () => {
-    swipeResetCounter++;
-    if (swipeResetCounter > 1) {
-      swipeResetCounter = 0;
-      isSwipeDetected = false;
-    }
+    requestAnimationFrame(() => {
+      swipeResetCounter++;
+      if (swipeResetCounter > 1) {
+        swipeResetCounter = 0;
+        isSwipeDetected = false;
+      }
+    });
   };
 
   return {
