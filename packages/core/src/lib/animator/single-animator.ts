@@ -43,7 +43,7 @@ export class SingleAnimator extends Animator {
     onComplete: () => void;
     onStart?: () => void;
   };
-  private runner: BoundRunner | null;
+  private runner: BoundRunner;
   private controls: AnimationControls | null = null;
   private isAnimating = false;
   private currentValue: number;
@@ -116,16 +116,6 @@ export class SingleAnimator extends Animator {
 
   private runAnimation(targetValue: number) {
     this.isAnimating = true;
-
-    // No animation mode - complete immediately
-    if (!this.runner) {
-      this.options.onStart?.();
-      this.currentValue = targetValue;
-      this.currentVelocity = 0;
-      this.isAnimating = false;
-      this.options.onComplete();
-      return;
-    }
 
     this.controls = this.runner({
       integrator: this.createIntegrator(),

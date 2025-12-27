@@ -35,15 +35,34 @@ export interface BoundRunnerOptions {
  */
 export type BoundRunner = (options: BoundRunnerOptions) => AnimationControls;
 
+/**
+ * Empty runner for when no animation mode is specified
+ * Calls onStart/onComplete immediately without any animation frames
+ */
+function runEmptyAnimation(options: BoundRunnerOptions): AnimationControls {
+  const { to, onStart, onComplete } = options;
+
+  // Call lifecycle hooks immediately
+  onStart?.();
+  onComplete();
+
+  return {
+    stop: () => {},
+    getPosition: () => to,
+    getVelocity: () => 0,
+    isRunning: () => false,
+  };
+}
+
 export class RunnerProvider {
   /**
    * Get bound runner based on animation mode
    *
    * @param options Animation mode options (tick or css)
-   * @returns Bound runner function or null if no animation mode specified
+   * @returns Bound runner function (empty runner if no animation mode specified)
    * @throws Error if both tick and css are provided
    */
-  static from(options: RunnerOptions): BoundRunner | null {
+  static from(options: RunnerOptions): BoundRunner {
     const { tick, css } = options;
 
     if (tick && css) {
@@ -67,6 +86,6 @@ export class RunnerProvider {
         });
     }
 
-    return null;
+    return runEmptyAnimation;
   }
 }
