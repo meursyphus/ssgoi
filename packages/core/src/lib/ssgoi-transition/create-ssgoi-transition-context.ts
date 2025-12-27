@@ -204,8 +204,14 @@ export function createSggoiTransitionContext(
   /**
    * Check if a transition is configured for the given from/to paths
    * Used for determining initial visibility before transition starts
+   * Returns false if swipe-back is detected (no need to hide initially)
    */
   const hasMatchingTransition = (from: string, to: string): boolean => {
+    // Skip hiding if swipe-back is detected (animation will be skipped anyway)
+    if (swipeDetector.isSwipePending()) {
+      return false;
+    }
+
     // Apply middleware transformation
     const { from: transformedFrom, to: transformedTo } = middleware(from, to);
 
