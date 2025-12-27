@@ -17,11 +17,13 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
   },
 };
 
-/** Scale offset for swap effect (5% = 0.05) */
-const SCALE_OFFSET = 0.05;
+/** Default scale offset for swap effect (5% = 0.05) */
+const DEFAULT_SCALE_OFFSET = 0.05;
 
 interface SwapOptions {
   physics?: PhysicsOptions;
+  /** Scale offset as a fraction (default: 0.05 = 5%) */
+  scaleOffset?: number;
 }
 
 /**
@@ -50,6 +52,7 @@ function getSwapRect(context: SggoiTransitionContext) {
  */
 export const swap = (options: SwapOptions = {}): SggoiTransition => {
   const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
+  const scaleOffset = options.scaleOffset ?? DEFAULT_SCALE_OFFSET;
 
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
@@ -81,7 +84,7 @@ export const swap = (options: SwapOptions = {}): SggoiTransition => {
           }
         },
         css: (progress): StyleObject => ({
-          transform: `scale(${1 - SCALE_OFFSET + progress * SCALE_OFFSET})`,
+          transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
           opacity: progress,
         }),
         onEnd: () => {

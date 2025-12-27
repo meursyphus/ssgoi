@@ -2,7 +2,7 @@ import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
-const TRANSLATE_OFFSET = 8; // px
+const DEFAULT_TRANSLATE_OFFSET = 8; // px
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
@@ -16,6 +16,8 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
 interface SnapOptions {
   direction?: "left" | "right";
   physics?: PhysicsOptions;
+  /** Translation offset in pixels (default: 8) */
+  translateOffset?: number;
 }
 
 /**
@@ -27,6 +29,7 @@ interface SnapOptions {
 export const snap = (options: SnapOptions = {}): SggoiTransition => {
   const direction = options.direction ?? "left";
   const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
+  const translateOffset = options.translateOffset ?? DEFAULT_TRANSLATE_OFFSET;
 
   const isLeft = direction === "left";
 
@@ -60,8 +63,8 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
           // If direction="left", IN page slides from right (positive → 0)
           // If direction="right", IN page slides from left (negative → 0)
           const translateX = isLeft
-            ? (1 - progress) * TRANSLATE_OFFSET
-            : (1 - progress) * -TRANSLATE_OFFSET;
+            ? (1 - progress) * translateOffset
+            : (1 - progress) * -translateOffset;
 
           // Opacity: IN_OPACITY_START → 1
           const opacity = `${progress}`;
@@ -94,11 +97,11 @@ export const snap = (options: SnapOptions = {}): SggoiTransition => {
         },
         css: (progress): StyleObject => {
           // Slide in the same direction as navigation
-          // If direction="left", OUT page slides left (0 → -8px)
-          // If direction="right", OUT page slides right (0 → 8px)
+          // If direction="left", OUT page slides left (0 → -offset)
+          // If direction="right", OUT page slides right (0 → offset)
           const translateX = isLeft
-            ? (1 - progress) * -TRANSLATE_OFFSET
-            : (1 - progress) * TRANSLATE_OFFSET;
+            ? (1 - progress) * -translateOffset
+            : (1 - progress) * translateOffset;
 
           // Opacity: 1 → OUT_OPACITY_MIN
           const opacity = `${progress}`;
