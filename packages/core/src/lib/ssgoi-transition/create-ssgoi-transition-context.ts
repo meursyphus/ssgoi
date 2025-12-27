@@ -107,10 +107,10 @@ export function createSggoiTransitionContext(
     if (swipeDetector.isSwipePending()) {
       swipeDetector.resetSwipeDetection();
       if (type === "in") {
-        // Return config with only onStart to restore visibility
+        // Return config with only onReady to restore visibility
         // This ensures the page becomes visible even without animation
         return async (element: HTMLElement) => ({
-          onStart: () => {
+          onReady: () => {
             element.style.visibility = "visible";
           },
         });
@@ -168,14 +168,14 @@ export function createSggoiTransitionContext(
           return getPositionedParentElement();
         },
       };
-      // Wrap IN transition to restore visibility on start
+      // Wrap IN transition to restore visibility on ready (before waitPaint)
       return async (element: HTMLElement) => {
         const config = await Promise.resolve(result.in!(element, inContext));
-        const originalOnStart = config.onStart;
-        config.onStart = () => {
-          // Restore visibility when transition actually starts
+        const originalOnReady = config.onReady;
+        config.onReady = () => {
+          // Restore visibility when transition is ready (before waitPaint)
           element.style.visibility = "visible";
-          originalOnStart?.();
+          originalOnReady?.();
         };
         return config;
       };

@@ -137,7 +137,11 @@ export type BaseTransitionConfig = {
   // Wait before starting the animation
   wait?: () => Promise<void>;
 
-  // Called when animation starts
+  // Called when animation is ready (before waitPaint, before onStart)
+  // Use this for synchronous setup like visibility restoration
+  onReady?: () => void;
+
+  // Called when animation starts (after waitPaint)
   onStart?: () => void;
 
   // Called when animation ends
