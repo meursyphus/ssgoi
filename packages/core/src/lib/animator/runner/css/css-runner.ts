@@ -193,9 +193,13 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     }
   }
 
+  // Get the final style for explicit application on complete
+  // This uses the exact target value (0 or 1) for clean final state
+  const finalStyle = styleFn(lastFrame.position);
+
   const animation = element.animate(keyframes, {
     duration,
-    fill: "forwards",
+    fill: "none", // Don't use fill:forwards - we'll apply final style explicitly
     easing: "linear",
     composite: "replace",
   });
@@ -294,6 +298,12 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   animation.onfinish = () => {
     if (isActive) {
       isActive = false;
+      // Explicitly apply final style to inline styles
+      // This replaces fill:forwards behavior with explicit control
+      for (const [key, value] of Object.entries(finalStyle)) {
+        (element.style as unknown as Record<string, string>)[key] =
+          typeof value === "number" ? String(value) : value;
+      }
       onComplete();
     }
   };
@@ -302,15 +312,18 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     stop: () => {
       if (isActive) {
         isActive = false;
-        // Commit current animated styles to inline styles before canceling
+        // Get current position and apply style before canceling
         // This prevents visual jump when animation is stopped mid-way
-        // Without this, cancel() removes fill:forwards effect and element jumps to original state
-        try {
-          animation.commitStyles();
-        } catch {
-          // commitStyles() can throw if animation is not in a valid state
-          // (e.g., already finished or element detached from DOM)
+        const elapsed = performance.now() - startTime;
+        const currentPosition = interpolateFrame(frames, elapsed).position;
+        const currentStyle = styleFn(currentPosition);
+
+        // Apply current state to inline styles
+        for (const [key, value] of Object.entries(currentStyle)) {
+          (element.style as unknown as Record<string, string>)[key] =
+            typeof value === "number" ? String(value) : value;
         }
+
         animation.cancel();
       }
     },
