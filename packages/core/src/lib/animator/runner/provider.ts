@@ -5,8 +5,8 @@
  * Returns bound runner function with mode-specific options pre-applied.
  */
 
-import { runTickAnimation } from "./tick-runner";
-import { runCssAnimation } from "./css-runner";
+import { runTickAnimation } from "./tick/tick-runner";
+import { runCssAnimation } from "./css/css-runner";
 import type { AnimationControls, StyleObject } from "./types";
 import type { Integrator } from "../integrator";
 

@@ -12,8 +12,9 @@ import {
   type Integrator,
   type IntegratorState,
   SETTLE_THRESHOLD,
-} from "../integrator";
-import type { AnimationControls, StyleObject } from "./types";
+} from "../../integrator";
+import type { AnimationControls, StyleObject } from "../types";
+import { interpolateElapsedTime } from "./transform-interpolator";
 
 export interface CssRunnerOptions {
   integrator: Integrator;
@@ -200,7 +201,74 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
   });
 
   let isActive = true;
-  const startTime = performance.now();
+  let startTime = performance.now();
+
+  // Extract frame times for interpolation
+  const frameTimes = frames.map((f) => f.time);
+
+  // ============================================================================
+  // WAAPI startTime Synchronization (Safari/WebKit compositor timing fix)
+  // ============================================================================
+  //
+  // Problem: Visual "jump back" glitch during animation start on heavy DOM mounts.
+  //
+  // Root cause (especially noticeable on Safari):
+  // When animate() is called, WAAPI goes through two phases:
+  //
+  // 1. PENDING STATE (Main Thread rendering):
+  //    - Animation enters "pending" state with unresolved startTime
+  //    - Main thread immediately starts rendering frames with temporary timing
+  //    - This happens BEFORE compositor thread is ready
+  //
+  // 2. COMPOSITOR PROMOTION:
+  //    - Compositor thread sets up GPU-accelerated layer
+  //    - When ready, compositor confirms the "real" startTime
+  //    - This startTime may differ from what main thread was using
+  //
+  // The timing gap between these phases causes visual regression:
+  //
+  //   Frame 1: Main thread renders at 10% (temp startTime)
+  //   Frame 2: Main thread renders at 15%
+  //   Frame 3: Compositor ready → confirms startTime → recalculates to 5%
+  //   Frame 4: Animation jumps from 15% → 5% (visible backward jump!)
+  //
+  // Solution:
+  // At animation.ready (compositor sync complete), we:
+  // 1. Read current rendered transform via getComputedStyle
+  // 2. Find which keyframe matches that transform value
+  // 3. Manually set startTime to maintain visual continuity
+  //
+  // This ensures the animation continues from where it visually was,
+  // not where the compositor thinks it should be.
+  //
+  // References:
+  // - Mozilla Bug 927349: "animation jumps from paused→future→started"
+  // - Chromium Blink README: "accelerated animation still runs on main thread"
+  // - WebKit Bug 236080: compositor timing with delayed animations
+  // ============================================================================
+  animation.ready.then(() => {
+    if (!isActive) return;
+
+    // Get current rendered transform from computed style
+    const computedTransform = getComputedStyle(element).transform;
+
+    // Try to find which keyframe matches the current rendered state
+    const result = interpolateElapsedTime(
+      keyframes,
+      frameTimes,
+      computedTransform,
+    );
+
+    const timelineTime = document.timeline.currentTime;
+    if (result.success && timelineTime !== null) {
+      // Adjust WAAPI startTime so animation continues from where it was rendered
+      animation.startTime = Number(timelineTime) - result.frameTime;
+
+      // Also sync our internal startTime for getPosition/getVelocity calculations
+      startTime = performance.now() - result.frameTime;
+    }
+    // If interpolation failed (no transform property), don't touch startTime
+  });
 
   onStart?.();
 

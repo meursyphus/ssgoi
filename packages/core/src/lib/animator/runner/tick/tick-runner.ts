@@ -9,8 +9,8 @@ import {
   type Integrator,
   type IntegratorState,
   SETTLE_THRESHOLD,
-} from "../integrator";
-import type { AnimationControls } from "./types";
+} from "../../integrator";
+import type { AnimationControls } from "../types";
 
 export interface TickRunnerOptions {
   integrator: Integrator;
