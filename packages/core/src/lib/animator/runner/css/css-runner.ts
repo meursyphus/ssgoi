@@ -302,6 +302,15 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
     stop: () => {
       if (isActive) {
         isActive = false;
+        // Commit current animated styles to inline styles before canceling
+        // This prevents visual jump when animation is stopped mid-way
+        // Without this, cancel() removes fill:forwards effect and element jumps to original state
+        try {
+          animation.commitStyles();
+        } catch {
+          // commitStyles() can throw if animation is not in a valid state
+          // (e.g., already finished or element detached from DOM)
+        }
         animation.cancel();
       }
     },
