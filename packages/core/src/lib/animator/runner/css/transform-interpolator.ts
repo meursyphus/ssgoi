@@ -127,12 +127,38 @@ export interface InterpolationResult {
 }
 
 /**
+ * Project a point onto a line segment and return the interpolation factor
+ * Returns value between 0 and 1 if projection is on the segment
+ */
+function projectOntoSegment(
+  point: TranslateValues,
+  start: TranslateValues,
+  end: TranslateValues,
+): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSq = dx * dx + dy * dy;
+
+  // Segment has zero length - just return 0
+  if (lengthSq === 0) {
+    return 0;
+  }
+
+  // Project point onto line, get interpolation factor
+  const t = ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSq;
+
+  // Clamp to [0, 1]
+  return Math.max(0, Math.min(1, t));
+}
+
+/**
  * Find the elapsed time that best matches the current computed transform
+ * Uses linear interpolation between keyframes for accurate timing
  *
  * @param keyframes - The keyframes array passed to WAAPI
  * @param frameTimes - Array of time values corresponding to each keyframe (ms)
  * @param computedTransform - Current transform from getComputedStyle
- * @returns InterpolationResult with matched frame time, or success=false if no match
+ * @returns InterpolationResult with interpolated frame time, or success=false if no match
  */
 export function interpolateElapsedTime(
   keyframes: Keyframe[],
@@ -146,59 +172,76 @@ export function interpolateElapsedTime(
     return { success: false, frameTime: 0, confidence: "low" };
   }
 
-  // Check if first keyframe has transform
-  const firstKeyframe = keyframes[0];
-  if (!firstKeyframe || typeof firstKeyframe.transform !== "string") {
-    return { success: false, frameTime: 0, confidence: "low" };
-  }
-
-  const firstValues = parseTranslateValues(firstKeyframe.transform);
-  if (!firstValues) {
-    return { success: false, frameTime: 0, confidence: "low" };
-  }
-
-  // Find best matching keyframe
-  let bestIndex = 0;
-  let bestDistance = Infinity;
-
+  // Build array of parsed keyframe values with their indices
+  const parsedFrames: { index: number; values: TranslateValues }[] = [];
   for (let i = 0; i < keyframes.length; i++) {
     const keyframe = keyframes[i];
     if (!keyframe || typeof keyframe.transform !== "string") {
       continue;
     }
-
-    const keyframeValues = parseTranslateValues(keyframe.transform);
-    if (!keyframeValues) {
-      continue;
-    }
-
-    const distance = calculateDistance(currentValues, keyframeValues);
-
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestIndex = i;
-    }
-
-    // Perfect match, no need to continue
-    if (distance === 0) {
-      break;
+    const values = parseTranslateValues(keyframe.transform);
+    if (values) {
+      parsedFrames.push({ index: i, values });
     }
   }
 
-  const frameTime = frameTimes[bestIndex];
-  if (frameTime === undefined) {
+  // Need at least 2 frames to interpolate
+  if (parsedFrames.length < 2) {
     return { success: false, frameTime: 0, confidence: "low" };
   }
 
-  // Determine confidence based on match quality
-  // High confidence: within 0.5px (sub-pixel accuracy)
-  // Low confidence: within 5px (might be due to rounding or different property)
-  const confidence = bestDistance <= 0.5 ? "high" : "low";
+  // Find the segment where current position falls between
+  // by finding the segment with minimum perpendicular distance
+  let bestSegmentStart = 0;
+  let bestT = 0;
+  let bestDistance = Infinity;
+
+  for (let i = 0; i < parsedFrames.length - 1; i++) {
+    const start = parsedFrames[i]!;
+    const end = parsedFrames[i + 1]!;
+
+    // Project current point onto this segment
+    const t = projectOntoSegment(currentValues, start.values, end.values);
+
+    // Calculate interpolated point on segment
+    const interpX = start.values.x + t * (end.values.x - start.values.x);
+    const interpY = start.values.y + t * (end.values.y - start.values.y);
+
+    // Distance from current to interpolated point
+    const distance = calculateDistance(currentValues, {
+      x: interpX,
+      y: interpY,
+    });
+
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestSegmentStart = i;
+      bestT = t;
+    }
+  }
 
   // If distance is too large (> 10px), probably wrong property or no match
   if (bestDistance > 10) {
     return { success: false, frameTime: 0, confidence: "low" };
   }
+
+  // Interpolate the frame time
+  const startFrame = parsedFrames[bestSegmentStart]!;
+  const endFrame = parsedFrames[bestSegmentStart + 1]!;
+
+  const startTime = frameTimes[startFrame.index];
+  const endTime = frameTimes[endFrame.index];
+
+  if (startTime === undefined || endTime === undefined) {
+    return { success: false, frameTime: 0, confidence: "low" };
+  }
+
+  // Linear interpolation: frameTime = startTime + t * (endTime - startTime)
+  const frameTime = startTime + bestT * (endTime - startTime);
+
+  // Determine confidence based on match quality
+  // High confidence: within 0.5px (sub-pixel accuracy)
+  const confidence = bestDistance <= 0.5 ? "high" : "low";
 
   return {
     success: true,

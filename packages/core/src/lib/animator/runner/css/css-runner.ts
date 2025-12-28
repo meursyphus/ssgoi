@@ -261,8 +261,27 @@ export function runCssAnimation(options: CssRunnerOptions): AnimationControls {
 
     const timelineTime = document.timeline.currentTime;
     if (result.success && timelineTime !== null) {
+      const originalStartTime = animation.startTime;
+      const correctedStartTime = Number(timelineTime) - result.frameTime;
+
+      // Debug log for startTime synchronization
+      console.log("[WAAPI Sync]", {
+        computedTransform,
+        interpolatedFrameTime: result.frameTime.toFixed(2) + "ms",
+        confidence: result.confidence,
+        originalStartTime:
+          originalStartTime !== null
+            ? Number(originalStartTime).toFixed(2)
+            : null,
+        correctedStartTime: correctedStartTime.toFixed(2),
+        diff:
+          originalStartTime !== null
+            ? (correctedStartTime - Number(originalStartTime)).toFixed(2) + "ms"
+            : "N/A",
+      });
+
       // Adjust WAAPI startTime so animation continues from where it was rendered
-      animation.startTime = Number(timelineTime) - result.frameTime;
+      animation.startTime = correctedStartTime;
 
       // Also sync our internal startTime for getPosition/getVelocity calculations
       startTime = performance.now() - result.frameTime;
