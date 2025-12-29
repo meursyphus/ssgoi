@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useMemo } from "react";
 import { Link, useLocation } from "react-router";
 import { Ssgoi } from "@ssgoi/react";
 import {
@@ -14,41 +14,10 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const location = useLocation();
   const pathname = location.pathname;
-  const pathRef = useRef(pathname);
-  pathRef.current = pathname;
-  const mainRef = useRef<HTMLElement>(null);
-  const scrollPositions = useRef<Record<string, number>>({});
-  const previousPath = useRef(pathname);
-
-  useEffect(() => {
-    if (!mainRef.current) return;
-
-    const handleScroll = () => {
-      if (!mainRef.current) return;
-      scrollPositions.current[pathRef.current] = mainRef.current.scrollTop;
-    };
-
-    const element = mainRef.current;
-    element.addEventListener("scroll", handleScroll);
-    return () => {
-      element?.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // Restore scroll position when path changes
-  useLayoutEffect(() => {
-    if (!mainRef.current) return;
-    const savedPosition = scrollPositions.current[pathname] || 0;
-
-    if (mainRef.current) {
-      mainRef.current.scrollTop = savedPosition;
-    }
-
-    previousPath.current = pathname;
-  }, [pathname]);
 
   const config = useMemo(
     () => ({
+      experimentalPreserveScroll: true,
       transitions: [
         // Pinterest transitions
         {
@@ -86,7 +55,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main
-          ref={mainRef}
           id="demo-content"
           className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
         >
