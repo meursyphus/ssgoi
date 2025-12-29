@@ -46,7 +46,6 @@ export function createContextManager(options: ContextManagerOptions = {}) {
           scrollContainer.scrollTo({
             top: savedPosition.y,
             left: savedPosition.x,
-            // No smooth scroll - instant restoration
           });
         }
       });
