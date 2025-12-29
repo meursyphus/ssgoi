@@ -23,10 +23,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
+  let isTransitioning = false; // Prevent saving scroll during transition
 
   // Scroll listener - captures current scroll position
   const scrollListener = () => {
-    if (scrollContainer && currentPath) {
+    // Don't save scroll position during page transition
+    if (scrollContainer && currentPath && !isTransitioning) {
       scrollPositions.set(currentPath, {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
@@ -39,21 +41,40 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     if (!scrollContainer || !preserveScroll) return;
 
     const savedPosition = scrollPositions.get(path);
-    if (savedPosition) {
-      // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
-        if (scrollContainer) {
-          scrollContainer.scrollTo({
-            top: savedPosition.y,
-            left: savedPosition.x,
-          });
-        }
+    if (!savedPosition) return;
+
+    const maxRetries = 10;
+    let retryCount = 0;
+
+    const tryRestore = () => {
+      if (!scrollContainer) return;
+
+      scrollContainer.scrollTo({
+        top: savedPosition.y,
+        left: savedPosition.x,
       });
-    }
+
+      // Retry if scroll position wasn't applied (DOM might not be ready)
+      const currentY = scrollContainer.scrollTop;
+      const currentX = scrollContainer.scrollLeft;
+      const targetReached =
+        Math.abs(currentY - savedPosition.y) < 1 &&
+        Math.abs(currentX - savedPosition.x) < 1;
+
+      if (!targetReached && retryCount < maxRetries) {
+        retryCount++;
+        requestAnimationFrame(tryRestore);
+      }
+    };
+
+    requestAnimationFrame(tryRestore);
   };
 
   // Initialize context with element - sets up scroll tracking and stores element for later use
   const initializeContext = (element: HTMLElement, path: string) => {
+    // Prevent scroll listener from saving during transition
+    isTransitioning = true;
+
     // Store the element for positioned parent calculation
     contextElement = element;
 
@@ -76,7 +97,31 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     currentPath = path;
 
     // Restore scroll position if preserveScroll is enabled
-    restoreScrollPosition(path);
+    // For first visits (no saved position), scroll to top
+    if (preserveScroll && scrollContainer) {
+      const savedPosition = scrollPositions.get(path);
+      if (savedPosition) {
+        restoreScrollPosition(path);
+      } else {
+        // First visit - scroll to top (SPA doesn't auto-reset scroll)
+        scrollContainer.scrollTo({ top: 0, left: 0 });
+      }
+    }
+
+    // Re-enable scroll listener after transition settles
+    const maxTransitionRetries = 10;
+    let transitionRetryCount = 0;
+
+    const tryEnableListener = () => {
+      transitionRetryCount++;
+      if (transitionRetryCount >= maxTransitionRetries) {
+        isTransitioning = false;
+      } else {
+        requestAnimationFrame(tryEnableListener);
+      }
+    };
+
+    requestAnimationFrame(tryEnableListener);
   };
 
   // Calculate scroll offset - computes difference between pages' scroll positions
