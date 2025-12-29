@@ -460,6 +460,14 @@ export type SsgoiConfig = {
    * @default true
    */
   skipOnIosSwipe?: boolean;
+  /**
+   * Automatically preserve and restore scroll position when navigating between pages
+   * When enabled, SSGOI will:
+   * - Save scroll position when leaving a page
+   * - Restore scroll position when returning to a previously visited page
+   * @default false
+   */
+  preserveScroll?: boolean;
 };
 
 /**

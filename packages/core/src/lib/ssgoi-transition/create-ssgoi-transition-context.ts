@@ -72,6 +72,7 @@ export function createSggoiTransitionContext(
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
     skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
+    preserveScroll = false, // Default to false - manual scroll management
   } = options;
 
   // Internal options (set by framework adapters)
@@ -85,14 +86,14 @@ export function createSggoiTransitionContext(
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(transitions);
 
-  // Initialize context manager
+  // Initialize context manager with preserveScroll option
   const {
     initializeContext,
     calculateScrollOffset,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
-  } = createContextManager();
+  } = createContextManager({ preserveScroll });
 
   // Initialize swipe detector
   const swipeDetector = createSwipeDetector(skipOnIosSwipe);
