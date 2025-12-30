@@ -34,23 +34,6 @@ export const showcaseData: ShowcaseItem[] = [
   // },
 
   {
-    id: "burrr",
-    title: "Burrr AI",
-    description:
-      "A Seoul-based startup driving innovation with generative AI, chatbots, and cutting-edge AI solutions.",
-    longDescription:
-      "Burrr AI leverages SSGOI's smooth page transitions to create a premium feel for their AI-powered platform. The seamless navigation between different sections showcases the company's innovative approach to user experience, matching their cutting-edge AI solutions with equally impressive web interactions.",
-    url: "https://burrr.ai",
-    thumbnail: "/showcase/burrr.webp",
-    gif: "/showcase/burrr.gif",
-    gallery: ["/showcase/burrr.gif"],
-    tags: ["AI", "Chatbot", "Startup"],
-    framework: "SvelteKit",
-    transitions: ["fade", "slide"],
-    year: 2024,
-    featured: true,
-  },
-  {
     id: "seoulbiyori",
     title: "Seoul Biyori",
     description:
@@ -65,6 +48,23 @@ export const showcaseData: ShowcaseItem[] = [
     framework: "Next.js",
     transitions: ["swap", "drill"],
     year: 2025,
+    featured: true,
+  },
+  {
+    id: "burrr",
+    title: "Burrr AI",
+    description:
+      "A Seoul-based startup driving innovation with generative AI, chatbots, and cutting-edge AI solutions.",
+    longDescription:
+      "Burrr AI leverages SSGOI's smooth page transitions to create a premium feel for their AI-powered platform. The seamless navigation between different sections showcases the company's innovative approach to user experience, matching their cutting-edge AI solutions with equally impressive web interactions.",
+    url: "https://burrr.ai",
+    thumbnail: "/showcase/burrr.webp",
+    gif: "/showcase/burrr.gif",
+    gallery: ["/showcase/burrr.gif"],
+    tags: ["AI", "Chatbot", "Startup"],
+    framework: "SvelteKit",
+    transitions: ["fade", "slide"],
+    year: 2024,
     featured: true,
   },
 ];
