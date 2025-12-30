@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  Layers,
   Calendar,
 } from "lucide-react";
 import type { ShowcaseItem } from "./showcase-data";
@@ -31,61 +30,31 @@ export function ShowcaseModal({
 }: ShowcaseModalProps) {
   const t = useTranslations("showcase");
   const [galleryIndex, setGalleryIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [direction, setDirection] = useState<"left" | "right" | null>(null);
 
   const gallery = item.gallery?.length ? item.gallery : [item.thumbnail];
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
 
   const handlePrevProject = useCallback(() => {
-    if (hasPrev && !isAnimating) {
-      setDirection("left");
-      setIsAnimating(true);
-      setTimeout(() => {
-        onNavigate(currentIndex - 1);
-        setGalleryIndex(0);
-        setIsAnimating(false);
-      }, 200);
+    if (hasPrev) {
+      onNavigate(currentIndex - 1);
     }
-  }, [hasPrev, currentIndex, onNavigate, isAnimating]);
+  }, [hasPrev, currentIndex, onNavigate]);
 
   const handleNextProject = useCallback(() => {
-    if (hasNext && !isAnimating) {
-      setDirection("right");
-      setIsAnimating(true);
-      setTimeout(() => {
-        onNavigate(currentIndex + 1);
-        setGalleryIndex(0);
-        setIsAnimating(false);
-      }, 200);
+    if (hasNext) {
+      onNavigate(currentIndex + 1);
     }
-  }, [hasNext, currentIndex, onNavigate, isAnimating]);
-
-  const handlePrevImage = useCallback(() => {
-    setGalleryIndex((prev) => (prev > 0 ? prev - 1 : gallery.length - 1));
-  }, [gallery.length]);
-
-  const handleNextImage = useCallback(() => {
-    setGalleryIndex((prev) => (prev < gallery.length - 1 ? prev + 1 : 0));
-  }, [gallery.length]);
+  }, [hasNext, currentIndex, onNavigate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       } else if (e.key === "ArrowLeft") {
-        if (e.shiftKey) {
-          handlePrevProject();
-        } else if (gallery.length > 1) {
-          handlePrevImage();
-        }
+        handlePrevProject();
       } else if (e.key === "ArrowRight") {
-        if (e.shiftKey) {
-          handleNextProject();
-        } else if (gallery.length > 1) {
-          handleNextImage();
-        }
+        handleNextProject();
       }
     };
 
@@ -96,14 +65,7 @@ export function ShowcaseModal({
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    onClose,
-    handlePrevProject,
-    handleNextProject,
-    handlePrevImage,
-    handleNextImage,
-    gallery.length,
-  ]);
+  }, [onClose, handlePrevProject, handleNextProject]);
 
   // Reset gallery index when item changes
   useEffect(() => {
@@ -147,15 +109,7 @@ export function ShowcaseModal({
       )}
 
       {/* Modal Content */}
-      <div
-        className={`relative w-full max-w-6xl max-h-[90vh] mx-4 bg-neutral-950 border border-white/10 rounded-2xl overflow-hidden transition-all duration-200 ${
-          isAnimating
-            ? direction === "left"
-              ? "opacity-0 translate-x-8"
-              : "opacity-0 -translate-x-8"
-            : "opacity-100 translate-x-0"
-        }`}
-      >
+      <div className="relative w-full max-w-6xl max-h-[90vh] mx-4 bg-neutral-950 border border-white/10 rounded-2xl overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -179,7 +133,7 @@ export function ShowcaseModal({
               />
             </div>
 
-            {/* Gallery Navigation */}
+            {/* Gallery Navigation - only show if multiple images */}
             {gallery.length > 1 && (
               <>
                 {/* Image Counter */}
@@ -189,13 +143,21 @@ export function ShowcaseModal({
 
                 {/* Image Navigation Arrows */}
                 <button
-                  onClick={handlePrevImage}
+                  onClick={() =>
+                    setGalleryIndex((prev) =>
+                      prev > 0 ? prev - 1 : gallery.length - 1,
+                    )
+                  }
                   className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 border border-white/10 text-white/60 hover:text-white hover:bg-black/80 transition-all"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={handleNextImage}
+                  onClick={() =>
+                    setGalleryIndex((prev) =>
+                      prev < gallery.length - 1 ? prev + 1 : 0,
+                    )
+                  }
                   className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 border border-white/10 text-white/60 hover:text-white hover:bg-black/80 transition-all"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -270,15 +232,6 @@ export function ShowcaseModal({
                   </span>
                 </div>
               )}
-              {item.transitions && item.transitions.length > 0 && (
-                <div className="flex items-center gap-3 text-xs">
-                  <Layers className="w-4 h-4 text-neutral-500" />
-                  <span className="text-neutral-500">{t("transitions")}</span>
-                  <span className="text-neutral-300 ml-auto">
-                    {item.transitions.join(", ")}
-                  </span>
-                </div>
-              )}
               {item.year && (
                 <div className="flex items-center gap-3 text-xs">
                   <Calendar className="w-4 h-4 text-neutral-500" />
@@ -311,19 +264,7 @@ export function ShowcaseModal({
                   </kbd>{" "}
                   {t("toClose")}
                 </p>
-                {gallery.length > 1 && (
-                  <p>
-                    <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-neutral-400">
-                      ← →
-                    </kbd>{" "}
-                    {t("browseImages")}
-                  </p>
-                )}
                 <p>
-                  <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-neutral-400">
-                    Shift
-                  </kbd>{" "}
-                  +{" "}
                   <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-neutral-400">
                     ← →
                   </kbd>{" "}
