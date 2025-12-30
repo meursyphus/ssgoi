@@ -12,4 +12,18 @@ export const showcase: ShowcaseMessages = {
   metaTitle: "ショーケース | SSGOI",
   metaDescription:
     "SSGOIで作られた素晴らしいウェブサイトを発見 - ウェブ用のユニバーサルページトランジションライブラリ",
+  // New modal-related messages
+  projects: "プロジェクト",
+  featured: "注目",
+  allProjects: "すべてのプロジェクト",
+  framework: "フレームワーク",
+  transitions: "トランジション",
+  year: "年",
+  visitSite: "サイトを訪問",
+  prevProject: "前のプロジェクト",
+  nextProject: "次のプロジェクト",
+  keyboardNav: "キーボードナビゲーション",
+  toClose: "閉じる",
+  browseImages: "画像を閲覧",
+  browseProjects: "プロジェクトを閲覧",
 };
