@@ -12,4 +12,18 @@ export const showcase: ShowcaseMessages = {
   metaTitle: "Showcase | SSGOI",
   metaDescription:
     "Discover amazing websites built with SSGOI - Universal page transition library for the web",
+  // New modal-related messages
+  projects: "Projects",
+  featured: "Featured",
+  allProjects: "All Projects",
+  framework: "Framework",
+  transitions: "Transitions",
+  year: "Year",
+  visitSite: "Visit Site",
+  prevProject: "Previous project",
+  nextProject: "Next project",
+  keyboardNav: "Keyboard Navigation",
+  toClose: "to close",
+  browseImages: "browse images",
+  browseProjects: "browse projects",
 };

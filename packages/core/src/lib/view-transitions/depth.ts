@@ -26,12 +26,14 @@ const EXIT_PHYSICS: PhysicsOptions = {
   },
 };
 
-/** Scale offset for depth effect (10% = 0.1) */
-const SCALE_OFFSET = 0.05;
+/** Default scale offset for depth effect (5% = 0.05) */
+const DEFAULT_SCALE_OFFSET = 0.05;
 
 interface DepthOptions {
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;
+  /** Scale offset as a fraction (default: 0.05 = 5%) */
+  scaleOffset?: number;
 }
 
 /**
@@ -67,6 +69,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
   const { direction = "enter" } = options;
   const physicsOptions =
     options.physics ?? (direction === "enter" ? ENTER_PHYSICS : EXIT_PHYSICS);
+  const scaleOffset = options.scaleOffset ?? DEFAULT_SCALE_OFFSET;
 
   // Shared promise for coordinating OUT and IN animations
   let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
@@ -101,7 +104,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
             }
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${1 - SCALE_OFFSET + progress * SCALE_OFFSET})`,
+            transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
             opacity: progress,
           }),
           onEnd: () => {
@@ -135,7 +138,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${1 + (1 - progress) * SCALE_OFFSET})`,
+            transform: `scale(${1 + (1 - progress) * scaleOffset})`,
             opacity: progress,
           }),
           onEnd: () => {
@@ -175,7 +178,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
             }
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${1 + SCALE_OFFSET - progress * SCALE_OFFSET})`,
+            transform: `scale(${1 + scaleOffset - progress * scaleOffset})`,
             opacity: progress,
           }),
           onEnd: () => {
@@ -209,7 +212,7 @@ export const depth = (options: DepthOptions = {}): SggoiTransition => {
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
           },
           css: (progress): StyleObject => ({
-            transform: `scale(${1 - (1 - progress) * SCALE_OFFSET})`,
+            transform: `scale(${1 - (1 - progress) * scaleOffset})`,
             opacity: progress,
           }),
           onEnd: () => {

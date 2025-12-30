@@ -93,7 +93,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={config}>{children}</Ssgoi>
+          <Ssgoi config={config} usePathname={usePathname}>
+            {children}
+          </Ssgoi>
         </main>
 
         {/* Bottom Navigation */}
