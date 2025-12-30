@@ -54,17 +54,17 @@ export const showcaseData: ShowcaseItem[] = [
     id: "seoulbiyori",
     title: "Seoul Biyori",
     description:
-      "A mobile web app for Japanese tourists visiting Seoul, featuring local food, cafes, shopping, and events.",
+      "A mobile web app for Japanese tourists visiting Seoul, built by a non-developer using MVPStar vibe-coding tool.",
     longDescription:
-      "Seoul Biyori (ソウル日和) is a comprehensive guide for Japanese visitors to Seoul. The app showcases the best of Seoul's dining, cafes, shopping spots, and events with smooth SSGOI transitions that create a native app-like experience. The intuitive mobile-first design helps tourists discover Seoul's hidden gems with ease.",
+      "Seoul Biyori (ソウル日和) is a comprehensive guide for Japanese visitors to Seoul. Built by a non-developer using MVPStar (https://mvpstar.ai), a Korean vibe-coding tool, this app showcases the best of Seoul's dining, cafes, shopping spots, and events. SSGOI transitions create a native app-like experience, proving that smooth web animations are accessible to everyone.",
     url: "https://www.seoulbiyori.com",
     thumbnail: "/showcase/seoulbiyori.webp",
     gif: "/showcase/seoulbiyori.gif",
     gallery: ["/showcase/seoulbiyori.gif"],
-    tags: ["Travel", "Mobile", "Guide"],
-    framework: "SvelteKit",
-    transitions: ["fade", "slide"],
-    year: 2024,
+    tags: ["Travel", "Mobile", "No-Code"],
+    framework: "Next.js",
+    transitions: ["swap", "drill"],
+    year: 2025,
     featured: true,
   },
 ];
