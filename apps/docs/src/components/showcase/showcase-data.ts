@@ -4,7 +4,8 @@ export interface ShowcaseItem {
   description: string;
   longDescription?: string;
   url: string;
-  thumbnail: string;
+  thumbnail: string; // Static image shown by default
+  gif?: string; // Animated GIF shown on hover (optional)
   gallery?: string[]; // Additional images/GIFs for the modal gallery
   tags?: string[];
   framework?: string;
@@ -22,7 +23,8 @@ export const showcaseData: ShowcaseItem[] = [
   //   description: "Brief description of your site and how it uses SSGOI",
   //   longDescription: "Detailed description about how SSGOI enhanced your site...",
   //   url: "https://yoursite.com",
-  //   thumbnail: "/showcase/your-site.png", // Add image to public/showcase/
+  //   thumbnail: "/showcase/your-site.png", // Static image (required)
+  //   gif: "/showcase/your-site.gif", // Animated preview on hover (optional)
   //   gallery: ["/showcase/your-site-1.gif", "/showcase/your-site-2.png"],
   //   tags: ["React", "E-commerce"],
   //   framework: "Next.js",
@@ -39,7 +41,8 @@ export const showcaseData: ShowcaseItem[] = [
     longDescription:
       "Burrr AI leverages SSGOI's smooth page transitions to create a premium feel for their AI-powered platform. The seamless navigation between different sections showcases the company's innovative approach to user experience, matching their cutting-edge AI solutions with equally impressive web interactions.",
     url: "https://burrr.ai",
-    thumbnail: "/showcase/burrr.gif",
+    thumbnail: "/showcase/burrr.webp",
+    gif: "/showcase/burrr.gif",
     gallery: ["/showcase/burrr.gif"],
     tags: ["AI", "Chatbot", "Startup"],
     framework: "SvelteKit",

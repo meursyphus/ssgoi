@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import type { ShowcaseItem } from "./showcase-data";
@@ -15,14 +16,21 @@ export function ShowcaseCard({ item, index, onClick }: ShowcaseCardProps) {
     title,
     description,
     thumbnail,
+    gif,
     tags = [],
     framework,
     featured,
   } = item;
 
+  const [isHovered, setIsHovered] = useState(false);
+  const hasGif = !!gif;
+  const currentImage = isHovered && hasGif ? gif : thumbnail;
+
   return (
     <button
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="group relative block w-full text-left overflow-hidden rounded-xl border border-white/5 bg-white/[0.02] transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] focus:outline-none focus:ring-2 focus:ring-white/20"
     >
       {/* Featured Badge */}
@@ -40,11 +48,11 @@ export function ShowcaseCard({ item, index, onClick }: ShowcaseCardProps) {
       {/* Thumbnail */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
         <Image
-          src={thumbnail}
+          src={currentImage}
           alt={title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
-          unoptimized={thumbnail.endsWith(".gif")}
+          unoptimized={currentImage.endsWith(".gif")}
         />
 
         {/* Hover Overlay */}
@@ -57,10 +65,16 @@ export function ShowcaseCard({ item, index, onClick }: ShowcaseCardProps) {
           </div>
         </div>
 
-        {/* GIF Indicator */}
-        {thumbnail.endsWith(".gif") && (
-          <div className="absolute bottom-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[9px] uppercase tracking-wider text-white/70">
-            GIF
+        {/* GIF Indicator - shows when GIF available */}
+        {hasGif && (
+          <div
+            className={`absolute bottom-3 left-3 px-2 py-0.5 backdrop-blur-sm rounded text-[9px] uppercase tracking-wider transition-colors ${
+              isHovered
+                ? "bg-green-500/80 text-white"
+                : "bg-black/60 text-white/70"
+            }`}
+          >
+            {isHovered ? "Playing" : "GIF"}
           </div>
         )}
       </div>
