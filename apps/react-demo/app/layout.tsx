@@ -10,6 +10,7 @@ import {
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
+  experimentalPreserveScroll: true,
   transitions: [
     // Use hero transition between main and item detail pages
     {
