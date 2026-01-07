@@ -455,11 +455,20 @@ export type SsgoiConfig = {
   defaultTransition?: SggoiTransition;
   middleware?: (from: string, to: string) => { from: string; to: string };
   /**
+   * @deprecated Use `skipAnimationOnBack` instead. Will be removed in next major version.
    * Skip page transitions when iOS/Safari swipe-back gesture is detected
-   * This prevents animation conflicts between SSGOI and Safari's native swipe animation
-   * @default true
    */
   skipOnIosSwipe?: boolean;
+  /**
+   * Skip animations on browser back navigation
+   * - `true`: Skip on back navigation (iOS only) - default
+   * - `false`: Never skip, always run animations
+   * - `'all'`: Skip on all platforms, not just iOS
+   *
+   * This prevents animation conflicts with iOS Safari's native swipe-back gesture.
+   * @default true
+   */
+  skipAnimationOnBack?: boolean | "all";
   /**
    * @description Automatically preserve and restore scroll position when navigating between pages.
    * When enabled, SSGOI will:

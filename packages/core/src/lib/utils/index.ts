@@ -6,3 +6,4 @@ export { getRect } from "./get-rect";
 export { round, floor, ceil, toFixed } from "./number";
 export { withResolvers } from "./with-resolvers";
 export { waitPaint } from "./wait-paint";
+export { isIOS } from "./is-ios";

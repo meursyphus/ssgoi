@@ -9,13 +9,14 @@ import {
   createPageTransitionStrategy,
 } from "../transition/transition-strategy";
 import { processSymmetricTransitions } from "./process-symmetric-transitions";
-import { createSwipeDetector } from "./create-swipe-detector";
+import { createNavigationDirectionDetector } from "./create-navigation-direction-detector";
 import { createContextManager } from "./create-context-manager";
 import { findMatchingTransition } from "./find-matching-transition";
 import {
   createOutFirstDetector,
   createAnyOrderDetector,
 } from "./navigation-detector-strategy";
+import { isIOS } from "../utils";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -71,9 +72,28 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
-    skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
+    skipOnIosSwipe,
+    skipAnimationOnBack,
     experimentalPreserveScroll = false, // Default to false - manual scroll management
   } = options;
+
+  // Handle deprecated skipOnIosSwipe option
+  if (skipOnIosSwipe !== undefined) {
+    console.warn(
+      "[SSGOI] skipOnIosSwipe is deprecated. Use skipAnimationOnBack instead.",
+    );
+  }
+
+  // Resolve skipAnimationOnBack value (with backward compatibility)
+  const resolvedSkipOnBack =
+    skipAnimationOnBack ?? (skipOnIosSwipe === false ? false : true);
+
+  // Determine if we should skip on back navigation
+  // - 'all': skip on all platforms
+  // - true: skip only on iOS
+  // - false: never skip
+  const shouldSkipOnBack =
+    resolvedSkipOnBack === "all" || (resolvedSkipOnBack === true && isIOS());
 
   // Internal options (set by framework adapters)
   const { outFirst = true, createNavigationDetector } = internalOptions || {};
@@ -95,28 +115,37 @@ export function createSggoiTransitionContext(
     getScrollPosition,
   } = createContextManager({ preserveScroll: experimentalPreserveScroll });
 
-  // Initialize swipe detector
-  const swipeDetector = createSwipeDetector(skipOnIosSwipe);
-  swipeDetector.initialize();
+  // Initialize navigation direction detector for back navigation detection
+  const directionDetector = createNavigationDirectionDetector();
+  if (shouldSkipOnBack) {
+    directionDetector.initialize();
+  }
 
   /**
    * Get transition config for the given path and type
    * Uses NavigationDetector to collect out/in pairs
    */
   const getTransition = async (path: string, type: "out" | "in") => {
-    // Skip animations if iOS swipe-back gesture is detected
-    if (swipeDetector.isSwipePending()) {
-      swipeDetector.resetSwipeDetection();
+    // Skip animations on back navigation (when enabled)
+    if (shouldSkipOnBack && directionDetector.isBack()) {
+      if (type === "out") {
+        // OUT: return empty config (no animation)
+        return () => ({});
+      }
       if (type === "in") {
-        // Return config with only onReady to restore visibility
-        // This ensures the page becomes visible even without animation
+        // IN: restore visibility and update direction state
+        directionDetector.onPageEnter();
         return async (element: HTMLElement) => ({
           onReady: () => {
             element.style.visibility = "visible";
           },
         });
       }
-      return () => ({});
+    }
+
+    // Update direction detector index on page enter (for non-back navigations)
+    if (type === "in" && shouldSkipOnBack) {
+      directionDetector.onPageEnter();
     }
 
     // Trigger and wait for navigation pair
@@ -205,11 +234,11 @@ export function createSggoiTransitionContext(
   /**
    * Check if a transition is configured for the given from/to paths
    * Used for determining initial visibility before transition starts
-   * Returns false if swipe-back is detected (no need to hide initially)
+   * Returns false if back navigation is detected (animation will be skipped)
    */
   const hasMatchingTransition = (from: string, to: string): boolean => {
-    // Skip hiding if swipe-back is detected (animation will be skipped anyway)
-    if (swipeDetector.isSwipePending()) {
+    // Skip hiding if back navigation is detected (animation will be skipped anyway)
+    if (shouldSkipOnBack && directionDetector.isBack()) {
       return false;
     }
 
