@@ -54,6 +54,10 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           element.style.backfaceVisibility = "";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "";
+          element.style.transform = "";
+          if (opacity) {
+            element.style.opacity = "";
+          }
         },
       }),
       out: (element, context) => ({
@@ -109,6 +113,10 @@ export const drill = (options: DrillOptions = {}): SggoiTransition => {
           element.style.backfaceVisibility = "";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =
             "";
+          element.style.transform = "";
+          if (opacity) {
+            element.style.opacity = "";
+          }
         },
       }),
       out: (element, context) => ({
