@@ -4,11 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Ssgoi } from "@ssgoi/react";
-import {
-  drill,
-  pinterest,
-  instagram,
-} from "@ssgoi/react/view-transitions";
+import { drill, pinterest, instagram } from "@ssgoi/react/view-transitions";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -20,6 +16,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   const config = useMemo(
     () => ({
       experimentalPreserveScroll: true,
+      scrollResetPatterns: ["/posts/*"],
       transitions: [
         // Pinterest transitions
         {
