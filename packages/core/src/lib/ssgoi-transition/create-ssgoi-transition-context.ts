@@ -121,39 +121,25 @@ export function createSggoiTransitionContext(
     directionDetector.initialize();
   }
 
-  // Flag to track if we're in a back navigation
-  // When IN detects back navigation, set this flag so the paired OUT is also skipped
-  let skipOutForBackNavigation = false;
-
   /**
    * Get transition config for the given path and type
    * Uses NavigationDetector to collect out/in pairs
    */
   const getTransition = async (path: string, type: "out" | "in") => {
-    // Check if this is a back navigation that should be skipped
-    // For IN: check current direction and set flag for paired OUT
-    // For OUT: check if flag was set by preceding IN
-    let isBackNavigation = false;
-    if (shouldSkipOnBack) {
-      if (type === "in" && directionDetector.isBack()) {
-        isBackNavigation = true;
-        skipOutForBackNavigation = true; // Mark that paired OUT should also skip
-      } else if (type === "out" && skipOutForBackNavigation) {
-        isBackNavigation = true;
-        skipOutForBackNavigation = false; // Clear flag after use
-      }
-    }
+    // Capture back navigation state at arrival time (before any reset)
+    // Both IN and OUT will see the same direction since they're part of the same navigation
+    const isBackNavigation = shouldSkipOnBack && directionDetector.isBack();
 
-    // Update direction detector index on page enter
-    if (type === "in" && shouldSkipOnBack) {
-      directionDetector.onPageEnter();
-    }
-
-    // Trigger and wait for navigation pair (always go through detector for proper pairing)
+    // Trigger and wait for navigation pair
     detector.trigger(path, type);
     const pair = await detector.get(type);
 
     if (!pair) return () => ({});
+
+    // Reset direction after pair is complete (only on IN to avoid double reset)
+    if (type === "in" && shouldSkipOnBack) {
+      directionDetector.onPageEnter();
+    }
 
     // Skip animations on back navigation (after detector pairing is complete)
     if (isBackNavigation) {
