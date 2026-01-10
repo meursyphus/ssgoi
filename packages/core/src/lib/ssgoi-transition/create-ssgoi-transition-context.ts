@@ -121,20 +121,46 @@ export function createSggoiTransitionContext(
     directionDetector.initialize();
   }
 
+  // Flag to track if we're in a back navigation
+  // When IN detects back navigation, set this flag so the paired OUT is also skipped
+  let skipOutForBackNavigation = false;
+
   /**
    * Get transition config for the given path and type
    * Uses NavigationDetector to collect out/in pairs
    */
   const getTransition = async (path: string, type: "out" | "in") => {
-    // Skip animations on back navigation (when enabled)
-    if (shouldSkipOnBack && directionDetector.isBack()) {
+    // Check if this is a back navigation that should be skipped
+    // For IN: check current direction and set flag for paired OUT
+    // For OUT: check if flag was set by preceding IN
+    let isBackNavigation = false;
+    if (shouldSkipOnBack) {
+      if (type === "in" && directionDetector.isBack()) {
+        isBackNavigation = true;
+        skipOutForBackNavigation = true; // Mark that paired OUT should also skip
+      } else if (type === "out" && skipOutForBackNavigation) {
+        isBackNavigation = true;
+        skipOutForBackNavigation = false; // Clear flag after use
+      }
+    }
+
+    // Update direction detector index on page enter
+    if (type === "in" && shouldSkipOnBack) {
+      directionDetector.onPageEnter();
+    }
+
+    // Trigger and wait for navigation pair (always go through detector for proper pairing)
+    detector.trigger(path, type);
+    const pair = await detector.get(type);
+
+    if (!pair) return () => ({});
+
+    // Skip animations on back navigation (after detector pairing is complete)
+    if (isBackNavigation) {
       if (type === "out") {
-        // OUT: return empty config (no animation)
         return () => ({});
       }
       if (type === "in") {
-        // IN: restore visibility and update direction state
-        directionDetector.onPageEnter();
         return async (element: HTMLElement) => ({
           onReady: () => {
             element.style.visibility = "visible";
@@ -142,17 +168,6 @@ export function createSggoiTransitionContext(
         });
       }
     }
-
-    // Update direction detector index on page enter (for non-back navigations)
-    if (type === "in" && shouldSkipOnBack) {
-      directionDetector.onPageEnter();
-    }
-
-    // Trigger and wait for navigation pair
-    detector.trigger(path, type);
-    const pair = await detector.get(type);
-
-    if (!pair) return () => ({});
 
     // Apply middleware transformation
     const { from: transformedFrom, to: transformedTo } = middleware(
