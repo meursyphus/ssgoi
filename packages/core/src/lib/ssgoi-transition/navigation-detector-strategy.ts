@@ -23,12 +23,6 @@ export interface NavigationDetector {
    * Returns null if should skip (e.g., page refresh in outFirst mode)
    */
   get(type: "out" | "in"): Promise<NavigationPair | null>;
-
-  /**
-   * Reset detector state (cancel any pending transitions)
-   * Used when skipping animations to prevent stale state
-   */
-  reset(): void;
 }
 
 export type CreateNavigationDetector = () => NavigationDetector;
@@ -49,14 +43,6 @@ type PendingNavigation = {
  */
 export function createOutFirstDetector(): NavigationDetector {
   let pending: PendingNavigation | null = null;
-
-  function reset() {
-    if (pending) {
-      pending.outResolve?.(null);
-      pending.inResolve?.(null);
-      pending = null;
-    }
-  }
 
   function checkPair() {
     // Only resolve when BOTH outResolve and inResolve are set
@@ -105,8 +91,6 @@ export function createOutFirstDetector(): NavigationDetector {
         checkPair();
       });
     },
-
-    reset,
   };
 }
 
@@ -187,7 +171,5 @@ export function createAnyOrderDetector(): NavigationDetector {
         checkPair();
       });
     },
-
-    reset,
   };
 }
