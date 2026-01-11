@@ -397,7 +397,24 @@ Visit [https://ssgoi.dev](https://ssgoi.dev) for:
 - Interactive examples
 - Framework integration guides
 - Custom transition recipes
-- LLM Context: [ssgoi.dev/llm.txt](https://ssgoi.dev/llm.txt) for AI assistants
+
+### AI-Assisted Setup
+
+If you're using an AI assistant (Claude, ChatGPT, Cursor, etc.) to help implement SSGOI:
+
+1. **Reference the LLM context file:** Add `https://ssgoi.dev/llm.txt` to your AI assistant's context
+2. **Or copy the content:** Download [llm.txt](https://ssgoi.dev/llm.txt) and paste it into your conversation
+
+The LLM context file contains:
+- Complete setup guides for Next.js and other frameworks
+- Explanation of why `position: relative` and `z-index: 0` are required
+- Troubleshooting guide for common issues
+- API reference and code examples
+
+**Tip for Cursor/AI IDE users:** Add this to your project rules or CLAUDE.md:
+```
+For page transitions, reference https://ssgoi.dev/llm.txt
+```
 
 ## Contributing
 
