@@ -10,6 +10,12 @@ import {
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
 import { waitPaint } from "../utils";
+import {
+  watchActivityHide,
+  unwatchActivityHide,
+  revealForAnimation,
+  hideAfterAnimation,
+} from "./activity-observer";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,
@@ -106,8 +112,20 @@ export function createTransitionCallback(
     }
   };
 
-  const runExitTransition = async (element: HTMLElement) => {
-    currentClone = element;
+  /**
+   * Run exit transition
+   * @param element - Element to animate (clone for traditional mode, original for Activity mode)
+   * @param mode - 'clone' for traditional unmount, 'activity' for Activity hidden
+   */
+  const runExitTransition = async (
+    element: HTMLElement,
+    mode: "clone" | "activity" = "clone",
+  ) => {
+    const isActivityMode = mode === "activity";
+
+    if (!isActivityMode) {
+      currentClone = element;
+    }
 
     const transition = getTransition();
     const inConfig =
@@ -115,6 +133,14 @@ export function createTransitionCallback(
     const outConfig = transition.out && transition.out(element);
 
     if (!outConfig) {
+      if (!isActivityMode && currentClone) {
+        currentClone.remove();
+        currentClone = null;
+      }
+      if (isActivityMode) {
+        // Keep element hidden if no animation
+        hideAfterAnimation(element);
+      }
       return;
     }
 
@@ -130,16 +156,24 @@ export function createTransitionCallback(
       if (currentAnimation) {
         currentAnimation.direction = "out";
       }
-      if (currentClone) {
+      if (!isActivityMode && currentClone) {
         currentClone.remove();
         currentClone = null;
+      }
+      if (isActivityMode) {
+        hideAfterAnimation(element);
       }
       return;
     }
 
     const config = setup.config;
 
-    insertClone();
+    // Activity mode: reveal element; Clone mode: insert clone
+    if (isActivityMode) {
+      revealForAnimation(element);
+    } else {
+      insertClone();
+    }
     config.prepare?.();
 
     const normalizedConfig = normalizeSchedule(
@@ -147,7 +181,11 @@ export function createTransitionCallback(
         ...config,
         onEnd: () => {
           config.onEnd?.();
-          if (currentClone) {
+          if (isActivityMode) {
+            // Activity mode: hide element back
+            hideAfterAnimation(element);
+          } else if (currentClone) {
+            // Clone mode: remove clone
             currentClone.remove();
             currentClone = null;
           }
@@ -194,14 +232,39 @@ export function createTransitionCallback(
   // Cached scope reference (only set for 'local' scope)
   let scopeRef: Element | null = null;
 
-  // Track if unmount has been triggered (prevents double execution)
-  let unmountTriggered = false;
+  // Track if exit has been triggered (prevents double execution from both Activity and unmount)
+  let exitTriggered = false;
 
-  // Function to handle unmount - returns cleanup function for framework adapters
+  // Current element reference for Activity cleanup
+  let currentElementRef: HTMLElement | null = null;
+
+  // Handler for Activity hidden detection (display: none)
+  const handleActivityHide = (element: HTMLElement) => {
+    if (exitTriggered) return;
+    exitTriggered = true;
+
+    if (scopeRef) {
+      queueMicrotask(() => {
+        if (!document.contains(scopeRef!)) {
+          // Scope removed = skip OUT animation
+          hideAfterAnimation(element);
+          return;
+        }
+        runExitTransition(element, "activity");
+      });
+    } else {
+      runExitTransition(element, "activity");
+    }
+  };
+
+  // Function to handle unmount (traditional clone mode) - returns cleanup function for framework adapters
   const createUnmountHandler = (element: HTMLElement) => {
     return () => {
-      if (unmountTriggered) return;
-      unmountTriggered = true;
+      // Cleanup Activity watcher
+      unwatchActivityHide(element);
+
+      if (exitTriggered) return;
+      exitTriggered = true;
 
       const cloned = element.cloneNode(true) as HTMLElement;
 
@@ -212,24 +275,37 @@ export function createTransitionCallback(
             // Scope removed = simultaneous unmount = skip OUT animation
             return;
           }
-          runExitTransition(cloned);
+          runExitTransition(cloned, "clone");
         });
       } else {
         // Global scope: run immediately
-        runExitTransition(cloned);
+        runExitTransition(cloned, "clone");
       }
     };
   };
 
   return (element: HTMLElement | null) => {
     if (!element) return;
+
+    // Cleanup previous element's Activity watcher if any
+    if (currentElementRef) {
+      unwatchActivityHide(currentElementRef);
+    }
+    currentElementRef = element;
+
     requestAnimationFrame(() => {
       parentRef = element.parentElement;
       nextSiblingRef = element.nextElementSibling;
     });
 
-    // Reset unmount flag for new element
-    unmountTriggered = false;
+    // Reset exit flag for new element
+    exitTriggered = false;
+
+    // === Register Activity observer ===
+    // This detects when React Activity hides element with display:none
+    // If Activity hides first, we use Activity mode (no clone)
+    // If DOM unmount happens first, we use traditional clone mode
+    watchActivityHide(element, handleActivityHide);
 
     // === IN transition ===
     if (options?.scope === "local") {
