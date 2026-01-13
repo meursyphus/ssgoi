@@ -46,11 +46,6 @@ export function createNavigationDirectionDetector() {
     }
   };
 
-  const cleanup = () => {
-    if (typeof window === "undefined") return;
-    window.removeEventListener("popstate", handlePopstate);
-  };
-
   /**
    * Called on page enter (IN transition)
    * - Updates index for push navigation
@@ -70,14 +65,11 @@ export function createNavigationDirectionDetector() {
     return result;
   };
 
-  const getDirection = () => direction;
   const isBack = () => direction === "back";
 
   return {
     initialize,
-    cleanup,
     onPageEnter,
-    getDirection,
     isBack,
   };
 }
