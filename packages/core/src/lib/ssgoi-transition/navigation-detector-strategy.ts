@@ -105,7 +105,7 @@ export function createOutFirstDetector(): NavigationDetector {
 export function createAnyOrderDetector(): NavigationDetector {
   let pending: PendingNavigation | null = null;
 
-  function cancelPending() {
+  function reset() {
     if (!pending) return;
     pending.outResolve?.(null);
     pending.inResolve?.(null);
@@ -121,6 +121,13 @@ export function createAnyOrderDetector(): NavigationDetector {
       pending?.outResolve &&
       pending?.inResolve
     ) {
+      // Validate pair: from and to must be different paths
+      // Same path means mismatched pairing (e.g., delayed OUT paired with wrong IN)
+      if (pending.from === pending.to) {
+        reset();
+        return;
+      }
+
       const pair: NavigationPair = { from: pending.from, to: pending.to };
       pending.outResolve(pair);
       pending.inResolve(pair);
@@ -137,7 +144,7 @@ export function createAnyOrderDetector(): NavigationDetector {
           (type === "in" && pending.to && pending.to !== path));
 
       if (isNewTransition) {
-        cancelPending();
+        reset();
       }
 
       if (!pending) {

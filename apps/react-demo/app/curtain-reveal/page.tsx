@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { SsgoiTransition } from "@ssgoi/react";
+import { useRouter } from "next/navigation";
 
 export default function CurtainRevealDemo() {
+  const router = useRouter();
   const features = [
     {
       icon: "🎭",
@@ -216,17 +217,17 @@ export default function CurtainRevealDemo() {
             The Curtain Reveal transition blends cinematic storytelling with
             shape-driven closure for a dramatic immersive effect.
           </p>
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             style={{
               background: "rgba(255,255,255,0.25)",
               color: "white",
               padding: "0.8rem 1.5rem",
               borderRadius: "10px",
-              textDecoration: "none",
               border: "1px solid rgba(255,255,255,0.3)",
               transition: "all 0.3s ease",
               fontSize: "1rem",
+              cursor: "pointer",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "rgba(255,255,255,0.4)";
@@ -238,7 +239,7 @@ export default function CurtainRevealDemo() {
             }}
           >
             ← Back to Home
-          </Link>
+          </button>
         </div>
       </div>
     </SsgoiTransition>

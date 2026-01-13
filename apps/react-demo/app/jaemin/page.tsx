@@ -1,9 +1,11 @@
 "use client";
 
 import { SsgoiTransition } from "@ssgoi/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RotatePage() {
+  const router = useRouter();
+
   // Generate content sections for scrolling test
   const features = [
     {
@@ -403,8 +405,8 @@ export default function RotatePage() {
             extensive content, multiple visual effects, and complex DOM
             structures.
           </p>
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             style={{
               background: "rgba(255, 255, 255, 0.2)",
               color: "white",
@@ -416,6 +418,7 @@ export default function RotatePage() {
               fontSize: "1.1rem",
               fontWeight: "600",
               display: "inline-block",
+              cursor: "pointer",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "rgba(255, 255, 255, 0.3)";
@@ -427,7 +430,7 @@ export default function RotatePage() {
             }}
           >
             ← Back to Home
-          </Link>
+          </button>
         </div>
       </div>
     </SsgoiTransition>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { SsgoiTransition } from "@ssgoi/svelte";
   import { page } from "$app/stores";
-  import { goto } from "$app/navigation";
 
   const colors = [
     { id: 1, color: "#FF6B6B", name: "Coral" },
@@ -23,7 +22,7 @@
       style="background-color: {item.color}"
       data-hero-key={`color-${item.id}`}
     >
-      <button onclick={() => goto("/")} class="back-button">
+      <button onclick={() => history.back()} class="back-button">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
           <path
             fill-rule="evenodd"
