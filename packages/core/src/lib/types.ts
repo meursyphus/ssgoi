@@ -445,6 +445,15 @@ export type SggoiTransitionContext = {
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;
 
+/**
+ * Platform types for skipAnimationOnBack configuration
+ * - 'ios': iOS devices (iPhone, iPad, iPod)
+ * - 'android': Android devices
+ * - 'desktop': Desktop browsers (non-mobile)
+ * - 'all': All platforms
+ */
+export type Platform = "ios" | "android" | "desktop" | "all";
+
 export type SsgoiConfig = {
   transitions?: {
     from: string;
@@ -455,20 +464,30 @@ export type SsgoiConfig = {
   defaultTransition?: SggoiTransition;
   middleware?: (from: string, to: string) => { from: string; to: string };
   /**
-   * @deprecated Use `skipAnimationOnBack` instead. Will be removed in next major version.
+   * @deprecated Use `skipAnimationOnBack: ['ios']` instead. Will be removed in next major version.
    * Skip page transitions when iOS/Safari swipe-back gesture is detected
    */
   skipOnIosSwipe?: boolean;
   /**
-   * Skip animations on browser back navigation
-   * - `true`: Skip on back navigation (iOS only) - default
-   * - `false`: Never skip, always run animations
-   * - `'all'`: Skip on all platforms, not just iOS
+   * Skip animations on browser back navigation for specified platforms
    *
-   * This prevents animation conflicts with iOS Safari's native swipe-back gesture.
-   * @default true
+   * @example
+   * // iOS only (default)
+   * skipAnimationOnBack: ['ios']
+   *
+   * // iOS and Android
+   * skipAnimationOnBack: ['ios', 'android']
+   *
+   * // All platforms
+   * skipAnimationOnBack: ['all']
+   *
+   * // Disabled - always run animations
+   * skipAnimationOnBack: []
+   *
+   * This prevents animation conflicts with native swipe-back gestures.
+   * @default ['ios']
    */
-  skipAnimationOnBack?: boolean | "all";
+  skipAnimationOnBack?: Platform[];
   /**
    * @description Automatically preserve and restore scroll position when navigating between pages.
    * When enabled, SSGOI will:

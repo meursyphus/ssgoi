@@ -12,7 +12,7 @@ import { hero } from "@ssgoi/vue/view-transitions";
 import type { SsgoiConfig } from "@ssgoi/vue";
 
 const ssgoiConfig: SsgoiConfig = {
-  skipAnimationOnBack: true,
+  skipAnimationOnBack: ["ios"],
   transitions: [
     // Use hero transition between main and item detail pages
     {

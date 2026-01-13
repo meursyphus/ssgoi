@@ -3,6 +3,7 @@ import type {
   SsgoiContext,
   SsgoiExtendedContext,
   SsgoiInternalOptions,
+  Platform,
 } from "../types";
 import {
   TRANSITION_STRATEGY,
@@ -16,7 +17,7 @@ import {
   createOutFirstDetector,
   createAnyOrderDetector,
 } from "./navigation-detector-strategy";
-import { isIOS } from "../utils";
+import { matchPlatform } from "../utils";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -80,20 +81,18 @@ export function createSggoiTransitionContext(
   // Handle deprecated skipOnIosSwipe option
   if (skipOnIosSwipe !== undefined) {
     console.warn(
-      "[SSGOI] skipOnIosSwipe is deprecated. Use skipAnimationOnBack instead.",
+      "[SSGOI] skipOnIosSwipe is deprecated. Use skipAnimationOnBack: ['ios'] instead.",
     );
   }
 
-  // Resolve skipAnimationOnBack value (with backward compatibility)
-  const resolvedSkipOnBack =
-    skipAnimationOnBack ?? (skipOnIosSwipe === false ? false : true);
+  // Resolve skipAnimationOnBack platforms (with backward compatibility)
+  // - undefined: default to ['ios']
+  // - skipOnIosSwipe: false → [], true/undefined → ['ios']
+  const resolvedPlatforms: Platform[] =
+    skipAnimationOnBack ?? (skipOnIosSwipe === false ? [] : ["ios"]);
 
-  // Determine if we should skip on back navigation
-  // - 'all': skip on all platforms
-  // - true: skip only on iOS
-  // - false: never skip
-  const shouldSkipOnBack =
-    resolvedSkipOnBack === "all" || (resolvedSkipOnBack === true && isIOS());
+  // Determine if we should skip on back navigation based on current platform
+  const shouldSkipOnBack = matchPlatform(resolvedPlatforms);
 
   // Internal options (set by framework adapters)
   const { outFirst = true, createNavigationDetector } = internalOptions || {};
