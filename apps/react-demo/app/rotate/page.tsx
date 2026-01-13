@@ -1,9 +1,11 @@
 "use client";
 
 import { SsgoiTransition } from "@ssgoi/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RotatePage() {
+  const router = useRouter();
+
   return (
     <SsgoiTransition id="/rotate">
       <div
@@ -76,18 +78,18 @@ export default function RotatePage() {
           </ul>
         </div>
 
-        <Link
-          href="/"
+        <button
+          onClick={() => router.back()}
           style={{
             background: "rgba(255, 255, 255, 0.2)",
             color: "white",
             padding: "1rem 2rem",
             borderRadius: "8px",
-            textDecoration: "none",
             border: "2px solid rgba(255, 255, 255, 0.3)",
             transition: "all 0.2s ease",
             fontSize: "1.1rem",
             fontWeight: "600",
+            cursor: "pointer",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(255, 255, 255, 0.3)";
@@ -99,7 +101,7 @@ export default function RotatePage() {
           }}
         >
           ← Back to Home
-        </Link>
+        </button>
       </div>
     </SsgoiTransition>
   );

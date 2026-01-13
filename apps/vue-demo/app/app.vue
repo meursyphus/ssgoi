@@ -7,16 +7,17 @@
 </template>
 
 <script setup lang="ts">
-import { Ssgoi } from '@ssgoi/vue';
-import { hero } from '@ssgoi/vue/view-transitions';
-import type { SsgoiConfig } from '@ssgoi/vue';
+import { Ssgoi } from "@ssgoi/vue";
+import { hero } from "@ssgoi/vue/view-transitions";
+import type { SsgoiConfig } from "@ssgoi/vue";
 
 const ssgoiConfig: SsgoiConfig = {
+  skipAnimationOnBack: true,
   transitions: [
     // Use hero transition between main and item detail pages
     {
-      from: '/',
-      to: '/item/*',
+      from: "/",
+      to: "/item/*",
       transition: hero({ spring: { stiffness: 5, damping: 1 } }),
       symmetric: true,
     },

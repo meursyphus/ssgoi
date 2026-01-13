@@ -7,6 +7,7 @@ import { fade, hero } from "@ssgoi/solid/view-transitions";
 import "./index.css";
 
 const ssgoiConfig: SsgoiConfig = {
+  skipAnimationOnBack: true,
   transitions: [
     // Use hero transition between main and item detail pages
     {

@@ -25,6 +25,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 })
 export class AppComponent {
   ssgoiConfig: SsgoiConfig = {
+    skipAnimationOnBack: true,
     middleware(from, to) {
       // Skip transition if navigating to the same path
       if (from === to) {

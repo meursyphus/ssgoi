@@ -1,4 +1,4 @@
-import { useParams, A } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { SsgoiTransition } from "@ssgoi/solid";
 
 const colors = [
@@ -23,8 +23,8 @@ export default function ItemDetail() {
           style={{ "background-color": item()!.color }}
           data-hero-key={`color-${item()!.id}`}
         >
-          <A
-            href="/"
+          <button
+            onClick={() => history.back()}
             class="inline-flex items-center gap-2 py-3 px-6 bg-black/30 text-white border-2 border-white/30 rounded-lg font-semibold cursor-pointer transition-all no-underline w-fit backdrop-blur-sm hover:bg-black/50 hover:border-white/50 hover:-translate-x-1"
           >
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
@@ -35,7 +35,7 @@ export default function ItemDetail() {
               />
             </svg>
             Back
-          </A>
+          </button>
 
           <div class="flex-1 flex flex-col items-center justify-center gap-8 mt-8">
             <div

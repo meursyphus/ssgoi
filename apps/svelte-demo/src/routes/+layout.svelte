@@ -11,6 +11,7 @@
 
   const ssgoiConfig = {
     experimentalPreserveScroll: true,
+    skipAnimationOnBack: true,
     transitions: [
       // Use hero transition between main and item detail pages
       {
