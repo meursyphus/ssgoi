@@ -470,6 +470,19 @@ export type SsgoiConfig = {
    * @default false
    */
   experimentalPreserveScroll?: boolean;
+  /**
+   * @description Patterns for routes that should always reset scroll to top when leaving.
+   * When navigating away from a matching route, scroll position will be saved as 0.
+   * This means returning to these routes will always start at the top.
+   *
+   * Supports wildcard patterns:
+   * - '/post/*' matches '/post/123', '/post/abc', etc.
+   * - '*' matches any path
+   *
+   * @example ['/post/*', '/article/*', '/product/detail/*']
+   * @experimental This is an experimental feature and may change in future versions.
+   */
+  scrollResetPatterns?: string[];
 };
 
 /**

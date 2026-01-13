@@ -16,10 +16,11 @@ export function matchPath(path: string, pattern: string): boolean {
     return true;
   }
 
-  // Wildcard match - pattern ending with /* matches path and subpaths
+  // Wildcard match - pattern ending with /* matches only subpaths (not the prefix itself)
+  // e.g., "/posts/*" matches "/posts/123" but NOT "/posts" or "/posts/"
   if (pattern.endsWith("/*")) {
-    const prefix = pattern.slice(0, -2);
-    return path === prefix || path.startsWith(prefix + "/");
+    const prefix = pattern.slice(0, -1); // "/posts/"
+    return path.startsWith(prefix) && path.length > prefix.length;
   }
 
   // Exact match - paths must be identical
