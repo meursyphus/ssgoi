@@ -6,11 +6,8 @@
 
 	let { children } = $props();
 
-	let mainElement: HTMLElement | null = $state(null);
-	let scrollPositions: Record<string, number> = {};
-	let previousPath = $state($page.url.pathname);
-
 	const config = {
+		experimentalPreserveScroll: true,
 		transitions: [
 			// Pinterest transitions
 			{
@@ -39,26 +36,6 @@
 			}
 		]
 	};
-
-	$effect(() => {
-		const pathname = $page.url.pathname;
-		if (mainElement && previousPath !== pathname) {
-			// Save current scroll position
-			scrollPositions[previousPath] = mainElement.scrollTop;
-
-			// Restore scroll position for new page
-			const savedPosition = scrollPositions[pathname] || 0;
-			mainElement.scrollTop = savedPosition;
-
-			previousPath = pathname;
-		}
-	});
-
-	function handleScroll() {
-		if (mainElement) {
-			scrollPositions[$page.url.pathname] = mainElement.scrollTop;
-		}
-	}
 </script>
 
 <div class="h-full bg-[#121212] flex z-0">
@@ -66,8 +43,6 @@
 	<div class="w-full bg-[#121212] flex flex-col overflow-hidden relative">
 		<!-- Main Content Area -->
 		<main
-			bind:this={mainElement}
-			onscroll={handleScroll}
 			id="demo-content"
 			class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
 		>

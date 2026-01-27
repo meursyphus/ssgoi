@@ -4,10 +4,8 @@
     <div class="w-full bg-[#121212] flex flex-col overflow-hidden relative">
       <!-- Main Content Area -->
       <main
-        ref="mainRef"
         id="demo-content"
         class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
-        @scroll="handleScroll"
       >
         <Ssgoi :config="config">
           <slot />
@@ -99,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { Ssgoi } from '@ssgoi/vue';
 import type { SsgoiConfig } from '@ssgoi/vue';
@@ -111,11 +109,9 @@ import {
 
 const route = useRoute();
 const pathname = computed(() => route.path);
-const mainRef = ref<HTMLElement | null>(null);
-const scrollPositions = ref<Record<string, number>>({});
-const previousPath = ref(pathname.value);
 
 const config: SsgoiConfig = {
+  experimentalPreserveScroll: true,
   transitions: [
     // Pinterest transitions
     {
@@ -145,20 +141,4 @@ const config: SsgoiConfig = {
   ],
 };
 
-const handleScroll = () => {
-  if (!mainRef.value) return;
-  scrollPositions.value[pathname.value] = mainRef.value.scrollTop;
-};
-
-// Restore scroll position when path changes
-watch(pathname, () => {
-  if (!mainRef.value) return;
-  const savedPosition = scrollPositions.value[pathname.value] || 0;
-
-  if (mainRef.value) {
-    mainRef.value.scrollTop = savedPosition;
-  }
-
-  previousPath.value = pathname.value;
-});
 </script>

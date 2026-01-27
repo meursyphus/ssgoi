@@ -1,51 +1,120 @@
 # SSGOI - Page Transition Library
 
-> Universal page transition library for web applications. Works in all modern browsers (Chrome, Firefox, Safari), unlike browser's View Transition API (Chrome-only).
+> Universal page transition library that works in all browsers (Chrome, Firefox, Safari), unlike the View Transition API (Chrome-only).
 
-## Installation (React/Next.js)
+This document is for AI assistants to help developers set up SSGOI page transitions in Next.js.
+
+---
+
+## Installation
 
 ```bash
-npm install @ssgoi/react
+npm install @ssgoi/react @ssgoi/core
 ```
 
-Other frameworks:
-- Svelte: `npm install @ssgoi/svelte`
-- Vue: `npm install @ssgoi/vue`
-- Angular: `npm install @ssgoi/angular`
+Recommend installing both `@ssgoi/react` and `@ssgoi/core` with latest versions.
 
-## Quick Start (React/Next.js)
+---
 
-### 1. Layout Setup
+## Layout Setup
+
+### Layout Structure
+
+```
+<Ssgoi config={config}>
+  <div className="relative z-0">  <-- CSS properties here
+    {children}                     <-- SsgoiTransition is inside each page
+  </div>
+</Ssgoi>
+```
+
+### CSS Properties
+
+**`z-index: 0` (Required)**
+- Place on the div that directly wraps `{children}` in layout
+- Creates a stacking context
+- Without this, OUT page disappears behind background color
+
+**`position: relative` (Conditional)**
+- Required when: header/bottom-nav are NOT fixed/sticky
+- Not required when: you have fixed header or bottom nav
+
+**`overflow-x: clip` (Recommended for web apps)**
+- Prevents horizontal overflow during slide/drill transitions
+
+### Web App Layout Pattern
 
 ```tsx
 // app/layout.tsx
+"use client";
+
 import { Ssgoi } from "@ssgoi/react";
-import { fade } from "@ssgoi/react/view-transitions";
+import { drill } from "@ssgoi/react/view-transitions";
+
+const config = {
+  experimentalPreserveScroll: true,  // Preserve scroll position
+  scrollResetPatterns: ['/post/*'],   // Detail pages start at top
+  transitions: [
+    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
+    { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
+  ],
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <Ssgoi config={{ defaultTransition: fade() }}>
-          {/* IMPORTANT: position: relative and z-index: 0 required */}
-          <div style={{ position: "relative", zIndex: 0, minHeight: "100vh" }}>
-            {children}
+        <div className="h-dvh flex flex-col">
+          {/* Scroll container ABOVE Ssgoi */}
+          <div className="flex-1 overflow-y-scroll">
+            <div className="max-w-[420px] mx-auto relative z-0 overflow-x-clip">
+              <Ssgoi config={config}>
+                {children}
+              </Ssgoi>
+            </div>
           </div>
-        </Ssgoi>
+          <BottomNav />
+        </div>
       </body>
     </html>
   );
 }
 ```
 
-**Why `position: relative` is required:**
-- During OUT animation, the leaving page becomes `position: absolute`
-- Without a positioned parent, the page will jump to wrong position
-- `z-index: 0` creates a stacking context to prevent z-index conflicts
+### Standard Web Layout Pattern
 
-### 2. Page Setup
+```tsx
+// app/layout.tsx
+import { Ssgoi } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/view-transitions";
 
-Each page must be wrapped with `SsgoiTransition`:
+const config = {
+  scrollResetPatterns: ['*'],  // Always scroll to top
+  defaultTransition: fade(),
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <Header />  {/* Fixed header provides positioning context */}
+        <Ssgoi config={config}>
+          <main className="z-0 min-h-screen">
+            {children}
+          </main>
+        </Ssgoi>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+## Page Setup
+
+Wrap each page with `SsgoiTransition`:
 
 ```tsx
 // app/page.tsx
@@ -54,348 +123,315 @@ import { SsgoiTransition } from "@ssgoi/react";
 export default function HomePage() {
   return (
     <SsgoiTransition id="/">
-      <main>
-        <h1>Home</h1>
-      </main>
+      <div>Home content</div>
     </SsgoiTransition>
   );
 }
 
-// app/about/page.tsx
-export default function AboutPage() {
+// app/post/[id]/page.tsx
+export default function PostPage({ params }: { params: { id: string } }) {
   return (
-    <SsgoiTransition id="/about">
-      <main>
-        <h1>About</h1>
-      </main>
+    <SsgoiTransition id={`/post/${params.id}`}>
+      <div>Post content</div>
     </SsgoiTransition>
   );
 }
 ```
 
-**Important:** The `id` prop should match the route path for proper transition matching.
+---
 
-## Route-based Transitions
+## SsgoiConfig
 
-Define different transitions for different route pairs:
+```ts
+type SsgoiConfig = {
+  // Route-specific transitions
+  transitions?: {
+    from: string;           // Source path (wildcards: '/post/*', '*')
+    to: string;             // Destination path
+    transition: Transition;
+    symmetric?: boolean;    // Auto-create reverse transition
+  }[];
 
-```tsx
-import { Ssgoi } from "@ssgoi/react";
-import { fade, scroll, drill, hero } from "@ssgoi/react/view-transitions";
+  // Fallback transition
+  defaultTransition?: Transition;
 
-const config = {
-  defaultTransition: fade(),
-  transitions: [
-    // Scroll up when going home -> about
-    { from: "/", to: "/about", transition: scroll({ direction: "up" }) },
-    // Scroll down when going about -> home
-    { from: "/about", to: "/", transition: scroll({ direction: "down" }) },
+  // Skip animation on back navigation (native gesture conflict prevention)
+  skipAnimationOnBack?: ('ios' | 'android' | 'desktop' | 'all')[];
+  // default: ['ios']
 
-    // Drill into detail pages (wildcard pattern)
-    { from: "/products", to: "/products/*", transition: drill({ direction: "enter" }) },
-    { from: "/products/*", to: "/products", transition: drill({ direction: "exit" }) },
+  // Auto preserve/restore scroll position
+  experimentalPreserveScroll?: boolean;  // default: false
 
-    // Symmetric: auto-creates reverse transition
-    { from: "/blog", to: "/blog/*", transition: fade(), symmetric: true },
-  ],
+  // Routes that reset scroll to top when entering
+  scrollResetPatterns?: string[];  // e.g., ['/post/*']
 };
-
-<Ssgoi config={config}>
-  <div style={{ position: "relative", zIndex: 0, minHeight: "100vh" }}>
-    {children}
-  </div>
-</Ssgoi>
 ```
 
-### Route Pattern Matching
+---
 
-1. **Exact match**: `/home` matches only `/home`
-2. **Wildcard suffix**: `/products/*` matches `/products/123`, `/products/abc`
-3. **Global wildcard**: `*` matches any route
+## View Transitions
 
-Priority: Exact > Wildcard > Default
+Import from `@ssgoi/react/view-transitions`
 
-## Built-in View Transitions (Page-level)
+Full documentation: https://ssgoi.dev/en/docs/mobile-transitions, https://ssgoi.dev/en/docs/desktop-transitions
+
+### drill
+
+iOS-style hierarchical navigation. List -> Detail.
+
+```ts
+drill({
+  direction: 'enter' | 'exit',
+  opacity?: boolean,
+  physics?: PhysicsOptions,
+})
+```
+
+- `enter`: New page slides in from right (100% -> 0), old page moves left (-20%)
+- `exit`: Current page slides out to right, previous page returns
+
+**Default physics:** `{ spring: { stiffness: 170, damping: 22 } }`
+
+### fade
+
+Cross-fade transition. General purpose.
+
+```ts
+fade({
+  transitionDelay?: number,
+  physics?: PhysicsOptions,
+})
+```
+
+**Default physics:** `{ spring: { stiffness: 170, damping: 20, doubleSpring: true } }`
+
+### scroll
+
+Vertical scroll transition. Sequential content.
+
+```ts
+scroll({
+  direction: 'up' | 'down',
+  physics?: PhysicsOptions,
+})
+```
+
+**Default physics:** `{ spring: { stiffness: 5, damping: 4 } }`
+
+### slide
+
+Horizontal slide transition. Tab navigation.
+
+```ts
+slide({
+  direction: 'left' | 'right',
+  physics?: PhysicsOptions,
+})
+```
+
+**Default physics:** `{ spring: { stiffness: 140, damping: 19, doubleSpring: 0.8 } }`
+
+### sheet
+
+Bottom sheet style. FAB -> Compose screen.
+
+```ts
+sheet({
+  direction: 'enter' | 'exit',
+  physics?: PhysicsOptions,
+})
+```
+
+- `enter`: Sheet slides up from bottom, background scales down (1 -> 0.8) + fades
+- `exit`: Sheet slides down, background scales up + fades in
+
+**Default physics:** `{ inertia: { acceleration: 20, resistance: 1.5 } }` (enter)
+
+### swap
+
+Same-level page swap. Bottom tab navigation.
+
+```ts
+swap({
+  physics?: PhysicsOptions,
+  scaleOffset?: number,  // default: 0.05
+})
+```
+
+- OUT: Fade out only
+- IN: Scale up (0.95 -> 1) + fade in, waits for OUT to complete
+
+**Default physics:** `{ spring: { stiffness: 600, damping: 40 } }`
+
+### hero
+
+Shared element transition. Same object, different views.
+
+```ts
+hero({
+  physics?: PhysicsOptions,
+  maxDistance?: number,  // default: 700
+})
+```
+
+**Requires matching `data-hero-key` on both pages:**
 
 ```tsx
-import { fade, scroll, drill, hero, pinterest } from "@ssgoi/react/view-transitions";
+// List page
+<img data-hero-key={`item-${id}`} src={thumbnail} />
 
-// Fade - smooth opacity transition
-fade()
-
-// Scroll - vertical scrolling
-scroll({ direction: "up" })   // or "down"
-
-// Drill - iOS-style drill in/out
-drill({ direction: "enter" }) // or "exit"
-
-// Hero - shared element animation (requires data-hero-key)
-hero()
-
-// Pinterest - expanding card effect
-pinterest()
+// Detail page
+<img data-hero-key={`item-${id}`} src={fullImage} />
 ```
 
-## Element Transitions (Component-level)
+**Default physics:** `{ spring: { stiffness: 300, damping: 30 } }`
 
-Animate individual elements on mount/unmount:
+### pinterest
 
-```tsx
-import { transition } from "@ssgoi/react";
-import { fade, scale, slide, blur, rotate, bounce } from "@ssgoi/react/transitions";
+Card expansion from gallery to full screen.
 
-function Card({ show }) {
-  return show && (
-    <div ref={transition({
-      key: "my-card",
-      ...fade()
-    })}>
-      Card content
-    </div>
-  );
-}
-
-// With custom options
-<div ref={transition({
-  key: "custom",
-  ...scale({ start: 0.8, opacity: 0 })
-})}>
-  Content
-</div>
-
-// Available presets
-fade({ from: 0, to: 1 })
-scale({ start: 0, opacity: 0, axis: "both" | "x" | "y" })
-slide({ direction: "left" | "right" | "up" | "down", distance: 100 })
-blur({ amount: 10, scale: false, fade: true })
-rotate({ degrees: 180 })
-bounce()
+```ts
+pinterest({
+  physics?: PhysicsOptions,
+})
 ```
 
-## Custom Transitions
+**Requires data attributes:**
+- Gallery: `data-pinterest-gallery-key={id}`
+- Detail: `data-pinterest-detail-key={id}`
 
-Create custom transitions using `css` (recommended) or `tick`:
+### instagram
 
-```tsx
-// Using css (Web Animation API - better performance)
-<div ref={transition({
-  key: "custom",
-  in: () => ({
-    physics: { spring: { stiffness: 300, damping: 30 } },
-    css: (progress) => ({
-      opacity: progress,
-      transform: `translateY(${(1 - progress) * 20}px)`,
-    }),
-  }),
-  out: () => ({
-    physics: { spring: { stiffness: 300, damping: 30 } },
-    css: (progress) => ({
-      opacity: progress,
-      transform: `translateY(${(1 - progress) * 20}px)`,
-    }),
-  }),
-})}>
-  Content
-</div>
+Similar to pinterest but only incoming page animates. Performance optimized.
 
-// Using tick (RAF-based - for complex DOM manipulation)
-<div ref={transition({
-  key: "tick-example",
-  in: (element) => ({
-    physics: { spring: { stiffness: 300, damping: 30 } },
-    tick: (progress) => {
-      element.style.opacity = String(progress);
-      element.style.transform = `scale(${0.8 + progress * 0.2})`;
-    },
-  }),
-})}>
-  Content
-</div>
+```ts
+instagram({
+  physics?: PhysicsOptions,
+})
 ```
 
-**css vs tick:**
-- `css`: Pre-computes spring physics to keyframes, runs on GPU, main thread free
-- `tick`: RAF-based, useful when you need dynamic DOM manipulation during animation
-- Cannot use both simultaneously
+**Requires data attributes:**
+- Gallery: `data-instagram-gallery-key={id}`
+- Detail: `data-instagram-detail-key={id}`
 
-## TransitionScope
+### depth
 
-Control animation behavior for grouped elements:
+Depth-based layered navigation.
 
-```tsx
-import { TransitionScope, transition } from "@ssgoi/react";
-import { fade } from "@ssgoi/react/transitions";
-
-function Modal({ show }) {
-  return show && (
-    <TransitionScope>
-      <div className="modal">
-        {/* scope: 'local' - skips animation when mounting/unmounting with parent */}
-        <div ref={transition({ ...fade(), scope: "local" })}>
-          Won't animate when modal opens/closes
-        </div>
-
-        {/* scope: 'global' (default) - always animates */}
-        <div ref={transition({ ...fade() })}>
-          Always animates
-        </div>
-      </div>
-    </TransitionScope>
-  );
-}
+```ts
+depth({
+  direction: 'enter' | 'exit',
+  physics?: PhysicsOptions,
+})
 ```
 
-Use cases:
-- Page transitions where child elements shouldn't animate individually
-- Modal content that appears with the container
-- Lists that mount/unmount as a group
+### snap
+
+Snap-scroll carousel effect.
+
+```ts
+snap({
+  direction: 'up' | 'down' | 'left' | 'right',
+  physics?: PhysicsOptions,
+})
+```
+
+---
 
 ## Physics Options
 
-SSGOI supports multiple physics engines for animations:
-
-### Spring Physics (ease-out)
-
-Default physics engine with natural spring-based motion:
-
-```tsx
-<div ref={transition({
-  key: "spring",
-  in: () => ({
-    physics: {
-      spring: {
-        stiffness: 300,
-        damping: 30,
-        doubleSpring: true  // Optional: creates ease-in-out effect
-      }
-    },
-    css: (progress) => ({ opacity: progress }),
-  }),
-})}>
-  Content
-</div>
-```
-
-- `stiffness`: How quickly the spring responds (higher = faster)
-- `damping`: Resistance to motion (higher = less bouncy)
-- `doubleSpring`: Combines two springs for smooth ease-in-out effect
-
-### Inertia Physics (ease-in)
-
-Decelerating motion that starts fast and slows down:
-
-```tsx
-<div ref={transition({
-  key: "inertia",
-  in: () => ({
-    physics: {
-      inertia: {
-        acceleration: 20,
-        resistance: 1.5,
-        resistanceType: 'quadratic'  // 'linear' | 'quadratic'
-      }
-    },
-    css: (progress) => ({ opacity: progress }),
-  }),
-})}>
-  Content
-</div>
-```
-
-- `acceleration`: Initial velocity (higher = faster start)
-- `resistance`: How quickly it decelerates (higher = slower)
-- `resistanceType`: Deceleration curve (`linear` for constant, `quadratic` for exponential)
-
-### Custom Integrator
-
-Create your own physics engine:
-
-```tsx
-import type { Integrator } from '@ssgoi/core';
-
-class MyCustomIntegrator implements Integrator {
-  integrate(state, deltaTime) {
-    // Custom physics calculation
-    return {
-      position: state.position + velocity * deltaTime,
-      velocity: state.velocity,
-      done: state.position >= 1,
-    };
-  }
-
-  fromState(state) {
-    return new MyCustomIntegrator();
+```ts
+// Spring (ease-out feel)
+physics: {
+  spring: {
+    stiffness: 300,    // Higher = faster
+    damping: 30,       // Higher = less bounce
+    doubleSpring?: boolean | number,  // Ease-in-out effect
   }
 }
 
-<div ref={transition({
-  key: "custom-physics",
-  in: () => ({
-    physics: {
-      integrator: () => new MyCustomIntegrator()
-    },
-    css: (progress) => ({ opacity: progress }),
-  }),
-})}>
-  Content
-</div>
+// Inertia (ease-in feel)
+physics: {
+  inertia: {
+    acceleration: 20,
+    resistance: 1.5,
+    resistanceType?: 'linear' | 'quadratic',
+  }
+}
 ```
 
-## Hero Transitions
+---
 
-Shared element animations between pages:
+## Troubleshooting
 
-```tsx
-// Page 1 - List
-<Link href="/item/1">
-  <div data-hero-key="item-1">
-    <img src="..." />
-  </div>
-</Link>
+### Page jumps during transition
+- **Cause**: Missing `position: relative` on container
+- **Check**: Do you have a fixed header/nav? If not, add `relative`
 
-// Page 2 - Detail
-<div data-hero-key="item-1">
-  <img src="..." />  {/* Same hero-key, element morphs */}
-</div>
-```
+### OUT page disappears behind background
+- **Cause**: Missing `z-index: 0` on container
+- **Fix**: Add `z-0` to the div wrapping `{children}`
 
-Config:
-```tsx
-const config = {
-  transitions: [
-    { from: "/list", to: "/item/*", transition: hero() },
-  ],
+### Horizontal overflow during slide transitions
+- **Cause**: Missing overflow clip
+- **Fix**: Add `overflow-x-clip` to container
+
+### Transition not applying
+- **Cause**: `id` prop doesn't match route pattern
+- **Fix**: Ensure `SsgoiTransition id` matches the actual route path
+
+### Scroll position not preserved (web apps)
+- **Fix**: Add `experimentalPreserveScroll: true` to config
+- Ensure scroll container is ABOVE Ssgoi component
+
+---
+
+## How It Works (For Debugging)
+
+When a route changes, SSGOI orchestrates two simultaneous animations:
+- **OUT**: The leaving page animates out
+- **IN**: The entering page animates in
+
+### Core Mechanism: Clone & Absolute Position
+
+**The key insight**: When a page unmounts, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in.
+
+```ts
+// Internal behavior (packages/core/src/lib/utils/prepare-outgoing.ts)
+export const prepareOutgoing = (element, context) => {
+  element.style.position = "absolute";  // Removed from flow
+  element.style.width = "100%";
+  element.style.top = `${-1 * (context?.scrollOffset?.y ?? 0)}px`;
+  element.style.left = "0";
 };
 ```
 
-## Performance
+**Why this matters:**
+- The OUT page is re-inserted into DOM as a clone
+- It becomes `position: absolute` to overlay with the IN page
+- It needs a positioned ancestor (`relative`) to stay in place
+- Without proper CSS setup, the OUT page will jump to wrong position
 
-SSGOI achieves 60fps through:
-- **Web Animation API**: Physics engines (Spring, Inertia) pre-computed to keyframes
-- **GPU acceleration**: Uses transform/opacity for hardware rendering
-- **Off main thread**: Animations run on compositor thread
-- **State memory**: Animation positions preserved across navigation (back/forward)
+### Transition Flow
 
-## Common Pitfalls
+```
+/home -> /about navigation:
 
-1. **Missing `position: relative`** on Ssgoi container
-   - OUT animation uses `position: absolute`
-   - Without positioned parent, page jumps incorrectly
+1. User clicks link to /about
+2. /home page unmounts from React
+3. SSGOI clones /home and re-inserts it with position: absolute (OUT)
+4. React renders /about page (IN)
+5. Both pages animate simultaneously
+6. Animation complete, cloned /home removed from DOM
+```
 
-2. **Missing `SsgoiTransition` wrapper**
-   - Each page must be wrapped
-   - `id` should match route path
-
-3. **Z-index issues**
-   - Add `zIndex: 0` to create stacking context
-   - Prevents child elements from overlapping incorrectly during transitions
-
-4. **Dynamic routes**
-   - Use wildcard patterns: `/products/*`
-   - Or dynamic id: `<SsgoiTransition id={`/products/${id}`}>`
+---
 
 ## Links
 
-- Documentation: https://ssgoi.dev
+- Docs: https://ssgoi.dev
+- Mobile Transitions: https://ssgoi.dev/en/docs/mobile-transitions
+- Desktop Transitions: https://ssgoi.dev/en/docs/desktop-transitions
+- Physics Options: https://ssgoi.dev/en/docs/core-concepts/spring-presets
 - GitHub: https://github.com/meursyphus/ssgoi
-- NPM: @ssgoi/react, @ssgoi/svelte, @ssgoi/vue, @ssgoi/angular
+- NPM: https://www.npmjs.com/package/@ssgoi/react

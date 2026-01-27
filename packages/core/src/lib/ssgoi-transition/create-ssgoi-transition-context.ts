@@ -3,19 +3,21 @@ import type {
   SsgoiContext,
   SsgoiExtendedContext,
   SsgoiInternalOptions,
+  Platform,
 } from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
 } from "../transition/transition-strategy";
 import { processSymmetricTransitions } from "./process-symmetric-transitions";
-import { createSwipeDetector } from "./create-swipe-detector";
+import { createNavigationDirectionDetector } from "./create-navigation-direction-detector";
 import { createContextManager } from "./create-context-manager";
 import { findMatchingTransition } from "./find-matching-transition";
 import {
   createOutFirstDetector,
   createAnyOrderDetector,
 } from "./navigation-detector-strategy";
+import { matchPlatform } from "../utils";
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -71,8 +73,27 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
-    skipOnIosSwipe = true, // Default to true - skip animations on iOS swipe
+    skipOnIosSwipe,
+    skipAnimationOnBack,
+    experimentalPreserveScroll = false, // Default to false - manual scroll management
+    scrollResetPatterns = [], // Default to empty array - no routes reset scroll
   } = options;
+
+  // Handle deprecated skipOnIosSwipe option
+  if (skipOnIosSwipe !== undefined) {
+    console.warn(
+      "[SSGOI] skipOnIosSwipe is deprecated. Use skipAnimationOnBack: ['ios'] instead.",
+    );
+  }
+
+  // Resolve skipAnimationOnBack platforms (with backward compatibility)
+  // - undefined: default to ['ios']
+  // - skipOnIosSwipe: false → [], true/undefined → ['ios']
+  const resolvedPlatforms: Platform[] =
+    skipAnimationOnBack ?? (skipOnIosSwipe === false ? [] : ["ios"]);
+
+  // Determine if we should skip on back navigation based on current platform
+  const shouldSkipOnBack = matchPlatform(resolvedPlatforms);
 
   // Internal options (set by framework adapters)
   const { outFirst = true, createNavigationDetector } = internalOptions || {};
@@ -85,44 +106,57 @@ export function createSggoiTransitionContext(
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(transitions);
 
-  // Initialize context manager
+  // Initialize context manager with preserveScroll option
   const {
     initializeContext,
     calculateScrollOffset,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
-  } = createContextManager();
+  } = createContextManager({
+    preserveScroll: experimentalPreserveScroll,
+    resetPatterns: scrollResetPatterns,
+  });
 
-  // Initialize swipe detector
-  const swipeDetector = createSwipeDetector(skipOnIosSwipe);
-  swipeDetector.initialize();
+  // Initialize navigation direction detector for back navigation detection
+  const directionDetector = createNavigationDirectionDetector();
+  if (shouldSkipOnBack) {
+    directionDetector.initialize();
+  }
 
   /**
    * Get transition config for the given path and type
    * Uses NavigationDetector to collect out/in pairs
    */
   const getTransition = async (path: string, type: "out" | "in") => {
-    // Skip animations if iOS swipe-back gesture is detected
-    if (swipeDetector.isSwipePending()) {
-      swipeDetector.resetSwipeDetection();
-      if (type === "in") {
-        // Return config with only onReady to restore visibility
-        // This ensures the page becomes visible even without animation
-        return async (element: HTMLElement) => ({
-          onReady: () => {
-            element.style.visibility = "visible";
-          },
-        });
-      }
-      return () => ({});
-    }
+    // Capture back navigation state at arrival time (before any reset)
+    // Both IN and OUT will see the same direction since they're part of the same navigation
+    const isBackNavigation = shouldSkipOnBack && directionDetector.isBack();
 
     // Trigger and wait for navigation pair
     detector.trigger(path, type);
     const pair = await detector.get(type);
 
     if (!pair) return () => ({});
+
+    // Reset direction after pair is complete (only on IN to avoid double reset)
+    if (type === "in" && shouldSkipOnBack) {
+      directionDetector.onPageEnter();
+    }
+
+    // Skip animations on back navigation (after detector pairing is complete)
+    if (isBackNavigation) {
+      if (type === "out") {
+        return () => ({});
+      }
+      if (type === "in") {
+        return async (element: HTMLElement) => ({
+          onReady: () => {
+            element.style.visibility = "visible";
+          },
+        });
+      }
+    }
 
     // Apply middleware transformation
     const { from: transformedFrom, to: transformedTo } = middleware(
@@ -204,11 +238,11 @@ export function createSggoiTransitionContext(
   /**
    * Check if a transition is configured for the given from/to paths
    * Used for determining initial visibility before transition starts
-   * Returns false if swipe-back is detected (no need to hide initially)
+   * Returns false if back navigation is detected (animation will be skipped)
    */
   const hasMatchingTransition = (from: string, to: string): boolean => {
-    // Skip hiding if swipe-back is detected (animation will be skipped anyway)
-    if (swipeDetector.isSwipePending()) {
+    // Skip hiding if back navigation is detected (animation will be skipped anyway)
+    if (shouldSkipOnBack && directionDetector.isBack()) {
       return false;
     }
 

@@ -1,19 +1,45 @@
 import { getScrollingElement } from "../utils/get-scrolling-element";
 import { getPositionedParent } from "../utils/get-positioned-parent";
+import { matchPath } from "./find-matching-transition";
+
+/**
+ * Options for the context manager
+ */
+export type ContextManagerOptions = {
+  /**
+   * Automatically restore scroll position when navigating to a previously visited page
+   * @default false
+   */
+  preserveScroll?: boolean;
+  /**
+   * Patterns for routes that should reset scroll to 0 when leaving
+   * Uses the same wildcard matching as transition routes
+   */
+  resetPatterns?: string[];
+};
 
 /**
  * Creates a context manager for tracking transition-related information
  * including scroll positions and DOM element relationships
  */
-export function createContextManager() {
+export function createContextManager(options: ContextManagerOptions = {}) {
+  const { preserveScroll = false, resetPatterns = [] } = options;
+
+  // Check if a path matches any reset pattern
+  const matchesResetPattern = (path: string): boolean => {
+    return resetPatterns.some((pattern) => matchPath(path, pattern));
+  };
+
   let scrollContainer: HTMLElement | null = null;
   let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
+  let isTransitioning = false; // Prevent saving scroll during transition
 
   // Scroll listener - captures current scroll position
   const scrollListener = () => {
-    if (scrollContainer && currentPath) {
+    // Don't save scroll position during page transition
+    if (scrollContainer && currentPath && !isTransitioning) {
       scrollPositions.set(currentPath, {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
@@ -21,8 +47,55 @@ export function createContextManager() {
     }
   };
 
+  // Restore scroll position for the given path
+  const restoreScrollPosition = (path: string) => {
+    if (!scrollContainer || !preserveScroll) return;
+
+    // If path matches reset pattern, always scroll to top
+    if (matchesResetPattern(path)) {
+      scrollContainer.scrollTo({ top: 0, left: 0 });
+      return;
+    }
+
+    const savedPosition = scrollPositions.get(path);
+    if (!savedPosition) {
+      // First visit - scroll to top (SPA doesn't auto-reset scroll)
+      scrollContainer.scrollTo({ top: 0, left: 0 });
+      return;
+    }
+
+    const maxRetries = 10;
+    let retryCount = 0;
+
+    const tryRestore = () => {
+      if (!scrollContainer) return;
+
+      scrollContainer.scrollTo({
+        top: savedPosition.y,
+        left: savedPosition.x,
+      });
+
+      // Retry if scroll position wasn't applied (DOM might not be ready)
+      const currentY = scrollContainer.scrollTop;
+      const currentX = scrollContainer.scrollLeft;
+      const targetReached =
+        Math.abs(currentY - savedPosition.y) < 1 &&
+        Math.abs(currentX - savedPosition.x) < 1;
+
+      if (!targetReached && retryCount < maxRetries) {
+        retryCount++;
+        requestAnimationFrame(tryRestore);
+      }
+    };
+
+    requestAnimationFrame(tryRestore);
+  };
+
   // Initialize context with element - sets up scroll tracking and stores element for later use
   const initializeContext = (element: HTMLElement, path: string) => {
+    // Prevent scroll listener from saving during transition
+    isTransitioning = true;
+
     // Store the element for positioned parent calculation
     contextElement = element;
 
@@ -43,6 +116,24 @@ export function createContextManager() {
 
     // Update current path for scroll position tracking
     currentPath = path;
+
+    // Restore scroll position if preserveScroll is enabled
+    restoreScrollPosition(path);
+
+    // Re-enable scroll listener after transition settles
+    const maxTransitionRetries = 10;
+    let transitionRetryCount = 0;
+
+    const tryEnableListener = () => {
+      transitionRetryCount++;
+      if (transitionRetryCount >= maxTransitionRetries) {
+        isTransitioning = false;
+      } else {
+        requestAnimationFrame(tryEnableListener);
+      }
+    };
+
+    requestAnimationFrame(tryEnableListener);
   };
 
   // Calculate scroll offset - computes difference between pages' scroll positions
@@ -55,8 +146,17 @@ export function createContextManager() {
         ? scrollPositions.get(from)!
         : { x: 0, y: 0 };
 
-    const toScroll =
-      to && scrollPositions.has(to) ? scrollPositions.get(to)! : { x: 0, y: 0 };
+    // If 'to' matches reset pattern, use 0,0 and save it
+    const toMatchesReset = to && matchesResetPattern(to);
+    if (toMatchesReset) {
+      scrollPositions.set(to, { x: 0, y: 0 });
+    }
+
+    const toScroll = toMatchesReset
+      ? { x: 0, y: 0 }
+      : to && scrollPositions.has(to)
+        ? scrollPositions.get(to)!
+        : { x: 0, y: 0 };
 
     return {
       x: -toScroll.x + fromScroll.x,

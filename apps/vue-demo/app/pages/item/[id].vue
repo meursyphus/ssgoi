@@ -5,7 +5,7 @@
       :style="{ backgroundColor: item?.color }"
       :data-hero-key="`color-${item?.id}`"
     >
-      <NuxtLink to="/" class="back-button">
+      <button @click="$router.back()" class="back-button">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
           <path
             fill-rule="evenodd"
@@ -14,13 +14,10 @@
           />
         </svg>
         Back
-      </NuxtLink>
+      </button>
 
       <div class="content" v-if="item">
-        <div
-          class="color-display"
-          :style="{ backgroundColor: item.color }"
-        />
+        <div class="color-display" :style="{ backgroundColor: item.color }" />
         <h1 class="color-title">{{ item.name }}</h1>
         <p class="color-value">{{ item.color }}</p>
 
@@ -44,18 +41,18 @@
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
+import { SsgoiTransition } from "@ssgoi/vue";
 
 const route = useRoute();
 const id = Number(route.params.id);
 
 const colors = [
-  { id: 1, color: '#FF6B6B', name: 'Coral' },
-  { id: 2, color: '#4ECDC4', name: 'Turquoise' },
-  { id: 3, color: '#45B7D1', name: 'Sky Blue' },
-  { id: 4, color: '#96CEB4', name: 'Sage' },
-  { id: 5, color: '#FECA57', name: 'Sunflower' },
-  { id: 6, color: '#DDA0DD', name: 'Plum' },
+  { id: 1, color: "#FF6B6B", name: "Coral" },
+  { id: 2, color: "#4ECDC4", name: "Turquoise" },
+  { id: 3, color: "#45B7D1", name: "Sky Blue" },
+  { id: 4, color: "#96CEB4", name: "Sage" },
+  { id: 5, color: "#FECA57", name: "Sunflower" },
+  { id: 6, color: "#DDA0DD", name: "Plum" },
 ];
 
 const item = colors.find((c) => c.id === id);
@@ -63,7 +60,7 @@ const item = colors.find((c) => c.id === id);
 if (!item) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'Item not found'
+    statusMessage: "Item not found",
   });
 }
 </script>
