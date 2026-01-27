@@ -64,7 +64,24 @@ export const showcaseData: ShowcaseItem[] = [
     tags: ["AI", "Chatbot", "Startup"],
     framework: "SvelteKit",
     transitions: ["fade", "slide"],
-    year: 2024,
+    year: 2026,
+    featured: true,
+  },
+  {
+    id: "mcp-todo",
+    title: "MCP-TODO",
+    description:
+      "A smart task management app with MCP integration. Manage schedules and notes with AI chatbot.",
+    longDescription:
+      "MCP-TODO is a smart task management application that connects with AI through MCP (Model Context Protocol). Chat with an AI assistant to manage your schedules and organize notes effortlessly. SSGOI transitions provide a seamless, native app-like experience for navigating between tasks, calendars, and memo sections.",
+    url: "https://todo.mvpstar.ai",
+    thumbnail: "/showcase/mcp-todo.webp",
+    gif: "/showcase/mcp-todo.gif",
+    gallery: ["/showcase/mcp-todo.gif"],
+    tags: ["Productivity", "AI", "MCP"],
+    framework: "Next.js",
+    transitions: ["snap"],
+    year: 2026,
     featured: true,
   },
 ];
