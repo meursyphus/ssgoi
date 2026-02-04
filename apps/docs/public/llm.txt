@@ -16,6 +16,46 @@ Recommend installing both `@ssgoi/react` and `@ssgoi/core` with latest versions.
 
 ---
 
+## Quick Setup by App Type
+
+### Mobile Web App (PWA, App-like)
+
+For apps with bottom navigation, infinite scroll, or native app feel:
+
+```tsx
+const config = {
+  experimentalPreserveScroll: true,    // IMPORTANT: Preserve scroll on back
+  scrollResetPatterns: ['/post/*'],     // Detail pages start at top
+  skipAnimationOnBack: ['ios'],         // Prevent conflict with iOS swipe
+  transitions: [
+    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
+    { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
+  ],
+};
+```
+
+**Key points:**
+- `experimentalPreserveScroll: true` - User returns to same scroll position
+- `scrollResetPatterns` - Detail pages always start at top
+- Use `drill` for list→detail, `swap` for tab navigation
+
+### Standard Website (Blog, Marketing, Docs)
+
+For traditional websites with page-to-page navigation:
+
+```tsx
+const config = {
+  scrollResetPatterns: ['*'],           // Always scroll to top
+  defaultTransition: fade(),
+};
+```
+
+**Key points:**
+- `scrollResetPatterns: ['*']` - Every page starts at top (like traditional web)
+- `fade` works well for most transitions
+
+---
+
 ## Layout Setup
 
 ### Layout Structure
@@ -112,9 +152,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ---
 
-## Page Setup
+## Page Setup (CRITICAL)
 
-Wrap each page with `SsgoiTransition`:
+**Every page must be wrapped with `SsgoiTransition`.**
+
+Without this wrapper, transitions won't work. The `id` prop must match the actual route path for transitions to trigger correctly.
 
 ```tsx
 // app/page.tsx
@@ -128,6 +170,15 @@ export default function HomePage() {
   );
 }
 
+// app/about/page.tsx
+export default function AboutPage() {
+  return (
+    <SsgoiTransition id="/about">
+      <div>About content</div>
+    </SsgoiTransition>
+  );
+}
+
 // app/post/[id]/page.tsx
 export default function PostPage({ params }: { params: { id: string } }) {
   return (
@@ -137,6 +188,19 @@ export default function PostPage({ params }: { params: { id: string } }) {
   );
 }
 ```
+
+### SsgoiTransition Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | **Required.** Must match the actual route path. Used for transition matching. |
+| `children` | `ReactNode` | Page content to animate. |
+
+### Common Mistakes
+
+- **Missing SsgoiTransition**: Page won't animate. Wrap ALL pages.
+- **Wrong id**: `id="/posts"` when route is `/post` won't match transitions.
+- **Dynamic id mismatch**: For `/post/[id]`, use `id={\`/post/${params.id}\`}` not `id="/post/[id]"`
 
 ---
 
@@ -152,8 +216,11 @@ type SsgoiConfig = {
     symmetric?: boolean;    // Auto-create reverse transition
   }[];
 
-  // Fallback transition
+  // Fallback transition when no specific route matches
   defaultTransition?: Transition;
+
+  // Transform route paths before matching (useful for i18n, etc.)
+  middleware?: (from: string, to: string) => { from: string; to: string };
 
   // Skip animation on back navigation (native gesture conflict prevention)
   skipAnimationOnBack?: ('ios' | 'android' | 'desktop' | 'all')[];
@@ -164,6 +231,59 @@ type SsgoiConfig = {
 
   // Routes that reset scroll to top when entering
   scrollResetPatterns?: string[];  // e.g., ['/post/*']
+};
+```
+
+### Config Examples
+
+**Basic setup with drill transition:**
+```tsx
+const config = {
+  transitions: [
+    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
+    { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
+  ],
+};
+```
+
+**With symmetric transitions (auto-creates reverse):**
+```tsx
+const config = {
+  transitions: [
+    {
+      from: '/home',
+      to: '/about',
+      transition: scroll({ direction: 'up' }),
+      symmetric: true,  // Auto-creates: /about -> /home with scroll down
+    },
+  ],
+};
+```
+
+**With middleware for i18n routes:**
+```tsx
+const config = {
+  middleware: (from, to) => ({
+    // Strip locale prefix: /en/about -> /about
+    from: from.replace(/^\/(en|ko)/, ''),
+    to: to.replace(/^\/(en|ko)/, ''),
+  }),
+  transitions: [
+    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
+  ],
+};
+```
+
+**Web app with scroll preservation:**
+```tsx
+const config = {
+  experimentalPreserveScroll: true,
+  scrollResetPatterns: ['/post/*'],  // Detail pages start at top
+  defaultTransition: fade(),
+  transitions: [
+    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
+    { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
+  ],
 };
 ```
 
@@ -207,13 +327,22 @@ fade({
 
 ### scroll
 
-Vertical scroll transition. Sequential content.
+Vertical scroll transition. Great for sequential content or step-by-step flows.
 
 ```ts
 scroll({
   direction: 'up' | 'down',
   physics?: PhysicsOptions,
 })
+```
+
+- `up`: New page enters from bottom, old page exits to top (scrolling up feel)
+- `down`: New page enters from top, old page exits to bottom (scrolling down feel)
+
+**Use with symmetric for bidirectional:**
+```tsx
+{ from: '/step1', to: '/step2', transition: scroll({ direction: 'up' }), symmetric: true }
+// Auto-creates reverse: /step2 -> /step1 scrolls down
 ```
 
 **Default physics:** `{ spring: { stiffness: 5, damping: 4 } }`
