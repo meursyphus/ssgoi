@@ -154,53 +154,68 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Page Setup (CRITICAL)
 
-**Every page must be wrapped with `SsgoiTransition`.**
+**Replace each page's root element with `SsgoiTransition`.**
 
-Without this wrapper, transitions won't work. The `id` prop must match the actual route path for transitions to trigger correctly.
+Don't add extra wrapper - replace the outermost element. This keeps your layout unchanged while enabling transitions.
 
 ```tsx
-// app/page.tsx
+// BEFORE (without SSGOI)
+export default function HomePage() {
+  return (
+    <div className="p-4">
+      <h1>Home</h1>
+    </div>
+  );
+}
+
+// AFTER (with SSGOI) - replace <div> with <SsgoiTransition>
 import { SsgoiTransition } from "@ssgoi/react";
 
 export default function HomePage() {
   return (
-    <SsgoiTransition id="/">
-      <div>Home content</div>
-    </SsgoiTransition>
-  );
-}
-
-// app/about/page.tsx
-export default function AboutPage() {
-  return (
-    <SsgoiTransition id="/about">
-      <div>About content</div>
-    </SsgoiTransition>
-  );
-}
-
-// app/post/[id]/page.tsx
-export default function PostPage({ params }: { params: { id: string } }) {
-  return (
-    <SsgoiTransition id={`/post/${params.id}`}>
-      <div>Post content</div>
+    <SsgoiTransition id="/" className="p-4">
+      <h1>Home</h1>
     </SsgoiTransition>
   );
 }
 ```
 
+### Using `as` prop for semantic HTML
+
+SsgoiTransition renders as `<div>` by default. Use `as` prop to change:
+
+```tsx
+// Renders as <main>
+<SsgoiTransition id="/" as="main" className="p-4">
+  <h1>Home</h1>
+</SsgoiTransition>
+
+// Renders as <section>
+<SsgoiTransition id="/about" as="section">
+  <h1>About</h1>
+</SsgoiTransition>
+
+// Renders as <article>
+<SsgoiTransition id={`/post/${params.id}`} as="article">
+  <h1>{post.title}</h1>
+</SsgoiTransition>
+```
+
 ### SsgoiTransition Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `id` | `string` | **Required.** Must match the actual route path. Used for transition matching. |
-| `children` | `ReactNode` | Page content to animate. |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `string` | - | **Required.** Must match the actual route path. |
+| `as` | `ElementType` | `"div"` | HTML tag or component to render as. |
+| `className` | `string` | - | CSS classes passed to the element. |
+| `style` | `CSSProperties` | - | Inline styles passed to the element. |
+| `children` | `ReactNode` | - | Page content. |
 
 ### Common Mistakes
 
-- **Missing SsgoiTransition**: Page won't animate. Wrap ALL pages.
-- **Wrong id**: `id="/posts"` when route is `/post` won't match transitions.
-- **Dynamic id mismatch**: For `/post/[id]`, use `id={\`/post/${params.id}\`}` not `id="/post/[id]"`
+- **Adding extra wrapper**: Don't wrap existing div. Replace it.
+- **Wrong id**: `id="/posts"` when route is `/post` won't match.
+- **Dynamic id mismatch**: Use `id={\`/post/${params.id}\`}` not `id="/post/[id]"`
 
 ---
 
