@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 import { useTranslations } from "@/i18n";
 import { Bot, User } from "lucide-react";
 
@@ -63,7 +64,9 @@ export function ChatbotMessages({
               >
                 {message.role === "assistant" ? (
                   <div className="chatbot-markdown prose prose-sm prose-invert max-w-none [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/30 [&_pre]:p-3 [&_code]:text-xs [&_pre]:my-2 [&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-300">
-                    <ReactMarkdown>{text}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                      {text}
+                    </ReactMarkdown>
                   </div>
                 ) : (
                   <p className="whitespace-pre-wrap">{text}</p>
