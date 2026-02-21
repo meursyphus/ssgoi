@@ -63,7 +63,7 @@ export function ChatbotMessages({
                 }`}
               >
                 {message.role === "assistant" ? (
-                  <div className="chatbot-markdown prose prose-sm prose-invert max-w-none [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/30 [&_pre]:p-3 [&_code]:text-xs [&_pre]:my-2 [&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-300">
+                  <div className="chatbot-markdown prose prose-sm prose-invert max-w-none [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/30 [&_pre]:p-3 [&_code]:text-xs [&_pre]:my-2 [&_.hljs]:!bg-transparent [&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-300">
                     <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
                       {text}
                     </ReactMarkdown>
