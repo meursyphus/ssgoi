@@ -8,7 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
-const LANGUAGES = ["en", "ko", "zh", "ja"];
+const LANGUAGES = ["en", "ko", "ja"];
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
