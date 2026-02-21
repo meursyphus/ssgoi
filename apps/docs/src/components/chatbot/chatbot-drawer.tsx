@@ -7,7 +7,7 @@ import { useTranslations } from "@/i18n";
 import { useCurrentLanguage } from "@/i18n";
 import { ChatbotMessages } from "./chatbot-messages";
 import { ChatbotInput } from "./chatbot-input";
-import { X } from "lucide-react";
+import { X, Maximize2, Minimize2 } from "lucide-react";
 
 interface ChatbotDrawerProps {
   isOpen: boolean;
@@ -18,6 +18,7 @@ export function ChatbotDrawer({ isOpen, onClose }: ChatbotDrawerProps) {
   const t = useTranslations("chatbot");
   const lang = useCurrentLanguage();
   const [input, setInput] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const transport = useMemo(
     () =>
@@ -54,21 +55,37 @@ export function ChatbotDrawer({ isOpen, onClose }: ChatbotDrawerProps) {
 
       {/* Drawer */}
       <div
-        className={`fixed z-50 flex flex-col overflow-hidden border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-md
+        className={`fixed z-50 flex flex-col overflow-hidden border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-md transition-all duration-200
           inset-2 rounded-2xl
-          md:inset-auto md:bottom-20 md:right-4 md:h-[560px] md:w-96 md:rounded-2xl`}
+          ${
+            expanded
+              ? "md:inset-auto md:bottom-4 md:right-4 md:left-4 md:top-16 md:h-auto md:w-auto md:rounded-2xl"
+              : "md:inset-auto md:bottom-20 md:right-4 md:h-[600px] md:w-[440px] md:rounded-2xl"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <h2 className="text-sm font-semibold text-neutral-100">
             {t("drawerTitle")}
           </h2>
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/10 hover:text-neutral-200"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setExpanded((prev) => !prev)}
+              className="hidden h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/10 hover:text-neutral-200 md:flex"
+            >
+              {expanded ? (
+                <Minimize2 className="h-3.5 w-3.5" />
+              ) : (
+                <Maximize2 className="h-3.5 w-3.5" />
+              )}
+            </button>
+            <button
+              onClick={onClose}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/10 hover:text-neutral-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}

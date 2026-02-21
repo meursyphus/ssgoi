@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { supabase } from "@/lib/supabase";
 import { rateLimit } from "@/lib/rate-limit";
 import OpenAI from "openai";
@@ -23,23 +23,42 @@ export async function POST(req: Request) {
 
   const lastUserMessage = [...messages]
     .reverse()
-    .find((m: { role: string }) => m.role === "user");
+    .find((m: { role: string }) => m.role === "user") as
+    | {
+        role: string;
+        content?: string;
+        parts?: { type: string; text?: string }[];
+      }
+    | undefined;
 
   if (!lastUserMessage) {
     return new Response("No user message found", { status: 400 });
   }
 
+  // AI SDK v6 sends parts array, fallback to content for curl/direct calls
+  const userText =
+    lastUserMessage.content ||
+    lastUserMessage.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join("") ||
+    "";
+
+  if (!userText) {
+    return new Response("Empty user message", { status: 400 });
+  }
+
   const embeddingRes = await openaiClient.embeddings.create({
     model: "text-embedding-3-small",
-    input: lastUserMessage.content,
+    input: userText,
   });
   const queryEmbedding = embeddingRes.data[0].embedding;
 
   const { data: chunks, error } = await supabase.rpc("match_doc_chunks", {
     query_embedding: queryEmbedding,
     match_lang: lang,
-    match_count: 5,
-    match_threshold: 0.3,
+    match_count: 12,
+    match_threshold: 0.2,
   });
 
   if (error) {
@@ -57,17 +76,25 @@ export async function POST(req: Request) {
       : "No relevant documentation found.";
 
   const systemPrompt = `You are an AI assistant for SSGOI (쓱오이), a universal page transition library for web applications.
-Answer questions based on the documentation context below. Be concise and helpful.
-If the context doesn't contain relevant information, say so honestly.
-Respond in the same language as the user's question.
+
+STRICT RULES:
+- ONLY use information from the Documentation Context below. Do NOT make up code, APIs, or package names.
+- If the context contains code examples, quote them EXACTLY as they appear in the documentation. Never modify, simplify, or invent code.
+- When documentation provides explanations or warnings (e.g., "왜 position: relative가 필요한가요?"), include them as-is from the original text.
+- The correct package names are @ssgoi/react, @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular — NEVER use "ssgoi" alone.
+- If the context doesn't contain directly relevant information, do your best to answer based on the closest matching context. Only say you can't find information if the context is completely unrelated to the question.
+- At the end of your answer, include the source page URL from the context so the user can read the full documentation.
+- Respond in the same language as the user's question.
 
 ## Documentation Context
 ${context}`;
 
+  const modelMessages = await convertToModelMessages(messages);
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: systemPrompt,
-    messages,
+    messages: modelMessages,
     maxOutputTokens: 1024,
     temperature: 0.1,
   });

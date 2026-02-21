@@ -55,14 +55,14 @@ export function ChatbotMessages({
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-xl px-3.5 py-2.5 text-sm ${
+                className={`min-w-0 max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm ${
                   message.role === "user"
                     ? "bg-blue-600 text-white"
                     : "bg-white/5 text-neutral-200"
                 }`}
               >
                 {message.role === "assistant" ? (
-                  <div className="chatbot-markdown prose prose-sm prose-invert max-w-none">
+                  <div className="chatbot-markdown prose prose-sm prose-invert max-w-none [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/30 [&_pre]:p-3 [&_code]:text-xs [&_pre]:my-2 [&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-300">
                     <ReactMarkdown>{text}</ReactMarkdown>
                   </div>
                 ) : (

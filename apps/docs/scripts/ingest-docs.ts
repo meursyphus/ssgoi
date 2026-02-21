@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
 import fs from "fs/promises";
 import path from "path";
+
+dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 import matter from "gray-matter";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
@@ -38,22 +41,76 @@ async function getMdxFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-function stripJsx(text: string): string {
-  // Remove JSX/component tags
-  return text
-    .replace(/<[A-Z][^>]*\/>/g, "")
-    .replace(/<[A-Z][^>]*>[\s\S]*?<\/[A-Z][^>]*>/g, "");
+function cleanMdx(text: string): string {
+  // Extract code blocks, replace with placeholders, clean, then restore
+  const codeBlocks: string[] = [];
+  const withPlaceholders = text.replace(/(`{3,}[\s\S]*?`{3,})/g, (match) => {
+    codeBlocks.push(match);
+    return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
+  });
+
+  const cleaned = withPlaceholders
+    // Remove import statements
+    .replace(/^import\s+.*$/gm, "")
+    // Remove all JSX/HTML-like tags but keep inner content
+    .replace(/<\/?[A-Za-z][A-Za-z0-9]*[^>]*>/g, "")
+    // Collapse multiple blank lines
+    .replace(/\n{3,}/g, "\n\n");
+
+  // Restore code blocks
+  return cleaned.replace(
+    /__CODE_BLOCK_(\d+)__/g,
+    (_, i) => codeBlocks[Number(i)],
+  );
 }
 
-function stripCodeBlocks(text: string): string {
-  return text.replace(/```[\s\S]*?```/g, "");
+const MAX_CHUNK_LENGTH = 1500;
+
+function splitLongChunk(
+  heading: string,
+  content: string,
+): { heading: string; content: string }[] {
+  if (content.length <= MAX_CHUNK_LENGTH) {
+    return [{ heading, content }];
+  }
+
+  // Split by code blocks as natural boundaries (handles indented code fences)
+  const parts: { heading: string; content: string }[] = [];
+  const segments = content.split(/\n(?=\s*```)/);
+  let current = "";
+  let partIndex = 1;
+
+  for (const segment of segments) {
+    if (
+      current.length + segment.length > MAX_CHUNK_LENGTH &&
+      current.length > 0
+    ) {
+      parts.push({
+        heading: `${heading} (${partIndex})`,
+        content: current.trim(),
+      });
+      partIndex++;
+      current = segment;
+    } else {
+      current += (current ? "\n" : "") + segment;
+    }
+  }
+
+  if (current.trim().length > 20) {
+    parts.push({
+      heading: parts.length > 0 ? `${heading} (${partIndex})` : heading,
+      content: current.trim(),
+    });
+  }
+
+  return parts;
 }
 
 function splitByHeadings(
   content: string,
 ): { heading: string; content: string }[] {
   const lines = content.split("\n");
-  const chunks: { heading: string; content: string }[] = [];
+  const rawChunks: { heading: string; content: string }[] = [];
   let currentHeading = "Introduction";
   let currentContent: string[] = [];
 
@@ -63,7 +120,7 @@ function splitByHeadings(
       if (currentContent.length > 0) {
         const text = currentContent.join("\n").trim();
         if (text.length > 20) {
-          chunks.push({ heading: currentHeading, content: text });
+          rawChunks.push({ heading: currentHeading, content: text });
         }
       }
       currentHeading = headingMatch[1];
@@ -76,11 +133,12 @@ function splitByHeadings(
   if (currentContent.length > 0) {
     const text = currentContent.join("\n").trim();
     if (text.length > 20) {
-      chunks.push({ heading: currentHeading, content: text });
+      rawChunks.push({ heading: currentHeading, content: text });
     }
   }
 
-  return chunks;
+  // Split oversized chunks
+  return rawChunks.flatMap((c) => splitLongChunk(c.heading, c.content));
 }
 
 function buildUrl(lang: string, filePath: string): string {
@@ -127,9 +185,10 @@ async function main() {
 
     for (const file of files) {
       const raw = await fs.readFile(file, "utf-8");
-      const { content } = matter(raw);
+      const { content, data: frontmatter } = matter(raw);
+      const docTitle = frontmatter.title || "";
 
-      const cleaned = stripCodeBlocks(stripJsx(content));
+      const cleaned = cleanMdx(content);
       const sections = splitByHeadings(cleaned);
       const docPath = path.relative(CONTENT_DIR, file);
       const url = buildUrl(lang, file);
@@ -138,7 +197,7 @@ async function main() {
         allChunks.push({
           lang,
           doc_path: docPath,
-          heading: section.heading,
+          heading: `${docTitle} > ${section.heading}`,
           content: section.content,
           url,
         });
@@ -151,6 +210,24 @@ async function main() {
   if (allChunks.length === 0) {
     console.log("No chunks to process. Exiting.");
     return;
+  }
+
+  // Dry run mode: dump chunks to file for inspection
+  if (process.argv.includes("--dry-run")) {
+    const dryLang = process.argv[process.argv.indexOf("--dry-run") + 1] || null;
+    const filtered = dryLang
+      ? allChunks.filter((c) => c.lang === dryLang)
+      : allChunks;
+    const outPath = path.join(process.cwd(), "chunks-preview.md");
+    const lines = filtered.map(
+      (c, i) =>
+        `# Chunk ${i + 1} [${c.lang}] ${c.heading}\n**url:** ${c.url} | **len:** ${c.content.length}\n\n${c.content}\n\n---\n`,
+    );
+    await fs.writeFile(outPath, lines.join("\n"), "utf-8");
+    console.log(`Preview saved to: ${outPath} (${filtered.length} chunks)`);
+    if (process.argv.includes("--preview-only")) {
+      return;
+    }
   }
 
   // Generate embeddings
