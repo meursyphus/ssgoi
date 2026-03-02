@@ -130,6 +130,7 @@ export async function MdxRemote({ source, components = {} }: MdxRemoteProps) {
         ...components,
       }}
       options={{
+        blockJS: false,
         mdxOptions: {
           remarkPlugins: [remarkGfm],
           rehypePlugins: [

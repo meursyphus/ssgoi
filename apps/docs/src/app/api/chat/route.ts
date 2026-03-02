@@ -1,13 +1,19 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText, convertToModelMessages } from "ai";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { rateLimit } from "@/lib/rate-limit";
 import OpenAI from "openai";
 import { headers } from "next/headers";
 
 export const runtime = "nodejs";
 
-const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openaiClient: OpenAI | null = null;
+function getOpenAIClient(): OpenAI {
+  if (!_openaiClient) {
+    _openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _openaiClient;
+}
 
 export async function POST(req: Request) {
   const headersList = await headers();
@@ -48,13 +54,13 @@ export async function POST(req: Request) {
     return new Response("Empty user message", { status: 400 });
   }
 
-  const embeddingRes = await openaiClient.embeddings.create({
+  const embeddingRes = await getOpenAIClient().embeddings.create({
     model: "text-embedding-3-small",
     input: userText,
   });
   const queryEmbedding = embeddingRes.data[0].embedding;
 
-  const { data: chunks, error } = await supabase.rpc("match_doc_chunks", {
+  const { data: chunks, error } = await getSupabase().rpc("match_doc_chunks", {
     query_embedding: queryEmbedding,
     match_lang: lang,
     match_count: 12,

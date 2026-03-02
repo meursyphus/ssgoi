@@ -13,33 +13,36 @@ tags: ["transition", "animation", "react", "svelte"]
 선언형 프레임워크에서는 이를 쉽게 조건문으로 구현할 수 있습니다.
 
 <Tabs items={[{ label: "React", value: "react" }, { label: "Svelte", value: "svelte" }]}>
-  <TabPanel value="react">
-  ```tsx
-  funtion App() {
+<TabPanel value="react">
+
+```tsx
+function App() {
   // {...중략}
   const [show, setShow] = useState(false)
 
-return (
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>Toggle</button>
+      {show && <div>content</div>}
+    </>
+  )
+}
+```
 
-<>
-  <button onClick={() => setShow(!show)}>Toggle</button>
-  {show && <div>content</div>}
-</>
-) }
-
-````
 </TabPanel>
 <TabPanel value="svelte">
-  ```svelte
-  <script>
-    let show = false;
-  </script>
 
-  <button onclick={() => (show = !show)}>Toggle</button>
-  {#if show}
-    <div>content</div>
-  {/if}
-  ```
+```svelte
+<script>
+  let show = false;
+</script>
+
+<button onclick={() => (show = !show)}>Toggle</button>
+{#if show}
+  <div>content</div>
+{/if}
+```
+
 </TabPanel>
 </Tabs>
 
@@ -72,4 +75,3 @@ css로 dom이 나타났을때 애니메이션을 부여하는 것은 쉽습니�
 ssgoi는 전 프레임워크 지원을 목표로 하고 있습니다. 그리고 타깃을 페이지 트랜지션 애니메이션으로 잡았죠. 그러나 원리는 같습니다. ssgoi의 transition은 돔 개별적으로도 적용시킬 수 있습니다. 마치 아래처럼 말이죠.
 
 <TransitionDemo type="scale" />
-````
