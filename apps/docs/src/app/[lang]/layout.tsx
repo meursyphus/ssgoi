@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Header } from "@/components/layout/header";
+import { ChatbotButton } from "@/components/chatbot";
 import TranslationsProvider from "@/i18n/translations-provider";
 import { StructuredData } from "./structured-data";
 import { ConsoleWelcome } from "@/components/console-welcome";
@@ -46,6 +47,7 @@ export default async function RootLayout({
           <ConsoleWelcome />
 
           <Header />
+          <ChatbotButton />
           <main className="relative z-0 overflow-hidden">
             <SsgoiProvider>{children}</SsgoiProvider>
           </main>
