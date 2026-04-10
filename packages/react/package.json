@@ -109,9 +109,20 @@
   "keywords": [
     "react",
     "page-transition",
+    "page-transitions",
+    "view-transitions",
+    "view-transition-api-alternative",
     "animation",
     "ssgoi",
-    "spring-physics"
+    "spring-physics",
+    "nextjs",
+    "next-js",
+    "cross-browser",
+    "navigation-animation",
+    "hero-transition",
+    "shared-element-transition",
+    "route-transition",
+    "drill-transition"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

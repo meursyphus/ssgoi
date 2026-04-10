@@ -1,16 +1,24 @@
 export const homeStructuredData = {
   app: {
     description:
-      "A powerful page transition library that brings native app-like animations to the web. Create smooth, spring-based transitions with state preservation across all frameworks.",
+      "SSGOI is a universal cross-browser page transition library for React, Svelte, and Vue. Works in Chrome, Firefox, and Safari — unlike the View Transition API which is Chrome-only. Provides native app-like animations with spring-based physics, shared element (hero) transitions, and scroll position preservation.",
     keywords: [
       "page transitions",
-      "animation library",
-      "react transitions",
-      "vue transitions",
+      "page transition library",
+      "view transition api alternative",
+      "cross-browser page transitions",
+      "react page transitions",
+      "next.js page transitions",
       "svelte transitions",
+      "vue transitions",
+      "web app transitions",
+      "native app-like transitions",
       "spring animations",
-      "view transitions",
-      "web animations",
+      "hero transitions",
+      "shared element transitions",
+      "drill transition",
+      "navigation animation",
+      "ssgoi",
     ],
   },
 };
