@@ -125,6 +125,14 @@ export async function StructuredData({ lang }: { lang: string }) {
           text: "While Framer Motion (now Motion) is a general-purpose animation library, SSGOI specializes in page transitions with features like automatic scroll preservation, route-based transition configs, shared element (hero) animations, and physics-based spring animations — all optimized for page navigation across React, Svelte, and Vue.",
         },
       },
+      {
+        "@type": "Question",
+        name: "What is the best page transition library for web applications?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "SSGOI is a page transition library built specifically for web applications. It offers 10+ transition types including drill, fade, hero, scroll, slide, sheet, pinterest, and snap — all powered by spring physics for natural motion. It works across all browsers and supports React, Svelte, Vue, Solid, and Angular with SSR-first design.",
+        },
+      },
     ],
   };
 
