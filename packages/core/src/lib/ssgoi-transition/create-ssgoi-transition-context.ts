@@ -75,8 +75,7 @@ export function createSggoiTransitionContext(
     middleware = (from, to) => ({ from, to }), // Identity function as default
     skipOnIosSwipe,
     skipAnimationOnBack,
-    experimentalPreserveScroll = false, // Default to false - manual scroll management
-    scrollResetPatterns = [], // Default to empty array - no routes reset scroll
+    preserveScroll = false,
   } = options;
 
   // Handle deprecated skipOnIosSwipe option
@@ -110,12 +109,13 @@ export function createSggoiTransitionContext(
   const {
     initializeContext,
     calculateScrollOffset,
+    evictScrollPosition,
+    shouldPreserve,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
   } = createContextManager({
-    preserveScroll: experimentalPreserveScroll,
-    resetPatterns: scrollResetPatterns,
+    preserveScroll,
   });
 
   // Initialize navigation direction detector for back navigation detection
@@ -188,6 +188,11 @@ export function createSggoiTransitionContext(
           return getPositionedParentElement();
         },
       };
+      // Evict from-side scroll for non-preserved paths so stale values don't
+      // bleed into a future OUT diff. outContext.scroll is already snapshot above.
+      if (pair.from && !shouldPreserve(pair.from)) {
+        evictScrollPosition(pair.from);
+      }
       return (element: HTMLElement) => result.out!(element, outContext);
     } else {
       const inContext = {

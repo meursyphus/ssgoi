@@ -52,8 +52,7 @@ import { Ssgoi } from "@ssgoi/react";
 import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
-  experimentalPreserveScroll: true,  // Preserve scroll position
-  scrollResetPatterns: ['/post/*'],   // Detail pages start at top
+  preserveScroll: { exclude: ['/post/*'] },  // Preserve scroll except detail pages
   transitions: [
     { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
     { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
@@ -89,7 +88,6 @@ import { Ssgoi } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/view-transitions";
 
 const config = {
-  scrollResetPatterns: ['*'],  // Always scroll to top
   defaultTransition: fade(),
 };
 
@@ -159,11 +157,10 @@ type SsgoiConfig = {
   skipAnimationOnBack?: ('ios' | 'android' | 'desktop' | 'all')[];
   // default: ['ios']
 
-  // Auto preserve/restore scroll position
-  experimentalPreserveScroll?: boolean;  // default: false
-
-  // Routes that reset scroll to top when entering
-  scrollResetPatterns?: string[];  // e.g., ['/post/*']
+  // Auto preserve/restore scroll position. Default: false.
+  // - true: preserve everywhere
+  // - { exclude: [...] }: preserve except these paths (e.g. detail pages)
+  preserveScroll?: boolean | { exclude: string[] };
 };
 ```
 
@@ -381,7 +378,7 @@ physics: {
 - **Fix**: Ensure `SsgoiTransition id` matches the actual route path
 
 ### Scroll position not preserved (web apps)
-- **Fix**: Add `experimentalPreserveScroll: true` to config
+- **Fix**: Add `preserveScroll: true` to config
 - Ensure scroll container is ABOVE Ssgoi component
 
 ---

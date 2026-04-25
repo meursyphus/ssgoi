@@ -489,28 +489,17 @@ export type SsgoiConfig = {
    */
   skipAnimationOnBack?: Platform[];
   /**
-   * @description Automatically preserve and restore scroll position when navigating between pages.
-   * When enabled, SSGOI will:
-   * - Save scroll position when leaving a page
-   * - Restore scroll position when returning to a previously visited page
+   * Automatically preserve and restore scroll position when navigating between pages.
    *
-   * @experimental This is an experimental feature and may change in future versions.
+   * - `false` (default): scroll positions are tracked only for the OUT transition diff,
+   *   then evicted — SSGOI does not restore scroll on arrival.
+   * - `true`: save scroll on leave, restore on return. New (unvisited) paths scroll to 0.
+   * - `{ exclude: string[] }`: preserve everywhere except matching paths. Excluded paths
+   *   behave like `false` (evict, no restore). Supports wildcards: `/post/*`, `*`.
+   *
    * @default false
    */
-  experimentalPreserveScroll?: boolean;
-  /**
-   * @description Patterns for routes that should always reset scroll to top when leaving.
-   * When navigating away from a matching route, scroll position will be saved as 0.
-   * This means returning to these routes will always start at the top.
-   *
-   * Supports wildcard patterns:
-   * - '/post/*' matches '/post/123', '/post/abc', etc.
-   * - '*' matches any path
-   *
-   * @example ['/post/*', '/article/*', '/product/detail/*']
-   * @experimental This is an experimental feature and may change in future versions.
-   */
-  scrollResetPatterns?: string[];
+  preserveScroll?: boolean | { exclude: string[] };
 };
 
 /**

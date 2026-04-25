@@ -2,20 +2,14 @@ import { getScrollingElement } from "../utils/get-scrolling-element";
 import { getPositionedParent } from "../utils/get-positioned-parent";
 import { matchPath } from "./find-matching-transition";
 
-/**
- * Options for the context manager
- */
+export type PreserveScrollOption = boolean | { exclude: string[] };
+
 export type ContextManagerOptions = {
   /**
-   * Automatically restore scroll position when navigating to a previously visited page
+   * Scroll preservation policy. See SsgoiConfig.preserveScroll for full semantics.
    * @default false
    */
-  preserveScroll?: boolean;
-  /**
-   * Patterns for routes that should reset scroll to 0 when leaving
-   * Uses the same wildcard matching as transition routes
-   */
-  resetPatterns?: string[];
+  preserveScroll?: PreserveScrollOption;
 };
 
 /**
@@ -23,11 +17,16 @@ export type ContextManagerOptions = {
  * including scroll positions and DOM element relationships
  */
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const { preserveScroll = false, resetPatterns = [] } = options;
+  const { preserveScroll = false } = options;
 
-  // Check if a path matches any reset pattern
-  const matchesResetPattern = (path: string): boolean => {
-    return resetPatterns.some((pattern) => matchPath(path, pattern));
+  const excludePatterns =
+    typeof preserveScroll === "object" ? preserveScroll.exclude : [];
+  const preserveEnabled = preserveScroll !== false;
+
+  // A path is preserved when the option is enabled AND the path is not excluded
+  const shouldPreserve = (path: string): boolean => {
+    if (!preserveEnabled) return false;
+    return !excludePatterns.some((pattern) => matchPath(path, pattern));
   };
 
   let scrollContainer: HTMLElement | null = null;
@@ -49,13 +48,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   // Restore scroll position for the given path
   const restoreScrollPosition = (path: string) => {
-    if (!scrollContainer || !preserveScroll) return;
-
-    // If path matches reset pattern, always scroll to top
-    if (matchesResetPattern(path)) {
-      scrollContainer.scrollTo({ top: 0, left: 0 });
-      return;
-    }
+    if (!scrollContainer || !shouldPreserve(path)) return;
 
     const savedPosition = scrollPositions.get(path);
     if (!savedPosition) {
@@ -146,15 +139,9 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         ? scrollPositions.get(from)!
         : { x: 0, y: 0 };
 
-    // If 'to' matches reset pattern, use 0,0 and save it
-    const toMatchesReset = to && matchesResetPattern(to);
-    if (toMatchesReset) {
-      scrollPositions.set(to, { x: 0, y: 0 });
-    }
-
-    const toScroll = toMatchesReset
-      ? { x: 0, y: 0 }
-      : to && scrollPositions.has(to)
+    // If 'to' is not preserved, treat as 0 (arrival starts fresh)
+    const toScroll =
+      to && shouldPreserve(to) && scrollPositions.has(to)
         ? scrollPositions.get(to)!
         : { x: 0, y: 0 };
 
@@ -162,6 +149,13 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       x: -toScroll.x + fromScroll.x,
       y: -toScroll.y + fromScroll.y,
     };
+  };
+
+  // Evict a saved scroll position. Caller invokes after OUT context is built
+  // for paths where preservation is disabled, so stale values don't leak across
+  // navigations.
+  const evictScrollPosition = (path: string) => {
+    scrollPositions.delete(path);
   };
 
   // Getter for scroll container - returns null if not initialized yet
@@ -183,6 +177,8 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   return {
     initializeContext,
     calculateScrollOffset,
+    evictScrollPosition,
+    shouldPreserve,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,

@@ -10,7 +10,7 @@ import {
 import "./globals.css";
 
 const ssgoiConfig: SsgoiConfig = {
-  experimentalPreserveScroll: true,
+  preserveScroll: true,
   skipAnimationOnBack: ["ios"], // Skip animation on back navigation for iOS
   transitions: [
     // Use hero transition between main and item detail pages
