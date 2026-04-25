@@ -7,17 +7,22 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
+// ease-out (Material decelerated): sheet rises and lands gracefully (incoming).
+// 200/24 = ratio 0.85 of critical (~28.3), ~290ms.
 const ENTER: PhysicsOptions = {
-  inertia: {
-    acceleration: 20,
-    resistance: 1.5,
+  spring: {
+    stiffness: 200,
+    damping: 24,
   },
 };
 
+// ease-in (Material accelerated): sheet falls away (outgoing).
+// Spring can't produce true ease-in (always decelerative); inertia integrator
+// starts at v=0 and accelerates toward target — natural acceleration curve.
 const EXIT: PhysicsOptions = {
   inertia: {
-    acceleration: 20,
-    resistance: 1,
+    acceleration: 25,
+    resistance: 1.2,
   },
 };
 

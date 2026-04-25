@@ -2,8 +2,11 @@ import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+// standard easing (Material): element transformation (gallery↔detail).
+// doubleSpring 1 chains two springs to soften both ends → ease-in-out feel.
+// 220/24 = ratio 0.81 of critical (~29.7), ~300ms with doubleSpring lag.
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 23, doubleSpring: 1 },
+  spring: { stiffness: 220, damping: 24, doubleSpring: 1 },
 };
 
 interface PinterestOptions {

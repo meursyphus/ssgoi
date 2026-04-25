@@ -2,8 +2,10 @@ import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+// standard easing (Material): element transformation, matches pinterest character.
+// 220/24 doubleSpring 1 → ease-in-out feel, ~300ms.
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 22, doubleSpring: 1 },
+  spring: { stiffness: 220, damping: 24, doubleSpring: 1 },
 };
 
 interface InstagramOptions {
