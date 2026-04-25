@@ -20,6 +20,7 @@
     "solid:watch": "pnpm --filter @ssgoi/solid watch",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
+    "sandpack-sync": "pnpm --filter docs generate:sandpack",
     "angular-demo": "pnpm --filter angular-demo dev",
     "react-demo": "pnpm --filter react-demo dev",
     "solid-demo": "pnpm --filter solid-demo dev",

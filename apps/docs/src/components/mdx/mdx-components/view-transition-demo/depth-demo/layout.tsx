@@ -10,11 +10,7 @@ interface DemoLayoutProps {
 }
 
 export const DemoLayout = memo(({ children }: DemoLayoutProps) => {
-  return (
-    <div className="overflow-x-clip overflow-y-scroll relative h-screen z-0">
-      <TransitionScope>{children}</TransitionScope>
-    </div>
-  );
+  return <TransitionScope>{children}</TransitionScope>;
 });
 
 DemoLayout.displayName = "DepthDemoLayout";
