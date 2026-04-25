@@ -1,9 +1,4 @@
-import type {
-  SsgoiConfig,
-  SsgoiContext,
-  SsgoiInternalOptions,
-  Platform,
-} from "../types";
+import type { SsgoiConfig, SsgoiContext, SsgoiInternalOptions } from "../types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -60,26 +55,12 @@ export function createSggoiTransitionContext(
     transitions = [],
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
-    skipOnIosSwipe,
-    skipAnimationOnBack,
-    preserveScroll,
+    skipAnimationOnBack = ["ios"],
+    preserveScroll = (isMobile: boolean) => isMobile,
   } = options;
 
-  // Handle deprecated skipOnIosSwipe option
-  if (skipOnIosSwipe !== undefined) {
-    console.warn(
-      "[SSGOI] skipOnIosSwipe is deprecated. Use skipAnimationOnBack: ['ios'] instead.",
-    );
-  }
-
-  // Resolve skipAnimationOnBack platforms (with backward compatibility)
-  // - undefined: default to ['ios']
-  // - skipOnIosSwipe: false → [], true/undefined → ['ios']
-  const resolvedPlatforms: Platform[] =
-    skipAnimationOnBack ?? (skipOnIosSwipe === false ? [] : ["ios"]);
-
   // Determine if we should skip on back navigation based on current platform
-  const shouldSkipOnBack = matchPlatform(resolvedPlatforms);
+  const shouldSkipOnBack = matchPlatform(skipAnimationOnBack);
 
   // Internal options (set by framework adapters)
   const { outFirst = true } = internalOptions || {};
