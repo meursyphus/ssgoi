@@ -7,7 +7,7 @@
 	let { children } = $props();
 
 	const config = {
-		experimentalPreserveScroll: true,
+		preserveScroll: true,
 		transitions: [
 			// Pinterest transitions
 			{

@@ -17,7 +17,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
-      experimentalPreserveScroll: true,
+      preserveScroll: true,
       transitions: [
         // Pinterest transitions
         {
