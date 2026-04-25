@@ -1,7 +1,6 @@
 import type {
   SsgoiConfig,
   SsgoiContext,
-  SsgoiExtendedContext,
   SsgoiInternalOptions,
   Platform,
 } from "../types";
@@ -54,20 +53,8 @@ import { matchPlatform } from "../utils";
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
-  internalOptions: SsgoiInternalOptions & {
-    createNavigationDetector: NonNullable<
-      SsgoiInternalOptions["createNavigationDetector"]
-    >;
-  },
-): SsgoiExtendedContext;
-export function createSggoiTransitionContext(
-  options: SsgoiConfig,
   internalOptions?: SsgoiInternalOptions,
-): SsgoiContext;
-export function createSggoiTransitionContext(
-  options: SsgoiConfig,
-  internalOptions?: SsgoiInternalOptions,
-): SsgoiContext | SsgoiExtendedContext {
+): SsgoiContext {
   // Destructure options with defaults
   const {
     transitions = [],
@@ -95,12 +82,12 @@ export function createSggoiTransitionContext(
   const shouldSkipOnBack = matchPlatform(resolvedPlatforms);
 
   // Internal options (set by framework adapters)
-  const { outFirst = true, createNavigationDetector } = internalOptions || {};
+  const { outFirst = true } = internalOptions || {};
 
-  // Create detector (injected or default based on outFirst)
-  const detector =
-    createNavigationDetector?.() ??
-    (outFirst ? createOutFirstDetector() : createAnyOrderDetector());
+  // Create detector based on outFirst preference
+  const detector = outFirst
+    ? createOutFirstDetector()
+    : createAnyOrderDetector();
 
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(transitions);
@@ -146,16 +133,7 @@ export function createSggoiTransitionContext(
 
     // Skip animations on back navigation (after detector pairing is complete)
     if (isBackNavigation) {
-      if (type === "out") {
-        return () => ({});
-      }
-      if (type === "in") {
-        return async (element: HTMLElement) => ({
-          onReady: () => {
-            element.style.visibility = "visible";
-          },
-        });
-      }
+      return () => ({});
     }
 
     // Apply middleware transformation
@@ -207,17 +185,7 @@ export function createSggoiTransitionContext(
           return getPositionedParentElement();
         },
       };
-      // Wrap IN transition to restore visibility on ready (before waitPaint)
-      return async (element: HTMLElement) => {
-        const config = await Promise.resolve(result.in!(element, inContext));
-        const originalOnReady = config.onReady;
-        config.onReady = () => {
-          // Restore visibility when transition is ready (before waitPaint)
-          element.style.visibility = "visible";
-          originalOnReady?.();
-        };
-        return config;
-      };
+      return (element: HTMLElement) => result.in!(element, inContext);
     }
   };
 
@@ -239,38 +207,6 @@ export function createSggoiTransitionContext(
       [TRANSITION_STRATEGY]: createPageTransitionStrategy,
     };
   };
-
-  /**
-   * Check if a transition is configured for the given from/to paths
-   * Used for determining initial visibility before transition starts
-   * Returns false if back navigation is detected (animation will be skipped)
-   */
-  const hasMatchingTransition = (from: string, to: string): boolean => {
-    // Skip hiding if back navigation is detected (animation will be skipped anyway)
-    if (shouldSkipOnBack && directionDetector.isBack()) {
-      return false;
-    }
-
-    // Apply middleware transformation
-    const { from: transformedFrom, to: transformedTo } = middleware(from, to);
-
-    // Check if there's a matching transition or default transition
-    const transition = findMatchingTransition(
-      transformedFrom,
-      transformedTo,
-      processedTransitions,
-    );
-
-    return !!(transition || defaultTransition);
-  };
-
-  // Return extended context when custom detector is provided
-  if (createNavigationDetector) {
-    return {
-      getTransition: ssgoiContext,
-      hasMatchingTransition,
-    };
-  }
 
   return ssgoiContext;
 }
