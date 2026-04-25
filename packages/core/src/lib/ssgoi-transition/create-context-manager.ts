@@ -4,6 +4,15 @@ import { getPositionedParent } from "../utils/get-positioned-parent";
 import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
+const RESTORE_RETRY_WINDOW_MS = 1000;
+
+type ScrollPosition = { x: number; y: number };
+
+type PendingRestoreState = {
+  container: HTMLElement;
+  path: string;
+  position: ScrollPosition;
+};
 
 export type ContextManagerOptions = {
   /**
@@ -61,29 +70,132 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return !value.exclude.some((pattern) => matchPath(path, pattern));
   };
   let contextElement: HTMLElement | null = null;
-  const scrollPositions: Map<string, { x: number; y: number }> = new Map();
+  let pendingContextElement: HTMLElement | null = null;
+  const scrollPositions: Map<string, ScrollPosition> = new Map();
   let currentPath: string | null = null;
+  let lockedOutgoingPath: string | null = null;
+  let restoringPath: string | null = null;
+  let pendingRestoreFrame: number | null = null;
+  let pendingRestoreState: PendingRestoreState | null = null;
+
+  const getNow = () =>
+    typeof performance !== "undefined" ? performance.now() : Date.now();
+  let pendingRestoreDeadline = 0;
 
   const scrollListener = () => {
     if (!scrollContainer || !currentPath) return;
+    if (currentPath === lockedOutgoingPath || currentPath === restoringPath) {
+      return;
+    }
     scrollPositions.set(currentPath, {
       x: scrollContainer.scrollLeft,
       y: scrollContainer.scrollTop,
     });
   };
 
-  const restoreScrollPosition = (path: string) => {
+  const captureScrollPosition = (path: string) => {
     if (!scrollContainer) return;
-    const savedPosition = scrollPositions.get(path) ?? { x: 0, y: 0 };
-    scrollContainer.scrollTo({
-      top: savedPosition.y,
-      left: savedPosition.x,
+    scrollPositions.set(path, {
+      x: scrollContainer.scrollLeft,
+      y: scrollContainer.scrollTop,
     });
   };
 
-  // Initialize context with element - sets up scroll tracking and stores element for later use
+  const cancelPendingRestore = (
+    options: { commitCurrentScroll?: boolean } = {},
+  ) => {
+    const { commitCurrentScroll = true } = options;
+
+    if (pendingRestoreFrame !== null) {
+      cancelAnimationFrame(pendingRestoreFrame);
+      pendingRestoreFrame = null;
+    }
+
+    if (
+      commitCurrentScroll &&
+      restoringPath &&
+      currentPath === restoringPath &&
+      scrollContainer
+    ) {
+      captureScrollPosition(restoringPath);
+    }
+
+    pendingRestoreState = null;
+    pendingRestoreDeadline = 0;
+    restoringPath = null;
+  };
+
+  const applyScrollPosition = (
+    container: HTMLElement,
+    position: ScrollPosition,
+  ) => {
+    const maxX = Math.max(0, container.scrollWidth - container.clientWidth);
+    const maxY = Math.max(0, container.scrollHeight - container.clientHeight);
+    const targetX = Math.max(0, Math.min(position.x, maxX));
+    const targetY = Math.max(0, Math.min(position.y, maxY));
+
+    if (container.scrollLeft === targetX && container.scrollTop === targetY) {
+      return;
+    }
+
+    container.scrollTo({
+      left: targetX,
+      top: targetY,
+    });
+  };
+
+  const restoreScrollPosition = (path: string) => {
+    if (!scrollContainer) return;
+    cancelPendingRestore();
+
+    const container = scrollContainer;
+    const savedPosition =
+      shouldPreserve(path) && scrollPositions.has(path)
+        ? scrollPositions.get(path)!
+        : { x: 0, y: 0 };
+
+    scrollPositions.set(path, savedPosition);
+    restoringPath = path;
+    pendingRestoreState = {
+      container,
+      path,
+      position: savedPosition,
+    };
+    pendingRestoreDeadline = getNow() + RESTORE_RETRY_WINDOW_MS;
+
+    // Some frameworks mount the new page before layout is final or apply
+    // their own scroll reset a little later. Keep asserting the target scroll
+    // for a short window so both out-first and in-first adapters converge.
+    const keepRestoring = () => {
+      const restoreState = pendingRestoreState;
+      if (!restoreState) return;
+
+      if (
+        scrollContainer !== restoreState.container ||
+        currentPath !== restoreState.path
+      ) {
+        cancelPendingRestore({ commitCurrentScroll: false });
+        return;
+      }
+
+      applyScrollPosition(restoreState.container, restoreState.position);
+
+      if (getNow() >= pendingRestoreDeadline) {
+        cancelPendingRestore();
+        return;
+      }
+
+      pendingRestoreFrame = requestAnimationFrame(keepRestoring);
+    };
+
+    pendingRestoreFrame = requestAnimationFrame(keepRestoring);
+  };
+
+  // Prepare incoming context with element. Activation is deferred until the
+  // navigation pair is resolved so frameworks with different out/in ordering
+  // still preserve the correct outgoing scroll state.
   const initializeContext = (element: HTMLElement, path: string) => {
-    contextElement = element;
+    pendingContextElement = element;
 
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
@@ -110,9 +222,37 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         passive: true,
       });
     }
+    if (currentPath && currentPath !== path) {
+      captureScrollPosition(currentPath);
+      lockedOutgoingPath = currentPath;
+    }
+  };
 
+  const activateContext = (
+    path: string,
+    options: { restoreScroll?: boolean } = {},
+  ) => {
+    if (
+      currentPath &&
+      currentPath !== path &&
+      currentPath !== lockedOutgoingPath
+    ) {
+      captureScrollPosition(currentPath);
+    }
+
+    cancelPendingRestore();
+
+    if (pendingContextElement) {
+      contextElement = pendingContextElement;
+      pendingContextElement = null;
+    }
+
+    lockedOutgoingPath = null;
     currentPath = path;
-    restoreScrollPosition(path);
+
+    if (options.restoreScroll) {
+      restoreScrollPosition(path);
+    }
   };
 
   // Calculate scroll offset - computes difference between pages' scroll positions
@@ -162,6 +302,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   return {
     initializeContext,
+    activateContext,
     calculateScrollOffset,
     evictScrollPosition,
     shouldPreserve,
