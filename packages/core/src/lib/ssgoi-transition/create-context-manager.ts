@@ -5,11 +5,6 @@ import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
 
-const detectIsMobile = (): boolean => {
-  if (typeof window === "undefined") return false;
-  return window.innerWidth < MOBILE_BREAKPOINT_PX;
-};
-
 export type ContextManagerOptions = {
   /**
    * Scroll preservation policy. See SsgoiConfig.preserveScroll for full semantics.
@@ -31,17 +26,40 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       ? preserveScroll
       : () => preserveScroll;
 
+  let scrollContainer: HTMLElement | null = null;
+
+  // "Mobile" is inferred from the scroll container's own width, not the
+  // viewport. This way an iPhone-frame demo embedded in a desktop page (a
+  // 390px-wide container) still triggers mobile-style scroll preservation.
+  // The value is cached and refreshed via ResizeObserver so reads on the
+  // hot path don't trigger synchronous layout.
+  let cachedIsMobile = false;
+  let isMobileMeasured = false;
+
+  const measureIsMobile = (): boolean => {
+    const width =
+      scrollContainer?.clientWidth ??
+      (typeof window !== "undefined" ? window.innerWidth : 0);
+    return width > 0 && width < MOBILE_BREAKPOINT_PX;
+  };
+
+  const detectIsMobile = (): boolean => {
+    if (!isMobileMeasured) {
+      cachedIsMobile = measureIsMobile();
+      isMobileMeasured = true;
+    }
+    return cachedIsMobile;
+  };
+
   // A path is preserved when the resolved value is enabled AND the path is
-  // not in the exclude list. Evaluated per-call so dynamic factors (e.g. the
-  // current viewport width) take effect immediately.
+  // not in the exclude list. Eviction (not scrollTo) is what actually
+  // distinguishes preserved vs non-preserved at navigation time.
   const shouldPreserve = (path: string): boolean => {
     const value = resolvePreserve(detectIsMobile());
     if (value === false) return false;
     if (value === true) return true;
     return !value.exclude.some((pattern) => matchPath(path, pattern));
   };
-
-  let scrollContainer: HTMLElement | null = null;
   let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, { x: number; y: number }> = new Map();
   let currentPath: string | null = null;
@@ -58,13 +76,15 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     }
   };
 
-  // Restore scroll position for the given path
+  // Restore scroll position for the given path. Always runs scrollTo —
+  // whether the saved value persists across navigations is decided by
+  // eviction, not by gating restore.
   const restoreScrollPosition = (path: string) => {
-    if (!scrollContainer || !shouldPreserve(path)) return;
+    if (!scrollContainer) return;
 
     const savedPosition = scrollPositions.get(path);
     if (!savedPosition) {
-      // First visit - scroll to top (SPA doesn't auto-reset scroll)
+      // No saved value (first visit, or evicted as non-preserved) — start at 0.
       scrollContainer.scrollTo({ top: 0, left: 0 });
       return;
     }
@@ -107,6 +127,18 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
+
+      // Re-measure now that the real container is known; subsequent updates
+      // come from the ResizeObserver below, which fires asynchronously after
+      // layout (no synchronous reflow on shouldPreserve calls).
+      cachedIsMobile = measureIsMobile();
+      isMobileMeasured = true;
+      if (typeof ResizeObserver !== "undefined") {
+        const observer = new ResizeObserver(() => {
+          cachedIsMobile = measureIsMobile();
+        });
+        observer.observe(scrollContainer);
+      }
 
       // IMPORTANT: When the scrolling element is document.documentElement (html element),
       // scroll events must be attached to window, not the element itself.
