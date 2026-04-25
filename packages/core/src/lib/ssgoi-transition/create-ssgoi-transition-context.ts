@@ -62,7 +62,7 @@ export function createSggoiTransitionContext(
     middleware = (from, to) => ({ from, to }), // Identity function as default
     skipOnIosSwipe,
     skipAnimationOnBack,
-    preserveScroll = false,
+    preserveScroll,
   } = options;
 
   // Handle deprecated skipOnIosSwipe option

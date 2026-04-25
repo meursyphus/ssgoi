@@ -490,16 +490,22 @@ export type SsgoiConfig = {
   /**
    * Automatically preserve and restore scroll position when navigating between pages.
    *
-   * - `false` (default): scroll positions are tracked only for the OUT transition diff,
+   * - `false`: scroll positions are tracked only for the OUT transition diff,
    *   then evicted — SSGOI does not restore scroll on arrival.
    * - `true`: save scroll on leave, restore on return. New (unvisited) paths scroll to 0.
    * - `{ exclude: string[] }`: preserve everywhere except matching paths. Excluded paths
    *   behave like `false` (evict, no restore). Supports wildcards: `/post/*`, `*`.
+   * - `(isMobile) => value`: function returning any of the above; evaluated on each
+   *   navigation so the answer can vary by environment (e.g. mobile vs. desktop).
    *
-   * @default false
+   * @default (isMobile) => isMobile  // mobile preserves, desktop does not
    */
-  preserveScroll?: boolean | { exclude: string[] };
+  preserveScroll?: PreserveScrollOption;
 };
+
+export type PreserveScrollValue = boolean | { exclude: string[] };
+export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
+export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 
 /**
  * Internal options for framework adapters

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useDemoRouter } from "./router-provider";
 import { Ssgoi, SsgoiConfig } from "@ssgoi/react";
 import {
@@ -52,11 +52,6 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const router = useDemoRouter();
   const currentPath = router.currentPath || "";
-  const pathRef = useRef(currentPath);
-  pathRef.current = currentPath;
-  const mainRef = useRef<HTMLElement>(null);
-  const scrollPositions = useRef<Record<string, number>>({});
-  const previousPath = useRef(currentPath);
 
   // Prefetch main pages on mount
   useEffect(() => {
@@ -65,33 +60,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
     router.prefetch("/demo/pinterest");
     router.prefetch("/demo/profile");
   }, [router]);
-
-  useEffect(() => {
-    if (!mainRef.current) return;
-
-    const handleScroll = () => {
-      if (!mainRef.current) return;
-      scrollPositions.current[pathRef.current] = mainRef.current.scrollTop;
-    };
-
-    const element = mainRef.current;
-    element.addEventListener("scroll", handleScroll);
-    return () => {
-      element?.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // Restore scroll position when path changes
-  useLayoutEffect(() => {
-    if (!mainRef.current) return;
-    const savedPosition = scrollPositions.current[currentPath] || 0;
-
-    if (mainRef.current) {
-      mainRef.current.scrollTop = savedPosition;
-    }
-
-    previousPath.current = currentPath;
-  }, [currentPath]);
 
   const config = useMemo(
     () => ({
@@ -139,7 +107,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       <div className="w-full bg-[#121212] flex flex-col overflow-hidden relative">
         {/* Main Content Area */}
         <main
-          ref={mainRef}
           id="demo-content"
           className={`flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] ${styles.scrollContainer}`}
         >

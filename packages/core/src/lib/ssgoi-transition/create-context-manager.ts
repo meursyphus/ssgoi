@@ -1,13 +1,19 @@
+import type { PreserveScrollOption, PreserveScrollFn } from "../types";
 import { getScrollingElement } from "../utils/get-scrolling-element";
 import { getPositionedParent } from "../utils/get-positioned-parent";
 import { matchPath } from "./find-matching-transition";
 
-export type PreserveScrollOption = boolean | { exclude: string[] };
+const MOBILE_BREAKPOINT_PX = 768;
+
+const detectIsMobile = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < MOBILE_BREAKPOINT_PX;
+};
 
 export type ContextManagerOptions = {
   /**
    * Scroll preservation policy. See SsgoiConfig.preserveScroll for full semantics.
-   * @default false
+   * @default (isMobile) => isMobile
    */
   preserveScroll?: PreserveScrollOption;
 };
@@ -17,16 +23,22 @@ export type ContextManagerOptions = {
  * including scroll positions and DOM element relationships
  */
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const { preserveScroll = false } = options;
+  const { preserveScroll = (isMobile: boolean) => isMobile } = options;
 
-  const excludePatterns =
-    typeof preserveScroll === "object" ? preserveScroll.exclude : [];
-  const preserveEnabled = preserveScroll !== false;
+  // Normalize all forms (boolean, { exclude }, function) to a function call.
+  const resolvePreserve: PreserveScrollFn =
+    typeof preserveScroll === "function"
+      ? preserveScroll
+      : () => preserveScroll;
 
-  // A path is preserved when the option is enabled AND the path is not excluded
+  // A path is preserved when the resolved value is enabled AND the path is
+  // not in the exclude list. Evaluated per-call so dynamic factors (e.g. the
+  // current viewport width) take effect immediately.
   const shouldPreserve = (path: string): boolean => {
-    if (!preserveEnabled) return false;
-    return !excludePatterns.some((pattern) => matchPath(path, pattern));
+    const value = resolvePreserve(detectIsMobile());
+    if (value === false) return false;
+    if (value === true) return true;
+    return !value.exclude.some((pattern) => matchPath(path, pattern));
   };
 
   let scrollContainer: HTMLElement | null = null;
