@@ -19,6 +19,11 @@ export function createNavigationDirectionDetector() {
     typeof history !== "undefined" ? (history.state?.ssgoiIndex ?? 0) : 0;
   let direction: NavigationDirection = "push";
   let popstateOccurred = false;
+  // Survives across all microtasks of the current navigation so IN and OUT
+  // phases (which can fire in either order, e.g. React's ref-callback vs
+  // MutationObserver) read the same back-nav state. Cleared on the next
+  // macrotask, before the following navigation begins.
+  let stickyBack = false;
 
   const handlePopstate = (e: PopStateEvent) => {
     popstateOccurred = true;
@@ -26,6 +31,7 @@ export function createNavigationDirectionDetector() {
 
     if (newIndex < currentIndex) {
       direction = "back";
+      stickyBack = true;
     } else if (newIndex > currentIndex) {
       direction = "forward";
     }
@@ -62,10 +68,15 @@ export function createNavigationDirectionDetector() {
     const result = direction;
     direction = "push"; // Reset for next navigation
     popstateOccurred = false;
+    // Defer until after sibling microtasks (e.g. an OUT phase queued via
+    // MutationObserver) have had a chance to read isBack().
+    setTimeout(() => {
+      stickyBack = false;
+    }, 0);
     return result;
   };
 
-  const isBack = () => direction === "back";
+  const isBack = () => stickyBack || direction === "back";
 
   return {
     initialize,

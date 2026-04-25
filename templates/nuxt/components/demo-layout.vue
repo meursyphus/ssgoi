@@ -111,7 +111,6 @@ const route = useRoute();
 const pathname = computed(() => route.path);
 
 const config: SsgoiConfig = {
-  experimentalPreserveScroll: true,
   transitions: [
     // Pinterest transitions
     {
