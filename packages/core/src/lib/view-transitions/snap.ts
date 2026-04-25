@@ -4,10 +4,12 @@ import { withResolvers } from "../utils";
 
 const DEFAULT_TRANSLATE_OFFSET = 8; // px
 
+// snappy ease-out: small (8px) decisive motion — punchy, settles fast.
+// 400/30 = ratio 0.75 of critical (~40), ~250ms with subtle settle.
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 600,
-    damping: 40,
+    stiffness: 400,
+    damping: 30,
     restDelta: 0.1,
     restSpeed: 100000000000000,
   },
