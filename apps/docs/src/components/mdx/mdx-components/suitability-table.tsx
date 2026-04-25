@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { cn } from "../../../lib/utils";
 
@@ -10,11 +8,17 @@ interface SuitabilityItem {
 }
 
 interface SuitabilityTableProps {
-  items: SuitabilityItem[];
+  items?: SuitabilityItem[];
   className?: string;
 }
 
 export function SuitabilityTable({ items, className }: SuitabilityTableProps) {
+  const safeItems = Array.isArray(items) ? items : [];
+
+  if (safeItems.length === 0) {
+    return null;
+  }
+
   const getSuitabilityIcon = (suitable: "yes" | "no" | "maybe") => {
     switch (suitable) {
       case "yes":
@@ -43,7 +47,7 @@ export function SuitabilityTable({ items, className }: SuitabilityTableProps) {
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => (
+          {safeItems.map((item, index) => (
             <tr
               key={index}
               className={cn(
