@@ -128,6 +128,9 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             ).contain = "layout paint";
             element.style.pointerEvents = "none";
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Clip to the viewport-aligned slice so scaling doesn't pull
+            // off-viewport content (above/below the scroll position) into view.
+            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
@@ -154,6 +157,9 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Clip to the viewport-aligned slice so scaling doesn't pull
+            // off-viewport content (above/below the scroll position) into view.
+            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
@@ -166,6 +172,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "";
             element.style.transformOrigin = "";
+            element.style.clipPath = "";
           },
         };
       },
