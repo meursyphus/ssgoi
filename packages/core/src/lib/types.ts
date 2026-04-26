@@ -444,15 +444,6 @@ export type SggoiTransitionContext = {
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;
 
-/**
- * Platform types for skipAnimationOnBack configuration
- * - 'ios': iOS devices (iPhone, iPad, iPod)
- * - 'android': Android devices
- * - 'desktop': Desktop browsers (non-mobile)
- * - 'all': All platforms
- */
-export type Platform = "ios" | "android" | "desktop" | "all";
-
 export type SsgoiConfig = {
   transitions?: {
     from: string;
@@ -462,31 +453,6 @@ export type SsgoiConfig = {
   }[];
   defaultTransition?: SggoiTransition;
   middleware?: (from: string, to: string) => { from: string; to: string };
-  /**
-   * @deprecated Use `skipAnimationOnBack: ['ios']` instead. Will be removed in next major version.
-   * Skip page transitions when iOS/Safari swipe-back gesture is detected
-   */
-  skipOnIosSwipe?: boolean;
-  /**
-   * Skip animations on browser back navigation for specified platforms
-   *
-   * @example
-   * // iOS only (default)
-   * skipAnimationOnBack: ['ios']
-   *
-   * // iOS and Android
-   * skipAnimationOnBack: ['ios', 'android']
-   *
-   * // All platforms
-   * skipAnimationOnBack: ['all']
-   *
-   * // Disabled - always run animations
-   * skipAnimationOnBack: []
-   *
-   * This prevents animation conflicts with native swipe-back gestures.
-   * @default ['ios']
-   */
-  skipAnimationOnBack?: Platform[];
   /**
    * Automatically preserve and restore scroll position when navigating between pages.
    *
@@ -517,10 +483,11 @@ export type SsgoiInternalOptions = {
    * Whether OUT transition must arrive before IN transition
    *
    * - true (default): OUT must arrive first, IN completes the pair.
-   *   Best for frameworks with native destroy callbacks (Svelte, Vue).
+   *   Best for frameworks with native destroy callbacks (Svelte).
    *
    * - false: OUT and IN can arrive in any order, both wait indefinitely.
-   *   Best for frameworks using MutationObserver for unmount detection (React).
+   *   Best for frameworks using MutationObserver for unmount detection
+   *   (React, Vue, Solid).
    *
    * @default true
    */

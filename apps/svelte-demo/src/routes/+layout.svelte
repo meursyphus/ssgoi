@@ -10,7 +10,6 @@
   let { children }: Props = $props();
 
   const ssgoiConfig = {
-    skipAnimationOnBack: ["ios"],
     transitions: [
       // Use hero transition between main and item detail pages
       {
