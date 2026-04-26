@@ -43,8 +43,9 @@ function getSheetRect(context: SggoiTransitionContext) {
   const containerRect = getRect(document.body, context.positionedParent);
   const top = context.scroll.y;
 
-  // Calculate viewport height considering container offset (like jaemin.ts)
-  const viewportHeight = window.innerHeight - containerRect.top;
+  // Calculate viewport height considering container offset
+  const viewportHeight =
+    context.scrollingElement.offsetHeight - containerRect.top;
 
   return {
     top,
@@ -78,6 +79,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       in: (element, context) => {
         const rect = getSheetRect(context);
         const viewportHeight = rect.height;
+        const visibleTop = context.scroll.y;
 
         return {
           physics: physicsOptions,
@@ -87,6 +89,9 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             (
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
+            // Clip the sheet to its viewport-aligned slice so translate3d only
+            // shows the slice the user was looking at, not the rest of the page.
+            element.style.clipPath = `inset(${visibleTop}px 0 calc(100% - ${visibleTop + viewportHeight}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,
@@ -97,6 +102,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             (
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "";
+            element.style.clipPath = "";
           },
         };
       },
@@ -104,7 +110,12 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       out: (element, context) => {
         const rect = getSheetRect(context);
         const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
+        // After prepareOutgoing applies top:-scrollOffset.y, the element's
+        // visible slice in element-local coords is S_from..S_from+viewportH;
+        // its center is rect.top+rect.height/2 (rect.top = context.scroll.y =
+        // S_from). Adding scrollOffset.y here would double-count the same
+        // compensation prepareOutgoing already does.
+        const centerY = rect.top + rect.height / 2;
 
         return {
           physics: physicsOptions,
@@ -131,9 +142,10 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
     return {
       // Entering background: scales up with fade
       in: (element, context) => {
-        const rect = getSheetRect(context);
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        const centerX = (() => {
+          const rect = getSheetRect(context);
+          return rect.left + rect.width / 2;
+        })();
 
         return {
           physics: physicsOptions,
@@ -143,7 +155,11 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             (
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
-            element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Read live geometry so the origin stays at viewport center even if
+            // scroll restoration to S_to hasn't landed yet at prepare time.
+            const visualRect = element.getBoundingClientRect();
+            const localCenterY = window.innerHeight / 2 - visualRect.top;
+            element.style.transformOrigin = `${centerX}px ${localCenterY}px`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
@@ -163,6 +179,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       out: (element, context) => {
         const rect = getSheetRect(context);
         const viewportHeight = rect.height;
+        const visibleTop = context.scroll.y;
 
         return {
           physics: physicsOptions,
@@ -175,6 +192,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
             element.style.pointerEvents = "none";
+            element.style.clipPath = `inset(${visibleTop}px 0 calc(100% - ${visibleTop + viewportHeight}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,
