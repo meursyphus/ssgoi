@@ -14,7 +14,7 @@ Using Claude, Cursor, ChatGPT, or other AI assistants? Let them set it up for yo
 
 **Add this to your AI's context:**
 ```
-https://ssgoi.dev/llm.txt
+https://ssgoi.dev/llms.txt
 ```
 
 Contains complete setup guides, all transition types, troubleshooting, and API docs.

@@ -8,7 +8,9 @@ interface DemoLayoutProps {
 }
 
 export const DemoLayout = memo(({ children }: DemoLayoutProps) => {
-  return <div className="min-h-screen bg-black">{children}</div>;
+  return (
+    <div className="overflow-x-clip relative z-0 bg-black">{children}</div>
+  );
 });
 
 DemoLayout.displayName = "FilmDemoLayout";

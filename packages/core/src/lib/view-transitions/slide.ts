@@ -6,10 +6,12 @@ interface SlideOptions {
   physics?: PhysicsOptions;
 }
 
+// ease-out (Material decelerated): horizontal page push, incoming page settles in.
+// 170/22 mirrors drill character; doubleSpring 0.8 softens both ends, ~330ms total.
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 140,
-    damping: 19,
+    stiffness: 170,
+    damping: 22,
     doubleSpring: 0.8,
   },
 };

@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "4.4.1",
+  "version": "5.0.0",
   "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
   "private": false,
   "type": "module",
@@ -58,11 +58,19 @@
   },
   "keywords": [
     "page-transition",
+    "page-transitions",
+    "view-transitions",
+    "view-transition-api-alternative",
     "animation",
     "typescript",
     "vanilla",
     "spring-physics",
-    "ssgoi"
+    "ssgoi",
+    "cross-browser",
+    "navigation-animation",
+    "hero-transition",
+    "shared-element-transition",
+    "web-animations"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

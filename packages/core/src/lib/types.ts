@@ -1,5 +1,4 @@
 import type { Integrator } from "./animator/integrator";
-import type { CreateNavigationDetector } from "./ssgoi-transition/navigation-detector-strategy";
 
 export type TransitionKey = string | symbol;
 
@@ -489,29 +488,24 @@ export type SsgoiConfig = {
    */
   skipAnimationOnBack?: Platform[];
   /**
-   * @description Automatically preserve and restore scroll position when navigating between pages.
-   * When enabled, SSGOI will:
-   * - Save scroll position when leaving a page
-   * - Restore scroll position when returning to a previously visited page
+   * Automatically preserve and restore scroll position when navigating between pages.
    *
-   * @experimental This is an experimental feature and may change in future versions.
-   * @default false
+   * - `false`: scroll positions are tracked only for the OUT transition diff,
+   *   then evicted — SSGOI does not restore scroll on arrival.
+   * - `true`: save scroll on leave, restore on return. New (unvisited) paths scroll to 0.
+   * - `{ exclude: string[] }`: preserve everywhere except matching paths. Excluded paths
+   *   behave like `false` (evict, no restore). Supports wildcards: `/post/*`, `*`.
+   * - `(isMobile) => value`: function returning any of the above; evaluated on each
+   *   navigation so the answer can vary by environment (e.g. mobile vs. desktop).
+   *
+   * @default (isMobile) => isMobile  // mobile preserves, desktop does not
    */
-  experimentalPreserveScroll?: boolean;
-  /**
-   * @description Patterns for routes that should always reset scroll to top when leaving.
-   * When navigating away from a matching route, scroll position will be saved as 0.
-   * This means returning to these routes will always start at the top.
-   *
-   * Supports wildcard patterns:
-   * - '/post/*' matches '/post/123', '/post/abc', etc.
-   * - '*' matches any path
-   *
-   * @example ['/post/*', '/article/*', '/product/detail/*']
-   * @experimental This is an experimental feature and may change in future versions.
-   */
-  scrollResetPatterns?: string[];
+  preserveScroll?: PreserveScrollOption;
 };
+
+export type PreserveScrollValue = boolean | { exclude: string[] };
+export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
+export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 
 /**
  * Internal options for framework adapters
@@ -531,31 +525,11 @@ export type SsgoiInternalOptions = {
    * @default true
    */
   outFirst?: boolean;
-
-  /**
-   * Custom navigation detector factory
-   * If provided, overrides the default detector selection based on outFirst
-   * Also returns SsgoiExtendedContext instead of SsgoiContext
-   */
-  createNavigationDetector?: CreateNavigationDetector;
 };
 
 export type SsgoiContext = (
   path: string,
 ) => Transition & { key: TransitionKey };
-
-/**
- * Extended context with additional utilities for frameworks that need
- * pre-transition visibility control (e.g., React with Next.js)
- */
-export type SsgoiExtendedContext = {
-  getTransition: SsgoiContext;
-  /**
-   * Check if a transition is configured for the given from/to paths
-   * Useful for determining initial visibility before transition starts
-   */
-  hasMatchingTransition: (from: string, to: string) => boolean;
-};
 
 /**
  * Normalized schedule entry for internal processing

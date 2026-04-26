@@ -10,11 +10,7 @@ interface DemoLayoutProps {
 }
 
 export const DemoLayout = memo(({ children }: DemoLayoutProps) => {
-  return (
-    <div className="z-0">
-      <TransitionScope>{children}</TransitionScope>
-    </div>
-  );
+  return <TransitionScope>{children}</TransitionScope>;
 });
 
 DemoLayout.displayName = "DepthDemoLayout";

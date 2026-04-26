@@ -1,0 +1,55 @@
+# SSGOI - pinterest transition
+
+Card expansion from gallery to full-screen. Use when a gallery card should appear to expand and fill the detail viewport (Pinterest, photo galleries, image-heavy product grids).
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+The tapped gallery card grows from its grid position to fill the detail viewport while the rest of the gallery fades away. On exit, the detail collapses back into its original card position.
+
+Visually heavier than `hero` — `pinterest` animates the entire card container, not just one shared element.
+
+## Signature
+
+```ts
+import { pinterest } from "@ssgoi/react/view-transitions";
+
+pinterest({
+  physics?: PhysicsOptions,
+})
+```
+
+## Required: matching data attributes
+
+```tsx
+// Gallery page
+{items.map(item => (
+  <Link key={item.id} href={`/photos/${item.id}`}>
+    <div data-pinterest-gallery-key={item.id}>
+      <img src={item.thumbnail} />
+    </div>
+  </Link>
+))}
+
+// Detail page (/photos/[id])
+<div data-pinterest-detail-key={id}>
+  <img src={fullImage} />
+</div>
+```
+
+The key on `data-pinterest-gallery-key` (source) and `data-pinterest-detail-key` (destination) must match.
+
+## Pairing pattern
+
+```ts
+const config = {
+  transitions: [
+    { from: '/photos', to: '/photos/*', transition: pinterest(), symmetric: true },
+  ],
+};
+```
+
+## When to use over instagram
+
+Use `pinterest` when both the OUT (collapsing back) and IN (expanding) animations matter to the UX. If your gallery has many items and you want lighter animation cost, prefer `instagram`.
