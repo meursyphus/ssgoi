@@ -1,0 +1,35 @@
+# SSGOI - depth transition
+
+Material Design Z-axis transition. Use for in-place transformations where the user feels they're moving forward or backward through layers of the same surface (e.g., Settings → sub-setting, expanded detail in place).
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- `enter`: New page scales up slightly + fades in; old page scales down + fades out.
+- `exit`: New page scales down + fades in; old page scales up + fades out.
+
+Both pages remain visible mid-animation, suggesting depth (Z-axis) movement rather than horizontal navigation.
+
+## Signature
+
+```ts
+import { depth } from "@ssgoi/react/view-transitions";
+
+depth({
+  direction: 'enter' | 'exit',
+  scaleOffset?: number,     // how much to scale (default: 0.05 = 5%)
+  physics?: PhysicsOptions, // default: { spring: { stiffness: 280, damping: 30 } }
+})
+```
+
+## Pairing pattern
+
+```ts
+const config = {
+  transitions: [
+    { from: '/settings',   to: '/settings/*', transition: depth({ direction: 'enter' }) },
+    { from: '/settings/*', to: '/settings',   transition: depth({ direction: 'exit' }) },
+  ],
+};
+```
