@@ -37,8 +37,13 @@ const createFakeElement = (
     scrollLeft: 0,
     scrollTop: 0,
     scrollTo: vi.fn(function (this: FakeElement, options: ScrollToOptions) {
-      this.scrollLeft = options.left ?? this.scrollLeft;
-      this.scrollTop = options.top ?? this.scrollTop;
+      // Mirror browser behavior: scroll values clamp to the scrollable extent.
+      const maxX = Math.max(0, this.scrollWidth - this.clientWidth);
+      const maxY = Math.max(0, this.scrollHeight - this.clientHeight);
+      const requestedX = options.left ?? this.scrollLeft;
+      const requestedY = options.top ?? this.scrollTop;
+      this.scrollLeft = Math.max(0, Math.min(requestedX, maxX));
+      this.scrollTop = Math.max(0, Math.min(requestedY, maxY));
     }),
     ...overrides,
   } as unknown as FakeElement;
@@ -134,7 +139,7 @@ describe("createContextManager", () => {
     vi.unstubAllGlobals();
   });
 
-  it("does not restore scroll on the initial mount", () => {
+  it("scrolls to top on first visit when preservation is enabled but nothing saved", () => {
     const manager = createContextManager({
       preserveScroll: true,
     });
@@ -145,101 +150,184 @@ describe("createContextManager", () => {
     documentElement.scrollTop = 320;
 
     manager.initializeContext(page, "/feed");
-    manager.activateContext("/feed");
-    flushAnimationFrames(5);
+    flushAnimationFrames(2);
 
-    expect(documentElement.scrollTo).not.toHaveBeenCalled();
+    expect(documentElement.scrollTop).toBe(0);
   });
 
-  it("freezes the outgoing path until the incoming page is activated", () => {
+  it("does not touch scroll for non-preserved paths' initial restore", () => {
+    const manager = createContextManager({
+      preserveScroll: false,
+    });
+    const page = createFakeElement({
+      parentElement: body,
+    });
+
+    documentElement.scrollTop = 320;
+
+    manager.initializeContext(page, "/feed");
+    flushAnimationFrames(2);
+
+    // Non-preserved path: arrives at top regardless of prior browser scroll.
+    expect(documentElement.scrollTop).toBe(0);
+  });
+
+  it("suppresses scroll capture during the transition settle window", () => {
     const manager = createContextManager({
       preserveScroll: true,
     });
-    const feedPage = createFakeElement({
-      parentElement: body,
-    });
-    const detailPage = createFakeElement({
-      parentElement: body,
-    });
-    const feedPageAgain = createFakeElement({
-      parentElement: body,
-    });
+    const feedPage = createFakeElement({ parentElement: body });
 
     manager.initializeContext(feedPage, "/feed");
-    manager.activateContext("/feed");
+
+    // Within the settle window, scroll events must not be captured —
+    // otherwise an OUT-side router scroll reset could write 0 under /feed.
+    documentElement.scrollTop = 0;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 0 });
+
+    // After the settle window, captures resume.
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 480 });
+  });
+
+  it("restores a saved scroll position on return navigation", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
 
     documentElement.scrollTop = 480;
     emitWindowScroll();
-    expect(manager.getScrollPosition("/feed")).toEqual({
-      x: 0,
-      y: 480,
-    });
 
     manager.initializeContext(detailPage, "/detail");
-
-    documentElement.scrollTop = 0;
-    emitWindowScroll();
-
-    expect(manager.getScrollPosition("/feed")).toEqual({
-      x: 0,
-      y: 480,
-    });
-
-    manager.activateContext("/detail", {
-      restoreScroll: true,
-    });
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(0);
 
-    manager.initializeContext(feedPageAgain, "/feed");
-    manager.activateContext("/feed", {
-      restoreScroll: true,
-    });
+    manager.initializeContext(returningFeedPage, "/feed");
     flushAnimationFrames(2);
-
     expect(documentElement.scrollTop).toBe(480);
   });
 
-  it("keeps retrying until the saved target becomes reachable", () => {
+  it("retries restore until the saved target becomes reachable", () => {
     const manager = createContextManager({
       preserveScroll: true,
     });
-    const feedPage = createFakeElement({
-      parentElement: body,
-    });
-    const detailPage = createFakeElement({
-      parentElement: body,
-    });
-    const returningFeedPage = createFakeElement({
-      parentElement: body,
-    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
 
     manager.initializeContext(feedPage, "/feed");
-    manager.activateContext("/feed");
+    flushAnimationFrames(11);
 
     documentElement.scrollTop = 900;
     emitWindowScroll();
 
     manager.initializeContext(detailPage, "/detail");
-    manager.activateContext("/detail", {
-      restoreScroll: true,
-    });
-    flushAnimationFrames(2);
+    flushAnimationFrames(11);
 
+    // Page hasn't grown enough to reach 900 yet.
     documentElement.scrollHeight = 760;
     documentElement.scrollTop = 0;
 
     manager.initializeContext(returningFeedPage, "/feed");
-    manager.activateContext("/feed", {
-      restoreScroll: true,
-    });
-
-    flushAnimationFrames(10);
+    flushAnimationFrames(5);
+    // Container clamps to maxY=160 until layout grows.
     expect(documentElement.scrollTop).toBe(160);
 
     documentElement.scrollHeight = 2000;
     flushAnimationFrames(1);
-
     expect(documentElement.scrollTop).toBe(900);
+  });
+
+  it("stops calling scrollTo once the saved target has been reached", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 0;
+
+    manager.initializeContext(returningFeedPage, "/feed");
+
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(480);
+    const callsAfterReached = documentElement.scrollTo.mock.calls.length;
+
+    flushAnimationFrames(20);
+    expect(documentElement.scrollTo.mock.calls.length).toBe(callsAfterReached);
+  });
+
+  it("invalidates an older settle when a new init starts", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    // Halfway through /feed's settle window, a new init starts.
+    flushAnimationFrames(5);
+    manager.initializeContext(detailPage, "/detail");
+
+    // Burn enough frames that the OLD settle would have fired by now if it
+    // were still alive (5 + 6 = 11). With the generation guard, only the
+    // newer settle counts toward unlocking the listener.
+    flushAnimationFrames(6);
+    documentElement.scrollTop = 999;
+    emitWindowScroll();
+    // Listener must still be suppressed — newer settle hasn't elapsed.
+    expect(manager.getScrollPosition("/detail")).toEqual({ x: 0, y: 0 });
+
+    // After the newer settle window also elapses, captures resume.
+    flushAnimationFrames(6);
+    documentElement.scrollTop = 320;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/detail")).toEqual({ x: 0, y: 320 });
+  });
+
+  it("excludes paths matched by preserveScroll.exclude", () => {
+    const manager = createContextManager({
+      preserveScroll: { exclude: ["/feed"] },
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+    // /feed IS captured (listener doesn't gate by shouldPreserve), but the
+    // restore on return ignores it because /feed is excluded.
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 480 });
+
+    manager.initializeContext(detailPage, "/detail");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 0;
+    manager.initializeContext(returningFeedPage, "/feed");
+    flushAnimationFrames(2);
+
+    expect(documentElement.scrollTop).toBe(0);
   });
 });

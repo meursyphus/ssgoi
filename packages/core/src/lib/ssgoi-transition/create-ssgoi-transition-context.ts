@@ -76,7 +76,6 @@ export function createSggoiTransitionContext(
   // Initialize context manager with preserveScroll option
   const {
     initializeContext,
-    activateContext,
     calculateScrollOffset,
     evictScrollPosition,
     shouldPreserve,
@@ -105,12 +104,6 @@ export function createSggoiTransitionContext(
     // Trigger and wait for navigation pair
     detector.trigger(path, type);
     const pair = await detector.get(type);
-
-    if (type === "in") {
-      activateContext(path, {
-        restoreScroll: Boolean(pair),
-      });
-    }
 
     if (!pair) return () => ({});
 
