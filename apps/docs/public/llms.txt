@@ -4,55 +4,46 @@
 
 This document is for AI assistants to help developers set up SSGOI page transitions in Next.js.
 
+**Per-transition reference (options, physics, examples):** see the `Transitions` section below — each entry links to its own page like `https://ssgoi.dev/llms/<name>.txt`.
+
 ---
 
 ## Installation
 
 ```bash
-npm install @ssgoi/react @ssgoi/core
+npm install @ssgoi/react (or @ssgoi/svelt, @ssgoi/vue dependings on your framework)
 ```
-
-Recommend installing both `@ssgoi/react` and `@ssgoi/core` with latest versions.
 
 ---
 
 ## Layout Setup
 
-### Layout Structure
+SSGOI works on any web app. There are only three things to get right:
 
-```
-<Ssgoi config={config}>
-  <div className="relative z-0">  <-- CSS properties here
-    {children}                     <-- SsgoiTransition is inside each page
-  </div>
-</Ssgoi>
-```
+1. **Decide your scroll element** — the element whose scroll position SSGOI should preserve across transitions. Often a `<main>` or a centered content container.
+2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the element that wraps `<Ssgoi>`.**
+3. **Wrap each page in `<SsgoiTransition id="...">`** (see the next section).
 
-### CSS Properties
+Why those classes:
 
-**`z-index: 0` (Required)**
-- Place on the div that directly wraps `{children}` in layout
-- Creates a stacking context
-- Without this, OUT page disappears behind background color
+| Class | Why |
+|-------|-----|
+| `relative` | OUT page is cloned with `position: absolute` — needs a positioned ancestor |
+| `z-0` | Creates a stacking context so the OUT page doesn't fall behind backgrounds |
+| `overflow-x-clip` | Prevents horizontal overflow flashing during slide/drill (only needed if you use horizontal transitions) |
 
-**`position: relative` (Conditional)**
-- Required when: header/bottom-nav are NOT fixed/sticky
-- Not required when: you have fixed header or bottom nav
+The scroll element and the `<Ssgoi>` wrapper are typically **the same element**, so all four classes (`overflow-y-auto relative z-0 overflow-x-clip`) sit together.
 
-**`overflow-x: clip` (Recommended for web apps)**
-- Prevents horizontal overflow during slide/drill transitions
+### Layout example (mobile-style web app)
 
-### Web App Layout Pattern
+The library is most often used to ship app-like, mobile-width experiences, so this example shows that shape — a centered max-width column where the column itself scrolls. Adapt as needed for desktop layouts.
 
 ```tsx
-// app/layout.tsx
-"use client";
-
+// src/app/layout.tsx
 import { Ssgoi } from "@ssgoi/react";
 import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
-  preserveScroll: { exclude: ['/post/*'] },  // Preserve scroll except detail pages
   transitions: [
     { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
     { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
@@ -63,45 +54,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <body>
-        <div className="h-dvh flex flex-col">
-          {/* Scroll container ABOVE Ssgoi */}
-          <div className="flex-1 overflow-y-scroll">
-            <div className="max-w-[420px] mx-auto relative z-0 overflow-x-clip">
-              <Ssgoi config={config}>
-                {children}
-              </Ssgoi>
-            </div>
-          </div>
-          <BottomNav />
-        </div>
-      </body>
-    </html>
-  );
-}
-```
-
-### Standard Web Layout Pattern
-
-```tsx
-// app/layout.tsx
-import { Ssgoi } from "@ssgoi/react";
-import { fade } from "@ssgoi/react/view-transitions";
-
-const config = {
-  defaultTransition: fade(),
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html>
-      <body>
-        <Header />  {/* Fixed header provides positioning context */}
-        <Ssgoi config={config}>
-          <main className="z-0 min-h-screen">
-            {children}
+        <div className="mx-auto max-w-md h-dvh flex flex-col">
+          <main className="flex-1 overflow-y-auto relative z-0 overflow-x-clip">
+            <Ssgoi config={config}>
+              {children}
+            </Ssgoi>
           </main>
-        </Ssgoi>
-        <Footer />
+          {/* Optional: <BottomNav /> outside <main>, fixed-positioned */}
+        </div>
       </body>
     </html>
   );
@@ -157,209 +117,78 @@ type SsgoiConfig = {
   skipAnimationOnBack?: ('ios' | 'android' | 'desktop' | 'all')[];
   // default: ['ios']
 
-  // Auto preserve/restore scroll position. Default: (isMobile) => isMobile.
-  // - true: preserve everywhere
-  // - false: never preserve
-  // - { exclude: [...] }: preserve except these paths (e.g. detail pages)
-  // - (isMobile) => value: any of the above, computed per-navigation
-  preserveScroll?:
-    | boolean
-    | { exclude: string[] }
-    | ((isMobile: boolean) => boolean | { exclude: string[] });
+  // Scroll preservation. Defaults are sensible for mobile + desktop —
+  // typically you don't need to set this. See section below.
+  preserveScroll?: ...;
 };
 ```
 
+### preserveScroll
+
+**Defaults work out of the box.** Mobile viewports automatically preserve scroll position across transitions; desktop does not (browsers handle it). You normally don't need to configure this.
+
+**Customizing — exclude specific paths:**
+
+```ts
+const config = {
+  preserveScroll: { exclude: ["/post/*"] },
+};
+```
+
+**How it works:** When navigating *to* a path matching an `exclude` pattern, the destination page starts at scroll position 0 (typical for detail pages where you want to read from the top). All other navigations keep their preserved scroll position.
+
 ---
 
-## View Transitions
+## Transitions
 
-Import from `@ssgoi/react/view-transitions`
+Browse the list, find the UX you want, then open the per-transition page for full options and examples. Each detail page is self-contained — you only need to read the ones you'll use.
 
-Full documentation: https://ssgoi.dev/en/docs/mobile-transitions, https://ssgoi.dev/en/docs/desktop-transitions
+### `drill` — https://ssgoi.dev/llms/drill.txt
+iOS-style hierarchical navigation. New page slides in from the right; old page eases left underneath. Use for **List → Detail** flows where the user feels they're going deeper into content.
 
-### drill
+### `fade` — https://ssgoi.dev/llms/fade.txt
+Calm cross-fade between pages. No motion, just opacity. Use as a **safe default** for unrelated pages, or anywhere you don't want a directional cue.
 
-iOS-style hierarchical navigation. List -> Detail.
+### `scroll` — https://ssgoi.dev/llms/scroll.txt
+Vertical "page scroll" — old page slides off and new page slides in along the same axis. Use for **sequential content** like onboarding steps or paginated long-form pages.
 
-```ts
-drill({
-  direction: 'enter' | 'exit',
-  opacity?: boolean,
-  physics?: PhysicsOptions,
-})
-```
+### `slide` — https://ssgoi.dev/llms/slide.txt
+Horizontal slide — both pages translate sideways at once, like swiping between tabs. Use for **tab navigation** or swipeable sections.
 
-- `enter`: New page slides in from right (100% -> 0), old page moves left (-20%)
-- `exit`: Current page slides out to right, previous page returns
+### `swap` — https://ssgoi.dev/llms/swap.txt
+Subtle scale + fade. OUT fades, then IN scales up (0.95 → 1) and fades in. Use for **bottom tab navigation** between sibling pages where there's no natural direction.
 
-**Default physics:** `{ spring: { stiffness: 170, damping: 22 } }`
+### `sheet` — https://ssgoi.dev/llms/sheet.txt
+Bottom sheet style. New page slides up from below while the previous page scales down behind it. Use for **modal-like** flows (FAB → compose, "new item" screens) that should feel temporary.
 
-### fade
+### `hero` — https://ssgoi.dev/llms/hero.txt
+Shared element transition. The same logical object (a thumbnail, an avatar) is tweened in size and position from one page to the next. Requires matching `data-hero-key` on both pages — see the detail page.
 
-Cross-fade transition. General purpose.
+### `pinterest` — https://ssgoi.dev/llms/pinterest.txt
+Card expansion. The tapped gallery card grows to fill the detail viewport while the rest fades out; reverses on back. Requires `data-pinterest-gallery-key` / `data-pinterest-detail-key` — see the detail page.
 
-```ts
-fade({
-  transitionDelay?: number,
-  physics?: PhysicsOptions,
-})
-```
+### `instagram` — https://ssgoi.dev/llms/instagram.txt
+Like `pinterest` but only the IN page animates — the gallery just unmounts. Use over `pinterest` when you have **many gallery items** and want lighter animation cost. Requires `data-instagram-gallery-key` / `data-instagram-detail-key`.
 
-**Default physics:** `{ spring: { stiffness: 170, damping: 20, doubleSpring: true } }`
+### `depth` — https://ssgoi.dev/llms/depth.txt
+Material Design Z-axis. Both pages scale + fade in place, suggesting depth (forward/backward) rather than horizontal navigation. Use for **drilling within the same surface** (Settings → sub-setting).
 
-### scroll
+### `snap` — https://ssgoi.dev/llms/snap.txt
+Fast, subtle slide + fade — punchy and decisive (~250ms). Use when you want **feedback that "something changed"** without a full directional animation, especially in chains of quick navigations.
 
-Vertical scroll transition. Sequential content.
-
-```ts
-scroll({
-  direction: 'up' | 'down',
-  physics?: PhysicsOptions,
-})
-```
-
-**Default physics:** `{ spring: { stiffness: 5, damping: 4 } }`
-
-### slide
-
-Horizontal slide transition. Tab navigation.
-
-```ts
-slide({
-  direction: 'left' | 'right',
-  physics?: PhysicsOptions,
-})
-```
-
-**Default physics:** `{ spring: { stiffness: 140, damping: 19, doubleSpring: 0.8 } }`
-
-### sheet
-
-Bottom sheet style. FAB -> Compose screen.
-
-```ts
-sheet({
-  direction: 'enter' | 'exit',
-  physics?: PhysicsOptions,
-})
-```
-
-- `enter`: Sheet slides up from bottom, background scales down (1 -> 0.8) + fades
-- `exit`: Sheet slides down, background scales up + fades in
-
-**Default physics:** `{ inertia: { acceleration: 20, resistance: 1.5 } }` (enter)
-
-### swap
-
-Same-level page swap. Bottom tab navigation.
-
-```ts
-swap({
-  physics?: PhysicsOptions,
-  scaleOffset?: number,  // default: 0.05
-})
-```
-
-- OUT: Fade out only
-- IN: Scale up (0.95 -> 1) + fade in, waits for OUT to complete
-
-**Default physics:** `{ spring: { stiffness: 600, damping: 40 } }`
-
-### hero
-
-Shared element transition. Same object, different views.
-
-```ts
-hero({
-  physics?: PhysicsOptions,
-  maxDistance?: number,  // default: 700
-})
-```
-
-**Requires matching `data-hero-key` on both pages:**
+### Basic usage
 
 ```tsx
-// List page
-<img data-hero-key={`item-${id}`} src={thumbnail} />
+import { drill, fade, scroll } from "@ssgoi/react/view-transitions";
 
-// Detail page
-<img data-hero-key={`item-${id}`} src={fullImage} />
-```
-
-**Default physics:** `{ spring: { stiffness: 300, damping: 30 } }`
-
-### pinterest
-
-Card expansion from gallery to full screen.
-
-```ts
-pinterest({
-  physics?: PhysicsOptions,
-})
-```
-
-**Requires data attributes:**
-- Gallery: `data-pinterest-gallery-key={id}`
-- Detail: `data-pinterest-detail-key={id}`
-
-### instagram
-
-Similar to pinterest but only incoming page animates. Performance optimized.
-
-```ts
-instagram({
-  physics?: PhysicsOptions,
-})
-```
-
-**Requires data attributes:**
-- Gallery: `data-instagram-gallery-key={id}`
-- Detail: `data-instagram-detail-key={id}`
-
-### depth
-
-Depth-based layered navigation.
-
-```ts
-depth({
-  direction: 'enter' | 'exit',
-  physics?: PhysicsOptions,
-})
-```
-
-### snap
-
-Snap-scroll carousel effect.
-
-```ts
-snap({
-  direction: 'up' | 'down' | 'left' | 'right',
-  physics?: PhysicsOptions,
-})
-```
-
----
-
-## Physics Options
-
-```ts
-// Spring (ease-out feel)
-physics: {
-  spring: {
-    stiffness: 300,    // Higher = faster
-    damping: 30,       // Higher = less bounce
-    doubleSpring?: boolean | number,  // Ease-in-out effect
-  }
-}
-
-// Inertia (ease-in feel)
-physics: {
-  inertia: {
-    acceleration: 20,
-    resistance: 1.5,
-    resistanceType?: 'linear' | 'quadratic',
-  }
-}
+const config = {
+  transitions: [
+    { from: '*',       to: '/post/*', transition: drill({ direction: 'enter' }) },
+    { from: '/post/*', to: '*',       transition: drill({ direction: 'exit' }) },
+    { from: '/',       to: '/about',  transition: scroll({ direction: 'up' }) },
+  ],
+  defaultTransition: fade(),
+};
 ```
 
 ---
@@ -382,9 +211,9 @@ physics: {
 - **Cause**: `id` prop doesn't match route pattern
 - **Fix**: Ensure `SsgoiTransition id` matches the actual route path
 
-### Scroll position not preserved (web apps)
-- **Fix**: The default `(isMobile) => isMobile` only preserves on mobile-width viewports. Set `preserveScroll: true` if you want preservation on desktop too.
-- Ensure scroll container is ABOVE Ssgoi component
+### hero / pinterest / instagram transition not running
+- **Cause**: Data attribute keys don't match between pages
+- **Fix**: Verify the same key value is on both source and destination elements
 
 ---
 
@@ -431,6 +260,7 @@ export const prepareOutgoing = (element, context) => {
 
 ## Links
 
+- Per-transition reference (one file per transition): https://ssgoi.dev/llms/<name>.txt
 - Docs: https://ssgoi.dev
 - Mobile Transitions: https://ssgoi.dev/en/docs/mobile-transitions
 - Desktop Transitions: https://ssgoi.dev/en/docs/desktop-transitions

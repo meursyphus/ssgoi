@@ -1,0 +1,57 @@
+# SSGOI - instagram transition
+
+Card expansion to full-screen, optimized for large galleries. Visually similar to `pinterest`, but only the incoming page animates — the outgoing gallery is left untouched. Use when you have many gallery items and per-frame animation cost matters.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- IN: The detail expands from the position of the tapped gallery card to fill the viewport.
+- OUT: No animation on the gallery — it just unmounts. (This is the perf trade-off vs. `pinterest`.)
+
+## Signature
+
+```ts
+import { instagram } from "@ssgoi/react/view-transitions";
+
+instagram({
+  physics?: PhysicsOptions,
+})
+```
+
+## Required: matching data attributes
+
+```tsx
+// Gallery page
+{items.map(item => (
+  <Link key={item.id} href={`/posts/${item.id}`}>
+    <div data-instagram-gallery-key={item.id}>
+      <img src={item.thumbnail} />
+    </div>
+  </Link>
+))}
+
+// Detail page (/posts/[id])
+<div data-instagram-detail-key={id}>
+  <img src={fullImage} />
+</div>
+```
+
+The key on `data-instagram-gallery-key` (source) and `data-instagram-detail-key` (destination) must match.
+
+## Pairing pattern
+
+```ts
+const config = {
+  transitions: [
+    { from: '/posts', to: '/posts/*', transition: instagram(), symmetric: true },
+  ],
+};
+```
+
+## When to use over pinterest
+
+- Gallery has many items (dozens+) and you want a lighter animation.
+- You don't mind the gallery snapping rather than animating on back-navigation.
+
+If you need a smooth bidirectional expand/collapse, use `pinterest`.

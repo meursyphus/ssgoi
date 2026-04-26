@@ -1,0 +1,53 @@
+# SSGOI - hero transition
+
+Shared element transition. Use when the same logical object (a thumbnail, an avatar, a card image) appears on both pages and you want to visually connect them by tweening size and position.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+The element with a given `data-hero-key` on the source page is tweened in position and size to match the element with the same key on the destination page. The rest of the pages cross-fade around it.
+
+## Signature
+
+```ts
+import { hero } from "@ssgoi/react/view-transitions";
+
+hero({
+  maxDistance?: number,     // skip if elements too far apart (default: 700px)
+  physics?: PhysicsOptions, // default: { spring: { stiffness: 300, damping: 30 } }
+})
+```
+
+## Required: matching data attributes
+
+Both pages must mark the shared element with the same `data-hero-key`:
+
+```tsx
+// List page
+{items.map(item => (
+  <Link key={item.id} href={`/items/${item.id}`}>
+    <img data-hero-key={`item-${item.id}`} src={item.thumbnail} />
+  </Link>
+))}
+
+// Detail page (/items/[id])
+<img data-hero-key={`item-${id}`} src={fullImage} />
+```
+
+The key value must be a unique, stable string that matches across the two pages. Use the item's id, not its index.
+
+## Pairing pattern
+
+```ts
+const config = {
+  transitions: [
+    { from: '/items', to: '/items/*', transition: hero(), symmetric: true },
+  ],
+};
+```
+
+## Notes
+
+- If the keys don't match, hero falls back gracefully (no animation on that element).
+- For very long galleries where many items animate simultaneously, consider `instagram` instead.

@@ -1,0 +1,32 @@
+# SSGOI - sheet transition
+
+Bottom sheet style. Use for modal-like overlays that come up from the bottom — FAB → compose, "new item" flows, secondary screens that should feel temporary.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- `enter`: Sheet slides up from the bottom. Background page scales down (1 → 0.8) and fades, suggesting it's pushed back.
+- `exit`: Sheet slides down. Background page scales back up (0.8 → 1) and fades in.
+
+## Signature
+
+```ts
+import { sheet } from "@ssgoi/react/view-transitions";
+
+sheet({
+  direction: 'enter' | 'exit',
+  physics?: PhysicsOptions, // enter default: { inertia: { acceleration: 20, resistance: 1.5 } }
+})
+```
+
+## Pairing pattern
+
+```ts
+const config = {
+  transitions: [
+    { from: '*',           to: '/compose', transition: sheet({ direction: 'enter' }) },
+    { from: '/compose',    to: '*',        transition: sheet({ direction: 'exit' }) },
+  ],
+};
+```
