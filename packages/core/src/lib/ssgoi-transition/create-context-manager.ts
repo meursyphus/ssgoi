@@ -4,15 +4,10 @@ import { getPositionedParent } from "../utils/get-positioned-parent";
 import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
-const RESTORE_RETRY_WINDOW_MS = 1000;
+const RESTORE_MAX_RETRIES = 10;
+const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
-
-type PendingRestoreState = {
-  container: HTMLElement;
-  path: string;
-  position: ScrollPosition;
-};
 
 export type ContextManagerOptions = {
   /**
@@ -22,14 +17,9 @@ export type ContextManagerOptions = {
   preserveScroll?: PreserveScrollOption;
 };
 
-/**
- * Creates a context manager for tracking transition-related information
- * including scroll positions and DOM element relationships
- */
 export function createContextManager(options: ContextManagerOptions = {}) {
   const { preserveScroll = (isMobile: boolean) => isMobile } = options;
 
-  // Normalize all forms (boolean, { exclude }, function) to a function call.
   const resolvePreserve: PreserveScrollFn =
     typeof preserveScroll === "function"
       ? preserveScroll
@@ -37,18 +27,25 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   let scrollContainer: HTMLElement | null = null;
 
-  // "Mobile" is inferred from the scroll container's own width, not the
-  // viewport. This way an iPhone-frame demo embedded in a desktop page (a
-  // 390px-wide container) still triggers mobile-style scroll preservation.
-  // The value is cached and refreshed via ResizeObserver so reads on the
-  // hot path don't trigger synchronous layout.
+  // Mobile detection is based on the scroll container's width (not the
+  // viewport) so an iPhone-frame demo embedded in a desktop page still
+  // triggers mobile behavior. Cached + refreshed via ResizeObserver so reads
+  // on the hot path don't synchronously force layout.
   let cachedIsMobile = false;
   let isMobileMeasured = false;
 
   const measureIsMobile = (): boolean => {
+    // Fall back to viewport width when the container hasn't been laid out
+    // yet (clientWidth === 0). Without this, an early measurement on a
+    // not-yet-visible container caches `false` (desktop) and breaks the
+    // default `(isMobile) => isMobile` predicate on actual mobile devices.
+    const containerWidth = scrollContainer?.clientWidth ?? 0;
     const width =
-      scrollContainer?.clientWidth ??
-      (typeof window !== "undefined" ? window.innerWidth : 0);
+      containerWidth > 0
+        ? containerWidth
+        : typeof window !== "undefined"
+          ? window.innerWidth
+          : 0;
     return width > 0 && width < MOBILE_BREAKPOINT_PX;
   };
 
@@ -60,142 +57,76 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return cachedIsMobile;
   };
 
-  // A path is preserved when the resolved value is enabled AND the path is
-  // not in the exclude list. Eviction (not scrollTo) is what actually
-  // distinguishes preserved vs non-preserved at navigation time.
   const shouldPreserve = (path: string): boolean => {
     const value = resolvePreserve(detectIsMobile());
     if (value === false) return false;
     if (value === true) return true;
     return !value.exclude.some((pattern) => matchPath(path, pattern));
   };
+
   let contextElement: HTMLElement | null = null;
-  let pendingContextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, ScrollPosition> = new Map();
   let currentPath: string | null = null;
-  let lockedOutgoingPath: string | null = null;
-  let restoringPath: string | null = null;
-  let pendingRestoreFrame: number | null = null;
-  let pendingRestoreState: PendingRestoreState | null = null;
-
-  const getNow = () =>
-    typeof performance !== "undefined" ? performance.now() : Date.now();
-  let pendingRestoreDeadline = 0;
+  // Suppress scroll capture during the transition window so OUT scrolls of
+  // an already-unmounted page don't bleed into IN under a wrong currentPath.
+  let isTransitioning = false;
+  // Generation token so a fresh init invalidates older settles. Without it,
+  // rapid navigations can leave an earlier settle running that flips
+  // isTransitioning back to false mid-way through a newer transition.
+  let initGeneration = 0;
 
   const scrollListener = () => {
-    if (!scrollContainer || !currentPath) return;
-    if (currentPath === lockedOutgoingPath || currentPath === restoringPath) {
-      return;
+    if (scrollContainer && currentPath && !isTransitioning) {
+      scrollPositions.set(currentPath, {
+        x: scrollContainer.scrollLeft,
+        y: scrollContainer.scrollTop,
+      });
     }
-    scrollPositions.set(currentPath, {
-      x: scrollContainer.scrollLeft,
-      y: scrollContainer.scrollTop,
-    });
   };
 
-  const captureScrollPosition = (path: string) => {
-    if (!scrollContainer) return;
-    scrollPositions.set(path, {
-      x: scrollContainer.scrollLeft,
-      y: scrollContainer.scrollTop,
-    });
-  };
-
-  const cancelPendingRestore = (
-    options: { commitCurrentScroll?: boolean } = {},
-  ) => {
-    const { commitCurrentScroll = true } = options;
-
-    if (pendingRestoreFrame !== null) {
-      cancelAnimationFrame(pendingRestoreFrame);
-      pendingRestoreFrame = null;
-    }
-
-    if (
-      commitCurrentScroll &&
-      restoringPath &&
-      currentPath === restoringPath &&
-      scrollContainer
-    ) {
-      captureScrollPosition(restoringPath);
-    }
-
-    pendingRestoreState = null;
-    pendingRestoreDeadline = 0;
-    restoringPath = null;
-  };
-
-  const applyScrollPosition = (
-    container: HTMLElement,
-    position: ScrollPosition,
-  ) => {
-    const maxX = Math.max(0, container.scrollWidth - container.clientWidth);
-    const maxY = Math.max(0, container.scrollHeight - container.clientHeight);
-    const targetX = Math.max(0, Math.min(position.x, maxX));
-    const targetY = Math.max(0, Math.min(position.y, maxY));
-
-    if (container.scrollLeft === targetX && container.scrollTop === targetY) {
-      return;
-    }
-
-    container.scrollTo({
-      left: targetX,
-      top: targetY,
-    });
-  };
-
+  // Restore scroll position for the given path. For non-preserved paths the
+  // arrival starts at the top; for preserved paths with a saved value we
+  // re-apply for up to 10 frames or until the target is reached, whichever
+  // comes first. Stops on success so we don't fight subsequent user scrolls.
   const restoreScrollPosition = (path: string) => {
     if (!scrollContainer) return;
-    cancelPendingRestore();
 
-    const container = scrollContainer;
-    const savedPosition =
+    // Resolve the target: saved value if preservation is on AND we have one,
+    // otherwise (0, 0). All three cases — non-preserved, preserved-but-empty,
+    // preserved-with-value — go through the same retry loop so a router-side
+    // scroll restore (e.g., SvelteKit's `afterNavigate`) running after our
+    // first scrollTo can be overridden within the retry window.
+    const target: ScrollPosition =
       shouldPreserve(path) && scrollPositions.has(path)
         ? scrollPositions.get(path)!
         : { x: 0, y: 0 };
 
-    scrollPositions.set(path, savedPosition);
-    restoringPath = path;
-    pendingRestoreState = {
-      container,
-      path,
-      position: savedPosition,
-    };
-    pendingRestoreDeadline = getNow() + RESTORE_RETRY_WINDOW_MS;
+    let retryCount = 0;
+    const tryRestore = () => {
+      if (!scrollContainer) return;
 
-    // Some frameworks mount the new page before layout is final or apply
-    // their own scroll reset a little later. Keep asserting the target scroll
-    // for a short window so both out-first and in-first adapters converge.
-    const keepRestoring = () => {
-      const restoreState = pendingRestoreState;
-      if (!restoreState) return;
+      scrollContainer.scrollTo({
+        top: target.y,
+        left: target.x,
+      });
 
-      if (
-        scrollContainer !== restoreState.container ||
-        currentPath !== restoreState.path
-      ) {
-        cancelPendingRestore({ commitCurrentScroll: false });
-        return;
+      const targetReached =
+        Math.abs(scrollContainer.scrollTop - target.y) < 1 &&
+        Math.abs(scrollContainer.scrollLeft - target.x) < 1;
+
+      if (!targetReached && retryCount < RESTORE_MAX_RETRIES) {
+        retryCount++;
+        requestAnimationFrame(tryRestore);
       }
-
-      applyScrollPosition(restoreState.container, restoreState.position);
-
-      if (getNow() >= pendingRestoreDeadline) {
-        cancelPendingRestore();
-        return;
-      }
-
-      pendingRestoreFrame = requestAnimationFrame(keepRestoring);
     };
 
-    pendingRestoreFrame = requestAnimationFrame(keepRestoring);
+    requestAnimationFrame(tryRestore);
   };
 
-  // Prepare incoming context with element. Activation is deferred until the
-  // navigation pair is resolved so frameworks with different out/in ordering
-  // still preserve the correct outgoing scroll state.
   const initializeContext = (element: HTMLElement, path: string) => {
-    pendingContextElement = element;
+    isTransitioning = true;
+    const myGeneration = ++initGeneration;
+    contextElement = element;
 
     if (!scrollContainer) {
       scrollContainer = getScrollingElement(element);
@@ -212,50 +143,41 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         observer.observe(scrollContainer);
       }
 
-      // IMPORTANT: When the scrolling element is document.documentElement (html element),
+      // IMPORTANT: When the scrolling element is document.documentElement,
       // scroll events must be attached to window, not the element itself.
-      // This is because document.documentElement doesn't fire scroll events directly.
-      // For all other scrollable containers, we attach the listener to the element.
+      // For all other scrollable containers, attach to the element directly.
       const target =
         scrollContainer === document.documentElement ? window : scrollContainer;
       target.addEventListener("scroll", scrollListener, {
         passive: true,
       });
     }
-    if (currentPath && currentPath !== path) {
-      captureScrollPosition(currentPath);
-      lockedOutgoingPath = currentPath;
-    }
-  };
 
-  const activateContext = (
-    path: string,
-    options: { restoreScroll?: boolean } = {},
-  ) => {
-    if (
-      currentPath &&
-      currentPath !== path &&
-      currentPath !== lockedOutgoingPath
-    ) {
-      captureScrollPosition(currentPath);
-    }
-
-    cancelPendingRestore();
-
-    if (pendingContextElement) {
-      contextElement = pendingContextElement;
-      pendingContextElement = null;
-    }
-
-    lockedOutgoingPath = null;
     currentPath = path;
+    restoreScrollPosition(path);
 
-    if (options.restoreScroll) {
-      restoreScrollPosition(path);
-    }
+    // Re-enable scroll capture after the transition window settles. Spans
+    // ~10 frames (~167ms) — long enough for most page transitions and any
+    // router-driven scroll reset to land before we start trusting the
+    // listener again.
+    let settleCount = 0;
+    const trySettle = () => {
+      // A newer init started its own settle; this older one must not be the
+      // one to flip the flag back, otherwise it'd unlock listener captures
+      // mid-way through the newer transition.
+      if (myGeneration !== initGeneration) return;
+      settleCount++;
+      if (settleCount >= TRANSITION_SETTLE_FRAMES) {
+        isTransitioning = false;
+      } else {
+        requestAnimationFrame(trySettle);
+      }
+    };
+    requestAnimationFrame(trySettle);
   };
 
-  // Calculate scroll offset - computes difference between pages' scroll positions
+  // Calculate scroll offset between two pages so transitions can use it as a
+  // delta. Non-preserved 'to' paths are treated as fresh (0,0).
   const calculateScrollOffset = (
     from?: string,
     to?: string,
@@ -265,7 +187,6 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         ? scrollPositions.get(from)!
         : { x: 0, y: 0 };
 
-    // If 'to' is not preserved, treat as 0 (arrival starts fresh)
     const toScroll =
       to && shouldPreserve(to) && scrollPositions.has(to)
         ? scrollPositions.get(to)!
@@ -278,22 +199,19 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   };
 
   // Evict a saved scroll position. Caller invokes after OUT context is built
-  // for paths where preservation is disabled, so stale values don't leak across
-  // navigations.
+  // for paths where preservation is disabled, so stale values don't leak
+  // across navigations.
   const evictScrollPosition = (path: string) => {
     scrollPositions.delete(path);
   };
 
-  // Getter for scroll container - returns null if not initialized yet
   const getScrollContainer = () => scrollContainer;
 
-  // Get positioned parent element - finds the nearest positioned ancestor
   const getPositionedParentElement = () => {
     if (!contextElement) return document.body;
     return getPositionedParent(contextElement);
   };
 
-  // Get scroll position for a specific path
   const getScrollPosition = (path?: string): { x: number; y: number } => {
     return path && scrollPositions.has(path)
       ? scrollPositions.get(path)!
@@ -302,7 +220,6 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   return {
     initializeContext,
-    activateContext,
     calculateScrollOffset,
     evictScrollPosition,
     shouldPreserve,
