@@ -10,7 +10,6 @@ import { homeStructuredData } from "./home-structured-data";
 import { blogStructuredData } from "./blog-structured-data";
 import { docsStructuredData } from "./docs-structured-data";
 import { showcase } from "./showcase";
-import { chatbot } from "./chatbot";
 
 const ko: Messages = {
   header,
@@ -24,7 +23,6 @@ const ko: Messages = {
   blogStructuredData,
   docsStructuredData,
   showcase,
-  chatbot,
 };
 
 export default ko;

@@ -9,12 +9,9 @@
     "lint": "next lint",
     "generate:sandpack": "tsx scripts/generate-sandpack-templates.ts",
     "prepare": "pnpm generate:sandpack",
-    "prebuild": "pnpm generate:sandpack",
-    "ingest:docs": "tsx scripts/ingest-docs.ts"
+    "prebuild": "pnpm generate:sandpack"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.30",
-    "@ai-sdk/react": "^3.0.99",
     "@codesandbox/sandpack-react": "^2.20.0",
     "@giscus/react": "^3.1.0",
     "@mdx-js/loader": "^3.1.0",
@@ -25,10 +22,8 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@react-three/drei": "^10.7.4",
     "@react-three/fiber": "^9.3.0",
-    "@supabase/supabase-js": "^2.97.0",
     "@types/three": "^0.179.0",
     "@vercel/analytics": "^1.5.0",
-    "ai": "^6.0.97",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
@@ -38,7 +33,6 @@
     "lucide-react": "^0.525.0",
     "next": "15.4.8",
     "next-mdx-remote": "^5.0.0",
-    "openai": "^6.22.0",
     "react": "19.1.2",
     "react-dom": "19.1.2",
     "react-markdown": "^10.1.0",

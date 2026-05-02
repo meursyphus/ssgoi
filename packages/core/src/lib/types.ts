@@ -186,13 +186,29 @@ export type SingleSpringConfig = BaseTransitionConfig & {
 };
 
 /**
- * Individual animation item in a multi-animation config
- *
- * Supports two animation modes (mutually exclusive):
- * - tick: RAF-based animation with callback on each frame
- * - css: Web Animation API with CSS string generation
+ * Common fields shared by every AnimationItem variant
  */
-export type AnimationItem = {
+type AnimationItemBase = {
+  onStart?: () => void;
+  onComplete?: () => void;
+
+  /**
+   * Progress offset (0-1) before this spring starts
+   * - 0: Start immediately (parallel behavior)
+   * - 1: Start after previous spring completes (sequential behavior)
+   * - 0.5: Start when previous spring is 50% complete
+   *
+   * Only applies to 'stagger' schedule mode.
+   * For 'parallel' mode, all springs start at 0.
+   * For 'sequential' mode, all springs use offset 1.
+   */
+  offset?: number;
+};
+
+/**
+ * Spring-driven animation item — physics drives a tick or css generator
+ */
+export type SpringAnimationItem = AnimationItemBase & {
   /**
    * Physics configuration for animation
    * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
@@ -224,42 +240,50 @@ export type AnimationItem = {
    *
    * @param progress - Current progress value (0 to 1)
    * @returns Style object for Web Animation API
-   *
-   * @example
-   * // Form 1: Function (element from parent)
-   * css: (progress) => ({
-   *   opacity: progress,
-   *   transform: `translateY(${(1 - progress) * 20}px)`,
-   * })
-   *
-   * @example
-   * // Form 2: Object with custom element
-   * css: {
-   *   element: myElement,
-   *   style: (progress) => ({
-   *     transform: `scale(${progress})`,
-   *   }),
-   * }
    */
   css?:
     | ((progress: number) => StyleObject)
     | { element: HTMLElement; style: (progress: number) => StyleObject };
 
-  onStart?: () => void;
-  onComplete?: () => void;
-
-  /**
-   * Progress offset (0-1) before this spring starts
-   * - 0: Start immediately (parallel behavior)
-   * - 1: Start after previous spring completes (sequential behavior)
-   * - 0.5: Start when previous spring is 50% complete
-   *
-   * Only applies to 'stagger' schedule mode.
-   * For 'parallel' mode, all springs start at 0.
-   * For 'sequential' mode, all springs use offset 1.
-   */
-  offset?: number;
+  /** keyframes mode is mutually exclusive with physics/tick/css */
+  keyframes?: never;
 };
+
+/**
+ * Pre-baked keyframes animation item — bypasses physics simulation
+ *
+ * Plays a pre-built `Keyframe[]` directly via Web Animation API. Use this when
+ * you've already composed the desired motion as keyframes (e.g. multiple springs
+ * baked into a single timeline) and want the animation to run entirely on the
+ * compositor with zero per-frame JS.
+ */
+export type KeyframesAnimationItem = AnimationItemBase & {
+  keyframes: {
+    /** Element to animate */
+    element: HTMLElement;
+    /** WAAPI keyframe array (offsets 0..1) */
+    frames: Keyframe[];
+    /** Total animation duration in ms */
+    duration: number;
+    /** WAAPI easing string (default: "linear") */
+    easing?: string;
+  };
+
+  /** physics/tick/css are not used in keyframes mode */
+  physics?: never;
+  tick?: never;
+  css?: never;
+};
+
+/**
+ * Individual animation item in a multi-animation config
+ *
+ * Three mutually-exclusive modes:
+ * - tick: RAF-based animation with callback on each frame
+ * - css: Web Animation API, generated from spring physics
+ * - keyframes: Web Animation API, played from pre-baked Keyframe[]
+ */
+export type AnimationItem = SpringAnimationItem | KeyframesAnimationItem;
 
 /**
  * Multi-animation configuration
@@ -316,6 +340,19 @@ export function isTickAnimation(
   config: SingleSpringConfig,
 ): config is SingleSpringConfig & { tick: (progress: number) => void } {
   return "tick" in config && typeof config.tick === "function";
+}
+
+/**
+ * Type guard to check if an AnimationItem uses pre-baked keyframes mode
+ */
+export function isKeyframesAnimation(
+  item: AnimationItem,
+): item is KeyframesAnimationItem {
+  return (
+    "keyframes" in item &&
+    item.keyframes !== undefined &&
+    item.keyframes !== null
+  );
 }
 
 /**
@@ -522,13 +559,24 @@ export type NormalizedScheduleEntry = {
 
 /**
  * Normalized animation item for internal use
- * - css is always in object form: { element, style }
+ * - css is always in object form: { element, style } (spring mode)
+ * - keyframes pass through as-is (already normalized — element required)
  * - normalizedOffset is always present
  * @internal
  */
-export type NormalizedAnimationItem = Omit<AnimationItem, "css" | "offset"> & {
-  css?: { element: HTMLElement; style: (progress: number) => StyleObject };
+export type NormalizedAnimationItem = {
+  onStart?: () => void;
+  onComplete?: () => void;
   normalizedOffset: number;
+  physics?: PhysicsOptions;
+  tick?: (progress: number) => void;
+  css?: { element: HTMLElement; style: (progress: number) => StyleObject };
+  keyframes?: {
+    element: HTMLElement;
+    frames: Keyframe[];
+    duration: number;
+    easing?: string;
+  };
 };
 
 /**
@@ -582,7 +630,15 @@ export function normalizeSchedule(
           normalizedOffset = 0;
       }
 
-      // Normalize css to object form
+      // Keyframes items pass through unchanged — they're already self-contained
+      // (element baked in, no physics, no css to normalize).
+      if (isKeyframesAnimation(item)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { offset: _, ...rest } = item;
+        return { ...rest, normalizedOffset };
+      }
+
+      // Spring item: normalize css to object form
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { css, offset: _, ...itemRest } = item;
       const normalizedCss = css

@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/angular",
-  "version": "5.0.0",
+  "version": "5.2.0",
   "description": "Angular bindings for SSGOI - Native app-like page transitions for Angular applications",
   "private": false,
   "type": "module",

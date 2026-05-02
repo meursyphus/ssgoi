@@ -75,6 +75,7 @@ export class MultiAnimator extends Animator {
         physics: item.physics,
         tick: item.tick,
         css: item.css,
+        keyframes: item.keyframes,
         onComplete: () => this.onAnimatorComplete(id),
         onStart: item.onStart,
       });
@@ -271,6 +272,7 @@ export class MultiAnimator extends Animator {
           physics: entry.item.physics,
           tick: entry.item.tick,
           css: entry.item.css,
+          keyframes: entry.item.keyframes,
           onComplete: () => this.onAnimatorComplete(entry.id),
           onStart: entry.item.onStart,
         });

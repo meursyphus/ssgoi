@@ -9,7 +9,6 @@ import { HomeStructuredDataMessages } from "./home-structured-data";
 import { BlogStructuredDataMessages } from "./blog-structured-data";
 import { DocsStructuredDataMessages } from "./docs-structured-data";
 import { ShowcaseMessages } from "./showcase";
-import { ChatbotMessages } from "./chatbot";
 
 export type Messages = {
   header: HeaderMessages;
@@ -23,7 +22,6 @@ export type Messages = {
   blogStructuredData: BlogStructuredDataMessages;
   docsStructuredData: DocsStructuredDataMessages;
   showcase: ShowcaseMessages;
-  chatbot: ChatbotMessages;
 };
 
 export type {
@@ -38,5 +36,4 @@ export type {
   BlogStructuredDataMessages,
   DocsStructuredDataMessages,
   ShowcaseMessages,
-  ChatbotMessages,
 };
