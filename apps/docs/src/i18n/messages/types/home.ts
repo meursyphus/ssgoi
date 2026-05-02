@@ -343,6 +343,10 @@ export type HomeMessages = {
       description: string;
       getStarted: string;
       viewDemo: string;
+      llms: {
+        label: string;
+        description: string;
+      };
     };
     features: {
       sectionLabel: string;

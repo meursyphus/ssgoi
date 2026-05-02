@@ -388,6 +388,11 @@ export const home: HomeMessages = {
         "페이지 간 전환을 매끄럽게. 모든 브라우저에서 동작하고, 모든 프레임워크를 지원합니다. 복잡한 설정 없이 몇 줄의 코드로 시작하세요.",
       getStarted: "시작하기",
       viewDemo: "데모 보기",
+      llms: {
+        label: "AI로 시작하기",
+        description:
+          "ChatGPT, Claude, Cursor 같은 AI에 이 URL을 붙여 넣으면 프로젝트에 SSGOI를 알아서 연결해줍니다.",
+      },
     },
     features: {
       sectionLabel: "Features",

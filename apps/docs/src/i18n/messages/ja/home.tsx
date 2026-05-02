@@ -393,6 +393,11 @@ export const home: HomeMessages = {
         "ページ間のトランジションをスムーズに。すべてのブラウザで動作し、すべてのフレームワークをサポート。複雑な設定なしで数行のコードで開始できます。",
       getStarted: "はじめる",
       viewDemo: "デモを見る",
+      llms: {
+        label: "AIで導入",
+        description:
+          "ChatGPT・Claude・CursorなどのAIにこのURLを貼り付けるだけで、SSGOIをプロジェクトに組み込んでくれます。",
+      },
     },
     features: {
       sectionLabel: "Features",
