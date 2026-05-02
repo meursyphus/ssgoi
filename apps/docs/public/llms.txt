@@ -113,9 +113,9 @@ type SsgoiConfig = {
   // Fallback transition
   defaultTransition?: Transition;
 
-  // Skip animation on back navigation (native gesture conflict prevention)
-  skipAnimationOnBack?: ('ios' | 'android' | 'desktop' | 'all')[];
-  // default: ['ios']
+  // Native edge-swipe gestures (iOS Safari swipe-back, Android system back) are
+  // detected from touch events and automatically suppress the page transition,
+  // so the OS gesture animation isn't fought by SSGOI. No configuration needed.
 
   // Scroll preservation. Defaults are sensible for mobile + desktop —
   // typically you don't need to set this. See section below.

@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "5.0.0",
+  "version": "5.2.0",
   "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
   "private": false,
   "type": "module",
@@ -49,7 +49,7 @@
     "watch": "vite build --watch",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "prepare": "pnpm run build",
+    "prepublishOnly": "pnpm run build",
     "lint": "eslint .",
     "test": "vitest",
     "test:ui": "vitest --ui",

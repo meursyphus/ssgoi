@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "5.0.0",
+  "version": "5.2.0",
   "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
   "private": false,
   "type": "module",
@@ -51,7 +51,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build",
-    "prepare": "pnpm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:^"

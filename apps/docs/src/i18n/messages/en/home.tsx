@@ -401,6 +401,11 @@ export const home: HomeMessages = {
         "Smooth page transitions. Works on all browsers and supports all frameworks. Start with just a few lines of code without complex setup.",
       getStarted: "Get Started",
       viewDemo: "View Demo",
+      llms: {
+        label: "AI-ready setup",
+        description:
+          "Paste this URL to your AI assistant — ChatGPT, Claude, Cursor — and let it wire SSGOI into your project.",
+      },
     },
     features: {
       sectionLabel: "Features",

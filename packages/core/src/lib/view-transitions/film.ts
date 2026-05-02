@@ -6,6 +6,7 @@ import type {
   SpringConfig,
 } from "../types";
 
+import { SETTLE_THRESHOLD, SpringIntegrator } from "../animator/integrator";
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
@@ -16,21 +17,294 @@ const DEFAULT_SPRINGS = {
   scaleUp: { stiffness: 20, damping: 7 } as SpringConfig, // Crisp return to full size
 };
 
-// Stagger offsets (when each spring starts relative to previous)
+// Stagger offsets — when each spring starts relative to the *previous* spring's
+// progress (0..1). 0.2 = "start when previous spring is 20% of the way to its
+// target". Values match the prior tick-based implementation exactly.
 const OFFSETS = {
-  scaleDown: 0, // Start immediately
-  translate: 0.2, // Start when scaleDown is 25% complete
-  scaleUp: 0.8, // Start when translate is 70% complete
+  scaleDown: 0,
+  translate: 0.2,
+  scaleUp: 0.8,
 };
 
 const DEFAULT_SCALE = 0.8;
 const DEFAULT_BORDER_COLOR = "white";
 
+const FRAME_MS = 1000 / 60;
+const MAX_FRAMES = 600; // 10s safety cap, mirrors css-runner
+
 interface FilmOptions {
   border?: {
-    color?: string; // Border color (default: white)
+    color?: string;
   };
   physics?: PhysicsOptions;
+}
+
+/**
+ * One spring inside a baked stagger schedule. Mirrors a tick-mode
+ * AnimationItem (physics + tick callback + offset).
+ */
+interface BakedSpringItem {
+  spring: SpringConfig;
+  /** Stagger offset 0..1 — start when previous spring reaches this progress. */
+  offset: number;
+  /**
+   * Called once per frame the spring is active, after its integrator step.
+   * Mirrors AnimationItem.tick exactly: receives the integrator's position
+   * (which moves from `from` to `to`).
+   */
+  tick: (position: number) => void;
+}
+
+/**
+ * Run a stagger schedule of springs offline, frame by frame, exactly the way
+ * MultiAnimator would run them live: each frame, items tick *in array order*
+ * (later items overwrite shared state written by earlier items), and items
+ * with stagger offsets start when the previous item's progress crosses their
+ * threshold.
+ *
+ * After each frame's ticks complete, `recordFrame(time)` is called so the
+ * caller can snapshot whatever shared state the ticks wrote to.
+ *
+ * Returns the wall-clock time at which the last spring settled, suitable for
+ * use as the WAAPI animation's `duration`.
+ */
+function bakeStaggerSchedule(opts: {
+  items: BakedSpringItem[];
+  from: number;
+  to: number;
+  recordFrame: (time: number) => void;
+}): number {
+  const { items, from, to, recordFrame } = opts;
+  const dt = FRAME_MS / 1000;
+  const range = Math.abs(to - from);
+
+  type SpringRuntime = {
+    item: BakedSpringItem;
+    integrator: SpringIntegrator;
+    state: { position: number; velocity: number };
+    started: boolean;
+    settled: boolean;
+    settleTime: number;
+  };
+
+  const springs: SpringRuntime[] = items.map((item) => ({
+    item,
+    integrator: new SpringIntegrator({
+      stiffness: item.spring.stiffness,
+      damping: item.spring.damping,
+    }),
+    state: { position: from, velocity: 0 },
+    started: false,
+    settled: false,
+    settleTime: 0,
+  }));
+
+  // First spring (or any with offset 0) starts immediately on frame 0.
+  for (let i = 0; i < springs.length; i++) {
+    if (i === 0 || springs[i]!.item.offset === 0) {
+      springs[i]!.started = true;
+    }
+  }
+
+  // Frame -1 snapshot — captures the initial state (before any ticks).
+  recordFrame(0);
+
+  let lastFrameTime = 0;
+  for (let frame = 1; frame <= MAX_FRAMES; frame++) {
+    const time = frame * FRAME_MS;
+    lastFrameTime = time;
+
+    // Step + tick each spring in items order. Order matters: later ticks
+    // overwrite shared state written by earlier ticks (matching the live
+    // multi-animator's RAF subscriber order).
+    for (const sp of springs) {
+      if (!sp.started || sp.settled) continue;
+
+      sp.state = sp.integrator.step(sp.state, to, dt);
+
+      if (sp.integrator.isSettled(sp.state, to)) {
+        sp.settleTime += dt;
+        if (sp.settleTime >= SETTLE_THRESHOLD) {
+          sp.state = { position: to, velocity: 0 };
+          sp.settled = true;
+        }
+      } else {
+        sp.settleTime = 0;
+      }
+
+      sp.item.tick(sp.state.position);
+    }
+
+    // After this frame's ticks, check whether the next un-started spring's
+    // stagger threshold has been crossed by its predecessor. (Predecessor
+    // is the spring directly before it in the items array.)
+    for (let i = 1; i < springs.length; i++) {
+      const sp = springs[i]!;
+      if (sp.started) continue;
+      const prev = springs[i - 1]!;
+      if (!prev.started) continue;
+      const prevProgress =
+        range === 0 ? 1 : Math.abs(prev.state.position - from) / range;
+      if (prevProgress >= sp.item.offset) {
+        sp.started = true;
+      }
+    }
+
+    recordFrame(time);
+
+    if (springs.every((sp) => sp.settled)) {
+      return time;
+    }
+  }
+
+  return lastFrameTime;
+}
+
+/**
+ * Pull a spring config out of a user-supplied PhysicsOptions override. If the
+ * user passed inertia or a custom integrator (rare for film), we fall back to
+ * the default — offline baking only supports spring physics here.
+ */
+function extractSpring(
+  override: PhysicsOptions | undefined,
+  fallback: SpringConfig,
+): SpringConfig {
+  if (override?.spring) {
+    return {
+      stiffness: override.spring.stiffness,
+      damping: override.spring.damping,
+    };
+  }
+  return fallback;
+}
+
+/**
+ * Per-frame snapshot of the shared transform state written by the ticks.
+ */
+interface FrameSnapshot {
+  time: number;
+  scale: number;
+  translateY: number;
+}
+
+/**
+ * Run film's three-spring schedule offline (matching what the live ticks
+ * would produce) and capture per-frame snapshots of the shared (scale, ty)
+ * state. Returns snapshots + total duration.
+ */
+function bakeFilmFrames(opts: {
+  rect: { top: number; height: number };
+  springs: typeof DEFAULT_SPRINGS;
+  scale: number;
+  direction: "in" | "out";
+  override: PhysicsOptions | undefined;
+}): { snapshots: FrameSnapshot[]; totalDuration: number } {
+  const { rect, springs, scale, direction, override } = opts;
+
+  // Initial shared state — matches the closure init in the original tick
+  // implementation.
+  const sharedState =
+    direction === "out"
+      ? { scale: 1, translateY: -rect.top }
+      : { scale, translateY: -rect.top + rect.height };
+
+  const sdSpring = extractSpring(override, springs.scaleDown);
+  const trSpring = extractSpring(override, springs.translate);
+  const suSpring = extractSpring(override, springs.scaleUp);
+
+  // Animator-level from/to — matches what ssgoi's MultiAnimator would feed
+  // each child SingleAnimator. OUT runs 1→0, IN runs 0→1; the tick formulas
+  // re-map this into the visible (scale, ty) space.
+  const from = direction === "out" ? 1 : 0;
+  const to = direction === "out" ? 0 : 1;
+
+  // Tick formulas — pulled verbatim from the previous tick-mode film
+  // implementation. They write to `sharedState` exactly as before.
+  const items: BakedSpringItem[] =
+    direction === "out"
+      ? [
+          {
+            spring: sdSpring,
+            offset: OFFSETS.scaleDown,
+            tick: (position) => {
+              const p = 1 - position; // OUT: position 1→0 ⇒ p 0→1
+              sharedState.scale = 1 - (1 - scale) * p;
+            },
+          },
+          {
+            spring: trSpring,
+            offset: OFFSETS.translate,
+            tick: (position) => {
+              const p = 1 - position;
+              sharedState.translateY = -rect.top - rect.height * p;
+            },
+          },
+          {
+            spring: suSpring,
+            offset: OFFSETS.scaleUp,
+            tick: (position) => {
+              const p = 1 - position;
+              sharedState.scale = scale + (1 - scale) * p;
+            },
+          },
+        ]
+      : [
+          {
+            spring: sdSpring,
+            offset: OFFSETS.scaleDown,
+            tick: (position) => {
+              // IN: position 0→1
+              sharedState.scale = 1 - (1 - scale) * position;
+            },
+          },
+          {
+            spring: trSpring,
+            offset: OFFSETS.translate,
+            tick: (position) => {
+              sharedState.translateY = -rect.top + rect.height * (1 - position);
+            },
+          },
+          {
+            spring: suSpring,
+            offset: OFFSETS.scaleUp,
+            tick: (position) => {
+              sharedState.scale = scale + (1 - scale) * position;
+            },
+          },
+        ];
+
+  const snapshots: FrameSnapshot[] = [];
+  const totalDuration = bakeStaggerSchedule({
+    items,
+    from,
+    to,
+    recordFrame: (time) => {
+      snapshots.push({
+        time,
+        scale: sharedState.scale,
+        translateY: sharedState.translateY,
+      });
+    },
+  });
+
+  return { snapshots, totalDuration };
+}
+
+/**
+ * Convert per-frame snapshots into a Keyframe[] via a per-element style
+ * builder. The builder receives the shared snapshot — every element animates
+ * off the same captured tick state, so they stay perfectly in sync.
+ */
+function snapshotsToKeyframes(
+  snapshots: FrameSnapshot[],
+  totalDuration: number,
+  toStyle: (snap: FrameSnapshot) => Record<string, string>,
+): Keyframe[] {
+  if (snapshots.length === 0 || totalDuration === 0) return [];
+  return snapshots.map((snap) => ({
+    ...toStyle(snap),
+    offset: Math.min(1, Math.max(0, snap.time / totalDuration)),
+  })) as Keyframe[];
 }
 
 export const film = (options?: FilmOptions): SggoiTransition => {
@@ -40,86 +314,66 @@ export const film = (options?: FilmOptions): SggoiTransition => {
 
   return {
     out: async (element, context): Promise<MultiAnimationConfig> => {
-      // 나가는 화면 애니메이션
       const rect = getFilmRect(context);
       const containerRect = getRect(document.body, context.positionedParent);
 
-      // Create border elements before return
       const borderElements = createCornerBorders(borderColor, {
         ...rect,
         top: containerRect.top,
       });
 
-      // Shared animation state
-      const state = {
-        scale: 1,
-        translateY: -rect.top,
-      };
+      const { snapshots, totalDuration } = bakeFilmFrames({
+        rect,
+        springs,
+        scale,
+        direction: "out",
+        override: options?.physics,
+      });
 
-      // Update function called by all springs
-      const applyTransform = () => {
-        element.style.transform = `translateY(${state.translateY}px) scale(${state.scale})`;
+      const mainFrames = snapshotsToKeyframes(
+        snapshots,
+        totalDuration,
+        (s) => ({
+          transform: `translateY(${s.translateY}px) scale(${s.scale})`,
+        }),
+      );
 
-        // Calculate how much the element has shrunk
-        const offsetX = (rect.width - rect.width * state.scale) / 2;
-        const offsetY = (rect.height - rect.height * state.scale) / 2;
-        updateBorders(borderElements, offsetX, offsetY);
-      };
+      const borderFrames = BORDER_SIGNS.map(([sx, sy]) =>
+        snapshotsToKeyframes(snapshots, totalDuration, (s) => {
+          const ox = ((rect.width - rect.width * s.scale) / 2) * 0.7 * sx;
+          const oy = ((rect.height - rect.height * s.scale) / 2) * 0.7 * sy;
+          return { transform: `translate(${ox}px, ${oy}px)` };
+        }),
+      );
 
       return {
         items: [
-          // Spring 1: Scale Down (1 → scale)
           {
-            physics: options?.physics ?? { spring: springs.scaleDown },
-            offset: OFFSETS.scaleDown,
-            tick: (progress) => {
-              // OUT: progress goes 1 → 0, convert to 0 → 1
-              const p = 1 - progress;
-              state.scale = 1 - (1 - scale) * p; // 1 → scale
-              applyTransform();
-            },
+            keyframes: { element, frames: mainFrames, duration: totalDuration },
           },
-          // Spring 2: Translate (vertical movement)
-          {
-            physics: options?.physics ?? { spring: springs.translate },
-            offset: OFFSETS.translate,
-            tick: (progress) => {
-              // OUT: progress goes 1 → 0, convert to 0 → 1
-              const p = 1 - progress;
-              state.translateY = -rect.top - rect.height * p;
-              applyTransform();
+          ...borderFrames.map((frames, i) => ({
+            keyframes: {
+              element: BORDER_ORDER[i]!(borderElements),
+              frames,
+              duration: totalDuration,
             },
-          },
-          // Spring 3: Scale Up (scale → 1)
-          {
-            physics: options?.physics ?? { spring: springs.scaleUp },
-            offset: OFFSETS.scaleUp,
-            tick: (progress) => {
-              // OUT: progress goes 1 → 0, convert to 0 → 1
-              const p = 1 - progress;
-              state.scale = scale + (1 - scale) * p; // scale → 1
-              applyTransform();
-            },
-          },
+          })),
         ],
-        schedule: "stagger",
+        schedule: "parallel",
         prepare: () => {
           prepareOutgoing(element);
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
           applyFlimTranslate(element, rect);
 
-          // Add border elements to positionedParent with transition
           for (const border of borderElements) {
             context.positionedParent.appendChild(border);
           }
         },
         onEnd: () => {
-          // Clean up styles after animation
           element.style.clipPath = "";
           element.style.transformOrigin = "";
 
-          // Remove border elements from positionedParent
           setTimeout(() => {
             for (const border of borderElements) {
               context.positionedParent.removeChild(border);
@@ -130,61 +384,37 @@ export const film = (options?: FilmOptions): SggoiTransition => {
     },
 
     in: async (element, context): Promise<MultiAnimationConfig> => {
-      // 들어오는 화면 애니메이션
       const rect = getFilmRect(context);
 
-      // Shared animation state
-      const state = {
-        scale: scale,
-        translateY: -rect.top + rect.height,
-      };
+      const { snapshots, totalDuration } = bakeFilmFrames({
+        rect,
+        springs,
+        scale,
+        direction: "in",
+        override: options?.physics,
+      });
 
-      // Update function called by all springs
-      const applyTransform = () => {
-        element.style.transform = `translateY(${state.translateY}px) scale(${state.scale})`;
-      };
+      const mainFrames = snapshotsToKeyframes(
+        snapshots,
+        totalDuration,
+        (s) => ({
+          transform: `translateY(${s.translateY}px) scale(${s.scale})`,
+        }),
+      );
 
       return {
         items: [
-          // Spring 1: Scale Down (1 → scale) - element starts scaled, shrinks further
           {
-            physics: options?.physics ?? { spring: springs.scaleDown },
-            offset: OFFSETS.scaleDown,
-            tick: (progress) => {
-              // IN: progress goes 0 → 1
-              state.scale = 1 - (1 - scale) * progress; // 1 → scale
-              applyTransform();
-            },
-          },
-          // Spring 2: Translate (vertical movement from bottom to top)
-          {
-            physics: options?.physics ?? { spring: springs.translate },
-            offset: OFFSETS.translate,
-            tick: (progress) => {
-              // IN: progress goes 0 → 1
-              state.translateY = -rect.top + rect.height * (1 - progress);
-              applyTransform();
-            },
-          },
-          // Spring 3: Scale Up (scale → 1) - element returns to full size
-          {
-            physics: options?.physics ?? { spring: springs.scaleUp },
-            offset: OFFSETS.scaleUp,
-            tick: (progress) => {
-              // IN: progress goes 0 → 1
-              state.scale = scale + (1 - scale) * progress; // scale → 1
-              applyTransform();
-            },
+            keyframes: { element, frames: mainFrames, duration: totalDuration },
           },
         ],
-        schedule: "stagger",
+        schedule: "parallel",
         prepare: () => {
           applyFilmTransformOrigin(element, rect);
           applyFilmClip(element, rect);
           element.style.transform = `translateY(${-rect.top + rect.height}px) scale(${scale})`;
         },
         onEnd: () => {
-          // Clean up styles after animation
           element.style.clipPath = "";
           element.style.transformOrigin = "";
           element.style.transform = "";
@@ -194,21 +424,20 @@ export const film = (options?: FilmOptions): SggoiTransition => {
   };
 };
 
-/**
- * Helper function to update border positions
- */
-function updateBorders(
-  borderElements: CornerBorders,
-  _offsetX: number,
-  _offsetY: number,
-) {
-  const offsetX = _offsetX * 0.7;
-  const offsetY = _offsetY * 0.7;
-  borderElements.topLeft.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-  borderElements.topRight.style.transform = `translate(${-offsetX}px, ${offsetY}px)`;
-  borderElements.bottomLeft.style.transform = `translate(${offsetX}px, ${-offsetY}px)`;
-  borderElements.bottomRight.style.transform = `translate(${-offsetX}px, ${-offsetY}px)`;
-}
+// Border sign matrix matches BORDER_ORDER below: TL, TR, BL, BR.
+const BORDER_SIGNS: ReadonlyArray<readonly [number, number]> = [
+  [1, 1],
+  [-1, 1],
+  [1, -1],
+  [-1, -1],
+];
+
+const BORDER_ORDER: Array<(b: CornerBorders) => HTMLElement> = [
+  (b) => b.topLeft,
+  (b) => b.topRight,
+  (b) => b.bottomLeft,
+  (b) => b.bottomRight,
+];
 
 interface CornerBorders extends Iterable<HTMLElement> {
   topLeft: HTMLElement;
@@ -334,7 +563,7 @@ function createCornerBorders(
   bottomRightV.style.width = `${borderWidth}px`;
   bottomRightV.style.height = `${borderLength}px`;
   bottomRightV.style.backgroundColor = color;
-  bottomRightV.style.bottom = "0";
+  bottomRightV.style.top = "0";
   bottomRightV.style.right = "0";
   bottomRight.appendChild(bottomRightH);
   bottomRight.appendChild(bottomRightV);

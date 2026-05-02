@@ -379,6 +379,11 @@ export const home: HomeMessages = {
         "页面间过渡流畅。在所有浏览器上运行，支持所有框架。无需复杂设置，只需几行代码即可开始。",
       getStarted: "开始使用",
       viewDemo: "查看演示",
+      llms: {
+        label: "AI 一键接入",
+        description:
+          "把这个 URL 粘贴给 ChatGPT、Claude、Cursor 等 AI 助手，让它直接把 SSGOI 接入你的项目。",
+      },
     },
     features: {
       sectionLabel: "Features",

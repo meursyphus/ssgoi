@@ -1,18 +1,34 @@
 "use client";
 
+import {
+  SiReact,
+  SiSvelte,
+  SiVuedotjs,
+  SiAngular,
+  SiSolid,
+  SiQwik,
+} from "react-icons/si";
+import type { IconType } from "react-icons";
 import { useTranslations } from "@/i18n/use-translations";
+
+type FrameworkStatus = "available" | "soon";
+
+const frameworks: {
+  name: string;
+  status: FrameworkStatus;
+  Icon: IconType;
+  color: string;
+}[] = [
+  { name: "React", status: "available", Icon: SiReact, color: "#61DAFB" },
+  { name: "Svelte", status: "available", Icon: SiSvelte, color: "#FF3E00" },
+  { name: "Vue", status: "available", Icon: SiVuedotjs, color: "#42B883" },
+  { name: "Angular", status: "available", Icon: SiAngular, color: "#DD0031" },
+  { name: "SolidJS", status: "available", Icon: SiSolid, color: "#2C4F7C" },
+  { name: "Qwik", status: "soon", Icon: SiQwik, color: "#AC7EF4" },
+];
 
 export function FrameworksSection() {
   const t = useTranslations("home");
-
-  const frameworks = [
-    { name: "React", status: "available" },
-    { name: "Svelte", status: "available" },
-    { name: "Vue", status: "available" },
-    { name: "Angular", status: "available" },
-    { name: "SolidJS", status: "available" },
-    { name: "Qwik", status: "soon" },
-  ];
 
   return (
     <section className="py-20 px-6 border-t border-white/5">
@@ -30,23 +46,31 @@ export function FrameworksSection() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {frameworks.map((fw) => (
-            <div
-              key={fw.name}
-              className={`px-4 py-2 rounded border text-xs ${
-                fw.status === "available"
-                  ? "bg-white/[0.02] border-white/10 text-neutral-300"
-                  : "border-white/5 text-neutral-500"
-              }`}
-            >
-              {fw.name}
-              {fw.status === "soon" && (
-                <span className="ml-2 text-[10px] text-neutral-500">
-                  {t("newHome.frameworks.soon")}
-                </span>
-              )}
-            </div>
-          ))}
+          {frameworks.map(({ name, status, Icon, color }) => {
+            const available = status === "available";
+            return (
+              <div
+                key={name}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded border text-xs transition-colors ${
+                  available
+                    ? "bg-white/[0.02] border-white/10 text-neutral-200 hover:border-white/20"
+                    : "border-white/5 text-neutral-500"
+                }`}
+              >
+                <Icon
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{ color: available ? color : undefined }}
+                  aria-hidden
+                />
+                <span>{name}</span>
+                {!available && (
+                  <span className="text-[10px] text-neutral-500">
+                    {t("newHome.frameworks.soon")}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
