@@ -4,17 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Copy, Check, ChevronRight, Sparkles } from "lucide-react";
 import Demo from "@/components/demo";
-import { useTranslations } from "@/i18n/use-translations";
-
-interface HeroSectionProps {
-  lang: string;
-}
+import { messages } from "@/messages";
 
 const LLMS_URL = "ssgoi.dev/llms.txt";
 
-export function HeroSection({ lang }: HeroSectionProps) {
+export function HeroSection() {
   const [copied, setCopied] = useState(false);
-  const t = useTranslations("home");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://${LLMS_URL}`);
@@ -32,22 +27,22 @@ export function HeroSection({ lang }: HeroSectionProps) {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span className="text-[10px] text-neutral-300 uppercase tracking-wider">
-                {t("newHome.hero.badge")}
+                {messages.home.newHome.hero.badge}
               </span>
             </div>
 
             {/* Title */}
             <h1 className="text-3xl sm:text-4xl font-light tracking-tight leading-tight mb-6">
-              {t("newHome.hero.title.line1")}
+              {messages.home.newHome.hero.title.line1}
               <br />
               <span className="text-neutral-400">
-                {t("newHome.hero.title.line2")}
+                {messages.home.newHome.hero.title.line2}
               </span>
             </h1>
 
             {/* Description */}
             <p className="text-sm text-neutral-300 leading-relaxed mb-8 max-w-md">
-              {t("newHome.hero.description")}
+              {messages.home.newHome.hero.description}
             </p>
 
             {/* AI / llms.txt card */}
@@ -55,7 +50,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-3 h-3 text-emerald-400" />
                 <span className="text-[10px] uppercase tracking-wider text-emerald-400">
-                  {t("newHome.hero.llms.label")}
+                  {messages.home.newHome.hero.llms.label}
                 </span>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg">
@@ -75,24 +70,24 @@ export function HeroSection({ lang }: HeroSectionProps) {
                 </button>
               </div>
               <p className="text-[11px] text-neutral-500 leading-relaxed mt-2">
-                {t("newHome.hero.llms.description")}
+                {messages.home.newHome.hero.llms.description}
               </p>
             </div>
 
             {/* CTAs */}
             <div className="flex items-center gap-4">
               <Link
-                href={`/${lang}/docs`}
+                href={`/docs`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors"
               >
-                {t("newHome.hero.getStarted")}
+                {messages.home.newHome.hero.getStarted}
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
-                href={`/${lang}/demo`}
+                href={`/demo`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-xs text-neutral-300 hover:text-white transition-colors"
               >
-                {t("newHome.hero.viewDemo")}
+                {messages.home.newHome.hero.viewDemo}
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>

@@ -7,23 +7,19 @@ import { FrameworksSection } from "./frameworks-section";
 import { CTASection } from "./cta-section";
 import { Footer } from "./footer";
 
-interface HomePageContentProps {
-  lang: string;
-}
-
-export function HomePageContent({ lang }: HomePageContentProps) {
+export function HomePageContent() {
   return (
     <SsgoiTransition
       id="/ssgoi"
       as="div"
       className="relative page !bg-transparent min-h-screen"
     >
-      <HeroSection lang={lang} />
+      <HeroSection />
       <FeaturesSection />
       <DemoShowcaseSection />
       <ElementTransitionSection />
       <FrameworksSection />
-      <CTASection lang={lang} />
+      <CTASection />
       <Footer />
     </SsgoiTransition>
   );

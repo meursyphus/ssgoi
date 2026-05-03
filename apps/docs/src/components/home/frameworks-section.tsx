@@ -9,7 +9,7 @@ import {
   SiQwik,
 } from "react-icons/si";
 import type { IconType } from "react-icons";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 type FrameworkStatus = "available" | "soon";
 
@@ -28,20 +28,18 @@ const frameworks: {
 ];
 
 export function FrameworksSection() {
-  const t = useTranslations("home");
-
   return (
     <section className="py-20 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
-            {t("newHome.frameworks.sectionLabel")}
+            {messages.home.newHome.frameworks.sectionLabel}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
-            {t("newHome.frameworks.title")}
+            {messages.home.newHome.frameworks.title}
           </h2>
           <p className="text-xs text-neutral-400">
-            {t("newHome.frameworks.description")}
+            {messages.home.newHome.frameworks.description}
           </p>
         </div>
 
@@ -65,7 +63,7 @@ export function FrameworksSection() {
                 <span>{name}</span>
                 {!available && (
                   <span className="text-[10px] text-neutral-500">
-                    {t("newHome.frameworks.soon")}
+                    {messages.home.newHome.frameworks.soon}
                   </span>
                 )}
               </div>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { NavigationItem } from "@/app/[lang]/docs/sidebar";
+import type { NavigationItem } from "@/app/docs/sidebar";
 
 interface NavigationStore {
   navigation: NavigationItem[] | null;

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getServerTranslations } from "@/i18n/get-server-translations";
+import { messages } from "@/messages";
 
 interface SEOMetadataOptions {
   title?: string;
@@ -62,7 +62,6 @@ const DEFAULT_METADATA = {
 
 export async function createSEOMetadata(
   options: SEOMetadataOptions = {},
-  lang: string = "en",
 ): Promise<Metadata> {
   const {
     title,
@@ -84,15 +83,13 @@ export async function createSEOMetadata(
     alternates,
   } = options;
 
-  // Get translations for default values
-  const t = await getServerTranslations("metadata", lang);
-
-  // Use provided values or fall back to translated defaults
-  const finalTitle = title || t("title");
-  const finalDescription = description || t("description");
-  const finalSiteName = siteName || t("og.siteName");
-  const finalLocale = locale || getLocaleFromLang(lang);
-  const finalKeywords = keywords || (t("keywords") as unknown as string[]);
+  // Use provided values or fall back to defaults
+  const finalTitle = title || messages.metadata.title;
+  const finalDescription = description || messages.metadata.description;
+  const finalSiteName = siteName || messages.metadata.og.siteName;
+  const finalLocale = locale || "en_US";
+  const finalKeywords =
+    keywords || (messages.metadata.keywords as unknown as string[]);
 
   // Prepare images array
   const ogImages = images || [image];
@@ -184,41 +181,4 @@ export async function createSEOMetadata(
   }
 
   return metadata;
-}
-
-// Helper function to get locale from language
-function getLocaleFromLang(lang: string): string {
-  const localeMap: Record<string, string> = {
-    en: "en_US",
-    ko: "ko_KR",
-    ja: "ja_JP",
-    zh: "zh_CN",
-  };
-  return localeMap[lang] || "en_US";
-}
-
-// Language-specific metadata helpers
-export const LOCALE_METADATA = {
-  en: {
-    locale: "en_US",
-    siteName: "SSGOI Documentation",
-  },
-  ko: {
-    locale: "ko_KR",
-    siteName: "SSGOI 문서",
-  },
-  ja: {
-    locale: "ja_JP",
-    siteName: "SSGOIドキュメント",
-  },
-  zh: {
-    locale: "zh_CN",
-    siteName: "SSGOI 文档",
-  },
-} as const;
-
-export function getLocaleMetadata(lang: string) {
-  return (
-    LOCALE_METADATA[lang as keyof typeof LOCALE_METADATA] || LOCALE_METADATA.en
-  );
 }

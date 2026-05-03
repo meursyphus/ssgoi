@@ -1,31 +1,29 @@
 "use client";
 
 import { Zap, Globe, Layers, Smartphone } from "lucide-react";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 export function FeaturesSection() {
-  const t = useTranslations("home");
-
   const features = [
     {
       icon: Zap,
-      titleKey: "newHome.features.zeroConfig.title" as const,
-      descriptionKey: "newHome.features.zeroConfig.description" as const,
+      title: messages.home.newHome.features.zeroConfig.title,
+      description: messages.home.newHome.features.zeroConfig.description,
     },
     {
       icon: Globe,
-      titleKey: "newHome.features.allBrowsers.title" as const,
-      descriptionKey: "newHome.features.allBrowsers.description" as const,
+      title: messages.home.newHome.features.allBrowsers.title,
+      description: messages.home.newHome.features.allBrowsers.description,
     },
     {
       icon: Layers,
-      titleKey: "newHome.features.ssrSupport.title" as const,
-      descriptionKey: "newHome.features.ssrSupport.description" as const,
+      title: messages.home.newHome.features.ssrSupport.title,
+      description: messages.home.newHome.features.ssrSupport.description,
     },
     {
       icon: Smartphone,
-      titleKey: "newHome.features.smoothPerformance.title" as const,
-      descriptionKey: "newHome.features.smoothPerformance.description" as const,
+      title: messages.home.newHome.features.smoothPerformance.title,
+      description: messages.home.newHome.features.smoothPerformance.description,
     },
   ];
 
@@ -34,10 +32,10 @@ export function FeaturesSection() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
-            {t("newHome.features.sectionLabel")}
+            {messages.home.newHome.features.sectionLabel}
           </p>
           <h2 className="text-xl font-light tracking-tight">
-            {t("newHome.features.title")}
+            {messages.home.newHome.features.title}
           </h2>
         </div>
 
@@ -49,11 +47,9 @@ export function FeaturesSection() {
                   <feature.icon className="w-3.5 h-3.5 text-neutral-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium mb-1">
-                    {t(feature.titleKey)}
-                  </h3>
+                  <h3 className="text-sm font-medium mb-1">{feature.title}</h3>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    {t(feature.descriptionKey)}
+                    {feature.description}
                   </p>
                 </div>
               </div>

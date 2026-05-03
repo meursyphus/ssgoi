@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 export async function getAllDocPaths(): Promise<string[]> {
-  const contentDir = path.join(process.cwd(), "content", "en");
+  const contentDir = path.join(process.cwd(), "content");
   const docPaths: string[] = [];
 
   async function traverseDir(dir: string, relativePath: string = "") {

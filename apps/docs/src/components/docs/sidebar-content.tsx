@@ -4,17 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
-import type { NavigationItem } from "@/app/[lang]/docs/sidebar";
+import type { NavigationItem } from "@/app/docs/sidebar";
 
 interface SidebarContentProps {
   navigation: NavigationItem[];
-  lang: string;
   onLinkClick?: () => void;
 }
 
 export function SidebarContent({
   navigation,
-  lang,
   onLinkClick,
 }: SidebarContentProps) {
   const pathname = usePathname();
@@ -27,7 +25,7 @@ export function SidebarContent({
       parentPath?: string,
     ): string | null => {
       for (const item of items) {
-        const itemPath = `/${lang}/docs/${item.path}`;
+        const itemPath = `/docs/${item.path}`;
 
         if (pathname === itemPath && parentPath) {
           return parentPath;
@@ -47,7 +45,7 @@ export function SidebarContent({
     if (activeParent) {
       setExpandedItems(new Set([activeParent]));
     }
-  }, [pathname, lang, navigation]);
+  }, [pathname, navigation]);
 
   const toggleExpanded = (path: string) => {
     setExpandedItems((prev) => {
@@ -64,7 +62,7 @@ export function SidebarContent({
   const renderNavItem = (item: NavigationItem, level: number = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.path);
-    const itemPath = `/${lang}/docs/${item.path}`;
+    const itemPath = `/docs/${item.path}`;
     const isActive = pathname === itemPath;
 
     return (
