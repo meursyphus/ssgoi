@@ -1,5 +1,5 @@
 import type { MultiAnimationConfig } from "@types";
-import type { Animator } from "../animator/types";
+import type { Animator } from "../animation/types";
 
 export const TRANSITION_STRATEGY = Symbol.for("TRANSITION_STRATEGY");
 

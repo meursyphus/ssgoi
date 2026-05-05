@@ -1,7 +1,7 @@
 import type { Transition, TransitionCallback, TransitionScope } from "@types";
 import { normalizeToMultiAnimation, normalizeSchedule } from "@types";
-import { MultiAnimator } from "../animator/multi-animator";
-import { Animator } from "../animator/types";
+import { MultiAnimator } from "../animation/multi-animator";
+import { Animator } from "../animation/types";
 import {
   createDefaultStrategy,
   type StrategyContext,
