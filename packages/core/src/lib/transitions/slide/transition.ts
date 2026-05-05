@@ -1,7 +1,7 @@
 import type { SggoiTransition, StyleObject, PhysicsOptions } from "@types";
 import { prepareOutgoing } from "@utils";
 
-interface SlideOptions {
+export interface SlideOptions {
   direction?: "left" | "right";
   physics?: PhysicsOptions;
 }

@@ -47,3 +47,38 @@ export function createDirectionalPathTransitions(
     },
   ];
 }
+
+export function createOrderedPathTransitions<TDirection extends string>(
+  paths: readonly string[],
+  directions: {
+    forward: TDirection;
+    backward: TDirection;
+  },
+  createTransition: (direction: TDirection) => SggoiTransition,
+): SsgoiTransitionConfig[] {
+  const transitions: SsgoiTransitionConfig[] = [];
+
+  for (let fromIndex = 0; fromIndex < paths.length; fromIndex++) {
+    for (let toIndex = fromIndex + 1; toIndex < paths.length; toIndex++) {
+      const from = paths[fromIndex];
+      const to = paths[toIndex];
+
+      if (!from || !to) continue;
+
+      transitions.push(
+        {
+          from,
+          to,
+          transition: createTransition(directions.forward),
+        },
+        {
+          from: to,
+          to: from,
+          transition: createTransition(directions.backward),
+        },
+      );
+    }
+  }
+
+  return transitions;
+}

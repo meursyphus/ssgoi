@@ -1,12 +1,7 @@
 import type { SsgoiTransitionConfig } from "@types";
 import { createSymmetricPathTransitions } from "../utils";
-import { strip as transition, type StripOptions } from "./transition";
+import { strip as transition } from "./transition";
 
-export function strip(
-  paths: readonly string[],
-  options?: StripOptions,
-): SsgoiTransitionConfig[] {
-  return createSymmetricPathTransitions(paths, () => transition(options));
+export function strip(paths: readonly string[]): SsgoiTransitionConfig[] {
+  return createSymmetricPathTransitions(paths, () => transition());
 }
-
-export type { StripOptions };

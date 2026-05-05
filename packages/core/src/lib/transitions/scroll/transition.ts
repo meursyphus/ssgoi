@@ -1,7 +1,7 @@
 import type { SggoiTransition, PhysicsOptions } from "@types";
 import { prepareOutgoing } from "@utils";
 
-interface ScrollOptions {
+export interface ScrollOptions {
   direction?: "up" | "down";
   physics?: PhysicsOptions;
 }

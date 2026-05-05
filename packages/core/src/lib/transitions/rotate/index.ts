@@ -1,12 +1,7 @@
 import type { SsgoiTransitionConfig } from "@types";
 import { createSymmetricPathTransitions } from "../utils";
-import { rotate as transition, type RotateOptions } from "./transition";
+import { rotate as transition } from "./transition";
 
-export function rotate(
-  paths: readonly string[],
-  options?: RotateOptions,
-): SsgoiTransitionConfig[] {
-  return createSymmetricPathTransitions(paths, () => transition(options));
+export function rotate(paths: readonly string[]): SsgoiTransitionConfig[] {
+  return createSymmetricPathTransitions(paths, () => transition());
 }
-
-export type { RotateOptions };
