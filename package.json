@@ -18,14 +18,10 @@
     "vue:watch": "pnpm --filter @ssgoi/vue watch",
     "solid:build": "pnpm --filter @ssgoi/solid build",
     "solid:watch": "pnpm --filter @ssgoi/solid watch",
+    "dev": "pnpm --filter dev dev",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
     "sandpack-sync": "pnpm --filter docs generate:sandpack",
-    "angular-demo": "pnpm --filter angular-demo dev",
-    "react-demo": "pnpm --filter react-demo dev",
-    "solid-demo": "pnpm --filter solid-demo dev",
-    "svelte-demo": "pnpm --filter svelte-demo dev",
-    "vue-demo": "pnpm --filter vue-demo dev",
     "template:nextjs": "pnpm --filter ssgoi-nextjs-template dev",
     "template:nextjs:build": "pnpm --filter ssgoi-nextjs-template build",
     "template:nuxt": "pnpm --filter ssgoi-nuxt-template dev",
@@ -109,20 +105,8 @@
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
       "prettier --write --config apps/docs/.prettierrc"
     ],
-    "apps/angular-demo/**/*.{ts,html,css}": [
-      "prettier --write --config apps/angular-demo/.prettierrc"
-    ],
-    "apps/react-demo/**/*.{ts,tsx,js,jsx}": [
-      "prettier --write --config apps/react-demo/.prettierrc"
-    ],
-    "apps/solid-demo/**/*.{ts,tsx,js,jsx}": [
-      "prettier --write --config apps/solid-demo/.prettierrc"
-    ],
-    "apps/svelte-demo/**/*.{ts,js,svelte}": [
-      "prettier --write --config apps/svelte-demo/.prettierrc"
-    ],
-    "apps/vue-demo/**/*.{ts,js,vue}": [
-      "prettier --write --config apps/vue-demo/.prettierrc"
+    "apps/dev/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
     ]
   }
 }
