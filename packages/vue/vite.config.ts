@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
@@ -17,7 +17,7 @@ export default defineConfig({
         filePath: filePath.replace("/src/lib", ""),
         content,
       }),
-    }) as any,
+    }) as PluginOption,
   ],
   build: {
     lib: {
@@ -28,11 +28,7 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: [
-        "vue",
-        "@ssgoi/core",
-        "@ssgoi/core/internal",
-      ],
+      external: ["vue", "@ssgoi/core", "@ssgoi/core/internal"],
       output: {
         preserveModules: true,
         exports: "named",

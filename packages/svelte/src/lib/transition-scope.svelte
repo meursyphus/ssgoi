@@ -1,8 +1,9 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { createTransitionScope } from "@ssgoi/core/internal";
 
   interface Props {
-    children: () => any;
+    children: Snippet;
   }
 
   let { children }: Props = $props();
