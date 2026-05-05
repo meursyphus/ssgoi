@@ -1,1 +1,1 @@
-export type * from "@ssgoi/core";
+export type * from "@ssgoi/core/types";

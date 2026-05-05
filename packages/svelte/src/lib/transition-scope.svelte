@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createTransitionScope } from "@ssgoi/core";
+  import { createTransitionScope } from "@ssgoi/core/internal";
 
   interface Props {
     children: () => any;

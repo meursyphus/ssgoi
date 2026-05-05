@@ -6,5 +6,5 @@ export {
 } from "./transition.directive";
 export { TransitionScopeDirective } from "./transition-scope.directive";
 export { injectSsgoi, SSGOI_CONTEXT } from "./context";
-export { transition } from "@ssgoi/core";
 export * from "./types";
+export * from "@ssgoi/core";

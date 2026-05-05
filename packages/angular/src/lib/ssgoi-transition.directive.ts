@@ -9,7 +9,7 @@ import {
   PLATFORM_ID,
 } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { transition } from "@ssgoi/core";
+import { transition } from "@ssgoi/core/internal";
 import { injectSsgoi } from "./context";
 
 @Directive({

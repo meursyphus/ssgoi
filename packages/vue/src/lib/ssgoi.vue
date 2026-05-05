@@ -8,7 +8,7 @@
 import { computed, watchEffect } from "vue";
 import type { SsgoiConfig } from "./types";
 import { provideSsgoi } from "./context";
-import { createSggoiTransitionContext } from "@ssgoi/core";
+import { createSggoiTransitionContext } from "@ssgoi/core/internal";
 
 interface Props {
   config: SsgoiConfig;

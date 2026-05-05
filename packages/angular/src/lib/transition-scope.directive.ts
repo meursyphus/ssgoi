@@ -7,7 +7,7 @@ import {
   PLATFORM_ID,
 } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { createTransitionScope } from "@ssgoi/core";
+import { createTransitionScope } from "@ssgoi/core/internal";
 
 /**
  * TransitionScope creates a boundary for local-scoped transitions.

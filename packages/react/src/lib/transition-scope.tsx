@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createTransitionScope } from "@ssgoi/core";
+import { createTransitionScope } from "@ssgoi/core/internal";
 
 type TransitionScopeProps = {
   children: ReactNode;

@@ -8,12 +8,12 @@ import {
   PLATFORM_ID,
 } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { transition as coreTransition } from "@ssgoi/core";
+import { transition as coreTransition } from "@ssgoi/core/internal";
 import type {
   Transition as CoreTransitionConfig,
   TransitionKey as CoreTransitionKey,
   TransitionScope as CoreTransitionScope,
-} from "@ssgoi/core";
+} from "@ssgoi/core/internal";
 
 export type TransitionDirectiveConfig = CoreTransitionConfig & {
   key?: CoreTransitionKey;

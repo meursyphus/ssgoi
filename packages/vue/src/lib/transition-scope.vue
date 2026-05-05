@@ -22,7 +22,7 @@
  * ```
  */
 import { ref, onMounted, onUnmounted } from "vue";
-import { createTransitionScope } from "@ssgoi/core";
+import { createTransitionScope } from "@ssgoi/core/internal";
 
 const scopeRef = ref<HTMLElement | null>(null);
 let cleanup: (() => void) | void;

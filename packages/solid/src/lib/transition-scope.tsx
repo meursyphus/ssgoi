@@ -1,5 +1,5 @@
 import { onMount, type JSX } from "solid-js";
-import { createTransitionScope } from "@ssgoi/core";
+import { createTransitionScope } from "@ssgoi/core/internal";
 
 type TransitionScopeProps = {
   children: JSX.Element;

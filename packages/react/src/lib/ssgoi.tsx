@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import type { ReactNode } from "react";
 import type { SsgoiConfig, ReactSsgoiContext } from "./types";
 import { SsgoiProvider } from "./context";
-import { createSggoiTransitionContext } from "@ssgoi/core";
+import { createSggoiTransitionContext } from "@ssgoi/core/internal";
 
 interface SsgoiProps {
   config: SsgoiConfig;

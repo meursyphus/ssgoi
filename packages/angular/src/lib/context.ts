@@ -1,5 +1,5 @@
 import { InjectionToken, inject } from "@angular/core";
-import type { SsgoiContext } from "@ssgoi/core";
+import type { SsgoiContext } from "@ssgoi/core/internal";
 
 export const SSGOI_CONTEXT = new InjectionToken<SsgoiContext | undefined>(
   "ssgoi-context",

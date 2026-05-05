@@ -1,6 +1,6 @@
-import { transition as _transition } from "@ssgoi/core";
+import { transition as _transition } from "@ssgoi/core/internal";
 import type { Directive } from "vue";
-import type { Transition, TransitionKey, TransitionScope } from "@ssgoi/core";
+import type { Transition, TransitionKey, TransitionScope } from "@ssgoi/core/internal";
 
 export const transition = _transition;
 

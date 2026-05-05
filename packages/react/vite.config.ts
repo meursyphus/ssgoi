@@ -25,13 +25,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        "transitions/index": resolve(__dirname, "src/lib/transitions/index.ts"),
-        "view-transitions/index": resolve(
-          __dirname,
-          "src/lib/view-transitions/index.ts",
-        ),
         types: resolve(__dirname, "src/lib/types.ts"),
-        "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),
         "unplugin/index": resolve(__dirname, "src/unplugin/index.ts"),
         "unplugin/webpack": resolve(__dirname, "src/unplugin/webpack.ts"),
         "unplugin/vite": resolve(__dirname, "src/unplugin/vite.ts"),
@@ -46,9 +40,7 @@ export default defineConfig({
         "react-dom",
         "react/jsx-runtime",
         "@ssgoi/core",
-        "@ssgoi/core/view-transitions",
-        "@ssgoi/core/transitions",
-        "@ssgoi/core/presets",
+        "@ssgoi/core/internal",
         "unplugin",
         "@babel/core",
       ],

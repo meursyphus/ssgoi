@@ -6,8 +6,8 @@ import {
   inject,
 } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { createSggoiTransitionContext } from "@ssgoi/core";
-import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core";
+import { createSggoiTransitionContext } from "@ssgoi/core/internal";
+import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core/internal";
 import { SSGOI_CONTEXT } from "./context";
 
 function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {

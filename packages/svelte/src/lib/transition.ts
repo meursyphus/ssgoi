@@ -3,7 +3,7 @@ import {
   type Transition,
   type TransitionKey,
   type TransitionScope,
-} from "@ssgoi/core";
+} from "@ssgoi/core/internal";
 
 type TransitionParams = Transition<undefined> & {
   key: TransitionKey;
