@@ -3,141 +3,222 @@
 import Link from "next/link";
 import { SsgoiTransition } from "@ssgoi/react";
 
-type Post = {
+type SentEmail = {
   id: string;
-  author: string;
-  handle: string;
+  to: string;
+  email: string;
+  subject: string;
+  preview: string;
+  date: string;
   time: string;
-  content: string;
 };
 
-const POSTS: Post[] = [
+const SENT_EMAILS: SentEmail[] = [
   {
-    id: "p1",
-    author: "Daeseung",
-    handle: "moon",
-    time: "1m",
-    content: "방금 sheet 트랜지션 셋업 완료. FAB 누르면 부드럽게 위로 올라옴.",
+    id: "1",
+    to: "John Smith",
+    email: "john@example.com",
+    subject: "Project status update",
+    preview: "Hi team, here's a quick update on where we stand with...",
+    date: "Today",
+    time: "10:32 AM",
   },
   {
-    id: "p2",
-    author: "Jaemin",
-    handle: "jaemin",
-    time: "12m",
-    content: "월요일이라 그런가 코드가 안 짜진다 ㅠ 커피 한 잔 더 가야겠다.",
+    id: "2",
+    to: "Sarah Johnson",
+    email: "sarah@example.com",
+    subject: "Re: Design review feedback",
+    preview: "Thanks for sharing! Overall looks great, just a few minor...",
+    date: "Today",
+    time: "9:15 AM",
   },
   {
-    id: "p3",
-    author: "Hyeon",
-    handle: "hyeon",
-    time: "32m",
-    content: "ssgoi 로 만든 모바일 인터랙션이 진짜 네이티브 같다. 이거 좋다.",
+    id: "3",
+    to: "Mike Chen",
+    email: "mike@example.com",
+    subject: "Weekly report attached",
+    preview: "Please find attached the weekly progress report with...",
+    date: "Yesterday",
+    time: "5:48 PM",
   },
   {
-    id: "p4",
-    author: "Soo",
-    handle: "soo",
-    time: "1h",
-    content: "퇴근 시간에 발견한 좋은 카페 ☕️ 사진은 내일 올릴게요.",
+    id: "4",
+    to: "Emily Davis",
+    email: "emily@example.com",
+    subject: "Meeting confirmation request",
+    preview: "Could you please confirm if Tuesday 2 PM works for...",
+    date: "Yesterday",
+    time: "3:22 PM",
   },
   {
-    id: "p5",
-    author: "Yuri",
-    handle: "yuri",
-    time: "2h",
-    content: "Next.js 16 turbopack 기본화는 정말 빠르네. 빌드가 다르다.",
+    id: "5",
+    to: "Alex Kim",
+    email: "alex@example.com",
+    subject: "API docs updated",
+    preview: "I've finished updating the API documentation with all...",
+    date: "Dec 18",
+    time: "1:05 PM",
   },
   {
-    id: "p6",
-    author: "Min",
-    handle: "min",
-    time: "3h",
-    content: "sheet 와 drill 의 UX 차이를 정리해봤어요. 곧 글로 공유합니다.",
+    id: "6",
+    to: "Lisa Park",
+    email: "lisa@example.com",
+    subject: "Vacation request",
+    preview: "I'd like to request time off from December 24th to 27th...",
+    date: "Dec 17",
+    time: "11:30 AM",
+  },
+  {
+    id: "7",
+    to: "Tom Wilson",
+    email: "tom@example.com",
+    subject: "Q4 budget review",
+    preview:
+      "Attached the revised numbers for next quarter — the marketing line...",
+    date: "Dec 16",
+    time: "4:18 PM",
+  },
+  {
+    id: "8",
+    to: "Rachel Adams",
+    email: "rachel@example.com",
+    subject: "Onboarding checklist",
+    preview: "Welcome aboard! Here's the checklist for your first week...",
+    date: "Dec 15",
+    time: "9:02 AM",
+  },
+  {
+    id: "9",
+    to: "David Park",
+    email: "david@example.com",
+    subject: "Re: Office relocation",
+    preview: "Confirmed for the new floor on Jan 6. I'll send the seating...",
+    date: "Dec 13",
+    time: "2:47 PM",
+  },
+  {
+    id: "10",
+    to: "Hyeon Lee",
+    email: "hyeon@example.com",
+    subject: "Sheet transition notes",
+    preview: "Here are my notes from the demo today — the spring config we...",
+    date: "Dec 12",
+    time: "8:11 AM",
   },
 ];
 
-async function fetchPosts(): Promise<Post[]> {
-  return POSTS;
+async function fetchSentEmails(): Promise<SentEmail[]> {
+  return SENT_EMAILS;
 }
 
-export default function Sheet1Feed() {
-  // Pretend we're calling an API. Suspense/async pages are unnecessary
-  // for this client-side mock — we just want the call site shape.
-  const posts = POSTS;
-  void fetchPosts;
+export default function Sheet1SentPage() {
+  // Pretend we're calling an API.
+  const emails = SENT_EMAILS;
+  void fetchSentEmails;
 
   return (
-    <SsgoiTransition id="/g/sheet1">
-      <div className="min-h-full bg-neutral-950 text-neutral-100">
-        <header className="sticky top-0 z-10 border-b border-white/5 bg-neutral-950/90 px-4 py-3 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
-              aria-label="Home"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 18l-6-6 6-6"
-                />
-              </svg>
-            </Link>
-            <h1 className="text-lg font-semibold">Feed</h1>
-          </div>
-        </header>
-
-        <main className="divide-y divide-white/5">
-          {posts.map((post) => (
-            <article key={post.id} className="px-4 py-4">
-              <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-sm font-semibold">
-                  {post.author[0]}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <span className="font-semibold text-neutral-100">
-                      {post.author}
-                    </span>
-                    <span className="text-neutral-500">@{post.handle}</span>
-                    <span className="text-neutral-500">· {post.time}</span>
-                  </div>
-                  <p className="mt-1 text-sm leading-snug text-neutral-200">
-                    {post.content}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </main>
-
-        <Link
-          href="/g/sheet1/compose"
-          aria-label="New post"
-          className="fixed bottom-10 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-2xl shadow-blue-500/40 transition-all hover:bg-blue-400 active:scale-95 md:absolute md:bottom-6"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className="h-6 w-6"
+    <SsgoiTransition
+      id="/g/sheet1"
+      className="relative flex min-h-full flex-col bg-[#121212] text-neutral-100"
+    >
+      <header className="sticky top-0 z-10 border-b border-white/5 bg-[#121212]/85 backdrop-blur">
+        <div className="flex items-center justify-between px-5 pt-4 pb-1.5">
+          <Link
+            href="/"
+            aria-label="Home"
+            className="-ml-2 flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 5v14M5 12h14"
-            />
-          </svg>
-        </Link>
-      </div>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="h-4 w-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 18l-6-6 6-6"
+              />
+            </svg>
+          </Link>
+          <button
+            type="button"
+            aria-label="Search"
+            className="-mr-2 flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="h-4 w-4"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path strokeLinecap="round" d="M20 20l-3-3" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-5 pb-4">
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Sent
+          </h1>
+          <p className="mt-0.5 text-sm text-neutral-400">
+            {emails.length} messages
+          </p>
+        </div>
+      </header>
+
+      <ul className="flex-1 divide-y divide-white/5">
+        {emails.map((email) => (
+          <li
+            key={email.id}
+            className="cursor-pointer px-5 py-4 transition-colors hover:bg-white/[0.04]"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-semibold text-white">
+                {email.to[0]}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="truncate text-sm font-medium text-white">
+                    {email.to}
+                  </span>
+                  <span className="shrink-0 text-xs text-neutral-500">
+                    {email.date}
+                  </span>
+                </div>
+                <h3 className="truncate text-sm text-neutral-300">
+                  {email.subject}
+                </h3>
+                <p className="mt-0.5 truncate text-sm text-neutral-500">
+                  {email.preview}
+                </p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <Link
+        href="/g/sheet1/compose"
+        aria-label="Compose new message"
+        className="absolute bottom-5 right-5 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-400 active:scale-95"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+          />
+        </svg>
+      </Link>
     </SsgoiTransition>
   );
 }
