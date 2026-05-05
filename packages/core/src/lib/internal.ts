@@ -5,6 +5,8 @@ export type {
   SsgoiConfig,
   SsgoiContext,
   SsgoiInternalOptions,
+  SsgoiTransitionConfig,
+  SsgoiTransitionConfigInput,
   Transition,
   TransitionCallback,
   TransitionKey,

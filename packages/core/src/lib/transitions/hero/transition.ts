@@ -7,7 +7,7 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 300, damping: 30 },
 };
 
-interface HeroOptions {
+export interface HeroOptions {
   physics?: PhysicsOptions;
   timeout?: number;
   maxDistance?: number;

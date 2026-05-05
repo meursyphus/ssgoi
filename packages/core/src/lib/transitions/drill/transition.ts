@@ -17,7 +17,7 @@ const EXIT: PhysicsOptions = {
   },
 };
 
-interface DrillOptions {
+export interface DrillOptions {
   opacity?: boolean;
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;

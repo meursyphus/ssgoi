@@ -18,7 +18,7 @@ const DEFAULT_BLIND_COUNT = 10;
 const DEFAULT_DIRECTION = "horizontal" as const;
 const DEFAULT_BLIND_COLOR = "#000000";
 
-interface BlindOptions {
+export interface BlindOptions {
   physics?: PhysicsOptions;
   transitionDelay?: number;
   blindCount?: number;

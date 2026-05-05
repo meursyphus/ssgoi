@@ -1,2 +1,6 @@
 export * from "./transitions";
-export type { SsgoiConfig } from "@types";
+export type {
+  SsgoiConfig,
+  SsgoiTransitionConfig,
+  SsgoiTransitionConfigInput,
+} from "@types";

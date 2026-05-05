@@ -26,16 +26,10 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           symmetric: true,
         },
         // Posts transitions - drill effect
-        {
-          from: "/posts",
-          to: "/posts/*",
-          transition: drill({ direction: "enter" }),
-        },
-        {
-          from: "/posts/*",
-          to: "/posts",
-          transition: drill({ direction: "exit" }),
-        },
+        drill({
+          enter: "/posts/*",
+          exit: "/posts",
+        }),
         // Profile transitions - instagram
         {
           from: "/profile",

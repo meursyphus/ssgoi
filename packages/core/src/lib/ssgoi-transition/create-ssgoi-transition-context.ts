@@ -1,4 +1,10 @@
-import type { SsgoiConfig, SsgoiContext, SsgoiInternalOptions } from "@types";
+import type {
+  SsgoiConfig,
+  SsgoiContext,
+  SsgoiInternalOptions,
+  SsgoiTransitionConfig,
+  SsgoiTransitionConfigInput,
+} from "@types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,
@@ -11,6 +17,28 @@ import {
   createOutFirstDetector,
   createAnyOrderDetector,
 } from "./navigation-detector-strategy";
+
+function isTransitionGroup(
+  transition: SsgoiTransitionConfigInput,
+): transition is readonly SsgoiTransitionConfigInput[] {
+  return Array.isArray(transition);
+}
+
+function flattenTransitions(
+  transitions: readonly SsgoiTransitionConfigInput[],
+): SsgoiTransitionConfig[] {
+  const flattened: SsgoiTransitionConfig[] = [];
+
+  for (const transition of transitions) {
+    if (isTransitionGroup(transition)) {
+      flattened.push(...flattenTransitions(transition));
+    } else {
+      flattened.push(transition);
+    }
+  }
+
+  return flattened;
+}
 
 /**
  * SSGOI Transition Context Operation Principles
@@ -66,7 +94,9 @@ export function createSggoiTransitionContext(
     : createAnyOrderDetector();
 
   // Process symmetric transitions - creates bidirectional transitions automatically
-  const processedTransitions = processSymmetricTransitions(transitions);
+  const processedTransitions = processSymmetricTransitions(
+    flattenTransitions(transitions),
+  );
 
   // Detect native edge swipe-back / swipe-forward gestures so we can suppress
   // animations that would fight the OS gesture (iOS Safari, Android system back).

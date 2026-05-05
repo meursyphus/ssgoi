@@ -29,7 +29,7 @@ const EXIT: PhysicsOptions = {
 /** Default scale offset for sheet effect (20% = 0.2) */
 const DEFAULT_SCALE_OFFSET = 0.2;
 
-interface SheetOptions {
+export interface SheetOptions {
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;
   /** Scale offset as a fraction (default: 0.2 = 20%) */

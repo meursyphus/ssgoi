@@ -10,7 +10,7 @@ const DEFAULT_IN_PHYSICS: PhysicsOptions = {
 };
 const DEFAULT_TRANSITION_DELAY = 0;
 
-interface FadeOptions {
+export interface FadeOptions {
   transitionDelay?: number;
   physics?: PhysicsOptions;
 }

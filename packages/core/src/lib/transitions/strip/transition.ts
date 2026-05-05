@@ -7,7 +7,7 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
 const ROTATE_Y = 20;
 const PERSPECTIVE = 800;
 
-interface StripOptions {
+export interface StripOptions {
   physics?: PhysicsOptions;
 }
 

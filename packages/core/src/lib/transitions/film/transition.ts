@@ -32,7 +32,7 @@ const DEFAULT_BORDER_COLOR = "white";
 const FRAME_MS = 1000 / 60;
 const MAX_FRAMES = 600; // 10s safety cap, mirrors css-runner
 
-interface FilmOptions {
+export interface FilmOptions {
   border?: {
     color?: string;
   };

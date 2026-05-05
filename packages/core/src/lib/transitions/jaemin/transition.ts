@@ -10,7 +10,7 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 50, damping: 30 },
 };
 
-interface JaeminOptions {
+export interface JaeminOptions {
   physics?: PhysicsOptions;
   initialRotation?: number; // Initial rotation angle in degrees
   initialScale?: number; // Initial scale factor

@@ -7,16 +7,10 @@ import { MobileFrame } from "@/components/mobile-frame";
 
 const config: SsgoiConfig = {
   transitions: [
-    {
-      from: "/g/sheet1",
-      to: "/g/sheet1/compose",
-      transition: sheet({ direction: "enter" }),
-    },
-    {
-      from: "/g/sheet1/compose",
-      to: "/g/sheet1",
-      transition: sheet({ direction: "exit" }),
-    },
+    sheet({
+      enter: "/g/sheet1/compose",
+      exit: "/g/sheet1",
+    }),
   ],
 };
 
