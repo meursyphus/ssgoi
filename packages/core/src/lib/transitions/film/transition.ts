@@ -6,7 +6,7 @@ import type {
   SpringConfig,
 } from "@types";
 
-import { SETTLE_THRESHOLD, SpringIntegrator } from "../animation/integrator";
+import { SETTLE_THRESHOLD, SpringIntegrator } from "../../animation/integrator";
 import { getRect } from "@utils";
 import { prepareOutgoing } from "@utils";
 
