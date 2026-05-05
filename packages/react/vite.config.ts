@@ -26,6 +26,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
         types: resolve(__dirname, "src/lib/types.ts"),
+        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
         "unplugin/index": resolve(__dirname, "src/unplugin/index.ts"),
         "unplugin/webpack": resolve(__dirname, "src/unplugin/webpack.ts"),
         "unplugin/vite": resolve(__dirname, "src/unplugin/vite.ts"),
@@ -41,6 +42,7 @@ export default defineConfig({
         "react/jsx-runtime",
         "@ssgoi/core",
         "@ssgoi/core/internal",
+        "@ssgoi/core/types",
         "unplugin",
         "@babel/core",
       ],

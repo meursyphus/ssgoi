@@ -26,6 +26,12 @@
       "require": "./dist/types.cjs",
       "default": "./dist/types.js"
     },
+    "./view-transitions": {
+      "types": "./dist/view-transitions.d.ts",
+      "import": "./dist/view-transitions.js",
+      "require": "./dist/view-transitions.cjs",
+      "default": "./dist/view-transitions.js"
+    },
     "./unplugin": {
       "types": "./dist/unplugin/index.d.ts",
       "import": "./dist/unplugin/index.js",

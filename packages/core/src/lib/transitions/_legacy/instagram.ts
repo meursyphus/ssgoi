@@ -8,5 +8,5 @@ interface InstagramOptions {
 export const instagram = (options: InstagramOptions = {}): SggoiTransition =>
   zoom({
     ...options,
-    type: "legacy-instagram",
+    type: "static",
   });

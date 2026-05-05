@@ -1,6 +1,6 @@
 import type { ZoomAnimationConfig, ZoomAnimationInput } from "./types";
 
-export function createEnterIn({
+export function createZoomIn({
   enterRect,
   exitRect,
   pageRect,
@@ -43,73 +43,7 @@ export function createEnterIn({
   };
 }
 
-export function createEnterOut({
-  enterRect,
-  exitRect,
-  scrollOffset,
-}: ZoomAnimationInput): ZoomAnimationConfig {
-  const dx =
-    enterRect.left -
-    exitRect.left +
-    (enterRect.width - exitRect.width) / 2 +
-    scrollOffset.x;
-  const dy =
-    enterRect.top -
-    exitRect.top +
-    (enterRect.height - exitRect.height) / 2 +
-    scrollOffset.y;
-
-  const scaleX = enterRect.width / exitRect.width;
-  const scaleY = enterRect.height / exitRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  return {
-    transformOrigin: `${exitRect.left + exitRect.width / 2}px ${exitRect.top + exitRect.height / 2}px`,
-    animate: (progress) => {
-      const t = 1 - progress;
-
-      return {
-        transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`,
-        opacity: `${1 - t}`,
-      };
-    },
-  };
-}
-
-export function createExitIn({
-  enterRect,
-  exitRect,
-  scrollOffset,
-}: ZoomAnimationInput): ZoomAnimationConfig {
-  const dx =
-    enterRect.left -
-    exitRect.left +
-    (enterRect.width - exitRect.width) / 2 -
-    scrollOffset.x;
-  const dy =
-    enterRect.top -
-    exitRect.top +
-    (enterRect.height - exitRect.height) / 2 -
-    scrollOffset.y;
-
-  const scaleX = enterRect.width / exitRect.width;
-  const scaleY = enterRect.height / exitRect.height;
-  const scale = Math.max(scaleX, scaleY);
-
-  return {
-    transformOrigin: `${exitRect.left + exitRect.width / 2}px ${exitRect.top + exitRect.height / 2}px`,
-    animate: (progress) => {
-      const t = 1 - progress;
-
-      return {
-        transform: `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
-        opacity: `${progress}`,
-      };
-    },
-  };
-}
-
-export function createExitOut({
+export function createZoomOut({
   enterRect,
   exitRect,
   pageRect,
@@ -146,7 +80,7 @@ export function createExitOut({
 
       return {
         clipPath: `inset(${startTop * t}% ${startRight * t}% ${startBottom * t}% ${startLeft * t}%)`,
-        transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t - scrollOffset.y}px) scale(${1 + (scale - 1) * t})`,
+        transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
       };
     },
   };

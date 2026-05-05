@@ -8,5 +8,5 @@ interface PinterestOptions {
 export const pinterest = (options: PinterestOptions = {}): SggoiTransition =>
   zoom({
     ...options,
-    type: "legacy-pinterest",
+    type: "expand",
   });

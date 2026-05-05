@@ -11,12 +11,11 @@ import type {
 export type { ZoomOptions, ZoomType } from "./types";
 
 const DEFAULT_TIMEOUT = 300;
+const ZOOM_ENTER_KEY = "data-zoom-enter-key";
+const ZOOM_EXIT_KEY = "data-zoom-exit-key";
 
-function findSingleByAttribute(
-  node: HTMLElement,
-  attribute: string,
-): HTMLElement | null {
-  const elements = node.querySelectorAll(`[${attribute}]`);
+function findZoomEnter(node: HTMLElement): HTMLElement | null {
+  const elements = node.querySelectorAll(`[${ZOOM_ENTER_KEY}]`);
 
   if (elements.length !== 1) {
     return null;
@@ -25,15 +24,11 @@ function findSingleByAttribute(
   return elements[0] as HTMLElement;
 }
 
-function findByAttributeValue(
-  node: HTMLElement,
-  attribute: string,
-  value: string,
-): HTMLElement | null {
-  const elements = node.querySelectorAll(`[${attribute}]`);
+function findZoomExit(node: HTMLElement, key: string): HTMLElement | null {
+  const elements = node.querySelectorAll(`[${ZOOM_EXIT_KEY}]`);
 
   for (const element of elements) {
-    if (element.getAttribute(attribute) === value) {
+    if (element.getAttribute(ZOOM_EXIT_KEY) === key) {
       return element as HTMLElement;
     }
   }
@@ -47,27 +42,26 @@ function createAnimationHandlers(
   scrollOffset: { x: number; y: number },
   provider: ZoomProvider,
 ): ZoomAnimationHandlers | null {
-  const { enterAttribute, exitAttribute } = provider;
-  const fromEnter = findSingleByAttribute(fromNode, enterAttribute);
-  const toEnter = findSingleByAttribute(toNode, enterAttribute);
+  const fromEnter = findZoomEnter(fromNode);
+  const toEnter = findZoomEnter(toNode);
 
   let enterEl: HTMLElement | null = null;
   let exitEl: HTMLElement | null = null;
   let mode: "enter" | "exit" | null = null;
 
   if (!fromEnter && toEnter) {
-    const key = toEnter.getAttribute(enterAttribute);
+    const key = toEnter.getAttribute(ZOOM_ENTER_KEY);
     if (!key) return null;
 
     enterEl = toEnter;
-    exitEl = findByAttributeValue(fromNode, exitAttribute, key);
+    exitEl = findZoomExit(fromNode, key);
     mode = "enter";
   } else if (fromEnter && !toEnter) {
-    const key = fromEnter.getAttribute(enterAttribute);
+    const key = fromEnter.getAttribute(ZOOM_ENTER_KEY);
     if (!key) return null;
 
     enterEl = fromEnter;
-    exitEl = findByAttributeValue(toNode, exitAttribute, key);
+    exitEl = findZoomExit(toNode, key);
     mode = "exit";
   }
 
@@ -86,8 +80,8 @@ function createAnimationHandlers(
   };
 
   if (mode === "enter") {
-    const inConfig = provider.in?.(input);
-    const outConfig = provider.backgroundOut?.(input);
+    const inConfig = provider.in(input);
+    const outConfig = provider.backgroundOut(input);
 
     if (inConfig) {
       toNode.style.transformOrigin = inConfig.transformOrigin;
@@ -98,14 +92,13 @@ function createAnimationHandlers(
 
     return {
       mode,
-      inAnimation: inConfig?.animate,
-      outAnimation: outConfig?.animate,
-      shouldPreserveOutgoingPosition: !outConfig,
+      inAnimation: inConfig.animate,
+      outAnimation: outConfig.animate,
     };
   }
 
-  const inConfig = provider.backgroundIn?.(input);
-  const outConfig = provider.out?.(input);
+  const inConfig = provider.backgroundIn(input);
+  const outConfig = provider.out(input);
 
   if (inConfig) {
     toNode.style.transformOrigin = inConfig.transformOrigin;
@@ -116,10 +109,17 @@ function createAnimationHandlers(
 
   return {
     mode,
-    inAnimation: inConfig?.animate,
-    outAnimation: outConfig?.animate,
-    shouldPreserveOutgoingPosition: !outConfig,
+    inAnimation: inConfig.animate,
+    outAnimation: outConfig.animate,
   };
+}
+
+function detectOutgoingMode(element: HTMLElement): "enter" | "exit" {
+  return findZoomEnter(element) ? "exit" : "enter";
+}
+
+function getOutgoingZIndex(mode: "enter" | "exit"): string {
+  return mode === "enter" ? "-1" : "100";
 }
 
 export const zoom = (options: ZoomOptions): SggoiTransition => {
@@ -205,12 +205,10 @@ export const zoom = (options: ZoomOptions): SggoiTransition => {
       return {
         physics: physicsOptions,
         prepare: () => {
-          if (handlers?.shouldPreserveOutgoingPosition) {
-            prepareOutgoing(element);
-          } else {
-            prepareOutgoing(element, context);
-            element.style.zIndex = "-1";
-          }
+          const outgoingMode = detectOutgoingMode(element);
+
+          prepareOutgoing(element, context);
+          element.style.zIndex = getOutgoingZIndex(outgoingMode);
           element.style.willChange = "transform, clip-path, opacity";
           element.style.backfaceVisibility = "hidden";
           (element.style as CSSStyleDeclaration & { contain: string }).contain =

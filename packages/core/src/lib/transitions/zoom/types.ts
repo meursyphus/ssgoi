@@ -2,13 +2,8 @@ import type { PhysicsOptions } from "@types";
 
 export type ZoomType = "expand" | "static";
 
-export type ZoomProviderType =
-  | ZoomType
-  | "legacy-pinterest"
-  | "legacy-instagram";
-
 export interface ZoomOptions {
-  type: ZoomProviderType;
+  type: ZoomType;
   timeout?: number;
 }
 
@@ -29,17 +24,14 @@ export interface ZoomAnimationInput {
 
 export interface ZoomProvider {
   physics: PhysicsOptions;
-  enterAttribute: string;
-  exitAttribute: string;
-  in?: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  out?: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  backgroundIn?: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  backgroundOut?: (input: ZoomAnimationInput) => ZoomAnimationConfig;
+  in: (input: ZoomAnimationInput) => ZoomAnimationConfig;
+  out: (input: ZoomAnimationInput) => ZoomAnimationConfig;
+  backgroundIn: (input: ZoomAnimationInput) => ZoomAnimationConfig;
+  backgroundOut: (input: ZoomAnimationInput) => ZoomAnimationConfig;
 }
 
 export interface ZoomAnimationHandlers {
   mode: "enter" | "exit";
   inAnimation?: ZoomAnimationFunc;
   outAnimation?: ZoomAnimationFunc;
-  shouldPreserveOutgoingPosition: boolean;
 }
