@@ -169,7 +169,7 @@ export default function Sheet1SentPage() {
         </div>
       </header>
 
-      <ul className="flex-1 divide-y divide-white/5">
+      <ul className="divide-y divide-white/5">
         {emails.map((email) => (
           <li
             key={email.id}
@@ -203,7 +203,7 @@ export default function Sheet1SentPage() {
       <Link
         href="/g/sheet1/compose"
         aria-label="Compose new message"
-        className="absolute bottom-5 right-5 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-400 active:scale-95"
+        className="sticky bottom-5 right-5 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-400 active:scale-95"
       >
         <svg
           viewBox="0 0 24 24"

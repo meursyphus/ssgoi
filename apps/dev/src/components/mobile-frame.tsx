@@ -61,9 +61,9 @@ function HomeIndicator() {
 export function MobileFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh w-full bg-neutral-950 md:flex md:items-center md:justify-center md:py-10">
-      <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-black md:h-[880px] md:w-[440px] md:rounded-[3.5rem] md:border-[14px] md:border-neutral-800 md:shadow-2xl md:shadow-black/60">
+      <div className="flex h-dvh w-full flex-col overflow-hidden bg-black md:h-[880px] md:w-[440px] md:rounded-[3.5rem] md:border-[14px] md:border-neutral-800 md:shadow-2xl md:shadow-black/60">
         <StatusBar />
-        <div className="relative z-0 flex-1 overflow-y-auto overflow-x-clip">
+        <div className="relative z-0 flex-1 overflow-y-scroll overflow-x-clip">
           {children}
         </div>
         <HomeIndicator />
