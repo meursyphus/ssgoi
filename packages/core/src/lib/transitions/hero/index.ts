@@ -2,6 +2,10 @@ import type { SsgoiTransitionConfig } from "@types";
 import { createSymmetricPathTransitions } from "../utils";
 import { hero as transition } from "./transition";
 
-export function hero(paths: readonly string[]): SsgoiTransitionConfig[] {
+export type HeroConfig = {
+  paths: readonly string[];
+};
+
+export function hero({ paths }: HeroConfig): SsgoiTransitionConfig[] {
   return createSymmetricPathTransitions(paths, () => transition());
 }

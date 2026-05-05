@@ -24,6 +24,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
         types: resolve(__dirname, "src/lib/types.ts"),
+        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },
       formats: ["es", "cjs"],
     },

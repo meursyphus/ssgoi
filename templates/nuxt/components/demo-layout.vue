@@ -103,7 +103,7 @@ import { Ssgoi } from '@ssgoi/vue';
 import type { SsgoiConfig } from '@ssgoi/vue';
 import {
   drill,
-  pinterest,
+  zoom,
   instagram,
 } from '@ssgoi/vue/view-transitions';
 
@@ -113,23 +113,15 @@ const pathname = computed(() => route.path);
 const config: SsgoiConfig = {
   transitions: [
     // Pinterest transitions
-    {
-      from: '/pinterest/*',
-      to: '/pinterest',
-      transition: pinterest(),
-      symmetric: true,
-    },
+    zoom({
+      paths: ['/pinterest', '/pinterest/*'],
+      type: 'expand',
+    }),
     // Posts transitions - drill effect
-    {
-      from: '/posts',
-      to: '/posts/*',
-      transition: drill({ direction: 'enter' }),
-    },
-    {
-      from: '/posts/*',
-      to: '/posts',
-      transition: drill({ direction: 'exit' }),
-    },
+    drill({
+      enter: '/posts/*',
+      exit: '/posts',
+    }),
     // Profile transitions - instagram
     {
       from: '/profile',

@@ -17,7 +17,9 @@ export default function ProductsLayout() {
 
   const config = useMemo(
     () => ({
-      transitions: [slide(categories.map((category) => category.path))],
+      transitions: [
+        slide({ paths: categories.map((category) => category.path) }),
+      ],
     }),
     [],
   );

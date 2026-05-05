@@ -2,6 +2,10 @@ import type { SsgoiTransitionConfig } from "@types";
 import { createSymmetricPathTransitions } from "../utils";
 import { film as transition } from "./transition";
 
-export function film(paths: readonly string[]): SsgoiTransitionConfig[] {
+export type FilmConfig = {
+  paths: readonly string[];
+};
+
+export function film({ paths }: FilmConfig): SsgoiTransitionConfig[] {
   return createSymmetricPathTransitions(paths, () => transition());
 }

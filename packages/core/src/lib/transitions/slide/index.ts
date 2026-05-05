@@ -2,7 +2,11 @@ import type { SsgoiTransitionConfig } from "@types";
 import { createOrderedPathTransitions } from "../utils";
 import { slide as transition } from "./transition";
 
-export function slide(paths: readonly string[]): SsgoiTransitionConfig[] {
+export type SlideConfig = {
+  paths: readonly string[];
+};
+
+export function slide({ paths }: SlideConfig): SsgoiTransitionConfig[] {
   return createOrderedPathTransitions(
     paths,
     { forward: "left", backward: "right" },
