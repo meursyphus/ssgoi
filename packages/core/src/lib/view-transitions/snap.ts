@@ -1,6 +1,6 @@
-import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { withResolvers } from "../utils";
+import type { PhysicsOptions, SggoiTransition, StyleObject } from "@types";
+import { prepareOutgoing } from "@utils";
+import { withResolvers } from "@utils";
 
 const DEFAULT_TRANSLATE_OFFSET = 8; // px
 

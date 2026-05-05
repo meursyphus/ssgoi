@@ -1,7 +1,7 @@
-import type { SggoiTransition, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { getRect } from "../utils/get-rect";
-import { withResolvers } from "../utils/with-resolvers";
+import type { SggoiTransition, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
+import { getRect } from "@utils";
+import { withResolvers } from "@utils";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 300, damping: 30 },

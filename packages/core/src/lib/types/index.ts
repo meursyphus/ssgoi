@@ -1,4 +1,4 @@
-import type { Integrator } from "./animator/integrator";
+import type { Integrator } from "../animator/integrator";
 
 export type TransitionKey = string | symbol;
 

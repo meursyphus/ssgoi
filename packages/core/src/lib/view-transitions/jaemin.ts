@@ -2,9 +2,9 @@ import type {
   SggoiTransition,
   SggoiTransitionContext,
   PhysicsOptions,
-} from "../types";
-import { getRect } from "../utils/get-rect";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+} from "@types";
+import { getRect } from "@utils";
+import { prepareOutgoing } from "@utils";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 50, damping: 30 },

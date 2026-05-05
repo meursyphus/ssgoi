@@ -1,5 +1,5 @@
-import type { SggoiTransition, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+import type { SggoiTransition, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
 
 /** Defaults */
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {

@@ -10,4 +10,4 @@ export type {
   TransitionKey,
   TransitionOptions,
   TransitionScope,
-} from "./types";
+} from "@types";

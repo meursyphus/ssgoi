@@ -3,9 +3,9 @@ import type {
   SggoiTransition,
   SggoiTransitionContext,
   StyleObject,
-} from "../types";
-import { getRect } from "../utils/get-rect";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+} from "@types";
+import { getRect } from "@utils";
+import { prepareOutgoing } from "@utils";
 
 // ease-out (Material decelerated): sheet rises and lands gracefully (incoming).
 // 200/24 = ratio 0.85 of critical (~28.3), ~290ms.

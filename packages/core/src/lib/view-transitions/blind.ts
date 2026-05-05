@@ -3,9 +3,9 @@ import type {
   MultiAnimationConfig,
   StyleObject,
   PhysicsOptions,
-} from "../types";
-import { sleep } from "../utils";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+} from "@types";
+import { sleep } from "@utils";
+import { prepareOutgoing } from "@utils";
 
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 200, damping: 22 },

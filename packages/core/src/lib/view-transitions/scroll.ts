@@ -1,5 +1,5 @@
-import type { SggoiTransition, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+import type { SggoiTransition, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
 
 interface ScrollOptions {
   direction?: "up" | "down";

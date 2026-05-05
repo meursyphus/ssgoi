@@ -1,4 +1,4 @@
-import type { SggoiTransitionContext } from "../types";
+import type { SggoiTransitionContext } from "@types";
 
 /**
  * Applies common styles for outgoing page elements

@@ -1,4 +1,4 @@
-import type { Transition } from "../types";
+import type { Transition } from "@types";
 
 /**
  * Matches a path against a pattern

@@ -1,6 +1,6 @@
-import type { SggoiTransition, StyleObject, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { sleep, withResolvers } from "../utils";
+import type { SggoiTransition, StyleObject, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
+import { sleep, withResolvers } from "@utils";
 
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 180, damping: 20, doubleSpring: true },

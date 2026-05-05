@@ -4,7 +4,7 @@ import type {
   NormalizedMultiAnimationConfig,
   NormalizedAnimationItem,
   AnimationState,
-} from "../types";
+} from "@types";
 
 /**
  * Entry to track individual animation state

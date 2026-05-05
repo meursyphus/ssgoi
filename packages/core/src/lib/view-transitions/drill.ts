@@ -1,5 +1,5 @@
-import type { PhysicsOptions, SggoiTransition, StyleObject } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+import type { PhysicsOptions, SggoiTransition, StyleObject } from "@types";
+import { prepareOutgoing } from "@utils";
 
 // ease-out (Material decelerated): incoming page settles into place.
 // stiffness 170, damping 22 → ratio 0.86 of critical (~26.1), settles ~310ms.

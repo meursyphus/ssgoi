@@ -1,6 +1,6 @@
 import { RunnerProvider, type BoundRunner } from "./runner/provider";
 import type { AnimationControls, StyleObject } from "./runner/types";
-import type { AnimationState, PhysicsOptions } from "../types";
+import type { AnimationState, PhysicsOptions } from "@types";
 import {
   IntegratorProvider,
   SpringIntegrator,

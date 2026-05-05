@@ -1,4 +1,4 @@
-import type { AnimationState } from "../types";
+import type { AnimationState } from "@types";
 
 /**
  * Animation - Abstract base class for spring-based animations

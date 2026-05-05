@@ -1,6 +1,6 @@
-import type { SggoiTransition, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { getRect } from "../utils/get-rect";
+import type { SggoiTransition, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
+import { getRect } from "@utils";
 
 // ease-in-out for elegant gallery↔detail morph. doubleSpring 1 chains an
 // identical follower for the S-curve. 340/30 keeps the timing on the gentler

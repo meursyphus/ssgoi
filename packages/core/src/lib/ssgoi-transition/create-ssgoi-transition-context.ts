@@ -1,4 +1,4 @@
-import type { SsgoiConfig, SsgoiContext, SsgoiInternalOptions } from "../types";
+import type { SsgoiConfig, SsgoiContext, SsgoiInternalOptions } from "@types";
 import {
   TRANSITION_STRATEGY,
   createPageTransitionStrategy,

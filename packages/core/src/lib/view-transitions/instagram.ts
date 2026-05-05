@@ -1,6 +1,6 @@
-import type { SggoiTransition, PhysicsOptions } from "../types";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { getRect } from "../utils/get-rect";
+import type { SggoiTransition, PhysicsOptions } from "@types";
+import { prepareOutgoing } from "@utils";
+import { getRect } from "@utils";
 
 // Decisive ease-out, no doubleSpring — instagram's tap-to-zoom is frequent and
 // must feel near-instantaneous. 420/34 ≈ critical damping, pure decelerated curve

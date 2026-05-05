@@ -3,10 +3,10 @@ import type {
   SggoiTransition,
   SggoiTransitionContext,
   StyleObject,
-} from "../types";
-import { getRect } from "../utils/get-rect";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
-import { withResolvers } from "../utils";
+} from "@types";
+import { getRect } from "@utils";
+import { prepareOutgoing } from "@utils";
+import { withResolvers } from "@utils";
 
 // standard easing (Material Z-axis): in-place transformation, both pages visible.
 // 280/30 = ratio 0.90 of critical (~33.5), near-critical, ~280ms.

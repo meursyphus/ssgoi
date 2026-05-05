@@ -4,11 +4,11 @@ import type {
   SggoiTransition,
   SggoiTransitionContext,
   SpringConfig,
-} from "../types";
+} from "@types";
 
 import { SETTLE_THRESHOLD, SpringIntegrator } from "../animator/integrator";
-import { getRect } from "../utils/get-rect";
-import { prepareOutgoing } from "../utils/prepare-outgoing";
+import { getRect } from "@utils";
+import { prepareOutgoing } from "@utils";
 
 // Default spring configurations for each animation phase
 const DEFAULT_SPRINGS = {

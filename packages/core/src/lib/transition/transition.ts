@@ -11,8 +11,8 @@ import type {
   TransitionMode,
   TransitionOptions,
   TransitionScope,
-} from "../types";
-import type { TransitionKey } from "../types";
+} from "@types";
+import type { TransitionKey } from "@types";
 import { watchUnmount } from "./unmount-observer";
 
 /**

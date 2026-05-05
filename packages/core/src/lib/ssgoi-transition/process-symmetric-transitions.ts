@@ -1,4 +1,4 @@
-import type { SsgoiConfig } from "../types";
+import type { SsgoiConfig } from "@types";
 
 /**
  * Processes symmetric transitions to create bidirectional navigation

@@ -1,5 +1,5 @@
-import type { Transition, TransitionCallback, TransitionScope } from "../types";
-import { normalizeToMultiAnimation, normalizeSchedule } from "../types";
+import type { Transition, TransitionCallback, TransitionScope } from "@types";
+import { normalizeToMultiAnimation, normalizeSchedule } from "@types";
 import { MultiAnimator } from "../animator/multi-animator";
 import { Animator } from "../animator/types";
 import {
@@ -9,7 +9,7 @@ import {
   type InternalTransitionConfigs,
 } from "./transition-strategy";
 import { findScope, isScopeReady } from "./transition-scope";
-import { waitPaint } from "../utils";
+import { waitPaint } from "@utils";
 
 export function createTransitionCallback(
   getTransition: () => Transition<undefined>,

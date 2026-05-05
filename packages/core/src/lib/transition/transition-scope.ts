@@ -1,4 +1,4 @@
-import type { TransitionCallback } from "../types";
+import type { TransitionCallback } from "@types";
 
 const SCOPE_ATTR = "data-ssgoi-scope";
 const SCOPE_READY_ATTR = "data-ssgoi-scope-ready";

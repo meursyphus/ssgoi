@@ -1,6 +1,6 @@
-import type { PreserveScrollOption, PreserveScrollFn } from "../types";
-import { getScrollingElement } from "../utils/get-scrolling-element";
-import { getPositionedParent } from "../utils/get-positioned-parent";
+import type { PreserveScrollOption, PreserveScrollFn } from "@types";
+import { getScrollingElement } from "@utils";
+import { getPositionedParent } from "@utils";
 import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
