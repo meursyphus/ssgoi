@@ -45,7 +45,7 @@
 					src={item.image}
 					alt={item.title}
 					style="aspect-ratio: {item.aspectRatio}"
-					data-pinterest-detail-key={item.id}
+					data-zoom-enter-key={item.id}
 				/>
 
 				<div>

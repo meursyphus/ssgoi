@@ -18,28 +18,28 @@ type TransitionParams = Transition<undefined> & {
  * params are updated (e.g., during SvelteKit page navigation).
  */
 export const transition = (node: HTMLElement, params: TransitionParams) => {
-  let callback = _transition({
-    key: params.key,
-    in: params.in,
-    out: params.out,
-    scope: params.scope,
-  });
-  let cleanup = callback(node);
+  const ref = _transition(
+    {
+      key: params.key,
+      in: params.in,
+      out: params.out,
+      scope: params.scope,
+    },
+    "auto",
+  );
+  ref(node);
 
   return {
     update(newParams: TransitionParams) {
-      callback = _transition({
-        key: newParams.key,
-        in: newParams.in,
-        out: newParams.out,
-        scope: newParams.scope,
-      });
-      cleanup = callback(node);
-    },
-    destroy() {
-      // Call cleanup to trigger OUT transition with the correct config
-      // The cleanup function captures the transition config at registration time
-      cleanup?.();
+      _transition(
+        {
+          key: newParams.key,
+          in: newParams.in,
+          out: newParams.out,
+          scope: newParams.scope,
+        },
+        "auto",
+      );
     },
   };
 };

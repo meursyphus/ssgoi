@@ -10,7 +10,9 @@
 
   let { config, children }: Props = $props();
 
-  const contextValue = createSggoiTransitionContext(config);
+  const contextValue = createSggoiTransitionContext(config, {
+    outFirst: false,
+  });
   setSsgoiContext(contextValue);
 </script>
 

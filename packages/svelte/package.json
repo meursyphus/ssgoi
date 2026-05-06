@@ -88,6 +88,11 @@
       "types": "./dist/types.d.ts",
       "svelte": "./dist/types.js",
       "import": "./dist/types.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions.d.ts",
+      "svelte": "./dist/view-transitions.js",
+      "import": "./dist/view-transitions.js"
     }
   }
 }

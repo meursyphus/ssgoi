@@ -60,14 +60,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "exports": {
-    "./package.json": {
-      "default": "./package.json"
-    },
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular.mjs"
-    }
-  },
   "sideEffects": false
 }

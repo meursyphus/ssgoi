@@ -137,6 +137,15 @@ export function createAnyOrderDetector(): NavigationDetector {
 
   return {
     trigger(path, type) {
+      // If the first page mounted in any-order mode, it can leave a pending
+      // IN-only entry. When that same page later unmounts before the next IN
+      // arrives, keep the OUT as the start of the real navigation instead of
+      // treating it as a same-path mismatch.
+      if (type === "out" && pending?.to === path && !pending.from) {
+        pending.inResolve?.(null);
+        pending = {};
+      }
+
       // Cancel previous if this is a new transition
       const isNewTransition =
         pending &&

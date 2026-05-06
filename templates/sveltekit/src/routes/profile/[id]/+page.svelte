@@ -45,7 +45,7 @@
 					src={post.coverImage.url}
 					alt={post.title}
 					style="aspect-ratio: {post.coverImage.aspectRatio}"
-					data-instagram-detail-key={post.id}
+					data-zoom-enter-key={post.id}
 				/>
 
 				<div>
