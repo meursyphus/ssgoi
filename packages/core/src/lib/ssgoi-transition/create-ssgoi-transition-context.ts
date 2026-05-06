@@ -1,7 +1,6 @@
 import type {
   SsgoiConfig,
   SsgoiContext,
-  SsgoiInternalOptions,
   SsgoiTransitionConfig,
   SsgoiTransitionConfigInput,
 } from "@types";
@@ -13,10 +12,7 @@ import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { findMatchingTransition } from "./find-matching-transition";
-import {
-  createOutFirstDetector,
-  createAnyOrderDetector,
-} from "./navigation-detector-strategy";
+import { createNavigationDetector } from "./navigation-detector-strategy";
 
 function isTransitionGroup(
   transition: SsgoiTransitionConfigInput,
@@ -45,15 +41,10 @@ function flattenTransitions(
  *
  * Page transition scenario: /home → /about
  *
- * **Default mode (outFirst: true)**: OUT must arrive before IN
- * - Best for frameworks with native destroy callbacks (Svelte)
- * - OUT triggers first, then IN completes the pair
- * - If IN arrives without OUT, returns empty transition (page refresh)
- *
- * **Observer mode (outFirst: false)**: OUT and IN can arrive in any order
- * - Best for frameworks using MutationObserver (React, Vue, Solid)
+ * **Navigation detection**: OUT and IN can arrive in any order
+ * - Best for frameworks using MutationObserver or lifecycle hooks
  * - Either OUT or IN can arrive first
- * - Both wait indefinitely for the other to complete the pair
+ * - Both wait for the other to complete the pair
  *
  * Flow:
  * 1. First transition arrives → Creates pendingTransition
@@ -75,7 +66,6 @@ function flattenTransitions(
  */
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
-  internalOptions?: SsgoiInternalOptions,
 ): SsgoiContext {
   // Destructure options with defaults
   const {
@@ -85,13 +75,7 @@ export function createSggoiTransitionContext(
     preserveScroll = (isMobile: boolean) => isMobile,
   } = options;
 
-  // Internal options (set by framework adapters)
-  const { outFirst = true } = internalOptions || {};
-
-  // Create detector based on outFirst preference
-  const detector = outFirst
-    ? createOutFirstDetector()
-    : createAnyOrderDetector();
+  const detector = createNavigationDetector();
 
   // Process symmetric transitions - creates bidirectional transitions automatically
   const processedTransitions = processSymmetricTransitions(

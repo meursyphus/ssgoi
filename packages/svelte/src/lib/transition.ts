@@ -13,33 +13,18 @@ type TransitionParams = Transition<undefined> & {
 /**
  * Svelte action for element transitions
  *
- * Uses Svelte's destroy callback for OUT transition detection.
- * This ensures the correct transition config is used even when
- * params are updated (e.g., during SvelteKit page navigation).
+ * OUT transition is automatically triggered by MutationObserver
+ * when the element is removed from the DOM.
  */
 export const transition = (node: HTMLElement, params: TransitionParams) => {
-  const ref = _transition(
-    {
-      key: params.key,
-      in: params.in,
-      out: params.out,
-      scope: params.scope,
-    },
-    "auto",
-  );
+  // Pass params through as-is to preserve symbol properties such as
+  // TRANSITION_STRATEGY on page transition configs.
+  const ref = _transition(params, "auto");
   ref(node);
 
   return {
     update(newParams: TransitionParams) {
-      _transition(
-        {
-          key: newParams.key,
-          in: newParams.in,
-          out: newParams.out,
-          scope: newParams.scope,
-        },
-        "auto",
-      );
+      _transition(newParams, "auto");
     },
   };
 };

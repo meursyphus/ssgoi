@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createAnyOrderDetector } from "./navigation-detector-strategy";
+import { createNavigationDetector } from "./navigation-detector-strategy";
 
-describe("createAnyOrderDetector", () => {
+describe("createNavigationDetector", () => {
   it("keeps OUT when it follows a stale first-mount IN for the same path", async () => {
-    const detector = createAnyOrderDetector();
+    const detector = createNavigationDetector();
 
     detector.trigger("/posts", "in");
     const staleIn = detector.get("in");

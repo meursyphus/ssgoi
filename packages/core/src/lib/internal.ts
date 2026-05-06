@@ -4,7 +4,6 @@ export { createSggoiTransitionContext } from "./ssgoi-transition/create-ssgoi-tr
 export type {
   SsgoiConfig,
   SsgoiContext,
-  SsgoiInternalOptions,
   SsgoiTransitionConfig,
   SsgoiTransitionConfigInput,
   Transition,

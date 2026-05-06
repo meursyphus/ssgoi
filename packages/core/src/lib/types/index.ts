@@ -516,27 +516,6 @@ export type PreserveScrollValue = boolean | { exclude: string[] };
 export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
 export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 
-/**
- * Internal options for framework adapters
- * Not exposed to end users
- * @internal
- */
-export type SsgoiInternalOptions = {
-  /**
-   * Whether OUT transition must arrive before IN transition
-   *
-   * - true (default): OUT must arrive first, IN completes the pair.
-   *   Best for frameworks with native destroy callbacks (Svelte).
-   *
-   * - false: OUT and IN can arrive in any order, both wait indefinitely.
-   *   Best for frameworks using MutationObserver for unmount detection
-   *   (React, Vue, Solid).
-   *
-   * @default true
-   */
-  outFirst?: boolean;
-};
-
 export type SsgoiContext = (
   path: string,
 ) => Transition & { key: TransitionKey };

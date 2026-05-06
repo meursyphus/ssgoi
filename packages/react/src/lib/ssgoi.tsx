@@ -14,9 +14,7 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
   ({ config, children }) => {
     const contextValue = useMemo<ReactSsgoiContext>(
       () => ({
-        getTransition: createSggoiTransitionContext(config, {
-          outFirst: false,
-        }),
+        getTransition: createSggoiTransitionContext(config),
       }),
       [config],
     );

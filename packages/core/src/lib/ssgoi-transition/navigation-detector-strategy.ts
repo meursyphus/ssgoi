@@ -2,9 +2,7 @@
  * Navigation Detector Strategy
  *
  * Collects out/in navigation events and provides navigation pairs.
- * Each strategy handles the timing differently:
- * - OutFirst: OUT must arrive before IN (for Svelte)
- * - AnyOrder: OUT and IN can arrive in any order (for React, Vue, Solid)
+ * OUT and IN can arrive in any order.
  */
 
 export type NavigationPair = {
@@ -20,7 +18,7 @@ export interface NavigationDetector {
 
   /**
    * Get navigation pair when ready
-   * Returns null if should skip (e.g., page refresh in outFirst mode)
+   * Returns null if a pending transition is cancelled.
    */
   get(type: "out" | "in"): Promise<NavigationPair | null>;
 }
@@ -35,74 +33,14 @@ type PendingNavigation = {
 };
 
 /**
- * OutFirst Strategy
+ * Navigation detector
  *
- * OUT must arrive before IN. Best for frameworks with native destroy callbacks.
- * - OUT triggers first, then IN completes the pair
- * - If IN arrives without OUT, returns null (page refresh case)
- */
-export function createOutFirstDetector(): NavigationDetector {
-  let pending: PendingNavigation | null = null;
-
-  function checkPair() {
-    // Only resolve when BOTH outResolve and inResolve are set
-    // This prevents race conditions when trigger/get calls interleave
-    if (
-      pending?.from &&
-      pending?.to &&
-      pending?.outResolve &&
-      pending?.inResolve
-    ) {
-      const pair: NavigationPair = { from: pending.from, to: pending.to };
-      pending.outResolve(pair);
-      pending.inResolve(pair);
-      pending = null;
-    }
-  }
-
-  return {
-    trigger(path, type) {
-      if (!pending) {
-        pending = {};
-      }
-
-      if (type === "out") {
-        pending.from = path;
-      } else {
-        pending.to = path;
-      }
-    },
-
-    get(type) {
-      // OutFirst: IN without OUT means page refresh - skip
-      if (type === "in" && (!pending || !pending.from)) {
-        return Promise.resolve(null);
-      }
-
-      return new Promise<NavigationPair | null>((resolve) => {
-        if (!pending) pending = {};
-
-        if (type === "out") {
-          pending.outResolve = resolve;
-        } else {
-          pending.inResolve = resolve;
-        }
-
-        checkPair();
-      });
-    },
-  };
-}
-
-/**
- * AnyOrder Strategy
- *
- * OUT and IN can arrive in any order. Best for frameworks using MutationObserver.
+ * OUT and IN can arrive in any order.
  * - Either OUT or IN can arrive first
  * - Both wait indefinitely for the other to complete the pair
  * - If a new path arrives, cancels the previous pending transition
  */
-export function createAnyOrderDetector(): NavigationDetector {
+export function createNavigationDetector(): NavigationDetector {
   let pending: PendingNavigation | null = null;
 
   function reset() {

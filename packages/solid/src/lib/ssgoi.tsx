@@ -10,11 +10,7 @@ interface SsgoiProps {
 
 export const Ssgoi = (props: SsgoiProps) => {
   const contextValue = createMemo<SsgoiContext>(() =>
-    createSggoiTransitionContext(props.config, {
-      // Solid uses MutationObserver for unmount detection,
-      // so OUT and IN can arrive in any order
-      outFirst: false,
-    }),
+    createSggoiTransitionContext(props.config),
   );
 
   return <SsgoiProvider value={contextValue()}>{props.children}</SsgoiProvider>;
