@@ -21,6 +21,14 @@
  *      → settle as a swipe.
  *      touchcancel after horizontal commitment also counts: the browser took the
  *      gesture over, which is exactly what edge-swipe-back does on iOS.
+ *      In some environments (notably iOS WKWebView), the OS commits the gesture
+ *      and dispatches `touchend` instead of `touchcancel`, with `clientX`
+ *      reported in the now document-translated coordinate space — `dx` flips
+ *      sign and fails the in-direction recheck above. When the in-direction
+ *      check fails but `|dx| ≥ FINAL_DISTANCE` and `moved` was set during
+ *      touchmove, treat it as the same takeover signal: the magnitude survives
+ *      translation, while keeping the FINAL_DISTANCE floor rejects weak or
+ *      cancelled gestures, matching pre-patch behavior in normal browsers.
  *
  * Settling arms an "active" flag. The flag auto-expires after EXPIRE_WINDOW so
  * a successful gesture that wasn't actually a navigation (e.g. user dragged a
@@ -162,6 +170,19 @@ export function createSwipeBackDetector() {
     const dx = t.clientX - candidate.startX;
     const inDirection = candidate.fromLeftEdge ? dx > 0 : dx < 0;
     if (candidate.moved && inDirection && Math.abs(dx) >= FINAL_DISTANCE) {
+      settle();
+      candidate = null;
+      return;
+    }
+    // Fallback for environments where the native gesture commits at touchend
+    // rather than dispatching touchcancel — notably iOS WKWebView, which
+    // reports clientX in document-translated coordinates after committing
+    // swipe-back, flipping dx sign even though the finger moved in-direction.
+    // The |dx| magnitude is preserved across the translation (typically far
+    // larger than FINAL_DISTANCE), so we keep that floor as a guard against
+    // weak or cancelled swipes that never crossed FINAL_DISTANCE — those
+    // remain rejected, matching pre-patch behavior.
+    if (candidate.moved && Math.abs(dx) >= FINAL_DISTANCE) {
       settle();
     }
     candidate = null;
