@@ -1,6 +1,6 @@
 import type { SggoiTransition } from "@types";
 import { getRect, prepareOutgoing } from "@utils";
-import { ZOOM_PROVIDERS } from "./providers";
+import { ZOOM_PROVIDERS } from "./provider";
 import type {
   ZoomAnimationHandlers,
   ZoomAnimationInput,

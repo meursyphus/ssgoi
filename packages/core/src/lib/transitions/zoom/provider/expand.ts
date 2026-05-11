@@ -3,8 +3,8 @@ import type {
   ZoomAnimationConfig,
   ZoomAnimationInput,
   ZoomProvider,
-} from "./types";
-import { createZoomIn, createZoomOut } from "./zoom-element";
+} from "../types";
+import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const EXPAND_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 340, damping: 30, doubleSpring: 1 },
