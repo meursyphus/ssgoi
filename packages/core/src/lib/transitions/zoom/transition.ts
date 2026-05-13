@@ -132,16 +132,16 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),
-        lowerBound: 0,
-        upperBound: 1,
-        style: (t) => outConfig.animate(t) as Record<string, string | number>,
+        // The provider's `animate` was authored against legacy convention
+        // where OUT runs `progress: 1 → 0`. Our `u` mirrors that, so feeding
+        // `u` keeps the visual direction (full page → shrunk to tile) intact.
+        style: (_t, u) =>
+          outConfig.animate(u) as Record<string, string | number>,
       });
 
       const inAnim = new WebAnimation({
         element: to,
         integrator: IntegratorProvider.from(physicsOptions),
-        lowerBound: 0,
-        upperBound: 1,
         style: (t) => inConfig.animate(t) as Record<string, string | number>,
         onComplete: () => {
           to.style.willChange = "auto";

@@ -140,15 +140,9 @@ export function createSggoiTransitionContext(
     };
 
     // Auto-applied for every transition — outgoing page goes absolute so the
-    // incoming page can take its slot.
+    // incoming page can take its slot. Style only; insertion is deferred
+    // until after `prepare` so any pre-paint styling settles first.
     prepareOutgoing(fromClone, ssgoiContext);
-    if (parent) {
-      if (nextSibling && parent.contains(nextSibling)) {
-        parent.insertBefore(fromClone, nextSibling);
-      } else {
-        parent.appendChild(fromClone);
-      }
-    }
 
     if (!shouldPreserve(fromPath)) evictScrollPosition(fromPath);
 
@@ -184,6 +178,17 @@ export function createSggoiTransitionContext(
       to: toPromise,
       extras: extrasPromise,
     }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
+      // Now that prepare's microtasks have all run (initial styles, extras
+      // built), drop the outgoing clone into place. Order is:
+      //   prepare → out insert → animation create/play
+      if (parent) {
+        if (nextSibling && parent.contains(nextSibling)) {
+          parent.insertBefore(fromClone, nextSibling);
+        } else {
+          parent.appendChild(fromClone);
+        }
+      }
+
       const animation = config.animation({
         from: resolvedFrom,
         to: resolvedTo,
