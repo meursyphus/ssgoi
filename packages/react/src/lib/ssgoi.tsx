@@ -1,7 +1,8 @@
 "use client";
+
 import React, { useMemo } from "react";
 import type { ReactNode } from "react";
-import type { SsgoiConfig, ReactSsgoiContext } from "./types";
+import type { SsgoiConfig } from "@ssgoi/core/types";
 import { SsgoiProvider } from "./context";
 import { createSggoiTransitionContext } from "@ssgoi/core/internal";
 
@@ -12,13 +13,7 @@ interface SsgoiProps {
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
   ({ config, children }) => {
-    const contextValue = useMemo<ReactSsgoiContext>(
-      () => ({
-        getTransition: createSggoiTransitionContext(config),
-      }),
-      [config],
-    );
-
-    return <SsgoiProvider value={contextValue}>{children}</SsgoiProvider>;
+    const ssgoi = useMemo(() => createSggoiTransitionContext(config), [config]);
+    return <SsgoiProvider value={ssgoi}>{children}</SsgoiProvider>;
   },
 );

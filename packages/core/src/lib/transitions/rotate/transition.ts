@@ -1,5 +1,9 @@
-import type { PhysicsOptions, SggoiTransition, StyleObject } from "@types";
-import { prepareOutgoing } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import {
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 100, damping: 30 },
@@ -9,48 +13,49 @@ export interface RotateOptions {
   physics?: PhysicsOptions;
 }
 
-export const rotate = (options: RotateOptions = {}): SggoiTransition => {
+export const rotate = (options: RotateOptions = {}): TransitionConfig => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   return {
-    in: (element) => {
-      return {
-        physics: physicsOptions,
-        prepare: () => {
-          element.style.opacity = "0";
-          element.style.transform = "rotate(-180deg)";
-          element.style.transformOrigin = "center center";
-          element.style.willChange = "transform, opacity";
-        },
-        css: (progress): StyleObject => ({
-          // -180deg → 0deg, show after 90deg (progress > 0.5)
-          transform: `rotate(${(progress - 1) * 180}deg)`,
-          opacity: progress > 0.5 ? 1 : 0,
-        }),
-        onEnd: () => {
-          element.style.willChange = "auto";
-          element.style.transform = "";
-          element.style.transformOrigin = "";
-          element.style.opacity = "";
-        },
-      };
+    prepare: ({ from, to }) => {
+      from.then((el) => {
+        el.style.transformOrigin = "center center";
+        el.style.willChange = "transform, opacity";
+      });
+      to.then((el) => {
+        el.style.opacity = "0";
+        el.style.transform = "rotate(-180deg)";
+        el.style.transformOrigin = "center center";
+        el.style.willChange = "transform, opacity";
+      });
+      return {};
     },
-    out: (element, context) => {
-      return {
-        physics: physicsOptions,
-        prepare: () => {
-          prepareOutgoing(element, context);
-          element.style.transformOrigin = "center center";
-          element.style.willChange = "transform, opacity";
-        },
-        css: (progress): StyleObject => ({
-          // 0deg → 180deg, hide after 90deg (progress < 0.5)
-          transform: `rotate(${(1 - progress) * 180}deg)`,
-          opacity: progress > 0.5 ? 1 : 0,
+    animation: ({ from, to }) => {
+      const outAnim = new WebAnimation({
+        element: from,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t) => ({
+          transform: `rotate(${t * 180}deg)`,
+          opacity: t < 0.5 ? 1 : 0,
         }),
-        onEnd: () => {
-          element.style.willChange = "auto";
+      });
+
+      const inAnim = new WebAnimation({
+        element: to,
+        integrator: IntegratorProvider.from(physicsOptions),
+        // u runs 1→0, so -u*180 unwinds -180→0.
+        style: (t, u) => ({
+          transform: `rotate(${-u * 180}deg)`,
+          opacity: t > 0.5 ? 1 : 0,
+        }),
+        onComplete: () => {
+          to.style.willChange = "auto";
+          to.style.transform = "";
+          to.style.transformOrigin = "";
+          to.style.opacity = "";
         },
-      };
+      });
+
+      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
     },
   };
 };

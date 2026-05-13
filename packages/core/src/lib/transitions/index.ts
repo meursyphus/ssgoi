@@ -1,5 +1,4 @@
 export * from "./blind";
-export * from "./_legacy/depth";
 export * from "./drill";
 export * from "./fade";
 export * from "./film";
@@ -9,7 +8,5 @@ export * from "./rotate";
 export * from "./scroll";
 export * from "./sheet";
 export * from "./slide";
-export * from "./_legacy/snap";
 export * from "./strip";
-export * from "./_legacy/swap";
 export * from "./zoom";

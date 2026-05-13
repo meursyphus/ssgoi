@@ -1,7 +1,11 @@
-import type { SggoiTransition, PhysicsOptions } from "@types";
-import { prepareOutgoing } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
 import { getRect } from "@utils";
-import { withResolvers } from "@utils";
+import {
+  Animation,
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 300, damping: 30 },
@@ -9,7 +13,6 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
 
 export interface HeroOptions {
   physics?: PhysicsOptions;
-  timeout?: number;
   maxDistance?: number;
 }
 
@@ -17,140 +20,105 @@ function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
   return page.querySelector(`[data-hero-key="${key}"]`);
 }
 
-export const hero = (options: HeroOptions = {}): SggoiTransition => {
+type HeroPair = {
+  toEl: HTMLElement;
+  fromEl: HTMLElement;
+  key: string;
+};
+
+export const hero = (options: HeroOptions = {}): TransitionConfig => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   const maxDistance = options.maxDistance ?? 700;
 
-  // Closure variables to share state between in/out
-  let fromNode: HTMLElement | null = null;
-  let fromNodeReady = withResolvers<void>();
-
   return {
-    in: async (element, context) => {
-      const toNode = element;
+    prepare: ({ from }) => {
+      // Hide the outgoing page; hero elements on the incoming page do the
+      // visible work.
+      from.then((el) => {
+        el.style.opacity = "0";
+      });
+      return {};
+    },
+    animation: ({ from, to, context }) => {
+      const fromNode = from;
+      const toNode = to;
 
-      // Find all hero elements in the incoming page
-      const heroEls = Array.from(toNode.querySelectorAll("[data-hero-key]"));
+      const heroEls = Array.from(
+        toNode.querySelectorAll<HTMLElement>("[data-hero-key]"),
+      );
 
-      // Wait for fromNode to be set by out transition
-      await fromNodeReady.promise;
-
-      // Calculate animations for matching hero elements
-      const heroAnimations = heroEls
-        .map((heroEl) => {
-          const key = heroEl.getAttribute("data-hero-key");
-          if (!key) return null;
-
-          const fromEl = getHeroEl(fromNode!, key);
-          if (!fromEl) return null;
-
-          const toEl = heroEl as HTMLElement;
-
-          // Calculate animation parameters
-          const fromRect = getRect(fromNode!, fromEl);
-          const toRect = getRect(toNode, toEl);
-          const dx = fromRect.left - toRect.left - context.scrollOffset.x;
-          const dy = fromRect.top - toRect.top - context.scrollOffset.y;
-          const dw = fromRect.width / toRect.width;
-          const dh = fromRect.height / toRect.height;
-
-          // Store original styles
-          const originalTransform = toEl.style.transform;
-          const originalPosition = toEl.style.position;
-          const originalTransformOrigin = toEl.style.transformOrigin;
-          const originalZIndex = toEl.style.zIndex;
-          const originalWillChange = toEl.style.willChange;
-
-          return {
-            toEl,
-            dx,
-            dy,
-            dw,
-            dh,
-            originalTransform,
-            originalPosition,
-            originalTransformOrigin,
-            originalZIndex,
-            originalWillChange,
-          };
-        })
-        .filter(
-          (
-            animation,
-          ): animation is {
-            toEl: HTMLElement;
-            dx: number;
-            dy: number;
-            dw: number;
-            dh: number;
-            originalTransform: string;
-            originalPosition: string;
-            originalTransformOrigin: string;
-            originalZIndex: string;
-            originalWillChange: string;
-          } => animation !== null && Math.abs(animation.dy) <= maxDistance,
-        );
-
-      // Reset for next transition
-      fromNode = null;
-      fromNodeReady = withResolvers<void>();
-
-      if (heroAnimations.length === 0) {
-        return {
-          physics: physicsOptions,
-          tick: () => {}, // No matching hero elements
-        };
+      const pairs: HeroPair[] = [];
+      for (const toEl of heroEls) {
+        const key = toEl.getAttribute("data-hero-key");
+        if (!key) continue;
+        const fromEl = getHeroEl(fromNode, key);
+        if (!fromEl) continue;
+        pairs.push({ key, fromEl, toEl });
       }
 
-      return {
-        items: heroAnimations.map(({ toEl, dx, dy, dw, dh }) => ({
-          physics: physicsOptions,
-          tick: (progress: number) => {
-            toEl.style.transform = `translate(${(1 - progress) * dx}px, ${(1 - progress) * dy}px) scale(${progress + (1 - progress) * dw}, ${progress + (1 - progress) * dh})`;
-          },
-        })),
-        schedule: "parallel" as const,
-        prepare: () => {
-          heroAnimations.forEach(({ toEl }) => {
-            toEl.style.position = "relative";
-            toEl.style.transformOrigin = "top left";
-            toEl.style.zIndex = "1000";
-            toEl.style.willChange = "transform";
-          });
-        },
-        onEnd: () => {
-          // Reset all hero elements
-          heroAnimations.forEach(
-            ({
-              toEl,
-              originalTransform,
-              originalPosition,
-              originalTransformOrigin,
-              originalZIndex,
-              originalWillChange,
-            }) => {
-              toEl.style.transform = originalTransform;
-              toEl.style.position = originalPosition;
-              toEl.style.transformOrigin = originalTransformOrigin;
-              toEl.style.zIndex = originalZIndex;
-              toEl.style.willChange = originalWillChange;
+      if (pairs.length === 0) {
+        return new MultiAnimation([], { mode: "parallel" });
+      }
+
+      const heroAnimations: Animation[] = [];
+      const cleanups: Array<() => void> = [];
+
+      for (const { fromEl, toEl } of pairs) {
+        const fromRect = getRect(fromNode, fromEl);
+        const toRect = getRect(toNode, toEl);
+        const dx = fromRect.left - toRect.left - context.scrollOffset.x;
+        const dy = fromRect.top - toRect.top - context.scrollOffset.y;
+        const dw = fromRect.width / toRect.width;
+        const dh = fromRect.height / toRect.height;
+
+        if (Math.abs(dy) > maxDistance) continue;
+
+        const originalTransform = toEl.style.transform;
+        const originalPosition = toEl.style.position;
+        const originalTransformOrigin = toEl.style.transformOrigin;
+        const originalZIndex = toEl.style.zIndex;
+        const originalWillChange = toEl.style.willChange;
+
+        toEl.style.position = "relative";
+        toEl.style.transformOrigin = "top left";
+        toEl.style.zIndex = "1000";
+        toEl.style.willChange = "transform";
+
+        heroAnimations.push(
+          new WebAnimation({
+            element: toEl,
+            integrator: IntegratorProvider.from(physicsOptions),
+            style: (t, u) => {
+              const tx = u * dx;
+              const ty = u * dy;
+              const sx = t + u * dw;
+              const sy = t + u * dh;
+              return {
+                transform: `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`,
+              };
             },
-          );
-        },
+          }),
+        );
+
+        cleanups.push(() => {
+          toEl.style.transform = originalTransform;
+          toEl.style.position = originalPosition;
+          toEl.style.transformOrigin = originalTransformOrigin;
+          toEl.style.zIndex = originalZIndex;
+          toEl.style.willChange = originalWillChange;
+        });
+      }
+
+      const composite = new MultiAnimation(heroAnimations, {
+        mode: "parallel",
+      });
+      const prevOnComplete = composite.onComplete;
+      composite.onComplete = () => {
+        for (const fn of cleanups) fn();
+        prevOnComplete?.();
       };
-    },
-    out: async (element) => {
-      return {
-        physics: physicsOptions,
-        tick: () => {},
-        prepare: () => {
-          // Store fromNode and resolve the waiting promise
-          fromNode = element;
-          fromNodeReady.resolve();
-          prepareOutgoing(element);
-          element.style.opacity = "0";
-        },
-      };
+
+      return composite;
     },
   };
 };

@@ -1,20 +1,14 @@
-import type { PhysicsOptions, SggoiTransition, StyleObject } from "@types";
-import { prepareOutgoing } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import {
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 // ease-out (Material decelerated): incoming page settles into place.
 // stiffness 170, damping 22 → ratio 0.86 of critical (~26.1), settles ~310ms.
-const ENTER: PhysicsOptions = {
-  spring: {
-    stiffness: 170,
-    damping: 22,
-  },
-};
-
-const EXIT: PhysicsOptions = {
-  spring: {
-    stiffness: 170,
-    damping: 22,
-  },
+const DEFAULT_PHYSICS: PhysicsOptions = {
+  spring: { stiffness: 170, damping: 22 },
 };
 
 export interface DrillOptions {
@@ -23,120 +17,72 @@ export interface DrillOptions {
   physics?: PhysicsOptions;
 }
 
-export const drill = (options: DrillOptions = {}): SggoiTransition => {
+export const drill = (options: DrillOptions = {}): TransitionConfig => {
   const { opacity = false, direction = "enter" } = options;
-  const physicsOptions =
-    options.physics ?? (direction === "enter" ? ENTER : EXIT);
+  const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
+  const willChange = opacity ? "transform, opacity" : "transform";
 
-  if (direction === "enter") {
-    return {
-      in: (element) => ({
-        physics: physicsOptions,
+  return {
+    prepare: ({ from, to }) => {
+      from.then((el) => {
+        el.style.willChange = willChange;
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+        el.style.pointerEvents = "none";
+        el.style.zIndex = direction === "enter" ? "-1" : "100";
+      });
+      to.then((el) => {
+        const startX = direction === "enter" ? 100 : -20;
+        el.style.transform = `translate3d(${startX}%, 0, 0)`;
+        if (opacity) el.style.opacity = "0";
+        el.style.willChange = willChange;
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+      });
+      return {};
+    },
+    animation: ({ from, to }) => {
+      const outAnim = new WebAnimation({
+        element: from,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t, u) => {
+          // enter: from slides left to -20% as t: 0→1
+          // exit:  from slides right to 100% as t: 0→1
+          const x = direction === "enter" ? -20 * t : 100 * t;
+          const style: Record<string, number | string> = {
+            transform: `translate3d(${x}%, 0, 0)`,
+          };
+          if (opacity) style.opacity = u;
+          return style;
+        },
+      });
 
-        prepare: () => {
-          // GPU acceleration hints
-          element.style.willChange = opacity
-            ? "transform, opacity"
-            : "transform";
-          element.style.backfaceVisibility = "hidden";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
-        },
-        css: (progress): StyleObject => {
-          const style: StyleObject = {
-            transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
+      const inAnim = new WebAnimation({
+        element: to,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t, u) => {
+          // enter: to comes from 100% (start) to 0 (end)
+          // exit:  to comes from -20% (start) to 0 (end)
+          const start = direction === "enter" ? 100 : -20;
+          const x = start * u;
+          const style: Record<string, number | string> = {
+            transform: `translate3d(${x}%, 0, 0)`,
           };
-          if (opacity) {
-            style.opacity = progress;
-          }
+          if (opacity) style.opacity = t;
           return style;
         },
-        onEnd: () => {
-          element.style.willChange = "auto";
-          element.style.backfaceVisibility = "";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "";
+        onComplete: () => {
+          to.style.willChange = "auto";
+          to.style.backfaceVisibility = "";
+          (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
+          to.style.transform = "";
+          if (opacity) to.style.opacity = "";
         },
-      }),
-      out: (element, context) => ({
-        physics: physicsOptions,
-        prepare: () => {
-          prepareOutgoing(element, context);
-          element.style.zIndex = "-1";
-          // GPU acceleration hints
-          element.style.willChange = opacity
-            ? "transform, opacity"
-            : "transform";
-          element.style.backfaceVisibility = "hidden";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
-          element.style.pointerEvents = "none"; // prevent interaction during exit
-        },
-        css: (progress): StyleObject => {
-          const style: StyleObject = {
-            transform: `translate3d(${-(1 - progress) * 20}%, 0, 0)`,
-          };
-          if (opacity) {
-            style.opacity = progress;
-          }
-          return style;
-        },
-      }),
-    };
-  } else {
-    // direction === "exit"
-    return {
-      in: (element) => ({
-        physics: physicsOptions,
-        prepare: () => {
-          // GPU acceleration hints
-          element.style.willChange = opacity
-            ? "transform, opacity"
-            : "transform";
-          element.style.backfaceVisibility = "hidden";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
-        },
-        css: (progress): StyleObject => {
-          const style: StyleObject = {
-            transform: `translate3d(${-(1 - progress) * 20}%, 0, 0)`,
-          };
-          if (opacity) {
-            style.opacity = progress;
-          }
-          return style;
-        },
-        onEnd: () => {
-          element.style.willChange = "auto";
-          element.style.backfaceVisibility = "";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "";
-        },
-      }),
-      out: (element, context) => ({
-        physics: physicsOptions,
-        prepare: () => {
-          prepareOutgoing(element, context);
-          element.style.zIndex = "100";
-          // GPU acceleration hints
-          element.style.willChange = opacity
-            ? "transform, opacity"
-            : "transform";
-          element.style.backfaceVisibility = "hidden";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
-          element.style.pointerEvents = "none";
-        },
-        css: (progress): StyleObject => {
-          const style: StyleObject = {
-            transform: `translate3d(${(1 - progress) * 100}%, 0, 0)`,
-          };
-          if (opacity) {
-            style.opacity = progress;
-          }
-          return style;
-        },
-      }),
-    };
-  }
+      });
+
+      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+    },
+  };
 };

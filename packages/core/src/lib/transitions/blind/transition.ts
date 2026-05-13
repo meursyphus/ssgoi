@@ -1,231 +1,171 @@
-import type {
-  SggoiTransition,
-  MultiAnimationConfig,
-  StyleObject,
-  PhysicsOptions,
-} from "@types";
-import { sleep } from "@utils";
-import { prepareOutgoing } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import {
+  Animation,
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
-const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
+const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 200, damping: 22 },
 };
-const DEFAULT_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 22 },
-};
-const DEFAULT_TRANSITION_DELAY = 300;
 const DEFAULT_BLIND_COUNT = 10;
 const DEFAULT_DIRECTION = "horizontal" as const;
 const DEFAULT_BLIND_COLOR = "#000000";
 
 export interface BlindOptions {
   physics?: PhysicsOptions;
-  transitionDelay?: number;
   blindCount?: number;
   direction?: "horizontal" | "vertical";
   blindColor?: string;
 }
 
-export const blind = (options: BlindOptions = {}): SggoiTransition => {
-  const {
-    transitionDelay = DEFAULT_TRANSITION_DELAY,
-    blindCount = DEFAULT_BLIND_COUNT,
-    direction = DEFAULT_DIRECTION,
-    blindColor = DEFAULT_BLIND_COLOR,
-  } = options;
+function makeBlinds(
+  host: HTMLElement,
+  count: number,
+  direction: "horizontal" | "vertical",
+  color: string,
+  initial: "hidden" | "closed",
+  origin: "left" | "right",
+): { container: HTMLDivElement; blinds: HTMLDivElement[] } {
+  const parentStyle = window.getComputedStyle(host);
+  if (parentStyle.position === "static") {
+    host.style.position = "relative";
+  }
 
-  const inPhysicsOptions: PhysicsOptions =
-    options.physics ?? DEFAULT_IN_PHYSICS;
-  const outPhysicsOptions: PhysicsOptions =
-    options.physics ?? DEFAULT_OUT_PHYSICS;
+  const container = document.createElement("div");
+  container.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  `;
 
-  let outAnimationComplete: Promise<void>;
-  let resolveOutAnimation: (() => void) | null = null;
-
-  // Helper function to create blinds
-  const createBlinds = (
-    element: HTMLElement,
-    initialState: "hidden" | "closed",
-    transformOrigin: "left" | "right" = "left",
-  ) => {
-    // Ensure parent has position relative for absolute positioning
-    const parentStyle = window.getComputedStyle(element);
-    if (parentStyle.position === "static") {
-      element.style.position = "relative";
+  const blinds: HTMLDivElement[] = [];
+  for (let i = 0; i < count; i++) {
+    const blind = document.createElement("div");
+    if (direction === "horizontal") {
+      const size = 100 / count;
+      blind.style.cssText = `
+        position: absolute;
+        top: ${size * i}%;
+        left: 0;
+        width: 100%;
+        height: calc(${size}% + 1px);
+        background: ${color};
+        transform: scaleX(${initial === "hidden" ? 0 : 1});
+        transform-origin: ${origin} center;
+        will-change: transform;
+      `;
+    } else {
+      const size = 100 / count;
+      blind.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: ${size * i}%;
+        width: calc(${size}% + 1px);
+        height: 100%;
+        background: ${color};
+        transform: scaleY(${initial === "hidden" ? 0 : 1});
+        transform-origin: ${origin === "left" ? "top" : "bottom"} center;
+        will-change: transform;
+      `;
     }
+    blinds.push(blind);
+    container.appendChild(blind);
+  }
 
-    const container = document.createElement("div");
-    container.className = "blind-container";
-    container.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9999;
-      overflow: hidden;
-    `;
+  host.appendChild(container);
+  return { container, blinds };
+}
 
-    const blinds: HTMLElement[] = [];
-    for (let i = 0; i < blindCount; i++) {
-      const blind = document.createElement("div");
+type BlindExtras = {
+  fromBlinds: HTMLDivElement[];
+  fromContainer: HTMLDivElement;
+  toBlinds: HTMLDivElement[];
+  toContainer: HTMLDivElement;
+};
 
-      if (direction === "horizontal") {
-        const blindHeight = 100 / blindCount;
-        // Add 1px overlap by slightly increasing height
-        const actualHeight = `calc(${blindHeight}% + 1px)`;
-        blind.style.cssText = `
-          position: absolute;
-          top: ${blindHeight * i}%;
-          left: 0;
-          width: 100%;
-          height: ${actualHeight};
-          background: ${blindColor};
-          transform: scaleX(${initialState === "hidden" ? 0 : 1});
-          transform-origin: ${transformOrigin} center;
-          will-change: transform;
-        `;
-      } else {
-        const blindWidth = 100 / blindCount;
-        // Add 1px overlap by slightly increasing width
-        const actualWidth = `calc(${blindWidth}% + 1px)`;
-        blind.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: ${blindWidth * i}%;
-          width: ${actualWidth};
-          height: 100%;
-          background: ${blindColor};
-          transform: scaleY(${initialState === "hidden" ? 0 : 1});
-          transform-origin: ${
-            transformOrigin === "left" ? "top" : "bottom"
-          } center;
-          will-change: transform;
-        `;
-      }
-
-      blinds.push(blind);
-      container.appendChild(blind);
-    }
-
-    element.appendChild(container);
-    return { container, blinds };
-  };
+export const blind = (
+  options: BlindOptions = {},
+): TransitionConfig<BlindExtras> => {
+  const blindCount = options.blindCount ?? DEFAULT_BLIND_COUNT;
+  const direction = options.direction ?? DEFAULT_DIRECTION;
+  const blindColor = options.blindColor ?? DEFAULT_BLIND_COLOR;
+  const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   return {
-    out: (element): MultiAnimationConfig => {
-      let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
-        null;
-
-      outAnimationComplete = new Promise((resolve) => {
-        resolveOutAnimation = resolve;
-      });
-
-      // Style generator for CSS animation mode
-      const style = (progress: number): StyleObject => {
-        // OUT: progress goes 1 → 0, but blind should appear (0 → 1)
-        const scale = 1 - progress;
-        return {
-          transform:
-            direction === "horizontal"
-              ? `scaleX(${scale})`
-              : `scaleY(${scale})`,
-        };
-      };
-
-      // Create AnimationItem for each blind with CSS mode
-      const items = Array.from({ length: blindCount }, (_, index) => {
-        return {
-          physics: outPhysicsOptions,
-          offset: 0.2,
-          css: {
-            // Use getter for lazy element access (evaluated after prepare)
-            get element(): HTMLElement {
-              return blindsData?.blinds[index] as HTMLElement;
-            },
-            style,
-          },
-        };
-      });
-
+    prepare: async ({ from, to }): Promise<BlindExtras> => {
+      const fromEl = await from;
+      const toEl = await to;
+      fromEl.style.zIndex = "1000";
+      const fromData = makeBlinds(
+        fromEl,
+        blindCount,
+        direction,
+        blindColor,
+        "hidden",
+        "left",
+      );
+      toEl.style.position = "relative";
+      toEl.style.zIndex = "0";
+      const toData = makeBlinds(
+        toEl,
+        blindCount,
+        direction,
+        blindColor,
+        "closed",
+        "right",
+      );
       return {
-        items,
-        schedule: "stagger",
-        prepare: () => {
-          prepareOutgoing(element);
-          element.style.zIndex = "1000";
-
-          // Create blinds starting from hidden state (will appear one by one)
-          // OUT uses left origin - blinds expand from left to right
-          blindsData = createBlinds(element, "hidden", "left");
-        },
-        onStart: () => {},
-        onEnd: () => {
-          // OUT element will be removed, taking blinds with it
-          if (resolveOutAnimation) {
-            resolveOutAnimation();
-          }
-        },
+        fromBlinds: fromData.blinds,
+        fromContainer: fromData.container,
+        toBlinds: toData.blinds,
+        toContainer: toData.container,
       };
     },
-    in: (element): MultiAnimationConfig => {
-      let blindsData: { container: HTMLElement; blinds: HTMLElement[] } | null =
-        null;
+    animation: ({ fromBlinds, fromContainer, toBlinds, toContainer }) => {
+      // OUT: each blind grows in (t: 0 → 1). IN: each blind shrinks out
+      // (`u`: 1 → 0). Default (0, 1) bounds for both.
+      const out: Animation[] = fromBlinds.map(
+        (b) =>
+          new WebAnimation({
+            element: b,
+            integrator: IntegratorProvider.from(physicsOptions),
+            style: (t) => ({
+              transform:
+                direction === "horizontal" ? `scaleX(${t})` : `scaleY(${t})`,
+            }),
+          }),
+      );
 
-      // Style generator for CSS animation mode
-      const style = (progress: number): StyleObject => {
-        // IN: progress goes 0 → 1, but blind should disappear (1 → 0)
-        const scale = 1 - progress;
-        return {
-          transform:
-            direction === "horizontal"
-              ? `scaleX(${scale})`
-              : `scaleY(${scale})`,
-        };
-      };
+      const inAnims: Animation[] = toBlinds.map(
+        (b, i) =>
+          new WebAnimation({
+            element: b,
+            integrator: IntegratorProvider.from(physicsOptions),
+            style: (_t, u) => ({
+              transform:
+                direction === "horizontal" ? `scaleX(${u})` : `scaleY(${u})`,
+            }),
+            onComplete:
+              i === toBlinds.length - 1
+                ? () => {
+                    toContainer.remove();
+                    fromContainer.remove();
+                  }
+                : undefined,
+          }),
+      );
 
-      // Create AnimationItem for each blind with CSS mode
-      const items = Array.from({ length: blindCount }, (_, index) => {
-        return {
-          physics: inPhysicsOptions,
-          offset: 0.2,
-          css: {
-            // Use getter for lazy element access (evaluated after prepare)
-            get element(): HTMLElement {
-              return blindsData?.blinds[index] as HTMLElement;
-            },
-            style,
-          },
-        };
-      });
+      const outPhase = new MultiAnimation(out, { mode: "parallel" });
+      const inPhase = new MultiAnimation(inAnims, { mode: "parallel" });
 
-      return {
-        items,
-        schedule: "stagger",
-        prepare: () => {
-          element.style.position = "relative";
-          element.style.zIndex = "0";
-          // Create blinds in closed state (fully covering the screen)
-          // IN uses right origin - blinds collapse from right to left
-          blindsData = createBlinds(element, "closed", "right");
-        },
-        onStart: () => {},
-        wait: async () => {
-          // Wait for OUT animation to complete
-          if (outAnimationComplete) {
-            await outAnimationComplete;
-          }
-          // Additional delay between OUT and IN
-          await sleep(transitionDelay);
-        },
-        onEnd: () => {
-          // Clean up blinds after animation completes
-          if (blindsData && blindsData.container) {
-            blindsData.container.remove();
-          }
-        },
-      };
+      return new MultiAnimation([outPhase, inPhase], { mode: "sequence" });
     },
   };
 };

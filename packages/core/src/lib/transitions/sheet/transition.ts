@@ -1,205 +1,146 @@
 import type {
   PhysicsOptions,
-  SggoiTransition,
-  SggoiTransitionContext,
-  StyleObject,
+  SsgoiTransitionContext,
+  TransitionConfig,
 } from "@types";
 import { getRect } from "@utils";
-import { prepareOutgoing } from "@utils";
+import {
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 // ease-out (Material decelerated): sheet rises and lands gracefully (incoming).
-// 200/24 = ratio 0.85 of critical (~28.3), ~290ms.
 const ENTER: PhysicsOptions = {
-  spring: {
-    stiffness: 200,
-    damping: 24,
-  },
+  spring: { stiffness: 200, damping: 24 },
 };
 
 // ease-in (Material accelerated): sheet falls away (outgoing).
-// Spring can't produce true ease-in (always decelerative); inertia integrator
-// starts at v=0 and accelerates toward target — natural acceleration curve.
 const EXIT: PhysicsOptions = {
-  inertia: {
-    acceleration: 25,
-    resistance: 1.2,
-  },
+  inertia: { acceleration: 25, resistance: 1.2 },
 };
 
-/** Default scale offset for sheet effect (20% = 0.2) */
 const DEFAULT_SCALE_OFFSET = 0.2;
 
 export interface SheetOptions {
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;
-  /** Scale offset as a fraction (default: 0.2 = 20%) */
   scaleOffset?: number;
 }
 
-/**
- * Calculate the viewport rect for sheet transition
- */
-function getSheetRect(context: SggoiTransitionContext) {
+function getSheetRect(
+  context: SsgoiTransitionContext,
+  fromOrTo: "from" | "to",
+) {
   const containerRect = getRect(document.body, context.positionedParent);
-  const top = context.scroll.y;
-
-  // Calculate viewport height considering container offset
+  const top = context[fromOrTo].scroll.y;
   const viewportHeight =
     context.scrollingElement.offsetHeight - containerRect.top;
-
-  const rect = {
+  return {
     top,
     left: 0,
     width: containerRect.width,
     height: viewportHeight,
   };
-
-  return {
-    ...rect,
-    centerX: rect.left + rect.width / 2,
-    centerY: rect.top + rect.height / 2,
-  };
 }
 
-/**
- * Mobile-optimized bottom sheet style transition
- *
- * Enter direction (forward navigation):
- * - IN: Sheet slides up from bottom
- * - OUT: Background page scales down (1 → 0.8) with fade
- *
- * Exit direction (back navigation):
- * - IN: Background page scales up (0.8 → 1) with fade
- * - OUT: Sheet slides down with high z-index
- */
-export const sheet = (options: SheetOptions = {}): SggoiTransition => {
+export const sheet = (options: SheetOptions = {}): TransitionConfig => {
   const { direction = "enter" } = options;
   const physicsOptions =
     options.physics ?? (direction === "enter" ? ENTER : EXIT);
   const scaleOffset = options.scaleOffset ?? DEFAULT_SCALE_OFFSET;
 
-  if (direction === "enter") {
-    // Forward: Sheet enters from bottom, background scales down
-    return {
-      // Entering sheet: slides up from bottom
-      in: (element, context) => {
-        const rect = getSheetRect(context);
+  return {
+    prepare: ({ from, to }) => {
+      from.then((el) => {
+        el.style.willChange = "transform, opacity";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+        el.style.pointerEvents = "none";
+        el.style.zIndex = direction === "enter" ? "-1" : "100";
+      });
+      to.then((el) => {
+        el.style.willChange = "transform, opacity";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+      });
+      return {};
+    },
+    animation: ({ from, to, context }) => {
+      const fromRect = getSheetRect(context, "from");
+      const toRect = getSheetRect(context, "to");
 
-        return {
-          physics: physicsOptions,
-          prepare: () => {
-            element.style.willChange = "transform";
-            element.style.backfaceVisibility = "hidden";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "layout paint";
-            // Clip the sheet to its viewport-aligned slice so translate3d only
-            // shows the slice the user was looking at, not the rest of the page.
-            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
-          },
-          css: (progress): StyleObject => ({
-            transform: `translate3d(0, ${(1 - progress) * rect.height}px, 0)`,
-          }),
-          onEnd: () => {
-            element.style.willChange = "auto";
-            element.style.backfaceVisibility = "";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "";
-            element.style.clipPath = "";
-          },
-        };
-      },
-      // Exiting background: scales down with fade
-      out: (element, context) => {
-        const rect = getSheetRect(context);
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+      const fromCenterX = fromRect.left + fromRect.width / 2;
+      const fromCenterY = fromRect.top + fromRect.height / 2;
 
-        return {
-          physics: physicsOptions,
-          prepare: () => {
-            prepareOutgoing(element, context);
-            element.style.zIndex = "-1";
-            element.style.willChange = "transform, opacity";
-            element.style.backfaceVisibility = "hidden";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "layout paint";
-            element.style.pointerEvents = "none";
-            element.style.transformOrigin = `${centerX}px ${centerY}px`;
-            // Clip to the viewport-aligned slice so scaling doesn't pull
-            // off-viewport content (above/below the scroll position) into view.
-            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
-          },
-          css: (progress): StyleObject => ({
-            transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
-            opacity: progress,
-          }),
-        };
-      },
-    };
-  } else {
-    // Exit direction: Sheet exits down, background scales up
-    return {
-      // Entering background: scales up with fade
-      in: (element, context) => {
-        const rect = getSheetRect(context);
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+      // Apply clip-paths sync so the sheet only shows its visible viewport
+      // slice during transform.
+      from.style.clipPath = `inset(${fromRect.top}px 0 calc(100% - ${fromRect.top + fromRect.height}px) 0)`;
+      to.style.clipPath = `inset(${toRect.top}px 0 calc(100% - ${toRect.top + toRect.height}px) 0)`;
 
-        return {
-          physics: physicsOptions,
-          prepare: () => {
-            element.style.willChange = "transform, opacity";
-            element.style.backfaceVisibility = "hidden";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "layout paint";
-            element.style.transformOrigin = `${centerX}px ${centerY}px`;
-            // Clip to the viewport-aligned slice so scaling doesn't pull
-            // off-viewport content (above/below the scroll position) into view.
-            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
-          },
-          css: (progress): StyleObject => ({
-            transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
-            opacity: progress,
-          }),
-          onEnd: () => {
-            element.style.willChange = "auto";
-            element.style.backfaceVisibility = "";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "";
-            element.style.transformOrigin = "";
-            element.style.clipPath = "";
-          },
-        };
-      },
-      // Exiting sheet: slides down with high z-index
-      out: (element, context) => {
-        const rect = getSheetRect(context);
-        const viewportHeight = rect.height;
-        const visibleTop = context.scroll.y;
+      if (direction === "enter") {
+        from.style.transformOrigin = `${fromCenterX}px ${fromCenterY}px`;
 
-        return {
-          physics: physicsOptions,
-          prepare: () => {
-            prepareOutgoing(element, context);
-            element.style.zIndex = "100";
-            element.style.willChange = "transform";
-            element.style.backfaceVisibility = "hidden";
-            (
-              element.style as CSSStyleDeclaration & { contain: string }
-            ).contain = "layout paint";
-            element.style.pointerEvents = "none";
-            element.style.clipPath = `inset(${visibleTop}px 0 calc(100% - ${visibleTop + viewportHeight}px) 0)`;
-          },
-          css: (progress): StyleObject => ({
-            transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,
+        const outAnim = new WebAnimation({
+          element: from,
+          integrator: IntegratorProvider.from(physicsOptions),
+          style: (t, u) => ({
+            transform: `scale(${1 - scaleOffset * t})`,
+            opacity: u,
           }),
-        };
-      },
-    };
-  }
+        });
+
+        const inAnim = new WebAnimation({
+          element: to,
+          integrator: IntegratorProvider.from(physicsOptions),
+          style: (_t, u) => ({
+            transform: `translate3d(0, ${u * toRect.height}px, 0)`,
+          }),
+          onComplete: () => {
+            to.style.willChange = "auto";
+            to.style.backfaceVisibility = "";
+            (to.style as CSSStyleDeclaration & { contain: string }).contain =
+              "";
+            to.style.clipPath = "";
+            to.style.transform = "";
+          },
+        });
+
+        return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+      }
+
+      // direction === "exit"
+      const toCenterX = toRect.left + toRect.width / 2;
+      const toCenterY = toRect.top + toRect.height / 2;
+      to.style.transformOrigin = `${toCenterX}px ${toCenterY}px`;
+
+      const outAnim = new WebAnimation({
+        element: from,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t) => ({
+          transform: `translate3d(0, ${t * fromRect.height}px, 0)`,
+        }),
+      });
+
+      const inAnim = new WebAnimation({
+        element: to,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t) => ({
+          transform: `scale(${1 - scaleOffset + scaleOffset * t})`,
+          opacity: t,
+        }),
+        onComplete: () => {
+          to.style.willChange = "auto";
+          to.style.backfaceVisibility = "";
+          (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
+          to.style.transformOrigin = "";
+          to.style.clipPath = "";
+        },
+      });
+
+      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+    },
+  };
 };

@@ -1,4 +1,4 @@
-import type { SggoiTransition, SsgoiTransitionConfig } from "@types";
+import type { AnyTransitionConfig, SsgoiPathTransition } from "@types";
 
 export type DirectionalTransitionPaths = {
   enter: string;
@@ -7,17 +7,15 @@ export type DirectionalTransitionPaths = {
 
 export function createSymmetricPathTransitions(
   paths: readonly string[],
-  createTransition: () => SggoiTransition,
-): SsgoiTransitionConfig[] {
-  const transitions: SsgoiTransitionConfig[] = [];
+  createTransition: () => AnyTransitionConfig,
+): SsgoiPathTransition[] {
+  const transitions: SsgoiPathTransition[] = [];
 
   for (let fromIndex = 0; fromIndex < paths.length; fromIndex++) {
     for (let toIndex = fromIndex + 1; toIndex < paths.length; toIndex++) {
       const from = paths[fromIndex];
       const to = paths[toIndex];
-
       if (!from || !to) continue;
-
       transitions.push({
         from,
         to,
@@ -32,8 +30,8 @@ export function createSymmetricPathTransitions(
 
 export function createDirectionalPathTransitions(
   paths: DirectionalTransitionPaths,
-  createTransition: (direction: "enter" | "exit") => SggoiTransition,
-): SsgoiTransitionConfig[] {
+  createTransition: (direction: "enter" | "exit") => AnyTransitionConfig,
+): SsgoiPathTransition[] {
   return [
     {
       from: paths.exit,
@@ -54,17 +52,15 @@ export function createOrderedPathTransitions<TDirection extends string>(
     forward: TDirection;
     backward: TDirection;
   },
-  createTransition: (direction: TDirection) => SggoiTransition,
-): SsgoiTransitionConfig[] {
-  const transitions: SsgoiTransitionConfig[] = [];
+  createTransition: (direction: TDirection) => AnyTransitionConfig,
+): SsgoiPathTransition[] {
+  const transitions: SsgoiPathTransition[] = [];
 
   for (let fromIndex = 0; fromIndex < paths.length; fromIndex++) {
     for (let toIndex = fromIndex + 1; toIndex < paths.length; toIndex++) {
       const from = paths[fromIndex];
       const to = paths[toIndex];
-
       if (!from || !to) continue;
-
       transitions.push(
         {
           from,

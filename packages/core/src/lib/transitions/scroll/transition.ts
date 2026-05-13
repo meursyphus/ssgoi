@@ -1,5 +1,9 @@
-import type { SggoiTransition, PhysicsOptions } from "@types";
-import { prepareOutgoing } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import {
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 export interface ScrollOptions {
   direction?: "up" | "down";
@@ -10,102 +14,60 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 5, damping: 4 },
 };
 
-export const scroll = (options: ScrollOptions = {}): SggoiTransition => {
+export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
   const direction = options.direction ?? "up";
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-
   const isUp = direction === "up";
 
-  // Shared state between out and in animations
-  let outElementHeight: number | null = null;
-  let inElementHeight: number | null = null;
-  let calculatedHeight: number | null = null;
-
-  // Common height calculation function
-  const calculateHeight = (): number | null => {
-    // Both heights must be available
-    if (outElementHeight === null || inElementHeight === null) {
-      return null;
-    }
-
-    // Min of out and in heights, then max with viewport
-    const minHeight = Math.min(outElementHeight, inElementHeight);
-    const viewportHeight = window.innerHeight;
-    return Math.max(minHeight, viewportHeight);
-  };
-
   return {
-    in: (element) => {
-      // Get incoming element height before animation starts
-      inElementHeight = element.offsetHeight;
-
-      // Calculate height if both values are ready
-      if (outElementHeight !== null) {
-        calculatedHeight = calculateHeight();
-      }
-
-      return {
-        physics: physicsOptions,
-        prepare: () => {
-          // GPU acceleration hints
-          element.style.willChange = "transform";
-          element.style.backfaceVisibility = "hidden";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
-        },
-        tick: (progress) => {
-          // Use cached height or recalculate
-          if (calculatedHeight === null) {
-            calculatedHeight = calculateHeight();
-          }
-          const height = calculatedHeight ?? window.innerHeight;
-
-          const translateY = isUp
-            ? (1 - progress) * height
-            : (1 - progress) * -height;
-
-          element.style.transform = `translate3d(0, ${translateY}px, 0)`;
-        },
-        onEnd: () => {
-          element.style.willChange = "auto";
-          element.style.backfaceVisibility = "";
-          (element.style as CSSStyleDeclaration & { contain: string }).contain =
-            "";
-        },
-      };
-    },
-    out: (element, context) => ({
-      physics: physicsOptions,
-      tick: (progress) => {
-        // Use cached height or recalculate
-        if (calculatedHeight === null) {
-          calculatedHeight = calculateHeight();
-        }
-        const height = calculatedHeight ?? window.innerHeight;
-
-        const translateY = isUp
-          ? (1 - progress) * -height
-          : (1 - progress) * height;
-
-        element.style.transform = `translate3d(0, ${translateY}px, 0)`;
-      },
-      prepare: () => {
-        // Capture outgoing element height at animation start (before detached)
-        outElementHeight = element.offsetHeight;
-
-        // Calculate height if both values are ready
-        if (inElementHeight !== null) {
-          calculatedHeight = calculateHeight();
-        }
-        prepareOutgoing(element, context);
-        element.style.zIndex = isUp ? "-1" : "1";
-        // GPU acceleration hints
-        element.style.willChange = "transform";
-        element.style.backfaceVisibility = "hidden";
-        (element.style as CSSStyleDeclaration & { contain: string }).contain =
+    prepare: ({ from, to }) => {
+      from.then((el) => {
+        el.style.zIndex = isUp ? "-1" : "1";
+        el.style.willChange = "transform";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
-        element.style.pointerEvents = "none";
-      },
-    }),
+        el.style.pointerEvents = "none";
+      });
+      to.then((el) => {
+        el.style.willChange = "transform";
+        el.style.backfaceVisibility = "hidden";
+        (el.style as CSSStyleDeclaration & { contain: string }).contain =
+          "layout paint";
+      });
+      return {};
+    },
+    animation: ({ from, to }) => {
+      const fromHeight = from.offsetHeight;
+      const toHeight = to.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      const height = Math.max(Math.min(fromHeight, toHeight), viewportHeight);
+
+      const outAnim = new WebAnimation({
+        element: from,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (t) => {
+          const translateY = isUp ? -height * t : height * t;
+          return { transform: `translate3d(0, ${translateY}px, 0)` };
+        },
+      });
+
+      const inAnim = new WebAnimation({
+        element: to,
+        integrator: IntegratorProvider.from(physicsOptions),
+        style: (_t, u) => {
+          const translateY = isUp ? u * height : u * -height;
+          return { transform: `translate3d(0, ${translateY}px, 0)` };
+        },
+        onComplete: () => {
+          to.style.willChange = "auto";
+          to.style.backfaceVisibility = "";
+          (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
+          to.style.transform = "";
+        },
+      });
+
+      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+    },
   };
 };

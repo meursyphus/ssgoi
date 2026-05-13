@@ -1,12 +1,12 @@
-import type { SsgoiTransitionConfig } from "@types";
+import type { SsgoiPathTransition } from "@types";
 
 /**
  * Processes symmetric transitions to create bidirectional navigation
  * For each symmetric transition, creates a reverse transition automatically
  */
 export function processSymmetricTransitions(
-  transitions: readonly SsgoiTransitionConfig[],
-): Omit<SsgoiTransitionConfig, "symmetric">[] {
+  transitions: readonly SsgoiPathTransition[],
+): Omit<SsgoiPathTransition, "symmetric">[] {
   const reversedTransitions = transitions
     .filter((t) => t.symmetric)
     .map((t) => ({

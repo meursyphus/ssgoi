@@ -1,14 +1,15 @@
-export { transition } from "./transition/transition";
-export { createTransitionScope } from "./transition/transition-scope";
 export { createSggoiTransitionContext } from "./ssgoi-transition/create-ssgoi-transition-context";
+export { Animation, WebAnimation, MultiAnimation } from "./animation";
 export type {
   SsgoiConfig,
   SsgoiContext,
-  SsgoiTransitionConfig,
-  SsgoiTransitionConfigInput,
-  Transition,
-  TransitionCallback,
-  TransitionKey,
-  TransitionOptions,
-  TransitionScope,
+  SsgoiPathTransition,
+  SsgoiPathTransitionInput,
+  TransitionConfig,
+  PrepareArgs,
+  AnimationFactoryArgs,
+  CreateElement,
+  SsgoiTransitionContext,
+  Pose,
+  Timeline,
 } from "@types";

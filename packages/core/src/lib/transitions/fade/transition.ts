@@ -1,6 +1,9 @@
-import type { SggoiTransition, StyleObject, PhysicsOptions } from "@types";
-import { prepareOutgoing } from "@utils";
-import { sleep, withResolvers } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import {
+  IntegratorProvider,
+  MultiAnimation,
+  WebAnimation,
+} from "../../animation";
 
 const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 180, damping: 20, doubleSpring: true },
@@ -8,67 +11,48 @@ const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
 const DEFAULT_IN_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 170, damping: 20, doubleSpring: true },
 };
-const DEFAULT_TRANSITION_DELAY = 0;
 
 export interface FadeOptions {
-  transitionDelay?: number;
   physics?: PhysicsOptions;
 }
 
-export const fade = (options: FadeOptions = {}): SggoiTransition => {
-  const { transitionDelay = DEFAULT_TRANSITION_DELAY } = options;
-  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_IN_PHYSICS;
-  const outPhysicsOptions: PhysicsOptions =
-    options.physics ?? DEFAULT_OUT_PHYSICS;
-  // Shared promise for coordinating OUT and IN animations
-  let { promise: outAnimationComplete, resolve: resolveOutAnimation } =
-    withResolvers<void>();
+export const fade = (options: FadeOptions = {}): TransitionConfig => {
+  const inPhysics = options.physics ?? DEFAULT_IN_PHYSICS;
+  const outPhysics = options.physics ?? DEFAULT_OUT_PHYSICS;
 
   return {
-    in: (element) => {
-      return {
-        physics: physicsOptions,
-        prepare: () => {
-          element.style.opacity = "0";
-          element.style.willChange = "opacity";
-        },
-        wait: async () => {
-          // Wait for OUT animation to complete if it exists
-          if (outAnimationComplete) {
-            await outAnimationComplete;
-            const newResolvers = withResolvers<void>();
-            outAnimationComplete = newResolvers.promise;
-            resolveOutAnimation = newResolvers.resolve;
-            await sleep(transitionDelay);
-          }
-        },
-        css: (progress): StyleObject => ({
-          opacity: progress,
-        }),
-        onEnd: () => {
-          element.style.willChange = "auto";
-          element.style.opacity = "1";
-        },
-      };
+    prepare: ({ to }) => {
+      // Lay down the incoming page invisible before paint so it doesn't flash
+      // at full opacity ahead of the spring.
+      to.then((el) => {
+        el.style.opacity = "0";
+        el.style.willChange = "opacity";
+      });
+      return {};
     },
-    out: (element, context) => {
-      return {
-        physics: outPhysicsOptions,
-        css: (progress): StyleObject => ({
-          opacity: progress,
-        }),
-        prepare: () => {
-          prepareOutgoing(element, context);
-          element.style.willChange = "opacity";
+    animation: ({ from, to }) => {
+      const outAnim = new WebAnimation({
+        element: from,
+        integrator: IntegratorProvider.from(outPhysics),
+        // Default bounds (0, 1). `u` runs 1→0 as the animation moves
+        // forward, mapping opacity from fully visible to invisible.
+        style: (_t, u) => ({ opacity: u }),
+        onComplete: () => {
+          from.style.willChange = "auto";
         },
-        onEnd: () => {
-          // Resolve the promise when OUT animation completes
-          if (resolveOutAnimation) {
-            resolveOutAnimation();
-          }
-          element.style.willChange = "auto";
+      });
+
+      const inAnim = new WebAnimation({
+        element: to,
+        integrator: IntegratorProvider.from(inPhysics),
+        style: (t) => ({ opacity: t }),
+        onComplete: () => {
+          to.style.willChange = "auto";
+          to.style.opacity = "";
         },
-      };
+      });
+
+      return new MultiAnimation([outAnim, inAnim], { mode: "sequence" });
     },
   };
 };

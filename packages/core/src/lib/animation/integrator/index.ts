@@ -28,3 +28,7 @@ export {
 } from "./inertia-integrator";
 
 export { IntegratorProvider, type PhysicsConfig } from "./provider";
+export {
+  LinearIntegrator,
+  type LinearIntegratorConfig,
+} from "./linear-integrator";

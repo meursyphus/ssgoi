@@ -1,4 +1,4 @@
-import type { Transition } from "@types";
+import type { TransitionConfig } from "@types";
 
 /**
  * Matches a path against a pattern
@@ -33,15 +33,15 @@ export function matchPath(path: string, pattern: string): boolean {
  * First tries to find exact match for both from and to paths,
  * then falls back to wildcard matches if no exact match is found.
  */
-export function findMatchingTransition<TContext>(
+export function findMatchingTransition(
   from: string,
   to: string,
   transitions: Array<{
     from: string;
     to: string;
-    transition: Transition<TContext>;
+    transition: TransitionConfig;
   }>,
-): Transition<TContext> | null {
+): TransitionConfig | null {
   // First try to find exact match for both from and to paths
   for (const config of transitions) {
     if (matchPath(from, config.from) && matchPath(to, config.to)) {
