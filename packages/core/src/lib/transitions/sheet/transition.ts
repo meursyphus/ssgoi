@@ -1,9 +1,5 @@
-import type {
-  PhysicsOptions,
-  SsgoiTransitionContext,
-  TransitionConfig,
-} from "@types";
-import { getRect } from "@utils";
+import type { PhysicsOptions, TransitionConfig } from "@types";
+import { getViewportRect } from "@utils";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -26,22 +22,6 @@ export interface SheetOptions {
   direction?: "enter" | "exit";
   physics?: PhysicsOptions;
   scaleOffset?: number;
-}
-
-function getSheetRect(
-  context: SsgoiTransitionContext,
-  fromOrTo: "from" | "to",
-) {
-  const containerRect = getRect(document.body, context.positionedParent);
-  const top = context[fromOrTo].scroll.y;
-  const viewportHeight =
-    context.scrollingElement.offsetHeight - containerRect.top;
-  return {
-    top,
-    left: 0,
-    width: containerRect.width,
-    height: viewportHeight,
-  };
 }
 
 export const sheet = (options: SheetOptions = {}): TransitionConfig => {
@@ -69,8 +49,8 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to, context }) => {
-      const fromRect = getSheetRect(context, "from");
-      const toRect = getSheetRect(context, "to");
+      const fromRect = getViewportRect(context, "from");
+      const toRect = getViewportRect(context, "to");
 
       const fromCenterX = fromRect.left + fromRect.width / 2;
       const fromCenterY = fromRect.top + fromRect.height / 2;

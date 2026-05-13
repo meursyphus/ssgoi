@@ -1,5 +1,5 @@
 import type { PhysicsOptions, TransitionConfig } from "@types";
-import { getRect } from "@utils";
+import { getViewportRect } from "@utils";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -19,16 +19,6 @@ export interface JaeminOptions {
   initialRotation?: number;
   initialScale?: number;
   rotationTriggerPoint?: number;
-}
-
-function getJaeminRect(positionedParent: HTMLElement, scrollY: number) {
-  const containerRect = getRect(document.body, positionedParent);
-  return {
-    top: scrollY,
-    left: 0,
-    width: containerRect.width,
-    height: window.innerHeight - containerRect.top,
-  };
 }
 
 /**
@@ -52,10 +42,7 @@ export const jaemin = (options: JaeminOptions = {}): TransitionConfig => {
         el.style.opacity = "1";
       });
       to.then((el) => {
-        const rect = getJaeminRect(
-          context.positionedParent,
-          context.to.scroll.y,
-        );
+        const rect = getViewportRect(context, "to");
         const maxBorderRadius = Math.min(rect.width, rect.height) * 0.4;
         el.style.setProperty("--max-border-radius", `${maxBorderRadius}px`);
         el.style.setProperty("--border-radius-scale", "1");

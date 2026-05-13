@@ -4,7 +4,7 @@ import type {
   StyleObject,
   TransitionConfig,
 } from "@types";
-import { getRect } from "@utils";
+import { getRect, getViewportRect } from "@utils";
 import { Animation, MultiAnimation, WebAnimation } from "../../animation";
 import {
   LinearIntegrator,
@@ -367,19 +367,6 @@ type FilmRect = {
   height: number;
 };
 
-function getFilmRect(
-  positionedParent: HTMLElement,
-  fromOrToScroll: { x: number; y: number },
-): FilmRect {
-  const containerRect = getRect(document.body, positionedParent);
-  return {
-    top: fromOrToScroll.y,
-    left: 0,
-    width: containerRect.width,
-    height: window.innerHeight - containerRect.top,
-  };
-}
-
 function applyFilmTransformOrigin(el: HTMLElement, rect: FilmRect) {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
@@ -428,11 +415,8 @@ export const film = (
 
   return {
     prepare: ({ from, to, context }) => {
-      const fromRect = getFilmRect(
-        context.positionedParent,
-        context.from.scroll,
-      );
-      const toRect = getFilmRect(context.positionedParent, context.to.scroll);
+      const fromRect = getViewportRect(context, "from");
+      const toRect = getViewportRect(context, "to");
       const containerRect = getRect(document.body, context.positionedParent);
 
       const borders = makeCornerBorders(borderColor, {
