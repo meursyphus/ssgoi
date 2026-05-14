@@ -1,12 +1,20 @@
 import { transition as _transition } from "@ssgoi/core/internal";
 import type { Directive } from "vue";
-import type { Transition, TransitionKey, TransitionScope } from "@ssgoi/core/internal";
+import type {
+  Transition,
+  TransitionKey,
+  TransitionScope,
+} from "@ssgoi/core/internal";
 
 export const transition = _transition;
 
-type TransitionConfig = Transition & {
+type TransitionConfig = Transition<undefined> & {
   key: TransitionKey;
   scope?: TransitionScope;
+};
+
+type TransitionElement = HTMLElement & {
+  _ssgoiCleanup?: () => void;
 };
 
 // Vue directive for element transitions
@@ -26,14 +34,16 @@ export const vTransition: Directive<HTMLElement, TransitionConfig | undefined> =
       const cleanup = transition(transitionConfig)(el);
 
       // Store cleanup function on element for unmounted hook
-      (el as any)._ssgoiCleanup = cleanup;
+      (el as TransitionElement)._ssgoiCleanup = cleanup;
     },
     unmounted(el) {
+      const transitionElement = el as TransitionElement;
+
       // Call cleanup if it exists
-      const cleanup = (el as any)._ssgoiCleanup;
+      const cleanup = transitionElement._ssgoiCleanup;
       if (cleanup) {
         cleanup();
-        delete (el as any)._ssgoiCleanup;
+        delete transitionElement._ssgoiCleanup;
       }
     },
   };

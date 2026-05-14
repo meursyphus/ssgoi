@@ -1,10 +1,11 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { transition } from "./transition";
   import { getSsgoiContext } from "./context";
 
   interface Props {
     id: string;
-    children: () => any;
+    children: Snippet;
     as?: keyof HTMLElementTagNameMap;
     class?: string;
   }

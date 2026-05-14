@@ -136,7 +136,7 @@ Animate specific elements during mount/unmount:
   use:transition={{
     key: "card",
     in: fade(),
-    out: slide({ direction: 'up' }),
+    out: slide({ direction: "up" }),
   }}
 >
   <h2>Animated Card</h2>

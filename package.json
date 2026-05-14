@@ -81,7 +81,7 @@
       "prettier --write --config packages/core/.prettierrc",
       "eslint --fix --config packages/core/eslint.config.js"
     ],
-    "packages/angular/**/*.{ts}": [
+    "packages/angular/**/*.ts": [
       "prettier --write"
     ],
     "packages/react/**/*.{ts,tsx}": [

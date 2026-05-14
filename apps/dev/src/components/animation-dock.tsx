@@ -34,6 +34,10 @@ function useHostSnapshot(host: HostAnimation | null) {
   return useSyncExternalStore(subscribe, getSnapshot, () => "idle");
 }
 
+function setHostPlaybackRate(host: HostAnimation, rate: number) {
+  host.playbackRate = rate;
+}
+
 export function AnimationDock() {
   const host = useSsgoiHost();
   const status = useHostSnapshot(host);
@@ -43,7 +47,7 @@ export function AnimationDock() {
 
   const setRateAndApply = (r: number) => {
     setRate(r);
-    host.playbackRate = r;
+    setHostPlaybackRate(host, r);
   };
 
   const live = status === "playing" || status === "reversing";
