@@ -53,6 +53,9 @@ export class WebAnimation extends Animation {
   private waapi: globalThis.Animation | null = null;
   private startTime = 0;
   private running = false;
+  private paused = false;
+  private settled = false;
+  private reversing = false;
 
   constructor(opts: WebAnimationOptions) {
     super();
@@ -67,27 +70,66 @@ export class WebAnimation extends Animation {
   }
 
   play(): void {
+    this.reversing = false;
+    if (this.paused && this.waapi) {
+      // Resume the same WAAPI run — currentTime is preserved, so motion
+      // continues exactly where it was halted.
+      this.paused = false;
+      this.running = true;
+      this.waapi.play();
+      return;
+    }
     this.runToward(this.upperBound);
   }
 
   reverse(): void {
+    this.reversing = true;
+    // Reverse from a paused state always starts a fresh spring sim from the
+    // current pose toward lowerBound — keyframes were baked forward, so
+    // flipping playbackRate would replay the wrong path.
     this.runToward(this.lowerBound);
   }
 
   pause(): void {
     if (!this.running) return;
+    // WAAPI's own pause keeps the forwards-fill visual and lets `play()`
+    // resume from the exact frame — no inline-style pinning needed.
     this.captureLiveState();
-    this.waapi?.cancel();
-    this.waapi = null;
+    this.waapi?.pause();
     this.running = false;
+    this.paused = true;
   }
 
   complete(): void {
-    this.pause();
+    this.clearWaapi();
+    this.running = false;
+    this.paused = false;
     this.currentValue = this.upperBound;
     this.currentVelocity = 0;
     this.applyStyleAt(this.currentValue);
+    this.settled = true;
     this.onComplete?.();
+  }
+
+  get isAnimating(): boolean {
+    return this.running;
+  }
+  get isPaused(): boolean {
+    return this.paused;
+  }
+  get isComplete(): boolean {
+    return this.settled;
+  }
+  get isReversing(): boolean {
+    return this.reversing;
+  }
+
+  get playbackRate(): number {
+    return super.playbackRate;
+  }
+  set playbackRate(rate: number) {
+    super.playbackRate = rate;
+    if (this.waapi) this.waapi.playbackRate = rate;
   }
 
   getPose(): Pose[] {
@@ -128,7 +170,11 @@ export class WebAnimation extends Animation {
   /* ───────────────────────────────────────────────────────── private */
 
   private runToward(target: number) {
-    if (this.running) this.pause();
+    if (this.running) this.captureLiveState();
+    this.clearWaapi();
+    this.running = false;
+    this.paused = false;
+    this.settled = false;
 
     this.frames = simulate(
       this.integrator,
@@ -141,6 +187,7 @@ export class WebAnimation extends Animation {
       this.currentValue = target;
       this.currentVelocity = 0;
       this.applyStyleAt(target);
+      this.settled = true;
       this.onComplete?.();
       return;
     }
@@ -176,10 +223,16 @@ export class WebAnimation extends Animation {
     this.waapi.onfinish = () => {
       if (!this.running) return;
       this.running = false;
+      this.settled = true;
       this.currentValue = lastFrame.position;
       this.currentVelocity = 0;
       this.onComplete?.();
     };
+  }
+
+  private clearWaapi() {
+    this.waapi?.cancel();
+    this.waapi = null;
   }
 
   private captureLiveState() {

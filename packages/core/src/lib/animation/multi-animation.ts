@@ -73,6 +73,30 @@ export class MultiAnimation extends Animation {
     // for now so we don't pretend to support cross-multi handoff.
   }
 
+  get isAnimating(): boolean {
+    return this.children.some((c) => c.isAnimating);
+  }
+  get isPaused(): boolean {
+    return (
+      this.children.some((c) => c.isPaused) &&
+      this.children.every((c) => c.isPaused || c.isComplete)
+    );
+  }
+  get isComplete(): boolean {
+    return this.children.every((c) => c.isComplete);
+  }
+  get isReversing(): boolean {
+    return this.children.some((c) => c.isReversing);
+  }
+
+  get playbackRate(): number {
+    return super.playbackRate;
+  }
+  set playbackRate(rate: number) {
+    super.playbackRate = rate;
+    for (const child of this.children) child.playbackRate = rate;
+  }
+
   /* ───────────────────────────────────────────────────────── private */
 
   private startParallel(method: "play" | "reverse") {

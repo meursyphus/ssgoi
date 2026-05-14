@@ -15,7 +15,7 @@ import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { findMatchingTransition } from "./find-matching-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount } from "./unmount-observer";
-import { Animation } from "../animation/animation";
+import { HostAnimation } from "../animation/host-animation";
 
 function isTransitionGroup(
   transition: SsgoiPathTransitionInput,
@@ -58,8 +58,18 @@ type ElementAnchor = {
  * resolves — never via blocking `await` — so a follow-up navigation can
  * start its own pair while a prior one is still building.
  */
+export interface CreateSsgoiTransitionContextOptions {
+  /**
+   * Long-lived host that owns playback state across consecutive transitions.
+   * Pass one in to drive play/pause/rate from the outside (e.g. dev tools).
+   * Omit it and the context spins up its own internal host.
+   */
+  host?: HostAnimation;
+}
+
 export function createSggoiTransitionContext(
   options: SsgoiConfig,
+  contextOptions: CreateSsgoiTransitionContextOptions = {},
 ): SsgoiContext {
   const {
     transitions = [],
@@ -67,6 +77,8 @@ export function createSggoiTransitionContext(
     middleware = (from, to) => ({ from, to }),
     preserveScroll = (isMobile: boolean) => isMobile,
   } = options;
+
+  const host = contextOptions.host ?? new HostAnimation();
 
   const detector = createNavigationDetector();
   const processedTransitions = processSymmetricTransitions(
@@ -88,7 +100,6 @@ export function createSggoiTransitionContext(
 
   let pendingOut: PendingSide | null = null;
   let pendingIn: PendingSide | null = null;
-  let currentAnimation: Animation | null = null;
 
   const elementAnchors = new WeakMap<HTMLElement, ElementAnchor>();
 
@@ -196,17 +207,9 @@ export function createSggoiTransitionContext(
         ...(extras as Record<string, unknown>),
       });
 
-      // Pose handoff so consecutive transitions feel continuous. Sample
-      // the live pose first, then `complete()` the prior animation — that
-      // both fires its onComplete (clone removal, willChange release) and
-      // jumps any unfinished tween to its end state.
-      if (currentAnimation) {
-        const prevPose = currentAnimation.getPose();
-        currentAnimation.complete();
-        animation.matchInto(prevPose);
-      }
-      currentAnimation = animation;
-
+      // Per-transition cleanup (clone removal, prepare-created nodes). Wire
+      // this BEFORE attach — host.attach hooks onComplete itself and chains
+      // through prior hooks, so cleanup still fires once the run settles.
       const prevOnComplete = animation.onComplete;
       animation.onComplete = () => {
         prevOnComplete?.();
@@ -216,10 +219,11 @@ export function createSggoiTransitionContext(
         for (const extra of createdElements) {
           if (extra.parentElement) extra.parentElement.removeChild(extra);
         }
-        if (currentAnimation === animation) currentAnimation = null;
       };
 
-      animation.play();
+      // Host owns pose handoff, playbackRate carry-over, and starts the run
+      // according to its own play/pause/reverse state.
+      host.attach(animation);
     });
   };
 

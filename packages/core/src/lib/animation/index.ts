@@ -5,6 +5,7 @@ export {
   type MultiAnimationOptions,
   type MultiAnimationMode,
 } from "./multi-animation";
+export { HostAnimation } from "./host-animation";
 export {
   type Integrator,
   type IntegratorState,

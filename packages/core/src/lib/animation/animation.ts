@@ -21,8 +21,15 @@ export abstract class Animation {
   abstract pause(): void;
   /** Jump immediately to the final state and fire `onComplete`. */
   abstract complete(): void;
+
   /** Current playback rate (1 = realtime, 0 = paused, negative = backwards) */
-  playbackRate = 1;
+  private _playbackRate = 1;
+  get playbackRate(): number {
+    return this._playbackRate;
+  }
+  set playbackRate(rate: number) {
+    this._playbackRate = rate;
+  }
 
   /** Sample current pose for every element this animation drives */
   abstract getPose(): Pose[];
@@ -41,4 +48,13 @@ export abstract class Animation {
   onUpdate?: (poses: Pose[]) => void;
   /** Fired once when the animation settles. */
   onComplete?: () => void;
+
+  /** Simulation tick is actively running (false while paused or settled). */
+  abstract get isAnimating(): boolean;
+  /** Halted via `pause()` and not yet resumed. */
+  abstract get isPaused(): boolean;
+  /** Settled — `onComplete` has fired and no further frames will play. */
+  abstract get isComplete(): boolean;
+  /** Direction of the active or most-recent run (true = backwards). */
+  abstract get isReversing(): boolean;
 }
