@@ -16,6 +16,11 @@ export type ContextManagerOptions = {
    * Uses the same wildcard matching as transition routes
    */
   resetPatterns?: string[];
+  /**
+   * Explicit scroll container resolver. When provided and it returns an
+   * element, it takes precedence over the parent traversal heuristic.
+   */
+  getScrollContainer?: () => HTMLElement | null;
 };
 
 /**
@@ -23,7 +28,11 @@ export type ContextManagerOptions = {
  * including scroll positions and DOM element relationships
  */
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const { preserveScroll = false, resetPatterns = [] } = options;
+  const {
+    preserveScroll = false,
+    resetPatterns = [],
+    getScrollContainer: resolveScrollContainer,
+  } = options;
 
   // Check if a path matches any reset pattern
   const matchesResetPattern = (path: string): boolean => {
@@ -101,7 +110,8 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
     // Initialize scroll container once - finds the scrollable element
     if (!scrollContainer) {
-      scrollContainer = getScrollingElement(element);
+      scrollContainer =
+        resolveScrollContainer?.() ?? getScrollingElement(element);
 
       // IMPORTANT: When the scrolling element is document.documentElement (html element),
       // scroll events must be attached to window, not the element itself.

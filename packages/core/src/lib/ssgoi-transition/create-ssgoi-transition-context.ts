@@ -77,6 +77,7 @@ export function createSggoiTransitionContext(
     skipAnimationOnBack,
     experimentalPreserveScroll = false, // Default to false - manual scroll management
     scrollResetPatterns = [], // Default to empty array - no routes reset scroll
+    getScrollContainer: resolveScrollContainer,
   } = options;
 
   // Handle deprecated skipOnIosSwipe option
@@ -116,6 +117,7 @@ export function createSggoiTransitionContext(
   } = createContextManager({
     preserveScroll: experimentalPreserveScroll,
     resetPatterns: scrollResetPatterns,
+    getScrollContainer: resolveScrollContainer,
   });
 
   // Initialize navigation direction detector for back navigation detection
