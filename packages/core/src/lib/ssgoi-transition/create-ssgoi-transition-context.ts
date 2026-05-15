@@ -55,7 +55,6 @@ export function createSggoiTransitionContext(
     defaultTransition,
     middleware = (from, to) => ({ from, to }), // Identity function as default
     preserveScroll = (isMobile: boolean) => isMobile,
-    getScrollContainer: resolveScrollContainer,
   } = options;
 
   // Internal options (set by framework adapters)
@@ -85,7 +84,6 @@ export function createSggoiTransitionContext(
     getScrollPosition,
   } = createContextManager({
     preserveScroll,
-    getScrollContainer: resolveScrollContainer,
   });
 
   /**

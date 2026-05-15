@@ -15,18 +15,10 @@ export type ContextManagerOptions = {
    * @default (isMobile) => isMobile
    */
   preserveScroll?: PreserveScrollOption;
-  /**
-   * Explicit scroll container resolver. When provided and it returns an
-   * element, it takes precedence over the parent traversal heuristic.
-   */
-  getScrollContainer?: () => HTMLElement | null;
 };
 
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const {
-    preserveScroll = (isMobile: boolean) => isMobile,
-    getScrollContainer: resolveScrollContainer,
-  } = options;
+  const { preserveScroll = (isMobile: boolean) => isMobile } = options;
 
   const resolvePreserve: PreserveScrollFn =
     typeof preserveScroll === "function"
@@ -137,8 +129,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     contextElement = element;
 
     if (!scrollContainer) {
-      scrollContainer =
-        resolveScrollContainer?.() ?? getScrollingElement(element);
+      scrollContainer = getScrollingElement(element);
 
       // Re-measure now that the real container is known; subsequent updates
       // come from the ResizeObserver below, which fires asynchronously after

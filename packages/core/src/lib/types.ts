@@ -504,19 +504,6 @@ export type SsgoiConfig = {
    * @default (isMobile) => isMobile  // mobile preserves, desktop does not
    */
   preserveScroll?: PreserveScrollOption;
-  /**
-   * @description Explicitly specify the scroll container element.
-   *
-   * When provided, SSGOI uses this element instead of inferring the scroll
-   * container via parent traversal.
-   *
-   * The returned element must be stable across the lifetime of the SSGOI
-   * root and shared by every route transition under the same provider.
-   * It should be an ancestor of transition elements, or
-   * document.documentElement. Returning unrelated sibling elements can make
-   * scroll offsets and visual positioning inconsistent.
-   */
-  getScrollContainer?: () => HTMLElement | null;
 };
 
 export type PreserveScrollValue = boolean | { exclude: string[] };
