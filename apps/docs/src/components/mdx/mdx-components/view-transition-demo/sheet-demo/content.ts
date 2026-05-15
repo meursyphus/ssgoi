@@ -55,4 +55,93 @@ export const sentEmails = [
     date: "Dec 17",
     time: "11:30 AM",
   },
+  {
+    id: "7",
+    to: "Tom Wilson",
+    email: "tom@example.com",
+    subject: "Q4 budget review",
+    preview: "Attached the revised numbers for next quarter — the marketing...",
+    date: "Dec 16",
+    time: "4:12 PM",
+  },
+  {
+    id: "8",
+    to: "Rachel Green",
+    email: "rachel@example.com",
+    subject: "Onboarding checklist",
+    preview:
+      "Here's everything you need for your first week. Let me know if...",
+    date: "Dec 15",
+    time: "9:48 AM",
+  },
+  {
+    id: "9",
+    to: "David Lee",
+    email: "david@example.com",
+    subject: "Re: Contract amendment",
+    preview:
+      "I've reviewed the changes and have a few comments on section 4...",
+    date: "Dec 14",
+    time: "2:33 PM",
+  },
+  {
+    id: "10",
+    to: "Nina Patel",
+    email: "nina@example.com",
+    subject: "Customer feedback summary",
+    preview:
+      "This week's NPS came in at 62 — the trend is up across mobile and...",
+    date: "Dec 13",
+    time: "6:07 PM",
+  },
+  {
+    id: "11",
+    to: "Chris Bennett",
+    email: "chris@example.com",
+    subject: "Sprint retrospective notes",
+    preview:
+      "Great session today. Key takeaways: shorter standups, more pairing...",
+    date: "Dec 12",
+    time: "11:55 AM",
+  },
+  {
+    id: "12",
+    to: "Hannah Wright",
+    email: "hannah@example.com",
+    subject: "Speaker confirmation — Spring Summit",
+    preview:
+      "Excited to confirm your keynote slot. I'll send the technical brief...",
+    date: "Dec 11",
+    time: "8:21 AM",
+  },
+  {
+    id: "13",
+    to: "Marco Rossi",
+    email: "marco@example.com",
+    subject: "Partnership proposal",
+    preview:
+      "Following up on our call last week — drafted a one-pager covering...",
+    date: "Dec 10",
+    time: "3:14 PM",
+  },
+  {
+    id: "14",
+    to: "Olivia Stone",
+    email: "olivia@example.com",
+    subject: "Re: Brand guidelines v3",
+    preview:
+      "Logo lockups look sharp. Two small notes on the type scale before...",
+    date: "Dec 9",
+    time: "10:02 AM",
+  },
+  {
+    id: "15",
+    to: "Ben Carter",
+    email: "ben@example.com",
+    subject: "Hiring update",
+    preview:
+      "Two strong candidates from the recent loop — happy to walk you...",
+    date: "Dec 8",
+    time: "5:39 PM",
+  },
 ];

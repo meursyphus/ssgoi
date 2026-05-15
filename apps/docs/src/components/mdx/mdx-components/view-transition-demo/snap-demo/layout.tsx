@@ -74,7 +74,7 @@ export const DemoLayout = memo(({ children }: DemoLayoutProps) => {
   ];
 
   return (
-    <div className="z-0">
+    <div className="overflow-x-clip relative z-0">
       <TransitionScope>
         {children}
 

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
-import { getServerTranslations } from "@/i18n/get-server-translations";
+import { messages } from "@/messages";
 
 /**
  * Navigation data and post content utilities for documentation
@@ -10,11 +9,11 @@ import { getServerTranslations } from "@/i18n/get-server-translations";
  * Usage examples:
  *
  * 1. Get navigation structure:
- *    const nav = await getNavigationData('ko')
+ *    const nav = await getNavigationData()
  *
  * 2. Get specific post by path:
- *    const post = await getPost('ko', 'getting-started/what-is-ssgoi')
- *    const post = await getPost('ko', 'core-concepts/dom-lifecycle')
+ *    const post = await getPost('getting-started/what-is-ssgoi')
+ *    const post = await getPost('core-concepts/dom-lifecycle')
  *
  * Note: Numeric prefixes in folder/file names (e.g., "01.getting-started") are automatically removed
  *       File extensions (.md, .mdx) are also handled automatically
@@ -40,8 +39,8 @@ function removeNumberPrefix(name: string): string {
 }
 
 // Get the content directory path relative to the project root
-function getContentPath(lang: string): string {
-  return path.join(process.cwd(), "content", lang);
+function getContentPath(): string {
+  return path.join(process.cwd(), "content");
 }
 
 async function processDirectory(
@@ -94,29 +93,24 @@ async function processDirectory(
 }
 
 /**
- * Get navigation structure for a specific language
- * @param lang - Language code (e.g., 'ko', 'en')
+ * Get navigation structure
  * @returns Array of navigation items with hierarchical structure
  */
-export async function getNavigationData(
-  lang: string,
-): Promise<NavigationItem[]> {
+export async function getNavigationData(): Promise<NavigationItem[]> {
   try {
-    const contentPath = getContentPath(lang);
+    const contentPath = getContentPath();
     const navigation = await processDirectory(contentPath);
-
-    // Apply translations to category titles
-    const t = await getServerTranslations("sidebar", lang);
 
     function applyTranslations(items: NavigationItem[]): NavigationItem[] {
       return items.map((item) => {
         if (item.children && item.children.length > 0) {
           // This is a category - apply translation
-          const categoryKey = item.title as keyof typeof t;
-          const translatedTitle = t(`categories.${categoryKey}` as any);
-          // Ensure we get a string
+          const categoryTitle =
+            messages.sidebar.categories[
+              item.title as keyof typeof messages.sidebar.categories
+            ];
           const titleString =
-            typeof translatedTitle === "string" ? translatedTitle : item.title;
+            typeof categoryTitle === "string" ? categoryTitle : item.title;
 
           return {
             ...item,
@@ -185,20 +179,16 @@ async function findFileByPath(
 
 /**
  * Get post content by path
- * @param lang - Language code (e.g., 'ko', 'en')
  * @param postPath - Path to post without numeric prefixes or extensions (e.g., 'getting-started/what-is-ssgoi')
  * @returns Post content with metadata or null if not found
  *
  * Example:
- *   // File structure: content/ko/01.getting-started/01.what-is-ssgoi.md
- *   const post = await getPost('ko', 'getting-started/what-is-ssgoi')
+ *   // File structure: content/01.getting-started/01.what-is-ssgoi.md
+ *   const post = await getPost('getting-started/what-is-ssgoi')
  */
-export async function getPost(
-  lang: string,
-  postPath: string,
-): Promise<PostContent | null> {
+export async function getPost(postPath: string): Promise<PostContent | null> {
   try {
-    const contentPath = getContentPath(lang);
+    const contentPath = getContentPath();
     const filePath = await findFileByPath(contentPath, postPath);
 
     if (!filePath) {

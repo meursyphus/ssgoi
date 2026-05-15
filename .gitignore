@@ -1,6 +1,7 @@
 node_modules
 .env
 .worktree
+.DS_Store
 
 # Personal Claude Code agents
 .claude/agents/

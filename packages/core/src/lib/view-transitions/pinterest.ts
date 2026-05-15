@@ -2,8 +2,13 @@ import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+// ease-in-out for elegant gallery↔detail morph. doubleSpring 1 chains an
+// identical follower for the S-curve. 340/30 keeps the timing on the gentler
+// side (~270ms) on purpose: the soft ease-in front-loads the curve, which
+// hides first-frame jank on the exit path (gallery re-mount + detail clone +
+// thumbnail re-decode) so the stall blends into the start of the motion.
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 23, doubleSpring: 1 },
+  spring: { stiffness: 340, damping: 30, doubleSpring: 1 },
 };
 
 interface PinterestOptions {
@@ -401,9 +406,23 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
 
       return {
         physics: physicsOptions,
+        prepare: () => {
+          // GPU acceleration hints — promote before first frame so paint/raster
+          // /layer-tree cost doesn't stall the start of the animation.
+          element.style.willChange = "transform, clip-path";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+        },
         css: (progress) => {
           if (!handlers) return {};
           return handlers.inAnimation(progress);
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },
@@ -418,6 +437,12 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
         prepare: () => {
           prepareOutgoing(element);
           element.style.zIndex = "-1";
+          // GPU acceleration hints — absorb gallery re-mount jank into an
+          // already-composited layer.
+          element.style.willChange = "transform, clip-path, opacity";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
           // Called after insertClone() - element is now in DOM!
           fromNode = element;
 
@@ -435,6 +460,12 @@ export const pinterest = (options: PinterestOptions = {}): SggoiTransition => {
           // Called after wait() - handlers are guaranteed to exist
           if (!handlers) return {};
           return handlers.outAnimation(progress);
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },

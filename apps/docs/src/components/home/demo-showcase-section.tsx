@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useState } from "react";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 // Lazy load demos for performance
 const FadeDemo = lazy(() =>
@@ -39,7 +39,6 @@ function DemoLoading() {
 
 export function DemoShowcaseSection() {
   const [activeDemo, setActiveDemo] = useState<DemoType>("fade");
-  const t = useTranslations("home");
 
   const renderDemo = () => {
     switch (activeDemo) {
@@ -62,13 +61,13 @@ export function DemoShowcaseSection() {
         {/* Header */}
         <div className="mb-8">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
-            {t("newHome.demoShowcase.sectionLabel")}
+            {messages.home.newHome.demoShowcase.sectionLabel}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
-            {t("newHome.demoShowcase.title")}
+            {messages.home.newHome.demoShowcase.title}
           </h2>
           <p className="text-xs text-neutral-400">
-            {t("newHome.demoShowcase.description")}
+            {messages.home.newHome.demoShowcase.description}
           </p>
         </div>
 
@@ -84,7 +83,7 @@ export function DemoShowcaseSection() {
                   : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-white/5"
               }`}
             >
-              {t(`newHome.demoShowcase.demos.${demoType}.label`)}
+              {messages.home.newHome.demoShowcase.demos[demoType].label}
             </button>
           ))}
         </div>
@@ -98,7 +97,7 @@ export function DemoShowcaseSection() {
 
           {/* Description */}
           <p className="mt-4 text-xs text-neutral-400 text-center">
-            {t(`newHome.demoShowcase.demos.${activeDemo}.description`)}
+            {messages.home.newHome.demoShowcase.demos[activeDemo].description}
           </p>
         </div>
       </div>

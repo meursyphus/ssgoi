@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 export function ConsoleWelcome() {
-  const t = useTranslations("console");
-
   useEffect(() => {
     // ASCII art with messages in one console.log
     console.log(
@@ -17,23 +15,23 @@ export function ConsoleWelcome() {
         "███████║███████║╚██████╔╝╚██████╔╝██║\n" +
         "╚══════╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝\n\n" +
         "%c🥒 " +
-        t("welcome") +
+        messages.console.welcome +
         "\n" +
         "%c✨ " +
-        t("subtitle") +
+        messages.console.subtitle +
         "\n" +
         "%c🚀 " +
-        t("supports") +
+        messages.console.supports +
         "\n" +
         "%c📚 " +
-        t("visit"),
+        messages.console.visit,
       "color: #ff6b35; font-family: monospace; font-size: 12px; line-height: 1.2;",
       "color: #ff6b35; font-size: 20px; font-weight: bold; line-height: 1.8;",
       "color: #6b7280; font-size: 14px; line-height: 1.6;",
       "color: #6b7280; font-size: 14px; line-height: 1.6;",
       "color: #3b82f6; font-size: 14px; line-height: 1.6;",
     );
-  }, [t]);
+  }, []);
 
   return null;
 }

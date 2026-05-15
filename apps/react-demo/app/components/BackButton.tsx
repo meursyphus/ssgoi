@@ -6,16 +6,6 @@ interface BackButtonProps {
   className?: string;
 }
 
-/**
- * Client component for back navigation.
- *
- * Uses router.back() instead of <Link> to trigger proper browser history navigation.
- * This ensures popstate event fires, which is required for SSGOI's skipAnimationOnBack
- * feature to detect back navigation correctly.
- *
- * Note: <Link href="/"> creates a new history entry (push), while router.back()
- * navigates to the previous entry, triggering popstate.
- */
 export function BackButton({ className }: BackButtonProps) {
   const router = useRouter();
 

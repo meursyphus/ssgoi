@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { CodeBlock } from "@/components/ui/code-block";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 export function CodeSection() {
   const [activeTab, setActiveTab] = useState<"setup" | "config">("setup");
-  const t = useTranslations("home");
 
   const setupCode = `import { Ssgoi, SsgoiTransition } from '@ssgoi/react';
 import { fade } from '@ssgoi/react/view-transitions';
@@ -44,13 +43,13 @@ import { fade } from '@ssgoi/react/view-transitions';
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
-            {t("newHome.code.sectionLabel")}
+            {messages.home.newHome.code.sectionLabel}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
-            {t("newHome.code.title")}
+            {messages.home.newHome.code.title}
           </h2>
           <p className="text-xs text-neutral-400">
-            {t("newHome.code.description")}
+            {messages.home.newHome.code.description}
           </p>
         </div>
 
@@ -64,7 +63,7 @@ import { fade } from '@ssgoi/react/view-transitions';
                 : "text-neutral-400 border-transparent hover:text-neutral-200"
             }`}
           >
-            {t("newHome.code.tabSetup")}
+            {messages.home.newHome.code.tabSetup}
           </button>
           <button
             onClick={() => setActiveTab("config")}
@@ -74,7 +73,7 @@ import { fade } from '@ssgoi/react/view-transitions';
                 : "text-neutral-400 border-transparent hover:text-neutral-200"
             }`}
           >
-            {t("newHome.code.tabRouteConfig")}
+            {messages.home.newHome.code.tabRouteConfig}
           </button>
         </div>
 

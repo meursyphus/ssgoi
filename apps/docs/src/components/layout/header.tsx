@@ -4,30 +4,17 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Menu, Github } from "lucide-react";
 import { useState } from "react";
-import { useCurrentLanguage } from "@/i18n/use-current-language";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 import { MobileDrawer } from "./mobile-drawer";
-import { LanguageSwitcher } from "./language-switcher";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 export function Header() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const currentLang = useCurrentLanguage();
-  const t = useTranslations("header");
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    const pathWithoutLang = pathname.replace(
-      new RegExp(`^/${currentLang}`),
-      "",
-    );
-    const cleanPath = path.replace(new RegExp(`^/${currentLang}`), "");
-
-    return (
-      pathWithoutLang === cleanPath ||
-      (cleanPath !== "/" && pathWithoutLang.startsWith(cleanPath))
-    );
+    return pathname === path || (path !== "/" && pathname.startsWith(path));
   };
 
   return (
@@ -35,7 +22,7 @@ export function Header() {
       {/* Mobile Header - Center floating */}
       <header className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-50">
         <div className="px-4 py-2 rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10">
-          <Link href={`/${currentLang}/`} className="flex items-center gap-2">
+          <Link href={`/`} className="flex items-center gap-2">
             <Image
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"
@@ -54,17 +41,14 @@ export function Header() {
         onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
       >
         <Menu className="h-4 w-4" />
-        <span className="sr-only">{t("openMenu")}</span>
+        <span className="sr-only">{messages.header.openMenu}</span>
       </button>
 
       {/* Desktop Header - Center floating */}
       <header className="hidden md:flex justify-center fixed w-[660px]  top-4 left-1/2 -translate-x-1/2 z-50 px-2 py-2 rounded-full bg-neutral-900/70 backdrop-blur-md border border-white/10">
         <div className="flex items-center gap-2 px-2">
           {/* Logo */}
-          <Link
-            href={`/${currentLang}/`}
-            className="flex items-center gap-2 shrink-0"
-          >
+          <Link href={`/`} className="flex items-center gap-2 shrink-0">
             <Image
               src="/ssgoi-logo.png"
               alt="SSGOI Logo"
@@ -78,48 +62,48 @@ export function Header() {
           {/* Navigation */}
           <nav className="flex items-center gap-0.5">
             <Link
-              href={`/${currentLang}/docs`}
+              href={`/docs`}
               className={cn(
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
-                isActive(`/${currentLang}/docs`)
+                isActive(`/docs`)
                   ? "bg-white/10 text-white"
                   : "text-neutral-300 hover:text-white",
               )}
             >
-              {t("docs")}
+              {messages.header.docs}
             </Link>
             <Link
-              href={`/${currentLang}/blog`}
+              href={`/blog`}
               className={cn(
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
-                isActive(`/${currentLang}/blog`)
+                isActive(`/blog`)
                   ? "bg-white/10 text-white"
                   : "text-neutral-300 hover:text-white",
               )}
             >
-              {t("blog")}
+              {messages.header.blog}
             </Link>
             <Link
-              href={`/${currentLang}/demo`}
+              href={`/demo`}
               className={cn(
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
-                isActive(`/${currentLang}/demo`)
+                isActive(`/demo`)
                   ? "bg-white/10 text-white"
                   : "text-neutral-300 hover:text-white",
               )}
             >
-              {t("demo")}
+              {messages.header.demo}
             </Link>
             <Link
-              href={`/${currentLang}/showcase`}
+              href={`/showcase`}
               className={cn(
                 "px-3 py-1.5 text-xs rounded-full transition-colors",
-                isActive(`/${currentLang}/showcase`)
+                isActive(`/showcase`)
                   ? "bg-white/10 text-white"
                   : "text-neutral-300 hover:text-white",
               )}
             >
-              {t("showcase")}
+              {messages.header.showcase}
             </Link>
           </nav>
 
@@ -128,8 +112,6 @@ export function Header() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-1">
-            <LanguageSwitcher />
-
             {/* Discord */}
             <Link
               href="https://discord.gg/9gSSWQbvX4"
@@ -170,7 +152,7 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
               className="h-7 w-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-white hover:bg-white/5 transition-colors"
-              aria-label={t("githubRepository")}
+              aria-label={messages.header.githubRepository}
             >
               <Github className="h-3.5 w-3.5" />
             </Link>
@@ -181,7 +163,6 @@ export function Header() {
       <MobileDrawer
         isOpen={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
-        lang={currentLang}
       />
     </>
   );

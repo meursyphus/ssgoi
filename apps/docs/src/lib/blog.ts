@@ -32,18 +32,17 @@ function removeNumberPrefix(name: string): string {
 }
 
 // Get the post directory path
-function getPostPath(lang: string): string {
-  return path.join(process.cwd(), "post", lang);
+function getPostPath(): string {
+  return path.join(process.cwd(), "post");
 }
 
 /**
  * Get all blog posts metadata for listing
- * @param lang - Language code (e.g., 'ko', 'en')
  * @returns Array of blog post metadata sorted by date (newest first)
  */
-export async function getAllBlogPosts(lang: string): Promise<BlogMetadata[]> {
+export async function getAllBlogPosts(): Promise<BlogMetadata[]> {
   try {
-    const postPath = getPostPath(lang);
+    const postPath = getPostPath();
     const files = await readdir(postPath);
 
     const posts: BlogMetadata[] = [];
@@ -84,16 +83,12 @@ export async function getAllBlogPosts(lang: string): Promise<BlogMetadata[]> {
 
 /**
  * Get a single blog post by slug
- * @param lang - Language code (e.g., 'ko', 'en')
  * @param slug - Blog post slug (filename without extension)
  * @returns Blog post with full content or null if not found
  */
-export async function getBlogPost(
-  lang: string,
-  slug: string,
-): Promise<BlogPost | null> {
+export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const postPath = getPostPath(lang);
+    const postPath = getPostPath();
     const files = await readdir(postPath);
 
     // Find the file with matching slug (ignoring number prefix)
@@ -132,14 +127,12 @@ export async function getBlogPost(
 
 /**
  * Get recent blog posts
- * @param lang - Language code (e.g., 'ko', 'en')
  * @param limit - Number of posts to return
  * @returns Array of recent blog post metadata
  */
 export async function getRecentBlogPosts(
-  lang: string,
   limit: number = 5,
 ): Promise<BlogMetadata[]> {
-  const allPosts = await getAllBlogPosts(lang);
+  const allPosts = await getAllBlogPosts();
   return allPosts.slice(0, limit);
 }

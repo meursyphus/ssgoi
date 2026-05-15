@@ -22,6 +22,12 @@ export interface AnimatorOptions {
     element: HTMLElement;
     style: (progress: number) => StyleObject;
   };
+  keyframes?: {
+    element: HTMLElement;
+    frames: Keyframe[];
+    duration: number;
+    easing?: string;
+  };
   onComplete?: () => void;
   onStart?: () => void;
 }
@@ -49,6 +55,7 @@ export class SingleAnimator extends Animator {
   private currentValue: number;
   private currentVelocity: number = 0;
   private updateFn: (progress: number) => void;
+  private isKeyframesMode: boolean;
 
   constructor(options: AnimatorOptions) {
     super();
@@ -61,8 +68,10 @@ export class SingleAnimator extends Animator {
       onStart: options.onStart,
     };
     this.currentValue = this.options.from;
+    this.isKeyframesMode = !!options.keyframes;
 
-    // Build updateFn from tick or css
+    // Build updateFn from tick or css. Keyframes mode applies styles via
+    // WAAPI directly, so syncState is a noop for it.
     if (options.tick) {
       this.updateFn = (p) => options.tick?.(p);
     } else if (options.css) {
@@ -82,6 +91,7 @@ export class SingleAnimator extends Animator {
     this.runner = RunnerProvider.from({
       tick: options.tick,
       css: options.css,
+      keyframes: options.keyframes,
     });
   }
 
@@ -118,7 +128,9 @@ export class SingleAnimator extends Animator {
     this.isAnimating = true;
 
     this.controls = this.runner({
-      integrator: this.createIntegrator(),
+      // Keyframes mode plays a pre-baked WAAPI animation — no integrator
+      // needed. tick/css modes still require one.
+      integrator: this.isKeyframesMode ? undefined : this.createIntegrator(),
       from: this.currentValue,
       to: targetValue,
       velocity: this.currentVelocity,

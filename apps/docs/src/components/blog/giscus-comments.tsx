@@ -2,14 +2,12 @@
 
 import Giscus from "@giscus/react";
 import { getGiscusLanguage } from "@/lib/giscus-utils";
-import { SupportedLanguage } from "@/i18n/supported-languages";
 
 interface GiscusCommentsProps {
   slug: string; // Use slug as the unique identifier
-  lang: SupportedLanguage;
 }
 
-export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
+export default function GiscusComments({ slug }: GiscusCommentsProps) {
   return (
     <div className="mt-16 pt-6 border-t border-white/5">
       <Giscus
@@ -25,7 +23,7 @@ export default function GiscusComments({ slug, lang }: GiscusCommentsProps) {
         emitMetadata="0"
         inputPosition="bottom"
         theme="dark"
-        lang={getGiscusLanguage(lang)}
+        lang={getGiscusLanguage()}
         loading="lazy"
       />
     </div>

@@ -8,10 +8,12 @@ import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
+// standard easing (Material): peer-level tab switch, quick & balanced.
+// 350/32 = ratio 0.86 of critical (~37.4), ~230ms — punchy but not jarring.
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 600,
-    damping: 40,
+    stiffness: 350,
+    damping: 32,
     restDelta: 0.1,
     restSpeed: 100000000000000,
   },

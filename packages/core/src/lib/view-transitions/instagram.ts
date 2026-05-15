@@ -2,8 +2,11 @@ import type { SggoiTransition, PhysicsOptions } from "../types";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { getRect } from "../utils/get-rect";
 
+// Decisive ease-out, no doubleSpring — instagram's tap-to-zoom is frequent and
+// must feel near-instantaneous. 420/34 ≈ critical damping, pure decelerated curve
+// (apple Photos-style spring), ~180ms perceived.
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 22, doubleSpring: 1 },
+  spring: { stiffness: 420, damping: 34 },
 };
 
 interface InstagramOptions {
@@ -311,10 +314,24 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
 
       return {
         physics: physicsOptions,
+        prepare: () => {
+          // GPU acceleration hints — promote before first frame so paint/raster
+          // /layer-tree cost doesn't stall the start of the animation.
+          element.style.willChange = "transform, clip-path";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+        },
         css: (progress) => {
           // Use inAnimation if available (enterMode), otherwise stay visible
           if (!handlers?.inAnimation) return {};
           return handlers.inAnimation(progress);
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },
@@ -333,6 +350,11 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
           } else {
             prepareOutgoing(element);
           }
+          // GPU acceleration hints
+          element.style.willChange = "transform, clip-path";
+          element.style.backfaceVisibility = "hidden";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
         },
         wait: async () => {
           // Called after insertClone() - element is now in DOM!
@@ -352,6 +374,12 @@ export const instagram = (options: InstagramOptions = {}): SggoiTransition => {
           // Use outAnimation if available (exitMode), otherwise stay visible
           if (!handlers?.outAnimation) return {};
           return handlers.outAnimation(progress);
+        },
+        onEnd: () => {
+          element.style.willChange = "auto";
+          element.style.backfaceVisibility = "";
+          (element.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
         },
       };
     },

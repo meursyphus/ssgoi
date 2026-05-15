@@ -8,10 +8,12 @@ import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 import { withResolvers } from "../utils";
 
+// standard easing (Material Z-axis): in-place transformation, both pages visible.
+// 280/30 = ratio 0.90 of critical (~33.5), near-critical, ~280ms.
 const ENTER_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 600,
-    damping: 40,
+    stiffness: 280,
+    damping: 30,
     restDelta: 0.1,
     restSpeed: 100000000000000,
   },
@@ -19,8 +21,8 @@ const ENTER_PHYSICS: PhysicsOptions = {
 
 const EXIT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 600,
-    damping: 40,
+    stiffness: 280,
+    damping: 30,
     restDelta: 0.1,
     restSpeed: 100000000000000,
   },

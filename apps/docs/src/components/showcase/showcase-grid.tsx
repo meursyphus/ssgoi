@@ -6,10 +6,9 @@ import { ShowcaseModal } from "./showcase-modal";
 import { showcaseData, type ShowcaseItem } from "./showcase-data";
 import { GitPullRequest, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 export function ShowcaseGrid() {
-  const t = useTranslations("showcase");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const featuredItems = showcaseData.filter((item) => item.featured);
@@ -38,29 +37,37 @@ export function ShowcaseGrid() {
           </p>
         </div>
         <h1 className="text-3xl font-light tracking-tight mb-3">
-          {t("title")}
+          {messages.showcase.title}
         </h1>
-        <p className="text-sm text-neutral-500 max-w-xl">{t("subtitle")}</p>
+        <p className="text-sm text-neutral-500 max-w-xl">
+          {messages.showcase.subtitle}
+        </p>
       </div>
 
       {/* Stats Bar */}
       <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/5">
         <div className="flex items-center gap-2">
           <span className="text-2xl font-light">{showcaseData.length}</span>
-          <span className="text-xs text-neutral-500">{t("projects")}</span>
+          <span className="text-xs text-neutral-500">
+            {messages.showcase.projects}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-2xl font-light">{featuredItems.length}</span>
-          <span className="text-xs text-neutral-500">{t("featured")}</span>
+          <span className="text-xs text-neutral-500">
+            {messages.showcase.featured}
+          </span>
         </div>
       </div>
 
       {showcaseData.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-16 text-center">
           <p className="mb-2 text-base font-medium text-neutral-300">
-            {t("noSitesYet")}
+            {messages.showcase.noSitesYet}
           </p>
-          <p className="text-sm text-neutral-500">{t("beTheFirst")}</p>
+          <p className="text-sm text-neutral-500">
+            {messages.showcase.beTheFirst}
+          </p>
         </div>
       ) : (
         <>
@@ -68,7 +75,7 @@ export function ShowcaseGrid() {
           {featuredItems.length > 0 && (
             <div className="mb-12">
               <h2 className="text-[10px] text-neutral-500 uppercase tracking-wider mb-4">
-                {t("featured")}
+                {messages.showcase.featured}
               </h2>
               <div className="grid gap-6 md:grid-cols-2">
                 {featuredItems.map((item: ShowcaseItem) => {
@@ -92,7 +99,7 @@ export function ShowcaseGrid() {
           {regularItems.length > 0 && (
             <div className="mb-12">
               <h2 className="text-[10px] text-neutral-500 uppercase tracking-wider mb-4">
-                {t("allProjects")}
+                {messages.showcase.allProjects}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {regularItems.map((item: ShowcaseItem) => {
@@ -121,11 +128,11 @@ export function ShowcaseGrid() {
             <div className="flex items-center gap-2 mb-2">
               <GitPullRequest className="h-5 w-5 text-neutral-400" />
               <h3 className="text-lg font-medium text-white">
-                {t("addYourSite")}
+                {messages.showcase.addYourSite}
               </h3>
             </div>
             <p className="text-sm text-neutral-500 max-w-md">
-              {t("addYourSiteDescription")}
+              {messages.showcase.addYourSiteDescription}
             </p>
           </div>
           <Link
@@ -134,7 +141,7 @@ export function ShowcaseGrid() {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-medium bg-white text-black hover:bg-neutral-200 transition-colors shrink-0"
           >
-            {t("submitViaPR")}
+            {messages.showcase.submitViaPR}
           </Link>
         </div>
       </div>

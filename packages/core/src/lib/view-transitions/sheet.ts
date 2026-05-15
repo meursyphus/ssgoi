@@ -7,17 +7,22 @@ import type {
 import { getRect } from "../utils/get-rect";
 import { prepareOutgoing } from "../utils/prepare-outgoing";
 
+// ease-out (Material decelerated): sheet rises and lands gracefully (incoming).
+// 200/24 = ratio 0.85 of critical (~28.3), ~290ms.
 const ENTER: PhysicsOptions = {
-  inertia: {
-    acceleration: 20,
-    resistance: 1.5,
+  spring: {
+    stiffness: 200,
+    damping: 24,
   },
 };
 
+// ease-in (Material accelerated): sheet falls away (outgoing).
+// Spring can't produce true ease-in (always decelerative); inertia integrator
+// starts at v=0 and accelerates toward target — natural acceleration curve.
 const EXIT: PhysicsOptions = {
   inertia: {
-    acceleration: 20,
-    resistance: 1,
+    acceleration: 25,
+    resistance: 1.2,
   },
 };
 
@@ -38,14 +43,21 @@ function getSheetRect(context: SggoiTransitionContext) {
   const containerRect = getRect(document.body, context.positionedParent);
   const top = context.scroll.y;
 
-  // Calculate viewport height considering container offset (like jaemin.ts)
-  const viewportHeight = window.innerHeight - containerRect.top;
+  // Calculate viewport height considering container offset
+  const viewportHeight =
+    context.scrollingElement.offsetHeight - containerRect.top;
 
-  return {
+  const rect = {
     top,
     left: 0,
     width: containerRect.width,
     height: viewportHeight,
+  };
+
+  return {
+    ...rect,
+    centerX: rect.left + rect.width / 2,
+    centerY: rect.top + rect.height / 2,
   };
 }
 
@@ -72,7 +84,6 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       // Entering sheet: slides up from bottom
       in: (element, context) => {
         const rect = getSheetRect(context);
-        const viewportHeight = rect.height;
 
         return {
           physics: physicsOptions,
@@ -82,9 +93,12 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             (
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
+            // Clip the sheet to its viewport-aligned slice so translate3d only
+            // shows the slice the user was looking at, not the rest of the page.
+            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
           },
           css: (progress): StyleObject => ({
-            transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,
+            transform: `translate3d(0, ${(1 - progress) * rect.height}px, 0)`,
           }),
           onEnd: () => {
             element.style.willChange = "auto";
@@ -92,6 +106,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             (
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "";
+            element.style.clipPath = "";
           },
         };
       },
@@ -99,7 +114,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       out: (element, context) => {
         const rect = getSheetRect(context);
         const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2 + context.scrollOffset.y;
+        const centerY = rect.top + rect.height / 2;
 
         return {
           physics: physicsOptions,
@@ -113,6 +128,9 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
             ).contain = "layout paint";
             element.style.pointerEvents = "none";
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Clip to the viewport-aligned slice so scaling doesn't pull
+            // off-viewport content (above/below the scroll position) into view.
+            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
@@ -139,6 +157,9 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
             element.style.transformOrigin = `${centerX}px ${centerY}px`;
+            // Clip to the viewport-aligned slice so scaling doesn't pull
+            // off-viewport content (above/below the scroll position) into view.
+            element.style.clipPath = `inset(${rect.top}px 0 calc(100% - ${rect.top + rect.height}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `scale(${1 - scaleOffset + progress * scaleOffset})`,
@@ -151,6 +172,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "";
             element.style.transformOrigin = "";
+            element.style.clipPath = "";
           },
         };
       },
@@ -158,6 +180,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
       out: (element, context) => {
         const rect = getSheetRect(context);
         const viewportHeight = rect.height;
+        const visibleTop = context.scroll.y;
 
         return {
           physics: physicsOptions,
@@ -170,6 +193,7 @@ export const sheet = (options: SheetOptions = {}): SggoiTransition => {
               element.style as CSSStyleDeclaration & { contain: string }
             ).contain = "layout paint";
             element.style.pointerEvents = "none";
+            element.style.clipPath = `inset(${visibleTop}px 0 calc(100% - ${visibleTop + viewportHeight}px) 0)`;
           },
           css: (progress): StyleObject => ({
             transform: `translate3d(0, ${(1 - progress) * viewportHeight}px, 0)`,

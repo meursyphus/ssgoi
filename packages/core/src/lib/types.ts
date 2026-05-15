@@ -1,5 +1,4 @@
 import type { Integrator } from "./animator/integrator";
-import type { CreateNavigationDetector } from "./ssgoi-transition/navigation-detector-strategy";
 
 export type TransitionKey = string | symbol;
 
@@ -187,13 +186,29 @@ export type SingleSpringConfig = BaseTransitionConfig & {
 };
 
 /**
- * Individual animation item in a multi-animation config
- *
- * Supports two animation modes (mutually exclusive):
- * - tick: RAF-based animation with callback on each frame
- * - css: Web Animation API with CSS string generation
+ * Common fields shared by every AnimationItem variant
  */
-export type AnimationItem = {
+type AnimationItemBase = {
+  onStart?: () => void;
+  onComplete?: () => void;
+
+  /**
+   * Progress offset (0-1) before this spring starts
+   * - 0: Start immediately (parallel behavior)
+   * - 1: Start after previous spring completes (sequential behavior)
+   * - 0.5: Start when previous spring is 50% complete
+   *
+   * Only applies to 'stagger' schedule mode.
+   * For 'parallel' mode, all springs start at 0.
+   * For 'sequential' mode, all springs use offset 1.
+   */
+  offset?: number;
+};
+
+/**
+ * Spring-driven animation item — physics drives a tick or css generator
+ */
+export type SpringAnimationItem = AnimationItemBase & {
   /**
    * Physics configuration for animation
    * Choose one: spring (ease-out), inertia (ease-in), or custom integrator
@@ -225,42 +240,50 @@ export type AnimationItem = {
    *
    * @param progress - Current progress value (0 to 1)
    * @returns Style object for Web Animation API
-   *
-   * @example
-   * // Form 1: Function (element from parent)
-   * css: (progress) => ({
-   *   opacity: progress,
-   *   transform: `translateY(${(1 - progress) * 20}px)`,
-   * })
-   *
-   * @example
-   * // Form 2: Object with custom element
-   * css: {
-   *   element: myElement,
-   *   style: (progress) => ({
-   *     transform: `scale(${progress})`,
-   *   }),
-   * }
    */
   css?:
     | ((progress: number) => StyleObject)
     | { element: HTMLElement; style: (progress: number) => StyleObject };
 
-  onStart?: () => void;
-  onComplete?: () => void;
-
-  /**
-   * Progress offset (0-1) before this spring starts
-   * - 0: Start immediately (parallel behavior)
-   * - 1: Start after previous spring completes (sequential behavior)
-   * - 0.5: Start when previous spring is 50% complete
-   *
-   * Only applies to 'stagger' schedule mode.
-   * For 'parallel' mode, all springs start at 0.
-   * For 'sequential' mode, all springs use offset 1.
-   */
-  offset?: number;
+  /** keyframes mode is mutually exclusive with physics/tick/css */
+  keyframes?: never;
 };
+
+/**
+ * Pre-baked keyframes animation item — bypasses physics simulation
+ *
+ * Plays a pre-built `Keyframe[]` directly via Web Animation API. Use this when
+ * you've already composed the desired motion as keyframes (e.g. multiple springs
+ * baked into a single timeline) and want the animation to run entirely on the
+ * compositor with zero per-frame JS.
+ */
+export type KeyframesAnimationItem = AnimationItemBase & {
+  keyframes: {
+    /** Element to animate */
+    element: HTMLElement;
+    /** WAAPI keyframe array (offsets 0..1) */
+    frames: Keyframe[];
+    /** Total animation duration in ms */
+    duration: number;
+    /** WAAPI easing string (default: "linear") */
+    easing?: string;
+  };
+
+  /** physics/tick/css are not used in keyframes mode */
+  physics?: never;
+  tick?: never;
+  css?: never;
+};
+
+/**
+ * Individual animation item in a multi-animation config
+ *
+ * Three mutually-exclusive modes:
+ * - tick: RAF-based animation with callback on each frame
+ * - css: Web Animation API, generated from spring physics
+ * - keyframes: Web Animation API, played from pre-baked Keyframe[]
+ */
+export type AnimationItem = SpringAnimationItem | KeyframesAnimationItem;
 
 /**
  * Multi-animation configuration
@@ -317,6 +340,19 @@ export function isTickAnimation(
   config: SingleSpringConfig,
 ): config is SingleSpringConfig & { tick: (progress: number) => void } {
   return "tick" in config && typeof config.tick === "function";
+}
+
+/**
+ * Type guard to check if an AnimationItem uses pre-baked keyframes mode
+ */
+export function isKeyframesAnimation(
+  item: AnimationItem,
+): item is KeyframesAnimationItem {
+  return (
+    "keyframes" in item &&
+    item.keyframes !== undefined &&
+    item.keyframes !== null
+  );
 }
 
 /**
@@ -445,15 +481,6 @@ export type SggoiTransitionContext = {
 
 export type SggoiTransition = Transition<SggoiTransitionContext>;
 
-/**
- * Platform types for skipAnimationOnBack configuration
- * - 'ios': iOS devices (iPhone, iPad, iPod)
- * - 'android': Android devices
- * - 'desktop': Desktop browsers (non-mobile)
- * - 'all': All platforms
- */
-export type Platform = "ios" | "android" | "desktop" | "all";
-
 export type SsgoiConfig = {
   transitions?: {
     from: string;
@@ -464,53 +491,19 @@ export type SsgoiConfig = {
   defaultTransition?: SggoiTransition;
   middleware?: (from: string, to: string) => { from: string; to: string };
   /**
-   * @deprecated Use `skipAnimationOnBack: ['ios']` instead. Will be removed in next major version.
-   * Skip page transitions when iOS/Safari swipe-back gesture is detected
+   * Automatically preserve and restore scroll position when navigating between pages.
+   *
+   * - `false`: scroll positions are tracked only for the OUT transition diff,
+   *   then evicted — SSGOI does not restore scroll on arrival.
+   * - `true`: save scroll on leave, restore on return. New (unvisited) paths scroll to 0.
+   * - `{ exclude: string[] }`: preserve everywhere except matching paths. Excluded paths
+   *   behave like `false` (evict, no restore). Supports wildcards: `/post/*`, `*`.
+   * - `(isMobile) => value`: function returning any of the above; evaluated on each
+   *   navigation so the answer can vary by environment (e.g. mobile vs. desktop).
+   *
+   * @default (isMobile) => isMobile  // mobile preserves, desktop does not
    */
-  skipOnIosSwipe?: boolean;
-  /**
-   * Skip animations on browser back navigation for specified platforms
-   *
-   * @example
-   * // iOS only (default)
-   * skipAnimationOnBack: ['ios']
-   *
-   * // iOS and Android
-   * skipAnimationOnBack: ['ios', 'android']
-   *
-   * // All platforms
-   * skipAnimationOnBack: ['all']
-   *
-   * // Disabled - always run animations
-   * skipAnimationOnBack: []
-   *
-   * This prevents animation conflicts with native swipe-back gestures.
-   * @default ['ios']
-   */
-  skipAnimationOnBack?: Platform[];
-  /**
-   * @description Automatically preserve and restore scroll position when navigating between pages.
-   * When enabled, SSGOI will:
-   * - Save scroll position when leaving a page
-   * - Restore scroll position when returning to a previously visited page
-   *
-   * @experimental This is an experimental feature and may change in future versions.
-   * @default false
-   */
-  experimentalPreserveScroll?: boolean;
-  /**
-   * @description Patterns for routes that should always reset scroll to top when leaving.
-   * When navigating away from a matching route, scroll position will be saved as 0.
-   * This means returning to these routes will always start at the top.
-   *
-   * Supports wildcard patterns:
-   * - '/post/*' matches '/post/123', '/post/abc', etc.
-   * - '*' matches any path
-   *
-   * @example ['/post/*', '/article/*', '/product/detail/*']
-   * @experimental This is an experimental feature and may change in future versions.
-   */
-  scrollResetPatterns?: string[];
+  preserveScroll?: PreserveScrollOption;
   /**
    * @description Explicitly specify the scroll container element.
    *
@@ -526,6 +519,10 @@ export type SsgoiConfig = {
   getScrollContainer?: () => HTMLElement | null;
 };
 
+export type PreserveScrollValue = boolean | { exclude: string[] };
+export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
+export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
+
 /**
  * Internal options for framework adapters
  * Not exposed to end users
@@ -536,39 +533,20 @@ export type SsgoiInternalOptions = {
    * Whether OUT transition must arrive before IN transition
    *
    * - true (default): OUT must arrive first, IN completes the pair.
-   *   Best for frameworks with native destroy callbacks (Svelte, Vue).
+   *   Best for frameworks with native destroy callbacks (Svelte).
    *
    * - false: OUT and IN can arrive in any order, both wait indefinitely.
-   *   Best for frameworks using MutationObserver for unmount detection (React).
+   *   Best for frameworks using MutationObserver for unmount detection
+   *   (React, Vue, Solid).
    *
    * @default true
    */
   outFirst?: boolean;
-
-  /**
-   * Custom navigation detector factory
-   * If provided, overrides the default detector selection based on outFirst
-   * Also returns SsgoiExtendedContext instead of SsgoiContext
-   */
-  createNavigationDetector?: CreateNavigationDetector;
 };
 
 export type SsgoiContext = (
   path: string,
 ) => Transition & { key: TransitionKey };
-
-/**
- * Extended context with additional utilities for frameworks that need
- * pre-transition visibility control (e.g., React with Next.js)
- */
-export type SsgoiExtendedContext = {
-  getTransition: SsgoiContext;
-  /**
-   * Check if a transition is configured for the given from/to paths
-   * Useful for determining initial visibility before transition starts
-   */
-  hasMatchingTransition: (from: string, to: string) => boolean;
-};
 
 /**
  * Normalized schedule entry for internal processing
@@ -594,13 +572,24 @@ export type NormalizedScheduleEntry = {
 
 /**
  * Normalized animation item for internal use
- * - css is always in object form: { element, style }
+ * - css is always in object form: { element, style } (spring mode)
+ * - keyframes pass through as-is (already normalized — element required)
  * - normalizedOffset is always present
  * @internal
  */
-export type NormalizedAnimationItem = Omit<AnimationItem, "css" | "offset"> & {
-  css?: { element: HTMLElement; style: (progress: number) => StyleObject };
+export type NormalizedAnimationItem = {
+  onStart?: () => void;
+  onComplete?: () => void;
   normalizedOffset: number;
+  physics?: PhysicsOptions;
+  tick?: (progress: number) => void;
+  css?: { element: HTMLElement; style: (progress: number) => StyleObject };
+  keyframes?: {
+    element: HTMLElement;
+    frames: Keyframe[];
+    duration: number;
+    easing?: string;
+  };
 };
 
 /**
@@ -654,7 +643,15 @@ export function normalizeSchedule(
           normalizedOffset = 0;
       }
 
-      // Normalize css to object form
+      // Keyframes items pass through unchanged — they're already self-contained
+      // (element baked in, no physics, no css to normalize).
+      if (isKeyframesAnimation(item)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { offset: _, ...rest } = item;
+        return { ...rest, normalizedOffset };
+      }
+
+      // Spring item: normalize css to object form
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { css, offset: _, ...itemRest } = item;
       const normalizedCss = css

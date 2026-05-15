@@ -3,8 +3,8 @@
  *
  * Collects out/in navigation events and provides navigation pairs.
  * Each strategy handles the timing differently:
- * - OutFirst: OUT must arrive before IN (for Svelte, Vue)
- * - AnyOrder: OUT and IN can arrive in any order (for React)
+ * - OutFirst: OUT must arrive before IN (for Svelte)
+ * - AnyOrder: OUT and IN can arrive in any order (for React, Vue, Solid)
  */
 
 export type NavigationPair = {

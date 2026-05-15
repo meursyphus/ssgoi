@@ -220,9 +220,14 @@ export default function App() {
 
   return (
     <BrowserContext.Provider value={{ currentPath, navigate, routes }}>
+      {/* Inline styles for overflow/height: Tailwind CDN loads async in
+          Sandpack, so utility classes aren't applied yet when SSGOI's
+          getScrollingElement runs. Inline styles take effect immediately
+          and ensure this div is detected as the scroll container. */}
       <div
         ref={contentRef}
-        className="browser-content z-0 relative bg-[#121212] h-screen overflow-y-scroll"
+        className="browser-content z-0 relative bg-[#121212]"
+        style={{ height: "100vh", overflowY: "scroll", position: "relative" }}
       >
         <Ssgoi config={config}>
           <DemoLayout>

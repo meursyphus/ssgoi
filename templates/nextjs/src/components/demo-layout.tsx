@@ -15,8 +15,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
-      experimentalPreserveScroll: true,
-      scrollResetPatterns: ["/posts/*"],
+      preserveScroll: { exclude: ["/posts/*"] },
       transitions: [
         // Pinterest transitions
         {
@@ -57,9 +56,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={config} usePathname={usePathname}>
-            {children}
-          </Ssgoi>
+          <Ssgoi config={config}>{children}</Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

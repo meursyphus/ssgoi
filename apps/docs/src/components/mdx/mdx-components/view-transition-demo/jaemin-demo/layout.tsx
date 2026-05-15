@@ -46,7 +46,7 @@ export const DemoLayout = memo(({ children }: DemoLayoutProps) => {
   const { currentPath, navigate, routes } = context;
 
   return (
-    <div className="relative min-h-full">
+    <div className="overflow-x-clip relative z-0">
       {/* Floating Header - Fixed, centered, doesn't take up space */}
       <header className="fixed top-3 left-1/2 -translate-x-1/2 z-[9999]">
         <div

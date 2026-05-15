@@ -1,30 +1,26 @@
 "use client";
 
-import { X, FileText, Globe, Menu, BookOpen } from "lucide-react";
+import { X, FileText, Menu, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar";
 import { useEffect, useState } from "react";
 import { useOutsideClick } from "@/lib/use-click-outside";
-import { LANGUAGE_LIST } from "@/i18n/supported-languages";
 import { SidebarContent } from "@/components/docs/sidebar-content";
 import { useNavigationStore } from "@/store/navigation";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  lang: string;
 }
 
-export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
+export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const isDocsPage = pathname.includes("/docs");
   const { toggle: toggleSidebar } = useSidebarStore();
   const onOutsideClick = useOutsideClick();
   const navigation = useNavigationStore((state) => state.navigation);
-  const t = useTranslations("mobileMenu");
 
   // 탭 상태 관리 - 문서 페이지에서는 'docs'가 기본값
   const [activeTab, setActiveTab] = useState<"menu" | "docs">(
@@ -42,15 +38,6 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
   useEffect(() => {
     setActiveTab(isDocsPage ? "docs" : "menu");
   }, [isDocsPage]);
-
-  const handleLanguageChange = (locale: string) => {
-    const pathSegments = pathname.split("/");
-    pathSegments[1] = locale;
-    const newPath = pathSegments.join("/");
-
-    router.push(newPath);
-    onClose();
-  };
 
   return (
     <>
@@ -84,7 +71,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                     }`}
                   >
                     <BookOpen className="h-4 w-4" />
-                    {t("documentToc")}
+                    {messages.mobileMenu.documentToc}
                   </button>
                 )}
                 <button
@@ -96,7 +83,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                   }`}
                 >
                   <Menu className="h-4 w-4" />
-                  {t("menu")}
+                  {messages.mobileMenu.menu}
                 </button>
               </div>
               <button
@@ -104,7 +91,9 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-800 h-9 w-9 text-gray-300 hover:text-white"
               >
                 <X className="h-5 w-5" />
-                <span className="sr-only">{t("closeDrawer")}</span>
+                <span className="sr-only">
+                  {messages.mobileMenu.closeDrawer}
+                </span>
               </button>
             </div>
             <div className="border-b border-zinc-800" />
@@ -115,18 +104,16 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
             {/* 문서 탭 콘텐츠 */}
             {activeTab === "docs" && isDocsPage && navigation && (
               <div>
-                <SidebarContent
-                  navigation={navigation}
-                  lang={lang}
-                  onLinkClick={onClose}
-                />
+                <SidebarContent navigation={navigation} onLinkClick={onClose} />
               </div>
             )}
 
             {/* 문서 탭이지만 navigation이 없는 경우 (문서 페이지가 아닐 때) */}
             {activeTab === "docs" && !navigation && (
               <div className="text-center py-8">
-                <p className="text-sm text-gray-300">{t("noDocumentPage")}</p>
+                <p className="text-sm text-gray-300">
+                  {messages.mobileMenu.noDocumentPage}
+                </p>
               </div>
             )}
 
@@ -136,33 +123,33 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                 {/* Navigation Section */}
                 <div>
                   <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
-                    {t("navigation")}
+                    {messages.mobileMenu.navigation}
                   </h3>
                   <nav>
                     <ul className="space-y-2">
                       <li>
                         <Link
-                          href={`/${lang}/docs`}
+                          href={`/docs`}
                           onClick={onClose}
                           className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
                         >
                           <FileText className="h-4 w-4" />
-                          {t("documents")}
+                          {messages.mobileMenu.documents}
                         </Link>
                       </li>
                       <li>
                         <Link
-                          href={`/${lang}/blog`}
+                          href={`/blog`}
                           onClick={onClose}
                           className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
                         >
                           <BookOpen className="h-4 w-4" />
-                          {t("blog")}
+                          {messages.mobileMenu.blog}
                         </Link>
                       </li>
                       <li>
                         <Link
-                          href={`/${lang}/demo`}
+                          href={`/demo`}
                           onClick={onClose}
                           className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
                         >
@@ -176,12 +163,12 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                             <rect x="7" y="4" width="10" height="16" rx="1" />
                             <circle cx="12" cy="17" r="1" />
                           </svg>
-                          {t("demo")}
+                          {messages.mobileMenu.demo}
                         </Link>
                       </li>
                       <li>
                         <Link
-                          href={`/${lang}/showcase`}
+                          href={`/showcase`}
                           onClick={onClose}
                           className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-zinc-800 transition-colors"
                         >
@@ -194,7 +181,7 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                           >
                             <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
                           </svg>
-                          {t("showcase")}
+                          {messages.mobileMenu.showcase}
                         </Link>
                       </li>
                     </ul>
@@ -267,29 +254,6 @@ export function MobileDrawer({ isOpen, onClose, lang }: MobileDrawerProps) {
                       </li>
                     </ul>
                   </nav>
-                </div>
-
-                {/* Language Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
-                    {t("language")}
-                  </h3>
-                  <div className="space-y-2">
-                    {LANGUAGE_LIST.map((language) => (
-                      <button
-                        key={language.locale}
-                        onClick={() => handleLanguageChange(language.locale)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                          lang === language.locale
-                            ? "bg-zinc-800 text-white"
-                            : "text-gray-300 hover:text-white hover:bg-zinc-800"
-                        }`}
-                      >
-                        <Globe className="h-4 w-4" />
-                        {language.title}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
             )}

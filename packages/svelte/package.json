@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/svelte",
-  "version": "4.0.0",
+  "version": "5.2.0",
   "description": "Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit applications",
   "private": false,
   "main": "./dist/index.js",
@@ -10,7 +10,7 @@
     "build": "svelte-package",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "prepare": "pnpm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "files": [
     "dist",
@@ -48,10 +48,18 @@
   },
   "keywords": [
     "svelte",
+    "sveltekit",
     "page-transition",
+    "page-transitions",
+    "view-transitions",
+    "view-transition-api-alternative",
     "animation",
     "ssgoi",
-    "spring-physics"
+    "spring-physics",
+    "cross-browser",
+    "navigation-animation",
+    "hero-transition",
+    "shared-element-transition"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

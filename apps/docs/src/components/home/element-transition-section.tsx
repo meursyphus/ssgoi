@@ -10,7 +10,7 @@ import {
   blur,
   bounce,
 } from "@ssgoi/react/transitions";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 import { SpringGraphPanel, DEFAULT_SPRING } from "./spring-graph";
 import type { GraphConfig } from "./spring-graph";
 import type { SpringConfig, InertiaConfig } from "@ssgoi/core/types";
@@ -22,7 +22,6 @@ export function ElementTransitionSection() {
     follower: null,
     inertia: null,
   });
-  const t = useTranslations("home");
 
   // Convert graph config to physics options for transitions
   const physics = useMemo(() => {
@@ -59,13 +58,13 @@ export function ElementTransitionSection() {
         {/* Section header */}
         <div className="text-center mb-12">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-3">
-            {t("newHome.elementTransition.sectionLabel")}
+            {messages.home.newHome.elementTransition.sectionLabel}
           </p>
           <h2 className="text-xl font-light tracking-tight mb-2">
-            {t("newHome.elementTransition.title")}
+            {messages.home.newHome.elementTransition.title}
           </h2>
           <p className="text-xs text-neutral-400">
-            {t("newHome.elementTransition.description")}
+            {messages.home.newHome.elementTransition.description}
           </p>
         </div>
 
@@ -120,8 +119,8 @@ export function ElementTransitionSection() {
             className="px-4 py-1.5 text-xs text-neutral-300 border border-white/10 rounded-md hover:border-white/20 hover:text-white transition-all"
           >
             {show
-              ? t("newHome.elementTransition.toggleHide")
-              : t("newHome.elementTransition.toggleShow")}
+              ? messages.home.newHome.elementTransition.toggleHide
+              : messages.home.newHome.elementTransition.toggleShow}
           </button>
         </div>
 

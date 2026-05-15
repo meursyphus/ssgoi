@@ -11,7 +11,7 @@ import {
   Calendar,
 } from "lucide-react";
 import type { ShowcaseItem } from "./showcase-data";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
 interface ShowcaseModalProps {
   item: ShowcaseItem;
@@ -28,7 +28,6 @@ export function ShowcaseModal({
   onClose,
   onNavigate,
 }: ShowcaseModalProps) {
-  const t = useTranslations("showcase");
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   const gallery = item.gallery?.length ? item.gallery : [item.thumbnail];
@@ -85,7 +84,7 @@ export function ShowcaseModal({
         <button
           onClick={handlePrevProject}
           className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all group"
-          title={t("prevProject")}
+          title={messages.showcase.prevProject}
         >
           <ChevronLeft className="w-6 h-6" />
           <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 text-xs text-white/40 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -99,7 +98,7 @@ export function ShowcaseModal({
         <button
           onClick={handleNextProject}
           className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all group"
-          title={t("nextProject")}
+          title={messages.showcase.nextProject}
         >
           <ChevronRight className="w-6 h-6" />
           <span className="absolute left-full ml-3 top-1/2 -translate-y-1/2 text-xs text-white/40 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -226,7 +225,9 @@ export function ShowcaseModal({
               {item.framework && (
                 <div className="flex items-center gap-3 text-xs">
                   <Globe className="w-4 h-4 text-neutral-500" />
-                  <span className="text-neutral-500">{t("framework")}</span>
+                  <span className="text-neutral-500">
+                    {messages.showcase.framework}
+                  </span>
                   <span className="text-neutral-300 ml-auto">
                     {item.framework}
                   </span>
@@ -235,7 +236,9 @@ export function ShowcaseModal({
               {item.year && (
                 <div className="flex items-center gap-3 text-xs">
                   <Calendar className="w-4 h-4 text-neutral-500" />
-                  <span className="text-neutral-500">{t("year")}</span>
+                  <span className="text-neutral-500">
+                    {messages.showcase.year}
+                  </span>
                   <span className="text-neutral-300 ml-auto">{item.year}</span>
                 </div>
               )}
@@ -248,27 +251,27 @@ export function ShowcaseModal({
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-white text-black rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors"
             >
-              {t("visitSite")}
+              {messages.showcase.visitSite}
               <ExternalLink className="w-4 h-4" />
             </a>
 
             {/* Keyboard Hints */}
             <div className="mt-6 pt-6 border-t border-white/5">
               <p className="text-[10px] text-neutral-600 uppercase tracking-wider mb-2">
-                {t("keyboardNav")}
+                {messages.showcase.keyboardNav}
               </p>
               <div className="space-y-1 text-[10px] text-neutral-500">
                 <p>
                   <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-neutral-400">
                     ESC
                   </kbd>{" "}
-                  {t("toClose")}
+                  {messages.showcase.toClose}
                 </p>
                 <p>
                   <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-neutral-400">
                     ← →
                   </kbd>{" "}
-                  {t("browseProjects")}
+                  {messages.showcase.browseProjects}
                 </p>
               </div>
             </div>

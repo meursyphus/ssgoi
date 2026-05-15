@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "4.2.1",
+  "version": "5.2.0",
   "description": "React bindings for SSGOI - Native app-like page transitions for React applications",
   "private": false,
   "type": "module",
@@ -109,9 +109,20 @@
   "keywords": [
     "react",
     "page-transition",
+    "page-transitions",
+    "view-transitions",
+    "view-transition-api-alternative",
     "animation",
     "ssgoi",
-    "spring-physics"
+    "spring-physics",
+    "nextjs",
+    "next-js",
+    "cross-browser",
+    "navigation-animation",
+    "hero-transition",
+    "shared-element-transition",
+    "route-transition",
+    "drill-transition"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

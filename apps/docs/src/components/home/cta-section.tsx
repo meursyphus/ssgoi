@@ -2,30 +2,24 @@
 
 import Link from "next/link";
 import { ArrowRight, Github } from "lucide-react";
-import { useTranslations } from "@/i18n/use-translations";
+import { messages } from "@/messages";
 
-interface CTASectionProps {
-  lang: string;
-}
-
-export function CTASection({ lang }: CTASectionProps) {
-  const t = useTranslations("home");
-
+export function CTASection() {
   return (
     <section className="py-24 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto text-center">
         <h2 className="text-2xl font-light tracking-tight mb-4">
-          {t("newHome.cta.title")}
+          {messages.home.newHome.cta.title}
         </h2>
         <p className="text-sm text-neutral-400 mb-8 max-w-md mx-auto">
-          {t("newHome.cta.description")}
+          {messages.home.newHome.cta.description}
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
-            href={`/${lang}/docs`}
+            href={`/docs`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors"
           >
-            {t("newHome.cta.viewDocs")}
+            {messages.home.newHome.cta.viewDocs}
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <a

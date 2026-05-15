@@ -1,4 +1,4 @@
-import type { NavigationItem } from "@/app/[lang]/docs/sidebar";
+import type { NavigationItem } from "@/app/docs/sidebar";
 
 interface NavigationLink {
   title: string;
@@ -38,12 +38,11 @@ function flattenNavigation(items: NavigationItem[]): NavigationLink[] {
 export function findNavigationLinks(
   navigation: NavigationItem[],
   currentPath: string,
-  lang: string,
 ): NavigationLinks {
   const flattened = flattenNavigation(navigation);
 
-  // Remove the language prefix from the current path for comparison
-  const normalizedCurrentPath = currentPath.replace(`/${lang}/docs/`, "");
+  // Remove the docs prefix from the current path for comparison
+  const normalizedCurrentPath = currentPath.replace(`/docs/`, "");
 
   // Find the current page index
   const currentIndex = flattened.findIndex(
