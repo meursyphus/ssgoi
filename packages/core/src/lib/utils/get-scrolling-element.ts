@@ -1,3 +1,5 @@
+const SCROLLABLE_OVERFLOW_VALUES = new Set(["auto", "scroll", "overlay"]);
+
 /**
  * Gets the scrolling element that contains the given element
  * Returns the first scrollable parent element or document.documentElement
@@ -7,17 +9,10 @@ export const getScrollingElement = (element: HTMLElement): HTMLElement => {
 
   while (current && current !== document.body) {
     const style = window.getComputedStyle(current);
-    const overflow = style.overflow + style.overflowY + style.overflowX;
 
-    // Check if element is scrollable
-    if (overflow.includes("auto") || overflow.includes("scroll")) {
-      return current;
-    }
-
-    // Also check if element has scroll even without explicit overflow
     if (
-      current.scrollHeight > current.clientHeight ||
-      current.scrollWidth > current.clientWidth
+      SCROLLABLE_OVERFLOW_VALUES.has(style.overflowY) ||
+      SCROLLABLE_OVERFLOW_VALUES.has(style.overflowX)
     ) {
       return current;
     }
