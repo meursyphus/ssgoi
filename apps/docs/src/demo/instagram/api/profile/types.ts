@@ -24,5 +24,4 @@ export type ProfileMe = {
   followersLabel: string;
   followingLabel: string;
   highlights: Highlight[];
-  speechBubble: string;
 };

@@ -21,7 +21,7 @@ function StatusBar() {
 
       <div className="flex items-center justify-between px-5 py-1 text-[11px] font-medium">
         <span>9:41</span>
-        <span className="absolute left-1/2 -translate-x-1/2 truncate text-[10px] text-white/40">
+        <span className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate text-[10px] text-white/40">
           {pathname}
         </span>
         <div className="flex items-center gap-1">

@@ -19,7 +19,6 @@ export function InstagramProfileLayoutClient({
 }) {
   const base = `/demo/instagram/profile/${id}`;
 
-  // inner ssgoi — 4탭 사이 slide. [id]별로 path 고정 → exact match
   const innerConfig: SsgoiConfig = useMemo(
     () => ({
       preserveScroll: false,
@@ -44,8 +43,6 @@ export function InstagramProfileLayoutClient({
   const me = profile.me.data;
 
   return (
-    // outer SsgoiTransition — inner Ssgoi 위에 두어야 outer 컨텍스트에 등록되어 zoom 매칭이 잡힘.
-    // 스크롤은 자체로 잡지 않고 mobile-frame outer scroll에 위임. top-bar/tabs/bottom-bar는 sticky.
     <SsgoiTransition
       id={base}
       className="relative block min-h-full w-full bg-white text-neutral-900"

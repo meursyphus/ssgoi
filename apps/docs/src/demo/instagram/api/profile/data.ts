@@ -32,7 +32,6 @@ const me: ProfileMe = {
   followersLabel: "113",
   followingLabel: "277",
   highlights,
-  speechBubble: "첫 메모를 작성\n해보세요...",
 };
 
 export const data = {

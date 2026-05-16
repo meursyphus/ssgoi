@@ -7,11 +7,7 @@ export function ProfileHeader({ me }: { me: ProfileMe }) {
     <div className="bg-white pb-2">
       {/* avatar + stats row */}
       <div className="flex items-start gap-6 px-4 pt-4">
-        <AvatarWithStory
-          avatar={me.avatar}
-          name={me.name}
-          bubble={me.speechBubble}
-        />
+        <AvatarWithStory avatar={me.avatar} name={me.name} />
         <div className="mt-1 flex flex-1 items-center justify-around">
           <Stat label="게시물" value={me.postsLabel} />
           <Stat label="팔로워" value={me.followersLabel} />
@@ -75,15 +71,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function AvatarWithStory({
-  avatar,
-  name,
-  bubble,
-}: {
-  avatar: string;
-  name: string;
-  bubble: string;
-}) {
+function AvatarWithStory({ avatar, name }: { avatar: string; name: string }) {
   return (
     <div className="relative shrink-0">
       <div className="rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px]">
@@ -106,10 +94,6 @@ function AvatarWithStory({
         >
           <path d="M12 5v14M5 12h14" strokeLinecap="round" />
         </svg>
-      </div>
-      {/* speech bubble */}
-      <div className="absolute -right-2 -top-3 -translate-y-1/2 translate-x-full whitespace-pre rounded-2xl rounded-bl-sm bg-neutral-100 px-2.5 py-1.5 text-[10px] leading-tight text-neutral-700 shadow-sm">
-        {bubble}
       </div>
     </div>
   );

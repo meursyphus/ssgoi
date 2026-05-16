@@ -16,7 +16,10 @@ export default function ProfileTaggedPage({ id }: { id: string }) {
   }, [post.actions]);
 
   return (
-    <SsgoiTransition id={`/demo/instagram/profile/${id}/tagged`}>
+    <SsgoiTransition
+      className="min-h-screen"
+      id={`/demo/instagram/profile/${id}/tagged`}
+    >
       {post.tagged.isLoading && post.tagged.data.length === 0 ? (
         <div className="grid grid-cols-3 gap-[2px] bg-white">
           {Array.from({ length: 6 }).map((_, i) => (

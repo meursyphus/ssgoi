@@ -18,7 +18,10 @@ export default function ProfileGridPage({ id }: { id: string }) {
   }, [post.actions]);
 
   return (
-    <SsgoiTransition id={`/demo/instagram/profile/${id}`}>
+    <SsgoiTransition
+      className="min-h-screen"
+      id={`/demo/instagram/profile/${id}`}
+    >
       {post.posts.isLoading && post.posts.data.length === 0 ? (
         <GridSkeleton />
       ) : (

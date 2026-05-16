@@ -16,7 +16,10 @@ export default function ProfileReelsPage({ id }: { id: string }) {
   }, [post.actions]);
 
   return (
-    <SsgoiTransition id={`/demo/instagram/profile/${id}/reels`}>
+    <SsgoiTransition
+      className="min-h-screen"
+      id={`/demo/instagram/profile/${id}/reels`}
+    >
       {post.reels.isLoading && post.reels.data.length === 0 ? (
         <div className="grid grid-cols-3 gap-[2px] bg-white">
           {Array.from({ length: 6 }).map((_, i) => (
