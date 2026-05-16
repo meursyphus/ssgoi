@@ -15,31 +15,8 @@
 
   const config = {
     transitions: [
-      {
-        from: "/products/tab/left",
-        to: "/products/tab/right",
-        transition: slide({ direction: "left" }),
-      },
-      {
-        from: "/products/tab/right",
-        to: "/products/tab/left",
-        transition: slide({ direction: "right" }),
-      },
+      slide({ paths: categories.map((category) => category.path) }),
     ],
-    middleware: (from: string, to: string) => {
-      const fromIndex = categories.findIndex((c) => c.path === from);
-      const toIndex = categories.findIndex((c) => c.path === to);
-
-      if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-        if (fromIndex < toIndex) {
-          return { from: "/products/tab/left", to: "/products/tab/right" };
-        } else {
-          return { from: "/products/tab/right", to: "/products/tab/left" };
-        }
-      }
-
-      return { from, to };
-    },
   };
 </script>
 

@@ -60,26 +60,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "exports": {
-    "./package.json": {
-      "default": "./package.json"
-    },
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular.mjs"
-    },
-    "./presets": {
-      "types": "./dist/presets/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular-presets.mjs"
-    },
-    "./transitions": {
-      "types": "./dist/transitions/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular-transitions.mjs"
-    },
-    "./view-transitions": {
-      "types": "./dist/view-transitions/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular-view-transitions.mjs"
-    }
-  },
   "sideEffects": false
 }

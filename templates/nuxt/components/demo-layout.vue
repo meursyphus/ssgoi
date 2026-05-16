@@ -101,42 +101,29 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { Ssgoi } from '@ssgoi/vue';
 import type { SsgoiConfig } from '@ssgoi/vue';
-import {
-  drill,
-  pinterest,
-  instagram,
-} from '@ssgoi/vue/view-transitions';
+import { drill, zoom } from '@ssgoi/vue/view-transitions';
 
 const route = useRoute();
 const pathname = computed(() => route.path);
 
 const config: SsgoiConfig = {
+  preserveScroll: { exclude: ['/posts/*'] },
   transitions: [
     // Pinterest transitions
-    {
-      from: '/pinterest/*',
-      to: '/pinterest',
-      transition: pinterest(),
-      symmetric: true,
-    },
+    zoom({
+      paths: ['/pinterest', '/pinterest/*'],
+      type: 'expand',
+    }),
     // Posts transitions - drill effect
-    {
-      from: '/posts',
-      to: '/posts/*',
-      transition: drill({ direction: 'enter' }),
-    },
-    {
-      from: '/posts/*',
-      to: '/posts',
-      transition: drill({ direction: 'exit' }),
-    },
-    // Profile transitions - instagram
-    {
-      from: '/profile',
-      to: '/profile/*',
-      transition: instagram(),
-      symmetric: true,
-    },
+    drill({
+      enter: '/posts/*',
+      exit: '/posts',
+    }),
+    // Profile transitions
+    zoom({
+      paths: ['/profile', '/profile/*'],
+      type: 'static',
+    }),
   ],
 };
 

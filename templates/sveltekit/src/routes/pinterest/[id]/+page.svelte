@@ -3,7 +3,7 @@
 	import { getPinterestItem, getRelatedPins } from '$lib/data/pinterest';
 	import { page } from '$app/stores';
 
-	const pinId = $page.params.id;
+	const pinId = $page.params.id!;
 	const item = getPinterestItem(pinId);
 	const relatedPins = item ? getRelatedPins(pinId, 6) : [];
 </script>
@@ -45,7 +45,7 @@
 					src={item.image}
 					alt={item.title}
 					style="aspect-ratio: {item.aspectRatio}"
-					data-pinterest-detail-key={item.id}
+					data-zoom-enter-key={item.id}
 				/>
 
 				<div>

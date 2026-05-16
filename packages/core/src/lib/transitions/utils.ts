@@ -1,14 +1,80 @@
-import type { PhysicsOptions, SpringConfig } from "../types";
+import type { AnyTransitionConfig, SsgoiPathTransition } from "@types";
 
-/**
- * Get physics options with fallback to default spring
- */
-export function getPhysics(
-  physics: PhysicsOptions | undefined,
-  fallback: { spring: SpringConfig },
-): PhysicsOptions {
-  if (physics?.spring || physics?.inertia || physics?.integrator) {
-    return physics;
+export type DirectionalTransitionPaths = {
+  enter: string;
+  exit: string;
+};
+
+export function createSymmetricPathTransitions(
+  paths: readonly string[],
+  createTransition: () => AnyTransitionConfig,
+): SsgoiPathTransition[] {
+  const transitions: SsgoiPathTransition[] = [];
+
+  for (let fromIndex = 0; fromIndex < paths.length; fromIndex++) {
+    for (let toIndex = fromIndex + 1; toIndex < paths.length; toIndex++) {
+      const from = paths[fromIndex];
+      const to = paths[toIndex];
+      if (!from || !to) continue;
+      transitions.push({
+        from,
+        to,
+        transition: createTransition(),
+        symmetric: true,
+      });
+    }
   }
-  return { spring: fallback.spring };
+
+  return transitions;
+}
+
+export function createDirectionalPathTransitions(
+  paths: DirectionalTransitionPaths,
+  createTransition: (direction: "enter" | "exit") => AnyTransitionConfig,
+): SsgoiPathTransition[] {
+  return [
+    {
+      from: paths.exit,
+      to: paths.enter,
+      transition: createTransition("enter"),
+    },
+    {
+      from: paths.enter,
+      to: paths.exit,
+      transition: createTransition("exit"),
+    },
+  ];
+}
+
+export function createOrderedPathTransitions<TDirection extends string>(
+  paths: readonly string[],
+  directions: {
+    forward: TDirection;
+    backward: TDirection;
+  },
+  createTransition: (direction: TDirection) => AnyTransitionConfig,
+): SsgoiPathTransition[] {
+  const transitions: SsgoiPathTransition[] = [];
+
+  for (let fromIndex = 0; fromIndex < paths.length; fromIndex++) {
+    for (let toIndex = fromIndex + 1; toIndex < paths.length; toIndex++) {
+      const from = paths[fromIndex];
+      const to = paths[toIndex];
+      if (!from || !to) continue;
+      transitions.push(
+        {
+          from,
+          to,
+          transition: createTransition(directions.forward),
+        },
+        {
+          from: to,
+          to: from,
+          transition: createTransition(directions.backward),
+        },
+      );
+    }
+  }
+
+  return transitions;
 }

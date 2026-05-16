@@ -3,7 +3,7 @@
 	import { getPost, getRelatedPosts } from '$lib/data/profile';
 	import { page } from '$app/stores';
 
-	const postId = $page.params.id;
+	const postId = $page.params.id!;
 	const post = getPost(postId);
 	const relatedPosts = post ? getRelatedPosts(postId, 3) : [];
 </script>
@@ -45,7 +45,7 @@
 					src={post.coverImage.url}
 					alt={post.title}
 					style="aspect-ratio: {post.coverImage.aspectRatio}"
-					data-instagram-detail-key={post.id}
+					data-zoom-enter-key={post.id}
 				/>
 
 				<div>

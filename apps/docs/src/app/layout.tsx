@@ -1,45 +1,40 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { Header } from "@/components/layout/header";
-import { ConsoleWelcome } from "@/components/console-welcome";
-import { createSEOMetadata } from "@/lib/seo-metadata";
-import { SsgoiProvider } from "@/components/layout/ssgoi";
-import { StructuredData } from "./structured-data";
+import Script from "next/script";
+import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
-});
-
-export async function generateMetadata(): Promise<Metadata> {
-  return createSEOMetadata({});
-}
+export const metadata: Metadata = {
+  metadataBase: new URL("https://ssgoi.dev"),
+  title: "SSGOI — Native page transitions on the web",
+  description: "Router-agnostic page transitions. Built on Web Animations API.",
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "SSGOI — Native page transitions on the web",
+    description:
+      "Router-agnostic page transitions. Built on Web Animations API.",
+    images: ["/og.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.png"],
+  },
+};
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
-      >
-        <StructuredData />
-        <ConsoleWelcome />
-        <Header />
-        <main className="relative z-0 overflow-hidden">
-          <SsgoiProvider>{children}</SsgoiProvider>
-        </main>
-        <Analytics />
+    <html lang="en" className="h-full antialiased">
+      <body className="relative z-0 min-h-full">
+        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            crossOrigin="anonymous"
+            strategy="lazyOnload"
+          />
+        )}
       </body>
     </html>
   );

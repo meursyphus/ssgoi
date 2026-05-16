@@ -1,6 +1,6 @@
 # SSGOI - hero transition
 
-Shared element transition. Use when the same logical object (a thumbnail, an avatar, a card image) appears on both pages and you want to visually connect them by tweening size and position.
+Shared element transition. The same logical object (a thumbnail, an avatar, a card image) is tweened in size and position from one page to the next. Use when the user should feel they're following the *same thing* across pages.
 
 Setup guide: https://ssgoi.dev/llms.txt
 
@@ -8,24 +8,25 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 The element with a given `data-hero-key` on the source page is tweened in position and size to match the element with the same key on the destination page. The rest of the pages cross-fade around it.
 
+If a key has no match on the other side, that element falls back gracefully (no animation on it).
+
 ## Signature
 
 ```ts
 import { hero } from "@ssgoi/react/view-transitions";
 
 hero({
-  maxDistance?: number,     // skip if elements too far apart (default: 700px)
-  physics?: PhysicsOptions, // default: { spring: { stiffness: 300, damping: 30 } }
-})
+  paths: readonly string[];   // routes participating in hero transitions
+}): SsgoiPathTransition[];
 ```
 
-## Required: matching data attributes
+## Required: matching `data-hero-key`
 
-Both pages must mark the shared element with the same `data-hero-key`:
+Both pages must mark the shared element with the **same** `data-hero-key` value. The value should be a stable string — use the item's id, not its index.
 
 ```tsx
-// List page
-{items.map(item => (
+// List page (/items)
+{items.map((item) => (
   <Link key={item.id} href={`/items/${item.id}`}>
     <img data-hero-key={`item-${item.id}`} src={item.thumbnail} />
   </Link>
@@ -35,19 +36,12 @@ Both pages must mark the shared element with the same `data-hero-key`:
 <img data-hero-key={`item-${id}`} src={fullImage} />
 ```
 
-The key value must be a unique, stable string that matches across the two pages. Use the item's id, not its index.
-
-## Pairing pattern
+## Usage
 
 ```ts
 const config = {
   transitions: [
-    { from: '/items', to: '/items/*', transition: hero(), symmetric: true },
+    hero({ paths: ["/items", "/items/*"] }),
   ],
 };
 ```
-
-## Notes
-
-- If the keys don't match, hero falls back gracefully (no animation on that element).
-- For very long galleries where many items animate simultaneously, consider `instagram` instead.

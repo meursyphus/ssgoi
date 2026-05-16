@@ -6,8 +6,8 @@ A Nuxt 3 template showcasing SSGOI page transitions with various demo pages.
 
 - **Posts**: Blog-style list-to-detail with drill transition
 - **Shop**: Product catalog with category tabs and slide transitions
-- **Gallery**: Pinterest-style masonry grid with pinterest transition
-- **Profile**: Instagram-style profile with feed and instagram transition
+- **Gallery**: Pinterest-style masonry grid with zoom expand transition
+- **Profile**: Instagram-style profile with feed and zoom static transition
 
 ## Getting Started
 
@@ -68,20 +68,24 @@ nuxt/
 ## Transitions
 
 ### Drill Transition (Posts)
+
 - List to detail: drill enter
 - Detail to list: drill exit
 
 ### Slide Transition (Products)
+
 - Horizontal slide between category tabs
 - Dynamic direction based on tab order
 
-### Pinterest Transition (Gallery)
+### Zoom Transition (Gallery)
+
 - Expand from grid to detail view
 - Smooth scaling animation
 
-### Instagram Transition (Profile)
+### Zoom Transition (Profile)
+
 - Feed grid to post detail
-- Instagram-style expansion
+- Static shared image expansion
 
 ## Technologies
 

@@ -23,13 +23,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        "transitions/index": resolve(__dirname, "src/lib/transitions/index.ts"),
-        "view-transitions/index": resolve(
-          __dirname,
-          "src/lib/view-transitions/index.ts",
-        ),
         types: resolve(__dirname, "src/lib/types.ts"),
-        "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),
+        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },
       formats: ["es", "cjs"],
     },
@@ -38,9 +33,8 @@ export default defineConfig({
         "solid-js",
         "solid-js/web",
         "@ssgoi/core",
-        "@ssgoi/core/view-transitions",
-        "@ssgoi/core/transitions",
-        "@ssgoi/core/presets",
+        "@ssgoi/core/internal",
+        "@ssgoi/core/types",
       ],
       output: {
         preserveModules: true,

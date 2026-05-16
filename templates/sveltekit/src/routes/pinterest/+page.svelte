@@ -30,7 +30,7 @@
 								src={item.image}
 								alt={item.title}
 								class="w-full h-full object-cover bg-[#111]"
-								data-pinterest-gallery-key={item.id}
+								data-zoom-exit-key={item.id}
 							/>
 							<!-- Overlay on hover -->
 							<div
@@ -86,7 +86,7 @@
 								src={item.image}
 								alt={item.title}
 								class="w-full h-full object-cover bg-[#111]"
-								data-pinterest-gallery-key={item.id}
+								data-zoom-exit-key={item.id}
 							/>
 							<!-- Overlay on hover -->
 							<div

@@ -20,8 +20,8 @@ Open [http://localhost:5173](http://localhost:5173) to see the demo.
 ## Features
 
 - **Drill Transition**: List to detail navigation (Posts section)
-- **Pinterest Transition**: Gallery to detail with hero animation
-- **Instagram Transition**: Profile feed grid to detail view
+- **Zoom Expand Transition**: Gallery to detail with shared image animation
+- **Zoom Static Transition**: Profile feed grid to detail view
 - **Scroll Position Restoration**: Maintains scroll position on navigation
 
 ## Project Structure
@@ -57,7 +57,7 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({ routeTree });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <RouterProvider router={router} />
+  <RouterProvider router={router} />,
 );
 ```
 
@@ -66,26 +66,24 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 ```tsx
 import { useRouterState } from "@tanstack/react-router";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, pinterest, instagram } from "@ssgoi/react/view-transitions";
+import { drill, zoom } from "@ssgoi/react/view-transitions";
 
 export default function DemoLayout({ children }) {
   const location = useRouterState({ select: (s) => s.location });
   const pathname = location.pathname;
 
-  const config = useMemo(() => ({
-    transitions: [
-      {
-        from: "/posts",
-        to: "/posts/*",
-        transition: drill({ direction: "enter" }),
-      },
-      // ... more transitions
-    ],
-  }), []);
-
-  return (
-    <Ssgoi config={config}>{children}</Ssgoi>
+  const config = useMemo(
+    () => ({
+      transitions: [
+        drill({ enter: "/posts/*", exit: "/posts" }),
+        zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
+        zoom({ paths: ["/profile", "/profile/*"], type: "static" }),
+      ],
+    }),
+    [],
   );
+
+  return <Ssgoi config={config}>{children}</Ssgoi>;
 }
 ```
 
@@ -97,11 +95,7 @@ Each page must be wrapped with `SsgoiTransition` and given a unique `id`:
 import { SsgoiTransition } from "@ssgoi/react";
 
 export default function PostsPage() {
-  return (
-    <SsgoiTransition id="/posts">
-      {/* Page content */}
-    </SsgoiTransition>
-  );
+  return <SsgoiTransition id="/posts">{/* Page content */}</SsgoiTransition>;
 }
 ```
 

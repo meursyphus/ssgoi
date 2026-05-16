@@ -2,16 +2,17 @@
 
 > Universal page transition library that works in all browsers (Chrome, Firefox, Safari), unlike the View Transition API (Chrome-only).
 
-This document is for AI assistants to help developers set up SSGOI page transitions in Next.js.
+This document is for AI assistants to help developers set up SSGOI page transitions.
 
-**Per-transition reference (options, physics, examples):** see the `Transitions` section below — each entry links to its own page like `https://ssgoi.dev/llms/<name>.txt`.
+**Per-transition reference (options, data keys, examples):** see the `Transitions` section below — each entry links to its own page like `https://ssgoi.dev/llms/<name>.txt`.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @ssgoi/react (or @ssgoi/svelt, @ssgoi/vue dependings on your framework)
+npm install @ssgoi/react
+# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular
 ```
 
 ---
@@ -41,12 +42,12 @@ The library is most often used to ship app-like, mobile-width experiences, so th
 ```tsx
 // src/app/layout.tsx
 import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { drill, fade } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [
-    { from: '*', to: '/post/*', transition: drill({ direction: 'enter' }) },
-    { from: '/post/*', to: '*', transition: drill({ direction: 'exit' }) },
+    drill({ enter: "/post/*", exit: "*", type: "parallax" }),
+    fade({ paths: ["/", "/about"] }),
   ],
 };
 
@@ -102,30 +103,46 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
 ```ts
 type SsgoiConfig = {
-  // Route-specific transitions
-  transitions?: {
-    from: string;           // Source path (wildcards: '/post/*', '*')
-    to: string;             // Destination path
-    transition: Transition;
-    symmetric?: boolean;    // Auto-create reverse transition
-  }[];
+  // Path-matched transitions. Each entry can be a single { from, to, transition }
+  // or an array returned by a transition factory (drill, fade, etc.). Arrays are
+  // flattened automatically — no spread needed.
+  transitions?: (SsgoiPathTransition | SsgoiPathTransition[])[];
 
-  // Fallback transition
-  defaultTransition?: Transition;
+  // Fallback transition when no path entry matches.
+  defaultTransition?: TransitionConfig;
 
-  // Native edge-swipe gestures (iOS Safari swipe-back, Android system back) are
-  // detected from touch events and automatically suppress the page transition,
-  // so the OS gesture animation isn't fought by SSGOI. No configuration needed.
+  // Rewrite (from, to) before matching. Useful for stripping prefixes/locales.
+  middleware?: (from: string, to: string) => { from: string; to: string };
 
-  // Scroll preservation. Defaults are sensible for mobile + desktop —
-  // typically you don't need to set this. See section below.
-  preserveScroll?: ...;
+  // Scroll preservation. Defaults are sensible — see section below.
+  preserveScroll?: PreserveScrollOption;
 };
 ```
 
+### Transition factory API (6.0)
+
+Each transition factory returns a `SsgoiPathTransition[]`. Drop the result straight into `transitions` — it'll be flattened:
+
+```ts
+const config = {
+  transitions: [
+    drill({ enter: "/post/*", exit: "*" }),       // directional pair
+    fade({ paths: ["/", "/about", "/contact"] }), // symmetric N×N
+    slide({ paths: ["/tabs/a", "/tabs/b"] }),     // ordered (forward/back)
+    zoom({ paths: ["/grid", "/photo/*"], type: "expand" }), // requires data keys
+  ],
+};
+```
+
+Three shapes:
+
+- **`{ paths }`** — symmetric: every pair animates with the same physics. Used by `fade`, `blind`, `film`, `hero`, `jaemin`, `rotate`, `strip`, `zoom`.
+- **`{ enter, exit, type? }`** — directional: enter and exit get different physics. Used by `drill`, `sheet`.
+- **`{ paths, ... }` with forward/backward variants** — ordered: path order decides direction. Used by `slide` and `scroll`.
+
 ### preserveScroll
 
-**Defaults work out of the box.** Mobile viewports automatically preserve scroll position across transitions; desktop does not (browsers handle it). You normally don't need to configure this.
+**Defaults work out of the box.** Mobile viewports automatically preserve scroll position across transitions; desktop does not. You normally don't need to configure this.
 
 **Customizing — exclude specific paths:**
 
@@ -135,61 +152,51 @@ const config = {
 };
 ```
 
-**How it works:** When navigating *to* a path matching an `exclude` pattern, the destination page starts at scroll position 0 (typical for detail pages where you want to read from the top). All other navigations keep their preserved scroll position.
+When navigating *to* a path matching `exclude`, the destination starts at scroll position 0. All other navigations keep their preserved scroll.
+
+> **Note:** `skipAnimationOnBack` was removed in 6.0. Native swipe-back gestures are now auto-detected and animations skipped automatically on iOS.
 
 ---
 
 ## Transitions
 
-Browse the list, find the UX you want, then open the per-transition page for full options and examples. Each detail page is self-contained — you only need to read the ones you'll use.
+Catalog of built-in transitions. Open the linked page for the full signature, options, and (when required) the `data-*` keys to put on your DOM.
 
 ### `drill` — https://ssgoi.dev/llms/drill.txt
-iOS-style hierarchical navigation. New page slides in from the right; old page eases left underneath. Use for **List → Detail** flows where the user feels they're going deeper into content.
+iOS-style hierarchical navigation. New page slides in from the right; old page eases left underneath. **Two types**: `parallax` (depth layering, default) and `crossfade` (dissolve + zoom). Use for **List → Detail** flows.
 
 ### `fade` — https://ssgoi.dev/llms/fade.txt
-Calm cross-fade between pages. No motion, just opacity. Use as a **safe default** for unrelated pages, or anywhere you don't want a directional cue.
-
-### `scroll` — https://ssgoi.dev/llms/scroll.txt
-Vertical "page scroll" — old page slides off and new page slides in along the same axis. Use for **sequential content** like onboarding steps or paginated long-form pages.
+Calm cross-fade between pages. No motion, just opacity. Use as a **safe default** for unrelated pages.
 
 ### `slide` — https://ssgoi.dev/llms/slide.txt
-Horizontal slide — both pages translate sideways at once, like swiping between tabs. Use for **tab navigation** or swipeable sections.
+Horizontal push. Forward navigation slides left, backward slides right. Use for **tab navigation** or sequential page flows.
 
-### `swap` — https://ssgoi.dev/llms/swap.txt
-Subtle scale + fade. OUT fades, then IN scales up (0.95 → 1) and fades in. Use for **bottom tab navigation** between sibling pages where there's no natural direction.
+### `scroll` — https://ssgoi.dev/llms/scroll.txt
+Vertical "page scroll" — pages slide along the y-axis. **Two types**: `directional` (forward up / backward down) and `non-directional` (always one fixed direction). Use for **onboarding** or paginated long-form pages.
 
 ### `sheet` — https://ssgoi.dev/llms/sheet.txt
-Bottom sheet style. New page slides up from below while the previous page scales down behind it. Use for **modal-like** flows (FAB → compose, "new item" screens) that should feel temporary.
+Bottom sheet style. New page slides up from below. **Two types**: `static` (background untouched) and `background-scale` (background scales down behind). Use for **modal-like** flows (FAB → compose, "new item" screens).
 
 ### `hero` — https://ssgoi.dev/llms/hero.txt
-Shared element transition. The same logical object (a thumbnail, an avatar) is tweened in size and position from one page to the next. Requires matching `data-hero-key` on both pages — see the detail page.
+Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Requires matching `data-hero-key` on both pages.**
 
-### `pinterest` — https://ssgoi.dev/llms/pinterest.txt
-Card expansion. The tapped gallery card grows to fill the detail viewport while the rest fades out; reverses on back. Requires `data-pinterest-gallery-key` / `data-pinterest-detail-key` — see the detail page.
+### `zoom` — https://ssgoi.dev/llms/zoom.txt
+Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Two types**: `expand` (fills viewport) and `static` (morphs to target size only). **Requires `data-zoom-exit-key` (outgoing) and `data-zoom-enter-key` (incoming)** matching by value.
 
-### `instagram` — https://ssgoi.dev/llms/instagram.txt
-Like `pinterest` but only the IN page animates — the gallery just unmounts. Use over `pinterest` when you have **many gallery items** and want lighter animation cost. Requires `data-instagram-gallery-key` / `data-instagram-detail-key`.
+### `strip` — https://ssgoi.dev/llms/strip.txt
+3D Y-axis perspective flip. Pages rotate horizontally with depth perspective. Use for **carded, distinctive page swaps** where slide feels too flat.
 
-### `depth` — https://ssgoi.dev/llms/depth.txt
-Material Design Z-axis. Both pages scale + fade in place, suggesting depth (forward/backward) rather than horizontal navigation. Use for **drilling within the same surface** (Settings → sub-setting).
+### `blind` — https://ssgoi.dev/llms/blind.txt
+Vertical/horizontal blinds wipe across, revealing the new page in staggered slats. Use for **cinematic, dramatic** reveals.
 
-### `snap` — https://ssgoi.dev/llms/snap.txt
-Fast, subtle slide + fade — punchy and decisive (~250ms). Use when you want **feedback that "something changed"** without a full directional animation, especially in chains of quick navigations.
+### `film` — https://ssgoi.dev/llms/film.txt
+Film-strip style: outgoing page scales down and slides off while incoming scales up from a tile with animated corner borders. Use for **gallery / lightbox** style flows that should feel premium.
 
-### Basic usage
+### `rotate` — https://ssgoi.dev/llms/rotate.txt
+Card flip. Outgoing rotates 180° and fades; incoming counter-rotates in from -180°. Use for **playful** transitions between sibling pages.
 
-```tsx
-import { drill, fade, scroll } from "@ssgoi/react/view-transitions";
-
-const config = {
-  transitions: [
-    { from: '*',       to: '/post/*', transition: drill({ direction: 'enter' }) },
-    { from: '/post/*', to: '*',       transition: drill({ direction: 'exit' }) },
-    { from: '/',       to: '/about',  transition: scroll({ direction: 'up' }) },
-  ],
-  defaultTransition: fade(),
-};
-```
+### `jaemin` — https://ssgoi.dev/llms/jaemin.txt
+Quirky: incoming page rotates in at 45° from tiny scale, then unwinds and grows. Use sparingly for **special / playful** moments — modal openings, easter-egg transitions.
 
 ---
 
@@ -197,23 +204,23 @@ const config = {
 
 ### Page jumps during transition
 - **Cause**: Missing `position: relative` on container
-- **Check**: Do you have a fixed header/nav? If not, add `relative`
+- **Fix**: Add `relative` to the element wrapping `<Ssgoi>`
 
 ### OUT page disappears behind background
 - **Cause**: Missing `z-index: 0` on container
 - **Fix**: Add `z-0` to the div wrapping `{children}`
 
-### Horizontal overflow during slide transitions
+### Horizontal overflow during slide/drill transitions
 - **Cause**: Missing overflow clip
 - **Fix**: Add `overflow-x-clip` to container
 
 ### Transition not applying
 - **Cause**: `id` prop doesn't match route pattern
-- **Fix**: Ensure `SsgoiTransition id` matches the actual route path
+- **Fix**: Ensure `SsgoiTransition id` matches the actual route path used in `from`/`to`/`paths`
 
-### hero / pinterest / instagram transition not running
-- **Cause**: Data attribute keys don't match between pages
-- **Fix**: Verify the same key value is on both source and destination elements
+### hero / zoom transition not running
+- **Cause**: Data attribute keys don't match between pages, or attribute missing on one side
+- **Fix**: For `hero`, both sides use `data-hero-key="<same-value>"`. For `zoom`, outgoing uses `data-zoom-exit-key` and incoming uses `data-zoom-enter-key` (same value)
 
 ---
 
@@ -225,7 +232,7 @@ When a route changes, SSGOI orchestrates two simultaneous animations:
 
 ### Core Mechanism: Clone & Absolute Position
 
-**The key insight**: When a page unmounts, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in.
+When a page unmounts, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in.
 
 ```ts
 // Internal behavior (packages/core/src/lib/utils/prepare-outgoing.ts)
@@ -238,10 +245,9 @@ export const prepareOutgoing = (element, context) => {
 ```
 
 **Why this matters:**
-- The OUT page is re-inserted into DOM as a clone
-- It becomes `position: absolute` to overlay with the IN page
+- The OUT page is re-inserted into DOM as a clone with `position: absolute`
 - It needs a positioned ancestor (`relative`) to stay in place
-- Without proper CSS setup, the OUT page will jump to wrong position
+- Without proper CSS setup, the OUT page will jump to the wrong position
 
 ### Transition Flow
 
@@ -264,6 +270,5 @@ export const prepareOutgoing = (element, context) => {
 - Docs: https://ssgoi.dev
 - Mobile Transitions: https://ssgoi.dev/en/docs/mobile-transitions
 - Desktop Transitions: https://ssgoi.dev/en/docs/desktop-transitions
-- Physics Options: https://ssgoi.dev/en/docs/core-concepts/spring-presets
 - GitHub: https://github.com/meursyphus/ssgoi
 - NPM: https://www.npmjs.com/package/@ssgoi/react

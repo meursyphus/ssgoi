@@ -6,8 +6,9 @@ import {
   inject,
 } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { createSggoiTransitionContext } from "@ssgoi/core";
-import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core";
+import { createSggoiTransitionContext } from "@ssgoi/core/internal";
+import type { HostAnimation } from "@ssgoi/core/internal";
+import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core/types";
 import { SSGOI_CONTEXT } from "./context";
 
 function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
@@ -18,7 +19,9 @@ function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
     // Return a no-op context for SSR
     return undefined;
   }
-  return createSggoiTransitionContext(component.config());
+  return createSggoiTransitionContext(component.config(), {
+    host: component.host(),
+  });
 }
 
 @Directive({
@@ -34,4 +37,5 @@ function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
 })
 export class Ssgoi {
   readonly config = input<SsgoiConfig>({});
+  readonly host = input<HostAnimation | undefined>(undefined);
 }

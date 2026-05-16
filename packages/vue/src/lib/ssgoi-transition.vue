@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { vTransition } from "./transition";
+import type { ComponentPublicInstance } from "vue";
 import { useSsgoi } from "./context";
 
 interface Props {
@@ -10,25 +9,27 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  as: 'div'
+  as: "div",
+  class: undefined,
 });
 
-const getTransition = useSsgoi();
+const ssgoi = useSsgoi();
 
-// Compute transition config for the directive
-const transitionConfig = computed(() => {
-  const transition = getTransition(props.id);
-  return {
-    ...transition,
-    key: props.id,
-  };
-});
+const setTransitionRef = (
+  element: Element | ComponentPublicInstance | null,
+) => {
+  const instance = element as ComponentPublicInstance | null;
+  const node = element instanceof HTMLElement ? element : instance?.$el;
+  if (node instanceof HTMLElement) {
+    ssgoi.value.refFor(props.id)(node);
+  }
+};
 </script>
 
 <template>
-  <component 
-    :is="as" 
-    v-transition="transitionConfig" 
+  <component
+    :is="as"
+    :ref="setTransitionRef"
     :data-ssgoi-transition="id"
     :class="props.class"
   >

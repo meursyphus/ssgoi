@@ -6,8 +6,10 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-- `enter`: New page slides in from the right (100% → 0). Old page slides slightly left (-20%) to suggest it's still there underneath.
-- `exit`: Current page slides out to the right, revealing the previous page underneath.
+- **`parallax`** (default): new page slides in from the right; old page eases slightly left under it, hinting it's still there.
+- **`crossfade`**: new page fades + zooms in over the old one. Softer, less directional.
+
+`enter` is forward navigation (e.g. list → detail). `exit` is the reverse — old page comes back from the left.
 
 ## Signature
 
@@ -15,25 +17,23 @@ Setup guide: https://ssgoi.dev/llms.txt
 import { drill } from "@ssgoi/react/view-transitions";
 
 drill({
-  direction: 'enter' | 'exit',
-  opacity?: boolean,        // fade alongside slide
-  physics?: PhysicsOptions, // default: { spring: { stiffness: 170, damping: 22 } }
-})
+  enter: string;                       // destination path (forward)
+  exit: string;                        // source path (forward)
+  type?: "parallax" | "crossfade";     // default: "parallax"
+}): SsgoiPathTransition[];
 ```
 
-## Pairing pattern
+Returns a directional pair: one entry for forward (`exit → enter`) and one for backward (`enter → exit`).
+
+## Usage
 
 ```ts
 const config = {
   transitions: [
-    { from: '*',       to: '/post/*', transition: drill({ direction: 'enter' }) },
-    { from: '/post/*', to: '*',       transition: drill({ direction: 'exit' }) },
+    drill({ enter: "/post/*", exit: "*" }),
+    drill({ enter: "/settings/*", exit: "/settings", type: "crossfade" }),
   ],
 };
 ```
 
-Or with `symmetric: true`:
-
-```ts
-{ from: '*', to: '/post/*', transition: drill({ direction: 'enter' }), symmetric: true }
-```
+Drop the result directly into `transitions` — arrays are flattened automatically.

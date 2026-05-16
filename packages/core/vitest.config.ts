@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
+      "@types": resolve(__dirname, "./src/lib/types/index.ts"),
+      "@utils": resolve(__dirname, "./src/lib/utils/index.ts"),
     },
   },
 });

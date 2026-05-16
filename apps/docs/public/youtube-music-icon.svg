@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="ytmTile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ececec"/>
+    </linearGradient>
+    <radialGradient id="ytmRed" cx="38%" cy="32%" r="80%">
+      <stop offset="0%" stop-color="#ff5959"/>
+      <stop offset="55%" stop-color="#ee1c1c"/>
+      <stop offset="100%" stop-color="#a40000"/>
+    </radialGradient>
+    <radialGradient id="ytmGloss" cx="40%" cy="22%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="80%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#ytmTile)"/>
+  <ellipse cx="32" cy="54" rx="18" ry="3" fill="#000000" fill-opacity="0.08"/>
+  <circle cx="32" cy="32" r="20" fill="url(#ytmRed)"/>
+  <circle cx="32" cy="32" r="14.5" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-opacity="0.95"/>
+  <path d="M28.4 25.6 L42 32 L28.4 38.4 Z" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="20" fill="url(#ytmGloss)"/>
+</svg>

@@ -1,12 +1,5 @@
-import Pinterest from "@/components/demo/pinterest";
-import { Metadata } from "next";
+import HomePage from "@/demo/pinterest/page/home";
 
-export const metadata: Metadata = {
-  title: "Gallery Demo - SSGOI",
-  description:
-    "Experience Pinterest-style expand animations and smooth gallery transitions.",
-};
-
-export default async function Page() {
-  return <Pinterest />;
+export default function Page() {
+  return <HomePage />;
 }

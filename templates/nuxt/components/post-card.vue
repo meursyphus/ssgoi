@@ -8,7 +8,7 @@
         :src="post.coverImage.url"
         :alt="post.title"
         class="w-full h-auto object-cover transition-transform duration-200"
-        :data-instagram-gallery-key="post.id"
+        :data-zoom-exit-key="post.id"
       />
       <!-- Overlay on hover -->
       <div

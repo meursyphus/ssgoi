@@ -1,4 +1,4 @@
-import type { SggoiTransitionContext } from "../types";
+import type { SsgoiTransitionContext } from "@types";
 
 /**
  * Applies common styles for outgoing page elements
@@ -6,7 +6,7 @@ import type { SggoiTransitionContext } from "../types";
  */
 export const prepareOutgoing = (
   element: HTMLElement,
-  context?: SggoiTransitionContext,
+  context?: Pick<SsgoiTransitionContext, "scrollOffset">,
 ): void => {
   element.style.position = "absolute";
   element.style.width = "100%";

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="gmTile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#gmTile)"/>
+  <g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- handle -->
+    <path d="M11.5 16 H17.5 L21 23"/>
+    <!-- basket trapezoid -->
+    <path d="M21 23 H52 L47.5 37 H26.5 Z"/>
+    <!-- inner ribs (subtle basket detail) -->
+    <line x1="30.5" y1="25" x2="31.3" y2="35"/>
+    <line x1="36.5" y1="25" x2="36.8" y2="35"/>
+    <line x1="42.5" y1="25" x2="42.3" y2="35"/>
+  </g>
+  <!-- wheels -->
+  <circle cx="30" cy="44.5" r="2.8" fill="#ffffff"/>
+  <circle cx="44" cy="44.5" r="2.8" fill="#ffffff"/>
+</svg>

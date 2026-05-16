@@ -1,15 +1,14 @@
 # SSGOI - slide transition
 
-Horizontal slide transition. Use for tab navigation, swipeable section navigation, or any same-level horizontal page change.
+Horizontal push. Use for **tab navigation**, swipeable sections, or any sequential flow where left/right corresponds to forward/backward.
 
 Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-- `direction: 'left'`: Pages move horizontally to the left — IN comes from right, OUT exits to the left.
-- `direction: 'right'`: Pages move horizontally to the right — IN comes from left, OUT exits to the right.
-
-Both pages translate at once, like swiping between tabs.
+Path order in `paths` defines direction:
+- **Forward** (earlier path → later path): outgoing slides left, incoming slides in from the right.
+- **Backward** (later → earlier): outgoing slides right, incoming slides in from the left.
 
 ## Signature
 
@@ -17,22 +16,21 @@ Both pages translate at once, like swiping between tabs.
 import { slide } from "@ssgoi/react/view-transitions";
 
 slide({
-  direction: 'left' | 'right',
-  physics?: PhysicsOptions, // default: { spring: { stiffness: 140, damping: 19, doubleSpring: 0.8 } }
-})
+  paths: readonly string[];   // ordered list — order matters
+}): SsgoiPathTransition[];
 ```
 
-## Pairing pattern
+Returns ordered entries: a forward and a backward pair for every combination in `paths`.
+
+## Usage
 
 ```ts
 const config = {
   transitions: [
-    { from: '/tab1', to: '/tab2', transition: slide({ direction: 'left' }) },
-    { from: '/tab2', to: '/tab1', transition: slide({ direction: 'right' }) },
+    // tabs in order: forward = a → b → c
+    slide({ paths: ["/tabs/a", "/tabs/b", "/tabs/c"] }),
   ],
 };
 ```
 
-## Setup tip
-
-Slide can cause horizontal overflow during the animation. Add `overflow-x-clip` (or equivalent) to the layout container — see the layout guide in https://ssgoi.dev/llms.txt.
+> Tip: Add `overflow-x-clip` to the `<Ssgoi>` wrapper so the off-screen page doesn't cause a horizontal scrollbar flash during the slide.
