@@ -61,10 +61,6 @@ function resolveZoom(
   return null;
 }
 
-function getOutgoingZIndex(mode: "enter" | "exit"): string {
-  return mode === "enter" ? "-1" : "100";
-}
-
 function buildInput(
   resolved: ZoomResolved,
   fromNode: HTMLElement,
@@ -124,10 +120,14 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
           : provider.out(input);
 
       if (inConfig) to.style.transformOrigin = inConfig.transformOrigin;
-      if (outConfig) {
-        from.style.transformOrigin = outConfig.transformOrigin;
-        from.style.zIndex = getOutgoingZIndex(resolved.mode);
-      }
+      if (outConfig) from.style.transformOrigin = outConfig.transformOrigin;
+
+      // Keep the page that owns the zoom area on top throughout the
+      // transition (enter → `to`, exit → `from`). Restore the prior inline
+      // z-index when the animation completes.
+      const zoomedPage = resolved.mode === "enter" ? to : from;
+      const previousZIndex = zoomedPage.style.zIndex;
+      zoomedPage.style.zIndex = "9999";
 
       const outAnim = new WebAnimation({
         element: from,
@@ -148,6 +148,7 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
           to.style.backfaceVisibility = "";
           to.style.transformOrigin = "";
           (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
+          zoomedPage.style.zIndex = previousZIndex;
         },
       });
 

@@ -4,7 +4,7 @@ import { Plus, MessageCircle } from "lucide-react";
 
 export function HomeHeader() {
   return (
-    <div className="sticky top-0 z-10 bg-white/95 backdrop-blur">
+    <div className="sticky top-0 z-1 bg-white/95 backdrop-blur">
       <div className="flex items-center gap-2 px-4 pt-3 pb-2">
         <PinterestWordmark />
         <div className="flex-1" />

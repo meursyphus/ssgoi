@@ -1,45 +1,41 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import type { TransitionConfig } from "@types";
 import {
   IntegratorProvider,
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import { DRILL_PROVIDERS } from "./provider";
+import type { DrillOptions, DrillSideConfig, DrillType } from "./types";
 
-// ease-out (Material decelerated): incoming page settles into place.
-// stiffness 170, damping 22 → ratio 0.86 of critical (~26.1), settles ~310ms.
-const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 170, damping: 22 },
-};
+export type { DrillOptions, DrillType } from "./types";
 
-export interface DrillOptions {
-  opacity?: boolean;
-  direction?: "enter" | "exit";
-  physics?: PhysicsOptions;
+const DEFAULT_TYPE: DrillType = "parallax";
+
+function applyStartStyle(el: HTMLElement, side: DrillSideConfig): void {
+  el.style.willChange = side.willChange;
+  el.style.backfaceVisibility = "hidden";
+  (el.style as CSSStyleDeclaration & { contain: string }).contain =
+    "layout paint";
+  for (const [key, value] of Object.entries(side.startStyle)) {
+    (el.style as unknown as Record<string, string | number>)[key] = value;
+  }
 }
 
 export const drill = (options: DrillOptions = {}): TransitionConfig => {
-  const { opacity = false, direction = "enter" } = options;
-  const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  const willChange = opacity ? "transform, opacity" : "transform";
+  const direction = options.direction ?? "enter";
+  const provider = DRILL_PROVIDERS[options.type ?? DEFAULT_TYPE];
+  const physicsOptions = provider.physics;
+  const config = provider.build(direction);
 
   return {
     prepare: ({ from, to }) => {
       from.then((el) => {
-        el.style.willChange = willChange;
-        el.style.backfaceVisibility = "hidden";
-        (el.style as CSSStyleDeclaration & { contain: string }).contain =
-          "layout paint";
+        applyStartStyle(el, config.out);
         el.style.pointerEvents = "none";
         el.style.zIndex = direction === "enter" ? "-1" : "100";
       });
       to.then((el) => {
-        const startX = direction === "enter" ? 100 : -20;
-        el.style.transform = `translate3d(${startX}%, 0, 0)`;
-        if (opacity) el.style.opacity = "0";
-        el.style.willChange = willChange;
-        el.style.backfaceVisibility = "hidden";
-        (el.style as CSSStyleDeclaration & { contain: string }).contain =
-          "layout paint";
+        applyStartStyle(el, config.in);
       });
       return {};
     },
@@ -47,38 +43,19 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),
-        style: (t, u) => {
-          // enter: from slides left to -20% as t: 0→1
-          // exit:  from slides right to 100% as t: 0→1
-          const x = direction === "enter" ? -20 * t : 100 * t;
-          const style: Record<string, number | string> = {
-            transform: `translate3d(${x}%, 0, 0)`,
-          };
-          if (opacity) style.opacity = u;
-          return style;
-        },
+        style: (t) => config.out.animate(t),
       });
 
       const inAnim = new WebAnimation({
         element: to,
         integrator: IntegratorProvider.from(physicsOptions),
-        style: (t, u) => {
-          // enter: to comes from 100% (start) to 0 (end)
-          // exit:  to comes from -20% (start) to 0 (end)
-          const start = direction === "enter" ? 100 : -20;
-          const x = start * u;
-          const style: Record<string, number | string> = {
-            transform: `translate3d(${x}%, 0, 0)`,
-          };
-          if (opacity) style.opacity = t;
-          return style;
-        },
+        style: (t) => config.in.animate(t),
         onComplete: () => {
           to.style.willChange = "auto";
           to.style.backfaceVisibility = "";
           (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
           to.style.transform = "";
-          if (opacity) to.style.opacity = "";
+          to.style.opacity = "";
         },
       });
 

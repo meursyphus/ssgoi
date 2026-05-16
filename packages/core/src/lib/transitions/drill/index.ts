@@ -4,11 +4,16 @@ import {
   type DirectionalTransitionPaths,
 } from "../utils";
 import { drill as transition } from "./transition";
+import type { DrillType } from "./types";
 
-export type DrillConfig = DirectionalTransitionPaths;
+export type { DrillType } from "./types";
 
-export function drill(config: DrillConfig): SsgoiPathTransition[] {
-  return createDirectionalPathTransitions(config, (direction) =>
-    transition({ direction }),
+export type DrillConfig = DirectionalTransitionPaths & {
+  type?: DrillType;
+};
+
+export function drill({ type, ...paths }: DrillConfig): SsgoiPathTransition[] {
+  return createDirectionalPathTransitions(paths, (direction) =>
+    transition({ direction, type }),
   );
 }
