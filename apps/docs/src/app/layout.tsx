@@ -26,17 +26,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <head>
+      <body className="relative z-0 min-h-full">
+        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
         {process.env.NODE_ENV === "development" && (
           <Script
             src="//unpkg.com/react-grab/dist/index.global.js"
             crossOrigin="anonymous"
-            strategy="beforeInteractive"
+            strategy="lazyOnload"
           />
         )}
-      </head>
-      <body className="relative z-0 min-h-full">
-        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
       </body>
     </html>
   );

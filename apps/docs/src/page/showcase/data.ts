@@ -166,6 +166,72 @@ export const showcases: ShowcaseApp[] = [
     ],
   },
   {
+    slug: "lumen",
+    name: "LUMEN",
+    tagline: "Film transition — cinematic course pages with a drop-down menu",
+    platforms: ["web"],
+    category: "Education",
+    badge: "New",
+    demoOrigin: "/demo/lumen",
+    transitions: ["film"],
+    sourcePath: "apps/docs/src/demo/lumen",
+    previewTransition: "film",
+    clips: [
+      {
+        title: "Foundations → Cinematic Eye",
+        transition: "film",
+        enterPath: "/demo/lumen/cinematic-eye",
+        exitPath: "/demo/lumen",
+        caption:
+          "Film transition — the outgoing course scales down and slides away while the next one rises in",
+      },
+    ],
+  },
+  {
+    slug: "honeydrop",
+    name: "HONEYDROP",
+    tagline: "Rotate transition — full-screen drops spin between chapters",
+    platforms: ["web"],
+    category: "Campaign",
+    badge: "New",
+    demoOrigin: "/demo/honeydrop",
+    transitions: ["rotate"],
+    sourcePath: "apps/docs/src/demo/honeydrop",
+    previewTransition: "rotate",
+    clips: [
+      {
+        title: "The Court → The Drop",
+        transition: "rotate",
+        enterPath: "/demo/honeydrop/drop",
+        exitPath: "/demo/honeydrop",
+        caption:
+          "Rotate transition — the page spins 180° in place while crossfading into the next chapter",
+      },
+    ],
+  },
+  {
+    slug: "nora-hale",
+    name: "NORA HALE",
+    tagline: "Strip transition — portfolio pages flip like printed pages",
+    platforms: ["web"],
+    category: "Portfolio",
+    badge: "New",
+    demoOrigin: "/demo/nora-hale",
+    transitions: ["strip"],
+    sourcePath: "apps/docs/src/demo/nora-hale",
+    previewTransition: "strip",
+    clips: [
+      {
+        title: "Work Archive → About",
+        transition: "strip",
+        enterPath: "/demo/nora-hale/about",
+        exitPath: "/demo/nora-hale",
+        caption:
+          "Strip transition — the outgoing page rotates off-screen while the next one peels in from the side",
+      },
+    ],
+  },
+  {
     slug: "gamja-market",
     name: "감자마켓",
     tagline: "Drill navigation + sheet review flow",

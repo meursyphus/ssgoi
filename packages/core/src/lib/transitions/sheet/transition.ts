@@ -19,93 +19,116 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
   const physics =
     direction === "enter" ? provider.enterPhysics : provider.exitPhysics;
   const bg = provider.background;
-  const bgWillChange = bg.willChange || "auto";
+  // Empty willChange == "don't touch the background at all" (zoom-style static).
+  const animatesBackground = bg.willChange !== "";
 
   return {
     prepare: ({ from, to }) => {
-      from.then((el) => {
-        el.style.willChange =
-          direction === "enter" ? bgWillChange : SHEET_WILL_CHANGE;
+      const sheet = direction === "enter" ? to : from;
+      const background = direction === "enter" ? from : to;
+
+      sheet.then((el) => {
+        el.style.willChange = SHEET_WILL_CHANGE;
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
-        el.style.pointerEvents = "none";
-        el.style.zIndex = direction === "enter" ? "-1" : "100";
+        if (direction === "exit") {
+          el.style.pointerEvents = "none";
+          el.style.zIndex = "100";
+        }
       });
-      to.then((el) => {
-        el.style.willChange =
-          direction === "enter" ? SHEET_WILL_CHANGE : bgWillChange;
-        el.style.backfaceVisibility = "hidden";
-        (el.style as CSSStyleDeclaration & { contain: string }).contain =
-          "layout paint";
+
+      background.then((el) => {
+        if (animatesBackground) {
+          el.style.willChange = bg.willChange;
+          el.style.backfaceVisibility = "hidden";
+          (el.style as CSSStyleDeclaration & { contain: string }).contain =
+            "layout paint";
+        }
+        if (direction === "enter") {
+          // Make sure the cloned outgoing page stays beneath the rising sheet.
+          el.style.pointerEvents = "none";
+          el.style.zIndex = "-1";
+        }
       });
+
       return {};
     },
     animation: ({ from, to, context }) => {
-      const fromRect = getViewportRect(context, "from");
-      const toRect = getViewportRect(context, "to");
+      const sheetEl = direction === "enter" ? to : from;
+      const backgroundEl = direction === "enter" ? from : to;
+      const sheetRect = getViewportRect(
+        context,
+        direction === "enter" ? "to" : "from",
+      );
 
-      // Clip each page to its visible viewport slice during transform.
-      from.style.clipPath = `inset(${fromRect.top}px 0 calc(100% - ${fromRect.top + fromRect.height}px) 0)`;
-      to.style.clipPath = `inset(${toRect.top}px 0 calc(100% - ${toRect.top + toRect.height}px) 0)`;
+      // Clip the moving sheet to its visible viewport slice — without this it
+      // can paint outside the chrome (top nav / player bar) during translate.
+      sheetEl.style.clipPath = `inset(${sheetRect.top}px 0 calc(100% - ${sheetRect.top + sheetRect.height}px) 0)`;
 
-      if (direction === "enter") {
-        const fromCenterX = fromRect.left + fromRect.width / 2;
-        const fromCenterY = fromRect.top + fromRect.height / 2;
-        from.style.transformOrigin = `${fromCenterX}px ${fromCenterY}px`;
+      const sheetStyle =
+        direction === "enter"
+          ? (_t: number, u: number) => ({
+              transform: `translate3d(0, ${u * sheetRect.height}px, 0)`,
+            })
+          : (t: number) => ({
+              transform: `translate3d(0, ${t * sheetRect.height}px, 0)`,
+            });
 
-        const outAnim = new WebAnimation({
-          element: from,
-          integrator: IntegratorProvider.from(physics),
-          style: (t, u) => bg.enterStyle(t, u),
-        });
-
-        const inAnim = new WebAnimation({
-          element: to,
-          integrator: IntegratorProvider.from(physics),
-          style: (_t, u) => ({
-            transform: `translate3d(0, ${u * toRect.height}px, 0)`,
-          }),
-          onComplete: () => {
-            to.style.willChange = "auto";
-            to.style.backfaceVisibility = "";
-            (to.style as CSSStyleDeclaration & { contain: string }).contain =
-              "";
-            to.style.clipPath = "";
-            to.style.transform = "";
-          },
-        });
-
-        return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
-      }
-
-      // direction === "exit"
-      const toCenterX = toRect.left + toRect.width / 2;
-      const toCenterY = toRect.top + toRect.height / 2;
-      to.style.transformOrigin = `${toCenterX}px ${toCenterY}px`;
-
-      const outAnim = new WebAnimation({
-        element: from,
+      const sheetAnim = new WebAnimation({
+        element: sheetEl,
         integrator: IntegratorProvider.from(physics),
-        style: (t) => ({
-          transform: `translate3d(0, ${t * fromRect.height}px, 0)`,
-        }),
-      });
-
-      const inAnim = new WebAnimation({
-        element: to,
-        integrator: IntegratorProvider.from(physics),
-        style: (t) => bg.exitStyle(t),
+        style: sheetStyle,
         onComplete: () => {
-          to.style.willChange = "auto";
-          to.style.backfaceVisibility = "";
-          (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
-          to.style.transformOrigin = "";
-          to.style.clipPath = "";
+          sheetEl.style.willChange = "auto";
+          sheetEl.style.backfaceVisibility = "";
+          (sheetEl.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
+          sheetEl.style.clipPath = "";
+          sheetEl.style.transform = "";
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+      if (!animatesBackground) {
+        // Static: the background sits untouched for the whole duration.
+        return new MultiAnimation([sheetAnim], { mode: "parallel" });
+      }
+
+      const bgRect = getViewportRect(
+        context,
+        direction === "enter" ? "from" : "to",
+      );
+      const bgCenterX = bgRect.left + bgRect.width / 2;
+      const bgCenterY = bgRect.top + bgRect.height / 2;
+      backgroundEl.style.clipPath = `inset(${bgRect.top}px 0 calc(100% - ${bgRect.top + bgRect.height}px) 0)`;
+      backgroundEl.style.transformOrigin = `${bgCenterX}px ${bgCenterY}px`;
+
+      const bgStyle =
+        direction === "enter"
+          ? (t: number, u: number) => bg.enterStyle(t, u)
+          : (t: number) => bg.exitStyle(t);
+
+      const bgAnim = new WebAnimation({
+        element: backgroundEl,
+        integrator: IntegratorProvider.from(physics),
+        style: bgStyle,
+        onComplete:
+          direction === "exit"
+            ? () => {
+                backgroundEl.style.willChange = "auto";
+                backgroundEl.style.backfaceVisibility = "";
+                (
+                  backgroundEl.style as CSSStyleDeclaration & {
+                    contain: string;
+                  }
+                ).contain = "";
+                backgroundEl.style.clipPath = "";
+                backgroundEl.style.transformOrigin = "";
+              }
+            : undefined,
+      });
+
+      return new MultiAnimation([sheetAnim, bgAnim], { mode: "parallel" });
     },
   };
 };

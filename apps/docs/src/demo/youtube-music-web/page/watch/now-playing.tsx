@@ -25,9 +25,7 @@ export function NowPlaying({ detail }: { detail: SongDetail }) {
         <span>•</span>
         <span>{detail.releaseYear}</span>
       </div>
-      <p className="mt-3 text-[12px] text-white/55">
-        {detail.plays ?? "1.2M 회 재생"}
-      </p>
+      <p className="mt-3 text-[12px] text-white/55">{detail.plays}</p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
@@ -35,26 +33,26 @@ export function NowPlaying({ detail }: { detail: SongDetail }) {
           className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[13px] font-semibold text-black hover:bg-white/90"
         >
           <Play className="h-4 w-4" fill="currentColor" />
-          재생
+          Play
         </button>
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
           aria-label="like"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
         >
           <Heart className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
           aria-label="share"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
         >
           <Share2 className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
           aria-label="more"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10"
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>

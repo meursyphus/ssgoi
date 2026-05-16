@@ -1,47 +1,37 @@
-export type SongCard = {
+export type ShelfCard = {
   id: string;
   title: string;
-  artist: string;
-  thumbnail: string;
-  duration: string;
-  /** Plays for hero variant */
-  plays?: string;
-  /** Subtitle override for non-song shelves (e.g. "Episode • Today") */
-  subtitle?: string;
-};
-
-export type HomeShelf = {
-  id: string;
-  title: string;
-  /** "row" — horizontal carousel · "grid" — quick-pick 2x2 · "list" — vertical list */
-  kind: "row" | "grid" | "list";
-  items: SongCard[];
-};
-
-export type HeroFeature = {
-  id: string;
-  /** Top eyebrow label e.g. "MIX FOR YOU" */
-  eyebrow: string;
-  title: string;
+  /** Pre-formatted subtitle line — e.g. "ZICO, Crush, DEAN • 188M plays • RUDE!" */
   subtitle: string;
   thumbnail: string;
-  /** Side list shown next to hero. e.g. "Forgotten favorites" */
-  sideTitle: string;
-  sideItems: SongCard[];
+};
+
+export type ShelfKind = "quick-picks" | "video-row";
+
+export type Shelf = {
+  id: string;
+  title: string;
+  kind: ShelfKind;
+  /** Avatar + name shown above the section heading (e.g. user byline). */
+  attribution?: { name: string; avatar: string };
+  items: ShelfCard[];
 };
 
 export type HomeData = {
-  hero: HeroFeature;
-  shelves: HomeShelf[];
+  shelves: Shelf[];
 };
 
-export type SongDetail = SongCard & {
+export type SongDetail = {
+  id: string;
+  title: string;
+  artist: string;
   album: string;
   releaseYear: number;
+  duration: string;
+  plays: string;
+  thumbnail: string;
   description: string;
-  /** Up next queue */
-  upNext: SongCard[];
-  /** Lyrics preview (a few stanzas) */
+  upNext: ShelfCard[];
   lyrics: string;
 };
 

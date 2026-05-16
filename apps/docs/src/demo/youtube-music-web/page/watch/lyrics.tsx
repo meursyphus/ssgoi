@@ -7,7 +7,7 @@ export function Lyrics({ detail }: { detail: SongDetail }) {
   return (
     <section>
       <header className="mb-3">
-        <h2 className="text-[16px] font-semibold tracking-tight">가사</h2>
+        <h2 className="text-[16px] font-semibold tracking-tight">Lyrics</h2>
         <p className="mt-1 text-[12px] text-white/55">
           {detail.artist} • {detail.album}
         </p>
@@ -33,7 +33,7 @@ export function Lyrics({ detail }: { detail: SongDetail }) {
         )}
       </div>
       <p className="mt-8 text-[11px] text-white/40">
-        제공: ssgoi 데모 • 라이센스 정보 없음
+        Provided by the ssgoi demo • No license info
       </p>
     </section>
   );
