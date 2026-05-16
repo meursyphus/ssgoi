@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShowcasePhone } from "@/components/showcase-phone";
+import { DesktopFrame } from "@/components/desktop-frame";
 import { SiteLogo } from "@/components/site-logo";
 import {
   showcases,
@@ -104,9 +105,16 @@ export default function ShowcaseListPage() {
         </div>
       )}
 
-      <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:[grid-template-columns:repeat(auto-fill,minmax(380px,1fr))]">
+      <div
+        className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${
+            platform === "web" ? "520px" : "380px"
+          }), 1fr))`,
+        }}
+      >
         {filtered.map((s) => (
-          <ShowcaseCard key={s.slug} showcase={s} />
+          <ShowcaseCard key={s.slug} showcase={s} platform={platform} />
         ))}
       </div>
 
@@ -209,7 +217,13 @@ function SearchInput({
   );
 }
 
-function ShowcaseCard({ showcase }: { showcase: ShowcaseApp }) {
+function ShowcaseCard({
+  showcase,
+  platform,
+}: {
+  showcase: ShowcaseApp;
+  platform: ShowcasePlatform;
+}) {
   const previewClip =
     (showcase.previewTransition &&
       showcase.clips.find(
@@ -238,14 +252,30 @@ function ShowcaseCard({ showcase }: { showcase: ShowcaseApp }) {
       href={`/showcase/${showcase.slug}`}
       className="group flex flex-col gap-3"
     >
-      <div className="relative flex justify-center rounded-3xl border border-white/5 bg-neutral-900/70 px-6 py-8 transition-all group-hover:border-white/15">
-        <ShowcasePhone
-          ref={iframeRef}
-          src={previewPath}
-          title={`${showcase.name} preview`}
-          widthClassName="w-[78%]"
-          interactive={false}
-        />
+      <div
+        className={
+          "relative flex justify-center rounded-3xl border border-white/5 bg-neutral-900/70 transition-all group-hover:border-white/15 " +
+          (platform === "web" ? "px-4 py-5 sm:px-6 sm:py-7" : "px-6 py-8")
+        }
+      >
+        {platform === "web" ? (
+          <DesktopFrame
+            ref={iframeRef}
+            src={previewPath}
+            title={`${showcase.name} preview`}
+            widthClassName="w-full"
+            interactive={false}
+            urlLabel={`ssgoi.dev${previewPath === "/" ? "" : previewPath}`}
+          />
+        ) : (
+          <ShowcasePhone
+            ref={iframeRef}
+            src={previewPath}
+            title={`${showcase.name} preview`}
+            widthClassName="w-[78%]"
+            interactive={false}
+          />
+        )}
         {showcase.badge && (
           <span className="absolute left-4 top-4 rounded-md bg-black/70 px-2 py-1 text-[11px] font-medium uppercase tracking-wider text-white/80 backdrop-blur">
             {showcase.badge}

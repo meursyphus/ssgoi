@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ShowcasePhone } from "@/components/showcase-phone";
-import type { ShowcaseClip } from "../data";
+import { DesktopFrame } from "@/components/desktop-frame";
+import type { ShowcaseClip, ShowcasePlatform } from "../data";
 
 type Status = "idle" | "playing" | "reversing" | "paused" | "settled";
 
@@ -21,9 +22,11 @@ type Status = "idle" | "playing" | "reversing" | "paused" | "settled";
 export function ClipPlayer({
   clip,
   demoOrigin,
+  platform = "mobile",
 }: {
   clip: ShowcaseClip;
   demoOrigin: string;
+  platform?: ShowcasePlatform;
 }) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [autoplay, setAutoplay] = useState(true);
@@ -84,30 +87,50 @@ export function ClipPlayer({
     sendHost("rate", r);
   };
 
+  const overlay = autoplay ? (
+    <a
+      href={clip.enterPath}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group absolute inset-0 z-10 flex items-end justify-center pb-5 transition-colors duration-200 hover:bg-black/45 hover:backdrop-blur-[2px]"
+      aria-label={`Open ${clip.title} in a new tab`}
+    >
+      <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-900 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+        Open demo ↗
+      </span>
+    </a>
+  ) : null;
+
   return (
-    <div className="flex w-[300px] flex-col gap-3">
-      <ShowcasePhone
-        ref={iframeRef}
-        src={demoOrigin}
-        title={clip.title}
-        widthClassName="w-full"
-        interactive={!autoplay}
-        scaleViewport={false}
-      >
-        {autoplay && (
-          <a
-            href={clip.enterPath}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group absolute inset-0 z-10 flex items-end justify-center pb-5 transition-colors duration-200 hover:bg-black/45 hover:backdrop-blur-[2px]"
-            aria-label={`Open ${clip.title} in a new tab`}
-          >
-            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-900 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-              Open demo ↗
-            </span>
-          </a>
-        )}
-      </ShowcasePhone>
+    <div
+      className={
+        "flex flex-col gap-3 " +
+        (platform === "web" ? "w-full max-w-[760px]" : "w-[300px]")
+      }
+    >
+      {platform === "web" ? (
+        <DesktopFrame
+          ref={iframeRef}
+          src={demoOrigin}
+          title={clip.title}
+          widthClassName="w-full"
+          interactive={!autoplay}
+          urlLabel={`ssgoi.dev${clip.exitPath === "/" ? "" : clip.exitPath}`}
+        >
+          {overlay}
+        </DesktopFrame>
+      ) : (
+        <ShowcasePhone
+          ref={iframeRef}
+          src={demoOrigin}
+          title={clip.title}
+          widthClassName="w-full"
+          interactive={!autoplay}
+          scaleViewport={false}
+        >
+          {overlay}
+        </ShowcasePhone>
+      )}
 
       <div className="flex items-center gap-2 text-sm">
         <h3 className="font-medium text-neutral-100">{clip.title}</h3>

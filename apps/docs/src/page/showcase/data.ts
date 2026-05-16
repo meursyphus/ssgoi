@@ -78,7 +78,7 @@ export const showcases: ShowcaseApp[] = [
       {
         title: "Grid → Post Detail",
         transition: "zoom",
-        enterPath: "/demo/instagram/feed/p-004",
+        enterPath: "/demo/instagram/feed/p-001",
         exitPath: "/demo/instagram/profile/deaseungseung94",
         caption: "Zoom static — the tapped thumbnail expands into the post",
       },
@@ -118,6 +118,29 @@ export const showcases: ShowcaseApp[] = [
           "/demo/pinterest/search/%EC%97%AC%EC%9E%90%20%EC%B9%98%EB%A7%88",
         exitPath: "/demo/pinterest/search",
         caption: "Horizontal drill push into category results",
+      },
+    ],
+  },
+  {
+    slug: "ssgoi-docs",
+    name: "ssgoi.dev",
+    tagline: "Non-directional scroll between landing and showcase",
+    platforms: ["web"],
+    category: "Docs",
+    badge: "New",
+    logo: "/ssgoi-logo.png",
+    demoOrigin: "/",
+    transitions: ["scroll"],
+    sourcePath: "apps/docs/src/components/docs-ssgoi-provider.tsx",
+    previewTransition: "scroll",
+    clips: [
+      {
+        title: "Landing ↔ Showcase",
+        transition: "scroll",
+        enterPath: "/showcase",
+        exitPath: "/",
+        caption:
+          "Non-directional scroll — the outgoing page glides up while the incoming page fades in",
       },
     ],
   },

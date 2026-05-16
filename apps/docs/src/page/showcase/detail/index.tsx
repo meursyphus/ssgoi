@@ -88,12 +88,13 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
         </div>
       </header>
 
-      <section className="mt-10 flex flex-wrap justify-start gap-x-8 gap-y-12">
+      <section className="mt-10 flex flex-col items-center gap-y-12 sm:flex-row sm:flex-wrap sm:items-start sm:justify-start sm:gap-x-8">
         {showcase.clips.map((clip, i) => (
           <ClipPlayer
             key={`${clip.transition}-${i}`}
             clip={clip}
             demoOrigin={showcase.demoOrigin}
+            platform={showcase.platforms[0] ?? "mobile"}
           />
         ))}
       </section>
