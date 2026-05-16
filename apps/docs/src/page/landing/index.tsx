@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { PhoneFrame } from "@/components/phone-frame";
-import { NextMark, NuxtMark, SvelteKitMark } from "@/components/router-logos";
+import {
+  NextMark,
+  NuxtMark,
+  ReactRouterMark,
+  SvelteKitMark,
+  TanStackRouterMark,
+} from "@/components/router-logos";
 import {
   ChromeMark,
   EdgeMark,
@@ -43,11 +49,25 @@ function Hero() {
             <NpmPill pkg="@ssgoi/react" />
           </div>
         </div>
-        <div className="order-1 flex justify-center md:order-2 md:justify-end">
+        <div className="order-1 flex flex-col items-center gap-4 md:order-2 md:items-end">
           <PhoneFrame
             src="https://www.seoulbiyori.com"
             title="ssgoi in production — seoulbiyori.com"
           />
+          <a
+            href="https://www.seoulbiyori.com"
+            target="_blank"
+            rel="noreferrer"
+            className="group inline-flex items-center gap-1.5 font-mono text-sm text-neutral-400 transition-colors hover:text-orange-400"
+          >
+            www.seoulbiyori.com
+            <span
+              className="transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            >
+              ↗
+            </span>
+          </a>
         </div>
       </div>
     </section>
@@ -57,12 +77,15 @@ function Hero() {
 const ROUTERS: Array<{
   name: string;
   icon: React.ComponentType<{ className?: string }>;
-  iconClass: string;
 }> = [
-  { name: "Next.js", icon: NextMark, iconClass: "text-neutral-100" },
-  { name: "SvelteKit", icon: SvelteKitMark, iconClass: "text-orange-500" },
-  { name: "Nuxt", icon: NuxtMark, iconClass: "text-emerald-400" },
+  { name: "Next.js", icon: NextMark },
+  { name: "React Router", icon: ReactRouterMark },
+  { name: "TanStack Router", icon: TanStackRouterMark },
+  { name: "SvelteKit", icon: SvelteKitMark },
+  { name: "Nuxt", icon: NuxtMark },
 ];
+
+const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
 
 function Routers() {
   return (
@@ -72,19 +95,30 @@ function Routers() {
           Use your router.{" "}
           <span className="text-neutral-400">SSR included.</span>
         </h2>
-        <div className="mt-10 grid gap-3 sm:grid-cols-3">
-          {ROUTERS.map(({ name, icon: Icon, iconClass }) => (
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {ROUTERS.map(({ name, icon: Icon }) => (
             <div
               key={name}
               className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-6 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
             >
-              <Icon className={`h-9 w-9 shrink-0 ${iconClass}`} />
+              <Icon className="h-9 w-9 shrink-0" />
               <span className="text-lg font-semibold tracking-tight text-neutral-100">
                 {name}
               </span>
             </div>
           ))}
         </div>
+        <p className="mt-6 text-sm text-neutral-400">
+          Starter examples for each router are on GitHub —{" "}
+          <a
+            href={TEMPLATES_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="font-mono text-neutral-200 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+          >
+            /templates ↗
+          </a>
+        </p>
       </div>
     </section>
   );
