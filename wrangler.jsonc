@@ -1,17 +1,17 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ssgoi-docs",
-  "main": ".open-next/worker.js",
+  "$schema": "apps/docs/node_modules/wrangler/config-schema.json",
+  "name": "ssgoi",
+  "main": "apps/docs/.open-next/worker.js",
   "compatibility_date": "2026-05-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
-    "directory": ".open-next/assets",
+    "directory": "apps/docs/.open-next/assets",
     "binding": "ASSETS"
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "ssgoi-docs"
+      "service": "ssgoi"
     }
   ]
 }
