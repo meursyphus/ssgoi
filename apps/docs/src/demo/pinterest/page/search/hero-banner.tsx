@@ -2,31 +2,29 @@
 
 export function HeroBanner() {
   return (
-    <div className="px-4">
-      <div className="relative overflow-hidden rounded-2xl">
+    <div>
+      <div className="relative w-full overflow-hidden bg-neutral-200">
         <img
-          src="/demo/pinterest/22-400x1000.jpg"
-          alt="Morimono-inspired wedding tablescapes"
-          className="h-[260px] w-full object-cover"
+          src="/demo/pinterest/10-400x400.jpg"
+          alt="Level up your screen aesthetics"
+          className="w-full object-cover"
+          style={{ aspectRatio: "1 / 1" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-5 text-center text-white">
-          <p className="text-[12px] font-medium tracking-wide text-white/90">
-            Produce in bloom
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+          <p className="text-[14px] font-medium tracking-wide drop-shadow">
+            Digital updates
           </p>
-          <h2 className="mt-1 text-[18px] font-bold leading-tight">
-            Morimono-inspired wedding
-            <br />
-            tablescapes
+          <h2 className="mt-1 text-[22px] font-bold leading-tight drop-shadow">
+            Level up your screen aesthetics
           </h2>
         </div>
       </div>
-      <div className="mt-2 flex justify-center gap-1.5">
+      <div className="mt-3 flex justify-center gap-1.5">
         {Array.from({ length: 7 }).map((_, i) => (
           <span
             key={i}
-            className={`h-1 rounded-full transition-all ${
-              i === 3 ? "w-3 bg-white" : "w-1 bg-white/30"
+            className={`h-1.5 w-1.5 rounded-full ${
+              i === 4 ? "bg-neutral-700" : "bg-neutral-300"
             }`}
           />
         ))}

@@ -19,7 +19,7 @@ export default function HomePage() {
   return (
     <SsgoiTransition
       id="/demo/pinterest"
-      className="flex min-h-full flex-col bg-black"
+      className="flex min-h-full flex-col bg-white"
     >
       <HomeHeader />
       <TabBar />

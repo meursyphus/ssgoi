@@ -15,7 +15,7 @@ export function ProfileTabs({ id }: { id: string }) {
   ];
 
   return (
-    <div className="sticky top-0 z-10 grid grid-cols-4 border-t border-neutral-200 bg-white">
+    <div className="sticky top-[52px] z-20 grid grid-cols-4 border-t border-neutral-200 bg-white">
       {tabs.map((t) => {
         const isActive =
           t.key === "grid" ? pathname === base : pathname === t.href;

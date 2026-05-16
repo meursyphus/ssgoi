@@ -10,32 +10,30 @@ export function CategoryCard({ category }: { category: RecommendedCategory }) {
     <div className="px-4">
       <div className="mb-2 flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-medium text-neutral-400">
+          <p className="text-[12px] font-medium text-neutral-500">
             {category.badge}
           </p>
-          <h3 className="text-[18px] font-bold text-white">{category.label}</h3>
+          <h3 className="text-[22px] font-bold leading-tight text-black">
+            {category.label}
+          </h3>
         </div>
         <Link
           href={href}
           aria-label={`${category.label} 검색`}
-          className="grid h-9 w-9 place-items-center rounded-full bg-neutral-800 text-white"
+          className="grid h-10 w-10 place-items-center rounded-full bg-neutral-100 text-black"
         >
-          <Search className="h-4 w-4" strokeWidth={2.2} />
+          <Search className="h-4 w-4" strokeWidth={2.6} />
         </Link>
       </div>
       <Link href={href} className="block">
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="flex gap-1.5 overflow-hidden rounded-2xl">
           {category.thumbnails.map((src, i) => (
-            <div
+            <img
               key={i}
-              className="relative overflow-hidden rounded-md bg-neutral-900"
-            >
-              <img
-                src={src}
-                alt=""
-                className="aspect-square w-full object-cover"
-              />
-            </div>
+              src={src}
+              alt=""
+              className="aspect-[3/4] w-1/4 object-cover"
+            />
           ))}
         </div>
       </Link>

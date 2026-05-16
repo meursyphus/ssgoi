@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SsgoiTransition } from "@ssgoi/react";
 import { PhoneFrame } from "@/components/phone-frame";
 import {
   NextMark,
@@ -14,15 +15,43 @@ import {
   SafariMark,
 } from "@/components/browser-logos";
 import { NpmPill } from "@/components/npm-pill";
+import { SiteLogo } from "@/components/site-logo";
 
 export default function LandingPage() {
   return (
-    <main>
+    <SsgoiTransition as="main" id="/" className="relative min-h-dvh bg-black">
+      <FloatingHeader />
       <Hero />
       <Routers />
       <Compat />
       <Resources />
-    </main>
+    </SsgoiTransition>
+  );
+}
+
+function FloatingHeader() {
+  return (
+    <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
+      <nav className="pointer-events-auto inline-flex h-11 items-center gap-5 rounded-full border border-white/10 bg-[#0e0b08]/70 pl-3 pr-4 backdrop-blur md:h-12 md:gap-6 md:pl-4 md:pr-5">
+        <SiteLogo />
+        <div className="flex items-center gap-5 text-sm text-neutral-300 md:gap-6">
+          <Link href="/docs" className="hover:text-neutral-100">
+            Docs
+          </Link>
+          <Link href="/showcase" className="hover:text-neutral-100">
+            Showcase
+          </Link>
+          <a
+            href="https://github.com/meursyphus/ssgoi"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-neutral-100"
+          >
+            GitHub
+          </a>
+        </div>
+      </nav>
+    </header>
   );
 }
 
@@ -210,76 +239,51 @@ function ReasonCard({
 function Resources() {
   return (
     <section className="border-t border-white/[0.05]">
-      <div className="mx-auto grid max-w-6xl gap-3 px-6 py-20 md:grid-cols-2 md:py-24">
-        <Link
-          href="/showcase"
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.015] p-8 transition-colors hover:border-orange-500/30 hover:bg-orange-500/[0.03]"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-7 w-7 text-orange-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden
+      <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
+        <div className="flex flex-col items-start gap-8">
+          <div className="max-w-2xl">
+            <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
+              Real apps, real transitions.
+            </h2>
+            <p className="mt-4 leading-relaxed text-neutral-400">
+              See how shipped products use ssgoi — Airbnb-style sheets, drill
+              navigation, hero pairs.
+            </p>
+          </div>
+          <Link
+            href="/showcase"
+            className="group inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-[#0e0b08] transition-colors hover:bg-orange-400"
           >
-            <rect x="3" y="4" width="7" height="7" rx="1.5" />
-            <rect x="14" y="4" width="7" height="7" rx="1.5" />
-            <rect x="3" y="14" width="7" height="7" rx="1.5" />
-            <rect x="14" y="14" width="7" height="7" rx="1.5" />
-          </svg>
-          <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-            Real apps, real transitions.
-          </h3>
-          <p className="mt-3 max-w-sm leading-relaxed text-neutral-400">
-            See how shipped products use ssgoi — Airbnb-style sheets, drill
-            navigation, hero pairs.
-          </p>
-          <span className="mt-7 inline-flex items-center gap-1.5 font-medium text-neutral-200 transition-colors group-hover:text-orange-400">
-            Browse showcase{" "}
+            Browse showcase
             <span
               className="transition-transform group-hover:translate-x-0.5"
               aria-hidden
             >
               →
             </span>
-          </span>
-        </Link>
+          </Link>
+        </div>
 
-        <a
-          href="https://ssgoi.dev/llms.txt"
-          target="_blank"
-          rel="noreferrer"
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.015] p-8 transition-colors hover:border-orange-500/30 hover:bg-orange-500/[0.03]"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-7 w-7 text-orange-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden
+        <div className="mt-16 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/[0.05] pt-8 text-sm">
+          <span className="text-neutral-500">Using an AI agent?</span>
+          <a
+            href="https://ssgoi.dev/llms.txt"
+            target="_blank"
+            rel="noreferrer"
+            className="group inline-flex items-center gap-1 font-mono text-neutral-200 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
           >
-            <rect x="3" y="4" width="18" height="16" rx="2" />
-            <path d="M7 9l3 3-3 3M12 15h5" strokeLinecap="round" />
-          </svg>
-          <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-            Drop it into your AI agent.
-          </h3>
-          <p className="mt-3 max-w-sm leading-relaxed text-neutral-400">
-            Single-file reference written for LLMs. Paste the URL and let your
-            agent wire ssgoi up for you.
-          </p>
-          <span className="mt-7 inline-flex items-center gap-1.5 font-mono text-neutral-200 transition-colors group-hover:text-orange-400">
-            /llms.txt{" "}
+            /llms.txt
             <span
               className="transition-transform group-hover:translate-x-0.5"
               aria-hidden
             >
               ↗
             </span>
+          </a>
+          <span className="text-neutral-500">
+            — single-file reference for LLMs.
           </span>
-        </a>
+        </div>
       </div>
     </section>
   );

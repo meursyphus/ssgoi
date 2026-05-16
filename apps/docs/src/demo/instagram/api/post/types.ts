@@ -30,6 +30,17 @@ export type PostDetail = {
   commentsLabel: string;
   /** "2일 전" */
   publishedAtLabel: string;
+  /** 미리 가공된 인기 댓글 목록 — 상세 페이지 본문 채움 */
+  topComments: PostComment[];
+};
+
+export type PostComment = {
+  id: string;
+  user: string;
+  text: string;
+  likesLabel: string;
+  whenLabel: string;
+  avatar: string;
 };
 
 export type Reel = {

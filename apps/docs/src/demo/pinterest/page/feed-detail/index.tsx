@@ -18,7 +18,7 @@ export default function FeedDetailPage({
   return (
     <SsgoiTransition
       id={`/demo/pinterest/feed/${initialData.id}`}
-      className="flex min-h-full flex-col bg-black"
+      className="flex min-h-full flex-col bg-white"
     >
       <div className="relative">
         <BackButton />

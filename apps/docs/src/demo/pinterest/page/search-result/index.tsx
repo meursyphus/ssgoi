@@ -17,7 +17,7 @@ export default function SearchResultPage({ query }: { query: string }) {
   return (
     <SsgoiTransition
       id={`/demo/pinterest/search/${query}`}
-      className="flex min-h-full flex-col bg-black"
+      className="flex min-h-full flex-col bg-white"
     >
       <ResultHeader query={query} />
       <ChipRow query={query} />

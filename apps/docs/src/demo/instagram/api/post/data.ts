@@ -1,6 +1,110 @@
-import type { PostDetail, Reel, TaggedPost } from "./types";
+import type { PostComment, PostDetail, Reel, TaggedPost } from "./types";
 
-const posts: PostDetail[] = [
+// 공통 댓글 풀 — post마다 4~7개 잘라서 씀
+const COMMENT_POOL: Omit<PostComment, "id">[] = [
+  {
+    user: "miso_devv",
+    text: "오 분위기 좋다 🤍",
+    likesLabel: "좋아요 12개",
+    whenLabel: "1시간",
+    avatar: "https://picsum.photos/seed/comment-miso/80/80",
+  },
+  {
+    user: "haru_oc",
+    text: "이거 어디에요?? 가보고 싶다",
+    likesLabel: "좋아요 4개",
+    whenLabel: "2시간",
+    avatar: "https://picsum.photos/seed/comment-haru/80/80",
+  },
+  {
+    user: "kim__sj",
+    text: "사진 진짜 잘 찍으심",
+    likesLabel: "좋아요 8개",
+    whenLabel: "3시간",
+    avatar: "https://picsum.photos/seed/comment-kim/80/80",
+  },
+  {
+    user: "alex.chen",
+    text: "이번 시리즈 다 좋네요 👀",
+    likesLabel: "좋아요 2개",
+    whenLabel: "5시간",
+    avatar: "https://picsum.photos/seed/comment-alex/80/80",
+  },
+  {
+    user: "moon_taeyong",
+    text: "🔥🔥🔥",
+    likesLabel: "좋아요 1개",
+    whenLabel: "6시간",
+    avatar: "https://picsum.photos/seed/comment-moon/80/80",
+  },
+  {
+    user: "yoon_dt",
+    text: "이거 보고 저도 한 장 찍으러 나가야겠어요",
+    likesLabel: "좋아요 3개",
+    whenLabel: "10시간",
+    avatar: "https://picsum.photos/seed/comment-yoon/80/80",
+  },
+  {
+    user: "jihye.k",
+    text: "썸네일부터 이미 작품",
+    likesLabel: "좋아요 5개",
+    whenLabel: "12시간",
+    avatar: "https://picsum.photos/seed/comment-jihye/80/80",
+  },
+  {
+    user: "neo_park",
+    text: "근데 카메라 뭐 쓰세요? 👀",
+    likesLabel: "좋아요 2개",
+    whenLabel: "1일",
+    avatar: "https://picsum.photos/seed/comment-neo/80/80",
+  },
+  {
+    user: "rena_films",
+    text: "스토리에도 올려주세요 ㅎㅎ",
+    likesLabel: "좋아요 0개",
+    whenLabel: "1일",
+    avatar: "https://picsum.photos/seed/comment-rena/80/80",
+  },
+  {
+    user: "ssoo_o",
+    text: "와... 색감 미쳤다",
+    likesLabel: "좋아요 7개",
+    whenLabel: "1일",
+    avatar: "https://picsum.photos/seed/comment-ssoo/80/80",
+  },
+  {
+    user: "byungjun_",
+    text: "💯💯",
+    likesLabel: "좋아요 1개",
+    whenLabel: "2일",
+    avatar: "https://picsum.photos/seed/comment-bj/80/80",
+  },
+  {
+    user: "studio.daily",
+    text: "공유해도 될까요? 🙏",
+    likesLabel: "좋아요 0개",
+    whenLabel: "2일",
+    avatar: "https://picsum.photos/seed/comment-studio/80/80",
+  },
+];
+
+function commentsFor(postId: string, count: number): PostComment[] {
+  // post id를 hash 삼아 시작 index 결정 — 결정적이지만 post마다 다른 댓글 조합
+  let h = 0;
+  for (let i = 0; i < postId.length; i++)
+    h = (h * 31 + postId.charCodeAt(i)) >>> 0;
+  const start = h % COMMENT_POOL.length;
+  const out: PostComment[] = [];
+  for (let i = 0; i < count; i++) {
+    const src = COMMENT_POOL[(start + i) % COMMENT_POOL.length];
+    out.push({ ...src, id: `${postId}-c${i + 1}` });
+  }
+  return out;
+}
+
+type PostSeed = Omit<PostDetail, "topComments"> & { commentCount: number };
+
+const seed: PostSeed[] = [
   {
     id: "p-001",
     image: "https://picsum.photos/seed/insta-desk/600/600",
@@ -11,6 +115,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 142개",
     commentsLabel: "댓글 8개 모두 보기",
     publishedAtLabel: "2일 전",
+    commentCount: 4,
   },
   {
     id: "p-002",
@@ -22,6 +127,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 86개",
     commentsLabel: "댓글 3개 모두 보기",
     publishedAtLabel: "4일 전",
+    commentCount: 3,
   },
   {
     id: "p-003",
@@ -33,6 +139,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 231개",
     commentsLabel: "댓글 17개 모두 보기",
     publishedAtLabel: "1주 전",
+    commentCount: 6,
   },
   {
     id: "p-004",
@@ -44,6 +151,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 412개",
     commentsLabel: "댓글 41개 모두 보기",
     publishedAtLabel: "1주 전",
+    commentCount: 7,
   },
   {
     id: "p-005",
@@ -55,6 +163,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 64개",
     commentsLabel: "댓글 2개 모두 보기",
     publishedAtLabel: "2주 전",
+    commentCount: 4,
   },
   {
     id: "p-006",
@@ -66,6 +175,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 178개",
     commentsLabel: "댓글 11개 모두 보기",
     publishedAtLabel: "2주 전",
+    commentCount: 5,
   },
   {
     id: "p-007",
@@ -77,6 +187,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 98개",
     commentsLabel: "댓글 5개 모두 보기",
     publishedAtLabel: "3주 전",
+    commentCount: 5,
   },
   {
     id: "p-008",
@@ -88,6 +199,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 305개",
     commentsLabel: "댓글 22개 모두 보기",
     publishedAtLabel: "3주 전",
+    commentCount: 7,
   },
   {
     id: "p-009",
@@ -99,6 +211,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 73개",
     commentsLabel: "댓글 4개 모두 보기",
     publishedAtLabel: "4주 전",
+    commentCount: 4,
   },
   {
     id: "p-010",
@@ -110,6 +223,7 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 121개",
     commentsLabel: "댓글 9개 모두 보기",
     publishedAtLabel: "5주 전",
+    commentCount: 5,
   },
   {
     id: "p-011",
@@ -121,8 +235,14 @@ const posts: PostDetail[] = [
     likesLabel: "좋아요 187개",
     commentsLabel: "댓글 14개 모두 보기",
     publishedAtLabel: "6주 전",
+    commentCount: 6,
   },
 ];
+
+const posts: PostDetail[] = seed.map(({ commentCount, ...rest }) => ({
+  ...rest,
+  topComments: commentsFor(rest.id, commentCount),
+}));
 
 const reels: Reel[] = [
   {
@@ -181,10 +301,16 @@ const tagged: TaggedPost[] = [
 ];
 
 export const data = {
-  all: () => posts.map((p) => ({ ...p })),
+  all: () =>
+    posts.map((p) => ({
+      ...p,
+      topComments: p.topComments.map((c) => ({ ...c })),
+    })),
   byId: (id: string) => {
     const found = posts.find((p) => p.id === id);
-    return found ? { ...found } : null;
+    return found
+      ? { ...found, topComments: found.topComments.map((c) => ({ ...c })) }
+      : null;
   },
   reels: () => reels.map((r) => ({ ...r })),
   tagged: () => tagged.map((t) => ({ ...t })),

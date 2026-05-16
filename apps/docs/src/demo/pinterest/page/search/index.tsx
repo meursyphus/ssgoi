@@ -18,10 +18,10 @@ export default function SearchPage() {
   return (
     <SsgoiTransition
       id="/demo/pinterest/search"
-      className="flex min-h-full flex-col bg-black"
+      className="flex min-h-full flex-col bg-white"
     >
       <SearchInput />
-      <div className="flex-1 space-y-5 pb-6">
+      <div className="flex-1 pb-6">
         <HeroBanner />
         <RecommendedList />
       </div>

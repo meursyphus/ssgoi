@@ -9,7 +9,7 @@ export function Masonry() {
 
   if (pinState.pins.isLoading) {
     return (
-      <div className="flex items-center justify-center py-16 text-neutral-500">
+      <div className="flex items-center justify-center py-16 text-neutral-400">
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     );

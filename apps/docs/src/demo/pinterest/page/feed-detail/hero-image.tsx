@@ -5,7 +5,7 @@ import type { PinDetail } from "@/demo/pinterest/state/pin";
 
 export function HeroImage({ pin }: { pin: PinDetail }) {
   return (
-    <div className="relative w-full overflow-hidden bg-black">
+    <div className="relative w-full overflow-hidden bg-neutral-100">
       <img
         src={pin.image}
         alt={pin.title}
@@ -22,7 +22,7 @@ export function HeroImage({ pin }: { pin: PinDetail }) {
       <button
         type="button"
         aria-label="검색"
-        className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white text-black shadow-lg"
+        className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
       >
         <Search className="h-4 w-4" strokeWidth={2.6} />
       </button>

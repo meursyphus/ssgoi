@@ -33,18 +33,16 @@ export default function FeedDetailPage({
   const me = profile.me.data;
 
   return (
-    <SsgoiTransition id={`/demo/instagram/feed/${detail.id}`}>
-      <div className="flex h-full flex-col bg-white">
-        <FeedDetailHeader
-          backHref={`/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`}
-        />
-        <div className="flex-1 overflow-y-auto">
-          <FeedDetailImage post={detail} author={me} />
-          <FeedDetailActions />
-          <FeedDetailMeta post={detail} author={me} />
-          <div className="h-6" />
-        </div>
-      </div>
+    <SsgoiTransition
+      id={`/demo/instagram/feed/${detail.id}`}
+      className="relative block min-h-full w-full bg-white"
+    >
+      <FeedDetailHeader
+        backHref={`/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`}
+      />
+      <FeedDetailImage post={detail} author={me} />
+      <FeedDetailActions />
+      <FeedDetailMeta post={detail} author={me} />
     </SsgoiTransition>
   );
 }

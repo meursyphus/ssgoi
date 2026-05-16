@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,7 +35,9 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="min-h-full">{children}</body>
+      <body className="relative z-0 min-h-full">
+        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+      </body>
     </html>
   );
 }
