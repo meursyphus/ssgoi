@@ -79,7 +79,7 @@ export function resolveActions<T extends Record<string, ActionFn>>(
     const action = actions[key];
     resolved[key] = async (...args: unknown[]) => {
       const safeArgs = args.map(deproxy);
-      const runAction = action as RunnableActionFn;
+      const runAction = action as unknown as RunnableActionFn;
       const result = await runParallelAction(runAction(...safeArgs));
       if (!result.ok) throw new Error(result.error);
       return result.data;

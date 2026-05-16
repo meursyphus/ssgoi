@@ -1,7 +1,5 @@
 type Props = { className?: string };
 
-/* eslint-disable @next/next/no-img-element */
-
 export function NextMark({ className }: Props) {
   return <img src="/logos/nextjs.svg" alt="Next.js" className={className} />;
 }

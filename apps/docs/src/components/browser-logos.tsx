@@ -1,7 +1,5 @@
 type Props = { className?: string };
 
-/* eslint-disable @next/next/no-img-element */
-
 export function ChromeMark({ className }: Props) {
   return <img src="/logos/chrome.svg" alt="Chrome" className={className} />;
 }

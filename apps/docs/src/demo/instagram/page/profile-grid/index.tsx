@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { SsgoiTransition } from "@ssgoi/react";
 import { usePost } from "@/demo/instagram/state/post";
 import { GridSkeleton } from "./grid-skeleton";
