@@ -11,7 +11,13 @@ export interface ScrollOptions {
 }
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 5, damping: 4 },
+  spring: {
+    stiffness: 20,
+    damping: 8,
+    doubleSpring: 1,
+    restDelta: 0.001,
+    restSpeed: 0.001,
+  },
 };
 
 export const scroll = (options: ScrollOptions = {}): TransitionConfig => {

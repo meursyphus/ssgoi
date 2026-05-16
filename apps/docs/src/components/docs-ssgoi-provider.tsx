@@ -5,8 +5,9 @@ import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { scroll } from "@ssgoi/react/view-transitions";
 
 const config: SsgoiConfig = {
+  preserveScroll: false,
   transitions: [
-    ...scroll({
+    scroll({
       paths: ["/", "/showcase"],
       type: "non-directional",
       direction: "up",
