@@ -1,10 +1,5 @@
 export { Ssgoi } from "./ssgoi.directive";
 export { SsgoiTransition } from "./ssgoi-transition.directive";
-export {
-  TransitionDirective,
-  TransitionDirectiveConfig,
-} from "./transition.directive";
-export { TransitionScopeDirective } from "./transition-scope.directive";
 export { injectSsgoi, SSGOI_CONTEXT } from "./context";
 export * from "./types";
 export * from "@ssgoi/core";

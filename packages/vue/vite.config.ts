@@ -29,7 +29,12 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: ["vue", "@ssgoi/core", "@ssgoi/core/internal"],
+      external: [
+        "vue",
+        "@ssgoi/core",
+        "@ssgoi/core/internal",
+        "@ssgoi/core/types",
+      ],
       output: {
         preserveModules: true,
         exports: "named",

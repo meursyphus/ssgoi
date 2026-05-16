@@ -1,0 +1,37 @@
+# SSGOI - sheet transition
+
+Bottom sheet style. New page slides up from below. Use for **modal-like** flows (FAB → compose, "new item" screen, settings panel) that should feel temporary.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- **`static`** (default): only the rising sheet moves. Background stays put — looks like the new page covers the old one cleanly.
+- **`background-scale`**: background scales/transforms down behind the rising sheet, giving a stacked, iOS-modal feel.
+
+`enter` is the destination path that slides UP. `exit` is the page underneath — what shows when you go back.
+
+## Signature
+
+```ts
+import { sheet } from "@ssgoi/react/view-transitions";
+
+sheet({
+  enter: string;                            // destination (the sheet page)
+  exit: string;                             // background (the page underneath)
+  type?: "static" | "background-scale";     // default: "static"
+}): SsgoiPathTransition[];
+```
+
+Returns a directional pair with different physics for opening and closing.
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    sheet({ enter: "/compose", exit: "/feed" }),
+    sheet({ enter: "/settings/*", exit: "/", type: "background-scale" }),
+  ],
+};
+```

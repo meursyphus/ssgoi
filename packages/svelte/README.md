@@ -16,7 +16,7 @@ SSGOI brings native app-like page transitions to the web. Transform your static 
 - **🚀 SSR Ready** - Perfect compatibility with SvelteKit. No hydration issues, SEO-friendly
 - **🎯 Use Your Router** - Keep your existing routing. SvelteKit's built-in router works seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **🧩 Svelte Native** - Built specifically for Svelte with actions and stores
+- **🧩 Svelte Native** - Built specifically for Svelte components
 
 ## Installation
 
@@ -37,9 +37,13 @@ pnpm add @ssgoi/svelte
 <script>
   import { Ssgoi } from "@ssgoi/svelte";
   import { fade } from "@ssgoi/svelte/view-transitions";
+
+  const config = {
+    transitions: [fade({ paths: ["/", "/about"] })],
+  };
 </script>
 
-<Ssgoi config={{ defaultTransition: fade() }}>
+<Ssgoi {config}>
   <!-- ⚠️ Important: position: relative is required! -->
   <div style="position: relative; min-height: 100vh;">
     <slot />
@@ -62,7 +66,7 @@ pnpm add @ssgoi/svelte
 </SsgoiTransition>
 ```
 
-**That's it!** Your pages now transition smoothly with a fade effect.
+**That's it!** Your pages now transition smoothly with the configured effect.
 
 ## Advanced Transitions
 
@@ -73,34 +77,19 @@ Define different transitions for different routes:
 ```svelte
 <script>
   import { Ssgoi } from "@ssgoi/svelte";
-  import {
-    scroll,
-    fade,
-    drill,
-    pinterest,
-  } from "@ssgoi/svelte/view-transitions";
+  import { scroll, drill, zoom } from "@ssgoi/svelte/view-transitions";
 
   const config = {
     transitions: [
       // Scroll between tabs
-      { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
-      {
-        from: "/about",
-        to: "/home",
-        transition: scroll({ direction: "down" }),
-      },
+      scroll({ paths: ["/home", "/about"] }),
 
       // Drill in when entering details
-      {
-        from: "/products",
-        to: "/products/*",
-        transition: drill({ direction: "enter" }),
-      },
+      drill({ enter: "/products/*", exit: "/products" }),
 
-      // Pinterest-style image transitions
-      { from: "/gallery", to: "/photo/*", transition: pinterest() },
+      // Shared element image transitions
+      zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
     ],
-    defaultTransition: fade(),
   };
 </script>
 
@@ -109,39 +98,7 @@ Define different transitions for different routes:
 </Ssgoi>
 ```
 
-### Symmetric Transitions
-
-Automatically create bidirectional transitions:
-
-```svelte
-{
-  from: '/home',
-  to: '/about',
-  transition: scroll({ direction: 'up' }),
-  symmetric: true  // Automatically creates reverse transition
-}
-```
-
-### Individual Element Animations
-
-Animate specific elements during mount/unmount:
-
-```svelte
-<script>
-  import { transition } from "@ssgoi/svelte";
-  import { fade, slide } from "@ssgoi/svelte/transitions";
-</script>
-
-<div
-  use:transition={{
-    key: "card",
-    in: fade(),
-    out: slide({ direction: "up" }),
-  }}
->
-  <h2>Animated Card</h2>
-</div>
-```
+The route helpers return path transition groups, so nested arrays are accepted in `config.transitions`.
 
 ## SvelteKit App Example
 
@@ -150,11 +107,13 @@ Animate specific elements during mount/unmount:
 <script>
   import { Ssgoi } from '@ssgoi/svelte';
   import { scroll } from '@ssgoi/svelte/view-transitions';
+
+  const config = {
+    transitions: [scroll({ paths: ['/', '/about', '/products'] })]
+  };
 </script>
 
-<Ssgoi config={{
-  defaultTransition: scroll({ direction: 'up' })
-}}>
+<Ssgoi {config}>
   <div style="position: relative; min-height: 100vh;">
     <nav>
       <a href="/">Home</a>
@@ -190,6 +149,11 @@ The provider component that manages transition context.
 </Ssgoi>
 ```
 
+Props:
+
+- `config` - Transition configuration object
+- `host` - Optional external playback host for debug tooling
+
 #### `<SsgoiTransition>`
 
 Wrapper component for pages that should transition.
@@ -200,40 +164,6 @@ Wrapper component for pages that should transition.
 </SsgoiTransition>
 ```
 
-### Actions
-
-#### `use:transition`
-
-Apply transitions to individual elements.
-
-```svelte
-<div
-  use:transition={{
-    key: "unique-key",
-    in: fade(),
-    out: fade(),
-  }}
->
-  Content
-</div>
-```
-
-### Stores
-
-#### `transitioning`
-
-Access transition state.
-
-```svelte
-<script>
-  import { transitioning } from "@ssgoi/svelte";
-</script>
-
-{#if $transitioning}
-  <p>Transitioning...</p>
-{/if}
-```
-
 ## Built-in Transitions
 
 ### Page Transitions (`@ssgoi/svelte/view-transitions`)
@@ -242,28 +172,16 @@ Access transition state.
 - `scroll()` - Vertical scrolling (up/down)
 - `drill()` - Drill in/out effect (enter/exit)
 - `hero()` - Shared element transitions
-- `pinterest()` - Pinterest-style expand effect
+- `slide()` - Ordered horizontal page transitions
+- `zoom()` - Shared element zoom transitions
 
-### Element Transitions (`@ssgoi/svelte/transitions`)
+## Typed Preset Configuration
 
-- `fade()`
-- `slide({ direction: 'up' | 'down' | 'left' | 'right' })`
-- `scale()`
-- `bounce()`
-- `blur()`
-- `rotate()`
-
-## Spring Physics Configuration
-
-All transitions use spring physics for natural motion:
+Transition presets are fully typed and use the core animation engine internally:
 
 ```javascript
 slide({
-  direction: "left",
-  spring: {
-    stiffness: 300, // 1-1000, higher = faster
-    damping: 30, // 0-100, higher = less oscillation
-  },
+  paths: ["/products/all", "/products/fashion"],
 });
 ```
 

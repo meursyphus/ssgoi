@@ -3,7 +3,7 @@
 	import { getPinterestItem, getRelatedPins } from '$lib/data/pinterest';
 	import { page } from '$app/stores';
 
-	const pinId = $page.params.id;
+	const pinId = $page.params.id!;
 	const item = getPinterestItem(pinId);
 	const relatedPins = item ? getRelatedPins(pinId, 6) : [];
 </script>

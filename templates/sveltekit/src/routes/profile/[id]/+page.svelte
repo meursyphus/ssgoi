@@ -3,7 +3,7 @@
 	import { getPost, getRelatedPosts } from '$lib/data/profile';
 	import { page } from '$app/stores';
 
-	const postId = $page.params.id;
+	const postId = $page.params.id!;
 	const post = getPost(postId);
 	const relatedPosts = post ? getRelatedPosts(postId, 3) : [];
 </script>

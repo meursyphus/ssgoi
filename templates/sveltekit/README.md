@@ -6,8 +6,8 @@ A demo template showcasing SSGOI page transitions in SvelteKit.
 
 - **Posts**: Drill transition between list and detail views
 - **Shop**: Slide transitions with category tabs using nested Ssgoi
-- **Gallery**: Pinterest-style masonry layout with pinterest transition
-- **Profile**: Instagram-style grid with instagram transition
+- **Gallery**: Pinterest-style masonry layout with zoom expand transition
+- **Profile**: Instagram-style grid with zoom static transition
 
 ## Getting Started
 
@@ -60,21 +60,10 @@ src/
 
 ```svelte
 <script>
-  import { drill } from '@ssgoi/svelte/view-transitions';
+  import { drill } from "@ssgoi/svelte/view-transitions";
 
   const config = {
-    transitions: [
-      {
-        from: '/posts',
-        to: '/posts/*',
-        transition: drill({ direction: 'enter' })
-      },
-      {
-        from: '/posts/*',
-        to: '/posts',
-        transition: drill({ direction: 'exit' })
-      }
-    ]
+    transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
   };
 </script>
 ```
@@ -83,58 +72,40 @@ src/
 
 ```svelte
 <script>
-  import { slide } from '@ssgoi/svelte/view-transitions';
+  import { slide } from "@ssgoi/svelte/view-transitions";
 
   const config = {
     transitions: [
-      {
-        from: '/products/tab/left',
-        to: '/products/tab/right',
-        transition: slide({ direction: 'left' })
-      }
+      slide({
+        paths: ["/products/all", "/products/electronics", "/products/fashion"],
+      }),
     ],
-    middleware: (from, to) => {
-      // Determine slide direction based on tab order
-      // ...
-    }
   };
 </script>
 ```
 
-### Pinterest Transition (Gallery)
+### Zoom Transition (Gallery)
 
 ```svelte
 <script>
-  import { pinterest } from '@ssgoi/svelte/view-transitions';
+  import { zoom } from "@ssgoi/svelte/view-transitions";
 
   const config = {
     transitions: [
-      {
-        from: '/pinterest/*',
-        to: '/pinterest',
-        transition: pinterest(),
-        symmetric: true
-      }
-    ]
+      zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
+    ],
   };
 </script>
 ```
 
-### Instagram Transition (Profile)
+### Zoom Transition (Profile)
 
 ```svelte
 <script>
-  import { instagram } from '@ssgoi/svelte/view-transitions';
+  import { zoom } from "@ssgoi/svelte/view-transitions";
 
   const config = {
-    transitions: [
-      {
-        from: '/profile',
-        to: '/profile/*',
-        transition: instagram(),
-        symmetric: true
-      }
-    ]
+    transitions: [zoom({ paths: ["/profile", "/profile/*"], type: "static" })],
   };
 </script>
 ```

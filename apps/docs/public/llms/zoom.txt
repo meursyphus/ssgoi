@@ -1,0 +1,56 @@
+# SSGOI - zoom transition
+
+Card-to-detail expansion. The tapped card grows from its grid position into the detail viewport (or to a target element). Use for **gallery → lightbox**, image grids, expandable cards, and "tap to expand" flows.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- **`expand`**: the source card grows to fill the destination viewport. Background fades. On exit, it collapses back into the card.
+- **`static`**: the source card morphs to the size/position of the destination element (without filling the viewport). Use when the detail isn't full-screen — e.g. a modal popping out of its tile in place.
+
+If no matching `enter`/`exit` element is found, the transition is a no-op.
+
+## Signature
+
+```ts
+import { zoom } from "@ssgoi/react/view-transitions";
+
+zoom({
+  paths: readonly string[];
+  type: "expand" | "static";    // REQUIRED — no default
+}): SsgoiPathTransition[];
+```
+
+## Required: matching `data-zoom-exit-key` / `data-zoom-enter-key`
+
+Different attribute names per side:
+- **Outgoing page** marks the source element (the card being tapped) with `data-zoom-exit-key="<key>"`.
+- **Incoming page** marks the destination element (where the card lands) with `data-zoom-enter-key="<key>"`.
+- The key VALUES must match across the two pages.
+
+```tsx
+// Gallery page (/grid) — the card being tapped
+{photos.map((p) => (
+  <Link key={p.id} href={`/photo/${p.id}`}>
+    <div data-zoom-exit-key={`photo-${p.id}`}>
+      <img src={p.thumb} />
+    </div>
+  </Link>
+))}
+
+// Detail page (/photo/[id]) — the destination
+<div data-zoom-enter-key={`photo-${id}`}>
+  <img src={fullImage} />
+</div>
+```
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    zoom({ paths: ["/grid", "/photo/*"], type: "expand" }),
+  ],
+};
+```

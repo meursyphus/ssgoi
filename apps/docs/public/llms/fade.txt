@@ -1,0 +1,33 @@
+# SSGOI - fade transition
+
+Cross-fade between pages. No motion, just opacity. Safe default for unrelated pages or anywhere a directional cue would feel arbitrary.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+Both pages overlap during the transition. The outgoing fades to 0 while the incoming fades from 0 to 1, driven by the same spring.
+
+## Signature
+
+```ts
+import { fade } from "@ssgoi/react/view-transitions";
+
+fade({
+  paths: readonly string[];   // every pair of paths gets the fade transition
+}): SsgoiPathTransition[];
+```
+
+Returns symmetric entries — one for every ordered pair within `paths`.
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    fade({ paths: ["/", "/about", "/contact"] }),
+  ],
+};
+```
+
+Drop the result directly into `transitions` — arrays are flattened automatically. Use wildcards in paths (`"/blog/*"`) to cover many routes at once.

@@ -34,6 +34,7 @@ export default defineConfig({
         "solid-js/web",
         "@ssgoi/core",
         "@ssgoi/core/internal",
+        "@ssgoi/core/types",
       ],
       output: {
         preserveModules: true,

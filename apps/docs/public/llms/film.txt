@@ -1,0 +1,29 @@
+# SSGOI - film transition
+
+Film-strip style. Outgoing page scales down and slides off while the incoming page scales up from a small tile with animated corner borders. Premium, cinematic feel — good for **gallery / lightbox** style flows.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+Multiple springs run in parallel with a baked stagger schedule: outgoing shrinks + translates, and the incoming page grows from a "viewfinder" tile while four corner borders trace into place around it. Heavier visual cost than slide/fade — use deliberately.
+
+## Signature
+
+```ts
+import { film } from "@ssgoi/react/view-transitions";
+
+film({
+  paths: readonly string[];   // symmetric — every pair gets the film effect
+}): SsgoiPathTransition[];
+```
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    film({ paths: ["/gallery", "/photo/*"] }),
+  ],
+};
+```

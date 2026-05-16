@@ -1,0 +1,39 @@
+# SSGOI - drill transition
+
+iOS-style hierarchical navigation. Use when going from a list to a detail screen, or any parent → child navigation where the user feels they're drilling deeper into content.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+- **`parallax`** (default): new page slides in from the right; old page eases slightly left under it, hinting it's still there.
+- **`crossfade`**: new page fades + zooms in over the old one. Softer, less directional.
+
+`enter` is forward navigation (e.g. list → detail). `exit` is the reverse — old page comes back from the left.
+
+## Signature
+
+```ts
+import { drill } from "@ssgoi/react/view-transitions";
+
+drill({
+  enter: string;                       // destination path (forward)
+  exit: string;                        // source path (forward)
+  type?: "parallax" | "crossfade";     // default: "parallax"
+}): SsgoiPathTransition[];
+```
+
+Returns a directional pair: one entry for forward (`exit → enter`) and one for backward (`enter → exit`).
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    drill({ enter: "/post/*", exit: "*" }),
+    drill({ enter: "/settings/*", exit: "/settings", type: "crossfade" }),
+  ],
+};
+```
+
+Drop the result directly into `transitions` — arrays are flattened automatically.

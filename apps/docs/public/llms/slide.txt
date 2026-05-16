@@ -1,0 +1,36 @@
+# SSGOI - slide transition
+
+Horizontal push. Use for **tab navigation**, swipeable sections, or any sequential flow where left/right corresponds to forward/backward.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+Path order in `paths` defines direction:
+- **Forward** (earlier path → later path): outgoing slides left, incoming slides in from the right.
+- **Backward** (later → earlier): outgoing slides right, incoming slides in from the left.
+
+## Signature
+
+```ts
+import { slide } from "@ssgoi/react/view-transitions";
+
+slide({
+  paths: readonly string[];   // ordered list — order matters
+}): SsgoiPathTransition[];
+```
+
+Returns ordered entries: a forward and a backward pair for every combination in `paths`.
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    // tabs in order: forward = a → b → c
+    slide({ paths: ["/tabs/a", "/tabs/b", "/tabs/c"] }),
+  ],
+};
+```
+
+> Tip: Add `overflow-x-clip` to the `<Ssgoi>` wrapper so the off-screen page doesn't cause a horizontal scrollbar flash during the slide.

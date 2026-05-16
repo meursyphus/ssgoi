@@ -1,0 +1,47 @@
+# SSGOI - hero transition
+
+Shared element transition. The same logical object (a thumbnail, an avatar, a card image) is tweened in size and position from one page to the next. Use when the user should feel they're following the *same thing* across pages.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+The element with a given `data-hero-key` on the source page is tweened in position and size to match the element with the same key on the destination page. The rest of the pages cross-fade around it.
+
+If a key has no match on the other side, that element falls back gracefully (no animation on it).
+
+## Signature
+
+```ts
+import { hero } from "@ssgoi/react/view-transitions";
+
+hero({
+  paths: readonly string[];   // routes participating in hero transitions
+}): SsgoiPathTransition[];
+```
+
+## Required: matching `data-hero-key`
+
+Both pages must mark the shared element with the **same** `data-hero-key` value. The value should be a stable string — use the item's id, not its index.
+
+```tsx
+// List page (/items)
+{items.map((item) => (
+  <Link key={item.id} href={`/items/${item.id}`}>
+    <img data-hero-key={`item-${item.id}`} src={item.thumbnail} />
+  </Link>
+))}
+
+// Detail page (/items/[id])
+<img data-hero-key={`item-${id}`} src={fullImage} />
+```
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    hero({ paths: ["/items", "/items/*"] }),
+  ],
+};
+```

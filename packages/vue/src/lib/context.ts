@@ -1,13 +1,15 @@
-import { inject, provide, type InjectionKey } from "vue";
+import { inject, provide, type ComputedRef, type InjectionKey } from "vue";
 import type { SsgoiContext } from "./types";
 
-const SsgoiContextKey: InjectionKey<SsgoiContext> = Symbol("ssgoi-context");
+type SsgoiContextRef = ComputedRef<SsgoiContext>;
 
-export const provideSsgoi = (context: SsgoiContext) => {
+const SsgoiContextKey: InjectionKey<SsgoiContextRef> = Symbol("ssgoi-context");
+
+export const provideSsgoi = (context: SsgoiContextRef) => {
   provide(SsgoiContextKey, context);
 };
 
-export const useSsgoi = () => {
+export const useSsgoi = (): SsgoiContextRef => {
   const context = inject(SsgoiContextKey);
   if (!context) {
     throw new Error("useSsgoi must be used within Ssgoi component");

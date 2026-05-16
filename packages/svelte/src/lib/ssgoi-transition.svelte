@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { transition } from "./transition";
   import { getSsgoiContext } from "./context";
 
   interface Props {
@@ -8,18 +7,24 @@
     children: Snippet;
     as?: keyof HTMLElementTagNameMap;
     class?: string;
+    [key: string]: unknown;
   }
 
-  let { id, children, as = "div", class: className }: Props = $props();
+  let { id, children, as = "div", class: className, ...rest }: Props = $props();
 
-  const getTransition = getSsgoiContext();
+  const ssgoi = getSsgoiContext();
+
+  function ssgoiRef(node: HTMLElement) {
+    ssgoi.refFor(id)(node);
+  }
 </script>
 
 <svelte:element
   this={as}
-  use:transition={getTransition(id)}
+  use:ssgoiRef
   data-ssgoi-transition={id}
   class={className}
+  {...rest}
 >
   {@render children()}
 </svelte:element>
