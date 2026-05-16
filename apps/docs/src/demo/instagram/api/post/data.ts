@@ -1,0 +1,191 @@
+import type { PostDetail, Reel, TaggedPost } from "./types";
+
+const posts: PostDetail[] = [
+  {
+    id: "p-001",
+    image: "https://picsum.photos/seed/insta-desk/600/600",
+    kind: "video",
+    caption: "오후의 데스크 셋업. 햇살 좋다",
+    likes: 142,
+    comments: 8,
+    likesLabel: "좋아요 142개",
+    commentsLabel: "댓글 8개 모두 보기",
+    publishedAtLabel: "2일 전",
+  },
+  {
+    id: "p-002",
+    image: "https://picsum.photos/seed/insta-tax/600/600",
+    kind: "image",
+    caption: "홍길동 세무사 랜딩 페이지 작업 — 카피와 톤을 다시 다듬는 중.",
+    likes: 86,
+    comments: 3,
+    likesLabel: "좋아요 86개",
+    commentsLabel: "댓글 3개 모두 보기",
+    publishedAtLabel: "4일 전",
+  },
+  {
+    id: "p-003",
+    image: "https://picsum.photos/seed/insta-backpack/600/600",
+    kind: "image",
+    caption: "퇴근길 하늘이 너무 예뻐서 한 장.",
+    likes: 231,
+    comments: 17,
+    likesLabel: "좋아요 231개",
+    commentsLabel: "댓글 17개 모두 보기",
+    publishedAtLabel: "1주 전",
+  },
+  {
+    id: "p-004",
+    image: "https://picsum.photos/seed/insta-cat/600/600",
+    kind: "carousel",
+    caption: "골목길에서 만난 친구. 자고 있길래 한 컷.",
+    likes: 412,
+    comments: 41,
+    likesLabel: "좋아요 412개",
+    commentsLabel: "댓글 41개 모두 보기",
+    publishedAtLabel: "1주 전",
+  },
+  {
+    id: "p-005",
+    image: "https://picsum.photos/seed/insta-blog/600/600",
+    kind: "image",
+    caption: "블로그 위젯 시리즈 4편 — Align, FractionallySizedBox, Center.",
+    likes: 64,
+    comments: 2,
+    likesLabel: "좋아요 64개",
+    commentsLabel: "댓글 2개 모두 보기",
+    publishedAtLabel: "2주 전",
+  },
+  {
+    id: "p-006",
+    image: "https://picsum.photos/seed/insta-portrait/600/600",
+    kind: "image",
+    caption: "스킬: sveltekit · react · spring boot · kotlin",
+    likes: 178,
+    comments: 11,
+    likesLabel: "좋아요 178개",
+    commentsLabel: "댓글 11개 모두 보기",
+    publishedAtLabel: "2주 전",
+  },
+  {
+    id: "p-007",
+    image: "https://picsum.photos/seed/insta-coffee/600/600",
+    kind: "image",
+    caption: "아침 루틴. 커피 한 잔 + 오늘 할 일 정리.",
+    likes: 98,
+    comments: 5,
+    likesLabel: "좋아요 98개",
+    commentsLabel: "댓글 5개 모두 보기",
+    publishedAtLabel: "3주 전",
+  },
+  {
+    id: "p-008",
+    image: "https://picsum.photos/seed/insta-sunset/600/600",
+    kind: "image",
+    caption: "노을. 더 할 말이 없다.",
+    likes: 305,
+    comments: 22,
+    likesLabel: "좋아요 305개",
+    commentsLabel: "댓글 22개 모두 보기",
+    publishedAtLabel: "3주 전",
+  },
+  {
+    id: "p-009",
+    image: "https://picsum.photos/seed/insta-keyboard/600/600",
+    kind: "image",
+    caption: "새 키보드 영입. 손맛이 또 다르네.",
+    likes: 73,
+    comments: 4,
+    likesLabel: "좋아요 73개",
+    commentsLabel: "댓글 4개 모두 보기",
+    publishedAtLabel: "4주 전",
+  },
+  {
+    id: "p-010",
+    image: "https://picsum.photos/seed/insta-walk/600/600",
+    kind: "video",
+    caption: "동네 산책. 한 바퀴 돌고 오면 머리가 맑아짐.",
+    likes: 121,
+    comments: 9,
+    likesLabel: "좋아요 121개",
+    commentsLabel: "댓글 9개 모두 보기",
+    publishedAtLabel: "5주 전",
+  },
+  {
+    id: "p-011",
+    image: "https://picsum.photos/seed/insta-screen/600/600",
+    kind: "image",
+    caption: "스벨트로 페이지 트랜지션 구현하기 — 1편 시작.",
+    likes: 187,
+    comments: 14,
+    likesLabel: "좋아요 187개",
+    commentsLabel: "댓글 14개 모두 보기",
+    publishedAtLabel: "6주 전",
+  },
+];
+
+const reels: Reel[] = [
+  {
+    id: "r-001",
+    image: "https://picsum.photos/seed/reel-1/400/700",
+    viewsLabel: "1.2만",
+  },
+  {
+    id: "r-002",
+    image: "https://picsum.photos/seed/reel-2/400/700",
+    viewsLabel: "8.8천",
+  },
+  {
+    id: "r-003",
+    image: "https://picsum.photos/seed/reel-3/400/700",
+    viewsLabel: "2.4만",
+  },
+  {
+    id: "r-004",
+    image: "https://picsum.photos/seed/reel-4/400/700",
+    viewsLabel: "5.9천",
+  },
+  {
+    id: "r-005",
+    image: "https://picsum.photos/seed/reel-5/400/700",
+    viewsLabel: "1.7만",
+  },
+  {
+    id: "r-006",
+    image: "https://picsum.photos/seed/reel-6/400/700",
+    viewsLabel: "3.1천",
+  },
+];
+
+const tagged: TaggedPost[] = [
+  {
+    id: "t-001",
+    image: "https://picsum.photos/seed/tagged-1/600/600",
+    userLabel: "@friend_a",
+  },
+  {
+    id: "t-002",
+    image: "https://picsum.photos/seed/tagged-2/600/600",
+    userLabel: "@friend_b",
+  },
+  {
+    id: "t-003",
+    image: "https://picsum.photos/seed/tagged-3/600/600",
+    userLabel: "@studio_c",
+  },
+  {
+    id: "t-004",
+    image: "https://picsum.photos/seed/tagged-4/600/600",
+    userLabel: "@friend_d",
+  },
+];
+
+export const data = {
+  all: () => posts.map((p) => ({ ...p })),
+  byId: (id: string) => {
+    const found = posts.find((p) => p.id === id);
+    return found ? { ...found } : null;
+  },
+  reels: () => reels.map((r) => ({ ...r })),
+  tagged: () => tagged.map((t) => ({ ...t })),
+};
