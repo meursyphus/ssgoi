@@ -189,7 +189,10 @@ export type SsgoiPathTransitionInput =
   | SsgoiPathTransition
   | readonly SsgoiPathTransitionInput[];
 
-export type PreserveScrollValue = boolean | { exclude: string[] };
+export type PreserveScrollValue =
+  | boolean
+  | { exclude: string[]; key?: string }
+  | { key: string; exclude?: string[] };
 export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
 export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 

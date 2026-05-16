@@ -8,6 +8,11 @@ const RESTORE_MAX_RETRIES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
+type ScrollPolicy = {
+  preserves: boolean;
+  shared: boolean;
+  storageKey: string;
+};
 
 export type ContextManagerOptions = {
   /**
@@ -57,11 +62,30 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return cachedIsMobile;
   };
 
-  const shouldPreserve = (path: string): boolean => {
+  const getScrollPolicy = (path: string): ScrollPolicy => {
     const value = resolvePreserve(detectIsMobile());
-    if (value === false) return false;
-    if (value === true) return true;
-    return !value.exclude.some((pattern) => matchPath(path, pattern));
+
+    if (value === false) {
+      return { preserves: false, shared: false, storageKey: `path:${path}` };
+    }
+
+    if (value === true) {
+      return { preserves: true, shared: false, storageKey: `path:${path}` };
+    }
+
+    const excluded =
+      value.exclude?.some((pattern) => matchPath(path, pattern)) ?? false;
+    const shared = !excluded && Boolean(value.key);
+
+    return {
+      preserves: !excluded,
+      shared,
+      storageKey: shared ? `shared:${value.key}` : `path:${path}`,
+    };
+  };
+
+  const shouldPreserve = (path: string): boolean => {
+    return getScrollPolicy(path).preserves;
   };
 
   let contextElement: HTMLElement | null = null;
@@ -77,7 +101,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   const scrollListener = () => {
     if (scrollContainer && currentPath && !isTransitioning) {
-      scrollPositions.set(currentPath, {
+      scrollPositions.set(getScrollPolicy(currentPath).storageKey, {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
       });
@@ -85,20 +109,28 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   };
 
   // Restore scroll position for the given path. For non-preserved paths the
-  // arrival starts at the top; for preserved paths with a saved value we
-  // re-apply for up to 10 frames or until the target is reached, whichever
-  // comes first. Stops on success so we don't fight subsequent user scrolls.
+  // arrival starts at the top; for shared-key paths without a saved value, leave
+  // the current scroll alone because a parent transition context may own it.
+  // Saved targets are re-applied for up to 10 frames or until reached.
   const restoreScrollPosition = (path: string) => {
     if (!scrollContainer) return;
 
     // Resolve the target: saved value if preservation is on AND we have one,
-    // otherwise (0, 0). All three cases — non-preserved, preserved-but-empty,
-    // preserved-with-value — go through the same retry loop so a router-side
-    // scroll restore (e.g., SvelteKit's `afterNavigate`) running after our
-    // first scrollTo can be overridden within the retry window.
+    // otherwise (0, 0). These cases go through the same retry loop so a
+    // router-side scroll restore (e.g., SvelteKit's `afterNavigate`) running
+    // after our first scrollTo can be overridden within the retry window.
+    const policy = getScrollPolicy(path);
+    if (
+      policy.preserves &&
+      policy.shared &&
+      !scrollPositions.has(policy.storageKey)
+    ) {
+      return;
+    }
+
     const target: ScrollPosition =
-      shouldPreserve(path) && scrollPositions.has(path)
-        ? scrollPositions.get(path)!
+      policy.preserves && scrollPositions.has(policy.storageKey)
+        ? scrollPositions.get(policy.storageKey)!
         : { x: 0, y: 0 };
 
     let retryCount = 0;
@@ -182,14 +214,17 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     from?: string,
     to?: string,
   ): { x: number; y: number } => {
+    const fromKey = from ? getScrollPolicy(from).storageKey : null;
     const fromScroll =
-      from && scrollPositions.has(from)
-        ? scrollPositions.get(from)!
+      fromKey && scrollPositions.has(fromKey)
+        ? scrollPositions.get(fromKey)!
         : { x: 0, y: 0 };
 
+    const toPolicy = to ? getScrollPolicy(to) : null;
+    const toKey = toPolicy?.preserves ? toPolicy.storageKey : null;
     const toScroll =
-      to && shouldPreserve(to) && scrollPositions.has(to)
-        ? scrollPositions.get(to)!
+      toKey && scrollPositions.has(toKey)
+        ? scrollPositions.get(toKey)!
         : { x: 0, y: 0 };
 
     return {
@@ -202,7 +237,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // for paths where preservation is disabled, so stale values don't leak
   // across navigations.
   const evictScrollPosition = (path: string) => {
-    scrollPositions.delete(path);
+    scrollPositions.delete(getScrollPolicy(path).storageKey);
   };
 
   const getScrollContainer = () => scrollContainer;
@@ -213,8 +248,9 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   };
 
   const getScrollPosition = (path?: string): { x: number; y: number } => {
-    return path && scrollPositions.has(path)
-      ? scrollPositions.get(path)!
+    const key = path ? getScrollPolicy(path).storageKey : null;
+    return key && scrollPositions.has(key)
+      ? scrollPositions.get(key)!
       : { x: 0, y: 0 };
   };
 

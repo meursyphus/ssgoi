@@ -21,7 +21,7 @@ export function InstagramProfileLayoutClient({
 
   const innerConfig: SsgoiConfig = useMemo(
     () => ({
-      preserveScroll: false,
+      preserveScroll: { key: base },
       transitions: [
         slide({
           paths: [base, `${base}/reels`, `${base}/remix`, `${base}/tagged`],

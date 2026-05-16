@@ -26,4 +26,5 @@ export type {
   Reel,
   TaggedPost,
   PostKind,
+  PostComment,
 } from "@/demo/instagram/api/post";
