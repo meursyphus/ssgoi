@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="srTile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15140f"/>
+      <stop offset="1" stop-color="#070706"/>
+    </linearGradient>
+    <linearGradient id="srWork" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1a16"/>
+      <stop offset="0.48" stop-color="#3a2c12"/>
+      <stop offset="0.56" stop-color="#f5e3a7"/>
+      <stop offset="0.65" stop-color="#3a2c12"/>
+      <stop offset="1" stop-color="#0d0c0a"/>
+    </linearGradient>
+    <radialGradient id="srHalo" cx="50%" cy="36%" r="42%">
+      <stop offset="0%" stop-color="#f5e7c0" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#c9a96b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#srTile)"/>
+  <!-- soft halo behind the work -->
+  <rect x="14" y="8" width="36" height="44" rx="2" fill="url(#srHalo)"/>
+  <!-- hanger nail -->
+  <circle cx="32" cy="10.5" r="0.8" fill="#c9a96b" fill-opacity="0.55"/>
+  <!-- picture frame (gold hairline) -->
+  <rect x="20" y="13" width="24" height="32" rx="1" fill="url(#srWork)" stroke="#c9a96b" stroke-width="1" stroke-opacity="0.9"/>
+  <rect x="22" y="15" width="20" height="28" rx="0.5" fill="none" stroke="#c9a96b" stroke-width="0.3" stroke-opacity="0.45"/>
+  <!-- aperture-style side ticks -->
+  <g stroke="#c9a96b" stroke-opacity="0.4" stroke-width="0.5" stroke-linecap="round">
+    <line x1="13" y1="29" x2="16.5" y2="29"/>
+    <line x1="47.5" y1="29" x2="51" y2="29"/>
+  </g>
+  <!-- gallery wall floor line -->
+  <line x1="6" y1="47.5" x2="58" y2="47.5" stroke="#c9a96b" stroke-opacity="0.22" stroke-width="0.5"/>
+  <!-- wordmark -->
+  <text x="32" y="56"
+        font-family="'Didot','Bodoni 72','GFS Didot','Times New Roman',serif"
+        font-size="4.4" font-weight="500"
+        text-anchor="middle" letter-spacing="2.4"
+        fill="#c9a96b" fill-opacity="0.8">SILENT · ROOM</text>
+</svg>
