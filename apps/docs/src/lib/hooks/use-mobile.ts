@@ -1,11 +1,31 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 export interface UseMobileResult {
   isMobile: boolean;
   detected: boolean;
+}
+
+function subscribeToMediaQuery(query: string, onChange: () => void) {
+  const mediaQuery = window.matchMedia(query);
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function subscribeToStaticValue() {
+  return () => {};
+}
+
+type WindowWithOpera = Window & { opera?: string };
+
+function detectMobileDevice() {
+  const opera = (window as WindowWithOpera).opera ?? "";
+  const userAgent = navigator.userAgent || navigator.vendor || opera;
+
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    userAgent.toLowerCase(),
+  );
 }
 
 /**
@@ -26,34 +46,17 @@ export interface UseMobileResult {
  * ```
  */
 export function useMobile(breakpoint: number = 768): UseMobileResult {
-  const [state, setState] = useState<UseMobileResult>({
-    isMobile: false,
-    detected: false,
-  });
+  const query = `(max-width: ${breakpoint}px)`;
+  const isMobile = useSyncExternalStore(
+    (onChange) => subscribeToMediaQuery(query, onChange),
+    () => window.matchMedia(query).matches,
+    () => null,
+  );
 
-  useEffect(() => {
-    // Media query를 사용한 반응형 감지
-    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
-
-    const updateMobileState = () => {
-      setState({
-        isMobile: mediaQuery.matches,
-        detected: true,
-      });
-    };
-
-    // 초기 감지
-    updateMobileState();
-
-    // 화면 크기 변경 감지
-    mediaQuery.addEventListener("change", updateMobileState);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateMobileState);
-    };
-  }, [breakpoint]);
-
-  return state;
+  return {
+    isMobile: isMobile ?? false,
+    detected: isMobile !== null,
+  };
 }
 
 /**
@@ -68,26 +71,14 @@ export function useMobile(breakpoint: number = 768): UseMobileResult {
  * ```
  */
 export function useMobileDevice(): UseMobileResult {
-  const [state, setState] = useState<UseMobileResult>({
-    isMobile: false,
-    detected: false,
-  });
+  const isMobile = useSyncExternalStore(
+    subscribeToStaticValue,
+    detectMobileDevice,
+    () => null,
+  );
 
-  useEffect(() => {
-    const userAgent =
-      navigator.userAgent || navigator.vendor || (window as any).opera;
-
-    // 모바일 디바이스 패턴 감지
-    const isMobileDevice =
-      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-        userAgent.toLowerCase(),
-      );
-
-    setState({
-      isMobile: isMobileDevice,
-      detected: true,
-    });
-  }, []);
-
-  return state;
+  return {
+    isMobile: isMobile ?? false,
+    detected: isMobile !== null,
+  };
 }

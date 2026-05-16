@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import { SiteLogo } from "@/components/site-logo";
@@ -240,12 +241,12 @@ function ShowcaseCard({
       const next = onEnter ? previewClip.exitPath : previewClip.enterPath;
       onEnter = !onEnter;
       iframeRef.current?.contentWindow?.postMessage(
-        { type: "ssgoi-showcase:navigate", path: next },
+        { type: showcaseFrameProtocol.messages.navigate, path: next },
         "*",
       );
     }, 5000);
     return () => window.clearInterval(id);
-  }, [previewClip?.enterPath, previewClip?.exitPath]);
+  }, [previewClip]);
 
   return (
     <Link

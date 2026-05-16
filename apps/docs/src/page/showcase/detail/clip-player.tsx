@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { showcaseFrameProtocol, type ShowcaseFrameStatus } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import type { ShowcaseClip, ShowcasePlatform } from "../data";
-
-type Status = "idle" | "playing" | "reversing" | "paused" | "settled";
 
 /**
  * Plays a single transition clip inside an iframe.
@@ -30,7 +29,7 @@ export function ClipPlayer({
 }) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [autoplay, setAutoplay] = useState(true);
-  const [status, setStatus] = useState<Status>("idle");
+  const [status, setStatus] = useState<ShowcaseFrameStatus>("idle");
   const [rate, setRate] = useState(1);
   const intervalMs = clip.intervalMs ?? 4800;
 
@@ -45,7 +44,8 @@ export function ClipPlayer({
   }, []);
 
   const navigate = useCallback(
-    (path: string) => post({ type: "ssgoi-showcase:navigate", path }),
+    (path: string) =>
+      post({ type: showcaseFrameProtocol.messages.navigate, path }),
     [post],
   );
 
@@ -55,8 +55,8 @@ export function ClipPlayer({
       if (e.source !== iframeRef.current?.contentWindow) return;
       const data = e.data;
       if (!data || typeof data !== "object") return;
-      if (data.type === "ssgoi-showcase:status") {
-        setStatus(data.status as Status);
+      if (data.type === showcaseFrameProtocol.messages.status) {
+        setStatus(data.status as ShowcaseFrameStatus);
       }
     }
     window.addEventListener("message", onMessage);
@@ -80,7 +80,7 @@ export function ClipPlayer({
   };
 
   const sendHost = (command: string, payload?: number) =>
-    post({ type: "ssgoi-showcase:host", command, payload });
+    post({ type: showcaseFrameProtocol.messages.host, command, payload });
 
   const setRateAndApply = (r: number) => {
     setRate(r);
@@ -245,7 +245,7 @@ function DockButton({
   );
 }
 
-function StatusDot({ status }: { status: Status }) {
+function StatusDot({ status }: { status: ShowcaseFrameStatus }) {
   const color =
     status === "playing"
       ? "bg-emerald-400"

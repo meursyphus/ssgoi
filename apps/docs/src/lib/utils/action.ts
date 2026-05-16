@@ -50,9 +50,12 @@ async function runParallelAction<T>(result: Promise<readonly [Promise<T>]>) {
  */
 export const createAction = flow(safeAction, parallelAction);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ActionFn = (
-  ...args: any[]
+  ...args: never[]
+) => Promise<readonly [Promise<ActionResult<unknown>>]>;
+
+type RunnableActionFn = (
+  ...args: unknown[]
 ) => Promise<readonly [Promise<ActionResult<unknown>>]>;
 
 type Resolved<T extends Record<string, ActionFn>> = {
@@ -76,7 +79,8 @@ export function resolveActions<T extends Record<string, ActionFn>>(
     const action = actions[key];
     resolved[key] = async (...args: unknown[]) => {
       const safeArgs = args.map(deproxy);
-      const result = await runParallelAction(action(...safeArgs));
+      const runAction = action as RunnableActionFn;
+      const result = await runParallelAction(runAction(...safeArgs));
       if (!result.ok) throw new Error(result.error);
       return result.data;
     };

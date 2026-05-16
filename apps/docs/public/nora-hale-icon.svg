@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="nhTile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6f0e2"/>
+      <stop offset="1" stop-color="#e3d8c0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#nhTile)"/>
+  <!-- editorial hairline frame -->
+  <rect x="5.5" y="5.5" width="53" height="53" rx="11" fill="none" stroke="#15110d" stroke-opacity="0.5" stroke-width="0.6"/>
+  <!-- top tick marks -->
+  <g stroke="#15110d" stroke-opacity="0.55" stroke-width="0.6" stroke-linecap="round">
+    <line x1="13" y1="13" x2="18" y2="13"/>
+    <line x1="46" y1="13" x2="51" y2="13"/>
+    <line x1="13" y1="51" x2="18" y2="51"/>
+    <line x1="46" y1="51" x2="51" y2="51"/>
+  </g>
+  <!-- N H monogram, serif (Didot-ish stack) -->
+  <text x="32" y="40.5"
+        font-family="'Didot','Bodoni 72','GFS Didot','Times New Roman',serif"
+        font-size="26" font-weight="600"
+        text-anchor="middle" letter-spacing="-0.5"
+        fill="#15110d">N<tspan dx="1.4" font-weight="400" fill="#15110d" fill-opacity="0.55">·</tspan><tspan dx="1.4">H</tspan></text>
+  <!-- subtle baseline rule -->
+  <line x1="22" y1="46" x2="42" y2="46" stroke="#15110d" stroke-opacity="0.55" stroke-width="0.6"/>
+  <!-- spaced wordmark -->
+  <text x="32" y="52"
+        font-family="'Helvetica Neue','Inter',Arial,sans-serif"
+        font-size="4.6" font-weight="600"
+        text-anchor="middle" letter-spacing="2.6"
+        fill="#15110d" fill-opacity="0.75">PORTFOLIO</text>
+</svg>
