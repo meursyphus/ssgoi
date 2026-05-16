@@ -1,58 +1,104 @@
 export type ShowcasePlatform = "mobile" | "web";
 
+/** GitHub tree URL prefix — paths in showcase data are repo-root-relative folders. */
+export const GITHUB_BASE = "https://github.com/meursyphus/ssgoi/tree/latest";
+
+export function githubUrl(path: string): string {
+  return `${GITHUB_BASE}/${path.replace(/^\//, "")}`;
+}
+
 export type ShowcaseClip = {
-  /** human-readable label shown under/over the gif */
+  /** human-readable label, e.g. "Home → Product Detail" */
   title: string;
-  /** path under /public — e.g. "/showcase/air-bnb/sheet.gif" */
-  src: string;
-  /** which ssgoi transition this clip demonstrates */
+  /** ssgoi transition name — used by the search bar's transition filter */
   transition: string;
-  /** optional one-line caption for the clip */
+  /**
+   * Path the iframe routes _to_ when the clip plays the "enter" leg.
+   * Absolute path within this docs site (e.g. "/demo/gamja-market/products/1").
+   */
+  enterPath: string;
+  /**
+   * Path the iframe routes _back to_ when the clip plays the "exit" leg.
+   * The detail page toggles between enterPath and exitPath on an interval.
+   */
+  exitPath: string;
+  /** auto-toggle interval in ms (default 2400) */
+  intervalMs?: number;
+  /** optional short caption */
   caption?: string;
 };
 
 export type ShowcaseApp = {
-  /** url slug, e.g. "air-bnb" */
+  /** url slug, e.g. "gamja-market" */
   slug: string;
-  /** display name, e.g. "Airbnb-style" */
+  /** display name, e.g. "감자마켓" */
   name: string;
   /** short tagline shown on the card */
   tagline: string;
   /** which form factor(s) this showcase ships */
   platforms: ShowcasePlatform[];
-  /** card thumbnail — first frame or the hero gif */
-  thumbnail: string;
-  /** category tag, e.g. "Travel", "Social", "Productivity" */
+  /** category tag, e.g. "Commerce", "Travel", "Productivity" */
   category: string;
-  /** optional path to the live demo route (e.g. "/demo/air-bnb"). omit if no live demo yet. */
-  demoHref?: string;
-  /** clips grouped by section, mirroring Mobbin's Screens / UI Elements / Flows split */
-  clips: {
-    screens?: ShowcaseClip[];
-    flows?: ShowcaseClip[];
-    elements?: ShowcaseClip[];
-  };
+  /** optional badge such as "New" / "Updated" */
+  badge?: "New" | "Updated";
+  /** Square app-icon URL (served from /public). Shown on cards and the detail header. */
+  logo?: string;
+  /**
+   * Iframe origin for this showcase — any path under this prefix is treated
+   * as belonging to the same demo shell, so we can postMessage-navigate within it.
+   */
+  demoOrigin: string;
+  /** demonstrated transitions (derived from clips, kept explicit for search) */
+  transitions: string[];
+  /** Repo-relative path to the layout/transition config — shown as a "Setup" link in detail. */
+  sourcePath?: string;
+  /**
+   * Transition name (matching one of `clips[*].transition`) used as the
+   * auto-playing preview on the list card. Defaults to the first clip.
+   */
+  previewTransition?: string;
+  /** clip list — detail page renders one iframe per clip */
+  clips: ShowcaseClip[];
 };
 
 export const showcases: ShowcaseApp[] = [
-  // 첫 시드는 frontend-design 에이전트가 디자인 의뢰 후 채워 넣는다.
-  // 예시:
-  // {
-  //   slug: "air-bnb",
-  //   name: "Airbnb-style",
-  //   tagline: "Sheet stack + hero image transition",
-  //   platforms: ["mobile"],
-  //   thumbnail: "/showcase/air-bnb/thumbnail.gif",
-  //   category: "Travel",
-  //   demoHref: "/demo/air-bnb",
-  //   clips: {
-  //     screens: [
-  //       { title: "Home → Detail", src: "/showcase/air-bnb/sheet.gif", transition: "sheet" },
-  //     ],
-  //   },
-  // },
+  {
+    slug: "gamja-market",
+    name: "감자마켓",
+    tagline: "Drill navigation + sheet review flow",
+    platforms: ["mobile"],
+    category: "Commerce",
+    logo: "/gamja-market-icon.svg",
+    demoOrigin: "/demo/gamja-market",
+    transitions: ["drill", "sheet"],
+    sourcePath: "apps/docs/src/demo/gamja-market",
+    previewTransition: "drill",
+    clips: [
+      {
+        title: "Home → Product Detail",
+        transition: "drill",
+        enterPath: "/demo/gamja-market/products/p-001",
+        exitPath: "/demo/gamja-market",
+        caption: "Horizontal drill push/pop",
+      },
+      {
+        title: "Home → Write Review",
+        transition: "sheet",
+        enterPath: "/demo/gamja-market/review/o-001",
+        exitPath: "/demo/gamja-market",
+        caption: "Modal sheet rising from below",
+      },
+    ],
+  },
 ];
 
 export function findShowcase(slug: string): ShowcaseApp | undefined {
   return showcases.find((s) => s.slug === slug);
+}
+
+/** All transition names across the catalog, deduped, sorted. */
+export function allTransitions(): string[] {
+  const seen = new Set<string>();
+  for (const s of showcases) for (const t of s.transitions) seen.add(t);
+  return [...seen].sort();
 }

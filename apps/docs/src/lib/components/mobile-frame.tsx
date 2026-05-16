@@ -7,7 +7,7 @@ function StatusBar() {
   const pathname = usePathname();
 
   return (
-    <div className="relative bg-black text-white shrink-0 select-none">
+    <div className="relative hidden bg-black text-white shrink-0 select-none md:block">
       <div className="flex justify-center pt-2 pb-1">
         <div className="flex h-7 w-32 items-center gap-3 rounded-full border border-white/10 bg-black px-3">
           <div className="h-2 w-2 rounded-full bg-neutral-800 ring-1 ring-white/20" />
@@ -52,7 +52,7 @@ function StatusBar() {
 
 function HomeIndicator() {
   return (
-    <div className="flex justify-center bg-black py-1.5 shrink-0">
+    <div className="hidden justify-center bg-black py-1.5 shrink-0 md:flex">
       <div className="h-1 w-32 rounded-full bg-white/40" />
     </div>
   );
