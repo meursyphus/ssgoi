@@ -32,9 +32,15 @@ import { MobileFrame } from "@/lib/components/mobile-frame";
 export function MobileShowcaseShell({
   config,
   children,
+  contentClassName,
 }: {
   config: SsgoiConfig;
   children: ReactNode;
+  /**
+   * 컨텐츠(스크롤) 영역에 덧붙일 className. 기본은 투명(프레임의 검정이 비침).
+   * 예: `bg-white` — kakao-talk처럼 흰 바탕이 필요한 쇼케이스.
+   */
+  contentClassName?: string;
 }) {
   const [host] = useState(() => new HostAnimation());
   useShowcaseFrameBridge(host);
@@ -42,7 +48,7 @@ export function MobileShowcaseShell({
   return (
     <StateProvider>
       <OverlayProvider>
-        <MobileFrame>
+        <MobileFrame contentClassName={contentClassName}>
           <Ssgoi config={config} host={host}>
             {children}
           </Ssgoi>

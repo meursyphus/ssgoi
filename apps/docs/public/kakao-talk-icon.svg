@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="ktTile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE56B"/>
+      <stop offset="1" stop-color="#F4C842"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#ktTile)"/>
+  <!-- chat bubble -->
+  <path d="M32 16
+           C 19 16, 11 24, 11 33
+           C 11 39, 14.5 44, 20 47
+           L 18.5 53
+           C 18.3 54, 19.4 54.6, 20.2 54
+           L 27 49.5
+           C 28.6 49.8, 30.3 50, 32 50
+           C 45 50, 53 42, 53 33
+           C 53 24, 45 16, 32 16 Z"
+        fill="#3B2A1E"/>
+</svg>
