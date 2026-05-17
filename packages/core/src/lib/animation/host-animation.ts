@@ -106,6 +106,14 @@ export class HostAnimation extends Animation {
     return this.child?.isReversing ?? this._state === "reversing";
   }
 
+  get progress(): number {
+    return this.child?.progress ?? 0;
+  }
+
+  findTimeForProgress(threshold: number): number | null {
+    return this.child?.findTimeForProgress(threshold) ?? null;
+  }
+
   get playbackRate(): number {
     return super.playbackRate;
   }

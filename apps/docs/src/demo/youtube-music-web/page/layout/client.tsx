@@ -36,7 +36,7 @@ export function YoutubeMusicLayoutClient({
           <TopNav />
           <div className="flex min-h-0 flex-1">
             <Sidebar />
-            <main className="relative min-w-0 flex-1 overflow-hidden">
+            <main className="relative z-0 min-w-0 flex-1 overflow-hidden">
               <Ssgoi config={config} host={host}>
                 {children}
               </Ssgoi>
