@@ -1,13 +1,15 @@
 # SSGOI - sheet transition
 
-Bottom sheet style. Use for modal-like overlays that come up from the bottom — FAB → compose, "new item" flows, secondary screens that should feel temporary.
+Bottom sheet style. New page slides up from below. Use for **modal-like** flows (FAB → compose, "new item" screen, settings panel) that should feel temporary.
 
 Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-- `enter`: Sheet slides up from the bottom. Background page scales down (1 → 0.8) and fades, suggesting it's pushed back.
-- `exit`: Sheet slides down. Background page scales back up (0.8 → 1) and fades in.
+- **`static`** (default): only the rising sheet moves. Background stays put — looks like the new page covers the old one cleanly.
+- **`background-scale`**: background scales/transforms down behind the rising sheet, giving a stacked, iOS-modal feel.
+
+`enter` is the destination path that slides UP. `exit` is the page underneath — what shows when you go back.
 
 ## Signature
 
@@ -15,18 +17,21 @@ Setup guide: https://ssgoi.dev/llms.txt
 import { sheet } from "@ssgoi/react/view-transitions";
 
 sheet({
-  direction: 'enter' | 'exit',
-  physics?: PhysicsOptions, // enter default: { inertia: { acceleration: 20, resistance: 1.5 } }
-})
+  enter: string;                            // destination (the sheet page)
+  exit: string;                             // background (the page underneath)
+  type?: "static" | "background-scale";     // default: "static"
+}): SsgoiPathTransition[];
 ```
 
-## Pairing pattern
+Returns a directional pair with different physics for opening and closing.
+
+## Usage
 
 ```ts
 const config = {
   transitions: [
-    { from: '*',           to: '/compose', transition: sheet({ direction: 'enter' }) },
-    { from: '/compose',    to: '*',        transition: sheet({ direction: 'exit' }) },
+    sheet({ enter: "/compose", exit: "/feed" }),
+    sheet({ enter: "/settings/*", exit: "/", type: "background-scale" }),
   ],
 };
 ```

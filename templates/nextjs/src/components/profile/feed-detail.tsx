@@ -47,7 +47,7 @@ export default function FeedDetail({ postId }: FeedDetailProps) {
               src={post.coverImage.url}
               alt={post.title}
               className="w-full h-auto"
-              data-instagram-detail-key={post.id}
+              data-zoom-enter-key={post.id}
             />
 
             {/* Back button overlay */}

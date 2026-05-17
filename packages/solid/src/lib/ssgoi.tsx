@@ -1,20 +1,18 @@
 import { createMemo, type JSX } from "solid-js";
 import type { SsgoiConfig, SsgoiContext } from "./types";
 import { SsgoiProvider } from "./context";
-import { createSggoiTransitionContext } from "@ssgoi/core";
+import { createSggoiTransitionContext } from "@ssgoi/core/internal";
+import type { HostAnimation } from "@ssgoi/core/internal";
 
 interface SsgoiProps {
   config: SsgoiConfig;
+  host?: HostAnimation;
   children: JSX.Element;
 }
 
 export const Ssgoi = (props: SsgoiProps) => {
   const contextValue = createMemo<SsgoiContext>(() =>
-    createSggoiTransitionContext(props.config, {
-      // Solid uses MutationObserver for unmount detection,
-      // so OUT and IN can arrive in any order
-      outFirst: false,
-    }),
+    createSggoiTransitionContext(props.config, { host: props.host }),
   );
 
   return <SsgoiProvider value={contextValue()}>{props.children}</SsgoiProvider>;

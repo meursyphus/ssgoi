@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
@@ -17,19 +17,14 @@ export default defineConfig({
         filePath: filePath.replace("/src/lib", ""),
         content,
       }),
-    }) as any,
+    }) as PluginOption,
   ],
   build: {
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        "transitions/index": resolve(__dirname, "src/lib/transitions/index.ts"),
-        "view-transitions/index": resolve(
-          __dirname,
-          "src/lib/view-transitions/index.ts",
-        ),
         types: resolve(__dirname, "src/lib/types.ts"),
-        "presets/index": resolve(__dirname, "src/lib/presets/index.ts"),
+        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },
       formats: ["es", "cjs"],
     },
@@ -37,9 +32,8 @@ export default defineConfig({
       external: [
         "vue",
         "@ssgoi/core",
-        "@ssgoi/core/view-transitions",
-        "@ssgoi/core/transitions",
-        "@ssgoi/core/presets",
+        "@ssgoi/core/internal",
+        "@ssgoi/core/types",
       ],
       output: {
         preserveModules: true,

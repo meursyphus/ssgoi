@@ -12,7 +12,7 @@
             :src="post.coverImage.url"
             :alt="post.title"
             class="w-full h-auto"
-            :data-instagram-detail-key="post.id"
+            :data-zoom-enter-key="post.id"
           />
 
           <!-- Back button overlay -->

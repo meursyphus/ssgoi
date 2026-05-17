@@ -1,15 +1,13 @@
 # SSGOI - scroll transition
 
-Vertical scroll-feel transition. Use when navigating between sequential, related pages where it feels natural to "scroll" from one to the next (e.g., onboarding steps, paginated long-form content).
+Vertical "page scroll" — outgoing page slides off and incoming page slides in along the y-axis. Use for **onboarding steps**, paginated long-form content, or any sequential vertical flow.
 
 Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-- `direction: 'up'`: New page slides up from below, old page slides up and out of view.
-- `direction: 'down'`: New page slides down from above, old page slides down and out of view.
-
-Looks like a vertical page scroll.
+- **`directional`** (default): forward navigation moves up (incoming rises from below); backward moves down. Direction follows `paths` order.
+- **`non-directional`**: always moves in the same direction regardless of which way you navigate. Combine with `direction` to fix it to `"up"` or `"down"`.
 
 ## Signature
 
@@ -17,18 +15,26 @@ Looks like a vertical page scroll.
 import { scroll } from "@ssgoi/react/view-transitions";
 
 scroll({
-  direction: 'up' | 'down',
-  physics?: PhysicsOptions, // default: { spring: { stiffness: 5, damping: 4 } }
-})
+  paths: readonly string[];
+  type?: "directional" | "non-directional";  // default: "directional"
+  direction?: "up" | "down";                  // only used when type is "non-directional"; default: "up"
+}): SsgoiPathTransition[];
 ```
 
-## Pairing pattern
+## Usage
 
 ```ts
 const config = {
   transitions: [
-    { from: '/', to: '/about', transition: scroll({ direction: 'up' }) },
-    { from: '/about', to: '/', transition: scroll({ direction: 'down' }) },
+    // onboarding: step1 → step2 → step3, forward goes up
+    scroll({ paths: ["/onboarding/1", "/onboarding/2", "/onboarding/3"] }),
+
+    // always slide up, no matter the direction
+    scroll({
+      paths: ["/feed", "/notifications"],
+      type: "non-directional",
+      direction: "up",
+    }),
   ],
 };
 ```

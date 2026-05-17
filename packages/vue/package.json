@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
   "private": false,
   "type": "module",
@@ -19,29 +19,17 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./transitions": {
-      "types": "./dist/transitions/index.d.ts",
-      "import": "./dist/transitions/index.js",
-      "require": "./dist/transitions/index.cjs",
-      "default": "./dist/transitions/index.js"
-    },
-    "./view-transitions": {
-      "types": "./dist/view-transitions/index.d.ts",
-      "import": "./dist/view-transitions/index.js",
-      "require": "./dist/view-transitions/index.cjs",
-      "default": "./dist/view-transitions/index.js"
-    },
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "require": "./dist/types.cjs",
       "default": "./dist/types.js"
     },
-    "./presets": {
-      "types": "./dist/presets/index.d.ts",
-      "import": "./dist/presets/index.js",
-      "require": "./dist/presets/index.cjs",
-      "default": "./dist/presets/index.js"
+    "./view-transitions": {
+      "types": "./dist/view-transitions.d.ts",
+      "import": "./dist/view-transitions.js",
+      "require": "./dist/view-transitions.cjs",
+      "default": "./dist/view-transitions.js"
     }
   },
   "scripts": {

@@ -1,0 +1,31 @@
+# SSGOI - blind transition
+
+Window-blinds wipe. Vertical or horizontal slats sweep across the page, revealing the new page behind in a staggered spring. Use for **cinematic, dramatic** reveals — splash → app, intro → main.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+A series of solid-color slats (10 by default) slides across the viewport. The slats are staggered, so they don't all hit the edges at the same moment — gives the effect a wave-like motion. The incoming page is fully visible behind the slats once they've passed.
+
+## Signature
+
+```ts
+import { blind } from "@ssgoi/react/view-transitions";
+
+blind({
+  paths: readonly string[];   // symmetric — every pair gets the blind wipe
+}): SsgoiPathTransition[];
+```
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    blind({ paths: ["/", "/app"] }),
+  ],
+};
+```
+
+Use sparingly — the visual is loud. Best for one-off, intentional moments rather than every page swap.

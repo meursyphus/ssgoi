@@ -1,16 +1,14 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { ReactSsgoiContext } from "./types";
+import type { SsgoiContext } from "@ssgoi/core/types";
 
-const SsgoiContextInstance = createContext<ReactSsgoiContext | null>(null);
+const SsgoiContextInstance = createContext<SsgoiContext | null>(null);
 
 export const SsgoiProvider = SsgoiContextInstance.Provider;
 
-export const useSsgoi = (): ReactSsgoiContext => {
-  const context = useContext(SsgoiContextInstance);
-  if (!context) {
-    throw new Error("useSsgoi must be used within SsgoiProvider");
-  }
-  return context;
+export const useSsgoi = (): SsgoiContext => {
+  const ctx = useContext(SsgoiContextInstance);
+  if (!ctx) throw new Error("useSsgoi must be used within Ssgoi provider");
+  return ctx;
 };

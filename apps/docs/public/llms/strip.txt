@@ -1,0 +1,31 @@
+# SSGOI - strip transition
+
+3D Y-axis perspective flip. Pages rotate horizontally with depth, like the leaves of a rolodex. Use when slide feels too flat — gives a distinctive, card-stack vibe.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+Both pages rotate around the Y axis with an 800px perspective. Outgoing rotates out to the left; incoming rotates in from the right. The depth makes the swap feel tangible.
+
+## Signature
+
+```ts
+import { strip } from "@ssgoi/react/view-transitions";
+
+strip({
+  paths: readonly string[];   // symmetric — every pair gets the strip effect
+}): SsgoiPathTransition[];
+```
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    strip({ paths: ["/cards/a", "/cards/b", "/cards/c"] }),
+  ],
+};
+```
+
+> Tip: Like `slide` and `drill`, this transition moves things horizontally. Add `overflow-x-clip` to the `<Ssgoi>` wrapper to prevent scrollbar flashes.

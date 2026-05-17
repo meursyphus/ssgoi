@@ -3,6 +3,8 @@ export { getScrollingElement } from "./get-scrolling-element";
 export { getPositionedParent } from "./get-positioned-parent";
 export { sleep } from "./sleep";
 export { getRect } from "./get-rect";
+export { getViewportRect } from "./get-viewport-rect";
 export { round, floor, ceil, toFixed } from "./number";
 export { withResolvers } from "./with-resolvers";
 export { waitPaint } from "./wait-paint";
+export { promiseAll, type AwaitedObject } from "./promise-all";

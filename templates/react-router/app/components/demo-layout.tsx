@@ -1,11 +1,7 @@
 import React, { useMemo } from "react";
 import { Link, useLocation } from "react-router";
 import { Ssgoi } from "@ssgoi/react";
-import {
-  drill,
-  pinterest,
-  instagram,
-} from "@ssgoi/react/view-transitions";
+import { drill, zoom } from "@ssgoi/react/view-transitions";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -17,32 +13,23 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
 
   const config = useMemo(
     () => ({
+      preserveScroll: { exclude: ["/posts/*"] },
       transitions: [
         // Pinterest transitions
-        {
-          from: "/pinterest/*",
-          to: "/pinterest",
-          transition: pinterest(),
-          symmetric: true,
-        },
+        zoom({
+          paths: ["/pinterest", "/pinterest/*"],
+          type: "expand",
+        }),
         // Posts transitions - drill effect
-        {
-          from: "/posts",
-          to: "/posts/*",
-          transition: drill({ direction: "enter" }),
-        },
-        {
-          from: "/posts/*",
-          to: "/posts",
-          transition: drill({ direction: "exit" }),
-        },
-        // Profile transitions - instagram
-        {
-          from: "/profile",
-          to: "/profile/*",
-          transition: instagram(),
-          symmetric: true,
-        },
+        drill({
+          enter: "/posts/*",
+          exit: "/posts",
+        }),
+        // Profile transitions
+        zoom({
+          paths: ["/profile", "/profile/*"],
+          type: "static",
+        }),
       ],
     }),
     [],

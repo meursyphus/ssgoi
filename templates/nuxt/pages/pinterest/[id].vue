@@ -32,7 +32,7 @@
           :src="item.image"
           :alt="item.title"
           :style="{ aspectRatio: item.aspectRatio }"
-          :data-pinterest-detail-key="item.id"
+          :data-zoom-enter-key="item.id"
         />
 
         <div>

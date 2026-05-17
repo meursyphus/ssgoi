@@ -57,7 +57,7 @@ function PinCard({ item }: PinCardProps) {
           src={item.image}
           alt={item.title}
           className="w-full h-full object-cover bg-[#111]"
-          data-pinterest-gallery-key={item.id}
+          data-zoom-exit-key={item.id}
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />

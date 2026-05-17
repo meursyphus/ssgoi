@@ -155,7 +155,7 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(0);
   });
 
-  it("does not touch scroll for non-preserved paths' initial restore", () => {
+  it("scrolls to top for non-preserved paths' initial restore", () => {
     const manager = createContextManager({
       preserveScroll: false,
     });
@@ -170,6 +170,49 @@ describe("createContextManager", () => {
 
     // Non-preserved path: arrives at top regardless of prior browser scroll.
     expect(documentElement.scrollTop).toBe(0);
+  });
+
+  it("shares a saved scroll position across paths with the same key", () => {
+    const manager = createContextManager({
+      preserveScroll: { key: "profile-tabs" },
+    });
+    const gridPage = createFakeElement({ parentElement: body });
+    const reelsPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(gridPage, "/profile");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 420;
+    emitWindowScroll();
+
+    manager.initializeContext(reelsPage, "/profile/reels");
+    flushAnimationFrames(2);
+
+    expect(documentElement.scrollTop).toBe(420);
+    expect(manager.getScrollPosition("/profile/reels")).toEqual({
+      x: 0,
+      y: 420,
+    });
+    expect(manager.calculateScrollOffset("/profile", "/profile/reels")).toEqual(
+      {
+        x: 0,
+        y: 0,
+      },
+    );
+  });
+
+  it("leaves current scroll alone for shared-key paths without a saved value", () => {
+    const manager = createContextManager({
+      preserveScroll: { key: "profile-tabs" },
+    });
+    const page = createFakeElement({ parentElement: body });
+
+    documentElement.scrollTop = 320;
+
+    manager.initializeContext(page, "/profile");
+    flushAnimationFrames(2);
+
+    expect(documentElement.scrollTop).toBe(320);
   });
 
   it("suppresses scroll capture during the transition settle window", () => {

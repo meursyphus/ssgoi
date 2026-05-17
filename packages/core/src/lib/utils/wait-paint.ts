@@ -11,7 +11,7 @@
  * @param _element - The element to wait for (reserved for future API usage)
  * @returns A promise that resolves after the paint cycle completes
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export function waitPaint(_element?: Element): Promise<void> {
   // TODO: When a native paint-waiting API becomes available (e.g., element.waitForPaint()),
   // we can use the _element parameter to leverage that API for more accurate timing.

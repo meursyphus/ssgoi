@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="lumenBg" cx="35%" cy="28%" r="95%">
+      <stop offset="0" stop-color="#1f2638"/>
+      <stop offset="0.55" stop-color="#0d111d"/>
+      <stop offset="1" stop-color="#04060c"/>
+    </radialGradient>
+    <radialGradient id="lumenCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff7d0"/>
+      <stop offset="35%" stop-color="#f6d062"/>
+      <stop offset="80%" stop-color="#c8841a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#7a4a08" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lumenRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7d977"/>
+      <stop offset="1" stop-color="#a76e16"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#lumenBg)"/>
+  <!-- ambient glow halo -->
+  <circle cx="32" cy="32" r="24" fill="url(#lumenCore)" fill-opacity="0.35"/>
+  <!-- outer hairline ring -->
+  <circle cx="32" cy="32" r="21" fill="none" stroke="#e7d29a" stroke-opacity="0.22" stroke-width="0.7"/>
+  <!-- main lens ring -->
+  <circle cx="32" cy="32" r="15.5" fill="#0a0e18" stroke="url(#lumenRing)" stroke-width="2"/>
+  <!-- aperture blade hints -->
+  <g stroke="#f4cd5a" stroke-opacity="0.35" stroke-width="0.6" stroke-linecap="round">
+    <line x1="32" y1="17.5" x2="32" y2="20.5"/>
+    <line x1="46.5" y1="32" x2="43.5" y2="32"/>
+    <line x1="32" y1="46.5" x2="32" y2="43.5"/>
+    <line x1="17.5" y1="32" x2="20.5" y2="32"/>
+    <line x1="42" y1="22" x2="40" y2="24"/>
+    <line x1="42" y1="42" x2="40" y2="40"/>
+    <line x1="22" y1="42" x2="24" y2="40"/>
+    <line x1="22" y1="22" x2="24" y2="24"/>
+  </g>
+  <!-- iris -->
+  <circle cx="32" cy="32" r="9" fill="#06080f" stroke="#f4cd5a" stroke-opacity="0.75" stroke-width="1.1"/>
+  <!-- bright pupil -->
+  <circle cx="30.6" cy="30.4" r="5" fill="url(#lumenCore)"/>
+  <!-- specular highlight -->
+  <circle cx="29.2" cy="29.2" r="1.4" fill="#ffffff" fill-opacity="0.95"/>
+  <!-- soft lens flare streak -->
+  <rect x="14" y="31.4" width="36" height="1.2" rx="0.6" fill="#fff3c2" fill-opacity="0.18"/>
+</svg>

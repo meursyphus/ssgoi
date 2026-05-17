@@ -1,32 +1,46 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
+import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
 import "./globals.css";
 
+const SITE_URL = "https://ssgoi.dev";
+const SITE_NAME = "SSGOI";
+const TITLE = "SSGOI — Native page transitions on the web";
+const DESCRIPTION =
+  "Router-agnostic page transitions for React, Svelte, Vue, Solid, and Angular. Built on the Web Animations API with spring physics and state preservation.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ssgoi.dev"),
-  title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
-  description:
-    "SSGOI is a powerful page transition library that brings native app-like animations to the web. Create smooth, spring-based transitions with state preservation across all frameworks.",
-  keywords:
-    "page transitions, animation library, react transitions, vue transitions, svelte transitions, spring animations, view transitions, web animations, ssgoi",
-  authors: [{ name: "MeurSyphus" }],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s | SSGOI",
+  },
+  description: DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "page transitions",
+    "view transitions",
+    "web animations api",
+    "spring animation",
+    "react transitions",
+    "svelte transitions",
+    "vue transitions",
+    "solid transitions",
+    "angular transitions",
+    "ssgoi",
+  ],
+  authors: [{ name: "MeurSyphus", url: "https://github.com/MeurSyphus" }],
   creator: "MeurSyphus",
   publisher: "SSGOI",
+  manifest: "/manifest.json",
+  alternates: {
+    canonical: "/",
+  },
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/ssgoi-logo.png",
-    other: {
-      rel: "apple-touch-icon-precomposed",
-      url: "/ssgoi-logo.png",
-    },
-  },
-  manifest: "/manifest.json",
   robots: {
     index: true,
     follow: true,
@@ -39,51 +53,46 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
-    description:
-      "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design. Works with React, Vue, Svelte, and more.",
     type: "website",
-    url: "https://ssgoi.dev",
-    siteName: "SSGOI",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "en_US",
+    title: TITLE,
+    description: DESCRIPTION,
     images: [
       {
-        url: "https://ssgoi.dev/ssgoi-logo.png",
-        width: 1200,
-        height: 1200,
-        alt: "SSGOI - Page Transition Library",
+        url: "/og.png",
+        width: 512,
+        height: 279,
+        alt: "SSGOI — Native page transitions on the web",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SSGOI - Beautiful Page Transitions for Modern Web Apps",
-    description:
-      "Create stunning page transitions with SSGOI. Native app-like animations, state preservation, and framework-agnostic design.",
-    images: ["https://ssgoi.dev/ssgoi-logo.png"],
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og.png"],
     creator: "@ssgoi",
-  },
-  alternates: {
-    canonical: "https://ssgoi.dev",
-    languages: {
-      "en-US": "https://ssgoi.dev/en",
-      "ko-KR": "https://ssgoi.dev/ko",
-      "ja-JP": "https://ssgoi.dev/ja",
-      "zh-CN": "https://ssgoi.dev/zh",
-    },
   },
   category: "technology",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <>
-      {children}
-      <Analytics />
-    </>
+    <html lang="en" className="h-full antialiased">
+      <body className="relative z-0 min-h-full">
+        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            crossOrigin="anonymous"
+            strategy="lazyOnload"
+          />
+        )}
+      </body>
+    </html>
   );
 }
