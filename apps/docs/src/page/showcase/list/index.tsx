@@ -121,7 +121,7 @@ export default function ShowcaseListPage() {
 
       {filtered.length === 0 && (
         <p className="mt-16 text-center text-sm text-neutral-500">
-          No showcases match.{" "}
+          No examples match.{" "}
           <button
             type="button"
             onClick={() => {

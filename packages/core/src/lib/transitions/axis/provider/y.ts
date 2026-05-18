@@ -44,7 +44,8 @@ function buildY({ direction }: AxisProviderBuildArgs): AxisAnimationConfig {
 
 export function createYProvider(): AxisProvider {
   return {
-    physics: Y_PHYSICS,
+    outPhysics: Y_PHYSICS,
+    inPhysics: Y_PHYSICS,
     composition: { mode: "parallel", startAt: [0, 0.3] },
     build: buildY,
   };

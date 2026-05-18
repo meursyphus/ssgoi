@@ -14,7 +14,8 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // home (친구 탭) ↔ chats (채팅 탭) — tab transition
-    ...axis({ paths: [BASE, `${BASE}/chats`], type: "x" }),
+    // KakaoTalk-style: snappy feel (tight 8 px slide + cross-fade, ~160 ms).
+    ...axis({ paths: [BASE, `${BASE}/chats`], type: "x", feel: "snappy" }),
 
     // home / chats → profile detail — sheet static (배경 가만, 시트만 올라옴)
     ...sheet({ type: "static", enter: `${BASE}/profile/*`, exit: BASE }),
@@ -42,9 +43,12 @@ function BottomTabSlot() {
 
 export function KakaoTalkLayoutClient({ children }: { children: ReactNode }) {
   return (
-    <MobileShowcaseShell config={config} contentClassName="bg-white">
+    <MobileShowcaseShell
+      config={config}
+      contentClassName="bg-white"
+      bottomSlot={<BottomTabSlot />}
+    >
       {children}
-      <BottomTabSlot />
     </MobileShowcaseShell>
   );
 }

@@ -12,6 +12,37 @@ export type { ZoomOptions, ZoomType } from "./types";
 
 const ZOOM_ENTER_KEY = "data-zoom-enter-key";
 const ZOOM_EXIT_KEY = "data-zoom-exit-key";
+const ZOOM_RADIUS_KEY = "data-zoom-radius";
+
+function readRadius(el: HTMLElement): number {
+  const raw = el.getAttribute(ZOOM_RADIUS_KEY);
+  if (!raw) return 0;
+  const num = parseFloat(raw);
+  return Number.isFinite(num) && num > 0 ? num : 0;
+}
+
+// Walk ancestor chain from focusEl up to (but excluding) page. At each step
+// collect siblings of the current node — those are elements that share a
+// parent with the focus subtree and can carry an opacity animation without
+// the inherited-opacity trap dimming the focus itself.
+function collectFadeTargets(
+  page: HTMLElement,
+  focusEl: HTMLElement,
+): HTMLElement[] {
+  const targets: HTMLElement[] = [];
+  let current: HTMLElement | null = focusEl;
+  while (current && current !== page) {
+    const parent: HTMLElement | null = current.parentElement;
+    if (!parent) break;
+    for (const sibling of Array.from(parent.children)) {
+      if (sibling !== current && sibling instanceof HTMLElement) {
+        targets.push(sibling);
+      }
+    }
+    current = parent;
+  }
+  return targets;
+}
 
 function findZoomEnter(node: HTMLElement): HTMLElement | null {
   const elements = node.querySelectorAll(`[${ZOOM_ENTER_KEY}]`);
@@ -81,15 +112,21 @@ function buildInput(
         ? toNode.getBoundingClientRect()
         : fromNode.getBoundingClientRect(),
     scrollOffset,
+    enterRadius: readRadius(resolved.enterEl),
+    exitRadius: readRadius(resolved.exitEl),
   };
 }
 
-export const zoom = (options: ZoomOptions): TransitionConfig => {
+type ZoomExtras = { overlay?: HTMLElement };
+
+export const zoom = (options: ZoomOptions): TransitionConfig<ZoomExtras> => {
   const provider: ZoomProvider = ZOOM_PROVIDERS[options.type];
   const physicsOptions: PhysicsOptions = provider.physics;
+  const overlayConfig = provider.overlay;
+  const fadeEnabled = options.fade ?? false;
 
   return {
-    prepare: ({ from }) => {
+    prepare: ({ from, context, createElement }) => {
       // Outgoing styling that doesn't depend on rect math.
       from.then((el) => {
         el.style.willChange = "transform, clip-path, opacity";
@@ -97,9 +134,18 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
       });
-      return {};
+
+      if (!overlayConfig) return {};
+
+      // Layer for effects (blur backdrop, etc.). Lives on positionedParent so
+      // it is clipped by that container while pages translate/scale.
+      const overlay = createElement("zoom-overlay");
+      Object.assign(overlay.style, overlayConfig.initialStyle);
+      overlay.style.willChange = overlayConfig.willChange;
+      context.positionedParent.appendChild(overlay);
+      return { overlay };
     },
-    animation: ({ from, to, context }) => {
+    animation: ({ from, to, context, overlay }) => {
       const resolved = resolveZoom(from, to);
 
       // No matching zoom pair → fall back to a noop animation so the
@@ -129,6 +175,29 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
       const previousZIndex = zoomedPage.style.zIndex;
       zoomedPage.style.zIndex = "9999";
 
+      // ── Fade targets (sibling-walk) ──
+      // To fade everything in the zoomed page EXCEPT the enter-key (and its
+      // ancestors), apply opacity to siblings at each level of the ancestor
+      // chain. The enter-key's branch is never touched, so CSS opacity
+      // inheritance can't dim it.
+      const fadeTargets: HTMLElement[] = fadeEnabled
+        ? collectFadeTargets(zoomedPage, resolved.enterEl)
+        : [];
+      const previousFadeOpacities = fadeTargets.map((el) => el.style.opacity);
+
+      // Seed initial opacity for enter mode so the page doesn't flash at full
+      // opacity before the first animation tick.
+      if (fadeEnabled && resolved.mode === "enter") {
+        for (const el of fadeTargets) el.style.opacity = "0";
+      }
+
+      const restoreFadeTargets = () => {
+        for (let i = 0; i < fadeTargets.length; i++) {
+          const el = fadeTargets[i];
+          if (el) el.style.opacity = previousFadeOpacities[i] ?? "";
+        }
+      };
+
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),
@@ -149,10 +218,37 @@ export const zoom = (options: ZoomOptions): TransitionConfig => {
           to.style.transformOrigin = "";
           (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
           zoomedPage.style.zIndex = previousZIndex;
+          if (fadeEnabled) restoreFadeTargets();
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+      const anims = [outAnim, inAnim];
+
+      // One WebAnimation per fade target. They share the same physics so
+      // progress is locked across all of them (and with the main zoom).
+      for (const target of fadeTargets) {
+        anims.push(
+          new WebAnimation({
+            element: target,
+            integrator: IntegratorProvider.from(physicsOptions),
+            style: (t, u) => ({
+              opacity: resolved.mode === "enter" ? t : u,
+            }),
+          }),
+        );
+      }
+
+      if (overlayConfig && overlay) {
+        anims.push(
+          new WebAnimation({
+            element: overlay,
+            integrator: IntegratorProvider.from(physicsOptions),
+            style: (t) => overlayConfig.style(resolved.mode, t),
+          }),
+        );
+      }
+
+      return new MultiAnimation(anims, { mode: "parallel" });
     },
   };
 };

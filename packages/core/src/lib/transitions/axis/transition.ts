@@ -4,12 +4,13 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
-import { AXIS_PROVIDERS } from "./provider";
-import type { AxisOptions, AxisSideConfig, AxisType } from "./types";
+import { resolveAxisProvider } from "./provider";
+import type { AxisFeel, AxisOptions, AxisSideConfig, AxisType } from "./types";
 
-export type { AxisOptions, AxisType } from "./types";
+export type { AxisFeel, AxisOptions, AxisType } from "./types";
 
 const DEFAULT_TYPE: AxisType = "x";
+const DEFAULT_FEEL: AxisFeel = "snappy";
 
 function applyStartStyle(el: HTMLElement, side: AxisSideConfig): void {
   el.style.willChange = side.willChange;
@@ -32,7 +33,8 @@ function clearStyle(el: HTMLElement): void {
 export const axis = (options: AxisOptions = {}): TransitionConfig => {
   const direction = options.direction ?? "forward";
   const type = options.type ?? DEFAULT_TYPE;
-  const provider = AXIS_PROVIDERS[type];
+  const feel = options.feel ?? DEFAULT_FEEL;
+  const provider = resolveAxisProvider(type, feel);
   const config = provider.build({ direction });
 
   return {
@@ -49,13 +51,13 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
     animation: ({ from, to }) => {
       const outAnim = new WebAnimation({
         element: from,
-        integrator: IntegratorProvider.from(provider.physics),
+        integrator: IntegratorProvider.from(provider.outPhysics),
         style: (t) => config.out.animate(t),
       });
 
       const inAnim = new WebAnimation({
         element: to,
-        integrator: IntegratorProvider.from(provider.physics),
+        integrator: IntegratorProvider.from(provider.inPhysics),
         style: (t) => config.in.animate(t),
         onComplete: () => clearStyle(to),
       });

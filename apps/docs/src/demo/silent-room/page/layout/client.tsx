@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type ReactNode } from "react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/view-transitions";
-import { HostAnimation } from "@ssgoi/core/internal";
-import { useShowcaseFrameBridge } from "@/lib/hooks";
+import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 import { GalleryChrome } from "../shared/gallery-chrome";
 
 const BASE = "/demo/silent-room";
@@ -17,15 +16,14 @@ const config: SsgoiConfig = {
 };
 
 export function SilentRoomLayoutClient({ children }: { children: ReactNode }) {
-  const [host] = useState(() => new HostAnimation());
-  useShowcaseFrameBridge(host);
-
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-[#0c0c0c] text-[#f5f1ea]">
-      <Ssgoi config={config} host={host}>
-        <main className="relative h-full w-full">{children}</main>
-      </Ssgoi>
-      <GalleryChrome />
-    </div>
+    <DemoShell>
+      <div className="relative h-dvh w-full overflow-hidden bg-[#0c0c0c] text-[#f5f1ea]">
+        <SsgoiWithHost config={config}>
+          <main className="relative h-full w-full">{children}</main>
+        </SsgoiWithHost>
+        <GalleryChrome />
+      </div>
+    </DemoShell>
   );
 }

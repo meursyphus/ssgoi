@@ -6,8 +6,11 @@ import type { ZoomType } from "./types";
 export type ZoomConfig = {
   paths: readonly string[];
   type: ZoomType;
+  fade?: boolean;
 };
 
-export function zoom({ paths, type }: ZoomConfig): SsgoiPathTransition[] {
-  return createSymmetricPathTransitions(paths, () => transition({ type }));
+export function zoom({ paths, type, fade }: ZoomConfig): SsgoiPathTransition[] {
+  return createSymmetricPathTransitions(paths, () =>
+    transition({ type, fade }),
+  );
 }

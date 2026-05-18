@@ -48,7 +48,7 @@ function Badge({ value }: { value: number | "dot" }) {
 
 export function BottomTabBar({ active }: { active: ActiveTab }) {
   return (
-    <nav className="sticky bottom-0 z-30 grid grid-cols-5 bg-white">
+    <nav className="grid shrink-0 grid-cols-5 bg-white">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
         const content = (

@@ -61,9 +61,16 @@ function HomeIndicator() {
 export function MobileFrame({
   children,
   contentClassName,
+  bottomSlot,
 }: {
   children: ReactNode;
   contentClassName?: string;
+  /**
+   * 콘텐츠 스크롤 영역 **바깥**에 고정으로 붙는 슬롯 (예: bottom nav/tab bar).
+   * 콘텐츠 wrapper는 `relative z-0`으로 자체 stacking context를 만들기 때문에,
+   * page 트랜지션(zoom/sheet/...)에 영향받지 않으려면 그 바깥에서 렌더해야 한다.
+   */
+  bottomSlot?: ReactNode;
 }) {
   return (
     <div className="min-h-dvh w-full bg-neutral-950 md:flex md:items-center md:justify-center md:py-10">
@@ -76,6 +83,7 @@ export function MobileFrame({
         >
           {children}
         </div>
+        {bottomSlot}
         <HomeIndicator />
       </div>
     </div>

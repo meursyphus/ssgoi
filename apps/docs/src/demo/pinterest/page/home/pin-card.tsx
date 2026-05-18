@@ -16,6 +16,7 @@ export function PinCard({ pin }: { pin: PinSimple }) {
           alt={pin.title}
           className="h-full w-full object-cover"
           data-zoom-exit-key={pin.id}
+          data-zoom-radius="16"
         />
         <button
           type="button"

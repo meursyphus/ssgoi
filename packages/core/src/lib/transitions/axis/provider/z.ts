@@ -38,7 +38,8 @@ function buildZ(): AxisAnimationConfig {
 
 export function createZProvider(): AxisProvider {
   return {
-    physics: Z_PHYSICS,
+    outPhysics: Z_PHYSICS,
+    inPhysics: Z_PHYSICS,
     // Both pages share the canvas (in-place scale+fade), so a strict
     // fade-through-with-offset would feel disjointed. Run them together
     // for a cleaner cross-fade.

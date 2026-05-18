@@ -1,3 +1,4 @@
+import { createBlurProvider } from "./blur";
 import { createExpandProvider } from "./expand";
 import { createStaticProvider } from "./static";
 import type { ZoomProvider, ZoomType } from "../types";
@@ -5,4 +6,5 @@ import type { ZoomProvider, ZoomType } from "../types";
 export const ZOOM_PROVIDERS: Record<ZoomType, ZoomProvider> = {
   expand: createExpandProvider(),
   static: createStaticProvider(),
+  blur: createBlurProvider(),
 };

@@ -108,9 +108,6 @@ type SsgoiConfig = {
   // flattened automatically — no spread needed.
   transitions?: (SsgoiPathTransition | SsgoiPathTransition[])[];
 
-  // Fallback transition when no path entry matches.
-  defaultTransition?: TransitionConfig;
-
   // Rewrite (from, to) before matching. Useful for stripping prefixes/locales.
   middleware?: (from: string, to: string) => { from: string; to: string };
 

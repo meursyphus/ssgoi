@@ -4,6 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { showcaseFrameProtocol, type ShowcaseFrameStatus } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
+import {
+  AnimationDockUI,
+  DockButton,
+  StatusDot,
+  type DockController,
+} from "@/lib/components/animation-dock";
 import type { ShowcaseClip, ShowcasePlatform } from "../data";
 
 /**
@@ -82,9 +88,15 @@ export function ClipPlayer({
   const sendHost = (command: string, payload?: number) =>
     post({ type: showcaseFrameProtocol.messages.host, command, payload });
 
-  const setRateAndApply = (r: number) => {
-    setRate(r);
-    sendHost("rate", r);
+  const controller: DockController = {
+    status,
+    rate,
+    play: () => sendHost("play"),
+    pause: () => sendHost("pause"),
+    setRate: (r) => {
+      setRate(r);
+      sendHost("rate", r);
+    },
   };
 
   const overlay = autoplay ? (
@@ -142,119 +154,29 @@ export function ClipPlayer({
         </span>
       </div>
 
-      <Dock
-        autoplay={autoplay}
-        onToggleAutoplay={() => setAutoplay((p) => !p)}
-        onPlay={() => sendHost("play")}
-        onPause={() => sendHost("pause")}
-        onReverse={() => sendHost("reverse")}
-        onComplete={() => sendHost("complete")}
-        onReset={reset}
-        rate={rate}
-        onRate={setRateAndApply}
-      />
+      <div className="rounded-xl border border-white/5 bg-white/[0.02] px-2 py-1.5">
+        <AnimationDockUI
+          controller={controller}
+          leading={
+            <>
+              <DockButton
+                title={autoplay ? "Pause auto-route" : "Resume auto-route"}
+                onClick={() => setAutoplay((p) => !p)}
+              >
+                {autoplay ? "⏸ auto" : "▶ auto"}
+              </DockButton>
+              <DockButton title="Reset to exit path" onClick={reset}>
+                ↺
+              </DockButton>
+              <div className="mx-1 h-4 w-px bg-white/10" />
+            </>
+          }
+        />
+      </div>
 
       {clip.caption && (
         <p className="text-xs text-neutral-500">{clip.caption}</p>
       )}
     </div>
   );
-}
-
-function Dock({
-  autoplay,
-  onToggleAutoplay,
-  onPlay,
-  onPause,
-  onReverse,
-  onComplete,
-  onReset,
-  rate,
-  onRate,
-}: {
-  autoplay: boolean;
-  onToggleAutoplay: () => void;
-  onPlay: () => void;
-  onPause: () => void;
-  onReverse: () => void;
-  onComplete: () => void;
-  onReset: () => void;
-  rate: number;
-  onRate: (r: number) => void;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-2 py-1.5 text-xs text-neutral-300">
-      <DockButton
-        title={autoplay ? "Pause auto-route" : "Resume auto-route"}
-        onClick={onToggleAutoplay}
-      >
-        {autoplay ? "⏸ auto" : "▶ auto"}
-      </DockButton>
-      <DockButton title="Reset to exit path" onClick={onReset}>
-        ↺
-      </DockButton>
-      <div className="mx-1 h-4 w-px bg-white/10" />
-      <DockButton title="Play forward" onClick={onPlay}>
-        ▶
-      </DockButton>
-      <DockButton title="Pause" onClick={onPause}>
-        ⏸
-      </DockButton>
-      <DockButton title="Reverse" onClick={onReverse}>
-        ◀
-      </DockButton>
-      <DockButton title="Jump to end" onClick={onComplete}>
-        ⏭
-      </DockButton>
-      <div className="mx-1 h-4 w-px bg-white/10" />
-      <input
-        type="range"
-        min={0}
-        max={2}
-        step={0.05}
-        value={rate}
-        onChange={(e) => onRate(+e.target.value)}
-        className="h-1 w-24 cursor-pointer accent-orange-300"
-        aria-label="Playback rate"
-      />
-      <span className="w-10 text-right tabular-nums text-neutral-400">
-        {rate.toFixed(2)}x
-      </span>
-    </div>
-  );
-}
-
-function DockButton({
-  children,
-  onClick,
-  title,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  title: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className="rounded-md px-2 py-1 hover:bg-white/10"
-    >
-      {children}
-    </button>
-  );
-}
-
-function StatusDot({ status }: { status: ShowcaseFrameStatus }) {
-  const color =
-    status === "playing"
-      ? "bg-emerald-400"
-      : status === "reversing"
-        ? "bg-amber-400"
-        : status === "paused"
-          ? "bg-sky-400"
-          : status === "settled"
-            ? "bg-white/40"
-            : "bg-white/20";
-  return <span className={`inline-block h-1.5 w-1.5 rounded-full ${color}`} />;
 }

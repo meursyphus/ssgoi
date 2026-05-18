@@ -38,7 +38,7 @@ import { fade } from '@ssgoi/react/view-transitions';
 
 export default function App() {
   return (
-    <Ssgoi config={{ defaultTransition: fade() }}>
+    <Ssgoi config={{ transitions: fade({ paths: ['/', '/about'] }) }}>
       <div style={{ position: 'relative' }}>
         {/* Your app */}
       </div>
@@ -62,7 +62,7 @@ export default function HomePage() {
 }
 ```
 
-**That's it!** Your pages now transition smoothly with a fade effect.
+**That's it!** Your configured pages now transition smoothly with a fade effect.
 
 ## Advanced Transitions
 
@@ -82,8 +82,7 @@ const config = {
     
     // Pinterest-style image transitions
     { from: '/gallery', to: '/photo/*', transition: pinterest() }
-  ],
-  defaultTransition: fade()
+  ]
 };
 ```
 
@@ -153,7 +152,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         <Ssgoi config={{
-          defaultTransition: scroll({ direction: 'up' })
+          transitions: scroll({ paths: ['/', '/about'] })
         }}>
           <div style={{ position: 'relative', minHeight: '100vh' }}>
             {children}
@@ -185,7 +184,7 @@ export default function Page() {
   import { fade } from '@ssgoi/svelte/view-transitions';
 </script>
 
-<Ssgoi config={{ defaultTransition: fade() }}>
+<Ssgoi config={{ transitions: fade({ paths: ['/', '/about'] }) }}>
   <div style="position: relative; min-height: 100vh;">
     <slot />
   </div>

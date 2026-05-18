@@ -159,13 +159,19 @@ export class MultiAnimation extends Animation {
       this.scheduleStart(next, method);
       return;
     }
+    // `triggerMs` is simulation time (frames are timestamped at 1× playback).
+    // WAAPI scales wall-clock by `playbackRate`, so the setTimeout has to
+    // scale too — otherwise rate < 1 fires the next child early (overlap)
+    // and rate > 1 fires it late (gap).
+    const rate = Math.abs(this.playbackRate) || 1;
+    const wallMs = triggerMs / rate;
     const timer = setTimeout(() => {
       this.pendingStartTimers = this.pendingStartTimers.filter(
         (t) => t !== timer,
       );
       if (!this.running) return;
       this.scheduleStart(next, method);
-    }, triggerMs);
+    }, wallMs);
     this.pendingStartTimers.push(timer);
   }
 

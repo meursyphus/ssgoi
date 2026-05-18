@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="16" fill="#FF385C"/>
+  <!-- Bélo mark -->
+  <path d="M32 14
+           C 27.5 14, 24 16.5, 22 20
+           C 20 23.5, 20 27.5, 22 31
+           C 24.5 35.5, 28 41, 32 47
+           C 36 41, 39.5 35.5, 42 31
+           C 44 27.5, 44 23.5, 42 20
+           C 40 16.5, 36.5 14, 32 14 Z"
+        fill="white"/>
+</svg>

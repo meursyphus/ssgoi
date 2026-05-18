@@ -6,7 +6,7 @@ export function PromoBanner() {
           Plans this weekend?
         </p>
         <p className="mt-0.5 text-[12px] text-neutral-500">
-          Catch up with someone you haven't seen in a while
+          Catch up with someone you haven&apos;t seen in a while
         </p>
       </div>
       <img
