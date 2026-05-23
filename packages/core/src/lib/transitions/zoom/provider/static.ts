@@ -9,7 +9,11 @@ import { Animation } from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const STATIC_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 420, damping: 34 },
+  spring: {
+    stiffness: 530,
+    damping: 34,
+    doubleSpring: 1,
+  },
 };
 
 function noopAnimation(): ZoomAnimationConfig {
