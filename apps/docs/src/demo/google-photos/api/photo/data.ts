@@ -82,7 +82,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1063,
     takenAt: "2026.05.16",
     description: "Mountain range",
     location: "Canada",
@@ -108,7 +108,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=70",
     width: 1600,
-    height: 1067,
+    height: 1066,
     takenAt: "2026.05.15",
     description: "Golden fields",
     fileSize: "4.2 MB",
@@ -159,7 +159,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1067,
     takenAt: "2026.05.12",
     description: "Desk setup",
     fileSize: "2.4 MB",
@@ -171,7 +171,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 900,
     takenAt: "2026.05.12",
     description: "Autumn walk",
     fileSize: "4.7 MB",
@@ -197,7 +197,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 2133,
     takenAt: "2026.05.10",
     description: "Dog on a walk",
     fileSize: "3.3 MB",
@@ -209,7 +209,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&q=70",
     width: 1600,
-    height: 1067,
+    height: 1600,
     takenAt: "2026.05.08",
     description: "Alley cat",
     fileSize: "2.8 MB",
@@ -234,7 +234,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1068,
     takenAt: "2026.05.06",
     description: "Burger",
     fileSize: "2.2 MB",
@@ -246,7 +246,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1068,
     takenAt: "2026.05.06",
     description: "Fresh salad",
     fileSize: "2.5 MB",
@@ -259,7 +259,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1067,
     takenAt: "2026.05.04",
     description: "Steak dinner",
     fileSize: "3.8 MB",
@@ -271,7 +271,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1060,
     takenAt: "2026.05.04",
     description: "Wine glass",
     fileSize: "2.7 MB",
@@ -310,7 +310,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1429087969512-1e85aab2683d?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 2400,
     takenAt: "2026.04.30",
     description: "Rocky cliffs",
     location: "Ireland",
@@ -324,7 +324,7 @@ const seed: RawPhoto[] = [
     thumbSrc:
       "https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=70",
     width: 1600,
-    height: 1066,
+    height: 1067,
     takenAt: "2026.04.28",
     description: "Forest path",
     fileSize: "3.5 MB",
