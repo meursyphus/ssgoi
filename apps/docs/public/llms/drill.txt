@@ -7,7 +7,7 @@ Setup guide: https://ssgoi.dev/llms.txt
 ## Behavior
 
 - **`parallax`** (default): new page slides in from the right; old page eases slightly left under it, hinting it's still there.
-- **`crossfade`**: new page fades + zooms in over the old one. Softer, less directional.
+- **`slide`**: new page slides in from the right while the old page cross-fades underneath. Flatter and less directional than `parallax`.
 
 `enter` is forward navigation (e.g. list → detail). `exit` is the reverse — old page comes back from the left.
 
@@ -19,11 +19,15 @@ import { drill } from "@ssgoi/react/view-transitions";
 drill({
   enter: string;                       // destination path (forward)
   exit: string;                        // source path (forward)
-  type?: "parallax" | "crossfade";     // default: "parallax"
+  type?: "parallax" | "slide";         // default: "parallax"
+  variant?: "default";                 // reserved — only "default" today
+  options?: {};                        // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
 
 Returns a directional pair: one entry for forward (`exit → enter`) and one for backward (`enter → exit`).
+
+> Deprecated: `type: "crossfade"` — use `type: "slide"` instead.
 
 ## Usage
 
@@ -31,7 +35,7 @@ Returns a directional pair: one entry for forward (`exit → enter`) and one for
 const config = {
   transitions: [
     drill({ enter: "/post/*", exit: "*" }),
-    drill({ enter: "/settings/*", exit: "/settings", type: "crossfade" }),
+    drill({ enter: "/settings/*", exit: "/settings", type: "slide" }),
   ],
 };
 ```

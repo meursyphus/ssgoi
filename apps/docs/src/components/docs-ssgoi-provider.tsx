@@ -13,7 +13,6 @@ const config: SsgoiConfig = {
     scroll({
       paths: ["/", "/showcase"],
       type: "non-directional",
-      direction: "up",
     }),
   ],
 };

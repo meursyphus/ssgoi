@@ -15,7 +15,7 @@ const config: SsgoiConfig = {
     zoom({
       paths: [BASE, `${BASE}/listings/*`],
       type: "blur",
-      fade: true,
+      variant: "fade",
     }),
     sheet({
       type: "static",

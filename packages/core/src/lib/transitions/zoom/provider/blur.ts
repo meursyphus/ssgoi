@@ -1,9 +1,14 @@
 import type { PhysicsOptions } from "@types";
 import type {
   ZoomAnimationConfig,
+  ZoomContributeCtx,
+  ZoomExtras,
   ZoomOverlayConfig,
+  ZoomPrepareCtx,
   ZoomProvider,
+  ZoomStrategy,
 } from "../types";
+import { Animation, IntegratorProvider, WebAnimation } from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
@@ -68,6 +73,67 @@ const overlay: ZoomOverlayConfig = {
     };
   },
 };
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * BackgroundStrategy — the blur tone scales the background page by a small
+ * amount around its center, leaving the actual blur to a separate overlay
+ * layer (see `OverlayStrategy` below).
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+export class BlurBackgroundStrategy implements ZoomStrategy {
+  readonly physics = BLUR_PHYSICS;
+
+  contribute(ctx: ZoomContributeCtx): Animation[] {
+    const { from, to, resolved, physics } = ctx;
+    const isEnter = resolved.mode === "enter";
+    const bgEl = isEnter ? from : to;
+    const bgConfig = isEnter ? backgroundOut() : backgroundIn();
+
+    if (bgConfig) bgEl.style.transformOrigin = bgConfig.transformOrigin;
+
+    return [
+      new WebAnimation({
+        element: bgEl,
+        integrator: IntegratorProvider.from(physics),
+        style: isEnter
+          ? (_t, u) => bgConfig.animate(u) as Record<string, string | number>
+          : (t) => bgConfig.animate(t) as Record<string, string | number>,
+      }),
+    ];
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * OverlayStrategy — adds a backdrop-filter layer between the background page
+ * and the zoomed tile. Only attached when the active type is `blur`, but the
+ * implementation lives here next to the overlay config it consumes.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+export class OverlayStrategy implements ZoomStrategy {
+  prepare(ctx: ZoomPrepareCtx): Partial<ZoomExtras> {
+    const overlayEl = ctx.createElement("zoom-overlay");
+    Object.assign(overlayEl.style, overlay.initialStyle);
+    overlayEl.style.willChange = overlay.willChange;
+    ctx.context.positionedParent.appendChild(overlayEl);
+    return { overlay: overlayEl };
+  }
+
+  contribute(ctx: ZoomContributeCtx): Animation[] {
+    const overlayEl = ctx.extras.overlay;
+    if (!overlayEl) return [];
+    return [
+      new WebAnimation({
+        element: overlayEl,
+        integrator: IntegratorProvider.from(ctx.physics),
+        style: (t) => overlay.style(ctx.resolved.mode, t),
+      }),
+    ];
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Legacy provider export.
+ * ──────────────────────────────────────────────────────────────────────────── */
 
 export function createBlurProvider(): ZoomProvider {
   return {

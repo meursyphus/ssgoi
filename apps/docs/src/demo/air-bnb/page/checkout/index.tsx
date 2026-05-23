@@ -41,7 +41,6 @@ export default function CheckoutLayoutClient({
             (step) => CHECKOUT_STEP_TRANSITION_IDS[step],
           ),
           type: "x",
-          feel: "fluid",
         }),
       ],
     }),

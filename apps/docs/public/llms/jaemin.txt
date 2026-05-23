@@ -15,6 +15,7 @@ import { jaemin } from "@ssgoi/react/view-transitions";
 
 jaemin({
   paths: readonly string[];   // symmetric
+  variant?: "default";        // reserved — only "default" today
 }): SsgoiPathTransition[];
 ```
 

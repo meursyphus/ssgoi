@@ -20,7 +20,7 @@ const config: SsgoiConfig = {
     drill({
       enter: `${BASE}/search/*`,
       exit: `${BASE}/search`,
-      type: "crossfade",
+      type: "slide",
     }),
   ],
 };

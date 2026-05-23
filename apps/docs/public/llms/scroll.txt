@@ -6,8 +6,8 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-- **`directional`** (default): forward navigation moves up (incoming rises from below); backward moves down. Direction follows `paths` order.
-- **`non-directional`**: always moves in the same direction regardless of which way you navigate. Combine with `direction` to fix it to `"up"` or `"down"`.
+- **`directional`** (default): path order decides direction. Earlier → later scrolls up (incoming rises from below); later → earlier scrolls down.
+- **`non-directional`**: every transition scrolls upward regardless of which way you navigate. Direction is fixed and not user-configurable.
 
 ## Signature
 
@@ -17,7 +17,8 @@ import { scroll } from "@ssgoi/react/view-transitions";
 scroll({
   paths: readonly string[];
   type?: "directional" | "non-directional";  // default: "directional"
-  direction?: "up" | "down";                  // only used when type is "non-directional"; default: "up"
+  variant?: "default";                       // reserved — only "default" today
+  options?: {};                              // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
 
@@ -29,11 +30,10 @@ const config = {
     // onboarding: step1 → step2 → step3, forward goes up
     scroll({ paths: ["/onboarding/1", "/onboarding/2", "/onboarding/3"] }),
 
-    // always slide up, no matter the direction
+    // always slides up regardless of direction
     scroll({
       paths: ["/feed", "/notifications"],
       type: "non-directional",
-      direction: "up",
     }),
   ],
 };

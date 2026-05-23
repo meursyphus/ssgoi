@@ -17,6 +17,8 @@ import { hero } from "@ssgoi/react/view-transitions";
 
 hero({
   paths: readonly string[];   // routes participating in hero transitions
+  variant?: "default";        // reserved — only "default" today
+  options?: {};               // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
 
