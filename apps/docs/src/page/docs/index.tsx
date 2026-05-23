@@ -117,7 +117,7 @@ const TRANSITIONS: TransitionEntry[] = [
   { name: "slide", blurb: "Horizontal push." },
   { name: "scroll", blurb: "Vertical page scroll." },
   { name: "sheet", blurb: "Bottom sheet, slides up." },
-  { name: "hero", blurb: "Shared element. data-hero-key." },
+  { name: "hero", blurb: "Shared element. data-hero-enter-key / data-hero-exit-key." },
   { name: "zoom", blurb: "Card expands to detail. data-zoom-*-key." },
   { name: "strip", blurb: "3D Y-axis flip." },
   { name: "blind", blurb: "Window-blinds wipe." },

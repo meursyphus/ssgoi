@@ -5,14 +5,17 @@ export type AxisType = "x" | "y" | "z";
 export type AxisDirection = "forward" | "backward";
 
 /**
- * UX flavor *within* a single axis. Independent dimension from `AxisType`:
- *   - `snappy` — tight, decisive page swap. KakaoTalk-style on x.
- *   - `fluid`  — relaxed, fade-through. Flutter SharedAxisTransition-style on x.
+ * UX flavor *within* a single axis. Independent dimension from `AxisType`; the
+ * set of meaningful values differs per type:
+ *   - x: `snappy` (KakaoTalk tab swap) | `fluid` (Material SharedAxisTransition)
+ *   - y: `directional` (forward = bottom→top) | `non-directional` (in always
+ *     rises from below; out fades in place)
+ *   - z: `snappy` only
  *
- * Only `x` currently ships both flavors; `y` and `z` only have `snappy` and
- * fall back to it when `fluid` is requested.
+ * Providers may alias unsupported feels to an in-axis default — `snappy` is
+ * the universal fallback inside `resolveAxisProvider`.
  */
-export type AxisFeel = "snappy" | "fluid";
+export type AxisFeel = "snappy" | "fluid" | "directional" | "non-directional";
 
 export interface AxisOptions {
   type?: AxisType;

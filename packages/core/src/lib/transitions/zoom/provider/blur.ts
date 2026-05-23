@@ -56,10 +56,10 @@ const overlay: ZoomOverlayConfig = {
     position: "absolute",
     inset: "0",
     pointerEvents: "none",
-    // Sits above the background page but below the zoomed page (z-index 9999
+    // Sits above the background page but below the zoomed page (z-index 2
     // in transition.ts). backdrop-filter therefore blurs the background,
     // while the zoom tile stays sharp as it expands on top.
-    zIndex: "5000",
+    zIndex: "1",
     backdropFilter: "blur(0px)",
     WebkitBackdropFilter: "blur(0px)",
   },
