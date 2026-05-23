@@ -5,3 +5,6 @@ node_modules
 
 # Personal Claude Code agents
 .claude/agents/
+
+# Project-scoped MCP config (may contain tokens)
+.mcp.json
