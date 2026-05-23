@@ -6,15 +6,17 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-`type` picks the axis. `variant` (x only) picks the tone.
+`type` picks the axis. `variant` picks the tone within that axis.
 
 - **`type: "x"`** (default) — horizontal shared axis.
   - **`variant: "default"`** — relaxed, fluid feel (Flutter `SharedAxisTransition` style): ~300 ms, ~30 px slide on both sides, fade-through with asymmetric easing.
   - **`variant: "snappy"`** — tight, decisive page swap (KakaoTalk tab style): ~160 ms, ~8 px slide on the incoming side only, parallel cross-fade.
-- **`type: "y"`** — vertical shared axis (snappy flavor only today).
-- **`type: "z"`** — depth shared axis: incoming scales up, outgoing scales down (snappy flavor only today).
+- **`type: "y"`** — vertical shared axis.
+  - **`variant: "default"`** — directional fade-through. Forward (earlier path → later path) goes bottom→top: the outgoing page exits up and the incoming page rises from below. ~8 px slide, sequenced composition.
+  - **`variant: "non-directional"`** — direction-agnostic. The incoming page always rises from below; the outgoing page fades in place without translating. Use when navigation isn't a forward/backward pair (e.g. bottom-nav tabs that swap to whichever the user tapped).
+- **`type: "z"`** — depth shared axis: incoming scales up, outgoing scales down. Only `variant: "default"` today.
 
-Path order matters: earlier → later is the "forward" direction; the reverse plays as "backward".
+Path order matters for `x` and `y`: earlier → later is the "forward" direction; the reverse plays as "backward". For `z` the effect is symmetric, so order has no UX impact.
 
 ## Signature
 
@@ -24,8 +26,10 @@ import { axis } from "@ssgoi/react/view-transitions";
 axis({
   paths: readonly string[];
   type?: "x" | "y" | "z";              // default: "x"
-  // variant is "default" | "snappy" when type is "x"; "default" only for y/z
-  variant?: "default" | "snappy";
+  // variant is "default" | "snappy"          when type is "x"
+  //            "default" | "non-directional" when type is "y"
+  //            "default"                     when type is "z"
+  variant?: string;
   options?: {};                        // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
@@ -43,8 +47,15 @@ const config = {
     // KakaoTalk-style tight tab swap
     axis({ paths: ["/chats", "/friends"], type: "x", variant: "snappy" }),
 
-    // Vertical shared axis
+    // Vertical shared axis — forward = bottom→top
     axis({ paths: ["/feed", "/notifications"], type: "y" }),
+
+    // Vertical bottom-nav: incoming always rises from below
+    axis({
+      paths: ["/photos", "/collections", "/create"],
+      type: "y",
+      variant: "non-directional",
+    }),
 
     // Depth shared axis
     axis({ paths: ["/home", "/search"], type: "z" }),

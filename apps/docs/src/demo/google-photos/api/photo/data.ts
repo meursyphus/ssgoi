@@ -1,6 +1,17 @@
 import type { PhotoDetail } from "./types";
 
 /**
+ * Internal seed shape — same as PhotoDetail but without `aspectRatio`, which
+ * is derived at the data-read boundary so we don't restate `${width}/${height}`
+ * on every entry.
+ */
+type RawPhoto = Omit<PhotoDetail, "aspectRatio">;
+
+function withAspectRatio(p: RawPhoto): PhotoDetail {
+  return { ...p, aspectRatio: `${p.width}/${p.height}` };
+}
+
+/**
  * Seed data — 24 photos. Uses unsplash images; each entry has a slightly
  * different width/height so the aspect ratio varies a bit. (The grid itself
  * crops to a 3-column aspect-square, but the fullscreen detail view preserves
@@ -9,7 +20,7 @@ import type { PhotoDetail } from "./types";
  * unsplash gives noticeably better image quality than picsum.photos seeds —
  * keeps the grid feeling alive.
  */
-const seed: PhotoDetail[] = [
+const seed: RawPhoto[] = [
   {
     id: "ph-001",
     src: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1600&q=80",
@@ -370,20 +381,20 @@ export const COLLECTION_PHOTO_IDS: Record<string, string[]> = {
 const PAGE_LIMIT = 30;
 
 export const data = {
-  all: () => seed.map((p) => ({ ...p })),
+  all: (): PhotoDetail[] => seed.map(withAspectRatio),
   /** find by id — detail response (includes location/description) */
-  byId: (id: string) => {
+  byId: (id: string): PhotoDetail | null => {
     const found = seed.find((p) => p.id === id);
-    return found ? { ...found } : null;
+    return found ? withAspectRatio(found) : null;
   },
   /** Photos for a given collection (preserves the id order) */
-  byCollection: (collectionId: string) => {
+  byCollection: (collectionId: string): PhotoDetail[] => {
     const ids = COLLECTION_PHOTO_IDS[collectionId];
     if (!ids) return [];
     const result: PhotoDetail[] = [];
     for (const id of ids) {
       const found = seed.find((p) => p.id === id);
-      if (found) result.push({ ...found });
+      if (found) result.push(withAspectRatio(found));
     }
     return result;
   },

@@ -3,17 +3,19 @@ import { createOrderedPathTransitions } from "../utils";
 import { axis as transition } from "./transition";
 import type { AxisFeel, AxisType } from "./types";
 
-// Note: the underlying transition/provider supports y/z too, but only x is
-// exposed publicly right now — y/z haven't been UX-verified yet and we don't
-// want to ship a type union that promises more than is polished.
-//
-// `variant` is an orthogonal dimension to `type`. For x:
-//   - omit (default) — Flutter SharedAxisTransition-style "fluid": relaxed,
-//     ~300 ms, 30 px slide on both sides, fade-through with asymmetric easings.
-//   - `"snappy"` — KakaoTalk-style tab swap: tight, ~160 ms, 8 px slide on the
-//     incoming side only, parallel cross-fade.
-//
-// y/z only ship the snappy flavor today; they expose no `variant` slot.
+// `variant` is an orthogonal dimension to `type`. Per axis:
+//   x:
+//     - omit (default) — Flutter SharedAxisTransition "fluid": relaxed,
+//       ~300 ms, 30 px slide on both sides, sequential fade-through.
+//     - "snappy" — KakaoTalk-style tab swap: tight, ~160 ms, 8 px slide on the
+//       incoming side only, parallel cross-fade.
+//   y:
+//     - omit (default) — directional fade-through: forward goes bottom→top
+//       (out exits up, in rises from below), 8 px slide, sequence composition.
+//     - "non-directional" — same fade-through but the incoming side always
+//       rises from below; outgoing fades in place without translating. Use
+//       when navigation isn't a forward/backward pair.
+//   z: snappy only — no `variant` slot.
 
 /**
  * Public `variant` value for `axis({ type: "x" })`.
@@ -22,6 +24,15 @@ import type { AxisFeel, AxisType } from "./types";
  * - `"snappy"` — tight, decisive page swap (KakaoTalk style).
  */
 export type AxisXVariant = "default" | "snappy";
+
+/**
+ * Public `variant` value for `axis({ type: "y" })`.
+ *
+ * - `"default"` — directional fade-through. Forward = bottom→top.
+ * - `"non-directional"` — direction-agnostic. Incoming always rises from
+ *   below; outgoing fades in place.
+ */
+export type AxisYVariant = "default" | "non-directional";
 
 /**
  * Legacy `feel` axis. Kept for source compatibility only.
@@ -50,7 +61,7 @@ export type AxisConfig = {
        */
       feel?: AxisFeelDeprecated;
     }
-  | { type: "y"; variant?: "default"; options?: {} }
+  | { type: "y"; variant?: AxisYVariant; options?: {} }
   | { type: "z"; variant?: "default"; options?: {} }
 );
 
@@ -72,6 +83,9 @@ function resolveInternalFeel(
   variant: string | undefined,
   legacyFeel: AxisFeelDeprecated | undefined,
 ): AxisFeel {
+  if (type === "y") {
+    return variant === "non-directional" ? "non-directional" : "directional";
+  }
   if (type !== "x") return "snappy";
   if (variant === "snappy") return "snappy";
   if (legacyFeel === "snappy") return "snappy";

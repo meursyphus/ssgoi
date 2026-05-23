@@ -6,9 +6,14 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-The element marked as the "list-side" entry on the source page is tweened in position and size to match its "detail-side" counterpart on the destination page. The rest of the pages cross-fade around it.
+The element marked as the "list-side" entry on the source page is tweened in position and size to match its "detail-side" counterpart on the destination page. The rest of the page handles its surrounding chrome based on `type`.
 
 If a key has no match on the other side, that element falls back gracefully (no animation on it).
+
+`type` picks how the surrounding chrome behaves around the shared element:
+
+- **`type: "static"`** (default) — the incoming page's chrome snaps in; the shared element morphs in place via clip-path inset + uniform scale. Use when the destination chrome should feel like an *extension* of the list page (e.g., gallery → fullscreen viewer where the rest of the screen is just dark).
+- **`type: "fade"`** — both pages cross-fade as whole surfaces while a temporary shared-element clone morphs above them. Use when each side has its own chrome (e.g., a list page and a detail page with its own back button, title bar, or meta panel).
 
 ## Signature
 
@@ -16,13 +21,12 @@ If a key has no match on the other side, that element falls back gracefully (no 
 import { hero } from "@ssgoi/react/view-transitions";
 
 hero({
-  paths: readonly string[];   // routes participating in hero transitions
-  variant?: "default";        // reserved — only "default" today
-  options?: {};               // reserved — no fields yet
+  paths: readonly string[];        // routes participating in hero transitions
+  type?: "static" | "fade";        // default: "static"
+  variant?: "default";             // reserved — only "default" today
+  options?: {};                    // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
-
-Planned variants (not yet in the public type): `"fade"` — for hero pairs where surrounding chrome should cross-fade alongside the shared element; `"snappy"` — tracked separately.
 
 ## Required: matching enter/exit keys
 
@@ -42,6 +46,22 @@ Mark the destination-side ("detail") element with `data-hero-enter-key` and the 
 
 The transition matches enter/exit pairs in both navigation directions — forward (list→detail) and back (detail→list) — without extra configuration.
 
+## Optional: `data-hero-aspect-ratio` for letterboxed images
+
+When the hero element is an `<img object-contain>` (or any element whose visible content occupies a smaller, centered sub-rect of its bbox), add `data-hero-aspect-ratio="W/H"` (or a single number) so hero can tween the *visible content rect* rather than the surrounding letterbox. Without the hint hero falls back to the element's bounding box.
+
+```tsx
+// Detail page where the photo is contained inside a full-bleed dark frame
+<img
+  data-hero-enter-key={`item-${id}`}
+  data-hero-aspect-ratio={`${photo.width}/${photo.height}`}
+  src={photo.src}
+  className="h-full w-full object-contain"
+/>
+```
+
+Accepts either `"W/H"` (e.g. `"1600/1067"`) or a precomputed ratio number (e.g. `"1.5"`). Pre-format at the data layer so you don't restate width/height per render.
+
 ## Legacy: `data-hero-key`
 
 The original `data-hero-key` attribute is still supported for backwards compatibility — putting the same `data-hero-key` value on both pages will animate that pair. New code should use the `data-hero-enter-key` / `data-hero-exit-key` pair instead; the single-key form is treated as a fallback and is only consulted when no enter/exit pair matched.
@@ -51,7 +71,11 @@ The original `data-hero-key` attribute is still supported for backwards compatib
 ```ts
 const config = {
   transitions: [
+    // List ↔ detail where the detail screen is "just a fullscreen viewer"
     hero({ paths: ["/items", "/items/*"] }),
+
+    // List ↔ detail where each page has its own chrome (back button, meta)
+    hero({ paths: ["/photos", "/photos/*"], type: "fade" }),
   ],
 };
 ```

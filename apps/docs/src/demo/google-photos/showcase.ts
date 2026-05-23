@@ -3,13 +3,13 @@ import type { ShowcaseApp } from "@/page/showcase/types";
 export const googlePhotosShowcase: ShowcaseApp = {
   slug: "google-photos",
   name: "Google Photos",
-  tagline: "Hero into photo detail, drill into collections, axis between tabs",
+  tagline: "Hero into photo detail, drill into collections, sheet for collage",
   platforms: ["mobile"],
   category: "Photos & Media",
   badge: "New",
   logo: "/google-photos-icon.svg",
   demoOrigin: "/demo/google-photos",
-  transitions: ["hero", "drill", "axis"],
+  transitions: ["hero", "drill", "axis", "sheet"],
   sourcePath: "apps/docs/src/demo/google-photos",
   previewTransition: "hero",
   clips: [
@@ -28,11 +28,18 @@ export const googlePhotosShowcase: ShowcaseApp = {
       caption: "Push/pop stack feel between collections",
     },
     {
-      title: "Tab swap — Photos → Collections (axis x)",
+      title: "Tab swap — Photos → Collections (axis y)",
       transition: "axis",
       enterPath: "/demo/google-photos/collections",
       exitPath: "/demo/google-photos",
-      caption: "Horizontal axis swap on the bottom nav",
+      caption: "Non-directional vertical axis on the bottom nav",
+    },
+    {
+      title: "Create → Collage maker (sheet)",
+      transition: "sheet",
+      enterPath: "/demo/google-photos/collage",
+      exitPath: "/demo/google-photos/create",
+      caption: "Sheet rises from the Collage tool tile",
     },
   ],
 };

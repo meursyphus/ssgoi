@@ -15,7 +15,7 @@ export function PhotoGrid({ photos }: { photos: PhotoSimple[] }) {
           key={p.id}
           href={`/demo/google-photos/p/${p.id}`}
           scroll={false}
-          className="relative block aspect-square overflow-hidden bg-neutral-100"
+          className="relative block aspect-square bg-neutral-100"
         >
           <img
             src={p.thumbSrc}
