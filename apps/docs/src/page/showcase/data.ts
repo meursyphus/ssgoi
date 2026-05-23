@@ -1,5 +1,6 @@
 import { airBnbShowcase } from "@/demo/air-bnb/showcase";
 import { gamjaMarketShowcase } from "@/demo/gamja-market/showcase";
+import { materialMailShowcase } from "@/demo/material-mail/showcase";
 import { honeydropShowcase } from "@/demo/honeydrop/showcase";
 import { instagramShowcase } from "@/demo/instagram/showcase";
 import { kakaoTalkShowcase } from "@/demo/kakao-talk/showcase";
@@ -34,6 +35,7 @@ export const showcases: ShowcaseApp[] = [
   kakaoTalkShowcase,
   airBnbShowcase,
   gamjaMarketShowcase,
+  materialMailShowcase,
 ];
 
 export function findShowcase(slug: string): ShowcaseApp | undefined {

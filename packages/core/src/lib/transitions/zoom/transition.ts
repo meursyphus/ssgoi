@@ -158,9 +158,11 @@ class TileStrategy implements ZoomStrategy {
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
     // Keep the zoomed page on top through the transition; restore the
-    // previous inline z-index when done.
+    // previous inline z-index when done. Sits at 2 (above the blur overlay
+    // at 1) — large absolute values like 9999 leaked above unrelated app
+    // chrome (modals, sheets) on the host page.
     const previousZIndex = tileEl.style.zIndex;
-    tileEl.style.zIndex = "9999";
+    tileEl.style.zIndex = "2";
 
     onComplete(() => {
       tileEl.style.willChange = "auto";
