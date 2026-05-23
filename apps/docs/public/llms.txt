@@ -174,13 +174,13 @@ Horizontal push. Forward navigation slides left, backward slides right. Use for 
 Vertical "page scroll" — pages slide along the y-axis. **Two types**: `directional` (forward up / backward down, default) and `non-directional` (always slides up regardless of direction). Use for **onboarding** or paginated long-form pages.
 
 ### `axis` — https://ssgoi.dev/llms/axis.txt
-Material/Flutter-style shared-axis page swap. **Three types**: `x` (horizontal, default), `y` (vertical), `z` (depth). On `x`, `variant: "default"` is a relaxed fluid feel and `variant: "snappy"` is a tight tab-swap (KakaoTalk-style). Use for **sibling/tab routes**.
+Material/Flutter-style shared-axis page swap. **Three types**: `x` (horizontal, default), `y` (vertical), `z` (depth). On `x`, `variant: "default"` is a relaxed fluid feel and `variant: "snappy"` is a tight tab-swap (KakaoTalk-style). On `y`, `variant: "default"` is directional (forward = bottom→top) and `variant: "non-directional"` always rises from below — use for bottom-nav tab swaps that aren't a forward/backward pair. Use for **sibling/tab routes**.
 
 ### `sheet` — https://ssgoi.dev/llms/sheet.txt
 Bottom sheet style. New page slides up from below. **Two types**: `static` (background untouched, default) and `scale` (background scales down behind). Use for **modal-like** flows (FAB → compose, "new item" screens). (Legacy `type: "background-scale"` deprecated → use `"scale"`.)
 
 ### `hero` — https://ssgoi.dev/llms/hero.txt
-Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Requires matching `data-hero-key` on both pages.**
+Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Two types**: `static` (default — incoming chrome snaps in while the shared element morphs in place) and `fade` (whole pages cross-fade with a temporary shared-element clone floating above — use when both pages have their own chrome). **Requires matching `data-hero-enter-key` (detail side) and `data-hero-exit-key` (list side).** Optional `data-hero-aspect-ratio="W/H"` if the element is letterboxed (e.g. `<img object-contain>`). Legacy single-attribute `data-hero-key` is still honored as a fallback.
 
 ### `zoom` — https://ssgoi.dev/llms/zoom.txt
 Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Three types**: `static` (morphs to target size only, default), `expand` (fills viewport), `blur` (background blurs while card focuses). Optional `variant: "fade"` cross-fades surrounding content. **Requires `data-zoom-exit-key` (outgoing) and `data-zoom-enter-key` (incoming)** matching by value.
@@ -222,7 +222,7 @@ Quirky: incoming page rotates in at 45° from tiny scale, then unwinds and grows
 
 ### hero / zoom transition not running
 - **Cause**: Data attribute keys don't match between pages, or attribute missing on one side
-- **Fix**: For `hero`, both sides use `data-hero-key="<same-value>"`. For `zoom`, outgoing uses `data-zoom-exit-key` and incoming uses `data-zoom-enter-key` (same value)
+- **Fix**: For `hero`, list side uses `data-hero-exit-key` and detail side uses `data-hero-enter-key` (same value). For `zoom`, outgoing uses `data-zoom-exit-key` and incoming uses `data-zoom-enter-key` (same value). Legacy single-attribute `data-hero-key` on both pages is also honored.
 
 ---
 

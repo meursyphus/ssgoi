@@ -19,13 +19,13 @@ const config: SsgoiConfig = {
     ...drill({ enter: `${BASE}/orders/*`, exit: `${BASE}/orders` }),
     // order detail ↔ review write (sheet)
     ...sheet({
-      type: "scale",
+      type: "static",
       enter: `${BASE}/review/*`,
       exit: `${BASE}/orders/*`,
     }),
     // home ↔ review write (sheet) — FAB 진입
     ...sheet({
-      type: "scale",
+      type: "static",
       enter: `${BASE}/review/*`,
       exit: BASE,
     }),

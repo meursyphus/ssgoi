@@ -9,11 +9,9 @@ import { MobileFrame } from "@/lib/components/mobile-frame";
 import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 
 /**
- * 모바일 쇼케이스용 셸. 내부적으로 `<DemoShell>`을 써서 host/bridge/도크가
- * 자동으로 연결되므로, 각 데모 layout은 이걸 감싸기만 하면 된다.
- *
- * iframe-embedded 데모에서 부모(showcase 상세)와 주고받는 postMessage 프로토콜은
- * `ShowcaseHostBridge`가 책임진다 (DemoShell이 내부에서 마운트).
+ * 모바일 쇼케이스용 셸. host/bridge/dock은 위쪽(`DocsSsgoiProvider` + `/demo/layout.tsx`)
+ * 에서 한 번씩 마운트되므로 여기서는 모바일 프레임 + state/overlay providers + Ssgoi
+ * (호스트 자동 바인딩)만 책임진다.
  */
 export function MobileShowcaseShell({
   config,

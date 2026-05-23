@@ -273,7 +273,7 @@ function ShowcaseCard({
             ref={iframeRef}
             src={previewPath}
             title={`${showcase.name} preview`}
-            widthClassName="w-[78%]"
+            widthClassName="w-[78%] max-w-[380px]"
             interactive={false}
           />
         )}

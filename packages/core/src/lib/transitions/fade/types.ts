@@ -1,12 +1,6 @@
 /**
- * Public option shapes for the fade preset.
- *
- * Default `type` is `"fade-through"` — the current sequential
- * fade-out → fade-in behavior.
- *
- * Not yet exposed (tracked separately on the TODO board):
- *   - `type: "cross-fade"` (simultaneous fade)
- *   - `variant: "smooth"`
+ * Public option shapes for the fade preset. Default `type` is
+ * `"fade-through"` — the sequential fade-out → fade-in behavior.
  */
 
 export type FadeType = "fade-through";

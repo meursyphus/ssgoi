@@ -8,11 +8,19 @@ import type {
   ZoomProvider,
   ZoomStrategy,
 } from "../types";
-import { Animation, IntegratorProvider, WebAnimation } from "../../../animation";
+import {
+  Animation,
+  IntegratorProvider,
+  WebAnimation,
+} from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 24 },
+  spring: {
+    stiffness: 430,
+    damping: 33,
+    doubleSpring: 1,
+  },
 };
 
 // Background page shrinks to (1 - SCALE_OFFSET) at peak.
@@ -56,10 +64,10 @@ const overlay: ZoomOverlayConfig = {
     position: "absolute",
     inset: "0",
     pointerEvents: "none",
-    // Sits above the background page but below the zoomed page (z-index 9999
+    // Sits above the background page but below the zoomed page (z-index 2
     // in transition.ts). backdrop-filter therefore blurs the background,
     // while the zoom tile stays sharp as it expands on top.
-    zIndex: "5000",
+    zIndex: "1",
     backdropFilter: "blur(0px)",
     WebkitBackdropFilter: "blur(0px)",
   },
