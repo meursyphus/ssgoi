@@ -1,9 +1,20 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { IframeLoadingOverlay } from "./iframe-loading-overlay";
+
 type Props = {
   src: string;
   title?: string;
 };
 
 export function PhoneFrame({ src, title = "Live demo" }: Props) {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [src]);
+
   return (
     <div className="relative mx-auto w-[320px] shrink-0 sm:w-[380px] lg:w-[420px]">
       <div className="relative aspect-[320/660] rounded-[52px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[12px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
@@ -14,8 +25,14 @@ export function PhoneFrame({ src, title = "Live demo" }: Props) {
             src={src}
             title={title}
             loading="lazy"
+            onLoad={() => setLoaded(true)}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             className="h-[calc(100%-44px)] w-full border-0 bg-white"
+          />
+          <IframeLoadingOverlay
+            visible={!loaded}
+            variant="light"
+            style={{ top: 44 }}
           />
         </div>
       </div>

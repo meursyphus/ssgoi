@@ -3,31 +3,31 @@ import type { PinDetail } from "./types";
 const authors = [
   {
     name: "Emma Wilson",
-    avatar: "/demo/pinterest/avatar-1.jpg",
+    avatar: "https://picsum.photos/seed/pinterest-avatar-1/96/96",
     followers: 5432,
     bio: "라이프스타일 매거진 에디터, 일상의 영감을 공유합니다",
   },
   {
     name: "Alex Chen",
-    avatar: "/demo/pinterest/avatar-2.jpg",
+    avatar: "https://picsum.photos/seed/pinterest-avatar-2/96/96",
     followers: 8765,
     bio: "프로덕트 디자이너 · 미니멀리스트",
   },
   {
     name: "Sarah Kim",
-    avatar: "/demo/pinterest/avatar-3.jpg",
+    avatar: "https://picsum.photos/seed/pinterest-avatar-3/96/96",
     followers: 3210,
     bio: "포토그래퍼, 빛과 그림자를 기록합니다",
   },
   {
     name: "Mike Davis",
-    avatar: "/demo/pinterest/avatar-4.jpg",
+    avatar: "https://picsum.photos/seed/pinterest-avatar-4/96/96",
     followers: 9876,
     bio: "DIY 크리에이터 · 손으로 만드는 사람",
   },
   {
     name: "Lisa Park",
-    avatar: "/demo/pinterest/avatar-5.jpg",
+    avatar: "https://picsum.photos/seed/pinterest-avatar-5/96/96",
     followers: 6543,
     bio: "패션 스타일리스트, 매일의 룩을 큐레이션합니다",
   },
@@ -37,7 +37,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-1",
     title: "AI 메이크업 인물 컨셉",
-    image: "/demo/pinterest/10-400x400.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-1/400/400",
     aspectRatio: "1 / 1",
     category: "Beauty",
     saves: 4123,
@@ -50,7 +50,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-2",
     title: "Black ink fountain pen — desk flat lay",
-    image: "/demo/pinterest/11-400x667.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-2/400/667",
     aspectRatio: "3 / 5",
     category: "만년필",
     saves: 2890,
@@ -63,7 +63,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-3",
     title: "남자로 안 느껴지는 남자 특징",
-    image: "/demo/pinterest/12-400x800.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-3/400/800",
     aspectRatio: "2 / 4",
     category: "코디",
     saves: 1567,
@@ -76,7 +76,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-4",
     title: "Vertical 2:3 Inspiration — Style guides AI",
-    image: "/demo/pinterest/13-400x533.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-4/400/533",
     aspectRatio: "3 / 4",
     category: "Design",
     saves: 3678,
@@ -89,7 +89,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-5",
     title: "여자 치마 — pleated mini skirt look",
-    image: "/demo/pinterest/14-400x1000.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-5/400/1000",
     aspectRatio: "2 / 5",
     category: "여자 치마",
     saves: 4567,
@@ -101,7 +101,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-6",
     title: "검정 플리츠 스커트 디테일",
-    image: "/demo/pinterest/15-400x800.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-6/400/800",
     aspectRatio: "1 / 2",
     category: "여자 치마",
     saves: 890,
@@ -113,7 +113,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-7",
     title: "Morimono-inspired wedding tablescape",
-    image: "/demo/pinterest/16-400x600.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-7/400/600",
     aspectRatio: "2 / 3",
     category: "Wedding",
     saves: 2456,
@@ -126,7 +126,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-8",
     title: "테무 코리아 — pleated mini",
-    image: "/demo/pinterest/17-400x667.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-8/400/667",
     aspectRatio: "3 / 5",
     category: "여자 치마",
     saves: 1234,
@@ -138,7 +138,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-9",
     title: "버거킹 와퍼 단품 한판이오 17%",
-    image: "/demo/pinterest/18-400x400.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-9/400/400",
     aspectRatio: "1 / 1",
     category: "광고",
     saves: 678,
@@ -150,7 +150,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-10",
     title: "Study room decor — soft warm light",
-    image: "/demo/pinterest/19-400x667.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-10/400/667",
     aspectRatio: "3 / 5",
     category: "Study room decor",
     saves: 3234,
@@ -163,7 +163,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-11",
     title: "Procreate brush study — landscape",
-    image: "/demo/pinterest/20-400x800.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-11/400/800",
     aspectRatio: "1 / 2",
     category: "Art",
     saves: 1890,
@@ -175,7 +175,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-12",
     title: "겨울 코디 — 모직 코트 톤온톤",
-    image: "/demo/pinterest/21-400x533.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-12/400/533",
     aspectRatio: "3 / 4",
     category: "겨울코디",
     saves: 2345,
@@ -187,7 +187,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-13",
     title: "Floral wedding bouquet — pale pink",
-    image: "/demo/pinterest/22-400x1000.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-13/400/1000",
     aspectRatio: "2 / 5",
     category: "Wedding",
     saves: 4567,
@@ -199,7 +199,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-14",
     title: "정장 룩북 — 블랙 셋업",
-    image: "/demo/pinterest/23-400x800.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-14/400/800",
     aspectRatio: "1 / 2",
     category: "정장",
     saves: 1567,
@@ -211,7 +211,7 @@ const seed: PinDetail[] = [
   {
     id: "pin-15",
     title: "멋진 발명품 — 무드등 컨셉",
-    image: "/demo/pinterest/24-400x600.jpg",
+    image: "https://picsum.photos/seed/pinterest-pin-15/400/600",
     aspectRatio: "2 / 3",
     category: "멋진 발명품",
     saves: 3456,

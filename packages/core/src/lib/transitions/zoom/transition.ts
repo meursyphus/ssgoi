@@ -6,10 +6,7 @@ import {
   WebAnimation,
   Animation,
 } from "../../animation";
-import {
-  OverlayStrategy,
-  createBackgroundStrategy,
-} from "./provider";
+import { OverlayStrategy, createBackgroundStrategy } from "./provider";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 import type {
   NormalizedZoomOptions,
@@ -157,19 +154,28 @@ class TileStrategy implements ZoomStrategy {
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
-    // Keep the zoomed page on top through the transition; restore the
-    // previous inline z-index when done. Sits at 2 (above the blur overlay
-    // at 1) — large absolute values like 9999 leaked above unrelated app
-    // chrome (modals, sheets) on the host page.
-    const previousZIndex = tileEl.style.zIndex;
-    tileEl.style.zIndex = "2";
+    // Only mutate `from`'s z-index — never `to`. The page that remains
+    // after the transition keeps its natural stacking, so any failed
+    // cleanup is self-healing (the `from` clone is removed anyway).
+    // enter: push `from` (background) down to -2, leaving -1 for the
+    //   optional blur overlay; the incoming tile (`to`) sits at default
+    //   and ends up on top by virtue of negative z-index stacking below
+    //   normal flow.
+    // exit: lift `from` (the shrinking tile) above the new background at
+    //   +2, with overlay at +1 in between.
+    // Callers are expected to provide a stacking context above this
+    // boundary (e.g. `isolation: isolate` or `z-index: 0` on the page
+    // wrapper) so negative z-indices stay scoped.
+    const fromZ = isEnter ? "-2" : "2";
+    const previousFromZIndex = from.style.zIndex;
+    from.style.zIndex = fromZ;
 
     onComplete(() => {
       tileEl.style.willChange = "auto";
       tileEl.style.backfaceVisibility = "";
       tileEl.style.transformOrigin = "";
       (tileEl.style as CSSStyleDeclaration & { contain: string }).contain = "";
-      tileEl.style.zIndex = previousZIndex;
+      from.style.zIndex = previousFromZIndex;
     });
 
     return [
@@ -354,7 +360,8 @@ export const zoom = (
       // construction). v5 fired all restores from the inAnim onComplete;
       // we mirror that — the tile animation is always present (created by
       // TileStrategy) and is the natural cleanup hook because it owns the
-      // longest-lived inline styles (z-index, will-change, transform).
+      // longest-lived inline styles (z-index on `from`, will-change/
+      // transform on the tile element).
       const head = anims[0];
       if (head) {
         const prevOnComplete = head.onComplete;
