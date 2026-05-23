@@ -8,11 +8,19 @@ import type {
   ZoomProvider,
   ZoomStrategy,
 } from "../types";
-import { Animation, IntegratorProvider, WebAnimation } from "../../../animation";
+import {
+  Animation,
+  IntegratorProvider,
+  WebAnimation,
+} from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 24 },
+  spring: {
+    stiffness: 430,
+    damping: 33,
+    doubleSpring: 1,
+  },
 };
 
 // Background page shrinks to (1 - SCALE_OFFSET) at peak.
