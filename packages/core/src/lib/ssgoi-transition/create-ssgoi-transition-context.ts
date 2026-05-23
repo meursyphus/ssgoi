@@ -276,7 +276,11 @@ export function createSggoiTransitionContext(
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
     };
-    handleArrival(path, "out");
+    // Read the latest id from the DOM rather than the closure-captured path
+    // so a mid-life id change (re-render with a new id prop on the same
+    // element) leaves with its current identity, not the one it mounted with.
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    handleArrival(currentPath, "out");
   };
 
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
