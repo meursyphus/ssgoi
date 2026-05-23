@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!--
+    4-petal pinwheel — Google brand-ish.
+    Each petal is a rounded rect that fans out from a point slightly
+    inset from center, giving the gentle pinwheel offset.
+  -->
+  <!-- top : red -->
+  <rect x="26" y="2" width="12" height="28" rx="6" fill="#EA4335" />
+  <!-- right : yellow -->
+  <rect x="34" y="26" width="28" height="12" rx="6" fill="#FBBC04" />
+  <!-- bottom : green -->
+  <rect x="26" y="34" width="12" height="28" rx="6" fill="#34A853" />
+  <!-- left : blue -->
+  <rect x="2" y="26" width="28" height="12" rx="6" fill="#4285F4" />
+</svg>
