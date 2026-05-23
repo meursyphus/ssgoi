@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { scroll } from "@ssgoi/react/view-transitions";
 import { HostAnimation } from "@ssgoi/core/internal";
-import { ShowcaseHostBridge } from "@/lib/components/showcase-host-bridge";
+import { HostContext } from "@/lib/components/host-context";
+import { useShowcaseFrameBridge } from "@/lib/hooks";
 
 const config: SsgoiConfig = {
   preserveScroll: false,
@@ -18,25 +18,28 @@ const config: SsgoiConfig = {
 };
 
 /**
- * docs(landing + /showcase) 전역 SSgoi 프로바이더. 데모 라우트가 아닌 곳에서는
- * 자체 host의 dock을 띄우고, `/demo/*` 라우트에서는 demo의 DemoShell이 자기
- * dock을 띄우므로 여기선 dock을 끈다 (bridge는 항상 켜둬서 iframe 임베딩은 유지).
+ * Top-level provider:
+ *   - Creates the one and only `HostAnimation` and exposes it via `HostContext`,
+ *     so the playback dock (mounted at `app/demo/layout.tsx`) and every nested
+ *     `<Ssgoi host={...}>` share one controller.
+ *   - Wraps the docs landing + `/showcase` pages in their own `<Ssgoi>` for the
+ *     non-directional scroll transition between `/` and `/showcase`.
+ *   - Mounts the postMessage bridge once at the root so docs-as-showcase
+ *     (`slug: ssgoi-docs`) and every `/demo/*` route loaded inside an iframe
+ *     can talk to their parent showcase shell without per-demo wiring.
  *
- * 또한 — 자기 자신을 showcase 데모로도 쓸 수 있도록 (`slug: ssgoi-docs`),
- * iframe 안에서 띄워졌을 때 부모와 postMessage 프로토콜로 통신한다.
- * `ShowcaseHostBridge`가 책임짐.
+ * The floating playback dock is *not* mounted here — it lives at
+ * `app/demo/layout.tsx` so it only appears under `/demo/*`.
  */
 export function DocsSsgoiProvider({ children }: { children: ReactNode }) {
   const [host] = useState(() => new HostAnimation());
-  const pathname = usePathname();
-  const showDock = !pathname?.startsWith("/demo/");
+  useShowcaseFrameBridge(host);
 
   return (
-    <>
+    <HostContext.Provider value={host}>
       <Ssgoi config={config} host={host}>
         {children}
       </Ssgoi>
-      <ShowcaseHostBridge host={host} dock={showDock} />
-    </>
+    </HostContext.Provider>
   );
 }

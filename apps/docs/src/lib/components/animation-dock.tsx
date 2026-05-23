@@ -120,9 +120,43 @@ function PlayPauseToggle({ controller }: { controller: DockController }) {
   );
 }
 
+const RATE_PRESETS = [0.1, 0.5, 1, 1.5, 2] as const;
+
+function RateSelector({ controller }: { controller: DockController }) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Playback rate"
+      className="flex items-stretch divide-x divide-white/10 overflow-hidden rounded-full ring-1 ring-inset ring-white/15"
+    >
+      {RATE_PRESETS.map((r) => {
+        const active = Math.abs(controller.rate - r) < 0.001;
+        return (
+          <button
+            key={r}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => controller.setRate(r)}
+            title={`${r}x`}
+            className={
+              "px-2 py-1 text-[11px] tabular-nums transition-colors " +
+              (active
+                ? "bg-white text-neutral-900"
+                : "text-white/80 hover:bg-white/10 hover:text-white")
+            }
+          >
+            {r}x
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /**
- * Bare minimal controls — play/pause toggle + rate. No outer chrome;
- * callers wrap in their own panel/glass container.
+ * Bare minimal controls — play/pause toggle + discrete rate selector.
+ * No outer chrome; callers wrap in their own panel/glass container.
  * `leading` lets callers prepend extras (e.g. clip-player's autoplay+reset).
  */
 export function AnimationDockUI({
@@ -136,21 +170,7 @@ export function AnimationDockUI({
     <div className="flex items-center gap-2.5 text-xs font-medium text-white/95 [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]">
       {leading}
       <PlayPauseToggle controller={controller} />
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={0}
-          max={2}
-          step={0.05}
-          value={controller.rate}
-          onChange={(e) => controller.setRate(+e.target.value)}
-          className="h-1 w-24 cursor-pointer accent-white"
-          aria-label="Playback rate"
-        />
-        <span className="w-10 text-right tabular-nums text-white/70">
-          {controller.rate.toFixed(2)}x
-        </span>
-      </div>
+      <RateSelector controller={controller} />
     </div>
   );
 }
