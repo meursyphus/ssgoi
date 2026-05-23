@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import type { CollectionDetail } from "@/demo/google-photos/state/collection";
 
@@ -9,19 +9,16 @@ export function CollectionHeader({
 }: {
   collection: CollectionDetail;
 }) {
-  const router = useRouter();
-
   return (
     <header className="sticky top-0 z-10 bg-white">
       <div className="flex h-14 items-center px-2">
-        <button
-          type="button"
-          onClick={() => router.back()}
+        <Link
+          href="/demo/google-photos/collections"
           aria-label="Back"
           className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 active:bg-black/[0.05]"
         >
           <ArrowLeft className="h-5 w-5" />
-        </button>
+        </Link>
         <div className="ml-auto">
           <button
             type="button"

@@ -17,7 +17,7 @@ export default function PhotoDetailPage({
   return (
     <SsgoiTransition
       id={`/demo/google-photos/p/${initialData.id}`}
-      className="relative block min-h-full bg-white"
+      className="relative block h-full bg-white"
     >
       <BackButton />
       <PhotoCanvas photo={initialData} />

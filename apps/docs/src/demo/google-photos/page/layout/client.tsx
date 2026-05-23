@@ -13,10 +13,10 @@ const config: SsgoiConfig = {
   transitions: [
     // Photo grid ↔ photo detail — shared-element hero (the tapped thumbnail
     // grows into the fullscreen image).
-    ...hero({ paths: [BASE, `${BASE}/p/*`] }),
-
     // Collections grid ↔ collection detail — drill (push/pop stack feel).
-    ...drill({ enter: `${BASE}/c/*`, exit: `${BASE}/collections` }),
+    drill({ enter: `${BASE}/c/*`, exit: `${BASE}/collections` }),
+    hero({ paths: [BASE, `${BASE}/p/*`] }),
+
 
     // TODO(fade-variant): once `hero({ variant: "fade" })` is exposed, pair
     // collection detail ↔ photo detail with the same hero so a thumbnail tapped

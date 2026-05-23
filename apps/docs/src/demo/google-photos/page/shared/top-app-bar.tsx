@@ -37,9 +37,9 @@ export function TopAppBar() {
         <button
           type="button"
           aria-label="Profile"
-          className="ml-1 h-8 w-8 overflow-hidden rounded-full"
+          className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-[#1A73E8] text-[13px] font-semibold text-white"
         >
-          <span className="block h-full w-full bg-gradient-to-r from-neutral-900 from-50% to-white to-50%" />
+          D
         </button>
       </div>
     </header>

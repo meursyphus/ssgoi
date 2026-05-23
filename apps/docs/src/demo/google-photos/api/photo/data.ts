@@ -26,11 +26,11 @@ const seed: PhotoDetail[] = [
   },
   {
     id: "ph-002",
-    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400&q=70",
-    width: 1600,
-    height: 2000,
+    width: 1200,
+    height: 1800,
     takenAt: "2026.05.20",
     description: "Misty forest",
     location: "Gangwon",
@@ -106,11 +106,11 @@ const seed: PhotoDetail[] = [
   },
   {
     id: "ph-008",
-    src: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
       "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&q=70",
-    width: 1600,
-    height: 1067,
+    width: 1200,
+    height: 1800,
     takenAt: "2026.05.15",
     description: "Ocean view",
     location: "Portugal",
@@ -119,11 +119,11 @@ const seed: PhotoDetail[] = [
   },
   {
     id: "ph-009",
-    src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
       "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=70",
-    width: 1600,
-    height: 1067,
+    width: 1200,
+    height: 1800,
     takenAt: "2026.05.14",
     description: "Travel suitcase",
     fileSize: "2.1 MB",
@@ -207,11 +207,11 @@ const seed: PhotoDetail[] = [
   },
   {
     id: "ph-016",
-    src: "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
       "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=400&q=70",
-    width: 1600,
-    height: 1066,
+    width: 1200,
+    height: 1800,
     takenAt: "2026.05.07",
     description: "Fluffy cat",
     fileSize: "3.0 MB",
@@ -269,11 +269,11 @@ const seed: PhotoDetail[] = [
   },
   {
     id: "ph-021",
-    src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
       "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70",
-    width: 1600,
-    height: 1066,
+    width: 1200,
+    height: 1800,
     takenAt: "2026.05.02",
     description: "Stars over the mountain",
     location: "Iceland",
