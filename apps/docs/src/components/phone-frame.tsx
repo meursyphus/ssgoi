@@ -14,6 +14,7 @@ export function PhoneFrame({ src, title = "Live demo" }: Props) {
             src={src}
             title={title}
             loading="lazy"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             className="h-[calc(100%-44px)] w-full border-0 bg-white"
           />
         </div>

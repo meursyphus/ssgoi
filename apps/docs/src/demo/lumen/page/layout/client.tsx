@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type ReactNode } from "react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { film } from "@ssgoi/react/view-transitions";
-import { HostAnimation } from "@ssgoi/core/internal";
-import { useShowcaseFrameBridge } from "@/lib/hooks";
+import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 
 const BASE = "/demo/lumen";
 const FOUNDATIONS = BASE;
@@ -15,14 +14,11 @@ const config: SsgoiConfig = {
 };
 
 export function LumenLayoutClient({ children }: { children: ReactNode }) {
-  const [host] = useState(() => new HostAnimation());
-  useShowcaseFrameBridge(host);
-
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-black text-white">
-      <Ssgoi config={config} host={host}>
-        {children}
-      </Ssgoi>
-    </div>
+    <DemoShell>
+      <div className="relative h-dvh w-full overflow-hidden bg-black text-white">
+        <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+      </div>
+    </DemoShell>
   );
 }

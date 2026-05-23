@@ -39,7 +39,7 @@ function FloatingHeader() {
             Docs
           </Link>
           <Link href="/showcase" className="hover:text-neutral-100">
-            Showcase
+            Examples
           </Link>
           <a
             href="https://github.com/meursyphus/ssgoi"
@@ -254,7 +254,7 @@ function Resources() {
             href="/showcase"
             className="group inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-[#0e0b08] transition-colors hover:bg-orange-400"
           >
-            Browse showcase
+            Browse examples
             <span
               className="transition-transform group-hover:translate-x-0.5"
               aria-hidden

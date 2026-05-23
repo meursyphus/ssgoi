@@ -108,9 +108,6 @@ type SsgoiConfig = {
   // flattened automatically — no spread needed.
   transitions?: (SsgoiPathTransition | SsgoiPathTransition[])[];
 
-  // Fallback transition when no path entry matches.
-  defaultTransition?: TransitionConfig;
-
   // Rewrite (from, to) before matching. Useful for stripping prefixes/locales.
   middleware?: (from: string, to: string) => { from: string; to: string };
 
@@ -138,7 +135,9 @@ Three shapes:
 
 - **`{ paths }`** — symmetric: every pair animates with the same physics. Used by `fade`, `blind`, `film`, `hero`, `jaemin`, `rotate`, `strip`, `zoom`.
 - **`{ enter, exit, type? }`** — directional: enter and exit get different physics. Used by `drill`, `sheet`.
-- **`{ paths, ... }` with forward/backward variants** — ordered: path order decides direction. Used by `slide` and `scroll`.
+- **`{ paths, ... }` with forward/backward variants** — ordered: path order decides direction. Used by `slide`, `scroll`, and `axis`.
+
+All factories accept the unified v6 schema `{ paths (or enter/exit), type?, variant?, options? }`. `type` / `variant` / `options` slots are present on every preset for forward compatibility, even when only one value is implemented today.
 
 ### preserveScroll
 
@@ -163,7 +162,7 @@ When navigating *to* a path matching `exclude`, the destination starts at scroll
 Catalog of built-in transitions. Open the linked page for the full signature, options, and (when required) the `data-*` keys to put on your DOM.
 
 ### `drill` — https://ssgoi.dev/llms/drill.txt
-iOS-style hierarchical navigation. New page slides in from the right; old page eases left underneath. **Two types**: `parallax` (depth layering, default) and `crossfade` (dissolve + zoom). Use for **List → Detail** flows.
+iOS-style hierarchical navigation. New page slides in from the right; old page eases left underneath. **Two types**: `parallax` (depth layering, default) and `slide` (flat cross-faded slide). Use for **List → Detail** flows. (Legacy `type: "crossfade"` deprecated → use `"slide"`.)
 
 ### `fade` — https://ssgoi.dev/llms/fade.txt
 Calm cross-fade between pages. No motion, just opacity. Use as a **safe default** for unrelated pages.
@@ -172,22 +171,25 @@ Calm cross-fade between pages. No motion, just opacity. Use as a **safe default*
 Horizontal push. Forward navigation slides left, backward slides right. Use for **tab navigation** or sequential page flows.
 
 ### `scroll` — https://ssgoi.dev/llms/scroll.txt
-Vertical "page scroll" — pages slide along the y-axis. **Two types**: `directional` (forward up / backward down) and `non-directional` (always one fixed direction). Use for **onboarding** or paginated long-form pages.
+Vertical "page scroll" — pages slide along the y-axis. **Two types**: `directional` (forward up / backward down, default) and `non-directional` (always slides up regardless of direction). Use for **onboarding** or paginated long-form pages.
+
+### `axis` — https://ssgoi.dev/llms/axis.txt
+Material/Flutter-style shared-axis page swap. **Three types**: `x` (horizontal, default), `y` (vertical), `z` (depth). On `x`, `variant: "default"` is a relaxed fluid feel and `variant: "snappy"` is a tight tab-swap (KakaoTalk-style). Use for **sibling/tab routes**.
 
 ### `sheet` — https://ssgoi.dev/llms/sheet.txt
-Bottom sheet style. New page slides up from below. **Two types**: `static` (background untouched) and `background-scale` (background scales down behind). Use for **modal-like** flows (FAB → compose, "new item" screens).
+Bottom sheet style. New page slides up from below. **Two types**: `static` (background untouched, default) and `scale` (background scales down behind). Use for **modal-like** flows (FAB → compose, "new item" screens). (Legacy `type: "background-scale"` deprecated → use `"scale"`.)
 
 ### `hero` — https://ssgoi.dev/llms/hero.txt
 Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Requires matching `data-hero-key` on both pages.**
 
 ### `zoom` — https://ssgoi.dev/llms/zoom.txt
-Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Two types**: `expand` (fills viewport) and `static` (morphs to target size only). **Requires `data-zoom-exit-key` (outgoing) and `data-zoom-enter-key` (incoming)** matching by value.
+Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Three types**: `static` (morphs to target size only, default), `expand` (fills viewport), `blur` (background blurs while card focuses). Optional `variant: "fade"` cross-fades surrounding content. **Requires `data-zoom-exit-key` (outgoing) and `data-zoom-enter-key` (incoming)** matching by value.
 
 ### `strip` — https://ssgoi.dev/llms/strip.txt
 3D Y-axis perspective flip. Pages rotate horizontally with depth perspective. Use for **carded, distinctive page swaps** where slide feels too flat.
 
 ### `blind` — https://ssgoi.dev/llms/blind.txt
-Vertical/horizontal blinds wipe across, revealing the new page in staggered slats. Use for **cinematic, dramatic** reveals.
+Vertical/horizontal blinds wipe across, revealing the new page in staggered slats. **Two types**: `horizontal` (default) and `vertical`. Use for **cinematic, dramatic** reveals.
 
 ### `film` — https://ssgoi.dev/llms/film.txt
 Film-strip style: outgoing page scales down and slides off while incoming scales up from a tile with animated corner borders. Use for **gallery / lightbox** style flows that should feel premium.

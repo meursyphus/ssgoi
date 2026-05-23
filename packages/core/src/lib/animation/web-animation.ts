@@ -124,6 +124,28 @@ export class WebAnimation extends Animation {
     return this.reversing;
   }
 
+  get progress(): number {
+    if (this.running) this.captureLiveState();
+    const span = this.upperBound - this.lowerBound;
+    if (span === 0) return 0;
+    const p = (this.currentValue - this.lowerBound) / span;
+    return p < 0 ? 0 : p > 1 ? 1 : p;
+  }
+
+  findTimeForProgress(threshold: number): number | null {
+    if (this.frames.length < 2) return null;
+    const span = this.upperBound - this.lowerBound;
+    if (span === 0) return 0;
+    // Walk frames directly — no per-frame style synthesis, no allocations.
+    // For underdamped springs that overshoot, "first crossing" is the right
+    // semantic: trigger when progress first reaches the threshold, not when
+    // it settles there.
+    for (const f of this.frames) {
+      if ((f.position - this.lowerBound) / span >= threshold) return f.time;
+    }
+    return this.frames[this.frames.length - 1]!.time;
+  }
+
   get playbackRate(): number {
     return super.playbackRate;
   }

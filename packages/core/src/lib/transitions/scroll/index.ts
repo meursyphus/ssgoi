@@ -8,24 +8,22 @@ import { scroll as transition } from "./transition";
 export type ScrollConfig = {
   paths: readonly string[];
   /**
-   * - `"directional"` (기본): paths 순서에 따라 정/역방향이 결정된다. 앞→뒤는 위로,
-   *   뒤→앞은 아래로 움직인다.
-   * - `"non-directional"`: paths 순서와 무관하게 항상 같은 방향으로 움직인다.
-   *   `direction` 옵션으로 방향을 지정한다 (기본 "up").
+   * - `"directional"` (default): path order decides direction. Earlier → later
+   *   scrolls up; later → earlier scrolls down.
+   * - `"non-directional"`: every transition scrolls upward (pages slide up, new
+   *   page enters from the bottom). Direction is fixed — not user-configurable.
    */
   type?: "directional" | "non-directional";
-  /** `type: "non-directional"`일 때만 의미가 있다. 기본값은 "up" (아래에서 위로). */
-  direction?: "up" | "down";
+  variant?: "default";
+  options?: object;
 };
 
-export function scroll({
-  paths,
-  type = "directional",
-  direction = "up",
-}: ScrollConfig): SsgoiPathTransition[] {
+export function scroll(config: ScrollConfig): SsgoiPathTransition[] {
+  const { paths, type = "directional" } = config;
+
   if (type === "non-directional") {
     return createSymmetricPathTransitions(paths, () =>
-      transition({ direction }),
+      transition({ direction: "up" }),
     );
   }
   return createOrderedPathTransitions(

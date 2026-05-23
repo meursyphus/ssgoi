@@ -14,9 +14,15 @@ Multiple springs run in parallel with a baked stagger schedule: outgoing shrinks
 import { film } from "@ssgoi/react/view-transitions";
 
 film({
-  paths: readonly string[];   // symmetric — every pair gets the film effect
+  paths: readonly string[];          // symmetric — every pair gets the film effect
+  variant?: "default";               // reserved — only "default" today
+  options?: {
+    borderColor?: string;            // color of the cinematic corner borders
+  };
 }): SsgoiPathTransition[];
 ```
+
+`options.borderColor` accepts any CSS color string (`"#fff"`, `"rgb(255 255 255 / 0.8)"`, `"var(--accent)"`, …). Omit it to keep the built-in default.
 
 ## Usage
 
@@ -24,6 +30,12 @@ film({
 const config = {
   transitions: [
     film({ paths: ["/gallery", "/photo/*"] }),
+
+    // Custom corner-border color
+    film({
+      paths: ["/showcase", "/showcase/*"],
+      options: { borderColor: "#ffcc00" },
+    }),
   ],
 };
 ```

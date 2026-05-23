@@ -73,7 +73,6 @@ export function createSggoiTransitionContext(
 ): SsgoiContext {
   const {
     transitions = [],
-    defaultTransition,
     middleware = (from, to) => ({ from, to }),
     preserveScroll = (isMobile: boolean) => isMobile,
   } = options;
@@ -253,12 +252,11 @@ export function createSggoiTransitionContext(
         pair.to,
       );
 
-      const matched = findMatchingTransition(
+      const config = findMatchingTransition(
         transformedFrom,
         transformedTo,
         processedTransitions,
       );
-      const config = matched ?? defaultTransition;
 
       const outSide = pendingOut;
       const inSide = pendingIn;

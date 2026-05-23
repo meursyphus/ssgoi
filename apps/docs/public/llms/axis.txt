@@ -1,0 +1,53 @@
+# SSGOI - axis transition
+
+Material/Flutter-style shared-axis page swap. Pages slide a short distance along one axis and cross-fade, giving a confident "sibling page" feel. Use for **tab swaps**, paired routes, or any flow where two pages are peers on the same axis.
+
+Setup guide: https://ssgoi.dev/llms.txt
+
+## Behavior
+
+`type` picks the axis. `variant` (x only) picks the tone.
+
+- **`type: "x"`** (default) — horizontal shared axis.
+  - **`variant: "default"`** — relaxed, fluid feel (Flutter `SharedAxisTransition` style): ~300 ms, ~30 px slide on both sides, fade-through with asymmetric easing.
+  - **`variant: "snappy"`** — tight, decisive page swap (KakaoTalk tab style): ~160 ms, ~8 px slide on the incoming side only, parallel cross-fade.
+- **`type: "y"`** — vertical shared axis (snappy flavor only today).
+- **`type: "z"`** — depth shared axis: incoming scales up, outgoing scales down (snappy flavor only today).
+
+Path order matters: earlier → later is the "forward" direction; the reverse plays as "backward".
+
+## Signature
+
+```ts
+import { axis } from "@ssgoi/react/view-transitions";
+
+axis({
+  paths: readonly string[];
+  type?: "x" | "y" | "z";              // default: "x"
+  // variant is "default" | "snappy" when type is "x"; "default" only for y/z
+  variant?: "default" | "snappy";
+  options?: {};                        // reserved — no fields yet
+}): SsgoiPathTransition[];
+```
+
+> Deprecated: `feel: "fluid" | "snappy"` — use `variant` instead (`feel: "fluid"` → omit `variant`, `feel: "snappy"` → `variant: "snappy"`).
+
+## Usage
+
+```ts
+const config = {
+  transitions: [
+    // tabs with the relaxed default feel
+    axis({ paths: ["/tabs/a", "/tabs/b", "/tabs/c"] }),
+
+    // KakaoTalk-style tight tab swap
+    axis({ paths: ["/chats", "/friends"], type: "x", variant: "snappy" }),
+
+    // Vertical shared axis
+    axis({ paths: ["/feed", "/notifications"], type: "y" }),
+
+    // Depth shared axis
+    axis({ paths: ["/home", "/search"], type: "z" }),
+  ],
+};
+```

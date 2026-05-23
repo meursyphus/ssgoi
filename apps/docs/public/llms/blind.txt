@@ -8,13 +8,19 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 A series of solid-color slats (10 by default) slides across the viewport. The slats are staggered, so they don't all hit the edges at the same moment — gives the effect a wave-like motion. The incoming page is fully visible behind the slats once they've passed.
 
+- **`horizontal`** (default): slats sweep along the horizontal axis.
+- **`vertical`**: slats sweep along the vertical axis.
+
 ## Signature
 
 ```ts
 import { blind } from "@ssgoi/react/view-transitions";
 
 blind({
-  paths: readonly string[];   // symmetric — every pair gets the blind wipe
+  paths: readonly string[];                // symmetric — every pair gets the blind wipe
+  type?: "horizontal" | "vertical";        // default: "horizontal"
+  variant?: "default";                     // reserved — only "default" today
+  options?: {};                            // reserved — no fields yet
 }): SsgoiPathTransition[];
 ```
 
@@ -24,6 +30,7 @@ blind({
 const config = {
   transitions: [
     blind({ paths: ["/", "/app"] }),
+    blind({ paths: ["/intro", "/main"], type: "vertical" }),
   ],
 };
 ```

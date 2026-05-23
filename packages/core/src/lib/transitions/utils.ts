@@ -5,6 +5,28 @@ export type DirectionalTransitionPaths = {
   exit: string;
 };
 
+/**
+ * Unified preset configuration schema used by all v6 transition presets.
+ *
+ * - `TPaths` carries the paths shape (symmetric / directional / ordered).
+ * - `TType` is the union of supported `type` discriminators. Use `never`
+ *   when the preset has no `type` slot.
+ * - `TVariant` is the union of supported `variant` values. Defaults to
+ *   `"default"` so single-variant presets expose a stable slot.
+ * - `TOptions` is the bag of fine-tuning options. Defaults to `{}` so
+ *   presets can stay forward-compatible without exposing knobs yet.
+ */
+export type PresetConfig<
+  TPaths,
+  TType extends string = never,
+  TVariant extends string = "default",
+  TOptions extends object = {},
+> = TPaths & {
+  type?: TType;
+  variant?: TVariant;
+  options?: TOptions;
+};
+
 export function createSymmetricPathTransitions(
   paths: readonly string[],
   createTransition: () => AnyTransitionConfig,

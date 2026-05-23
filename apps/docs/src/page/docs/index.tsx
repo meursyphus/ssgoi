@@ -30,7 +30,7 @@ function FloatingHeader() {
             Docs
           </Link>
           <Link href="/showcase" className="hover:text-neutral-100">
-            Showcase
+            Examples
           </Link>
           <a
             href="https://github.com/meursyphus/ssgoi"

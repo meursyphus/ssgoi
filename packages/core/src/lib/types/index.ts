@@ -167,9 +167,9 @@ export type TransitionConfig<TExtras extends object = object> = {
 };
 
 /**
- * Erased-extras form used at storage boundaries (path config, default
- * transition). The dispatcher passes whatever prepare returned to animation
- * verbatim, so we can treat the extras as opaque here.
+ * Erased-extras form used at path config storage boundaries. The dispatcher
+ * passes whatever prepare returned to animation verbatim, so we can treat the
+ * extras as opaque here.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyTransitionConfig = TransitionConfig<any>;
@@ -198,7 +198,6 @@ export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 
 export type SsgoiConfig = {
   transitions?: readonly SsgoiPathTransitionInput[];
-  defaultTransition?: AnyTransitionConfig;
   middleware?: (from: string, to: string) => { from: string; to: string };
   preserveScroll?: PreserveScrollOption;
 };

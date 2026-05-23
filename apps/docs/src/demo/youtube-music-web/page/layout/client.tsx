@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type ReactNode } from "react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { sheet } from "@ssgoi/react/view-transitions";
-import { HostAnimation } from "@ssgoi/core/internal";
-import { useShowcaseFrameBridge } from "@/lib/hooks";
 import { OverlayProvider } from "overlay-kit";
 import { Toaster } from "sonner";
 import { StateProvider } from "@/lib/state";
+import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 import { TopNav } from "./top-nav";
 import { Sidebar } from "./sidebar";
 import { PlayerBar } from "./player-bar";
@@ -26,26 +25,23 @@ export function YoutubeMusicLayoutClient({
 }: {
   children: ReactNode;
 }) {
-  const [host] = useState(() => new HostAnimation());
-  useShowcaseFrameBridge(host);
-
   return (
-    <StateProvider>
-      <OverlayProvider>
-        <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#030303] text-white">
-          <TopNav />
-          <div className="flex min-h-0 flex-1">
-            <Sidebar />
-            <main className="relative min-w-0 flex-1 overflow-hidden">
-              <Ssgoi config={config} host={host}>
-                {children}
-              </Ssgoi>
-            </main>
+    <DemoShell>
+      <StateProvider>
+        <OverlayProvider>
+          <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#030303] text-white">
+            <TopNav />
+            <div className="flex min-h-0 flex-1">
+              <Sidebar />
+              <main className="relative z-0 min-w-0 flex-1 overflow-hidden">
+                <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+              </main>
+            </div>
+            <PlayerBar />
           </div>
-          <PlayerBar />
-        </div>
-        <Toaster position="top-center" richColors theme="dark" />
-      </OverlayProvider>
-    </StateProvider>
+          <Toaster position="top-center" richColors theme="dark" />
+        </OverlayProvider>
+      </StateProvider>
+    </DemoShell>
   );
 }

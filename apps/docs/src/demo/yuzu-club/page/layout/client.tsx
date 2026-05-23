@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type ReactNode } from "react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { jaemin } from "@ssgoi/react/view-transitions";
-import { HostAnimation } from "@ssgoi/core/internal";
-import { useShowcaseFrameBridge } from "@/lib/hooks";
+import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 import { FloatingHeader } from "../shared/floating-header";
 
 const BASE = "/demo/yuzu-club";
@@ -16,15 +15,14 @@ const config: SsgoiConfig = {
 };
 
 export function YuzuClubLayoutClient({ children }: { children: ReactNode }) {
-  const [host] = useState(() => new HostAnimation());
-  useShowcaseFrameBridge(host);
-
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-[#fff5d6] text-[#1a1a2e]">
-      <Ssgoi config={config} host={host}>
-        <main className="relative h-full w-full">{children}</main>
-      </Ssgoi>
-      <FloatingHeader />
-    </div>
+    <DemoShell>
+      <div className="relative h-dvh w-full overflow-hidden bg-[#fff5d6] text-[#1a1a2e]">
+        <SsgoiWithHost config={config}>
+          <main className="relative h-full w-full">{children}</main>
+        </SsgoiWithHost>
+        <FloatingHeader />
+      </div>
+    </DemoShell>
   );
 }

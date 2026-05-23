@@ -57,4 +57,24 @@ export abstract class Animation {
   abstract get isComplete(): boolean;
   /** Direction of the active or most-recent run (true = backwards). */
   abstract get isReversing(): boolean;
+
+  /**
+   * Current progress, normalized to 0..1 between lowerBound and upperBound.
+   * Reads the live simulation value, so it advances frame-by-frame while
+   * playing. Useful for external inspection / debugging.
+   *
+   * NOT used by `MultiAnimation` stagger triggering — that uses the
+   * pre-computed timeline via `findTimeForProgress` to avoid per-frame work.
+   */
+  abstract get progress(): number;
+
+  /**
+   * Find the time (ms, relative to this animation's last play() / reverse())
+   * at which progress first crosses `threshold` (0..1). Returns `null` if
+   * the animation has no simulation yet (i.e. play hasn't been called).
+   *
+   * Implementations should read from the pre-computed simulation timeline so
+   * this is an O(n) one-shot lookup — never a polling loop.
+   */
+  abstract findTimeForProgress(threshold: number): number | null;
 }
