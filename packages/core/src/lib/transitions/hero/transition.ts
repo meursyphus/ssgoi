@@ -11,13 +11,17 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 300, damping: 30 },
 };
 
+const HERO_ENTER_KEY = "data-hero-enter-key";
+const HERO_EXIT_KEY = "data-hero-exit-key";
+const HERO_LEGACY_KEY = "data-hero-key";
+
 export interface HeroOptions {
   physics?: PhysicsOptions;
   maxDistance?: number;
 }
 
 function getHeroEl(page: HTMLElement, key: string): HTMLElement | null {
-  return page.querySelector(`[data-hero-key="${key}"]`);
+  return page.querySelector(`[${HERO_LEGACY_KEY}="${key}"]`);
 }
 
 type HeroPair = {
@@ -25,6 +29,58 @@ type HeroPair = {
   fromEl: HTMLElement;
   key: string;
 };
+
+/**
+ * Build a `key → element` map for every element on `page` carrying `attr`.
+ * If the same key appears twice on one side we keep the first match
+ * (mirroring `querySelector` semantics) and silently ignore duplicates.
+ */
+function collectByAttr(
+  page: HTMLElement,
+  attr: string,
+): Map<string, HTMLElement> {
+  const map = new Map<string, HTMLElement>();
+  const nodes = page.querySelectorAll<HTMLElement>(`[${attr}]`);
+  for (const node of Array.from(nodes)) {
+    const key = node.getAttribute(attr);
+    if (!key) continue;
+    if (map.has(key)) continue;
+    map.set(key, node);
+  }
+  return map;
+}
+
+/**
+ * Resolve new-style hero pairs from `data-hero-enter-key` (detail side) and
+ * `data-hero-exit-key` (list side). Direction-agnostic: enter elements on
+ * `to` pair with exit elements on `from` (forward navigation), and enter
+ * elements on `from` pair with exit elements on `to` (reverse navigation).
+ * In both cases the animated element is the one living on `to`.
+ */
+function resolvePairs(
+  fromNode: HTMLElement,
+  toNode: HTMLElement,
+): HeroPair[] {
+  const pairs: HeroPair[] = [];
+
+  const toEnters = collectByAttr(toNode, HERO_ENTER_KEY);
+  const fromExits = collectByAttr(fromNode, HERO_EXIT_KEY);
+  for (const [key, toEl] of toEnters) {
+    const fromEl = fromExits.get(key);
+    if (!fromEl) continue;
+    pairs.push({ key, fromEl, toEl });
+  }
+
+  const fromEnters = collectByAttr(fromNode, HERO_ENTER_KEY);
+  const toExits = collectByAttr(toNode, HERO_EXIT_KEY);
+  for (const [key, fromEl] of fromEnters) {
+    const toEl = toExits.get(key);
+    if (!toEl) continue;
+    pairs.push({ key, fromEl, toEl });
+  }
+
+  return pairs;
+}
 
 export const hero = (options: HeroOptions = {}): TransitionConfig => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
@@ -43,17 +99,26 @@ export const hero = (options: HeroOptions = {}): TransitionConfig => {
       const fromNode = from;
       const toNode = to;
 
-      const heroEls = Array.from(
-        toNode.querySelectorAll<HTMLElement>("[data-hero-key]"),
-      );
+      let pairs: HeroPair[] = resolvePairs(fromNode, toNode);
 
-      const pairs: HeroPair[] = [];
-      for (const toEl of heroEls) {
-        const key = toEl.getAttribute("data-hero-key");
-        if (!key) continue;
-        const fromEl = getHeroEl(fromNode, key);
-        if (!fromEl) continue;
-        pairs.push({ key, fromEl, toEl });
+      if (pairs.length === 0) {
+        // Legacy fallback: `data-hero-key` is kept for backwards
+        // compatibility for animation matching. New code should use
+        // `data-hero-enter-key` (detail side) + `data-hero-exit-key`
+        // (list side). This branch only runs when no new-style pair
+        // resolved — once any enter/exit match exists, the legacy
+        // attribute is ignored.
+        // @deprecated for animation matching — use the enter/exit pair.
+        const legacyEls = Array.from(
+          toNode.querySelectorAll<HTMLElement>(`[${HERO_LEGACY_KEY}]`),
+        );
+        for (const toEl of legacyEls) {
+          const key = toEl.getAttribute(HERO_LEGACY_KEY);
+          if (!key) continue;
+          const fromEl = getHeroEl(fromNode, key);
+          if (!fromEl) continue;
+          pairs.push({ key, fromEl, toEl });
+        }
       }
 
       if (pairs.length === 0) {

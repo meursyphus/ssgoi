@@ -6,7 +6,7 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-The element with a given `data-hero-key` on the source page is tweened in position and size to match the element with the same key on the destination page. The rest of the pages cross-fade around it.
+The element marked as the "list-side" entry on the source page is tweened in position and size to match its "detail-side" counterpart on the destination page. The rest of the pages cross-fade around it.
 
 If a key has no match on the other side, that element falls back gracefully (no animation on it).
 
@@ -22,21 +22,29 @@ hero({
 }): SsgoiPathTransition[];
 ```
 
-## Required: matching `data-hero-key`
+Planned variants (not yet in the public type): `"fade"` — for hero pairs where surrounding chrome should cross-fade alongside the shared element; `"snappy"` — tracked separately.
 
-Both pages must mark the shared element with the **same** `data-hero-key` value. The value should be a stable string — use the item's id, not its index.
+## Required: matching enter/exit keys
+
+Mark the destination-side ("detail") element with `data-hero-enter-key` and the source-side ("list") element with `data-hero-exit-key`. Both must use the **same** stable string value — use the item's id, not its index.
 
 ```tsx
 // List page (/items)
 {items.map((item) => (
   <Link key={item.id} href={`/items/${item.id}`}>
-    <img data-hero-key={`item-${item.id}`} src={item.thumbnail} />
+    <img data-hero-exit-key={`item-${item.id}`} src={item.thumbnail} />
   </Link>
 ))}
 
 // Detail page (/items/[id])
-<img data-hero-key={`item-${id}`} src={fullImage} />
+<img data-hero-enter-key={`item-${id}`} src={fullImage} />
 ```
+
+The transition matches enter/exit pairs in both navigation directions — forward (list→detail) and back (detail→list) — without extra configuration.
+
+## Legacy: `data-hero-key`
+
+The original `data-hero-key` attribute is still supported for backwards compatibility — putting the same `data-hero-key` value on both pages will animate that pair. New code should use the `data-hero-enter-key` / `data-hero-exit-key` pair instead; the single-key form is treated as a fallback and is only consulted when no enter/exit pair matched.
 
 ## Usage
 
