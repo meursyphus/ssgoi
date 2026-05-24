@@ -15,6 +15,11 @@ import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { findMatchingTransition } from "./find-matching-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount } from "./unmount-observer";
+import {
+  pauseVisibility,
+  resumeVisibility,
+  watchVisibility,
+} from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
 
 function isTransitionGroup(
@@ -41,6 +46,13 @@ type PendingSide = {
   element: HTMLElement;
   parent: Element | null;
   nextSibling: Element | null;
+  /**
+   * True when this side was triggered by a `display: none` toggle (React
+   * Activity / Next.js Cache Components) rather than a real
+   * mount/unmount. The original element stays in the DOM, so the exit path
+   * animates it in place instead of operating on a clone.
+   */
+  isVisibility?: boolean;
 };
 
 type ElementAnchor = {
@@ -127,14 +139,19 @@ export function createSggoiTransitionContext(
   ): void => {
     const fromOriginal = outSide.element;
     const toElement = inSide.element;
+    const isVisibilityOut = outSide.isVisibility === true;
 
     const { parent, nextSibling } = outSide.parent
       ? { parent: outSide.parent, nextSibling: outSide.nextSibling }
       : readAnchor(fromOriginal);
 
-    // Clone while the original is still mounted; the host framework will
-    // detach the original right after `out()` returns.
-    const fromClone = fromOriginal.cloneNode(true) as HTMLElement;
+    // Activity-hidden elements stay in place — animate the original so we
+    // never duplicate React-owned state into a detached clone. The unmount
+    // path still clones because the host framework will detach the original
+    // immediately after `out()` returns.
+    const fromForAnimation: HTMLElement = isVisibilityOut
+      ? fromOriginal
+      : (fromOriginal.cloneNode(true) as HTMLElement);
     const scrollOffset = calculateScrollOffset(fromPath, toPath);
 
     const ssgoiContext: SsgoiTransitionContext = {
@@ -152,11 +169,11 @@ export function createSggoiTransitionContext(
     // Auto-applied for every transition — outgoing page goes absolute so the
     // incoming page can take its slot. Style only; insertion is deferred
     // until after `prepare` so any pre-paint styling settles first.
-    prepareOutgoing(fromClone, ssgoiContext);
+    prepareOutgoing(fromForAnimation, ssgoiContext);
 
     if (!shouldPreserve(fromPath)) evictScrollPosition(fromPath);
 
-    const fromPromise: Promise<HTMLElement> = Promise.resolve(fromClone);
+    const fromPromise: Promise<HTMLElement> = Promise.resolve(fromForAnimation);
     const toPromise: Promise<HTMLElement> = Promise.resolve(toElement);
 
     const createdElements: HTMLElement[] = [];
@@ -189,13 +206,14 @@ export function createSggoiTransitionContext(
       extras: extrasPromise,
     }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
       // Now that prepare's microtasks have all run (initial styles, extras
-      // built), drop the outgoing clone into place. Order is:
-      //   prepare → out insert → animation create/play
-      if (parent) {
+      // built), drop the outgoing clone into place. Visibility-out skips
+      // this — the original was never detached, so re-insertion would be a
+      // double-mount. Order is: prepare → out insert → animation create/play
+      if (!isVisibilityOut && parent) {
         if (nextSibling && parent.contains(nextSibling)) {
-          parent.insertBefore(fromClone, nextSibling);
+          parent.insertBefore(fromForAnimation, nextSibling);
         } else {
-          parent.appendChild(fromClone);
+          parent.appendChild(fromForAnimation);
         }
       }
 
@@ -206,14 +224,25 @@ export function createSggoiTransitionContext(
         ...(extras as Record<string, unknown>),
       });
 
-      // Per-transition cleanup (clone removal, prepare-created nodes). Wire
-      // this BEFORE attach — host.attach hooks onComplete itself and chains
-      // through prior hooks, so cleanup still fires once the run settles.
+      // Per-transition cleanup. Wire this BEFORE attach — host.attach hooks
+      // onComplete itself and chains through prior hooks, so cleanup still
+      // fires once the run settles.
       const prevOnComplete = animation.onComplete;
       animation.onComplete = () => {
         prevOnComplete?.();
-        if (fromClone.parentElement) {
-          fromClone.parentElement.removeChild(fromClone);
+        if (isVisibilityOut) {
+          // Original stays mounted — clear the inline positioning we
+          // injected and re-hide the element so React's intended hidden
+          // state holds. resumeVisibility resyncs the observer so a future
+          // React-driven show still triggers the in side.
+          fromForAnimation.style.position = "";
+          fromForAnimation.style.width = "";
+          fromForAnimation.style.top = "";
+          fromForAnimation.style.left = "";
+          fromForAnimation.style.display = "none";
+          resumeVisibility(fromForAnimation);
+        } else if (fromForAnimation.parentElement) {
+          fromForAnimation.parentElement.removeChild(fromForAnimation);
         }
         for (const extra of createdElements) {
           if (extra.parentElement) extra.parentElement.removeChild(extra);
@@ -283,6 +312,39 @@ export function createSggoiTransitionContext(
     handleArrival(currentPath, "out");
   };
 
+  /**
+   * React Activity / Next.js Cache Components hide a subtree by setting
+   * `display: none` on its host element while leaving the DOM intact. Treat
+   * that as the exit trigger: pause the observer (so our own restore writes
+   * don't bounce back through onHide/onShow), clear the inline display so
+   * the element paints during the animation, and stash it as pendingOut
+   * with isVisibility set so runTransition skips the clone path.
+   */
+  const handleHide = (element: HTMLElement, path: string) => {
+    pauseVisibility(element);
+    element.style.display = "";
+    pendingOut = {
+      element,
+      parent: element.parentElement,
+      nextSibling: element.nextElementSibling,
+      isVisibility: true,
+    };
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    handleArrival(currentPath, "out");
+  };
+
+  /** Counterpart to handleHide — `display: none` was just cleared. */
+  const handleShow = (element: HTMLElement, path: string) => {
+    pendingIn = {
+      element,
+      parent: element.parentElement,
+      nextSibling: element.nextElementSibling,
+      isVisibility: true,
+    };
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    handleArrival(currentPath, "in");
+  };
+
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
   // either from React re-firing a ref or a host that bounces in/out under
   // strict-mode double-mount.
@@ -302,6 +364,10 @@ export function createSggoiTransitionContext(
     handleArrival(path, "in");
 
     watchUnmount(element, () => handleRemoval(element, path));
+    watchVisibility(element, {
+      onHide: () => handleHide(element, path),
+      onShow: () => handleShow(element, path),
+    });
   };
 
   // Per-path ref callbacks are cached so adapters can drop `refFor(path)`
