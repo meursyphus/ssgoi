@@ -6,7 +6,6 @@ import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import {
   AnimationDockUI,
-  DockButton,
   StatusDot,
   type DockController,
 } from "@/lib/components/animation-dock";
@@ -34,7 +33,6 @@ export function ClipPlayer({
   platform?: ShowcasePlatform;
 }) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [autoplay, setAutoplay] = useState(true);
   const [status, setStatus] = useState<ShowcaseFrameStatus>("idle");
   const [rate, setRate] = useState(1);
   const intervalMs = clip.intervalMs ?? 4800;
@@ -71,19 +69,13 @@ export function ClipPlayer({
 
   // auto-toggle enter/exit
   useEffect(() => {
-    if (!autoplay) return;
     const id = window.setInterval(() => {
       const next = onEnterRef.current ? clip.exitPath : clip.enterPath;
       onEnterRef.current = !onEnterRef.current;
       navigate(next);
     }, intervalMs);
     return () => window.clearInterval(id);
-  }, [autoplay, clip.enterPath, clip.exitPath, intervalMs, navigate]);
-
-  const reset = () => {
-    onEnterRef.current = false;
-    navigate(clip.exitPath);
-  };
+  }, [clip.enterPath, clip.exitPath, intervalMs, navigate]);
 
   const sendHost = (command: string, payload?: number) =>
     post({ type: showcaseFrameProtocol.messages.host, command, payload });
@@ -99,9 +91,9 @@ export function ClipPlayer({
     },
   };
 
-  const overlay = autoplay ? (
+  const overlay = (
     <a
-      href={clip.enterPath}
+      href={clip.exitPath}
       target="_blank"
       rel="noopener noreferrer"
       className="group absolute inset-0 z-10 flex items-end justify-center pb-5 transition-colors duration-200 hover:bg-black/45 hover:backdrop-blur-[2px]"
@@ -111,7 +103,7 @@ export function ClipPlayer({
         Open demo ↗
       </span>
     </a>
-  ) : null;
+  );
 
   return (
     <div
@@ -126,7 +118,7 @@ export function ClipPlayer({
           src={demoOrigin}
           title={clip.title}
           widthClassName="w-full"
-          interactive={!autoplay}
+          interactive={false}
           urlLabel={`ssgoi.dev${clip.exitPath === "/" ? "" : clip.exitPath}`}
         >
           {overlay}
@@ -137,7 +129,7 @@ export function ClipPlayer({
           src={demoOrigin}
           title={clip.title}
           widthClassName="w-full"
-          interactive={!autoplay}
+          interactive={false}
           scaleViewport={false}
         >
           {overlay}
@@ -155,23 +147,7 @@ export function ClipPlayer({
       </div>
 
       <div className="rounded-xl border border-white/5 bg-white/[0.02] px-2 py-1.5">
-        <AnimationDockUI
-          controller={controller}
-          leading={
-            <>
-              <DockButton
-                title={autoplay ? "Pause auto-route" : "Resume auto-route"}
-                onClick={() => setAutoplay((p) => !p)}
-              >
-                {autoplay ? "⏸ auto" : "▶ auto"}
-              </DockButton>
-              <DockButton title="Reset to exit path" onClick={reset}>
-                ↺
-              </DockButton>
-              <div className="mx-1 h-4 w-px bg-white/10" />
-            </>
-          }
-        />
+        <AnimationDockUI controller={controller} />
       </div>
 
       {clip.caption && (

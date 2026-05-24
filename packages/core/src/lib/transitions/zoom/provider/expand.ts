@@ -6,10 +6,18 @@ import type {
   ZoomProvider,
   ZoomStrategy,
 } from "../types";
-import { Animation, IntegratorProvider, WebAnimation } from "../../../animation";
+import {
+  Animation,
+  IntegratorProvider,
+  WebAnimation,
+} from "../../../animation";
 
 export const EXPAND_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 340, damping: 30, doubleSpring: 1 },
+  spring: {
+    stiffness: 430,
+    damping: 33,
+    doubleSpring: 1,
+  },
 };
 
 /**
@@ -47,7 +55,6 @@ function createEnterOut({
 
       return {
         transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
-        opacity: `${1 - t}`,
       };
     },
   };
@@ -85,7 +92,6 @@ function createExitIn({
 
       return {
         transform: `translate(${dx * t}px, ${dy * t}px) scale(${1 + (scale - 1) * t})`,
-        opacity: `${progress}`,
       };
     },
   };

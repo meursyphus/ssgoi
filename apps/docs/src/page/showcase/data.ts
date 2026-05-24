@@ -1,4 +1,5 @@
 import { airBnbShowcase } from "@/demo/air-bnb/showcase";
+import { airbnbPhotoTourShowcase } from "@/demo/airbnb-photo-tour/showcase";
 import { gamjaMarketShowcase } from "@/demo/gamja-market/showcase";
 import { googlePhotosShowcase } from "@/demo/google-photos/showcase";
 import { materialMailShowcase } from "@/demo/material-mail/showcase";
@@ -24,20 +25,23 @@ export function githubUrl(path: string): string {
 }
 
 export const showcases: ShowcaseApp[] = [
+  //mobile
+  googlePhotosShowcase,
+  airBnbShowcase,
   instagramShowcase,
+  kakaoTalkShowcase,
   pinterestShowcase,
-  ssgoiDocsShowcase,
+  gamjaMarketShowcase,
+  materialMailShowcase,
+  //web
   youtubeMusicWebShowcase,
+  airbnbPhotoTourShowcase,
   lumenShowcase,
   yuzuClubShowcase,
+  ssgoiDocsShowcase,
   silentRoomShowcase,
   honeydropShowcase,
   noraHaleShowcase,
-  kakaoTalkShowcase,
-  airBnbShowcase,
-  gamjaMarketShowcase,
-  materialMailShowcase,
-  googlePhotosShowcase,
 ];
 
 export function findShowcase(slug: string): ShowcaseApp | undefined {

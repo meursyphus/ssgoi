@@ -6,7 +6,6 @@ import { usePin } from "@/demo/pinterest/state/pin";
 import { HomeHeader } from "./header";
 import { TabBar } from "./tab-bar";
 import { Masonry } from "./masonry";
-import { RefreshPill } from "./refresh-pill";
 import { BottomNav } from "../shared/bottom-nav";
 
 export default function HomePage() {
@@ -23,8 +22,7 @@ export default function HomePage() {
     >
       <HomeHeader />
       <TabBar />
-      <div className="relative flex-1 pt-2">
-        <RefreshPill />
+      <div className="flex-1 pt-2">
         <Masonry />
         <div className="h-4" />
       </div>

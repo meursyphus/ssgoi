@@ -1,13 +1,14 @@
 "use client";
 
 import { Sparkles, Search } from "lucide-react";
+import { pinImageUrl } from "@/demo/pinterest/api/pin/image";
 import type { PinDetail } from "@/demo/pinterest/state/pin";
 
 export function HeroImage({ pin }: { pin: PinDetail }) {
   return (
     <div className="relative w-full overflow-hidden bg-neutral-100">
       <img
-        src={pin.image}
+        src={pinImageUrl(pin.image, pin.aspectRatio, 800)}
         alt={pin.title}
         className="w-full object-cover"
         style={{ aspectRatio: pin.aspectRatio }}

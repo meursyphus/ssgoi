@@ -2,11 +2,13 @@
 
 import {
   forwardRef,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import { IframeLoadingOverlay } from "./iframe-loading-overlay";
 
 type Props = {
   src: string;
@@ -55,6 +57,11 @@ export const DesktopFrame = forwardRef<HTMLIFrameElement, Props>(
   ) {
     const screenRef = useRef<HTMLDivElement>(null);
     const [screenW, setScreenW] = useState(0);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+      setLoaded(false);
+    }, [src]);
 
     useLayoutEffect(() => {
       if (!scaleViewport) return;
@@ -113,8 +120,10 @@ export const DesktopFrame = forwardRef<HTMLIFrameElement, Props>(
               title={title}
               tabIndex={-1}
               loading="lazy"
+              onLoad={() => setLoaded(true)}
               style={iframeStyle}
             />
+            <IframeLoadingOverlay visible={!loaded} variant="dark" />
             {children}
           </div>
         </div>

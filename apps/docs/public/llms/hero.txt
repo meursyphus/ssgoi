@@ -12,7 +12,7 @@ If a key has no match on the other side, that element falls back gracefully (no 
 
 `type` picks how the surrounding chrome behaves around the shared element:
 
-- **`type: "static"`** (default) — the incoming page's chrome snaps in; the shared element morphs in place via clip-path inset + uniform scale. Use when the destination chrome should feel like an *extension* of the list page (e.g., gallery → fullscreen viewer where the rest of the screen is just dark).
+- **`type: "static"`** (default) — the incoming page's chrome snaps in; a temporary shared-element clone morphs via clip-path inset + uniform scale. Use when the destination chrome should feel like an *extension* of the list page (e.g., gallery → fullscreen viewer where the rest of the screen is just dark).
 - **`type: "fade"`** — both pages cross-fade as whole surfaces while a temporary shared-element clone morphs above them. Use when each side has its own chrome (e.g., a list page and a detail page with its own back button, title bar, or meta panel).
 
 ## Signature
@@ -61,6 +61,18 @@ When the hero element is an `<img object-contain>` (or any element whose visible
 ```
 
 Accepts either `"W/H"` (e.g. `"1600/1067"`) or a precomputed ratio number (e.g. `"1.5"`). Pre-format at the data layer so you don't restate width/height per render.
+
+## Optional: `data-hero-radius` for rounded shared elements
+
+When the visible shared element has rounded corners, add `data-hero-radius="px"` on both sides. Hero treats the radius as part of the morph and applies it through `clip-path: inset(... round ...)`, so the visible corner radius interpolates correctly even while the clone is being scaled.
+
+```tsx
+<img
+  data-hero-exit-key={`item-${item.id}`}
+  data-hero-radius="12"
+  src={item.thumbnail}
+/>
+```
 
 ## Legacy: `data-hero-key`
 

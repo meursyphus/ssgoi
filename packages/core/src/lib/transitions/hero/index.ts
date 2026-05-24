@@ -8,8 +8,8 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
 /**
  * Hero preset configuration.
  *
- * - `type: "static"` (default) — incoming-page chrome snaps in; the shared
- *   element morphs in place via clip-path inset + uniform scale.
+ * - `type: "static"` (default) — incoming-page chrome snaps in; a temporary
+ *   shared-element clone morphs via clip-path inset + uniform scale.
  * - `type: "fade"` — both pages cross-fade as whole surfaces while a
  *   temporary shared-element clone morphs above them. Use when each side has
  *   its own chrome (e.g., a detail screen with its own back button / app bar).

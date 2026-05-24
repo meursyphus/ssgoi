@@ -41,7 +41,7 @@ export function BottomNav() {
   const isSearch = pathname === `${BASE}/search`;
 
   return (
-    <nav className="sticky bottom-0 left-0 right-0 z-20 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 py-2">
+    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 py-2">
       <NavItem
         href={BASE}
         active={isHome}

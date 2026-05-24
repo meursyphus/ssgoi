@@ -6,14 +6,25 @@ import type { Animation } from "../../animation";
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * - `static` — the shared element morphs in place; the incoming page's chrome
- *   snaps in. Default.
+ * - `static` — a temporary shared-element clone morphs above the incoming
+ *   page while page chrome snaps to its final state. Default.
  * - `fade` — both pages cross-fade as whole surfaces while a temporary hero
  *   clone morphs above them.
  */
 export type HeroType = "static" | "fade";
-export type HeroVariant = "default";
+/**
+ * - `default` — single-spring physics shared between every strategy in the
+ *   transition (300/30). Crisp, traditional spring feel.
+ * - `smooth` — same base spring with `doubleSpring: 1` so the tile motion
+ *   trails through a soft follower stage; gentler arrival, no hard stop.
+ *
+ * The variant only swaps the physics provider — chrome handling is owned by
+ * `HeroType` and stays orthogonal.
+ */
+export type HeroVariant = "default" | "smooth";
 export type HeroOptions = Record<string, never>;
+
+export type HeroFit = "contain" | "cover";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Internal normalized options — `index.ts` is the single place that fills in
@@ -33,6 +44,8 @@ export interface HeroPair {
   key: string;
   fromEl: HTMLElement;
   toEl: HTMLElement;
+  fromFit: HeroFit;
+  toFit: HeroFit;
 }
 
 export interface HeroResolved {
@@ -58,7 +71,6 @@ export interface HeroContributeCtx {
   to: HTMLElement;
   resolved: HeroResolved;
   physics: PhysicsOptions;
-  scrollOffset: { x: number; y: number };
   positionedParent: HTMLElement;
   maxDistance: number;
   /**

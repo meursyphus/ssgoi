@@ -5,7 +5,7 @@ export function HeroBanner() {
     <div>
       <div className="relative w-full overflow-hidden bg-neutral-200">
         <img
-          src="/demo/pinterest/10-400x400.jpg"
+          src="https://picsum.photos/seed/pinterest-hero-banner/400/400"
           alt="Level up your screen aesthetics"
           className="w-full object-cover"
           style={{ aspectRatio: "1 / 1" }}

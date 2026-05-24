@@ -4,6 +4,7 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import { getViewportRect } from "@utils";
 import { resolveAxisProvider } from "./provider";
 import type { AxisFeel, AxisOptions, AxisSideConfig, AxisType } from "./types";
 
@@ -28,6 +29,7 @@ function clearStyle(el: HTMLElement): void {
   (el.style as CSSStyleDeclaration & { contain: string }).contain = "";
   el.style.transform = "";
   el.style.opacity = "";
+  el.style.clipPath = "";
 }
 
 export const axis = (options: AxisOptions = {}): TransitionConfig => {
@@ -48,11 +50,27 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
       });
       return {};
     },
-    animation: ({ from, to }) => {
+    animation: ({ from, to, context }) => {
+      // Z scales the page element in place. Without clipping to the viewport
+      // slice, scale-up paints over chrome / scroll overflow and scale-down
+      // exposes neighbouring layout. Mirror sheet's inset trick.
+      if (type === "z") {
+        const fromRect = getViewportRect(context, "from");
+        const toRect = getViewportRect(context, "to");
+        from.style.clipPath = `inset(${fromRect.top}px 0 calc(100% - ${fromRect.top + fromRect.height}px) 0)`;
+        to.style.clipPath = `inset(${toRect.top}px 0 calc(100% - ${toRect.top + toRect.height}px) 0)`;
+      }
+
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(provider.outPhysics),
         style: (t) => config.out.animate(t),
+        onComplete:
+          type === "z"
+            ? () => {
+                from.style.clipPath = "";
+              }
+            : undefined,
       });
 
       const inAnim = new WebAnimation({

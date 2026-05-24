@@ -20,7 +20,7 @@ export default function FeedDetailPage({
       id={`/demo/pinterest/feed/${initialData.id}`}
       className="flex min-h-full flex-col bg-white"
     >
-      <div className="relative">
+      <div className="">
         <BackButton />
         <HeroImage pin={initialData} />
       </div>
