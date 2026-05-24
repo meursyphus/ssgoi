@@ -51,7 +51,7 @@ export type AxisConfig = {
   | {
       type?: "x";
       variant?: AxisXVariant;
-      options?: {};
+      options?: Record<string, never>;
       /**
        * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
        * Migrate `feel: "fluid"` → omit `variant` (default tone),
@@ -61,8 +61,8 @@ export type AxisConfig = {
        */
       feel?: AxisFeelDeprecated;
     }
-  | { type: "y"; variant?: AxisYVariant; options?: {} }
-  | { type: "z"; variant?: "default"; options?: {} }
+  | { type: "y"; variant?: AxisYVariant; options?: Record<string, never> }
+  | { type: "z"; variant?: "default"; options?: Record<string, never> }
 );
 
 /**

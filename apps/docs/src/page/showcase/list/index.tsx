@@ -13,9 +13,13 @@ import {
   type ShowcaseApp,
   type ShowcasePlatform,
 } from "../data";
+import { useShowcasePlatform } from "@/lib/state";
 
 export default function ShowcaseListPage() {
-  const [platform, setPlatform] = useState<ShowcasePlatform>("mobile");
+  const { platform, setPlatform } = useShowcasePlatform((s) => ({
+    platform: s.value,
+    setPlatform: s.actions.set,
+  }));
   const [query, setQuery] = useState("");
   const [activeTransitions, setActiveTransitions] = useState<Set<string>>(
     () => new Set(),

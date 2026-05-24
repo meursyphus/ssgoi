@@ -27,8 +27,12 @@ export type DrillTypeDeprecated = "crossfade";
 
 export type DrillConfig = DirectionalTransitionPaths &
   (
-    | { type?: "parallax"; variant?: "default"; options?: {} }
-    | { type: "slide"; variant?: "default"; options?: {} }
+    | {
+        type?: "parallax";
+        variant?: "default";
+        options?: Record<string, never>;
+      }
+    | { type: "slide"; variant?: "default"; options?: Record<string, never> }
     | {
         /**
          * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
@@ -38,7 +42,7 @@ export type DrillConfig = DirectionalTransitionPaths &
          */
         type: "crossfade";
         variant?: "default";
-        options?: {};
+        options?: Record<string, never>;
       }
   );
 
