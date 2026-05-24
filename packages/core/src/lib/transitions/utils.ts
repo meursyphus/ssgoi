@@ -20,7 +20,7 @@ export type PresetConfig<
   TPaths,
   TType extends string = never,
   TVariant extends string = "default",
-  TOptions extends object = {},
+  TOptions extends object = Record<string, never>,
 > = TPaths & {
   type?: TType;
   variant?: TVariant;

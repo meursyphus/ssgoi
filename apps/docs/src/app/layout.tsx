@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
+import { StateProvider } from "@/lib/state";
 import "./globals.css";
 
 const SITE_URL = "https://ssgoi.dev";
@@ -84,7 +85,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="relative z-0 min-h-full">
-        <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+        <StateProvider>
+          <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+        </StateProvider>
         {process.env.NODE_ENV === "development" && (
           <Script
             src="//unpkg.com/react-grab/dist/index.global.js"

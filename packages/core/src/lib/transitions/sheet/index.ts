@@ -28,8 +28,8 @@ export type SheetTypeDeprecated = "background-scale";
 
 export type SheetConfig = DirectionalTransitionPaths &
   (
-    | { type?: "static"; variant?: "default"; options?: {} }
-    | { type: "scale"; variant?: "default"; options?: {} }
+    | { type?: "static"; variant?: "default"; options?: Record<string, never> }
+    | { type: "scale"; variant?: "default"; options?: Record<string, never> }
     | {
         /**
          * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
@@ -39,7 +39,7 @@ export type SheetConfig = DirectionalTransitionPaths &
          */
         type: "background-scale";
         variant?: "default";
-        options?: {};
+        options?: Record<string, never>;
       }
   );
 

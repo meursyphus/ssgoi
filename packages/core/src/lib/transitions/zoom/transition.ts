@@ -372,7 +372,6 @@ export const zoom = (
               fn();
             } catch (e) {
               // Don't let one faulty restore tear down sibling cleanups.
-              // eslint-disable-next-line no-console
               console.error("[zoom] cleanup error", e);
             }
           }
