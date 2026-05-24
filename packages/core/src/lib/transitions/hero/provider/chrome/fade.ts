@@ -1,13 +1,14 @@
-import { IntegratorProvider, WebAnimation } from "../../../animation";
-import type { Animation } from "../../../animation";
-import type { HeroContributeCtx, HeroStrategy } from "../types";
+import { IntegratorProvider, WebAnimation } from "../../../../animation";
+import type { Animation } from "../../../../animation";
+import type { HeroContributeCtx, HeroStrategy } from "../../types";
 
 /**
  * Chrome handling for `type: "fade"`.
  *
  * Page chrome is treated as the page itself: the outgoing page fades out as a
  * whole surface, and the incoming page fades in as a whole surface. The shared
- * element morph is handled by CloneTileStrategy, which runs above both pages.
+ * element morph is handled by the always-on clone strategy, which runs above
+ * both pages.
  */
 class PageCrossfadeChromeStrategy implements HeroStrategy {
   contribute(ctx: HeroContributeCtx): Animation[] {

@@ -1,4 +1,4 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import type { TransitionConfig } from "@types";
 import { getRect } from "@utils";
 import {
   Animation,
@@ -7,35 +7,40 @@ import {
   WebAnimation,
 } from "../../animation";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
-import { HERO_CHROME_PROVIDERS } from "./provider";
+import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
   HeroContributeCtx,
+  HeroFit,
   HeroPair,
   HeroPrepareCtx,
   HeroResolved,
   HeroStrategy,
-  HeroType,
   NormalizedHeroOptions,
 } from "./types";
 
 export type { HeroType, HeroVariant, NormalizedHeroOptions } from "./types";
 
-const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 300, damping: 30 },
-};
 const DEFAULT_MAX_DISTANCE = 700;
 
 const HERO_ASPECT_KEY = "data-hero-aspect-ratio";
+const HERO_RADIUS_KEY = "data-hero-radius";
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Visible-rect resolution
+ * Content/window rect resolution
  *
  * Authors opt in via `data-hero-aspect-ratio` (e.g. "1600/1067" or "1.5") to
- * tell hero that the element's actual content occupies a smaller, centered
- * sub-rect of its bbox (the typical `<img object-contain>` case). Without
- * the hint, visible == bbox and the rest of the math runs identically to
- * the bbox-only path.
+ * tell hero how image content sits inside an element bbox. New-style
+ * `data-hero-exit-key` elements are treated as centered object-cover tiles;
+ * `data-hero-enter-key` elements are treated as centered object-contain
+ * content. Without the hint, content/window/bbox all collapse to the bbox.
  * ──────────────────────────────────────────────────────────────────────────── */
+
+type Rect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
 
 type LetterboxInset = {
   top: number;
@@ -45,9 +50,10 @@ type LetterboxInset = {
 };
 
 type HeroRect = {
-  visible: { left: number; top: number; width: number; height: number };
-  bbox: { left: number; top: number; width: number; height: number };
-  letterbox: LetterboxInset;
+  bbox: Rect;
+  content: Rect;
+  window: Rect;
+  clipInset: LetterboxInset;
 };
 
 function parseAspect(value: string | null): number | null {
@@ -56,45 +62,115 @@ function parseAspect(value: string | null): number | null {
     const [wStr, hStr] = value.split("/");
     const w = parseFloat(wStr ?? "");
     const h = parseFloat(hStr ?? "");
-    if (!Number.isFinite(w) || !Number.isFinite(h) || h === 0) return null;
+    if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+      return null;
+    }
     return w / h;
   }
   const ratio = parseFloat(value);
   return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
 }
 
-function getHeroRect(container: HTMLElement, el: HTMLElement): HeroRect {
+function readRadius(el: HTMLElement): number {
+  const raw = el.getAttribute(HERO_RADIUS_KEY);
+  if (!raw) return 0;
+  const num = parseFloat(raw);
+  return Number.isFinite(num) && num > 0 ? num : 0;
+}
+
+function centerX(rect: Rect): number {
+  return rect.left + rect.width / 2;
+}
+
+function centerY(rect: Rect): number {
+  return rect.top + rect.height / 2;
+}
+
+function insetWithin(outer: Rect, inner: Rect): LetterboxInset {
+  return {
+    top: Math.max(0, inner.top - outer.top),
+    right: Math.max(0, outer.left + outer.width - (inner.left + inner.width)),
+    bottom: Math.max(0, outer.top + outer.height - (inner.top + inner.height)),
+    left: Math.max(0, inner.left - outer.left),
+  };
+}
+
+function fittedContentRect(bbox: Rect, aspect: number, fit: HeroFit): Rect {
+  const bboxAspect = bbox.width / bbox.height;
+  let width: number;
+  let height: number;
+
+  if (fit === "contain") {
+    if (bboxAspect > aspect) {
+      height = bbox.height;
+      width = height * aspect;
+    } else {
+      width = bbox.width;
+      height = width / aspect;
+    }
+  } else if (bboxAspect > aspect) {
+    width = bbox.width;
+    height = width / aspect;
+  } else {
+    height = bbox.height;
+    width = height * aspect;
+  }
+
+  return {
+    left: bbox.left + (bbox.width - width) / 2,
+    top: bbox.top + (bbox.height - height) / 2,
+    width,
+    height,
+  };
+}
+
+function getHeroRect(
+  container: HTMLElement,
+  el: HTMLElement,
+  fit: HeroFit,
+): HeroRect {
   const bbox = getRect(container, el);
   const aspect = parseAspect(el.getAttribute(HERO_ASPECT_KEY));
   if (aspect === null) {
     return {
-      visible: bbox,
       bbox,
-      letterbox: { top: 0, right: 0, bottom: 0, left: 0 },
+      content: bbox,
+      window: bbox,
+      clipInset: { top: 0, right: 0, bottom: 0, left: 0 },
     };
   }
-  // Contain-fit sub-rect at `aspect`, centered in bbox.
-  const bboxAspect = bbox.width / bbox.height;
-  let visibleW: number;
-  let visibleH: number;
-  if (bboxAspect > aspect) {
-    visibleH = bbox.height;
-    visibleW = visibleH * aspect;
-  } else {
-    visibleW = bbox.width;
-    visibleH = visibleW / aspect;
-  }
-  const dx = (bbox.width - visibleW) / 2;
-  const dy = (bbox.height - visibleH) / 2;
+  const content = fittedContentRect(bbox, aspect, fit);
+  const window = fit === "cover" ? bbox : content;
   return {
-    visible: {
-      left: bbox.left + dx,
-      top: bbox.top + dy,
-      width: visibleW,
-      height: visibleH,
-    },
     bbox,
-    letterbox: { top: dy, right: dx, bottom: dy, left: dx },
+    content,
+    window,
+    clipInset: insetWithin(content, window),
+  };
+}
+
+function projectedWindowInset(
+  baseContent: Rect,
+  targetContent: Rect,
+  targetWindow: Rect,
+  scale: number,
+): LetterboxInset {
+  const width = targetWindow.width / scale;
+  const height = targetWindow.height / scale;
+  const left =
+    baseContent.width / 2 +
+    (centerX(targetWindow) - centerX(targetContent)) / scale -
+    width / 2;
+  const top =
+    baseContent.height / 2 +
+    (centerY(targetWindow) - centerY(targetContent)) / scale -
+    height / 2;
+
+  return {
+    top: Math.max(0, top),
+    right: Math.max(0, baseContent.width - left - width),
+    bottom: Math.max(0, baseContent.height - top - height),
+    left: Math.max(0, left),
   };
 }
 
@@ -135,7 +211,13 @@ function resolveNewStylePairs(
   for (const [key, toEl] of toEnters) {
     const fromEl = fromExits.get(key);
     if (!fromEl) continue;
-    pairs.push({ key, fromEl, toEl });
+    pairs.push({
+      key,
+      fromEl,
+      toEl,
+      fromFit: "cover",
+      toFit: "contain",
+    });
   }
 
   const fromEnters = collectByAttr(fromNode, HERO_ENTER_KEY);
@@ -143,7 +225,13 @@ function resolveNewStylePairs(
   for (const [key, fromEl] of fromEnters) {
     const toEl = toExits.get(key);
     if (!toEl) continue;
-    pairs.push({ key, fromEl, toEl });
+    pairs.push({
+      key,
+      fromEl,
+      toEl,
+      fromFit: "contain",
+      toFit: "cover",
+    });
   }
 
   return pairs;
@@ -172,7 +260,13 @@ function resolveLegacyPairs(
       `[${HERO_LEGACY_KEY}="${key}"]`,
     );
     if (!fromEl) continue;
-    pairs.push({ key, fromEl, toEl });
+    pairs.push({
+      key,
+      fromEl,
+      toEl,
+      fromFit: "contain",
+      toFit: "contain",
+    });
   }
   return pairs;
 }
@@ -183,183 +277,125 @@ function resolvePairs(fromNode: HTMLElement, toNode: HTMLElement): HeroPair[] {
   return resolveLegacyPairs(fromNode, toNode);
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * TileStrategy — the per-pair morph. Uniform scale (max of dim ratios)
- * keeps the image's aspect intact; clip-path inset hides the overshoot so
- * the visible window equals fromRect without stretching content. Used by
- * `type: "static"`, where the destination element itself can move.
- * ──────────────────────────────────────────────────────────────────────────── */
+type HeroMorphStyle = {
+  transform: string;
+  clipPath: string;
+};
 
-class TileStrategy implements HeroStrategy {
-  contribute(ctx: HeroContributeCtx): Animation[] {
-    const {
-      from: fromNode,
-      to: toNode,
-      resolved,
-      physics,
-      scrollOffset,
-      maxDistance,
-      onComplete,
-    } = ctx;
+type HeroMorphPlan = {
+  toContent: HeroRect["content"];
+  hasRadius: boolean;
+  styleFor: (t: number, u: number) => HeroMorphStyle;
+};
 
-    const animations: Animation[] = [];
+function buildHeroMorphPlan(
+  root: HTMLElement,
+  pair: HeroPair,
+  maxDistance: number,
+): HeroMorphPlan | null {
+  const { fromEl, toEl } = pair;
+  const fromHero = getHeroRect(root, fromEl, pair.fromFit);
+  const toHero = getHeroRect(root, toEl, pair.toFit);
+  const fromContent = fromHero.content;
+  const fromWindow = fromHero.window;
+  const toContent = toHero.content;
+  const toWindow = toHero.window;
+  const toClipInset = toHero.clipInset;
+  const fromRadius = readRadius(fromEl);
+  const toRadius = readRadius(toEl);
 
-    for (const { fromEl, toEl } of resolved.pairs) {
-      const fromHero = getHeroRect(fromNode, fromEl);
-      const toHero = getHeroRect(toNode, toEl);
-      const fromVisible = fromHero.visible;
-      const toVisible = toHero.visible;
-      const toBbox = toHero.bbox;
-      const toLetterbox = toHero.letterbox;
-
-      // Uniform scale on visible-to-visible. The matching dim hits
-      // fromVisible exactly; the other overshoots and gets hidden by the
-      // window inset (added on top of the letterbox baseline).
-      const sMax = Math.max(
-        fromVisible.width / toVisible.width,
-        fromVisible.height / toVisible.height,
-      );
-
-      // Translate so the scaled bbox center lands on fromVisible's center.
-      // (Centered-fit case → visible.center == bbox.center, so using bbox
-      // center is equivalent and simpler.)
-      const cxFrom = fromVisible.left + fromVisible.width / 2;
-      const cyFrom = fromVisible.top + fromVisible.height / 2;
-      const cxTo = toBbox.left + toBbox.width / 2;
-      const cyTo = toBbox.top + toBbox.height / 2;
-      const dx = cxFrom - cxTo - scrollOffset.x;
-      const dy = cyFrom - cyTo - scrollOffset.y;
-
-      if (Math.abs(dy) > maxDistance) continue;
-
-      // Pre-scale window inset WITHIN toVisible. At u=1 the post-scale
-      // visible window equals fromVisible; pre-scale that's
-      // fromVisible.{w,h}/sMax. One dim equals toVisible (window inset 0);
-      // the other is smaller (window inset half the gap).
-      const visibleWUnscaled = fromVisible.width / sMax;
-      const visibleHUnscaled = fromVisible.height / sMax;
-      const windowInsetX = Math.max(
-        0,
-        (toVisible.width - visibleWUnscaled) / 2,
-      );
-      const windowInsetY = Math.max(
-        0,
-        (toVisible.height - visibleHUnscaled) / 2,
-      );
-
-      const prevTransform = toEl.style.transform;
-      const prevPosition = toEl.style.position;
-      const prevTransformOrigin = toEl.style.transformOrigin;
-      const prevClipPath = toEl.style.clipPath;
-      const prevZIndex = toEl.style.zIndex;
-      const prevWillChange = toEl.style.willChange;
-
-      toEl.style.position = "relative";
-      toEl.style.transformOrigin = "center center";
-      toEl.style.zIndex = "1000";
-      toEl.style.willChange = "transform, clip-path";
-
-      onComplete(() => {
-        toEl.style.transform = prevTransform;
-        toEl.style.position = prevPosition;
-        toEl.style.transformOrigin = prevTransformOrigin;
-        toEl.style.clipPath = prevClipPath;
-        toEl.style.zIndex = prevZIndex;
-        toEl.style.willChange = prevWillChange;
-      });
-
-      animations.push(
-        new WebAnimation({
-          element: toEl,
-          integrator: IntegratorProvider.from(physics),
-          style: (t, u) => {
-            const tx = u * dx;
-            const ty = u * dy;
-            const s = t + u * sMax;
-            // Letterbox is a permanent baseline (hides bbox space outside
-            // the visible sub-rect); window inset opens up from full crop
-            // at u=1 to the full visible rect at u=0.
-            const insetT = toLetterbox.top + u * windowInsetY;
-            const insetR = toLetterbox.right + u * windowInsetX;
-            const insetB = toLetterbox.bottom + u * windowInsetY;
-            const insetL = toLetterbox.left + u * windowInsetX;
-            return {
-              transform: `translate(${tx}px, ${ty}px) scale(${s})`,
-              clipPath: `inset(${insetT}px ${insetR}px ${insetB}px ${insetL}px)`,
-            };
-          },
-        }),
-      );
-    }
-
-    return animations;
+  if (
+    fromContent.width === 0 ||
+    fromContent.height === 0 ||
+    fromWindow.width === 0 ||
+    fromWindow.height === 0 ||
+    toContent.width === 0 ||
+    toContent.height === 0 ||
+    toWindow.width === 0 ||
+    toWindow.height === 0
+  ) {
+    return null;
   }
+
+  // Uniform scale on content-to-content. Window clips then express either
+  // object-cover crop (exit side) or object-contain content (enter side).
+  const sMax = Math.max(
+    fromContent.width / toContent.width,
+    fromContent.height / toContent.height,
+  );
+
+  // Translate so the scaled destination content lands on source content.
+  const cxFrom = centerX(fromContent);
+  const cyFrom = centerY(fromContent);
+  const cxTo = centerX(toContent);
+  const cyTo = centerY(toContent);
+  const dx = cxFrom - cxTo;
+  const dy = cyFrom - cyTo;
+
+  if (Math.abs(dy) > maxDistance) return null;
+
+  // Pre-transform source window expressed inside the destination content.
+  const fromClipInset = projectedWindowInset(
+    toContent,
+    fromContent,
+    fromWindow,
+    sMax,
+  );
+
+  return {
+    toContent,
+    hasRadius: fromRadius > 0 || toRadius > 0,
+    styleFor: (t, u) => {
+      const tx = u * dx;
+      const ty = u * dy;
+      const s = t + u * sMax;
+      const visibleRadius = fromRadius * u + toRadius * t;
+      // clip-path is resolved before transform; divide by the current scale
+      // so the on-screen corner radius matches the visible hero window.
+      const clipRadius = visibleRadius / s;
+      const insetT = fromClipInset.top * u + toClipInset.top * t;
+      const insetR = fromClipInset.right * u + toClipInset.right * t;
+      const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
+      const insetL = fromClipInset.left * u + toClipInset.left * t;
+      return {
+        transform: `translate(${tx}px, ${ty}px) scale(${s})`,
+        clipPath: `inset(${insetT}px ${insetR}px ${insetB}px ${insetL}px round ${clipRadius}px)`,
+      };
+    },
+  };
 }
 
-/**
- * CloneTileStrategy — used by `type: "fade"`.
+function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
+  el.style.transform = style.transform;
+  el.style.clipPath = style.clipPath;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * HeroTileStrategy — shared by every hero type.
  *
- * The pages themselves cross-fade as whole surfaces, so the moving hero cannot
- * live inside either page. Instead we clone the destination element, hide both
- * matched originals, and morph the clone above the pages. The geometry mirrors
- * TileStrategy's uniform-scale + clip-path math, but it is measured relative
- * to the positioned parent because the clone is appended there.
- */
-class CloneTileStrategy implements HeroStrategy {
+ * The moving hero lives as a temporary clone above both pages. That keeps
+ * static/fade pair resolution, content/window rect math, distance filtering, and
+ * aspect-ratio clipping identical; chrome strategies only decide whether
+ * page surfaces snap or cross-fade around this shared tile morph.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+class HeroTileStrategy implements HeroStrategy {
   contribute(ctx: HeroContributeCtx): Animation[] {
     const { resolved, physics, positionedParent, maxDistance, onComplete } =
       ctx;
-
     const animations: Animation[] = [];
 
-    for (const { fromEl, toEl } of resolved.pairs) {
-      const fromHero = getHeroRect(positionedParent, fromEl);
-      const toHero = getHeroRect(positionedParent, toEl);
-      const fromVisible = fromHero.visible;
-      const toVisible = toHero.visible;
-      const toBbox = toHero.bbox;
-      const toLetterbox = toHero.letterbox;
-
-      if (
-        fromVisible.width === 0 ||
-        fromVisible.height === 0 ||
-        toVisible.width === 0 ||
-        toVisible.height === 0
-      ) {
-        continue;
-      }
-
-      const sMax = Math.max(
-        fromVisible.width / toVisible.width,
-        fromVisible.height / toVisible.height,
-      );
-
-      const cxFrom = fromVisible.left + fromVisible.width / 2;
-      const cyFrom = fromVisible.top + fromVisible.height / 2;
-      const cxTo = toBbox.left + toBbox.width / 2;
-      const cyTo = toBbox.top + toBbox.height / 2;
-      const dx = cxFrom - cxTo;
-      const dy = cyFrom - cyTo;
-
-      if (Math.abs(dy) > maxDistance) continue;
-
-      const visibleWUnscaled = fromVisible.width / sMax;
-      const visibleHUnscaled = fromVisible.height / sMax;
-      const windowInsetX = Math.max(
-        0,
-        (toVisible.width - visibleWUnscaled) / 2,
-      );
-      const windowInsetY = Math.max(
-        0,
-        (toVisible.height - visibleHUnscaled) / 2,
-      );
+    for (const pair of resolved.pairs) {
+      const { fromEl, toEl } = pair;
+      const morph = buildHeroMorphPlan(positionedParent, pair, maxDistance);
+      if (!morph) continue;
 
       const clone = toEl.cloneNode(true) as HTMLElement;
       clone.style.position = "absolute";
-      clone.style.left = `${toBbox.left}px`;
-      clone.style.top = `${toBbox.top}px`;
-      clone.style.width = `${toBbox.width}px`;
-      clone.style.height = `${toBbox.height}px`;
+      clone.style.left = `${morph.toContent.left}px`;
+      clone.style.top = `${morph.toContent.top}px`;
+      clone.style.width = `${morph.toContent.width}px`;
+      clone.style.height = `${morph.toContent.height}px`;
       clone.style.margin = "0";
       clone.style.transformOrigin = "center center";
       clone.style.zIndex = "1000";
@@ -367,24 +403,9 @@ class CloneTileStrategy implements HeroStrategy {
       clone.style.pointerEvents = "none";
       clone.style.maxWidth = "none";
       clone.style.maxHeight = "none";
+      if (morph.hasRadius) clone.style.borderRadius = "0";
 
-      const styleFor = (t: number, u: number) => {
-        const tx = u * dx;
-        const ty = u * dy;
-        const s = t + u * sMax;
-        const insetT = toLetterbox.top + u * windowInsetY;
-        const insetR = toLetterbox.right + u * windowInsetX;
-        const insetB = toLetterbox.bottom + u * windowInsetY;
-        const insetL = toLetterbox.left + u * windowInsetX;
-        return {
-          transform: `translate(${tx}px, ${ty}px) scale(${s})`,
-          clipPath: `inset(${insetT}px ${insetR}px ${insetB}px ${insetL}px)`,
-        };
-      };
-
-      const initialStyle = styleFor(0, 1);
-      clone.style.transform = initialStyle.transform;
-      clone.style.clipPath = initialStyle.clipPath;
+      applyMorphStyle(clone, morph.styleFor(0, 1));
 
       positionedParent.appendChild(clone);
 
@@ -403,7 +424,7 @@ class CloneTileStrategy implements HeroStrategy {
         new WebAnimation({
           element: clone,
           integrator: IntegratorProvider.from(physics),
-          style: styleFor,
+          style: morph.styleFor,
         }),
       );
     }
@@ -412,22 +433,8 @@ class CloneTileStrategy implements HeroStrategy {
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Strategy assembly — *no* if/switch on `type` here. The chrome factory
- * owns the lookup; this function just stitches the resulting instances into
- * a single ordered list.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-const HERO_TILE_STRATEGIES: Record<HeroType, () => HeroStrategy> = {
-  static: () => new TileStrategy(),
-  fade: () => new CloneTileStrategy(),
-};
-
 function heroStrategiesFor(opts: NormalizedHeroOptions): HeroStrategy[] {
-  return [
-    HERO_TILE_STRATEGIES[opts.type](),
-    HERO_CHROME_PROVIDERS[opts.type](),
-  ];
+  return [new HeroTileStrategy(), HERO_CHROME_PROVIDERS[opts.type]()];
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -447,7 +454,7 @@ export const hero = (
   options: NormalizedHeroOptions,
 ): TransitionConfig<HeroExtras> => {
   const strategies = heroStrategiesFor(options);
-  const physics = DEFAULT_PHYSICS;
+  const physics = HERO_VARIANT_PROVIDERS[options.variant]();
   const maxDistance = DEFAULT_MAX_DISTANCE;
 
   return {
@@ -487,7 +494,6 @@ export const hero = (
         to,
         resolved,
         physics,
-        scrollOffset: context.scrollOffset,
         positionedParent: context.positionedParent,
         maxDistance,
         onComplete,
