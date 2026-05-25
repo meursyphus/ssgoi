@@ -2,10 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
+import { IframeLoadingOverlay } from "@/components/iframe-loading-overlay";
 import { SiteLogo } from "@/components/site-logo";
 import {
   showcases,
@@ -20,6 +27,7 @@ export default function ShowcaseListPage() {
     platform: s.value,
     setPlatform: s.actions.set,
   }));
+  const canRenderLivePreviews = useCanRenderShowcasePreviews();
   const [query, setQuery] = useState("");
   const [activeTransitions, setActiveTransitions] = useState<Set<string>>(
     () => new Set(),
@@ -119,7 +127,12 @@ export default function ShowcaseListPage() {
         }}
       >
         {filtered.map((s) => (
-          <ShowcaseCard key={s.slug} showcase={s} platform={platform} />
+          <ShowcaseCard
+            key={s.slug}
+            showcase={s}
+            platform={platform}
+            livePreview={canRenderLivePreviews}
+          />
         ))}
       </div>
 
@@ -140,6 +153,30 @@ export default function ShowcaseListPage() {
       )}
     </main>
   );
+}
+
+function useCanRenderShowcasePreviews() {
+  return useSyncExternalStore(
+    subscribeToFrameContext,
+    getCanRenderShowcasePreviewsSnapshot,
+    getServerCanRenderShowcasePreviewsSnapshot,
+  );
+}
+
+function subscribeToFrameContext() {
+  return () => {};
+}
+
+function getCanRenderShowcasePreviewsSnapshot() {
+  try {
+    return window.self === window.top;
+  } catch {
+    return false;
+  }
+}
+
+function getServerCanRenderShowcasePreviewsSnapshot() {
+  return false;
 }
 
 function PlatformToggle({
@@ -225,9 +262,11 @@ function SearchInput({
 function ShowcaseCard({
   showcase,
   platform,
+  livePreview,
 }: {
   showcase: ShowcaseApp;
   platform: ShowcasePlatform;
+  livePreview: boolean;
 }) {
   const previewClip =
     (showcase.previewTransition &&
@@ -239,7 +278,7 @@ function ShowcaseCard({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
-    if (!previewClip) return;
+    if (!livePreview || !previewClip) return;
     let onEnter = false;
     const id = window.setInterval(() => {
       const next = onEnter ? previewClip.exitPath : previewClip.enterPath;
@@ -250,7 +289,7 @@ function ShowcaseCard({
       );
     }, 5000);
     return () => window.clearInterval(id);
-  }, [previewClip]);
+  }, [livePreview, previewClip]);
 
   return (
     <Link
@@ -263,23 +302,27 @@ function ShowcaseCard({
           (platform === "web" ? "px-4 py-5 sm:px-6 sm:py-7" : "px-6 py-8")
         }
       >
-        {platform === "web" ? (
-          <DesktopFrame
-            ref={iframeRef}
-            src={previewPath}
-            title={`${showcase.name} preview`}
-            widthClassName="w-full"
-            interactive={false}
-            urlLabel={`ssgoi.dev${previewPath === "/" ? "" : previewPath}`}
-          />
+        {livePreview ? (
+          platform === "web" ? (
+            <DesktopFrame
+              ref={iframeRef}
+              src={previewPath}
+              title={`${showcase.name} preview`}
+              widthClassName="w-full"
+              interactive={false}
+              urlLabel={`ssgoi.dev${previewPath === "/" ? "" : previewPath}`}
+            />
+          ) : (
+            <ShowcasePhone
+              ref={iframeRef}
+              src={previewPath}
+              title={`${showcase.name} preview`}
+              widthClassName="w-[78%] max-w-[380px]"
+              interactive={false}
+            />
+          )
         ) : (
-          <ShowcasePhone
-            ref={iframeRef}
-            src={previewPath}
-            title={`${showcase.name} preview`}
-            widthClassName="w-[78%] max-w-[380px]"
-            interactive={false}
-          />
+          <ShowcasePreviewLoadingFrame platform={platform} />
         )}
         {showcase.badge && (
           <span className="absolute left-4 top-4 rounded-md bg-black/70 px-2 py-1 text-[11px] font-medium uppercase tracking-wider text-white/80 backdrop-blur">
@@ -322,5 +365,36 @@ function ShowcaseCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+function ShowcasePreviewLoadingFrame({
+  platform,
+}: {
+  platform: ShowcasePlatform;
+}) {
+  if (platform === "web") {
+    return (
+      <div className="w-full overflow-hidden rounded-[12px] bg-[#1c1611] p-[1px] shadow-[0_28px_60px_-18px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)_inset]">
+        <div className="flex h-7 w-full items-center gap-[5px] rounded-t-[11px] bg-gradient-to-b from-[#2a221c] to-[#1c1611] px-2.5">
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+        </div>
+        <div className="relative aspect-[1280/800] overflow-hidden rounded-b-[11px] bg-neutral-950">
+          <IframeLoadingOverlay visible variant="dark" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-[78%] max-w-[380px]">
+      <div className="relative aspect-[9/19] rounded-[32px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[6px] shadow-[0_22px_50px_-14px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
+        <div className="relative h-full overflow-hidden rounded-[26px] bg-white">
+          <IframeLoadingOverlay visible variant="light" />
+        </div>
+      </div>
+    </div>
   );
 }
