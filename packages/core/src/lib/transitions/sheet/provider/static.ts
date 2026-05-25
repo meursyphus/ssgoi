@@ -8,7 +8,7 @@ const ENTER_PHYSICS: PhysicsOptions = {
 
 // ease-in (Material accelerated): sheet falls away (outgoing).
 const EXIT_PHYSICS: PhysicsOptions = {
-  inertia: { acceleration: 70, resistance: 1.2 },
+  inertia: { acceleration: 30, resistance: 1 },
 };
 
 export function createStaticProvider(): SheetProvider {
