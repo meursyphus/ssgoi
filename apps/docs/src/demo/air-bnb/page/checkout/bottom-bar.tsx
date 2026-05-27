@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { toast } from "sonner";
 import type { CheckoutStep } from "@/demo/air-bnb/state/checkout";
 import { StepIndicator } from "./step-indicator";

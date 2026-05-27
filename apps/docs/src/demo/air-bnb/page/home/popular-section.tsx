@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ChevronRight, Heart } from "lucide-react";
 import type { ListingSimple } from "@/demo/air-bnb/state/listing";
 

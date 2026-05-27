@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import type { PhotoCategory } from "@/demo/airbnb-photo-tour/state/photo";
 
 export function CategorySection({

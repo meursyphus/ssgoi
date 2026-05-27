@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { FileText } from "lucide-react";
 
 export function HomeHeader() {

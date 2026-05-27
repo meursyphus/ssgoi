@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 type Flavor = {
   emoji: string;
   name: string;

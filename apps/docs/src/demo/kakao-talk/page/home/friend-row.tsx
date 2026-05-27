@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import type { FriendSimple } from "@/demo/kakao-talk/api/friend";
 
 type Props = {

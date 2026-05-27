@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { NpmPill } from "@/components/npm-pill";
 import { SiteLogo } from "@/components/site-logo";
 export default function DocsPage() {

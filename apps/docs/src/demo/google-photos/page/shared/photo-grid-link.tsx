@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { useEffect, useRef } from "react";
 import type { PhotoSimple } from "@/demo/google-photos/state/photo";
 

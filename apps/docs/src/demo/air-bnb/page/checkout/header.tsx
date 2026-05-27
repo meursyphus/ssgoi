@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ArrowLeft, X } from "lucide-react";
 import { useCheckoutStep } from "./use-checkout-step";
 import { useCurrentListing } from "./use-current-listing";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { PenLine, CheckCircle2 } from "lucide-react";
 import type { OrderDetail } from "@/demo/gamja-market/state/order";
 

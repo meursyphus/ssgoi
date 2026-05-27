@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { usePathname } from "next/navigation";
 
 export function ProfileTabs({ id }: { id: string }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { X, Paperclip, Send, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 

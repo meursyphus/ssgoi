@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { Cast, Menu, Mic, Search } from "lucide-react";
 
 export function TopNav() {

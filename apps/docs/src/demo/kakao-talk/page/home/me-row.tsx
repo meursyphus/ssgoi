@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ChevronRight } from "lucide-react";
 import type { MeProfile } from "@/demo/kakao-talk/state/friend";
 

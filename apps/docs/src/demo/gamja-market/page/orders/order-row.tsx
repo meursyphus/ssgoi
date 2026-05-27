@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ChevronRight } from "lucide-react";
 import type { OrderSimple } from "@/demo/gamja-market/state/order";
 

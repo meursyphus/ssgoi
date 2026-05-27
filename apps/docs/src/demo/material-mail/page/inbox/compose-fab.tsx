@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { Pencil } from "lucide-react";
 
 export function ComposeFab() {

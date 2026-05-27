@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { PhoneFrame } from "@/components/phone-frame";
 import {
   NextMark,

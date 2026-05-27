@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import type { PostSimple } from "@/demo/instagram/state/post";
 
 export function GridItem({ post }: { post: PostSimple }) {
