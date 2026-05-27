@@ -135,6 +135,7 @@ export function createSggoiTransitionContext(
     // Clone while the original is still mounted; the host framework will
     // detach the original right after `out()` returns.
     const fromClone = fromOriginal.cloneNode(true) as HTMLElement;
+    fromClone.setAttribute("data-ssgoi-clone", "");
     const scrollOffset = calculateScrollOffset(fromPath, toPath);
 
     const ssgoiContext: SsgoiTransitionContext = {

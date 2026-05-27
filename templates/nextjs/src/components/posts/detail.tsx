@@ -2,26 +2,22 @@
 
 import React from "react";
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
 import { getPost, getRelatedPosts } from "./mock-data";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
 interface PostDetailProps {
   postId: string;
 }
-
 export default function PostDetail({ postId }: PostDetailProps) {
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
-
   if (!post) {
     return (
-      <SsgoiTransition id={`/posts/${postId}`}>
+      <div data-ssgoi-transition={`/posts/${postId}`}>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
-      </SsgoiTransition>
+      </div>
     );
   }
 
@@ -77,9 +73,8 @@ export default function PostDetail({ postId }: PostDetailProps) {
     ),
     hr: () => <hr className="border-white/5 my-6" />,
   };
-
   return (
-    <SsgoiTransition id={`/posts/${postId}`}>
+    <div data-ssgoi-transition={`/posts/${postId}`}>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">
@@ -196,6 +191,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
           </div>
         )}
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

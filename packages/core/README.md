@@ -33,31 +33,27 @@ npm install @ssgoi/svelte
 #### 1. Wrap your app
 
 ```tsx
-import { Ssgoi } from '@ssgoi/react';
-import { fade } from '@ssgoi/react/view-transitions';
+import { Ssgoi } from "@ssgoi/react";
+import { fade } from "@ssgoi/react/view-transitions";
 
 export default function App() {
   return (
-    <Ssgoi config={{ transitions: fade({ paths: ['/', '/about'] }) }}>
-      <div style={{ position: 'relative' }}>
-        {/* Your app */}
-      </div>
+    <Ssgoi config={{ transitions: fade({ paths: ["/", "/about"] }) }}>
+      <div style={{ position: "relative" }}>{/* Your app */}</div>
     </Ssgoi>
   );
 }
 ```
 
-#### 2. Wrap your pages
+#### 2. Mark your pages
 
 ```tsx
-import { SsgoiTransition } from '@ssgoi/react';
-
 export default function HomePage() {
   return (
-    <SsgoiTransition id="/">
+    <main data-ssgoi-transition="/">
       <h1>Welcome</h1>
       {/* Page content */}
-    </SsgoiTransition>
+    </main>
   );
 }
 ```
@@ -74,15 +70,19 @@ Define different transitions for different routes:
 const config = {
   transitions: [
     // Scroll between tabs
-    { from: '/home', to: '/about', transition: scroll({ direction: 'up' }) },
-    { from: '/about', to: '/home', transition: scroll({ direction: 'down' }) },
-    
+    { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
+    { from: "/about", to: "/home", transition: scroll({ direction: "down" }) },
+
     // Drill in when entering details
-    { from: '/products', to: '/products/*', transition: drill({ direction: 'enter' }) },
-    
+    {
+      from: "/products",
+      to: "/products/*",
+      transition: drill({ direction: "enter" }),
+    },
+
     // Pinterest-style image transitions
-    { from: '/gallery', to: '/photo/*', transition: pinterest() }
-  ]
+    { from: "/gallery", to: "/photo/*", transition: pinterest() },
+  ],
 };
 ```
 
@@ -93,7 +93,7 @@ Automatically create bidirectional transitions:
 ```tsx
 {
   from: '/home',
-  to: '/about', 
+  to: '/about',
   transition: scroll({ direction: 'up' }),
   symmetric: true  // Automatically creates reverse transition
 }
@@ -104,16 +104,18 @@ Automatically create bidirectional transitions:
 Animate specific elements during mount/unmount:
 
 ```tsx
-import { transition } from '@ssgoi/react';
-import { fade, slide } from '@ssgoi/react/transitions';
+import { transition } from "@ssgoi/react";
+import { fade, slide } from "@ssgoi/react/transitions";
 
 function Card() {
   return (
-    <div ref={transition({
-      key: 'card',
-      in: fade(),
-      out: slide({ direction: 'up' })
-    })}>
+    <div
+      ref={transition({
+        key: "card",
+        in: fade(),
+        out: slide({ direction: "up" }),
+      })}
+    >
       <h2>Animated Card</h2>
     </div>
   );
@@ -123,6 +125,7 @@ function Card() {
 ## Built-in Transitions
 
 ### Page Transitions
+
 - `fade` - Smooth opacity transition
 - `scroll` - Vertical scrolling (up/down)
 - `drill` - Drill in/out effect (enter/exit)
@@ -130,6 +133,7 @@ function Card() {
 - `pinterest` - Pinterest-style expand effect
 
 ### Element Transitions
+
 - `fade` - Fade in/out
 - `scale` - Scale in/out
 - `slide` - Slide (direction: up/down/left/right)
@@ -144,17 +148,19 @@ function Card() {
 
 ```tsx
 // app/layout.tsx
-import { Ssgoi } from '@ssgoi/react';
-import { scroll } from '@ssgoi/react/view-transitions';
+import { Ssgoi } from "@ssgoi/react";
+import { scroll } from "@ssgoi/react/view-transitions";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <Ssgoi config={{
-          transitions: scroll({ paths: ['/', '/about'] })
-        }}>
-          <div style={{ position: 'relative', minHeight: '100vh' }}>
+        <Ssgoi
+          config={{
+            transitions: scroll({ paths: ["/", "/about"] }),
+          }}
+        >
+          <div style={{ position: "relative", minHeight: "100vh" }}>
             {children}
           </div>
         </Ssgoi>
@@ -163,15 +169,8 @@ export default function RootLayout({ children }) {
   );
 }
 
-// app/page.tsx
-import { SsgoiTransition } from '@ssgoi/react';
-
 export default function Page() {
-  return (
-    <SsgoiTransition id="/">
-      {/* Your page content */}
-    </SsgoiTransition>
-  );
+  return <main data-ssgoi-transition="/">{/* Your page content */}</main>;
 }
 ```
 
@@ -192,23 +191,24 @@ export default function Page() {
 
 <!-- +page.svelte -->
 <script>
-  import { SsgoiTransition } from '@ssgoi/svelte';
   import { page } from '$app/stores';
 </script>
 
-<SsgoiTransition id={$page.url.pathname}>
+<main data-ssgoi-transition={$page.url.pathname}>
   <!-- Your page content -->
-</SsgoiTransition>
+</main>
 ```
 
 ## Why SSGOI?
 
 ### vs View Transition API
+
 - ✅ Works in all browsers, not just Chrome
 - ✅ More animation options with spring physics
 - ✅ Better developer experience
 
 ### vs Other Animation Libraries
+
 - ✅ Built specifically for page transitions
 - ✅ SSR-first design
 - ✅ No router lock-in
@@ -230,17 +230,21 @@ All powered by a spring physics engine for natural, smooth motion.
 Try out SSGOI with our framework-specific demo applications:
 
 ### React Demo
+
 ```bash
 pnpm react-demo:dev
 # Opens at http://localhost:3001
 ```
+
 Explore Next.js App Router integration with various transition effects.
 
 ### Svelte Demo
+
 ```bash
 pnpm svelte-demo:dev
 # Opens at http://localhost:5174
 ```
+
 See SvelteKit integration with smooth page transitions.
 
 Visit the `/apps` directory to explore the demo source code and learn how to implement SSGOI in your own projects.
@@ -248,6 +252,7 @@ Visit the `/apps` directory to explore the demo source code and learn how to imp
 ## Documentation
 
 Visit [https://ssgoi.dev](https://ssgoi.dev) for:
+
 - Detailed API reference
 - Interactive examples
 - Framework integration guides

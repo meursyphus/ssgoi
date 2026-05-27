@@ -9,6 +9,10 @@ type SsgoiTransitionProps<T extends ValidComponent = "div"> = {
   class?: string;
 };
 
+/**
+ * @deprecated Set `data-ssgoi-transition` directly on the page boundary
+ * element inside `<Ssgoi>` instead.
+ */
 export const SsgoiTransition = <T extends ValidComponent = "div">(
   props: SsgoiTransitionProps<T>,
 ) => {

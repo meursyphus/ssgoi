@@ -1,25 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { Loader2 } from "lucide-react";
 import { useCollection } from "@/demo/google-photos/state/collection";
 import { UtilityRow } from "./utility-row";
 import { CollectionGrid } from "./collection-grid";
-
 export default function CollectionsPage() {
   const collection = useCollection((state) => ({
     collections: state.collections,
     actions: state.actions,
   }));
-
   useEffect(() => {
     collection.actions.loadAll();
   }, [collection.actions]);
-
   return (
-    <SsgoiTransition
-      id="/demo/google-photos/collections"
+    <div
+      data-ssgoi-transition="/demo/google-photos/collections"
       className="block min-h-full bg-white"
     >
       <div className="px-4 pt-4">
@@ -33,6 +29,6 @@ export default function CollectionsPage() {
       ) : (
         <CollectionGrid collections={collection.collections.data} />
       )}
-    </SsgoiTransition>
+    </div>
   );
 }

@@ -1,28 +1,23 @@
 import React from "react";
 import { Link } from "react-router";
-import { SsgoiTransition } from "@ssgoi/react";
 import { getPost, getRelatedPosts } from "./mock-data";
-
 interface PostDetailProps {
   postId: string;
 }
-
 export default function PostDetail({ postId }: PostDetailProps) {
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
-
   if (!post) {
     return (
-      <SsgoiTransition id={`/posts/${postId}`}>
+      <div data-ssgoi-transition={`/posts/${postId}`}>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
-      </SsgoiTransition>
+      </div>
     );
   }
-
   return (
-    <SsgoiTransition id={`/posts/${postId}`}>
+    <div data-ssgoi-transition={`/posts/${postId}`}>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">
@@ -89,37 +84,56 @@ export default function PostDetail({ postId }: PostDetailProps) {
         {/* Post content */}
         <article className="px-4 py-6">
           <div className="prose prose-invert max-w-none">
-            {post.content.split('\n\n').map((paragraph, idx) => {
-              if (paragraph.startsWith('# ')) {
+            {post.content.split("\n\n").map((paragraph, idx) => {
+              if (paragraph.startsWith("# ")) {
                 return (
-                  <h1 key={idx} className="text-lg font-medium text-white mb-4 mt-6">
+                  <h1
+                    key={idx}
+                    className="text-lg font-medium text-white mb-4 mt-6"
+                  >
                     {paragraph.substring(2)}
                   </h1>
                 );
-              } else if (paragraph.startsWith('## ')) {
+              } else if (paragraph.startsWith("## ")) {
                 return (
-                  <h2 key={idx} className="text-base font-medium text-white mb-3 mt-5">
+                  <h2
+                    key={idx}
+                    className="text-base font-medium text-white mb-3 mt-5"
+                  >
                     {paragraph.substring(3)}
                   </h2>
                 );
-              } else if (paragraph.startsWith('### ')) {
+              } else if (paragraph.startsWith("### ")) {
                 return (
-                  <h3 key={idx} className="text-sm font-medium text-white mb-2 mt-4">
+                  <h3
+                    key={idx}
+                    className="text-sm font-medium text-white mb-2 mt-4"
+                  >
                     {paragraph.substring(4)}
                   </h3>
                 );
-              } else if (paragraph.startsWith('- ')) {
-                const items = paragraph.split('\n- ').map(item => item.replace(/^- /, ''));
+              } else if (paragraph.startsWith("- ")) {
+                const items = paragraph
+                  .split("\n- ")
+                  .map((item) => item.replace(/^- /, ""));
                 return (
-                  <ul key={idx} className="list-disc list-inside text-neutral-300 mb-4 space-y-1 pl-3 text-xs">
+                  <ul
+                    key={idx}
+                    className="list-disc list-inside text-neutral-300 mb-4 space-y-1 pl-3 text-xs"
+                  >
                     {items.map((item, i) => (
-                      <li key={i} className="text-neutral-300 text-xs">{item}</li>
+                      <li key={i} className="text-neutral-300 text-xs">
+                        {item}
+                      </li>
                     ))}
                   </ul>
                 );
               } else {
                 return (
-                  <p key={idx} className="text-xs text-neutral-300 mb-4 leading-relaxed">
+                  <p
+                    key={idx}
+                    className="text-xs text-neutral-300 mb-4 leading-relaxed"
+                  >
                     {paragraph}
                   </p>
                 );
@@ -174,6 +188,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
           </div>
         )}
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

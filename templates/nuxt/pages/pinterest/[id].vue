@@ -1,5 +1,5 @@
 <template>
-  <SsgoiTransition :id="`/pinterest/${id}`">
+  <div :data-ssgoi-transition="`/pinterest/${id}`">
     <div v-if="!item" class="min-h-screen bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Pin not found</p>
     </div>
@@ -45,7 +45,9 @@
 
           <!-- Category and saves -->
           <div class="flex justify-between items-center mb-3">
-            <span class="px-2 py-0.5 bg-white/5 text-neutral-400 rounded text-xs">
+            <span
+              class="px-2 py-0.5 bg-white/5 text-neutral-400 rounded text-xs"
+            >
               {{ item.category }}
             </span>
             <span class="text-neutral-500 text-xs">
@@ -112,7 +114,9 @@
           </div>
 
           <!-- Author info -->
-          <div class="flex items-center gap-3 p-3 border border-white/5 rounded-lg">
+          <div
+            class="flex items-center gap-3 p-3 border border-white/5 rounded-lg"
+          >
             <img
               :src="item.author.avatar"
               :alt="item.author.name"
@@ -138,12 +142,10 @@
         </div>
       </div>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
-
 const route = useRoute();
 const id = route.params.id as string;
 

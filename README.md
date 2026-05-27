@@ -13,6 +13,7 @@ Native app-like page transitions for the web.
 Using Claude, Cursor, ChatGPT, or other AI assistants? Let them set it up for you.
 
 **Add this to your AI's context:**
+
 ```
 https://ssgoi.dev/llms.txt
 ```
@@ -25,13 +26,13 @@ Contains complete setup guides, all transition types, troubleshooting, and API d
 
 Web pages don't transition—they just swap. SSGOI changes that.
 
-| | View Transition API | Other Libraries | SSGOI |
-|---|:---:|:---:|:---:|
-| All browsers | ❌ Chrome only | ✅ | ✅ |
-| SSR support | ⚠️ Limited | ⚠️ Varies | ✅ |
-| Spring physics | ❌ | ⚠️ Some | ✅ |
-| Router agnostic | ❌ | ❌ | ✅ |
-| Back/forward state | ❌ | ❌ | ✅ |
+|                    | View Transition API | Other Libraries | SSGOI |
+| ------------------ | :-----------------: | :-------------: | :---: |
+| All browsers       |   ❌ Chrome only    |       ✅        |  ✅   |
+| SSR support        |     ⚠️ Limited      |    ⚠️ Varies    |  ✅   |
+| Spring physics     |         ❌          |     ⚠️ Some     |  ✅   |
+| Router agnostic    |         ❌          |       ❌        |  ✅   |
+| Back/forward state |         ❌          |       ❌        |  ✅   |
 
 **60fps guaranteed** — Spring physics pre-computed to Web Animation API keyframes. GPU-accelerated, main thread free.
 
@@ -71,26 +72,24 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### 2. Wrap your pages
+### 2. Mark your pages
 
 ```tsx
 // app/page.tsx
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function HomePage() {
   return (
-    <SsgoiTransition id="/">
+    <main data-ssgoi-transition="/">
       <h1>Home</h1>
-    </SsgoiTransition>
+    </main>
   );
 }
 
 // app/post/[id]/page.tsx
 export default function PostPage({ params }) {
   return (
-    <SsgoiTransition id={`/post/${params.id}`}>
+    <main data-ssgoi-transition={`/post/${params.id}`}>
       <h1>Post Detail</h1>
-    </SsgoiTransition>
+    </main>
   );
 }
 ```
@@ -102,16 +101,25 @@ export default function PostPage({ params }) {
 ## Transitions
 
 ```tsx
-import { drill, fade, scroll, slide, swap, sheet, hero, pinterest } from "@ssgoi/react/view-transitions";
+import {
+  drill,
+  fade,
+  scroll,
+  slide,
+  swap,
+  sheet,
+  hero,
+  pinterest,
+} from "@ssgoi/react/view-transitions";
 
-drill({ direction: "enter" | "exit" })  // iOS-style (list → detail)
-fade()                                   // Cross-fade
-scroll({ direction: "up" | "down" })    // Vertical scroll
-slide({ direction: "left" | "right" })  // Horizontal (tabs)
-swap()                                   // Bottom tab navigation
-sheet({ direction: "enter" | "exit" })  // Bottom sheet
-hero()                                   // Shared element
-pinterest()                              // Gallery expand
+drill({ direction: "enter" | "exit" }); // iOS-style (list → detail)
+fade(); // Cross-fade
+scroll({ direction: "up" | "down" }); // Vertical scroll
+slide({ direction: "left" | "right" }); // Horizontal (tabs)
+swap(); // Bottom tab navigation
+sheet({ direction: "enter" | "exit" }); // Bottom sheet
+hero(); // Shared element
+pinterest(); // Gallery expand
 ```
 
 See all transitions at [ssgoi.dev](https://ssgoi.dev/en/docs/mobile-transitions)
@@ -120,12 +128,12 @@ See all transitions at [ssgoi.dev](https://ssgoi.dev/en/docs/mobile-transitions)
 
 ## Packages
 
-| Package | Framework |
-|---------|-----------|
-| `@ssgoi/react` | React, Next.js |
-| `@ssgoi/svelte` | Svelte, SvelteKit |
-| `@ssgoi/angular` | Angular |
-| `@ssgoi/vue` | Vue, Nuxt |
+| Package          | Framework         |
+| ---------------- | ----------------- |
+| `@ssgoi/react`   | React, Next.js    |
+| `@ssgoi/svelte`  | Svelte, SvelteKit |
+| `@ssgoi/angular` | Angular           |
+| `@ssgoi/vue`     | Vue, Nuxt         |
 
 ---
 

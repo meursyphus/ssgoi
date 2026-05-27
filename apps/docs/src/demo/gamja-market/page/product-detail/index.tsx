@@ -1,6 +1,5 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import {
   useProduct,
   type ProductDetail,
@@ -11,18 +10,18 @@ import { ProductInfo } from "./product-info";
 import { PickupInfo } from "./pickup-info";
 import { Description } from "./description";
 import { OrderBar } from "./order-bar";
-
 export default function ProductDetailPage({
   initialData,
 }: {
   initialData: ProductDetail;
 }) {
-  const product = useProduct((state) => ({ actions: state.actions }));
+  const product = useProduct((state) => ({
+    actions: state.actions,
+  }));
   product.actions.init(initialData);
-
   return (
-    <SsgoiTransition
-      id={`/demo/gamja-market/products/${initialData.id}`}
+    <div
+      data-ssgoi-transition={`/demo/gamja-market/products/${initialData.id}`}
       className="flex min-h-full flex-col bg-[#FAF8F6]"
     >
       <DetailHeader />
@@ -32,6 +31,6 @@ export default function ProductDetailPage({
       <Description product={initialData} />
       <div className="flex-1" />
       <OrderBar product={initialData} />
-    </SsgoiTransition>
+    </div>
   );
 }

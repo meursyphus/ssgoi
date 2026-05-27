@@ -1,4 +1,5 @@
 export { createSggoiTransitionContext } from "./ssgoi-transition/create-ssgoi-transition-context";
+export { observeSsgoiTransitions } from "./ssgoi-transition/observe-ssgoi-transitions";
 export {
   Animation,
   WebAnimation,

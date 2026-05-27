@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useMemo } from "react";
-import type { ReactNode } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { SsgoiConfig } from "@ssgoi/core/types";
-import { SsgoiProvider } from "./context";
-import { createSggoiTransitionContext } from "@ssgoi/core/internal";
+import {
+  createSggoiTransitionContext,
+  observeSsgoiTransitions,
+} from "@ssgoi/core/internal";
 import type { HostAnimation } from "@ssgoi/core/internal";
+
+const rootStyle: CSSProperties = { display: "contents" };
 
 interface SsgoiProps {
   config: SsgoiConfig;
@@ -20,10 +24,23 @@ interface SsgoiProps {
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
   ({ config, host, children }) => {
+    const rootRef = useRef<HTMLDivElement | null>(null);
     const ssgoi = useMemo(
       () => createSggoiTransitionContext(config, { host }),
       [config, host],
     );
-    return <SsgoiProvider value={ssgoi}>{children}</SsgoiProvider>;
+
+    useEffect(() => {
+      const root = rootRef.current;
+      if (!root) return;
+
+      return observeSsgoiTransitions(root, ssgoi);
+    }, [ssgoi]);
+
+    return (
+      <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
+        {children}
+      </div>
+    );
   },
 );

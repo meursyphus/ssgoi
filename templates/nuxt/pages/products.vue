@@ -1,5 +1,8 @@
 <template>
-  <SsgoiTransition id="/products" class="min-h-screen bg-[#121212] flex flex-col">
+  <div
+    data-ssgoi-transition="/products"
+    class="min-h-screen bg-[#121212] flex flex-col"
+  >
     <!-- Header - Fixed -->
     <div class="px-4 pt-6 pb-3 flex-shrink-0">
       <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
@@ -31,31 +34,28 @@
         <NuxtPage />
       </Ssgoi>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { Ssgoi, SsgoiTransition } from '@ssgoi/vue';
-import type { SsgoiConfig } from '@ssgoi/vue';
-import { slide } from '@ssgoi/vue/view-transitions';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { Ssgoi } from "@ssgoi/vue";
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { slide } from "@ssgoi/vue/view-transitions";
 
 const route = useRoute();
 const pathname = computed(() => route.path);
 
 const categories = [
-  { id: 'all', label: 'All', path: '/products/all' },
-  { id: 'electronics', label: 'Tech', path: '/products/electronics' },
-  { id: 'fashion', label: 'Fashion', path: '/products/fashion' },
-  { id: 'home', label: 'Home', path: '/products/home' },
-  { id: 'beauty', label: 'Beauty', path: '/products/beauty' },
+  { id: "all", label: "All", path: "/products/all" },
+  { id: "electronics", label: "Tech", path: "/products/electronics" },
+  { id: "fashion", label: "Fashion", path: "/products/fashion" },
+  { id: "home", label: "Home", path: "/products/home" },
+  { id: "beauty", label: "Beauty", path: "/products/beauty" },
 ];
 
 const config: SsgoiConfig = {
-  transitions: [
-    slide({ paths: categories.map((category) => category.path) }),
-  ],
+  transitions: [slide({ paths: categories.map((category) => category.path) })],
 };
-
 </script>

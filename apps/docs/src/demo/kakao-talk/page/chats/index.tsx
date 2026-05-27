@@ -1,25 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { useChat } from "@/demo/kakao-talk/state/chat";
 import { ChatsHeader } from "./chats-header";
 import { AdBanner } from "./ad-banner";
 import { ThreadList } from "./thread-list";
-
 export default function ChatsPage() {
   const chat = useChat((state) => ({
     threads: state.threads,
     actions: state.actions,
   }));
-
   useEffect(() => {
     chat.actions.loadThreads();
   }, [chat.actions]);
-
   return (
-    <SsgoiTransition
-      id="/demo/kakao-talk/chats"
+    <div
+      data-ssgoi-transition="/demo/kakao-talk/chats"
       className="flex min-h-full flex-col bg-white"
     >
       <ChatsHeader />
@@ -31,6 +27,6 @@ export default function ChatsPage() {
           isLoading={chat.threads.isLoading}
         />
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

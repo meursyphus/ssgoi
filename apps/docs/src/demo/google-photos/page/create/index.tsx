@@ -1,13 +1,11 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { HeroCard } from "./hero-card";
 import { ToolGrid } from "./tool-grid";
-
 export default function CreatePage() {
   return (
-    <SsgoiTransition
-      id="/demo/google-photos/create"
+    <div
+      data-ssgoi-transition="/demo/google-photos/create"
       className="block min-h-full bg-white"
     >
       <div className="space-y-6 px-4 py-4">
@@ -19,6 +17,6 @@ export default function CreatePage() {
           <ToolGrid />
         </section>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

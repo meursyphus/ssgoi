@@ -1,30 +1,25 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { useFriend } from "@/demo/kakao-talk/state/friend";
 import { TopHeader } from "./top-header";
 import { PromoBanner } from "./promo-banner";
 import { MeRow } from "./me-row";
 import { FriendSection } from "./friend-section";
 import { ChevronRight } from "lucide-react";
-
 export default function HomePage() {
   const friend = useFriend((state) => ({
     groups: state.groups,
     actions: state.actions,
   }));
-
   useEffect(() => {
     friend.actions.loadGroups();
   }, [friend.actions]);
-
   const { me, birthday, favorites, friends, friendsCountLabel } =
     friend.groups.data;
-
   return (
-    <SsgoiTransition
-      id="/demo/kakao-talk"
+    <div
+      data-ssgoi-transition="/demo/kakao-talk"
       className="flex min-h-full flex-col bg-white"
     >
       <TopHeader me={me} />
@@ -58,10 +53,9 @@ export default function HomePage() {
           footer={<ChannelLinks />}
         />
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }
-
 function GiftButton() {
   return (
     <button
@@ -72,7 +66,6 @@ function GiftButton() {
     </button>
   );
 }
-
 function MoreBirthdaysRow() {
   return (
     <li>
@@ -92,11 +85,20 @@ function MoreBirthdaysRow() {
     </li>
   );
 }
-
 function ChannelLinks() {
   const ITEMS = [
-    { label: "추천친구", count: 87, emoji: "🥰", bg: "bg-[#FFF1C2]" },
-    { label: "채널", count: 12, emoji: "Ch", bg: "bg-[#FFE7B0]" },
+    {
+      label: "추천친구",
+      count: 87,
+      emoji: "🥰",
+      bg: "bg-[#FFF1C2]",
+    },
+    {
+      label: "채널",
+      count: 12,
+      emoji: "Ch",
+      bg: "bg-[#FFE7B0]",
+    },
   ] as const;
   return (
     <>
