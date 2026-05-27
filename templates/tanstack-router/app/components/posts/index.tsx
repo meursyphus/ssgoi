@@ -1,13 +1,10 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 import { getAllPosts } from "./mock-data";
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function PostsDemo() {
   const posts = getAllPosts();
-
   return (
-    <SsgoiTransition id="/posts">
+    <div data-ssgoi-transition="/posts">
       <div className="min-h-full bg-[#121212] px-4 py-6">
         {/* Header */}
         <div className="mb-6">
@@ -23,7 +20,9 @@ export default function PostsDemo() {
             <Link
               key={post.id}
               to="/posts/$postId"
-              params={{ postId: post.id }}
+              params={{
+                postId: post.id,
+              }}
               className="block border border-white/5 rounded-lg overflow-hidden transition-all duration-200 hover:border-white/10"
             >
               <div className="flex gap-3 p-3">
@@ -72,6 +71,6 @@ export default function PostsDemo() {
           ))}
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

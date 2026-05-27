@@ -1,14 +1,12 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { ComposeBar } from "./compose-bar";
 import { ComposeForm } from "./compose-form";
 import { ComposeToolbar } from "./compose-toolbar";
-
 export default function ComposePage() {
   return (
-    <SsgoiTransition
-      id="/demo/material-mail/compose"
+    <div
+      data-ssgoi-transition="/demo/material-mail/compose"
       className="relative flex min-h-full flex-col bg-white"
     >
       <ComposeBar />
@@ -16,6 +14,6 @@ export default function ComposePage() {
         <ComposeForm />
       </div>
       <ComposeToolbar />
-    </SsgoiTransition>
+    </div>
   );
 }

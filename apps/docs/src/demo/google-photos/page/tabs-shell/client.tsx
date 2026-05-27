@@ -2,13 +2,11 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Ssgoi, SsgoiTransition, type SsgoiConfig } from "@ssgoi/react";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { axis } from "@ssgoi/react/view-transitions";
 import { TopAppBar } from "../shared/top-app-bar";
 import { FloatingBottomNav } from "../shared/floating-bottom-nav";
-
 const BASE = "/demo/google-photos";
-
 const innerConfig: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
@@ -24,7 +22,7 @@ const innerConfig: SsgoiConfig = {
 // pathname, so the outer Ssgoi (hero/drill) can pair the tabs area with
 // detail routes that live outside the (tabs) group.
 //
-// SsgoiTransition is the flex-column wrapper itself (not nested inside one).
+// The transition boundary is the flex-column wrapper itself (not nested inside one).
 // `min-h-full` here only resolves when the *parent's* height is explicit; with
 // an extra `block min-h-full` div in between the chain broke (parent had
 // min-height but no height), the wrapper collapsed to content height, and
@@ -33,8 +31,8 @@ const innerConfig: SsgoiConfig = {
 export function GooglePhotosTabsShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (
-    <SsgoiTransition
-      id={pathname}
+    <div
+      data-ssgoi-transition={pathname}
       className="relative flex min-h-full flex-col bg-white"
     >
       <div className="sticky top-0 z-30 bg-white">
@@ -44,6 +42,6 @@ export function GooglePhotosTabsShell({ children }: { children: ReactNode }) {
         <div className="relative z-0 flex-1">{children}</div>
       </Ssgoi>
       <FloatingBottomNav />
-    </SsgoiTransition>
+    </div>
   );
 }

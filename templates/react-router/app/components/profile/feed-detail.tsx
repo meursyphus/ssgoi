@@ -1,12 +1,9 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { SsgoiTransition } from "@ssgoi/react";
 import { getPost } from "./mock-data";
-
 interface FeedDetailProps {
   postId: string;
 }
-
 export default function FeedDetail({ postId }: FeedDetailProps) {
   const navigate = useNavigate();
   const post = getPost(postId);
@@ -18,23 +15,20 @@ export default function FeedDetail({ postId }: FeedDetailProps) {
         navigate("/profile");
       }
     };
-
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [navigate]);
-
   if (!post) {
     return (
-      <SsgoiTransition id={`/profile/${postId}`}>
+      <div data-ssgoi-transition={`/profile/${postId}`}>
         <div className="bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
-      </SsgoiTransition>
+      </div>
     );
   }
-
   return (
-    <SsgoiTransition className="" id={`/profile/${postId}`}>
+    <div data-ssgoi-transition={`/profile/${postId}`} className="">
       <div className="bg-[#121212] min-h-[760px]">
         {/* Content */}
         <div>
@@ -152,6 +146,6 @@ export default function FeedDetail({ postId }: FeedDetailProps) {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

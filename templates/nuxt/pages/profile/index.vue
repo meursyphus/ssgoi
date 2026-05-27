@@ -1,5 +1,5 @@
 <template>
-  <SsgoiTransition id="/profile">
+  <div data-ssgoi-transition="/profile">
     <div class="bg-[#121212]">
       <!-- Profile Header -->
       <div class="relative">
@@ -79,7 +79,7 @@
                   rel="noopener"
                   class="text-neutral-300 hover:underline"
                 >
-                  {{ profile.website.replace('https://', '') }}
+                  {{ profile.website.replace("https://", "") }}
                 </a>
               </span>
             </div>
@@ -99,11 +99,9 @@
         <ProfileFeed />
       </div>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
-
 const profile = useProfile();
 </script>

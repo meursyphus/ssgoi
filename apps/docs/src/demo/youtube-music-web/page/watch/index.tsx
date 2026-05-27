@@ -1,24 +1,24 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { useSong, type SongDetail } from "@/demo/youtube-music-web/state/song";
 import { NowPlaying } from "./now-playing";
 import { UpNext } from "./up-next";
 import { Lyrics } from "./lyrics";
 import { Related } from "./related";
 import { TabBar } from "./tab-bar";
-
 export default function WatchPage({
   initialData,
 }: {
   initialData: SongDetail;
 }) {
-  const song = useSong((s) => ({ tab: s.tab, actions: s.actions }));
+  const song = useSong((s) => ({
+    tab: s.tab,
+    actions: s.actions,
+  }));
   song.actions.init(initialData);
-
   return (
-    <SsgoiTransition
-      id="/demo/youtube-music-web/watch"
+    <div
+      data-ssgoi-transition="/demo/youtube-music-web/watch"
       className="h-full overflow-y-auto bg-gradient-to-b from-[#161616] via-[#0a0a0a] to-[#030303] text-white"
     >
       <div className="mx-auto flex max-w-[1300px] flex-col px-4 pb-12 pt-4 lg:px-8">
@@ -32,6 +32,6 @@ export default function WatchPage({
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

@@ -15,7 +15,8 @@ yarn add @ssgoi/angular
 ## What You Get
 
 - `Ssgoi` directive (selector: `[ssgoi]`) that bootstraps the core transition context on the client and gracefully no-ops during SSR.
-- `SsgoiTransition` directive (selector: `[ssgoiTransition]`) that wires individual route containers into the transition system.
+- `data-ssgoi-transition` route markers discovered automatically inside `[ssgoi]`.
+- Deprecated `SsgoiTransition` directive (selector: `[ssgoiTransition]`) kept for backward compatibility.
 - `injectSsgoi()` helper and `SSGOI_CONTEXT` injection token for retrieving the transition context anywhere in your component tree.
 - Re-exported transition factories under `@ssgoi/angular/view-transitions`.
 
@@ -50,18 +51,16 @@ export class AppComponent {
 }
 ```
 
-### 2. Mark each routed view with `SsgoiTransition`
+### 2. Mark each routed view
 
 ```typescript
 import { Component } from "@angular/core";
-import { SsgoiTransition } from "@ssgoi/angular";
 
 @Component({
   selector: "app-home",
   standalone: true,
-  imports: [SsgoiTransition],
   template: `
-    <section [ssgoiTransition]="'/home'">
+    <section data-ssgoi-transition="/home">
       <h1>Home Page</h1>
     </section>
   `,
@@ -69,12 +68,12 @@ import { SsgoiTransition } from "@ssgoi/angular";
 export class HomeComponent {}
 ```
 
-The value you pass to `[ssgoiTransition]` should uniquely identify the view (commonly the route path).
+The `data-ssgoi-transition` value should uniquely identify the view (commonly the route path).
 
 ## How It Works
 
-- `Ssgoi` wraps `createSggoiTransitionContext` from `@ssgoi/core` and injects it via `SSGOI_CONTEXT`. The directive guards against the server platform so SSR renders stay deterministic.
-- `SsgoiTransition` reads that context with `injectSsgoi()`, sets `data-ssgoi-transition` on the host, and subscribes the element to the core transition runner.
+- `Ssgoi` wraps `createSggoiTransitionContext` from `@ssgoi/core`, injects it via `SSGOI_CONTEXT`, and observes `data-ssgoi-transition` elements under the host. The directive guards against the server platform so SSR renders stay deterministic.
+- The deprecated `SsgoiTransition` directive still sets `data-ssgoi-transition` and registers the host directly for backward compatibility.
 
 Because everything is driven by signals, Angular change detection stays minimal and the bundle remains fully tree-shakeable.
 
@@ -83,8 +82,8 @@ Because everything is driven by signals, Angular change detection stays minimal 
 - `Ssgoi`
   - `config: SsgoiConfig` (input, optional) – global transition configuration. Uses `{}` as default.
   - `host: HostAnimation | undefined` (input, optional) – external playback host for debug tooling.
-- `SsgoiTransition`
-  - `ssgoiTransition: string` (required input) – identifier for the target view/container.
+- `data-ssgoi-transition` – identifier for the target view/container.
+- `SsgoiTransition` is deprecated; use `data-ssgoi-transition` directly.
 - `injectSsgoi(): SsgoiContext` – returns the adapter context. During SSR it falls back to a no-op implementation so you can call it unconditionally.
 
 ## Available Transitions

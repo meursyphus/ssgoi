@@ -45,17 +45,15 @@ export default function App() {
 }
 ```
 
-### 2. Wrap your pages
+### 2. Mark your pages
 
 ```tsx
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function HomePage() {
   return (
-    <SsgoiTransition id="/">
+    <main data-ssgoi-transition="/">
       <h1>Welcome</h1>
       {/* Page content */}
-    </SsgoiTransition>
+    </main>
   );
 }
 ```
@@ -246,11 +244,8 @@ export default function RootLayout({ children }) {
   );
 }
 
-// app/page.tsx
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function Page() {
-  return <SsgoiTransition id="/">{/* Your page content */}</SsgoiTransition>;
+  return <main data-ssgoi-transition="/">{/* Your page content */}</main>;
 }
 ```
 
@@ -266,12 +261,13 @@ The provider component that manages transition context.
 <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
 ```
 
-#### `<SsgoiTransition>`
+#### `data-ssgoi-transition`
 
-Wrapper component for pages that should transition.
+Attribute for pages that should transition. Set it on the page boundary element
+inside `<Ssgoi>`.
 
 ```tsx
-<SsgoiTransition id="/page-id">{children}</SsgoiTransition>
+<main data-ssgoi-transition="/page-id">{children}</main>
 ```
 
 ### Hooks

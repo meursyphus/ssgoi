@@ -1,27 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { useListing } from "@/demo/air-bnb/state/listing";
 import { HomeHeader } from "./header";
 import { CategoryTabs } from "./category-tabs";
 import { CompanyNotice } from "./company-notice";
 import { ListingRow } from "./listing-row";
 import { PopularSection } from "./popular-section";
-
 export default function HomePage() {
   const listing = useListing((state) => ({
     feed: state.feed,
     actions: state.actions,
   }));
-
   useEffect(() => {
     listing.actions.loadFeed();
   }, [listing.actions]);
-
   return (
-    <SsgoiTransition
-      id="/demo/air-bnb"
+    <div
+      data-ssgoi-transition="/demo/air-bnb"
       className="flex min-h-full flex-col bg-white"
     >
       <HomeHeader />
@@ -38,6 +34,6 @@ export default function HomePage() {
           loading={listing.feed.isLoading}
         />
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

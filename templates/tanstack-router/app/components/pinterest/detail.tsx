@@ -1,27 +1,22 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { SsgoiTransition } from "@ssgoi/react";
 import { getPinterestItem } from "./mock-data";
-
 interface PinterestDetailProps {
   pinId: string;
 }
-
 export default function PinterestDetail({ pinId }: PinterestDetailProps) {
   const item = getPinterestItem(pinId);
-
   if (!item) {
     return (
-      <SsgoiTransition id={`/pinterest/${pinId}`}>
+      <div data-ssgoi-transition={`/pinterest/${pinId}`}>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Pin not found</p>
         </div>
-      </SsgoiTransition>
+      </div>
     );
   }
-
   return (
-    <SsgoiTransition id={`/pinterest/${pinId}`}>
+    <div data-ssgoi-transition={`/pinterest/${pinId}`}>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">
@@ -50,7 +45,9 @@ export default function PinterestDetail({ pinId }: PinterestDetailProps) {
             className="w-full rounded-lg mb-4"
             src={item.image}
             alt={item.title}
-            style={{ aspectRatio: item.aspectRatio }}
+            style={{
+              aspectRatio: item.aspectRatio,
+            }}
             data-zoom-enter-key={item.id}
           />
 
@@ -167,6 +164,6 @@ export default function PinterestDetail({ pinId }: PinterestDetailProps) {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

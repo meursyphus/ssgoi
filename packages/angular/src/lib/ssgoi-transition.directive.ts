@@ -10,6 +10,10 @@ import {
 import { isPlatformBrowser } from "@angular/common";
 import { injectSsgoi } from "./context";
 
+/**
+ * @deprecated Set `data-ssgoi-transition` directly on the page boundary
+ * element inside `[ssgoi]` instead.
+ */
 @Directive({
   selector: "[ssgoiTransition]",
   standalone: true,

@@ -1,13 +1,13 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
-
 const BG =
   "https://images.unsplash.com/photo-1518407613690-d9fc990e795f?auto=format&fit=crop&w=2400&q=80";
-
 export default function CourtPage() {
   return (
-    <SsgoiTransition id="/demo/honeydrop" className="relative h-full w-full">
+    <div
+      data-ssgoi-transition="/demo/honeydrop"
+      className="relative h-full w-full"
+    >
       <div className="relative h-full w-full overflow-hidden">
         <img
           src={BG}
@@ -32,6 +32,6 @@ export default function CourtPage() {
           </p>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

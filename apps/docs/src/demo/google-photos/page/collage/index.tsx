@@ -1,10 +1,8 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { useRouter } from "next/navigation";
 import { Search, Circle, Maximize2 } from "lucide-react";
 import type { PhotoSimple } from "@/demo/google-photos/state/photo";
-
 const SECTION_LABELS = ["Today", "Yesterday", "Thursday"] as const;
 
 /**
@@ -16,14 +14,12 @@ function bucket(photos: PhotoSimple[], perSection = 6): PhotoSimple[][] {
     photos.slice(i * perSection, (i + 1) * perSection),
   );
 }
-
 export default function CollagePage({ photos }: { photos: PhotoSimple[] }) {
   const router = useRouter();
   const sections = bucket(photos);
-
   return (
-    <SsgoiTransition
-      id="/demo/google-photos/collage"
+    <div
+      data-ssgoi-transition="/demo/google-photos/collage"
       className="relative flex min-h-full flex-col bg-white"
     >
       <header className="sticky top-0 z-30 bg-white pt-3 pb-2">
@@ -62,10 +58,7 @@ export default function CollagePage({ photos }: { photos: PhotoSimple[] }) {
         {sections.map((items, i) => (
           <section key={SECTION_LABELS[i]} className="mt-5">
             <div className="flex items-center gap-3 px-4 pb-3">
-              <Circle
-                className="h-5 w-5 text-neutral-300"
-                strokeWidth={1.75}
-              />
+              <Circle className="h-5 w-5 text-neutral-300" strokeWidth={1.75} />
               <h2 className="text-[18px] font-semibold text-neutral-900">
                 {SECTION_LABELS[i]}
               </h2>
@@ -96,6 +89,6 @@ export default function CollagePage({ photos }: { photos: PhotoSimple[] }) {
       >
         <Maximize2 className="h-5 w-5" strokeWidth={2.25} />
       </button>
-    </SsgoiTransition>
+    </div>
   );
 }

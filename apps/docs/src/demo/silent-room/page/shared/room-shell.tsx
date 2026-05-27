@@ -1,14 +1,14 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import type { RoomData } from "./types";
-
 export function RoomShell({ data }: { data: RoomData }) {
   const alignClass = data.align === "left" ? "items-start" : "items-end";
   const textAlignClass = data.align === "left" ? "text-left" : "text-right";
-
   return (
-    <SsgoiTransition id={data.routeId} className="relative h-full w-full">
+    <div
+      data-ssgoi-transition={data.routeId}
+      className="relative h-full w-full"
+    >
       <div className="relative h-full w-full overflow-hidden">
         <img
           src={data.bg}
@@ -36,9 +36,7 @@ export function RoomShell({ data }: { data: RoomData }) {
               {data.title}
             </h1>
             <p
-              className={`mt-6 max-w-md text-sm leading-relaxed text-[#f5f1ea]/70 ${
-                data.align === "right" ? "ml-auto" : ""
-              }`}
+              className={`mt-6 max-w-md text-sm leading-relaxed text-[#f5f1ea]/70 ${data.align === "right" ? "ml-auto" : ""}`}
             >
               {data.caption}
             </p>
@@ -61,6 +59,6 @@ export function RoomShell({ data }: { data: RoomData }) {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

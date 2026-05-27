@@ -1,12 +1,10 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function ProfileRemixPage({ id }: { id: string }) {
   return (
-    <SsgoiTransition
+    <div
+      data-ssgoi-transition={`/demo/instagram/profile/${id}/remix`}
       className="min-h-screen"
-      id={`/demo/instagram/profile/${id}/remix`}
     >
       <div className="flex min-h-[400px] flex-col items-center justify-center px-10 py-16 text-center">
         <div className="grid h-16 w-16 place-items-center rounded-full border-2 border-neutral-900">
@@ -39,6 +37,6 @@ export default function ProfileRemixPage({ id }: { id: string }) {
           다른 사용자가 만든 리믹스가 여기에 표시됩니다.
         </p>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

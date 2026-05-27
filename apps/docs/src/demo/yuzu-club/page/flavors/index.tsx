@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
-
 type Flavor = {
   emoji: string;
   name: string;
@@ -11,7 +9,6 @@ type Flavor = {
   bg: string;
   rotate: string;
 };
-
 const FLAVORS: Flavor[] = [
   {
     emoji: "🍊",
@@ -62,11 +59,10 @@ const FLAVORS: Flavor[] = [
     rotate: "rotate-2",
   },
 ];
-
 export default function FlavorsPage() {
   return (
-    <SsgoiTransition
-      id="/demo/yuzu-club/flavors"
+    <div
+      data-ssgoi-transition="/demo/yuzu-club/flavors"
       className="relative h-full w-full"
     >
       <div className="relative h-full w-full overflow-y-auto bg-[#8ed1a4]">
@@ -133,6 +129,6 @@ export default function FlavorsPage() {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

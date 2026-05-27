@@ -89,13 +89,11 @@ export default function DemoLayout({ children }) {
 
 ### 3. Page Components
 
-Each page must be wrapped with `SsgoiTransition` and given a unique `id`:
+Each page must set a unique `data-ssgoi-transition` route id:
 
 ```tsx
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function PostsPage() {
-  return <SsgoiTransition id="/posts">{/* Page content */}</SsgoiTransition>;
+  return <main data-ssgoi-transition="/posts">{/* Page content */}</main>;
 }
 ```
 

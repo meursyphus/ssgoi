@@ -1,11 +1,11 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { Play } from "lucide-react";
 import { SiteMenu } from "./site-menu";
-
-type Meta = { label: string; value: string };
-
+type Meta = {
+  label: string;
+  value: string;
+};
 export type CoursePageData = {
   routeId: string;
   eyebrow: string;
@@ -16,11 +16,10 @@ export type CoursePageData = {
   videoUrl: string;
   posterUrl: string;
 };
-
 export function CoursePage({ data }: { data: CoursePageData }) {
   return (
-    <SsgoiTransition
-      id={data.routeId}
+    <div
+      data-ssgoi-transition={data.routeId}
       className="relative h-full w-full overflow-hidden"
     >
       {/* fullscreen cinematic background — absolute so it animates with the page */}
@@ -114,6 +113,6 @@ export function CoursePage({ data }: { data: CoursePageData }) {
           </div>
         </section>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 <template>
-  <SsgoiTransition :id="`/profile/${id}`">
+  <div :data-ssgoi-transition="`/profile/${id}`">
     <div v-if="!post" class="bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Post not found</p>
     </div>
@@ -94,7 +94,9 @@
 
           <!-- Comments -->
           <div class="space-y-1.5 mb-3">
-            <p class="text-neutral-400 text-xs">View all {{ post.comments }} comments</p>
+            <p class="text-neutral-400 text-xs">
+              View all {{ post.comments }} comments
+            </p>
             <div class="space-y-1">
               <p class="text-white text-xs">
                 <span class="font-medium">user1</span> Amazing!
@@ -111,7 +113,9 @@
           </p>
 
           <!-- Comment input -->
-          <div class="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
+          <div
+            class="mt-3 pt-3 border-t border-white/5 flex items-center gap-2"
+          >
             <input
               type="text"
               placeholder="Add a comment..."
@@ -122,12 +126,11 @@
         </div>
       </div>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted } from "vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -137,16 +140,16 @@ const post = useProfilePost(id);
 
 // Add keyboard navigation (ESC to go back)
 const handleKeyPress = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') {
-    router.push('/profile');
+  if (e.key === "Escape") {
+    router.push("/profile");
   }
 };
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeyPress);
+  window.addEventListener("keydown", handleKeyPress);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
+  window.removeEventListener("keydown", handleKeyPress);
 });
 </script>

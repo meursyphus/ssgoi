@@ -1,28 +1,23 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { SsgoiTransition } from "@ssgoi/react";
 import { getPost, getRelatedPosts } from "./mock-data";
-
 interface PostDetailProps {
   postId: string;
 }
-
 export default function PostDetail({ postId }: PostDetailProps) {
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
-
   if (!post) {
     return (
-      <SsgoiTransition id={`/posts/${postId}`}>
+      <div data-ssgoi-transition={`/posts/${postId}`}>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
-      </SsgoiTransition>
+      </div>
     );
   }
-
   return (
-    <SsgoiTransition id={`/posts/${postId}`}>
+    <div data-ssgoi-transition={`/posts/${postId}`}>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">
@@ -164,13 +159,17 @@ export default function PostDetail({ postId }: PostDetailProps) {
         {/* Related posts */}
         {relatedPosts.length > 0 && (
           <div className="border-t border-white/5 px-4 py-6">
-            <h3 className="text-sm font-medium text-white mb-3">More to Read</h3>
+            <h3 className="text-sm font-medium text-white mb-3">
+              More to Read
+            </h3>
             <div className="space-y-2">
               {relatedPosts.map((relatedPost) => (
                 <Link
                   key={relatedPost.id}
                   to="/posts/$postId"
-                  params={{ postId: relatedPost.id }}
+                  params={{
+                    postId: relatedPost.id,
+                  }}
                   className="flex gap-3 p-2 border border-white/5 rounded hover:border-white/10 transition-colors"
                 >
                   <img
@@ -192,6 +191,6 @@ export default function PostDetail({ postId }: PostDetailProps) {
           </div>
         )}
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

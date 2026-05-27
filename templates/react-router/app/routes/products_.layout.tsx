@@ -1,32 +1,50 @@
 import React, { useMemo } from "react";
 import { Link, Outlet, useLocation } from "react-router";
-import { Ssgoi, SsgoiTransition } from "@ssgoi/react";
+import { Ssgoi } from "@ssgoi/react";
 import { slide } from "@ssgoi/react/view-transitions";
-
 const categories = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
+  {
+    id: "all",
+    label: "All",
+    path: "/products/all",
+  },
+  {
+    id: "electronics",
+    label: "Tech",
+    path: "/products/electronics",
+  },
+  {
+    id: "fashion",
+    label: "Fashion",
+    path: "/products/fashion",
+  },
+  {
+    id: "home",
+    label: "Home",
+    path: "/products/home",
+  },
+  {
+    id: "beauty",
+    label: "Beauty",
+    path: "/products/beauty",
+  },
 ];
-
 export default function ProductsLayout() {
   const location = useLocation();
   const pathname = location.pathname;
-
   const config = useMemo(
     () => ({
       transitions: [
-        slide({ paths: categories.map((category) => category.path) }),
+        slide({
+          paths: categories.map((category) => category.path),
+        }),
       ],
     }),
     [],
   );
-
   return (
-    <SsgoiTransition
-      id="/products"
+    <div
+      data-ssgoi-transition="/products"
       className="min-h-screen bg-[#121212] flex flex-col"
     >
       {/* Header - Fixed */}
@@ -44,11 +62,7 @@ export default function ProductsLayout() {
             <Link
               key={cat.id}
               to={cat.path}
-              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                pathname === cat.path
-                  ? "bg-white text-black"
-                  : "bg-white/10 text-neutral-400 hover:bg-white/15"
-              }`}
+              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${pathname === cat.path ? "bg-white text-black" : "bg-white/10 text-neutral-400 hover:bg-white/15"}`}
             >
               {cat.label}
             </Link>
@@ -62,6 +76,6 @@ export default function ProductsLayout() {
           <Outlet />
         </Ssgoi>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

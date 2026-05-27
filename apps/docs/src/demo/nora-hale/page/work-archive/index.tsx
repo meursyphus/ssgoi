@@ -1,18 +1,33 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
-
 const PROJECTS = [
-  { year: "2026", title: "Helios — Editorial Identity" },
-  { year: "2025", title: "Forma — Custom Type" },
-  { year: "2025", title: "Pulp & Press — Print Series" },
-  { year: "2024", title: "Tide House — Brand System" },
-  { year: "2024", title: "Salt River Music — Album Art" },
+  {
+    year: "2026",
+    title: "Helios — Editorial Identity",
+  },
+  {
+    year: "2025",
+    title: "Forma — Custom Type",
+  },
+  {
+    year: "2025",
+    title: "Pulp & Press — Print Series",
+  },
+  {
+    year: "2024",
+    title: "Tide House — Brand System",
+  },
+  {
+    year: "2024",
+    title: "Salt River Music — Album Art",
+  },
 ];
-
 export default function WorkArchivePage() {
   return (
-    <SsgoiTransition id="/demo/nora-hale" className="relative h-full w-full">
+    <div
+      data-ssgoi-transition="/demo/nora-hale"
+      className="relative h-full w-full"
+    >
       <div className="relative flex h-full w-full flex-col overflow-y-auto px-6 lg:px-10">
         <section className="flex flex-col items-center pt-36 lg:pt-44">
           <p className="text-[11px] tracking-[0.32em] text-[#1a1a1a]/55 uppercase">
@@ -57,6 +72,6 @@ export default function WorkArchivePage() {
           </p>
         </section>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

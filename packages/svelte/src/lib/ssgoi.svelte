@@ -3,7 +3,11 @@
   import type { SsgoiConfig } from "@ssgoi/core/types";
   import type { HostAnimation } from "@ssgoi/core/internal";
   import { setSsgoiContext } from "./context";
-  import { createSggoiTransitionContext } from "@ssgoi/core/internal";
+  import {
+    createSggoiTransitionContext,
+    observeSsgoiTransitions,
+  } from "@ssgoi/core/internal";
+  import { onMount } from "svelte";
 
   interface Props {
     config: SsgoiConfig;
@@ -15,6 +19,12 @@
 
   const contextValue = createSggoiTransitionContext(config, { host });
   setSsgoiContext(contextValue);
+
+  let root: HTMLDivElement;
+
+  onMount(() => observeSsgoiTransitions(root, contextValue));
 </script>
 
-{@render children()}
+<div bind:this={root} data-ssgoi-root="" style="display: contents">
+  {@render children()}
+</div>

@@ -1,24 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { Loader2 } from "lucide-react";
 import { usePhoto } from "@/demo/google-photos/state/photo";
 import { PhotoGrid } from "./photo-grid";
-
 export default function PhotosPage() {
   const photo = usePhoto((state) => ({
     photos: state.photos,
     actions: state.actions,
   }));
-
   useEffect(() => {
     photo.actions.loadAll();
   }, [photo.actions]);
-
   return (
-    <SsgoiTransition
-      id="/demo/google-photos"
+    <div
+      data-ssgoi-transition="/demo/google-photos"
       className="block min-h-full bg-white"
     >
       {photo.photos.isLoading && photo.photos.data.items.length === 0 ? (
@@ -28,6 +24,6 @@ export default function PhotosPage() {
       ) : (
         <PhotoGrid photos={photo.photos.data.items} />
       )}
-    </SsgoiTransition>
+    </div>
   );
 }

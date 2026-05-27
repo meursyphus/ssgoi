@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Ssgoi, SsgoiTransition } from "@ssgoi/svelte";
+  import { Ssgoi } from "@ssgoi/svelte";
   import { slide } from "@ssgoi/svelte/view-transitions";
   import { page } from "$app/stores";
 
@@ -20,7 +20,10 @@
   };
 </script>
 
-<SsgoiTransition id="/products" class="min-h-screen bg-[#121212] flex flex-col">
+<div
+  data-ssgoi-transition="/products"
+  class="min-h-screen bg-[#121212] flex flex-col"
+>
   <!-- Header - Fixed -->
   <div class="px-4 pt-6 pb-3 shrink-0">
     <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
@@ -50,4 +53,4 @@
       {@render children()}
     </Ssgoi>
   </div>
-</SsgoiTransition>
+</div>
