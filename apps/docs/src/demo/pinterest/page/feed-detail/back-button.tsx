@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ChevronLeft } from "lucide-react";
 
 export function BackButton() {

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/demo/gamja-market/state/cart";
 import type { ProductSimple } from "@/demo/gamja-market/state/product";

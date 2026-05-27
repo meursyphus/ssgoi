@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ArrowLeft, Heart, Share } from "lucide-react";
 
 export function DetailHeader() {

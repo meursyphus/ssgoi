@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { findShowcase, githubUrl, type ShowcaseClip } from "../data";
 import { ClipPlayer } from "./clip-player";
 

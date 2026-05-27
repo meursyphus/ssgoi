@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ChevronLeft, SlidersHorizontal } from "lucide-react";
 
 export function ResultHeader({ query }: { query: string }) {

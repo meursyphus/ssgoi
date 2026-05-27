@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { Pin, BellOff } from "lucide-react";
 import type { ChatThreadSimple } from "@/demo/kakao-talk/api/chat";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import type { CollectionDetail } from "@/demo/google-photos/state/collection";
 

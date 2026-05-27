@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import type { CollectionSimple } from "@/demo/google-photos/state/collection";
 
 /**
@@ -38,11 +38,7 @@ export function CollectionCard({
               ))}
           </div>
         ) : covers.length === 1 ? (
-          <img
-            src={covers[0]}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={covers[0]} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full bg-neutral-200" />
         )}

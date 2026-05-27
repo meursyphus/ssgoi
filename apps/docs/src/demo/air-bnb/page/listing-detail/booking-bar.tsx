@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import type { ListingDetail } from "@/demo/air-bnb/state/listing";
 
 export function BookingBar({ detail }: { detail: ListingDetail }) {

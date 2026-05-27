@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/link";
 import { Search } from "lucide-react";
 import type { RecommendedCategory } from "@/demo/pinterest/state/category";
 
