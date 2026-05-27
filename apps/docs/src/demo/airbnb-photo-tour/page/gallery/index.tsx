@@ -1,12 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { usePhoto, type PhotoTour } from "@/demo/airbnb-photo-tour/state/photo";
 import { GalleryHeader } from "./gallery-header";
 import { CategoryStrip } from "./category-strip";
 import { CategorySection } from "./category-section";
-
 export default function GalleryPage({
   initialData,
 }: {
@@ -15,23 +13,25 @@ export default function GalleryPage({
   // SSR data is the source of truth — render from `initialData` directly so
   // SSR/CSR markup matches. Model sync is silent and only useful for any
   // future cross-page reads of the tour list.
-  const photo = usePhoto((state) => ({ actions: state.actions }));
+  const photo = usePhoto((state) => ({
+    actions: state.actions,
+  }));
   photo.actions.initTour(initialData);
-
   const { title, categories } = initialData;
   const [activeId, setActiveId] = useState<string>(categories[0]?.id ?? "");
   const refs = useRef<Record<string, HTMLElement | null>>({});
-
   const registerRef = useCallback((id: string, el: HTMLElement | null) => {
     refs.current[id] = el;
   }, []);
-
   const handleSelect = useCallback((id: string) => {
     setActiveId(id);
     const el = refs.current[id];
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el)
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
   }, []);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -43,7 +43,10 @@ export default function GalleryPage({
           if (id) setActiveId(id);
         }
       },
-      { rootMargin: "-200px 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+      {
+        rootMargin: "-200px 0px -55% 0px",
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      },
     );
     for (const [id, el] of Object.entries(refs.current)) {
       if (el) {
@@ -53,10 +56,9 @@ export default function GalleryPage({
     }
     return () => observer.disconnect();
   }, [categories.length]);
-
   return (
-    <SsgoiTransition
-      id="/demo/airbnb-photo-tour"
+    <div
+      data-ssgoi-transition="/demo/airbnb-photo-tour"
       className="block h-full overflow-y-auto bg-white text-neutral-900"
     >
       <GalleryHeader title={title} />
@@ -76,6 +78,6 @@ export default function GalleryPage({
           ))}
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

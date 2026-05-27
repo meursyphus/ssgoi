@@ -1,6 +1,5 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { DetailHero } from "./hero";
 import { DetailHeader } from "./header";
@@ -9,7 +8,6 @@ import { DetailStats } from "./stats";
 import { PerksCard } from "./perks-card";
 import { AmenitiesGrid } from "./amenities-grid";
 import { BookingBar } from "./booking-bar";
-
 export default function ListingDetailPage({
   initialData,
 }: {
@@ -20,12 +18,10 @@ export default function ListingDetailPage({
     actions: state.actions,
   }));
   listing.actions.init(initialData);
-
   const detail = listing.current ?? initialData;
-
   return (
-    <SsgoiTransition
-      id={`/demo/air-bnb/listings/detail`}
+    <div
+      data-ssgoi-transition={`/demo/air-bnb/listings/detail`}
       className="relative block min-h-full w-full bg-white"
     >
       <DetailHero detail={detail} />
@@ -37,6 +33,6 @@ export default function ListingDetailPage({
         <AmenitiesGrid amenities={detail.amenities} />
       </div>
       <BookingBar detail={detail} />
-    </SsgoiTransition>
+    </div>
   );
 }

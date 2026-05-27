@@ -52,19 +52,15 @@ const config = {
 </script>
 ```
 
-### 2. Wrap your pages
+### 2. Mark your pages
 
 ```vue
 <template>
-  <SsgoiTransition id="/">
+  <main data-ssgoi-transition="/">
     <h1>Welcome</h1>
     <!-- Page content -->
-  </SsgoiTransition>
+  </main>
 </template>
-
-<script setup>
-import { SsgoiTransition } from "@ssgoi/vue";
-</script>
 ```
 
 **That's it!** Your pages now transition smoothly with the configured effect.
@@ -115,14 +111,10 @@ const config = {
 
 <!-- pages/index.vue -->
 <template>
-  <SsgoiTransition id="/">
+  <main data-ssgoi-transition="/">
     <!-- Your page content -->
-  </SsgoiTransition>
+  </main>
 </template>
-
-<script setup>
-import { SsgoiTransition } from "@ssgoi/vue";
-</script>
 ```
 
 ## API Reference
@@ -144,19 +136,16 @@ Props:
 - `config` - Transition configuration object
 - `host` - Optional external playback host for debug tooling
 
-#### `<SsgoiTransition>`
+#### `data-ssgoi-transition`
 
-Wrapper component for pages that should transition.
+Attribute for pages that should transition. Set it on the page boundary element
+inside `<Ssgoi>`.
 
 ```vue
-<SsgoiTransition id="/page-id">
+<main data-ssgoi-transition="/page-id">
   <!-- children -->
-</SsgoiTransition>
+</main>
 ```
-
-Props:
-
-- `id` - Unique identifier for the page (required)
 
 ## Built-in Transitions
 

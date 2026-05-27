@@ -1,6 +1,5 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { CreditCard } from "lucide-react";
 import {
   useCheckout,
@@ -8,14 +7,12 @@ import {
 } from "@/demo/air-bnb/state/checkout";
 import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
-
 type Option = {
   key: CheckoutMethod;
   label: string;
   icon: React.ReactNode;
   brandRow?: React.ReactNode;
 };
-
 const OPTIONS: Option[] = [
   {
     key: "card",
@@ -48,7 +45,6 @@ const OPTIONS: Option[] = [
     ),
   },
 ];
-
 function BrandPill({
   bg,
   fg,
@@ -60,22 +56,23 @@ function BrandPill({
 }) {
   return (
     <span
-      style={{ backgroundColor: bg, color: fg }}
+      style={{
+        backgroundColor: bg,
+        color: fg,
+      }}
       className="rounded-sm px-1.5 py-0.5 text-[8px] font-bold tracking-wider"
     >
       {label}
     </span>
   );
 }
-
 export function MethodStep() {
   const checkout = useCheckout((state) => ({
     method: state.selectedMethod,
     actions: state.actions,
   }));
-
   return (
-    <SsgoiTransition id={CHECKOUT_STEP_TRANSITION_IDS.method}>
+    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.method}>
       <CheckoutTitle step="method" />
       <div className="px-5 pt-5">
         <p className="text-[13px] text-neutral-700">
@@ -97,11 +94,7 @@ export function MethodStep() {
                 key={option.key}
                 type="button"
                 onClick={() => checkout.actions.setMethod(option.key)}
-                className={`flex w-full items-start justify-between gap-3 px-4 py-4 text-left ${
-                  idx !== OPTIONS.length - 1
-                    ? "border-b border-neutral-100"
-                    : ""
-                }`}
+                className={`flex w-full items-start justify-between gap-3 px-4 py-4 text-left ${idx !== OPTIONS.length - 1 ? "border-b border-neutral-100" : ""}`}
               >
                 <div className="flex flex-1 items-start gap-3">
                   <span className="flex h-6 w-10 flex-shrink-0 items-center justify-center">
@@ -115,11 +108,7 @@ export function MethodStep() {
                   </div>
                 </div>
                 <span
-                  className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                    selected
-                      ? "border-neutral-900 bg-white"
-                      : "border-neutral-300 bg-white"
-                  }`}
+                  className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${selected ? "border-neutral-900 bg-white" : "border-neutral-300 bg-white"}`}
                 >
                   {selected && (
                     <span className="h-2.5 w-2.5 rounded-full bg-neutral-900" />
@@ -153,6 +142,6 @@ export function MethodStep() {
           additional fees.
         </p>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

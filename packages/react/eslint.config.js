@@ -24,10 +24,4 @@ export default tseslint.config([
       },
     },
   },
-  {
-    files: ["src/lib/context.tsx"],
-    rules: {
-      "react-refresh/only-export-components": "off",
-    },
-  },
 ]);

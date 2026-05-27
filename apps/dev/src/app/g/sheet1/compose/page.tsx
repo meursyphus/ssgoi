@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 
 type Recipient = {
   name: string;
@@ -54,8 +53,8 @@ export default function Sheet1ComposePage() {
   };
 
   return (
-    <SsgoiTransition
-      id="/g/sheet1/compose"
+    <div
+      data-ssgoi-transition="/g/sheet1/compose"
       className="flex min-h-full flex-col bg-[#121212] text-neutral-100"
     >
       <div className="sticky top-0 z-10 border-b border-white/10 bg-[#121212]/95 backdrop-blur-md">
@@ -219,6 +218,6 @@ export default function Sheet1ComposePage() {
           {body.length} chars
         </span>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

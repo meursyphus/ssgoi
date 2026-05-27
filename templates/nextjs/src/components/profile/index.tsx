@@ -2,12 +2,10 @@
 
 import React from "react";
 import { profile } from "./mock-data";
-import { SsgoiTransition } from "@ssgoi/react";
 import { Feed } from "./feed";
-
 export default function ProfileDemo() {
   return (
-    <SsgoiTransition id="/profile">
+    <div data-ssgoi-transition="/profile">
       <div className="bg-[#121212]">
         {/* Profile Header */}
         <div className="relative">
@@ -106,6 +104,6 @@ export default function ProfileDemo() {
           <Feed />
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

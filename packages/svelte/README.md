@@ -51,19 +51,18 @@ pnpm add @ssgoi/svelte
 </Ssgoi>
 ```
 
-### 2. Wrap your pages
+### 2. Mark your pages
 
 ```svelte
 <!-- +page.svelte -->
 <script>
-  import { SsgoiTransition } from "@ssgoi/svelte";
   import { page } from "$app/stores";
 </script>
 
-<SsgoiTransition id={$page.url.pathname}>
+<main data-ssgoi-transition={$page.url.pathname}>
   <h1>Welcome</h1>
   <!-- Page content -->
-</SsgoiTransition>
+</main>
 ```
 
 **That's it!** Your pages now transition smoothly with the configured effect.
@@ -126,13 +125,12 @@ The route helpers return path transition groups, so nested arrays are accepted i
 
 <!-- +page.svelte -->
 <script>
-  import { SsgoiTransition } from '@ssgoi/svelte';
   import { page } from '$app/stores';
 </script>
 
-<SsgoiTransition id={$page.url.pathname}>
+<main data-ssgoi-transition={$page.url.pathname}>
   <!-- Your page content -->
-</SsgoiTransition>
+</main>
 ```
 
 ## API Reference
@@ -154,14 +152,15 @@ Props:
 - `config` - Transition configuration object
 - `host` - Optional external playback host for debug tooling
 
-#### `<SsgoiTransition>`
+#### `data-ssgoi-transition`
 
-Wrapper component for pages that should transition.
+Attribute for pages that should transition. Set it on the page boundary element
+inside `<Ssgoi>`.
 
 ```svelte
-<SsgoiTransition id="/page-id">
+<main data-ssgoi-transition="/page-id">
   <slot />
-</SsgoiTransition>
+</main>
 ```
 
 ## Built-in Transitions

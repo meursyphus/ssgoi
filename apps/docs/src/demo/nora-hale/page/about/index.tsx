@@ -1,14 +1,23 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
-
 const FACTS = [
-  { label: "Based", value: "Rotterdam, NL" },
-  { label: "Discipline", value: "Brand · Type · Editorial" },
-  { label: "Clients", value: "MoMA · Frame · Wax & Wane" },
-  { label: "Press", value: "It's Nice That · Eye on Design" },
+  {
+    label: "Based",
+    value: "Rotterdam, NL",
+  },
+  {
+    label: "Discipline",
+    value: "Brand · Type · Editorial",
+  },
+  {
+    label: "Clients",
+    value: "MoMA · Frame · Wax & Wane",
+  },
+  {
+    label: "Press",
+    value: "It's Nice That · Eye on Design",
+  },
 ];
-
 const PORTRAITS = [
   {
     src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=facearea&facepad=2&w=400&h=400&q=80",
@@ -27,11 +36,10 @@ const PORTRAITS = [
     className: "bottom-[18%] right-[10%] size-20 lg:size-28 -rotate-3",
   },
 ];
-
 export default function AboutPage() {
   return (
-    <SsgoiTransition
-      id="/demo/nora-hale/about"
+    <div
+      data-ssgoi-transition="/demo/nora-hale/about"
       className="relative h-full w-full"
     >
       <div className="relative h-full w-full overflow-y-auto px-6 lg:px-10">
@@ -81,6 +89,6 @@ export default function AboutPage() {
           </h2>
         </section>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

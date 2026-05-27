@@ -1,25 +1,18 @@
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
 import { NpmPill } from "@/components/npm-pill";
 import { SiteLogo } from "@/components/site-logo";
-
 export default function DocsPage() {
   return (
-    <SsgoiTransition
-      as="main"
-      id="/docs"
-      className="relative min-h-dvh bg-black"
-    >
+    <main data-ssgoi-transition="/docs" className="relative min-h-dvh bg-black">
       <FloatingHeader />
       <Hero />
       <Install />
       <Transitions />
       <Layout />
       <HowItWorks />
-    </SsgoiTransition>
+    </main>
   );
 }
-
 function FloatingHeader() {
   return (
     <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
@@ -45,7 +38,6 @@ function FloatingHeader() {
     </header>
   );
 }
-
 function Hero() {
   return (
     <section className="mx-auto max-w-3xl px-6 pb-12 pt-16 md:pt-24">
@@ -80,7 +72,6 @@ function Hero() {
     </section>
   );
 }
-
 const PACKAGES = [
   "@ssgoi/react",
   "@ssgoi/svelte",
@@ -88,7 +79,6 @@ const PACKAGES = [
   "@ssgoi/solid",
   "@ssgoi/angular",
 ];
-
 function Install() {
   return (
     <section className="border-t border-white/[0.05]">
@@ -105,28 +95,64 @@ function Install() {
     </section>
   );
 }
-
 type TransitionEntry = {
   name: string;
   blurb: string;
 };
-
 const TRANSITIONS: TransitionEntry[] = [
-  { name: "drill", blurb: "iOS-style hierarchical navigation." },
-  { name: "fade", blurb: "Calm cross-fade. Safe default." },
-  { name: "slide", blurb: "Horizontal push." },
-  { name: "scroll", blurb: "Vertical page scroll." },
-  { name: "sheet", blurb: "Bottom sheet, slides up." },
-  { name: "hero", blurb: "Shared element. data-hero-enter-key / data-hero-exit-key." },
-  { name: "zoom", blurb: "Card expands to detail. data-zoom-*-key." },
-  { name: "strip", blurb: "3D Y-axis flip." },
-  { name: "blind", blurb: "Window-blinds wipe." },
-  { name: "film", blurb: "Cinematic shrink + tile." },
-  { name: "rotate", blurb: "Card flip." },
-  { name: "jaemin", blurb: "Playful rotated zoom." },
+  {
+    name: "drill",
+    blurb: "iOS-style hierarchical navigation.",
+  },
+  {
+    name: "fade",
+    blurb: "Calm cross-fade. Safe default.",
+  },
+  {
+    name: "slide",
+    blurb: "Horizontal push.",
+  },
+  {
+    name: "scroll",
+    blurb: "Vertical page scroll.",
+  },
+  {
+    name: "sheet",
+    blurb: "Bottom sheet, slides up.",
+  },
+  {
+    name: "hero",
+    blurb: "Shared element. data-hero-enter-key / data-hero-exit-key.",
+  },
+  {
+    name: "zoom",
+    blurb: "Card expands to detail. data-zoom-*-key.",
+  },
+  {
+    name: "strip",
+    blurb: "3D Y-axis flip.",
+  },
+  {
+    name: "blind",
+    blurb: "Window-blinds wipe.",
+  },
+  {
+    name: "film",
+    blurb: "Cinematic shrink + tile.",
+  },
+  {
+    name: "rotate",
+    blurb: "Card flip.",
+  },
+  {
+    name: "jaemin",
+    blurb: "Playful rotated zoom.",
+  },
 ];
-
-const LAYOUT_CLASSES: { cls: string; why: string }[] = [
+const LAYOUT_CLASSES: {
+  cls: string;
+  why: string;
+}[] = [
   {
     cls: "relative",
     why: "The outgoing page is cloned with position: absolute — it needs a positioned ancestor or it jumps.",
@@ -140,7 +166,6 @@ const LAYOUT_CLASSES: { cls: string; why: string }[] = [
     why: "Prevents horizontal scrollbar flashes during slide / drill / strip.",
   },
 ];
-
 function Layout() {
   return (
     <section className="border-t border-white/[0.05]">
@@ -194,7 +219,6 @@ function Layout() {
     </section>
   );
 }
-
 function HowItWorks() {
   return (
     <section className="border-t border-white/[0.05]">
@@ -242,7 +266,6 @@ function HowItWorks() {
     </section>
   );
 }
-
 function FlowStep({ n, body }: { n: string; body: string }) {
   return (
     <li className="flex gap-4">
@@ -256,7 +279,6 @@ function FlowStep({ n, body }: { n: string; body: string }) {
     </li>
   );
 }
-
 function Transitions() {
   return (
     <section className="border-t border-white/[0.05]">

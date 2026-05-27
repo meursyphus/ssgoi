@@ -1,5 +1,5 @@
 <template>
-  <SsgoiTransition :id="`/posts/${id}`">
+  <div :data-ssgoi-transition="`/posts/${id}`">
     <div v-if="!post" class="min-h-screen bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Post not found</p>
     </div>
@@ -64,7 +64,9 @@
 
       <!-- Post content -->
       <article class="px-4 py-6 prose prose-invert max-w-none">
-        <div class="text-xs text-neutral-300 leading-relaxed whitespace-pre-line">
+        <div
+          class="text-xs text-neutral-300 leading-relaxed whitespace-pre-line"
+        >
           {{ post.content }}
         </div>
       </article>
@@ -112,12 +114,10 @@
         </div>
       </div>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
-
 const route = useRoute();
 const id = route.params.id as string;
 
@@ -125,10 +125,10 @@ const post = usePost(id);
 const relatedPosts = useRelatedPosts(id, 3);
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 </script>

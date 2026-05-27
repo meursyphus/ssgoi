@@ -37,13 +37,11 @@ const config = {
 };
 ```
 
-Each routed page is wrapped with `SsgoiTransition` and a stable route id.
+Each routed page has a stable `data-ssgoi-transition` route id.
 
 ```tsx
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function PostsPage() {
-  return <SsgoiTransition id="/posts">{/* page */}</SsgoiTransition>;
+  return <main data-ssgoi-transition="/posts">{/* page */}</main>;
 }
 ```
 

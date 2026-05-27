@@ -1,13 +1,10 @@
 import React from "react";
 import { Link } from "react-router";
 import { getAllPosts } from "./mock-data";
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function PostsDemo() {
   const posts = getAllPosts();
-
   return (
-    <SsgoiTransition id="/posts">
+    <div data-ssgoi-transition="/posts">
       <div className="min-h-full bg-[#121212] px-4 py-6">
         {/* Header */}
         <div className="mb-6">
@@ -71,6 +68,6 @@ export default function PostsDemo() {
           ))}
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

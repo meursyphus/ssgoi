@@ -1,5 +1,3 @@
-"use server";
-
 import { createAction, ActionError } from "@/lib/utils";
 import { photo } from "@/demo/google-photos/api/photo";
 import { data } from "../data";
@@ -8,7 +6,6 @@ import type { CollectionDetail } from "../types";
 const COVER_LIMIT = 4;
 
 async function _find(id: string): Promise<CollectionDetail> {
-  await new Promise((r) => setTimeout(r, 200));
   const meta = data.byId(id);
   if (!meta) throw new ActionError("Collection not found");
 

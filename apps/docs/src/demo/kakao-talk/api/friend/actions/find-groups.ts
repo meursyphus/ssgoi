@@ -1,5 +1,3 @@
-"use server";
-
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
 import type { FriendGroups, FriendSimple } from "../types";
@@ -13,8 +11,6 @@ function toSimple(profile: ReturnType<typeof data.byId>): FriendSimple | null {
 }
 
 async function _findGroups(): Promise<FriendGroups> {
-  await new Promise((r) => setTimeout(r, 220));
-
   const all = data.all();
   const me = data.me();
 

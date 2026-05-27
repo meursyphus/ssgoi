@@ -1,14 +1,12 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
 import { useCurrentListing } from "./use-current-listing";
-
 export function ReviewStep() {
   const detail = useCurrentListing();
   return (
-    <SsgoiTransition id={CHECKOUT_STEP_TRANSITION_IDS.review}>
+    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.review}>
       <CheckoutTitle step="review" />
       <div className="px-5 pt-5">
         <div className="rounded-2xl border border-neutral-200 p-3">
@@ -75,10 +73,9 @@ export function ReviewStep() {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }
-
 function SummaryRow({
   label,
   value,
@@ -108,7 +105,6 @@ function SummaryRow({
     </div>
   );
 }
-
 function PayTimingOption({
   label,
   selected,
@@ -124,11 +120,7 @@ function PayTimingOption({
     >
       <span className="text-[13px] font-medium text-neutral-900">{label}</span>
       <span
-        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-          selected
-            ? "border-neutral-900 bg-white"
-            : "border-neutral-300 bg-white"
-        }`}
+        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${selected ? "border-neutral-900 bg-white" : "border-neutral-300 bg-white"}`}
       >
         {selected && (
           <span className="h-2.5 w-2.5 rounded-full bg-neutral-900" />

@@ -1,17 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
-
 const STATS = [
-  { value: "12", label: "Flavors" },
-  { value: "8K", label: "Members" },
-  { value: "4.9", label: "Rating" },
+  {
+    value: "12",
+    label: "Flavors",
+  },
+  {
+    value: "8K",
+    label: "Members",
+  },
+  {
+    value: "4.9",
+    label: "Rating",
+  },
 ];
-
 export default function HomePage() {
   return (
-    <SsgoiTransition id="/demo/yuzu-club" className="relative h-full w-full">
+    <div
+      data-ssgoi-transition="/demo/yuzu-club"
+      className="relative h-full w-full"
+    >
       <div className="relative h-full w-full overflow-y-auto bg-[#ffd2a4]">
         {/* floating shapes */}
         <span
@@ -67,13 +76,7 @@ export default function HomePage() {
             {STATS.map((s, i) => (
               <div
                 key={s.label}
-                className={`flex flex-col items-center rounded-3xl px-6 py-5 ring-2 ring-[#1a1a2e] sm:px-8 ${
-                  i === 0
-                    ? "bg-[#ffd23f] -rotate-2"
-                    : i === 1
-                      ? "bg-[#8ed1a4] rotate-1"
-                      : "bg-[#fff5d6] -rotate-1"
-                }`}
+                className={`flex flex-col items-center rounded-3xl px-6 py-5 ring-2 ring-[#1a1a2e] sm:px-8 ${i === 0 ? "bg-[#ffd23f] -rotate-2" : i === 1 ? "bg-[#8ed1a4] rotate-1" : "bg-[#fff5d6] -rotate-1"}`}
               >
                 <span className="text-3xl font-black sm:text-4xl">
                   {s.value}
@@ -90,6 +93,6 @@ export default function HomePage() {
           </p>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }

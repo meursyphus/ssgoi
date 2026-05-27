@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
 
 type SentEmail = {
   id: string;
@@ -117,8 +116,8 @@ export default function Sheet1SentPage() {
   void fetchSentEmails;
 
   return (
-    <SsgoiTransition
-      id="/g/sheet1"
+    <div
+      data-ssgoi-transition="/g/sheet1"
       className="relative flex min-h-full flex-col bg-[#121212] text-neutral-100"
     >
       <header className="sticky top-0 z-10 border-b border-white/5 bg-[#121212]/85 backdrop-blur">
@@ -219,6 +218,6 @@ export default function Sheet1SentPage() {
           />
         </svg>
       </Link>
-    </SsgoiTransition>
+    </div>
   );
 }

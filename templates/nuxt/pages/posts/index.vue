@@ -1,5 +1,5 @@
 <template>
-  <SsgoiTransition id="/posts">
+  <div data-ssgoi-transition="/posts">
     <div class="min-h-full bg-[#121212] px-4 py-6">
       <!-- Header -->
       <div class="mb-6">
@@ -64,11 +64,9 @@
         </NuxtLink>
       </div>
     </div>
-  </SsgoiTransition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiTransition } from '@ssgoi/vue';
-
 const posts = useAllPosts();
 </script>

@@ -2,6 +2,10 @@
 import type { ComponentPublicInstance } from "vue";
 import { useSsgoi } from "./context";
 
+/**
+ * @deprecated Set `data-ssgoi-transition` directly on the page boundary
+ * element inside `<Ssgoi>` instead.
+ */
 interface Props {
   id: string;
   as?: keyof HTMLElementTagNameMap;

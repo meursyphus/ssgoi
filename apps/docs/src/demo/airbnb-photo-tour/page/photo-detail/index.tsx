@@ -1,6 +1,5 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import {
   usePhoto,
   type PhotoDetail,
@@ -8,18 +7,18 @@ import {
 import { DetailHeader } from "./detail-header";
 import { NavArrows } from "./nav-arrows";
 import { PhotoCanvas } from "./photo-canvas";
-
 export default function PhotoDetailPage({
   initialData,
 }: {
   initialData: PhotoDetail;
 }) {
-  const photo = usePhoto((state) => ({ actions: state.actions }));
+  const photo = usePhoto((state) => ({
+    actions: state.actions,
+  }));
   photo.actions.initDetail(initialData);
-
   return (
-    <SsgoiTransition
-      id={`/demo/airbnb-photo-tour/photos/${initialData.id}`}
+    <div
+      data-ssgoi-transition={`/demo/airbnb-photo-tour/photos/${initialData.id}`}
       className="relative block h-screen bg-white"
     >
       <DetailHeader
@@ -29,6 +28,6 @@ export default function PhotoDetailPage({
       />
       <NavArrows prevId={initialData.prevId} nextId={initialData.nextId} />
       <PhotoCanvas photo={initialData} />
-    </SsgoiTransition>
+    </div>
   );
 }

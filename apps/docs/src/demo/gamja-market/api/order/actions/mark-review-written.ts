@@ -1,5 +1,3 @@
-"use server";
-
 import { createAction, ActionError } from "@/lib/utils";
 import { data } from "../data";
 

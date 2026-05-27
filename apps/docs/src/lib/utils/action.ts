@@ -45,7 +45,7 @@ async function runParallelAction<T>(result: Promise<readonly [Promise<T>]>) {
 }
 
 /**
- * server action 정의 시 사용. safe + parallel 합성.
+ * demo mock action 정의 시 사용. safe + parallel 합성.
  * 모든 api/actions/*.ts export는 이걸로 감싸야 한다 (api-create-action 룰).
  */
 export const createAction = flow(safeAction, parallelAction);

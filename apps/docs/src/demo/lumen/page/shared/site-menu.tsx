@@ -87,7 +87,7 @@ export function SiteMenu() {
         </div>
       </header>
 
-      {/* drop-down overlay — absolute fills the page (SsgoiTransition wrapper) */}
+      {/* drop-down overlay — absolute fills the page transition boundary */}
       <div
         className={`absolute inset-0 z-50 flex flex-col bg-black text-white transition-transform duration-[600ms] ease-[cubic-bezier(0.7,0,0.2,1)] ${
           open ? "translate-y-0" : "-translate-y-full"

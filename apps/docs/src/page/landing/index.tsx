@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SsgoiTransition } from "@ssgoi/react";
 import { PhoneFrame } from "@/components/phone-frame";
 import {
   NextMark,
@@ -16,19 +15,17 @@ import {
 } from "@/components/browser-logos";
 import { NpmPill } from "@/components/npm-pill";
 import { SiteLogo } from "@/components/site-logo";
-
 export default function LandingPage() {
   return (
-    <SsgoiTransition as="main" id="/" className="relative min-h-dvh bg-black">
+    <main data-ssgoi-transition="/" className="relative min-h-dvh bg-black">
       <FloatingHeader />
       <Hero />
       <Routers />
       <Compat />
       <Resources />
-    </SsgoiTransition>
+    </main>
   );
 }
-
 function FloatingHeader() {
   return (
     <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
@@ -54,7 +51,6 @@ function FloatingHeader() {
     </header>
   );
 }
-
 function Hero() {
   return (
     <section className="mx-auto max-w-6xl px-6 pb-24 pt-12 md:pt-20">
@@ -102,20 +98,34 @@ function Hero() {
     </section>
   );
 }
-
 const ROUTERS: Array<{
   name: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
 }> = [
-  { name: "Next.js", icon: NextMark },
-  { name: "React Router", icon: ReactRouterMark },
-  { name: "TanStack Router", icon: TanStackRouterMark },
-  { name: "SvelteKit", icon: SvelteKitMark },
-  { name: "Nuxt", icon: NuxtMark },
+  {
+    name: "Next.js",
+    icon: NextMark,
+  },
+  {
+    name: "React Router",
+    icon: ReactRouterMark,
+  },
+  {
+    name: "TanStack Router",
+    icon: TanStackRouterMark,
+  },
+  {
+    name: "SvelteKit",
+    icon: SvelteKitMark,
+  },
+  {
+    name: "Nuxt",
+    icon: NuxtMark,
+  },
 ];
-
 const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
-
 function Routers() {
   return (
     <section className="border-t border-white/[0.05]">
@@ -152,18 +162,34 @@ function Routers() {
     </section>
   );
 }
-
 const BROWSERS: Array<{
   name: string;
   v: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
 }> = [
-  { name: "Chrome", v: "84+", icon: ChromeMark },
-  { name: "Safari", v: "13.1+", icon: SafariMark },
-  { name: "Firefox", v: "75+", icon: FirefoxMark },
-  { name: "Edge", v: "84+", icon: EdgeMark },
+  {
+    name: "Chrome",
+    v: "84+",
+    icon: ChromeMark,
+  },
+  {
+    name: "Safari",
+    v: "13.1+",
+    icon: SafariMark,
+  },
+  {
+    name: "Firefox",
+    v: "75+",
+    icon: FirefoxMark,
+  },
+  {
+    name: "Edge",
+    v: "84+",
+    icon: EdgeMark,
+  },
 ];
-
 function Compat() {
   return (
     <section className="border-t border-white/[0.05]">
@@ -210,7 +236,6 @@ function Compat() {
     </section>
   );
 }
-
 function ReasonCard({
   title,
   desc,
@@ -235,7 +260,6 @@ function ReasonCard({
     </div>
   );
 }
-
 function Resources() {
   return (
     <section className="border-t border-white/[0.05]">

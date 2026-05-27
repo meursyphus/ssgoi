@@ -2,15 +2,12 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { pinterestItems } from "./mock-data";
 import type { PinterestItem } from "./mock-data";
-import { SsgoiTransition } from "@ssgoi/react";
-
 export default function PinterestDemo() {
   // Split items into two columns for masonry effect
   const leftColumnItems = pinterestItems.filter((_, index) => index % 2 === 0);
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
-
   return (
-    <SsgoiTransition id="/pinterest">
+    <div data-ssgoi-transition="/pinterest">
       <div className="min-h-screen bg-[#121212] px-4 py-6">
         {/* Header */}
         <div className="mb-6">
@@ -37,23 +34,28 @@ export default function PinterestDemo() {
           </div>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }
-
 interface PinCardProps {
   item: PinterestItem;
 }
-
 function PinCard({ item }: PinCardProps) {
   return (
     <Link
       to="/pinterest/$pinId"
-      params={{ pinId: item.id }}
+      params={{
+        pinId: item.id,
+      }}
       className="block border border-white/5 rounded-lg overflow-hidden transition-all duration-200 hover:border-white/10 group"
     >
       {/* Image with dynamic aspect ratio */}
-      <div className="relative" style={{ aspectRatio: item.aspectRatio }}>
+      <div
+        className="relative"
+        style={{
+          aspectRatio: item.aspectRatio,
+        }}
+      >
         <img
           src={item.image}
           alt={item.title}

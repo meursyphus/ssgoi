@@ -1,15 +1,12 @@
 import React from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import type { Product } from "./mock-data";
-
 interface ProductGridProps {
   products: Product[];
   category: string;
 }
-
 export default function ProductGrid({ products, category }: ProductGridProps) {
   return (
-    <SsgoiTransition id={`/products/${category}`}>
+    <div data-ssgoi-transition={`/products/${category}`}>
       <div className="px-4 pb-6 h-full overflow-y-auto">
         {products.length === 0 ? (
           <div className="text-center py-12">
@@ -25,10 +22,9 @@ export default function ProductGrid({ products, category }: ProductGridProps) {
           </div>
         )}
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }
-
 function ProductCard({ product }: { product: Product }) {
   return (
     <div className="block bg-white/5 rounded-xl overflow-hidden">
@@ -41,13 +37,7 @@ function ProductCard({ product }: { product: Product }) {
         />
         {product.badge && (
           <span
-            className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-medium uppercase ${
-              product.badge === "sale"
-                ? "bg-red-500/90 text-white"
-                : product.badge === "new"
-                ? "bg-blue-500/90 text-white"
-                : "bg-amber-500/90 text-black"
-            }`}
+            className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-medium uppercase ${product.badge === "sale" ? "bg-red-500/90 text-white" : product.badge === "new" ? "bg-blue-500/90 text-white" : "bg-amber-500/90 text-black"}`}
           >
             {product.badge}
           </span>

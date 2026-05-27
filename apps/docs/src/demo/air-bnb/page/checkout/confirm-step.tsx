@@ -1,24 +1,22 @@
 "use client";
 
-import { SsgoiTransition } from "@ssgoi/react";
 import { Check } from "lucide-react";
 import { useCheckout } from "@/demo/air-bnb/state/checkout";
 import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
 import { useCurrentListing } from "./use-current-listing";
-
 const METHOD_LABEL = {
   card: "Credit / debit card",
   naver: "Naver Pay",
   kakao: "Kakao Pay",
 } as const;
-
 export function ConfirmStep() {
   const detail = useCurrentListing();
-  const checkout = useCheckout((state) => ({ method: state.selectedMethod }));
-
+  const checkout = useCheckout((state) => ({
+    method: state.selectedMethod,
+  }));
   return (
-    <SsgoiTransition id={CHECKOUT_STEP_TRANSITION_IDS.confirm}>
+    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.confirm}>
       <CheckoutTitle step="confirm" />
       <div className="px-5 pt-5">
         <p className="text-[13px] text-neutral-700">
@@ -46,10 +44,9 @@ export function ConfirmStep() {
           </p>
         </div>
       </div>
-    </SsgoiTransition>
+    </div>
   );
 }
-
 function ConfirmRow({
   label,
   value,
@@ -63,9 +60,7 @@ function ConfirmRow({
     <div className="flex items-start justify-between gap-4 rounded-2xl border border-neutral-200 px-4 py-3">
       <span className="text-[12px] font-medium text-neutral-500">{label}</span>
       <span
-        className={`max-w-[60%] text-right text-[13px] ${
-          emphasized ? "font-bold text-neutral-900" : "text-neutral-900"
-        }`}
+        className={`max-w-[60%] text-right text-[13px] ${emphasized ? "font-bold text-neutral-900" : "text-neutral-900"}`}
       >
         {value}
       </span>

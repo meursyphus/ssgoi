@@ -1,28 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiTransition } from "@ssgoi/react";
 import { usePost } from "@/demo/instagram/state/post";
 import { TaggedItem } from "./tagged-item";
-
 export default function ProfileTaggedPage({ id }: { id: string }) {
   const post = usePost((state) => ({
     tagged: state.tagged,
     actions: state.actions,
   }));
-
   useEffect(() => {
     post.actions.loadTagged();
   }, [post.actions]);
-
   return (
-    <SsgoiTransition
+    <div
+      data-ssgoi-transition={`/demo/instagram/profile/${id}/tagged`}
       className="min-h-screen"
-      id={`/demo/instagram/profile/${id}/tagged`}
     >
       {post.tagged.isLoading && post.tagged.data.length === 0 ? (
         <div className="grid grid-cols-3 gap-[2px] bg-white">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({
+            length: 6,
+          }).map((_, i) => (
             <div
               key={i}
               className="aspect-square animate-pulse bg-neutral-100"
@@ -36,6 +34,6 @@ export default function ProfileTaggedPage({ id }: { id: string }) {
           ))}
         </div>
       )}
-    </SsgoiTransition>
+    </div>
   );
 }
