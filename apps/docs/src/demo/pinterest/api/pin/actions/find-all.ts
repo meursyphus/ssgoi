@@ -1,11 +1,8 @@
-"use server";
-
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
 import type { PinSimple } from "../types";
 
 async function _findAll(): Promise<PinSimple[]> {
-  await new Promise((r) => setTimeout(r, 220));
   return data.all().map(({ description, tags, domain, ...rest }) => {
     void description;
     void tags;

@@ -1,8 +1,11 @@
-"use server";
-
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
-import type { FindAllFilter, Pageable, PhotoDetail, PhotoSimple } from "../types";
+import type {
+  FindAllFilter,
+  Pageable,
+  PhotoDetail,
+  PhotoSimple,
+} from "../types";
 
 function toSimple(detail: PhotoDetail): PhotoSimple {
   return {
@@ -19,7 +22,6 @@ function toSimple(detail: PhotoDetail): PhotoSimple {
 async function _findAll(
   filter: FindAllFilter = {},
 ): Promise<Pageable<PhotoSimple>> {
-  await new Promise((r) => setTimeout(r, 200));
   const limit = data.pageLimit();
   const page = filter.page && filter.page > 0 ? filter.page : 1;
 

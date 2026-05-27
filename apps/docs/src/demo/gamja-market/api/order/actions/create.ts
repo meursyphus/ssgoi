@@ -1,11 +1,8 @@
-"use server";
-
 import { createAction, ActionError } from "@/lib/utils";
 import { data, statusToLabel } from "../data";
 import type { CreateOrderInput, OrderDetail } from "../types";
 
 async function _create(input: CreateOrderInput): Promise<OrderDetail> {
-  await new Promise((r) => setTimeout(r, 320));
   if (input.quantity < 1) throw new ActionError("수량은 1개 이상이어야 합니다");
 
   const today = new Date();

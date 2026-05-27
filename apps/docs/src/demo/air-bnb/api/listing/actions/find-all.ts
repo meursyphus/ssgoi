@@ -1,5 +1,3 @@
-"use server";
-
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
 import type { ListingFeed, ListingSimple } from "../types";
@@ -27,7 +25,6 @@ function toSimple({
 }
 
 async function _findAll(): Promise<ListingFeed> {
-  await new Promise((r) => setTimeout(r, 220));
   const feed = data.feed();
   return {
     recent: feed.recent.map(toSimple),

@@ -1,5 +1,3 @@
-"use server";
-
 import { createAction } from "@/lib/utils";
 import { photo } from "@/demo/google-photos/api/photo";
 import { data } from "../data";
@@ -8,7 +6,6 @@ import type { CollectionSimple } from "../types";
 const COVER_LIMIT = 4;
 
 async function _findAll(): Promise<CollectionSimple[]> {
-  await new Promise((r) => setTimeout(r, 220));
   const metas = data.all();
 
   // For each collection, hit the photo api to fill cover thumbs + count.

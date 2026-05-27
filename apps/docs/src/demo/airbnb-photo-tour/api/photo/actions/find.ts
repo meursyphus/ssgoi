@@ -1,11 +1,8 @@
-"use server";
-
 import { ActionError, createAction } from "@/lib/utils";
 import { data } from "../data";
 import type { PhotoDetail } from "../types";
 
 async function _find(id: string): Promise<PhotoDetail> {
-  await new Promise((r) => setTimeout(r, 120));
   const category = data.findPhotoCategory(id);
   if (!category) throw new ActionError("사진을 찾을 수 없습니다");
 
