@@ -20,12 +20,15 @@ import type {
 // The sibling `snappy` x is the KakaoTalk-style flavor — parallel cross-fade.
 const TRANSLATE_PX = 30;
 
+// All axis providers loosen settle thresholds 10× over the integrator
+// defaults (0.01 → 0.1) so the imperceptible tail of each phase doesn't
+// hold up the sequence handoff or the page lifecycle.
 const FLUID_OUT_PHYSICS: PhysicsOptions = {
-  inertia: { acceleration: 150, resistance: 1.5 },
+  inertia: { acceleration: 150, resistance: 1.5, restDelta: 0.1 },
 };
 
 const FLUID_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 34 },
+  spring: { stiffness: 180, damping: 34, restDelta: 0.1, restSpeed: 0.1 },
 };
 
 function buildFluidX({

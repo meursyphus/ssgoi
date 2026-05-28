@@ -8,8 +8,9 @@ import type {
 // Material shared Z-axis. Spring is near-critical (damping 30 vs ~33.5
 // critical → ratio ≈ 0.9), so progress is effectively monotonic — safe to
 // piecewise-map opacity inside the same tick as the scale.
+// See x/fluid.ts — settle thresholds loosened 10× across all axis providers.
 const Z_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 280, damping: 30 },
+  spring: { stiffness: 280, damping: 30, restDelta: 0.1, restSpeed: 0.1 },
 };
 
 const SCALE_OFFSET = 0.1;

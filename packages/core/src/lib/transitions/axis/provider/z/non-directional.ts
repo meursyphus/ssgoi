@@ -3,8 +3,9 @@ import type { AxisAnimationConfig, AxisProvider } from "../../types";
 
 // Same physics as directional z so the fade-through timing aligns regardless
 // of which feel is picked. See directional.ts for the damping rationale.
+// See x/fluid.ts — settle thresholds loosened 10× across all axis providers.
 const Z_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 280, damping: 30 },
+  spring: { stiffness: 280, damping: 30, restDelta: 0.1, restSpeed: 0.1 },
 };
 
 const SCALE_OFFSET = 0.1;
