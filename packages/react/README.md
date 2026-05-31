@@ -6,6 +6,16 @@ try this: [ssgoi.dev](https://ssgoi.dev)
 
 ![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
 
+## AI-Assisted Setup
+
+Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
+
+```
+https://ssgoi.dev/llms.txt
+```
+
+It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
+
 ## What is SSGOI?
 
 SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
@@ -36,10 +46,15 @@ pnpm add @ssgoi/react
 import { Ssgoi } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/view-transitions";
 
+const config = {
+  transitions: [fade({ paths: ["/", "/about"] })],
+};
+
 export default function App() {
   return (
-    <Ssgoi config={{ transitions: fade({ paths: ["/", "/about"] }) }}>
-      <div style={{ position: "relative" }}>{/* Your app */}</div>
+    <Ssgoi config={config}>
+      {/* relative + z-0 are required (see "Layout Requirements" below) */}
+      <div className="relative z-0">{/* Your app */}</div>
     </Ssgoi>
   );
 }
@@ -60,48 +75,44 @@ export default function HomePage() {
 
 **That's it!** Your configured pages now transition smoothly with a fade effect.
 
+## Layout Requirements
+
+The element wrapping `<Ssgoi>` needs `position: relative` and `z-index: 0` (`relative z-0` in Tailwind).
+
+When a page leaves, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in. Without a positioned, stacking-context ancestor the clone jumps to the wrong place or falls behind the background. Add `overflow-x-clip` too if you use horizontal transitions (`slide`, `drill`).
+
 ## Advanced Transitions
 
 ### Route-based Transitions
 
-Define different transitions for different routes:
+Each transition factory returns a path-transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
 
 ```tsx
+import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
+
 const config = {
   transitions: [
-    // Scroll between tabs
-    { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
-    { from: "/about", to: "/home", transition: scroll({ direction: "down" }) },
+    // Calm cross-fade between tabs
+    fade({ paths: ["/home", "/about"] }),
 
-    // Drill in when entering details
-    {
-      from: "/products",
-      to: "/products/*",
-      transition: drill({ direction: "enter" }),
-    },
+    // iOS-style drill-in when entering details
+    drill({ enter: "/products/*", exit: "/products" }),
 
-    // Pinterest-style image transitions
-    { from: "/gallery", to: "/photo/*", transition: pinterest() },
+    // Card-to-detail zoom (needs matching data-zoom-*-key)
+    zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
   ],
 };
 ```
 
-### Symmetric Transitions
+Transitions come in three shapes:
 
-Automatically create bidirectional transitions:
-
-```tsx
-{
-  from: '/home',
-  to: '/about',
-  transition: scroll({ direction: 'up' }),
-  symmetric: true  // Automatically creates reverse transition
-}
-```
+- **`{ paths }`** — symmetric: every pair animates with the same physics (`fade`, `hero`, `zoom`, `blind`, `film`, `rotate`, `strip`, `jaemin`)
+- **`{ enter, exit, type? }`** — directional: enter and exit get different physics (`drill`, `sheet`)
+- **`{ paths }`** — ordered: path order decides forward / back direction (`slide`, `scroll`, `axis`)
 
 ### Individual Element Animations
 
-Animate specific elements during mount/unmount:
+Animate specific elements during mount/unmount with `transition()`:
 
 ```tsx
 import { transition } from "@ssgoi/react";
@@ -224,26 +235,34 @@ function List() {
 ```tsx
 // app/layout.tsx
 import { Ssgoi } from "@ssgoi/react";
-import { scroll } from "@ssgoi/react/view-transitions";
+import { drill, fade } from "@ssgoi/react/view-transitions";
 
-export default function RootLayout({ children }) {
+const config = {
+  transitions: [
+    drill({ enter: "/post/*", exit: "*" }),
+    fade({ paths: ["/", "/about"] }),
+  ],
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html>
       <body>
-        <Ssgoi
-          config={{
-            transitions: scroll({ paths: ["/", "/about"] }),
-          }}
-        >
-          <div style={{ position: "relative", minHeight: "100vh" }}>
-            {children}
-          </div>
+        <Ssgoi config={config}>
+          <div className="relative z-0 min-h-screen">{children}</div>
         </Ssgoi>
       </body>
     </html>
   );
 }
+```
 
+```tsx
+// app/page.tsx
 export default function Page() {
   return <main data-ssgoi-transition="/">{/* Your page content */}</main>;
 }
@@ -302,11 +321,19 @@ Apply transitions to individual elements.
 
 ### Page Transitions (`@ssgoi/react/view-transitions`)
 
-- `fade()` - Smooth opacity transition
-- `scroll()` - Vertical scrolling (up/down)
-- `drill()` - Drill in/out effect (enter/exit)
-- `hero()` - Shared element transitions
-- `pinterest()` - Pinterest-style expand effect
+- `fade()` - Calm cross-fade. Safe default for unrelated pages
+- `drill()` - iOS-style hierarchical navigation (list → detail)
+- `slide()` - Horizontal push for tabs / sequential flows
+- `scroll()` - Vertical page scroll for onboarding / paginated views
+- `axis()` - Material/Flutter shared-axis swap for sibling/tab routes
+- `sheet()` - Bottom sheet that slides up (modal-like flows)
+- `hero()` - Shared element transition (matching `data-hero-enter-key` / `data-hero-exit-key`)
+- `zoom()` - Card-to-detail expansion (matching `data-zoom-enter-key` / `data-zoom-exit-key`)
+- `strip()` - 3D Y-axis perspective flip
+- `blind()` - Window-blinds wipe reveal
+- `film()` - Cinematic shrink + tile (gallery / lightbox)
+- `rotate()` - Card flip between siblings
+- `jaemin()` - Playful rotated zoom for special moments
 
 ### Element Transitions (`@ssgoi/react/transitions`)
 

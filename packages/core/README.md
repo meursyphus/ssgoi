@@ -1,31 +1,43 @@
 # SSGOI
 
-## What is SSGOI?
+The framework-agnostic animation engine behind [SSGOI](https://ssgoi.dev) — native app-like page transitions for the web.
 
-SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
+> Most apps should install a framework binding (`@ssgoi/react`, `@ssgoi/svelte`, `@ssgoi/vue`, `@ssgoi/solid`, `@ssgoi/angular`), which depend on this package. Install `@ssgoi/core` directly only when building a custom integration.
 
 try this: [ssgoi.dev](https://ssgoi.dev)
 
 ![SSGOI Demo](https://ssgoi.dev/ssgoi.gif)
 
+## AI-Assisted Setup
+
+Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
+
+```
+https://ssgoi.dev/llms.txt
+```
+
+It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
+
+## What is SSGOI?
+
+SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
+
 ### ✨ Key Features
 
 - **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
-- **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit. No hydration issues, SEO-friendly
+- **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit, SolidStart. No hydration issues, SEO-friendly
 - **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit - all work seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **🎨 Framework Agnostic** - One consistent API for React, Svelte, Vue, SolidJS, and more
+- **🎨 Framework Agnostic** - One consistent API for React, Svelte, Vue, Solid, Angular, and more
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# React
+# Pick the binding for your framework
 npm install @ssgoi/react
-
-# Svelte
-npm install @ssgoi/svelte
+# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular
 ```
 
 ### Add Transitions in 30 Seconds
@@ -36,10 +48,15 @@ npm install @ssgoi/svelte
 import { Ssgoi } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/view-transitions";
 
+const config = {
+  transitions: [fade({ paths: ["/", "/about"] })],
+};
+
 export default function App() {
   return (
-    <Ssgoi config={{ transitions: fade({ paths: ["/", "/about"] }) }}>
-      <div style={{ position: "relative" }}>{/* Your app */}</div>
+    <Ssgoi config={config}>
+      {/* relative + z-0: the outgoing page is cloned with position:absolute */}
+      <div className="relative z-0">{/* Your app */}</div>
     </Ssgoi>
   );
 }
@@ -64,44 +81,34 @@ export default function HomePage() {
 
 ### Route-based Transitions
 
-Define different transitions for different routes:
+Each transition factory returns a path-transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
 
 ```tsx
+import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
+
 const config = {
   transitions: [
-    // Scroll between tabs
-    { from: "/home", to: "/about", transition: scroll({ direction: "up" }) },
-    { from: "/about", to: "/home", transition: scroll({ direction: "down" }) },
+    // Calm cross-fade between tabs
+    fade({ paths: ["/home", "/about"] }),
 
-    // Drill in when entering details
-    {
-      from: "/products",
-      to: "/products/*",
-      transition: drill({ direction: "enter" }),
-    },
+    // iOS-style drill-in when entering details
+    drill({ enter: "/products/*", exit: "/products" }),
 
-    // Pinterest-style image transitions
-    { from: "/gallery", to: "/photo/*", transition: pinterest() },
+    // Card-to-detail zoom (needs matching data-zoom-*-key)
+    zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
   ],
 };
 ```
 
-### Symmetric Transitions
+Transitions come in three shapes:
 
-Automatically create bidirectional transitions:
-
-```tsx
-{
-  from: '/home',
-  to: '/about',
-  transition: scroll({ direction: 'up' }),
-  symmetric: true  // Automatically creates reverse transition
-}
-```
+- **`{ paths }`** — symmetric: every pair animates with the same physics (`fade`, `hero`, `zoom`, `blind`, `film`, `rotate`, `strip`, `jaemin`)
+- **`{ enter, exit, type? }`** — directional: enter and exit get different physics (`drill`, `sheet`)
+- **`{ paths }`** — ordered: path order decides forward / back direction (`slide`, `scroll`, `axis`)
 
 ### Individual Element Animations
 
-Animate specific elements during mount/unmount:
+Animate specific elements during mount/unmount with `transition()`:
 
 ```tsx
 import { transition } from "@ssgoi/react";
@@ -124,15 +131,25 @@ function Card() {
 
 ## Built-in Transitions
 
-### Page Transitions
+### Page Transitions (`@ssgoi/<framework>/view-transitions`)
 
-- `fade` - Smooth opacity transition
-- `scroll` - Vertical scrolling (up/down)
-- `drill` - Drill in/out effect (enter/exit)
-- `hero` - Shared element transitions
-- `pinterest` - Pinterest-style expand effect
+- `fade` - Calm cross-fade. Safe default for unrelated pages
+- `drill` - iOS-style hierarchical navigation (list → detail)
+- `slide` - Horizontal push for tabs / sequential flows
+- `scroll` - Vertical page scroll for onboarding / paginated views
+- `axis` - Material/Flutter shared-axis swap for sibling/tab routes
+- `sheet` - Bottom sheet that slides up (modal-like flows)
+- `hero` - Shared element transition (matching `data-hero-*-key`)
+- `zoom` - Card-to-detail expansion (matching `data-zoom-*-key`)
+- `strip` - 3D Y-axis perspective flip
+- `blind` - Window-blinds wipe reveal
+- `film` - Cinematic shrink + tile (gallery / lightbox)
+- `rotate` - Card flip between siblings
+- `jaemin` - Playful rotated zoom for special moments
 
-### Element Transitions
+### Element Transitions (`@ssgoi/<framework>/transitions`)
+
+For mount/unmount of individual elements (not whole pages):
 
 - `fade` - Fade in/out
 - `scale` - Scale in/out
@@ -142,61 +159,16 @@ function Card() {
 - `blur` - Blur
 - `fly` - Fly (custom x, y position)
 
-## Framework Examples
+## Layout Requirements
 
-### Next.js App Router
+The element wrapping `<Ssgoi>` needs `position: relative` and `z-index: 0`.
+
+When a page leaves, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in. Without a positioned, stacking-context ancestor the clone jumps to the wrong place or falls behind the background. Add `overflow-x-clip` too if you use horizontal transitions (`slide`, `drill`).
 
 ```tsx
-// app/layout.tsx
-import { Ssgoi } from "@ssgoi/react";
-import { scroll } from "@ssgoi/react/view-transitions";
-
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        <Ssgoi
-          config={{
-            transitions: scroll({ paths: ["/", "/about"] }),
-          }}
-        >
-          <div style={{ position: "relative", minHeight: "100vh" }}>
-            {children}
-          </div>
-        </Ssgoi>
-      </body>
-    </html>
-  );
-}
-
-export default function Page() {
-  return <main data-ssgoi-transition="/">{/* Your page content */}</main>;
-}
-```
-
-### SvelteKit
-
-```svelte
-<!-- +layout.svelte -->
-<script>
-  import { Ssgoi } from '@ssgoi/svelte';
-  import { fade } from '@ssgoi/svelte/view-transitions';
-</script>
-
-<Ssgoi config={{ transitions: fade({ paths: ['/', '/about'] }) }}>
-  <div style="position: relative; min-height: 100vh;">
-    <slot />
-  </div>
-</Ssgoi>
-
-<!-- +page.svelte -->
-<script>
-  import { page } from '$app/stores';
-</script>
-
-<main data-ssgoi-transition={$page.url.pathname}>
-  <!-- Your page content -->
-</main>
+<div className="relative z-0 overflow-x-clip">
+  <Ssgoi config={config}>{children}</Ssgoi>
+</div>
 ```
 
 ## Why SSGOI?
@@ -216,38 +188,14 @@ export default function Page() {
 
 ## How It Works
 
-SSGOI intercepts DOM lifecycle events to create smooth transitions:
+SSGOI orchestrates two simultaneous animations on every route change:
 
 1. **Route Change**: Your router changes the URL
-2. **Exit Animation**: Current page animates out
-3. **Enter Animation**: New page animates in
-4. **State Sync**: Animation state persists across navigation
+2. **Exit (OUT)**: SSGOI clones the leaving page with `position: absolute` and animates it out
+3. **Enter (IN)**: The new page mounts in place and animates in
+4. **State Sync**: Animation state persists across navigation, including browser back/forward
 
-All powered by a spring physics engine for natural, smooth motion.
-
-## Live Demos
-
-Try out SSGOI with our framework-specific demo applications:
-
-### React Demo
-
-```bash
-pnpm react-demo:dev
-# Opens at http://localhost:3001
-```
-
-Explore Next.js App Router integration with various transition effects.
-
-### Svelte Demo
-
-```bash
-pnpm svelte-demo:dev
-# Opens at http://localhost:5174
-```
-
-See SvelteKit integration with smooth page transitions.
-
-Visit the `/apps` directory to explore the demo source code and learn how to implement SSGOI in your own projects.
+All powered by a spring physics engine — springs are pre-computed into Web Animations API keyframes, so animations run at 60fps off the main thread.
 
 ## Documentation
 
@@ -260,7 +208,7 @@ Visit [https://ssgoi.dev](https://ssgoi.dev) for:
 
 ## Contributing
 
-We welcome contributions! Please see our [contributing guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [contributing guide](https://github.com/meursyphus/ssgoi/blob/main/CONTRIBUTING.md) for details.
 
 ## License
 

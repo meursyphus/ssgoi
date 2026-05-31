@@ -289,8 +289,7 @@ export const prepareOutgoing = (element, context) => {
 ## Links
 
 - Per-transition reference (one file per transition): https://ssgoi.dev/llms/<name>.txt
-- Docs: https://ssgoi.dev
-- Mobile Transitions: https://ssgoi.dev/en/docs/mobile-transitions
-- Desktop Transitions: https://ssgoi.dev/en/docs/desktop-transitions
+- Docs: https://ssgoi.dev/docs
+- Live examples (real apps rebuilt with SSGOI): https://ssgoi.dev/showcase
 - GitHub: https://github.com/meursyphus/ssgoi
 - NPM: https://www.npmjs.com/package/@ssgoi/react
