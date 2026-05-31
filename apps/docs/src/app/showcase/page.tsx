@@ -5,12 +5,12 @@ import { showcases } from "@/page/showcase/data";
 import ShowcaseListPage from "@/page/showcase/list";
 
 export const metadata: Metadata = {
-  title: "Examples — Real apps rebuilt with SSGOI page transitions",
+  title: "Demos — Real apps rebuilt with SSGOI page transitions",
   description:
     "Live demos of Instagram, Pinterest, Airbnb, Google Photos and more — rebuilt on the web with native app-like page transitions powered by SSGOI.",
   alternates: { canonical: "/showcase" },
   openGraph: {
-    title: "SSGOI Examples — Real apps rebuilt with page transitions",
+    title: "SSGOI Demos — Real apps rebuilt with page transitions",
     description:
       "Live demos of Instagram, Pinterest, Airbnb, Google Photos and more — rebuilt on the web with native app-like page transitions powered by SSGOI.",
     url: "/showcase",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "SSGOI Examples",
+  name: "SSGOI Demos",
   itemListElement: showcases.map((s, i) => ({
     "@type": "ListItem",
     position: i + 1,
@@ -36,7 +36,7 @@ export default function Page() {
         data={[
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Examples", path: "/showcase" },
+            { name: "Demos", path: "/showcase" },
           ]),
           itemListSchema,
         ]}

@@ -9,7 +9,7 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center px-6 py-24">
         <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
-          Examples
+          Demos
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">
           Not found
@@ -22,7 +22,7 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
           href="/showcase"
           className="mt-8 text-sm text-neutral-300 hover:text-neutral-100"
         >
-          ← Back to examples
+          ← Back to demos
         </Link>
       </main>
     );
@@ -46,7 +46,7 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
         >
           <path d="M15 18l-6-6 6-6" />
         </svg>
-        Examples
+        Demos
       </Link>
 
       <header className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

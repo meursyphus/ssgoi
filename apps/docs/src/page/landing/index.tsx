@@ -14,44 +14,19 @@ import {
   SafariMark,
 } from "@/components/browser-logos";
 import { NpmPill } from "@/components/npm-pill";
-import { SiteLogo } from "@/components/site-logo";
+import { SiteNav } from "@/components/site-nav";
 import { JsonLd } from "@/components/json-ld";
 import { softwareApplicationSchema } from "@/lib/seo";
 export default function LandingPage() {
   return (
     <main data-ssgoi-transition="/" className="relative min-h-dvh bg-black">
       <JsonLd data={softwareApplicationSchema} />
-      <FloatingHeader />
+      <SiteNav />
       <Hero />
       <Routers />
       <Compat />
       <Resources />
     </main>
-  );
-}
-function FloatingHeader() {
-  return (
-    <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
-      <nav className="pointer-events-auto inline-flex h-11 items-center gap-5 rounded-full border border-white/10 bg-[#0e0b08]/70 pl-3 pr-4 backdrop-blur md:h-12 md:gap-6 md:pl-4 md:pr-5">
-        <SiteLogo />
-        <div className="flex items-center gap-5 text-sm text-neutral-300 md:gap-6">
-          <Link href="/docs" className="hover:text-neutral-100">
-            Docs
-          </Link>
-          <Link href="/showcase" className="hover:text-neutral-100">
-            Examples
-          </Link>
-          <a
-            href="https://github.com/meursyphus/ssgoi"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-neutral-100"
-          >
-            GitHub
-          </a>
-        </div>
-      </nav>
-    </header>
   );
 }
 function Hero() {
@@ -270,18 +245,18 @@ function Resources() {
         <div className="flex flex-col items-start gap-8">
           <div className="max-w-2xl">
             <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-              Real apps, real transitions.
+              See the transitions in action.
             </h2>
             <p className="mt-4 leading-relaxed text-neutral-400">
-              See how shipped products use ssgoi — Airbnb-style sheets, drill
-              navigation, hero pairs.
+              Interactive demos of real-world app patterns — Airbnb-style
+              sheets, drill navigation, hero pairs.
             </p>
           </div>
           <Link
             href="/showcase"
             className="group inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-[#0e0b08] transition-colors hover:bg-orange-400"
           >
-            Browse examples
+            Browse demos
             <span
               className="transition-transform group-hover:translate-x-0.5"
               aria-hidden

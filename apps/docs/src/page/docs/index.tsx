@@ -1,6 +1,5 @@
-import { Link } from "@/lib/link";
 import { NpmPill } from "@/components/npm-pill";
-import { SiteLogo } from "@/components/site-logo";
+import { SiteNav } from "@/components/site-nav";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, faqSchema } from "@/lib/seo";
 
@@ -32,38 +31,13 @@ export default function DocsPage() {
   return (
     <main data-ssgoi-transition="/docs" className="relative min-h-dvh bg-black">
       <JsonLd data={[DOCS_FAQ, DOCS_BREADCRUMB]} />
-      <FloatingHeader />
+      <SiteNav active="docs" />
       <Hero />
       <Install />
       <Transitions />
       <Layout />
       <HowItWorks />
     </main>
-  );
-}
-function FloatingHeader() {
-  return (
-    <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
-      <nav className="pointer-events-auto inline-flex h-11 items-center gap-5 rounded-full border border-white/10 bg-[#0e0b08]/70 pl-3 pr-4 backdrop-blur md:h-12 md:gap-6 md:pl-4 md:pr-5">
-        <SiteLogo />
-        <div className="flex items-center gap-5 text-sm text-neutral-300 md:gap-6">
-          <Link href="/docs" className="text-neutral-100">
-            Docs
-          </Link>
-          <Link href="/showcase" className="hover:text-neutral-100">
-            Examples
-          </Link>
-          <a
-            href="https://github.com/meursyphus/ssgoi"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-neutral-100"
-          >
-            GitHub
-          </a>
-        </div>
-      </nav>
-    </header>
   );
 }
 function Hero() {

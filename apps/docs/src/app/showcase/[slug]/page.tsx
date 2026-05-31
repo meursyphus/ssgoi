@@ -54,7 +54,7 @@ export default async function Page({
         <JsonLd
           data={breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Examples", path: "/showcase" },
+            { name: "Demos", path: "/showcase" },
             { name: showcase.name, path: `/showcase/${showcase.slug}` },
           ])}
         />
