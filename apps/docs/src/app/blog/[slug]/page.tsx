@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import { Link } from "@/lib/link";
-import { SiteLogo } from "@/components/site-logo";
 import { JsonLd } from "@/components/json-ld";
 import { mdxComponents } from "@/components/mdx-components";
 import {
@@ -108,16 +108,14 @@ export default async function BlogPostPage({
     >
       <JsonLd data={schemas} />
       <div className="mx-auto max-w-3xl px-6 pb-24 pt-6">
-        <SiteLogo />
-
         <Link
           href="/blog"
-          className="mt-10 inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-100"
+          className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-100"
         >
           ← Blog
         </Link>
 
-        <article className="mt-6">
+        <article className="mt-10">
           <header>
             <time
               dateTime={meta.date}
@@ -137,7 +135,14 @@ export default async function BlogPostPage({
             <MDXRemote
               source={content}
               components={mdxComponents}
-              options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                  rehypePlugins: [
+                    [rehypeHighlight, { aliases: { typescript: ["tsx"] } }],
+                  ],
+                },
+              }}
             />
           </div>
         </article>
