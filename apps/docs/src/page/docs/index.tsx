@@ -1,9 +1,37 @@
 import { Link } from "@/lib/link";
 import { NpmPill } from "@/components/npm-pill";
 import { SiteLogo } from "@/components/site-logo";
+import { JsonLd } from "@/components/json-ld";
+import { breadcrumbSchema, faqSchema } from "@/lib/seo";
+
+const DOCS_FAQ = faqSchema([
+  {
+    question: "Which frameworks does SSGOI support?",
+    answer:
+      "SSGOI works with React (and Next.js), Svelte (and SvelteKit), Vue (and Nuxt), Solid (and SolidStart), and Angular. It is router-agnostic, so it works regardless of which router you use.",
+  },
+  {
+    question: "How do SSGOI page transitions work?",
+    answer:
+      "When a route changes the old page normally unmounts and vanishes. SSGOI clones the leaving page and re-inserts it with position: absolute so the OUT animation can play while the new page mounts in place (IN). Both animate at the same time, and the cloned OUT page is removed when its animation ends.",
+  },
+  {
+    question:
+      "Why does the SSGOI wrapper need the classes relative, z-0, and overflow-x-clip?",
+    answer:
+      "relative gives the absolutely-positioned cloned page a positioned ancestor so it does not jump; z-0 creates a stacking context so the OUT page does not fall behind backgrounds; and overflow-x-clip prevents horizontal scrollbar flashes during slide, drill, and strip transitions.",
+  },
+]);
+
+const DOCS_BREADCRUMB = breadcrumbSchema([
+  { name: "Home", path: "/" },
+  { name: "Docs", path: "/docs" },
+]);
+
 export default function DocsPage() {
   return (
     <main data-ssgoi-transition="/docs" className="relative min-h-dvh bg-black">
+      <JsonLd data={[DOCS_FAQ, DOCS_BREADCRUMB]} />
       <FloatingHeader />
       <Hero />
       <Install />

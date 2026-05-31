@@ -15,9 +15,12 @@ import {
 } from "@/components/browser-logos";
 import { NpmPill } from "@/components/npm-pill";
 import { SiteLogo } from "@/components/site-logo";
+import { JsonLd } from "@/components/json-ld";
+import { softwareApplicationSchema } from "@/lib/seo";
 export default function LandingPage() {
   return (
     <main data-ssgoi-transition="/" className="relative min-h-dvh bg-black">
+      <JsonLd data={softwareApplicationSchema} />
       <FloatingHeader />
       <Hero />
       <Routers />
