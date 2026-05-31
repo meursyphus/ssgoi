@@ -3,7 +3,7 @@ import type { ShowcaseApp } from "@/page/showcase/types";
 export const ssgoiDocsShowcase: ShowcaseApp = {
   slug: "ssgoi-docs",
   name: "ssgoi.dev",
-  tagline: "Non-directional scroll between landing and examples",
+  tagline: "Non-directional scroll between the home catalog and a demo",
   platforms: ["web"],
   category: "Docs",
   badge: "New",
@@ -14,9 +14,9 @@ export const ssgoiDocsShowcase: ShowcaseApp = {
   previewTransition: "scroll",
   clips: [
     {
-      title: "Landing ↔ Examples",
+      title: "Home ↔ Demo",
       transition: "scroll",
-      enterPath: "/showcase",
+      enterPath: "/showcase/air-bnb",
       exitPath: "/",
       caption:
         "Non-directional scroll — the outgoing page glides up while the incoming page fades in",

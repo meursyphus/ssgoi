@@ -20,6 +20,9 @@ const devHosts =
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: devHosts,
+  async redirects() {
+    return [{ source: "/showcase", destination: "/", permanent: true }];
+  },
 };
 
 export default nextConfig;

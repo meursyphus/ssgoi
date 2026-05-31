@@ -11,6 +11,7 @@ import {
   SITE_NAME,
   SITE_URL,
   breadcrumbSchema,
+  buildOpenGraph,
   faqSchema,
 } from "@/lib/seo";
 import { getAllPosts, getPost } from "@/lib/blog";
@@ -36,16 +37,16 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
-    openGraph: {
+    openGraph: buildOpenGraph({
       type: "article",
+      path: url,
       title: `${title} | ${SITE_NAME}`,
       description,
-      url,
       publishedTime: date,
       modifiedTime: updated ?? date,
       authors: [post.meta.author ?? AUTHOR.name],
-    },
-    twitter: { title, description },
+      tags: post.meta.tags,
+    }),
   };
 }
 

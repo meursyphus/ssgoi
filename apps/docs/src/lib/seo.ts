@@ -1,8 +1,56 @@
+import type { Metadata } from "next";
+
 export const SITE_URL = "https://ssgoi.dev";
 export const SITE_NAME = "SSGOI";
 export const SITE_TITLE = "SSGOI — Native page transitions on the web";
 export const SITE_DESCRIPTION =
   "Router-agnostic page transitions for React, Svelte, Vue, Solid, and Angular. Built on the Web Animations API with spring physics and state preservation.";
+
+/** The single shared social-preview image. Referenced by every page's OG + Twitter card. */
+export const OG_IMAGE = {
+  url: "/og.png",
+  width: 512,
+  height: 279,
+  alt: SITE_TITLE,
+};
+
+/**
+ * Build a complete openGraph object. Always includes the shared image so it
+ * survives Next's shallow per-segment metadata merge (a page that defines its
+ * own `openGraph` replaces the parent's entirely — including any image).
+ * Omit `title`/`description` to let Next inherit them from the page metadata.
+ */
+export function buildOpenGraph(params: {
+  path: string;
+  title?: string;
+  description?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
+  tags?: string[];
+}): NonNullable<Metadata["openGraph"]> {
+  return {
+    type: params.type ?? "website",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    url: params.path,
+    title: params.title,
+    description: params.description,
+    images: [OG_IMAGE],
+    publishedTime: params.publishedTime,
+    modifiedTime: params.modifiedTime,
+    authors: params.authors,
+    tags: params.tags,
+  } as NonNullable<Metadata["openGraph"]>;
+}
+
+/** Shared Twitter card config. Pages omit `twitter` and inherit this from the root layout. */
+export const twitterMeta: NonNullable<Metadata["twitter"]> = {
+  card: "summary_large_image",
+  creator: "@ssgoi",
+  images: [OG_IMAGE.url],
+};
 
 export const GITHUB_URL = "https://github.com/meursyphus/ssgoi";
 export const NPM_URL = "https://www.npmjs.com/package/@ssgoi/react";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
-import { breadcrumbSchema } from "@/lib/seo";
+import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import ShowcaseDetailPage from "@/page/showcase/detail";
 import { findShowcase, showcases } from "@/page/showcase/data";
 
@@ -30,13 +30,12 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
-    openGraph: {
+    openGraph: buildOpenGraph({
       type: "article",
+      path: url,
       title: `${title} | SSGOI`,
       description,
-      url,
-    },
-    twitter: { title, description },
+    }),
   };
 }
 
@@ -54,7 +53,6 @@ export default async function Page({
         <JsonLd
           data={breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Demos", path: "/showcase" },
             { name: showcase.name, path: `/showcase/${showcase.slug}` },
           ])}
         />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "@/lib/link";
 import { SiteLogo } from "@/components/site-logo";
 import { JsonLd } from "@/components/json-ld";
-import { SITE_URL, breadcrumbSchema } from "@/lib/seo";
+import { SITE_URL, breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
@@ -13,12 +13,12 @@ export const metadata: Metadata = {
     canonical: "/blog",
     types: { "application/rss+xml": `${SITE_URL}/blog/rss.xml` },
   },
-  openGraph: {
+  openGraph: buildOpenGraph({
+    path: "/blog",
     title: "SSGOI Blog — Page transitions & native-feel web UX",
     description:
       "Guides and deep dives on page transitions, the View Transition API, spring physics, and building web apps that feel like native apps.",
-    url: "/blog",
-  },
+  }),
 };
 
 function formatDate(iso: string) {

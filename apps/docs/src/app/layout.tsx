@@ -8,7 +8,9 @@ import {
   SITE_NAME,
   SITE_TITLE as TITLE,
   SITE_URL,
+  buildOpenGraph,
   organizationSchema,
+  twitterMeta,
   websiteSchema,
 } from "@/lib/seo";
 import "./globals.css";
@@ -56,29 +58,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: "en_US",
+  openGraph: buildOpenGraph({
+    path: SITE_URL,
     title: TITLE,
     description: DESCRIPTION,
-    images: [
-      {
-        url: "/og.png",
-        width: 512,
-        height: 279,
-        alt: "SSGOI — Native page transitions on the web",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: ["/og.png"],
-    creator: "@ssgoi",
-  },
+  }),
+  twitter: twitterMeta,
   category: "technology",
 };
 

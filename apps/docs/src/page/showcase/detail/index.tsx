@@ -19,7 +19,7 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
           yet.
         </p>
         <Link
-          href="/showcase"
+          href="/"
           className="mt-8 text-sm text-neutral-300 hover:text-neutral-100"
         >
           ← Back to demos
@@ -31,7 +31,7 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
   return (
     <main className="mx-auto max-w-[1440px] px-4 pb-32 pt-10 sm:px-8">
       <Link
-        href="/showcase"
+        href="/"
         className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-sm font-medium text-neutral-200 transition-colors hover:border-white/25 hover:bg-white/[0.06] hover:text-white"
       >
         <svg
