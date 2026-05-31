@@ -6,6 +6,16 @@ try this: [ssgoi.dev](https://ssgoi.dev)
 
 ![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
 
+## AI-Assisted Setup
+
+Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
+
+```
+https://ssgoi.dev/llms.txt
+```
+
+It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
+
 ## What is SSGOI?
 
 SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
@@ -35,7 +45,8 @@ pnpm add @ssgoi/vue
 ```vue
 <template>
   <Ssgoi :config="config">
-    <div style="position: relative">
+    <!-- position: relative + z-index: 0 are required (the outgoing page is cloned with position:absolute) -->
+    <div style="position: relative; z-index: 0">
       <!-- Your app -->
       <RouterView />
     </div>
@@ -94,7 +105,7 @@ The route helpers return path transition groups, so nested arrays are accepted i
 <!-- app.vue -->
 <template>
   <Ssgoi :config="config">
-    <div style="position: relative; min-height: 100vh">
+    <div style="position: relative; z-index: 0; min-height: 100vh">
       <NuxtPage />
     </div>
   </Ssgoi>
@@ -151,12 +162,19 @@ inside `<Ssgoi>`.
 
 ### Page Transitions (`@ssgoi/vue/view-transitions`)
 
-- `fade()` - Smooth opacity transition
-- `scroll()` - Vertical scrolling (up/down)
-- `drill()` - Drill in/out effect (enter/exit)
-- `hero()` - Shared element transitions
-- `slide()` - Ordered horizontal page transitions
-- `zoom()` - Shared element zoom transitions
+- `fade()` - Calm cross-fade. Safe default for unrelated pages
+- `drill()` - iOS-style hierarchical navigation (list → detail)
+- `slide()` - Horizontal push for tabs / sequential flows
+- `scroll()` - Vertical page scroll for onboarding / paginated views
+- `axis()` - Material/Flutter shared-axis swap for sibling/tab routes
+- `sheet()` - Bottom sheet that slides up (modal-like flows)
+- `hero()` - Shared element transition (matching `data-hero-enter-key` / `data-hero-exit-key`)
+- `zoom()` - Card-to-detail expansion (matching `data-zoom-enter-key` / `data-zoom-exit-key`)
+- `strip()` - 3D Y-axis perspective flip
+- `blind()` - Window-blinds wipe reveal
+- `film()` - Cinematic shrink + tile (gallery / lightbox)
+- `rotate()` - Card flip between siblings
+- `jaemin()` - Playful rotated zoom for special moments
 
 ## Typed Preset Configuration
 

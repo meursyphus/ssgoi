@@ -2,6 +2,18 @@
 
 Angular bindings for SSGOI that give any Angular 20+ app native-feeling page transitions powered by the `@ssgoi/core` animation engine.
 
+try this: [ssgoi.dev](https://ssgoi.dev)
+
+## AI-Assisted Setup
+
+Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
+
+```
+https://ssgoi.dev/llms.txt
+```
+
+It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
+
 ## Installation
 
 ```bash
@@ -35,10 +47,11 @@ import { fade } from "@ssgoi/angular/view-transitions";
   standalone: true,
   imports: [RouterOutlet, Ssgoi],
   template: `
+    <!-- position: relative + z-index: 0 are required (the outgoing page is cloned with position:absolute) -->
     <div
       ssgoi
       [config]="ssgoiConfig()"
-      style="position: relative; min-height: 100vh"
+      style="position: relative; z-index: 0; min-height: 100vh"
     >
       <router-outlet />
     </div>
@@ -88,18 +101,41 @@ Because everything is driven by signals, Angular change detection stays minimal 
 
 ## Available Transitions
 
-View-level factories:
+Import view-level factories from `@ssgoi/angular/view-transitions`:
 
 ```typescript
 import {
   fade,
-  scroll,
   drill,
-  hero,
   slide,
+  scroll,
+  axis,
+  sheet,
+  hero,
   zoom,
+  strip,
+  blind,
+  film,
+  rotate,
+  jaemin,
 } from "@ssgoi/angular/view-transitions";
 ```
+
+- `fade()` - Calm cross-fade. Safe default for unrelated pages
+- `drill()` - iOS-style hierarchical navigation (list → detail)
+- `slide()` - Horizontal push for tabs / sequential flows
+- `scroll()` - Vertical page scroll for onboarding / paginated views
+- `axis()` - Material/Flutter shared-axis swap for sibling/tab routes
+- `sheet()` - Bottom sheet that slides up (modal-like flows)
+- `hero()` - Shared element transition (matching `data-hero-enter-key` / `data-hero-exit-key`)
+- `zoom()` - Card-to-detail expansion (matching `data-zoom-enter-key` / `data-zoom-exit-key`)
+- `strip()` - 3D Y-axis perspective flip
+- `blind()` - Window-blinds wipe reveal
+- `film()` - Cinematic shrink + tile (gallery / lightbox)
+- `rotate()` - Card flip between siblings
+- `jaemin()` - Playful rotated zoom for special moments
+
+Each factory takes the unified config: `{ paths }` (symmetric), `{ enter, exit, type? }` (directional, e.g. `drill`/`sheet`), or `{ paths }` with order deciding direction (`slide`/`scroll`/`axis`).
 
 ## Sample Configuration
 
