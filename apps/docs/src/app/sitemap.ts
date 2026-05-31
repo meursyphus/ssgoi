@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { showcases } from "@/page/showcase/data";
+import { getAllPosts } from "@/lib/blog";
 
 const BASE_URL = "https://ssgoi.dev";
 
@@ -25,6 +26,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "weekly",
     },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: now,
+      priority: 0.7,
+      changeFrequency: "weekly",
+    },
   ];
 
   const showcaseRoutes: MetadataRoute.Sitemap = showcases.map((s) => ({
@@ -34,5 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  return [...staticRoutes, ...showcaseRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = getAllPosts().map((p) => ({
+    url: `${BASE_URL}/blog/${p.slug}`,
+    lastModified: new Date(p.updated ?? p.date),
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
+
+  return [...staticRoutes, ...showcaseRoutes, ...blogRoutes];
 }

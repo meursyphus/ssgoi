@@ -1,0 +1,122 @@
+---
+title: "How to Add Page Transitions in Next.js (App Router)"
+description: "A complete, copy-paste guide to native app-like page transitions in the Next.js App Router — cross-browser, SSR-safe, and router-agnostic — using SSGOI."
+date: "2026-05-31"
+author: "MeurSyphus"
+tags: ["nextjs", "react", "page transitions", "app router"]
+faq:
+  - question: "Does this work with the Next.js App Router and Server Components?"
+    answer: "Yes. SSGOI wraps your app once in the root layout (a Client Component boundary) and marks pages with a data attribute. Your pages can stay Server Components; only the Ssgoi wrapper needs 'use client'."
+  - question: "Do page transitions work in Safari and Firefox?"
+    answer: "Yes. SSGOI is built on the Web Animations API, so transitions run the same way across Chrome, Safari, Firefox, and Edge — unlike the View Transition API, whose cross-document support is still limited outside Chromium."
+  - question: "Will transitions break server-side rendering or SEO?"
+    answer: "No. Pages render and stream normally; SSGOI animates the swap on the client after navigation. There is no extra blocking work and no impact on the server-rendered HTML."
+---
+
+Web pages don't transition — they swap. You click a link, the old page vanishes, the new one appears. Native apps don't do that: they slide, drill, and fade between screens. This guide shows how to get that feel in the **Next.js App Router**, cross-browser and SSR-safe, in two steps.
+
+We'll use [SSGOI](/), a router-agnostic transition engine built on the Web Animations API.
+
+## Why not just the View Transition API?
+
+The native View Transition API is great, but in 2026 its **cross-document (multi-page) support is still limited outside Chromium**, it has no spring physics, and you don't control enter/exit independently. SSGOI fills those gaps: it works in every modern browser, preserves back/forward state, and is driven by spring physics pre-computed into Web Animations API keyframes for 60fps off the main thread.
+
+## Step 1 — Wrap your app once
+
+Install the package:
+
+```bash
+npm install @ssgoi/react
+```
+
+Then wrap your app in the root layout. This is the only Client Component you need to add — your pages can remain Server Components.
+
+```tsx
+// app/layout.tsx
+"use client";
+
+import { Ssgoi } from "@ssgoi/react";
+import { drill, fade } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [
+    // iOS-style drill-in when entering a post, ease back out
+    drill({ enter: "/post/*", exit: "*" }),
+    // Calm cross-fade between top-level pages
+    fade({ paths: ["/", "/about"] }),
+  ],
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Ssgoi config={config}>
+          {/* relative + z-0: the outgoing page is cloned with position:absolute */}
+          <div className="relative z-0 min-h-dvh overflow-x-clip">
+            {children}
+          </div>
+        </Ssgoi>
+      </body>
+    </html>
+  );
+}
+```
+
+The wrapper needs `relative z-0` (and `overflow-x-clip` for horizontal transitions) because SSGOI clones the leaving page with `position: absolute` so it can animate out while the new page mounts in.
+
+## Step 2 — Mark your pages
+
+Add a `data-ssgoi-transition` attribute to each page's root element. The value is the path key your config matches against.
+
+```tsx
+// app/page.tsx
+export default function HomePage() {
+  return (
+    <main data-ssgoi-transition="/">
+      <h1>Home</h1>
+    </main>
+  );
+}
+
+// app/post/[id]/page.tsx
+export default function PostPage({ params }: { params: { id: string } }) {
+  return (
+    <main data-ssgoi-transition={`/post/${params.id}`}>
+      <h1>Post Detail</h1>
+    </main>
+  );
+}
+```
+
+That's it. Navigations now drill in and ease back out like a native app.
+
+## Choosing a transition
+
+Each transition is a factory you drop into `config.transitions`:
+
+| Transition | Feel | Config shape |
+| ---------- | ---- | ------------ |
+| `fade` | calm cross-fade, safe default | `fade({ paths })` |
+| `drill` | iOS list → detail | `drill({ enter, exit })` |
+| `hero` | shared element morph | `hero({ paths })` |
+| `sheet` | bottom sheet | `sheet({ enter, exit })` |
+| `slide` | horizontal tabs | `slide({ paths })` |
+
+See all 13 transitions live on the [examples page](/showcase), or read the [docs](/docs).
+
+## Letting your AI set it up
+
+SSGOI ships a plain-text setup guide for coding agents. Hand this URL to Claude Code, Cursor, or ChatGPT and it has everything it needs:
+
+```
+https://ssgoi.dev/llms.txt
+```
+
+## Wrapping up
+
+Two steps — wrap once, mark your pages — and the App Router feels like a native app, in every browser, without giving up server rendering. Browse the [examples](/showcase) to find the exact transition you want and copy its config.
