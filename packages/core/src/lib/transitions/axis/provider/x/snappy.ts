@@ -21,8 +21,19 @@ import type {
 //   - Very stiff spring — lands around ~160 ms.
 const KAKAO_SLIDE_PX = 8;
 
+// Loosen the settle thresholds 10× over the integrator defaults
+// (0.01 → 0.1 for both position and velocity). With a very stiff spring the
+// tail past ~98% is visually indistinguishable but still simulates for a few
+// extra frames; bumping the thresholds lets the snappy x land sooner without
+// changing the perceived motion.
 const SNAPPY_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 1000, damping: 40, doubleSpring: 1.2 },
+  spring: {
+    stiffness: 1000,
+    damping: 40,
+    doubleSpring: 1.2,
+    restDelta: 0.1,
+    restSpeed: 0.1,
+  },
 };
 
 function buildSnappyX({

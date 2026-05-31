@@ -13,7 +13,6 @@ import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import { IframeLoadingOverlay } from "@/components/iframe-loading-overlay";
-import { SiteLogo } from "@/components/site-logo";
 import {
   showcases,
   allTransitions,
@@ -22,7 +21,7 @@ import {
 } from "../data";
 import { useShowcasePlatform } from "@/lib/state";
 
-export default function ShowcaseListPage() {
+export default function ShowcaseCatalog() {
   const { platform, setPlatform } = useShowcasePlatform((s) => ({
     platform: s.value,
     setPlatform: s.actions.set,
@@ -73,19 +72,11 @@ export default function ShowcaseListPage() {
   };
 
   return (
-    <main className="mx-auto max-w-[1440px] px-4 pb-24 pt-6 sm:px-8">
-      <SiteLogo />
-
-      <header className="mt-10 flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-100 sm:text-4xl">
-          Find your transition.
-        </h1>
-        <p className="max-w-xl text-sm text-neutral-400">
-          Pick one from the demos and drop it into your app.
-        </p>
-      </header>
-
-      <div className="mt-8 flex flex-wrap items-center gap-4 border-b border-white/5 pb-5">
+    <section
+      id="demos"
+      className="mx-auto max-w-[1440px] scroll-mt-24 px-4 pb-24 sm:px-8"
+    >
+      <div className="flex flex-wrap items-center gap-4 border-b border-white/5 pb-5">
         <PlatformToggle value={platform} onChange={setPlatform} />
         <div className="ml-auto flex w-full items-center gap-2 sm:w-[420px]">
           <SearchInput value={query} onChange={setQuery} />
@@ -138,7 +129,7 @@ export default function ShowcaseListPage() {
 
       {filtered.length === 0 && (
         <p className="mt-16 text-center text-sm text-neutral-500">
-          No examples match.{" "}
+          No demos match.{" "}
           <button
             type="button"
             onClick={() => {
@@ -151,7 +142,7 @@ export default function ShowcaseListPage() {
           </button>
         </p>
       )}
-    </main>
+    </section>
   );
 }
 
@@ -177,6 +168,29 @@ function getCanRenderShowcasePreviewsSnapshot() {
 
 function getServerCanRenderShowcasePreviewsSnapshot() {
   return false;
+}
+
+/** Latches `hasBeenVisible` once the element nears the viewport; tracks live `inView`. */
+function useInViewport<T extends Element>(rootMargin = "400px") {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+        if (entry.isIntersecting) setHasBeenVisible(true);
+      },
+      { rootMargin },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [rootMargin]);
+
+  return { ref, inView, hasBeenVisible };
 }
 
 function PlatformToggle({
@@ -276,9 +290,15 @@ function ShowcaseCard({
     showcase.clips[0];
   const previewPath = previewClip?.exitPath ?? showcase.demoOrigin;
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const {
+    ref: frameRef,
+    inView,
+    hasBeenVisible,
+  } = useInViewport<HTMLDivElement>();
+  const showLive = livePreview && hasBeenVisible;
 
   useEffect(() => {
-    if (!livePreview || !previewClip) return;
+    if (!showLive || !inView || !previewClip) return;
     let onEnter = false;
     const id = window.setInterval(() => {
       const next = onEnter ? previewClip.exitPath : previewClip.enterPath;
@@ -289,7 +309,7 @@ function ShowcaseCard({
       );
     }, 5000);
     return () => window.clearInterval(id);
-  }, [livePreview, previewClip]);
+  }, [showLive, inView, previewClip]);
 
   return (
     <Link
@@ -297,12 +317,13 @@ function ShowcaseCard({
       className="group flex flex-col gap-3"
     >
       <div
+        ref={frameRef}
         className={
           "relative flex justify-center rounded-3xl border border-white/5 bg-neutral-900/70 transition-all group-hover:border-white/15 " +
           (platform === "web" ? "px-4 py-5 sm:px-6 sm:py-7" : "px-6 py-8")
         }
       >
-        {livePreview ? (
+        {showLive ? (
           platform === "web" ? (
             <DesktopFrame
               ref={iframeRef}

@@ -6,9 +6,14 @@ import { IframeLoadingOverlay } from "./iframe-loading-overlay";
 type Props = {
   src: string;
   title?: string;
+  widthClassName?: string;
 };
 
-export function PhoneFrame({ src, title = "Live demo" }: Props) {
+export function PhoneFrame({
+  src,
+  title = "Live demo",
+  widthClassName = "w-[320px] sm:w-[380px] lg:w-[420px]",
+}: Props) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -16,7 +21,7 @@ export function PhoneFrame({ src, title = "Live demo" }: Props) {
   }, [src]);
 
   return (
-    <div className="relative mx-auto w-[320px] shrink-0 sm:w-[380px] lg:w-[420px]">
+    <div className={`relative mx-auto shrink-0 ${widthClassName}`}>
       <div className="relative aspect-[320/660] rounded-[52px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[12px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
         <div className="pointer-events-none absolute inset-[12px] rounded-[42px] ring-1 ring-white/5" />
         <div className="relative h-full w-full overflow-hidden rounded-[40px] bg-white">

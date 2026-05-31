@@ -1,14 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
+import { JsonLd } from "@/components/json-ld";
 import { StateProvider } from "@/lib/state";
+import {
+  SITE_DESCRIPTION as DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE as TITLE,
+  SITE_URL,
+  buildOpenGraph,
+  organizationSchema,
+  twitterMeta,
+  websiteSchema,
+} from "@/lib/seo";
 import "./globals.css";
-
-const SITE_URL = "https://ssgoi.dev";
-const SITE_NAME = "SSGOI";
-const TITLE = "SSGOI — Native page transitions on the web";
-const DESCRIPTION =
-  "Router-agnostic page transitions for React, Svelte, Vue, Solid, and Angular. Built on the Web Animations API with spring physics and state preservation.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -53,30 +58,18 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: "en_US",
+  openGraph: buildOpenGraph({
+    path: SITE_URL,
     title: TITLE,
     description: DESCRIPTION,
-    images: [
-      {
-        url: "/og.png",
-        width: 512,
-        height: 279,
-        alt: "SSGOI — Native page transitions on the web",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: ["/og.png"],
-    creator: "@ssgoi",
-  },
+  }),
+  twitter: twitterMeta,
   category: "technology",
+};
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -85,6 +78,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="relative z-0 min-h-full">
+        <JsonLd data={[organizationSchema, websiteSchema]} />
         <StateProvider>
           <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
         </StateProvider>

@@ -39,3 +39,47 @@ body {
     "Helvetica Neue",
     Arial;
 }
+
+/* Syntax highlighting (rehype-highlight / highlight.js) — warm dark palette */
+.hljs-comment,
+.hljs-quote {
+  color: #71717a;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-literal,
+.hljs-built_in,
+.hljs-type {
+  color: #fb923c;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-char.escape_,
+.hljs-meta .hljs-string {
+  color: #86efac;
+}
+.hljs-number {
+  color: #fcd34d;
+}
+.hljs-title,
+.hljs-title.function_ {
+  color: #93c5fd;
+}
+.hljs-title.class_,
+.hljs-tag .hljs-name {
+  color: #f0abfc;
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-property {
+  color: #fdba74;
+}
+.hljs-params,
+.hljs-variable {
+  color: #e5e7eb;
+}
+.hljs-meta,
+.hljs-punctuation,
+.hljs-operator {
+  color: #a1a1aa;
+}

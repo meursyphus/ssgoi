@@ -22,8 +22,9 @@ const config: SsgoiConfig = {
  *   - Creates the one and only `HostAnimation` and exposes it via `HostContext`,
  *     so the playback dock (mounted at `app/demo/layout.tsx`) and every nested
  *     `<Ssgoi host={...}>` share one controller.
- *   - Wraps the docs landing + `/showcase` pages in their own `<Ssgoi>` for the
- *     non-directional scroll transition between `/` and `/showcase`.
+ *   - Wraps the home catalog + `/showcase/[slug]` demo pages in their own
+ *     `<Ssgoi>` for the non-directional scroll transition between `/` and
+ *     `/showcase`.
  *   - Mounts the postMessage bridge once at the root so docs-as-showcase
  *     (`slug: ssgoi-docs`) and every `/demo/*` route loaded inside an iframe
  *     can talk to their parent showcase shell without per-demo wiring.

@@ -15,12 +15,13 @@ import type {
 // needs its own tuning later.
 const TRANSLATE_PX = 8;
 
+// See x/fluid.ts — settle thresholds loosened 10× across all axis providers.
 const Y_NON_DIRECTIONAL_OUT_PHYSICS: PhysicsOptions = {
-  inertia: { acceleration: 150, resistance: 1.5 },
+  inertia: { acceleration: 150, resistance: 1.5, restDelta: 0.1 },
 };
 
 const Y_NON_DIRECTIONAL_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 34 },
+  spring: { stiffness: 180, damping: 34, restDelta: 0.1, restSpeed: 0.1 },
 };
 
 function buildNonDirectionalY(

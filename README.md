@@ -41,7 +41,7 @@ Web pages don't transition—they just swap. SSGOI changes that.
 ## Quick Start
 
 ```bash
-npm install @ssgoi/react @ssgoi/core
+npm install @ssgoi/react
 ```
 
 ### 1. Wrap your app (layout.tsx)
@@ -50,12 +50,14 @@ npm install @ssgoi/react @ssgoi/core
 "use client";
 
 import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { drill, fade } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [
-    { from: "*", to: "/post/*", transition: drill({ direction: "enter" }) },
-    { from: "/post/*", to: "*", transition: drill({ direction: "exit" }) },
+    // iOS-style drill-in when entering a post, ease back out
+    drill({ enter: "/post/*", exit: "*" }),
+    // Calm cross-fade between top-level pages
+    fade({ paths: ["/", "/about"] }),
   ],
 };
 
@@ -64,6 +66,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         <Ssgoi config={config}>
+          {/* relative + z-0: the outgoing page is cloned with position:absolute */}
           <div className="relative z-0">{children}</div>
         </Ssgoi>
       </body>
@@ -100,46 +103,58 @@ export default function PostPage({ params }) {
 
 ## Transitions
 
+Each transition is a factory you drop into `config.transitions`. They return path-transition groups, so nested arrays are flattened automatically.
+
 ```tsx
 import {
-  drill,
   fade,
-  scroll,
+  drill,
   slide,
-  swap,
+  scroll,
+  axis,
   sheet,
   hero,
-  pinterest,
+  zoom,
 } from "@ssgoi/react/view-transitions";
 
-drill({ direction: "enter" | "exit" }); // iOS-style (list → detail)
-fade(); // Cross-fade
-scroll({ direction: "up" | "down" }); // Vertical scroll
-slide({ direction: "left" | "right" }); // Horizontal (tabs)
-swap(); // Bottom tab navigation
-sheet({ direction: "enter" | "exit" }); // Bottom sheet
-hero(); // Shared element
-pinterest(); // Gallery expand
+// Symmetric — every pair animates the same ({ paths })
+fade({ paths: ["/", "/about"] });
+hero({ paths: ["/products", "/products/*"] }); // shared element
+zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }); // card → detail
+
+// Directional — enter / exit get different physics ({ enter, exit })
+drill({ enter: "/post/*", exit: "*" }); // iOS list → detail
+sheet({ enter: "/compose", exit: "*" }); // bottom sheet
+
+// Ordered — path order decides forward / back ({ paths })
+slide({ paths: ["/tabs/a", "/tabs/b"] }); // horizontal tabs
+scroll({ paths: ["/step-1", "/step-2"] }); // vertical onboarding
+axis({ paths: ["/feed", "/profile"] }); // Material shared axis
 ```
 
-See all transitions at [ssgoi.dev](https://ssgoi.dev/en/docs/mobile-transitions)
+**All built-in transitions:** `fade` · `drill` · `slide` · `scroll` · `axis` · `sheet` · `hero` · `zoom` · `strip` · `blind` · `film` · `rotate` · `jaemin`.
+
+See them all live at [ssgoi.dev](https://ssgoi.dev) or in [llms.txt](https://ssgoi.dev/llms.txt).
 
 ---
 
 ## Packages
 
-| Package          | Framework         |
-| ---------------- | ----------------- |
-| `@ssgoi/react`   | React, Next.js    |
-| `@ssgoi/svelte`  | Svelte, SvelteKit |
-| `@ssgoi/angular` | Angular           |
-| `@ssgoi/vue`     | Vue, Nuxt         |
+| Package          | Framework          |
+| ---------------- | ------------------ |
+| `@ssgoi/react`   | React, Next.js     |
+| `@ssgoi/svelte`  | Svelte, SvelteKit  |
+| `@ssgoi/vue`     | Vue, Nuxt          |
+| `@ssgoi/solid`   | Solid, SolidStart  |
+| `@ssgoi/angular` | Angular            |
+| `@ssgoi/core`    | Framework-agnostic engine |
 
 ---
 
 ## Documentation
 
 **[ssgoi.dev](https://ssgoi.dev)** — Full docs, interactive examples, and API reference.
+**[ssgoi.dev/llms.txt](https://ssgoi.dev/llms.txt)** — Plain-text setup guide for AI assistants.
 
 ---
 
