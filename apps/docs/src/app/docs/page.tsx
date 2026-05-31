@@ -94,7 +94,7 @@ export default function DocsOverviewPage() {
             <PhoneFrame
               src="https://www.seoulbiyori.com"
               title="ssgoi in production — seoulbiyori.com"
-              widthClassName="w-[250px] sm:w-[270px]"
+              widthClassName="w-[280px] sm:w-[300px]"
             />
           </div>
         </div>
