@@ -9,13 +9,13 @@ import { DOCS_NAV } from "@/page/docs/nav";
 export const metadata: Metadata = {
   title: "Docs — Setup, transitions, and how SSGOI works",
   description:
-    "Install SSGOI, mark your pages, and pick from twelve page transitions. Setup lives in plain-text llms.txt files your AI agent can read directly.",
+    "Install SSGOI, mark your pages, and pick from thirteen page transitions. Setup lives in plain-text llms.txt files your AI agent can read directly.",
   alternates: { canonical: "/docs" },
   openGraph: buildOpenGraph({
     path: "/docs",
     title: "SSGOI Docs — Setup, transitions, and how it works",
     description:
-      "Install SSGOI, mark your pages, and pick from twelve page transitions. Setup lives in plain-text llms.txt files your AI agent can read directly.",
+      "Install SSGOI, mark your pages, and pick from thirteen page transitions. Setup lives in plain-text llms.txt files your AI agent can read directly.",
   }),
 };
 

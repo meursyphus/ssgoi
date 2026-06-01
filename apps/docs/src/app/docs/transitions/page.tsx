@@ -4,9 +4,9 @@ import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { DocsPageHeading, TransitionsBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Transitions — the twelve built-in SSGOI transitions",
+  title: "Transitions — the thirteen built-in SSGOI transitions",
   description:
-    "drill, fade, slide, scroll, sheet, hero, zoom, strip, blind, film, rotate, jaemin. Each transition links to a self-contained .txt with the full API.",
+    "drill, fade, slide, axis, scroll, sheet, hero, zoom, strip, blind, film, rotate, jaemin. Each links to its variants, usage, live demos, and a self-contained .txt with the full API.",
   alternates: { canonical: "/docs/transitions" },
   openGraph: buildOpenGraph({ path: "/docs/transitions" }),
 };
@@ -23,7 +23,7 @@ export default function DocsTransitionsPage() {
       />
       <DocsPageHeading
         title="Transitions"
-        lead="Twelve built-in transitions. Pick one, drop it into your config, and let the AI agent wire up the per-element keys."
+        lead="Thirteen built-in transitions. Pick one, drop it into your config, and let the AI agent wire up the per-element keys."
       />
       <TransitionsBody />
     </>
