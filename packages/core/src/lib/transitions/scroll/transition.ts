@@ -56,6 +56,20 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
           const translateY = isUp ? -height * t : height * t;
           return { transform: `translate3d(0, ${translateY}px, 0)` };
         },
+        // The outgoing node is the real, reused element (re-hidden then shown
+        // again on the next navigation), so mirror the incoming cleanup and
+        // also reset the out-only props applied in prepare (zIndex,
+        // pointerEvents) — otherwise the leftover inline styles corrupt the
+        // page the next time it appears.
+        onComplete: () => {
+          from.style.willChange = "auto";
+          from.style.backfaceVisibility = "";
+          (from.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
+          from.style.transform = "";
+          from.style.pointerEvents = "";
+          from.style.zIndex = "";
+        },
       });
 
       const inAnim = new WebAnimation({

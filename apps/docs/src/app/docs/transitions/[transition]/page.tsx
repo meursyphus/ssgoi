@@ -9,8 +9,9 @@ import {
   getTransitionDoc,
 } from "@/page/docs/transitions-data";
 
-export const dynamicParams = false;
-
+// `dynamicParams = false` is incompatible with cacheComponents. The known
+// transitions are still prerendered via generateStaticParams; an unknown slug
+// falls through to `notFound()` below, so it 404s either way.
 export function generateStaticParams() {
   return TRANSITION_DOCS.map((t) => ({ transition: t.name }));
 }

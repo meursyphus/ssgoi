@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { useShowcaseHost } from "@/lib/components/host-context";
 import { FloatingAnimationDock } from "@/lib/components/animation-dock";
 
@@ -16,7 +16,11 @@ export default function DemoLayout({ children }: { children: ReactNode }) {
   const host = useShowcaseHost();
   return (
     <>
-      {children}
+      {/* Demo route pages read runtime-dynamic data (route `params`,
+          `searchParams`) for their interactive content. Under cacheComponents
+          that must sit inside a <Suspense> boundary so the static shell can
+          prerender without it — one boundary here covers every /demo/* page. */}
+      <Suspense>{children}</Suspense>
       <FloatingAnimationDock host={host} />
     </>
   );

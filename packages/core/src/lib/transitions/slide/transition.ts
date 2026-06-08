@@ -48,6 +48,17 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
           const translateX = isLeft ? -100 * t : 100 * t;
           return { transform: `translate3d(${translateX}%, 0, 0)` };
         },
+        // The outgoing node is the real Activity page and gets reused on the
+        // next navigation, so reset every inline style we wrote to it (mirror
+        // the incoming cleanup, plus the out-only pointerEvents).
+        onComplete: () => {
+          from.style.willChange = "auto";
+          from.style.backfaceVisibility = "";
+          (from.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
+          from.style.transform = "";
+          from.style.pointerEvents = "";
+        },
       });
 
       const inAnim = new WebAnimation({

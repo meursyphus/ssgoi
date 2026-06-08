@@ -11,6 +11,12 @@ const ROUTES: { href: string; title: string; description: string }[] = [
     title: "/animator",
     description: "Animator 테스트용 빈 라우트",
   },
+  {
+    href: "/activity",
+    title: "/activity",
+    description:
+      "React <Activity> 전환 테스트 — display:none hide/show로 unmount 없이 페이지 전환",
+  },
 ];
 
 export default function Home() {

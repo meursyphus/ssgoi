@@ -2,7 +2,6 @@
 
 import {
   forwardRef,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -59,9 +58,15 @@ export const DesktopFrame = forwardRef<HTMLIFrameElement, Props>(
     const [screenW, setScreenW] = useState(0);
     const [loaded, setLoaded] = useState(false);
 
-    useEffect(() => {
+    // Reset the loading overlay only when `src` ACTUALLY changes — not on a bare
+    // effect re-run. React <Activity> re-runs passive effects on hidden→visible,
+    // so a `useEffect(..., [src])` would fire on every reveal and re-show the
+    // overlay over an already-loaded iframe that never re-fires `onLoad`.
+    const [trackedSrc, setTrackedSrc] = useState(src);
+    if (src !== trackedSrc) {
+      setTrackedSrc(src);
       setLoaded(false);
-    }, [src]);
+    }
 
     useLayoutEffect(() => {
       if (!scaleViewport) return;
