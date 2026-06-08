@@ -19,7 +19,15 @@ let sharedObserver: MutationObserver | null = null;
 let initialized = false;
 
 function checkRemovedSubtree(node: Node): void {
-  if (node instanceof HTMLElement && watched.has(node)) {
+  // A childList "removed" record also fires when a node is MOVED (removed then
+  // re-inserted within the same commit) — e.g. Next.js reorders its bfcache
+  // `<Activity>` siblings on back/forward navigation, so React detaches and
+  // reattaches a kept-alive page's DOM node. By the time this observer callback
+  // runs the move is already complete, so `isConnected` distinguishes a real
+  // unmount (still detached) from a reorder (already reattached). Only a true
+  // unmount may fire the leave callback; a moved node keeps its watch, otherwise
+  // its visibility tracking would be torn down and later transitions break.
+  if (node instanceof HTMLElement && watched.has(node) && !node.isConnected) {
     const cb = watched.get(node)!;
     watched.delete(node);
     // Defer to microtask so we never mutate the DOM inside the observer

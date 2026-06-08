@@ -62,6 +62,17 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         direction === "enter" ? "to" : "from",
       );
 
+      // The outgoing (`from`) node is now reused across navigations (it is
+      // re-hidden with display:none and shown again next time), so any inline
+      // style we leave on it would corrupt the page when it reappears. Reset
+      // the `from`-only prepare props that the per-element onComplete below
+      // does not already clear (the `to`-side cleanup is the template). For
+      // `enter` the `from` is the background; for `exit` it is the sheet.
+      const resetFromInteractionProps = () => {
+        from.style.pointerEvents = "";
+        from.style.zIndex = "";
+      };
+
       // Clip the moving sheet to its visible viewport slice — without this it
       // can paint outside the chrome (top nav / player bar) during translate.
       sheetEl.style.clipPath = `inset(${sheetRect.top}px 0 calc(100% - ${sheetRect.top + sheetRect.height}px) 0)`;
@@ -86,6 +97,11 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
             "";
           sheetEl.style.clipPath = "";
           sheetEl.style.transform = "";
+          // The sheet animation always settles, so use it to clear the
+          // pointerEvents/zIndex that prepare put on the reused `from` node
+          // (the sheet itself on `exit`, the background on `enter`). The rest
+          // of the `from` background props on `enter` are cleared by bgAnim.
+          resetFromInteractionProps();
         },
       });
 
@@ -112,6 +128,12 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         element: backgroundEl,
         integrator: IntegratorProvider.from(physics),
         style: bgStyle,
+        // On `exit` the background is the incoming (`to`) node; on `enter` it is
+        // the reused outgoing (`from`) node — in both cases its inline styles
+        // must be restored when the animation settles, so the reused node is
+        // not left scaled/faded/clipped the next time it is shown. The `enter`
+        // branch mirrors the `exit` cleanup and additionally clears the
+        // transform/opacity final frame WAAPI leaves behind.
         onComplete:
           direction === "exit"
             ? () => {
@@ -125,7 +147,19 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
                 backgroundEl.style.clipPath = "";
                 backgroundEl.style.transformOrigin = "";
               }
-            : undefined,
+            : () => {
+                backgroundEl.style.willChange = "auto";
+                backgroundEl.style.backfaceVisibility = "";
+                (
+                  backgroundEl.style as CSSStyleDeclaration & {
+                    contain: string;
+                  }
+                ).contain = "";
+                backgroundEl.style.clipPath = "";
+                backgroundEl.style.transformOrigin = "";
+                backgroundEl.style.transform = "";
+                backgroundEl.style.opacity = "";
+              },
       });
 
       return new MultiAnimation([sheetAnim, bgAnim], { mode: "parallel" });

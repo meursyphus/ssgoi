@@ -84,6 +84,8 @@ function makeBlinds(
 }
 
 type BlindExtras = {
+  // Threaded through so the OUT cleanup can reach the reused `from` node.
+  fromEl: HTMLElement;
   fromBlinds: HTMLDivElement[];
   fromContainer: HTMLDivElement;
   toBlinds: HTMLDivElement[];
@@ -122,13 +124,20 @@ export const blind = (
         "right",
       );
       return {
+        fromEl,
         fromBlinds: fromData.blinds,
         fromContainer: fromData.container,
         toBlinds: toData.blinds,
         toContainer: toData.container,
       };
     },
-    animation: ({ fromBlinds, fromContainer, toBlinds, toContainer }) => {
+    animation: ({
+      fromEl,
+      fromBlinds,
+      fromContainer,
+      toBlinds,
+      toContainer,
+    }) => {
       // OUT: each blind grows in (t: 0 → 1). IN: each blind shrinks out
       // (`u`: 1 → 0). Default (0, 1) bounds for both.
       const out: Animation[] = fromBlinds.map(
@@ -157,6 +166,14 @@ export const blind = (
                 ? () => {
                     toContainer.remove();
                     fromContainer.remove();
+                    // The OUT (`from`) element is the real, reused page node now
+                    // (React Activity / Next cacheComponents re-show it on the
+                    // next navigation), so strip the inline styles `prepare`
+                    // wrote — `zIndex` (set directly) and `position` (set by
+                    // `makeBlinds` when the host was `static`) — or they stick
+                    // and corrupt the page the next time it appears.
+                    fromEl.style.zIndex = "";
+                    fromEl.style.position = "";
                   }
                 : undefined,
           }),

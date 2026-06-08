@@ -176,6 +176,24 @@ class TileStrategy implements ZoomStrategy {
       tileEl.style.transformOrigin = "";
       (tileEl.style as CSSStyleDeclaration & { contain: string }).contain = "";
       from.style.zIndex = previousFromZIndex;
+      // `from` is the REAL outgoing page now (React <Activity> / Next
+      // cacheComponents re-hide and reuse this node on the next nav), so any
+      // inline style left on it persists and corrupts the page when it
+      // reappears. Mirror the tile-side (`to`) reset above for every prop the
+      // prepare hook / out animations write to `from`, regardless of mode:
+      //   - prepare(): willChange, backfaceVisibility, contain.
+      //   - background/tile out animations: transformOrigin (set here for the
+      //     `from`-owned config) plus the WAAPI forwards-fill final frame
+      //     (transform on the expand/blur background, transform + clipPath on
+      //     the exit-mode tile). When `tileEl === from` (exit) the resets
+      //     above already cover those props; the lines below make the cleanup
+      //     correct in enter mode too, where `tileEl === to`.
+      from.style.willChange = "auto";
+      from.style.backfaceVisibility = "";
+      from.style.transformOrigin = "";
+      (from.style as CSSStyleDeclaration & { contain: string }).contain = "";
+      from.style.transform = "";
+      from.style.clipPath = "";
     });
 
     return [

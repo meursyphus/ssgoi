@@ -44,6 +44,19 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => config.out.animate(t),
+        // The outgoing node is the real, reused element (re-hidden on navigate),
+        // so clear every inline style we set on it — mirroring the `to` cleanup,
+        // plus the out-only `pointerEvents` / `zIndex`.
+        onComplete: () => {
+          from.style.willChange = "auto";
+          from.style.backfaceVisibility = "";
+          (from.style as CSSStyleDeclaration & { contain: string }).contain =
+            "";
+          from.style.transform = "";
+          from.style.opacity = "";
+          from.style.pointerEvents = "";
+          from.style.zIndex = "";
+        },
       });
 
       const inAnim = new WebAnimation({

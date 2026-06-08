@@ -467,8 +467,13 @@ export const film = (
           transform: `translateY(${s.translateY}px) scale(${s.scale})`,
         }),
         () => {
+          // The outgoing node is reused (re-hidden, shown on the next
+          // navigation), so every inline style this transition wrote to `from`
+          // must be reset here — mirroring the `to` cleanup below — or the
+          // stale clip/origin/transform corrupts the page when it reappears.
           from.style.clipPath = "";
           from.style.transformOrigin = "";
+          from.style.transform = "";
         },
       );
 

@@ -15,6 +15,7 @@ import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { findMatchingTransition } from "./find-matching-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount } from "./unmount-observer";
+import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
 
 function isTransitionGroup(
@@ -37,10 +38,23 @@ function flattenTransitions(
   return flattened;
 }
 
+type TransitionMode = "unmount" | "hidden";
+
 type PendingSide = {
   element: HTMLElement;
   parent: Element | null;
   nextSibling: Element | null;
+  /**
+   * How the outgoing page left (meaningful on the OUT side only):
+   *  - "unmount": real DOM removal (SPA frameworks, Next without
+   *    cacheComponents). The outgoing page is cloned and the clone is removed on
+   *    settle — the battle-tested baseline path.
+   *  - "hidden":  React `<Activity>` / Next `cacheComponents` toggled it to
+   *    `display:none`. The REAL node is reused (page state preserved) and
+   *    re-hidden on settle.
+   * Absent on the IN side; defaults to "unmount".
+   */
+  mode?: TransitionMode;
 };
 
 type ElementAnchor = {
@@ -118,6 +132,79 @@ export function createSggoiTransitionContext(
     };
   };
 
+  // ── Hidden-mode bookkeeping (React <Activity> / Next cacheComponents) ───────
+  //
+  // In hidden mode a page element is registered ONCE (first mount) and then
+  // toggled between visible and display:none forever; OUT/IN are driven by the
+  // visibility-observer rather than mount/unmount. Repeated, interruptible
+  // navigation stays correct via three pieces of state:
+  //
+  //  - `owner` / `transitionEpoch`: every hidden run stamps the real nodes it
+  //    drives with a monotonically increasing epoch. On settle a run only
+  //    restores a node it STILL owns, so when a follow-up navigation re-claims
+  //    the same nodes mid-flight (A: OUT→IN, B: IN→OUT) the interrupted run's
+  //    cleanup is skipped and the live run owns the final resting state — no
+  //    vanished or stuck-hidden pages.
+  //  - `hiddenState`: per-element resting bookkeeping. `savedCss` is the clean
+  //    inline cssText snapshot taken on idle→active entry (so every style a
+  //    transition leaks onto a reused node is wiped on settle); `intent` is
+  //    React's latest visible/hidden intent; `visibleDisplay` is the inline
+  //    display to restore to when resting visible (possibly "" for class-driven
+  //    display); `computedDisplay` is a concrete value used to reveal a hidden
+  //    node for its out-animation.
+  type HiddenState = {
+    vis: VisibilityHandle;
+    savedCss: string | null;
+    intent: "visible" | "hidden";
+    visibleDisplay: string;
+    computedDisplay: string;
+  };
+  const hiddenState = new WeakMap<HTMLElement, HiddenState>();
+  const owner = new WeakMap<HTMLElement, number>();
+  let transitionEpoch = 0;
+
+  const readComputedDisplay = (el: HTMLElement): string => {
+    const d =
+      typeof getComputedStyle !== "undefined"
+        ? getComputedStyle(el).display
+        : "";
+    return d && d !== "none" ? d : "block";
+  };
+
+  // Capture the element's resting visible display while it IS visible: the
+  // inline value (what React restores on reveal, possibly "") plus a concrete
+  // computed value (needed to reveal it later, where "" is not a legal write).
+  const captureVisibleDisplay = (el: HTMLElement, state: HiddenState): void => {
+    state.visibleDisplay = el.style.getPropertyValue("display");
+    state.computedDisplay = readComputedDisplay(el);
+  };
+
+  // Reconcile a reused (hidden-mode) real node to its final resting state — but
+  // only if this run still owns it (a newer run re-claiming it wins). Wipes all
+  // transition-leaked inline styles via the clean cssText snapshot, then sets
+  // display to match React's latest intent.
+  const reconcileResting = (el: HTMLElement, epoch: number): void => {
+    if (owner.get(el) !== epoch) return; // superseded by a newer run
+    owner.delete(el);
+    const state = hiddenState.get(el);
+    if (!state) return;
+    if (state.savedCss !== null) {
+      el.style.cssText = state.savedCss;
+      state.savedCss = null;
+    }
+    if (state.intent === "hidden") {
+      // Match React's own hidden form so a later React reveal is observable.
+      state.vis.setDisplay("none", true);
+    } else if (state.visibleDisplay) {
+      state.vis.setDisplay(state.visibleDisplay, false);
+      captureVisibleDisplay(el, state);
+    } else {
+      // React drives visibility via a class / UA default (no inline display).
+      state.vis.setDisplay(null);
+      captureVisibleDisplay(el, state);
+    }
+  };
+
   const runTransition = (
     config: AnyTransitionConfig,
     fromPath: string,
@@ -127,15 +214,13 @@ export function createSggoiTransitionContext(
   ): void => {
     const fromOriginal = outSide.element;
     const toElement = inSide.element;
+    const outMode: TransitionMode = outSide.mode ?? "unmount";
+    const isHidden = outMode === "hidden";
 
     const { parent, nextSibling } = outSide.parent
       ? { parent: outSide.parent, nextSibling: outSide.nextSibling }
       : readAnchor(fromOriginal);
 
-    // Clone while the original is still mounted; the host framework will
-    // detach the original right after `out()` returns.
-    const fromClone = fromOriginal.cloneNode(true) as HTMLElement;
-    fromClone.setAttribute("data-ssgoi-clone", "");
     const scrollOffset = calculateScrollOffset(fromPath, toPath);
 
     const ssgoiContext: SsgoiTransitionContext = {
@@ -150,14 +235,49 @@ export function createSggoiTransitionContext(
       },
     };
 
-    // Auto-applied for every transition — outgoing page goes absolute so the
-    // incoming page can take its slot. Style only; insertion is deferred
-    // until after `prepare` so any pre-paint styling settles first.
-    prepareOutgoing(fromClone, ssgoiContext);
+    // The element handed to the animation as `from`:
+    //  - unmount mode: a throwaway deep clone (the real node is being destroyed
+    //    by the host framework), inserted after `prepare` and removed on settle.
+    //  - hidden mode: the REAL outgoing node, already revealed + taken out of
+    //    flow by `handleHide`. Reusing it keeps page state alive AND lets a
+    //    follow-up navigation hand its motion back continuously (matchInto keys
+    //    on element identity) — a fresh clone every nav never could.
+    let fromElement: HTMLElement;
+    if (isHidden) {
+      fromElement = fromOriginal;
+      // scrollOffset is only known now — finish the out-of-flow placement begun
+      // in handleHide so the incoming page lines up with the prior scroll.
+      fromElement.style.top = `${-1 * (scrollOffset?.y ?? 0)}px`;
+      // Snapshot the incoming node's clean inline styles BEFORE `prepare` paints
+      // starting styles onto it, so settle can wipe transition leakage off this
+      // reused real node. (The outgoing node was snapshotted in handleHide.)
+      const toState = hiddenState.get(toElement);
+      if (toState && toState.savedCss === null) {
+        toState.savedCss = toElement.style.cssText;
+      }
+    } else {
+      // Clone while the original is still mounted; the host framework will
+      // detach the original right after `out()` returns.
+      fromElement = fromOriginal.cloneNode(true) as HTMLElement;
+      fromElement.setAttribute("data-ssgoi-clone", "");
+      // Outgoing page goes absolute so the incoming page can take its slot.
+      // Style only; insertion is deferred until after `prepare`.
+      prepareOutgoing(fromElement, ssgoiContext);
+    }
 
     if (!shouldPreserve(fromPath)) evictScrollPosition(fromPath);
 
-    const fromPromise: Promise<HTMLElement> = Promise.resolve(fromClone);
+    // Stamp ownership BEFORE host.attach force-completes any prior run (below):
+    // the prior run's settle checks ownership and must already see THIS run
+    // owning the shared real nodes, so it skips them instead of fighting us.
+    // Only hidden mode reuses/owns real nodes; unmount mode stays clone-based.
+    const epoch = isHidden ? ++transitionEpoch : 0;
+    if (isHidden) {
+      owner.set(toElement, epoch);
+      owner.set(fromOriginal, epoch);
+    }
+
+    const fromPromise: Promise<HTMLElement> = Promise.resolve(fromElement);
     const toPromise: Promise<HTMLElement> = Promise.resolve(toElement);
 
     const createdElements: HTMLElement[] = [];
@@ -192,11 +312,12 @@ export function createSggoiTransitionContext(
       // Now that prepare's microtasks have all run (initial styles, extras
       // built), drop the outgoing clone into place. Order is:
       //   prepare → out insert → animation create/play
-      if (parent) {
+      // Hidden mode skips insertion: the real node is already in place.
+      if (!isHidden && parent) {
         if (nextSibling && parent.contains(nextSibling)) {
-          parent.insertBefore(fromClone, nextSibling);
+          parent.insertBefore(fromElement, nextSibling);
         } else {
-          parent.appendChild(fromClone);
+          parent.appendChild(fromElement);
         }
       }
 
@@ -207,14 +328,21 @@ export function createSggoiTransitionContext(
         ...(extras as Record<string, unknown>),
       });
 
-      // Per-transition cleanup (clone removal, prepare-created nodes). Wire
-      // this BEFORE attach — host.attach hooks onComplete itself and chains
-      // through prior hooks, so cleanup still fires once the run settles.
+      // Per-transition settle. Wire this BEFORE attach — host.attach hooks
+      // onComplete itself and chains through prior hooks, so cleanup still
+      // fires once the run settles (natural finish OR host force-completing it).
       const prevOnComplete = animation.onComplete;
       animation.onComplete = () => {
         prevOnComplete?.();
-        if (fromClone.parentElement) {
-          fromClone.parentElement.removeChild(fromClone);
+        if (isHidden) {
+          // Reuse: re-hide the real outgoing node (or leave it visible if a
+          // follow-up navigation re-claimed it as an incoming page) and wipe
+          // every inline style the transition leaked onto it. Both reconciles
+          // no-op if a newer run now owns the node.
+          reconcileResting(fromOriginal, epoch);
+          reconcileResting(toElement, epoch);
+        } else if (fromElement.parentElement) {
+          fromElement.parentElement.removeChild(fromElement);
         }
         for (const extra of createdElements) {
           if (extra.parentElement) extra.parentElement.removeChild(extra);
@@ -270,12 +398,114 @@ export function createSggoiTransitionContext(
     });
   };
 
-  const handleRemoval = (element: HTMLElement, path: string) => {
+  // React drove `element` to display:none (an <Activity> went mode="hidden").
+  // Reveal the REAL node immediately — synchronously, inside the observer's
+  // microtask, before the browser paints — so it animates out from where it sat
+  // instead of flashing away, and take it out of flow so the incoming page
+  // claims its slot. The run itself starts once the IN side pairs.
+  const handleHide = (element: HTMLElement, path: string) => {
+    const state = hiddenState.get(element);
+    if (!state) return;
+    // React's <Activity> can commit the SAME hide more than once (dev re-commit
+    // / follow-up render). Only the first edge of a given intent starts a
+    // transition; a repeat must NOT enqueue a second OUT, or it corrupts the
+    // navigation detector's pairing for the next real navigation. Real nav
+    // always FLIPS intent, so it is never deduped here.
+    const alreadyHidden = state.intent === "hidden";
+    state.intent = "hidden";
+
+    // Snapshot inline styles once, on idle→active entry, so settle can wipe
+    // transition leakage off this reused node. These are the node's resting
+    // styles except for React's just-applied `display:none` — which is fine,
+    // because reconcileResting always overrides display explicitly afterward.
+    // If already mid-flight (savedCss set), keep the original snapshot.
+    if (state.savedCss === null) state.savedCss = element.style.cssText;
+
+    // (Re-)reveal over React's `display:none !important`, every time — so the
+    // node stays visible for its out-animation even when React re-asserts the
+    // hide. A concrete computed value WITH !important keeps our reveal
+    // observably distinct from React's plain `display:` reveal, so an
+    // interrupting React reveal is still caught.
+    state.vis.setDisplay(state.computedDisplay || "block", true);
+    element.style.position = "absolute";
+    element.style.width = "100%";
+    element.style.left = "0";
+
+    if (alreadyHidden) return; // duplicate hide — kept revealed, don't re-pair
+
     const anchor = readAnchor(element);
     pendingOut = {
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
+      mode: "hidden",
+    };
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    handleArrival(currentPath, "out");
+  };
+
+  // React revealed `element` (an <Activity> went mode="visible"): it is entering
+  // again, with its state preserved. Drive an IN exactly like a fresh mount,
+  // minus the mount.
+  const handleShow = (element: HTMLElement, path: string) => {
+    const state = hiddenState.get(element);
+    if (!state) return;
+    // Dedupe redundant reveals (see handleHide): only an intent flip enters.
+    if (state.intent === "visible") return;
+    state.intent = "visible";
+    // Capture React's visible display BEFORE the restore below mutates it.
+    captureVisibleDisplay(element, state);
+
+    // OUT→IN role swap: an in-flight outgoing node (savedCss already taken) is
+    // being re-claimed as the incoming page. It still carries the out-of-flow
+    // positioning handleHide imposed (position:absolute/width/left/top) plus the
+    // out-transition's style leakage — normalize it back to its clean inline
+    // styles so the incoming page re-enters in NORMAL flow, then re-assert the
+    // visible display (the snapshot carries React's display:none from the hide).
+    // savedCss is kept for the eventual settle; the spring handoff (matchInto)
+    // carries motion continuity, so wiping the stale inline transform is fine.
+    if (state.savedCss !== null) {
+      element.style.cssText = state.savedCss;
+      if (state.visibleDisplay) {
+        state.vis.setDisplay(state.visibleDisplay, false);
+      } else {
+        state.vis.setDisplay(null);
+      }
+    }
+
+    initializeContext(element, path);
+    pendingIn = {
+      element,
+      parent: element.parentElement,
+      nextSibling: element.nextElementSibling,
+    };
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    handleArrival(currentPath, "in");
+  };
+
+  const handleRemoval = (element: HTMLElement, path: string) => {
+    const state = hiddenState.get(element);
+    if (state) {
+      state.vis.stop();
+      hiddenState.delete(element);
+      owner.delete(element);
+      // An Activity page evicted WHILE hidden (e.g. dropped from Next's bfcache)
+      // is just GC, not a navigation — don't animate it out. Drop any pending
+      // side that still points at this now-gone node so it can't mis-pair a
+      // later arrival onto a detached element.
+      if (state.intent === "hidden") {
+        if (pendingOut?.element === element) pendingOut = null;
+        if (pendingIn?.element === element) pendingIn = null;
+        return;
+      }
+    }
+
+    const anchor = readAnchor(element);
+    pendingOut = {
+      element,
+      parent: anchor.parent,
+      nextSibling: anchor.nextSibling,
+      mode: "unmount",
     };
     // Read the latest id from the DOM rather than the closure-captured path
     // so a mid-life id change (re-render with a new id prop on the same
@@ -294,13 +524,35 @@ export function createSggoiTransitionContext(
     registered.add(element);
 
     captureAnchor(element);
-    initializeContext(element, path);
-    pendingIn = {
-      element,
-      parent: element.parentElement,
-      nextSibling: element.nextElementSibling,
+
+    // Watch React <Activity> / cacheComponents display toggles for this node for
+    // the rest of its life. The node is registered ONCE; subsequent OUT/IN come
+    // from these handlers (display:none flips), not from mount/unmount.
+    const vis = watchVisibility(element, {
+      onHide: () => handleHide(element, path),
+      onShow: () => handleShow(element, path),
+    });
+    const state: HiddenState = {
+      vis,
+      savedCss: null,
+      intent: vis.isHidden ? "hidden" : "visible",
+      visibleDisplay: "",
+      computedDisplay: "block",
     };
-    handleArrival(path, "in");
+    hiddenState.set(element, state);
+
+    // A node that mounts already hidden (e.g. an inactive Activity sibling) is
+    // not "entering" — set it up but don't fire an IN until React reveals it.
+    if (!vis.isHidden) {
+      captureVisibleDisplay(element, state);
+      initializeContext(element, path);
+      pendingIn = {
+        element,
+        parent: element.parentElement,
+        nextSibling: element.nextElementSibling,
+      };
+      handleArrival(path, "in");
+    }
 
     watchUnmount(element, () => handleRemoval(element, path));
   };
