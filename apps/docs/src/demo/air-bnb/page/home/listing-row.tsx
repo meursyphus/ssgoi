@@ -1,5 +1,6 @@
 import { Link } from "@/lib/link";
 import { ChevronRight, Heart } from "lucide-react";
+import { DragScroller } from "@/lib/components/drag-scroller";
 import type { ListingSimple } from "@/demo/air-bnb/state/listing";
 
 export function ListingRow({
@@ -17,7 +18,7 @@ export function ListingRow({
         <h2 className="text-[20px] font-bold text-neutral-900">{title}</h2>
         <ChevronRight className="h-5 w-5 text-neutral-500" />
       </div>
-      <div className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pt-3">
+      <DragScroller className="pt-3" trackClassName="gap-3 px-4">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <div
@@ -26,7 +27,7 @@ export function ListingRow({
               />
             ))
           : listings.map((l) => <RowCard key={l.id} listing={l} />)}
-      </div>
+      </DragScroller>
     </section>
   );
 }
