@@ -1,5 +1,5 @@
 import type { PhysicsOptions, TransitionConfig } from "@types";
-import { getRect } from "@utils";
+import { getClientRect } from "@utils";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -106,11 +106,11 @@ function buildInput(
   scrollOffset: { x: number; y: number },
 ): ZoomAnimationInput {
   return {
-    enterRect: getRect(
+    enterRect: getClientRect(
       resolved.mode === "enter" ? toNode : fromNode,
       resolved.enterEl,
     ),
-    exitRect: getRect(
+    exitRect: getClientRect(
       resolved.mode === "enter" ? fromNode : toNode,
       resolved.exitEl,
     ),
@@ -393,6 +393,24 @@ export const zoom = (
               console.error("[zoom] cleanup error", e);
             }
           }
+        };
+      }
+
+      // Release each animation's WAAPI forwards-fill once its OWN run settles,
+      // so the inline styles (cleared during playback, reset by the cleanups
+      // above) govern the resting visual instead of a lingering fill. Wrapped on
+      // each animation's own onComplete — which fires after its onfinish but
+      // before MultiAnimation's completion count — so every child is still
+      // counted as done. Without this the exit tile stays shrunk to the card and
+      // the background stays scaled; React <Activity> / Next cacheComponents then
+      // preserve that on the real node, so the NEXT transition measures (and
+      // renders) the page at the wrong size.
+      for (const anim of anims) {
+        if (!(anim instanceof WebAnimation)) continue;
+        const prev = anim.onComplete;
+        anim.onComplete = () => {
+          prev?.();
+          anim.releaseFill();
         };
       }
 
