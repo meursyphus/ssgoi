@@ -24,19 +24,34 @@ export class HostAnimation extends Animation {
   private _settled = false;
   private listeners = new Set<() => void>();
 
-  attach(next: Animation): void {
+  /**
+   * Sample the active child's live pose and force-settle it, returning the
+   * poses for a successor's `matchInto`. The dispatcher calls this BEFORE
+   * the next transition's animation factory runs, so the settled run's
+   * preset cleanups (which wipe inline styles off shared real nodes in
+   * hidden mode) land before — never after — the new run's setup styles.
+   * `attach()` flushes lazily when no poses are handed in.
+   */
+  flush(): Pose[] {
     const prev = this.child;
-    // Swap the slot up front so prev's onComplete (which guards on
-    // `this.child === prev`) won't reset host state to idle when we
-    // complete it below.
+    if (!prev) return [];
+    // Clear the slot first so prev's onComplete (which guards on
+    // `this.child === prev`) won't reset host state to idle — a successor
+    // is about to attach.
+    this.child = null;
+    const poses = prev.getPose();
+    prev.complete();
+    return poses;
+  }
+
+  attach(next: Animation, poses?: Pose[]): void {
+    // Settle any straggler child (no-op when the caller already flush()ed).
+    const flushed = this.flush();
+    const handoff = poses ?? flushed;
     this.child = next;
     this._settled = false;
 
-    if (prev) {
-      const pose = prev.getPose();
-      prev.complete();
-      next.matchInto(pose);
-    }
+    if (handoff.length > 0) next.matchInto(handoff);
 
     next.playbackRate = this.playbackRate;
 

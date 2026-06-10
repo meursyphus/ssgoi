@@ -309,6 +309,14 @@ export function createSggoiTransitionContext(
       to: toPromise,
       extras: extrasPromise,
     }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
+      // Settle the interrupted run NOW — before the new transition's
+      // animation() writes setup styles (clipPath, transformOrigin, …) onto
+      // nodes both runs share in hidden mode. Completing it later (inside
+      // host.attach) would fire its preset onComplete cleanups last and
+      // wipe those styles for the whole new run. The returned poses still
+      // carry the live mid-flight state for the matchInto handoff below.
+      const handoffPoses = host.flush();
+
       // Now that prepare's microtasks have all run (initial styles, extras
       // built), drop the outgoing clone into place. Order is:
       //   prepare → out insert → animation create/play
@@ -351,7 +359,7 @@ export function createSggoiTransitionContext(
 
       // Host owns pose handoff, playbackRate carry-over, and starts the run
       // according to its own play/pause/reverse state.
-      host.attach(animation);
+      host.attach(animation, handoffPoses);
     });
   };
 

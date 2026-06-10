@@ -6,6 +6,11 @@ import { matchPath } from "./find-matching-transition";
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
+// Cap on saved scroll positions: preserved paths accumulate for the lifetime
+// of the context, so a long session across many routes would otherwise grow
+// the map without bound. 50 distinct scroll targets is far beyond what a
+// back/forward journey meaningfully revisits.
+const MAX_SCROLL_ENTRIES = 50;
 
 type ScrollPosition = { x: number; y: number };
 type ScrollPolicy = {
@@ -99,9 +104,27 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // isTransitioning back to false mid-way through a newer transition.
   let initGeneration = 0;
 
+  // LRU write: Map iterates in insertion order, so delete-then-set keeps
+  // recency and the size cap evicts the least-recently-scrolled path.
+  const rememberScrollPosition = (key: string, position: ScrollPosition) => {
+    if (scrollPositions.has(key)) scrollPositions.delete(key);
+    scrollPositions.set(key, position);
+    if (scrollPositions.size > MAX_SCROLL_ENTRIES) {
+      // Evict the least-recently-written PER-PATH entry. `shared:` entries
+      // are long-lived singletons (one per share key); churning one out via
+      // unrelated path traffic would strand every path that resolves to it.
+      for (const candidate of scrollPositions.keys()) {
+        if (candidate.startsWith("path:")) {
+          scrollPositions.delete(candidate);
+          break;
+        }
+      }
+    }
+  };
+
   const scrollListener = () => {
     if (scrollContainer && currentPath && !isTransitioning) {
-      scrollPositions.set(getScrollPolicy(currentPath).storageKey, {
+      rememberScrollPosition(getScrollPolicy(currentPath).storageKey, {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
       });

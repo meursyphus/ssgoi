@@ -62,6 +62,12 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to, context }) => {
+      // X/Y pairs mirror cleanly (in(t) ≈ out(1-t) under direction-paired
+      // routes), so they opt into pose matching. Z's fade-through opacity
+      // split (out fades over t∈[0,1/3], in over t∈[1/3,1]) is NOT a
+      // mirror — a role-flip seed would pop opacity by up to 0.5 — so z
+      // stays unkeyed and starts fresh on interrupts.
+      const poseKey = (role: "out" | "in") => (type === "z" ? undefined : role);
       // Z scales the page element in place. Without clipping to the viewport
       // slice, scale-up paints over chrome / scroll overflow and scale-down
       // exposes neighbouring layout. Mirror sheet's inset trick.
@@ -74,6 +80,7 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
 
       const outAnim = new WebAnimation({
         element: from,
+        key: poseKey("out"),
         integrator: IntegratorProvider.from(provider.outPhysics),
         style: (t) => config.out.animate(t),
         // Restore the reused from node's inline styles on complete. This
@@ -85,6 +92,7 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
 
       const inAnim = new WebAnimation({
         element: to,
+        key: poseKey("in"),
         integrator: IntegratorProvider.from(provider.inPhysics),
         style: (t) => config.in.animate(t),
         onComplete: () => clearStyle(to),

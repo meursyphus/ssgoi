@@ -30,6 +30,10 @@ export const rotate = (options: RotateOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to }) => {
+      // No motion-matching keys: rotate's in/out styles are a CONTINUATION
+      // (out spins 0→+180°, in unwinds −180°→0 so the pair reads as one
+      // 360° turn), not mirrors — a role-flip seed would jump the visible
+      // angle. Unkeyed animations opt out of pose handoff entirely.
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),

@@ -33,11 +33,13 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
     return [
       new WebAnimation({
         element: from,
+        key: "out",
         integrator: IntegratorProvider.from(physics),
         style: (_t, u) => ({ opacity: u }),
       }),
       new WebAnimation({
         element: to,
+        key: "in",
         integrator: IntegratorProvider.from(physics),
         style: (t) => ({ opacity: t }),
       }),

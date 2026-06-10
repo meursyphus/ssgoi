@@ -58,6 +58,22 @@ export type Pose = {
   element: HTMLElement;
   value: number;
   velocity: number;
+  /**
+   * Logical role for matching when element identity can't survive a handoff
+   * (unmount-mode clones are new nodes every navigation). The reserved roles
+   * "out" and "in" match each other MIRRORED — a page 70% gone re-enters 30%
+   * visible, moving the opposite way. Any other string is a custom identity
+   * that matches itself directly. See animation/pose-matching.ts.
+   */
+  key?: string;
+  /**
+   * Bounds of the t-space `value` and `velocity` live in. A receiver with
+   * different bounds rebases the pose into its own range (value via
+   * normalized progress, velocity rescaled to the new span) instead of
+   * misreading raw numbers. Default 0 / 1.
+   */
+  lowerBound?: number;
+  upperBound?: number;
 };
 
 export type TimelineFrame = {

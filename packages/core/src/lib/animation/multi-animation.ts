@@ -86,11 +86,16 @@ export class MultiAnimation extends Animation {
     return this.children.flatMap((c) => c.getTimeline());
   }
 
-  matchInto(_poses: Pose[]): void {
-    // TODO: handing a flat pose list to a composite isn't well-defined yet —
-    // sequence/stagger progress, mode mismatches, and active-child awareness
-    // all need a richer protocol than per-child broadcast. Left as a no-op
-    // for now so we don't pretend to support cross-multi handoff.
+  matchInto(poses: Pose[]): void {
+    // Fan the flat pose list out to every child: each child applies the
+    // shared matching rules (element identity first, then role keys — see
+    // pose-matching.ts), so cross-multi handoff works without this composite
+    // knowing which prior child maps to which of its own. Children that find
+    // no match keep their resting state. This composes with sequence
+    // scheduling naturally: a child whose match seeds it at (or past) its
+    // target settles instantly on play() and hands off to the next child, so
+    // an interrupted sequence resumes from the right stage.
+    for (const child of this.children) child.matchInto(poses);
   }
 
   get isAnimating(): boolean {

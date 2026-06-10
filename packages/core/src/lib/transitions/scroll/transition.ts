@@ -51,6 +51,7 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
 
       const outAnim = new WebAnimation({
         element: from,
+        key: "out",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => {
           const translateY = isUp ? -height * t : height * t;
@@ -74,6 +75,7 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
 
       const inAnim = new WebAnimation({
         element: to,
+        key: "in",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (_t, u) => {
           const translateY = isUp ? u * height : u * -height;

@@ -43,6 +43,7 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
     animation: ({ from, to }) => {
       const outAnim = new WebAnimation({
         element: from,
+        key: "out",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => {
           const translateX = isLeft ? -100 * t : 100 * t;
@@ -63,6 +64,7 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
 
       const inAnim = new WebAnimation({
         element: to,
+        key: "in",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (_t, u) => {
           const translateX = isLeft ? u * 100 : u * -100;

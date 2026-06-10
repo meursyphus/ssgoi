@@ -88,6 +88,10 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
 
       const sheetAnim = new WebAnimation({
         element: sheetEl,
+        // The sheet is the incoming page on `enter` and the outgoing page on
+        // `exit`; its enter/exit styles are exact mirrors (u vs t × height),
+        // so role-flip pose matching resumes an interrupted slide in place.
+        key: direction === "enter" ? "in" : "out",
         integrator: IntegratorProvider.from(physics),
         style: sheetStyle,
         onComplete: () => {
@@ -126,6 +130,7 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
 
       const bgAnim = new WebAnimation({
         element: backgroundEl,
+        key: direction === "enter" ? "out" : "in",
         integrator: IntegratorProvider.from(physics),
         style: bgStyle,
         // On `exit` the background is the incoming (`to`) node; on `enter` it is

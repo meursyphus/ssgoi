@@ -1,9 +1,21 @@
 export * from "./transitions";
-export { Animation, WebAnimation, MultiAnimation } from "./animation";
+export {
+  Animation,
+  WebAnimation,
+  MultiAnimation,
+  capturePoseFrom,
+  findPoseMatch,
+  rebasePose,
+  OUT_ROLE,
+  IN_ROLE,
+} from "./animation";
 export type {
   WebAnimationOptions,
   MultiAnimationOptions,
   MultiAnimationMode,
+  CapturePoseOptions,
+  PoseMatch,
+  PoseBounds,
 } from "./animation";
 export type {
   SsgoiConfig,

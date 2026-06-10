@@ -65,6 +65,11 @@ export const jaemin = (options: JaeminOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to }) => {
+      // No motion-matching keys: the two sides animate different channels
+      // entirely (out is a pure opacity fade; in is a pow-9-eased scale +
+      // late rotation unwind at opacity 1), so in(t) is nothing like
+      // out(1-t) and a role-flip seed would pop hard. Unkeyed animations
+      // opt out of pose handoff entirely.
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(OUT_PHYSICS),

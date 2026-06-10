@@ -37,6 +37,10 @@ export const strip = (options: StripOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to }) => {
+      // No motion-matching keys: the strip carousel always exits to the
+      // right and enters from the left, so in(t) is NOT out(1-t) — a
+      // role-flip seed would teleport the page across the viewport. Unkeyed
+      // animations opt out of pose handoff entirely.
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),

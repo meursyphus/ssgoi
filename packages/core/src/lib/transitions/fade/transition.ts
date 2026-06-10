@@ -33,6 +33,7 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
     animation: ({ from, to }) => {
       const outAnim = new WebAnimation({
         element: from,
+        key: "out",
         integrator: IntegratorProvider.from(outPhysics),
         // Default bounds (0, 1). `u` runs 1→0 as the animation moves
         // forward, mapping opacity from fully visible to invisible.
@@ -49,6 +50,7 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
 
       const inAnim = new WebAnimation({
         element: to,
+        key: "in",
         integrator: IntegratorProvider.from(inPhysics),
         style: (t) => ({ opacity: t }),
         onComplete: () => {

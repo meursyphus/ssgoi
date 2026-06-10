@@ -373,4 +373,80 @@ describe("createContextManager", () => {
 
     expect(documentElement.scrollTop).toBe(0);
   });
+
+  it("evicts the least-recently-scrolled path beyond the LRU cap", () => {
+    const manager = createContextManager({ preserveScroll: true });
+
+    // 51 distinct paths each capture one scroll — one over the cap of 50.
+    for (let i = 0; i <= 50; i++) {
+      const page = createFakeElement({ parentElement: body });
+      manager.initializeContext(page, `/page-${i}`);
+      flushAnimationFrames(11);
+      documentElement.scrollTop = 100 + i;
+      emitWindowScroll();
+    }
+
+    expect(manager.getScrollPosition("/page-0")).toEqual({ x: 0, y: 0 });
+    expect(manager.getScrollPosition("/page-1")).toEqual({ x: 0, y: 101 });
+    expect(manager.getScrollPosition("/page-50")).toEqual({ x: 0, y: 150 });
+  });
+
+  it("refreshes recency on re-scroll so active paths survive eviction", () => {
+    const manager = createContextManager({ preserveScroll: true });
+
+    // Fill exactly to the cap.
+    for (let i = 0; i < 50; i++) {
+      const page = createFakeElement({ parentElement: body });
+      manager.initializeContext(page, `/page-${i}`);
+      flushAnimationFrames(11);
+      documentElement.scrollTop = 100 + i;
+      emitWindowScroll();
+    }
+
+    // Revisit the oldest path — its entry moves to the recent end.
+    const revisited = createFakeElement({ parentElement: body });
+    manager.initializeContext(revisited, "/page-0");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 300;
+    emitWindowScroll();
+
+    // One more path pushes the map over the cap: /page-1 is now the oldest.
+    const fresh = createFakeElement({ parentElement: body });
+    manager.initializeContext(fresh, "/page-new");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 555;
+    emitWindowScroll();
+
+    expect(manager.getScrollPosition("/page-0")).toEqual({ x: 0, y: 300 });
+    expect(manager.getScrollPosition("/page-1")).toEqual({ x: 0, y: 0 });
+    expect(manager.getScrollPosition("/page-2")).toEqual({ x: 0, y: 102 });
+    expect(manager.getScrollPosition("/page-new")).toEqual({ x: 0, y: 555 });
+  });
+
+  it("never evicts a shared scroll entry for per-path churn", () => {
+    // Excluded paths still capture under path:<path> keys but are only
+    // cleaned up when a transition runs — heavy churn on them must not push
+    // the long-lived shared:<key> singleton out of the cap.
+    const manager = createContextManager({
+      preserveScroll: { key: "tabs", exclude: ["/detail/*"] },
+    });
+
+    const home = createFakeElement({ parentElement: body });
+    manager.initializeContext(home, "/home");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 400;
+    emitWindowScroll();
+
+    for (let i = 0; i <= 55; i++) {
+      const page = createFakeElement({ parentElement: body });
+      manager.initializeContext(page, `/detail/${i}`);
+      flushAnimationFrames(11);
+      documentElement.scrollTop = 100 + i;
+      emitWindowScroll();
+    }
+
+    // The shared entry survived; old per-path entries were evicted instead.
+    expect(manager.getScrollPosition("/home")).toEqual({ x: 0, y: 400 });
+    expect(manager.getScrollPosition("/detail/0")).toEqual({ x: 0, y: 0 });
+  });
 });

@@ -42,6 +42,7 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
     animation: ({ from, to }) => {
       const outAnim = new WebAnimation({
         element: from,
+        key: "out",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => config.out.animate(t),
         // The outgoing node is the real, reused element (re-hidden on navigate),
@@ -61,6 +62,7 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
 
       const inAnim = new WebAnimation({
         element: to,
+        key: "in",
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => config.in.animate(t),
         onComplete: () => {

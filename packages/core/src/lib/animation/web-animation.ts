@@ -5,8 +5,15 @@ import {
   SETTLE_THRESHOLD,
 } from "./integrator";
 import { Animation } from "./animation";
+import { compressSettledFrames } from "./keyframe-compression";
+import { findPoseMatch, rebasePose } from "./pose-matching";
 
 const FRAME_TIME = 1000 / 60;
+
+// Band width for keyframe decimation, as a fraction of the simulation's
+// total position travel. 0.2% of travel is sub-pixel for any sub-500px
+// motion and invisible for opacity — see keyframe-compression.ts.
+const KEYFRAME_FLATTEN_RATIO = 0.002;
 
 export interface WebAnimationOptions {
   element: HTMLElement;
@@ -16,6 +23,13 @@ export interface WebAnimationOptions {
   lowerBound?: number;
   /** Default 1 — the value `t` takes at the end of `play()`. */
   upperBound?: number;
+  /**
+   * Logical role for motion matching across handoffs. The reserved roles
+   * "out"/"in" mirror into each other when an interrupting transition takes
+   * over (see pose-matching.ts); any other string matches itself directly,
+   * letting a pose survive node replacement (e.g. unmount-mode clones).
+   */
+  key?: string;
   onUpdate?: (poses: Pose[]) => void;
   onComplete?: () => void;
 }
@@ -35,10 +49,13 @@ interface SimFrame {
  *      velocity) toward the target bound, producing a frame list.
  *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` runs them.
  *   3. While playing, `getPose()` interpolates the live position from frames
- *      using `performance.now() - startTime`.
+ *      using the WAAPI clock (`waapi.currentTime`), which tracks
+ *      playbackRate and pause/resume; wall-clock elapsed is the fallback.
  *
- * Identity for motion matching is the DOM element itself — when a previous
- * animation's pose is handed in via `matchInto`, we look up by element.
+ * Identity for motion matching is the DOM element first, then the logical
+ * `key` role — when a previous animation's pose is handed in via
+ * `matchInto`, the shared rules in pose-matching.ts decide whether to seed
+ * it directly or mirrored (role flip), rebased into this animation's bounds.
  */
 export class WebAnimation extends Animation {
   private element: HTMLElement;
@@ -46,6 +63,7 @@ export class WebAnimation extends Animation {
   private styleFn: (t: number, u: number) => StyleObject;
   private lowerBound: number;
   private upperBound: number;
+  private key: string | undefined;
 
   private currentValue: number;
   private currentVelocity = 0;
@@ -64,6 +82,7 @@ export class WebAnimation extends Animation {
     this.styleFn = opts.style;
     this.lowerBound = opts.lowerBound ?? 0;
     this.upperBound = opts.upperBound ?? 1;
+    this.key = opts.key;
     this.currentValue = this.lowerBound;
     this.onUpdate = opts.onUpdate;
     this.onComplete = opts.onComplete;
@@ -164,6 +183,9 @@ export class WebAnimation extends Animation {
         element: this.element,
         value: this.currentValue,
         velocity: this.currentVelocity,
+        key: this.key,
+        lowerBound: this.lowerBound,
+        upperBound: this.upperBound,
       },
     ];
   }
@@ -183,10 +205,18 @@ export class WebAnimation extends Animation {
   }
 
   matchInto(poses: Pose[]): void {
-    const match = poses.find((p) => p.element === this.element);
+    const match = findPoseMatch(poses, {
+      element: this.element,
+      key: this.key,
+    });
     if (!match) return;
-    this.currentValue = match.value;
-    this.currentVelocity = match.velocity;
+    const seeded = rebasePose(
+      match.pose,
+      { lowerBound: this.lowerBound, upperBound: this.upperBound },
+      match.mirror,
+    );
+    this.currentValue = seeded.value;
+    this.currentVelocity = seeded.velocity;
   }
 
   /* ───────────────────────────────────────────────────────── private */
@@ -209,27 +239,60 @@ export class WebAnimation extends Animation {
       this.currentValue = target;
       this.currentVelocity = 0;
       this.applyStyleAt(target);
+      // Natural completion keeps its final frame alive through the
+      // forwards-filling WAAPI entry, and preset onComplete cleanups count
+      // on that when they wipe inline styles. Mirror it here — otherwise a
+      // child seeded exactly at its target (a fast-forwarded sequence
+      // stage) pops back to its resting styles for the rest of the run.
+      const u = this.lowerBound + this.upperBound - target;
+      this.waapi = this.element.animate([this.styleFn(target, u) as Keyframe], {
+        duration: 0,
+        fill: "forwards",
+        composite: "replace",
+      });
       this.settled = true;
       this.onComplete?.();
       return;
     }
 
-    const keyframes: Keyframe[] = this.frames.map((f) => {
+    const lastFrame = this.frames[this.frames.length - 1]!;
+    const duration = lastFrame.time;
+
+    // Decimate near-still stretches (the settle tail, sub-visual overshoot
+    // wiggle) before baking keyframes — see compressSettledFrames. Dropped
+    // frames force explicit offsets so the kept frames stay on the original
+    // clock. Live-state reads are unaffected: getPose() and
+    // findTimeForProgress() interpolate this.frames, never the baked
+    // keyframes.
+    let positionLow = Infinity;
+    let positionHigh = -Infinity;
+    for (const f of this.frames) {
+      if (f.position < positionLow) positionLow = f.position;
+      if (f.position > positionHigh) positionHigh = f.position;
+    }
+    const keptIndices = compressSettledFrames(
+      this.frames.map((f) => f.position),
+      (positionHigh - positionLow) * KEYFRAME_FLATTEN_RATIO,
+    );
+
+    // Collect the animated props off the first style BEFORE tacking offsets
+    // onto the keyframes — `offset` is also a CSS property and must not be
+    // swept up by the inline-style clearing below.
+    let styledProps: string[] = [];
+    const keyframes: Keyframe[] = keptIndices.map((idx, kept) => {
+      const f = this.frames[idx]!;
       const t = f.position;
       const u = this.lowerBound + this.upperBound - t;
-      return this.styleFn(t, u) as Keyframe;
+      const frame = this.styleFn(t, u) as Keyframe;
+      if (kept === 0) styledProps = Object.keys(frame);
+      frame.offset = duration > 0 ? f.time / duration : 0;
+      return frame;
     });
 
     // Clear inline styles for animated props so they don't clash with WAAPI.
-    const firstFrame = keyframes[0];
-    if (firstFrame) {
-      for (const prop of Object.keys(firstFrame)) {
-        (this.element.style as unknown as Record<string, string>)[prop] = "";
-      }
+    for (const prop of styledProps) {
+      (this.element.style as unknown as Record<string, string>)[prop] = "";
     }
-
-    const lastFrame = this.frames[this.frames.length - 1]!;
-    const duration = lastFrame.time;
 
     this.waapi = this.element.animate(keyframes, {
       duration,
@@ -259,7 +322,13 @@ export class WebAnimation extends Animation {
 
   private captureLiveState() {
     if (this.frames.length === 0) return;
-    const elapsed = performance.now() - this.startTime;
+    // Frame timestamps are 1×-speed simulation times. The WAAPI clock
+    // (currentTime) advances at playbackRate and freezes across
+    // pause/resume, so prefer it over wall-clock elapsed, which diverges
+    // from the visual under either.
+    const local = this.waapi?.currentTime;
+    const elapsed =
+      typeof local === "number" ? local : performance.now() - this.startTime;
     const { position, velocity } = interpolateFrame(this.frames, elapsed);
     this.currentValue = position;
     this.currentVelocity = velocity;
