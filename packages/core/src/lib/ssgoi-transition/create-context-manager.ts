@@ -94,6 +94,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   };
 
   let contextElement: HTMLElement | null = null;
+  // Window-level resources, kept so destroy() can release them. Re-acquired
+  // lazily by the next initializeContext after a destroy.
+  let scrollTarget: Window | HTMLElement | null = null;
+  let resizeObserver: ResizeObserver | null = null;
   const scrollPositions: Map<string, ScrollPosition> = new Map();
   let currentPath: string | null = null;
   // Suppress scroll capture during the transition window so OUT scrolls of
@@ -192,18 +196,18 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       cachedIsMobile = measureIsMobile();
       isMobileMeasured = true;
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => {
+        resizeObserver = new ResizeObserver(() => {
           cachedIsMobile = measureIsMobile();
         });
-        observer.observe(scrollContainer);
+        resizeObserver.observe(scrollContainer);
       }
 
       // IMPORTANT: When the scrolling element is document.documentElement,
       // scroll events must be attached to window, not the element itself.
       // For all other scrollable containers, attach to the element directly.
-      const target =
+      scrollTarget =
         scrollContainer === document.documentElement ? window : scrollContainer;
-      target.addEventListener("scroll", scrollListener, {
+      scrollTarget.addEventListener("scroll", scrollListener, {
         passive: true,
       });
     }
@@ -277,6 +281,18 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       : { x: 0, y: 0 };
   };
 
+  // Release the scroll listener + ResizeObserver. Dropping the cached
+  // container makes the next initializeContext re-discover it and re-attach
+  // fresh listeners, so a destroyed manager is fully restartable.
+  const destroy = () => {
+    scrollTarget?.removeEventListener("scroll", scrollListener);
+    scrollTarget = null;
+    resizeObserver?.disconnect();
+    resizeObserver = null;
+    scrollContainer = null;
+    isMobileMeasured = false;
+  };
+
   return {
     initializeContext,
     calculateScrollOffset,
@@ -285,5 +301,6 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    destroy,
   };
 }

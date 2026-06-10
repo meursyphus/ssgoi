@@ -28,6 +28,12 @@ export function observeSsgoiTransitions(
 ): () => void {
   if (!canObserveDom()) return () => {};
 
+  // Arm the context's window-level resources (swipe-back detector) together
+  // with the DOM observer, and release them in the returned cleanup. Every
+  // adapter already runs that cleanup on provider unmount, so listeners
+  // can't accumulate across HMR / strict-mode remounts.
+  ssgoi.start?.();
+
   root.setAttribute(ROOT_ATTRIBUTE, "");
 
   const ownsElement = (element: Element) =>
@@ -81,5 +87,8 @@ export function observeSsgoiTransitions(
   });
   scanNode(root);
 
-  return () => observer.disconnect();
+  return () => {
+    observer.disconnect();
+    ssgoi.destroy?.();
+  };
 }

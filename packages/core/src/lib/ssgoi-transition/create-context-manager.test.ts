@@ -449,4 +449,28 @@ describe("createContextManager", () => {
     expect(manager.getScrollPosition("/home")).toEqual({ x: 0, y: 400 });
     expect(manager.getScrollPosition("/detail/0")).toEqual({ x: 0, y: 0 });
   });
+
+  it("destroy() detaches scroll tracking and a later init re-attaches", () => {
+    const manager = createContextManager({ preserveScroll: true });
+    const page = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(page, "/feed");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 100;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 100 });
+
+    manager.destroy();
+    documentElement.scrollTop = 200;
+    emitWindowScroll();
+    // Listener detached — the scroll after destroy is not captured.
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 100 });
+
+    const remounted = createFakeElement({ parentElement: body });
+    manager.initializeContext(remounted, "/feed");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 300;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 300 });
+  });
 });

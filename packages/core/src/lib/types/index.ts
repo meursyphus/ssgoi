@@ -246,4 +246,19 @@ export type SsgoiContext = {
    * `useCallback`/`useMemo`.
    */
   refFor: (path: string) => (element: HTMLElement | null) => void;
+
+  /**
+   * (Re-)arm window-level resources (swipe-back touch listeners). Idempotent.
+   * `observeSsgoiTransitions` calls this on every (re)observe, so provider
+   * teardown/remount cycles (HMR, React strict mode) stay symmetric without
+   * any adapter-side wiring.
+   */
+  start?: () => void;
+
+  /**
+   * Release window-level resources (swipe-back touch listeners, scroll
+   * tracking). Called by the cleanup function `observeSsgoiTransitions`
+   * returns; a later `start()` + `register()` re-arms everything.
+   */
+  destroy?: () => void;
 };

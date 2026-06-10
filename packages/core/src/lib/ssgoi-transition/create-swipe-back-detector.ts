@@ -210,11 +210,11 @@ export function createSwipeBackDetector() {
     window.addEventListener("touchcancel", onTouchCancel, opts);
   };
 
-  // TODO: not currently called from anywhere. Wire from each adapter's Ssgoi
-  // provider unmount (React useEffect cleanup, Vue onUnmounted, Svelte
-  // onDestroy, Solid onCleanup, Angular ngOnDestroy) so HMR / repeated mounts /
-  // multi-provider pages don't accumulate window touch listeners. Non-issue in
-  // production root-level usage today.
+  // Wired through observeSsgoiTransitions: its returned cleanup calls
+  // context.destroy() → here, and a re-observe calls initialize() again.
+  // Every adapter already runs that cleanup on provider unmount, so HMR /
+  // repeated mounts / multi-provider pages don't accumulate window touch
+  // listeners.
   const destroy = () => {
     if (typeof window === "undefined" || !installed) return;
     installed = false;

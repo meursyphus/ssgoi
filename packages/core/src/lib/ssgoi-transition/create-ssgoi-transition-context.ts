@@ -109,6 +109,7 @@ export function createSggoiTransitionContext(
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    destroy: releaseScrollTracking,
   } = createContextManager({ preserveScroll });
 
   let pendingOut: PendingSide | null = null;
@@ -581,5 +582,18 @@ export function createSggoiTransitionContext(
     return cb;
   };
 
-  return { register, refFor };
+  // Window-level resource lifecycle, driven by observeSsgoiTransitions so
+  // every adapter's existing observe-cleanup wiring covers it: observe →
+  // start(), cleanup → destroy(). Both are idempotent, keeping provider
+  // remount cycles (HMR, React strict mode) symmetric.
+  const start = () => {
+    swipeDetector.initialize();
+  };
+
+  const destroy = () => {
+    swipeDetector.destroy();
+    releaseScrollTracking();
+  };
+
+  return { register, refFor, start, destroy };
 }
