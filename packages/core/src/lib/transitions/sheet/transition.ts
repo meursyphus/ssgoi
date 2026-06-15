@@ -98,6 +98,18 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         if (to.style.zIndex === toZ) to.style.zIndex = "";
       };
 
+      // Drop a WAAPI forwards-fill once its run settles, so the inline resets
+      // in onComplete (not a lingering final frame) govern the resting visual —
+      // mirrors the zoom transition. Without this a reused node (React
+      // <Activity>) reappears holding its animated transform/clip.
+      const releaseFillOnSettle = (anim: WebAnimation) => {
+        const prev = anim.onComplete;
+        anim.onComplete = () => {
+          prev?.();
+          anim.releaseFill();
+        };
+      };
+
       // Clip the moving sheet to its visible viewport slice — without this it
       // can paint outside the chrome (top nav / player bar) during translate.
       sheetEl.style.clipPath = `inset(${sheetRect.top}px 0 calc(100% - ${sheetRect.top + sheetRect.height}px) 0)`;
@@ -131,6 +143,7 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
           resetToStackProps();
         },
       });
+      releaseFillOnSettle(sheetAnim);
 
       if (!animatesBackground) {
         // Static: the background sits untouched for the whole duration.
@@ -155,39 +168,24 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         element: backgroundEl,
         integrator: IntegratorProvider.from(physics),
         style: bgStyle,
-        // On `exit` the background is the incoming (`to`) node; on `enter` it is
-        // the reused outgoing (`from`) node — in both cases its inline styles
-        // must be restored when the animation settles, so the reused node is
-        // not left scaled/faded/clipped the next time it is shown. The `enter`
-        // branch mirrors the `exit` cleanup and additionally clears the
-        // transform/opacity final frame WAAPI leaves behind.
-        onComplete:
-          direction === "exit"
-            ? () => {
-                backgroundEl.style.willChange = "auto";
-                backgroundEl.style.backfaceVisibility = "";
-                (
-                  backgroundEl.style as CSSStyleDeclaration & {
-                    contain: string;
-                  }
-                ).contain = "";
-                backgroundEl.style.clipPath = "";
-                backgroundEl.style.transformOrigin = "";
-              }
-            : () => {
-                backgroundEl.style.willChange = "auto";
-                backgroundEl.style.backfaceVisibility = "";
-                (
-                  backgroundEl.style as CSSStyleDeclaration & {
-                    contain: string;
-                  }
-                ).contain = "";
-                backgroundEl.style.clipPath = "";
-                backgroundEl.style.transformOrigin = "";
-                backgroundEl.style.transform = "";
-                backgroundEl.style.opacity = "";
-              },
+        // The background is the reused outgoing (`from`) node on `enter` and the
+        // surviving incoming (`to`) node on `exit` — in both cases its inline
+        // styles must be cleared on settle so the reused node is not left
+        // scaled/faded/clipped the next time it is shown. releaseFill below
+        // drops the WAAPI fill so these resets actually take effect.
+        onComplete: () => {
+          backgroundEl.style.willChange = "auto";
+          backgroundEl.style.backfaceVisibility = "";
+          (
+            backgroundEl.style as CSSStyleDeclaration & { contain: string }
+          ).contain = "";
+          backgroundEl.style.clipPath = "";
+          backgroundEl.style.transformOrigin = "";
+          backgroundEl.style.transform = "";
+          backgroundEl.style.opacity = "";
+        },
       });
+      releaseFillOnSettle(bgAnim);
 
       return new MultiAnimation([sheetAnim, bgAnim], { mode: "parallel" });
     },

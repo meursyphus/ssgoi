@@ -89,6 +89,18 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
         },
       });
 
+      // Drop each WAAPI forwards-fill once its own run settles, so the inline
+      // resets above (not a lingering final frame) govern the resting visual —
+      // mirrors the zoom transition. Without this a reused node (React
+      // <Activity>) reappears holding its animated transform/opacity.
+      for (const anim of [outAnim, inAnim]) {
+        const prev = anim.onComplete;
+        anim.onComplete = () => {
+          prev?.();
+          anim.releaseFill();
+        };
+      }
+
       return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
     },
   };

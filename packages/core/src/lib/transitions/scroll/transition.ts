@@ -103,6 +103,18 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
         },
       });
 
+      // Drop each WAAPI forwards-fill once its own run settles, so the inline
+      // resets above (not a lingering final frame) govern the resting visual —
+      // mirrors the zoom transition. Without this a reused node (React
+      // <Activity>) reappears displaced by the leftover transform.
+      for (const anim of [outAnim, inAnim]) {
+        const prev = anim.onComplete;
+        anim.onComplete = () => {
+          prev?.();
+          anim.releaseFill();
+        };
+      }
+
       return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
     },
   };
