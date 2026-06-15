@@ -4,6 +4,7 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 
 export interface ScrollOptions {
   direction?: "up" | "down";
@@ -25,10 +26,15 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
   const isUp = direction === "up";
 
+  // up: the incoming `to` slides up over the outgoing `from`; down: the
+  // outgoing `from` slides down on top of the revealed `to`.
+  const fromZ = isUp ? Z_BACKGROUND : Z_FOREGROUND;
+  const toZ = isUp ? Z_FOREGROUND : Z_BACKGROUND;
+
   return {
     prepare: ({ from, to }) => {
       from.then((el) => {
-        el.style.zIndex = isUp ? "-1" : "1";
+        el.style.zIndex = fromZ;
         el.style.willChange = "transform";
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
@@ -40,6 +46,9 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
+        // `to` is in normal flow; promote it so its z-index takes effect.
+        el.style.position = "relative";
+        el.style.zIndex = toZ;
       });
       return {};
     },
@@ -84,8 +93,27 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
           to.style.backfaceVisibility = "";
           (to.style as CSSStyleDeclaration & { contain: string }).contain = "";
           to.style.transform = "";
+          // `to` is the surviving page; clear the stacking props prepare set on
+          // it (unmount mode gives the persistent `to` node no other cleanup).
+          // Guard: if a follow-up navigation already re-claimed this node (e.g.
+          // as the next outgoing `from`, now position:absolute), leave its
+          // fresh stacking intact instead of stripping it.
+          if (to.style.position === "relative") to.style.position = "";
+          if (to.style.zIndex === toZ) to.style.zIndex = "";
         },
       });
+
+      // Drop each WAAPI forwards-fill once its own run settles, so the inline
+      // resets above (not a lingering final frame) govern the resting visual —
+      // mirrors the zoom transition. Without this a reused node (React
+      // <Activity>) reappears displaced by the leftover transform.
+      for (const anim of [outAnim, inAnim]) {
+        const prev = anim.onComplete;
+        anim.onComplete = () => {
+          prev?.();
+          anim.releaseFill();
+        };
+      }
 
       return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
     },
