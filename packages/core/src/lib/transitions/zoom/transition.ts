@@ -8,6 +8,7 @@ import {
 } from "../../animation";
 import { OverlayStrategy, createBackgroundStrategy } from "./provider";
 import { createZoomIn, createZoomOut } from "./zoom-element";
+import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 import type {
   NormalizedZoomOptions,
   ZoomAnimationInput,
@@ -154,21 +155,26 @@ class TileStrategy implements ZoomStrategy {
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
-    // Only mutate `from`'s z-index — never `to`. The page that remains
-    // after the transition keeps its natural stacking, so any failed
-    // cleanup is self-healing (the `from` clone is removed anyway).
-    // enter: push `from` (background) down to -2, leaving -1 for the
-    //   optional blur overlay; the incoming tile (`to`) sits at default
-    //   and ends up on top by virtue of negative z-index stacking below
-    //   normal flow.
-    // exit: lift `from` (the shrinking tile) above the new background at
-    //   +2, with overlay at +1 in between.
-    // Callers are expected to provide a stacking context above this
-    // boundary (e.g. `isolation: isolate` or `z-index: 0` on the page
-    // wrapper) so negative z-indices stay scoped.
-    const fromZ = isEnter ? "-2" : "2";
+    // Non-negative three-tier stacking: background < overlay < tile.
+    // enter: `from` is the background (Z_BACKGROUND), the incoming tile (`to`)
+    //   is raised to the foreground (Z_FOREGROUND); the blur overlay sits at
+    //   Z_OVERLAY in between (see OverlayStrategy).
+    // exit: `from` is the shrinking tile (Z_FOREGROUND) above the revealed
+    //   background (`to`, Z_BACKGROUND), overlay in between.
+    // Giving the background page an explicit z-index forms its own stacking
+    // context so its descendants stay trapped beneath the tile. Keeping every
+    // tier >= 0 means the layering no longer depends on the caller wrapping the
+    // pages in a stacking context (a negative z-index would bleed behind it).
+    const fromZ = isEnter ? Z_BACKGROUND : Z_FOREGROUND;
+    const toZ = isEnter ? Z_FOREGROUND : Z_BACKGROUND;
     const previousFromZIndex = from.style.zIndex;
     from.style.zIndex = fromZ;
+    // `to` is the surviving incoming page; raise/lower it and promote it to
+    // position:relative (it is in normal flow) so the z-index takes effect.
+    const previousToZIndex = to.style.zIndex;
+    const previousToPosition = to.style.position;
+    to.style.zIndex = toZ;
+    to.style.position = "relative";
 
     onComplete(() => {
       tileEl.style.willChange = "auto";
@@ -176,6 +182,16 @@ class TileStrategy implements ZoomStrategy {
       tileEl.style.transformOrigin = "";
       (tileEl.style as CSSStyleDeclaration & { contain: string }).contain = "";
       from.style.zIndex = previousFromZIndex;
+      // `to` is the surviving page; restore the stacking props raised above.
+      // Guard each reset: if a follow-up navigation already re-claimed this
+      // node (e.g. as the next outgoing `from`, now position:absolute), its
+      // stacking has changed — don't strip the fresh values.
+      if (to.style.zIndex === toZ) to.style.zIndex = previousToZIndex;
+      if (to.style.position === "relative")
+        to.style.position = previousToPosition;
+      // The exit-mode background animation writes transformOrigin onto `to`
+      // (bgEl === to) and nothing else clears it — reset it here too.
+      to.style.transformOrigin = "";
       // `from` is the REAL outgoing page now (React <Activity> / Next
       // cacheComponents re-hide and reuse this node on the next nav), so any
       // inline style left on it persists and corrupts the page when it

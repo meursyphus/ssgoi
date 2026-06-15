@@ -6,6 +6,7 @@ import {
   WebAnimation,
 } from "../../animation";
 import { SHEET_PROVIDERS } from "./provider";
+import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 import type { SheetOptions, SheetType } from "./types";
 
 export type { SheetOptions, SheetType } from "./types";
@@ -32,9 +33,15 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
           "layout paint";
-        if (direction === "exit") {
+        // The sheet is always the foreground layer.
+        el.style.zIndex = Z_FOREGROUND;
+        if (direction === "enter") {
+          // sheet is the incoming `to`, still in normal flow — promote it so
+          // its z-index takes effect.
+          el.style.position = "relative";
+        } else {
+          // sheet is the outgoing `from` (already absolute); keep it inert.
           el.style.pointerEvents = "none";
-          el.style.zIndex = "100";
         }
       });
 
@@ -45,10 +52,16 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
             "layout paint";
         }
+        // The background sits beneath the sheet. An explicit z-index forms its
+        // own stacking context so its descendants stay trapped below.
+        el.style.zIndex = Z_BACKGROUND;
         if (direction === "enter") {
-          // Make sure the cloned outgoing page stays beneath the rising sheet.
+          // background is the outgoing `from` (absolute); keep it inert.
           el.style.pointerEvents = "none";
-          el.style.zIndex = "0";
+        } else {
+          // background is the incoming `to`, in normal flow — promote it so its
+          // z-index takes effect.
+          el.style.position = "relative";
         }
       });
 
@@ -71,6 +84,18 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
       const resetFromInteractionProps = () => {
         from.style.pointerEvents = "";
         from.style.zIndex = "";
+      };
+
+      // `to` is the surviving page and now also carries stacking props (the
+      // foreground sheet on `enter`, the promoted background on `exit`). Clear
+      // them too — in unmount mode the context never cleans the persistent `to`.
+      const resetToStackProps = () => {
+        // Guard: if a follow-up navigation already re-claimed this node (e.g.
+        // as the next outgoing `from`, now position:absolute), leave its fresh
+        // stacking intact instead of stripping it.
+        const toZ = direction === "enter" ? Z_FOREGROUND : Z_BACKGROUND;
+        if (to.style.position === "relative") to.style.position = "";
+        if (to.style.zIndex === toZ) to.style.zIndex = "";
       };
 
       // Clip the moving sheet to its visible viewport slice — without this it
@@ -99,9 +124,11 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
           sheetEl.style.transform = "";
           // The sheet animation always settles, so use it to clear the
           // pointerEvents/zIndex that prepare put on the reused `from` node
-          // (the sheet itself on `exit`, the background on `enter`). The rest
-          // of the `from` background props on `enter` are cleared by bgAnim.
+          // (the sheet itself on `exit`, the background on `enter`) and the
+          // stacking props on the surviving `to` node. The rest of the `from`
+          // background props on `enter` are cleared by bgAnim.
           resetFromInteractionProps();
+          resetToStackProps();
         },
       });
 
