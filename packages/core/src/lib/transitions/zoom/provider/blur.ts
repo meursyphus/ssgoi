@@ -135,7 +135,7 @@ export class OverlayStrategy implements ZoomStrategy {
     // Mirrors the from-only z-index scheme in TileStrategy. Overlay is fully
     // transparent (blur(0px)) until the first tick fires, so applying the
     // z-index here — after prepare, before paint — has no visual cost.
-    overlayEl.style.zIndex = ctx.resolved.mode === "enter" ? "-1" : "1";
+    overlayEl.style.zIndex = ctx.resolved.mode === "enter" ? "0" : "1";
     return [
       new WebAnimation({
         element: overlayEl,

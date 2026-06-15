@@ -28,7 +28,7 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
   return {
     prepare: ({ from, to }) => {
       from.then((el) => {
-        el.style.zIndex = isUp ? "-1" : "1";
+        el.style.zIndex = isUp ? "0" : "1";
         el.style.willChange = "transform";
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =

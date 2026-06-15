@@ -32,7 +32,7 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
       from.then((el) => {
         applyStartStyle(el, config.out);
         el.style.pointerEvents = "none";
-        el.style.zIndex = direction === "enter" ? "-1" : "100";
+        el.style.zIndex = direction === "enter" ? "0" : "100";
       });
       to.then((el) => {
         applyStartStyle(el, config.in);

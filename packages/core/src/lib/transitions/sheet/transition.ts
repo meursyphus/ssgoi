@@ -48,7 +48,7 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         if (direction === "enter") {
           // Make sure the cloned outgoing page stays beneath the rising sheet.
           el.style.pointerEvents = "none";
-          el.style.zIndex = "-1";
+          el.style.zIndex = "0";
         }
       });
 
