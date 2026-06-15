@@ -13,7 +13,7 @@ import { silentRoomShowcase } from "@/demo/silent-room/showcase";
 import { ssgoiDocsShowcase } from "@/demo/ssgoi-docs/showcase";
 import { youtubeMusicWebShowcase } from "@/demo/youtube-music-web/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
-import type { ShowcaseApp } from "./types";
+import type { ShowcaseApp, ShowcaseClip } from "./types";
 
 export type { ShowcaseApp, ShowcaseClip, ShowcasePlatform } from "./types";
 
@@ -46,6 +46,17 @@ export const showcases: ShowcaseApp[] = [
 
 export function findShowcase(slug: string): ShowcaseApp | undefined {
   return showcases.find((s) => s.slug === slug);
+}
+
+/** First showcase + clip demonstrating a given transition, in catalog order. */
+export function representativeClip(
+  transition: string,
+): { showcase: ShowcaseApp; clip: ShowcaseClip } | undefined {
+  for (const s of showcases) {
+    const clip = s.clips.find((c) => c.transition === transition);
+    if (clip) return { showcase: s, clip };
+  }
+  return undefined;
 }
 
 /** All transition names across the catalog, deduped, sorted. */

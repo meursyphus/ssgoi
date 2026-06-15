@@ -37,6 +37,15 @@ export const rotate = (options: RotateOptions = {}): TransitionConfig => {
           transform: `rotate(${t * 180}deg)`,
           opacity: t < 0.5 ? 1 : 0,
         }),
+        // The outgoing node is reused (re-hidden, shown again on the next
+        // navigation), so clear every inline style we wrote to `from`
+        // (prepare + the final WAAPI frame), mirroring the `to` cleanup.
+        onComplete: () => {
+          from.style.willChange = "auto";
+          from.style.transform = "";
+          from.style.transformOrigin = "";
+          from.style.opacity = "";
+        },
       });
 
       const inAnim = new WebAnimation({

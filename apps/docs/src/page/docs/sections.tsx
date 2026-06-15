@@ -2,6 +2,11 @@ import { Link } from "@/lib/link";
 import { NpmPill } from "@/components/npm-pill";
 import { CodeBlock } from "@/components/code-block";
 import {
+  TRANSITION_DOCS,
+  USE_META,
+  type TransitionDoc,
+} from "@/page/docs/transitions-data";
+import {
   NextMark,
   NuxtMark,
   ReactRouterMark,
@@ -248,62 +253,57 @@ function SetupStep({
 /* Transitions                                                                */
 /* -------------------------------------------------------------------------- */
 
-type TransitionEntry = { name: string; blurb: string };
-
-const TRANSITIONS: TransitionEntry[] = [
-  { name: "drill", blurb: "iOS-style hierarchical navigation." },
-  { name: "fade", blurb: "Calm cross-fade. Safe default." },
-  { name: "slide", blurb: "Horizontal push." },
-  { name: "scroll", blurb: "Vertical page scroll." },
-  { name: "sheet", blurb: "Bottom sheet, slides up." },
-  {
-    name: "hero",
-    blurb: "Shared element. data-hero-enter-key / data-hero-exit-key.",
-  },
-  { name: "zoom", blurb: "Card expands to detail. data-zoom-*-key." },
-  { name: "strip", blurb: "3D Y-axis flip." },
-  { name: "blind", blurb: "Window-blinds wipe." },
-  { name: "film", blurb: "Cinematic shrink + tile." },
-  { name: "rotate", blurb: "Card flip." },
-  { name: "jaemin", blurb: "Playful rotated zoom." },
-];
-
 export function TransitionsBody() {
   return (
     <div className="mt-8">
-      <p className="text-sm text-neutral-500">
-        Each links to a self-contained{" "}
-        <span className="font-mono text-neutral-300">.txt</span> with the full
+      <p className="max-w-xl text-sm leading-relaxed text-neutral-400">
+        Every built-in transition, tagged with when it fits. Open one for its
+        variants, usage, and live demos — or grab the{" "}
+        <span className="font-mono text-neutral-300">.txt</span> for the full
         API.
       </p>
-      <ul className="mt-6 divide-y divide-white/[0.05] border-y border-white/[0.05]">
-        {TRANSITIONS.map((t) => (
-          <li key={t.name}>
-            <a
-              href={`https://ssgoi.dev/llms/${t.name}.txt`}
-              target="_blank"
-              rel="noreferrer"
-              className="group flex items-center justify-between gap-6 py-4 transition-colors hover:bg-white/[0.02]"
-            >
-              <div className="flex min-w-0 items-baseline gap-4">
-                <span className="font-mono text-base font-semibold text-neutral-100">
-                  {t.name}
-                </span>
-                <span className="truncate text-sm text-neutral-400">
-                  {t.blurb}
-                </span>
-              </div>
-              <span
-                className="hidden shrink-0 font-mono text-xs text-neutral-500 transition-colors group-hover:text-orange-400 sm:inline"
-                aria-hidden
-              >
-                /llms/{t.name}.txt ↗
-              </span>
-            </a>
-          </li>
+
+      <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+        {TRANSITION_DOCS.map((t) => (
+          <TransitionCard key={t.name} entry={t} />
         ))}
       </ul>
     </div>
+  );
+}
+
+function TransitionCard({ entry }: { entry: TransitionDoc }) {
+  const meta = USE_META[entry.use];
+
+  return (
+    <li>
+      <Link
+        href={`/docs/transitions/${entry.name}`}
+        className="group flex h-full flex-col gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-base font-semibold text-neutral-100 transition-colors group-hover:text-orange-400">
+            {entry.name}
+          </span>
+          <span
+            className={
+              "rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider " +
+              meta.cls
+            }
+          >
+            {meta.label}
+          </span>
+          <span
+            className="ml-auto text-neutral-600 transition-colors group-hover:text-orange-400"
+            aria-hidden
+          >
+            →
+          </span>
+        </div>
+        <p className="text-sm leading-snug text-neutral-300">{entry.blurb}</p>
+        <p className="text-xs leading-snug text-neutral-500">{meta.when}</p>
+      </Link>
+    </li>
   );
 }
 

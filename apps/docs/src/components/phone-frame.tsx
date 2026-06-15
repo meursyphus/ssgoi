@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IframeLoadingOverlay } from "./iframe-loading-overlay";
 
 type Props = {
@@ -16,9 +16,17 @@ export function PhoneFrame({
 }: Props) {
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
+  // Reset the loading overlay only when `src` ACTUALLY changes — not on a bare
+  // effect re-run. React <Activity> re-runs passive effects on hidden→visible,
+  // so a `useEffect(..., [src])` would fire on every reveal and re-show the
+  // overlay over an already-loaded iframe that never re-fires `onLoad` (the
+  // iframe state is preserved, so it just sits behind a stuck loader). Deriving
+  // from a tracked src keeps the reset tied to a genuine src change.
+  const [trackedSrc, setTrackedSrc] = useState(src);
+  if (src !== trackedSrc) {
+    setTrackedSrc(src);
     setLoaded(false);
-  }, [src]);
+  }
 
   return (
     <div className={`relative mx-auto shrink-0 ${widthClassName}`}>

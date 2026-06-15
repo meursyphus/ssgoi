@@ -111,6 +111,17 @@ export class WebAnimation extends Animation {
     this.onComplete?.();
   }
 
+  /**
+   * Drop the WAAPI forwards-fill after the run has settled, letting inline
+   * styles govern the resting visual. Call only from `onComplete` (the run is
+   * already finished) — otherwise it cancels mid-flight. Unlike `complete()`,
+   * it writes no final frame, so a caller can reset the element to its natural
+   * state without the lingering fill clobbering it.
+   */
+  releaseFill(): void {
+    this.clearWaapi();
+  }
+
   get isAnimating(): boolean {
     return this.running;
   }

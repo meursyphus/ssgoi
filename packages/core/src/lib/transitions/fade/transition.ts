@@ -38,7 +38,12 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
         // forward, mapping opacity from fully visible to invisible.
         style: (_t, u) => ({ opacity: u }),
         onComplete: () => {
+          // The outgoing node is the real page and gets reused (re-hidden,
+          // shown again next navigation), so clear every inline style we
+          // wrote — willChange and the final opacity:0 frame — exactly like
+          // the incoming cleanup below, or the page stays invisible.
           from.style.willChange = "auto";
+          from.style.opacity = "";
         },
       });
 

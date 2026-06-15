@@ -28,7 +28,7 @@ export const DOCS_NAV: DocsNavGroup[] = [
       {
         title: "Transitions",
         href: "/docs/transitions",
-        blurb: "The twelve built-in transitions.",
+        blurb: "The thirteen built-in transitions.",
       },
       {
         title: "Layout",

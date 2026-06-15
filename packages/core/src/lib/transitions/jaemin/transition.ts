@@ -69,6 +69,13 @@ export const jaemin = (options: JaeminOptions = {}): TransitionConfig => {
         element: from,
         integrator: IntegratorProvider.from(OUT_PHYSICS),
         style: (_t, u) => ({ opacity: u }),
+        // The outgoing node is reused (re-hidden, shown again on the next
+        // navigation), so reset every inline style we wrote to it — mirroring
+        // the "to" cleanup below. prepare sets opacity and the out style fades
+        // it toward 0, so clear opacity or the reused node stays invisible.
+        onComplete: () => {
+          from.style.opacity = "";
+        },
       });
 
       const inAnim = new WebAnimation({

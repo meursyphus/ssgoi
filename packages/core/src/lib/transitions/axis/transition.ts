@@ -32,6 +32,17 @@ function clearStyle(el: HTMLElement): void {
   el.style.clipPath = "";
 }
 
+// The outgoing (from) element is now the real, reused page node (React
+// Activity / Next cacheComponents) rather than a throwaway clone, so every
+// inline style we set on it must be cleared when the out animation completes —
+// otherwise the re-hidden node reappears stuck (invisible / translated /
+// non-interactive) on the next navigation. Mirrors `clearStyle` (the in-side
+// template) plus the out-only `pointerEvents` we set in `prepare`.
+function clearFromStyle(el: HTMLElement): void {
+  clearStyle(el);
+  el.style.pointerEvents = "";
+}
+
 export const axis = (options: AxisOptions = {}): TransitionConfig => {
   const direction = options.direction ?? "forward";
   const type = options.type ?? DEFAULT_TYPE;
@@ -65,12 +76,11 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
         element: from,
         integrator: IntegratorProvider.from(provider.outPhysics),
         style: (t) => config.out.animate(t),
-        onComplete:
-          type === "z"
-            ? () => {
-                from.style.clipPath = "";
-              }
-            : undefined,
+        // Restore the reused from node's inline styles on complete. This
+        // covers willChange/backfaceVisibility/contain/transform/opacity (from
+        // applyStartStyle + the WAAPI final frame), pointerEvents (set in
+        // prepare), and clipPath (set above for z; harmless no-op otherwise).
+        onComplete: () => clearFromStyle(from),
       });
 
       const inAnim = new WebAnimation({

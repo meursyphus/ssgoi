@@ -1,7 +1,8 @@
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
 
-export const dynamic = "force-static";
+// `dynamic = "force-static"` is incompatible with cacheComponents; the feed is
+// cheap to generate per request from local MDX, so render it dynamically.
 
 function escapeXml(value: string) {
   return value
