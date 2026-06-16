@@ -262,5 +262,8 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    // Same measurement that drives `preserveScroll`'s `isMobile`, exposed so a
+    // functional `transitions` config can branch on it too.
+    getIsMobile: detectIsMobile,
   };
 }

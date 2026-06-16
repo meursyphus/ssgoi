@@ -4,6 +4,7 @@ import type {
   SsgoiContext,
   SsgoiPathTransition,
   SsgoiPathTransitionInput,
+  SsgoiTransitionsFn,
   SsgoiTransitionContext,
   PrepareArgs,
   CreateElement,
@@ -94,9 +95,13 @@ export function createSggoiTransitionContext(
   const host = contextOptions.host ?? new HostAnimation();
 
   const detector = createNavigationDetector();
-  const processedTransitions = processSymmetricTransitions(
-    flattenTransitions(transitions),
-  );
+
+  // Normalize both accepted shapes to the functional form up front so the rest
+  // of the file deals with exactly one shape: a static list becomes a function
+  // that ignores its args and returns that list. No `typeof transitions` branch
+  // ever leaks past this line.
+  const resolveTransitions: SsgoiTransitionsFn =
+    typeof transitions === "function" ? transitions : () => transitions;
 
   const swipeDetector = createSwipeBackDetector();
   swipeDetector.initialize();
@@ -109,7 +114,26 @@ export function createSggoiTransitionContext(
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
+    getIsMobile,
   } = createContextManager({ preserveScroll });
+
+  // Resolve + flatten + process the path-transition list lazily. `isMobile` is
+  // only reliable once the scroll container is known (measured on the first IN),
+  // which always precedes findMatchingTransition. Memoized per device class so a
+  // static list is processed at most once per `isMobile` value and the resolver
+  // never runs on the hot path more than necessary.
+  const processedByIsMobile = new Map<boolean, SsgoiPathTransition[]>();
+  const getProcessedTransitions = (): SsgoiPathTransition[] => {
+    const isMobile = getIsMobile();
+    let processed = processedByIsMobile.get(isMobile);
+    if (!processed) {
+      processed = processSymmetricTransitions(
+        flattenTransitions(resolveTransitions({ isMobile })),
+      );
+      processedByIsMobile.set(isMobile, processed);
+    }
+    return processed;
+  };
 
   let pendingOut: PendingSide | null = null;
   let pendingIn: PendingSide | null = null;
@@ -384,7 +408,7 @@ export function createSggoiTransitionContext(
       const config = findMatchingTransition(
         transformedFrom,
         transformedTo,
-        processedTransitions,
+        getProcessedTransitions(),
       );
 
       const outSide = pendingOut;
