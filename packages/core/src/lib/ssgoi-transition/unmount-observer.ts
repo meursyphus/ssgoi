@@ -11,14 +11,19 @@
  *  - lower memory / browser overhead than dozens of observers
  */
 
-type UnmountCallback = () => void;
+export type UnmountAnchor = {
+  parent: Node;
+  nextSibling: Node | null;
+};
+
+type UnmountCallback = (anchor?: UnmountAnchor) => void;
 
 const watched = new Map<HTMLElement, UnmountCallback>();
 
 let sharedObserver: MutationObserver | null = null;
 let initialized = false;
 
-function checkRemovedSubtree(node: Node): void {
+function checkRemovedSubtree(node: Node, anchor: UnmountAnchor): void {
   // A childList "removed" record also fires when a node is MOVED (removed then
   // re-inserted within the same commit) — e.g. Next.js reorders its bfcache
   // `<Activity>` siblings on back/forward navigation, so React detaches and
@@ -32,10 +37,10 @@ function checkRemovedSubtree(node: Node): void {
     watched.delete(node);
     // Defer to microtask so we never mutate the DOM inside the observer
     // callback (some browsers complain).
-    queueMicrotask(cb);
+    queueMicrotask(() => cb(anchor));
   }
   for (const child of Array.from(node.childNodes)) {
-    checkRemovedSubtree(child);
+    checkRemovedSubtree(child, anchor);
   }
 }
 
@@ -45,8 +50,12 @@ function init(): void {
 
   sharedObserver = new MutationObserver((mutations) => {
     for (const m of mutations) {
+      const anchor = {
+        parent: m.target,
+        nextSibling: m.nextSibling,
+      };
       for (const removed of Array.from(m.removedNodes)) {
-        checkRemovedSubtree(removed);
+        checkRemovedSubtree(removed, anchor);
       }
     }
   });
