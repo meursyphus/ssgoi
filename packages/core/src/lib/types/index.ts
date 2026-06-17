@@ -196,8 +196,32 @@ export type PreserveScrollValue =
 export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
 export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
 
+/**
+ * Argument handed to a functional `transitions` config. Destructured at the
+ * call site (`({ isMobile }) => …`) so the boolean's meaning is self-documenting
+ * — and so the object can grow more fields later without breaking signatures.
+ */
+export type TransitionsResolverArgs = { isMobile: boolean };
+
+/**
+ * Functional form of `transitions`: receives device context and returns the
+ * path-transition list. Lets a config branch on viewport (e.g. drawer on
+ * mobile, fade on desktop) without an outer wrapper.
+ */
+export type SsgoiTransitionsFn = (
+  args: TransitionsResolverArgs,
+) => readonly SsgoiPathTransitionInput[];
+
+/**
+ * `transitions` accepts either the plain list (existing form) or a function of
+ * device context. Both normalize to the functional form internally.
+ */
+export type SsgoiTransitionsOption =
+  | readonly SsgoiPathTransitionInput[]
+  | SsgoiTransitionsFn;
+
 export type SsgoiConfig = {
-  transitions?: readonly SsgoiPathTransitionInput[];
+  transitions?: SsgoiTransitionsOption;
   middleware?: (from: string, to: string) => { from: string; to: string };
   preserveScroll?: PreserveScrollOption;
 };

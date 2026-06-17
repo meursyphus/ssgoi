@@ -14,6 +14,7 @@ import {
   WebAnimation,
 } from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
+import { Z_OVERLAY } from "../../stacking";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
@@ -64,13 +65,9 @@ const overlay: ZoomOverlayConfig = {
     position: "absolute",
     inset: "0",
     pointerEvents: "none",
-    // z-index is mode-dependent and applied in OverlayStrategy.contribute
-    // once `resolved.mode` is known. Sits between the background page and
-    // the zoomed tile:
-    //   enter — tile (`to`) is default(0), background (`from`) at -2,
-    //           overlay at -1.
-    //   exit  — tile (`from`) is at +2, background (`to`) default(0),
-    //           overlay at +1.
+    // z-index is applied in OverlayStrategy.contribute. The overlay always
+    // sits at Z_OVERLAY, between the background page (Z_BACKGROUND) and the
+    // zoomed tile (Z_FOREGROUND), in both enter and exit.
     backdropFilter: "blur(0px)",
     WebkitBackdropFilter: "blur(0px)",
   },
@@ -132,10 +129,10 @@ export class OverlayStrategy implements ZoomStrategy {
   contribute(ctx: ZoomContributeCtx): Animation[] {
     const overlayEl = ctx.extras.overlay;
     if (!overlayEl) return [];
-    // Mirrors the from-only z-index scheme in TileStrategy. Overlay is fully
-    // transparent (blur(0px)) until the first tick fires, so applying the
-    // z-index here — after prepare, before paint — has no visual cost.
-    overlayEl.style.zIndex = ctx.resolved.mode === "enter" ? "-1" : "1";
+    // Sits at the middle tier between background and tile (see TileStrategy).
+    // Overlay is fully transparent (blur(0px)) until the first tick fires, so
+    // applying the z-index here — after prepare, before paint — has no cost.
+    overlayEl.style.zIndex = Z_OVERLAY;
     return [
       new WebAnimation({
         element: overlayEl,
