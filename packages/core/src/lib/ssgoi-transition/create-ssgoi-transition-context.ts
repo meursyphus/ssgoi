@@ -15,7 +15,7 @@ import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { findMatchingTransition } from "./find-matching-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
-import { watchUnmount } from "./unmount-observer";
+import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
 
@@ -43,13 +43,13 @@ type TransitionMode = "unmount" | "hidden";
 
 type PendingSide = {
   element: HTMLElement;
-  parent: Element | null;
-  nextSibling: Element | null;
+  parent: Node | null;
+  nextSibling: Node | null;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
-   *    cacheComponents). The outgoing page is cloned and the clone is removed on
-   *    settle — the battle-tested baseline path.
+   *    cacheComponents). The detached real node is reinserted for the OUT
+   *    animation, then removed on settle.
    *  - "hidden":  React `<Activity>` / Next `cacheComponents` toggled it to
    *    `display:none`. The REAL node is reused (page state preserved) and
    *    re-hidden on settle.
@@ -59,8 +59,8 @@ type PendingSide = {
 };
 
 type ElementAnchor = {
-  parent: Element | null;
-  nextSibling: Element | null;
+  parent: Node | null;
+  nextSibling: Node | null;
 };
 
 /**
@@ -68,10 +68,10 @@ type ElementAnchor = {
  *
  * Pure promise plumbing: the framework adapter calls `in(element)` on mount
  * and `out(element)` on unmount; the dispatcher pairs them by path via
- * NavigationDetector, then `.then`-chains the prepare result, the cloned
- * `from` element, and the `to` element. `animation()` runs once the chain
- * resolves — never via blocking `await` — so a follow-up navigation can
- * start its own pair while a prior one is still building.
+ * NavigationDetector, then `.then`-chains the prepare result, the `from`
+ * element, and the `to` element. `animation()` runs once the chain resolves —
+ * never via blocking `await` — so a follow-up navigation can start its own pair
+ * while a prior one is still building.
  */
 export interface CreateSsgoiTransitionContextOptions {
   /**
@@ -142,8 +142,8 @@ export function createSggoiTransitionContext(
 
   const captureAnchor = (element: HTMLElement) => {
     elementAnchors.set(element, {
-      parent: element.parentElement,
-      nextSibling: element.nextElementSibling,
+      parent: element.parentNode,
+      nextSibling: element.nextSibling,
     });
   };
 
@@ -151,8 +151,8 @@ export function createSggoiTransitionContext(
     const cached = elementAnchors.get(element);
     if (cached) return cached;
     return {
-      parent: element.parentElement,
-      nextSibling: element.nextElementSibling,
+      parent: element.parentNode,
+      nextSibling: element.nextSibling,
     };
   };
 
@@ -260,8 +260,8 @@ export function createSggoiTransitionContext(
     };
 
     // The element handed to the animation as `from`:
-    //  - unmount mode: a throwaway deep clone (the real node is being destroyed
-    //    by the host framework), inserted after `prepare` and removed on settle.
+    //  - unmount mode: the detached real node, reinserted after `prepare` and
+    //    removed on settle.
     //  - hidden mode: the REAL outgoing node, already revealed + taken out of
     //    flow by `handleHide`. Reusing it keeps page state alive AND lets a
     //    follow-up navigation hand its motion back continuously (matchInto keys
@@ -280,10 +280,11 @@ export function createSggoiTransitionContext(
         toState.savedCss = toElement.style.cssText;
       }
     } else {
-      // Clone while the original is still mounted; the host framework will
-      // detach the original right after `out()` returns.
-      fromElement = fromOriginal.cloneNode(true) as HTMLElement;
-      fromElement.setAttribute("data-ssgoi-clone", "");
+      // The host framework already detached the original. Reuse that exact
+      // node so DOM state (input values, canvas contents, media state, etc.)
+      // survives through the outgoing animation instead of being flattened by
+      // cloneNode().
+      fromElement = fromOriginal;
       // Outgoing page goes absolute so the incoming page can take its slot.
       // Style only; insertion is deferred until after `prepare`.
       prepareOutgoing(fromElement, ssgoiContext);
@@ -294,7 +295,9 @@ export function createSggoiTransitionContext(
     // Stamp ownership BEFORE host.attach force-completes any prior run (below):
     // the prior run's settle checks ownership and must already see THIS run
     // owning the shared real nodes, so it skips them instead of fighting us.
-    // Only hidden mode reuses/owns real nodes; unmount mode stays clone-based.
+    // Hidden mode reuses mounted real nodes; unmount mode reuses a detached real
+    // node and removes it on settle, so ownership guards are only needed for
+    // hidden mode's persistent nodes.
     const epoch = isHidden ? ++transitionEpoch : 0;
     if (isHidden) {
       owner.set(toElement, epoch);
@@ -334,7 +337,7 @@ export function createSggoiTransitionContext(
       extras: extrasPromise,
     }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
       // Now that prepare's microtasks have all run (initial styles, extras
-      // built), drop the outgoing clone into place. Order is:
+      // built), drop the outgoing node into place. Order is:
       //   prepare → out insert → animation create/play
       // Hidden mode skips insertion: the real node is already in place.
       if (!isHidden && parent) {
@@ -365,11 +368,11 @@ export function createSggoiTransitionContext(
           // no-op if a newer run now owns the node.
           reconcileResting(fromOriginal, epoch);
           reconcileResting(toElement, epoch);
-        } else if (fromElement.parentElement) {
-          fromElement.parentElement.removeChild(fromElement);
+        } else if (fromElement.parentNode) {
+          fromElement.parentNode.removeChild(fromElement);
         }
         for (const extra of createdElements) {
-          if (extra.parentElement) extra.parentElement.removeChild(extra);
+          if (extra.parentNode) extra.parentNode.removeChild(extra);
         }
       };
 
@@ -507,7 +510,11 @@ export function createSggoiTransitionContext(
     handleArrival(currentPath, "in");
   };
 
-  const handleRemoval = (element: HTMLElement, path: string) => {
+  const handleRemoval = (
+    element: HTMLElement,
+    path: string,
+    removalAnchor?: UnmountAnchor,
+  ) => {
     const state = hiddenState.get(element);
     if (state) {
       state.vis.stop();
@@ -524,7 +531,7 @@ export function createSggoiTransitionContext(
       }
     }
 
-    const anchor = readAnchor(element);
+    const anchor = removalAnchor ?? readAnchor(element);
     pendingOut = {
       element,
       parent: anchor.parent,
@@ -578,7 +585,7 @@ export function createSggoiTransitionContext(
       handleArrival(path, "in");
     }
 
-    watchUnmount(element, () => handleRemoval(element, path));
+    watchUnmount(element, (anchor) => handleRemoval(element, path, anchor));
   };
 
   // Per-path ref callbacks are cached so adapters can drop `refFor(path)`

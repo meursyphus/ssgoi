@@ -29,8 +29,17 @@ class FakeMutationObserver {
   }
 }
 
-function fireRemoval(node: FakeNode): void {
-  observerCb?.([{ removedNodes: [node] }]);
+function fireRemoval(
+  node: FakeNode,
+  record: { target?: FakeNode; nextSibling?: FakeNode | null } = {},
+): void {
+  observerCb?.([
+    {
+      target: record.target ?? new FakeNode(),
+      nextSibling: record.nextSibling ?? null,
+      removedNodes: [node],
+    },
+  ]);
 }
 
 async function flushMicrotasks(): Promise<void> {
@@ -64,6 +73,27 @@ describe("watchUnmount", () => {
     await flushMicrotasks();
 
     expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the removal anchor to the leave callback", async () => {
+    const { watchUnmount } = await import("./unmount-observer");
+    const parent = new FakeNode();
+    const nextSibling = new FakeNode();
+    const node = new FakeNode();
+    const child = new FakeNode();
+    node.childNodes = [child];
+    node.isConnected = false;
+    child.isConnected = false;
+
+    const cb = vi.fn();
+    watchUnmount(child as unknown as HTMLElement, cb);
+
+    fireRemoval(node, { target: parent, nextSibling });
+    await flushMicrotasks();
+
+    const anchor = cb.mock.calls[0]?.[0];
+    expect(anchor?.parent).toBe(parent);
+    expect(anchor?.nextSibling).toBe(nextSibling);
   });
 
   it("does NOT fire on a MOVE (node reattached -> isConnected), and keeps watching", async () => {
