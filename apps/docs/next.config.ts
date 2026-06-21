@@ -20,11 +20,11 @@ const devHosts =
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: devHosts,
-  // Keep previously-visited routes mounted (hidden via React <Activity>) on
-  // client navigation instead of unmounting them. ssgoi detects the
-  // display:none hide/show and runs page transitions on the real nodes,
-  // so navigation animations work with cached/kept-alive pages.
-  cacheComponents: true,
+  // // Keep previously-visited routes mounted (hidden via React <Activity>) on
+  // // client navigation instead of unmounting them. ssgoi detects the
+  // // display:none hide/show and runs page transitions on the real nodes,
+  // // so navigation animations work with cached/kept-alive pages.
+  // cacheComponents: true,
   async redirects() {
     return [{ source: "/showcase", destination: "/", permanent: true }];
   },
