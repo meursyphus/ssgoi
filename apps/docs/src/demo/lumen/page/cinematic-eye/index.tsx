@@ -6,7 +6,6 @@ export default function CinematicEyePage() {
   return (
     <CoursePage
       data={{
-        routeId: "/demo/lumen/cinematic-eye",
         eyebrow: "Cinematography",
         title: "The Cinematic Eye",
         overview:

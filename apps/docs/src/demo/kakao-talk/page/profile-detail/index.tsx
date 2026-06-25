@@ -14,10 +14,7 @@ export default function ProfileDetailPage({
   }));
   friend.actions.init(initialData);
   return (
-    <div
-      data-ssgoi-transition={`/demo/kakao-talk/profile/${initialData.id}`}
-      className="relative flex min-h-full flex-col bg-[#A6AEBE]"
-    >
+    <div className="relative flex min-h-full flex-col bg-[#A6AEBE]">
       <ProfileHeader />
       <ProfileHero profile={initialData} />
       <ProfileActions />

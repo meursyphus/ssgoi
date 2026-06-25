@@ -13,10 +13,7 @@ export default function PhotosPage() {
     photo.actions.loadAll();
   }, [photo.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/google-photos"
-      className="block min-h-full bg-white"
-    >
+    <div className="block min-h-full bg-white">
       {photo.photos.isLoading && photo.photos.data.items.length === 0 ? (
         <div className="flex items-center justify-center py-16 text-neutral-400">
           <Loader2 className="h-5 w-5 animate-spin" />

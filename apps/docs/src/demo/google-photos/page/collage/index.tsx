@@ -18,10 +18,7 @@ export default function CollagePage({ photos }: { photos: PhotoSimple[] }) {
   const router = useRouter();
   const sections = bucket(photos);
   return (
-    <div
-      data-ssgoi-transition="/demo/google-photos/collage"
-      className="relative flex min-h-full flex-col bg-white"
-    >
+    <div className="relative flex min-h-full flex-col bg-white">
       <header className="sticky top-0 z-30 bg-white pt-3 pb-2">
         <p className="text-center text-[13px] text-neutral-500">
           Select 1–6 photos

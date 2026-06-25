@@ -54,6 +54,20 @@ src/
     └── profile/                    # Profile demo
 ```
 
+## Route Boundaries
+
+SvelteKit pages mark their own transition boundary with `data-ssgoi-transition`.
+Use a stable logical id that matches your config; it does not have to be the
+actual route pathname.
+Do not use a single slot-based layout boundary here; the outgoing slot can
+render the incoming page content.
+
+```svelte
+<div data-ssgoi-transition="/posts">
+  <!-- page content -->
+</div>
+```
+
 ## Transitions
 
 ### Drill Transition (Posts)

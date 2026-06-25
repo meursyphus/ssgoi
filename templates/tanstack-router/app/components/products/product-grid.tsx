@@ -2,11 +2,10 @@ import React from "react";
 import type { Product } from "./mock-data";
 interface ProductGridProps {
   products: Product[];
-  category: string;
 }
-export default function ProductGrid({ products, category }: ProductGridProps) {
+export default function ProductGrid({ products }: ProductGridProps) {
   return (
-    <div data-ssgoi-transition={`/products/${category}`}>
+    <div>
       <div className="px-4 pb-6 h-full overflow-y-auto">
         {products.length === 0 ? (
           <div className="text-center py-12">

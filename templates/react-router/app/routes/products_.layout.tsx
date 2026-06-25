@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Link, Outlet, useLocation } from "react-router";
 import { Ssgoi } from "@ssgoi/react";
 import { slide } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
 const categories = [
   {
     id: "all",
@@ -43,10 +44,7 @@ export default function ProductsLayout() {
     [],
   );
   return (
-    <div
-      data-ssgoi-transition="/products"
-      className="min-h-screen bg-[#121212] flex flex-col"
-    >
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Fixed */}
       <div className="px-4 pt-6 pb-3 flex-shrink-0">
         <h1 className="text-sm font-medium text-white mb-1">Shop</h1>
@@ -73,7 +71,9 @@ export default function ProductsLayout() {
       {/* Tab Content - Slide transitions here */}
       <div className="flex-1 overflow-hidden relative">
         <Ssgoi config={config}>
-          <Outlet />
+          <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+            <Outlet />
+          </SsgoiTransitionBoundary>
         </Ssgoi>
       </div>
     </div>

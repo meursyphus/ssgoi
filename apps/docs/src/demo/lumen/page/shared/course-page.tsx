@@ -7,7 +7,6 @@ type Meta = {
   value: string;
 };
 export type CoursePageData = {
-  routeId: string;
   eyebrow: string;
   title: string;
   overview: string;
@@ -18,10 +17,7 @@ export type CoursePageData = {
 };
 export function CoursePage({ data }: { data: CoursePageData }) {
   return (
-    <div
-      data-ssgoi-transition={data.routeId}
-      className="relative h-full w-full overflow-hidden"
-    >
+    <div className="relative h-full w-full overflow-hidden">
       {/* fullscreen cinematic background — absolute so it animates with the page */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <video

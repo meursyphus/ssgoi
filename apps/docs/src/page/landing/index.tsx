@@ -21,7 +21,7 @@ const demoItemListSchema = {
 
 export default function HomePage() {
   return (
-    <main data-ssgoi-transition="/" className="relative min-h-dvh bg-black">
+    <main className="relative min-h-dvh bg-black">
       <JsonLd data={[softwareApplicationSchema, demoItemListSchema]} />
       <SiteNav />
       <Hero />

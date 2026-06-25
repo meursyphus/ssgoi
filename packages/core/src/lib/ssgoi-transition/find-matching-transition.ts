@@ -1,37 +1,153 @@
 import type { TransitionConfig } from "@types";
 
+type PathMatch = {
+  matched: boolean;
+  specificity: number;
+};
+
+const EXACT_MATCH_BONUS = 1_000_000;
+const STATIC_SEGMENT_SCORE = 100;
+const DYNAMIC_SEGMENT_SCORE = 10;
+
+function stripQueryAndHash(path: string): string {
+  const trimmed = path.trim();
+  const hashIndex = trimmed.indexOf("#");
+  const queryIndex = trimmed.indexOf("?");
+  const cutIndex = [hashIndex, queryIndex]
+    .filter((index) => index >= 0)
+    .reduce((min, index) => Math.min(min, index), trimmed.length);
+
+  return trimmed.slice(0, cutIndex);
+}
+
+function normalizePath(path: string): string {
+  const stripped = stripQueryAndHash(path);
+
+  try {
+    if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(stripped)) {
+      return normalizePath(new URL(stripped).pathname);
+    }
+  } catch {
+    // Fall through and treat it as a path-like value.
+  }
+
+  const withLeadingSlash = stripped.startsWith("/") ? stripped : `/${stripped}`;
+  const collapsed = withLeadingSlash.replace(/\/+/g, "/");
+  const withoutTrailingSlash =
+    collapsed.length > 1 ? collapsed.replace(/\/+$/g, "") : collapsed;
+
+  return withoutTrailingSlash || "/";
+}
+
+function normalizePattern(pattern: string): string {
+  const trimmed = pattern.trim();
+  if (trimmed === "*") return "*";
+  return normalizePath(trimmed);
+}
+
+function splitSegments(path: string): string[] {
+  if (path === "/") return [];
+  return path.slice(1).split("/");
+}
+
+function isDynamicSegment(segment: string): boolean {
+  return (
+    segment.startsWith(":") ||
+    (segment.startsWith("[") && segment.endsWith("]")) ||
+    (segment.startsWith("{") && segment.endsWith("}"))
+  );
+}
+
+function getPathMatch(path: string, pattern: string): PathMatch {
+  const normalizedPath = normalizePath(path);
+  const normalizedPattern = normalizePattern(pattern);
+
+  if (normalizedPattern === "*") {
+    return { matched: true, specificity: 0 };
+  }
+
+  if (normalizedPath === normalizedPattern) {
+    return {
+      matched: true,
+      specificity:
+        EXACT_MATCH_BONUS +
+        splitSegments(normalizedPattern).length * STATIC_SEGMENT_SCORE,
+    };
+  }
+
+  const pathSegments = splitSegments(normalizedPath);
+  const patternSegments = splitSegments(normalizedPattern);
+  let specificity = 0;
+
+  for (let index = 0; index < patternSegments.length; index++) {
+    const patternSegment = patternSegments[index];
+    const pathSegment = pathSegments[index];
+    const isLastPatternSegment = index === patternSegments.length - 1;
+
+    if (patternSegment === undefined) {
+      return { matched: false, specificity: 0 };
+    }
+
+    if (
+      (patternSegment === "*" || patternSegment === "**") &&
+      isLastPatternSegment
+    ) {
+      return {
+        matched:
+          patternSegment === "**"
+            ? pathSegments.length >= index
+            : pathSegments.length > index,
+        specificity,
+      };
+    }
+
+    if (pathSegment === undefined) {
+      return { matched: false, specificity: 0 };
+    }
+
+    if (patternSegment === "*" || isDynamicSegment(patternSegment)) {
+      specificity += DYNAMIC_SEGMENT_SCORE;
+      continue;
+    }
+
+    if (patternSegment !== pathSegment) {
+      return { matched: false, specificity: 0 };
+    }
+
+    specificity += STATIC_SEGMENT_SCORE;
+  }
+
+  return {
+    matched: pathSegments.length === patternSegments.length,
+    specificity,
+  };
+}
+
 /**
  * Matches a path against a pattern
- * Supports exact matches and wildcard patterns
+ * Supports exact matches, wildcard patterns, and common route segment params
  *
  * @example
  * matchPath('/products', '/products') // true
  * matchPath('/products/123', '/products/*') // true
+ * matchPath('/products', '/products/**') // true
+ * matchPath('/products/123/reviews', '/products/**') // true
+ * matchPath('/products/123', '/products/:id') // true
+ * matchPath('/products/123', '/products/[id]') // true
+ * matchPath('/products/123', '/products/{id}') // true
  * matchPath('/products/123', '/products') // false
  * matchPath('/anything', '*') // true
  */
 export function matchPath(path: string, pattern: string): boolean {
-  // Universal match - asterisk matches any path
-  if (pattern === "*") {
-    return true;
-  }
-
-  // Wildcard match - pattern ending with /* matches only subpaths (not the prefix itself)
-  // e.g., "/posts/*" matches "/posts/123" but NOT "/posts" or "/posts/"
-  if (pattern.endsWith("/*")) {
-    const prefix = pattern.slice(0, -1); // "/posts/"
-    return path.startsWith(prefix) && path.length > prefix.length;
-  }
-
-  // Exact match - paths must be identical
-  return path === pattern;
+  return getPathMatch(path, pattern).matched;
 }
 
 /**
  * Finds a matching transition configuration for the given from and to paths
  *
- * First tries to find exact match for both from and to paths,
- * then falls back to wildcard matches if no exact match is found.
+ * Chooses the most specific matching config. Exact paths outrank wildcard
+ * paths, deeper static wildcard prefixes outrank broader fallbacks, and equal
+ * specificity preserves the original config order.
  */
 export function findMatchingTransition(
   from: string,
@@ -42,22 +158,25 @@ export function findMatchingTransition(
     transition: TransitionConfig;
   }>,
 ): TransitionConfig | null {
-  // First try to find exact match for both from and to paths
+  let best:
+    | {
+        transition: TransitionConfig;
+        specificity: number;
+      }
+    | undefined;
+
   for (const config of transitions) {
-    if (matchPath(from, config.from) && matchPath(to, config.to)) {
-      return config.transition;
+    const fromMatch = getPathMatch(from, config.from);
+    if (!fromMatch.matched) continue;
+
+    const toMatch = getPathMatch(to, config.to);
+    if (!toMatch.matched) continue;
+
+    const specificity = fromMatch.specificity + toMatch.specificity;
+    if (!best || specificity > best.specificity) {
+      best = { transition: config.transition, specificity };
     }
   }
 
-  // Then try wildcard matches if no exact match found
-  for (const config of transitions) {
-    if (
-      (config.from === "*" || matchPath(from, config.from)) &&
-      (config.to === "*" || matchPath(to, config.to))
-    ) {
-      return config.transition;
-    }
-  }
-
-  return null;
+  return best?.transition ?? null;
 }

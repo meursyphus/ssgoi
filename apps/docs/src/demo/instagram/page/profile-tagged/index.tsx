@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { usePost } from "@/demo/instagram/state/post";
 import { TaggedItem } from "./tagged-item";
-export default function ProfileTaggedPage({ id }: { id: string }) {
+
+export default function ProfileTaggedPage() {
   const post = usePost((state) => ({
     tagged: state.tagged,
     actions: state.actions,
@@ -12,10 +13,7 @@ export default function ProfileTaggedPage({ id }: { id: string }) {
     post.actions.loadTagged();
   }, [post.actions]);
   return (
-    <div
-      data-ssgoi-transition={`/demo/instagram/profile/${id}/tagged`}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen">
       {post.tagged.isLoading && post.tagged.data.length === 0 ? (
         <div className="grid grid-cols-3 gap-[2px] bg-white">
           {Array.from({

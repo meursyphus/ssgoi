@@ -1,21 +1,39 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { scroll } from "@ssgoi/react/view-transitions";
 import { HostAnimation } from "@ssgoi/core/internal";
 import { HostContext } from "@/lib/components/host-context";
 import { useShowcaseFrameBridge } from "@/lib/hooks";
+import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
 
 const config: SsgoiConfig = {
   preserveScroll: false,
   transitions: [
     scroll({
-      paths: ["/", "/showcase"],
+      paths: ["/", "/showcase/*"],
       type: "non-directional",
     }),
   ],
 };
+
+function DocsRouteBoundary({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isShowcaseRoute =
+    pathname === "/" ||
+    pathname === "/showcase" ||
+    pathname.startsWith("/showcase/");
+
+  if (!isShowcaseRoute) return <>{children}</>;
+
+  return (
+    <SsgoiTransitionBoundary className="min-h-dvh bg-black">
+      {children}
+    </SsgoiTransitionBoundary>
+  );
+}
 
 /**
  * Top-level provider:
@@ -39,7 +57,7 @@ export function DocsSsgoiProvider({ children }: { children: ReactNode }) {
   return (
     <HostContext.Provider value={host}>
       <Ssgoi config={config} host={host}>
-        {children}
+        <DocsRouteBoundary>{children}</DocsRouteBoundary>
       </Ssgoi>
     </HostContext.Provider>
   );

@@ -26,6 +26,7 @@ The main provider lives in `app/components/demo-layout.tsx`:
 ```tsx
 import { Ssgoi } from "@ssgoi/react";
 import { drill, zoom } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   preserveScroll: { exclude: ["/posts/*"] },
@@ -37,13 +38,24 @@ const config = {
 };
 ```
 
-Each routed page has a stable `data-ssgoi-transition` route id.
+The demo layout wraps routed content once with a small boundary utility.
 
 ```tsx
-export default function PostsPage() {
-  return <main data-ssgoi-transition="/posts">{/* page */}</main>;
+export default function DemoLayout({ children }) {
+  return (
+    <Ssgoi config={config}>
+      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
 }
 ```
+
+Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
+stay as real pathnames and are matched by wildcard patterns in config. Use
+`/posts/*` for descendants and `/posts/**` when the parent path should match
+too.
 
 ## Build
 

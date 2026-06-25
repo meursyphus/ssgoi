@@ -4,7 +4,7 @@ import { getAllPosts } from "./mock-data";
 export default function PostsDemo() {
   const posts = getAllPosts();
   return (
-    <div data-ssgoi-transition="/posts">
+    <div>
       <div className="min-h-full bg-[#121212] px-4 py-6">
         {/* Header */}
         <div className="mb-6">

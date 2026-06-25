@@ -14,10 +14,7 @@ export default function ChatsPage() {
     chat.actions.loadThreads();
   }, [chat.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/kakao-talk/chats"
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <ChatsHeader />
       <div className="flex-1 overflow-y-auto pb-16">
         <AdBanner />

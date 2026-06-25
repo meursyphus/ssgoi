@@ -44,13 +44,16 @@ Web pages don't transition—they just swap. SSGOI changes that.
 npm install @ssgoi/react
 ```
 
-### 1. Wrap your app (layout.tsx)
+### 1. Wrap your React app
 
 ```tsx
+// app/ssgoi-provider.tsx
 "use client";
 
+import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, fade } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
@@ -61,43 +64,126 @@ const config = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export function SsgoiProvider({ children }: { children: ReactNode }) {
   return (
-    <html>
+    <Ssgoi config={config}>
+      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
+      <SsgoiTransitionBoundary className="min-h-full bg-black">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
+}
+
+// app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
       <body>
-        <Ssgoi config={config}>
-          {/* relative + z-0: the outgoing page is cloned with position:absolute */}
-          <div className="relative z-0">{children}</div>
-        </Ssgoi>
+        {/* Layout shell: positioned ancestor + stacking context for the OUT clone. */}
+        <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
+          <SsgoiProvider>{children}</SsgoiProvider>
+        </main>
       </body>
     </html>
   );
 }
 ```
 
-### 2. Mark your pages
+### 2. Use a React boundary utility
 
 ```tsx
-// app/page.tsx
-export default function HomePage() {
-  return (
-    <main data-ssgoi-transition="/">
-      <h1>Home</h1>
-    </main>
-  );
-}
+// ssgoi-transition-boundary.tsx
+"use client";
 
-// app/post/[id]/page.tsx
-export default function PostPage({ params }) {
+import { type ElementType, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiTransitionBoundary({
+  children,
+  as,
+  className,
+}: {
+  children: ReactNode;
+  as?: ElementType;
+  className?: string;
+}) {
+  const pathname = usePathname();
+  const Component = as ?? "div";
+
   return (
-    <main data-ssgoi-transition={`/post/${params.id}`}>
-      <h1>Post Detail</h1>
-    </main>
+    <Component
+      key={pathname}
+      data-ssgoi-transition={pathname}
+      className={className}
+    >
+      {children}
+    </Component>
   );
 }
 ```
 
-**That's it.** Your pages now transition like a native app.
+Then use it inside `<Ssgoi>`:
+
+```tsx
+<SsgoiTransitionBoundary className="min-h-full bg-black">
+  {children}
+</SsgoiTransitionBoundary>
+```
+
+React Router and TanStack Router use the same component body with their own
+pathname hook.
+
+The utility reads the current pathname internally and sets `key` plus
+`data-ssgoi-transition`. This is a React convenience pattern: SSGOI only needs a
+logical page id that matches config, and the utility uses the current pathname
+as that id. Match dynamic descendants with wildcard config like `/post/*`. Use
+`/docs/**` when the parent path itself should match too. **That's it.** Your
+pages now transition like a native app.
+
+This layout-level utility pattern is for React adapters. In SvelteKit,
+Nuxt/Vue, Solid, and Angular, mark each routed page boundary directly with
+`data-ssgoi-transition`. Use a stable logical id such as `/gallery`; it does not
+have to be the actual route pathname.
+
+Why mark each page directly instead of using one shared boundary? SvelteKit and
+Nuxt render slot/snippet content live, so a single route boundary in a parent
+layout would let the outgoing page wrapper render the _incoming_ page's children
+mid-navigation. Marking each page keeps the outgoing and incoming boundaries
+cleanly separated. React's utility sidesteps this by keying the subtree on the
+pathname.
+
+### Layout shell requirements
+
+The outer element that wraps the SSGOI provider / `<Ssgoi>` is the layout shell.
+Put `relative z-0` on that wrapper, and add `overflow-x-clip` when you use
+horizontal transitions such as `slide` or `drill`.
+
+Those classes are not route marker classes. Keep them off
+`SsgoiTransitionBoundary`; the boundary should only identify routed content with
+`key` and `data-ssgoi-transition`.
+
+| Class             | Why                                                                             |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `relative`        | The OUT page clone uses `position: absolute`, so it needs a positioned ancestor |
+| `z-0`             | Creates a stacking context so the OUT page does not fall behind backgrounds     |
+| `overflow-x-clip` | Prevents horizontal overflow flashing during slide/drill transitions            |
+
+### Framework templates
+
+Use the templates as reference implementations for each router/framework:
+
+- [Next.js](https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs)
+- [React Router](https://github.com/meursyphus/ssgoi/tree/main/templates/react-router)
+- [TanStack Router](https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router)
+- [SvelteKit](https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit)
+- [Nuxt](https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt)
+
+React templates use the pathname boundary utility. SvelteKit and Nuxt mark each
+routed page directly with `data-ssgoi-transition`.
 
 ---
 
@@ -140,13 +226,13 @@ See them all live at [ssgoi.dev](https://ssgoi.dev) or in [llms.txt](https://ssg
 
 ## Packages
 
-| Package          | Framework          |
-| ---------------- | ------------------ |
-| `@ssgoi/react`   | React, Next.js     |
-| `@ssgoi/svelte`  | Svelte, SvelteKit  |
-| `@ssgoi/vue`     | Vue, Nuxt          |
-| `@ssgoi/solid`   | Solid, SolidStart  |
-| `@ssgoi/angular` | Angular            |
+| Package          | Framework                 |
+| ---------------- | ------------------------- |
+| `@ssgoi/react`   | React, Next.js            |
+| `@ssgoi/svelte`  | Svelte, SvelteKit         |
+| `@ssgoi/vue`     | Vue, Nuxt                 |
+| `@ssgoi/solid`   | Solid, SolidStart         |
+| `@ssgoi/angular` | Angular                   |
 | `@ssgoi/core`    | Framework-agnostic engine |
 
 ---

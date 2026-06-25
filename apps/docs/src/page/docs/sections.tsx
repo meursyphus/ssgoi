@@ -133,7 +133,8 @@ export function InstallBody() {
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
           Two steps and the router feels native. The example below is React /
-          Next.js — the shape is identical in every framework.
+          Next.js; other frameworks place the page marker directly on each
+          routed page.
         </p>
 
         <SetupStep
@@ -143,15 +144,19 @@ export function InstallBody() {
             <>
               Add the{" "}
               <code className="font-mono text-neutral-200">&lt;Ssgoi&gt;</code>{" "}
-              provider in your root layout — the only client component you need.
-              Your pages stay server components.
+              provider from your root layout, then put the layout shell classes
+              on the wrapper above it. Keep the layout and pages as server
+              components; only the small provider/boundary files need client
+              hooks.
             </>
           }
-          code={`// app/layout.tsx
+          code={`// app/ssgoi-provider.tsx
 "use client";
 
+import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, fade } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
@@ -160,59 +165,283 @@ const config = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export function SsgoiProvider({ children }: { children: ReactNode }) {
   return (
     <Ssgoi config={config}>
-      <div className="relative z-0 min-h-dvh overflow-x-clip">
+      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
+      <SsgoiTransitionBoundary className="min-h-full bg-black">
         {children}
-      </div>
+      </SsgoiTransitionBoundary>
     </Ssgoi>
+  );
+}
+
+// app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {/* Layout shell: positioned ancestor + stacking context for the OUT clone. */}
+        <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
+          <SsgoiProvider>{children}</SsgoiProvider>
+        </main>
+      </body>
+    </html>
   );
 }`}
         />
 
+        <WhyStructure />
+
         <SetupStep
           n="2"
-          title="Mark your pages"
+          title="Wrap React routed content"
           desc={
             <>
-              Give each page root a{" "}
+              In React adapters, use one pathname-based{" "}
               <code className="font-mono text-neutral-200">
                 data-ssgoi-transition
               </code>{" "}
-              key — that&apos;s the path your config matches against.
+              boundary utility in your layout. This is a React convenience
+              pattern: SSGOI only needs a logical page id, and the utility uses
+              the current pathname as that id. Match descendants with wildcards
+              like <code className="font-mono text-neutral-200">/post/*</code>{" "}
+              or include the parent path with{" "}
+              <code className="font-mono text-neutral-200">/docs/**</code>.
             </>
           }
-          code={`// app/page.tsx
-export default function HomePage() {
-  return <main data-ssgoi-transition="/">…</main>;
+          code={`// ssgoi-transition-boundary.tsx
+"use client";
+
+import { type ElementType, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiTransitionBoundary({
+  children,
+  as,
+  className,
+}: {
+  children: ReactNode;
+  as?: ElementType;
+  className?: string;
+}) {
+  const pathname = usePathname();
+  const Component = as ?? "div";
+
+  return (
+    <Component
+      key={pathname}
+      data-ssgoi-transition={pathname}
+      className={className}
+    >
+      {children}
+    </Component>
+  );
 }
 
-// app/post/[id]/page.tsx
-export default function PostPage({ params }) {
-  return <main data-ssgoi-transition={\`/post/\${params.id}\`}>…</main>;
-}`}
+// app/ssgoi-provider.tsx
+import { Ssgoi } from "@ssgoi/react";
+
+return (
+  <Ssgoi config={config}>
+    <SsgoiTransitionBoundary className="min-h-full bg-black">
+      {children}
+    </SsgoiTransitionBoundary>
+  </Ssgoi>
+);`}
         />
 
-        <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-          That&apos;s the whole integration. Which transition goes where is just
-          config — browse them in{" "}
-          <Link
-            href="/docs/transitions"
-            className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-          >
-            Transitions
-          </Link>
-          , and check the{" "}
-          <Link
-            href="/docs/layout"
-            className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-          >
-            wrapper classes
-          </Link>{" "}
-          if a transition ever looks off.
-        </p>
+        <NonReactBoundary />
       </div>
+
+      <ReferenceTemplates />
+
+      <p className="mt-10 max-w-xl text-sm leading-relaxed text-neutral-500">
+        Which transition goes where is just config — browse them in{" "}
+        <Link
+          href="/docs/transitions"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Transitions
+        </Link>
+        . If a transition ever looks off, the cause is almost always the wrapper
+        — see{" "}
+        <Link
+          href="/docs/layout"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Layout
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/docs/how-it-works"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          How it works
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — why the DOM structure                                            */
+/* -------------------------------------------------------------------------- */
+
+function WhyStructure() {
+  return (
+    <div className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-6">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Why this shape
+      </p>
+      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
+        The wrapper classes aren&apos;t decoration
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        When you navigate, the framework unmounts the leaving page. SSGOI clones
+        it back into the DOM with{" "}
+        <code className="font-mono text-neutral-200">position: absolute</code>{" "}
+        so its exit animation can play <em>over</em> the incoming page. An
+        absolutely-positioned clone needs the right ancestor, or it jumps and
+        flickers — that&apos;s what these three classes on the layout shell are
+        for:
+      </p>
+
+      <ul className="mt-5 divide-y divide-white/[0.05] border-y border-white/[0.05]">
+        {LAYOUT_CLASSES.map(({ cls, why }) => (
+          <li
+            key={cls}
+            className="flex flex-col gap-1.5 py-3 md:flex-row md:items-baseline md:gap-5"
+          >
+            <code className="shrink-0 font-mono text-sm font-semibold text-orange-400">
+              {cls}
+            </code>
+            <span className="text-sm leading-relaxed text-neutral-400">
+              {why}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
+        These belong on the outer layout shell that wraps{" "}
+        <code className="font-mono text-neutral-300">&lt;Ssgoi&gt;</code>, not
+        on the route marker. Full walkthrough in{" "}
+        <Link
+          href="/docs/layout"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Layout
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/docs/how-it-works"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          How it works
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — non-React route boundary                                         */
+/* -------------------------------------------------------------------------- */
+
+function NonReactBoundary() {
+  return (
+    <div className="mt-12 border-t border-white/[0.06] pt-10">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Svelte · Vue · Solid · Angular
+      </p>
+      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
+        Mark each routed page directly
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Outside React, skip the boundary utility and put{" "}
+        <code className="font-mono text-neutral-200">
+          data-ssgoi-transition
+        </code>{" "}
+        right on each routed page. The value is a stable logical page id — it
+        does <em>not</em> have to be the framework&apos;s route pathname; it
+        only has to match the{" "}
+        <code className="font-mono text-neutral-200">from</code>/
+        <code className="font-mono text-neutral-200">to</code>/
+        <code className="font-mono text-neutral-200">paths</code> values in your
+        config.
+      </p>
+
+      <CodeBlock
+        className="mt-5"
+        language="xml"
+        code={`<!-- SvelteKit · src/routes/gallery/+page.svelte -->
+<main data-ssgoi-transition="/gallery">
+  <!-- page content -->
+</main>
+
+<!-- Nuxt / Vue · pages/gallery.vue -->
+<template>
+  <main data-ssgoi-transition="/gallery">
+    <!-- page content -->
+  </main>
+</template>
+
+<!-- Angular · gallery.component.html -->
+<section data-ssgoi-transition="/gallery">
+  <!-- page content -->
+</section>`}
+      />
+
+      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
+        <span className="text-neutral-300">Why not one shared boundary?</span>{" "}
+        SvelteKit and Nuxt render slot/snippet content live, so a single route
+        boundary in a parent layout would let the outgoing page wrapper render
+        the <em>incoming</em> page&apos;s children mid-navigation. Marking each
+        page directly keeps the outgoing and incoming boundaries cleanly
+        separated. (React&apos;s utility sidesteps this by keying the subtree on
+        the pathname.)
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — reference templates                                              */
+/* -------------------------------------------------------------------------- */
+
+function ReferenceTemplates() {
+  return (
+    <div className="mt-12 border-t border-white/[0.06] pt-10">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Copy from a working app
+      </p>
+      <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
+        Reference templates
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Each template is a runnable app wired up the recommended way for its
+        router — provider, layout shell, and route boundaries already in place.
+        Clone one and read the diff, or copy the pieces you need.
+      </p>
+      <RoutersBody />
+      <p className="mt-6 text-sm text-neutral-500">
+        Source lives in the monorepo at{" "}
+        <a
+          href="https://github.com/meursyphus/ssgoi/tree/main/templates"
+          target="_blank"
+          rel="noreferrer"
+          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          meursyphus/ssgoi/templates ↗
+        </a>
+        .
+      </p>
     </div>
   );
 }
@@ -440,12 +669,21 @@ function FlowStep({ n, body }: { n: string; body: string }) {
 const ROUTERS: Array<{
   name: string;
   icon: React.ComponentType<{ className?: string }>;
+  templatePath: string;
 }> = [
-  { name: "Next.js", icon: NextMark },
-  { name: "React Router", icon: ReactRouterMark },
-  { name: "TanStack Router", icon: TanStackRouterMark },
-  { name: "SvelteKit", icon: SvelteKitMark },
-  { name: "Nuxt", icon: NuxtMark },
+  { name: "Next.js", icon: NextMark, templatePath: "nextjs" },
+  {
+    name: "React Router",
+    icon: ReactRouterMark,
+    templatePath: "react-router",
+  },
+  {
+    name: "TanStack Router",
+    icon: TanStackRouterMark,
+    templatePath: "tanstack-router",
+  },
+  { name: "SvelteKit", icon: SvelteKitMark, templatePath: "sveltekit" },
+  { name: "Nuxt", icon: NuxtMark, templatePath: "nuxt" },
 ];
 
 const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
@@ -454,20 +692,30 @@ export function RoutersBody() {
   return (
     <div className="mt-8">
       <div className="grid gap-3 sm:grid-cols-2">
-        {ROUTERS.map(({ name, icon: Icon }) => (
-          <div
+        {ROUTERS.map(({ name, icon: Icon, templatePath }) => (
+          <a
             key={name}
+            href={`${TEMPLATES_URL}/${templatePath}`}
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
           >
             <Icon className="h-8 w-8 shrink-0" />
-            <span className="text-base font-semibold tracking-tight text-neutral-100">
-              {name}
+            <span className="min-w-0 flex-1">
+              <span className="block text-base font-semibold tracking-tight text-neutral-100">
+                {name}
+              </span>
+              <span className="mt-1 block font-mono text-xs text-neutral-500">
+                templates/{templatePath} ↗
+              </span>
             </span>
-          </div>
+          </a>
         ))}
       </div>
       <p className="mt-6 text-sm text-neutral-400">
-        Starter examples for each router are on GitHub —{" "}
+        These examples show the recommended framework-specific setup. React
+        templates use the pathname boundary utility; SvelteKit and Nuxt mark
+        routed pages directly. Full templates index:{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

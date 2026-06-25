@@ -57,10 +57,7 @@ export default function GalleryPage({
     return () => observer.disconnect();
   }, [categories.length]);
   return (
-    <div
-      data-ssgoi-transition="/demo/airbnb-photo-tour"
-      className="block h-full overflow-y-auto bg-white text-neutral-900"
-    >
+    <div className="block h-full overflow-y-auto bg-white text-neutral-900">
       <GalleryHeader title={title} />
       <div className="mx-auto max-w-[1200px]">
         <CategoryStrip

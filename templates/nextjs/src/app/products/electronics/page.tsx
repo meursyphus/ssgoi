@@ -3,5 +3,5 @@ import { products } from "@/components/products/mock-data";
 
 export default function ElectronicsPage() {
   const filtered = products.filter((p) => p.category === "Electronics");
-  return <ProductGrid products={filtered} category="electronics" />;
+  return <ProductGrid products={filtered} />;
 }

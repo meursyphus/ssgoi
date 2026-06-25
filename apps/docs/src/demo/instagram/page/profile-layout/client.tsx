@@ -3,6 +3,7 @@
 import { useEffect, useMemo, type ReactNode } from "react";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { slide } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
 import { useProfile } from "@/demo/instagram/state/profile";
 import { ProfileHeader } from "../profile-shell/header";
 import { ProfileHeaderSkeleton } from "../profile-shell/header-skeleton";
@@ -39,8 +40,8 @@ export function InstagramProfileLayoutClient({
   }, [profile.actions]);
   const me = profile.me.data;
   return (
-    <div
-      data-ssgoi-transition={base}
+    <SsgoiTransitionBoundary
+      id={base}
       className="relative block min-h-full w-full bg-white text-neutral-900"
     >
       <div className="sticky top-0 z-30 bg-white">
@@ -52,11 +53,15 @@ export function InstagramProfileLayoutClient({
       {me ? <ProfileHeader me={me} /> : <ProfileHeaderSkeleton />}
       <ProfileTabs id={id} />
       <Ssgoi config={innerConfig}>
-        <div className="relative z-0">{children}</div>
+        <div className="relative z-0 bg-white">
+          <SsgoiTransitionBoundary className="min-h-full bg-white">
+            {children}
+          </SsgoiTransitionBoundary>
+        </div>
       </Ssgoi>
       <div className="sticky bottom-0 z-30 bg-white">
         <ProfileBottomBar avatar={me?.avatar} />
       </div>
-    </div>
+    </SsgoiTransitionBoundary>
   );
 }

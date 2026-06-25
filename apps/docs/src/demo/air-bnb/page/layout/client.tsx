@@ -13,14 +13,14 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     zoom({
-      paths: [BASE, `${BASE}/listings/*`],
+      paths: [BASE, `${BASE}/listings/:id`],
       type: "blur",
       variant: "fade",
     }),
     sheet({
       type: "static",
-      enter: `${BASE}/listings/detail/checkout`,
-      exit: `${BASE}/listings/detail`,
+      enter: `${BASE}/listings/:id/checkout/*`,
+      exit: `${BASE}/listings/:id`,
     }),
   ],
 };

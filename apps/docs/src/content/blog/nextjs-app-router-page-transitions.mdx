@@ -6,7 +6,7 @@ author: "MeurSyphus"
 tags: ["nextjs", "react", "page transitions", "app router"]
 faq:
   - question: "Does this work with the Next.js App Router and Server Components?"
-    answer: "Yes. SSGOI wraps your app once in the root layout (a Client Component boundary) and marks pages with a data attribute. Your pages can stay Server Components; only the Ssgoi wrapper needs 'use client'."
+    answer: "Yes. Keep app/layout.tsx and pages as Server Components. Put SSGOI in a small Client Component provider, and let the boundary utility mark routed content with a data attribute."
   - question: "Do page transitions work in Safari and Firefox?"
     answer: "Yes. SSGOI is built on the Web Animations API, so transitions run the same way across Chrome, Safari, Firefox, and Edge — unlike the View Transition API, whose cross-document support is still limited outside Chromium."
   - question: "Will transitions break server-side rendering or SEO?"
@@ -29,14 +29,16 @@ Install the package:
 npm install @ssgoi/react
 ```
 
-Then wrap your app in the root layout. This is the only Client Component you need to add — your pages can remain Server Components.
+Then wrap your app from the root layout. Your layout and pages can remain Server Components; the SSGOI provider and pathname boundary utility are the small Client Components.
 
 ```tsx
-// app/layout.tsx
+// app/ssgoi-provider.tsx
 "use client";
 
+import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, fade } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
@@ -47,51 +49,81 @@ const config = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SsgoiProvider({ children }: { children: ReactNode }) {
+  return (
+    <Ssgoi config={config}>
+      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
+      <SsgoiTransitionBoundary className="min-h-full bg-black">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
+}
+
+// app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Ssgoi config={config}>
-          {/* relative + z-0: the outgoing page is cloned with position:absolute */}
-          <div className="relative z-0 min-h-dvh overflow-x-clip">
-            {children}
-          </div>
-        </Ssgoi>
+        {/* Layout shell: positioned ancestor + stacking context for the OUT clone. */}
+        <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
+          <SsgoiProvider>{children}</SsgoiProvider>
+        </main>
       </body>
     </html>
   );
 }
 ```
 
-The wrapper needs `relative z-0` (and `overflow-x-clip` for horizontal transitions) because SSGOI clones the leaving page with `position: absolute` so it can animate out while the new page mounts in.
+The wrapper above `<Ssgoi>` needs `relative z-0` (and `overflow-x-clip` for horizontal transitions) because SSGOI clones the leaving page with `position: absolute` so it can animate out while the new page mounts in. Keep those layout classes on that outer wrapper, not on the route boundary utility.
 
-## Step 2 — Mark your pages
+## Step 2 — Wrap routed content
 
-Add a `data-ssgoi-transition` attribute to each page's root element. The value is the path key your config matches against.
+In React/Next.js, use one router-specific `SsgoiTransitionBoundary` utility in your layout. It reads the current pathname internally and sets the path key your config matches against.
 
 ```tsx
-// app/page.tsx
-export default function HomePage() {
-  return (
-    <main data-ssgoi-transition="/">
-      <h1>Home</h1>
-    </main>
-  );
-}
+// ssgoi-transition-boundary.tsx
+"use client";
 
-// app/post/[id]/page.tsx
-export default function PostPage({ params }: { params: { id: string } }) {
+import { type ElementType, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiTransitionBoundary({
+  children,
+  as,
+  className,
+}: {
+  children: ReactNode;
+  as?: ElementType;
+  className?: string;
+}) {
+  const pathname = usePathname();
+  const Component = as ?? "div";
+
   return (
-    <main data-ssgoi-transition={`/post/${params.id}`}>
-      <h1>Post Detail</h1>
-    </main>
+    <Component
+      key={pathname}
+      data-ssgoi-transition={pathname}
+      className={className}
+    >
+      {children}
+    </Component>
   );
 }
 ```
+
+Use it inside `<Ssgoi>`:
+
+```tsx
+<SsgoiTransitionBoundary className="min-h-full bg-black">
+  {children}
+</SsgoiTransitionBoundary>
+```
+
+Dynamic routes keep their real pathnames, such as `/post/123`; use wildcard config like `/post/*` to match them. Use `/docs/**` when the parent path itself should match too.
 
 That's it. Navigations now drill in and ease back out like a native app.
 
@@ -99,13 +131,13 @@ That's it. Navigations now drill in and ease back out like a native app.
 
 Each transition is a factory you drop into `config.transitions`:
 
-| Transition | Feel | Config shape |
-| ---------- | ---- | ------------ |
-| `fade` | calm cross-fade, safe default | `fade({ paths })` |
-| `drill` | iOS list → detail | `drill({ enter, exit })` |
-| `hero` | shared element morph | `hero({ paths })` |
-| `sheet` | bottom sheet | `sheet({ enter, exit })` |
-| `slide` | horizontal tabs | `slide({ paths })` |
+| Transition | Feel                          | Config shape             |
+| ---------- | ----------------------------- | ------------------------ |
+| `fade`     | calm cross-fade, safe default | `fade({ paths })`        |
+| `drill`    | iOS list → detail             | `drill({ enter, exit })` |
+| `hero`     | shared element morph          | `hero({ paths })`        |
+| `sheet`    | bottom sheet                  | `sheet({ enter, exit })` |
+| `slide`    | horizontal tabs               | `slide({ paths })`       |
 
 See all the transitions live on the [demos](/), or read the [docs](/docs).
 

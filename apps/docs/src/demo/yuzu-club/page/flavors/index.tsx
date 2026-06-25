@@ -61,10 +61,7 @@ const FLAVORS: Flavor[] = [
 ];
 export default function FlavorsPage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/yuzu-club/flavors"
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative h-full w-full overflow-y-auto bg-[#8ed1a4]">
         <span
           aria-hidden

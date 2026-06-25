@@ -65,6 +65,22 @@ nuxt/
 └── public/demo/              # Static demo images
 ```
 
+## Route Boundaries
+
+Nuxt pages mark their own transition boundary with `data-ssgoi-transition`.
+Use a stable logical id that matches your config; it does not have to be the
+actual route pathname.
+Do not use a single slot-based layout boundary here; the outgoing slot can
+render the incoming page content.
+
+```vue
+<template>
+  <div data-ssgoi-transition="/posts">
+    <!-- page content -->
+  </div>
+</template>
+```
+
 ## Transitions
 
 ### Drill Transition (Posts)

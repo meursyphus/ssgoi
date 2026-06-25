@@ -2,7 +2,6 @@
 
 import { Check } from "lucide-react";
 import { useCheckout } from "@/demo/air-bnb/state/checkout";
-import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
 import { useCurrentListing } from "./use-current-listing";
 const METHOD_LABEL = {
@@ -16,7 +15,7 @@ export function ConfirmStep() {
     method: state.selectedMethod,
   }));
   return (
-    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.confirm}>
+    <div>
       <CheckoutTitle step="confirm" />
       <div className="px-5 pt-5">
         <p className="text-[13px] text-neutral-700">

@@ -19,7 +19,10 @@ export function SilentRoomLayoutClient({ children }: { children: ReactNode }) {
   return (
     <DemoShell>
       <div className="relative h-dvh w-full overflow-hidden bg-[#0c0c0c] text-[#f5f1ea]">
-        <SsgoiWithHost config={config}>
+        <SsgoiWithHost
+          config={config}
+          boundaryClassName="h-full min-h-full bg-[#0c0c0c]"
+        >
           <main className="relative h-full w-full">{children}</main>
         </SsgoiWithHost>
         <GalleryChrome />

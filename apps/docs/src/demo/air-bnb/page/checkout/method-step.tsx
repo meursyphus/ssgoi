@@ -5,7 +5,6 @@ import {
   useCheckout,
   type CheckoutMethod,
 } from "@/demo/air-bnb/state/checkout";
-import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
 type Option = {
   key: CheckoutMethod;
@@ -72,7 +71,7 @@ export function MethodStep() {
     actions: state.actions,
   }));
   return (
-    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.method}>
+    <div>
       <CheckoutTitle step="method" />
       <div className="px-5 pt-5">
         <p className="text-[13px] text-neutral-700">
