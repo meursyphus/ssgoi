@@ -149,6 +149,13 @@ Nuxt/Vue, Solid, and Angular, mark each routed page boundary directly with
 `data-ssgoi-transition`. Use a stable logical id such as `/gallery`; it does not
 have to be the actual route pathname.
 
+Why mark each page directly instead of using one shared boundary? SvelteKit and
+Nuxt render slot/snippet content live, so a single route boundary in a parent
+layout would let the outgoing page wrapper render the _incoming_ page's children
+mid-navigation. Marking each page keeps the outgoing and incoming boundaries
+cleanly separated. React's utility sidesteps this by keying the subtree on the
+pathname.
+
 ### Layout shell requirements
 
 The outer element that wraps the SSGOI provider / `<Ssgoi>` is the layout shell.

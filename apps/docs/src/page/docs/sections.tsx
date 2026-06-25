@@ -194,6 +194,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }`}
         />
 
+        <WhyStructure />
+
         <SetupStep
           n="2"
           title="Wrap React routed content"
@@ -252,31 +254,194 @@ return (
 );`}
         />
 
-        <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-          For SvelteKit, Nuxt/Vue, Solid, and Angular, mark each routed page
-          boundary directly with{" "}
-          <code className="font-mono text-neutral-300">
-            data-ssgoi-transition
-          </code>{" "}
-          using a stable logical id. It does not have to be the route pathname;
-          it only has to match your config. Which transition goes where is just
-          config — browse them in{" "}
-          <Link
-            href="/docs/transitions"
-            className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-          >
-            Transitions
-          </Link>
-          , and check the{" "}
-          <Link
-            href="/docs/layout"
-            className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-          >
-            wrapper classes
-          </Link>{" "}
-          if a transition ever looks off.
-        </p>
+        <NonReactBoundary />
       </div>
+
+      <ReferenceTemplates />
+
+      <p className="mt-10 max-w-xl text-sm leading-relaxed text-neutral-500">
+        Which transition goes where is just config — browse them in{" "}
+        <Link
+          href="/docs/transitions"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Transitions
+        </Link>
+        . If a transition ever looks off, the cause is almost always the wrapper
+        — see{" "}
+        <Link
+          href="/docs/layout"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Layout
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/docs/how-it-works"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          How it works
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — why the DOM structure                                            */
+/* -------------------------------------------------------------------------- */
+
+function WhyStructure() {
+  return (
+    <div className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-6">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Why this shape
+      </p>
+      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
+        The wrapper classes aren&apos;t decoration
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        When you navigate, the framework unmounts the leaving page. SSGOI clones
+        it back into the DOM with{" "}
+        <code className="font-mono text-neutral-200">position: absolute</code>{" "}
+        so its exit animation can play <em>over</em> the incoming page. An
+        absolutely-positioned clone needs the right ancestor, or it jumps and
+        flickers — that&apos;s what these three classes on the layout shell are
+        for:
+      </p>
+
+      <ul className="mt-5 divide-y divide-white/[0.05] border-y border-white/[0.05]">
+        {LAYOUT_CLASSES.map(({ cls, why }) => (
+          <li
+            key={cls}
+            className="flex flex-col gap-1.5 py-3 md:flex-row md:items-baseline md:gap-5"
+          >
+            <code className="shrink-0 font-mono text-sm font-semibold text-orange-400">
+              {cls}
+            </code>
+            <span className="text-sm leading-relaxed text-neutral-400">
+              {why}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
+        These belong on the outer layout shell that wraps{" "}
+        <code className="font-mono text-neutral-300">&lt;Ssgoi&gt;</code>, not
+        on the route marker. Full walkthrough in{" "}
+        <Link
+          href="/docs/layout"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Layout
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/docs/how-it-works"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          How it works
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — non-React route boundary                                         */
+/* -------------------------------------------------------------------------- */
+
+function NonReactBoundary() {
+  return (
+    <div className="mt-12 border-t border-white/[0.06] pt-10">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Svelte · Vue · Solid · Angular
+      </p>
+      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
+        Mark each routed page directly
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Outside React, skip the boundary utility and put{" "}
+        <code className="font-mono text-neutral-200">
+          data-ssgoi-transition
+        </code>{" "}
+        right on each routed page. The value is a stable logical page id — it
+        does <em>not</em> have to be the framework&apos;s route pathname; it
+        only has to match the{" "}
+        <code className="font-mono text-neutral-200">from</code>/
+        <code className="font-mono text-neutral-200">to</code>/
+        <code className="font-mono text-neutral-200">paths</code> values in your
+        config.
+      </p>
+
+      <CodeBlock
+        className="mt-5"
+        language="xml"
+        code={`<!-- SvelteKit · src/routes/gallery/+page.svelte -->
+<main data-ssgoi-transition="/gallery">
+  <!-- page content -->
+</main>
+
+<!-- Nuxt / Vue · pages/gallery.vue -->
+<template>
+  <main data-ssgoi-transition="/gallery">
+    <!-- page content -->
+  </main>
+</template>
+
+<!-- Angular · gallery.component.html -->
+<section data-ssgoi-transition="/gallery">
+  <!-- page content -->
+</section>`}
+      />
+
+      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
+        <span className="text-neutral-300">Why not one shared boundary?</span>{" "}
+        SvelteKit and Nuxt render slot/snippet content live, so a single route
+        boundary in a parent layout would let the outgoing page wrapper render
+        the <em>incoming</em> page&apos;s children mid-navigation. Marking each
+        page directly keeps the outgoing and incoming boundaries cleanly
+        separated. (React&apos;s utility sidesteps this by keying the subtree on
+        the pathname.)
+      </p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Install — reference templates                                              */
+/* -------------------------------------------------------------------------- */
+
+function ReferenceTemplates() {
+  return (
+    <div className="mt-12 border-t border-white/[0.06] pt-10">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
+        Copy from a working app
+      </p>
+      <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
+        Reference templates
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Each template is a runnable app wired up the recommended way for its
+        router — provider, layout shell, and route boundaries already in place.
+        Clone one and read the diff, or copy the pieces you need.
+      </p>
+      <RoutersBody />
+      <p className="mt-6 text-sm text-neutral-500">
+        Source lives in the monorepo at{" "}
+        <a
+          href="https://github.com/meursyphus/ssgoi/tree/main/templates"
+          target="_blank"
+          rel="noreferrer"
+          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          meursyphus/ssgoi/templates ↗
+        </a>
+        .
+      </p>
     </div>
   );
 }
