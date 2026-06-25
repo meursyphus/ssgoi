@@ -373,4 +373,42 @@ describe("createContextManager", () => {
 
     expect(documentElement.scrollTop).toBe(0);
   });
+
+  it("keys scroll off resolvePath so aliased/rewritten routes share one position", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+      // Mirror a config `middleware` that aliases a mobile-only route to its
+      // canonical id (e.g. `/m-p/[id]` → `/p/[id]`).
+      resolvePath: (path) => path.replace(/^\/m-p\//, "/p/"),
+    });
+    const mobilePost = createFakeElement({ parentElement: body });
+    const away = createFakeElement({ parentElement: body });
+    const canonicalPost = createFakeElement({ parentElement: body });
+
+    // Scroll the page while on the ALIAS path.
+    manager.initializeContext(mobilePost, "/m-p/123");
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 540;
+    emitWindowScroll();
+
+    // Stored under the RESOLVED key — visible through either spelling.
+    expect(manager.getScrollPosition("/m-p/123")).toEqual({ x: 0, y: 540 });
+    expect(manager.getScrollPosition("/p/123")).toEqual({ x: 0, y: 540 });
+
+    // Outgoing offset leaving the alias keeps the prior scroll (no top-snap):
+    // the regression was this resolving to 0 because the lookup key missed.
+    expect(manager.calculateScrollOffset("/m-p/123", "/external")).toEqual({
+      x: 0,
+      y: 540,
+    });
+
+    // Return via the CANONICAL path — scroll restores from the shared key.
+    manager.initializeContext(away, "/external");
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(0);
+
+    manager.initializeContext(canonicalPost, "/p/123");
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(540);
+  });
 });
