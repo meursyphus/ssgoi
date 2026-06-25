@@ -17,10 +17,7 @@ export default function WatchPage({
   }));
   song.actions.init(initialData);
   return (
-    <div
-      data-ssgoi-transition="/demo/youtube-music-web/watch"
-      className="h-full overflow-y-auto bg-gradient-to-b from-[#161616] via-[#0a0a0a] to-[#030303] text-white"
-    >
+    <div className="h-full overflow-y-auto bg-gradient-to-b from-[#161616] via-[#0a0a0a] to-[#030303] text-white">
       <div className="mx-auto flex max-w-[1300px] flex-col px-4 pb-12 pt-4 lg:px-8">
         <TabBar />
         <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">

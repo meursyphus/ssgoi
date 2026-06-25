@@ -3,11 +3,12 @@
 import { useEffect, useMemo, type ReactNode } from "react";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { axis } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { useCheckout } from "@/demo/air-bnb/state/checkout";
 import { CheckoutHeader } from "./header";
 import { CheckoutBottomBar } from "./bottom-bar";
-import { CHECKOUT_STEP_ORDER, CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
+import { CHECKOUT_STEP_ORDER, getCheckoutStepHref } from "./steps";
 import { useShowcaseHost } from "@/lib/components/demo-shell";
 export default function CheckoutLayoutClient({
   initialData,
@@ -31,29 +32,28 @@ export default function CheckoutLayoutClient({
   const config: SsgoiConfig = useMemo(
     () => ({
       preserveScroll: {
-        key: `detail/checkout`,
+        key: `${initialData.id}/checkout`,
       },
       transitions: [
         axis({
-          paths: CHECKOUT_STEP_ORDER.map(
-            (step) => CHECKOUT_STEP_TRANSITION_IDS[step],
+          paths: CHECKOUT_STEP_ORDER.map((step) =>
+            getCheckoutStepHref(initialData.id, step),
           ),
           type: "x",
         }),
       ],
     }),
-    [],
+    [initialData.id],
   );
   const host = useShowcaseHost();
   return (
-    <div
-      data-ssgoi-transition={`/demo/air-bnb/listings/detail/checkout`}
-      className="relative flex min-h-full w-full flex-col bg-white"
-    >
+    <div className="relative flex min-h-full w-full flex-col bg-white">
       <CheckoutHeader />
       <div className="relative z-0 flex-1 pb-3">
         <Ssgoi config={config} host={host}>
-          {children}
+          <SsgoiTransitionBoundary className="min-h-full bg-white">
+            {children}
+          </SsgoiTransitionBoundary>
         </Ssgoi>
       </div>
       <CheckoutBottomBar />

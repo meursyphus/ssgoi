@@ -19,7 +19,10 @@ export function HoneydropLayoutClient({ children }: { children: ReactNode }) {
   return (
     <DemoShell>
       <div className="relative h-dvh w-full overflow-hidden bg-black text-white">
-        <SsgoiWithHost config={config}>
+        <SsgoiWithHost
+          config={config}
+          boundaryClassName="h-full min-h-full bg-black"
+        >
           <main className="relative h-full w-full">{children}</main>
         </SsgoiWithHost>
         {/* fixed chrome — outside Ssgoi so it doesn't rotate with the page */}

@@ -6,7 +6,6 @@ export default function FoundationsPage() {
   return (
     <CoursePage
       data={{
-        routeId: "/demo/lumen",
         eyebrow: "Documentary",
         title: "Foundations",
         overview:

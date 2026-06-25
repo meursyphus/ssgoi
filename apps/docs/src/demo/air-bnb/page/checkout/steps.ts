@@ -1,11 +1,5 @@
 import type { CheckoutStep } from "@/demo/air-bnb/state/checkout";
 
-export const CHECKOUT_STEP_TRANSITION_IDS: Record<CheckoutStep, string> = {
-  review: "/checkout/review",
-  method: "/checkout/method",
-  confirm: "/checkout/confirm",
-};
-
 export const CHECKOUT_STEP_ORDER: CheckoutStep[] = [
   "review",
   "method",

@@ -17,10 +17,7 @@ const STATS = [
 ];
 export default function HomePage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/yuzu-club"
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative h-full w-full overflow-y-auto bg-[#ffd2a4]">
         {/* floating shapes */}
         <span

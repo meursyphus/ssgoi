@@ -13,17 +13,11 @@ export default function InboxPage() {
     mail.actions.loadMails();
   }, [mail.actions]);
 
-  // Two siblings inside the mobile-frame scroll container:
-  //  1. data-ssgoi-transition wrapper — the transition target (TopBar + list).
-  //  2. The FAB row — sticky to the bottom of the scroll container, but
-  //     *outside* the transition boundary so the sheet/scale animation doesn't drag
-  //     it along. Same approach as gamja-market's FloatingBottom.
+  // The FAB row stays outside the scrolled content block so the compose sheet
+  // does not drag it along. Same approach as gamja-market's FloatingBottom.
   return (
     <>
-      <div
-        data-ssgoi-transition="/demo/material-mail"
-        className="flex min-h-full flex-col bg-[#FAFAFE]"
-      >
+      <div className="flex min-h-full flex-col bg-[#FAFAFE]">
         <TopBar />
         <div className="flex-1 pb-4">
           <InboxList />

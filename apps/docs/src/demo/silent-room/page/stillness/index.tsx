@@ -6,7 +6,6 @@ export default function StillnessPage() {
   return (
     <RoomShell
       data={{
-        routeId: "/demo/silent-room",
         index: "I",
         ordinal: "01",
         title: "Stillness",

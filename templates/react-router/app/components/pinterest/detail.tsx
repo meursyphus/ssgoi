@@ -8,7 +8,7 @@ export default function PinterestDetail({ pinId }: PinterestDetailProps) {
   const item = getPinterestItem(pinId);
   if (!item) {
     return (
-      <div data-ssgoi-transition={`/pinterest/${pinId}`}>
+      <div>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Pin not found</p>
         </div>
@@ -16,7 +16,7 @@ export default function PinterestDetail({ pinId }: PinterestDetailProps) {
     );
   }
   return (
-    <div data-ssgoi-transition={`/pinterest/${pinId}`}>
+    <div>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">

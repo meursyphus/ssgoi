@@ -21,5 +21,9 @@ const config: SsgoiConfig = {
 };
 
 export function InstagramLayoutClient({ children }: { children: ReactNode }) {
-  return <MobileShowcaseShell config={config}>{children}</MobileShowcaseShell>;
+  return (
+    <MobileShowcaseShell config={config} withTransitionBoundary={false}>
+      {children}
+    </MobileShowcaseShell>
+  );
 }

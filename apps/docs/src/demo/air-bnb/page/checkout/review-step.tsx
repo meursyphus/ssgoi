@@ -1,12 +1,11 @@
 "use client";
 
-import { CHECKOUT_STEP_TRANSITION_IDS } from "./steps";
 import { CheckoutTitle } from "./title";
 import { useCurrentListing } from "./use-current-listing";
 export function ReviewStep() {
   const detail = useCurrentListing();
   return (
-    <div data-ssgoi-transition={CHECKOUT_STEP_TRANSITION_IDS.review}>
+    <div>
       <CheckoutTitle step="review" />
       <div className="px-5 pt-5">
         <div className="rounded-2xl border border-neutral-200 p-3">

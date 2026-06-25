@@ -19,7 +19,10 @@ export function NoraHaleLayoutClient({ children }: { children: ReactNode }) {
     <DemoShell>
       <div className="relative h-dvh w-full overflow-hidden bg-[#f4ecdd] text-[#1a1a1a]">
         <SiteHeader />
-        <SsgoiWithHost config={config}>
+        <SsgoiWithHost
+          config={config}
+          boundaryClassName="h-full min-h-full bg-[#f4ecdd]"
+        >
           <main className="relative h-full w-full">{children}</main>
         </SsgoiWithHost>
       </div>

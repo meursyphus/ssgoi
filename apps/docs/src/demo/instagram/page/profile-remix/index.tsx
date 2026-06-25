@@ -1,11 +1,8 @@
 "use client";
 
-export default function ProfileRemixPage({ id }: { id: string }) {
+export default function ProfileRemixPage() {
   return (
-    <div
-      data-ssgoi-transition={`/demo/instagram/profile/${id}/remix`}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen">
       <div className="flex min-h-[400px] flex-col items-center justify-center px-10 py-16 text-center">
         <div className="grid h-16 w-16 place-items-center rounded-full border-2 border-neutral-900">
           <svg

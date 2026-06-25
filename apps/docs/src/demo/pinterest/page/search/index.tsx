@@ -14,10 +14,7 @@ export default function SearchPage() {
     cat.actions.loadCategories();
   }, [cat.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/pinterest/search"
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <SearchInput />
       <div className="flex-1 pb-6">
         <HeroBanner />

@@ -19,10 +19,7 @@ export default function HomePage() {
     order.actions.loadOrders();
   }, [product.actions, order.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/gamja-market"
-      className="flex min-h-full flex-col bg-[#FAF8F6]"
-    >
+    <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <HomeHeader />
       <SectionTitle />
       <div className="flex-1">

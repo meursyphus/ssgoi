@@ -12,10 +12,7 @@ export default function OrdersPage() {
     order.actions.loadOrders();
   }, [order.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/gamja-market/orders"
-      className="flex min-h-full flex-col bg-[#FAF8F6]"
-    >
+    <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <OrdersHeader />
       <div className="flex-1">
         <OrdersList />

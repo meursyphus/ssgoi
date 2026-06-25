@@ -17,10 +17,7 @@ export default function PhotoDetailPage({
   }));
   photo.actions.initDetail(initialData);
   return (
-    <div
-      data-ssgoi-transition={`/demo/airbnb-photo-tour/photos/${initialData.id}`}
-      className="relative block h-screen bg-white"
-    >
+    <div className="relative block h-screen bg-white">
       <DetailHeader
         categoryLabel={initialData.categoryLabel}
         indexInCategory={initialData.indexInCategory}

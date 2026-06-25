@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SSGOI + Next.js Template
+
+This template demonstrates SSGOI page transitions with the Next.js App Router.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to view the demo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Drill Transition**: Posts list-to-detail navigation
+- **Slide Transition**: Product category tabs with nested `Ssgoi`
+- **Zoom Expand Transition**: Gallery grid-to-detail shared image animation
+- **Zoom Static Transition**: Profile feed-to-detail shared image animation
+- **Scroll Preservation**: Keeps scroll state where configured
 
-## Learn More
+## Integration
 
-To learn more about Next.js, take a look at the following resources:
+The main provider lives in `src/components/demo-layout.tsx`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```tsx
+import { Ssgoi } from "@ssgoi/react";
+import { drill, zoom } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+const config = {
+  preserveScroll: { exclude: ["/posts/*"] },
+  transitions: [
+    drill({ enter: "/posts/*", exit: "/posts" }),
+    zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
+    zoom({ paths: ["/profile", "/profile/*"], type: "static" }),
+  ],
+};
 
-## Deploy on Vercel
+export default function DemoLayout({ children }) {
+  return (
+    <Ssgoi config={config}>
+      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
+stay as real pathnames and are matched by wildcard patterns in config. Use
+`/posts/*` for descendants and `/posts/**` when the parent path should match
+too.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```tsx
+export default function PostsPage() {
+  return <main>{/* Page content */}</main>;
+}
+```
+
+## Build
+
+```bash
+pnpm lint
+pnpm build
+```

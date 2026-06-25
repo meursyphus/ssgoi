@@ -103,10 +103,7 @@ export default async function BlogPostPage({
   ];
 
   return (
-    <main
-      data-ssgoi-transition={`/blog/${slug}`}
-      className="relative min-h-dvh bg-black"
-    >
+    <main className="relative min-h-dvh bg-black">
       <JsonLd data={schemas} />
       <div className="mx-auto max-w-3xl px-6 pb-24 pt-6">
         <Link

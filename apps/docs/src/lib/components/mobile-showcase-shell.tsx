@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { StateProvider } from "@/lib/state";
 import { MobileFrame } from "@/lib/components/mobile-frame";
 import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
+import { cn } from "@/lib/utils";
 
 /**
  * 모바일 쇼케이스용 셸. host/bridge/dock은 위쪽(`DocsSsgoiProvider` + `/demo/layout.tsx`)
@@ -18,6 +19,7 @@ export function MobileShowcaseShell({
   children,
   contentClassName,
   bottomSlot,
+  withTransitionBoundary = true,
 }: {
   config: SsgoiConfig;
   children: ReactNode;
@@ -31,6 +33,11 @@ export function MobileShowcaseShell({
    * page transition 영향을 받지 말아야 하는 요소를 넣는다.
    */
   bottomSlot?: ReactNode;
+  /**
+   * Most mobile demos can use the shared pathname boundary. Nested demos can
+   * opt out and place their boundary on the exact routed shell instead.
+   */
+  withTransitionBoundary?: boolean;
 }) {
   return (
     <DemoShell>
@@ -40,7 +47,16 @@ export function MobileShowcaseShell({
             contentClassName={contentClassName}
             bottomSlot={bottomSlot}
           >
-            <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+            <SsgoiWithHost
+              config={config}
+              withTransitionBoundary={withTransitionBoundary}
+              boundaryClassName={cn(
+                "h-full min-h-full bg-black",
+                contentClassName,
+              )}
+            >
+              {children}
+            </SsgoiWithHost>
           </MobileFrame>
           <Toaster position="top-center" richColors />
         </OverlayProvider>

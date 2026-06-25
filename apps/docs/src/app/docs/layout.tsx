@@ -4,7 +4,7 @@ import { DocsSidebar, DocsMobileNav } from "@/page/docs/sidebar";
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
-    <div data-ssgoi-transition="/docs" className="relative min-h-dvh bg-black">
+    <div className="relative min-h-dvh bg-black">
       <SiteNav active="docs" />
       <DocsMobileNav />
       <div className="mx-auto flex w-full max-w-6xl gap-10 px-6 pt-8 lg:gap-14 lg:pt-12">

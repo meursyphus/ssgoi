@@ -20,10 +20,7 @@ export default function ListingDetailPage({
   listing.actions.init(initialData);
   const detail = listing.current ?? initialData;
   return (
-    <div
-      data-ssgoi-transition={`/demo/air-bnb/listings/detail`}
-      className="relative block min-h-full w-full bg-white"
-    >
+    <div className="relative block min-h-full w-full bg-white">
       <DetailHero detail={detail} />
       <DetailHeader />
       <div className="relative -mt-6 rounded-t-3xl bg-white px-5 pt-5 pb-6">

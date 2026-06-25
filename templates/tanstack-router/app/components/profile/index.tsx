@@ -3,7 +3,7 @@ import { profile } from "./mock-data";
 import { Feed } from "./feed";
 export default function ProfileDemo() {
   return (
-    <div data-ssgoi-transition="/profile">
+    <div>
       <div className="bg-[#121212]">
         {/* Profile Header */}
         <div className="relative">

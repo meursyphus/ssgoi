@@ -4,10 +4,7 @@ import { HeroCard } from "./hero-card";
 import { ToolGrid } from "./tool-grid";
 export default function CreatePage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/google-photos/create"
-      className="block min-h-full bg-white"
-    >
+    <div className="block min-h-full bg-white">
       <div className="space-y-6 px-4 py-4">
         <HeroCard />
         <section>

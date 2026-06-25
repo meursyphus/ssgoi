@@ -15,10 +15,7 @@ export default function FeedDetailPage({
   }));
   pinState.actions.init(initialData);
   return (
-    <div
-      data-ssgoi-transition={`/demo/pinterest/feed/${initialData.id}`}
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <div className="">
         <BackButton />
         <HeroImage pin={initialData} />
