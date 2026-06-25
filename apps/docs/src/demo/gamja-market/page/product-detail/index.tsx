@@ -20,10 +20,7 @@ export default function ProductDetailPage({
   }));
   product.actions.init(initialData);
   return (
-    <div
-      data-ssgoi-transition={`/demo/gamja-market/products/${initialData.id}`}
-      className="flex min-h-full flex-col bg-[#FAF8F6]"
-    >
+    <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <DetailHeader />
       <ProductGallery images={initialData.images} alt={initialData.name} />
       <ProductInfo product={initialData} />

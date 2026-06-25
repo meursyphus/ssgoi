@@ -5,10 +5,7 @@ export function RoomShell({ data }: { data: RoomData }) {
   const alignClass = data.align === "left" ? "items-start" : "items-end";
   const textAlignClass = data.align === "left" ? "text-left" : "text-right";
   return (
-    <div
-      data-ssgoi-transition={data.routeId}
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative h-full w-full overflow-hidden">
         <img
           src={data.bg}

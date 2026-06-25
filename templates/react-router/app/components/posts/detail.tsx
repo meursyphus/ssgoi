@@ -9,7 +9,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const relatedPosts = getRelatedPosts(postId, 3);
   if (!post) {
     return (
-      <div data-ssgoi-transition={`/posts/${postId}`}>
+      <div>
         <div className="min-h-screen bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
@@ -17,7 +17,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
     );
   }
   return (
-    <div data-ssgoi-transition={`/posts/${postId}`}>
+    <div>
       <div className="min-h-screen bg-[#121212]">
         {/* Back button */}
         <div className="px-4 py-4">

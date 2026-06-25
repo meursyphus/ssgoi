@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { usePost } from "@/demo/instagram/state/post";
 import { GridSkeleton } from "./grid-skeleton";
 import { GridItem } from "./grid-item";
-export default function ProfileGridPage({ id }: { id: string }) {
+
+export default function ProfileGridPage() {
   const post = usePost((state) => ({
     posts: state.posts,
     actions: state.actions,
@@ -13,10 +14,7 @@ export default function ProfileGridPage({ id }: { id: string }) {
     post.actions.loadPosts();
   }, [post.actions]);
   return (
-    <div
-      data-ssgoi-transition={`/demo/instagram/profile/${id}`}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen">
       {post.posts.isLoading && post.posts.data.length === 0 ? (
         <GridSkeleton />
       ) : (

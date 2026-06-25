@@ -24,10 +24,7 @@ const PROJECTS = [
 ];
 export default function WorkArchivePage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/nora-hale"
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative flex h-full w-full flex-col overflow-y-auto px-6 lg:px-10">
         <section className="flex flex-col items-center pt-36 lg:pt-44">
           <p className="text-[11px] tracking-[0.32em] text-[#1a1a1a]/55 uppercase">

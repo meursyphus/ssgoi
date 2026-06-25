@@ -38,10 +38,7 @@ const PORTRAITS = [
 ];
 export default function AboutPage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/nora-hale/about"
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative h-full w-full overflow-y-auto px-6 lg:px-10">
         {PORTRAITS.map((p) => (
           <img

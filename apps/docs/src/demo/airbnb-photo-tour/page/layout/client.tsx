@@ -27,7 +27,12 @@ export function AirbnbPhotoTourLayoutClient({
 }) {
   return (
     <WebShowcaseShell>
-      <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+      <SsgoiWithHost
+        config={config}
+        boundaryClassName="h-full min-h-full bg-white"
+      >
+        {children}
+      </SsgoiWithHost>
     </WebShowcaseShell>
   );
 }

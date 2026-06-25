@@ -3,6 +3,7 @@
 import { type ReactNode } from "react";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { useShowcaseHost } from "./host-context";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 // Re-export so existing imports (`from "@/lib/components/demo-shell"`) keep
 // working after the host moved up to `DocsSsgoiProvider`.
@@ -28,14 +29,26 @@ export function DemoShell({ children }: { children: ReactNode }) {
 export function SsgoiWithHost({
   config,
   children,
+  boundaryClassName = "h-full min-h-full bg-black",
+  withTransitionBoundary = true,
 }: {
   config: SsgoiConfig;
   children: ReactNode;
+  boundaryClassName?: string;
+  withTransitionBoundary?: boolean;
 }) {
   const host = useShowcaseHost();
+  const content = withTransitionBoundary ? (
+    <SsgoiTransitionBoundary className={boundaryClassName}>
+      {children}
+    </SsgoiTransitionBoundary>
+  ) : (
+    children
+  );
+
   return (
     <Ssgoi config={config} host={host}>
-      {children}
+      {content}
     </Ssgoi>
   );
 }

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, zoom } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -44,7 +45,11 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={config}>{children}</Ssgoi>
+          <Ssgoi config={config}>
+            <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+              {children}
+            </SsgoiTransitionBoundary>
+          </Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

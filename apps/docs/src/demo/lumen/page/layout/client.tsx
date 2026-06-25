@@ -17,7 +17,12 @@ export function LumenLayoutClient({ children }: { children: ReactNode }) {
   return (
     <DemoShell>
       <div className="relative h-dvh w-full overflow-hidden bg-black text-white">
-        <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+        <SsgoiWithHost
+          config={config}
+          boundaryClassName="h-full min-h-full bg-black"
+        >
+          {children}
+        </SsgoiWithHost>
       </div>
     </DemoShell>
   );

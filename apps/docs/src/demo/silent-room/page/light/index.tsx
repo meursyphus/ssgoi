@@ -6,7 +6,6 @@ export default function LightPage() {
   return (
     <RoomShell
       data={{
-        routeId: "/demo/silent-room/light",
         index: "III",
         ordinal: "03",
         title: "Light",

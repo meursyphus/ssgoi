@@ -14,10 +14,7 @@ export default function CollectionsPage() {
     collection.actions.loadAll();
   }, [collection.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/google-photos/collections"
-      className="block min-h-full bg-white"
-    >
+    <div className="block min-h-full bg-white">
       <div className="px-4 pt-4">
         <UtilityRow />
       </div>

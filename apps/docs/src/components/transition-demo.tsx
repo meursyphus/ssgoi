@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
@@ -34,15 +34,17 @@ export function TransitionDemo({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const [inView, setInView] = useState(false);
-  const [topLevel, setTopLevel] = useState(false);
-
-  useEffect(() => {
-    try {
-      setTopLevel(window.self === window.top);
-    } catch {
-      setTopLevel(false);
-    }
-  }, []);
+  const topLevel = useSyncExternalStore(
+    () => () => {},
+    () => {
+      try {
+        return window.self === window.top;
+      } catch {
+        return false;
+      }
+    },
+    () => false,
+  );
 
   useEffect(() => {
     const el = containerRef.current;

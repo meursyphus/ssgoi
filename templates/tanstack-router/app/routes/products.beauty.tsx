@@ -4,7 +4,7 @@ import { getProductsByCategory } from "../components/products/mock-data";
 
 function ProductsBeautyRoute() {
   const products = getProductsByCategory("beauty");
-  return <ProductGrid products={products} category="beauty" />;
+  return <ProductGrid products={products} />;
 }
 
 export const Route = createFileRoute("/products/beauty")({

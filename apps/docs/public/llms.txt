@@ -4,6 +4,8 @@
 
 This document is for AI assistants to help developers set up SSGOI page transitions.
 
+**Current core package version:** `@ssgoi/core@6.6.2`
+
 **Per-transition reference (options, data keys, examples):** see the `Transitions` section below — each entry links to its own page like `https://ssgoi.dev/llms/<name>.txt`.
 
 ---
@@ -15,6 +17,16 @@ npm install @ssgoi/react
 # or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular
 ```
 
+Reference templates:
+
+- Next.js: https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs
+- React Router: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
+- TanStack Router: https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router
+- SvelteKit: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
+- Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+
+React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit and Nuxt templates mark each routed page directly with `data-ssgoi-transition`.
+
 ---
 
 ## Layout Setup
@@ -22,8 +34,8 @@ npm install @ssgoi/react
 SSGOI works on any web app. There are only three things to get right:
 
 1. **Decide your scroll element** — the element whose scroll position SSGOI should preserve across transitions. Often a `<main>` or a centered content container.
-2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the element that wraps `<Ssgoi>`.**
-3. **Set `data-ssgoi-transition="..."` on each page boundary** (see the next section).
+2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the outer element that wraps the SSGOI provider / `<Ssgoi>`.** This is the layout shell, not the `data-ssgoi-transition` boundary.
+3. **Mark routed content with `data-ssgoi-transition="..."`**. React adapters can use one layout-level boundary utility for this marker. SvelteKit, Nuxt/Vue, Solid, and Angular should mark each routed page boundary directly.
 
 Why those classes:
 
@@ -40,9 +52,13 @@ The scroll element and the `<Ssgoi>` wrapper are typically **the same element**,
 The library is most often used to ship app-like, mobile-width experiences, so this example shows that shape — a centered max-width column where the column itself scrolls. Adapt as needed for desktop layouts.
 
 ```tsx
-// src/app/layout.tsx
+// src/app/ssgoi-provider.tsx
+"use client";
+
+import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, fade } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
@@ -51,17 +67,33 @@ const config = {
   ],
 };
 
+export function SsgoiProvider({ children }: { children: ReactNode }) {
+  return (
+    <Ssgoi config={config}>
+      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
+      <SsgoiTransitionBoundary className="min-h-full bg-black">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
+}
+
+// src/app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html>
       <body>
         <div className="mx-auto max-w-md h-dvh flex flex-col">
+          {/* Layout shell: scroll element + positioned ancestor for OUT clones. */}
           <main className="flex-1 overflow-y-auto relative z-0 overflow-x-clip">
-            <Ssgoi config={config}>{children}</Ssgoi>
+            <SsgoiProvider>{children}</SsgoiProvider>
           </main>
           {/* Optional: <BottomNav /> outside <main>, fixed-positioned */}
         </div>
@@ -73,28 +105,88 @@ export default function RootLayout({
 
 ---
 
-## Page Setup
+## React Route Boundary Setup
 
-Mark each page boundary with `data-ssgoi-transition`:
+For React, Next.js, React Router, and TanStack Router, you can mark routed content once with a small router-specific boundary utility. This is a React-specific convenience pattern: the utility uses the current pathname as the logical transition id and keys the routed subtree so React gives SSGOI a clear outgoing boundary and incoming boundary. Do not put `relative z-0 overflow-x-clip` on this utility; those belong to the outer wrapper shown above.
+
+Next.js implementation:
 
 ```tsx
-// app/page.tsx
-export default function HomePage() {
-  return (
-    <main data-ssgoi-transition="/">
-      <div>Home content</div>
-    </main>
-  );
-}
+"use client";
 
-// app/post/[id]/page.tsx
-export default function PostPage({ params }: { params: { id: string } }) {
+import { type ElementType, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiTransitionBoundary({
+  children,
+  as,
+  className,
+}: {
+  children: ReactNode;
+  as?: ElementType;
+  className?: string;
+}) {
+  const pathname = usePathname();
+  const Component = as ?? "div";
+
   return (
-    <main data-ssgoi-transition={`/post/${params.id}`}>
-      <div>Post content</div>
-    </main>
+    <Component
+      key={pathname}
+      data-ssgoi-transition={pathname}
+      className={className}
+    >
+      {children}
+    </Component>
   );
 }
+```
+
+React Router uses the same component body, but reads `const { pathname } = useLocation()` from `react-router`. TanStack Router reads `const pathname = useRouterState({ select: (state) => state.location.pathname })`.
+
+```tsx
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <SsgoiTransitionBoundary className="min-h-full bg-black">
+      {children}
+    </SsgoiTransitionBoundary>
+  );
+}
+```
+
+`SsgoiTransitionBoundary` reads the current pathname internally and sets both `key` and `data-ssgoi-transition`. SSGOI itself only needs a logical page id that matches config; using the real pathname is the React utility's default convention. For dynamic routes, match descendants with wildcard patterns like `/post/*`. A suffix `*` matches one or more descendants; a suffix `**` also includes the prefix path itself, so `/docs/**` matches `/docs` and `/docs/install`.
+
+## Non-React Route Boundary Setup
+
+For SvelteKit, Nuxt/Vue, Solid, and Angular, set `data-ssgoi-transition` directly on each routed page boundary. The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`.
+
+Do not put a single slot/snippet-based route boundary in a parent layout for SvelteKit or Nuxt. Their slot content is live, so the outgoing page wrapper can render the incoming page's children during navigation.
+
+SvelteKit:
+
+```svelte
+<main data-ssgoi-transition="/gallery">
+  <!-- page content -->
+</main>
+```
+
+Nuxt/Vue:
+
+```vue
+<template>
+  <main data-ssgoi-transition="/gallery">
+    <!-- page content -->
+  </main>
+</template>
+```
+
+Angular:
+
+```html
+<section data-ssgoi-transition="/home">
+  <h1>Home Page</h1>
+</section>
 ```
 
 ---

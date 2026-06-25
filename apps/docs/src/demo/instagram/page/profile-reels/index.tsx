@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { usePost } from "@/demo/instagram/state/post";
 import { ReelItem } from "./reel-item";
-export default function ProfileReelsPage({ id }: { id: string }) {
+
+export default function ProfileReelsPage() {
   const post = usePost((state) => ({
     reels: state.reels,
     actions: state.actions,
@@ -12,10 +13,7 @@ export default function ProfileReelsPage({ id }: { id: string }) {
     post.actions.loadReels();
   }, [post.actions]);
   return (
-    <div
-      data-ssgoi-transition={`/demo/instagram/profile/${id}/reels`}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen">
       {post.reels.isLoading && post.reels.data.length === 0 ? (
         <div className="grid grid-cols-3 gap-[2px] bg-white">
           {Array.from({

@@ -18,7 +18,10 @@ export function YuzuClubLayoutClient({ children }: { children: ReactNode }) {
   return (
     <DemoShell>
       <div className="relative h-dvh w-full overflow-hidden bg-[#fff5d6] text-[#1a1a2e]">
-        <SsgoiWithHost config={config}>
+        <SsgoiWithHost
+          config={config}
+          boundaryClassName="h-full min-h-full bg-[#fff5d6]"
+        >
           <main className="relative h-full w-full">{children}</main>
         </SsgoiWithHost>
         <FloatingHeader />

@@ -18,10 +18,7 @@ export default function HomePage() {
   const { me, birthday, favorites, friends, friendsCountLabel } =
     friend.groups.data;
   return (
-    <div
-      data-ssgoi-transition="/demo/kakao-talk"
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <TopHeader me={me} />
       <div className="flex-1 overflow-y-auto pb-16">
         <PromoBanner />

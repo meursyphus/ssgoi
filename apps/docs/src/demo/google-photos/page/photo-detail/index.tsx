@@ -14,10 +14,7 @@ export default function PhotoDetailPage({
   }));
   photo.actions.init(initialData);
   return (
-    <div
-      data-ssgoi-transition={`/demo/google-photos/p/${initialData.id}`}
-      className="relative block h-full bg-white"
-    >
+    <div className="relative block h-full bg-white">
       <BackButton />
       <PhotoCanvas photo={initialData} />
       <PhotoMeta photo={initialData} />

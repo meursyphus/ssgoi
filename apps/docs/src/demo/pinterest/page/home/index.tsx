@@ -14,10 +14,7 @@ export default function HomePage() {
     pinState.actions.loadPins();
   }, [pinState.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/pinterest"
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <HomeHeader />
       <TabBar />
       <div className="flex-1 pt-2">

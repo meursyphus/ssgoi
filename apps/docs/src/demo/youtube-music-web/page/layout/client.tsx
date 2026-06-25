@@ -30,7 +30,12 @@ export function YoutubeMusicLayoutClient({
         <div className="flex min-h-0 flex-1">
           <Sidebar />
           <main className="relative z-0 min-w-0 flex-1 overflow-hidden">
-            <SsgoiWithHost config={config}>{children}</SsgoiWithHost>
+            <SsgoiWithHost
+              config={config}
+              boundaryClassName="h-full min-h-full bg-[#030303]"
+            >
+              {children}
+            </SsgoiWithHost>
           </main>
         </div>
         <PlayerBar />

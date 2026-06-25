@@ -64,14 +64,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 ### 2. SSGOI Configuration (demo-layout.tsx)
 
 ```tsx
-import { useRouterState } from "@tanstack/react-router";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, zoom } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
 
 export default function DemoLayout({ children }) {
-  const location = useRouterState({ select: (s) => s.location });
-  const pathname = location.pathname;
-
   const config = useMemo(
     () => ({
       transitions: [
@@ -83,17 +80,26 @@ export default function DemoLayout({ children }) {
     [],
   );
 
-  return <Ssgoi config={config}>{children}</Ssgoi>;
+  return (
+    <Ssgoi config={config}>
+      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+        {children}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  );
 }
 ```
 
 ### 3. Page Components
 
-Each page must set a unique `data-ssgoi-transition` route id:
+Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
+stay as real pathnames and are matched by wildcard patterns in config. Use
+`/posts/*` for descendants and `/posts/**` when the parent path should match
+too.
 
 ```tsx
 export default function PostsPage() {
-  return <main data-ssgoi-transition="/posts">{/* Page content */}</main>;
+  return <main>{/* Page content */}</main>;
 }
 ```
 

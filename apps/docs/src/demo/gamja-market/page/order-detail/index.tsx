@@ -19,10 +19,7 @@ export default function OrderDetailPage({
   order.actions.init(initialData);
   const data = order.current ?? initialData;
   return (
-    <div
-      data-ssgoi-transition={`/demo/gamja-market/orders/${initialData.id}`}
-      className="flex min-h-full flex-col bg-[#FAF8F6]"
-    >
+    <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <OrderDetailHeader />
       <StatusBanner order={data} />
       <ProductSummary order={data} />

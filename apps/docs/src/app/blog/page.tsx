@@ -47,7 +47,7 @@ export default function BlogIndexPage() {
   };
 
   return (
-    <main data-ssgoi-transition="/blog" className="relative min-h-dvh bg-black">
+    <main className="relative min-h-dvh bg-black">
       <JsonLd
         data={[
           blogSchema,

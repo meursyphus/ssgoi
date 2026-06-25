@@ -4,10 +4,7 @@ const BG =
   "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=2400&q=80";
 export default function DropPage() {
   return (
-    <div
-      data-ssgoi-transition="/demo/honeydrop/drop"
-      className="relative h-full w-full"
-    >
+    <div className="relative h-full w-full">
       <div className="relative h-full w-full overflow-hidden">
         <img
           src={BG}

@@ -22,7 +22,7 @@ export default function FeedDetail({ postId }: FeedDetailProps) {
   }, [navigate]);
   if (!post) {
     return (
-      <div data-ssgoi-transition={`/profile/${postId}`}>
+      <div>
         <div className="bg-[#121212] px-4 py-8">
           <p className="text-gray-400">Post not found</p>
         </div>
@@ -30,7 +30,7 @@ export default function FeedDetail({ postId }: FeedDetailProps) {
     );
   }
   return (
-    <div data-ssgoi-transition={`/profile/${postId}`} className="">
+    <div className="">
       <div className="bg-[#121212] min-h-[760px]">
         {/* Content */}
         <div>

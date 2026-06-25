@@ -13,10 +13,7 @@ export default function SearchResultPage({ query }: { query: string }) {
     pinState.actions.search(query);
   }, [pinState.actions, query]);
   return (
-    <div
-      data-ssgoi-transition={`/demo/pinterest/search/${query}`}
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <ResultHeader query={query} />
       <ChipRow query={query} />
       <div className="flex-1 pb-6">

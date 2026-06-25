@@ -16,10 +16,7 @@ export default function HomePage() {
     listing.actions.loadFeed();
   }, [listing.actions]);
   return (
-    <div
-      data-ssgoi-transition="/demo/air-bnb"
-      className="flex min-h-full flex-col bg-white"
-    >
+    <div className="flex min-h-full flex-col bg-white">
       <HomeHeader />
       <CategoryTabs />
       <div className="flex-1 pb-6">

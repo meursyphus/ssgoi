@@ -42,11 +42,12 @@ npm install @ssgoi/react
 
 ### Add Transitions in 30 Seconds
 
-#### 1. Wrap your app
+#### 1. Wrap your React app
 
 ```tsx
 import { Ssgoi } from "@ssgoi/react";
 import { fade } from "@ssgoi/react/view-transitions";
+import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [fade({ paths: ["/", "/about"] })],
@@ -54,26 +55,76 @@ const config = {
 
 export default function App() {
   return (
-    <Ssgoi config={config}>
-      {/* relative + z-0: the outgoing page is cloned with position:absolute */}
-      <div className="relative z-0">{/* Your app */}</div>
-    </Ssgoi>
+    <div className="relative z-0 min-h-dvh bg-white">
+      {/* Layout shell above: positioned ancestor + stacking context for the OUT clone. */}
+      <Ssgoi config={config}>
+        {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
+        <SsgoiTransitionBoundary className="min-h-full bg-white">
+          {/* Your app */}
+        </SsgoiTransitionBoundary>
+      </Ssgoi>
+    </div>
   );
 }
 ```
 
-#### 2. Mark your pages
+#### 2. Keep React pages unmarked
 
 ```tsx
 export default function HomePage() {
   return (
-    <main data-ssgoi-transition="/">
+    <main>
       <h1>Welcome</h1>
       {/* Page content */}
     </main>
   );
 }
 ```
+
+For React adapters, create one router-specific `SsgoiTransitionBoundary` utility
+in your layout. It reads the current pathname internally, sets the transition
+boundary key, and uses that pathname as a logical page id matched by config such
+as `/products/*`. Use `/products/**` when the parent path itself should match
+too.
+
+Next.js implementation:
+
+```tsx
+"use client";
+
+import { type ElementType, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiTransitionBoundary({
+  children,
+  as,
+  className,
+}: {
+  children: ReactNode;
+  as?: ElementType;
+  className?: string;
+}) {
+  const pathname = usePathname();
+  const Component = as ?? "div";
+
+  return (
+    <Component
+      key={pathname}
+      data-ssgoi-transition={pathname}
+      className={className}
+    >
+      {children}
+    </Component>
+  );
+}
+```
+
+React Router and TanStack Router use the same component body with their own
+pathname hook.
+
+For SvelteKit, Nuxt/Vue, Solid, and Angular, mark each routed page boundary
+directly with `data-ssgoi-transition` instead of using a layout-level utility.
+The value can be a hard-coded logical id; it only has to match your config.
 
 **That's it!** Your configured pages now transition smoothly with a fade effect.
 
@@ -161,9 +212,15 @@ For mount/unmount of individual elements (not whole pages):
 
 ## Layout Requirements
 
-The element wrapping `<Ssgoi>` needs `position: relative` and `z-index: 0`.
+The outer element wrapping the SSGOI provider / `<Ssgoi>` needs
+`position: relative` and `z-index: 0`.
 
-When a page leaves, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in. Without a positioned, stacking-context ancestor the clone jumps to the wrong place or falls behind the background. Add `overflow-x-clip` too if you use horizontal transitions (`slide`, `drill`).
+When a page leaves, SSGOI clones it back into the DOM with `position: absolute`
+so it can animate out while the new page animates in. Without a positioned,
+stacking-context ancestor the clone jumps to the wrong place or falls behind the
+background. Add `overflow-x-clip` too if you use horizontal transitions
+(`slide`, `drill`). Keep these layout classes on the outer wrapper, not on the
+route boundary marker.
 
 ```tsx
 <div className="relative z-0 overflow-x-clip">

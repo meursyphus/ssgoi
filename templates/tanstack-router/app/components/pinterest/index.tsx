@@ -7,7 +7,7 @@ export default function PinterestDemo() {
   const leftColumnItems = pinterestItems.filter((_, index) => index % 2 === 0);
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
   return (
-    <div data-ssgoi-transition="/pinterest">
+    <div>
       <div className="min-h-screen bg-[#121212] px-4 py-6">
         {/* Header */}
         <div className="mb-6">

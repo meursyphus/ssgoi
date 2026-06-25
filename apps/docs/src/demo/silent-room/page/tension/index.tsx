@@ -6,7 +6,6 @@ export default function TensionPage() {
   return (
     <RoomShell
       data={{
-        routeId: "/demo/silent-room/tension",
         index: "II",
         ordinal: "02",
         title: "Tension",

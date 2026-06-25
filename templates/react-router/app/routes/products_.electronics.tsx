@@ -3,7 +3,7 @@ import { products } from "../components/products/mock-data";
 
 export default function ProductsElectronicsRoute() {
   const electronicsProducts = products.filter(
-    (p) => p.category === "Electronics"
+    (p) => p.category === "Electronics",
   );
-  return <ProductGrid products={electronicsProducts} category="electronics" />;
+  return <ProductGrid products={electronicsProducts} />;
 }
