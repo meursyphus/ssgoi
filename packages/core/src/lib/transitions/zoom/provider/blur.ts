@@ -15,6 +15,7 @@ import {
 } from "../../../animation";
 import { createZoomIn, createZoomOut } from "../zoom-element";
 import { Z_OVERLAY } from "../../stacking";
+import { getOverlayRect } from "@utils";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
@@ -61,9 +62,12 @@ function backgroundIn(): ZoomAnimationConfig {
 
 const overlay: ZoomOverlayConfig = {
   willChange: "backdrop-filter",
+  // `top` + `height` are set per-transition in OverlayStrategy.contribute (they
+  // track the live scroll position), so they are intentionally omitted here.
   initialStyle: {
     position: "absolute",
-    inset: "0",
+    left: "0",
+    width: "100%",
     pointerEvents: "none",
     // z-index is applied in OverlayStrategy.contribute. The overlay always
     // sits at Z_OVERLAY, between the background page (Z_BACKGROUND) and the
@@ -133,6 +137,18 @@ export class OverlayStrategy implements ZoomStrategy {
     // Overlay is fully transparent (blur(0px)) until the first tick fires, so
     // applying the z-index here — after prepare, before paint — has no cost.
     overlayEl.style.zIndex = Z_OVERLAY;
+    // The overlay must stay inside positionedParent to sit between the
+    // background and the tile in the stacking order — but positionedParent is
+    // the scroll container, and absolute children of a scroll container
+    // translate with the content. A plain inset:0 would ride the scroll and
+    // leave the bottom `scroll.y` px of the viewport unblurred (visible on
+    // exit, e.g. zooming back into a scrolled grid). The container is restored
+    // to the incoming page's scroll (context.to.scroll.y) for the whole run, so
+    // anchor the overlay to that live viewport slice instead (getOverlayRect
+    // backs out both the scroll and positionedParent's own offset).
+    const overlayRect = getOverlayRect(ctx.context, "to");
+    overlayEl.style.top = `${overlayRect.top}px`;
+    overlayEl.style.height = `${overlayRect.height}px`;
     return [
       new WebAnimation({
         element: overlayEl,

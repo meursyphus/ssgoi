@@ -1,5 +1,5 @@
 import type { TransitionConfig } from "@types";
-import { getViewportRect } from "@utils";
+import { getViewportRect, getOverlayRect } from "@utils";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -235,6 +235,19 @@ export const sheet = (
       // the created node on settle, so no inline-style cleanup is needed.
       if (overlay && overlayConfig) {
         overlay.style.zIndex = Z_OVERLAY;
+        // The overlay must stay inside positionedParent so it sits between the
+        // background and the sheet in the stacking order. But positionedParent
+        // is the scroll container, and absolute children of a scroll container
+        // translate with the content — a plain inset:0 would ride the scroll
+        // and leave the bottom `scroll.y` px of the viewport unblurred (a
+        // missing strip, seen on exit once the sheet drops past it). The
+        // container is restored to the INCOMING page's scroll
+        // (context.to.scroll.y) for the whole run, so anchor the overlay to
+        // that live viewport slice instead (getOverlayRect backs out both the
+        // scroll and positionedParent's own offset so it covers [0, viewport]).
+        const overlayRect = getOverlayRect(context, "to");
+        overlay.style.top = `${overlayRect.top}px`;
+        overlay.style.height = `${overlayRect.height}px`;
         anims.push(
           new WebAnimation({
             element: overlay,

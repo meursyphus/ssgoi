@@ -1,4 +1,4 @@
-import type { PhysicsOptions } from "@types";
+import type { PhysicsOptions, SsgoiTransitionContext } from "@types";
 import type { Animation } from "../../animation";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -124,6 +124,11 @@ export interface ZoomContributeCtx {
   input: ZoomAnimationInput;
   physics: PhysicsOptions;
   extras: ZoomExtras;
+  /**
+   * Full transition context — strategies that stage viewport-aligned layers
+   * (the blur overlay) need the live scroll position + scrolling element.
+   */
+  context: SsgoiTransitionContext;
   /**
    * Mutation registry. Strategies push restore callbacks here; the
    * dispatcher fires them on completion. Keeps cleanup local to each

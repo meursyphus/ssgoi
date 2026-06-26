@@ -61,9 +61,12 @@ export function createBlurProvider(): SheetProvider {
     },
     overlay: {
       willChange: "backdrop-filter",
+      // `top` + `height` are set per-transition in transition.ts (they depend on
+      // the live scroll position), so they are intentionally omitted here.
       initialStyle: {
         position: "absolute",
-        inset: "0",
+        left: "0",
+        width: "100%",
         pointerEvents: "none",
         backdropFilter: "blur(0px)",
         WebkitBackdropFilter: "blur(0px)",
