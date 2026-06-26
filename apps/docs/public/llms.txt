@@ -275,7 +275,7 @@ Material/Flutter-style shared-axis page swap. **Three types**: `x` (horizontal, 
 
 ### `sheet` — https://ssgoi.dev/llms/sheet.txt
 
-Bottom sheet style. New page slides up from below. **Two types**: `static` (background untouched, default) and `scale` (background scales down behind). Use for **modal-like** flows (FAB → compose, "new item" screens). (Legacy `type: "background-scale"` deprecated → use `"scale"`.)
+Bottom sheet style. New page slides up from below. **Three types**: `static` (background untouched, default), `scale` (background scales down behind), and `blur` (background blurs + recedes behind, a modal pushing the page out of focus). Use for **modal-like** flows (FAB → compose, "new item" screens). (Legacy `type: "background-scale"` deprecated → use `"scale"`.)
 
 ### `hero` — https://ssgoi.dev/llms/hero.txt
 

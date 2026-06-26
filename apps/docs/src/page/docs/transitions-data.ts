@@ -259,6 +259,17 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
           },
         ],
       },
+      {
+        label: "blur",
+        args: 'type: "blur"',
+        ux: "The background page blurs and recedes behind the rising sheet — a modal pushing the page out of focus.",
+        demos: [
+          {
+            enterPath: "/demo/voyage/compose",
+            exitPath: "/demo/voyage",
+          },
+        ],
+      },
     ],
   },
   {

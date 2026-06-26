@@ -1,12 +1,12 @@
 import type { TransitionConfig } from "@types";
-import { getViewportRect } from "@utils";
+import { getViewportRect, getOverlayRect } from "@utils";
 import {
   IntegratorProvider,
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
 import { SHEET_PROVIDERS } from "./provider";
-import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
+import { Z_BACKGROUND, Z_FOREGROUND, Z_OVERLAY } from "../stacking";
 import type { SheetOptions, SheetType } from "./types";
 
 export type { SheetOptions, SheetType } from "./types";
@@ -14,17 +14,25 @@ export type { SheetOptions, SheetType } from "./types";
 const DEFAULT_TYPE: SheetType = "static";
 const SHEET_WILL_CHANGE = "transform";
 
-export const sheet = (options: SheetOptions = {}): TransitionConfig => {
+/** Prepare → animation hand-off: the optional backdrop-filter overlay layer. */
+interface SheetExtras {
+  overlay?: HTMLElement;
+}
+
+export const sheet = (
+  options: SheetOptions = {},
+): TransitionConfig<SheetExtras> => {
   const direction = options.direction ?? "enter";
   const provider = SHEET_PROVIDERS[options.type ?? DEFAULT_TYPE];
   const physics =
     direction === "enter" ? provider.enterPhysics : provider.exitPhysics;
   const bg = provider.background;
+  const overlayConfig = provider.overlay;
   // Empty willChange == "don't touch the background at all" (zoom-style static).
   const animatesBackground = bg.willChange !== "";
 
   return {
-    prepare: ({ from, to }) => {
+    prepare: ({ from, to, context, createElement }) => {
       const sheet = direction === "enter" ? to : from;
       const background = direction === "enter" ? from : to;
 
@@ -65,9 +73,23 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
         }
       });
 
-      return {};
+      // Tones that frost the background (currently `blur`) need a separate
+      // backdrop-filter layer between the background and the sheet. Stage it
+      // here and hand it to `animation` via extras. It is deliberately NOT
+      // clipped or scaled — keeping the blur on its own layer is what decouples
+      // it from the background's clip + scale. The dispatcher removes nodes
+      // created via `createElement` on settle, so it needs no teardown.
+      let overlay: HTMLElement | undefined;
+      if (overlayConfig) {
+        overlay = createElement("sheet-overlay");
+        Object.assign(overlay.style, overlayConfig.initialStyle);
+        overlay.style.willChange = overlayConfig.willChange;
+        context.positionedParent.appendChild(overlay);
+      }
+
+      return { overlay };
     },
-    animation: ({ from, to, context }) => {
+    animation: ({ from, to, context, overlay }) => {
       const sheetEl = direction === "enter" ? to : from;
       const backgroundEl = direction === "enter" ? from : to;
       const sheetRect = getViewportRect(
@@ -145,49 +167,97 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
       });
       releaseFillOnSettle(sheetAnim);
 
-      if (!animatesBackground) {
-        // Static: the background sits untouched for the whole duration.
-        return new MultiAnimation([sheetAnim], { mode: "parallel" });
+      const anims: WebAnimation[] = [sheetAnim];
+
+      if (animatesBackground) {
+        // The clip slice below and the `contain: paint` set in prepare both
+        // assume the background's border box equals its full content height —
+        // the clip's `100%` is the element box, and the slice is offset by
+        // `scroll.y` so it lands at the viewport. But prepareOutgoing made the
+        // outgoing page `position: absolute`, under which a page root sized
+        // `height: 100%` (`h-full`) collapses to one viewport. `contain: paint`
+        // would then delete everything the user scrolled past, and the clip's
+        // `100%` would be a viewport — together leaving a white band of height
+        // `scroll.y` below the scrolled-in content. Pin the box to the real
+        // content height so both assumptions hold. Read after re-insertion
+        // (this runs in `animation`, where the node is laid out); guard against
+        // a 0 from an edge-case detached node so we never collapse it.
+        const contentHeight = backgroundEl.scrollHeight;
+        if (contentHeight > 0) {
+          backgroundEl.style.height = `${contentHeight}px`;
+        }
+
+        const bgRect = getViewportRect(
+          context,
+          direction === "enter" ? "from" : "to",
+        );
+        const bgCenterX = bgRect.left + bgRect.width / 2;
+        const bgCenterY = bgRect.top + bgRect.height / 2;
+        backgroundEl.style.clipPath = `inset(${bgRect.top}px 0 calc(100% - ${bgRect.top + bgRect.height}px) 0)`;
+        backgroundEl.style.transformOrigin = `${bgCenterX}px ${bgCenterY}px`;
+
+        const bgStyle =
+          direction === "enter"
+            ? (t: number, u: number) => bg.enterStyle(t, u)
+            : (t: number) => bg.exitStyle(t);
+
+        const bgAnim = new WebAnimation({
+          element: backgroundEl,
+          integrator: IntegratorProvider.from(physics),
+          style: bgStyle,
+          // The background is the reused outgoing (`from`) node on `enter` and
+          // the surviving incoming (`to`) node on `exit` — in both cases its
+          // inline styles must be cleared on settle so the reused node is not
+          // left scaled/faded/clipped the next time it is shown. releaseFill
+          // below drops the WAAPI fill so these resets actually take effect.
+          onComplete: () => {
+            backgroundEl.style.willChange = "auto";
+            backgroundEl.style.backfaceVisibility = "";
+            (
+              backgroundEl.style as CSSStyleDeclaration & { contain: string }
+            ).contain = "";
+            backgroundEl.style.clipPath = "";
+            backgroundEl.style.transformOrigin = "";
+            backgroundEl.style.transform = "";
+            backgroundEl.style.opacity = "";
+            // Release the content-height pin applied above.
+            backgroundEl.style.height = "";
+          },
+        });
+        releaseFillOnSettle(bgAnim);
+        anims.push(bgAnim);
       }
 
-      const bgRect = getViewportRect(
-        context,
-        direction === "enter" ? "from" : "to",
-      );
-      const bgCenterX = bgRect.left + bgRect.width / 2;
-      const bgCenterY = bgRect.top + bgRect.height / 2;
-      backgroundEl.style.clipPath = `inset(${bgRect.top}px 0 calc(100% - ${bgRect.top + bgRect.height}px) 0)`;
-      backgroundEl.style.transformOrigin = `${bgCenterX}px ${bgCenterY}px`;
+      // Blur tone: animate the backdrop-filter on the separate overlay layer.
+      // It sits at Z_OVERLAY — between the background (Z_BACKGROUND) and the
+      // sheet (Z_FOREGROUND) — so it frosts the receding background but never
+      // the sheet. Unclipped and unscaled by design. The dispatcher removes
+      // the created node on settle, so no inline-style cleanup is needed.
+      if (overlay && overlayConfig) {
+        overlay.style.zIndex = Z_OVERLAY;
+        // The overlay must stay inside positionedParent so it sits between the
+        // background and the sheet in the stacking order. But positionedParent
+        // is the scroll container, and absolute children of a scroll container
+        // translate with the content — a plain inset:0 would ride the scroll
+        // and leave the bottom `scroll.y` px of the viewport unblurred (a
+        // missing strip, seen on exit once the sheet drops past it). The
+        // container is restored to the INCOMING page's scroll
+        // (context.to.scroll.y) for the whole run, so anchor the overlay to
+        // that live viewport slice instead (getOverlayRect backs out both the
+        // scroll and positionedParent's own offset so it covers [0, viewport]).
+        const overlayRect = getOverlayRect(context, "to");
+        overlay.style.top = `${overlayRect.top}px`;
+        overlay.style.height = `${overlayRect.height}px`;
+        anims.push(
+          new WebAnimation({
+            element: overlay,
+            integrator: IntegratorProvider.from(physics),
+            style: (t) => overlayConfig.style(direction, t),
+          }),
+        );
+      }
 
-      const bgStyle =
-        direction === "enter"
-          ? (t: number, u: number) => bg.enterStyle(t, u)
-          : (t: number) => bg.exitStyle(t);
-
-      const bgAnim = new WebAnimation({
-        element: backgroundEl,
-        integrator: IntegratorProvider.from(physics),
-        style: bgStyle,
-        // The background is the reused outgoing (`from`) node on `enter` and the
-        // surviving incoming (`to`) node on `exit` — in both cases its inline
-        // styles must be cleared on settle so the reused node is not left
-        // scaled/faded/clipped the next time it is shown. releaseFill below
-        // drops the WAAPI fill so these resets actually take effect.
-        onComplete: () => {
-          backgroundEl.style.willChange = "auto";
-          backgroundEl.style.backfaceVisibility = "";
-          (
-            backgroundEl.style as CSSStyleDeclaration & { contain: string }
-          ).contain = "";
-          backgroundEl.style.clipPath = "";
-          backgroundEl.style.transformOrigin = "";
-          backgroundEl.style.transform = "";
-          backgroundEl.style.opacity = "";
-        },
-      });
-      releaseFillOnSettle(bgAnim);
-
-      return new MultiAnimation([sheetAnim, bgAnim], { mode: "parallel" });
+      return new MultiAnimation(anims, { mode: "parallel" });
     },
   };
 };
