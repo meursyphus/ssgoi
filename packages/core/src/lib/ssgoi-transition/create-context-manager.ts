@@ -20,10 +20,24 @@ export type ContextManagerOptions = {
    * @default (isMobile) => isMobile
    */
   preserveScroll?: PreserveScrollOption;
+  /**
+   * Resolves a raw path to the identity used for ALL scroll bookkeeping
+   * (record, restore, offset, evict). Defaults to the path unchanged.
+   *
+   * Wire this to the config `middleware` so a rewritten/aliased route records and
+   * restores its scroll under the SAME key the transition matcher resolves it to.
+   * Without it, scroll is stored under the raw `data-ssgoi-transition` id while the
+   * offset is looked up under the middleware-rewritten id (or vice-versa); the keys
+   * miss each other and the outgoing page snaps to the top mid-transition.
+   */
+  resolvePath?: (path: string) => string;
 };
 
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const { preserveScroll = (isMobile: boolean) => isMobile } = options;
+  const {
+    preserveScroll = (isMobile: boolean) => isMobile,
+    resolvePath = (path: string) => path,
+  } = options;
 
   const resolvePreserve: PreserveScrollFn =
     typeof preserveScroll === "function"
@@ -62,7 +76,11 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return cachedIsMobile;
   };
 
-  const getScrollPolicy = (path: string): ScrollPolicy => {
+  const getScrollPolicy = (rawPath: string): ScrollPolicy => {
+    // Every scroll-key derivation funnels through here (record, restore, offset,
+    // evict), so resolving the path once at the top normalizes ALL of them to a
+    // single middleware-aware identity — no caller can sneak a raw path past it.
+    const path = resolvePath(rawPath);
     const value = resolvePreserve(detectIsMobile());
 
     if (value === false) {
