@@ -8,6 +8,7 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 - **`static`** (default): only the rising sheet moves. Background stays put — looks like the new page covers the old one cleanly.
 - **`scale`**: background scales down slightly behind the rising sheet, giving a stacked, iOS-modal feel.
+- **`blur`**: background blurs and recedes (a subtle scale + dim) behind the rising sheet — a modal pushing the page underneath out of focus.
 
 `enter` is the destination path that slides UP. `exit` is the page underneath — what shows when you go back.
 
@@ -19,7 +20,7 @@ import { sheet } from "@ssgoi/react/view-transitions";
 sheet({
   enter: string;                       // destination (the sheet page)
   exit: string;                        // background (the page underneath)
-  type?: "static" | "scale";           // default: "static"
+  type?: "static" | "scale" | "blur";  // default: "static"
   variant?: "default";                 // reserved — only "default" today
   options?: {};                        // reserved — no fields yet
 }): SsgoiPathTransition[];
@@ -36,6 +37,7 @@ const config = {
   transitions: [
     sheet({ enter: "/compose", exit: "/feed" }),
     sheet({ enter: "/settings/*", exit: "/", type: "scale" }),
+    sheet({ enter: "/story/new", exit: "/story", type: "blur" }),
   ],
 };
 ```
