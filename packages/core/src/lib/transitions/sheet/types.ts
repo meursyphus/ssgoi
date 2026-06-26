@@ -10,7 +10,7 @@ import type { PhysicsOptions } from "@types";
  *
  * @internal
  */
-export type SheetType = "static" | "background-scale";
+export type SheetType = "static" | "background-scale" | "blur";
 export type SheetDirection = "enter" | "exit";
 
 export interface SheetOptions {

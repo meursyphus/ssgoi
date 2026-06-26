@@ -183,6 +183,9 @@ export const sheet = (options: SheetOptions = {}): TransitionConfig => {
           backgroundEl.style.transformOrigin = "";
           backgroundEl.style.transform = "";
           backgroundEl.style.opacity = "";
+          // `blur` tone leaves a filter on the background; clear it too so the
+          // reused node is not shown still frosted next time.
+          backgroundEl.style.filter = "";
         },
       });
       releaseFillOnSettle(bgAnim);

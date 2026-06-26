@@ -13,8 +13,10 @@ import type { SheetType as InternalSheetType } from "./types";
  * - `"scale"` — the background scales down slightly behind the rising sheet.
  *   This is the new name for the legacy `"background-scale"` value; the
  *   underlying behavior is unchanged.
+ * - `"blur"` — the background blurs and recedes (subtle scale + dim) behind the
+ *   rising sheet, the way a modal pushes the page underneath out of focus.
  */
-export type SheetType = "static" | "scale";
+export type SheetType = "static" | "scale" | "blur";
 
 /**
  * Legacy public `type` value, kept for source compatibility only.
@@ -30,6 +32,7 @@ export type SheetConfig = DirectionalTransitionPaths &
   (
     | { type?: "static"; variant?: "default"; options?: Record<string, never> }
     | { type: "scale"; variant?: "default"; options?: Record<string, never> }
+    | { type: "blur"; variant?: "default"; options?: Record<string, never> }
     | {
         /**
          * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
@@ -54,6 +57,7 @@ function resolveInternalType(
 ): InternalSheetType {
   if (type === "scale") return "background-scale";
   if (type === "background-scale") return "background-scale";
+  if (type === "blur") return "blur";
   return "static";
 }
 
