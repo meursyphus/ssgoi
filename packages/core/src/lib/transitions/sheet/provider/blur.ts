@@ -16,8 +16,8 @@ const EXIT_PHYSICS: PhysicsOptions = {
 // at depth (the `scale` tone uses a much larger 0.2).
 const SCALE_OFFSET = 0.08;
 
-// Peak gaussian blur (px) applied to the background page when the sheet is
-// fully risen. Matches the zoom `blur` tone's frosted-glass amount.
+// Peak backdrop blur (px) applied to the overlay layer when the sheet is fully
+// risen. Matches the zoom `blur` tone's frosted-glass amount.
 const MAX_BLUR_PX = 16;
 
 // The background also dims a touch so the foreground sheet reads as the focus.
@@ -25,37 +25,56 @@ const MAX_BLUR_PX = 16;
 // covers it, and a partial dim looks richer mid-transit than a hard fade).
 const MIN_OPACITY = 0.6;
 
-// Springs/inertia overshoot past the endpoints: exit (t > 1) drives
-// blur(MAX * (1 - t)) negative, and an interrupted/reversed enter (t < 0) drives
-// blur(MAX * t) negative — both invalid CSS. Clamp the radius to >= 0.
+// Springs/inertia overshoot past the endpoints (exit t > 1, reversed enter
+// t < 0), which would drive the radius negative — invalid CSS. Clamp to >= 0.
 const blur = (px: number) => `blur(${Math.max(0, px).toFixed(2)}px)`;
 
 /**
  * `blur` sheet tone — the background page blurs and recedes behind the rising
- * sheet, the way a modal pushes the page underneath out of focus. A small
- * scale + dim gives the recede some depth without the heavy stacked-card shrink
- * of the `scale` tone.
+ * sheet, the way a modal pushes the page underneath out of focus.
+ *
+ * The blur lives on a *separate* overlay layer (a `backdrop-filter` between the
+ * background and the sheet) rather than on the background element itself. That
+ * keeps the frost uniform and decoupled from the background's clip + scale —
+ * applying `filter: blur` directly to the clipped/scaled page would hard-cut
+ * the blur halo at the clip edge and ride the scale transform. The background
+ * only carries the recede (a small scale + dim); the overlay owns the blur.
  */
 export function createBlurProvider(): SheetProvider {
   return {
     enterPhysics: ENTER_PHYSICS,
     exitPhysics: EXIT_PHYSICS,
     background: {
-      willChange: "transform, opacity, filter",
-      // enter: t 0 → 1 as the sheet rises (u = 1 - t). At rest (t = 0) the page
-      // is untouched; at peak it is shrunk, blurred and dimmed.
+      willChange: "transform, opacity",
+      // enter: t 0 → 1 as the sheet rises. At rest (t = 0) the page is
+      // untouched; at peak it is shrunk and dimmed.
       enterStyle: (t) => ({
         transform: `scale(${1 - SCALE_OFFSET * t})`,
-        filter: blur(MAX_BLUR_PX * t),
         opacity: 1 - (1 - MIN_OPACITY) * t,
       }),
-      // exit: t 0 → 1 as the sheet falls away and the page returns to rest. The
-      // visual ramp is the inverse of enter.
+      // exit: t 0 → 1 as the sheet falls away and the page returns to rest —
+      // the inverse ramp of enter.
       exitStyle: (t) => ({
         transform: `scale(${1 - SCALE_OFFSET + SCALE_OFFSET * t})`,
-        filter: blur(MAX_BLUR_PX * (1 - t)),
         opacity: MIN_OPACITY + (1 - MIN_OPACITY) * t,
       }),
+    },
+    overlay: {
+      willChange: "backdrop-filter",
+      initialStyle: {
+        position: "absolute",
+        inset: "0",
+        pointerEvents: "none",
+        backdropFilter: "blur(0px)",
+        WebkitBackdropFilter: "blur(0px)",
+      },
+      // enter: 0 → MAX as the sheet rises (progress 0 → 1).
+      // exit: MAX → 0 as it falls (progress 0 → 1, so the visual is inverted).
+      style: (direction, progress) => {
+        const visual = direction === "enter" ? progress : 1 - progress;
+        const b = blur(MAX_BLUR_PX * visual);
+        return { backdropFilter: b, WebkitBackdropFilter: b };
+      },
     },
   };
 }
