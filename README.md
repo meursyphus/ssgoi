@@ -179,12 +179,13 @@ Use the templates as reference implementations for each router/framework:
 - [Next.js](https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs)
 - [React Router](https://github.com/meursyphus/ssgoi/tree/main/templates/react-router)
 - [TanStack Router](https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router)
+- [SolidStart](https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart)
 - [SvelteKit](https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit)
 - [Nuxt](https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt)
 - [Qwik City](https://github.com/meursyphus/ssgoi/tree/main/templates/qwik)
 
-React templates use the pathname boundary utility. SvelteKit, Nuxt, Qwik,
-Solid, and Angular mark each routed page directly with
+React templates use the pathname boundary utility. SolidStart, SvelteKit, Nuxt,
+Qwik, Solid, and Angular mark each routed page directly with
 `data-ssgoi-transition`.
 
 ---

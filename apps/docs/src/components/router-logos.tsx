@@ -8,6 +8,23 @@ export function SvelteKitMark({ className }: Props) {
   return <img src="/logos/svelte.svg" alt="SvelteKit" className={className} />;
 }
 
+export function SolidStartMark({ className }: Props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label="SolidStart"
+      className={className}
+    >
+      <rect width="24" height="24" rx="6" fill="#2C4F7C" />
+      <path d="M5.1 14.35 12 18.3l6.9-3.95L12 10.4 5.1 14.35Z" fill="#76B3E1" />
+      <path d="M5.1 9.65 12 13.6l6.9-3.95L12 5.7 5.1 9.65Z" fill="#518AC8" />
+      <path d="M12 13.6v4.7l6.9-3.95v-4.7L12 13.6Z" fill="#99D7FF" />
+      <path d="M5.1 9.65v4.7L12 18.3v-4.7L5.1 9.65Z" fill="#76B3E1" />
+    </svg>
+  );
+}
+
 export function NuxtMark({ className }: Props) {
   return <img src="/logos/nuxt.svg" alt="Nuxt" className={className} />;
 }
