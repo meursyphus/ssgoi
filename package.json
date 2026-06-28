@@ -20,6 +20,7 @@
     "template:nextjs": "pnpm --filter ssgoi-nextjs-template dev",
     "template:nuxt": "pnpm --filter ssgoi-nuxt-template dev",
     "template:react-router": "pnpm --filter ssgoi-react-router-template dev",
+    "template:solidstart": "pnpm --filter ssgoi-solidstart-template dev",
     "template:sveltekit": "pnpm --filter ssgoi-sveltekit-template dev",
     "template:tanstack-router": "pnpm --filter ssgoi-tanstack-router-template dev",
     "template:qwik": "pnpm --filter ssgoi-qwik-template dev",

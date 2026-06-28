@@ -11,6 +11,7 @@ import {
   NuxtMark,
   QwikMark,
   ReactRouterMark,
+  SolidStartMark,
   SvelteKitMark,
   TanStackRouterMark,
 } from "@/components/router-logos";
@@ -742,6 +743,7 @@ const ROUTERS: Array<{
     icon: TanStackRouterMark,
     templatePath: "tanstack-router",
   },
+  { name: "SolidStart", icon: SolidStartMark, templatePath: "solidstart" },
   { name: "SvelteKit", icon: SvelteKitMark, templatePath: "sveltekit" },
   { name: "Nuxt", icon: NuxtMark, templatePath: "nuxt" },
   { name: "Qwik City", icon: QwikMark, templatePath: "qwik" },
@@ -775,9 +777,9 @@ export function RoutersBody() {
       </div>
       <p className="mt-6 text-sm text-neutral-400">
         These examples show the recommended framework-specific setup. React
-        templates use the pathname boundary utility; SvelteKit, Nuxt, and Qwik
-        mark routed pages directly. Solid and Angular follow the same direct
-        marker rule in their package docs. Full templates index:{" "}
+        templates use the pathname boundary utility; SolidStart, SvelteKit,
+        Nuxt, and Qwik mark routed pages directly. Angular follows the same
+        direct marker rule in its package docs. Full templates index:{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

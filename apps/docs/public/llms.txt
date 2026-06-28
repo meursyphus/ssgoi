@@ -22,11 +22,12 @@ Reference templates:
 - Next.js: https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs
 - React Router: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
 - TanStack Router: https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router
+- SolidStart: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
 - SvelteKit: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
 - Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
 - Qwik City: https://github.com/meursyphus/ssgoi/tree/main/templates/qwik
 
-React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`; Solid and Angular use the same direct marker rule in their package docs.
+React templates use a pathname-based `SsgoiTransitionBoundary` utility. SolidStart, SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`; Solid and Angular use the same direct marker rule in their package docs.
 
 ---
 
@@ -176,6 +177,39 @@ Nuxt/Vue:
     <!-- page content -->
   </main>
 </template>
+```
+
+SolidStart:
+
+```tsx
+// src/app.tsx
+import { Router } from "@solidjs/router";
+import { FileRoutes } from "@solidjs/start/router";
+import { Ssgoi } from "@ssgoi/solid";
+import { zoom } from "@ssgoi/solid/view-transitions";
+
+const config = {
+  transitions: [zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" })],
+};
+
+export default function App() {
+  return (
+    <Router
+      root={(props) => (
+        <main class="relative z-0 min-h-dvh overflow-y-auto overflow-x-clip">
+          <Ssgoi config={config}>{props.children}</Ssgoi>
+        </main>
+      )}
+    >
+      <FileRoutes />
+    </Router>
+  );
+}
+
+// src/routes/gallery/index.tsx
+export default function Gallery() {
+  return <section data-ssgoi-transition="/gallery">{/* content */}</section>;
+}
 ```
 
 Angular:
