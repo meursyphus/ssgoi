@@ -12,15 +12,20 @@ export interface UseSsgoiOptions {
 
 export const useSsgoi = (
   root: Signal<HTMLElement | undefined>,
-  { config$, host$ }: UseSsgoiOptions = {},
+  options: UseSsgoiOptions = {},
 ) => {
+  const configQrl = options.config$;
+  const hostQrl = options.host$;
+
   useVisibleTask$(
     async ({ cleanup, track }) => {
       const element = track(() => root.value);
       if (!element) return;
 
-      const config = config$ ? await config$() : {};
-      const host = host$ ? await host$() : undefined;
+      const configFactory = configQrl ? await configQrl.resolve() : undefined;
+      const hostFactory = hostQrl ? await hostQrl.resolve() : undefined;
+      const config = configFactory ? await configFactory() : {};
+      const host = hostFactory ? await hostFactory() : undefined;
       const ssgoi = createSggoiTransitionContext(config, { host });
       const stopObserving = observeSsgoiTransitions(element, ssgoi);
 

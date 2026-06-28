@@ -26,7 +26,7 @@ Reference templates:
 - Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
 - Qwik City: https://github.com/meursyphus/ssgoi/tree/main/templates/qwik
 
-React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`.
+React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`; Solid and Angular use the same direct marker rule in their package docs.
 
 ---
 
@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 For SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik, set `data-ssgoi-transition` directly on each routed page boundary. The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`.
 
-Do not put a single slot/snippet-based route boundary in a parent layout for SvelteKit or Nuxt. Their slot content is live, so the outgoing page wrapper can render the incoming page's children during navigation.
+Do not put a single slot/snippet-based route boundary in a parent layout for SvelteKit or Nuxt. Their slot content is live, so the outgoing page wrapper can render the incoming page's children during navigation. In Qwik City, do not forward the route `<Slot />` through the exported `<Ssgoi>` component; call `useSsgoi(ref, { config$ })` directly in the layout that owns the route slot.
 
 SvelteKit:
 
@@ -225,9 +225,16 @@ export default component$(() => {
 });
 ```
 
-Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory) instead of passing a plain `config` object.
+Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory created with `$(() => config)`) instead of passing a plain `config` object. The Qwik adapter resolves that QRL in the browser task before creating the SSGOI observer.
 
 In Qwik City layouts, prefer `useSsgoi(ref, { config$ })` over wrapping the route `<Slot />` in `<Ssgoi>`. Forwarding a Qwik City route slot through another component prevents routed content from being projected into the live DOM.
+
+Qwik troubleshooting checklist:
+
+- The root layout imports `useSsgoi` from `@ssgoi/qwik` and calls it with a signal ref.
+- The config is declared with Qwik `$`, for example `const config$ = $(() => ({ transitions: [...] }))`.
+- Each page component has its own `data-ssgoi-transition` value that matches `paths`, `from`, or `to`.
+- The SSGOI root element is the scroll/positioning shell (`relative z-0 overflow-x-clip`) and contains the route `<Slot />` directly.
 
 ---
 

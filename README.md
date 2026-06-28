@@ -183,8 +183,9 @@ Use the templates as reference implementations for each router/framework:
 - [Nuxt](https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt)
 - [Qwik City](https://github.com/meursyphus/ssgoi/tree/main/templates/qwik)
 
-React templates use the pathname boundary utility. SvelteKit, Nuxt, and Qwik
-mark each routed page directly with `data-ssgoi-transition`.
+React templates use the pathname boundary utility. SvelteKit, Nuxt, Qwik,
+Solid, and Angular mark each routed page directly with
+`data-ssgoi-transition`.
 
 ---
 

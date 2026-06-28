@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] md:pt-20 relative overflow-hidden"
+    class="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] relative overflow-hidden lg:p-6"
   >
     <!-- Subtle gradient accent -->
     <div class="absolute inset-0 opacity-30">
@@ -14,7 +14,7 @@
 
     <!-- Main content - iPhone frame -->
     <div
-      class="w-full h-full lg:w-[390px] lg:h-[844px] lg:rounded-[2.5rem] overflow-hidden lg:border lg:border-white/10 lg:shadow-2xl lg:shadow-black/50 relative z-10 bg-[#121212]"
+      class="w-full max-w-[390px] h-full lg:h-[min(844px,calc(100svh-3rem))] lg:rounded-[2.5rem] overflow-hidden lg:border lg:border-white/10 lg:shadow-2xl lg:shadow-black/50 relative z-10 bg-[#121212]"
     >
       <!-- Notch for desktop -->
       <div
@@ -29,5 +29,4 @@
   </div>
 </template>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>

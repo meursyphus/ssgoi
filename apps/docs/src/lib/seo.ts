@@ -4,7 +4,7 @@ export const SITE_URL = "https://ssgoi.dev";
 export const SITE_NAME = "SSGOI";
 export const SITE_TITLE = "SSGOI — Native page transitions on the web";
 export const SITE_DESCRIPTION =
-  "Router-agnostic page transitions for React, Svelte, Vue, Solid, and Angular. Built on the Web Animations API with spring physics and state preservation.";
+  "Router-agnostic page transitions for React, Svelte, Vue, Solid, Angular, and Qwik. Built on the Web Animations API with spring physics and state preservation.";
 
 /** The single shared social-preview image. Referenced by every page's OG + Twitter card. */
 export const OG_IMAGE = {

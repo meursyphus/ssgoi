@@ -38,9 +38,9 @@ function Hero() {
         <span className="text-orange-500">on the web.</span>
       </h1>
       <p className="mt-7 max-w-xl text-pretty text-base leading-relaxed text-neutral-400 md:text-lg">
-        Router- and framework-agnostic — React, Svelte, Vue, Solid, and Angular.
-        Built on the Web Animations API, beyond what View Transitions can do.
-        Browse real apps rebuilt below.
+        Router- and framework-agnostic — React, Svelte, Vue, Solid, Angular, and
+        Qwik. Built on the Web Animations API, beyond what View Transitions can
+        do. Browse real apps rebuilt below.
       </p>
       <div className="mt-9 flex flex-wrap items-center gap-3">
         <Link
