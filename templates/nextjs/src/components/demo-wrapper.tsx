@@ -9,7 +9,7 @@ export default function DemoWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] md:pt-20 relative overflow-hidden">
+    <div className="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] relative overflow-hidden lg:p-6">
       {/* Subtle gradient accent */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neutral-800/50 rounded-full blur-[150px]" />
@@ -19,8 +19,8 @@ export default function DemoWrapper({
       {/* Main content - iPhone frame */}
       <div
         className={`
-          w-full h-full
-          lg:w-[390px] lg:h-[844px]
+          w-full max-w-[390px] h-full
+          lg:h-[min(844px,calc(100svh-3rem))]
           lg:rounded-[2.5rem]
           overflow-hidden
           lg:border lg:border-white/10

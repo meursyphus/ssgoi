@@ -12,6 +12,18 @@ export function NuxtMark({ className }: Props) {
   return <img src="/logos/nuxt.svg" alt="Nuxt" className={className} />;
 }
 
+export function QwikMark({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" role="img" aria-label="Qwik" className={className}>
+      <circle cx="12" cy="12" r="12" fill="#AC7EF4" />
+      <path
+        d="M12.35 5.25c3.44 0 5.95 2.46 5.95 5.86 0 2.08-.9 3.84-2.38 4.89l1.59 1.77-2.16 1.93-1.84-2.1c-.37.07-.76.1-1.16.1-3.44 0-5.95-2.46-5.95-5.87 0-3.4 2.51-5.86 5.95-5.86Zm0 2.56c-1.84 0-3.04 1.32-3.04 3.3 0 1.99 1.2 3.31 3.04 3.31.27 0 .52-.03.76-.08l-1.35-1.52 2.14-1.92 1.11 1.27c.26-.58.39-1.28.39-2.06 0-1.98-1.2-3.3-3.05-3.3Z"
+        fill="#0E0B14"
+      />
+    </svg>
+  );
+}
+
 export function ReactRouterMark({ className }: Props) {
   return (
     <img

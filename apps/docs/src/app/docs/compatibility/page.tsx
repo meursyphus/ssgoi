@@ -10,7 +10,7 @@ import {
 export const metadata: Metadata = {
   title: "Compatibility — routers and browser support",
   description:
-    "SSGOI is router-agnostic (Next.js, React Router, TanStack, SvelteKit, Nuxt) and runs on every modern browser — Chrome 84+, Safari 13.1+, Firefox 75+, Edge 84+.",
+    "SSGOI is router-agnostic (Next.js, React Router, TanStack, SvelteKit, Nuxt, Qwik City) and runs on every modern browser — Chrome 84+, Safari 13.1+, Firefox 75+, Edge 84+.",
   alternates: { canonical: "/docs/compatibility" },
   openGraph: buildOpenGraph({ path: "/docs/compatibility" }),
 };
