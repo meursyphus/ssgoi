@@ -1,9 +1,6 @@
-import { Slot, component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
-import {
-  createSggoiTransitionContext,
-  observeSsgoiTransitions,
-} from "@ssgoi/core/internal";
+import { Slot, component$, useSignal } from "@builder.io/qwik";
 import type { SsgoiConfigQrl, SsgoiHostQrl } from "./types";
+import { useSsgoi } from "./use-ssgoi";
 
 export interface SsgoiProps {
   config$?: SsgoiConfigQrl;
@@ -13,20 +10,7 @@ export interface SsgoiProps {
 export const Ssgoi = component$<SsgoiProps>(({ config$, host$ }) => {
   const root = useSignal<HTMLElement>();
 
-  useVisibleTask$(
-    async ({ cleanup }) => {
-      const element = root.value;
-      if (!element) return;
-
-      const config = config$ ? await config$() : {};
-      const host = host$ ? await host$() : undefined;
-      const ssgoi = createSggoiTransitionContext(config, { host });
-      const stopObserving = observeSsgoiTransitions(element, ssgoi);
-
-      cleanup(stopObserving);
-    },
-    { strategy: "document-ready" },
-  );
+  useSsgoi(root, { config$, host$ });
 
   return (
     <div ref={root} data-ssgoi-root="" style={{ display: "contents" }}>

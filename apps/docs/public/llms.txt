@@ -189,8 +189,8 @@ Angular:
 Qwik City:
 
 ```tsx
-import { $, Slot, component$ } from "@builder.io/qwik";
-import { Ssgoi } from "@ssgoi/qwik";
+import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { useSsgoi } from "@ssgoi/qwik";
 import { drill, zoom } from "@ssgoi/qwik/view-transitions";
 
 const config$ = $(() => ({
@@ -202,11 +202,16 @@ const config$ = $(() => ({
 }));
 
 export default component$(() => {
+  const ssgoiRoot = useSignal<HTMLElement>();
+
+  useSsgoi(ssgoiRoot, { config$ });
+
   return (
-    <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
-      <Ssgoi config$={config$}>
-        <Slot />
-      </Ssgoi>
+    <main
+      ref={ssgoiRoot}
+      class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
+    >
+      <Slot />
     </main>
   );
 });
@@ -220,7 +225,9 @@ export default component$(() => {
 });
 ```
 
-Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory) instead of passing a plain `config` object into `<Ssgoi>`.
+Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory) instead of passing a plain `config` object.
+
+In Qwik City layouts, prefer `useSsgoi(ref, { config$ })` over wrapping the route `<Slot />` in `<Ssgoi>`. Forwarding a Qwik City route slot through another component prevents routed content from being projected into the live DOM.
 
 ---
 

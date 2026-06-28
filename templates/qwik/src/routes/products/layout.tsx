@@ -1,6 +1,6 @@
-import { $, Slot, component$ } from "@builder.io/qwik";
+import { $, Slot, component$, useSignal } from "@builder.io/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
-import { Ssgoi } from "@ssgoi/qwik";
+import { useSsgoi } from "@ssgoi/qwik";
 import { slide } from "@ssgoi/qwik/view-transitions";
 
 const categories = [
@@ -18,6 +18,9 @@ const productConfig$ = $(() => ({
 export default component$(() => {
   const location = useLocation();
   const pathname = location.url.pathname.replace(/\/$/, "");
+  const ssgoiRoot = useSignal<HTMLElement>();
+
+  useSsgoi(ssgoiRoot, { config$: productConfig$ });
 
   return (
     <div
@@ -47,10 +50,12 @@ export default component$(() => {
         </div>
       </div>
 
-      <div class="flex-1 overflow-hidden relative">
-        <Ssgoi config$={productConfig$}>
-          <Slot />
-        </Ssgoi>
+      <div
+        ref={ssgoiRoot}
+        data-ssgoi-root=""
+        class="flex-1 overflow-hidden relative"
+      >
+        <Slot />
       </div>
     </div>
   );
