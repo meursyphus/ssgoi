@@ -2,7 +2,7 @@
 
 The framework-agnostic animation engine behind [SSGOI](https://ssgoi.dev) — native app-like page transitions for the web.
 
-> Most apps should install a framework binding (`@ssgoi/react`, `@ssgoi/svelte`, `@ssgoi/vue`, `@ssgoi/solid`, `@ssgoi/angular`), which depend on this package. Install `@ssgoi/core` directly only when building a custom integration.
+> Most apps should install a framework binding (`@ssgoi/react`, `@ssgoi/svelte`, `@ssgoi/vue`, `@ssgoi/solid`, `@ssgoi/angular`, `@ssgoi/qwik`), which depend on this package. Install `@ssgoi/core` directly only when building a custom integration.
 
 try this: [ssgoi.dev](https://ssgoi.dev)
 
@@ -25,8 +25,8 @@ SSGOI brings native app-like page transitions to the web. Transform your static 
 ### ✨ Key Features
 
 - **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
-- **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit, SolidStart. No hydration issues, SEO-friendly
-- **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit - all work seamlessly
+- **🚀 SSR Ready** - Perfect compatibility with Next.js, Nuxt, SvelteKit, SolidStart, Qwik City. No hydration issues, SEO-friendly
+- **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router, SvelteKit, Qwik City - all work seamlessly
 - **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
 - **🎨 Framework Agnostic** - One consistent API for React, Svelte, Vue, Solid, Angular, and more
 
@@ -37,7 +37,7 @@ SSGOI brings native app-like page transitions to the web. Transform your static 
 ```bash
 # Pick the binding for your framework
 npm install @ssgoi/react
-# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular
+# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular, @ssgoi/qwik
 ```
 
 ### Add Transitions in 30 Seconds
@@ -122,7 +122,7 @@ export function SsgoiTransitionBoundary({
 React Router and TanStack Router use the same component body with their own
 pathname hook.
 
-For SvelteKit, Nuxt/Vue, Solid, and Angular, mark each routed page boundary
+For SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik, mark each routed page boundary
 directly with `data-ssgoi-transition` instead of using a layout-level utility.
 The value can be a hard-coded logical id; it only has to match your config.
 

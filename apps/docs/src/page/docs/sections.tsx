@@ -9,6 +9,7 @@ import {
 import {
   NextMark,
   NuxtMark,
+  QwikMark,
   ReactRouterMark,
   SvelteKitMark,
   TanStackRouterMark,
@@ -109,6 +110,7 @@ const PACKAGES = [
   "@ssgoi/vue",
   "@ssgoi/solid",
   "@ssgoi/angular",
+  "@ssgoi/qwik",
 ];
 
 export function InstallBody() {
@@ -358,7 +360,7 @@ function NonReactBoundary() {
   return (
     <div className="mt-12 border-t border-white/[0.06] pt-10">
       <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Svelte · Vue · Solid · Angular
+        Svelte · Vue · Solid · Angular · Qwik
       </p>
       <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
         Mark each routed page directly
@@ -395,7 +397,16 @@ function NonReactBoundary() {
 <!-- Angular · gallery.component.html -->
 <section data-ssgoi-transition="/gallery">
   <!-- page content -->
-</section>`}
+</section>
+
+// Qwik City · src/routes/gallery/index.tsx
+export default component$(() => {
+  return (
+    <main data-ssgoi-transition="/gallery">
+      {/* page content */}
+    </main>
+  );
+});`}
       />
 
       <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
@@ -684,6 +695,7 @@ const ROUTERS: Array<{
   },
   { name: "SvelteKit", icon: SvelteKitMark, templatePath: "sveltekit" },
   { name: "Nuxt", icon: NuxtMark, templatePath: "nuxt" },
+  { name: "Qwik City", icon: QwikMark, templatePath: "qwik" },
 ];
 
 const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
@@ -714,8 +726,8 @@ export function RoutersBody() {
       </div>
       <p className="mt-6 text-sm text-neutral-400">
         These examples show the recommended framework-specific setup. React
-        templates use the pathname boundary utility; SvelteKit and Nuxt mark
-        routed pages directly. Full templates index:{" "}
+        templates use the pathname boundary utility; SvelteKit, Nuxt, and Qwik
+        mark routed pages directly. Full templates index:{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

@@ -23,7 +23,7 @@ const DOCS_FAQ = faqSchema([
   {
     question: "Which frameworks does SSGOI support?",
     answer:
-      "SSGOI works with React (and Next.js), Svelte (and SvelteKit), Vue (and Nuxt), Solid (and SolidStart), and Angular. It is router-agnostic, so it works regardless of which router you use.",
+      "SSGOI works with React (and Next.js), Svelte (and SvelteKit), Vue (and Nuxt), Solid (and SolidStart), Angular, and Qwik (with Qwik City). It is router-agnostic, so it works regardless of which router you use.",
   },
   {
     question: "How do SSGOI page transitions work?",

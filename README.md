@@ -145,7 +145,7 @@ as that id. Match dynamic descendants with wildcard config like `/post/*`. Use
 pages now transition like a native app.
 
 This layout-level utility pattern is for React adapters. In SvelteKit,
-Nuxt/Vue, Solid, and Angular, mark each routed page boundary directly with
+Nuxt/Vue, Solid, Angular, and Qwik, mark each routed page boundary directly with
 `data-ssgoi-transition`. Use a stable logical id such as `/gallery`; it does not
 have to be the actual route pathname.
 
@@ -181,9 +181,10 @@ Use the templates as reference implementations for each router/framework:
 - [TanStack Router](https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router)
 - [SvelteKit](https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit)
 - [Nuxt](https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt)
+- [Qwik City](https://github.com/meursyphus/ssgoi/tree/main/templates/qwik)
 
-React templates use the pathname boundary utility. SvelteKit and Nuxt mark each
-routed page directly with `data-ssgoi-transition`.
+React templates use the pathname boundary utility. SvelteKit, Nuxt, and Qwik
+mark each routed page directly with `data-ssgoi-transition`.
 
 ---
 
@@ -233,6 +234,7 @@ See them all live at [ssgoi.dev](https://ssgoi.dev) or in [llms.txt](https://ssg
 | `@ssgoi/vue`     | Vue, Nuxt                 |
 | `@ssgoi/solid`   | Solid, SolidStart         |
 | `@ssgoi/angular` | Angular                   |
+| `@ssgoi/qwik`    | Qwik, Qwik City           |
 | `@ssgoi/core`    | Framework-agnostic engine |
 
 ---

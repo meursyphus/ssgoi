@@ -14,7 +14,7 @@ This document is for AI assistants to help developers set up SSGOI page transiti
 
 ```bash
 npm install @ssgoi/react
-# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular
+# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular, @ssgoi/qwik
 ```
 
 Reference templates:
@@ -24,8 +24,9 @@ Reference templates:
 - TanStack Router: https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router
 - SvelteKit: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
 - Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+- Qwik City: https://github.com/meursyphus/ssgoi/tree/main/templates/qwik
 
-React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit and Nuxt templates mark each routed page directly with `data-ssgoi-transition`.
+React templates use a pathname-based `SsgoiTransitionBoundary` utility. SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`.
 
 ---
 
@@ -35,7 +36,7 @@ SSGOI works on any web app. There are only three things to get right:
 
 1. **Decide your scroll element** — the element whose scroll position SSGOI should preserve across transitions. Often a `<main>` or a centered content container.
 2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the outer element that wraps the SSGOI provider / `<Ssgoi>`.** This is the layout shell, not the `data-ssgoi-transition` boundary.
-3. **Mark routed content with `data-ssgoi-transition="..."`**. React adapters can use one layout-level boundary utility for this marker. SvelteKit, Nuxt/Vue, Solid, and Angular should mark each routed page boundary directly.
+3. **Mark routed content with `data-ssgoi-transition="..."`**. React adapters can use one layout-level boundary utility for this marker. SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik should mark each routed page boundary directly.
 
 Why those classes:
 
@@ -82,11 +83,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html>
       <body>
@@ -159,7 +156,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 ## Non-React Route Boundary Setup
 
-For SvelteKit, Nuxt/Vue, Solid, and Angular, set `data-ssgoi-transition` directly on each routed page boundary. The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`.
+For SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik, set `data-ssgoi-transition` directly on each routed page boundary. The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`.
 
 Do not put a single slot/snippet-based route boundary in a parent layout for SvelteKit or Nuxt. Their slot content is live, so the outgoing page wrapper can render the incoming page's children during navigation.
 
@@ -188,6 +185,42 @@ Angular:
   <h1>Home Page</h1>
 </section>
 ```
+
+Qwik City:
+
+```tsx
+import { $, Slot, component$ } from "@builder.io/qwik";
+import { Ssgoi } from "@ssgoi/qwik";
+import { drill, zoom } from "@ssgoi/qwik/view-transitions";
+
+const config$ = $(() => ({
+  preserveScroll: { exclude: ["/post/*"] },
+  transitions: [
+    drill({ enter: "/post/*", exit: "/post" }),
+    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
+  ],
+}));
+
+export default component$(() => {
+  return (
+    <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
+      <Ssgoi config$={config$}>
+        <Slot />
+      </Ssgoi>
+    </main>
+  );
+});
+```
+
+```tsx
+export default component$(() => {
+  return (
+    <section data-ssgoi-transition="/gallery">{/* page content */}</section>
+  );
+});
+```
+
+Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory) instead of passing a plain `config` object into `<Ssgoi>`.
 
 ---
 

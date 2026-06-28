@@ -3,7 +3,7 @@
   "homepage": "https://ssgoi.dev",
   "version": "2.0.0",
   "private": true,
-  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue).",
+  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Qwik).",
   "scripts": {
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",
@@ -13,6 +13,7 @@
     "svelte:build": "pnpm --filter @ssgoi/svelte build",
     "vue:build": "pnpm --filter @ssgoi/vue build",
     "solid:build": "pnpm --filter @ssgoi/solid build",
+    "qwik:build": "pnpm --filter @ssgoi/qwik build",
     "dev": "pnpm --filter dev dev",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
@@ -21,6 +22,7 @@
     "template:react-router": "pnpm --filter ssgoi-react-router-template dev",
     "template:sveltekit": "pnpm --filter ssgoi-sveltekit-template dev",
     "template:tanstack-router": "pnpm --filter ssgoi-tanstack-router-template dev",
+    "template:qwik": "pnpm --filter ssgoi-qwik-template dev",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
@@ -49,6 +51,8 @@
     "svelte",
     "sveltekit",
     "vue",
+    "qwik",
+    "qwik-city",
     "page-transition",
     "animation"
   ],
@@ -96,6 +100,9 @@
       "eslint --fix --config packages/vue/eslint.config.js"
     ],
     "packages/solid/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "packages/qwik/**/*.{ts,tsx}": [
       "prettier --write"
     ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [
