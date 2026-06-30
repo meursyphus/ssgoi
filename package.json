@@ -71,17 +71,6 @@
     "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ],
-    "overrides": {
-      "baseline-browser-mapping": "2.10.27",
-      "browserslist": "4.28.2",
-      "caniuse-lite": "1.0.30001792",
-      "update-browserslist-db": "1.2.3"
-    }
-  },
   "lint-staged": {
     "packages/core/**/*.{ts,tsx}": [
       "prettier --write --config packages/core/.prettierrc",
