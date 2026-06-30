@@ -2,3 +2,19 @@ packages:
   - "packages/*"
   - "apps/*"
   - "templates/*"
+
+# pnpm 10 reads these from pnpm-workspace.yaml; the old `pnpm` field in
+# package.json is ignored.
+onlyBuiltDependencies:
+  - esbuild
+
+overrides:
+  baseline-browser-mapping: "2.10.27"
+  browserslist: "4.28.2"
+  caniuse-lite: "1.0.30001792"
+  update-browserslist-db: "1.2.3"
+  # Dedupe rollup to a single version. vite (^4.43.0) and the rollup plugins all
+  # accept this, and collapsing 4.52.5 into 4.62.2 keeps vite's bundled rollup
+  # types in sync with the plugins, so vue-tsc no longer sees a Plugin<any>
+  # structural mismatch (see packages/vue/vite.config.ts).
+  rollup: "4.62.2"
