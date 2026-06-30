@@ -494,7 +494,7 @@ function ReferenceTemplates() {
       <p className="mt-6 text-sm text-neutral-500">
         Source lives in the monorepo at{" "}
         <a
-          href="https://github.com/meursyphus/ssgoi/tree/main/templates"
+          href="https://github.com/meursyphus/ssgoi/tree/HEAD/templates"
           target="_blank"
           rel="noreferrer"
           className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
@@ -749,7 +749,7 @@ const ROUTERS: Array<{
   { name: "Qwik City", icon: QwikMark, templatePath: "qwik" },
 ];
 
-const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
+const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/HEAD/templates";
 
 export function RoutersBody() {
   return (

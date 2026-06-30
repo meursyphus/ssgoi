@@ -19,7 +19,7 @@ import type { ShowcaseApp, ShowcaseClip } from "./types";
 export type { ShowcaseApp, ShowcaseClip, ShowcasePlatform } from "./types";
 
 /** GitHub tree URL prefix — paths in showcase data are repo-root-relative folders. */
-export const GITHUB_BASE = "https://github.com/meursyphus/ssgoi/tree/latest";
+export const GITHUB_BASE = "https://github.com/meursyphus/ssgoi/tree/HEAD";
 
 export function githubUrl(path: string): string {
   return `${GITHUB_BASE}/${path.replace(/^\//, "")}`;
