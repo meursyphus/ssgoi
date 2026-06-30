@@ -43,7 +43,11 @@ export default defineConfig({
           "@ssgoi/core": "@ssgoi/core",
         },
       },
-      plugins: [preserveDirectives()],
+      // Cast away a rollup version skew: preserve-directives is typed against a
+      // newer rollup than the one vite resolves, so its Plugin<any> isn't
+      // structurally assignable to InputPluginOption (e.g. ModuleInfo gained
+      // `safeVariableNames`). Runtime is unaffected.
+      plugins: [preserveDirectives() as PluginOption],
     },
   },
 });
