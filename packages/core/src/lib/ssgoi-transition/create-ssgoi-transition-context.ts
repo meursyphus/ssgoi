@@ -106,6 +106,21 @@ export function createSggoiTransitionContext(
   const swipeDetector = createSwipeBackDetector();
   swipeDetector.initialize();
 
+  // Single-path scroll identity, derived from the SAME `middleware` the matcher
+  // uses, so an aliased/rewritten route records & restores scroll under one key.
+  // `middleware` is a (from,to) pair rewrite; for a lone path we run it as a
+  // self-pair and take `from`. Memoized — the scroll listener calls this per
+  // frame and the path set is tiny (one per route).
+  const resolvedScrollPaths = new Map<string, string>();
+  const resolveScrollPath = (path: string): string => {
+    let resolved = resolvedScrollPaths.get(path);
+    if (resolved === undefined) {
+      resolved = middleware(path, path).from;
+      resolvedScrollPaths.set(path, resolved);
+    }
+    return resolved;
+  };
+
   const {
     initializeContext,
     calculateScrollOffset,
@@ -115,7 +130,7 @@ export function createSggoiTransitionContext(
     getPositionedParentElement,
     getScrollPosition,
     getIsMobile,
-  } = createContextManager({ preserveScroll });
+  } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
 
   // Resolve + flatten + process the path-transition list lazily. `isMobile` is
   // only reliable once the scroll container is known (measured on the first IN),
@@ -403,6 +418,14 @@ export function createSggoiTransitionContext(
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
 
+      // `middleware` rewrites the path pair for matching (e.g. aliasing
+      // `/m-p/[id]` → `/p/[id]`, or collapsing a deep route to a logical id). Use
+      // the transformed pair for `findMatchingTransition`, but hand `runTransition`
+      // the ORIGINAL pair: the context manager already funnels every scroll path
+      // through the same `middleware` (via `resolveScrollPath`), so passing the
+      // originals keeps record/restore on one identity. Passing the pre-transformed
+      // paths here would double-apply the rewrite and could miss the stored scroll,
+      // snapping the outgoing page to the top mid-transition.
       const { from: transformedFrom, to: transformedTo } = middleware(
         pair.from,
         pair.to,
@@ -421,7 +444,7 @@ export function createSggoiTransitionContext(
 
       if (!config || !outSide || !inSide) return;
 
-      runTransition(config, transformedFrom, transformedTo, outSide, inSide);
+      runTransition(config, pair.from, pair.to, outSide, inSide);
     });
   };
 

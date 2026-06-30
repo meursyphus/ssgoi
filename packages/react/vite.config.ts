@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
@@ -56,7 +56,7 @@ export default defineConfig({
           "@ssgoi/core": "@ssgoi/core",
         },
       },
-      plugins: [preserveDirectives()],
+      plugins: [preserveDirectives() as PluginOption],
     },
   },
 });

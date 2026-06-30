@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
@@ -45,7 +45,7 @@ export default defineConfig({
           "@ssgoi/core": "@ssgoi/core",
         },
       },
-      plugins: [preserveDirectives()],
+      plugins: [preserveDirectives() as PluginOption],
     },
   },
 });

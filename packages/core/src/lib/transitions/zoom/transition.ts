@@ -379,6 +379,7 @@ export const zoom = (
         resolved,
         input,
         physics,
+        context,
         extras: extras as ZoomExtras,
         onComplete,
       };

@@ -11,6 +11,7 @@ import { noraHaleShowcase } from "@/demo/nora-hale/showcase";
 import { pinterestShowcase } from "@/demo/pinterest/showcase";
 import { silentRoomShowcase } from "@/demo/silent-room/showcase";
 import { ssgoiDocsShowcase } from "@/demo/ssgoi-docs/showcase";
+import { voyageShowcase } from "@/demo/voyage/showcase";
 import { youtubeMusicWebShowcase } from "@/demo/youtube-music-web/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
 import type { ShowcaseApp, ShowcaseClip } from "./types";
@@ -33,6 +34,7 @@ export const showcases: ShowcaseApp[] = [
   pinterestShowcase,
   gamjaMarketShowcase,
   materialMailShowcase,
+  voyageShowcase,
   //web
   youtubeMusicWebShowcase,
   airbnbPhotoTourShowcase,

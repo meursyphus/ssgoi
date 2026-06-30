@@ -1,11 +1,14 @@
 {
   "name": "@ssgoi/solid",
-  "version": "6.5.0",
+  "version": "6.6.4",
   "description": "Solid.js bindings for SSGOI - Native app-like page transitions for Solid applications",
   "private": false,
   "type": "module",
   "files": [
+    "src/lib",
     "dist",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*",
     "!dist/**/*.test.*",
     "!dist/**/*.spec.*"
   ],
@@ -14,18 +17,21 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "solid": "./src/lib/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
     "./types": {
+      "solid": "./src/lib/types.ts",
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "require": "./dist/types.cjs",
       "default": "./dist/types.js"
     },
     "./view-transitions": {
+      "solid": "./src/lib/view-transitions.ts",
       "types": "./dist/view-transitions.d.ts",
       "import": "./dist/view-transitions.js",
       "require": "./dist/view-transitions.cjs",

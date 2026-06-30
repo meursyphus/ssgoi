@@ -6,7 +6,7 @@ import { DocsPageHeading, InstallBody } from "@/page/docs/sections";
 export const metadata: Metadata = {
   title: "Install SSGOI — one package per framework",
   description:
-    "Install SSGOI for React, Svelte, Vue, Solid, or Angular. One package per framework, same API across all of them.",
+    "Install SSGOI for React, Svelte, Vue, Solid, Angular, or Qwik. One package per framework, with setup patterns for each router.",
   alternates: { canonical: "/docs/install" },
   openGraph: buildOpenGraph({ path: "/docs/install" }),
 };
@@ -23,7 +23,7 @@ export default function DocsInstallPage() {
       />
       <DocsPageHeading
         title="Install"
-        lead="Add the package that matches your framework. The API is identical across all of them."
+        lead="Add the package that matches your framework. The transition model is shared; the setup follows each router."
       />
       <InstallBody />
     </>

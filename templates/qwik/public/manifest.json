@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "SSGOI Qwik Template",
+  "short_name": "SSGOI Qwik",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "description": "A Qwik City SSR template showcasing SSGOI page transitions."
+}

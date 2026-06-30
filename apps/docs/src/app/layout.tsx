@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     "vue transitions",
     "solid transitions",
     "angular transitions",
+    "qwik transitions",
     "ssgoi",
   ],
   authors: [{ name: "MeurSyphus", url: "https://github.com/MeurSyphus" }],

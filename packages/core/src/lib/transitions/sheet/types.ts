@@ -10,7 +10,7 @@ import type { PhysicsOptions } from "@types";
  *
  * @internal
  */
-export type SheetType = "static" | "background-scale";
+export type SheetType = "static" | "background-scale" | "blur";
 export type SheetDirection = "enter" | "exit";
 
 export interface SheetOptions {
@@ -26,8 +26,24 @@ export interface SheetBackgroundConfig {
   exitStyle: (t: number) => SheetStyle;
 }
 
+/**
+ * A separate full-viewport layer that sits *between* the background page and
+ * the foreground sheet (at `Z_OVERLAY`). Used by the `blur` tone to drive a
+ * `backdrop-filter` independently of the background's own clip + scale — the
+ * background recedes (clipped, scaled) while this layer frosts it uniformly,
+ * the way the zoom `blur` tone separates its blur overlay from the tile.
+ */
+export interface SheetOverlayConfig {
+  willChange: string;
+  initialStyle: Record<string, string>;
+  /** `progress` is the raw animation t (0 → 1) for the active direction. */
+  style: (direction: SheetDirection, progress: number) => SheetStyle;
+}
+
 export interface SheetProvider {
   enterPhysics: PhysicsOptions;
   exitPhysics: PhysicsOptions;
   background: SheetBackgroundConfig;
+  /** Only set by tones that need a backdrop-filter layer (currently `blur`). */
+  overlay?: SheetOverlayConfig;
 }

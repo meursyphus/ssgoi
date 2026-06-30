@@ -3,7 +3,7 @@
   "homepage": "https://ssgoi.dev",
   "version": "2.0.0",
   "private": true,
-  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue).",
+  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Qwik).",
   "scripts": {
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",
@@ -13,14 +13,17 @@
     "svelte:build": "pnpm --filter @ssgoi/svelte build",
     "vue:build": "pnpm --filter @ssgoi/vue build",
     "solid:build": "pnpm --filter @ssgoi/solid build",
+    "qwik:build": "pnpm --filter @ssgoi/qwik build",
     "dev": "pnpm --filter dev dev",
     "docs": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
     "template:nextjs": "pnpm --filter ssgoi-nextjs-template dev",
     "template:nuxt": "pnpm --filter ssgoi-nuxt-template dev",
     "template:react-router": "pnpm --filter ssgoi-react-router-template dev",
+    "template:solidstart": "pnpm --filter ssgoi-solidstart-template dev",
     "template:sveltekit": "pnpm --filter ssgoi-sveltekit-template dev",
     "template:tanstack-router": "pnpm --filter ssgoi-tanstack-router-template dev",
+    "template:qwik": "pnpm --filter ssgoi-qwik-template dev",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "legacy-docs": "pnpm --filter legacy-docs dev",
@@ -28,7 +31,7 @@
     "version:bump": "node scripts/bump-version.mjs",
     "release:build": "pnpm -r --filter \"./packages/*\" run build",
     "release:publish": "pnpm -r --filter \"./packages/*\" publish --access public --no-git-checks",
-    "release": "pnpm release:build && pnpm release:publish",
+    "release": "node scripts/release.mjs",
     "docs:cf-build": "pnpm release:build && pnpm --filter docs exec opennextjs-cloudflare build --skipWranglerConfigCheck",
     "prepare": "husky"
   },
@@ -49,6 +52,8 @@
     "svelte",
     "sveltekit",
     "vue",
+    "qwik",
+    "qwik-city",
     "page-transition",
     "animation"
   ],
@@ -65,17 +70,6 @@
     "lint-staged": "^16.1.6",
     "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ],
-    "overrides": {
-      "baseline-browser-mapping": "2.10.27",
-      "browserslist": "4.28.2",
-      "caniuse-lite": "1.0.30001792",
-      "update-browserslist-db": "1.2.3"
-    }
   },
   "lint-staged": {
     "packages/core/**/*.{ts,tsx}": [
@@ -96,6 +90,9 @@
       "eslint --fix --config packages/vue/eslint.config.js"
     ],
     "packages/solid/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "packages/qwik/**/*.{ts,tsx}": [
       "prettier --write"
     ],
     "apps/docs/**/*.{ts,tsx,js,jsx}": [

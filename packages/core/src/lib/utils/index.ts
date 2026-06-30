@@ -4,7 +4,7 @@ export { getPositionedParent } from "./get-positioned-parent";
 export { sleep } from "./sleep";
 export { getRect } from "./get-rect";
 export { getClientRect } from "./get-client-rect";
-export { getViewportRect } from "./get-viewport-rect";
+export { getViewportRect, getOverlayRect } from "./get-viewport-rect";
 export { round, floor, ceil, toFixed } from "./number";
 export { withResolvers } from "./with-resolvers";
 export { waitPaint } from "./wait-paint";

@@ -9,7 +9,9 @@ import {
 import {
   NextMark,
   NuxtMark,
+  QwikMark,
   ReactRouterMark,
+  SolidStartMark,
   SvelteKitMark,
   TanStackRouterMark,
 } from "@/components/router-logos";
@@ -109,6 +111,7 @@ const PACKAGES = [
   "@ssgoi/vue",
   "@ssgoi/solid",
   "@ssgoi/angular",
+  "@ssgoi/qwik",
 ];
 
 export function InstallBody() {
@@ -121,7 +124,8 @@ export function InstallBody() {
       </div>
       <p className="mt-6 text-sm leading-relaxed text-neutral-500">
         One package per framework. Pick the one that matches your stack — the
-        API is the same across all of them.
+        transition config shape is shared, while the wrapper and route marker
+        follow each framework&apos;s routing model.
       </p>
 
       <div className="mt-12 border-t border-white/[0.06] pt-10">
@@ -134,7 +138,7 @@ export function InstallBody() {
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
           Two steps and the router feels native. The example below is React /
           Next.js; other frameworks place the page marker directly on each
-          routed page.
+          routed page, and Qwik passes the config as a QRL factory.
         </p>
 
         <SetupStep
@@ -358,7 +362,7 @@ function NonReactBoundary() {
   return (
     <div className="mt-12 border-t border-white/[0.06] pt-10">
       <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Svelte · Vue · Solid · Angular
+        Svelte · Vue · Solid · Angular · Qwik
       </p>
       <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
         Mark each routed page directly
@@ -395,7 +399,16 @@ function NonReactBoundary() {
 <!-- Angular · gallery.component.html -->
 <section data-ssgoi-transition="/gallery">
   <!-- page content -->
-</section>`}
+</section>
+
+// Qwik City · src/routes/gallery/index.tsx
+export default component$(() => {
+  return (
+    <main data-ssgoi-transition="/gallery">
+      {/* page content */}
+    </main>
+  );
+});`}
       />
 
       <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
@@ -407,6 +420,54 @@ function NonReactBoundary() {
         separated. (React&apos;s utility sidesteps this by keying the subtree on
         the pathname.)
       </p>
+
+      <div className="mt-8 border-t border-white/[0.06] pt-8">
+        <h4 className="text-sm font-semibold tracking-tight text-neutral-100">
+          Qwik City layout setup
+        </h4>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+          Qwik serializes component state for resumability, while SSGOI configs
+          contain transition functions. Pass the config as{" "}
+          <code className="font-mono text-neutral-200">config$</code> and call{" "}
+          <code className="font-mono text-neutral-200">useSsgoi</code> directly
+          in the Qwik City layout that owns the route{" "}
+          <code className="font-mono text-neutral-200">&lt;Slot /&gt;</code>.
+        </p>
+        <CodeBlock
+          className="mt-5"
+          language="tsx"
+          code={`import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { useSsgoi } from "@ssgoi/qwik";
+import { drill } from "@ssgoi/qwik/view-transitions";
+
+const config$ = $(() => ({
+  transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
+}));
+
+export default component$(() => {
+  const ssgoiRoot = useSignal<HTMLElement>();
+
+  useSsgoi(ssgoiRoot, { config$ });
+
+  return (
+    <main
+      ref={ssgoiRoot}
+      class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
+    >
+      <Slot />
+    </main>
+  );
+});`}
+        />
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
+          Avoid wrapping a Qwik City route{" "}
+          <code className="font-mono text-neutral-300">&lt;Slot /&gt;</code>{" "}
+          inside the exported{" "}
+          <code className="font-mono text-neutral-300">&lt;Ssgoi&gt;</code>{" "}
+          component. Forwarding the route slot through another component can
+          keep routed content out of the live DOM during navigation.
+        </p>
+      </div>
     </div>
   );
 }
@@ -682,8 +743,10 @@ const ROUTERS: Array<{
     icon: TanStackRouterMark,
     templatePath: "tanstack-router",
   },
+  { name: "SolidStart", icon: SolidStartMark, templatePath: "solidstart" },
   { name: "SvelteKit", icon: SvelteKitMark, templatePath: "sveltekit" },
   { name: "Nuxt", icon: NuxtMark, templatePath: "nuxt" },
+  { name: "Qwik City", icon: QwikMark, templatePath: "qwik" },
 ];
 
 const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/main/templates";
@@ -714,8 +777,9 @@ export function RoutersBody() {
       </div>
       <p className="mt-6 text-sm text-neutral-400">
         These examples show the recommended framework-specific setup. React
-        templates use the pathname boundary utility; SvelteKit and Nuxt mark
-        routed pages directly. Full templates index:{" "}
+        templates use the pathname boundary utility; SolidStart, SvelteKit,
+        Nuxt, and Qwik mark routed pages directly. Angular follows the same
+        direct marker rule in its package docs. Full templates index:{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"
