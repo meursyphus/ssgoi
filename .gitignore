@@ -1,7 +1,9 @@
 node_modules
 .env
 .worktree
+.wrangler/
 .DS_Store
+apps/docs/src/lib/blog.generated.ts
 
 # Personal Claude Code agents
 .claude/agents/

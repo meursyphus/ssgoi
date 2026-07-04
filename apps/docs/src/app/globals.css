@@ -83,3 +83,134 @@ body {
 .hljs-operator {
   color: #a1a1aa;
 }
+
+.blog-content h1 {
+  margin-top: 3rem;
+  text-wrap: balance;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #f5f5f5;
+}
+
+.blog-content h2 {
+  margin-top: 3rem;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+  padding-top: 2.5rem;
+  text-wrap: balance;
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f5f5f5;
+}
+
+.blog-content h3 {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+.blog-content p {
+  margin-top: 1.25rem;
+  line-height: 1.75;
+  color: #d4d4d8;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-top: 1.25rem;
+  padding-left: 1.5rem;
+  line-height: 1.75;
+  color: #d4d4d8;
+}
+
+.blog-content ul {
+  list-style: disc;
+}
+
+.blog-content ol {
+  list-style: decimal;
+}
+
+.blog-content li + li {
+  margin-top: 0.5rem;
+}
+
+.blog-content a {
+  color: #fb923c;
+  text-decoration-line: underline;
+  text-decoration-color: rgb(251 146 60 / 0.4);
+  text-underline-offset: 4px;
+}
+
+.blog-content a:hover {
+  text-decoration-color: #fb923c;
+}
+
+.blog-content blockquote {
+  margin-top: 1.5rem;
+  border-left: 2px solid rgb(249 115 22 / 0.4);
+  padding-left: 1rem;
+  font-style: italic;
+  color: #a1a1aa;
+}
+
+.blog-content :not(pre) > code {
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.06);
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85em;
+  color: #fed7aa;
+}
+
+.blog-content pre {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.015);
+  padding: 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e5e5e5;
+}
+
+.blog-content pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.blog-content hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.blog-content table {
+  margin-top: 1.5rem;
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.blog-content th {
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  color: #e5e5e5;
+}
+
+.blog-content td {
+  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+  padding: 0.5rem 0.75rem;
+  color: #d4d4d8;
+}

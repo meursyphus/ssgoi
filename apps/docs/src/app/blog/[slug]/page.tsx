@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
 import { Link } from "@/lib/link";
 import { JsonLd } from "@/components/json-ld";
-import { mdxComponents } from "@/components/mdx-components";
 import {
   AUTHOR,
   SITE_NAME,
@@ -67,7 +63,7 @@ export default async function BlogPostPage({
   const post = getPost(slug);
   if (!post) notFound();
 
-  const { meta, content } = post;
+  const { meta, html } = post;
   const url = `${SITE_URL}/blog/${slug}`;
 
   const articleSchema = {
@@ -129,20 +125,10 @@ export default async function BlogPostPage({
             </p>
           </header>
 
-          <div className="mt-4">
-            <MDXRemote
-              source={content}
-              components={mdxComponents}
-              options={{
-                mdxOptions: {
-                  remarkPlugins: [remarkGfm],
-                  rehypePlugins: [
-                    [rehypeHighlight, { aliases: { typescript: ["tsx"] } }],
-                  ],
-                },
-              }}
-            />
-          </div>
+          <div
+            className="blog-content mt-4"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
         </article>
       </div>
     </main>
