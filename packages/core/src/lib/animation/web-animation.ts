@@ -4,6 +4,7 @@ import {
   type IntegratorState,
   SETTLE_THRESHOLD,
 } from "./integrator";
+import { waitPaint } from "../utils/wait-paint";
 import { Animation } from "./animation";
 
 const FRAME_TIME = 1000 / 60;
@@ -33,9 +34,11 @@ interface SimFrame {
  * Lifecycle:
  *   1. `play()` / `reverse()` calls `simulate()` from the current (position,
  *      velocity) toward the target bound, producing a frame list.
- *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` runs them.
+ *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is armed
+ *      at 0 ms, waits for the browser's pending setup, then starts.
  *   3. While playing, `getPose()` interpolates the live position from frames
- *      using `performance.now() - startTime`.
+ *      using WAAPI's `currentTime`, so browser setup latency is not counted as
+ *      animation progress.
  *
  * Identity for motion matching is the DOM element itself — when a previous
  * animation's pose is handed in via `matchInto`, we look up by element.
@@ -51,7 +54,10 @@ export class WebAnimation extends Animation {
   private currentVelocity = 0;
   private frames: SimFrame[] = [];
   private waapi: globalThis.Animation | null = null;
-  private startTime = 0;
+  private runId = 0;
+  private waitingForStart = false;
+  private startReady = false;
+  private pendingFirstFrame: Keyframe | undefined;
   private running = false;
   private paused = false;
   private settled = false;
@@ -76,6 +82,10 @@ export class WebAnimation extends Animation {
       // continues exactly where it was halted.
       this.paused = false;
       this.running = true;
+      if (this.waitingForStart) {
+        if (this.startReady) this.playPreparedWaapi(this.waapi);
+        return;
+      }
       this.waapi.play();
       return;
     }
@@ -231,49 +241,97 @@ export class WebAnimation extends Animation {
       return this.styleFn(t, u) as Keyframe;
     });
 
-    // Clear inline styles for animated props so they don't clash with WAAPI.
     const firstFrame = keyframes[0];
-    if (firstFrame) {
-      for (const prop of Object.keys(firstFrame)) {
-        (this.element.style as unknown as Record<string, string>)[prop] = "";
-      }
-    }
-
     const lastFrame = this.frames[this.frames.length - 1]!;
     const duration = lastFrame.time;
+    const runId = ++this.runId;
 
-    this.waapi = this.element.animate(keyframes, {
+    const waapi = this.element.animate(keyframes, {
       duration,
-      fill: "forwards",
+      fill: "both",
       easing: "linear",
       composite: "replace",
     });
-    this.waapi.playbackRate = this.playbackRate;
+    waapi.playbackRate = this.playbackRate;
+    waapi.pause();
+    waapi.currentTime = 0;
 
-    this.startTime = performance.now();
+    this.waapi = waapi;
+    this.waitingForStart = true;
+    this.startReady = false;
+    this.pendingFirstFrame = firstFrame;
     this.running = true;
 
-    this.waapi.onfinish = () => {
-      if (!this.running) return;
+    waapi.onfinish = () => {
+      if (!this.running || this.waapi !== waapi) return;
       this.running = false;
       this.settled = true;
       this.currentValue = lastFrame.position;
       this.currentVelocity = 0;
       this.onComplete?.();
     };
+
+    void this.startWhenReady(waapi, runId);
   }
 
   private clearWaapi() {
+    this.runId++;
     this.waapi?.cancel();
     this.waapi = null;
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.pendingFirstFrame = undefined;
   }
 
   private captureLiveState() {
     if (this.frames.length === 0) return;
-    const elapsed = performance.now() - this.startTime;
+    const elapsed = readAnimationTime(this.waapi);
+    if (elapsed === null) return;
     const { position, velocity } = interpolateFrame(this.frames, elapsed);
     this.currentValue = position;
     this.currentVelocity = velocity;
+  }
+
+  private async startWhenReady(
+    waapi: globalThis.Animation,
+    runId: number,
+  ): Promise<void> {
+    try {
+      await waapi.ready;
+      if (typeof requestAnimationFrame !== "undefined") {
+        await waitPaint(this.element);
+      }
+    } catch {
+      return;
+    }
+
+    if (this.runId !== runId || this.waapi !== waapi) {
+      return;
+    }
+
+    this.startReady = true;
+    if (!this.running || this.paused) return;
+    this.playPreparedWaapi(waapi);
+  }
+
+  private playPreparedWaapi(waapi: globalThis.Animation): void {
+    if (this.waapi !== waapi || !this.waitingForStart || !this.startReady) {
+      return;
+    }
+
+    // Clear inline styles only after the browser has applied the paused 0 ms
+    // WAAPI frame. Clearing earlier can expose the underlying, unanimated
+    // style while the animation is still pending.
+    if (this.pendingFirstFrame) {
+      for (const prop of Object.keys(this.pendingFirstFrame)) {
+        (this.element.style as unknown as Record<string, string>)[prop] = "";
+      }
+    }
+
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.pendingFirstFrame = undefined;
+    waapi.play();
   }
 
   private applyStyleAt(value: number) {
@@ -355,4 +413,11 @@ function interpolateFrame(
     position: a.position + (b.position - a.position) * t,
     velocity: a.velocity + (b.velocity - a.velocity) * t,
   };
+}
+
+function readAnimationTime(
+  animation: globalThis.Animation | null,
+): number | null {
+  const currentTime = animation?.currentTime;
+  return typeof currentTime === "number" ? currentTime : null;
 }
