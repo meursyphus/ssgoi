@@ -6,9 +6,9 @@ import type {
 } from "../types";
 
 // ease-out (Material decelerated): incoming page settles into place.
-// stiffness 170, damping 22 → ratio 0.86 of critical (~26.1), settles ~310ms.
+// stiffness 160, damping 22 → ratio 0.87 of critical (~25.3), settles gently.
 const PARALLAX_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 170, damping: 22 },
+  spring: { stiffness: 160, damping: 22 },
 };
 
 function buildParallax(direction: DrillDirection): DrillAnimationConfig {
