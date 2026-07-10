@@ -6,7 +6,7 @@ const seed: ListingDetail[] = [
     title:
       "Women only · A night in a traditional Hanok near Gyeongbokgung, Dongmyo and Gwanghwamun",
     thumbnail:
-      "https://images.unsplash.com/photo-1657461821555-492764a6940a?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1657461821555-492764a6940a?auto=format&fit=crop&w=900&h=900&q=80",
     region: "Hostel in Seoul",
     bedroomLabel: "24 beds",
     rating: 4.82,
@@ -14,7 +14,7 @@ const seed: ListingDetail[] = [
     dateLabel: "Jun 12 – 14",
     badge: "Guest favourite",
     images: [
-      "https://images.unsplash.com/photo-1657461821555-492764a6940a?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1657461821555-492764a6940a?auto=format&fit=crop&w=1200&h=1200&q=80",
       "https://images.unsplash.com/photo-1618237586696-d3690dad22e3?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1633839323577-fe4bd3079fab?auto=format&fit=crop&w=1200&q=80",
     ],
@@ -40,7 +40,7 @@ const seed: ListingDetail[] = [
     id: "l-002",
     title: "Boutique hotel in Seoul",
     thumbnail:
-      "https://images.unsplash.com/photo-1667125095636-dce94dcbdd96?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1667125095636-dce94dcbdd96?auto=format&fit=crop&w=900&h=900&q=80",
     region: "Boutique hotel in Seoul",
     bedroomLabel: "1 king bed",
     rating: 4.91,
@@ -48,7 +48,7 @@ const seed: ListingDetail[] = [
     dateLabel: "Jun 26 – 28",
     badge: "Guest favourite",
     images: [
-      "https://images.unsplash.com/photo-1667125095636-dce94dcbdd96?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1667125095636-dce94dcbdd96?auto=format&fit=crop&w=1200&h=1200&q=80",
       "https://images.unsplash.com/photo-1662385930165-49ebaa03b152?auto=format&fit=crop&w=1200&q=80",
     ],
     locationDesc: "Hotel in Seoul, South Korea",
@@ -72,14 +72,14 @@ const seed: ListingDetail[] = [
     id: "l-003",
     title: "Seoul",
     thumbnail:
-      "https://images.unsplash.com/photo-1687779018338-46d350ff2e6a?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1687779018338-46d350ff2e6a?auto=format&fit=crop&w=900&h=900&q=80",
     region: "Seoul",
     bedroomLabel: "24 beds",
     rating: 4.82,
     priceLabel: "Recently viewed",
     dateLabel: "Jun 12 – 14",
     images: [
-      "https://images.unsplash.com/photo-1687779018338-46d350ff2e6a?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1687779018338-46d350ff2e6a?auto=format&fit=crop&w=1200&h=1200&q=80",
     ],
     locationDesc: "Room in Seoul, South Korea",
     facilityLabel: "12 bunk beds · 3 shared bathrooms",
@@ -99,14 +99,14 @@ const seed: ListingDetail[] = [
     id: "l-004",
     title: "Gwangalli Beach",
     thumbnail:
-      "https://images.unsplash.com/photo-1702040093832-6cc011725092?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1702040093832-6cc011725092?auto=format&fit=crop&w=900&h=900&q=80",
     region: "Gwangalli Beach",
     bedroomLabel: "1 queen bed",
     rating: 4.86,
     priceLabel: "Recently viewed",
     dateLabel: "Jul 02 – 04",
     images: [
-      "https://images.unsplash.com/photo-1702040093832-6cc011725092?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1702040093832-6cc011725092?auto=format&fit=crop&w=1200&h=1200&q=80",
     ],
     locationDesc: "Apartment in Busan, South Korea",
     facilityLabel: "1 queen bed · 1 private bathroom",
@@ -126,14 +126,14 @@ const seed: ListingDetail[] = [
     id: "l-005",
     title: "Jeju",
     thumbnail:
-      "https://images.unsplash.com/photo-1584345015538-213f90f9ccbc?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1584345015538-213f90f9ccbc?auto=format&fit=crop&w=900&h=900&q=80",
     region: "Jeju",
     bedroomLabel: "1 double bed",
     rating: 4.82,
     priceLabel: "Recently viewed",
     dateLabel: "Sep 14 – 16",
     images: [
-      "https://images.unsplash.com/photo-1584345015538-213f90f9ccbc?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1584345015538-213f90f9ccbc?auto=format&fit=crop&w=1200&h=1200&q=80",
     ],
     locationDesc: "Stay in Hallim, Jeju",
     facilityLabel: "1 double bed · 1 private bathroom",

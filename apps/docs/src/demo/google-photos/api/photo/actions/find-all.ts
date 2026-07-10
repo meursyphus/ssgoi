@@ -14,7 +14,6 @@ function toSimple(detail: PhotoDetail): PhotoSimple {
     thumbSrc: detail.thumbSrc,
     width: detail.width,
     height: detail.height,
-    aspectRatio: detail.aspectRatio,
     takenAt: detail.takenAt,
   };
 }

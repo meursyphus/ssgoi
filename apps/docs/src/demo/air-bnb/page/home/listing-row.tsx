@@ -39,12 +39,15 @@ function RowCard({ listing }: { listing: ListingSimple }) {
       scroll={false}
       className="flex w-36 flex-shrink-0 flex-col gap-2"
     >
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
+      <div
+        className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100"
+        data-zoom-exit-key={listing.id}
+      >
         <img
           src={listing.thumbnail}
           alt={listing.region}
-          data-zoom-exit-key={listing.id}
-          data-zoom-radius="16"
+          width={900}
+          height={900}
           className="h-full w-full object-cover"
         />
         <span className="pointer-events-none absolute right-2 top-2 text-white drop-shadow">

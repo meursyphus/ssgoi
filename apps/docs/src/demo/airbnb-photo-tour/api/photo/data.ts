@@ -163,7 +163,8 @@ function toSimple(p: RawPhoto): PhotoSimple {
     id: p.id,
     src: p.src,
     alt: p.alt,
-    aspectRatio: `${p.width}/${p.height}`,
+    width: p.width,
+    height: p.height,
   };
 }
 

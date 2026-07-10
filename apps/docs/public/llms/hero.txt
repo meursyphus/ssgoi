@@ -36,43 +36,48 @@ Mark the destination-side ("detail") element with `data-hero-enter-key` and the 
 // List page (/items)
 {items.map((item) => (
   <Link key={item.id} href={`/items/${item.id}`}>
-    <img data-hero-exit-key={`item-${item.id}`} src={item.thumbnail} />
+    <img
+      data-hero-exit-key={`item-${item.id}`}
+      src={item.thumbnail}
+      width={item.width}
+      height={item.height}
+      className="object-cover"
+    />
   </Link>
 ))}
 
 // Detail page (/items/[id])
-<img data-hero-enter-key={`item-${id}`} src={fullImage} />
+<img
+  data-hero-enter-key={`item-${id}`}
+  src={fullImage}
+  width={photo.width}
+  height={photo.height}
+  className="object-contain"
+/>
 ```
 
 The transition matches enter/exit pairs in both navigation directions — forward (list→detail) and back (detail→list) — without extra configuration.
 
-## Optional: `data-hero-aspect-ratio` for letterboxed images
+## Automatic image geometry
 
-When the hero element is an `<img object-contain>` (or any element whose visible content occupies a smaller, centered sub-rect of its bbox), add `data-hero-aspect-ratio="W/H"` (or a single number) so hero can tween the *visible content rect* rather than the surrounding letterbox. Without the hint hero falls back to the element's bounding box.
-
-```tsx
-// Detail page where the photo is contained inside a full-bleed dark frame
-<img
-  data-hero-enter-key={`item-${id}`}
-  data-hero-aspect-ratio={`${photo.width}/${photo.height}`}
-  src={photo.src}
-  className="h-full w-full object-contain"
-/>
-```
-
-Accepts either `"W/H"` (e.g. `"1600/1067"`) or a precomputed ratio number (e.g. `"1.5"`). Pre-format at the data layer so you don't restate width/height per render.
-
-## Optional: `data-hero-radius` for rounded shared elements
-
-When the visible shared element has rounded corners, add `data-hero-radius="px"` on both sides. Hero treats the radius as part of the morph and applies it through `clip-path: inset(... round ...)`, so the visible corner radius interpolates correctly even while the clone is being scaled.
+Hero automatically resolves image geometry when the keyed element is an `<img>`, or when a keyed wrapper contains exactly one direct `<img>` child. It reads intrinsic dimensions or standard `width` / `height` attributes, computed centered `object-fit: cover|contain`, and a simple uniform CSS border radius.
 
 ```tsx
-<img
-  data-hero-exit-key={`item-${item.id}`}
-  data-hero-radius="12"
-  src={item.thumbnail}
-/>
+// The wrapper defines the visible crop and radius; the child defines media.
+<div
+  data-hero-exit-key={`item-${id}`}
+  className="overflow-hidden rounded-xl"
+>
+  <img
+    src={photo.src}
+    width={photo.width}
+    height={photo.height}
+    className="h-full w-full object-cover"
+  />
+</div>
 ```
+
+For wrapper inference, the image must be a direct child and the wrapper must use `overflow: hidden` or `overflow: clip` for its radius to define the visible window. Multiple/deep images, `<picture>` / `<video>`, unsupported fits, custom object positions, unavailable dimensions, complex radii, or mismatched endpoint ratios safely fall back to the original bounding-box transition.
 
 ## Legacy: `data-hero-key`
 

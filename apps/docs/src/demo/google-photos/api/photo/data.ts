@@ -1,15 +1,6 @@
 import type { PhotoDetail } from "./types";
 
-/**
- * Internal seed shape — same as PhotoDetail but without `aspectRatio`, which
- * is derived at the data-read boundary so we don't restate `${width}/${height}`
- * on every entry.
- */
-type RawPhoto = Omit<PhotoDetail, "aspectRatio">;
-
-function withAspectRatio(p: RawPhoto): PhotoDetail {
-  return { ...p, aspectRatio: `${p.width}/${p.height}` };
-}
+type RawPhoto = PhotoDetail;
 
 /**
  * Seed data — 24 photos. Uses unsplash images; each entry has a slightly
@@ -119,7 +110,7 @@ const seed: RawPhoto[] = [
     id: "ph-008",
     src: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
-      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&q=70",
+      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=600&fit=crop&q=70",
     width: 1200,
     height: 1800,
     takenAt: "2026.05.15",
@@ -132,7 +123,7 @@ const seed: RawPhoto[] = [
     id: "ph-009",
     src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=70",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=600&fit=crop&q=70",
     width: 1200,
     height: 1800,
     takenAt: "2026.05.14",
@@ -144,7 +135,7 @@ const seed: RawPhoto[] = [
     id: "ph-010",
     src: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1600&q=80&hash=10",
     thumbSrc:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=70",
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400&q=70",
     width: 1600,
     height: 1067,
     takenAt: "2026.05.14",
@@ -220,7 +211,7 @@ const seed: RawPhoto[] = [
     id: "ph-016",
     src: "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
-      "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=400&q=70",
+      "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=400&h=600&fit=crop&q=70",
     width: 1200,
     height: 1800,
     takenAt: "2026.05.07",
@@ -282,7 +273,7 @@ const seed: RawPhoto[] = [
     id: "ph-021",
     src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=1800&fit=crop&q=80",
     thumbSrc:
-      "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=600&fit=crop&q=70",
     width: 1200,
     height: 1800,
     takenAt: "2026.05.02",
@@ -381,11 +372,11 @@ export const COLLECTION_PHOTO_IDS: Record<string, string[]> = {
 const PAGE_LIMIT = 30;
 
 export const data = {
-  all: (): PhotoDetail[] => seed.map(withAspectRatio),
+  all: (): PhotoDetail[] => seed.map((photo) => ({ ...photo })),
   /** find by id — detail response (includes location/description) */
   byId: (id: string): PhotoDetail | null => {
     const found = seed.find((p) => p.id === id);
-    return found ? withAspectRatio(found) : null;
+    return found ? { ...found } : null;
   },
   /** Photos for a given collection (preserves the id order) */
   byCollection: (collectionId: string): PhotoDetail[] => {
@@ -394,7 +385,7 @@ export const data = {
     const result: PhotoDetail[] = [];
     for (const id of ids) {
       const found = seed.find((p) => p.id === id);
-      if (found) result.push(withAspectRatio(found));
+      if (found) result.push({ ...found });
     }
     return result;
   },
