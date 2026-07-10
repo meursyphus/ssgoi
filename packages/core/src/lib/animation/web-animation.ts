@@ -34,8 +34,9 @@ interface SimFrame {
  * Lifecycle:
  *   1. `play()` / `reverse()` calls `simulate()` from the current (position,
  *      velocity) toward the target bound, producing a frame list.
- *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is armed
- *      at 0 ms, waits for the browser's pending setup, then starts.
+ *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is held
+ *      at 0 ms until the pending pause is acknowledged and the browser has had
+ *      a rendering opportunity, then starts.
  *   3. While playing, `getPose()` interpolates the live position from frames
  *      using WAAPI's `currentTime`, so browser setup latency is not counted as
  *      animation progress.
@@ -253,8 +254,11 @@ export class WebAnimation extends Animation {
       composite: "replace",
     });
     waapi.playbackRate = this.playbackRate;
-    waapi.pause();
+    // Element.animate() auto-plays. Seek while that play is pending, then pause:
+    // setting currentTime after pause would synchronously complete the pending
+    // pause, making `ready` useless as an acknowledgement of the pause request.
     waapi.currentTime = 0;
+    waapi.pause();
 
     this.waapi = waapi;
     this.waitingForStart = true;
@@ -297,6 +301,8 @@ export class WebAnimation extends Animation {
     runId: number,
   ): Promise<void> {
     try {
+      // This acknowledges the pending pause. It does not prove that pixels have
+      // been presented, so keep the animation held through the frame barrier.
       await waapi.ready;
       if (typeof requestAnimationFrame !== "undefined") {
         await waitPaint(this.element);
