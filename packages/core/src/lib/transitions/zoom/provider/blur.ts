@@ -19,9 +19,12 @@ import { getOverlayRect } from "@utils";
 
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 430,
-    damping: 33,
-    doubleSpring: 1,
+    stiffness: 380,
+    damping: 30,
+    doubleSpring: {
+      stiffness: 260,
+      damping: 30,
+    },
   },
 };
 
