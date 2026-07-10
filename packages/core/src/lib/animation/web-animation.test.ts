@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Integrator } from "./integrator";
 import { WebAnimation } from "./web-animation";
 
@@ -38,21 +38,77 @@ function createFakeElement(waapi: globalThis.Animation) {
 
 function createFakeWaapi() {
   const ready = createReady<globalThis.Animation>();
+  const calls: string[] = [];
+  let currentTime: CSSNumberish | null = 0;
+  let running = true;
   const waapi = {
-    currentTime: null as CSSNumberish | null,
+    get currentTime() {
+      return currentTime;
+    },
+    set currentTime(value: CSSNumberish | null) {
+      calls.push("seek");
+      currentTime = value;
+    },
     playbackRate: 1,
     ready: ready.promise,
     onfinish: null,
-    play: vi.fn(),
-    pause: vi.fn(),
+    play: vi.fn(() => {
+      calls.push("play");
+      running = true;
+    }),
+    pause: vi.fn(() => {
+      calls.push("pause");
+      running = false;
+    }),
     cancel: vi.fn(),
   } as unknown as globalThis.Animation;
-  return { waapi, ready };
+  return {
+    waapi,
+    ready,
+    calls,
+    advance(ms: number) {
+      if (running && typeof currentTime === "number") {
+        currentTime += ms * waapi.playbackRate;
+      }
+    },
+  };
+}
+
+function installAnimationFrameHarness() {
+  let now = 0;
+  let nextId = 0;
+  let queue = new Map<number, FrameRequestCallback>();
+
+  vi.stubGlobal(
+    "requestAnimationFrame",
+    vi.fn((callback: FrameRequestCallback) => {
+      const id = nextId++;
+      queue.set(id, callback);
+      return id;
+    }),
+  );
+
+  return {
+    get pending() {
+      return queue.size;
+    },
+    flush() {
+      const callbacks = [...queue.values()];
+      queue = new Map();
+      now += 1000 / 60;
+      for (const callback of callbacks) callback(now);
+    },
+  };
 }
 
 describe("WebAnimation", () => {
-  it("waits for WAAPI readiness before playing and clearing start styles", async () => {
-    const { waapi, ready } = createFakeWaapi();
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("holds at zero through delayed rendering before playback", async () => {
+    const frames = installAnimationFrameHarness();
+    const { waapi, ready, calls, advance } = createFakeWaapi();
     const { element, style } = createFakeElement(waapi);
     const animation = new WebAnimation({
       element,
@@ -62,16 +118,37 @@ describe("WebAnimation", () => {
 
     animation.play();
 
+    expect(calls).toEqual(["seek", "pause"]);
     expect(waapi.pause).toHaveBeenCalledTimes(1);
     expect(waapi.currentTime).toBe(0);
     expect(waapi.play).not.toHaveBeenCalled();
     expect(style.opacity).toBe("0");
 
+    advance(1000);
+    expect(waapi.currentTime).toBe(0);
+
     ready.resolve(waapi);
+    await Promise.resolve();
+
+    expect(frames.pending).toBe(1);
+    frames.flush();
+    expect(frames.pending).toBe(1);
+    advance(1000);
+    expect(waapi.currentTime).toBe(0);
+    expect(waapi.play).not.toHaveBeenCalled();
+    expect(style.opacity).toBe("0");
+
+    frames.flush();
     await Promise.resolve();
 
     expect(style.opacity).toBe("");
     expect(waapi.play).toHaveBeenCalledTimes(1);
+    expect(waapi.currentTime).toBe(0);
+
+    advance(16);
+    const [pose] = animation.getPose();
+    expect(pose?.value).toBeGreaterThan(0.15);
+    expect(pose?.value).toBeLessThan(0.17);
   });
 
   it("samples live pose from WAAPI currentTime", () => {
