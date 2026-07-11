@@ -3,7 +3,6 @@
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
-import { scroll } from "@ssgoi/react/view-transitions";
 import { HostAnimation } from "@ssgoi/core/internal";
 import { HostContext } from "@/lib/components/host-context";
 import { useShowcaseFrameBridge } from "@/lib/hooks";
@@ -11,12 +10,7 @@ import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-bound
 
 const config: SsgoiConfig = {
   preserveScroll: false,
-  transitions: [
-    scroll({
-      paths: ["/", "/showcase/*"],
-      type: "non-directional",
-    }),
-  ],
+  transitions: [],
 };
 
 function DocsRouteBoundary({ children }: { children: ReactNode }) {

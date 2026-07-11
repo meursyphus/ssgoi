@@ -50,14 +50,14 @@ function PhotoTile({
       href={`/demo/airbnb-photo-tour/photos/${photo.id}`}
       scroll={false}
       className={`relative block ${sizeClass} overflow-hidden rounded-xl bg-neutral-100`}
+      data-hero-exit-key={photo.id}
     >
       <img
         src={photo.src}
         alt={photo.alt}
+        width={photo.width}
+        height={photo.height}
         className="h-full w-full object-cover"
-        data-hero-exit-key={photo.id}
-        data-hero-aspect-ratio={photo.aspectRatio}
-        data-hero-radius="12"
       />
     </Link>
   );

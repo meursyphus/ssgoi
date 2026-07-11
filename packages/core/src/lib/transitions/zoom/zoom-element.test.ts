@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createMediaGeometry } from "../media-geometry";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 import type { ZoomAnimationInput } from "./types";
 
@@ -46,20 +47,76 @@ describe("zoom-element", () => {
   it("rounds the tile clip-path so visible radius matches exitRadius on zoom-in start", () => {
     const animation = createZoomIn(input({ exitRadius: 16 }));
 
-    // At progress=0: page is scaled to (0.5, 0.25) → avg 0.375.
-    // visibleR = 16 → cpR = 16 / 0.375 ≈ 42.667px.
-    expect(animation.animate(0).clipPath).toContain(`round ${16 / 0.375}px`);
+    // Pre-transform elliptical radii become a circular 16px radius after the
+    // independent 0.5 × 0.25 page scale.
+    expect(animation.animate(0).clipPath).toContain("round 32px / 64px");
     // At progress=1: visibleR = 0 → no rounding.
-    expect(animation.animate(1).clipPath).toContain("round 0px");
+    expect(animation.animate(1).clipPath).toContain("round 0px / 0px");
   });
 
   it("rounds the tile clip-path so visible radius matches exitRadius on zoom-out end", () => {
     const animation = createZoomOut(input({ exitRadius: 16 }));
 
-    // animate(0) corresponds to the tile state (t=1): scale (0.5, 0.25),
-    // visibleR = exitRadius = 16, cpR = 16 / 0.375.
-    expect(animation.animate(0).clipPath).toContain(`round ${16 / 0.375}px`);
+    // animate(0) corresponds to the tile state (t=1): scale (0.5, 0.25).
+    expect(animation.animate(0).clipPath).toContain("round 32px / 64px");
     // animate(1) is the full-page state (t=0): no rounding.
-    expect(animation.animate(1).clipPath).toContain("round 0px");
+    expect(animation.animate(1).clipPath).toContain("round 0px / 0px");
+  });
+
+  it("maps contain content into a cropped cover window without distortion", () => {
+    const enterRect = rect(0, 100, 400, 400);
+    const exitRect = rect(20, 30, 100, 100);
+    const mediaInput = input({
+      enterRect,
+      exitRect,
+      pageRect: rect(0, 0, 400, 800),
+      enterMedia: createMediaGeometry(enterRect, 2, "contain"),
+      exitMedia: createMediaGeometry(exitRect, 2, "cover"),
+    });
+
+    const zoomInStart = createZoomIn(mediaInput).animate(0);
+    const zoomOutEnd = createZoomOut(mediaInput).animate(0);
+
+    expect(zoomInStart.transform).toBe(
+      "translate(-130px, -220px) scale(0.5, 0.5)",
+    );
+    expect(zoomInStart.clipPath).toBe("inset(25% 25% 50% 25% round 0px / 0px)");
+    expect(zoomOutEnd).toEqual(zoomInStart);
+  });
+
+  it("falls back to bbox math when the detail image cannot render the projected crop", () => {
+    const enterRect = rect(0, 100, 400, 400);
+    const exitRect = rect(20, 30, 100, 100);
+    const animation = createZoomIn(
+      input({
+        enterRect,
+        exitRect,
+        pageRect: rect(0, 0, 400, 800),
+        enterMedia: createMediaGeometry(enterRect, 2, "cover"),
+        exitMedia: createMediaGeometry(exitRect, 2, "contain"),
+      }),
+    );
+
+    expect(animation.animate(0).transform).toBe(
+      "translate(-130px, -220px) scale(0.25, 0.25)",
+    );
+  });
+
+  it("falls back to bbox math when endpoint media ratios differ", () => {
+    const enterRect = rect(0, 100, 400, 400);
+    const exitRect = rect(20, 30, 100, 100);
+    const animation = createZoomIn(
+      input({
+        enterRect,
+        exitRect,
+        pageRect: rect(0, 0, 400, 800),
+        enterMedia: createMediaGeometry(enterRect, 2, "contain"),
+        exitMedia: createMediaGeometry(exitRect, 1, "cover"),
+      }),
+    );
+
+    expect(animation.animate(0).transform).toBe(
+      "translate(-130px, -220px) scale(0.25, 0.25)",
+    );
   });
 });

@@ -28,10 +28,6 @@ export type PhotoSimple = {
   thumbSrc: string;
   width: number;
   height: number;
-  /** Pre-formatted W/H string ("1600/1067") for the `data-hero-aspect-ratio`
-   *  attribute. Derived from width/height in the API layer so consumers don't
-   *  re-compute on every render. */
-  aspectRatio: string;
   /** Pre-formatted label like "2026.05.16" */
   takenAt: string;
 };

@@ -36,26 +36,40 @@ zoom({
 
 ## Required: matching `data-zoom-exit-key` / `data-zoom-enter-key`
 
-Different attribute names per side:
-- **Outgoing page** marks the source element (the card being tapped) with `data-zoom-exit-key="<key>"`.
-- **Incoming page** marks the destination element (where the card lands) with `data-zoom-enter-key="<key>"`.
+Different attribute names describe stable semantic roles in both navigation directions:
+- **List/card side** marks the collapsed source element with `data-zoom-exit-key="<key>"`.
+- **Detail/expanded side** marks the expanded destination element with `data-zoom-enter-key="<key>"`.
 - The key VALUES must match across the two pages.
 
 ```tsx
 // Gallery page (/grid) — the card being tapped
 {photos.map((p) => (
   <Link key={p.id} href={`/photo/${p.id}`}>
-    <div data-zoom-exit-key={`photo-${p.id}`}>
-      <img src={p.thumb} />
-    </div>
+    <img
+      data-zoom-exit-key={`photo-${p.id}`}
+      src={p.thumb}
+      width={p.width}
+      height={p.height}
+      className="aspect-square object-cover"
+    />
   </Link>
 ))}
 
 // Detail page (/photo/[id]) — the destination
-<div data-zoom-enter-key={`photo-${id}`}>
-  <img src={fullImage} />
-</div>
+<img
+  data-zoom-enter-key={`photo-${id}`}
+  src={fullImage}
+  width={photo.width}
+  height={photo.height}
+  className="h-full w-full object-contain"
+/>
 ```
+
+## Automatic image geometry
+
+Like Hero, Zoom resolves a directly keyed `<img>` or exactly one direct `<img>` child inside a keyed wrapper. It reads intrinsic dimensions or standard `width` / `height` attributes and computed centered `object-fit: cover|contain`, then maps content to content and inverse-projects the collapsed crop into the detail page.
+
+A keyed wrapper with `overflow: hidden|clip` supplies the visible crop and a simple uniform CSS radius; its single direct image supplies the media ratio and fit. Both endpoints must resolve to compatible images, and the destination must be able to render the projected source crop. Otherwise Zoom preserves its original bounding-box animation. Ambiguous/deep images, `<picture>` / `<video>`, unsupported fits, custom object positions, unavailable dimensions, or complex radii also fall back safely.
 
 ## Usage
 

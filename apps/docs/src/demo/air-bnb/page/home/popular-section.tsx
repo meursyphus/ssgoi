@@ -38,13 +38,16 @@ function PopularCard({ listing }: { listing: ListingSimple }) {
       scroll={false}
       className="flex flex-col gap-2"
     >
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
+      <div
+        className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100"
+        data-zoom-exit-key={listing.id}
+      >
         <img
           src={listing.thumbnail}
           alt={listing.region}
+          width={900}
+          height={900}
           className="h-full w-full object-cover"
-          data-zoom-exit-key={listing.id}
-          data-zoom-radius="16"
         />
         {listing.badge && (
           <span className="absolute left-2 top-2 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-900 shadow-sm">
