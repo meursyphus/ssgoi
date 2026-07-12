@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Link } from "@/lib/link";
-import { SiteLogo } from "@/components/site-logo";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_URL, breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
@@ -43,11 +42,12 @@ export default function BlogIndexPage() {
       description: p.description,
       datePublished: p.date,
       url: `${SITE_URL}/blog/${p.slug}`,
+      ...(p.image ? { image: `${SITE_URL}${p.image}` } : {}),
     })),
   };
 
   return (
-    <main className="relative min-h-dvh bg-black">
+    <main>
       <JsonLd
         data={[
           blogSchema,
@@ -57,10 +57,8 @@ export default function BlogIndexPage() {
           ]),
         ]}
       />
-      <div className="mx-auto max-w-3xl px-6 pb-24 pt-6">
-        <SiteLogo />
-
-        <header className="mt-10">
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-8 lg:pt-12">
+        <header>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-100 md:text-4xl">
             Blog.
           </h1>

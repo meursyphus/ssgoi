@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "@/lib/link";
 import { JsonLd } from "@/components/json-ld";
 import {
@@ -9,6 +10,7 @@ import {
   breadcrumbSchema,
   buildOpenGraph,
   faqSchema,
+  twitterMeta,
 } from "@/lib/seo";
 import { getAllPosts, getPost } from "@/lib/blog";
 
@@ -26,23 +28,53 @@ export async function generateMetadata({
   if (!post)
     return { title: "Not found", robots: { index: false, follow: true } };
 
-  const { title, description, date, updated } = post.meta;
+  const {
+    title,
+    description,
+    date,
+    updated,
+    image,
+    imageAlt,
+    imageWidth,
+    imageHeight,
+  } = post.meta;
   const url = `/blog/${slug}`;
+  const socialImage = image
+    ? {
+        url: image,
+        width: imageWidth ?? 1200,
+        height: imageHeight ?? 630,
+        alt: imageAlt ?? title,
+      }
+    : null;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: buildOpenGraph({
-      type: "article",
-      path: url,
-      title: `${title} | ${SITE_NAME}`,
-      description,
-      publishedTime: date,
-      modifiedTime: updated ?? date,
-      authors: [post.meta.author ?? AUTHOR.name],
-      tags: post.meta.tags,
-    }),
+    openGraph: {
+      ...buildOpenGraph({
+        type: "article",
+        path: url,
+        title: `${title} | ${SITE_NAME}`,
+        description,
+        publishedTime: date,
+        modifiedTime: updated ?? date,
+        authors: [post.meta.author ?? AUTHOR.name],
+        tags: post.meta.tags,
+      }),
+      ...(socialImage ? { images: [socialImage] } : {}),
+    },
+    ...(socialImage
+      ? {
+          twitter: {
+            ...twitterMeta,
+            title,
+            description,
+            images: [socialImage.url],
+          },
+        }
+      : {}),
   };
 }
 
@@ -84,7 +116,7 @@ export default async function BlogPostPage({
       logo: { "@type": "ImageObject", url: `${SITE_URL}/ssgoi-logo.png` },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    image: `${SITE_URL}/og.png`,
+    image: meta.image ? `${SITE_URL}${meta.image}` : `${SITE_URL}/og.png`,
     keywords: meta.tags?.join(", "),
   };
 
@@ -99,14 +131,18 @@ export default async function BlogPostPage({
   ];
 
   return (
-    <main className="relative min-h-dvh bg-black">
+    <main>
       <JsonLd data={schemas} />
-      <div className="mx-auto max-w-3xl px-6 pb-24 pt-6">
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-8 lg:pt-12">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-100"
+          className="group inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-neutral-300 shadow-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
-          ← Blog
+          <ArrowLeft
+            className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+            aria-hidden
+          />
+          Back to Blog
         </Link>
 
         <article className="mt-10">
