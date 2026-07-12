@@ -156,6 +156,26 @@ body {
   color: #a1a1aa;
 }
 
+.blog-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.02);
+}
+
+.blog-content p:has(> img:only-child) {
+  margin-top: 1.75rem;
+}
+
+.blog-content p:has(> img:only-child) + p:has(> em:only-child) {
+  margin-top: 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #71717a;
+}
+
 .blog-content :not(pre) > code {
   border-radius: 0.25rem;
   background: rgb(255 255 255 / 0.06);
