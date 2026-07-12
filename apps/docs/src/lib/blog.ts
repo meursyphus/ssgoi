@@ -1,8 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import { BLOG_POSTS } from "./blog.generated";
 
-const BLOG_DIR = path.join(process.cwd(), "src/content/blog");
+type GeneratedBlogPost = {
+  slug: string;
+  frontmatter: string;
+  content: string;
+  html: string;
+};
+
+const blogPosts = BLOG_POSTS as readonly GeneratedBlogPost[];
 
 export type PostFaq = { question: string; answer: string };
 
@@ -21,22 +26,20 @@ export type PostFrontmatter = {
 
 export type PostMeta = PostFrontmatter & { slug: string };
 
-export type Post = { meta: PostMeta; content: string };
+export type Post = { meta: PostMeta; content: string; html: string };
 
 export function getPostSlugs(): string[] {
-  if (!fs.existsSync(BLOG_DIR)) return [];
-  return fs
-    .readdirSync(BLOG_DIR)
-    .filter((f) => f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx$/, ""));
+  return blogPosts.map((post) => post.slug);
 }
 
 export function getPost(slug: string): Post | null {
-  const file = path.join(BLOG_DIR, `${slug}.mdx`);
-  if (!fs.existsSync(file)) return null;
-  const raw = fs.readFileSync(file, "utf8");
-  const { data, content } = matter(raw);
-  return { meta: { ...(data as PostFrontmatter), slug }, content };
+  const post = blogPosts.find((entry) => entry.slug === slug);
+  if (!post) return null;
+  return {
+    meta: { ...(JSON.parse(post.frontmatter) as PostFrontmatter), slug },
+    content: post.content,
+    html: post.html,
+  };
 }
 
 export function getAllPosts(): PostMeta[] {
