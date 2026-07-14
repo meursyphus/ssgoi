@@ -468,6 +468,35 @@ export default component$(() => {
           keep routed content out of the live DOM during navigation.
         </p>
       </div>
+
+      <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
+        Agent-readable setup for each framework lives in its own file:{" "}
+        {(["svelte", "vue", "solid", "angular", "qwik"] as const).map(
+          (fw, i) => (
+            <span key={fw}>
+              {i > 0 && " · "}
+              <a
+                href={`https://ssgoi.dev/llms/${fw}.txt`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+              >
+                /llms/{fw}.txt
+              </a>
+            </span>
+          ),
+        )}
+        . The main{" "}
+        <a
+          href={LLMS_TXT}
+          target="_blank"
+          rel="noreferrer"
+          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          /llms.txt
+        </a>{" "}
+        stays React-first and indexes the rest.
+      </p>
     </div>
   );
 }
