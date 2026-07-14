@@ -5,7 +5,6 @@ import { useCategory } from "@/demo/pinterest/state/category";
 import { SearchInput } from "./search-input";
 import { HeroBanner } from "./hero-banner";
 import { RecommendedList } from "./recommended-list";
-import { BottomNav } from "../shared/bottom-nav";
 export default function SearchPage() {
   const cat = useCategory((state) => ({
     actions: state.actions,
@@ -20,7 +19,6 @@ export default function SearchPage() {
         <HeroBanner />
         <RecommendedList />
       </div>
-      <BottomNav />
     </div>
   );
 }

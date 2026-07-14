@@ -5,6 +5,7 @@ import { useMail } from "@/demo/material-mail/state/mail";
 import { TopBar } from "./top-bar";
 import { InboxList } from "./inbox-list";
 import { ComposeFab } from "./compose-fab";
+import { BottomNav } from "./bottom-nav";
 export default function InboxPage() {
   const mail = useMail((s) => ({
     actions: s.actions,
@@ -22,8 +23,9 @@ export default function InboxPage() {
         <div className="flex-1 pb-4">
           <InboxList />
         </div>
+        <BottomNav />
       </div>
-      <div className="sticky bottom-4 z-20 flex justify-end px-5 pointer-events-none">
+      <div className="sticky bottom-20 z-20 flex justify-end px-5 pointer-events-none">
         <div className="pointer-events-auto">
           <ComposeFab />
         </div>

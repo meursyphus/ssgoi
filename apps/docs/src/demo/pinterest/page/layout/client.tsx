@@ -26,5 +26,12 @@ const config: SsgoiConfig = {
 };
 
 export function PinterestLayoutClient({ children }: { children: ReactNode }) {
-  return <MobileShowcaseShell config={config}>{children}</MobileShowcaseShell>;
+  return (
+    // Boundaries live in the (tabs)/(detail) group shells, not here — a
+    // layout-level pathname boundary would remount the tab shell (bottom nav
+    // included) on every Home↔Search move.
+    <MobileShowcaseShell config={config} withTransitionBoundary={false}>
+      {children}
+    </MobileShowcaseShell>
+  );
 }

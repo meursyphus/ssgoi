@@ -5,6 +5,7 @@ import { useStory } from "@/demo/voyage/state/story";
 import { TopBar } from "./top-bar";
 import { StoryList } from "./story-list";
 import { ComposeFab } from "./compose-fab";
+import { BottomNav } from "./bottom-nav";
 
 export default function FeedPage() {
   const story = useStory((s) => ({ actions: s.actions }));
@@ -21,8 +22,9 @@ export default function FeedPage() {
         <div className="flex-1 pb-6">
           <StoryList />
         </div>
+        <BottomNav />
       </div>
-      <div className="sticky bottom-5 z-20 flex justify-end px-5 pointer-events-none">
+      <div className="sticky bottom-20 z-20 flex justify-end px-5 pointer-events-none">
         <div className="pointer-events-auto">
           <ComposeFab />
         </div>

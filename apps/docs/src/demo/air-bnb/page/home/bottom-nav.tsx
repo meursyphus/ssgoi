@@ -38,7 +38,7 @@ const ITEMS: Item[] = [
 
 export function BottomNav() {
   return (
-    <nav className="flex shrink-0 items-center justify-around border-t border-neutral-200 bg-white px-2 pb-3 pt-2">
+    <nav className="sticky bottom-0 z-30 flex shrink-0 items-center justify-around border-t border-neutral-200 bg-white px-2 pb-3 pt-2">
       {ITEMS.map((item) => (
         <button
           key={item.key}
