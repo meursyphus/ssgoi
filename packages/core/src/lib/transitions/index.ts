@@ -11,3 +11,7 @@ export * from "./sheet";
 export * from "./slide";
 export * from "./strip";
 export * from "./zoom";
+export type {
+  DirectionTransitionMap,
+  DirectionTransitionSelector,
+} from "./utils";
