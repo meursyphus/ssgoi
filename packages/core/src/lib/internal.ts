@@ -13,6 +13,7 @@ export type {
   SsgoiPathTransition,
   SsgoiDirectionTransition,
   SsgoiTransitionEntry,
+  SsgoiTransitionInput,
   SsgoiPathTransitionInput,
   TransitionConfig,
   PrepareArgs,

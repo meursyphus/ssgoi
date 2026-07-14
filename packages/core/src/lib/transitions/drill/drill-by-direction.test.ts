@@ -1,8 +1,26 @@
 import { describe, expect, it } from "vitest";
+import type { SsgoiDirectionTransition } from "@types";
 import { drillByDirection } from "./index";
 
+async function incomingStartTransform(
+  entry: SsgoiDirectionTransition,
+): Promise<string> {
+  const from = { style: {} } as HTMLElement;
+  const to = { style: {} } as HTMLElement;
+
+  entry.transition.prepare?.({
+    from: Promise.resolve(from),
+    to: Promise.resolve(to),
+    context: {} as never,
+    createElement: (() => ({ style: {} })) as never,
+  });
+  await Promise.resolve();
+
+  return to.style.transform;
+}
+
 describe("drillByDirection", () => {
-  it("produces `forward` and `back` direction entries carrying drill motion", () => {
+  it("maps forward to enter motion and back to exit motion", async () => {
     const entries = drillByDirection({
       forward: "enter",
       back: "exit",
@@ -13,15 +31,18 @@ describe("drillByDirection", () => {
       "forward",
       "back",
     ]);
-    for (const entry of entries) {
-      // Each entry carries a real drill transition config (prepare + animation).
-      expect(typeof entry.transition.animation).toBe("function");
-      expect(typeof entry.transition.prepare).toBe("function");
-    }
+    await expect(incomingStartTransform(entries[0]!)).resolves.toBe(
+      "translate3d(100%, 0, 0)",
+    );
+    await expect(incomingStartTransform(entries[1]!)).resolves.toBe(
+      "translate3d(-100%, 0, 0)",
+    );
   });
 
-  it("defaults the type to parallax when omitted", () => {
+  it("defaults the type to parallax when omitted", async () => {
     const entries = drillByDirection({ forward: "enter", back: "exit" });
-    expect(entries).toHaveLength(2);
+    await expect(incomingStartTransform(entries[1]!)).resolves.toBe(
+      "translate3d(-20%, 0, 0)",
+    );
   });
 });

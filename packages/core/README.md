@@ -132,7 +132,7 @@ The value can be a hard-coded logical id; it only has to match your config.
 
 ### Route-based Transitions
 
-Each transition factory returns a path-transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
+Each transition factory returns a transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
 
 ```tsx
 import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
@@ -151,11 +151,44 @@ const config = {
 };
 ```
 
-Transitions come in three shapes:
+Transition presets support four patterns:
 
 - **`{ paths }`** — symmetric: every pair animates with the same physics (`fade`, `hero`, `zoom`, `blind`, `film`, `rotate`, `strip`, `jaemin`)
 - **`{ enter, exit, type? }`** — directional: enter and exit get different physics (`drill`, `sheet`)
 - **`{ paths }`** — ordered: path order decides forward / back direction (`slide`, `scroll`, `axis`)
+- **`{ forward, back, type? }`** — navigation-direction keyed: an app-supplied token decides the motion (`drillByDirection`)
+
+### Navigation-Direction Transitions
+
+Path matching describes what changed. When the same path pair must animate
+differently depending on how the user arrived, supply a direction token for the
+navigation instead:
+
+```tsx
+import {
+  drillByDirection,
+  fade,
+  type SsgoiConfig,
+} from "@ssgoi/react/view-transitions";
+
+const config: SsgoiConfig = {
+  resolveDirection: ({ from, to }) =>
+    isHistoryBack({ from, to }) ? "back" : "forward",
+  transitions: [
+    drillByDirection({
+      forward: "enter",
+      back: "exit",
+      type: "slide",
+    }),
+    fade({ paths: ["/", "/settings"] }),
+  ],
+};
+```
+
+`resolveDirection` runs once per real transition with the original paths,
+before `middleware` normalizes them. A registered direction token overrides a
+path match; `null`, `undefined`, and unregistered tokens fall back to normal
+path matching. Direction resolution is not used for scroll-key normalization.
 
 ### Individual Element Animations
 
@@ -186,6 +219,7 @@ function Card() {
 
 - `fade` - Calm cross-fade. Safe default for unrelated pages
 - `drill` - iOS-style hierarchical navigation (list → detail)
+- `drillByDirection` - Drill motion selected by an app-supplied navigation direction
 - `slide` - Horizontal push for tabs / sequential flows
 - `scroll` - Vertical page scroll for onboarding / paginated views
 - `axis` - Material/Flutter shared-axis swap for sibling/tab routes

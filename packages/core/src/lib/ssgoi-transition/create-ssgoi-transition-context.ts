@@ -2,72 +2,23 @@ import type {
   AnyTransitionConfig,
   SsgoiConfig,
   SsgoiContext,
-  SsgoiPathTransition,
-  SsgoiPathTransitionInput,
-  SsgoiTransitionEntry,
   SsgoiTransitionsFn,
   SsgoiTransitionContext,
   PrepareArgs,
   CreateElement,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
-import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
-import { resolveTransitionForPair } from "./find-matching-transition";
+import {
+  buildTransitionRegistry,
+  resolveTransitionForPair,
+  type TransitionRegistry,
+} from "./resolve-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
-
-function isTransitionGroup(
-  transition: SsgoiPathTransitionInput,
-): transition is readonly SsgoiPathTransitionInput[] {
-  return Array.isArray(transition);
-}
-
-function flattenTransitions(
-  transitions: readonly SsgoiPathTransitionInput[],
-): SsgoiTransitionEntry[] {
-  const flattened: SsgoiTransitionEntry[] = [];
-  for (const transition of transitions) {
-    if (isTransitionGroup(transition)) {
-      flattened.push(...flattenTransitions(transition));
-    } else {
-      flattened.push(transition);
-    }
-  }
-  return flattened;
-}
-
-/**
- * Splits a flat entry list into the two selectors:
- *  - `pathEntries`: `{ from, to }` entries fed to `processSymmetricTransitions`
- *    and `findMatchingTransition` (direction entries have no `from`/`to`, so
- *    they must never reach symmetric processing — §4.5).
- *  - `directionTransitions`: token → config, populated set-if-absent so the
- *    FIRST-declared entry wins on a duplicate token, mirroring
- *    `findMatchingTransition`'s config-order tie-break.
- */
-export function partitionTransitions(
-  entries: readonly SsgoiTransitionEntry[],
-): {
-  pathEntries: SsgoiPathTransition[];
-  directionTransitions: Map<string, AnyTransitionConfig>;
-} {
-  const pathEntries: SsgoiPathTransition[] = [];
-  const directionTransitions = new Map<string, AnyTransitionConfig>();
-  for (const entry of entries) {
-    if ("direction" in entry) {
-      if (!directionTransitions.has(entry.direction)) {
-        directionTransitions.set(entry.direction, entry.transition);
-      }
-    } else {
-      pathEntries.push(entry);
-    }
-  }
-  return { pathEntries, directionTransitions };
-}
 
 type TransitionMode = "unmount" | "hidden";
 
@@ -163,31 +114,21 @@ export function createSggoiTransitionContext(
     getIsMobile,
   } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
 
-  // Resolve + flatten + partition + process the transition list lazily.
+  // Resolve the transition list and build its selector registry lazily.
   // `isMobile` is only reliable once the scroll container is known (measured on
   // the first IN), which always precedes selection. Memoized per device class so
   // a static list is processed at most once per `isMobile` value. Path entries
-  // and direction entries are split here (§4.5): only path entries go through
-  // symmetric processing / path matching; direction entries become a token map.
-  type ProcessedTransitions = {
-    pathTransitions: SsgoiPathTransition[];
-    directionTransitions: Map<string, AnyTransitionConfig>;
-  };
-  const processedByIsMobile = new Map<boolean, ProcessedTransitions>();
-  const getProcessedTransitions = (): ProcessedTransitions => {
+  // and direction entries are indexed by the selector module, which owns
+  // symmetric expansion, duplicate-token precedence, and path fallback.
+  const registryByIsMobile = new Map<boolean, TransitionRegistry>();
+  const getTransitionRegistry = (): TransitionRegistry => {
     const isMobile = getIsMobile();
-    let processed = processedByIsMobile.get(isMobile);
-    if (!processed) {
-      const { pathEntries, directionTransitions } = partitionTransitions(
-        flattenTransitions(resolveTransitions({ isMobile })),
-      );
-      processed = {
-        pathTransitions: processSymmetricTransitions(pathEntries),
-        directionTransitions,
-      };
-      processedByIsMobile.set(isMobile, processed);
+    let registry = registryByIsMobile.get(isMobile);
+    if (!registry) {
+      registry = buildTransitionRegistry(resolveTransitions({ isMobile }));
+      registryByIsMobile.set(isMobile, registry);
     }
-    return processed;
+    return registry;
   };
 
   let pendingOut: PendingSide | null = null;
@@ -467,15 +408,12 @@ export function createSggoiTransitionContext(
       // originals keeps record/restore on one identity. A resolved direction
       // token that maps to a registered `{ direction }` entry wins over path
       // matching; anything else falls through to the path pair exactly as before.
-      const { pathTransitions, directionTransitions } =
-        getProcessedTransitions();
       const config = resolveTransitionForPair({
         from: pair.from,
         to: pair.to,
         middleware,
         resolveDirection,
-        pathTransitions,
-        directionTransitions,
+        getRegistry: getTransitionRegistry,
       });
 
       const outSide = pendingOut;

@@ -201,16 +201,23 @@ export type SsgoiDirectionTransition = {
 /**
  * A single entry in the `transitions` list: either a path-pair entry (the
  * existing form, matched by `findMatchingTransition`) or a direction entry (new,
- * selected by a resolved token). Structurally discriminated by the presence of
- * `direction`.
+ * selected by a resolved token). Runtime selection recognizes the existing
+ * required `from`/`to` fields first so extra application metadata cannot
+ * reclassify a path entry.
  */
 export type SsgoiTransitionEntry =
   | SsgoiPathTransition
   | SsgoiDirectionTransition;
 
-export type SsgoiPathTransitionInput =
+export type SsgoiTransitionInput =
   | SsgoiTransitionEntry
-  | readonly SsgoiPathTransitionInput[];
+  | readonly SsgoiTransitionInput[];
+
+/**
+ * @deprecated Use `SsgoiTransitionInput`. Direction entries are now accepted,
+ * so the old path-specific name no longer describes the full input shape.
+ */
+export type SsgoiPathTransitionInput = SsgoiTransitionInput;
 
 export type PreserveScrollValue =
   | boolean
@@ -228,19 +235,19 @@ export type TransitionsResolverArgs = { isMobile: boolean };
 
 /**
  * Functional form of `transitions`: receives device context and returns the
- * path-transition list. Lets a config branch on viewport (e.g. drawer on
- * mobile, fade on desktop) without an outer wrapper.
+ * transition list. Lets a config branch on viewport (e.g. drawer on mobile,
+ * fade on desktop) without an outer wrapper.
  */
 export type SsgoiTransitionsFn = (
   args: TransitionsResolverArgs,
-) => readonly SsgoiPathTransitionInput[];
+) => readonly SsgoiTransitionInput[];
 
 /**
  * `transitions` accepts either the plain list (existing form) or a function of
  * device context. Both normalize to the functional form internally.
  */
 export type SsgoiTransitionsOption =
-  | readonly SsgoiPathTransitionInput[]
+  | readonly SsgoiTransitionInput[]
   | SsgoiTransitionsFn;
 
 /**

@@ -76,20 +76,23 @@ export function createDirectionalPathTransitions(
  * Token-keyed sibling of `createOrderedPathTransitions`: builds direction
  * entries (no paths) from a single `createTransition(direction)` factory.
  *
- * `directions` maps each app-facing TOKEN — what `SsgoiConfig.resolveDirection`
- * returns — to the DIRECTION argument the factory understands. e.g.
+ * `directionMap` maps each app-facing TOKEN — what
+ * `SsgoiConfig.resolveDirection` returns — to the MOTION DIRECTION argument the
+ * factory understands. e.g.
  * `{ forward: "enter", back: "exit" }` yields entries keyed `"forward"` /
  * `"back"`, each carrying the config the factory produced for `"enter"` /
  * `"exit"`. The factory is invoked once per token.
  */
-export function createDirectionalTransitions<TDirection extends string>(
-  directions: Record<string, TDirection>,
-  createTransition: (direction: TDirection) => AnyTransitionConfig,
+export function createDirectionalTransitions<TMotionDirection extends string>(
+  directionMap: Record<string, TMotionDirection>,
+  createTransition: (direction: TMotionDirection) => AnyTransitionConfig,
 ): SsgoiDirectionTransition[] {
-  return Object.entries(directions).map(([token, direction]) => ({
-    direction: token,
-    transition: createTransition(direction),
-  }));
+  return Object.entries(directionMap).map(
+    ([directionToken, motionDirection]) => ({
+      direction: directionToken,
+      transition: createTransition(motionDirection),
+    }),
+  );
 }
 
 export function createOrderedPathTransitions<TDirection extends string>(
