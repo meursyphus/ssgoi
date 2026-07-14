@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import type { SsgoiDirectionTransition, SsgoiPathTransition } from "@types";
-import { drill } from "./index";
+import { drill, type DrillConfig } from "./index";
 
 async function incomingStartTransform(
   entry: SsgoiDirectionTransition,
@@ -29,6 +29,7 @@ describe("drill", () => {
       type: "slide",
     });
 
+    expectTypeOf(entries).toEqualTypeOf<SsgoiDirectionTransition[]>();
     expect(entries.map((entry) => entry.direction)).toEqual(["push", "pop"]);
     await expect(incomingStartTransform(entries[0]!)).resolves.toBe(
       "translate3d(100%, 0, 0)",
@@ -59,5 +60,15 @@ describe("drill", () => {
       { from: "/", to: "/detail" },
       { from: "/detail", to: "/" },
     ]);
+  });
+
+  it("keeps path and direction selectors mutually exclusive", () => {
+    type AmbiguousConfig = {
+      enter: "/detail";
+      exit: "/";
+      directions: { forward: "enter" };
+    };
+
+    expectTypeOf<AmbiguousConfig>().not.toMatchTypeOf<DrillConfig>();
   });
 });

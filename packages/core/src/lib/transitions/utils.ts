@@ -13,13 +13,8 @@ export type DirectionalTransitionPaths = {
  * Maps application direction tokens to the motion directions understood by a
  * preset. The keys are matched against `SsgoiConfig.resolveDirection`.
  */
-export type DirectionTransitionMap<TMotionDirection extends string> = Readonly<
-  Record<string, TMotionDirection>
->;
-
-export type DirectionTransitionSelector<TMotionDirection extends string> = {
-  directions: DirectionTransitionMap<TMotionDirection>;
-};
+export type NavigationDirectionMotionMap<TMotionDirection extends string> =
+  Readonly<Record<string, TMotionDirection>>;
 
 /**
  * Unified preset configuration schema used by all v6 transition presets.
@@ -95,7 +90,7 @@ export function createDirectionalPathTransitions(
  * `"exit"`. The factory is invoked once per token.
  */
 export function createDirectionalTransitions<TMotionDirection extends string>(
-  directionMap: DirectionTransitionMap<TMotionDirection>,
+  directionMap: NavigationDirectionMotionMap<TMotionDirection>,
   createTransition: (direction: TMotionDirection) => AnyTransitionConfig,
 ): SsgoiDirectionTransition[] {
   return Object.entries(directionMap).map(

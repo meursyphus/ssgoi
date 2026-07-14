@@ -2,8 +2,8 @@ import type { SsgoiDirectionTransition, SsgoiPathTransition } from "@types";
 import {
   createDirectionalPathTransitions,
   createDirectionalTransitions,
-  type DirectionTransitionSelector,
   type DirectionalTransitionPaths,
+  type NavigationDirectionMotionMap,
 } from "../utils";
 import { drill as transition } from "./transition";
 import type { DrillDirection, DrillType as InternalDrillType } from "./types";
@@ -50,11 +50,16 @@ type DrillPathAppearanceConfig =
     };
 
 export type DrillPathConfig = DirectionalTransitionPaths &
-  DrillPathAppearanceConfig;
+  DrillPathAppearanceConfig & {
+    directions?: never;
+  };
 
 /** Selects a drill motion for each application-defined direction token. */
-export type DrillDirectionConfig = DirectionTransitionSelector<DrillDirection> &
-  DrillAppearanceConfig;
+export type DrillDirectionConfig = DrillAppearanceConfig & {
+  directions: NavigationDirectionMotionMap<DrillDirection>;
+  enter?: never;
+  exit?: never;
+};
 
 export type DrillConfig = DrillPathConfig | DrillDirectionConfig;
 
@@ -85,7 +90,7 @@ export function drill(
   // compatibility but currently have no implemented values to forward.
   const internalType = resolveInternalType(type);
 
-  if ("directions" in config) {
+  if (config.directions !== undefined) {
     return createDirectionalTransitions(config.directions, (direction) =>
       transition({ direction, type: internalType }),
     );
