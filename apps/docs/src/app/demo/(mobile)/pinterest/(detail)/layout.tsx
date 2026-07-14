@@ -1,3 +1,6 @@
-import DetailShell from "@/demo/pinterest/page/detail-shell";
+import type { ReactNode } from "react";
+import { MobileDetailShell } from "@/lib/components/mobile-detail-shell";
 
-export default DetailShell;
+export default function DetailLayout({ children }: { children: ReactNode }) {
+  return <MobileDetailShell>{children}</MobileDetailShell>;
+}

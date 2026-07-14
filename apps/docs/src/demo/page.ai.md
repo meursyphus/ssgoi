@@ -45,6 +45,13 @@ page/layout/
 - 모바일/데스크탑 분기는 여기서 처리 (`MobileFrame`이 데스크탑에서는 가운데 mock device, 모바일에서는 풀스크린). 라우트 페이지에서 매번 분기하지 않는다.
 - 루트 `src/app/layout.tsx`에는 provider를 올리지 않는다 — 각 쇼케이스가 독립적으로 자기 provider 스택을 가진다.
 
+## Bottom nav 규칙 (모바일 데모 공통)
+
+**백 아이콘이 있는 상세 화면엔 바텀 네비가 없고, 나머지 메인 화면엔 있다.** 네비는 항상 트랜지션 boundary **안**(sticky)에 둔다 — `MobileFrame`의 `bottomSlot`은 모든 트랜지션 밖이라 상세 진입 시 네비가 얼어붙으므로 쓰지 않는다.
+
+- **탭이 여러 개인 데모** (google-photos, kakao-talk, pinterest): `@/lib/components/mobile-tabs-shell`의 `MobileTabsShell` + `mobile-detail-shell`의 `MobileDetailShell` 사용. 라우트를 `(tabs)`/`(detail)` 그룹으로 나누고, `(tabs)/layout.tsx`가 데모별 tabs-shell(탭 전환 config + nav만 정의)을, `(detail)/layout.tsx`가 `MobileDetailShell`을 렌더한다. 패턴 설명은 `MobileTabsShell` JSDoc 참고. 이때 데모 layout은 `withTransitionBoundary={false}`.
+- **메인 화면이 하나인 데모** (air-bnb, material-mail, voyage, gamja-market): 셸 분리 없이 메인 페이지 컴포넌트 마지막에 sticky 네비를 렌더하면 된다 (`withTransitionBoundary` 기본값 유지 — layout boundary가 페이지째 감싸므로 네비도 트랜지션을 같이 탄다). FAB 등 플로팅 요소는 네비 위로 offset.
+
 ## 규칙
 - `'use client'` 필수 (layout 서버 컴포넌트 제외)
 - `<img />` 사용 (`<Image />` 금지 — Cloudflare Workers 호환)

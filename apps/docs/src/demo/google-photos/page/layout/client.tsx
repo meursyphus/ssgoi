@@ -33,9 +33,9 @@ export function GooglePhotosLayoutClient({
 }) {
   return (
     // No shared pathname boundary here: the `(tabs)` group brings its own
-    // stable-key double boundary (tabs-shell) and `(detail)` brings a
-    // per-route boundary (detail-shell). A layout-level boundary would remount
-    // the tab shell — bottom nav included — on every tab move.
+    // stable-key double boundary (MobileTabsShell) and `(detail)` brings a
+    // per-route boundary (MobileDetailShell). A layout-level boundary would
+    // remount the tab shell — bottom nav included — on every tab move.
     <MobileShowcaseShell
       config={config}
       contentClassName="bg-white"
