@@ -14,7 +14,7 @@ export default function ChatDetailPage({
   }));
   chat.actions.init(initialData);
   return (
-    <div className="flex min-h-full flex-col bg-[#A4BFD2]">
+    <div className="flex h-full min-h-0 flex-col bg-[#A4BFD2]">
       <ChatHeader thread={initialData} />
       <MessageList messages={initialData.messages} />
       <Composer />
