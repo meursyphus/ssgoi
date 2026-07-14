@@ -63,8 +63,8 @@ export abstract class Animation {
    * Reads the live simulation value, so it advances frame-by-frame while
    * playing. Useful for external inspection / debugging.
    *
-   * NOT used by `MultiAnimation` stagger triggering — that uses the
-   * pre-computed timeline via `findTimeForProgress` to avoid per-frame work.
+   * `MultiAnimation` uses this live value for sequence/stagger triggering so
+   * delayed WAAPI startup is never mistaken for elapsed animation time.
    */
   abstract get progress(): number;
 

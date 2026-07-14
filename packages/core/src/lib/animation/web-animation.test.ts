@@ -87,15 +87,21 @@ function installAnimationFrameHarness() {
       return id;
     }),
   );
+  vi.stubGlobal(
+    "cancelAnimationFrame",
+    vi.fn((id: number) => {
+      queue.delete(id);
+    }),
+  );
 
   return {
     get pending() {
       return queue.size;
     },
-    flush() {
+    flush(delta = 1000 / 60) {
       const callbacks = [...queue.values()];
       queue = new Map();
-      now += 1000 / 60;
+      now += delta;
       for (const callback of callbacks) callback(now);
     },
   };
@@ -106,7 +112,7 @@ describe("WebAnimation", () => {
     vi.unstubAllGlobals();
   });
 
-  it("holds at zero through delayed rendering before playback", async () => {
+  it("frame-paces startup before handing playback to WAAPI", async () => {
     const frames = installAnimationFrameHarness();
     const { waapi, ready, calls, advance } = createFakeWaapi();
     const { element, style } = createFakeElement(waapi);
@@ -142,13 +148,51 @@ describe("WebAnimation", () => {
     await Promise.resolve();
 
     expect(style.opacity).toBe("");
-    expect(waapi.play).toHaveBeenCalledTimes(1);
+    expect(waapi.play).not.toHaveBeenCalled();
     expect(waapi.currentTime).toBe(0);
+
+    frames.flush();
+    expect(waapi.play).not.toHaveBeenCalled();
+    expect(waapi.currentTime).toBeCloseTo(1000 / 60);
+
+    frames.flush();
+    expect(waapi.play).toHaveBeenCalledTimes(1);
+    expect(waapi.currentTime).toBeCloseTo(1000 / 30);
 
     advance(16);
     const [pose] = animation.getPose();
-    expect(pose?.value).toBeGreaterThan(0.15);
-    expect(pose?.value).toBeLessThan(0.17);
+    expect(pose?.value).toBeGreaterThan(0.48);
+    expect(pose?.value).toBeLessThan(0.5);
+  });
+
+  it("does not charge a long startup frame to animation progress", async () => {
+    const frames = installAnimationFrameHarness();
+    const { waapi, ready } = createFakeWaapi();
+    const { element } = createFakeElement(waapi);
+    const animation = new WebAnimation({
+      element,
+      integrator: testIntegrator,
+      style: (t) => ({ opacity: t }),
+    });
+
+    animation.play();
+    ready.resolve(waapi);
+    await Promise.resolve();
+    frames.flush();
+    frames.flush();
+    await Promise.resolve();
+
+    frames.flush();
+    expect(waapi.currentTime).toBeCloseTo(1000 / 60);
+
+    frames.flush(1000);
+    expect(waapi.currentTime).toBeCloseTo(50);
+    expect(waapi.play).not.toHaveBeenCalled();
+
+    frames.flush();
+    expect(waapi.play).not.toHaveBeenCalled();
+    frames.flush();
+    expect(waapi.play).toHaveBeenCalledTimes(1);
   });
 
   it("samples live pose from WAAPI currentTime", () => {

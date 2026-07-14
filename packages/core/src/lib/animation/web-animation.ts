@@ -6,8 +6,14 @@ import {
 } from "./integrator";
 import { waitPaint } from "../utils/wait-paint";
 import { Animation } from "./animation";
+import {
+  frameScheduler,
+  STABLE_FRAME_THRESHOLD,
+  type FrameTick,
+} from "./frame-scheduler";
 
 const FRAME_TIME = 1000 / 60;
+const STARTUP_STABLE_FRAMES = 2;
 
 export interface WebAnimationOptions {
   element: HTMLElement;
@@ -36,8 +42,14 @@ interface SimFrame {
  *      velocity) toward the target bound, producing a frame list.
  *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is held
  *      at 0 ms until the pending pause is acknowledged and the browser has had
- *      a rendering opportunity, then starts.
- *   3. While playing, `getPose()` interpolates the live position from frames
+ *      a rendering opportunity.
+ *   3. Startup is advanced by a shared frame clock until two rendering
+ *      opportunities arrive without a long gap. Delayed mount work during
+ *      this startup window therefore cannot be charged to the document
+ *      timeline in one catch-up jump.
+ *   4. Playback is handed to native WAAPI once rendering is stable, preserving
+ *      compositor playback for the remainder of the transition.
+ *   5. While playing, `getPose()` interpolates the live position from frames
  *      using WAAPI's `currentTime`, so browser setup latency is not counted as
  *      animation progress.
  *
@@ -59,6 +71,8 @@ export class WebAnimation extends Animation {
   private waitingForStart = false;
   private startReady = false;
   private pendingFirstFrame: Keyframe | undefined;
+  private stopStartupClock: (() => void) | null = null;
+  private startupStableFrames = 0;
   private running = false;
   private paused = false;
   private settled = false;
@@ -84,7 +98,7 @@ export class WebAnimation extends Animation {
       this.paused = false;
       this.running = true;
       if (this.waitingForStart) {
-        if (this.startReady) this.playPreparedWaapi(this.waapi);
+        if (this.startReady) this.startFramePacedPlayback(this.waapi);
         return;
       }
       this.waapi.play();
@@ -107,6 +121,8 @@ export class WebAnimation extends Animation {
     // resume from the exact frame — no inline-style pinning needed.
     this.captureLiveState();
     this.waapi?.pause();
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
     this.running = false;
     this.paused = true;
   }
@@ -285,6 +301,9 @@ export class WebAnimation extends Animation {
     this.waitingForStart = false;
     this.startReady = false;
     this.pendingFirstFrame = undefined;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
+    this.startupStableFrames = 0;
   }
 
   private captureLiveState() {
@@ -317,11 +336,16 @@ export class WebAnimation extends Animation {
 
     this.startReady = true;
     if (!this.running || this.paused) return;
-    this.playPreparedWaapi(waapi);
+    this.startFramePacedPlayback(waapi);
   }
 
-  private playPreparedWaapi(waapi: globalThis.Animation): void {
-    if (this.waapi !== waapi || !this.waitingForStart || !this.startReady) {
+  private startFramePacedPlayback(waapi: globalThis.Animation): void {
+    if (
+      this.waapi !== waapi ||
+      !this.waitingForStart ||
+      !this.startReady ||
+      this.stopStartupClock
+    ) {
       return;
     }
 
@@ -334,10 +358,79 @@ export class WebAnimation extends Animation {
       }
     }
 
+    this.pendingFirstFrame = undefined;
+    if (typeof requestAnimationFrame === "undefined" || this.playbackRate < 0) {
+      this.handOffToWaapi(waapi);
+      return;
+    }
+    this.startupStableFrames = 0;
+    this.stopStartupClock = frameScheduler.subscribe((tick) => {
+      this.advanceFramePacedStartup(waapi, tick);
+    });
+  }
+
+  private advanceFramePacedStartup(
+    waapi: globalThis.Animation,
+    tick: FrameTick,
+  ): void {
+    if (
+      this.waapi !== waapi ||
+      !this.running ||
+      this.paused ||
+      !this.waitingForStart
+    ) {
+      return;
+    }
+
+    const lastFrame = this.frames[this.frames.length - 1];
+    if (!lastFrame) return;
+
+    const currentTime = readAnimationTime(waapi) ?? 0;
+    const nextTime = Math.min(
+      lastFrame.time,
+      currentTime + tick.delta * Math.max(0, this.playbackRate),
+    );
+    waapi.currentTime = nextTime;
+    this.captureLiveState();
+
+    if (nextTime >= lastFrame.time) {
+      this.finishFramePacedRun(waapi, lastFrame);
+      return;
+    }
+
+    if (tick.rawDelta <= STABLE_FRAME_THRESHOLD) this.startupStableFrames++;
+    else this.startupStableFrames = 0;
+
+    if (this.startupStableFrames < STARTUP_STABLE_FRAMES) return;
+
+    this.handOffToWaapi(waapi);
+  }
+
+  private handOffToWaapi(waapi: globalThis.Animation): void {
+    if (this.waapi !== waapi || !this.running || this.paused) return;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
     this.waitingForStart = false;
     this.startReady = false;
-    this.pendingFirstFrame = undefined;
+    this.startupStableFrames = 0;
     waapi.play();
+  }
+
+  private finishFramePacedRun(
+    waapi: globalThis.Animation,
+    lastFrame: SimFrame,
+  ): void {
+    if (this.waapi !== waapi || !this.running) return;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.startupStableFrames = 0;
+    this.running = false;
+    this.settled = true;
+    this.currentValue = lastFrame.position;
+    this.currentVelocity = 0;
+    this.onComplete?.();
   }
 
   private applyStyleAt(value: number) {
