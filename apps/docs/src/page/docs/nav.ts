@@ -36,6 +36,11 @@ export const DOCS_NAV: DocsNavGroup[] = [
         blurb: "The three classes on the wrapper.",
       },
       {
+        title: "Nested boundaries",
+        href: "/docs/nested-boundaries",
+        blurb: "A bottom nav that survives tab moves.",
+      },
+      {
         title: "How it works",
         href: "/docs/how-it-works",
         blurb: "Clone & absolute, step by step.",

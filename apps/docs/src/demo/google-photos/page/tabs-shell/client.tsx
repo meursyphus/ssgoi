@@ -1,13 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { axis } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
+import { MobileTabsShell } from "@/lib/components/mobile-tabs-shell";
 import { TopAppBar } from "../shared/top-app-bar";
 import { FloatingBottomNav } from "../shared/floating-bottom-nav";
+
 const BASE = "/demo/google-photos";
-const innerConfig: SsgoiConfig = {
+
+const tabsConfig: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     ...axis({
@@ -18,22 +20,21 @@ const innerConfig: SsgoiConfig = {
   ],
 };
 
-// Keep the layout shell outside the transition boundary. Its flex/stacking
-// context is stable chrome; only the routed tab page below it changes.
+// Double-boundary tab shell — pattern docs live on MobileTabsShell. Here we
+// only supply what's Google-Photos-specific: the tab axis config, the sticky
+// top app bar, and the floating pill nav.
 export function GooglePhotosTabsShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-full flex-col bg-white">
-      <div className="sticky top-0 z-30 bg-white">
-        <TopAppBar />
-      </div>
-      <Ssgoi config={innerConfig}>
-        <div className="relative z-0 flex-1 bg-white">
-          <SsgoiTransitionBoundary className="min-h-full bg-white">
-            {children}
-          </SsgoiTransitionBoundary>
+    <MobileTabsShell
+      config={tabsConfig}
+      topBar={
+        <div className="sticky top-0 z-30 bg-white">
+          <TopAppBar />
         </div>
-      </Ssgoi>
-      <FloatingBottomNav />
-    </div>
+      }
+      nav={<FloatingBottomNav />}
+    >
+      {children}
+    </MobileTabsShell>
   );
 }
