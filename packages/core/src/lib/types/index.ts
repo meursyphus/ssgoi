@@ -185,8 +185,31 @@ export type SsgoiPathTransition = {
   symmetric?: boolean;
 };
 
-export type SsgoiPathTransitionInput =
+/**
+ * A transition selected by an app-supplied direction token rather than by the
+ * `(from, to)` path pair. The token is whatever `SsgoiConfig.resolveDirection`
+ * returns (e.g. `"forward"` / `"back"`); a resolved token that matches a
+ * registered entry's `direction` selects it with strict precedence over path
+ * matching. Has no `from`/`to`/`symmetric` — all path/direction conditionality
+ * lives in the resolver, which already receives the paths.
+ */
+export type SsgoiDirectionTransition = {
+  direction: string;
+  transition: AnyTransitionConfig;
+};
+
+/**
+ * A single entry in the `transitions` list: either a path-pair entry (the
+ * existing form, matched by `findMatchingTransition`) or a direction entry (new,
+ * selected by a resolved token). Structurally discriminated by the presence of
+ * `direction`.
+ */
+export type SsgoiTransitionEntry =
   | SsgoiPathTransition
+  | SsgoiDirectionTransition;
+
+export type SsgoiPathTransitionInput =
+  | SsgoiTransitionEntry
   | readonly SsgoiPathTransitionInput[];
 
 export type PreserveScrollValue =
@@ -220,10 +243,34 @@ export type SsgoiTransitionsOption =
   | readonly SsgoiPathTransitionInput[]
   | SsgoiTransitionsFn;
 
+/**
+ * Classifies a real transition into an app-defined direction token. Receives
+ * the ORIGINAL navigated paths (before `middleware`) and returns a token —
+ * typically computed from state the app owns (history-stack traversal, a
+ * nav-intent store, a gesture). A returned token that matches a registered
+ * `{ direction }` entry selects it; `null`/`undefined` falls through to normal
+ * path-pair matching. Never invoked for the `(path, path)` scroll-normalization
+ * calls — it is wired only at the real-transition site.
+ */
+export type ResolveDirection = (args: {
+  from: string;
+  to: string;
+}) => string | null | undefined;
+
 export type SsgoiConfig = {
   transitions?: SsgoiTransitionsOption;
   middleware?: (from: string, to: string) => { from: string; to: string };
   preserveScroll?: PreserveScrollOption;
+  /**
+   * Optional direction classifier. When it returns a token registered as a
+   * `{ direction }` entry in `transitions`, that entry wins over path matching;
+   * otherwise selection falls through to `findMatchingTransition`. Lets the
+   * SAME path pair animate differently depending on how the user navigated
+   * (e.g. history-back reverses) — the concern `middleware` cannot express
+   * without corrupting scroll identity. Omitting it is a no-op: behavior is
+   * byte-for-byte the path-only path.
+   */
+  resolveDirection?: ResolveDirection;
 };
 
 /* ────────────────────────────────────────────────────────────────────────────

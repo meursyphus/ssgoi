@@ -1,10 +1,11 @@
-import type { SsgoiPathTransition } from "@types";
+import type { SsgoiDirectionTransition, SsgoiPathTransition } from "@types";
 import {
   createDirectionalPathTransitions,
+  createDirectionalTransitions,
   type DirectionalTransitionPaths,
 } from "../utils";
 import { drill as transition } from "./transition";
-import type { DrillType as InternalDrillType } from "./types";
+import type { DrillDirection, DrillType as InternalDrillType } from "./types";
 
 /**
  * Public `type` values supported by `drill`.
@@ -69,5 +70,33 @@ export function drill(config: DrillConfig): SsgoiPathTransition[] {
 
   return createDirectionalPathTransitions({ enter, exit }, (direction) =>
     transition({ direction, type: internalType }),
+  );
+}
+
+/**
+ * Direction-keyed sibling of `drill`. Instead of pairing paths, it produces two
+ * `{ direction }` entries — `"forward"` and `"back"` — selected by
+ * `SsgoiConfig.resolveDirection`, so the SAME path pair can drill forward on a
+ * push and reverse on a history-back:
+ *
+ * @example
+ * const config: SsgoiConfig = {
+ *   resolveDirection: () => (isHistoryBack() ? "back" : "forward"),
+ *   transitions: [...drillByDirection({ forward: "enter", back: "exit", type: "slide" })],
+ * };
+ *
+ * `forward`/`back` are drill motions (`"enter"` covers the incoming page over
+ * the outgoing; `"exit"` drills the outgoing back out), reusing the exact same
+ * motion `drill` uses — no new transition to author.
+ */
+export function drillByDirection(config: {
+  forward: DrillDirection;
+  back: DrillDirection;
+  type?: DrillType;
+}): SsgoiDirectionTransition[] {
+  const internalType = resolveInternalType(config.type);
+  return createDirectionalTransitions(
+    { forward: config.forward, back: config.back },
+    (direction) => transition({ direction, type: internalType }),
   );
 }

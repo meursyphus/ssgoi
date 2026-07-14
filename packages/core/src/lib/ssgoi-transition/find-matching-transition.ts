@@ -1,4 +1,4 @@
-import type { TransitionConfig } from "@types";
+import type { ResolveDirection, TransitionConfig } from "@types";
 
 type PathMatch = {
   matched: boolean;
@@ -179,4 +179,75 @@ export function findMatchingTransition(
   }
 
   return best?.transition ?? null;
+}
+
+/**
+ * Resolves the transition for one real navigation, layering direction-token
+ * selection over path matching.
+ *
+ * Precedence:
+ *  1. If a `direction` token was resolved AND a `{ direction }` entry is
+ *     registered for it, that entry wins — strict override over any path match.
+ *  2. Otherwise (no token, or the token has no registered entry) fall through to
+ *     `findMatchingTransition` on the path pair — the existing behavior.
+ *
+ * An unregistered token deliberately falls back rather than dead-ending, so a
+ * resolver that classifies every navigation (`"forward" | "back"`) never forces
+ * the app to register a handler for every token. Token comparison is exact
+ * string equality (`Map.get`); wildcards/specificity remain path-only.
+ */
+export function selectTransition(args: {
+  from: string;
+  to: string;
+  direction: string | null | undefined;
+  pathTransitions: Array<{
+    from: string;
+    to: string;
+    transition: TransitionConfig;
+  }>;
+  directionTransitions: ReadonlyMap<string, TransitionConfig>;
+}): TransitionConfig | null {
+  if (args.direction != null) {
+    const hit = args.directionTransitions.get(args.direction);
+    if (hit) return hit;
+  }
+  return findMatchingTransition(args.from, args.to, args.pathTransitions);
+}
+
+/**
+ * The full per-navigation selection seam, extracted from the context so it is
+ * node-testable without a DOM. Encodes the ordering contract:
+ *
+ *  1. `resolveDirection` runs FIRST, on the ORIGINAL (pre-`middleware`) pair —
+ *     direction is "how we arrived", orthogonal to the URL normalization
+ *     `middleware` performs for path matching (§4.2).
+ *  2. `middleware` then normalizes the pair for the path fallback only.
+ *  3. `selectTransition` layers the token override over the path match.
+ *
+ * `middleware` is invoked exactly once here; `resolveDirection` at most once.
+ * Neither participates in scroll-path normalization — that path never calls in.
+ */
+export function resolveTransitionForPair(args: {
+  from: string;
+  to: string;
+  middleware: (from: string, to: string) => { from: string; to: string };
+  resolveDirection?: ResolveDirection;
+  pathTransitions: Array<{
+    from: string;
+    to: string;
+    transition: TransitionConfig;
+  }>;
+  directionTransitions: ReadonlyMap<string, TransitionConfig>;
+}): TransitionConfig | null {
+  const direction = args.resolveDirection
+    ? args.resolveDirection({ from: args.from, to: args.to })
+    : null;
+  const { from, to } = args.middleware(args.from, args.to);
+  return selectTransition({
+    from,
+    to,
+    direction,
+    pathTransitions: args.pathTransitions,
+    directionTransitions: args.directionTransitions,
+  });
 }

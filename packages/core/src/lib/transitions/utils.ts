@@ -1,4 +1,8 @@
-import type { AnyTransitionConfig, SsgoiPathTransition } from "@types";
+import type {
+  AnyTransitionConfig,
+  SsgoiDirectionTransition,
+  SsgoiPathTransition,
+} from "@types";
 
 export type DirectionalTransitionPaths = {
   enter: string;
@@ -66,6 +70,26 @@ export function createDirectionalPathTransitions(
       transition: createTransition("exit"),
     },
   ];
+}
+
+/**
+ * Token-keyed sibling of `createOrderedPathTransitions`: builds direction
+ * entries (no paths) from a single `createTransition(direction)` factory.
+ *
+ * `directions` maps each app-facing TOKEN — what `SsgoiConfig.resolveDirection`
+ * returns — to the DIRECTION argument the factory understands. e.g.
+ * `{ forward: "enter", back: "exit" }` yields entries keyed `"forward"` /
+ * `"back"`, each carrying the config the factory produced for `"enter"` /
+ * `"exit"`. The factory is invoked once per token.
+ */
+export function createDirectionalTransitions<TDirection extends string>(
+  directions: Record<string, TDirection>,
+  createTransition: (direction: TDirection) => AnyTransitionConfig,
+): SsgoiDirectionTransition[] {
+  return Object.entries(directions).map(([token, direction]) => ({
+    direction: token,
+    transition: createTransition(direction),
+  }));
 }
 
 export function createOrderedPathTransitions<TDirection extends string>(

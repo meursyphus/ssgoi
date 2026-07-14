@@ -8,8 +8,11 @@ export {
 } from "./animation";
 export type {
   SsgoiConfig,
+  ResolveDirection,
   SsgoiContext,
   SsgoiPathTransition,
+  SsgoiDirectionTransition,
+  SsgoiTransitionEntry,
   SsgoiPathTransitionInput,
   TransitionConfig,
   PrepareArgs,

@@ -4,6 +4,7 @@ import type {
   SsgoiContext,
   SsgoiPathTransition,
   SsgoiPathTransitionInput,
+  SsgoiTransitionEntry,
   SsgoiTransitionsFn,
   SsgoiTransitionContext,
   PrepareArgs,
@@ -13,7 +14,7 @@ import { prepareOutgoing, promiseAll } from "@utils";
 import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
-import { findMatchingTransition } from "./find-matching-transition";
+import { resolveTransitionForPair } from "./find-matching-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
@@ -27,8 +28,8 @@ function isTransitionGroup(
 
 function flattenTransitions(
   transitions: readonly SsgoiPathTransitionInput[],
-): SsgoiPathTransition[] {
-  const flattened: SsgoiPathTransition[] = [];
+): SsgoiTransitionEntry[] {
+  const flattened: SsgoiTransitionEntry[] = [];
   for (const transition of transitions) {
     if (isTransitionGroup(transition)) {
       flattened.push(...flattenTransitions(transition));
@@ -37,6 +38,35 @@ function flattenTransitions(
     }
   }
   return flattened;
+}
+
+/**
+ * Splits a flat entry list into the two selectors:
+ *  - `pathEntries`: `{ from, to }` entries fed to `processSymmetricTransitions`
+ *    and `findMatchingTransition` (direction entries have no `from`/`to`, so
+ *    they must never reach symmetric processing — §4.5).
+ *  - `directionTransitions`: token → config, populated set-if-absent so the
+ *    FIRST-declared entry wins on a duplicate token, mirroring
+ *    `findMatchingTransition`'s config-order tie-break.
+ */
+export function partitionTransitions(
+  entries: readonly SsgoiTransitionEntry[],
+): {
+  pathEntries: SsgoiPathTransition[];
+  directionTransitions: Map<string, AnyTransitionConfig>;
+} {
+  const pathEntries: SsgoiPathTransition[] = [];
+  const directionTransitions = new Map<string, AnyTransitionConfig>();
+  for (const entry of entries) {
+    if ("direction" in entry) {
+      if (!directionTransitions.has(entry.direction)) {
+        directionTransitions.set(entry.direction, entry.transition);
+      }
+    } else {
+      pathEntries.push(entry);
+    }
+  }
+  return { pathEntries, directionTransitions };
 }
 
 type TransitionMode = "unmount" | "hidden";
@@ -90,6 +120,7 @@ export function createSggoiTransitionContext(
     transitions = [],
     middleware = (from, to) => ({ from, to }),
     preserveScroll = (isMobile: boolean) => isMobile,
+    resolveDirection,
   } = options;
 
   const host = contextOptions.host ?? new HostAnimation();
@@ -132,19 +163,28 @@ export function createSggoiTransitionContext(
     getIsMobile,
   } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
 
-  // Resolve + flatten + process the path-transition list lazily. `isMobile` is
-  // only reliable once the scroll container is known (measured on the first IN),
-  // which always precedes findMatchingTransition. Memoized per device class so a
-  // static list is processed at most once per `isMobile` value and the resolver
-  // never runs on the hot path more than necessary.
-  const processedByIsMobile = new Map<boolean, SsgoiPathTransition[]>();
-  const getProcessedTransitions = (): SsgoiPathTransition[] => {
+  // Resolve + flatten + partition + process the transition list lazily.
+  // `isMobile` is only reliable once the scroll container is known (measured on
+  // the first IN), which always precedes selection. Memoized per device class so
+  // a static list is processed at most once per `isMobile` value. Path entries
+  // and direction entries are split here (§4.5): only path entries go through
+  // symmetric processing / path matching; direction entries become a token map.
+  type ProcessedTransitions = {
+    pathTransitions: SsgoiPathTransition[];
+    directionTransitions: Map<string, AnyTransitionConfig>;
+  };
+  const processedByIsMobile = new Map<boolean, ProcessedTransitions>();
+  const getProcessedTransitions = (): ProcessedTransitions => {
     const isMobile = getIsMobile();
     let processed = processedByIsMobile.get(isMobile);
     if (!processed) {
-      processed = processSymmetricTransitions(
+      const { pathEntries, directionTransitions } = partitionTransitions(
         flattenTransitions(resolveTransitions({ isMobile })),
       );
+      processed = {
+        pathTransitions: processSymmetricTransitions(pathEntries),
+        directionTransitions,
+      };
       processedByIsMobile.set(isMobile, processed);
     }
     return processed;
@@ -418,24 +458,25 @@ export function createSggoiTransitionContext(
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
 
-      // `middleware` rewrites the path pair for matching (e.g. aliasing
-      // `/m-p/[id]` → `/p/[id]`, or collapsing a deep route to a logical id). Use
-      // the transformed pair for `findMatchingTransition`, but hand `runTransition`
-      // the ORIGINAL pair: the context manager already funnels every scroll path
+      // Select on the ORIGINAL navigated pair. `resolveDirection` classifies
+      // "how we arrived" first (§4.2), then `middleware` rewrites the pair for
+      // path matching only (e.g. aliasing `/m-p/[id]` → `/p/[id]`, or collapsing
+      // a deep route to a logical id) — but `runTransition` still gets the
+      // ORIGINAL pair: the context manager already funnels every scroll path
       // through the same `middleware` (via `resolveScrollPath`), so passing the
-      // originals keeps record/restore on one identity. Passing the pre-transformed
-      // paths here would double-apply the rewrite and could miss the stored scroll,
-      // snapping the outgoing page to the top mid-transition.
-      const { from: transformedFrom, to: transformedTo } = middleware(
-        pair.from,
-        pair.to,
-      );
-
-      const config = findMatchingTransition(
-        transformedFrom,
-        transformedTo,
-        getProcessedTransitions(),
-      );
+      // originals keeps record/restore on one identity. A resolved direction
+      // token that maps to a registered `{ direction }` entry wins over path
+      // matching; anything else falls through to the path pair exactly as before.
+      const { pathTransitions, directionTransitions } =
+        getProcessedTransitions();
+      const config = resolveTransitionForPair({
+        from: pair.from,
+        to: pair.to,
+        middleware,
+        resolveDirection,
+        pathTransitions,
+        directionTransitions,
+      });
 
       const outSide = pendingOut;
       const inSide = pendingIn;

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { TransitionConfig } from "@types";
-import { findMatchingTransition, matchPath } from "./find-matching-transition";
+import {
+  findMatchingTransition,
+  matchPath,
+  resolveTransitionForPair,
+  selectTransition,
+} from "./find-matching-transition";
 
 function transition(id: string): TransitionConfig {
   return { animation: (() => id) as unknown as TransitionConfig["animation"] };
@@ -92,5 +97,121 @@ describe("findMatchingTransition", () => {
         },
       ]),
     ).toBe(first);
+  });
+});
+
+describe("selectTransition", () => {
+  const back = transition("back");
+  const forward = transition("forward");
+  const pathHit = transition("path");
+  const pathTransitions = [{ from: "/a", to: "/b", transition: pathHit }];
+  const directionTransitions = new Map<string, TransitionConfig>([
+    ["forward", forward],
+    ["back", back],
+  ]);
+
+  it("lets a resolved token override a matching path pair", () => {
+    expect(
+      selectTransition({
+        from: "/a",
+        to: "/b",
+        direction: "back",
+        pathTransitions,
+        directionTransitions,
+      }),
+    ).toBe(back);
+  });
+
+  it("returns opposite transitions for the same pair under opposite tokens", () => {
+    const args = {
+      from: "/a",
+      to: "/b",
+      pathTransitions,
+      directionTransitions,
+    };
+    expect(selectTransition({ ...args, direction: "forward" })).toBe(forward);
+    expect(selectTransition({ ...args, direction: "back" })).toBe(back);
+  });
+
+  it("falls back to path matching when the token is null or undefined", () => {
+    const args = {
+      from: "/a",
+      to: "/b",
+      pathTransitions,
+      directionTransitions,
+    };
+    expect(selectTransition({ ...args, direction: null })).toBe(pathHit);
+    expect(selectTransition({ ...args, direction: undefined })).toBe(pathHit);
+  });
+
+  it("falls back to path matching when the token has no registered entry", () => {
+    expect(
+      selectTransition({
+        from: "/a",
+        to: "/b",
+        direction: "sideways",
+        pathTransitions,
+        directionTransitions,
+      }),
+    ).toBe(pathHit);
+  });
+
+  it("returns null when neither a token nor a path matches", () => {
+    expect(
+      selectTransition({
+        from: "/x",
+        to: "/y",
+        direction: "sideways",
+        pathTransitions,
+        directionTransitions,
+      }),
+    ).toBeNull();
+  });
+});
+
+describe("resolveTransitionForPair", () => {
+  const forward = transition("forward");
+  const pathHit = transition("path");
+
+  it("calls resolveDirection with the original, pre-middleware pair", () => {
+    const seen: Array<{ from: string; to: string }> = [];
+    resolveTransitionForPair({
+      from: "/raw-from",
+      to: "/raw-to",
+      middleware: () => ({ from: "/aliased", to: "/aliased" }),
+      resolveDirection: (args) => {
+        seen.push(args);
+        return null;
+      },
+      pathTransitions: [],
+      directionTransitions: new Map(),
+    });
+    expect(seen).toEqual([{ from: "/raw-from", to: "/raw-to" }]);
+  });
+
+  it("matches path entries against the middleware-transformed pair", () => {
+    expect(
+      resolveTransitionForPair({
+        from: "/m-p/1",
+        to: "/m-p/2",
+        middleware: () => ({ from: "/p", to: "/p/detail" }),
+        resolveDirection: () => null,
+        pathTransitions: [{ from: "/p", to: "/p/detail", transition: pathHit }],
+        directionTransitions: new Map(),
+      }),
+    ).toBe(pathHit);
+  });
+
+  it("lets a resolved token win over the transformed path match", () => {
+    expect(
+      resolveTransitionForPair({
+        from: "/a",
+        to: "/b",
+        middleware: (from, to) => ({ from, to }),
+        resolveDirection: () => "forward",
+        pathTransitions: [{ from: "/a", to: "/b", transition: pathHit }],
+        directionTransitions: new Map([["forward", forward]]),
+      }),
+    ).toBe(forward);
   });
 });
