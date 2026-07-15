@@ -6,7 +6,7 @@ This document is for AI assistants to help developers set up SSGOI page transiti
 
 **This file is the React setup guide plus the shared core reference** (`SsgoiConfig`, transition catalog, troubleshooting — those apply to every framework). Using Svelte, Vue/Nuxt, Solid, Angular, or Qwik? Read the matching file from the Index at the bottom instead of the React sections here.
 
-**Current core package version:** `@ssgoi/core@6.6.9`
+**Current core package version:** `@ssgoi/core@6.6.10`
 
 ---
 

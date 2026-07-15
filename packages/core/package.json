@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "6.6.9",
+  "version": "6.6.10",
   "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
   "private": false,
   "type": "module",
