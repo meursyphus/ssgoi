@@ -11,10 +11,6 @@ const PARALLAX_PHYSICS: PhysicsOptions = {
   spring: {
     stiffness: 230,
     damping: 25,
-    doubleSpring: {
-      stiffness: 230,
-      damping: 24,
-    },
   },
 };
 
