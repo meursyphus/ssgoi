@@ -6,11 +6,15 @@ import type {
 } from "../types";
 
 // ease-out (Material decelerated): incoming page settles into place.
-// stiffness 230, damping 25 → ratio 0.82 of critical (~30.3), settles gently.
+// Primary spring 270/25 settles gently; double spring 600/50 is near-critical.
 const PARALLAX_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 230,
+    stiffness: 270,
     damping: 25,
+    doubleSpring: {
+      stiffness: 600,
+      damping: 50,
+    },
   },
 };
 
