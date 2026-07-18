@@ -10,10 +10,10 @@ export function PhotoCanvas({ photo }: { photo: PhotoDetail }) {
       <img
         src={photo.src}
         alt={photo.alt}
+        width={photo.width}
+        height={photo.height}
         className="block max-h-[min(70vh,640px)] w-auto max-w-[min(900px,calc(100vw-96px))] rounded-xl object-contain"
         data-hero-enter-key={photo.id}
-        data-hero-aspect-ratio={photo.aspectRatio}
-        data-hero-radius="12"
       />
     </section>
   );

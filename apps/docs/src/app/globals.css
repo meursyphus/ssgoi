@@ -139,6 +139,7 @@ body {
 
 .blog-content a {
   color: #fb923c;
+  overflow-wrap: anywhere;
   text-decoration-line: underline;
   text-decoration-color: rgb(251 146 60 / 0.4);
   text-underline-offset: 4px;

@@ -1,5 +1,6 @@
 import type { PhysicsOptions, SsgoiTransitionContext } from "@types";
 import type { Animation } from "../../animation";
+import type { MediaGeometry } from "../media-geometry";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Public option surface (v6 unified `{type?, variant?, options?}` shape)
@@ -35,6 +36,10 @@ export interface ZoomAnimationConfig {
 export interface ZoomAnimationInput {
   enterRect: DOMRect;
   exitRect: DOMRect;
+  /** Optional content-aware geometry used only by the foreground tile. */
+  enterMedia?: MediaGeometry;
+  /** Optional content-aware geometry used only by the foreground tile. */
+  exitMedia?: MediaGeometry;
   pageRect: DOMRect;
   scrollOffset: { x: number; y: number };
   enterRadius: number;

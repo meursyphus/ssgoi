@@ -1,5 +1,6 @@
 import type { PhysicsOptions } from "@types";
 import type { Animation } from "../../animation";
+import type { MediaFit } from "../media-geometry";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Public option surface (v6 unified `{type?, variant?, options?}` shape)
@@ -24,7 +25,7 @@ export type HeroType = "static" | "fade";
 export type HeroVariant = "default" | "smooth";
 export type HeroOptions = Record<string, never>;
 
-export type HeroFit = "contain" | "cover";
+export type HeroFit = MediaFit;
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Internal normalized options — `index.ts` is the single place that fills in

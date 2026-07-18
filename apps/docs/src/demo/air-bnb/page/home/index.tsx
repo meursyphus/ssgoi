@@ -7,6 +7,7 @@ import { CategoryTabs } from "./category-tabs";
 import { CompanyNotice } from "./company-notice";
 import { ListingRow } from "./listing-row";
 import { PopularSection } from "./popular-section";
+import { BottomNav } from "./bottom-nav";
 export default function HomePage() {
   const listing = useListing((state) => ({
     feed: state.feed,
@@ -31,6 +32,7 @@ export default function HomePage() {
           loading={listing.feed.isLoading}
         />
       </div>
+      <BottomNav />
     </div>
   );
 }

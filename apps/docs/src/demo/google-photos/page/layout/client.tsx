@@ -26,9 +26,21 @@ const config: SsgoiConfig = {
   ],
 };
 
-export function GooglePhotosLayoutClient({ children }: { children: ReactNode }) {
+export function GooglePhotosLayoutClient({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <MobileShowcaseShell config={config} contentClassName="bg-white">
+    // No shared pathname boundary here: the `(tabs)` group brings its own
+    // stable-key double boundary (MobileTabsShell) and `(detail)` brings a
+    // per-route boundary (MobileDetailShell). A layout-level boundary would
+    // remount the tab shell — bottom nav included — on every tab move.
+    <MobileShowcaseShell
+      config={config}
+      contentClassName="bg-white"
+      withTransitionBoundary={false}
+    >
       {children}
     </MobileShowcaseShell>
   );

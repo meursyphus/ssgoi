@@ -1,5 +1,6 @@
 import type { Pose, Timeline } from "@types";
 import { Animation } from "./animation";
+import { frameScheduler } from "./frame-scheduler";
 
 export type MultiAnimationMode = "parallel" | "sequence";
 
@@ -32,7 +33,7 @@ export class MultiAnimation extends Animation {
   private startAt: number[];
   private pendingComplete = 0;
   private running = false;
-  private pendingStartTimers: ReturnType<typeof setTimeout>[] = [];
+  private pendingStartObservers: Array<() => void> = [];
 
   constructor(children: Animation[], opts: MultiAnimationOptions = {}) {
     super();
@@ -60,13 +61,13 @@ export class MultiAnimation extends Animation {
 
   pause(): void {
     this.running = false;
-    this.clearPendingStartTimers();
+    this.clearPendingStartObservers();
     for (const child of this.children) child.pause();
   }
 
   complete(): void {
     this.running = false;
-    this.clearPendingStartTimers();
+    this.clearPendingStartObservers();
     for (const child of this.children) child.complete();
     this.onComplete?.();
   }
@@ -137,11 +138,11 @@ export class MultiAnimation extends Animation {
     this.scheduleStart(0, method);
   }
 
-  // Chained start: play child `index`, then schedule the next one based on
-  // *this* child's freshly computed timeline. Doing this lazily (rather than
-  // up-front for the whole chain) is what makes it correct for >2 children —
-  // child[i+1]'s trigger ms is only knowable after child[i].play() has run
-  // `simulate()`. Single setTimeout per gap, no polling.
+  // Chained start: play child `index`, then observe its actual progress before
+  // starting the next one. A wall-clock timeout starts counting before WAAPI's
+  // asynchronous startup has completed, so mount/layout delays can otherwise
+  // make a sequence or stagger run early. The shared frame scheduler evaluates
+  // observers after frame-paced drivers, matching the pose painted this frame.
   private scheduleStart(index: number, method: "play" | "reverse") {
     if (!this.running) return;
     if (index >= this.children.length) return;
@@ -154,30 +155,37 @@ export class MultiAnimation extends Animation {
       this.scheduleStart(next, method);
       return;
     }
-    const triggerMs = this.children[index]!.findTimeForProgress(threshold);
-    if (triggerMs === null || triggerMs <= 0) {
+    const child = this.children[index]!;
+    if (this.hasReachedThreshold(child, threshold, method)) {
       this.scheduleStart(next, method);
       return;
     }
-    // `triggerMs` is simulation time (frames are timestamped at 1× playback).
-    // WAAPI scales wall-clock by `playbackRate`, so the setTimeout has to
-    // scale too — otherwise rate < 1 fires the next child early (overlap)
-    // and rate > 1 fires it late (gap).
-    const rate = Math.abs(this.playbackRate) || 1;
-    const wallMs = triggerMs / rate;
-    const timer = setTimeout(() => {
-      this.pendingStartTimers = this.pendingStartTimers.filter(
-        (t) => t !== timer,
-      );
+
+    const stop = frameScheduler.subscribe(() => {
       if (!this.running) return;
+      if (!this.hasReachedThreshold(child, threshold, method)) return;
+      stop();
+      this.pendingStartObservers = this.pendingStartObservers.filter(
+        (candidate) => candidate !== stop,
+      );
       this.scheduleStart(next, method);
-    }, wallMs);
-    this.pendingStartTimers.push(timer);
+    }, "observe");
+    this.pendingStartObservers.push(stop);
   }
 
-  private clearPendingStartTimers() {
-    for (const timer of this.pendingStartTimers) clearTimeout(timer);
-    this.pendingStartTimers = [];
+  private hasReachedThreshold(
+    child: Animation,
+    threshold: number,
+    method: "play" | "reverse",
+  ): boolean {
+    if (child.isComplete) return true;
+    const runProgress = method === "play" ? child.progress : 1 - child.progress;
+    return runProgress >= threshold;
+  }
+
+  private clearPendingStartObservers() {
+    for (const stop of this.pendingStartObservers) stop();
+    this.pendingStartObservers = [];
   }
 
   private handleChildComplete() {
@@ -187,7 +195,7 @@ export class MultiAnimation extends Animation {
 
   private handleFinished() {
     this.running = false;
-    this.clearPendingStartTimers();
+    this.clearPendingStartObservers();
     this.onComplete?.();
   }
 

@@ -13,6 +13,8 @@ export function GridItem({ post }: { post: PostSimple }) {
       <img
         src={post.image}
         alt=""
+        width={600}
+        height={600}
         className="h-full w-full object-cover"
         data-zoom-exit-key={post.id}
       />

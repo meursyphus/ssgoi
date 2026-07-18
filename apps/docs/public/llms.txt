@@ -4,17 +4,16 @@
 
 This document is for AI assistants to help developers set up SSGOI page transitions.
 
-**Current core package version:** `@ssgoi/core@6.6.2`
+**This file is the React setup guide plus the shared core reference** (`SsgoiConfig`, transition catalog, troubleshooting — those apply to every framework). Using Svelte, Vue/Nuxt, Solid, Angular, or Qwik? Read the matching file from the Index at the bottom instead of the React sections here.
 
-**Per-transition reference (options, data keys, examples):** see the `Transitions` section below — each entry links to its own page like `https://ssgoi.dev/llms/<name>.txt`.
+**Current core package version:** `@ssgoi/core@6.6.10`
 
 ---
 
-## Installation
+## Installation (React)
 
 ```bash
 npm install @ssgoi/react
-# or @ssgoi/svelte, @ssgoi/vue, @ssgoi/solid, @ssgoi/angular, @ssgoi/qwik
 ```
 
 Reference templates:
@@ -22,12 +21,6 @@ Reference templates:
 - Next.js: https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs
 - React Router: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
 - TanStack Router: https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router
-- SolidStart: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
-- SvelteKit: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
-- Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
-- Qwik City: https://github.com/meursyphus/ssgoi/tree/main/templates/qwik
-
-React templates use a pathname-based `SsgoiTransitionBoundary` utility. SolidStart, SvelteKit, Nuxt, and Qwik templates mark each routed page directly with `data-ssgoi-transition`; Solid and Angular use the same direct marker rule in their package docs.
 
 ---
 
@@ -36,8 +29,8 @@ React templates use a pathname-based `SsgoiTransitionBoundary` utility. SolidSta
 SSGOI works on any web app. There are only three things to get right:
 
 1. **Decide your scroll element** — the element whose scroll position SSGOI should preserve across transitions. Often a `<main>` or a centered content container.
-2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the outer element that wraps the SSGOI provider / `<Ssgoi>`.** This is the layout shell, not the `data-ssgoi-transition` boundary.
-3. **Mark routed content with `data-ssgoi-transition="..."`**. React adapters can use one layout-level boundary utility for this marker. SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik should mark each routed page boundary directly.
+2. **Apply `relative z-0` (and optionally `overflow-x-clip`) to the outer element that wraps `<Ssgoi>`.** This is the layout shell, not the `data-ssgoi-transition` boundary.
+3. **Mark routed content with `data-ssgoi-transition="..."`**. React apps can use one layout-level boundary utility for this marker (next section).
 
 Why those classes:
 
@@ -93,7 +86,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main className="flex-1 overflow-y-auto relative z-0 overflow-x-clip">
             <SsgoiProvider>{children}</SsgoiProvider>
           </main>
-          {/* Optional: <BottomNav /> outside <main>, fixed-positioned */}
         </div>
       </body>
     </html>
@@ -101,11 +93,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
+Building an app shell with a persistent bottom tab bar? Don't bolt the nav outside `<main>` — use the nested-boundary pattern: https://ssgoi.dev/llms/bottom-nav.txt
+
 ---
 
 ## React Route Boundary Setup
 
-For React, Next.js, React Router, and TanStack Router, you can mark routed content once with a small router-specific boundary utility. This is a React-specific convenience pattern: the utility uses the current pathname as the logical transition id and keys the routed subtree so React gives SSGOI a clear outgoing boundary and incoming boundary. Do not put `relative z-0 overflow-x-clip` on this utility; those belong to the outer wrapper shown above.
+For React, Next.js, React Router, and TanStack Router, mark routed content once with a small router-specific boundary utility. The utility uses the current pathname as the logical transition id and keys the routed subtree so React gives SSGOI a clear outgoing boundary and incoming boundary. Do not put `relative z-0 overflow-x-clip` on this utility; those belong to the outer wrapper shown above.
 
 Next.js implementation:
 
@@ -154,121 +148,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 ```
 
 `SsgoiTransitionBoundary` reads the current pathname internally and sets both `key` and `data-ssgoi-transition`. SSGOI itself only needs a logical page id that matches config; using the real pathname is the React utility's default convention. For dynamic routes, match descendants with wildcard patterns like `/post/*`. A suffix `*` matches one or more descendants; a suffix `**` also includes the prefix path itself, so `/docs/**` matches `/docs` and `/docs/install`.
-
-## Non-React Route Boundary Setup
-
-For SvelteKit, Nuxt/Vue, Solid, Angular, and Qwik, set `data-ssgoi-transition` directly on each routed page boundary. The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`.
-
-Do not put a single slot/snippet-based route boundary in a parent layout for SvelteKit or Nuxt. Their slot content is live, so the outgoing page wrapper can render the incoming page's children during navigation. In Qwik City, do not forward the route `<Slot />` through the exported `<Ssgoi>` component; call `useSsgoi(ref, { config$ })` directly in the layout that owns the route slot.
-
-SvelteKit:
-
-```svelte
-<main data-ssgoi-transition="/gallery">
-  <!-- page content -->
-</main>
-```
-
-Nuxt/Vue:
-
-```vue
-<template>
-  <main data-ssgoi-transition="/gallery">
-    <!-- page content -->
-  </main>
-</template>
-```
-
-SolidStart:
-
-```tsx
-// src/app.tsx
-import { Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
-import { Ssgoi } from "@ssgoi/solid";
-import { zoom } from "@ssgoi/solid/view-transitions";
-
-const config = {
-  transitions: [zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" })],
-};
-
-export default function App() {
-  return (
-    <Router
-      root={(props) => (
-        <main class="relative z-0 min-h-dvh overflow-y-auto overflow-x-clip">
-          <Ssgoi config={config}>{props.children}</Ssgoi>
-        </main>
-      )}
-    >
-      <FileRoutes />
-    </Router>
-  );
-}
-
-// src/routes/gallery/index.tsx
-export default function Gallery() {
-  return <section data-ssgoi-transition="/gallery">{/* content */}</section>;
-}
-```
-
-Angular:
-
-```html
-<section data-ssgoi-transition="/home">
-  <h1>Home Page</h1>
-</section>
-```
-
-Qwik City:
-
-```tsx
-import { $, Slot, component$, useSignal } from "@builder.io/qwik";
-import { useSsgoi } from "@ssgoi/qwik";
-import { drill, zoom } from "@ssgoi/qwik/view-transitions";
-
-const config$ = $(() => ({
-  preserveScroll: { exclude: ["/post/*"] },
-  transitions: [
-    drill({ enter: "/post/*", exit: "/post" }),
-    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
-  ],
-}));
-
-export default component$(() => {
-  const ssgoiRoot = useSignal<HTMLElement>();
-
-  useSsgoi(ssgoiRoot, { config$ });
-
-  return (
-    <main
-      ref={ssgoiRoot}
-      class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
-    >
-      <Slot />
-    </main>
-  );
-});
-```
-
-```tsx
-export default component$(() => {
-  return (
-    <section data-ssgoi-transition="/gallery">{/* page content */}</section>
-  );
-});
-```
-
-Qwik uses resumability and serializes component state, while SSGOI transition configs contain functions. Use `config$` (a QRL factory created with `$(() => config)`) instead of passing a plain `config` object. The Qwik adapter resolves that QRL in the browser task before creating the SSGOI observer.
-
-In Qwik City layouts, prefer `useSsgoi(ref, { config$ })` over wrapping the route `<Slot />` in `<Ssgoi>`. Forwarding a Qwik City route slot through another component prevents routed content from being projected into the live DOM.
-
-Qwik troubleshooting checklist:
-
-- The root layout imports `useSsgoi` from `@ssgoi/qwik` and calls it with a signal ref.
-- The config is declared with Qwik `$`, for example `const config$ = $(() => ({ transitions: [...] }))`.
-- Each page component has its own `data-ssgoi-transition` value that matches `paths`, `from`, or `to`.
-- The SSGOI root element is the scroll/positioning shell (`relative z-0 overflow-x-clip`) and contains the route `<Slot />` directly.
 
 ---
 
@@ -360,11 +239,11 @@ Bottom sheet style. New page slides up from below. **Three types**: `static` (ba
 
 ### `hero` — https://ssgoi.dev/llms/hero.txt
 
-Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Two types**: `static` (default — incoming chrome snaps in while a temporary shared-element clone morphs above it) and `fade` (whole pages cross-fade with the same shared-element clone floating above — use when both pages have their own chrome). **Requires matching `data-hero-enter-key` (detail side) and `data-hero-exit-key` (list side).** Optional `data-hero-aspect-ratio="W/H"` if the element is letterboxed (e.g. `<img object-contain>`). Optional `data-hero-radius="px"` makes rounded corners part of the morph via clip-path inset rounding. Legacy single-attribute `data-hero-key` is still honored as a fallback.
+Shared element transition. The same logical object (thumbnail, avatar) is tweened in size and position from one page to the next. **Two types**: `static` (default — incoming chrome snaps in while a temporary shared-element clone morphs above it) and `fade` (whole pages cross-fade with the same shared-element clone floating above — use when both pages have their own chrome). **Requires matching `data-hero-enter-key` (detail side) and `data-hero-exit-key` (list side).** A directly keyed image—or one direct image child in a clipping wrapper—automatically supplies intrinsic ratio, computed centered `cover` / `contain` fit, visible crop, and simple CSS radius. Ambiguous geometry falls back to the element bounding box. Legacy single-attribute `data-hero-key` is still honored as a fallback.
 
 ### `zoom` — https://ssgoi.dev/llms/zoom.txt
 
-Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Three types**: `static` (morphs to target size only, default), `expand` (fills viewport), `blur` (background blurs while card focuses). Optional `variant: "fade"` cross-fades surrounding content. **Requires `data-zoom-exit-key` (outgoing) and `data-zoom-enter-key` (incoming)** matching by value.
+Card-to-detail expansion. The tapped card grows to fill the detail viewport. **Three types**: `static` (morphs to target size only, default), `expand` (fills viewport), `blur` (background blurs while card focuses). Optional `variant: "fade"` cross-fades surrounding content. **Requires matching `data-zoom-exit-key` (list/card side) and `data-zoom-enter-key` (detail/expanded side).** A directly keyed image—or one direct image child in a clipping wrapper—automatically supplies intrinsic-ratio, centered `cover` / `contain` geometry, crop, and simple CSS radius; ambiguous geometry uses the original bounding-box animation.
 
 ### `strip` — https://ssgoi.dev/llms/strip.txt
 
@@ -385,6 +264,14 @@ Card flip. Outgoing rotates 180° and fades; incoming counter-rotates in from -1
 ### `jaemin` — https://ssgoi.dev/llms/jaemin.txt
 
 Quirky: incoming page rotates in at 45° from tiny scale, then unwinds and grows. Use sparingly for **special / playful** moments — modal openings, easter-egg transitions.
+
+---
+
+## Patterns
+
+### Persistent bottom nav (nested boundaries) — https://ssgoi.dev/llms/bottom-nav.txt
+
+App shell where main tab screens share a bottom tab bar and detail screens are fullscreen without it. The nav must stand still on tab↔tab (`axis`) but slide away with the page on tab→detail (`drill`) — one provider can't do both, so you nest a second `<Ssgoi>` with a stable-key outer boundary. Full structure, code, and gotchas in the linked file.
 
 ---
 
@@ -415,53 +302,50 @@ Quirky: incoming page rotates in at 45° from tiny scale, then unwinds and grows
 - **Cause**: Data attribute keys don't match between pages, or attribute missing on one side
 - **Fix**: For `hero`, list side uses `data-hero-exit-key` and detail side uses `data-hero-enter-key` (same value). For `zoom`, outgoing uses `data-zoom-exit-key` and incoming uses `data-zoom-enter-key` (same value). Legacy single-attribute `data-hero-key` on both pages is also honored.
 
----
-
-## How It Works (For Debugging)
-
-When a route changes, SSGOI orchestrates two simultaneous animations:
-
-- **OUT**: The leaving page animates out
-- **IN**: The entering page animates in
-
-### Core Mechanism: Clone & Absolute Position
-
-When a page unmounts, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in.
-
-```ts
-// Internal behavior (packages/core/src/lib/utils/prepare-outgoing.ts)
-export const prepareOutgoing = (element, context) => {
-  element.style.position = "absolute"; // Removed from flow
-  element.style.width = "100%";
-  element.style.top = `${-1 * (context?.scrollOffset?.y ?? 0)}px`;
-  element.style.left = "0";
-};
-```
-
-**Why this matters:**
-
-- The OUT page is re-inserted into DOM as a clone with `position: absolute`
-- It needs a positioned ancestor (`relative`) to stay in place
-- Without proper CSS setup, the OUT page will jump to the wrong position
-
-### Transition Flow
-
-```
-/home -> /about navigation:
-
-1. User clicks link to /about
-2. /home page unmounts from React
-3. SSGOI clones /home and re-inserts it with position: absolute (OUT)
-4. React renders /about page (IN)
-5. Both pages animate simultaneously
-6. Animation complete, cloned /home removed from DOM
-```
+Deeper debugging (clone & absolute mechanism, step-by-step transition flow): https://ssgoi.dev/llms/how-it-works.txt
 
 ---
 
-## Links
+## Index
 
-- Per-transition reference (one file per transition): https://ssgoi.dev/llms/<name>.txt
+Everything outside the React core above lives in its own plain-text file. Fetch only what you need.
+
+### Per-transition reference
+
+- drill: https://ssgoi.dev/llms/drill.txt
+- fade: https://ssgoi.dev/llms/fade.txt
+- slide: https://ssgoi.dev/llms/slide.txt
+- scroll: https://ssgoi.dev/llms/scroll.txt
+- axis: https://ssgoi.dev/llms/axis.txt
+- sheet: https://ssgoi.dev/llms/sheet.txt
+- hero: https://ssgoi.dev/llms/hero.txt
+- zoom: https://ssgoi.dev/llms/zoom.txt
+- strip: https://ssgoi.dev/llms/strip.txt
+- blind: https://ssgoi.dev/llms/blind.txt
+- film: https://ssgoi.dev/llms/film.txt
+- rotate: https://ssgoi.dev/llms/rotate.txt
+- jaemin: https://ssgoi.dev/llms/jaemin.txt
+
+### Patterns
+
+- Persistent bottom nav / nested boundaries: https://ssgoi.dev/llms/bottom-nav.txt
+
+### Other frameworks (setup + route boundary rules)
+
+- Svelte / SvelteKit: https://ssgoi.dev/llms/svelte.txt
+- Vue / Nuxt: https://ssgoi.dev/llms/vue.txt
+- Solid / SolidStart: https://ssgoi.dev/llms/solid.txt
+- Angular: https://ssgoi.dev/llms/angular.txt
+- Qwik / Qwik City: https://ssgoi.dev/llms/qwik.txt
+
+The `SsgoiConfig` shape, transition catalog, and troubleshooting sections above are shared across all frameworks — only installation and the route boundary marker differ.
+
+### Deep dive
+
+- How it works (clone & absolute, transition flow): https://ssgoi.dev/llms/how-it-works.txt
+
+### Project links
+
 - Docs: https://ssgoi.dev/docs
 - Live examples (real apps rebuilt with SSGOI): https://ssgoi.dev/showcase
 - GitHub: https://github.com/meursyphus/ssgoi

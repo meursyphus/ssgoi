@@ -56,6 +56,8 @@ export function PhotoGridLink({ photo }: { photo: PhotoSimple }) {
       <img
         src={photo.thumbSrc}
         alt={photo.takenAt}
+        width={photo.width}
+        height={photo.height}
         className="h-full w-full object-cover"
         data-hero-exit-key={photo.id}
       />

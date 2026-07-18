@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">What Hero and Zoom actually animate</title>
+  <desc id="desc">Hero moves only a visual clone between two pages. Zoom uses the image as an anchor, then scales and clips the entire detail page.</desc>
+  <rect width="1200" height="620" rx="32" fill="#0b0b0f"/>
+  <text x="600" y="64" fill="#f5f5f5" font-family="system-ui, sans-serif" font-size="30" font-weight="700" text-anchor="middle">What do Hero and Zoom actually animate?</text>
+
+  <rect x="48" y="102" width="532" height="466" rx="24" fill="#14141b" stroke="#30303b" stroke-width="2"/>
+  <text x="82" y="150" fill="#ff8a3d" font-family="system-ui, sans-serif" font-size="26" font-weight="700">Hero</text>
+  <text x="82" y="184" fill="#b9b9c4" font-family="system-ui, sans-serif" font-size="18">Move only a visual clone above both pages</text>
+  <rect x="86" y="222" width="184" height="264" rx="18" fill="#20202a" stroke="#3b3b48" stroke-width="2"/>
+  <rect x="108" y="252" width="58" height="58" rx="10" fill="#ff8a3d"/>
+  <rect x="177" y="252" width="70" height="12" rx="6" fill="#4b4b59"/>
+  <rect x="177" y="276" width="50" height="10" rx="5" fill="#343441"/>
+  <rect x="108" y="330" width="139" height="12" rx="6" fill="#343441"/>
+  <rect x="108" y="356" width="116" height="12" rx="6" fill="#343441"/>
+  <rect x="358" y="222" width="184" height="264" rx="18" fill="#20202a" stroke="#3b3b48" stroke-width="2"/>
+  <rect x="380" y="250" width="140" height="124" rx="14" fill="#ff8a3d"/>
+  <rect x="380" y="398" width="139" height="12" rx="6" fill="#343441"/>
+  <rect x="380" y="424" width="104" height="12" rx="6" fill="#343441"/>
+  <path d="M190 281 C260 216 320 216 390 281" fill="none" stroke="#ffb27d" stroke-width="5" stroke-linecap="round"/>
+  <path d="M377 267 L397 281 L374 291" fill="none" stroke="#ffb27d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="314" y="530" fill="#dedee5" font-family="system-ui, sans-serif" font-size="18" font-weight="600" text-anchor="middle">page stays · visual gets transform + clip</text>
+
+  <rect x="620" y="102" width="532" height="466" rx="24" fill="#14141b" stroke="#30303b" stroke-width="2"/>
+  <text x="654" y="150" fill="#69d8ff" font-family="system-ui, sans-serif" font-size="26" font-weight="700">Zoom</text>
+  <text x="654" y="184" fill="#b9b9c4" font-family="system-ui, sans-serif" font-size="18">Use the image to unfold the entire detail page</text>
+  <rect x="654" y="222" width="184" height="264" rx="18" fill="#20202a" stroke="#3b3b48" stroke-width="2"/>
+  <rect x="680" y="254" width="62" height="62" rx="10" fill="#69d8ff"/>
+  <rect x="754" y="254" width="58" height="12" rx="6" fill="#4b4b59"/>
+  <rect x="754" y="279" width="43" height="10" rx="5" fill="#343441"/>
+  <rect x="680" y="338" width="132" height="12" rx="6" fill="#343441"/>
+  <rect x="680" y="364" width="108" height="12" rx="6" fill="#343441"/>
+  <g transform="translate(852 270) scale(.43)">
+    <rect x="0" y="0" width="244" height="340" rx="20" fill="#252532" stroke="#69d8ff" stroke-width="6"/>
+    <rect x="20" y="20" width="204" height="98" rx="14" fill="#69d8ff"/>
+    <rect x="20" y="142" width="204" height="15" rx="7" fill="#515161"/>
+    <rect x="20" y="176" width="170" height="13" rx="6" fill="#3c3c49"/>
+    <rect x="20" y="210" width="184" height="13" rx="6" fill="#3c3c49"/>
+    <rect x="20" y="260" width="92" height="48" rx="12" fill="#454555"/>
+  </g>
+  <path d="M833 335 C879 288 925 261 986 244" fill="none" stroke="#9be6ff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M968 237 L990 243 L976 261" fill="none" stroke="#9be6ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="946" y="208" width="166" height="278" rx="18" fill="#20202a" stroke="#69d8ff" stroke-width="3"/>
+  <rect x="964" y="228" width="130" height="90" rx="12" fill="#69d8ff"/>
+  <rect x="964" y="342" width="130" height="12" rx="6" fill="#4b4b59"/>
+  <rect x="964" y="368" width="106" height="10" rx="5" fill="#343441"/>
+  <rect x="964" y="394" width="118" height="10" rx="5" fill="#343441"/>
+  <rect x="964" y="432" width="62" height="32" rx="9" fill="#454555"/>
+  <text x="886" y="530" fill="#dedee5" font-family="system-ui, sans-serif" font-size="18" font-weight="600" text-anchor="middle">entire page root · transform + page-space clip</text>
+</svg>

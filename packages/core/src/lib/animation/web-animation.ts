@@ -4,9 +4,16 @@ import {
   type IntegratorState,
   SETTLE_THRESHOLD,
 } from "./integrator";
+import { waitPaint } from "../utils/wait-paint";
 import { Animation } from "./animation";
+import {
+  frameScheduler,
+  STABLE_FRAME_THRESHOLD,
+  type FrameTick,
+} from "./frame-scheduler";
 
 const FRAME_TIME = 1000 / 60;
+const STARTUP_STABLE_FRAMES = 2;
 
 export interface WebAnimationOptions {
   element: HTMLElement;
@@ -33,9 +40,18 @@ interface SimFrame {
  * Lifecycle:
  *   1. `play()` / `reverse()` calls `simulate()` from the current (position,
  *      velocity) toward the target bound, producing a frame list.
- *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` runs them.
- *   3. While playing, `getPose()` interpolates the live position from frames
- *      using `performance.now() - startTime`.
+ *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is held
+ *      at 0 ms until the pending pause is acknowledged and the browser has had
+ *      a rendering opportunity.
+ *   3. Startup is advanced by a shared frame clock until two rendering
+ *      opportunities arrive without a long gap. Delayed mount work during
+ *      this startup window therefore cannot be charged to the document
+ *      timeline in one catch-up jump.
+ *   4. Playback is handed to native WAAPI once rendering is stable, preserving
+ *      compositor playback for the remainder of the transition.
+ *   5. While playing, `getPose()` interpolates the live position from frames
+ *      using WAAPI's `currentTime`, so browser setup latency is not counted as
+ *      animation progress.
  *
  * Identity for motion matching is the DOM element itself — when a previous
  * animation's pose is handed in via `matchInto`, we look up by element.
@@ -51,7 +67,12 @@ export class WebAnimation extends Animation {
   private currentVelocity = 0;
   private frames: SimFrame[] = [];
   private waapi: globalThis.Animation | null = null;
-  private startTime = 0;
+  private runId = 0;
+  private waitingForStart = false;
+  private startReady = false;
+  private pendingFirstFrame: Keyframe | undefined;
+  private stopStartupClock: (() => void) | null = null;
+  private startupStableFrames = 0;
   private running = false;
   private paused = false;
   private settled = false;
@@ -76,6 +97,10 @@ export class WebAnimation extends Animation {
       // continues exactly where it was halted.
       this.paused = false;
       this.running = true;
+      if (this.waitingForStart) {
+        if (this.startReady) this.startFramePacedPlayback(this.waapi);
+        return;
+      }
       this.waapi.play();
       return;
     }
@@ -96,6 +121,8 @@ export class WebAnimation extends Animation {
     // resume from the exact frame — no inline-style pinning needed.
     this.captureLiveState();
     this.waapi?.pause();
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
     this.running = false;
     this.paused = true;
   }
@@ -231,49 +258,179 @@ export class WebAnimation extends Animation {
       return this.styleFn(t, u) as Keyframe;
     });
 
-    // Clear inline styles for animated props so they don't clash with WAAPI.
     const firstFrame = keyframes[0];
-    if (firstFrame) {
-      for (const prop of Object.keys(firstFrame)) {
-        (this.element.style as unknown as Record<string, string>)[prop] = "";
-      }
-    }
-
     const lastFrame = this.frames[this.frames.length - 1]!;
     const duration = lastFrame.time;
+    const runId = ++this.runId;
 
-    this.waapi = this.element.animate(keyframes, {
+    const waapi = this.element.animate(keyframes, {
       duration,
-      fill: "forwards",
+      fill: "both",
       easing: "linear",
       composite: "replace",
     });
-    this.waapi.playbackRate = this.playbackRate;
+    waapi.playbackRate = this.playbackRate;
+    // Element.animate() auto-plays. Seek while that play is pending, then pause:
+    // setting currentTime after pause would synchronously complete the pending
+    // pause, making `ready` useless as an acknowledgement of the pause request.
+    waapi.currentTime = 0;
+    waapi.pause();
 
-    this.startTime = performance.now();
+    this.waapi = waapi;
+    this.waitingForStart = true;
+    this.startReady = false;
+    this.pendingFirstFrame = firstFrame;
     this.running = true;
 
-    this.waapi.onfinish = () => {
-      if (!this.running) return;
+    waapi.onfinish = () => {
+      if (!this.running || this.waapi !== waapi) return;
       this.running = false;
       this.settled = true;
       this.currentValue = lastFrame.position;
       this.currentVelocity = 0;
       this.onComplete?.();
     };
+
+    void this.startWhenReady(waapi, runId);
   }
 
   private clearWaapi() {
+    this.runId++;
     this.waapi?.cancel();
     this.waapi = null;
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.pendingFirstFrame = undefined;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
+    this.startupStableFrames = 0;
   }
 
   private captureLiveState() {
     if (this.frames.length === 0) return;
-    const elapsed = performance.now() - this.startTime;
+    const elapsed = readAnimationTime(this.waapi);
+    if (elapsed === null) return;
     const { position, velocity } = interpolateFrame(this.frames, elapsed);
     this.currentValue = position;
     this.currentVelocity = velocity;
+  }
+
+  private async startWhenReady(
+    waapi: globalThis.Animation,
+    runId: number,
+  ): Promise<void> {
+    try {
+      // This acknowledges the pending pause. It does not prove that pixels have
+      // been presented, so keep the animation held through the frame barrier.
+      await waapi.ready;
+      if (typeof requestAnimationFrame !== "undefined") {
+        await waitPaint(this.element);
+      }
+    } catch {
+      return;
+    }
+
+    if (this.runId !== runId || this.waapi !== waapi) {
+      return;
+    }
+
+    this.startReady = true;
+    if (!this.running || this.paused) return;
+    this.startFramePacedPlayback(waapi);
+  }
+
+  private startFramePacedPlayback(waapi: globalThis.Animation): void {
+    if (
+      this.waapi !== waapi ||
+      !this.waitingForStart ||
+      !this.startReady ||
+      this.stopStartupClock
+    ) {
+      return;
+    }
+
+    // Clear inline styles only after the browser has applied the paused 0 ms
+    // WAAPI frame. Clearing earlier can expose the underlying, unanimated
+    // style while the animation is still pending.
+    if (this.pendingFirstFrame) {
+      for (const prop of Object.keys(this.pendingFirstFrame)) {
+        (this.element.style as unknown as Record<string, string>)[prop] = "";
+      }
+    }
+
+    this.pendingFirstFrame = undefined;
+    if (typeof requestAnimationFrame === "undefined" || this.playbackRate < 0) {
+      this.handOffToWaapi(waapi);
+      return;
+    }
+    this.startupStableFrames = 0;
+    this.stopStartupClock = frameScheduler.subscribe((tick) => {
+      this.advanceFramePacedStartup(waapi, tick);
+    });
+  }
+
+  private advanceFramePacedStartup(
+    waapi: globalThis.Animation,
+    tick: FrameTick,
+  ): void {
+    if (
+      this.waapi !== waapi ||
+      !this.running ||
+      this.paused ||
+      !this.waitingForStart
+    ) {
+      return;
+    }
+
+    const lastFrame = this.frames[this.frames.length - 1];
+    if (!lastFrame) return;
+
+    const currentTime = readAnimationTime(waapi) ?? 0;
+    const nextTime = Math.min(
+      lastFrame.time,
+      currentTime + tick.delta * Math.max(0, this.playbackRate),
+    );
+    waapi.currentTime = nextTime;
+    this.captureLiveState();
+
+    if (nextTime >= lastFrame.time) {
+      this.finishFramePacedRun(waapi, lastFrame);
+      return;
+    }
+
+    if (tick.rawDelta <= STABLE_FRAME_THRESHOLD) this.startupStableFrames++;
+    else this.startupStableFrames = 0;
+
+    if (this.startupStableFrames < STARTUP_STABLE_FRAMES) return;
+
+    this.handOffToWaapi(waapi);
+  }
+
+  private handOffToWaapi(waapi: globalThis.Animation): void {
+    if (this.waapi !== waapi || !this.running || this.paused) return;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.startupStableFrames = 0;
+    waapi.play();
+  }
+
+  private finishFramePacedRun(
+    waapi: globalThis.Animation,
+    lastFrame: SimFrame,
+  ): void {
+    if (this.waapi !== waapi || !this.running) return;
+    this.stopStartupClock?.();
+    this.stopStartupClock = null;
+    this.waitingForStart = false;
+    this.startReady = false;
+    this.startupStableFrames = 0;
+    this.running = false;
+    this.settled = true;
+    this.currentValue = lastFrame.position;
+    this.currentVelocity = 0;
+    this.onComplete?.();
   }
 
   private applyStyleAt(value: number) {
@@ -355,4 +512,11 @@ function interpolateFrame(
     position: a.position + (b.position - a.position) * t,
     velocity: a.velocity + (b.velocity - a.velocity) * t,
   };
+}
+
+function readAnimationTime(
+  animation: globalThis.Animation | null,
+): number | null {
+  const currentTime = animation?.currentTime;
+  return typeof currentTime === "number" ? currentTime : null;
 }

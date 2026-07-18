@@ -1,10 +1,29 @@
-import { Fragment } from "react";
+"use client";
+
+import { Fragment, useEffect, useRef } from "react";
 import type { ChatMessage } from "@/demo/kakao-talk/api/chat";
 import { MessageBubble } from "./message-bubble";
 
 export function MessageList({ messages }: { messages: ChatMessage[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    // Deliberately mirror real chat screens: the history mounts first, then a
+    // passive effect reads its laid-out height and opens at the newest message.
+    // This also keeps the showcase as a regression fixture for WAAPI startup
+    // while layout-dependent mount work is happening.
+    container.scrollTo({ top: container.scrollHeight });
+  }, [messages]);
+
   return (
-    <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-3">
+    <div
+      ref={scrollRef}
+      data-kakao-message-list
+      className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3"
+    >
       {messages.map((m) => (
         <Fragment key={m.id}>
           {m.dateDividerLabel && <DateDivider label={m.dateDividerLabel} />}

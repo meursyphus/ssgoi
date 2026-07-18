@@ -6,11 +6,21 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import {
+  centerX,
+  centerY,
+  insetWithin,
+  normalizeMediaGeometryPair,
+  projectedWindowRect,
+  resolveElementMediaGeometry,
+  type MediaGeometry,
+  type MediaFit,
+} from "../media-geometry";
+import { fallbackHeroFit } from "./fit";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
   HeroContributeCtx,
-  HeroFit,
   HeroPair,
   HeroPrepareCtx,
   HeroResolved,
@@ -22,156 +32,36 @@ export type { HeroType, HeroVariant, NormalizedHeroOptions } from "./types";
 
 const DEFAULT_MAX_DISTANCE = 700;
 
-const HERO_ASPECT_KEY = "data-hero-aspect-ratio";
-const HERO_RADIUS_KEY = "data-hero-radius";
+/** @deprecated Intrinsic media dimensions are inferred automatically. */
+const LEGACY_HERO_ASPECT_KEY = "data-hero-aspect-ratio";
+/** @deprecated Border radius is inferred from the keyed clipping window. */
+const LEGACY_HERO_RADIUS_KEY = "data-hero-radius";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Content/window rect resolution
  *
- * Authors opt in via `data-hero-aspect-ratio` (e.g. "1600/1067" or "1.5") to
- * tell hero how image content sits inside an element bbox. New-style
- * `data-hero-exit-key` elements are treated as centered object-cover tiles;
- * `data-hero-enter-key` elements are treated as centered object-contain
- * content. Without the hint, content/window/bbox all collapse to the bbox.
+ * A direct image or one unambiguous direct image child auto-resolves intrinsic
+ * ratio, computed object-fit, clipping window, and simple uniform CSS radius.
+ * Ambiguous structures retain bbox geometry. Deprecated aspect/radius data
+ * attributes remain compatibility overrides for already-published markup.
  * ──────────────────────────────────────────────────────────────────────────── */
-
-type Rect = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
-
-type LetterboxInset = {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-};
-
-type HeroRect = {
-  bbox: Rect;
-  content: Rect;
-  window: Rect;
-  clipInset: LetterboxInset;
-};
-
-function parseAspect(value: string | null): number | null {
-  if (!value) return null;
-  if (value.includes("/")) {
-    const [wStr, hStr] = value.split("/");
-    const w = parseFloat(wStr ?? "");
-    const h = parseFloat(hStr ?? "");
-    if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
-      return null;
-    }
-    return w / h;
-  }
-  const ratio = parseFloat(value);
-  return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
-}
-
-function readRadius(el: HTMLElement): number {
-  const raw = el.getAttribute(HERO_RADIUS_KEY);
-  if (!raw) return 0;
-  const num = parseFloat(raw);
-  return Number.isFinite(num) && num > 0 ? num : 0;
-}
-
-function centerX(rect: Rect): number {
-  return rect.left + rect.width / 2;
-}
-
-function centerY(rect: Rect): number {
-  return rect.top + rect.height / 2;
-}
-
-function insetWithin(outer: Rect, inner: Rect): LetterboxInset {
-  return {
-    top: Math.max(0, inner.top - outer.top),
-    right: Math.max(0, outer.left + outer.width - (inner.left + inner.width)),
-    bottom: Math.max(0, outer.top + outer.height - (inner.top + inner.height)),
-    left: Math.max(0, inner.left - outer.left),
-  };
-}
-
-function fittedContentRect(bbox: Rect, aspect: number, fit: HeroFit): Rect {
-  const bboxAspect = bbox.width / bbox.height;
-  let width: number;
-  let height: number;
-
-  if (fit === "contain") {
-    if (bboxAspect > aspect) {
-      height = bbox.height;
-      width = height * aspect;
-    } else {
-      width = bbox.width;
-      height = width / aspect;
-    }
-  } else if (bboxAspect > aspect) {
-    width = bbox.width;
-    height = width / aspect;
-  } else {
-    height = bbox.height;
-    width = height * aspect;
-  }
-
-  return {
-    left: bbox.left + (bbox.width - width) / 2,
-    top: bbox.top + (bbox.height - height) / 2,
-    width,
-    height,
-  };
-}
 
 function getHeroRect(
   container: HTMLElement,
   el: HTMLElement,
-  fit: HeroFit,
-): HeroRect {
+  fit: MediaFit,
+): MediaGeometry {
   const bbox = getRect(container, el);
-  const aspect = parseAspect(el.getAttribute(HERO_ASPECT_KEY));
-  if (aspect === null) {
-    return {
-      bbox,
-      content: bbox,
-      window: bbox,
-      clipInset: { top: 0, right: 0, bottom: 0, left: 0 },
-    };
-  }
-  const content = fittedContentRect(bbox, aspect, fit);
-  const window = fit === "cover" ? bbox : content;
-  return {
+  return resolveElementMediaGeometry(
+    el,
     bbox,
-    content,
-    window,
-    clipInset: insetWithin(content, window),
-  };
-}
-
-function projectedWindowInset(
-  baseContent: Rect,
-  targetContent: Rect,
-  targetWindow: Rect,
-  scale: number,
-): LetterboxInset {
-  const width = targetWindow.width / scale;
-  const height = targetWindow.height / scale;
-  const left =
-    baseContent.width / 2 +
-    (centerX(targetWindow) - centerX(targetContent)) / scale -
-    width / 2;
-  const top =
-    baseContent.height / 2 +
-    (centerY(targetWindow) - centerY(targetContent)) / scale -
-    height / 2;
-
-  return {
-    top: Math.max(0, top),
-    right: Math.max(0, baseContent.width - left - width),
-    bottom: Math.max(0, baseContent.height - top - height),
-    left: Math.max(0, left),
-  };
+    (mediaEl) => getRect(container, mediaEl),
+    {
+      fallbackFit: fit,
+      legacyAspectRatioAttribute: LEGACY_HERO_ASPECT_KEY,
+      legacyRadiusAttribute: LEGACY_HERO_RADIUS_KEY,
+    },
+  );
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -200,7 +90,7 @@ function collectByAttr(
  * elements on `from` pair with exit elements on `to` (reverse). In both
  * cases the animated element is the one living on `to`.
  */
-function resolveNewStylePairs(
+export function resolveNewStylePairs(
   fromNode: HTMLElement,
   toNode: HTMLElement,
 ): HeroPair[] {
@@ -215,8 +105,8 @@ function resolveNewStylePairs(
       key,
       fromEl,
       toEl,
-      fromFit: "cover",
-      toFit: "contain",
+      fromFit: fallbackHeroFit("exit"),
+      toFit: fallbackHeroFit("enter"),
     });
   }
 
@@ -229,8 +119,8 @@ function resolveNewStylePairs(
       key,
       fromEl,
       toEl,
-      fromFit: "contain",
-      toFit: "cover",
+      fromFit: fallbackHeroFit("enter"),
+      toFit: fallbackHeroFit("exit"),
     });
   }
 
@@ -264,8 +154,8 @@ function resolveLegacyPairs(
       key,
       fromEl,
       toEl,
-      fromFit: "contain",
-      toFit: "contain",
+      fromFit: fallbackHeroFit("legacy"),
+      toFit: fallbackHeroFit("legacy"),
     });
   }
   return pairs;
@@ -283,10 +173,39 @@ type HeroMorphStyle = {
 };
 
 type HeroMorphPlan = {
-  toContent: HeroRect["content"];
-  hasRadius: boolean;
+  toContent: MediaGeometry["content"];
+  fromVisualEl: HTMLElement;
+  toVisualEl: HTMLElement;
+  resetCloneRadius: boolean;
   styleFor: (t: number, u: number) => HeroMorphStyle;
 };
+
+export function normalizeHeroGeometryPair(
+  from: MediaGeometry,
+  to: MediaGeometry,
+): [MediaGeometry, MediaGeometry] {
+  return normalizeMediaGeometryPair(from, to);
+}
+
+export function shouldResetHeroCloneRadius(
+  from: MediaGeometry,
+  to: MediaGeometry,
+): boolean {
+  if (
+    from.radiusSource === "unsupported" ||
+    to.radiusSource === "unsupported"
+  ) {
+    return false;
+  }
+  return (
+    from.mediaElement !== null ||
+    to.mediaElement !== null ||
+    from.radiusSource === "computed" ||
+    from.radiusSource === "legacy" ||
+    to.radiusSource === "computed" ||
+    to.radiusSource === "legacy"
+  );
+}
 
 function buildHeroMorphPlan(
   root: HTMLElement,
@@ -294,15 +213,20 @@ function buildHeroMorphPlan(
   maxDistance: number,
 ): HeroMorphPlan | null {
   const { fromEl, toEl } = pair;
-  const fromHero = getHeroRect(root, fromEl, pair.fromFit);
-  const toHero = getHeroRect(root, toEl, pair.toFit);
+  const [fromHero, toHero] = normalizeHeroGeometryPair(
+    getHeroRect(root, fromEl, pair.fromFit),
+    getHeroRect(root, toEl, pair.toFit),
+  );
   const fromContent = fromHero.content;
   const fromWindow = fromHero.window;
   const toContent = toHero.content;
   const toWindow = toHero.window;
   const toClipInset = toHero.clipInset;
-  const fromRadius = readRadius(fromEl);
-  const toRadius = readRadius(toEl);
+  const preserveCloneRadius =
+    fromHero.radiusSource === "unsupported" ||
+    toHero.radiusSource === "unsupported";
+  const fromRadius = preserveCloneRadius ? 0 : fromHero.radius;
+  const toRadius = preserveCloneRadius ? 0 : toHero.radius;
 
   if (
     fromContent.width === 0 ||
@@ -335,24 +259,24 @@ function buildHeroMorphPlan(
   if (Math.abs(dy) > maxDistance) return null;
 
   // Pre-transform source window expressed inside the destination content.
-  const fromClipInset = projectedWindowInset(
+  const fromClipInset = insetWithin(
     toContent,
-    fromContent,
-    fromWindow,
-    sMax,
+    projectedWindowRect(toContent, fromContent, fromWindow, sMax, sMax),
   );
 
   return {
     toContent,
-    hasRadius: fromRadius > 0 || toRadius > 0,
+    fromVisualEl: fromHero.mediaElement ?? fromEl,
+    toVisualEl: toHero.mediaElement ?? toEl,
+    resetCloneRadius: shouldResetHeroCloneRadius(fromHero, toHero),
     styleFor: (t, u) => {
       const tx = u * dx;
       const ty = u * dy;
       const s = t + u * sMax;
-      const visibleRadius = fromRadius * u + toRadius * t;
+      const visibleRadius = Math.max(0, fromRadius * u + toRadius * t);
       // clip-path is resolved before transform; divide by the current scale
       // so the on-screen corner radius matches the visible hero window.
-      const clipRadius = visibleRadius / s;
+      const clipRadius = visibleRadius / Math.max(Math.abs(s), 0.000001);
       const insetT = fromClipInset.top * u + toClipInset.top * t;
       const insetR = fromClipInset.right * u + toClipInset.right * t;
       const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
@@ -386,11 +310,11 @@ class HeroTileStrategy implements HeroStrategy {
     const animations: Animation[] = [];
 
     for (const pair of resolved.pairs) {
-      const { fromEl, toEl } = pair;
       const morph = buildHeroMorphPlan(positionedParent, pair, maxDistance);
       if (!morph) continue;
+      const { fromVisualEl, toVisualEl } = morph;
 
-      const clone = toEl.cloneNode(true) as HTMLElement;
+      const clone = toVisualEl.cloneNode(true) as HTMLElement;
       clone.style.position = "absolute";
       clone.style.left = `${morph.toContent.left}px`;
       clone.style.top = `${morph.toContent.top}px`;
@@ -403,20 +327,20 @@ class HeroTileStrategy implements HeroStrategy {
       clone.style.pointerEvents = "none";
       clone.style.maxWidth = "none";
       clone.style.maxHeight = "none";
-      if (morph.hasRadius) clone.style.borderRadius = "0";
+      if (morph.resetCloneRadius) clone.style.borderRadius = "0";
 
       applyMorphStyle(clone, morph.styleFor(0, 1));
 
       positionedParent.appendChild(clone);
 
-      const previousFromOpacity = fromEl.style.opacity;
-      const previousToOpacity = toEl.style.opacity;
-      fromEl.style.opacity = "0";
-      toEl.style.opacity = "0";
+      const previousFromOpacity = fromVisualEl.style.opacity;
+      const previousToOpacity = toVisualEl.style.opacity;
+      fromVisualEl.style.opacity = "0";
+      toVisualEl.style.opacity = "0";
 
       onComplete(() => {
-        fromEl.style.opacity = previousFromOpacity;
-        toEl.style.opacity = previousToOpacity;
+        fromVisualEl.style.opacity = previousFromOpacity;
+        toVisualEl.style.opacity = previousToOpacity;
         if (clone.parentElement) clone.parentElement.removeChild(clone);
       });
 

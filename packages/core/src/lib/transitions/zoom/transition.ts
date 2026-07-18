@@ -9,6 +9,10 @@ import {
 import { OverlayStrategy, createBackgroundStrategy } from "./provider";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
+import {
+  normalizeMediaGeometryPair,
+  resolveElementMediaGeometry,
+} from "../media-geometry";
 import type {
   NormalizedZoomOptions,
   ZoomAnimationInput,
@@ -24,13 +28,20 @@ export type { ZoomType, ZoomVariant, NormalizedZoomOptions } from "./types";
 
 const ZOOM_ENTER_KEY = "data-zoom-enter-key";
 const ZOOM_EXIT_KEY = "data-zoom-exit-key";
-const ZOOM_RADIUS_KEY = "data-zoom-radius";
+/** @deprecated Border radius is inferred from the keyed clipping window. */
+const LEGACY_ZOOM_RADIUS_KEY = "data-zoom-radius";
 
-function readRadius(el: HTMLElement): number {
-  const raw = el.getAttribute(ZOOM_RADIUS_KEY);
-  if (!raw) return 0;
-  const num = parseFloat(raw);
-  return Number.isFinite(num) && num > 0 ? num : 0;
+function sameRect(
+  a: { left: number; top: number; width: number; height: number },
+  b: { left: number; top: number; width: number; height: number },
+): boolean {
+  const epsilon = 0.01;
+  return (
+    Math.abs(a.left - b.left) < epsilon &&
+    Math.abs(a.top - b.top) < epsilon &&
+    Math.abs(a.width - b.width) < epsilon &&
+    Math.abs(a.height - b.height) < epsilon
+  );
 }
 
 /**
@@ -100,28 +111,65 @@ function resolveZoom(
   return null;
 }
 
-function buildInput(
+export function buildInput(
   resolved: ZoomResolved,
   fromNode: HTMLElement,
   toNode: HTMLElement,
   scrollOffset: { x: number; y: number },
 ): ZoomAnimationInput {
+  const enterPage = resolved.mode === "enter" ? toNode : fromNode;
+  const exitPage = resolved.mode === "enter" ? fromNode : toNode;
+  const enterRect = getClientRect(enterPage, resolved.enterEl);
+  const exitRect = getClientRect(exitPage, resolved.exitEl);
+  const enterMedia = resolveElementMediaGeometry(
+    resolved.enterEl,
+    enterRect,
+    (mediaEl) => getClientRect(enterPage, mediaEl),
+    {
+      legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
+    },
+  );
+  const exitMedia = resolveElementMediaGeometry(
+    resolved.exitEl,
+    exitRect,
+    (mediaEl) => getClientRect(exitPage, mediaEl),
+    {
+      legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
+    },
+  );
+  const [normalizedEnterMedia, normalizedExitMedia] =
+    normalizeMediaGeometryPair(enterMedia, exitMedia);
+  const hasMediaPair =
+    normalizedEnterMedia.contentAware && normalizedExitMedia.contentAware;
+  const pageRect =
+    resolved.mode === "enter"
+      ? toNode.getBoundingClientRect()
+      : fromNode.getBoundingClientRect();
+  const pageBounds = {
+    left: 0,
+    top: 0,
+    width: pageRect.width,
+    height: pageRect.height,
+  };
+  const enterRadius =
+    normalizedEnterMedia.radiusSource === "legacy" ||
+    sameRect(normalizedEnterMedia.window, pageBounds)
+      ? normalizedEnterMedia.radius
+      : 0;
+
   return {
-    enterRect: getClientRect(
-      resolved.mode === "enter" ? toNode : fromNode,
-      resolved.enterEl,
-    ),
-    exitRect: getClientRect(
-      resolved.mode === "enter" ? fromNode : toNode,
-      resolved.exitEl,
-    ),
-    pageRect:
-      resolved.mode === "enter"
-        ? toNode.getBoundingClientRect()
-        : fromNode.getBoundingClientRect(),
+    enterRect,
+    exitRect,
+    ...(hasMediaPair
+      ? {
+          enterMedia: normalizedEnterMedia,
+          exitMedia: normalizedExitMedia,
+        }
+      : {}),
+    pageRect,
     scrollOffset,
-    enterRadius: readRadius(resolved.enterEl),
-    exitRadius: readRadius(resolved.exitEl),
+    enterRadius,
+    exitRadius: normalizedExitMedia.radius,
   };
 }
 

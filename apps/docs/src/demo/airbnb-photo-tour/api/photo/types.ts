@@ -29,8 +29,9 @@ export type PhotoSimple = {
   src: string;
   /** Display label or alt text */
   alt: string;
-  /** Pre-formatted W/H string ("1600/1067") for `data-hero-aspect-ratio`. */
-  aspectRatio: string;
+  /** Native image dimensions double as early intrinsic-ratio hints. */
+  width: number;
+  height: number;
 };
 
 export type PhotoDetail = PhotoSimple & {

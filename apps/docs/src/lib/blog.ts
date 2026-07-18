@@ -19,6 +19,11 @@ export type PostFrontmatter = {
   /** ISO date of last meaningful edit; defaults to `date` */
   updated?: string;
   author?: string;
+  /** Optional per-post cover used for social previews and structured data. */
+  image?: string;
+  imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   tags?: string[];
   /** drives the per-post FAQPage JSON-LD */
   faq?: PostFaq[];

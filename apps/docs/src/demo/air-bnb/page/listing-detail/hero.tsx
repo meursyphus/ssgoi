@@ -6,6 +6,8 @@ export function DetailHero({ detail }: { detail: ListingDetail }) {
       <img
         src={detail.images[0]}
         alt={detail.title}
+        width={1200}
+        height={1200}
         className="h-full w-full object-cover"
         data-zoom-enter-key={detail.id}
       />

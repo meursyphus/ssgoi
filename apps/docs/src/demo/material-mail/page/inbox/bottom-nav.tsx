@@ -11,7 +11,7 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="grid grid-cols-4 border-t border-neutral-200/70 bg-white">
+    <nav className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-neutral-200/70 bg-white">
       {items.map(({ label, icon: Icon, active }) => (
         <button
           key={label}

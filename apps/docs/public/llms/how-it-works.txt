@@ -1,0 +1,45 @@
+# SSGOI - How it works (for debugging)
+
+Deep-dive companion to https://ssgoi.dev/llms.txt. Read this when a transition misbehaves and you need the underlying mechanism.
+
+When a route changes, SSGOI orchestrates two simultaneous animations:
+
+- **OUT**: The leaving page animates out
+- **IN**: The entering page animates in
+
+## Core mechanism: clone & absolute position
+
+When a page unmounts, SSGOI clones it back into the DOM with `position: absolute` so it can animate out while the new page animates in.
+
+```ts
+// Internal behavior (packages/core/src/lib/utils/prepare-outgoing.ts)
+export const prepareOutgoing = (element, context) => {
+  element.style.position = "absolute"; // Removed from flow
+  element.style.width = "100%";
+  element.style.top = `${-1 * (context?.scrollOffset?.y ?? 0)}px`;
+  element.style.left = "0";
+};
+```
+
+**Why this matters:**
+
+- The OUT page is re-inserted into DOM as a clone with `position: absolute`
+- It needs a positioned ancestor (`relative`) to stay in place
+- Without proper CSS setup, the OUT page will jump to the wrong position
+
+## Transition flow
+
+```
+/home -> /about navigation:
+
+1. User clicks link to /about
+2. /home page unmounts from React
+3. SSGOI clones /home and re-inserts it with position: absolute (OUT)
+4. React renders /about page (IN)
+5. Both pages animate simultaneously
+6. Animation complete, cloned /home removed from DOM
+```
+
+## Boundary ownership (nested providers)
+
+Every `<Ssgoi>` marks its root element with `data-ssgoi-root`. A `data-ssgoi-transition` boundary registers with its **nearest** enclosing root (`closest("[data-ssgoi-root]")`), so nested providers each own only the boundaries beneath them. This is what makes patterns like the persistent bottom nav possible: https://ssgoi.dev/llms/bottom-nav.txt

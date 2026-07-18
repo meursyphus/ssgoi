@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { slide } from "@ssgoi/react/view-transitions";
+import { SsgoiWithHost } from "@/lib/components/demo-shell";
 import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
 import { useProfile } from "@/demo/instagram/state/profile";
 import { ProfileHeader } from "../profile-shell/header";
@@ -52,13 +53,15 @@ export function InstagramProfileLayoutClient({
       </div>
       {me ? <ProfileHeader me={me} /> : <ProfileHeaderSkeleton />}
       <ProfileTabs id={id} />
-      <Ssgoi config={innerConfig}>
+      {/* SsgoiWithHost (not raw <Ssgoi>) so the nested provider stays bound
+          to the playback dock's host like every other nested demo provider. */}
+      <SsgoiWithHost config={innerConfig} withTransitionBoundary={false}>
         <div className="relative z-0 bg-white">
           <SsgoiTransitionBoundary className="min-h-full bg-white">
             {children}
           </SsgoiTransitionBoundary>
         </div>
-      </Ssgoi>
+      </SsgoiWithHost>
       <div className="sticky bottom-0 z-30 bg-white">
         <ProfileBottomBar avatar={me?.avatar} />
       </div>
