@@ -8,7 +8,11 @@ import type {
 // Double spring gives an ease-in-out feel; leader 130/20 + 0.7 follower
 // lands the visible motion near ~400ms with a soft tail at both ends.
 const CROSSFADE_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 200, damping: 20, doubleSpring: 0.7 },
+  spring: {
+    stiffness: 250,
+    damping: 23,
+    doubleSpring: 0.7,
+  },
 };
 
 // Opacity floor — incoming starts at 0.5 (not 0), outgoing settles at 0.5 (not 0).
