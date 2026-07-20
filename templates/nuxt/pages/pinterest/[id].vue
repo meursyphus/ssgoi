@@ -1,5 +1,5 @@
 <template>
-  <div :data-ssgoi-transition="`/pinterest/${id}`">
+  <div>
     <div v-if="!item" class="min-h-screen bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Pin not found</p>
     </div>

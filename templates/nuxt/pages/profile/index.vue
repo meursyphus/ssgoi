@@ -1,5 +1,5 @@
 <template>
-  <div data-ssgoi-transition="/profile">
+  <div>
     <div class="bg-[#121212]">
       <!-- Profile Header -->
       <div class="relative">

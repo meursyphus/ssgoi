@@ -50,6 +50,7 @@ nuxt/
 │   ├── pincard.vue           # Pinterest card
 │   ├── postcard.vue          # Profile post card
 │   ├── profilefeed.vue       # Profile feed grid
+│   ├── ssgoi-transition-boundary.vue # Keyed route boundary
 │   └── products/             # Product components
 ├── composables/               # Vue composables
 │   ├── use-posts.ts          # Posts data
@@ -67,19 +68,22 @@ nuxt/
 
 ## Route Boundaries
 
-Nuxt pages mark their own transition boundary with `data-ssgoi-transition`.
-Use a stable logical id that matches your config; it does not have to be the
-actual route pathname.
-Do not use a single slot-based layout boundary here; the outgoing slot can
-render the incoming page content.
+`SsgoiTransitionBoundary` lets a persistent layout own the transition marker,
+so individual page components do not set `data-ssgoi-transition`. Its keyed
+Vue VNode keeps the outgoing slot subtree separate from the incoming route.
 
 ```vue
-<template>
-  <div data-ssgoi-transition="/posts">
-    <!-- page content -->
-  </div>
-</template>
+<Ssgoi :config="config">
+  <SsgoiTransitionBoundary>
+    <slot />
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
+
+The default id is `route.path`. Pass `getId` when a persistent nested layout
+needs one outer identity. This template maps every `/products/*` route to the
+outer `/products` boundary and uses the full path in the nested products
+provider.
 
 ## Transitions
 

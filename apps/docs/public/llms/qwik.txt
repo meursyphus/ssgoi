@@ -57,6 +57,8 @@ export default component$(() => {
 });
 ```
 
+Do not replace this with a keyed wrapper around the layout `<Slot />`. Qwik City moves projected slot content into the new wrapper before updating the routed subtree, so an incoming transition id can temporarily contain the outgoing page. `usePreventNavigate$` could stage a pre-navigation unmount, but it currently requires Qwik City's experimental `preventNavigate` flag; the stable template deliberately avoids that dependency.
+
 The value can be a hard-coded logical page id; it only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
 
 ## Troubleshooting checklist

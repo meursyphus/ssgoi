@@ -4,7 +4,7 @@ import { getPost, profile, posts, type Post } from "../data/profile";
 
 export function ProfilePage() {
   return (
-    <div data-ssgoi-transition="/profile" class="bg-[#121212]">
+    <div class="bg-[#121212]">
       <div class="relative">
         <div class="h-24 relative">
           <img
@@ -91,19 +91,13 @@ export function ProfileDetailPage(props: { postId: string }) {
     <Show
       when={post()}
       fallback={
-        <div
-          data-ssgoi-transition={`/profile/${props.postId}`}
-          class="bg-[#121212] px-4 py-8"
-        >
+        <div class="bg-[#121212] px-4 py-8">
           <p class="text-gray-400">Post not found</p>
         </div>
       }
     >
       {(post) => (
-        <div
-          data-ssgoi-transition={`/profile/${post().id}`}
-          class="bg-[#121212] min-h-[760px]"
-        >
+        <div class="bg-[#121212] min-h-[760px]">
           <div class="relative">
             <img
               src={post().coverImage.url}
