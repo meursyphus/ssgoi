@@ -18,19 +18,101 @@ Same three rules as every framework (details in llms.txt):
 2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
 3. Mark routed content with `data-ssgoi-transition="..."`.
 
-## Route boundary rule (SvelteKit-specific)
+## SvelteKit route boundary
 
-Set `data-ssgoi-transition` **directly on each routed page's boundary element** — do NOT wrap the layout slot in a single shared boundary.
+SvelteKit can mark routed content once in a layout, but a plain `{#key $page.url.pathname}` wrapper is not sufficient. Layout snippets are live: SvelteKit can update the old wrapper's `children` to the incoming route before removing it.
 
-SvelteKit slot content is live: during navigation the outgoing page wrapper can render the incoming page's children, so a layout-level boundary pairs the wrong subtrees. Each page marks itself:
+Use a small SvelteKit-specific boundary that detaches the old route synchronously in `onNavigate`, before SvelteKit updates the live snippet, and mounts the new route in the callback SvelteKit runs after the route DOM has updated:
 
 ```svelte
-<main data-ssgoi-transition="/gallery">
-  <!-- page content -->
+<!-- src/lib/ssgoi-transition-boundary.svelte -->
+<script lang="ts">
+  import { onNavigate } from "$app/navigation";
+  import { page } from "$app/stores";
+  import { flushSync, onDestroy, type Snippet } from "svelte";
+
+  interface Props {
+    children: Snippet;
+    as?: keyof HTMLElementTagNameMap;
+    class?: string;
+    getId?: (url: URL) => string;
+    [key: string]: unknown;
+  }
+
+  const pathnameId = (url: URL) => url.pathname;
+
+  let {
+    children,
+    as = "div",
+    class: className,
+    getId = pathnameId,
+    ...rest
+  }: Props = $props();
+
+  let currentId = $state(getId($page.url));
+  let mounted = $state(true);
+  let alive = true;
+
+  onDestroy(() => {
+    alive = false;
+  });
+
+  onNavigate((navigation) => {
+    if (!alive || !navigation.to) return;
+
+    const nextId = getId(navigation.to.url);
+    if (nextId === currentId) return;
+
+    flushSync(() => {
+      mounted = false;
+    });
+
+    return () => {
+      if (!alive) return;
+
+      flushSync(() => {
+        currentId = nextId;
+        mounted = true;
+      });
+    };
+  });
+</script>
+
+{#if mounted}
+  <svelte:element
+    this={as}
+    data-ssgoi-transition={currentId}
+    class={className}
+    {...rest}
+  >
+    {@render children()}
+  </svelte:element>
+{/if}
+```
+
+Use it inside the provider in a persistent layout:
+
+```svelte
+<script lang="ts">
+  import { Ssgoi } from "@ssgoi/svelte";
+  import SsgoiTransitionBoundary from "$lib/ssgoi-transition-boundary.svelte";
+
+  let { children } = $props();
+</script>
+
+<!-- Positioning and overflow classes belong on this outer layout shell. -->
+<main class="relative z-0 overflow-x-clip overflow-y-auto">
+  <Ssgoi {config}>
+    <SsgoiTransitionBoundary class="min-h-full">
+      {@render children()}
+    </SsgoiTransitionBoundary>
+  </Ssgoi>
 </main>
 ```
 
-The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+The default logical id is `url.pathname`. Pass `getId` when a persistent nested layout needs a stable outer identity. For example, map every `/products/*` URL to `/products` on the outer boundary, and use the default full pathname in a nested products provider.
+
+For plain Svelte without SvelteKit navigation hooks, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`; match dynamic descendants with config wildcards such as `/post/*`.
 
 ## Shared reference
 

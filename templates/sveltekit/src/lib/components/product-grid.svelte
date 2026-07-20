@@ -3,13 +3,12 @@
 
   interface Props {
     products: Product[];
-    category: string;
   }
 
-  let { products, category }: Props = $props();
+  let { products }: Props = $props();
 </script>
 
-<div data-ssgoi-transition="/products/{category}">
+<div>
   <div class="px-4 pb-6 h-full overflow-y-auto">
     {#if products.length === 0}
       <div class="text-center py-12">

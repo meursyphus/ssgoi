@@ -39,6 +39,7 @@ src/
 │   ├── components/
 │   │   ├── demo-layout.svelte      # Main layout with Ssgoi provider and navigation
 │   │   ├── demo-wrapper.svelte     # iPhone frame wrapper
+│   │   ├── ssgoi-transition-boundary.svelte # SvelteKit route boundary
 │   │   └── product-grid.svelte     # Product grid component
 │   └── data/
 │       ├── posts.ts                # Posts mock data
@@ -56,17 +57,24 @@ src/
 
 ## Route Boundaries
 
-SvelteKit pages mark their own transition boundary with `data-ssgoi-transition`.
-Use a stable logical id that matches your config; it does not have to be the
-actual route pathname.
-Do not use a single slot-based layout boundary here; the outgoing slot can
-render the incoming page content.
+`SsgoiTransitionBoundary` lets the layout own the transition marker, so page
+components do not need to set `data-ssgoi-transition` themselves. It detaches
+the outgoing boundary in SvelteKit's `onNavigate` hook before the live layout
+snippet is updated, then mounts the incoming boundary after the route DOM has
+updated.
 
 ```svelte
-<div data-ssgoi-transition="/posts">
-  <!-- page content -->
-</div>
+<Ssgoi {config}>
+  <SsgoiTransitionBoundary>
+    {@render children()}
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
+
+By default the boundary uses `url.pathname`. Pass `getId` when a persistent
+nested layout should keep one logical id. The outer demo boundary maps every
+`/products/*` URL to `/products`, while the nested products boundary uses the
+full pathname for tab transitions.
 
 ## Transitions
 

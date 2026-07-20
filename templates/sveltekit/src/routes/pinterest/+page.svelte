@@ -6,7 +6,7 @@
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
 </script>
 
-<div data-ssgoi-transition="/pinterest">
+<div>
   <div class="min-h-screen bg-[#121212] px-4 py-6">
     <!-- Header -->
     <div class="mb-6">
