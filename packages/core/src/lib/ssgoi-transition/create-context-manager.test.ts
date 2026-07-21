@@ -374,6 +374,154 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(0);
   });
 
+  it("yields to an app-driven scroll during the restore window", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 900;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail");
+    flushAnimationFrames(11);
+
+    // Return while the page is still short: restore clamps and keeps retrying.
+    documentElement.scrollHeight = 760;
+    documentElement.scrollTop = 0;
+    manager.initializeContext(returningFeedPage, "/feed");
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(160);
+
+    // Content arrives AND the page scrolls itself somewhere deliberate
+    // (anchor / useEffect scrollTo). The restore loop must yield, not drag
+    // the container back to the saved 900.
+    documentElement.scrollHeight = 2000;
+    documentElement.scrollTop = 300;
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(300);
+
+    const callsAfterYield = documentElement.scrollTo.mock.calls.length;
+    flushAnimationFrames(10);
+    expect(documentElement.scrollTop).toBe(300);
+    expect(documentElement.scrollTo.mock.calls.length).toBe(callsAfterYield);
+  });
+
+  it("yields to a scroll that lands before the first restore frame", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const page = createFakeElement({ parentElement: body });
+
+    // Previous page's stale position at init time…
+    documentElement.scrollTop = 320;
+    manager.initializeContext(page, "/feed");
+    // …then the entering page scrolls itself during commit (useLayoutEffect
+    // timing), BEFORE our first frame runs.
+    documentElement.scrollTop = 600;
+
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(600);
+    expect(documentElement.scrollTo).not.toHaveBeenCalled();
+  });
+
+  it("treats a layout clamp as passive, not as an external scroll", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const page = createFakeElement({ parentElement: body });
+
+    // Stale position from the previous page; the new page's shorter layout
+    // clamps it down before our first frame. That's the browser, not intent —
+    // the fresh page must still arrive at the top.
+    documentElement.scrollTop = 480;
+    manager.initializeContext(page, "/feed");
+    documentElement.scrollHeight = 760;
+    documentElement.scrollTop = 160;
+
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(0);
+  });
+
+  it("re-fights a router top reset even after the target was reached", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 0;
+    manager.initializeContext(returningFeedPage, "/feed");
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(480);
+
+    // A router-side reset (e.g. afterNavigate) lands AFTER we already
+    // restored. A jump to exactly (0,0) is the one movement we re-fight.
+    documentElement.scrollTop = 0;
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(480);
+
+    // Restoration writes are pinned to instant so a page-level
+    // `scroll-behavior: smooth` can't turn them into animations.
+    const lastCall = documentElement.scrollTo.mock.calls.at(-1)![0];
+    expect(lastCall).toMatchObject({ behavior: "instant" });
+  });
+
+  it("cancels a live restore loop when a newer navigation initializes", () => {
+    const manager = createContextManager({
+      preserveScroll: true,
+    });
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+    const nextPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed");
+    flushAnimationFrames(11);
+
+    documentElement.scrollTop = 900;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail");
+    flushAnimationFrames(11);
+
+    // Return to /feed with the page still short: the loop stays alive
+    // waiting for layout to grow toward the saved 900.
+    documentElement.scrollHeight = 760;
+    documentElement.scrollTop = 0;
+    manager.initializeContext(returningFeedPage, "/feed");
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(160);
+
+    // Navigate again mid-loop. The old loop must die with its generation —
+    // even once 900 becomes reachable, only the new target may be applied.
+    const callsBeforeNext = documentElement.scrollTo.mock.calls.length;
+    manager.initializeContext(nextPage, "/next");
+    documentElement.scrollHeight = 2000;
+    flushAnimationFrames(12);
+
+    const staleWrites = documentElement.scrollTo.mock.calls
+      .slice(callsBeforeNext)
+      .filter(([options]) => (options as ScrollToOptions).top === 900);
+    expect(staleWrites).toHaveLength(0);
+    expect(documentElement.scrollTop).toBe(0);
+  });
+
   it("keys scroll off resolvePath so aliased/rewritten routes share one position", () => {
     const manager = createContextManager({
       preserveScroll: true,

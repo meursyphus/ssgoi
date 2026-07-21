@@ -4,7 +4,7 @@ import { getPositionedParent } from "@utils";
 import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
-const RESTORE_MAX_RETRIES = 10;
+const RESTORE_WINDOW_FRAMES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
@@ -129,14 +129,24 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // Restore scroll position for the given path. For non-preserved paths the
   // arrival starts at the top; for shared-key paths without a saved value, leave
   // the current scroll alone because a parent transition context may own it.
-  // Saved targets are re-applied for up to 10 frames or until reached.
+  //
+  // The target (saved value or top) is supervised for RESTORE_WINDOW_FRAMES
+  // frames, but never re-applied blindly. Each frame classifies how the
+  // container moved since OUR last write:
+  //  - unmoved, or merely clamped by the new page's shorter layout: our write
+  //    hasn't stuck / isn't reachable yet — re-apply and wait for layout.
+  //  - moved to (0,0) while we hold a non-top target: a router-style top reset
+  //    (e.g. SvelteKit's `afterNavigate`) — the thing this window exists to
+  //    beat — re-apply.
+  //  - moved anywhere else: a deliberate scroll by the entering page (anchor,
+  //    `useEffect` scrollTo, scroll-to-bottom) or by the user — yield
+  //    immediately and never touch scroll again for this navigation.
+  // The baseline is read synchronously at init, before the first write, so a
+  // scroll landing between commit and our first frame (`useLayoutEffect`
+  // timing) is classified the same way instead of being overwritten.
   const restoreScrollPosition = (path: string) => {
     if (!scrollContainer) return;
 
-    // Resolve the target: saved value if preservation is on AND we have one,
-    // otherwise (0, 0). These cases go through the same retry loop so a
-    // router-side scroll restore (e.g., SvelteKit's `afterNavigate`) running
-    // after our first scrollTo can be overridden within the retry window.
     const policy = getScrollPolicy(path);
     if (
       policy.preserves &&
@@ -151,21 +161,83 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         ? scrollPositions.get(policy.storageKey)!
         : { x: 0, y: 0 };
 
-    let retryCount = 0;
+    // A newer init supersedes this loop — two live loops with different
+    // targets must never fight over one container during rapid navigation.
+    const myGeneration = initGeneration;
+
+    // Last position WE put the container at (seeded with the pre-write
+    // baseline). Re-read after every write because the browser clamps writes
+    // to the scrollable extent.
+    let lastApplied: ScrollPosition = {
+      x: scrollContainer.scrollLeft,
+      y: scrollContainer.scrollTop,
+    };
+    let frame = 0;
+
     const tryRestore = () => {
       if (!scrollContainer) return;
+      if (myGeneration !== initGeneration) return;
+      frame++;
 
-      scrollContainer.scrollTo({
-        top: target.y,
-        left: target.x,
-      });
+      const current: ScrollPosition = {
+        x: scrollContainer.scrollLeft,
+        y: scrollContainer.scrollTop,
+      };
+      // Where lastApplied passively sits after any layout shrink — clamping
+      // moves nobody deliberately, so landing exactly there is not a scroll.
+      const expected: ScrollPosition = {
+        x: Math.min(
+          lastApplied.x,
+          Math.max(
+            0,
+            scrollContainer.scrollWidth - scrollContainer.clientWidth,
+          ),
+        ),
+        y: Math.min(
+          lastApplied.y,
+          Math.max(
+            0,
+            scrollContainer.scrollHeight - scrollContainer.clientHeight,
+          ),
+        ),
+      };
 
-      const targetReached =
-        Math.abs(scrollContainer.scrollTop - target.y) < 1 &&
-        Math.abs(scrollContainer.scrollLeft - target.x) < 1;
+      const movedExternally =
+        Math.abs(current.x - expected.x) >= 1 ||
+        Math.abs(current.y - expected.y) >= 1;
 
-      if (!targetReached && retryCount < RESTORE_MAX_RETRIES) {
-        retryCount++;
+      if (movedExternally) {
+        const movedToTop = current.x < 1 && current.y < 1;
+        const targetIsTop = target.x < 1 && target.y < 1;
+        // Only a top reset while we hold a saved position gets fought; any
+        // other movement is someone's intent — stop competing with it.
+        if (!movedToTop || targetIsTop) return;
+      }
+
+      const atTarget =
+        Math.abs(current.x - target.x) < 1 &&
+        Math.abs(current.y - target.y) < 1;
+
+      if (!atTarget) {
+        // behavior:"instant" pins the write against a page-level
+        // `scroll-behavior: smooth`, which would otherwise turn restoration
+        // into a visible crawl and leave the read-back below mid-animation.
+        scrollContainer.scrollTo({
+          top: target.y,
+          left: target.x,
+          behavior: "instant",
+        });
+      }
+
+      lastApplied = {
+        x: scrollContainer.scrollLeft,
+        y: scrollContainer.scrollTop,
+      };
+
+      // Keep supervising for the full window even after the target is
+      // reached: a late router reset must still be re-fought, and reads
+      // without writes are cheap.
+      if (frame <= RESTORE_WINDOW_FRAMES) {
         requestAnimationFrame(tryRestore);
       }
     };
