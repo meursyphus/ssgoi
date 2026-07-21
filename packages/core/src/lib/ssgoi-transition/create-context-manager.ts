@@ -4,7 +4,6 @@ import { getPositionedParent } from "@utils";
 import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
-const RESTORE_WINDOW_FRAMES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
@@ -117,37 +116,123 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // isTransitioning back to false mid-way through a newer transition.
   let initGeneration = 0;
 
-  const scrollListener = () => {
-    if (scrollContainer && currentPath && !isTransitioning) {
-      scrollPositions.set(getScrollPolicy(currentPath).storageKey, {
-        x: scrollContainer.scrollLeft,
-        y: scrollContainer.scrollTop,
-      });
-    }
+  /* ── Scroll restoration ──────────────────────────────────────────────────
+   *
+   * Restoration is a small reconciler, not a polling loop. A session opens at
+   * init with a target (saved value, or top for non-preserved paths) and a
+   * pre-write baseline; `superviseRestore` is then invoked only when something
+   * actually happens:
+   *  - one deferred kick on the next frame (the entering page needs a layout
+   *    before the first write can stick),
+   *  - every scroll event during the transition window (the same listener that
+   *    captures positions outside it),
+   *  - the entering page resizing (ResizeObserver) — growth is what makes a
+   *    clamped target reachable.
+   *
+   * Each invocation classifies how the container moved since OUR last write:
+   *  - unmoved, or merely clamped by a shorter layout: our write hasn't stuck /
+   *    isn't reachable yet — re-apply.
+   *  - moved to (0,0) while we hold a non-top target: a router-style top reset
+   *    (e.g. SvelteKit's `afterNavigate`) — the one movement we fight —
+   *    re-apply.
+   *  - moved anywhere else: a deliberate scroll by the entering page (anchor,
+   *    `useEffect` scrollTo, scroll-to-bottom) or by the user — yield and
+   *    never touch scroll again for this navigation.
+   * The baseline is read synchronously at init, before the first write, so a
+   * scroll landing between commit and the first frame (`useLayoutEffect`
+   * timing) is classified the same way instead of being overwritten.
+   *
+   * The session closes when the settle countdown flips `isTransitioning` off —
+   * one shared window for capture suppression and restoration alike.
+   * ──────────────────────────────────────────────────────────────────────── */
+
+  type RestoreSession = {
+    target: ScrollPosition;
+    // Last position WE put the container at (seeded with the pre-write
+    // baseline). Re-read after every write because the browser clamps writes
+    // to the scrollable extent.
+    lastApplied: ScrollPosition;
+    yielded: boolean;
   };
 
-  // Restore scroll position for the given path. For non-preserved paths the
-  // arrival starts at the top; for shared-key paths without a saved value, leave
-  // the current scroll alone because a parent transition context may own it.
-  //
-  // The target (saved value or top) is supervised for RESTORE_WINDOW_FRAMES
-  // frames, but never re-applied blindly. Each frame classifies how the
-  // container moved since OUR last write:
-  //  - unmoved, or merely clamped by the new page's shorter layout: our write
-  //    hasn't stuck / isn't reachable yet — re-apply and wait for layout.
-  //  - moved to (0,0) while we hold a non-top target: a router-style top reset
-  //    (e.g. SvelteKit's `afterNavigate`) — the thing this window exists to
-  //    beat — re-apply.
-  //  - moved anywhere else: a deliberate scroll by the entering page (anchor,
-  //    `useEffect` scrollTo, scroll-to-bottom) or by the user — yield
-  //    immediately and never touch scroll again for this navigation.
-  // The baseline is read synchronously at init, before the first write, so a
-  // scroll landing between commit and our first frame (`useLayoutEffect`
-  // timing) is classified the same way instead of being overwritten.
-  const restoreScrollPosition = (path: string) => {
+  let restoreSession: RestoreSession | null = null;
+  // Lazily created, reused across sessions; watches the entering page element
+  // so content growth (images, async data) re-triggers reconciliation.
+  let restoreObserver: ResizeObserver | null = null;
+
+  const superviseRestore = () => {
+    const session = restoreSession;
+    if (!session || session.yielded || !scrollContainer) return;
+
+    const current: ScrollPosition = {
+      x: scrollContainer.scrollLeft,
+      y: scrollContainer.scrollTop,
+    };
+    // Where lastApplied passively sits after any layout shrink — clamping
+    // moves nobody deliberately, so landing exactly there is not a scroll.
+    const expected: ScrollPosition = {
+      x: Math.min(
+        session.lastApplied.x,
+        Math.max(0, scrollContainer.scrollWidth - scrollContainer.clientWidth),
+      ),
+      y: Math.min(
+        session.lastApplied.y,
+        Math.max(
+          0,
+          scrollContainer.scrollHeight - scrollContainer.clientHeight,
+        ),
+      ),
+    };
+
+    const movedExternally =
+      Math.abs(current.x - expected.x) >= 1 ||
+      Math.abs(current.y - expected.y) >= 1;
+
+    if (movedExternally) {
+      const movedToTop = current.x < 1 && current.y < 1;
+      const targetIsTop = session.target.x < 1 && session.target.y < 1;
+      // Only a top reset while we hold a saved position gets fought; any
+      // other movement is someone's intent — stop competing with it.
+      if (!movedToTop || targetIsTop) {
+        session.yielded = true;
+        restoreObserver?.disconnect();
+        return;
+      }
+    }
+
+    const atTarget =
+      Math.abs(current.x - session.target.x) < 1 &&
+      Math.abs(current.y - session.target.y) < 1;
+    if (atTarget) return;
+
+    // behavior:"instant" pins the write against a page-level
+    // `scroll-behavior: smooth`, which would otherwise turn restoration into
+    // a visible crawl and leave the read-back below mid-animation.
+    scrollContainer.scrollTo({
+      top: session.target.y,
+      left: session.target.x,
+      behavior: "instant",
+    });
+    session.lastApplied = {
+      x: scrollContainer.scrollLeft,
+      y: scrollContainer.scrollTop,
+    };
+  };
+
+  const endRestoreSession = () => {
+    restoreObserver?.disconnect();
+    restoreSession = null;
+  };
+
+  const startRestoreSession = (path: string, element: HTMLElement) => {
+    // A newer navigation supersedes any live session — two sessions with
+    // different targets must never fight over one container.
+    endRestoreSession();
     if (!scrollContainer) return;
 
     const policy = getScrollPolicy(path);
+    // Shared-key paths without a saved value: leave the current scroll alone,
+    // a parent transition context may own it.
     if (
       policy.preserves &&
       policy.shared &&
@@ -156,93 +241,42 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       return;
     }
 
-    const target: ScrollPosition =
-      policy.preserves && scrollPositions.has(policy.storageKey)
-        ? scrollPositions.get(policy.storageKey)!
-        : { x: 0, y: 0 };
+    restoreSession = {
+      target:
+        policy.preserves && scrollPositions.has(policy.storageKey)
+          ? scrollPositions.get(policy.storageKey)!
+          : { x: 0, y: 0 },
+      lastApplied: {
+        x: scrollContainer.scrollLeft,
+        y: scrollContainer.scrollTop,
+      },
+      yielded: false,
+    };
 
-    // A newer init supersedes this loop — two live loops with different
-    // targets must never fight over one container during rapid navigation.
-    const myGeneration = initGeneration;
+    if (typeof ResizeObserver !== "undefined") {
+      restoreObserver ??= new ResizeObserver(() => superviseRestore());
+      restoreObserver.observe(element);
+    }
 
-    // Last position WE put the container at (seeded with the pre-write
-    // baseline). Re-read after every write because the browser clamps writes
-    // to the scrollable extent.
-    let lastApplied: ScrollPosition = {
+    // First write is deferred one frame so the entering page has a layout to
+    // scroll against. A stale kick from a superseded navigation is harmless:
+    // the reconciler only ever acts on the CURRENT session.
+    requestAnimationFrame(superviseRestore);
+  };
+
+  const scrollListener = () => {
+    if (!scrollContainer || !currentPath) return;
+    // During the transition window the listener supervises restoration instead
+    // of capturing: OUT scrolls of an unmounted page must not be recorded, but
+    // they are exactly the signals the reconciler classifies.
+    if (isTransitioning) {
+      superviseRestore();
+      return;
+    }
+    scrollPositions.set(getScrollPolicy(currentPath).storageKey, {
       x: scrollContainer.scrollLeft,
       y: scrollContainer.scrollTop,
-    };
-    let frame = 0;
-
-    const tryRestore = () => {
-      if (!scrollContainer) return;
-      if (myGeneration !== initGeneration) return;
-      frame++;
-
-      const current: ScrollPosition = {
-        x: scrollContainer.scrollLeft,
-        y: scrollContainer.scrollTop,
-      };
-      // Where lastApplied passively sits after any layout shrink — clamping
-      // moves nobody deliberately, so landing exactly there is not a scroll.
-      const expected: ScrollPosition = {
-        x: Math.min(
-          lastApplied.x,
-          Math.max(
-            0,
-            scrollContainer.scrollWidth - scrollContainer.clientWidth,
-          ),
-        ),
-        y: Math.min(
-          lastApplied.y,
-          Math.max(
-            0,
-            scrollContainer.scrollHeight - scrollContainer.clientHeight,
-          ),
-        ),
-      };
-
-      const movedExternally =
-        Math.abs(current.x - expected.x) >= 1 ||
-        Math.abs(current.y - expected.y) >= 1;
-
-      if (movedExternally) {
-        const movedToTop = current.x < 1 && current.y < 1;
-        const targetIsTop = target.x < 1 && target.y < 1;
-        // Only a top reset while we hold a saved position gets fought; any
-        // other movement is someone's intent — stop competing with it.
-        if (!movedToTop || targetIsTop) return;
-      }
-
-      const atTarget =
-        Math.abs(current.x - target.x) < 1 &&
-        Math.abs(current.y - target.y) < 1;
-
-      if (!atTarget) {
-        // behavior:"instant" pins the write against a page-level
-        // `scroll-behavior: smooth`, which would otherwise turn restoration
-        // into a visible crawl and leave the read-back below mid-animation.
-        scrollContainer.scrollTo({
-          top: target.y,
-          left: target.x,
-          behavior: "instant",
-        });
-      }
-
-      lastApplied = {
-        x: scrollContainer.scrollLeft,
-        y: scrollContainer.scrollTop,
-      };
-
-      // Keep supervising for the full window even after the target is
-      // reached: a late router reset must still be re-fought, and reads
-      // without writes are cheap.
-      if (frame <= RESTORE_WINDOW_FRAMES) {
-        requestAnimationFrame(tryRestore);
-      }
-    };
-
-    requestAnimationFrame(tryRestore);
+    });
   };
 
   const initializeContext = (element: HTMLElement, path: string) => {
@@ -276,12 +310,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     }
 
     currentPath = path;
-    restoreScrollPosition(path);
+    startRestoreSession(path, element);
 
-    // Re-enable scroll capture after the transition window settles. Spans
-    // ~10 frames (~167ms) — long enough for most page transitions and any
-    // router-driven scroll reset to land before we start trusting the
-    // listener again.
+    // Close the transition window after ~10 frames (~167ms) — long enough for
+    // most page transitions and any router-driven scroll reset to land. One
+    // countdown bounds both halves of the window: the restore session ends and
+    // scroll capture resumes.
     let settleCount = 0;
     const trySettle = () => {
       // A newer init started its own settle; this older one must not be the
@@ -290,6 +324,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       if (myGeneration !== initGeneration) return;
       settleCount++;
       if (settleCount >= TRANSITION_SETTLE_FRAMES) {
+        endRestoreSession();
         isTransitioning = false;
       } else {
         requestAnimationFrame(trySettle);

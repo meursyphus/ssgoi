@@ -25,6 +25,32 @@ const emitEvent = (listeners: ListenerMap, type: string) => {
   }
 };
 
+class FakeResizeObserver {
+  static instances: FakeResizeObserver[] = [];
+  targets = new Set<HTMLElement>();
+  constructor(private callback: ResizeObserverCallback) {
+    FakeResizeObserver.instances.push(this);
+  }
+  observe(target: HTMLElement) {
+    this.targets.add(target);
+  }
+  unobserve(target: HTMLElement) {
+    this.targets.delete(target);
+  }
+  disconnect() {
+    this.targets.clear();
+  }
+  trigger() {
+    this.callback([], this as unknown as ResizeObserver);
+  }
+}
+
+const triggerResize = (element: HTMLElement) => {
+  for (const instance of FakeResizeObserver.instances) {
+    if (instance.targets.has(element)) instance.trigger();
+  }
+};
+
 const createFakeElement = (
   overrides: Partial<FakeElement> = {},
 ): FakeElement => {
@@ -131,7 +157,8 @@ describe("createContextManager", () => {
       body,
       documentElement,
     } as unknown as Document);
-    vi.stubGlobal("ResizeObserver", undefined);
+    FakeResizeObserver.instances = [];
+    vi.stubGlobal("ResizeObserver", FakeResizeObserver);
   });
 
   afterEach(() => {
@@ -259,7 +286,7 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(480);
   });
 
-  it("retries restore until the saved target becomes reachable", () => {
+  it("re-applies when the entering page's growth makes the target reachable", () => {
     const manager = createContextManager({
       preserveScroll: true,
     });
@@ -285,8 +312,10 @@ describe("createContextManager", () => {
     // Container clamps to maxY=160 until layout grows.
     expect(documentElement.scrollTop).toBe(160);
 
+    // Content arrives (images, async data): the page element resizes, and the
+    // reconciler re-applies the still-unreached target — no frame polling.
     documentElement.scrollHeight = 2000;
-    flushAnimationFrames(1);
+    triggerResize(returningFeedPage);
     expect(documentElement.scrollTop).toBe(900);
   });
 
@@ -399,14 +428,16 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(160);
 
     // Content arrives AND the page scrolls itself somewhere deliberate
-    // (anchor / useEffect scrollTo). The restore loop must yield, not drag
-    // the container back to the saved 900.
+    // (anchor / useEffect scrollTo). The reconciler must yield, not drag the
+    // container back to the saved 900.
     documentElement.scrollHeight = 2000;
     documentElement.scrollTop = 300;
-    flushAnimationFrames(1);
+    emitWindowScroll();
     expect(documentElement.scrollTop).toBe(300);
 
+    // Once yielded, even a later resize of the page must not re-apply.
     const callsAfterYield = documentElement.scrollTo.mock.calls.length;
+    triggerResize(returningFeedPage);
     flushAnimationFrames(10);
     expect(documentElement.scrollTop).toBe(300);
     expect(documentElement.scrollTo.mock.calls.length).toBe(callsAfterYield);
@@ -471,9 +502,10 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(480);
 
     // A router-side reset (e.g. afterNavigate) lands AFTER we already
-    // restored. A jump to exactly (0,0) is the one movement we re-fight.
+    // restored. Its scroll event reaches the reconciler, and a jump to
+    // exactly (0,0) is the one movement that gets re-fought.
     documentElement.scrollTop = 0;
-    flushAnimationFrames(1);
+    emitWindowScroll();
     expect(documentElement.scrollTop).toBe(480);
 
     // Restoration writes are pinned to instant so a page-level
@@ -482,7 +514,7 @@ describe("createContextManager", () => {
     expect(lastCall).toMatchObject({ behavior: "instant" });
   });
 
-  it("cancels a live restore loop when a newer navigation initializes", () => {
+  it("drops a superseded restore session when a newer navigation initializes", () => {
     const manager = createContextManager({
       preserveScroll: true,
     });
@@ -500,19 +532,21 @@ describe("createContextManager", () => {
     manager.initializeContext(detailPage, "/detail");
     flushAnimationFrames(11);
 
-    // Return to /feed with the page still short: the loop stays alive
-    // waiting for layout to grow toward the saved 900.
+    // Return to /feed with the page still short: the session holds a clamped
+    // target, waiting for layout to grow toward the saved 900.
     documentElement.scrollHeight = 760;
     documentElement.scrollTop = 0;
     manager.initializeContext(returningFeedPage, "/feed");
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(160);
 
-    // Navigate again mid-loop. The old loop must die with its generation —
-    // even once 900 becomes reachable, only the new target may be applied.
+    // Navigate again mid-session. The superseded session's observer must be
+    // disconnected — even once 900 becomes reachable, only the new target may
+    // be applied.
     const callsBeforeNext = documentElement.scrollTo.mock.calls.length;
     manager.initializeContext(nextPage, "/next");
     documentElement.scrollHeight = 2000;
+    triggerResize(returningFeedPage);
     flushAnimationFrames(12);
 
     const staleWrites = documentElement.scrollTo.mock.calls
