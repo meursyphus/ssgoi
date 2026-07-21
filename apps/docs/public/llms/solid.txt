@@ -22,6 +22,8 @@ Same three rules as every framework (details in llms.txt):
 
 Solid's keyed `<Show>` gives each pathname its own reactive owner. Disposing the old owner removes the outgoing subtree before the incoming owner mounts:
 
+### 1. Copy the boundary component
+
 ```tsx
 // src/components/ssgoi-transition-boundary.tsx
 import { useLocation } from "@solidjs/router";
@@ -52,29 +54,43 @@ export function SsgoiTransitionBoundary(props: Props) {
 }
 ```
 
-Keep the boundary inside `<Suspense>`. Lazy route content must resolve before SSGOI observes the incoming marker; putting `<Suspense>` inside the boundary can mount an empty incoming wrapper too early.
+### 2. Wrap routed content once
+
+Copy the boundary as-is. Keep it inside `<Suspense>`: lazy route content must resolve before SSGOI observes the incoming marker. Putting `<Suspense>` inside the boundary can mount an empty incoming wrapper too early.
 
 ```tsx
 // src/app.tsx
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
-import { Ssgoi } from "@ssgoi/solid";
-import { zoom } from "@ssgoi/solid/view-transitions";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
+import { drill, zoom } from "@ssgoi/solid/view-transitions";
 import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
 
 const config = {
-  transitions: [zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" })],
-};
+  preserveScroll: { exclude: ["/posts/*"] },
+  transitions: [
+    drill({ enter: "/posts/*", exit: "/posts" }),
+    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
+  ],
+} satisfies SsgoiConfig;
+
+const getRootTransitionId = (path: string) =>
+  path === "/products" || path.startsWith("/products/")
+    ? "/products"
+    : path;
 
 export default function App() {
   return (
     <Router
       root={(props) => (
-        <main class="relative z-0 min-h-dvh overflow-y-auto overflow-x-clip">
+        <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
           <Ssgoi config={config}>
             <Suspense>
-              <SsgoiTransitionBoundary>
+              <SsgoiTransitionBoundary
+                getId={getRootTransitionId}
+                class="min-h-full"
+              >
                 {props.children}
               </SsgoiTransitionBoundary>
             </Suspense>
@@ -88,7 +104,53 @@ export default function App() {
 }
 ```
 
-The default logical id is `location.pathname`. Pass `getId` when a persistent nested layout needs a stable outer identity. For example, map every `/products/*` URL to `/products` on the outer boundary, and use the default full pathname in a nested products provider.
+If the app has no nested transition provider, omit `getId={getRootTransitionId}` and the helper; the boundary defaults to the full `location.pathname`.
+
+### 3. Optional nested provider
+
+For nested transitions, the outer identity must stay stable while the nested boundary uses the full pathname. With the root setup above, copy this route layout:
+
+```tsx
+// src/routes/products.tsx
+import { A } from "@solidjs/router";
+import { For, type JSX } from "solid-js";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
+import { slide } from "@ssgoi/solid/view-transitions";
+import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
+
+const paths = [
+  "/products/all",
+  "/products/electronics",
+  "/products/fashion",
+];
+
+const config = {
+  transitions: [slide({ paths })],
+} satisfies SsgoiConfig;
+
+export default function ProductsLayout(props: { children?: JSX.Element }) {
+  return (
+    <section class="min-h-full">
+      <nav>
+        <For each={paths}>
+          {(path) => <A href={path}>{path.split("/").at(-1)}</A>}
+        </For>
+      </nav>
+
+      <div class="relative z-0 overflow-x-clip">
+        <Ssgoi config={config}>
+          {/* No getId here: nested tabs need their full pathname. */}
+          <SsgoiTransitionBoundary class="min-h-full">
+            {props.children}
+          </SsgoiTransitionBoundary>
+        </Ssgoi>
+      </div>
+    </section>
+  );
+}
+```
+
+Create child routes such as `src/routes/products/all.tsx`. Routed page components render ordinary content and must not add another `data-ssgoi-transition` marker; the boundary owns it.
 
 For plain Solid without Solid Router, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the config; match dynamic descendants with wildcards such as `/post/*`.
 

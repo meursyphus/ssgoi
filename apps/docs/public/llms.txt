@@ -332,15 +332,13 @@ Everything outside the React core above lives in its own plain-text file. Fetch 
 
 ### Other frameworks (setup + route boundary rules)
 
-Do not copy the React keyed-child pattern verbatim across frameworks. Use the matching guide; each router has a different ownership and update lifecycle for projected route content:
+- Svelte / SvelteKit: https://ssgoi.dev/llms/svelte.txt
+- Vue / Nuxt: https://ssgoi.dev/llms/vue.txt
+- Solid / SolidStart: https://ssgoi.dev/llms/solid.txt
+- Angular: https://ssgoi.dev/llms/angular.txt
+- Qwik / Qwik City: https://ssgoi.dev/llms/qwik.txt
 
-- Svelte / SvelteKit — use a staged layout boundary that detaches the old live snippet in `onNavigate` before mounting the new route: https://ssgoi.dev/llms/svelte.txt
-- Vue / Nuxt — use a keyed layout VNode; the old VNode retains its own slot subtree while it unmounts: https://ssgoi.dev/llms/vue.txt
-- Solid / SolidStart — use a keyed `<Show>` boundary inside `<Suspense>` so lazy content resolves before the incoming marker appears: https://ssgoi.dev/llms/solid.txt
-- Angular — keep the transition marker on each routed component's own template: https://ssgoi.dev/llms/angular.txt
-- Qwik / Qwik City — keep page-owned markers; a keyed wrapper around the layout `<Slot />` can pair the incoming id with outgoing content: https://ssgoi.dev/llms/qwik.txt
-
-The `SsgoiConfig` shape, transition catalog, and troubleshooting sections above are shared across all frameworks. Installation, provider wiring, and the exact route-boundary lifecycle are framework-specific.
+The `SsgoiConfig` shape, transition catalog, and troubleshooting sections above are shared across all frameworks. Installation, provider wiring, and route-boundary lifecycle are documented only in the linked framework guides.
 
 ### Deep dive
 

@@ -22,10 +22,12 @@ Same three rules as every framework (details in llms.txt):
 
 SvelteKit can mark routed content once in a layout, but a plain `{#key $page.url.pathname}` wrapper is not sufficient. Layout snippets are live: SvelteKit can update the old wrapper's `children` to the incoming route before removing it.
 
+### 1. Copy the boundary component
+
 Use a small SvelteKit-specific boundary that detaches the old route synchronously in `onNavigate`, before SvelteKit updates the live snippet, and mounts the new route in the callback SvelteKit runs after the route DOM has updated:
 
 ```svelte
-<!-- src/lib/ssgoi-transition-boundary.svelte -->
+<!-- src/lib/components/ssgoi-transition-boundary.svelte -->
 <script lang="ts">
   import { onNavigate } from "$app/navigation";
   import { page } from "$app/stores";
@@ -63,10 +65,14 @@ Use a small SvelteKit-specific boundary that detaches the old route synchronousl
     const nextId = getId(navigation.to.url);
     if (nextId === currentId) return;
 
+    // Detach the old route before SvelteKit updates its live `children`
+    // snippet. SSGOI can then retain the real outgoing DOM for its animation.
     flushSync(() => {
       mounted = false;
     });
 
+    // SvelteKit calls this after the route DOM has updated. Rendering the
+    // snippet now produces only the incoming route under its own boundary.
     return () => {
       if (!alive) return;
 
@@ -90,27 +96,94 @@ Use a small SvelteKit-specific boundary that detaches the old route synchronousl
 {/if}
 ```
 
-Use it inside the provider in a persistent layout:
+### 2. Wrap routed content once
+
+Copy the component above as-is, then use it inside the provider in a persistent root layout. This example is complete: it includes imports, a typed config, the required scroll/positioning shell, and a stable id for an optional nested `/products` layout.
 
 ```svelte
+<!-- src/routes/+layout.svelte -->
 <script lang="ts">
-  import { Ssgoi } from "@ssgoi/svelte";
-  import SsgoiTransitionBoundary from "$lib/ssgoi-transition-boundary.svelte";
+  import "../app.css";
+  import { Ssgoi, type SsgoiConfig } from "@ssgoi/svelte";
+  import { drill, zoom } from "@ssgoi/svelte/view-transitions";
+  import type { Snippet } from "svelte";
+  import SsgoiTransitionBoundary from "$lib/components/ssgoi-transition-boundary.svelte";
 
-  let { children } = $props();
+  let { children }: { children: Snippet } = $props();
+
+  const config = {
+    preserveScroll: { exclude: ["/posts/*"] },
+    transitions: [
+      drill({ enter: "/posts/*", exit: "/posts" }),
+      zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
+    ],
+  } satisfies SsgoiConfig;
+
+  const getRootTransitionId = (url: URL) =>
+    url.pathname === "/products" || url.pathname.startsWith("/products/")
+      ? "/products"
+      : url.pathname;
 </script>
 
-<!-- Positioning and overflow classes belong on this outer layout shell. -->
-<main class="relative z-0 overflow-x-clip overflow-y-auto">
+<!-- This is the scroll element and the positioned ancestor for OUT clones. -->
+<main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
   <Ssgoi {config}>
-    <SsgoiTransitionBoundary class="min-h-full">
+    <SsgoiTransitionBoundary
+      getId={getRootTransitionId}
+      class="min-h-full"
+    >
       {@render children()}
     </SsgoiTransitionBoundary>
   </Ssgoi>
 </main>
 ```
 
-The default logical id is `url.pathname`. Pass `getId` when a persistent nested layout needs a stable outer identity. For example, map every `/products/*` URL to `/products` on the outer boundary, and use the default full pathname in a nested products provider.
+If the app has no nested transition provider, omit `getId={getRootTransitionId}` and the helper; the boundary defaults to the full `url.pathname`.
+
+### 3. Optional nested provider
+
+For nested transitions, the outer identity must stay stable while the nested boundary uses the full pathname. With the root layout above, copy this nested layout:
+
+```svelte
+<!-- src/routes/products/+layout.svelte -->
+<script lang="ts">
+  import { Ssgoi, type SsgoiConfig } from "@ssgoi/svelte";
+  import { slide } from "@ssgoi/svelte/view-transitions";
+  import type { Snippet } from "svelte";
+  import SsgoiTransitionBoundary from "$lib/components/ssgoi-transition-boundary.svelte";
+
+  let { children }: { children: Snippet } = $props();
+
+  const paths = [
+    "/products/all",
+    "/products/electronics",
+    "/products/fashion",
+  ];
+
+  const config = {
+    transitions: [slide({ paths })],
+  } satisfies SsgoiConfig;
+</script>
+
+<section class="min-h-full">
+  <nav>
+    <a href="/products/all">All</a>
+    <a href="/products/electronics">Tech</a>
+    <a href="/products/fashion">Fashion</a>
+  </nav>
+
+  <div class="relative z-0 overflow-x-clip">
+    <Ssgoi {config}>
+      <!-- No getId here: nested tabs need their full pathname. -->
+      <SsgoiTransitionBoundary class="min-h-full">
+        {@render children()}
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  </div>
+</section>
+```
+
+Routed `+page.svelte` files now render ordinary page content and must not add another `data-ssgoi-transition` marker. The boundary owns that marker.
 
 For plain Svelte without SvelteKit navigation hooks, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`; match dynamic descendants with config wildcards such as `/post/*`.
 
