@@ -344,25 +344,36 @@ export function createSggoiTransitionContext(
       config.prepare ? config.prepare(prepareArgs) : {},
     );
 
-    // Resolve from/to + prepare extras in parallel via promiseAll util.
-    // The entire function returns synchronously; .then fires when ready.
+    // `prepare` schedules its per-side pre-paint styles through the already
+    // resolved from/to promises. Queue the insertion after those callbacks,
+    // but do not make it wait for the (possibly asynchronous) extras result.
+    //
+    // Waiting for all of `prepare` used to leave an unmount-mode page detached
+    // while the incoming page was still empty. With document/body scrolling,
+    // that transient height collapse clamps window.scrollY before the outgoing
+    // page returns, which iOS browsers can expose as a white frame. Keeping the
+    // insertion on its own promise preserves the style-before-insert ordering
+    // without extending the detached interval to the full prepare pipeline.
+    const outgoingReady: Promise<void> =
+      !isHidden && parent
+        ? fromPromise.then(() => {
+            if (nextSibling && parent.contains(nextSibling)) {
+              parent.insertBefore(fromElement, nextSibling);
+            } else {
+              parent.appendChild(fromElement);
+            }
+          })
+        : Promise.resolve();
+
+    // Resolve from/to + prepare extras in parallel via promiseAll util. Include
+    // the independently scheduled insertion so animation creation can never
+    // race ahead of the outgoing node reaching the DOM.
     promiseAll({
       from: fromPromise,
       to: toPromise,
       extras: extrasPromise,
+      outgoingReady,
     }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
-      // Now that prepare's microtasks have all run (initial styles, extras
-      // built), drop the outgoing node into place. Order is:
-      //   prepare → out insert → animation create/play
-      // Hidden mode skips insertion: the real node is already in place.
-      if (!isHidden && parent) {
-        if (nextSibling && parent.contains(nextSibling)) {
-          parent.insertBefore(fromElement, nextSibling);
-        } else {
-          parent.appendChild(fromElement);
-        }
-      }
-
       const animation = config.animation({
         from: resolvedFrom,
         to: resolvedTo,

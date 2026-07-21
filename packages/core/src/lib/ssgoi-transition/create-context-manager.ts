@@ -2,6 +2,10 @@ import type { PreserveScrollOption, PreserveScrollFn } from "@types";
 import { getScrollingElement } from "@utils";
 import { getPositionedParent } from "@utils";
 import { matchPath } from "./find-matching-transition";
+import {
+  installDocumentScrollGuard,
+  releaseDocumentScrollGuard,
+} from "./document-scroll-guard";
 
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;
@@ -164,9 +168,18 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         Math.abs(scrollContainer.scrollTop - target.y) < 1 &&
         Math.abs(scrollContainer.scrollLeft - target.x) < 1;
 
-      if (!targetReached && retryCount < RESTORE_MAX_RETRIES) {
+      if (targetReached) {
+        if (scrollContainer === document.documentElement) {
+          releaseDocumentScrollGuard(document);
+        }
+      } else if (retryCount < RESTORE_MAX_RETRIES) {
         retryCount++;
         requestAnimationFrame(tryRestore);
+      } else if (scrollContainer === document.documentElement) {
+        // Do not leave a stale floor behind when an async page never grows
+        // enough to make the saved target reachable. The guard also owns a
+        // safety timeout, but releasing here keeps the normal path prompt.
+        releaseDocumentScrollGuard(document);
       }
     };
 
@@ -201,6 +214,9 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       target.addEventListener("scroll", scrollListener, {
         passive: true,
       });
+      if (scrollContainer === document.documentElement) {
+        installDocumentScrollGuard(document);
+      }
     }
 
     currentPath = path;

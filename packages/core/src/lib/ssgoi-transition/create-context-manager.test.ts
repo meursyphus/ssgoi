@@ -130,6 +130,7 @@ describe("createContextManager", () => {
     vi.stubGlobal("document", {
       body,
       documentElement,
+      addEventListener: vi.fn(),
     } as unknown as Document);
     vi.stubGlobal("ResizeObserver", undefined);
   });
