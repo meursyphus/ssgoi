@@ -1,71 +1,41 @@
-# SSGOI + React Router Template
-
-This template demonstrates SSGOI page transitions with React Router 7.
-
-## Getting Started
+# SSGOI + React Router
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5173 to view the demo.
+## Structure
 
-## Features
+- `app/components/ssgoi-config.ts`: one transition config.
+- `app/components/demo-layout.tsx`: one root `<Ssgoi>`.
+- `app/components/ssgoi-transition-boundary.tsx`: uses `useLocation()`.
+- `app/routes/page-boundary.layout.tsx`: standard pathname boundary.
+- `app/routes/products_.layout.tsx`: persistent product shell plus inner tab
+  boundary.
 
-- **Drill Transition**: Posts list-to-detail navigation
-- **Slide Transition**: Product category tabs with nested `Ssgoi`
-- **Zoom Expand Transition**: Gallery grid-to-detail shared image animation
-- **Zoom Static Transition**: Profile feed-to-detail shared image animation
-- **Scroll Preservation**: Keeps scroll state where configured
-
-## Integration
-
-The main provider lives in `app/components/demo-layout.tsx`:
+The custom boundary maps pathname to a React key:
 
 ```tsx
-import { Ssgoi } from "@ssgoi/react";
-import { drill, zoom } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+const { pathname } = useLocation();
 
-const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    { on: "/posts/**", except: "/posts", transition: drill() },
-    {
-      from: "/pinterest",
-      to: "/pinterest/*",
-      transition: zoom({ type: "expand" }),
-    },
-    {
-      from: "/profile",
-      to: "/profile/*",
-      transition: zoom({ type: "static" }),
-    },
-  ],
-};
+return (
+  <div key={scope(pathname)} data-ssgoi-transition={pathname}>
+    {children}
+  </div>
+);
 ```
 
-The demo layout wraps routed content once with a small boundary utility.
+The products layout returns a stable outer key and uses the pathname for its
+inner `<Outlet />`. Category navigation slides only the inner content.
 
-```tsx
-export default function DemoLayout({ children }) {
-  return (
-    <Ssgoi config={config}>
-      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
-}
-```
+Effects:
 
-Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
-stay as real pathnames and are matched by wildcard patterns in config. Use
-`/posts/*` for descendants and `/posts/**` when the parent path should match
-too.
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
 
-## Build
+Guide: https://ssgoi.dev/llms.txt#8-other-frameworks
 
 ```bash
 pnpm typecheck

@@ -160,7 +160,6 @@ export function InstallBody() {
 import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, fade } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
@@ -175,14 +174,7 @@ const config = {
 };
 
 export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return (
-    <Ssgoi config={config}>
-      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
-      <SsgoiTransitionBoundary className="min-h-full bg-black">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
+  return <Ssgoi config={config}>{children}</Ssgoi>;
 }
 
 // app/layout.tsx
@@ -210,39 +202,41 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           title="Wrap React routed content"
           desc={
             <>
-              In React adapters, use one pathname-based{" "}
+              In React adapters, create a pathname-based{" "}
               <code className="font-mono text-neutral-200">
                 data-ssgoi-transition
               </code>{" "}
-              boundary utility in your layout. This is a React convenience
-              pattern: SSGOI only needs a logical page id, and the utility uses
-              the current pathname as that id. Match descendants with wildcards
-              like <code className="font-mono text-neutral-200">/post/*</code>{" "}
-              or include the parent path with{" "}
-              <code className="font-mono text-neutral-200">/docs/**</code>.
+              boundary utility, then place it in the layouts that should
+              transition. Its key controls layout lifetime; the transition id
+              remains the real pathname.
             </>
           }
           code={`// ssgoi-transition-boundary.tsx
 "use client";
 
-import { type ElementType, type ReactNode } from "react";
+import { type ElementType, type Key, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+
+type BoundaryScope = (pathname: string) => Key;
+const pathnameScope: BoundaryScope = (pathname) => pathname;
 
 export function SsgoiTransitionBoundary({
   children,
   as,
   className,
+  scope = pathnameScope,
 }: {
   children: ReactNode;
   as?: ElementType;
   className?: string;
+  scope?: BoundaryScope;
 }) {
   const pathname = usePathname();
   const Component = as ?? "div";
 
   return (
     <Component
-      key={pathname}
+      key={scope(pathname)}
       data-ssgoi-transition={pathname}
       className={className}
     >
@@ -251,16 +245,10 @@ export function SsgoiTransitionBoundary({
   );
 }
 
-// app/ssgoi-provider.tsx
-import { Ssgoi } from "@ssgoi/react";
-
-return (
-  <Ssgoi config={config}>
-    <SsgoiTransitionBoundary className="min-h-full bg-black">
-      {children}
-    </SsgoiTransitionBoundary>
-  </Ssgoi>
-);`}
+// app/posts/layout.tsx
+export default function PostsLayout({ children }) {
+  return <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>;
+}`}
         />
 
         <NonReactBoundary />
@@ -377,9 +365,8 @@ function NonReactBoundary() {
         <code className="font-mono text-neutral-200">
           data-ssgoi-transition
         </code>{" "}
-        right on each routed page. The value is a stable logical page id — it
-        does <em>not</em> have to be the framework&apos;s route pathname; it
-        only has to match the route patterns in your config&apos;s{" "}
+        on each routed page or route layout. The value is a logical page id and
+        must match the route patterns in your config&apos;s{" "}
         <code className="font-mono text-neutral-200">on</code>,{" "}
         <code className="font-mono text-neutral-200">from</code>/
         <code className="font-mono text-neutral-200">to</code>, or{" "}
@@ -417,13 +404,10 @@ export default component$(() => {
       />
 
       <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
-        <span className="text-neutral-300">Why not one shared boundary?</span>{" "}
-        SvelteKit and Nuxt render slot/snippet content live, so a single route
-        boundary in a parent layout would let the outgoing page wrapper render
-        the <em>incoming</em> page&apos;s children mid-navigation. Marking each
-        page directly keeps the outgoing and incoming boundaries cleanly
-        separated. (React&apos;s utility sidesteps this by keying the subtree on
-        the pathname.)
+        Parent route layouts may own an outer boundary for persistent tabs,
+        headers, or navigation. Keep child page boundaries for inner route
+        changes. If both leave together, SSGOI selects the outer changed
+        boundary.
       </p>
 
       <div className="mt-8 border-t border-white/[0.06] pt-8">

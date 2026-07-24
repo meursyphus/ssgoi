@@ -1,88 +1,110 @@
 # @ssgoi/qwik
 
-Qwik bindings for SSGOI - native app-like page transitions for Qwik and Qwik City.
+Qwik and Qwik City bindings for SSGOI.
 
-Full setup reference for AI agents:
+[![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
-https://ssgoi.dev/llms.txt
-
-## Install
+[Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)
 
 ```bash
 npm install @ssgoi/qwik
 ```
 
-## Qwik City
+Agent setup guide: https://ssgoi.dev/llms/qwik.txt
 
-Qwik serializes component state for resumability, while SSGOI transition configs contain functions. Pass the config as a QRL factory (`config$`) so the adapter can resolve it in the browser before starting the DOM observer.
+## Root
 
-Use `useSsgoi(ref, { config$ })` directly in the Qwik City layout that owns the route `<Slot />`:
+Qwik configs contain functions, so pass a QRL factory.
 
 ```tsx
 import { $, Slot, component$, useSignal } from "@builder.io/qwik";
-import { Link, useLocation } from "@builder.io/qwik-city";
 import { useSsgoi } from "@ssgoi/qwik";
-import { drill, zoom } from "@ssgoi/qwik/view-transitions";
+import { drill } from "@ssgoi/qwik/view-transitions";
 
-const ssgoiConfig$ = $(() => ({
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    {
-      from: "/gallery",
-      to: "/gallery/*",
-      transition: zoom({ type: "expand" }),
-    },
-    { on: "/posts/**", except: "/posts", transition: drill() },
-  ],
+const config$ = $(() => ({
+  transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
 }));
 
 export default component$(() => {
-  const location = useLocation();
-  const ssgoiRoot = useSignal<HTMLElement>();
-
-  useSsgoi(ssgoiRoot, { config$: ssgoiConfig$ });
+  const root = useSignal<HTMLElement>();
+  useSsgoi(root, { config$ });
 
   return (
-    <main
-      ref={ssgoiRoot}
-      class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
-    >
+    <main ref={root} class="relative z-0 min-h-dvh overflow-x-clip">
       <Slot />
-      <Link href="/posts/">Posts</Link>
-      <p>{location.url.pathname}</p>
     </main>
   );
 });
 ```
 
-Set `data-ssgoi-transition` directly on each routed page boundary. The value only needs to match the `on`, `from`, `to`, or `ordered` route patterns in your config:
+## Route boundary
+
+Mark route component roots:
+
+```tsx
+export default component$(() => (
+  <section data-ssgoi-transition="/posts">Posts</section>
+));
+```
+
+Dynamic route:
+
+```tsx
+<section data-ssgoi-transition={`/posts/${postId}`}>...</section>
+```
+
+## Persistent layouts
+
+Put an outer marker in the persistent route layout and markers on child route
+roots:
 
 ```tsx
 export default component$(() => {
+  const location = useLocation();
+  const pathname = location.url.pathname.replace(/\/$/, "");
+
   return (
-    <section data-ssgoi-transition="/posts" class="min-h-full">
-      Posts
+    <section data-ssgoi-transition={pathname}>
+      <ProductTabs />
+      <Slot />
     </section>
   );
 });
 ```
 
-Import view-level factories from `@ssgoi/qwik/view-transitions`.
+Qwik City replaces child route roots under `<Slot />`. Child navigation uses
+the child boundary; leaving the layout uses the outer boundary.
 
-## Qwik City Notes
+## Config
 
-- Declare configs with Qwik `$`, for example `const config$ = $(() => ({ transitions: [...] }))`. Do not pass a plain config object through component props.
-- Keep the route `<Slot />` inside the same layout element observed by `useSsgoi`.
-- Mark pages directly with `data-ssgoi-transition`; do not put one generic boundary around the parent `<Slot />`.
-- Put layout-shell classes such as `relative z-0 overflow-x-clip` on the SSGOI root/scroll container, not on every page marker.
+```tsx
+import { $ } from "@builder.io/qwik";
+import { drill, slide, zoom } from "@ssgoi/qwik/view-transitions";
 
-`Ssgoi` is also exported for wrapping concrete children outside Qwik City routing. In Qwik City layouts, prefer `useSsgoi` because forwarding a route `<Slot />` through another component can prevent routed content from being projected into the live DOM during navigation.
+const config$ = $(() => ({
+  transitions: [
+    { on: "/posts/**", except: "/posts", transition: drill() },
+    { from: "/gallery", to: "/gallery/:id", transition: zoom() },
+    { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
+  ],
+}));
+```
 
-## Troubleshooting
+## Effect index
 
-If route navigation works but no transition runs:
+- `fade`: unrelated pages.
+- `drill`: list → detail.
+- `slide` or `axis`: ordered tabs.
+- `sheet`: modal-like routes.
+- `zoom` or `hero`: shared-element details.
+- `scroll`: vertical sequences.
 
-1. Confirm the layout calls `useSsgoi(ssgoiRoot, { config$ })`.
-2. Confirm `config$` is created with Qwik `$`.
-3. Confirm the SSGOI root contains the route `<Slot />` directly.
-4. Confirm every routed page has a `data-ssgoi-transition` value that matches your transition config.
+All effects: https://ssgoi.dev/llms.txt#7-transition-index
+
+`Ssgoi` remains available for concrete projected children. In Qwik City route
+layouts, prefer `useSsgoi()` so `<Slot />` stays directly under the observed
+root.
+
+## License
+
+MIT

@@ -40,6 +40,16 @@ export const prepareOutgoing = (element, context) => {
 6. Animation complete, cloned /home removed from DOM
 ```
 
-## Boundary ownership (nested providers)
+## Nested boundary ownership
 
-Every `<Ssgoi>` marks its root element with `data-ssgoi-root`. A `data-ssgoi-transition` boundary registers with its **nearest** enclosing root (`closest("[data-ssgoi-root]")`), so nested providers each own only the boundaries beneath them. This is what makes patterns like the persistent bottom nav possible: https://ssgoi.dev/llms/bottom-nav.txt
+Persistent layouts may contain another route boundary. SSGOI resolves changed
+DOM hierarchically:
+
+- If a parent and descendant enter or leave in the same mutation, the parent
+  owns that transition. Descendants are registered or cleaned up silently.
+- If the parent remains mounted and only the child changes, the child owns the
+  transition.
+
+This lets one provider handle sliding tab content while a bottom navigation
+remains still, then animate the full shell when its route group exits:
+https://ssgoi.dev/llms/bottom-nav.txt

@@ -1,66 +1,61 @@
-# SSGOI - Solid / SolidStart setup
+# SSGOI with SolidStart
 
-Framework-specific setup for `@ssgoi/solid`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
-
-```bash
-npm install @ssgoi/solid
-```
-
-Reference template: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
-
-## Layout setup
-
-Same three rules as every framework (details in llms.txt):
-
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps `<Ssgoi>`.
-3. Mark routed content with `data-ssgoi-transition="..."` directly on each routed page.
-
-## SolidStart example
+Use one config and one `<Ssgoi>` at the router root.
 
 ```tsx
 // src/app.tsx
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Ssgoi } from "@ssgoi/solid";
-import { zoom } from "@ssgoi/solid/view-transitions";
+import { config } from "./ssgoi-config";
 
-const config = {
-  transitions: [
-    {
-      from: "/gallery",
-      to: "/gallery/*",
-      transition: zoom({ type: "expand" }),
-    },
-  ],
-};
+<Router
+  root={(props) => (
+    <main class="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={config}>{props.children}</Ssgoi>
+    </main>
+  )}
+>
+  <FileRoutes />
+</Router>
+```
 
-export default function App() {
+## Page boundary
+
+```tsx
+export default function Post() {
+  const location = useLocation();
+
   return (
-    <Router
-      root={(props) => (
-        <main class="relative z-0 min-h-dvh overflow-y-auto overflow-x-clip">
-          <Ssgoi config={config}>{props.children}</Ssgoi>
-        </main>
-      )}
-    >
-      <FileRoutes />
-    </Router>
+    <article data-ssgoi-transition={location.pathname}>
+      {/* page */}
+    </article>
   );
-}
-
-// src/routes/gallery/index.tsx
-export default function Gallery() {
-  return <section data-ssgoi-transition="/gallery">{/* content */}</section>;
 }
 ```
 
-The `data-ssgoi-transition` value can be a hard-coded logical page id; it only needs to match the `on`, `from`, `to`, or `ordered` route patterns in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+## Persistent layout
 
-## Shared reference
+Put an outer boundary on the route layout and keep child page boundaries.
 
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/zoom.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+```tsx
+export default function ProductsLayout(props) {
+  const location = useLocation();
+
+  return (
+    <section data-ssgoi-transition={location.pathname}>
+      <ProductTabs />
+      {props.children}
+    </section>
+  );
+}
+```
+
+The child boundary handles tab changes. If the entire layout leaves, SSGOI uses
+the outer changed boundary.
+
+## Reference
+
+- Shared config and route patterns: https://ssgoi.dev/llms.txt
+- SolidStart template: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
+- Effect options: `https://ssgoi.dev/llms/<effect>.txt`

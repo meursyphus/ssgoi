@@ -1,73 +1,60 @@
-# SSGOI + Next.js Template
-
-This template demonstrates SSGOI page transitions with the Next.js App Router.
-
-## Getting Started
+# SSGOI + Next.js
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:3000 to view the demo.
+## Structure
 
-## Features
+- `src/components/ssgoi-config.ts`: one transition config.
+- `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
+- `src/components/ssgoi-transition-boundary.tsx`: pathname → key utility.
+- `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
-- **Drill Transition**: Posts list-to-detail navigation
-- **Slide Transition**: Product category tabs with nested `Ssgoi`
-- **Zoom Expand Transition**: Gallery grid-to-detail shared image animation
-- **Zoom Static Transition**: Profile feed-to-detail shared image animation
-- **Scroll Preservation**: Keeps scroll state where configured
-
-## Integration
-
-The main provider lives in `src/components/demo-layout.tsx`:
+The boundary keeps the real pathname as the transition id. Its `scope`
+function only controls the React key:
 
 ```tsx
-import { Ssgoi } from "@ssgoi/react";
-import { drill, zoom } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+<div key={scope(pathname)} data-ssgoi-transition={pathname}>
+  {children}
+</div>
+```
 
-const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    { on: "/posts/**", except: "/posts", transition: drill() },
-    {
-      from: "/pinterest",
-      to: "/pinterest/*",
-      transition: zoom({ type: "expand" }),
-    },
-    {
-      from: "/profile",
-      to: "/profile/*",
-      transition: zoom({ type: "static" }),
-    },
-  ],
-};
+Default scope returns the pathname and remounts on each route change.
 
-export default function DemoLayout({ children }) {
-  return (
-    <Ssgoi config={config}>
-      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
+## Product tabs
+
+The products layout has two boundaries:
+
+```tsx
+<SsgoiTransitionBoundary scope={() => "products-layout"}>
+  <ProductHeader />
+  <ProductTabs />
+
+  <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>
+</SsgoiTransitionBoundary>
+```
+
+- Category → category: inner boundary slides; header and tabs stay.
+- Products → another section: the outer products layout leaves.
+
+Direction comes from the single config:
+
+```ts
+{
+  ordered: PRODUCT_CATEGORIES.map((category) => category.path),
+  transition: slide(),
 }
 ```
 
-Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
-stay as real pathnames and are matched by wildcard patterns in config. Use
-`/posts/*` for descendants and `/posts/**` when the parent path should match
-too.
+## Other demos
 
-```tsx
-export default function PostsPage() {
-  return <main>{/* Page content */}</main>;
-}
-```
+- Posts: `drill` for list → detail.
+- Gallery: expanding `zoom`.
+- Profile: static `zoom`.
 
-## Build
+Full boundary guide: https://ssgoi.dev/llms.txt
 
 ```bash
 pnpm lint

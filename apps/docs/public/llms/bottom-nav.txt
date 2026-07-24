@@ -1,72 +1,80 @@
-# SSGOI Pattern - Persistent bottom nav (nested boundaries)
+# SSGOI pattern: persistent bottom navigation
 
-App shell where the main tab screens share a bottom tab bar and detail screens are fullscreen without it. The nav must **stand still** on tab↔tab transitions but **slide away with the page** on tab→detail. One provider can't do both — nest a second `<Ssgoi>`.
+Use one `<Ssgoi>` and one config. Put transition boundaries in layouts.
 
-Setup guide: https://ssgoi.dev/llms.txt
-Live example: https://ssgoi.dev/demo/google-photos (source: `apps/docs/src/demo/google-photos` in the SSGOI repo)
+## Goal
 
-## Why one provider is not enough
+- Tab → tab: animate page content; keep the bottom nav still.
+- Tab → detail: animate the whole tab shell; the bottom nav leaves with it.
+- Detail → tab: restore the whole tab shell.
 
-SSGOI animates the `data-ssgoi-transition` boundary element — the whole subtree at once. The bottom nav requirement splits in two:
+## Route structure
 
-- **tab→detail** (`drill` / `hero`): the nav should leave **with** the page → nav must be *inside* the animated boundary.
-- **tab↔tab** (`axis`): the nav must **not move** → nav must be *outside* the animated boundary.
+Next.js route groups change layout lifetime without changing URLs.
 
-A single provider has one boundary per screen, so the nav is either always inside (jiggles on tab swaps) or always outside (stays frozen on detail screens). The fix is a **double boundary with a nested provider**:
-
-```
-tab shell boundary (STABLE React key — never remounts on tab moves)   ← outer provider owns.
-  ├ sticky top app bar (optional)                                        drill/sheet/hero.
-  ├ nested <Ssgoi> (renders display:contents — zero layout impact)
-  │   └ tab content boundary (remounts per tab)                       ← nested provider owns.
-  │                                                                      axis between tabs.
-  └ <BottomNav />   ← outside the nested root, inside the shell boundary
-```
-
-- **tab↔tab**: the shell's key never changes → no remount → the outer provider sees nothing. Only the inner boundary swaps, so the nested provider runs `axis` on the tab body while the app bar + bottom nav stand perfectly still.
-- **tab→detail**: the whole tab shell unmounts (detail routes live outside it). SSGOI reads the shell's `data-ssgoi-transition` at that moment — the actual tab path — and pairs it with the detail boundary via the outer config. Nav and page drill out together; the detail screen has no nav at all.
-
-Both boundaries can carry the **same path value**: each boundary registers with its *nearest* provider (`closest("[data-ssgoi-root]")`), so they never clash.
-
-## Implementation (React / Next.js App Router)
-
-Route structure — show/hide is decided by **route groups**, not runtime pathname checks:
-
-```
+```text
 app/
-  layout.tsx            ← <Ssgoi config={outerConfig}> (NO layout-level boundary here!)
+  layout.tsx
+  ssgoi-provider.tsx
+  ssgoi-transition-boundary.tsx
   (tabs)/
-    layout.tsx          ← <TabShell> — the only place that renders <BottomNav>
-    page.tsx            ← /            (tab 1)
-    collections/page.tsx← /collections (tab 2)
-    create/page.tsx     ← /create      (tab 3)
+    layout.tsx
+    page.tsx
+    collections/page.tsx
+    create/page.tsx
   (detail)/
-    layout.tsx          ← <DetailShell> — plain pathname boundary, no nav
-    c/[id]/page.tsx     ← /c/:id
-    p/[id]/page.tsx     ← /p/:id
+    layout.tsx
+    photo/[id]/page.tsx
 ```
 
-Boundary utility with a `stableKey` option (pin the React key, keep updating the attribute):
+The root layout contains the only SSGOI instance:
 
 ```tsx
+// app/ssgoi-provider.tsx
 "use client";
 
-import { type ReactNode } from "react";
+import { Ssgoi } from "@ssgoi/react";
+import { axis, drill } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [
+    {
+      ordered: ["/", "/collections", "/create"],
+      transition: axis({ type: "x", variant: "snappy" }),
+    },
+    {
+      on: "/photo/*",
+      transition: drill(),
+    },
+  ],
+};
+
+export function SsgoiProvider({ children }) {
+  return <Ssgoi config={config}>{children}</Ssgoi>;
+}
+```
+
+## Boundary utility
+
+`scope` is application code. It maps the real pathname to a React key.
+It is not part of `SsgoiConfig`.
+
+```tsx
+// app/ssgoi-transition-boundary.tsx
+"use client";
+
 import { usePathname } from "next/navigation";
 
 export function SsgoiTransitionBoundary({
   children,
+  scope = (pathname) => pathname,
   className,
-  stableKey = false,
-}: {
-  children: ReactNode;
-  className?: string;
-  stableKey?: boolean;
 }) {
   const pathname = usePathname();
+
   return (
     <div
-      key={stableKey ? "ssgoi-stable-boundary" : pathname}
+      key={scope(pathname)}
       data-ssgoi-transition={pathname}
       className={className}
     >
@@ -76,77 +84,72 @@ export function SsgoiTransitionBoundary({
 }
 ```
 
-Tab shell — the double boundary:
+Rules:
+
+- Return the pathname to remount on every route change.
+- Return the same key to keep a layout mounted.
+- Always keep the real pathname in `data-ssgoi-transition`.
+
+## Tab layout
 
 ```tsx
-"use client";
+// app/(tabs)/layout.tsx
+import { SsgoiTransitionBoundary } from "../ssgoi-transition-boundary";
 
-const tabsConfig: SsgoiConfig = {
-  transitions: [
-    {
-      ordered: ["/", "/collections", "/create"],
-      transition: axis({ type: "y", variant: "non-directional" }),
-    },
-  ],
-};
-
-export function TabShell({ children }: { children: ReactNode }) {
+export default function TabsLayout({ children }) {
   return (
-    <SsgoiTransitionBoundary
-      stableKey
-      className="relative flex min-h-full flex-col"
-    >
-      <Ssgoi config={tabsConfig}>
-        <div className="relative z-0 flex-1">
-          <SsgoiTransitionBoundary className="min-h-full">
-            {children}
-          </SsgoiTransitionBoundary>
-        </div>
-      </Ssgoi>
-      <BottomNav /> {/* outside the nested root, inside the shell boundary */}
+    <SsgoiTransitionBoundary scope={() => "tabs-shell"}>
+      <header>Photos</header>
+
+      <SsgoiTransitionBoundary>
+        {children}
+      </SsgoiTransitionBoundary>
+
+      <BottomNav />
     </SsgoiTransitionBoundary>
   );
 }
 ```
 
-Detail shell — a plain per-route boundary:
+The outer key is stable while the `(tabs)` layout survives. The inner key is
+the pathname.
+
+## Detail layout
 
 ```tsx
-"use client";
+// app/(detail)/layout.tsx
+import { SsgoiTransitionBoundary } from "../ssgoi-transition-boundary";
 
-export function DetailShell({ children }: { children: ReactNode }) {
+export default function DetailLayout({ children }) {
   return (
-    <SsgoiTransitionBoundary className="h-full min-h-full">
+    <SsgoiTransitionBoundary>
       {children}
     </SsgoiTransitionBoundary>
   );
 }
 ```
 
-Outer config — screen-level moves only (the nested provider owns tab↔tab):
+## What remounts
 
-```ts
-const outerConfig: SsgoiConfig = {
-  transitions: [
-    { on: "/c/*", transition: drill() },
-    {
-      from: ["/", "/c/*", "/p/*"],
-      to: ["/", "/c/*", "/p/*"],
-      transition: hero({ type: "fade" }),
-    },
-  ],
-};
-```
+| Navigation | Outer tab shell | Inner tab content | Bottom nav |
+| --- | --- | --- | --- |
+| `/` → `/collections` | stays | remounts | stays |
+| `/collections` → `/photo/1` | leaves | leaves with parent | leaves |
+| `/photo/1` → `/collections` | enters | enters with parent | enters |
 
-## Rules & gotchas
+When a parent and nested boundary enter or leave in the same DOM mutation,
+SSGOI uses the outer changed boundary. If the parent remains mounted, the
+changed child boundary owns the transition.
 
-- **No layout-level pathname boundary around everything.** If the root layout wraps all routes in one `key={pathname}` boundary, the tab shell — nav included — remounts on every tab move and the nested `axis` never runs. Boundaries live in `(tabs)`/`(detail)` shells only.
-- **`stableKey` semantics**: the React key is constant so tab moves never remount the shell, but `data-ssgoi-transition` keeps tracking the route. On a real unmount (tab→detail) SSGOI reads the attribute at that moment, so path-based matching in the outer config works with the actual tab path as `from`.
-- **Bottom nav positioning**: use `position: sticky; bottom: 0` *inside* the scroll container, not `position: fixed` outside the provider. Sticky keeps the nav in the shell's subtree so it rides the drill transform (slides out with the page). A nav rendered outside the provider entirely stays frozen on screen during detail transitions.
-- **Nested `<Ssgoi>` layout**: the provider root renders with `display: contents`, so inserting it between flex parent and children changes nothing visually.
-- **Direction of the tab animation**: `axis({ type: "y", variant: "non-directional" })` (always rises from below) fits bottom-nav swaps that aren't forward/backward pairs. For KakaoTalk-style horizontal snaps between ordered tabs use `axis({ type: "x", variant: "snappy" })` — path order defines forward/backward.
-- **Same pattern nests deeper**: a workspace screen with its own inner tab strip repeats the trick — a stable outer boundary truncated to the workspace base path plus a nested provider with `{ ordered: paths, transition: slide() }` for the inner tabs.
+## Do not
 
-## Human-readable companion
+- Do not create a nested `<Ssgoi>`.
+- Do not put one pathname-keyed boundary around every route at the root.
+- Do not render the nav outside the tab shell if it must leave on detail
+  navigation.
+- Do not use a stable transition id. Keep only the React key stable; the
+  transition id must remain the real pathname.
 
-https://ssgoi.dev/docs/nested-boundaries
+Main guide: https://ssgoi.dev/llms.txt
+Live example: https://ssgoi.dev/demo/google-photos
+Human-readable guide: https://ssgoi.dev/docs/nested-boundaries

@@ -1,39 +1,63 @@
-# SSGOI - Svelte / SvelteKit setup
+# SSGOI with SvelteKit
 
-Framework-specific setup for `@ssgoi/svelte`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
-
-```bash
-npm install @ssgoi/svelte
-```
-
-Reference template: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
-
-## Layout setup
-
-Same three rules as every framework (details in llms.txt):
-
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
-3. Mark routed content with `data-ssgoi-transition="..."`.
-
-## Route boundary rule (SvelteKit-specific)
-
-Set `data-ssgoi-transition` **directly on each routed page's boundary element** — do NOT wrap the layout slot in a single shared boundary.
-
-SvelteKit slot content is live: during navigation the outgoing page wrapper can render the incoming page's children, so a layout-level boundary pairs the wrong subtrees. Each page marks itself:
+Use one config and one `<Ssgoi>` in the root layout.
 
 ```svelte
-<main data-ssgoi-transition="/gallery">
-  <!-- page content -->
+<!-- src/routes/+layout.svelte -->
+<script>
+  import { Ssgoi } from "@ssgoi/svelte";
+  import { config } from "$lib/ssgoi-config";
+
+  let { children } = $props();
+</script>
+
+<main class="relative z-0 min-h-dvh overflow-x-clip">
+  <Ssgoi {config}>{@render children()}</Ssgoi>
 </main>
 ```
 
-The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `on`, `from`, `to`, or `ordered` route patterns in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+## Page boundary
 
-## Shared reference
+Put the transition id on the routed page root.
 
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/drill.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+```svelte
+<!-- src/routes/posts/[id]/+page.svelte -->
+<article data-ssgoi-transition="/posts/{post.id}">
+  <!-- page -->
+</article>
+```
+
+## Persistent layout
+
+A route layout may own a boundary. It stays mounted while its child pages
+change.
+
+```svelte
+<!-- src/routes/products/+layout.svelte -->
+<script>
+  import { page } from "$app/stores";
+  let { children } = $props();
+</script>
+
+<section data-ssgoi-transition={$page.url.pathname}>
+  <ProductTabs />
+  {@render children()}
+</section>
+```
+
+Keep a child page boundary for tab-to-tab transitions:
+
+```svelte
+<main data-ssgoi-transition={$page.url.pathname}>
+  <!-- tab content -->
+</main>
+```
+
+When the layout and page leave together, SSGOI uses the outer changed
+boundary. When only the page changes, it uses the page boundary.
+
+## Reference
+
+- Shared config and route patterns: https://ssgoi.dev/llms.txt
+- SvelteKit template: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
+- Effect options: `https://ssgoi.dev/llms/<effect>.txt`

@@ -1,35 +1,49 @@
-# SSGOI - Angular setup
+# SSGOI with Angular
 
-Framework-specific setup for `@ssgoi/angular`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
+Create one SSGOI root above the router outlet.
 
-## Installation
+```ts
+import { Component, signal } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/angular";
+import { drill } from "@ssgoi/angular/view-transitions";
 
-```bash
-npm install @ssgoi/angular
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [RouterOutlet, Ssgoi],
+  template: `
+    <main
+      ssgoi
+      [config]="config()"
+      style="position:relative;z-index:0;overflow-x:clip"
+    >
+      <router-outlet />
+    </main>
+  `,
+})
+export class AppComponent {
+  protected readonly config = signal<SsgoiConfig>({
+    transitions: [
+      { on: "/posts/**", except: "/posts", transition: drill() },
+    ],
+  });
+}
 ```
 
-## Layout setup
+## Page boundary
 
-Same three rules as every framework (details in llms.txt):
-
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
-3. Mark routed content with `data-ssgoi-transition="..."` directly on each routed page's template.
-
-## Route boundary rule
-
-Each routed component marks its own boundary in its template:
+Mark the routed component root:
 
 ```html
-<section data-ssgoi-transition="/home">
-  <h1>Home Page</h1>
-</section>
+<article data-ssgoi-transition="/posts/42">
+  <!-- page -->
+</article>
 ```
 
-The value can be a hard-coded logical page id; it does not have to be the router's URL. It only needs to match the `on`, `from`, `to`, or `ordered` route patterns in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+The id must match the config route patterns.
 
-## Shared reference
+## Reference
 
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/fade.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+- Shared config and route patterns: https://ssgoi.dev/llms.txt
+- Effect options: `https://ssgoi.dev/llms/<effect>.txt`

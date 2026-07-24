@@ -1,41 +1,55 @@
-# SSGOI - Vue / Nuxt setup
+# SSGOI with Nuxt
 
-Framework-specific setup for `@ssgoi/vue`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
-
-```bash
-npm install @ssgoi/vue
-```
-
-Reference template (Nuxt): https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
-
-## Layout setup
-
-Same three rules as every framework (details in llms.txt):
-
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
-3. Mark routed content with `data-ssgoi-transition="..."`.
-
-## Route boundary rule (Nuxt/Vue-specific)
-
-Set `data-ssgoi-transition` **directly on each routed page's boundary element** — do NOT wrap the layout slot in a single shared boundary.
-
-Nuxt slot content is live: during navigation the outgoing page wrapper can render the incoming page's children, so a layout-level boundary pairs the wrong subtrees. Each page marks itself:
+Use one config and one `<Ssgoi>` in the root layout.
 
 ```vue
+<!-- components/demo-layout.vue -->
+<script setup>
+import { Ssgoi } from "@ssgoi/vue";
+import { config } from "~/utils/ssgoi-config";
+</script>
+
 <template>
-  <main data-ssgoi-transition="/gallery">
-    <!-- page content -->
+  <main class="relative z-0 min-h-dvh overflow-x-clip">
+    <Ssgoi :config="config">
+      <slot />
+    </Ssgoi>
   </main>
 </template>
 ```
 
-The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `on`, `from`, `to`, or `ordered` route patterns in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+## Page boundary
 
-## Shared reference
+Put the transition id on the routed page root.
 
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/drill.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+```vue
+<template>
+  <article :data-ssgoi-transition="route.path">
+    <!-- page -->
+  </article>
+</template>
+```
+
+## Persistent layout
+
+A parent page may own a boundary and render `<NuxtPage />`.
+
+```vue
+<!-- pages/products.vue -->
+<template>
+  <section :data-ssgoi-transition="route.path">
+    <ProductTabs />
+    <NuxtPage />
+  </section>
+</template>
+```
+
+Keep a boundary on each child page for tab-to-tab transitions. When the parent
+and child leave together, SSGOI uses the outer changed boundary. When only the
+child changes, it uses the child boundary.
+
+## Reference
+
+- Shared config and route patterns: https://ssgoi.dev/llms.txt
+- Nuxt template: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+- Effect options: `https://ssgoi.dev/llms/<effect>.txt`

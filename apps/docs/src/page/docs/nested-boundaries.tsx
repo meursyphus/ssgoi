@@ -3,134 +3,156 @@ import { CodeBlock } from "@/components/code-block";
 
 const LLMS_PATTERN = "https://ssgoi.dev/llms/bottom-nav.txt";
 
-/**
- * Nested providers — the persistent bottom-nav pattern. Human-readable
- * companion to /llms/bottom-nav.txt; the live example is the Google Photos
- * demo (tab shell keeps the nav still on tab↔tab, drills it out on
- * tab→detail).
- */
 export function NestedBoundariesBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl leading-relaxed text-neutral-400">
-        SSGOI animates the{" "}
+        Put boundaries in persistent layouts, not in every page. The boundary
+        key controls which region remounts;{" "}
         <code className="font-mono text-neutral-200">
           data-ssgoi-transition
         </code>{" "}
-        boundary element — the whole subtree at once. A bottom tab bar breaks
-        that model in two directions: switching tabs it must{" "}
-        <em className="not-italic text-neutral-200">stand still</em>, but
-        opening a detail screen it must{" "}
-        <em className="not-italic text-neutral-200">
-          slide away with the page
-        </em>
-        . One provider can&apos;t do both, so you nest a second one.
+        keeps the real pathname used by your transition config.
       </p>
 
       <CodeBlock
         className="mt-8"
-        code={`// Tab shell — wraps ONLY the tab routes. Detail routes live outside it.
-function TabShell({ children }) {
+        code={`"use client";
+
+import { usePathname } from "next/navigation";
+
+export function RouteBoundary({ children, scope = (path) => path }) {
   const pathname = usePathname();
+
   return (
-    // Outer boundary: React key is CONSTANT (never remounts on tab moves),
-    // but the attribute keeps tracking the route.
-    <div key="tab-shell" data-ssgoi-transition={pathname}>
-      <Ssgoi config={tabsConfig}>{/* nested provider */}
-        {/* Inner boundary: remounts per tab — the nested provider */}
-        {/* runs its transition on the tab content only. */}
-        <div key={pathname} data-ssgoi-transition={pathname}>
-          {children}
-        </div>
-      </Ssgoi>
-      <BottomNav /> {/* outside the nested root, inside the shell */}
+    <div
+      key={scope(pathname)}
+      data-ssgoi-transition={pathname}
+    >
+      {children}
     </div>
   );
 }`}
       />
 
-      <ul className="mt-8 space-y-4 text-sm leading-relaxed text-neutral-400">
-        <li className="flex gap-3">
-          <span className="mt-0.5 shrink-0 font-mono text-xs text-orange-400">
-            tab ↔ tab
-          </span>
-          <span>
-            The shell&apos;s key never changes, so it never remounts and the
-            outer provider sees nothing. Only the inner boundary swaps — the
-            nested provider animates the tab body while the bottom nav (and any
-            sticky app bar in the shell) stays perfectly still.
-          </span>
+      <ul className="mt-8 space-y-3 text-sm leading-relaxed text-neutral-400">
+        <li>
+          Return the pathname to remount this boundary on every route change.
         </li>
-        <li className="flex gap-3">
-          <span className="mt-0.5 shrink-0 font-mono text-xs text-orange-400">
-            tab → detail
-          </span>
-          <span>
-            The whole shell unmounts (the detail route lives outside it). SSGOI
-            reads the shell&apos;s attribute at that moment — the actual tab
-            path — and pairs it with the detail boundary using the outer config.
-            Nav and page drill out together; the detail screen is genuinely
-            nav-free.
-          </span>
+        <li>
+          Return the same key for routes that share one persistent layout.
+        </li>
+        <li>
+          Keep the real pathname in the transition attribute even when the key
+          is stable.
         </li>
       </ul>
 
       <h2 className="mt-12 text-lg font-semibold text-neutral-100">
-        Two configs, two jobs
+        Bottom navigation
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        The outer provider owns screen-level moves; the nested provider owns
-        only the tab strip. Each boundary registers with its{" "}
-        <em className="not-italic text-neutral-300">nearest</em> provider (
-        <code className="font-mono text-neutral-300">
-          closest(&quot;[data-ssgoi-root]&quot;)
-        </code>
-        ), so both boundaries can even carry the same path value without
-        clashing.
+        Use route groups to separate tab screens from fullscreen details. The
+        tab layout owns the bottom nav.
       </p>
 
       <CodeBlock
         className="mt-6"
-        code={`// Outer provider — list ↔ detail, sheets, shared elements.
-const config: SsgoiConfig = {
+        code={`app/
+  layout.tsx                 # one <Ssgoi config={config}>
+  (tabs)/
+    layout.tsx               # stable shell + bottom nav
+    page.tsx                 # /
+    collections/page.tsx     # /collections
+    create/page.tsx          # /create
+  (detail)/
+    layout.tsx               # pathname boundary, no nav
+    photo/[id]/page.tsx`}
+      />
+
+      <CodeBlock
+        className="mt-6"
+        code={`// app/(tabs)/layout.tsx
+export default function TabsLayout({ children }) {
+  return (
+    <RouteBoundary scope={() => "tabs-shell"}>
+      <RouteBoundary>
+        {children}
+      </RouteBoundary>
+      <BottomNav />
+    </RouteBoundary>
+  );
+}
+
+// app/(detail)/layout.tsx
+export default function DetailLayout({ children }) {
+  return <RouteBoundary>{children}</RouteBoundary>;
+}`}
+      />
+
+      <ul className="mt-8 space-y-4 text-sm leading-relaxed text-neutral-400">
+        <li>
+          <code className="font-mono text-orange-400">tab → tab</code>: the
+          outer key stays <code>tabs-shell</code>; only the inner pathname
+          boundary remounts. The nav stays still.
+        </li>
+        <li>
+          <code className="font-mono text-orange-400">tab → detail</code>: the
+          route group exits, so the outer shell leaves. The nav is inside that
+          boundary and leaves with the page.
+        </li>
+        <li>
+          When nested boundaries leave together, SSGOI uses the outer changed
+          boundary. When only the child changes, it uses the child.
+        </li>
+      </ul>
+
+      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
+        Sliding tabs inside a layout
+      </h2>
+
+      <CodeBlock
+        className="mt-6"
+        code={`const config = {
   transitions: [
-    { on: "/c/*", transition: drill() },
-    { on: "/collage", transition: sheet() },
     {
-      from: ["/", "/c/*", "/p/*"],
-      to: ["/", "/c/*", "/p/*"],
-      transition: hero({ type: "fade" }),
+      ordered: [
+        "/products/all",
+        "/products/electronics",
+        "/products/fashion",
+      ],
+      transition: slide(),
     },
   ],
 };
 
-// Nested provider — tab ↔ tab only.
-const tabsConfig: SsgoiConfig = {
-  transitions: [
-    {
-      ordered: ["/", "/collections", "/create"],
-      transition: axis({ type: "y", variant: "non-directional" }),
-    },
-  ],
-};`}
+export default function ProductsLayout({ children }) {
+  return (
+    <RouteBoundary scope={() => "products-layout"}>
+      <ProductHeader />
+      <ProductTabs />
+      <RouteBoundary>{children}</RouteBoundary>
+    </RouteBoundary>
+  );
+}`}
       />
 
       <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-        Don&apos;t reach for a nav slot rendered outside the provider instead —
-        that keeps the nav on screen (frozen) during detail transitions. The
-        double boundary is what lets it leave with the page. See it live in the{" "}
+        Keep one provider and one transition config. Boundary scope functions
+        describe layout lifetime only; they do not belong in{" "}
+        <code className="font-mono text-neutral-300">SsgoiConfig</code>. See the{" "}
         <Link
           href="/demo/google-photos"
           className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
         >
           Google Photos demo
-        </Link>
-        , or hand your agent{" "}
+        </Link>{" "}
+        or the concise agent guide at{" "}
         <a
           href={LLMS_PATTERN}
           target="_blank"
           rel="noreferrer"
-          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
         >
           /llms/bottom-nav.txt
         </a>
