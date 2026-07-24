@@ -57,10 +57,13 @@ import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
-    // iOS-style drill-in when entering a post, ease back out
-    drill({ enter: "/post/*", exit: "*" }),
-    // Calm cross-fade between top-level pages
-    fade({ paths: ["/", "/about"] }),
+    {
+      priority: -100,
+      on: "/**",
+      except: ["/", "/about"],
+      transition: drill(),
+    },
+    { from: "/", to: "/about", transition: fade() },
   ],
 };
 
@@ -192,7 +195,8 @@ Qwik, Solid, and Angular mark each routed page directly with
 
 ## Transitions
 
-Each transition is a factory you drop into `config.transitions`. They return path-transition groups, so nested arrays are flattened automatically.
+Transition factories describe effects only. Route rules decide where an effect
+applies and resolve its semantic `forward` / `backward` direction.
 
 ```tsx
 import {
@@ -206,20 +210,37 @@ import {
   zoom,
 } from "@ssgoi/react/view-transitions";
 
-// Symmetric — every pair animates the same ({ paths })
-fade({ paths: ["/", "/about"] });
-hero({ paths: ["/products", "/products/*"] }); // shared element
-zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }); // card → detail
-
-// Directional — enter / exit get different physics ({ enter, exit })
-drill({ enter: "/post/*", exit: "*" }); // iOS list → detail
-sheet({ enter: "/compose", exit: "*" }); // bottom sheet
-
-// Ordered — path order decides forward / back ({ paths })
-slide({ paths: ["/tabs/a", "/tabs/b"] }); // horizontal tabs
-scroll({ paths: ["/step-1", "/step-2"] }); // vertical onboarding
-axis({ paths: ["/feed", "/profile"] }); // Material shared axis
+const config = {
+  transitions: [
+    { from: "/", to: "/about", transition: fade() },
+    { from: "/products", to: "/products/:id", transition: hero() },
+    {
+      from: "/gallery",
+      to: "/photo/:id",
+      transition: zoom({ type: "expand" }),
+    },
+    { from: "/feed", to: "/compose", transition: sheet() },
+    {
+      ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
+      transition: slide(),
+    },
+  ],
+};
 ```
+
+Rule forms:
+
+- `on` scopes a route family. Entering it is forward, leaving it is backward,
+  and navigation inside it uses popstate/semantic history. Use `except` to keep
+  top-level routes outside a catch-all stack.
+- `from`/`to` describes a precise pair. It is bidirectional by default; arrays
+  mean “any of these patterns”.
+- `ordered` requires both routes to be in the list. Increasing index is forward
+  and decreasing index is backward.
+
+Higher `priority` wins first, then more-specific paths, then declaration order.
+Use `:id` for one dynamic segment, `*` for exactly one arbitrary segment, and
+suffix `**` for zero or more segments (`/docs/**` includes `/docs`).
 
 **All built-in transitions:** `fade` · `drill` · `slide` · `scroll` · `axis` · `sheet` · `hero` · `zoom` · `strip` · `blind` · `film` · `rotate` · `jaemin`.
 

@@ -21,11 +21,10 @@ If a key has no match on the other side, that element falls back gracefully (no 
 import { hero } from "@ssgoi/react/view-transitions";
 
 hero({
-  paths: readonly string[];        // routes participating in hero transitions
   type?: "static" | "fade";        // default: "static"
   variant?: "default";             // reserved — only "default" today
   options?: {};                    // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 ## Required: matching enter/exit keys
@@ -89,10 +88,14 @@ The original `data-hero-key` attribute is still supported for backwards compatib
 const config = {
   transitions: [
     // List ↔ detail where the detail screen is "just a fullscreen viewer"
-    hero({ paths: ["/items", "/items/*"] }),
+    { from: "/items", to: "/items/:id", transition: hero() },
 
     // List ↔ detail where each page has its own chrome (back button, meta)
-    hero({ paths: ["/photos", "/photos/*"], type: "fade" }),
+    {
+      from: "/photos",
+      to: "/photos/:id",
+      transition: hero({ type: "fade" }),
+    },
   ],
 };
 ```

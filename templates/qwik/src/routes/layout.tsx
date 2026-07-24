@@ -6,18 +6,17 @@ import { drill, zoom } from "@ssgoi/qwik/view-transitions";
 const ssgoiConfig$ = $(() => ({
   preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
-    zoom({
-      paths: ["/pinterest", "/pinterest/*"],
-      type: "expand" as const,
-    }),
-    drill({
-      enter: "/posts/*",
-      exit: "/posts",
-    }),
-    zoom({
-      paths: ["/profile", "/profile/*"],
-      type: "static" as const,
-    }),
+    {
+      from: "/pinterest",
+      to: "/pinterest/*",
+      transition: zoom({ type: "expand" as const }),
+    },
+    { from: "/posts", to: "/posts/*", transition: drill() },
+    {
+      from: "/profile",
+      to: "/profile/*",
+      transition: zoom({ type: "static" as const }),
+    },
   ],
 }));
 

@@ -58,7 +58,7 @@ import { Ssgoi } from "@ssgoi/vue";
 import { fade } from "@ssgoi/vue/view-transitions";
 
 const config = {
-  transitions: [fade({ paths: ["/", "/about"] })],
+  transitions: [{ from: "/", to: "/about", transition: fade() }],
 };
 </script>
 ```
@@ -86,18 +86,22 @@ Define different transitions for different routes:
 const config = {
   transitions: [
     // Scroll between tabs
-    scroll({ paths: ["/home", "/about"] }),
+    { ordered: ["/home", "/about"], transition: scroll() },
 
     // Drill in when entering details
-    drill({ enter: "/products/*", exit: "/products" }),
+    { from: "/products", to: "/products/*", transition: drill() },
 
     // Shared element image transitions
-    zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
+    {
+      from: "/gallery",
+      to: "/photo/:id",
+      transition: zoom({ type: "expand" }),
+    },
   ],
 };
 ```
 
-The route helpers return path transition groups, so nested arrays are accepted in `config.transitions`.
+The transition list is flat: route rules own matching and factories own effects.
 
 ## Nuxt 3 Example
 
@@ -116,7 +120,9 @@ import { Ssgoi } from "@ssgoi/vue";
 import { scroll } from "@ssgoi/vue/view-transitions";
 
 const config = {
-  transitions: [scroll({ paths: ["/", "/about", "/products"] })],
+  transitions: [
+    { ordered: ["/", "/about", "/products"], transition: scroll() },
+  ],
 };
 </script>
 
@@ -181,9 +187,10 @@ inside `<Ssgoi>`.
 Transition presets are fully typed and use the core animation engine internally:
 
 ```javascript
-slide({
-  paths: ["/products/all", "/products/fashion"],
-});
+{
+  ordered: ["/products/all", "/products/fashion"],
+  transition: slide(),
+}
 ```
 
 ## TypeScript Support

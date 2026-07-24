@@ -12,10 +12,11 @@ import {
 
 const config: SsgoiConfig = {
   transitions: [
-    sheet({
-      enter: "/g/sheet1/compose",
-      exit: "/g/sheet1",
-    }),
+    {
+      from: "/g/sheet1",
+      to: "/g/sheet1/compose",
+      transition: sheet(),
+    },
   ],
 };
 

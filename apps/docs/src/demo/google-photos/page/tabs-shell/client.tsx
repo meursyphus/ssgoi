@@ -12,11 +12,10 @@ const BASE = "/demo/google-photos";
 const tabsConfig: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
-    ...axis({
-      paths: [BASE, `${BASE}/collections`, `${BASE}/create`],
-      type: "y",
-      variant: "non-directional",
-    }),
+    {
+      ordered: [BASE, `${BASE}/collections`, `${BASE}/create`],
+      transition: axis({ type: "y", variant: "non-directional" }),
+    },
   ],
 };
 

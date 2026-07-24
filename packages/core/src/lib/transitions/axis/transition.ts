@@ -44,14 +44,13 @@ function clearFromStyle(el: HTMLElement): void {
 }
 
 export const axis = (options: AxisOptions = {}): TransitionConfig => {
-  const direction = options.direction ?? "forward";
   const type = options.type ?? DEFAULT_TYPE;
   const feel = options.feel ?? DEFAULT_FEEL;
   const provider = resolveAxisProvider(type, feel);
-  const config = provider.build({ direction });
 
   return {
-    prepare: ({ from, to }) => {
+    prepare: ({ from, to, context }) => {
+      const config = provider.build({ direction: context.direction });
       from.then((el) => {
         applyStartStyle(el, config.out);
         el.style.pointerEvents = "none";
@@ -62,6 +61,7 @@ export const axis = (options: AxisOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to, context }) => {
+      const config = provider.build({ direction: context.direction });
       // Z scales the page element in place. Without clipping to the viewport
       // slice, scale-up paints over chrome / scroll overflow and scale-down
       // exposes neighbouring layout. Mirror sheet's inset trick.

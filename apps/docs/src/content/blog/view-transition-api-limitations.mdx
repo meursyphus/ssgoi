@@ -239,11 +239,11 @@ After seeing what Zoom blur does, its public configuration is easier to read:
 const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
-    zoom({
-      paths: ["/photos", "/photos/:id"],
-      type: "blur",
-      variant: "fade",
-    }),
+    {
+      from: "/photos",
+      to: "/photos/:id",
+      transition: zoom({ type: "blur", variant: "fade" }),
+    },
   ],
 };
 ```

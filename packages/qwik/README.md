@@ -27,8 +27,12 @@ import { drill, zoom } from "@ssgoi/qwik/view-transitions";
 const ssgoiConfig$ = $(() => ({
   preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
-    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
-    drill({ enter: "/posts/*", exit: "/posts" }),
+    {
+      from: "/gallery",
+      to: "/gallery/*",
+      transition: zoom({ type: "expand" }),
+    },
+    { from: "/posts", to: "/posts/*", transition: drill() },
   ],
 }));
 
@@ -51,7 +55,7 @@ export default component$(() => {
 });
 ```
 
-Set `data-ssgoi-transition` directly on each routed page boundary. The value only needs to match the `paths`, `from`, or `to` values in your config:
+Set `data-ssgoi-transition` directly on each routed page boundary. The value only needs to match the `on`, `from`, `to`, or `ordered` route patterns in your config:
 
 ```tsx
 export default component$(() => {

@@ -164,8 +164,13 @@ import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
-    drill({ enter: "/post/*", exit: "*" }),
-    fade({ paths: ["/", "/about"] }),
+    {
+      priority: -100,
+      on: "/**",
+      except: ["/", "/about"],
+      transition: drill(),
+    },
+    { from: "/", to: "/about", transition: fade() },
   ],
 };
 
@@ -374,11 +379,11 @@ function NonReactBoundary() {
         </code>{" "}
         right on each routed page. The value is a stable logical page id — it
         does <em>not</em> have to be the framework&apos;s route pathname; it
-        only has to match the{" "}
+        only has to match the route patterns in your config&apos;s{" "}
+        <code className="font-mono text-neutral-200">on</code>,{" "}
         <code className="font-mono text-neutral-200">from</code>/
-        <code className="font-mono text-neutral-200">to</code>/
-        <code className="font-mono text-neutral-200">paths</code> values in your
-        config.
+        <code className="font-mono text-neutral-200">to</code>, or{" "}
+        <code className="font-mono text-neutral-200">ordered</code> rule.
       </p>
 
       <CodeBlock
@@ -441,7 +446,9 @@ import { useSsgoi } from "@ssgoi/qwik";
 import { drill } from "@ssgoi/qwik/view-transitions";
 
 const config$ = $(() => ({
-  transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
+  transitions: [
+    { from: "/posts", to: "/posts/*", transition: drill() },
+  ],
 }));
 
 export default component$(() => {
@@ -576,10 +583,67 @@ export function TransitionsBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl text-sm leading-relaxed text-neutral-400">
-        Every built-in transition, tagged with when it fits. Open one for its
-        variants, usage, and live demos — or grab the{" "}
+        Effects and route matching are separate: a factory describes how pages
+        move, while its surrounding rule describes where it applies. Open an
+        effect for variants and live demos — or grab the{" "}
         <span className="font-mono text-neutral-300">.txt</span> for the full
         API.
+      </p>
+
+      <CodeBlock
+        className="mt-6"
+        code={`const TOP_LEVEL = ["/", "/search", "/profile"] as const;
+
+const config: SsgoiConfig = {
+  transitions: ({ isMobile }) =>
+    isMobile
+      ? [
+          {
+            from: "/gallery",
+            to: "/photo/:id",
+            transition: zoom({ type: "expand" }),
+          },
+          {
+            ordered: TOP_LEVEL,
+            transition: slide(),
+          },
+          {
+            priority: -100,
+            on: "/**",
+            except: TOP_LEVEL,
+            transition: drill(),
+          },
+        ]
+      : [
+          { ordered: TOP_LEVEL, transition: film() },
+          { priority: -100, on: "/**", transition: fade() },
+        ],
+};`}
+      />
+
+      <ul className="mt-6 grid gap-3 text-sm text-neutral-400 sm:grid-cols-3">
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">on</code> defines a route
+          family. Entering is forward, leaving is backward;{" "}
+          <code className="font-mono text-neutral-300">except</code> marks its
+          boundary.
+        </li>
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">from / to</code> defines
+          an exact relationship. It is bidirectional by default and accepts
+          pattern arrays.
+        </li>
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">ordered</code> requires
+          both routes in one ordered scope; index order resolves direction.
+        </li>
+      </ul>
+
+      <p className="mt-4 max-w-2xl text-xs leading-relaxed text-neutral-500">
+        Matching supports <code className="font-mono">:id</code> and{" "}
+        <code className="font-mono">*</code> for one segment, plus suffix{" "}
+        <code className="font-mono">**</code> for zero or more. Winners are
+        chosen by priority, then path specificity, then declaration order.
       </p>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">

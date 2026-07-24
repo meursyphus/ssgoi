@@ -16,7 +16,10 @@
 
   const config = {
     transitions: [
-      slide({ paths: categories.map((category) => category.path) }),
+      {
+        ordered: categories.map((category) => category.path),
+        transition: slide(),
+      },
     ],
   };
 </script>

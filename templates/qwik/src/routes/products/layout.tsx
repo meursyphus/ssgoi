@@ -12,7 +12,12 @@ const categories = [
 ];
 
 const productConfig$ = $(() => ({
-  transitions: [slide({ paths: categories.map((category) => category.path) })],
+  transitions: [
+    {
+      ordered: categories.map((category) => category.path),
+      transition: slide(),
+    },
+  ],
 }));
 
 export default component$(() => {

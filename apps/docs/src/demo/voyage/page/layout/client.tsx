@@ -13,11 +13,11 @@ const BASE = "/demo/voyage";
 const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
-    ...sheet({
-      type: "blur",
-      enter: `${BASE}/compose`,
-      exit: BASE,
-    }),
+    {
+      from: BASE,
+      to: `${BASE}/compose`,
+      transition: sheet({ type: "blur" }),
+    },
   ],
 };
 

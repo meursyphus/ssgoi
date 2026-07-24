@@ -1,11 +1,6 @@
-import type { SsgoiPathTransition } from "@types";
-import { createSymmetricPathTransitions } from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { zoom as transition } from "./transition";
-import type {
-  NormalizedZoomOptions,
-  ZoomType,
-  ZoomVariant,
-} from "./types";
+import type { NormalizedZoomOptions, ZoomType, ZoomVariant } from "./types";
 
 /**
  * Public config for the `zoom` preset (v6 unified `{type?, variant?, options?}`
@@ -13,7 +8,6 @@ import type {
  * the type so editors can drive completion without showing TODO branches.
  */
 export type ZoomConfig = {
-  paths: readonly string[];
   type?: ZoomType;
   variant?: ZoomVariant;
   // Reserved for future per-type knobs. Kept as an empty shape so call sites
@@ -22,7 +16,7 @@ export type ZoomConfig = {
   /**
    * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
    * Migrate `fade: true` to `variant: "fade"`.
-   * Example: `zoom({ paths, type: "static", variant: "fade" })`.
+   * Example: `zoom({ type: "static", variant: "fade" })`.
    * Kept here only for backward compatibility — will be removed in a future major.
    */
   fade?: boolean;
@@ -45,9 +39,7 @@ function normalize(config: ZoomConfig): NormalizedZoomOptions {
   return { type, variant };
 }
 
-export function zoom(config: ZoomConfig): SsgoiPathTransition[] {
+export function zoom(config: ZoomConfig = {}): AnyTransitionConfig {
   const normalized = normalize(config);
-  return createSymmetricPathTransitions(config.paths, () =>
-    transition(normalized),
-  );
+  return transition(normalized);
 }

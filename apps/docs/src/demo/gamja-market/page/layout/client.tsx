@@ -12,23 +12,27 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // home ↔ product detail (drill)
-    ...drill({ enter: `${BASE}/products/*`, exit: BASE }),
+    { from: BASE, to: `${BASE}/products/*`, transition: drill() },
     // home ↔ orders list (drill)
-    ...drill({ enter: `${BASE}/orders`, exit: BASE }),
+    { from: BASE, to: `${BASE}/orders`, transition: drill() },
     // orders list ↔ order detail (drill)
-    ...drill({ enter: `${BASE}/orders/*`, exit: `${BASE}/orders` }),
+    {
+      from: `${BASE}/orders`,
+      to: `${BASE}/orders/*`,
+      transition: drill(),
+    },
     // order detail ↔ review write (sheet)
-    ...sheet({
-      type: "static",
-      enter: `${BASE}/review/*`,
-      exit: `${BASE}/orders/*`,
-    }),
+    {
+      from: `${BASE}/orders/*`,
+      to: `${BASE}/review/*`,
+      transition: sheet({ type: "static" }),
+    },
     // home ↔ review write (sheet) — FAB 진입
-    ...sheet({
-      type: "static",
-      enter: `${BASE}/review/*`,
-      exit: BASE,
-    }),
+    {
+      from: BASE,
+      to: `${BASE}/review/*`,
+      transition: sheet({ type: "static" }),
+    },
   ],
 };
 

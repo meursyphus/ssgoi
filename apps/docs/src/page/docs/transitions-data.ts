@@ -43,8 +43,8 @@ export type TransitionVariant = {
   /** One-line UX note: what it looks/feels like, when to reach for it. */
   ux: string;
   /**
-   * Extra args shown inside the factory call, e.g. `type: "slide"`. Empty for
-   * the bare default call. Paths are added by the renderer per `pathStyle`.
+   * Extra args shown inside the effect factory call, e.g. `type: "slide"`.
+   * Route matching is configured separately on the transition rule.
    */
   args: string;
   /** Marks the default behavior of the transition. */
@@ -64,8 +64,8 @@ export type TransitionDoc = {
   use: UseKind;
   /** Intro paragraph for the detail page header. */
   intro: string;
-  /** How the factory receives routes. */
-  pathStyle: "enter-exit" | "paths";
+  /** Natural route rule for this effect in the usage example. */
+  ruleStyle: "pair" | "ordered";
   variants: TransitionVariant[];
 };
 
@@ -76,7 +76,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "Hierarchical push/pop, like an iOS navigation stack. Use it when the user goes one level deeper — a list into its detail — and back out again.",
-    pathStyle: "enter-exit",
+    ruleStyle: "pair",
     variants: [
       {
         label: "parallax",
@@ -114,7 +114,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "top-level",
     intro:
       "A calm symmetric cross-fade. The safe default for any navigation where you don't want to imply direction or hierarchy.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "fade",
@@ -137,7 +137,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "sibling",
     intro:
       "A horizontal push between peer screens. Direction follows path order — forward slides left, back slides right.",
-    pathStyle: "paths",
+    ruleStyle: "ordered",
     variants: [
       {
         label: "slide",
@@ -159,7 +159,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "sibling",
     intro:
       "Material Design shared-axis: a coordinated slide + fade along one axis. Pick the axis that matches the spatial relationship between screens.",
-    pathStyle: "paths",
+    ruleStyle: "ordered",
     variants: [
       {
         label: "x",
@@ -201,7 +201,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "sibling",
     intro:
       "Pages scroll vertically as if stacked. Reads as continuous movement through a sequence.",
-    pathStyle: "paths",
+    ruleStyle: "ordered",
     variants: [
       {
         label: "directional",
@@ -229,7 +229,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "A bottom sheet that slides up over the current page — for modal-like detail that keeps the origin in context.",
-    pathStyle: "enter-exit",
+    ruleStyle: "pair",
     variants: [
       {
         label: "static",
@@ -278,7 +278,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "A shared-element transition: a tagged element flies from its spot on one page to its spot on the next. Mark the element with data-hero-enter-key / data-hero-exit-key.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "static",
@@ -312,7 +312,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "A card expands into its detail view. Tag the source and target with data-zoom-enter-key / data-zoom-exit-key.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "static",
@@ -361,7 +361,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "decorative",
     intro:
       "A 3D flip around the Y-axis, like turning a card. A decorative flourish for moments that want a little drama.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "strip",
@@ -384,7 +384,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "decorative",
     intro:
       "A window-blinds wipe — the page reveals in slats. Decorative; pick the axis the slats open along.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "horizontal",
@@ -405,7 +405,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "decorative",
     intro:
       "A cinematic shrink-and-tile with film-strip corner borders. Decorative — for a movie-reel feel.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "film",
@@ -432,7 +432,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     blurb: "Card flip.",
     use: "decorative",
     intro: "A full card flip between pages. A playful decorative transition.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "rotate",
@@ -455,7 +455,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "decorative",
     intro:
       "A playful rotated zoom — the signature flourish. Decorative, for personality.",
-    pathStyle: "paths",
+    ruleStyle: "pair",
     variants: [
       {
         label: "jaemin",
@@ -480,15 +480,10 @@ export function getTransitionDoc(name: string): TransitionDoc | undefined {
   return TRANSITION_DOCS.find((t) => t.name === name);
 }
 
-/** Factory call string for a variant, e.g. `drill({ enter: "/list", exit: "/detail", type: "slide" })`. */
+/** Effect-only factory call string for a variant, e.g. `drill({ type: "slide" })`. */
 export function variantCall(
   doc: TransitionDoc,
   variant: TransitionVariant,
 ): string {
-  const paths =
-    doc.pathStyle === "enter-exit"
-      ? 'enter: "/list", exit: "/detail"'
-      : 'paths: ["/list", "/detail"]';
-  const rest = variant.args ? `, ${variant.args}` : "";
-  return `${doc.name}({ ${paths}${rest} })`;
+  return variant.args ? `${doc.name}({ ${variant.args} })` : `${doc.name}()`;
 }

@@ -31,9 +31,17 @@ import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 const config = {
   preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
-    drill({ enter: "/posts/*", exit: "/posts" }),
-    zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
-    zoom({ paths: ["/profile", "/profile/*"], type: "static" }),
+    { from: "/posts", to: "/posts/*", transition: drill() },
+    {
+      from: "/pinterest",
+      to: "/pinterest/*",
+      transition: zoom({ type: "expand" }),
+    },
+    {
+      from: "/profile",
+      to: "/profile/*",
+      transition: zoom({ type: "static" }),
+    },
   ],
 };
 

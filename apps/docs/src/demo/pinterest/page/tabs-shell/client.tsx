@@ -12,7 +12,7 @@ const tabsConfig: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // Home ↔ Search — Pinterest swaps tabs with a quick, quiet cross-fade.
-    fade({ paths: [BASE, `${BASE}/search`] }),
+    { from: BASE, to: `${BASE}/search`, transition: fade() },
   ],
 };
 

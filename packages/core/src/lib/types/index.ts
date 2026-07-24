@@ -78,6 +78,7 @@ export type Timeline = {
 
 export type ScrollOffset = { x: number; y: number };
 export type ScrollPosition = { x: number; y: number };
+export type NavigationDirection = "forward" | "backward";
 
 /**
  * Context provided by the dispatcher to a transition.
@@ -86,6 +87,11 @@ export type ScrollPosition = { x: number; y: number };
  * — `from.scroll` is the outgoing page's scroll, `to.scroll` the incoming page.
  */
 export type SsgoiTransitionContext = {
+  /**
+   * Semantic navigation direction resolved from the route rule. Transitions
+   * map this to their own visual vocabulary (enter/exit, left/right, up/down).
+   */
+  readonly direction: NavigationDirection;
   scrollOffset: ScrollOffset;
   from: {
     scroll: ScrollPosition;
@@ -175,19 +181,64 @@ export type TransitionConfig<TExtras extends object = object> = {
 export type AnyTransitionConfig = TransitionConfig<any>;
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Path-matched config (Ssgoi top-level)
+ * Route rules (Ssgoi top-level)
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type SsgoiPathTransition = {
-  from: string;
-  to: string;
+export type PathPatterns = string | readonly string[];
+
+type SsgoiTransitionRuleBase = {
   transition: AnyTransitionConfig;
-  symmetric?: boolean;
+  /**
+   * Higher values win before path specificity. Defaults to 0.
+   * Useful for an exceptional effect declared below a broad fallback.
+   */
+  priority?: number;
 };
 
-export type SsgoiPathTransitionInput =
-  | SsgoiPathTransition
-  | readonly SsgoiPathTransitionInput[];
+/**
+ * A route-family rule. Entering the family is forward, leaving it is
+ * backward, and navigation within it uses semantic history/pop detection.
+ */
+export type SsgoiOnTransitionRule = SsgoiTransitionRuleBase & {
+  on: PathPatterns;
+  except?: PathPatterns;
+  from?: never;
+  to?: never;
+  ordered?: never;
+  bidirectional?: never;
+};
+
+/**
+ * A precise relationship between two route families. The normal from → to
+ * orientation is forward; the reverse is backward when bidirectional
+ * (the default).
+ */
+export type SsgoiPairTransitionRule = SsgoiTransitionRuleBase & {
+  from: PathPatterns;
+  to: PathPatterns;
+  bidirectional?: boolean;
+  on?: never;
+  except?: never;
+  ordered?: never;
+};
+
+/**
+ * An ordered set of routes. Both endpoints must match the set; increasing
+ * index is forward and decreasing index is backward.
+ */
+export type SsgoiOrderedTransitionRule = SsgoiTransitionRuleBase & {
+  ordered: readonly string[];
+  on?: never;
+  except?: never;
+  from?: never;
+  to?: never;
+  bidirectional?: never;
+};
+
+export type SsgoiTransitionRule =
+  | SsgoiOnTransitionRule
+  | SsgoiPairTransitionRule
+  | SsgoiOrderedTransitionRule;
 
 export type PreserveScrollValue =
   | boolean
@@ -210,14 +261,14 @@ export type TransitionsResolverArgs = { isMobile: boolean };
  */
 export type SsgoiTransitionsFn = (
   args: TransitionsResolverArgs,
-) => readonly SsgoiPathTransitionInput[];
+) => readonly SsgoiTransitionRule[];
 
 /**
- * `transitions` accepts either the plain list (existing form) or a function of
- * device context. Both normalize to the functional form internally.
+ * `transitions` accepts either a flat rule list or a function of device
+ * context. Both normalize to the functional form internally.
  */
 export type SsgoiTransitionsOption =
-  | readonly SsgoiPathTransitionInput[]
+  | readonly SsgoiTransitionRule[]
   | SsgoiTransitionsFn;
 
 export type SsgoiConfig = {

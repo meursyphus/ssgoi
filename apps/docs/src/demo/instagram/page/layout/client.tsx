@@ -13,10 +13,11 @@ const BASE = "/demo/instagram";
 const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
-    ...zoom({
-      paths: [`${BASE}/profile/*`, `${BASE}/feed/*`],
-      type: "static",
-    }),
+    {
+      from: `${BASE}/profile/*`,
+      to: `${BASE}/feed/*`,
+      transition: zoom({ type: "static" }),
+    },
   ],
 };
 

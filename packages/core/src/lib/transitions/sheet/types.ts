@@ -15,7 +15,6 @@ export type SheetDirection = "enter" | "exit";
 
 export interface SheetOptions {
   type?: SheetType;
-  direction?: SheetDirection;
 }
 
 export type SheetStyle = Record<string, number | string>;

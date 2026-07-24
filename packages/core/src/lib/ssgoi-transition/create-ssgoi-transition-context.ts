@@ -2,42 +2,22 @@ import type {
   AnyTransitionConfig,
   SsgoiConfig,
   SsgoiContext,
-  SsgoiPathTransition,
-  SsgoiPathTransitionInput,
+  NavigationDirection,
+  SsgoiTransitionRule,
   SsgoiTransitionsFn,
   SsgoiTransitionContext,
   PrepareArgs,
   CreateElement,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
-import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
-import { findMatchingTransition } from "./find-matching-transition";
+import { resolveTransitionRule } from "./resolve-transition-rule";
+import { createNavigationDirectionTracker } from "./navigation-direction";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
-
-function isTransitionGroup(
-  transition: SsgoiPathTransitionInput,
-): transition is readonly SsgoiPathTransitionInput[] {
-  return Array.isArray(transition);
-}
-
-function flattenTransitions(
-  transitions: readonly SsgoiPathTransitionInput[],
-): SsgoiPathTransition[] {
-  const flattened: SsgoiPathTransition[] = [];
-  for (const transition of transitions) {
-    if (isTransitionGroup(transition)) {
-      flattened.push(...flattenTransitions(transition));
-    } else {
-      flattened.push(transition);
-    }
-  }
-  return flattened;
-}
 
 type TransitionMode = "unmount" | "hidden";
 
@@ -95,6 +75,7 @@ export function createSggoiTransitionContext(
   const host = contextOptions.host ?? new HostAnimation();
 
   const detector = createNavigationDetector();
+  const directionTracker = createNavigationDirectionTracker();
 
   // Normalize both accepted shapes to the functional form up front so the rest
   // of the file deals with exactly one shape: a static list becomes a function
@@ -132,19 +113,20 @@ export function createSggoiTransitionContext(
     getIsMobile,
   } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
 
-  // Resolve + flatten + process the path-transition list lazily. `isMobile` is
+  // Resolve the flat route-rule list lazily. `isMobile` is
   // only reliable once the scroll container is known (measured on the first IN),
-  // which always precedes findMatchingTransition. Memoized per device class so a
-  // static list is processed at most once per `isMobile` value and the resolver
+  // which always precedes route resolution. Memoized per device class so a
+  // static list is resolved at most once per `isMobile` value and the resolver
   // never runs on the hot path more than necessary.
-  const processedByIsMobile = new Map<boolean, SsgoiPathTransition[]>();
-  const getProcessedTransitions = (): SsgoiPathTransition[] => {
+  const processedByIsMobile = new Map<
+    boolean,
+    readonly SsgoiTransitionRule[]
+  >();
+  const getProcessedTransitions = (): readonly SsgoiTransitionRule[] => {
     const isMobile = getIsMobile();
     let processed = processedByIsMobile.get(isMobile);
     if (!processed) {
-      processed = processSymmetricTransitions(
-        flattenTransitions(resolveTransitions({ isMobile })),
-      );
+      processed = resolveTransitions({ isMobile });
       processedByIsMobile.set(isMobile, processed);
     }
     return processed;
@@ -246,6 +228,7 @@ export function createSggoiTransitionContext(
 
   const runTransition = (
     config: AnyTransitionConfig,
+    direction: NavigationDirection,
     fromPath: string,
     toPath: string,
     outSide: PendingSide,
@@ -263,6 +246,7 @@ export function createSggoiTransitionContext(
     const scrollOffset = calculateScrollOffset(fromPath, toPath);
 
     const ssgoiContext: SsgoiTransitionContext = {
+      direction,
       scrollOffset,
       from: { scroll: getScrollPosition(fromPath) },
       to: { scroll: getScrollPosition(toPath) },
@@ -406,6 +390,14 @@ export function createSggoiTransitionContext(
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) return;
 
+      // Native swipe-back owns the visual animation, but it still changes our
+      // semantic history. Record it on the IN side before skipping playback so
+      // the next in-scope navigation does not see a stale stack.
+      if (isSwipeBack && side === "in") {
+        const transformed = middleware(pair.from, pair.to);
+        directionTracker.resolve(transformed.from, transformed.to);
+      }
+
       if (isSwipeBack) {
         if (side === "out" && pair.from && !shouldPreserve(pair.from)) {
           evictScrollPosition(pair.from);
@@ -420,7 +412,7 @@ export function createSggoiTransitionContext(
 
       // `middleware` rewrites the path pair for matching (e.g. aliasing
       // `/m-p/[id]` → `/p/[id]`, or collapsing a deep route to a logical id). Use
-      // the transformed pair for `findMatchingTransition`, but hand `runTransition`
+      // the transformed pair to the rule resolver, but hand `runTransition`
       // the ORIGINAL pair: the context manager already funnels every scroll path
       // through the same `middleware` (via `resolveScrollPath`), so passing the
       // originals keeps record/restore on one identity. Passing the pre-transformed
@@ -431,10 +423,15 @@ export function createSggoiTransitionContext(
         pair.to,
       );
 
-      const config = findMatchingTransition(
+      const historyDirection = directionTracker.resolve(
+        transformedFrom,
+        transformedTo,
+      );
+      const resolved = resolveTransitionRule(
         transformedFrom,
         transformedTo,
         getProcessedTransitions(),
+        historyDirection,
       );
 
       const outSide = pendingOut;
@@ -442,9 +439,16 @@ export function createSggoiTransitionContext(
       pendingOut = null;
       pendingIn = null;
 
-      if (!config || !outSide || !inSide) return;
+      if (!resolved || !outSide || !inSide) return;
 
-      runTransition(config, pair.from, pair.to, outSide, inSide);
+      runTransition(
+        resolved.transition,
+        resolved.direction,
+        pair.from,
+        pair.to,
+        outSide,
+        inSide,
+      );
     });
   };
 

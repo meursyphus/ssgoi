@@ -6,7 +6,7 @@ This document is for AI assistants to help developers set up SSGOI page transiti
 
 **This file is the React setup guide plus the shared core reference** (`SsgoiConfig`, transition catalog, troubleshooting — those apply to every framework). Using Svelte, Vue/Nuxt, Solid, Angular, or Qwik? Read the matching file from the Index at the bottom instead of the React sections here.
 
-**Current core package version:** `@ssgoi/core@6.6.10`
+**Current core package version:** `@ssgoi/core@6.6.12`
 
 ---
 
@@ -57,8 +57,13 @@ import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
   transitions: [
-    drill({ enter: "/post/*", exit: "*", type: "parallax" }),
-    fade({ paths: ["/", "/about"] }),
+    {
+      priority: -100,
+      on: "/**",
+      except: ["/", "/about"],
+      transition: drill({ type: "parallax" }),
+    },
+    { from: "/", to: "/about", transition: fade() },
   ],
 };
 
@@ -147,7 +152,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 ```
 
-`SsgoiTransitionBoundary` reads the current pathname internally and sets both `key` and `data-ssgoi-transition`. SSGOI itself only needs a logical page id that matches config; using the real pathname is the React utility's default convention. For dynamic routes, match descendants with wildcard patterns like `/post/*`. A suffix `*` matches one or more descendants; a suffix `**` also includes the prefix path itself, so `/docs/**` matches `/docs` and `/docs/install`.
+`SsgoiTransitionBoundary` reads the current pathname internally and sets both `key` and `data-ssgoi-transition`. SSGOI itself only needs a logical page id that matches config; using the real pathname is the React utility's default convention. Use `:id` for one dynamic segment, `*` for exactly one arbitrary segment, and a suffix `**` for zero or more segments. Thus `/post/*` matches `/post/1` but not `/post/1/comments`, while `/docs/**` matches `/docs`, `/docs/install`, and deeper paths.
 
 ---
 
@@ -155,10 +160,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 ```ts
 type SsgoiConfig = {
-  // Path-matched transitions. Each entry can be a single { from, to, transition }
-  // or an array returned by a transition factory (drill, fade, etc.). Arrays are
-  // flattened automatically — no spread needed.
-  transitions?: (SsgoiPathTransition | SsgoiPathTransition[])[];
+  // Flat route rules. Exactly one selector shape per rule:
+  // { on, except?, transition }, { from, to, transition }, or
+  // { ordered, transition }. Every rule may set priority.
+  transitions?: SsgoiTransitionRule[];
 
   // Rewrite (from, to) before matching. Useful for stripping prefixes/locales.
   middleware?: (from: string, to: string) => { from: string; to: string };
@@ -168,28 +173,45 @@ type SsgoiConfig = {
 };
 ```
 
-### Transition factory API (6.0)
+### Route rules and effect factories
 
-Each transition factory returns a `SsgoiPathTransition[]`. Drop the result straight into `transitions` — it'll be flattened:
+Each transition factory returns one effect-only `TransitionConfig`. Route
+matching and direction live in the surrounding rule:
 
 ```ts
 const config = {
   transitions: [
-    drill({ enter: "/post/*", exit: "*" }), // directional pair
-    fade({ paths: ["/", "/about", "/contact"] }), // symmetric N×N
-    slide({ paths: ["/tabs/a", "/tabs/b"] }), // ordered (forward/back)
-    zoom({ paths: ["/grid", "/photo/*"], type: "expand" }), // requires data keys
+    {
+      on: "/post/**",
+      except: ["/", "/about", "/contact"],
+      transition: drill(),
+    },
+    {
+      from: ["/", "/about", "/contact"],
+      to: ["/", "/about", "/contact"],
+      transition: fade(),
+    },
+    { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
+    {
+      from: "/grid",
+      to: "/photo/:id",
+      transition: zoom({ type: "expand" }),
+    },
   ],
 };
 ```
 
-Three shapes:
+Three exclusive selector shapes:
 
-- **`{ paths }`** — symmetric: every pair animates with the same physics. Used by `fade`, `blind`, `film`, `hero`, `jaemin`, `rotate`, `strip`, `zoom`.
-- **`{ enter, exit, type? }`** — directional: enter and exit get different physics. Used by `drill`, `sheet`.
-- **`{ paths, ... }` with forward/backward variants** — ordered: path order decides direction. Used by `slide`, `scroll`, and `axis`.
+- **`{ on, except?, transition }`** — route-family membership. Outside → inside is forward; inside → outside is backward; navigation inside the family uses popstate and semantic history. Use `except` to keep top-level routes outside a catch-all stack.
+- **`{ from, to, transition, bidirectional? }`** — precise pair/families. Normal orientation is forward and reverse is backward. `bidirectional` defaults to `true`; arrays mean OR on each side.
+- **`{ ordered, transition }`** — both endpoints must match the list. Increasing index is forward and decreasing index is backward.
 
-All factories accept the unified v6 schema `{ paths (or enter/exit), type?, variant?, options? }`. `type` / `variant` / `options` slots are present on every preset for forward compatibility, even when only one value is implemented today.
+Candidates are selected by higher explicit `priority` (default `0`), then path
+specificity (exact/static > `:id` > `*` > `**`), then earlier declaration
+order. Factories accept only their effect options (`type`, `variant`,
+`options`); the dispatcher passes semantic direction to both `prepare` and
+`animation` through `context.direction`.
 
 ### preserveScroll
 
@@ -295,7 +317,7 @@ App shell where main tab screens share a bottom tab bar and detail screens are f
 ### Transition not applying
 
 - **Cause**: `data-ssgoi-transition` doesn't match route pattern
-- **Fix**: Ensure `data-ssgoi-transition` matches the actual route path used in `from`/`to`/`paths`
+- **Fix**: Ensure `data-ssgoi-transition` matches an `on`, `from`, `to`, or `ordered` route pattern
 
 ### hero / zoom transition not running
 

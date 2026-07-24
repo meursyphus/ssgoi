@@ -72,9 +72,17 @@ export default function DemoLayout({ children }) {
   const config = useMemo(
     () => ({
       transitions: [
-        drill({ enter: "/posts/*", exit: "/posts" }),
-        zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
-        zoom({ paths: ["/profile", "/profile/*"], type: "static" }),
+        { from: "/posts", to: "/posts/*", transition: drill() },
+        {
+          from: "/pinterest",
+          to: "/pinterest/*",
+          transition: zoom({ type: "expand" }),
+        },
+        {
+          from: "/profile",
+          to: "/profile/*",
+          transition: zoom({ type: "static" }),
+        },
       ],
     }),
     [],

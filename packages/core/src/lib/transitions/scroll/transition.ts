@@ -7,7 +7,7 @@ import {
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 
 export interface ScrollOptions {
-  direction?: "up" | "down";
+  directional?: boolean;
   physics?: PhysicsOptions;
 }
 
@@ -22,17 +22,14 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
 };
 
 export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
-  const direction = options.direction ?? "up";
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  const isUp = direction === "up";
-
-  // up: the incoming `to` slides up over the outgoing `from`; down: the
-  // outgoing `from` slides down on top of the revealed `to`.
-  const fromZ = isUp ? Z_BACKGROUND : Z_FOREGROUND;
-  const toZ = isUp ? Z_FOREGROUND : Z_BACKGROUND;
+  const directional = options.directional ?? true;
 
   return {
-    prepare: ({ from, to }) => {
+    prepare: ({ from, to, context }) => {
+      const isUp = !directional || context.direction === "forward";
+      const fromZ = isUp ? Z_BACKGROUND : Z_FOREGROUND;
+      const toZ = isUp ? Z_FOREGROUND : Z_BACKGROUND;
       from.then((el) => {
         el.style.zIndex = fromZ;
         el.style.willChange = "transform";
@@ -52,7 +49,9 @@ export const scroll = (options: ScrollOptions = {}): TransitionConfig => {
       });
       return {};
     },
-    animation: ({ from, to }) => {
+    animation: ({ from, to, context }) => {
+      const isUp = !directional || context.direction === "forward";
+      const toZ = isUp ? Z_FOREGROUND : Z_BACKGROUND;
       const fromHeight = from.offsetHeight;
       const toHeight = to.offsetHeight;
       const viewportHeight = window.innerHeight;

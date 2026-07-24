@@ -1,8 +1,4 @@
-import type { SsgoiPathTransition } from "@types";
-import {
-  createDirectionalPathTransitions,
-  type DirectionalTransitionPaths,
-} from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { sheet as transition } from "./transition";
 import type { SheetType as InternalSheetType } from "./types";
 
@@ -23,28 +19,26 @@ export type SheetType = "static" | "scale" | "blur";
  *
  * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
  * Migrate `type: "background-scale"` to `type: "scale"` — same behavior, new name.
- * Example: `sheet({ enter: "/list", exit: "/sheet", type: "scale" })`.
+ * Example: `{ from: "/list", to: "/sheet", transition: sheet({ type: "scale" }) }`.
  * Kept here only for backward compatibility — will be removed in a future major.
  */
 export type SheetTypeDeprecated = "background-scale";
 
-export type SheetConfig = DirectionalTransitionPaths &
-  (
-    | { type?: "static"; variant?: "default"; options?: Record<string, never> }
-    | { type: "scale"; variant?: "default"; options?: Record<string, never> }
-    | { type: "blur"; variant?: "default"; options?: Record<string, never> }
-    | {
-        /**
-         * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
-         * Migrate `type: "background-scale"` to `type: "scale"` — same behavior, new name.
-         * Example: `sheet({ enter: "/list", exit: "/sheet", type: "scale" })`.
-         * Kept here only for backward compatibility — will be removed in a future major.
-         */
-        type: "background-scale";
-        variant?: "default";
-        options?: Record<string, never>;
-      }
-  );
+export type SheetConfig =
+  | { type?: "static"; variant?: "default"; options?: Record<string, never> }
+  | { type: "scale"; variant?: "default"; options?: Record<string, never> }
+  | { type: "blur"; variant?: "default"; options?: Record<string, never> }
+  | {
+      /**
+       * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
+       * Migrate `type: "background-scale"` to `type: "scale"` — same behavior, new name.
+       * Example: `sheet({ type: "scale" })`.
+       * Kept here only for backward compatibility — will be removed in a future major.
+       */
+      type: "background-scale";
+      variant?: "default";
+      options?: Record<string, never>;
+    };
 
 /**
  * Normalize the public `type` value to the internal provider key. The internal
@@ -61,14 +55,11 @@ function resolveInternalType(
   return "static";
 }
 
-export function sheet(config: SheetConfig): SsgoiPathTransition[] {
-  const { enter, exit } = config;
+export function sheet(config: SheetConfig = {}): AnyTransitionConfig {
   const type = (config as { type?: SheetType | SheetTypeDeprecated }).type;
   // `variant` / `options` are accepted in the public schema for forward
   // compatibility but currently have no implemented values to forward.
   const internalType = resolveInternalType(type);
 
-  return createDirectionalPathTransitions({ enter, exit }, (direction) =>
-    transition({ direction, type: internalType }),
-  );
+  return transition({ type: internalType });
 }

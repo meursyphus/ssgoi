@@ -9,18 +9,17 @@ import "./app.css";
 const ssgoiConfig = {
   preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
-    zoom({
-      paths: ["/pinterest", "/pinterest/*"],
-      type: "expand",
-    }),
-    drill({
-      enter: "/posts/*",
-      exit: "/posts",
-    }),
-    zoom({
-      paths: ["/profile", "/profile/*"],
-      type: "static",
-    }),
+    {
+      from: "/pinterest",
+      to: "/pinterest/*",
+      transition: zoom({ type: "expand" }),
+    },
+    { from: "/posts", to: "/posts/*", transition: drill() },
+    {
+      from: "/profile",
+      to: "/profile/*",
+      transition: zoom({ type: "static" }),
+    },
   ],
 } satisfies SsgoiConfig;
 

@@ -12,16 +12,17 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // home ↔ feed detail — zoom EXPAND (the headline interaction)
-    zoom({
-      paths: [BASE, `${BASE}/feed/*`],
-      type: "expand",
-    }),
+    {
+      from: BASE,
+      to: `${BASE}/feed/*`,
+      transition: zoom({ type: "expand" }),
+    },
     // search ↔ search result drill
-    drill({
-      enter: `${BASE}/search/*`,
-      exit: `${BASE}/search`,
-      type: "slide",
-    }),
+    {
+      from: `${BASE}/search`,
+      to: `${BASE}/search/*`,
+      transition: drill({ type: "slide" }),
+    },
   ],
 };
 

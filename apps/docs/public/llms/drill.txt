@@ -9,7 +9,8 @@ Setup guide: https://ssgoi.dev/llms.txt
 - **`parallax`** (default): new page slides in from the right; old page eases slightly left under it, hinting it's still there.
 - **`slide`**: new page slides in from the right while the old page cross-fades underneath. Flatter and less directional than `parallax`.
 
-`enter` is forward navigation (e.g. list → detail). `exit` is the reverse — old page comes back from the left.
+The route rule resolves semantic direction. Forward (e.g. list → detail)
+drills in; backward drills out.
 
 ## Signature
 
@@ -17,15 +18,13 @@ Setup guide: https://ssgoi.dev/llms.txt
 import { drill } from "@ssgoi/react/view-transitions";
 
 drill({
-  enter: string;                       // destination path (forward)
-  exit: string;                        // source path (forward)
   type?: "parallax" | "slide";         // default: "parallax"
   variant?: "default";                 // reserved — only "default" today
   options?: {};                        // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
-Returns a directional pair: one entry for forward (`exit → enter`) and one for backward (`enter → exit`).
+The factory returns one effect config. Put it in a route rule.
 
 > Deprecated: `type: "crossfade"` — use `type: "slide"` instead.
 
@@ -34,10 +33,12 @@ Returns a directional pair: one entry for forward (`exit → enter`) and one for
 ```ts
 const config = {
   transitions: [
-    drill({ enter: "/post/*", exit: "*" }),
-    drill({ enter: "/settings/*", exit: "/settings", type: "slide" }),
+    { from: "/posts", to: "/post/:id", transition: drill() },
+    {
+      on: "/settings/**",
+      except: "/settings",
+      transition: drill({ type: "slide" }),
+    },
   ],
 };
 ```
-
-Drop the result directly into `transitions` — arrays are flattened automatically.

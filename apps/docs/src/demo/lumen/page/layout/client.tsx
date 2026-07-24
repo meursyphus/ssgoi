@@ -10,7 +10,7 @@ const FOUNDATIONS = BASE;
 const CINEMATIC_EYE = `${BASE}/cinematic-eye`;
 
 const config: SsgoiConfig = {
-  transitions: film({ paths: [FOUNDATIONS, CINEMATIC_EYE] }),
+  transitions: [{ from: FOUNDATIONS, to: CINEMATIC_EYE, transition: film() }],
 };
 
 export function LumenLayoutClient({ children }: { children: ReactNode }) {

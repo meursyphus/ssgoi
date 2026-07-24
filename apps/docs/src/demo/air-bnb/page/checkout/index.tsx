@@ -35,12 +35,12 @@ export default function CheckoutLayoutClient({
         key: `${initialData.id}/checkout`,
       },
       transitions: [
-        axis({
-          paths: CHECKOUT_STEP_ORDER.map((step) =>
+        {
+          ordered: CHECKOUT_STEP_ORDER.map((step) =>
             getCheckoutStepHref(initialData.id, step),
           ),
-          type: "x",
-        }),
+          transition: axis({ type: "x" }),
+        },
       ],
     }),
     [initialData.id],

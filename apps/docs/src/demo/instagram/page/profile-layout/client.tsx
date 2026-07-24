@@ -25,9 +25,10 @@ export function InstagramProfileLayoutClient({
         key: base,
       },
       transitions: [
-        slide({
-          paths: [base, `${base}/reels`, `${base}/remix`, `${base}/tagged`],
-        }),
+        {
+          ordered: [base, `${base}/reels`, `${base}/remix`, `${base}/tagged`],
+          transition: slide(),
+        },
       ],
     }),
     [base],

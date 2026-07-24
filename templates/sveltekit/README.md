@@ -85,7 +85,7 @@ full pathname for tab transitions.
   import { drill } from "@ssgoi/svelte/view-transitions";
 
   const config = {
-    transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
+    transitions: [{ from: "/posts", to: "/posts/*", transition: drill() }],
   };
 </script>
 ```
@@ -98,9 +98,10 @@ full pathname for tab transitions.
 
   const config = {
     transitions: [
-      slide({
-        paths: ["/products/all", "/products/electronics", "/products/fashion"],
-      }),
+      {
+        ordered: ["/products/all", "/products/electronics", "/products/fashion"],
+        transition: slide(),
+      },
     ],
   };
 </script>
@@ -114,7 +115,11 @@ full pathname for tab transitions.
 
   const config = {
     transitions: [
-      zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
+      {
+        from: "/pinterest",
+        to: "/pinterest/*",
+        transition: zoom({ type: "expand" }),
+      },
     ],
   };
 </script>
@@ -127,7 +132,13 @@ full pathname for tab transitions.
   import { zoom } from "@ssgoi/svelte/view-transitions";
 
   const config = {
-    transitions: [zoom({ paths: ["/profile", "/profile/*"], type: "static" })],
+    transitions: [
+      {
+        from: "/profile",
+        to: "/profile/*",
+        transition: zoom({ type: "static" }),
+      },
+    ],
   };
 </script>
 ```

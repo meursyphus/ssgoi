@@ -10,16 +10,20 @@ import {
 
 export function TransitionDetailBody({ doc }: { doc: TransitionDoc }) {
   const meta = USE_META[doc.use];
-  const paths =
-    doc.pathStyle === "enter-exit"
-      ? `enter: "/list", exit: "/detail"`
-      : `paths: ["/list", "/detail"]`;
+  const effect = `${doc.name}()`;
+  const rule =
+    doc.ruleStyle === "ordered"
+      ? `{
+      ordered: ["/first", "/second", "/third"],
+      transition: ${effect},
+    }`
+      : `{ from: "/list", to: "/detail/:id", transition: ${effect} }`;
 
   const setup = `import { ${doc.name} } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [
-    ${doc.name}({ ${paths} }),
+    ${rule},
   ],
 };`;
 
@@ -40,9 +44,9 @@ const config = {
       <section className="mt-8">
         <h2 className="text-lg font-semibold text-neutral-100">Usage</h2>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Add the factory to your <code className="font-mono">config</code>.
-          Shown for React — the same factory works in Svelte, Vue, Solid, and
-          Angular.
+          Put the effect in a route rule. The factory only describes animation;
+          the rule describes where it applies and resolves forward/backward.
+          Shown for React — the same config works across adapters.
         </p>
         <CodeBlock className="mt-4" code={setup} />
       </section>

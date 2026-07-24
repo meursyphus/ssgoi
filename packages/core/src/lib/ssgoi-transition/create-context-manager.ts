@@ -1,7 +1,7 @@
 import type { PreserveScrollOption, PreserveScrollFn } from "@types";
 import { getScrollingElement } from "@utils";
 import { getPositionedParent } from "@utils";
-import { matchPath } from "./find-matching-transition";
+import { matchPath } from "./path-pattern";
 
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;

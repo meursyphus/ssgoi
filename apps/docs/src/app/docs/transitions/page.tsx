@@ -23,7 +23,7 @@ export default function DocsTransitionsPage() {
       />
       <DocsPageHeading
         title="Transitions"
-        lead="Thirteen built-in transitions. Pick one, drop it into your config, and let the AI agent wire up the per-element keys."
+        lead="Choose an effect, then attach it to an on, from/to, or ordered route rule."
       />
       <TransitionsBody />
     </>

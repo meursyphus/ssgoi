@@ -1,5 +1,4 @@
-import type { SsgoiPathTransition } from "@types";
-import { createSymmetricPathTransitions } from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { blind as transition } from "./transition";
 
 /**
@@ -10,18 +9,15 @@ import { blind as transition } from "./transition";
 export type BlindType = "horizontal" | "vertical";
 
 export type BlindConfig = {
-  paths: readonly string[];
   type?: BlindType;
   variant?: "default";
   options?: object;
 };
 
-export function blind(config: BlindConfig): SsgoiPathTransition[] {
-  const { paths, type = "horizontal" } = config;
+export function blind(config: BlindConfig = {}): AnyTransitionConfig {
+  const { type = "horizontal" } = config;
   // Internal `blind()` keys on `direction` (horizontal/vertical). The public
   // `type` slot is just a rename — the value space is identical. Slat count
   // and color stay on internal defaults; not exposed in v6 public surface.
-  return createSymmetricPathTransitions(paths, () =>
-    transition({ direction: type }),
-  );
+  return transition({ direction: type });
 }

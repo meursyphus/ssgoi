@@ -94,20 +94,23 @@ function TabShell({ children }) {
         code={`// Outer provider — list ↔ detail, sheets, shared elements.
 const config: SsgoiConfig = {
   transitions: [
-    drill({ enter: "/c/*", exit: "/collections" }),
-    ...sheet({ enter: "/collage", exit: "/create" }),
-    hero({ paths: ["/", "/c/*", "/p/*"], type: "fade" }),
+    { from: "/collections", to: "/c/*", transition: drill() },
+    { from: "/create", to: "/collage", transition: sheet() },
+    {
+      from: ["/", "/c/*", "/p/*"],
+      to: ["/", "/c/*", "/p/*"],
+      transition: hero({ type: "fade" }),
+    },
   ],
 };
 
 // Nested provider — tab ↔ tab only.
 const tabsConfig: SsgoiConfig = {
   transitions: [
-    ...axis({
-      paths: ["/", "/collections", "/create"],
-      type: "y",
-      variant: "non-directional",
-    }),
+    {
+      ordered: ["/", "/collections", "/create"],
+      transition: axis({ type: "y", variant: "non-directional" }),
+    },
   ],
 };`}
       />

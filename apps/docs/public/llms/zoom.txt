@@ -25,11 +25,10 @@ If no matching `enter` / `exit` element is found, the transition is a no-op.
 import { zoom } from "@ssgoi/react/view-transitions";
 
 zoom({
-  paths: readonly string[];
   type?: "static" | "expand" | "blur";   // default: "static"
   variant?: "default" | "fade";          // default: "default"
   options?: {};                          // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 > Deprecated: `fade: true` — use `variant: "fade"` instead.
@@ -76,8 +75,16 @@ A keyed wrapper with `overflow: hidden|clip` supplies the visible crop and a sim
 ```ts
 const config = {
   transitions: [
-    zoom({ paths: ["/grid", "/photo/*"], type: "expand" }),
-    zoom({ paths: ["/feed", "/post/*"], type: "static", variant: "fade" }),
+    {
+      from: "/grid",
+      to: "/photo/:id",
+      transition: zoom({ type: "expand" }),
+    },
+    {
+      from: "/feed",
+      to: "/post/:id",
+      transition: zoom({ type: "static", variant: "fade" }),
+    },
   ],
 };
 ```

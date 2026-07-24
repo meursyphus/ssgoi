@@ -59,7 +59,7 @@ import { fade } from "@ssgoi/angular/view-transitions";
 })
 export class AppComponent {
   protected readonly ssgoiConfig = signal<SsgoiConfig>({
-    transitions: [fade({ paths: ["/home", "/about"] })],
+    transitions: [{ from: "/home", to: "/about", transition: fade() }],
   });
 }
 ```
@@ -135,7 +135,8 @@ import {
 - `rotate()` - Card flip between siblings
 - `jaemin()` - Playful rotated zoom for special moments
 
-Each factory takes the unified config: `{ paths }` (symmetric), `{ enter, exit, type? }` (directional, e.g. `drill`/`sheet`), or `{ paths }` with order deciding direction (`slide`/`scroll`/`axis`).
+Factories take effect options only. Put them in an `on`, `from`/`to`, or
+`ordered` route rule; the rule resolves forward/backward direction.
 
 ## Sample Configuration
 
@@ -145,8 +146,8 @@ import type { SsgoiConfig } from "@ssgoi/angular";
 
 export const config: SsgoiConfig = {
   transitions: [
-    fade({ paths: ["/", "/home"] }),
-    scroll({ paths: ["/home", "/about"] }),
+    { from: "/", to: "/home", transition: fade() },
+    { ordered: ["/home", "/about"], transition: scroll() },
   ],
 };
 ```

@@ -1,5 +1,5 @@
-import type { SsgoiPathTransition } from "@types";
-import { createSymmetricPathTransitions, type PresetConfig } from "../utils";
+import type { AnyTransitionConfig } from "@types";
+import { type PresetConfig } from "../utils";
 import { hero as transition } from "./transition";
 import type { HeroOptions, HeroType, HeroVariant } from "./types";
 
@@ -16,18 +16,10 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
  * - `variant: "default"` — only value today; reserved for future tonal
  *   variants without re-shaping the public API.
  */
-export type HeroConfig = PresetConfig<
-  { paths: readonly string[] },
-  HeroType,
-  HeroVariant,
-  HeroOptions
->;
+export type HeroConfig = PresetConfig<HeroType, HeroVariant, HeroOptions>;
 
-export function hero(config: HeroConfig): SsgoiPathTransition[] {
-  const { paths } = config;
+export function hero(config: HeroConfig = {}): AnyTransitionConfig {
   const type: HeroType = config.type ?? "static";
   const variant: HeroVariant = config.variant ?? "default";
-  return createSymmetricPathTransitions(paths, () =>
-    transition({ type, variant }),
-  );
+  return transition({ type, variant });
 }

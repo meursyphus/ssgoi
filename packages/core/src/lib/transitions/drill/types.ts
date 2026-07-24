@@ -15,7 +15,6 @@ export type DrillDirection = "enter" | "exit";
 
 export interface DrillOptions {
   type?: DrillType;
-  direction?: DrillDirection;
 }
 
 export type DrillStyle = Record<string, number | string>;

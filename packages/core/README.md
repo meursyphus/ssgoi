@@ -50,7 +50,7 @@ import { fade } from "@ssgoi/react/view-transitions";
 import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
-  transitions: [fade({ paths: ["/", "/about"] })],
+  transitions: [{ from: "/", to: "/about", transition: fade() }],
 };
 
 export default function App() {
@@ -132,7 +132,8 @@ The value can be a hard-coded logical id; it only has to match your config.
 
 ### Route-based Transitions
 
-Each transition factory returns a path-transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
+Transition factories return one effect-only `TransitionConfig`. Put that
+effect inside a flat route rule:
 
 ```tsx
 import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
@@ -140,22 +141,41 @@ import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
 const config = {
   transitions: [
     // Calm cross-fade between tabs
-    fade({ paths: ["/home", "/about"] }),
+    { from: "/home", to: "/about", transition: fade() },
 
     // iOS-style drill-in when entering details
-    drill({ enter: "/products/*", exit: "/products" }),
+    {
+      on: "/products/**",
+      except: "/products",
+      transition: drill(),
+    },
 
     // Card-to-detail zoom (needs matching data-zoom-*-key)
-    zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
+    {
+      from: "/gallery",
+      to: "/photo/:id",
+      transition: zoom({ type: "expand" }),
+    },
   ],
 };
 ```
 
-Transitions come in three shapes:
+Route rules come in three shapes:
 
-- **`{ paths }`** — symmetric: every pair animates with the same physics (`fade`, `hero`, `zoom`, `blind`, `film`, `rotate`, `strip`, `jaemin`)
-- **`{ enter, exit, type? }`** — directional: enter and exit get different physics (`drill`, `sheet`)
-- **`{ paths }`** — ordered: path order decides forward / back direction (`slide`, `scroll`, `axis`)
+- **`{ on, except?, transition }`** — a route family. Entering is forward,
+  leaving is backward, and internal navigation uses popstate/semantic history.
+- **`{ from, to, transition, bidirectional? }`** — a precise pair. Arrays on
+  either side mean OR; reverse matching is enabled by default.
+- **`{ ordered, transition }`** — both endpoints must be in the ordered list.
+  Increasing index is forward; decreasing index is backward.
+
+Rules may set `priority` (default `0`). Candidates are chosen by higher
+priority, then path specificity, then earlier declaration order. Patterns
+support exact paths, `:id` (one dynamic segment), `*` (exactly one arbitrary
+segment), and suffix `**` (zero or more segments).
+
+Factories accept only their effect options: `{ type?, variant?, options? }`.
+The dispatcher passes semantic direction through the transition context.
 
 ### Individual Element Animations
 

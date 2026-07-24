@@ -6,7 +6,7 @@ Setup guide: https://ssgoi.dev/llms.txt
 
 ## Behavior
 
-Path order in `paths` defines direction:
+Path order in the rule's `ordered` list defines direction:
 - **Forward** (earlier path → later path): outgoing slides left, incoming slides in from the right.
 - **Backward** (later → earlier): outgoing slides right, incoming slides in from the left.
 
@@ -16,13 +16,12 @@ Path order in `paths` defines direction:
 import { slide } from "@ssgoi/react/view-transitions";
 
 slide({
-  paths: readonly string[];   // ordered list — order matters
   variant?: "default";        // reserved — only "default" today
   options?: {};               // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
-Returns ordered entries: a forward and a backward pair for every combination in `paths`.
+The factory returns one effect config.
 
 ## Usage
 
@@ -30,7 +29,10 @@ Returns ordered entries: a forward and a backward pair for every combination in 
 const config = {
   transitions: [
     // tabs in order: forward = a → b → c
-    slide({ paths: ["/tabs/a", "/tabs/b", "/tabs/c"] }),
+    {
+      ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
+      transition: slide(),
+    },
   ],
 };
 ```

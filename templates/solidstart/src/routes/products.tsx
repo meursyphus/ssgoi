@@ -13,7 +13,12 @@ const categories = [
 ];
 
 const productConfig = {
-  transitions: [slide({ paths: categories.map((category) => category.path) })],
+  transitions: [
+    {
+      ordered: categories.map((category) => category.path),
+      transition: slide(),
+    },
+  ],
 } satisfies SsgoiConfig;
 
 export default function ProductsLayout(props: { children?: JSX.Element }) {

@@ -17,20 +17,19 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
       preserveScroll: { exclude: ["/posts/*"] },
       transitions: [
         // Pinterest transitions
-        zoom({
-          paths: ["/pinterest", "/pinterest/*"],
-          type: "expand",
-        }),
+        {
+          from: "/pinterest",
+          to: "/pinterest/*",
+          transition: zoom({ type: "expand" }),
+        },
         // Posts transitions - drill effect
-        drill({
-          enter: "/posts/*",
-          exit: "/posts",
-        }),
+        { from: "/posts", to: "/posts/*", transition: drill() },
         // Profile transitions
-        zoom({
-          paths: ["/profile", "/profile/*"],
-          type: "static",
-        }),
+        {
+          from: "/profile",
+          to: "/profile/*",
+          transition: zoom({ type: "static" }),
+        },
       ],
     }),
     [],

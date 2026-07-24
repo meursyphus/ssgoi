@@ -10,16 +10,16 @@ const BASE = "/demo/air-bnb";
 const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
-    zoom({
-      paths: [BASE, `${BASE}/listings/:id`],
-      type: "blur",
-      variant: "fade",
-    }),
-    sheet({
-      type: "static",
-      enter: `${BASE}/listings/:id/checkout/*`,
-      exit: `${BASE}/listings/:id`,
-    }),
+    {
+      from: BASE,
+      to: `${BASE}/listings/:id`,
+      transition: zoom({ type: "blur", variant: "fade" }),
+    },
+    {
+      from: `${BASE}/listings/:id`,
+      to: `${BASE}/listings/:id/checkout/*`,
+      transition: sheet({ type: "static" }),
+    },
   ],
 };
 

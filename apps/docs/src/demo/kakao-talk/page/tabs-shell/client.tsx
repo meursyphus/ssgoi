@@ -13,7 +13,10 @@ const tabsConfig: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // 친구 ↔ 채팅 — KakaoTalk-style snappy tab swap (tight 8px slide, ~160ms).
-    ...axis({ paths: [BASE, `${BASE}/chats`], type: "x", variant: "snappy" }),
+    {
+      ordered: [BASE, `${BASE}/chats`],
+      transition: axis({ type: "x", variant: "snappy" }),
+    },
   ],
 };
 

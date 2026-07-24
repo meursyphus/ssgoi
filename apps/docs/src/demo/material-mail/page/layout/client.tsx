@@ -18,15 +18,16 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // FAB ✏️ → Compose (the main showcase of sheet/scale)
-    ...sheet({
-      type: "scale",
-      enter: `${BASE}/compose`,
-      exit: BASE,
-    }),
-    // ...axis({
-    //   paths: [`${BASE}/m/*/reply`, `${BASE}/m/*`],
-    //   type: "z",
-    // }),
+    {
+      from: BASE,
+      to: `${BASE}/compose`,
+      transition: sheet({ type: "scale" }),
+    },
+    // {
+    //   from: `${BASE}/m/*`,
+    //   to: `${BASE}/m/*/reply`,
+    //   transition: axis({ type: "z" }),
+    // },
   ],
 };
 

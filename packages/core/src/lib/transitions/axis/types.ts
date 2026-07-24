@@ -19,7 +19,6 @@ export type AxisFeel = "snappy" | "fluid" | "directional" | "non-directional";
 
 export interface AxisOptions {
   type?: AxisType;
-  direction?: AxisDirection;
   feel?: AxisFeel;
 }
 
