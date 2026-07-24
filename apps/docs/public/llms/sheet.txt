@@ -35,7 +35,7 @@ const config = {
   transitions: [
     { on: "/compose", transition: sheet() },
     {
-      on: "/settings/:id",
+      on: "/settings/*",
       transition: sheet({ type: "scale" }),
     },
     {

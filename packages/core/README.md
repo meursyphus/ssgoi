@@ -27,7 +27,7 @@ const config: SsgoiConfig = {
   preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
     { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/:id", transition: zoom() },
+    { from: "/gallery", to: "/gallery/*", transition: zoom() },
     {
       ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
       transition: slide(),
@@ -46,9 +46,12 @@ Rule forms:
 Path patterns:
 
 - `/posts`: exact.
-- `/posts/:id`: one named segment.
 - `/posts/*`: exactly one arbitrary segment.
 - `/posts/**`: the parent and every descendant.
+
+A bare `*` remains a compatibility alias for `/**`. Named single-segment forms
+remain supported and rank above a single-segment `*` when rules overlap, but
+their names are not captured or exposed.
 
 ## Boundary model
 

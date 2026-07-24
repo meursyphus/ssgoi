@@ -7,7 +7,14 @@ image: "/blog/view-transition-api-limitations/thumbnail.png"
 imageAlt: "Layered page snapshots connected through a precise visual transition"
 imageWidth: 1536
 imageHeight: 864
-tags: ["view transition api", "page transition", "shared element transition", "animation", "ssgoi"]
+tags:
+  [
+    "view transition api",
+    "page transition",
+    "shared element transition",
+    "animation",
+    "ssgoi",
+  ]
 faq:
   - question: "Who supplies the fit and crop rules for a Hero transition?"
     answer: "In a View Transition implementation, the application author styles the old and new snapshots. SSGOI's Hero preset takes responsibility for inferring those rules from the DOM and computed styles when the structure is unambiguous."
@@ -55,8 +62,8 @@ View Transition keeps its captures and generated pseudo-element tree inside the 
 
 Hero and Zoom are a useful place to start because they look similar at first. Both begin when a user selects an image in a list, but they animate different things.
 
-| Hero — the photo moves | Zoom static — the whole page unfolds |
-|---|---|
+| Hero — the photo moves                                                                       | Zoom static — the whole page unfolds                                                       |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | ![Google Photos Hero transition](/blog/view-transition-api-limitations/hero-mobile-full.gif) | ![Instagram Zoom static transition](/blog/view-transition-api-limitations/zoom-static.gif) |
 
 Hero: <https://ssgoi.dev/demo/google-photos>
@@ -65,7 +72,7 @@ Zoom static: <https://ssgoi.dev/demo/instagram/profile/deaseungseung94>
 
 ![Hero moves a visual clone while Zoom transforms and clips the entire detail page](/blog/view-transition-api-limitations/hero-vs-zoom.svg)
 
-*Diagram based on the SSGOI Hero and Zoom implementations, created July 12, 2026.*
+_Diagram based on the SSGOI Hero and Zoom implementations, created July 12, 2026._
 
 Hero puts a clone of the selected visual above the two pages and moves that visual to its next position. Zoom does not move only a shared element. It uses the image as an anchor, scales the **entire incoming detail page** down to the thumbnail, clips it to the card, then releases both the page transform and the clip.
 
@@ -75,8 +82,8 @@ A Hero-style shared element transition fits the View Transition model well. Give
 
 These GIFs come from an earlier SSGOI Hero implementation that had to connect a `cover` thumbnail to a `contain` detail image.
 
-| Hero using only bounding boxes | Hero using a content rect and visible window |
-|---|---|
+| Hero using only bounding boxes                                                                      | Hero using a content rect and visible window                                                                         |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | ![Hero transition that ignores the image crop](/blog/view-transition-api-limitations/crop-fail.gif) | ![Hero transition that preserves and reveals the image crop](/blog/view-transition-api-limitations/crop-success.gif) |
 
 <https://ssgoi.dev/blog/shared-element-transitions-object-fit>
@@ -102,8 +109,8 @@ The image coordinates therefore do not exist merely to move one shared element. 
 
 Zoom types also treat the page behind it differently.
 
-| Zoom expand | Zoom blur + fade |
-|---|---|
+| Zoom expand                                                                                | Zoom blur + fade                                                                             |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
 | ![Pinterest Zoom expand transition](/blog/view-transition-api-limitations/zoom-expand.gif) | ![Airbnb Zoom blur and fade transition](/blog/view-transition-api-limitations/zoom-blur.gif) |
 
 Zoom expand: <https://ssgoi.dev/demo/pinterest>
@@ -183,14 +190,14 @@ SSGOI owns the transition scene, so it can create the backdrop at the required s
 
 These examples become clearer when grouped by the information, scene, and policy a reusable preset has to own.
 
-| Control the preset needs | Example | What remains outside View Transition |
-|---|---|---|
-| Information — geometry and meaning outside the capture | Detail-page transform, clip, and scroll for Zoom | The application or library measures both DOM states and transfers metadata |
-| Scene — visual pieces decided at runtime | Film corners, Blind blades, dynamic splash particles | Prepare helpers before capture or use a separate scene layer |
-| Scene — a layer between old and new | Zoom blur and Sheet blur | Design named groups and helper stacking in advance |
-| Scene — a continuously moving outgoing view | Video in Film, canvas, or live visualization | Use real DOM or another live renderer instead of a static old capture |
-| Policy — coordinated lifetime and cleanup | Film's three springs; Zoom's page, crop, and background | Own measurement, playback, cancellation, and cleanup as one flow |
-| Policy — transition selection and replacement | Swipe-back skips, rapid navigation, duplicate mount/hide, and mid-transition navigation | Define pairing, skip, queue, pose handoff, and cleanup rules |
+| Control the preset needs                               | Example                                                                                 | What remains outside View Transition                                       |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Information — geometry and meaning outside the capture | Detail-page transform, clip, and scroll for Zoom                                        | The application or library measures both DOM states and transfers metadata |
+| Scene — visual pieces decided at runtime               | Film corners, Blind blades, dynamic splash particles                                    | Prepare helpers before capture or use a separate scene layer               |
+| Scene — a layer between old and new                    | Zoom blur and Sheet blur                                                                | Design named groups and helper stacking in advance                         |
+| Scene — a continuously moving outgoing view            | Video in Film, canvas, or live visualization                                            | Use real DOM or another live renderer instead of a static old capture      |
+| Policy — coordinated lifetime and cleanup              | Film's three springs; Zoom's page, crop, and background                                 | Own measurement, playback, cancellation, and cleanup as one flow           |
+| Policy — transition selection and replacement          | Swipe-back skips, rapid navigation, duplicate mount/hide, and mid-transition navigation | Define pairing, skip, queue, pose handoff, and cleanup rules               |
 
 Geometry measurement, prepared helpers, and named groups are available when application code also owns the DOM structure and metadata.
 
@@ -202,13 +209,13 @@ The central limit appears when these effects have to become reusable presets: th
 
 Applications can work around several limits today, but the responsibility moves into application code.
 
-| Requirement | Current workaround | Remaining boundary |
-|---|---|---|
-| Old/new geometry and crop | Measure the DOM before and after the update; pass values through CSS variables or WAAPI keyframes | `ViewTransition` still exposes no capture metadata |
-| Previous-page data in a cross-document transition | Pass the required values through storage or navigation metadata | The new document cannot inspect the previous DOM or its computed styles |
-| Transition fragments or a backdrop | Create helpers before the new capture and design the named-group order | Nothing can be inserted into the fixed pseudo tree after `ready` |
-| Live outgoing video or canvas | Keep it outside the transition capture or render it in a separate live layer | `::view-transition-old()` remains a static image |
-| Navigation changes during a transition | Let application code own navigation queue/skip behavior and spring scheduling | [The active transition on the same root is skipped](https://drafts.csswg.org/css-view-transitions-2/#startviewtransition-method-steps), with no built-in handoff of current pose, velocity, or completion reason |
+| Requirement                                       | Current workaround                                                                                | Remaining boundary                                                                                                                                                                                               |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Old/new geometry and crop                         | Measure the DOM before and after the update; pass values through CSS variables or WAAPI keyframes | `ViewTransition` still exposes no capture metadata                                                                                                                                                               |
+| Previous-page data in a cross-document transition | Pass the required values through storage or navigation metadata                                   | The new document cannot inspect the previous DOM or its computed styles                                                                                                                                          |
+| Transition fragments or a backdrop                | Create helpers before the new capture and design the named-group order                            | Nothing can be inserted into the fixed pseudo tree after `ready`                                                                                                                                                 |
+| Live outgoing video or canvas                     | Keep it outside the transition capture or render it in a separate live layer                      | `::view-transition-old()` remains a static image                                                                                                                                                                 |
+| Navigation changes during a transition            | Let application code own navigation queue/skip behavior and spring scheduling                     | [The active transition on the same root is skipped](https://drafts.csswg.org/css-view-transitions-2/#startviewtransition-method-steps), with no built-in handoff of current pose, velocity, or completion reason |
 
 An application with known screens can keep these workarounds in screen code. A reusable preset needs its own measurement and scene layer plus transition policy.
 
@@ -216,14 +223,14 @@ An application with known screens can keep these workarounds in screen code. A r
 
 The View Transition API continues to evolve. [Nested groups](https://developer.chrome.com/blog/view-transitions-in-2025) and [element-scoped transitions](https://developer.chrome.com/blog/element-scoped-view-transitions) already address parts of the original flat-tree and whole-document limitations. Additional interfaces could move more of the examples above into the browser-managed layer.
 
-| Additional interface | What it would enable |
-|---|---|
-| Per-name old/new rect, transform, clip, and scroll metadata | Reusable Zoom without remeasuring both DOM states |
-| Rendered-media content rect and visible window | Page-clip and automatic crop rules without re-deriving DOM/CSS geometry |
-| An author overlay or insertion point in the pseudo tree | Film corners, Blind blades, dynamic splash fragments, and intermediate backdrops |
-| A security-aware snapshot handle | Canvas or WebGL effects that divide a capture into multiple pieces |
-| A live outgoing-element layer | Old video and canvas that keep updating during the transition |
-| A completion reason plus current pose and velocity | Natural continuation when navigation changes mid-transition |
+| Additional interface                                        | What it would enable                                                             |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Per-name old/new rect, transform, clip, and scroll metadata | Reusable Zoom without remeasuring both DOM states                                |
+| Rendered-media content rect and visible window              | Page-clip and automatic crop rules without re-deriving DOM/CSS geometry          |
+| An author overlay or insertion point in the pseudo tree     | Film corners, Blind blades, dynamic splash fragments, and intermediate backdrops |
+| A security-aware snapshot handle                            | Canvas or WebGL effects that divide a capture into multiple pieces               |
+| A live outgoing-element layer                               | Old video and canvas that keep updating during the transition                    |
+| A completion reason plus current pose and velocity          | Natural continuation when navigation changes mid-transition                      |
 
 Until browsers expose those capabilities, reusable presets have to own the missing measurement and scene control outside the browser-managed capture layer. The dependency is on a future interface, not merely broader compatibility for the current one.
 
@@ -241,7 +248,7 @@ const config: SsgoiConfig = {
   transitions: [
     {
       from: "/photos",
-      to: "/photos/:id",
+      to: "/photos/*",
       transition: zoom({ type: "blur", variant: "fade" }),
     },
   ],
@@ -267,4 +274,4 @@ Callers see one `zoom(...)` declaration and two markers. Behind that surface, cr
 
 You can try Zoom, Hero, Film, and Sheet on [ssgoi.dev](/), or inspect the [SSGOI source on GitHub](https://github.com/meursyphus/ssgoi).
 
-*Demo GIFs were recorded from SSGOI demos on July 12, 2026. Demo media licensing: [Unsplash](https://unsplash.com/license), [Lorem Picsum](https://picsum.photos/), and [Pexels](https://www.pexels.com/license/).*
+_Demo GIFs were recorded from SSGOI demos on July 12, 2026. Demo media licensing: [Unsplash](https://unsplash.com/license), [Lorem Picsum](https://picsum.photos/), and [Pexels](https://www.pexels.com/license/)._

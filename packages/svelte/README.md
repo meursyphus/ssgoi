@@ -92,7 +92,7 @@ import { drill, slide, zoom } from "@ssgoi/svelte/view-transitions";
 const config = {
   transitions: [
     { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/:id", transition: zoom() },
+    { from: "/gallery", to: "/gallery/*", transition: zoom() },
     { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
   ],
 };

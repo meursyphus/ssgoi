@@ -71,7 +71,7 @@ import { drill, slide, zoom } from "@ssgoi/angular/view-transitions";
 const config: SsgoiConfig = {
   transitions: [
     { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/:id", transition: zoom() },
+    { from: "/gallery", to: "/gallery/*", transition: zoom() },
     { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
   ],
 };
@@ -80,7 +80,7 @@ const config: SsgoiConfig = {
 - `on`: route family.
 - `from`/`to`: precise pair.
 - `ordered`: directional sequence.
-- Patterns support exact paths, `:id`, `*`, and suffix `**`.
+- Patterns support exact paths, a `*` path segment, and suffix `**`.
 - Higher `priority` wins before path specificity.
 
 ## Effect index

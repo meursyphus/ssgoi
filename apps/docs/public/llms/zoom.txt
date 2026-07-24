@@ -36,23 +36,26 @@ zoom({
 ## Required: matching `data-zoom-exit-key` / `data-zoom-enter-key`
 
 Different attribute names describe stable semantic roles in both navigation directions:
+
 - **List/card side** marks the collapsed source element with `data-zoom-exit-key="<key>"`.
 - **Detail/expanded side** marks the expanded destination element with `data-zoom-enter-key="<key>"`.
 - The key VALUES must match across the two pages.
 
 ```tsx
 // Gallery page (/grid) — the card being tapped
-{photos.map((p) => (
-  <Link key={p.id} href={`/photo/${p.id}`}>
-    <img
-      data-zoom-exit-key={`photo-${p.id}`}
-      src={p.thumb}
-      width={p.width}
-      height={p.height}
-      className="aspect-square object-cover"
-    />
-  </Link>
-))}
+{
+  photos.map((p) => (
+    <Link key={p.id} href={`/photo/${p.id}`}>
+      <img
+        data-zoom-exit-key={`photo-${p.id}`}
+        src={p.thumb}
+        width={p.width}
+        height={p.height}
+        className="aspect-square object-cover"
+      />
+    </Link>
+  ));
+}
 
 // Detail page (/photo/[id]) — the destination
 <img
@@ -61,7 +64,7 @@ Different attribute names describe stable semantic roles in both navigation dire
   width={photo.width}
   height={photo.height}
   className="h-full w-full object-contain"
-/>
+/>;
 ```
 
 ## Automatic image geometry
@@ -77,12 +80,12 @@ const config = {
   transitions: [
     {
       from: "/grid",
-      to: "/photo/:id",
+      to: "/photo/*",
       transition: zoom({ type: "expand" }),
     },
     {
       from: "/feed",
-      to: "/post/:id",
+      to: "/post/*",
       transition: zoom({ type: "static", variant: "fade" }),
     },
   ],

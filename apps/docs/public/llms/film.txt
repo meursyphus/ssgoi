@@ -28,12 +28,12 @@ film({
 ```ts
 const config = {
   transitions: [
-    { from: "/gallery", to: "/photo/:id", transition: film() },
+    { from: "/gallery", to: "/photo/*", transition: film() },
 
     // Custom corner-border color
     {
       from: "/showcase",
-      to: "/showcase/:id",
+      to: "/showcase/*",
       transition: film({ options: { borderColor: "#ffcc00" } }),
     },
   ],

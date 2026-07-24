@@ -253,8 +253,8 @@ layouts.
 
 Main → main changes only the inner content boundary, so the bottom nav stays
 still. Main → detail changes the common app-shell key, so the whole main shell
-and its nav leave together. Project tab navigation keeps the
-`/projects/:id` app-shell key and changes only the project content boundary.
+and its nav leave together. Project tab navigation keeps the current project
+base-path key and changes only the project content boundary.
 If parent and child leave together, SSGOI uses the outer changed boundary. Do
 not create a nested `<Ssgoi>`.
 
@@ -310,10 +310,10 @@ import {
 const config = {
   transitions: [
     { from: "/", to: "/about", transition: fade() },
-    { from: "/products", to: "/products/:id", transition: hero() },
+    { from: "/products", to: "/products/*", transition: hero() },
     {
       from: "/gallery",
-      to: "/photo/:id",
+      to: "/photo/*",
       transition: zoom({ type: "expand" }),
     },
     { on: "/compose", transition: sheet() },
@@ -340,8 +340,10 @@ These selectors work with every effect; the usual convention is `drill` and
 `zoom`/`hero` with `from`/`to`.
 
 Higher `priority` wins first, then more-specific paths, then declaration order.
-Use `:id` for one dynamic segment, `*` for exactly one arbitrary segment, and
-suffix `**` for zero or more segments (`/docs/**` includes `/docs`).
+Inside a path, `*` matches exactly one arbitrary segment (`/photo/*`); suffix
+`**` matches zero or more (`/docs/**` includes `/docs`). A bare `*` remains a
+compatibility alias for `/**`. Named single-segment forms remain supported and
+rank above `*` when rules overlap, but their names are not captured or exposed.
 
 **All built-in transitions:** `fade` · `drill` · `slide` · `scroll` · `axis` · `sheet` · `hero` · `zoom` · `strip` · `blind` · `film` · `rotate` · `jaemin`.
 

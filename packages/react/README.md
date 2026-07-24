@@ -197,7 +197,7 @@ export default function MainLayout({ children }) {
 
 - Main → main: only the inner content boundary changes; the nav stays.
 - Main → detail: the common app-shell key changes; the nav leaves with it.
-- Project tab → project tab: the `/projects/:id` app-shell key stays; a project
+- Project tab → project tab: the current project base-path key stays; a project
   content boundary can change below its header and tabs.
 
 Use Next.js route groups to describe layout ownership, not to duplicate the
@@ -254,7 +254,7 @@ import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
 const config = {
   transitions: [
     { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/:id", transition: zoom() },
+    { from: "/gallery", to: "/gallery/*", transition: zoom() },
     { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
   ],
 };
@@ -263,7 +263,7 @@ const config = {
 - `on`: route family.
 - `from`/`to`: precise pair.
 - `ordered`: directional sequence.
-- Patterns support exact paths, `:id`, `*`, and suffix `**`.
+- Patterns support exact paths, a `*` path segment, and suffix `**`.
 - `priority` overrides path specificity.
 
 ## Effect index

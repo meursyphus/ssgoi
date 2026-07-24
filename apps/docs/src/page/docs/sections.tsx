@@ -626,7 +626,7 @@ const config: SsgoiConfig = {
       ? [
           {
             from: "/gallery",
-            to: "/photo/:id",
+            to: "/photo/*",
             transition: zoom({ type: "expand" }),
           },
           {
@@ -666,12 +666,14 @@ const config: SsgoiConfig = {
       </ul>
 
       <p className="mt-4 max-w-2xl text-xs leading-relaxed text-neutral-500">
-        Matching supports <code className="font-mono">:id</code> and{" "}
-        <code className="font-mono">*</code> for one segment, plus suffix{" "}
-        <code className="font-mono">**</code> for zero or more. Winners are
-        chosen by priority, then path specificity, then declaration order.
-        Selectors work with every effect; the examples show their most common
-        pairings.
+        Inside a path, <code className="font-mono">*</code> matches exactly one
+        segment; suffix <code className="font-mono">**</code> matches zero or
+        more. A bare <code className="font-mono">*</code> remains a
+        compatibility alias for <code className="font-mono">{"/**"}</code>.
+        Named single-segment forms remain supported and rank above a
+        single-segment <code className="font-mono">*</code> when rules overlap,
+        but their names are not captured or exposed. Winners are chosen by
+        priority, then path specificity, then declaration order.
       </p>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
