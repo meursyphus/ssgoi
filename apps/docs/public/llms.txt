@@ -7,7 +7,7 @@ Current core version: `@ssgoi/core@7.0.0-beta.0`
 ## Contents
 
 1. Next.js setup
-2. Route boundary contract
+2. Route boundaries and React lifetime
 3. Persistent layouts
 4. Sliding tabs
 5. Bottom navigation and route groups
@@ -75,101 +75,163 @@ export default function RootLayout({ children }) {
 }
 ```
 
-Layout requirements:
+This layout shell is the first structural requirement. When a route boundary
+unmounts, SSGOI temporarily reinserts the detached outgoing DOM node with
+`position: absolute` so its OUT animation can finish over the incoming page:
 
-- `relative`: positions the outgoing page.
-- `z-0`: creates a local stacking context.
-- `overflow-x-clip`: prevents horizontal overflow during slide and drill.
+- `relative`: gives the OUT page the correct containing block.
+- `z-0`: creates a local stacking context above the shell background.
+- `overflow-x-clip`: prevents horizontal overflow during slide, drill, and
+  similar transitions.
 
-## 2. Route boundary contract
+Put these classes on the element around `<Ssgoi>`, not on each route boundary.
 
-SSGOI does not provide a router-aware boundary. Create one for the application.
+## 2. Route boundaries and React lifetime
+
+SSGOI does not replace the router and does not initiate route unmounts. A React
+route boundary is a keyed DOM element with a transition id:
 
 ```tsx
-// app/ssgoi-transition-boundary.tsx
+<div key={boundary.key} data-ssgoi-transition={boundary.id}>
+  {children}
+</div>
+```
+
+- A changed `key` makes React remove the old subtree and mount a new one.
+- `data-ssgoi-transition` identifies that routed region for config matching.
+- `<Ssgoi>` observes the real removal/insertion, preserves the detached OUT
+  node for its exit animation, and animates the new IN node.
+
+The boundary component can remain mounted in a common layout while its keyed
+DOM child is replaced.
+
+The deprecated `<SsgoiTransition>` component only rendered the transition
+attribute. Set the attribute directly in the application boundary.
+
+For a small app, `key` and id can both be the pathname. For persistent layouts,
+do not make every layout choose an ad hoc key. Define route ownership once and
+let consumers pass a semantic `name`:
+
+```tsx
+// app/ssgoi-route-boundary.tsx
 "use client";
 
-import {
-  type ElementType,
-  type Key,
-  type ReactNode,
-} from "react";
-import { usePathname } from "next/navigation";
+import { type ReactNode } from "react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 
-type BoundaryScope = (pathname: string) => Key;
+type BoundaryName = "app-shell" | "main-content" | "project-content";
+type BoundaryIdentity = { id: string; key: string };
 
-const pathnameScope: BoundaryScope = (pathname) => pathname;
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
 
-export function SsgoiTransitionBoundary({
+function isRouteGroup(segment: string) {
+  return segment.startsWith("(") && segment.endsWith(")");
+}
+
+function pathFromSegments(segments: string[]) {
+  const path = segments
+    .filter((segment) => !isRouteGroup(segment))
+    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+    .filter(Boolean)
+    .join("/");
+
+  return path ? `/${path}` : null;
+}
+
+function resolveBoundary(
+  name: BoundaryName,
+  pathname: string,
+  segments: string[],
+): BoundaryIdentity {
+  const ownedRoute = pathFromSegments(segments) ?? pathname;
+
+  switch (name) {
+    case "app-shell": {
+      const routeGroup = segments.find(isRouteGroup);
+      if (routeGroup === "(main)") {
+        return { id: ownedRoute, key: "main-shell" };
+      }
+
+      const project = ownedRoute.match(/^\/projects\/[^/]+/)?.[0];
+      return { id: ownedRoute, key: project ?? ownedRoute };
+    }
+    case "project-content": {
+      const project = pathname.match(/^\/projects\/[^/]+/)?.[0];
+      const child = pathFromSegments(segments);
+      const id = project
+        ? child
+          ? `${project}${child}`
+          : project
+        : ownedRoute;
+      return { id, key: id };
+    }
+    case "main-content":
+      return { id: ownedRoute, key: ownedRoute };
+  }
+}
+
+export function SsgoiRouteBoundary({
   children,
-  as,
-  className,
-  scope = pathnameScope,
+  name,
 }: {
   children: ReactNode;
-  as?: ElementType;
-  className?: string;
-  scope?: BoundaryScope;
+  name: BoundaryName;
 }) {
   const pathname = usePathname();
-  const Component = as ?? "div";
+  const segments = useSelectedLayoutSegments("children");
+  const boundary = resolveBoundary(name, pathname, segments);
 
   return (
-    <Component
-      key={scope(pathname)}
-      data-ssgoi-transition={pathname}
-      className={className}
-    >
+    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
       {children}
-    </Component>
+    </div>
   );
 }
 ```
 
-The two values have different jobs:
+`BoundaryName` and `resolveBoundary` are application code, not
+`@ssgoi/react` API. A name owns both the route id and its React-key partition:
 
-- `key`: controls layout lifetime.
-- `data-ssgoi-transition`: identifies the real route for config matching.
+- Reuse a key only while that exact persistent shell should remain mounted.
+- Return a different key when navigation leaves the shell.
+- A constant key is safe only when the router itself removes the whole
+  boundary outside its route layout.
+- Put one `app-shell` boundary in the common app layout. Add child names only
+  for routed regions that change while the parent remains mounted.
 
-Returning the same scope key prevents a remount:
-
-```tsx
-<SsgoiTransitionBoundary
-  scope={(pathname) =>
-    pathname.startsWith("/products/")
-      ? "products-layout"
-      : pathname
-  }
->
-  {children}
-</SsgoiTransitionBoundary>
-```
-
-Do not put one pathname-keyed boundary around the entire application. Put
-boundaries in the layouts that own the UI region being animated.
+A public `scope(pathname)` callback can express the same mapping, but it is a
+low-level application pattern, not SSGOI API. Prefer names so one resolver owns
+the route policy.
 
 ## 3. Persistent layouts
 
-Use one outer stable boundary and one inner pathname boundary.
+The common app boundary can span main, detail, and standalone routes:
 
 ```tsx
-export default function ProductsLayout({ children }) {
-  return (
-    <SsgoiTransitionBoundary scope={() => "products-layout"}>
-      <ProductHeader />
-      <ProductTabs />
+// app/layout.tsx — replace the provider line from section 1.
+<SsgoiProvider>
+  <SsgoiRouteBoundary name="app-shell">{children}</SsgoiRouteBoundary>
+</SsgoiProvider>
+```
 
-      <SsgoiTransitionBoundary>
-        {children}
-      </SsgoiTransitionBoundary>
-    </SsgoiTransitionBoundary>
+A persistent child layout owns only the content boundary below its stable
+header, tabs, or navigation:
+
+```tsx
+export default function MainLayout({ children }) {
+  return (
+    <>
+      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
+      <BottomNav />
+    </>
   );
 }
 ```
 
-- Product category change: outer layout stays; inner content remounts.
-- Leaving products: outer layout and its chrome leave together.
-- Entering products: the outer layout owns the incoming transition.
+- Main → main: the app-shell key stays; inner content remounts.
+- Main → detail: the app-shell key changes; the nav leaves with it.
+- Project tab → project tab: the `/projects/:id` app-shell key stays; only a
+  project content boundary remounts below its header and tabs.
 
 When nested boundaries change in one DOM mutation, SSGOI uses the outer changed
 boundary. A nested boundary owns a transition only while its parent remains
@@ -184,9 +246,9 @@ const config = {
   transitions: [
     {
       ordered: [
-        "/products/all",
-        "/products/electronics",
-        "/products/fashion",
+        "/projects/acme/overview",
+        "/projects/acme/docs",
+        "/projects/acme/activity",
       ],
       transition: slide(),
     },
@@ -196,60 +258,54 @@ const config = {
 
 Increasing index is forward. Decreasing index is backward.
 
-The tab header belongs outside the inner pathname boundary:
+The tab header belongs outside the named content boundary:
 
 ```tsx
-<SsgoiTransitionBoundary scope={() => "products-layout"}>
-  <ProductTabs />
-  <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>
-</SsgoiTransitionBoundary>
+<>
+  <ProjectTabs />
+  <SsgoiRouteBoundary name="project-content">{children}</SsgoiRouteBoundary>
+</>
 ```
 
 ## 5. Bottom navigation and route groups
 
 ```text
 app/
-  layout.tsx                 # one SsgoiProvider
-  (tabs)/
-    layout.tsx               # stable shell + bottom nav
+  layout.tsx                 # one SsgoiProvider + named app-shell boundary
+  (main)/
+    layout.tsx               # content boundary + bottom nav
     page.tsx
     collections/page.tsx
     create/page.tsx
   (detail)/
-    layout.tsx               # pathname boundary, no nav
     photo/[id]/page.tsx
 ```
 
 ```tsx
-// app/(tabs)/layout.tsx
-export default function TabsLayout({ children }) {
+// app/(main)/layout.tsx
+export default function MainLayout({ children }) {
   return (
-    <SsgoiTransitionBoundary scope={() => "tabs-shell"}>
-      <SsgoiTransitionBoundary>
-        {children}
-      </SsgoiTransitionBoundary>
+    <>
+      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
       <BottomNav />
-    </SsgoiTransitionBoundary>
+    </>
   );
 }
 ```
 
-```tsx
-// app/(detail)/layout.tsx
-export default function DetailLayout({ children }) {
-  return <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>;
-}
-```
-
 - Tab → tab: only inner content remounts; nav stays.
-- Tab → detail: the `(tabs)` layout leaves; nav leaves with it.
-- Detail → tab: the tab shell enters with the nav.
+- Tab → detail: the common app-shell boundary remounts; nav leaves with it.
+- Detail → tab: the common app shell enters with the nav.
 
 Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
 
-Route groups do not change URLs. Parallel and intercepted routes require
-application-specific ownership. Use `useSelectedLayoutSegment()` when pathname
-changes should not remount the active children slot.
+Route groups do not change URLs. During a soft parallel/intercepted route,
+`usePathname()` points at the modal URL while the background `children` slot
+can remain unchanged. Resolve the background boundary id/key from
+`useSelectedLayoutSegments("children")`. In the layout that owns `@modal`,
+`useSelectedLayoutSegment("modal") !== null` explicitly reports an active
+modal slot. The same URL opened directly selects the detail children slot and
+therefore receives a detail key.
 
 ## 6. Transition config
 
@@ -322,10 +378,7 @@ Use `useLocation()` and nested layout routes:
 const { pathname } = useLocation();
 
 return (
-  <div
-    key={scope(pathname)}
-    data-ssgoi-transition={pathname}
-  >
+  <div key={pathname} data-ssgoi-transition={pathname}>
     <Outlet />
   </div>
 );
@@ -394,7 +447,7 @@ Wrong region animates:
 1. Find the nearest boundary whose key changed.
 2. Keep persistent UI outside the inner boundary.
 3. Put UI that must leave inside the outer boundary.
-4. Use a stable scope key for routes sharing one layout.
+4. Fix that boundary name's resolver so routes in the same shell share a key.
 
 Layout jumps:
 

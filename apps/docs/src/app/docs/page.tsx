@@ -28,13 +28,13 @@ const DOCS_FAQ = faqSchema([
   {
     question: "How do SSGOI page transitions work?",
     answer:
-      "When a route changes the old page normally unmounts and vanishes. SSGOI clones the leaving page and re-inserts it with position: absolute so the OUT animation can play while the new page mounts in place (IN). Both animate at the same time, and the cloned OUT page is removed when its animation ends.",
+      "A route-boundary key change unmounts the old region and mounts the new one. SSGOI preserves the detached leaving DOM node, temporarily reinserts it with position: absolute, and runs its OUT animation beside the incoming region's IN animation.",
   },
   {
     question:
       "Why does the SSGOI wrapper need the classes relative, z-0, and overflow-x-clip?",
     answer:
-      "relative gives the absolutely-positioned cloned page a positioned ancestor so it does not jump; z-0 creates a stacking context so the OUT page does not fall behind backgrounds; and overflow-x-clip prevents horizontal scrollbar flashes during slide, drill, and strip transitions.",
+      "relative gives the absolutely positioned OUT page the correct containing block; z-0 creates a stacking context so it does not fall behind backgrounds; and overflow-x-clip prevents horizontal scrollbar flashes during slide, drill, and strip transitions.",
   },
 ]);
 

@@ -9,35 +9,44 @@ pnpm dev
 
 - `src/components/ssgoi-config.ts`: one transition config.
 - `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `src/components/ssgoi-transition-boundary.tsx`: pathname → key utility.
+- `src/components/ssgoi-route-boundary.tsx`: name → route id/key utility.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
-The boundary keeps the real pathname as the transition id. Its `scope`
-function only controls the React key:
+The template keeps route lifetime rules in the boundary resolver. Layouts pass
+only a semantic name:
 
 ```tsx
-<div key={scope(pathname)} data-ssgoi-transition={pathname}>
+const boundary = resolveBoundary(name, pathname);
+
+<div key={boundary.key} data-ssgoi-transition={boundary.id}>
   {children}
-</div>
+</div>;
 ```
 
-Default scope returns the pathname and remounts on each route change.
+`page` uses the pathname for both values and remounts on every route change.
+`products-shell` uses a stable key for the persistent products layout while
+keeping the pathname as its transition id.
 
 ## Product tabs
 
 The products layout has two boundaries:
 
 ```tsx
-<SsgoiTransitionBoundary scope={() => "products-layout"}>
+<SsgoiRouteBoundary name="products-shell">
   <ProductHeader />
   <ProductTabs />
 
-  <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>
-</SsgoiTransitionBoundary>
+  <SsgoiRouteBoundary name="page">{children}</SsgoiRouteBoundary>
+</SsgoiRouteBoundary>
 ```
 
 - Category → category: inner boundary slides; header and tabs stay.
 - Products → another section: the outer products layout leaves.
+
+The constant outer key is safe here because `app/products/layout.tsx` itself
+unmounts outside `/products`. If the boundary moves into a common app layout,
+its named resolver must return `"products-layout"` only for product category
+paths and a different key for routes outside them.
 
 Direction comes from the single config:
 

@@ -16,6 +16,21 @@ export const DOCS_NAV: DocsNavGroup[] = [
         blurb: "Add the package for your framework.",
       },
       {
+        title: "Layout shell",
+        href: "/docs/layout",
+        blurb: "Set the OUT page's containing and stacking context.",
+      },
+      {
+        title: "Route boundaries",
+        href: "/docs/nested-boundaries",
+        blurb: "Use keys to define routed-region lifetime.",
+      },
+      {
+        title: "How it works",
+        href: "/docs/how-it-works",
+        blurb: "Unmount, reinsert, and animate, step by step.",
+      },
+      {
         title: "Compatibility",
         href: "/docs/compatibility",
         blurb: "Routers and browser support.",
@@ -29,21 +44,6 @@ export const DOCS_NAV: DocsNavGroup[] = [
         title: "Transitions",
         href: "/docs/transitions",
         blurb: "The thirteen built-in transitions.",
-      },
-      {
-        title: "Layout",
-        href: "/docs/layout",
-        blurb: "The three classes on the wrapper.",
-      },
-      {
-        title: "Persistent boundaries",
-        href: "/docs/nested-boundaries",
-        blurb: "Keep tabs and navigation mounted.",
-      },
-      {
-        title: "How it works",
-        href: "/docs/how-it-works",
-        blurb: "Clone & absolute, step by step.",
       },
     ],
   },

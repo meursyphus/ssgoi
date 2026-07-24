@@ -1,4 +1,4 @@
-import { SsgoiTransitionBoundary } from "@/components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@/components/ssgoi-route-boundary";
 
 export default function PostsLayout({
   children,
@@ -6,8 +6,8 @@ export default function PostsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+    <SsgoiRouteBoundary name="page" className="min-h-full bg-[#121212]">
       {children}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

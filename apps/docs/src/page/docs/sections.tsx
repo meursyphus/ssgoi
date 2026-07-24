@@ -133,17 +133,18 @@ export function InstallBody() {
           Set up
         </p>
         <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
-          Wrap once, mark your pages
+          Build the shell, then mark routed regions
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Two steps and the router feels native. The example below is React /
-          Next.js; other frameworks place the page marker directly on each
-          routed page, and Qwik passes the config as a QRL factory.
+          The order matters: establish the OUT page&apos;s layout context first,
+          then add keyed route boundaries. The example below is React / Next.js;
+          other frameworks place the marker directly on routed roots, and Qwik
+          passes the config as a QRL factory.
         </p>
 
         <SetupStep
           n="1"
-          title="Wrap your app once"
+          title="Create the layout shell"
           desc={
             <>
               Add the{" "}
@@ -185,7 +186,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* Layout shell: positioned ancestor + stacking context for the OUT clone. */}
+        {/* Layout shell for the reinserted OUT page. */}
         <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
           <SsgoiProvider>{children}</SsgoiProvider>
         </main>
@@ -199,56 +200,97 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <SetupStep
           n="2"
-          title="Wrap React routed content"
+          title="Add named route boundaries"
           desc={
             <>
-              In React adapters, create a pathname-based{" "}
+              A changed React{" "}
+              <code className="font-mono text-neutral-200">key</code> unmounts
+              the old region and mounts the new one.{" "}
               <code className="font-mono text-neutral-200">
                 data-ssgoi-transition
               </code>{" "}
-              boundary utility, then place it in the layouts that should
-              transition. Its key controls layout lifetime; the transition id
-              remains the real pathname.
+              gives those regions the ids used by transition config. Keep both
+              decisions in one resolver; layout files should pass only a
+              semantic name. The legacy{" "}
+              <code className="font-mono text-neutral-200">
+                &lt;SsgoiTransition&gt;
+              </code>{" "}
+              wrapper only added this attribute and is deprecated.
             </>
           }
-          code={`// ssgoi-transition-boundary.tsx
+          code={`// app/ssgoi-route-boundary.tsx
 "use client";
 
-import { type ElementType, type Key, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { type ReactNode } from "react";
+import {
+  usePathname,
+  useSelectedLayoutSegments,
+} from "next/navigation";
 
-type BoundaryScope = (pathname: string) => Key;
-const pathnameScope: BoundaryScope = (pathname) => pathname;
+type BoundaryName = "app-shell" | "main-content";
 
-export function SsgoiTransitionBoundary({
+function isRouteGroup(segment: string) {
+  return segment.startsWith("(") && segment.endsWith(")");
+}
+
+function normalizeSegment(segment: string) {
+  return segment
+    .replace("(...)", "")
+    .replace("(..)", "")
+    .replace("(.)", "");
+}
+
+function resolveBoundary(
+  name: BoundaryName,
+  { pathname, segments }: { pathname: string; segments: string[] },
+) {
+  const path = segments
+    .filter((segment) => !isRouteGroup(segment))
+    .map(normalizeSegment)
+    .filter(Boolean)
+    .join("/");
+  const id = path ? \`/\${path}\` : pathname;
+
+  if (name === "app-shell") {
+    const routeGroup = segments.find(isRouteGroup);
+    return { id, key: routeGroup === "(main)" ? "main-shell" : id };
+  }
+
+  return { id, key: id };
+}
+
+export function SsgoiRouteBoundary({
   children,
-  as,
-  className,
-  scope = pathnameScope,
+  name,
 }: {
   children: ReactNode;
-  as?: ElementType;
-  className?: string;
-  scope?: BoundaryScope;
+  name: BoundaryName;
 }) {
   const pathname = usePathname();
-  const Component = as ?? "div";
+  const segments = useSelectedLayoutSegments("children");
+  const boundary = resolveBoundary(name, { pathname, segments });
 
   return (
-    <Component
-      key={scope(pathname)}
-      data-ssgoi-transition={pathname}
-      className={className}
-    >
+    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
       {children}
-    </Component>
+    </div>
   );
 }
 
-// app/posts/layout.tsx
-export default function PostsLayout({ children }) {
-  return <SsgoiTransitionBoundary>{children}</SsgoiTransitionBoundary>;
-}`}
+// app/layout.tsx — replace the provider line from step 1
+<SsgoiProvider>
+  <SsgoiRouteBoundary name="app-shell">
+    {children}
+  </SsgoiRouteBoundary>
+</SsgoiProvider>
+
+// app/(main)/layout.tsx
+<>
+  <SsgoiRouteBoundary name="main-content">
+    {children}
+  </SsgoiRouteBoundary>
+  <BottomNav />
+</>`}
         />
 
         <NonReactBoundary />
@@ -299,11 +341,11 @@ function WhyStructure() {
         The wrapper classes aren&apos;t decoration
       </h3>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        When you navigate, the framework unmounts the leaving page. SSGOI clones
-        it back into the DOM with{" "}
+        When you navigate, the framework detaches the leaving page. SSGOI
+        temporarily reinserts that actual DOM node with{" "}
         <code className="font-mono text-neutral-200">position: absolute</code>{" "}
-        so its exit animation can play <em>over</em> the incoming page. An
-        absolutely-positioned clone needs the right ancestor, or it jumps and
+        so its exit animation can play <em>over</em> the incoming page. That
+        absolutely positioned OUT page needs the right ancestor, or it jumps and
         flickers — that&apos;s what these three classes on the layout shell are
         for:
       </p>
@@ -683,7 +725,7 @@ function TransitionCard({ entry }: { entry: TransitionDoc }) {
 const LAYOUT_CLASSES: { cls: string; why: string }[] = [
   {
     cls: "relative",
-    why: "The outgoing page is cloned with position: absolute — it needs a positioned ancestor or it jumps.",
+    why: "The detached outgoing page is reinserted with position: absolute — it needs the correct containing block.",
   },
   {
     cls: "z-0",
@@ -715,7 +757,7 @@ export function LayoutBody() {
 
       <CodeBlock
         className="mt-8"
-        code={`<main className="overflow-y-auto relative z-0 overflow-x-clip h-dvh">
+        code={`<main className="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
   <Ssgoi config={config}>{children}</Ssgoi>
 </main>`}
       />
@@ -747,8 +789,9 @@ export function HowItWorksBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl leading-relaxed text-neutral-400">
-        When a route changes, the old page would normally unmount and vanish.
-        SSGOI clones it back into the DOM with{" "}
+        A boundary key change makes the framework unmount the old routed region
+        and mount a new one. SSGOI preserves the detached outgoing DOM node and
+        temporarily reinserts it with{" "}
         <code className="font-mono text-neutral-200">position: absolute</code>{" "}
         so the OUT animation can play while the new page mounts in place.
       </p>
@@ -756,22 +799,22 @@ export function HowItWorksBody() {
       <ol className="mt-8 space-y-3 text-sm text-neutral-300">
         <FlowStep
           n="1"
-          body="User navigates — framework unmounts the old page."
+          body="Navigation changes the boundary key, so the framework unmounts the old routed region."
         />
         <FlowStep
           n="2"
-          body="SSGOI clones the leaving page and re-inserts it with position: absolute (OUT)."
+          body="SSGOI preserves the detached leaving node and reinserts it with position: absolute (OUT)."
         />
         <FlowStep n="3" body="The new page mounts at its natural place (IN)." />
         <FlowStep n="4" body="OUT and IN animate at the same time." />
         <FlowStep
           n="5"
-          body="The cloned OUT page is removed when its animation ends."
+          body="The reinserted OUT page is removed when its animation ends."
         />
       </ol>
 
       <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-        That clone is why the wrapper needs{" "}
+        That reinserted OUT page is why the wrapper needs{" "}
         <code className="font-mono text-neutral-300">relative z-0</code> —
         without a positioned, stacking-context ancestor, the absolute-positioned
         OUT page either jumps to the wrong spot or falls behind the background.
