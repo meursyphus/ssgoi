@@ -33,7 +33,11 @@ The factory returns one effect config. Put it in a route rule.
 ```ts
 const config = {
   transitions: [
-    { from: "/posts", to: "/post/:id", transition: drill() },
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
     {
       on: "/settings/**",
       except: "/settings",

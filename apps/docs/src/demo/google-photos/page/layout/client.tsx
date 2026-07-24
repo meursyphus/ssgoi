@@ -11,20 +11,12 @@ const config: SsgoiConfig = {
   // Always preserve scroll inside the mobile-frame.
   preserveScroll: true,
   transitions: [
-    {
-      from: `${BASE}/collections`,
-      to: `${BASE}/c/*`,
-      transition: drill(),
-    },
+    { on: `${BASE}/c/*`, transition: drill() },
     // Collage maker rises as a sheet over the Create tab.
-    {
-      from: `${BASE}/create`,
-      to: `${BASE}/collage`,
-      transition: sheet(),
-    },
+    { on: `${BASE}/collage`, transition: sheet() },
     // Every detail screen has its own chrome (back button, meta) that the
     // surrounding tabs don't share, so cross-fade chrome on both pairs.
-    // BASE↔c/* pair also gets generated but no UI flow triggers it.
+    // BASE↔c/* also matches this rule, but no UI flow triggers it.
     {
       from: [BASE, `${BASE}/c/*`, `${BASE}/p/*`],
       to: [BASE, `${BASE}/c/*`, `${BASE}/p/*`],

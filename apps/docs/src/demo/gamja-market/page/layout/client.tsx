@@ -12,25 +12,16 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // home ↔ product detail (drill)
-    { from: BASE, to: `${BASE}/products/*`, transition: drill() },
+    { on: `${BASE}/products/*`, transition: drill() },
     // home ↔ orders list (drill)
-    { from: BASE, to: `${BASE}/orders`, transition: drill() },
-    // orders list ↔ order detail (drill)
+    // orders is one nested drill stack, including its detail pages
     {
-      from: `${BASE}/orders`,
-      to: `${BASE}/orders/*`,
+      on: `${BASE}/orders/**`,
       transition: drill(),
     },
-    // order detail ↔ review write (sheet)
+    // review write is a sheet regardless of whether it opens from home or an order
     {
-      from: `${BASE}/orders/*`,
-      to: `${BASE}/review/*`,
-      transition: sheet({ type: "static" }),
-    },
-    // home ↔ review write (sheet) — FAB 진입
-    {
-      from: BASE,
-      to: `${BASE}/review/*`,
+      on: `${BASE}/review/*`,
       transition: sheet({ type: "static" }),
     },
   ],

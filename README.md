@@ -219,7 +219,7 @@ const config = {
       to: "/photo/:id",
       transition: zoom({ type: "expand" }),
     },
-    { from: "/feed", to: "/compose", transition: sheet() },
+    { on: "/compose", transition: sheet() },
     {
       ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
       transition: slide(),
@@ -237,6 +237,10 @@ Rule forms:
   mean “any of these patterns”.
 - `ordered` requires both routes to be in the list. Increasing index is forward
   and decreasing index is backward.
+
+These selectors work with every effect; the usual convention is `drill` and
+`sheet` with `on`, `slide`/`axis`/directional `scroll` with `ordered`, and
+`zoom`/`hero` with `from`/`to`.
 
 Higher `priority` wins first, then more-specific paths, then declaration order.
 Use `:id` for one dynamic segment, `*` for exactly one arbitrary segment, and

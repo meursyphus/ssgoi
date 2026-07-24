@@ -16,7 +16,7 @@ export type DrillType = "parallax" | "slide";
  *
  * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
  * Migrate `type: "crossfade"` to `type: "slide"` — same behavior, new name.
- * Example: `{ from: "/list", to: "/detail", transition: drill({ type: "slide" }) }`.
+ * Example: `{ on: "/detail/**", transition: drill({ type: "slide" }) }`.
  * Kept here only for backward compatibility — will be removed in a future major.
  */
 export type DrillTypeDeprecated = "crossfade";

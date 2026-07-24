@@ -11,7 +11,7 @@ const ssgoiConfig$ = $(() => ({
       to: "/pinterest/*",
       transition: zoom({ type: "expand" as const }),
     },
-    { from: "/posts", to: "/posts/*", transition: drill() },
+    { on: "/posts/**", except: "/posts", transition: drill() },
     {
       from: "/profile",
       to: "/profile/*",

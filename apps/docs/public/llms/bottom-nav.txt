@@ -128,7 +128,7 @@ Outer config — screen-level moves only (the nested provider owns tab↔tab):
 ```ts
 const outerConfig: SsgoiConfig = {
   transitions: [
-    { from: "/collections", to: "/c/*", transition: drill() },
+    { on: "/c/*", transition: drill() },
     {
       from: ["/", "/c/*", "/p/*"],
       to: ["/", "/c/*", "/p/*"],

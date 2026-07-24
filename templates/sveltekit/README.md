@@ -85,7 +85,9 @@ full pathname for tab transitions.
   import { drill } from "@ssgoi/svelte/view-transitions";
 
   const config = {
-    transitions: [{ from: "/posts", to: "/posts/*", transition: drill() }],
+    transitions: [
+      { on: "/posts/**", except: "/posts", transition: drill() },
+    ],
   };
 </script>
 ```

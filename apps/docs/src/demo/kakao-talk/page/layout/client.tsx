@@ -15,16 +15,12 @@ const config: SsgoiConfig = {
   preserveScroll: true,
   transitions: [
     // home / chats → profile detail — sheet static (배경 가만, 시트만 올라옴)
-    {
-      from: [BASE, `${BASE}/chats`],
-      to: `${BASE}/profile/*`,
-      transition: sheet({ type: "static" }),
-    },
+    { on: `${BASE}/profile/*`, transition: sheet({ type: "static" }) },
 
     // chats → chat detail — drill
     {
-      from: `${BASE}/chats`,
-      to: `${BASE}/chats/*`,
+      on: `${BASE}/chats/**`,
+      except: `${BASE}/chats`,
       transition: drill(),
     },
   ],

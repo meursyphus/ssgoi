@@ -65,7 +65,7 @@ export type TransitionDoc = {
   /** Intro paragraph for the detail page header. */
   intro: string;
   /** Natural route rule for this effect in the usage example. */
-  ruleStyle: "pair" | "ordered";
+  ruleStyle: "stack" | "target" | "pair" | "ordered";
   variants: TransitionVariant[];
 };
 
@@ -76,7 +76,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "Hierarchical push/pop, like an iOS navigation stack. Use it when the user goes one level deeper — a list into its detail — and back out again.",
-    ruleStyle: "pair",
+    ruleStyle: "stack",
     variants: [
       {
         label: "parallax",
@@ -229,7 +229,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     use: "drill-in",
     intro:
       "A bottom sheet that slides up over the current page — for modal-like detail that keeps the origin in context.",
-    ruleStyle: "pair",
+    ruleStyle: "target",
     variants: [
       {
         label: "static",

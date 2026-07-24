@@ -16,8 +16,7 @@ const config: SsgoiConfig = {
       transition: zoom({ type: "blur", variant: "fade" }),
     },
     {
-      from: `${BASE}/listings/:id`,
-      to: `${BASE}/listings/:id/checkout/*`,
+      on: `${BASE}/listings/:id/checkout/*`,
       transition: sheet({ type: "static" }),
     },
   ],

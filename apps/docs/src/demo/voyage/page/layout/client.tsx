@@ -12,13 +12,7 @@ const BASE = "/demo/voyage";
 // the page out of focus, the way Gmail's compose floats over the inbox.
 const config: SsgoiConfig = {
   preserveScroll: true,
-  transitions: [
-    {
-      from: BASE,
-      to: `${BASE}/compose`,
-      transition: sheet({ type: "blur" }),
-    },
-  ],
+  transitions: [{ on: `${BASE}/compose`, transition: sheet({ type: "blur" }) }],
 };
 
 export function VoyageLayoutClient({ children }: { children: ReactNode }) {

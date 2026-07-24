@@ -24,7 +24,7 @@ import { drill, zoom } from "@ssgoi/qwik/view-transitions";
 const config$ = $(() => ({
   preserveScroll: { exclude: ["/post/*"] },
   transitions: [
-    { from: "/post", to: "/post/*", transition: drill() },
+    { on: "/post/**", except: "/post", transition: drill() },
     {
       from: "/gallery",
       to: "/gallery/*",

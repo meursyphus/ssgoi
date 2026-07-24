@@ -447,7 +447,7 @@ import { drill } from "@ssgoi/qwik/view-transitions";
 
 const config$ = $(() => ({
   transitions: [
-    { from: "/posts", to: "/posts/*", transition: drill() },
+    { on: "/posts/**", except: "/posts", transition: drill() },
   ],
 }));
 
@@ -644,6 +644,8 @@ const config: SsgoiConfig = {
         <code className="font-mono">*</code> for one segment, plus suffix{" "}
         <code className="font-mono">**</code> for zero or more. Winners are
         chosen by priority, then path specificity, then declaration order.
+        Selectors work with every effect; the examples show their most common
+        pairings.
       </p>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">

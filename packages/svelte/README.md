@@ -94,7 +94,11 @@ Define different transitions for different routes:
       { ordered: ["/home", "/about"], transition: scroll() },
 
       // Drill in when entering details
-      { from: "/products", to: "/products/*", transition: drill() },
+      {
+        on: "/products/**",
+        except: "/products",
+        transition: drill(),
+      },
 
       // Shared element image transitions
       {

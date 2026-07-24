@@ -32,7 +32,7 @@ const ssgoiConfig$ = $(() => ({
       to: "/gallery/*",
       transition: zoom({ type: "expand" }),
     },
-    { from: "/posts", to: "/posts/*", transition: drill() },
+    { on: "/posts/**", except: "/posts", transition: drill() },
   ],
 }));
 

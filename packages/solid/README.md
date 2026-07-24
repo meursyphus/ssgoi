@@ -95,7 +95,11 @@ const config = {
     { from: "/", to: "/about", transition: fade() },
 
     // iOS-style drill-in when entering a detail page
-    { from: "/products", to: "/products/*", transition: drill() },
+    {
+      on: "/products/**",
+      except: "/products",
+      transition: drill(),
+    },
 
     // Card-to-detail zoom (needs matching data-zoom-*-key)
     {

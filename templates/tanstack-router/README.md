@@ -72,7 +72,7 @@ export default function DemoLayout({ children }) {
   const config = useMemo(
     () => ({
       transitions: [
-        { from: "/posts", to: "/posts/*", transition: drill() },
+        { on: "/posts/**", except: "/posts", transition: drill() },
         {
           from: "/pinterest",
           to: "/pinterest/*",

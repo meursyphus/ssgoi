@@ -183,7 +183,7 @@ const config = {
   transitions: [
     {
       on: "/post/**",
-      except: ["/", "/about", "/contact"],
+      except: "/post",
       transition: drill(),
     },
     {
@@ -206,6 +206,11 @@ Three exclusive selector shapes:
 - **`{ on, except?, transition }`** — route-family membership. Outside → inside is forward; inside → outside is backward; navigation inside the family uses popstate and semantic history. Use `except` to keep top-level routes outside a catch-all stack.
 - **`{ from, to, transition, bidirectional? }`** — precise pair/families. Normal orientation is forward and reverse is backward. `bidirectional` defaults to `true`; arrays mean OR on each side.
 - **`{ ordered, transition }`** — both endpoints must match the list. Increasing index is forward and decreasing index is backward.
+
+Selectors are effect-agnostic: every transition can be used with `on`,
+`from`/`to`, or `ordered`. The conventional pairings are `drill`/`sheet` with
+`on`, `slide`/`axis`/directional `scroll` with `ordered`, and `zoom`/`hero`
+with `from`/`to`.
 
 Candidates are selected by higher explicit `priority` (default `0`), then path
 specificity (exact/static > `:id` > `*` > `**`), then earlier declaration

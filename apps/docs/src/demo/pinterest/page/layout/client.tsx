@@ -19,8 +19,8 @@ const config: SsgoiConfig = {
     },
     // search ↔ search result drill
     {
-      from: `${BASE}/search`,
-      to: `${BASE}/search/*`,
+      on: `${BASE}/search/**`,
+      except: `${BASE}/search`,
       transition: drill({ type: "slide" }),
     },
   ],

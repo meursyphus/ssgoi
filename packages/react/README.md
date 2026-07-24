@@ -147,8 +147,12 @@ const config = {
     // Calm cross-fade between tabs
     { from: "/home", to: "/about", transition: fade() },
 
-    // iOS-style drill-in when entering details
-    { from: "/products", to: "/products/*", transition: drill() },
+    // iOS-style stack for the products section
+    {
+      on: "/products/**",
+      except: "/products",
+      transition: drill(),
+    },
 
     // Card-to-detail zoom (needs matching data-zoom-*-key)
     {

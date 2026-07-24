@@ -14,7 +14,7 @@ const BASE = "/demo/youtube-music-web";
 const config: SsgoiConfig = {
   transitions: [
     // home ↔ watch — sheet (default static: 백그라운드는 가만히, 시트만 슬라이드)
-    { from: BASE, to: `${BASE}/watch`, transition: sheet() },
+    { on: `${BASE}/watch`, transition: sheet() },
   ],
 };
 

@@ -17,7 +17,15 @@ export function TransitionDetailBody({ doc }: { doc: TransitionDoc }) {
       ordered: ["/first", "/second", "/third"],
       transition: ${effect},
     }`
-      : `{ from: "/list", to: "/detail/:id", transition: ${effect} }`;
+      : doc.ruleStyle === "stack"
+        ? `{
+      on: "/products/**",
+      except: "/products",
+      transition: ${effect},
+    }`
+        : doc.ruleStyle === "target"
+          ? `{ on: "/compose", transition: ${effect} }`
+          : `{ from: "/list", to: "/detail/:id", transition: ${effect} }`;
 
   const setup = `import { ${doc.name} } from "@ssgoi/react/view-transitions";
 

@@ -14,7 +14,7 @@ const ssgoiConfig = {
       to: "/pinterest/*",
       transition: zoom({ type: "expand" }),
     },
-    { from: "/posts", to: "/posts/*", transition: drill() },
+    { on: "/posts/**", except: "/posts", transition: drill() },
     {
       from: "/profile",
       to: "/profile/*",

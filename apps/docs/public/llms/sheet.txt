@@ -33,15 +33,13 @@ Returns one effect config with different forward/backward physics.
 ```ts
 const config = {
   transitions: [
-    { from: "/feed", to: "/compose", transition: sheet() },
+    { on: "/compose", transition: sheet() },
     {
-      from: "/",
-      to: "/settings/:id",
+      on: "/settings/:id",
       transition: sheet({ type: "scale" }),
     },
     {
-      from: "/story",
-      to: "/story/new",
+      on: "/story/new",
       transition: sheet({ type: "blur" }),
     },
   ],

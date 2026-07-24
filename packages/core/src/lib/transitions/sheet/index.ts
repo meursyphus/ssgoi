@@ -19,7 +19,7 @@ export type SheetType = "static" | "scale" | "blur";
  *
  * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
  * Migrate `type: "background-scale"` to `type: "scale"` — same behavior, new name.
- * Example: `{ from: "/list", to: "/sheet", transition: sheet({ type: "scale" }) }`.
+ * Example: `{ on: "/sheet", transition: sheet({ type: "scale" }) }`.
  * Kept here only for backward compatibility — will be removed in a future major.
  */
 export type SheetTypeDeprecated = "background-scale";

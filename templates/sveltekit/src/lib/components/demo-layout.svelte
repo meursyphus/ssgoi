@@ -17,7 +17,7 @@
 				transition: zoom({ type: 'expand' })
 			},
 			// Posts transitions - drill effect
-			{ from: '/posts', to: '/posts/*', transition: drill() },
+			{ on: '/posts/**', except: '/posts', transition: drill() },
 			// Profile transitions
 			{
 				from: '/profile',

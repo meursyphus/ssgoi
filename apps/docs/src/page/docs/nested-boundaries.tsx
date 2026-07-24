@@ -94,8 +94,8 @@ function TabShell({ children }) {
         code={`// Outer provider — list ↔ detail, sheets, shared elements.
 const config: SsgoiConfig = {
   transitions: [
-    { from: "/collections", to: "/c/*", transition: drill() },
-    { from: "/create", to: "/collage", transition: sheet() },
+    { on: "/c/*", transition: drill() },
+    { on: "/collage", transition: sheet() },
     {
       from: ["/", "/c/*", "/p/*"],
       to: ["/", "/c/*", "/p/*"],

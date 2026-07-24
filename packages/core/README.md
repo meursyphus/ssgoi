@@ -169,6 +169,10 @@ Route rules come in three shapes:
 - **`{ ordered, transition }`** — both endpoints must be in the ordered list.
   Increasing index is forward; decreasing index is backward.
 
+Selectors are effect-agnostic. Conventionally, use `on` for `drill`/`sheet`,
+`ordered` for `slide`/`axis`/directional `scroll`, and `from`/`to` for
+`zoom`/`hero`.
+
 Rules may set `priority` (default `0`). Candidates are chosen by higher
 priority, then path specificity, then earlier declaration order. Patterns
 support exact paths, `:id` (one dynamic segment), `*` (exactly one arbitrary
