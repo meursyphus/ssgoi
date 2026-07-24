@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { type SsgoiConfig } from "@ssgoi/react";
-import { drill, hero, sheet } from "@ssgoi/react/view-transitions";
+import { axis, drill, hero, sheet } from "@ssgoi/react/view-transitions";
 import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 
 const BASE = "/demo/google-photos";
@@ -11,6 +11,10 @@ const config: SsgoiConfig = {
   // Always preserve scroll inside the mobile-frame.
   preserveScroll: true,
   transitions: [
+    {
+      ordered: [BASE, `${BASE}/collections`, `${BASE}/create`],
+      transition: axis({ type: "y", variant: "non-directional" }),
+    },
     { on: `${BASE}/c/*`, transition: drill() },
     // Collage maker rises as a sheet over the Create tab.
     { on: `${BASE}/collage`, transition: sheet() },
@@ -31,10 +35,7 @@ export function GooglePhotosLayoutClient({
   children: ReactNode;
 }) {
   return (
-    // No shared pathname boundary here: the `(tabs)` group brings its own
-    // stable-key double boundary (MobileTabsShell) and `(detail)` brings a
-    // per-route boundary (MobileDetailShell). A layout-level boundary would
-    // remount the tab shell — bottom nav included — on every tab move.
+    // Boundaries live in the `(tabs)` and `(detail)` route-group layouts.
     <MobileShowcaseShell
       config={config}
       contentClassName="bg-white"

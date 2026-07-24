@@ -1,57 +1,23 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Ssgoi } from "@ssgoi/react";
-import { slide } from "@ssgoi/react/view-transitions";
 import { SsgoiTransitionBoundary } from "@/components/ssgoi-transition-boundary";
-const categories = [
-  {
-    id: "all",
-    label: "All",
-    path: "/products/all",
-  },
-  {
-    id: "electronics",
-    label: "Tech",
-    path: "/products/electronics",
-  },
-  {
-    id: "fashion",
-    label: "Fashion",
-    path: "/products/fashion",
-  },
-  {
-    id: "home",
-    label: "Home",
-    path: "/products/home",
-  },
-  {
-    id: "beauty",
-    label: "Beauty",
-    path: "/products/beauty",
-  },
-];
+import { PRODUCT_CATEGORIES } from "@/components/ssgoi-config";
+
 export default function ProductsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const config = useMemo(
-    () => ({
-      transitions: [
-        {
-          ordered: categories.map((category) => category.path),
-          transition: slide(),
-        },
-      ],
-    }),
-    [],
-  );
+
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col">
+    <SsgoiTransitionBoundary
+      scope={() => "products-layout"}
+      className="min-h-screen bg-[#121212] flex flex-col"
+    >
       {/* Header - Fixed */}
       <div className="px-4 pt-6 pb-3 flex-shrink-0">
         <h1 className="text-sm font-medium text-white mb-1">Shop</h1>
@@ -63,7 +29,7 @@ export default function ProductsLayout({
       {/* Category Tabs - Fixed */}
       <div className="px-4 mb-4 flex-shrink-0">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {categories.map((cat) => (
+          {PRODUCT_CATEGORIES.map((cat) => (
             <Link
               key={cat.id}
               href={cat.path}
@@ -77,12 +43,10 @@ export default function ProductsLayout({
 
       {/* Tab Content - Slide transitions here */}
       <div className="flex-1 overflow-hidden relative">
-        <Ssgoi config={config}>
-          <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-            {children}
-          </SsgoiTransitionBoundary>
-        </Ssgoi>
+        <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+          {children}
+        </SsgoiTransitionBoundary>
       </div>
-    </div>
+    </SsgoiTransitionBoundary>
   );
 }

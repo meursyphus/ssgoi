@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * Detail-group counterpart of `MobileTabsShell`: a plain per-route pathname
  * boundary for fullscreen screens without the bottom nav. Render it from a
  * `(detail)` route-group layout — the tab shell (nav included) unmounts on
- * entry, so the outer provider pairs this boundary with the shell's and
+ * entry, so SSGOI pairs this boundary with the leaving shell boundary and
  * detail screens are nav-free by construction.
  */
 export function MobileDetailShell({

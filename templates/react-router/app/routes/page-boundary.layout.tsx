@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Outlet } from "react-router";
 import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
 
-export const Route = createFileRoute("/posts")({
-  component: () => (
+export default function PageBoundaryLayout() {
+  return (
     <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
       <Outlet />
     </SsgoiTransitionBoundary>
-  ),
-});
+  );
+}

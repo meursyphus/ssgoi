@@ -6,11 +6,9 @@ import type { HostAnimation } from "@ssgoi/core/internal";
 /**
  * Shared HostAnimation context.
  *
- * Provided once at the top by `DocsSsgoiProvider`. Demos consume the same host
- * via `useShowcaseHost()` so the playback dock at `app/demo/layout.tsx` and
- * every nested `<Ssgoi host={...}>` share one controller. Keeping the context
- * here (instead of inside `demo-shell.tsx`) lets consumers reach the host
- * without dragging `DemoShell` into their import graph.
+ * Provided once at the top by `DocsSsgoiProvider`. The active catalog or demo
+ * SSGOI root consumes the same host as the playback dock. Keeping the context
+ * here lets consumers reach it without importing `DemoShell`.
  */
 export const HostContext = createContext<HostAnimation | null>(null);
 

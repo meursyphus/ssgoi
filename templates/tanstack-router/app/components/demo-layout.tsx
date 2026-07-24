@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, zoom } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { ssgoiConfig } from "./ssgoi-config";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -11,33 +10,6 @@ interface DemoLayoutProps {
 export default function DemoLayout({ children }: DemoLayoutProps) {
   const location = useRouterState({ select: (s) => s.location });
   const pathname = location.pathname;
-
-  const config = useMemo(
-    () => ({
-      preserveScroll: { exclude: ["/posts/*"] },
-      transitions: [
-        // Pinterest transitions
-        {
-          from: "/pinterest",
-          to: "/pinterest/*",
-          transition: zoom({ type: "expand" }),
-        },
-        // Posts transitions - drill effect
-        {
-          on: "/posts/**",
-          except: "/posts",
-          transition: drill(),
-        },
-        // Profile transitions
-        {
-          from: "/profile",
-          to: "/profile/*",
-          transition: zoom({ type: "static" }),
-        },
-      ],
-    }),
-    [],
-  );
 
   return (
     <div className="h-full bg-[#121212] flex z-0">
@@ -48,11 +20,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={config}>
-            <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-              {children}
-            </SsgoiTransitionBoundary>
-          </Ssgoi>
+          <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

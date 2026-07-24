@@ -73,6 +73,7 @@ export function createSggoiTransitionContext(
   } = options;
 
   const host = contextOptions.host ?? new HostAnimation();
+  const unmountGroup = {};
 
   const detector = createNavigationDetector();
   const directionTracker = createNavigationDirectionTracker();
@@ -541,6 +542,7 @@ export function createSggoiTransitionContext(
     element: HTMLElement,
     path: string,
     removalAnchor?: UnmountAnchor,
+    emit = true,
   ) => {
     const state = hiddenState.get(element);
     if (state) {
@@ -557,6 +559,8 @@ export function createSggoiTransitionContext(
         return;
       }
     }
+
+    if (!emit) return;
 
     const anchor = removalAnchor ?? readAnchor(element);
     pendingOut = {
@@ -577,7 +581,11 @@ export function createSggoiTransitionContext(
   // strict-mode double-mount.
   const registered = new WeakSet<HTMLElement>();
 
-  const register: SsgoiContext["register"] = (path, element) => {
+  const register: SsgoiContext["register"] = (
+    path,
+    element,
+    { enter = true } = {},
+  ) => {
     if (registered.has(element)) return;
     registered.add(element);
 
@@ -603,16 +611,23 @@ export function createSggoiTransitionContext(
     // not "entering" — set it up but don't fire an IN until React reveals it.
     if (!vis.isHidden) {
       captureVisibleDisplay(element, state);
-      initializeContext(element, path);
-      pendingIn = {
-        element,
-        parent: element.parentElement,
-        nextSibling: element.nextElementSibling,
-      };
-      handleArrival(path, "in");
+      if (enter) {
+        initializeContext(element, path);
+        pendingIn = {
+          element,
+          parent: element.parentElement,
+          nextSibling: element.nextElementSibling,
+        };
+        handleArrival(path, "in");
+      }
     }
 
-    watchUnmount(element, (anchor) => handleRemoval(element, path, anchor));
+    watchUnmount(
+      element,
+      (anchor, options) =>
+        handleRemoval(element, path, anchor, options?.emit ?? true),
+      unmountGroup,
+    );
   };
 
   // Per-path ref callbacks are cached so adapters can drop `refFor(path)`

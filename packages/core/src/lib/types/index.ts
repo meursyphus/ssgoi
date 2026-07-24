@@ -297,7 +297,20 @@ export type SsgoiContext = {
    * transition, and watching for removal via a shared MutationObserver.
    * Idempotent per element — repeat calls with the same node are no-ops.
    */
-  register: (path: string, element: HTMLElement) => void;
+  register: (
+    path: string,
+    element: HTMLElement,
+    options?: {
+      /**
+       * Whether this registration represents an entering transition boundary.
+       *
+       * Nested boundaries discovered inside a newly-mounted parent boundary
+       * are registered with `enter: false`: they must be watched for future
+       * child-route changes, but the parent owns the current IN event.
+       */
+      enter?: boolean;
+    },
+  ) => void;
 
   /**
    * Returns a path-bound ref callback. Stable across calls for the same

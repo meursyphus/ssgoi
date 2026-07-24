@@ -1,31 +1,15 @@
 import { A, useLocation } from "@solidjs/router";
 import { For, type JSX } from "solid-js";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
-import { slide } from "@ssgoi/solid/view-transitions";
-import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
-
-const categories = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
-];
-
-const productConfig = {
-  transitions: [
-    {
-      ordered: categories.map((category) => category.path),
-      transition: slide(),
-    },
-  ],
-} satisfies SsgoiConfig;
+import { PRODUCT_CATEGORIES } from "../ssgoi-config";
 
 export default function ProductsLayout(props: { children?: JSX.Element }) {
   const location = useLocation();
 
   return (
-    <div class="min-h-screen bg-[#121212] flex flex-col">
+    <div
+      data-ssgoi-transition={location.pathname}
+      class="min-h-screen bg-[#121212] flex flex-col"
+    >
       <div class="px-4 pt-6 pb-3 flex-shrink-0">
         <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
         <p class="text-xs text-neutral-500">Discover our curated collection</p>
@@ -33,7 +17,7 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
 
       <div class="px-4 mb-4 flex-shrink-0">
         <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          <For each={categories}>
+          <For each={PRODUCT_CATEGORIES}>
             {(category) => (
               <A
                 href={category.path}
@@ -52,13 +36,7 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
         </div>
       </div>
 
-      <div class="flex-1 overflow-hidden relative">
-        <Ssgoi config={productConfig}>
-          <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
-            {props.children}
-          </SsgoiTransitionBoundary>
-        </Ssgoi>
-      </div>
+      <div class="flex-1 overflow-hidden relative">{props.children}</div>
     </div>
   );
 }

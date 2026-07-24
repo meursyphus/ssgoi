@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 class FakeNode {
   childNodes: FakeNode[] = [];
+  parentElement: FakeNode | null = null;
   isConnected = false;
 }
 
@@ -82,6 +83,7 @@ describe("watchUnmount", () => {
     const node = new FakeNode();
     const child = new FakeNode();
     node.childNodes = [child];
+    child.parentElement = node;
     node.isConnected = false;
     child.isConnected = false;
 
@@ -94,6 +96,49 @@ describe("watchUnmount", () => {
     const anchor = cb.mock.calls[0]?.[0];
     expect(anchor?.parent).toBe(parent);
     expect(anchor?.nextSibling).toBe(nextSibling);
+  });
+
+  it("emits only the outer boundary when a watched subtree is removed", async () => {
+    const { watchUnmount } = await import("./unmount-observer");
+    const group = {};
+    const outer = new FakeNode();
+    const inner = new FakeNode();
+    outer.childNodes = [inner];
+    inner.parentElement = outer;
+    outer.isConnected = false;
+    inner.isConnected = false;
+
+    const outerCb = vi.fn();
+    const innerCb = vi.fn();
+    watchUnmount(outer as unknown as HTMLElement, outerCb, group);
+    watchUnmount(inner as unknown as HTMLElement, innerCb, group);
+
+    fireRemoval(outer);
+    await flushMicrotasks();
+
+    expect(outerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
+    expect(innerCb.mock.calls[0]?.[1]).toEqual({ emit: false });
+  });
+
+  it("keeps nested boundaries independent across different contexts", async () => {
+    const { watchUnmount } = await import("./unmount-observer");
+    const outer = new FakeNode();
+    const inner = new FakeNode();
+    outer.childNodes = [inner];
+    inner.parentElement = outer;
+    outer.isConnected = false;
+    inner.isConnected = false;
+
+    const outerCb = vi.fn();
+    const innerCb = vi.fn();
+    watchUnmount(outer as unknown as HTMLElement, outerCb, {});
+    watchUnmount(inner as unknown as HTMLElement, innerCb, {});
+
+    fireRemoval(outer);
+    await flushMicrotasks();
+
+    expect(outerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
+    expect(innerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
   });
 
   it("does NOT fire on a MOVE (node reattached -> isConnected), and keeps watching", async () => {

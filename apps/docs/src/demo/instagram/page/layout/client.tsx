@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { type SsgoiConfig } from "@ssgoi/react";
-import { zoom } from "@ssgoi/react/view-transitions";
+import { slide, zoom } from "@ssgoi/react/view-transitions";
 import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 
 const BASE = "/demo/instagram";
@@ -17,6 +17,15 @@ const config: SsgoiConfig = {
       from: `${BASE}/profile/*`,
       to: `${BASE}/feed/*`,
       transition: zoom({ type: "static" }),
+    },
+    {
+      ordered: [
+        `${BASE}/profile/:id`,
+        `${BASE}/profile/:id/reels`,
+        `${BASE}/profile/:id/remix`,
+        `${BASE}/profile/:id/tagged`,
+      ],
+      transition: slide(),
     },
   ],
 };
