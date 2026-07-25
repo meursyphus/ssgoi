@@ -9,7 +9,6 @@ import { useShowcaseFrameBridge } from "@/lib/hooks";
 import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
 
 const config: SsgoiConfig = {
-  preserveScroll: false,
   transitions: [],
 };
 

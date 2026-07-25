@@ -10,7 +10,6 @@ export const PRODUCT_CATEGORIES = [
 ];
 
 export const ssgoiConfig = {
-  preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
     {
       from: "/pinterest",

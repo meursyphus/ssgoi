@@ -15,7 +15,6 @@ const BASE = "/demo/material-mail";
 // below should be uncommented. Today the underlying axis({ type: "z" })
 // provider exists in core but is not UX-verified for this app yet.
 const config: SsgoiConfig = {
-  preserveScroll: true,
   transitions: [
     // FAB ✏️ → Compose (the main showcase of sheet/scale)
     { on: `${BASE}/compose`, transition: sheet({ type: "scale" }) },

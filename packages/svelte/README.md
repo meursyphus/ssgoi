@@ -91,12 +91,27 @@ import { drill, slide, zoom } from "@ssgoi/svelte/view-transitions";
 
 const config = {
   transitions: [
-    { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/*", transition: zoom() },
-    { ordered: ["/tabs/a", "/tabs/b"], transition: slide() },
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+    {
+      from: "/gallery",
+      to: "/gallery/*",
+      transition: zoom(),
+    },
+    {
+      ordered: ["/tabs/a", "/tabs/b"],
+      transition: slide(),
+    },
   ],
 };
 ```
+
+Scroll is automatic: `on` and `from`/`to` restore `from` and reset `to`;
+`ordered` restores both. Override with
+`preserveScroll: { from: boolean, to: boolean }`.
 
 ## Effect index
 

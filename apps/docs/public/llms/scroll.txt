@@ -42,3 +42,6 @@ const config = {
   ],
 };
 ```
+
+`ordered` restores both pages automatically. The `from`/`to` example restores
+`from` and resets `to` when each page comes IN.

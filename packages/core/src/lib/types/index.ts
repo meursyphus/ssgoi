@@ -186,8 +186,34 @@ export type AnyTransitionConfig = TransitionConfig<any>;
 
 export type PathPatterns = string | readonly string[];
 
+export type PreserveScrollConfig = {
+  /**
+   * Restore the forward relationship's source when it becomes the incoming
+   * page again.
+   */
+  from: boolean;
+  /**
+   * Restore the forward relationship's destination when it becomes the
+   * incoming page again.
+   */
+  to: boolean;
+};
+
 type SsgoiTransitionRuleBase = {
   transition: AnyTransitionConfig;
+  /**
+   * Override this rule's automatic scroll-restoration policy.
+   *
+   * `from` and `to` describe the rule's semantic forward relationship, not the
+   * current navigation's physical OUT and IN pages. On backward navigation the
+   * mapping is reversed automatically.
+   *
+   * Omitted defaults:
+   * - `on`: `{ from: true, to: false }`
+   * - `from`/`to`: `{ from: true, to: false }`
+   * - `ordered`: `{ from: true, to: true }`
+   */
+  preserveScroll?: PreserveScrollConfig;
   /**
    * Higher values win before path specificity. Defaults to 0.
    * Useful for an exceptional effect declared below a broad fallback.
@@ -240,13 +266,6 @@ export type SsgoiTransitionRule =
   | SsgoiPairTransitionRule
   | SsgoiOrderedTransitionRule;
 
-export type PreserveScrollValue =
-  | boolean
-  | { exclude: string[]; key?: string }
-  | { key: string; exclude?: string[] };
-export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
-export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
-
 /**
  * Argument handed to a functional `transitions` config. Destructured at the
  * call site (`({ isMobile }) => …`) so the boolean's meaning is self-documenting
@@ -274,7 +293,6 @@ export type SsgoiTransitionsOption =
 export type SsgoiConfig = {
   transitions?: SsgoiTransitionsOption;
   middleware?: (from: string, to: string) => { from: string; to: string };
-  preserveScroll?: PreserveScrollOption;
 };
 
 /* ────────────────────────────────────────────────────────────────────────────

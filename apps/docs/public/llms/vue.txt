@@ -1,9 +1,19 @@
 # SSGOI with Nuxt
 
-Use one config and one `<Ssgoi>` in the root layout.
+Nuxt wiring only. Config syntax, transition catalog, options:
+https://ssgoi.dev/llms.txt
+
+```bash
+npm install @ssgoi/vue
+```
+
+## Setup
+
+Everything wires in the app root — one `<Ssgoi>`, the shell classes, and the
+boundary component around `<NuxtPage />`:
 
 ```vue
-<!-- components/demo-layout.vue -->
+<!-- app.vue -->
 <script setup>
 import { Ssgoi } from "@ssgoi/vue";
 import { config } from "~/utils/ssgoi-config";
@@ -12,44 +22,64 @@ import { config } from "~/utils/ssgoi-config";
 <template>
   <main class="relative z-0 min-h-dvh overflow-x-clip">
     <Ssgoi :config="config">
-      <slot />
+      <SsgoiTransitionBoundary>
+        <NuxtPage />
+      </SsgoiTransitionBoundary>
     </Ssgoi>
   </main>
 </template>
 ```
 
-## Page boundary
+```ts
+// utils/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { drill } from "@ssgoi/vue/view-transitions";
 
-Put the transition id on the routed page root.
-
-```vue
-<template>
-  <article :data-ssgoi-transition="route.path">
-    <!-- page -->
-  </article>
-</template>
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
 ```
 
-## Persistent layout
+## The boundary component
 
-A parent page may own a boundary and render `<NuxtPage />`.
+A changed `:key` remounts the subtree — that unmount/mount pair is what SSGOI
+animates. Key and marker both come from `route.path`. Files under
+`components/` auto-import:
 
 ```vue
-<!-- pages/products.vue -->
+<!-- components/ssgoi-transition-boundary.vue -->
 <template>
-  <section :data-ssgoi-transition="route.path">
-    <ProductTabs />
-    <NuxtPage />
-  </section>
+  <component :is="as" :key="transitionId" :data-ssgoi-transition="transitionId">
+    <slot />
+  </component>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+interface Props {
+  as?: keyof HTMLElementTagNameMap;
+  getId?: (pathname: string) => string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  as: "div",
+  getId: (pathname: string) => pathname,
+});
+
+const route = useRoute();
+const transitionId = computed(() => props.getId(route.path));
+</script>
 ```
 
-Keep a boundary on each child page for tab-to-tab transitions. When the parent
-and child leave together, SSGOI uses the outer changed boundary. When only the
-child changes, it uses the child boundary.
+Verify: navigate `/` → any page slides in from the right; back slides out.
 
-## Reference
+## Beyond the basics
 
-- Shared config and route patterns: https://ssgoi.dev/llms.txt
-- Nuxt template: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
-- Effect options: `https://ssgoi.dev/llms/<effect>.txt`
+- Persistent layout (tabs stay while tab content changes): a parent page puts
+  `:data-ssgoi-transition="route.path"` on its own root and renders
+  `<NuxtPage />` for children; child pages keep their boundaries. When parent
+  and child leave together, the outer changed boundary wins.
+- Grouping several routes under one id: pass `getId` to the boundary.
+- Full example: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt

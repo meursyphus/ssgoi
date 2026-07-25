@@ -8,7 +8,6 @@ import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 const BASE = "/demo/air-bnb";
 
 const config: SsgoiConfig = {
-  preserveScroll: true,
   transitions: [
     {
       from: BASE,

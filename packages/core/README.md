@@ -24,10 +24,17 @@ framework-specific transition boundaries, not this config.
 import { drill, slide, zoom, type SsgoiConfig } from "@ssgoi/core";
 
 const config: SsgoiConfig = {
-  preserveScroll: { exclude: ["/posts/*"] },
   transitions: [
-    { on: "/posts/**", except: "/posts", transition: drill() },
-    { from: "/gallery", to: "/gallery/*", transition: zoom() },
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+    {
+      from: "/gallery",
+      to: "/gallery/*",
+      transition: zoom(),
+    },
     {
       ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
       transition: slide(),
@@ -42,6 +49,9 @@ Rule forms:
 - `from`/`to`: precise pair. Reverse matching is enabled by default.
 - `ordered`: array order decides forward and backward.
 - `priority`: higher values win before path specificity.
+- Scroll is automatic: `on` and `from`/`to` restore the forward `from` side
+  and reset `to`; `ordered` restores both. Use
+  `preserveScroll: { from: boolean, to: boolean }` for an exact override.
 
 Path patterns:
 

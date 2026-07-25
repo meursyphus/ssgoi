@@ -4,9 +4,9 @@ import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { DocsPageHeading, InstallBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Install SSGOI — one package per framework",
+  title: "Quick start — SSGOI in three small files",
   description:
-    "Install SSGOI for React, Svelte, Vue, Solid, Angular, or Qwik. One package per framework, with setup patterns for each router.",
+    "Install SSGOI, wire the provider, layout shell, and route boundary, and verify your first page transition. Copy-paste ready for React and Next.js.",
   alternates: { canonical: "/docs/install" },
   openGraph: buildOpenGraph({ path: "/docs/install" }),
 };
@@ -22,8 +22,8 @@ export default function DocsInstallPage() {
         ])}
       />
       <DocsPageHeading
-        title="Install"
-        lead="Add the package that matches your framework. The transition model is shared; the setup follows each router."
+        title="Quick start"
+        lead="Three small files, then verify. Copy each step as-is — understanding the internals comes later, if ever."
       />
       <InstallBody />
     </>

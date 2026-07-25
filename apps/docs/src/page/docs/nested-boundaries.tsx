@@ -7,242 +7,189 @@ export function NestedBoundariesBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl leading-relaxed text-neutral-400">
-        A changed boundary key makes React unmount the old routed region and
-        mount a new one.{" "}
-        <code className="font-mono text-neutral-200">
-          data-ssgoi-transition
-        </code>{" "}
-        gives SSGOI the route id used by transition config. Put boundaries in
-        layouts that own those regions, not in every page.
+        The quick start keys everything on the pathname. This page is about the
+        day that stops being enough — walked through with the most common case:
+        a bottom nav that some pages show and some don&apos;t. It explains what
+        you need to achieve; the full implementation lives in the linked pattern
+        file and templates.
       </p>
 
-      <CodeBlock
-        className="mt-8"
-        code={`// app/ssgoi-route-boundary.tsx
-"use client";
-
-import { type ReactNode } from "react";
-import {
-  usePathname,
-  useSelectedLayoutSegments,
-} from "next/navigation";
-
-type BoundaryName = "app-shell" | "main-content" | "project-content";
-
-function isRouteGroup(segment: string) {
-  return segment.startsWith("(") && segment.endsWith(")");
-}
-
-function normalizeSegment(segment: string) {
-  return segment
-    .replace("(...)", "")
-    .replace("(..)", "")
-    .replace("(.)", "");
-}
-
-function pathFromSegments(segments: string[]) {
-  const path = segments
-    .filter((segment) => !isRouteGroup(segment))
-    .map(normalizeSegment)
-    .filter(Boolean)
-    .join("/");
-
-  return path ? "/" + path : null;
-}
-
-function resolveBoundary(
-  name: BoundaryName,
-  pathname: string,
-  segments: string[],
-) {
-  const ownedRoute = pathFromSegments(segments) ?? pathname;
-
-  if (name === "app-shell") {
-    const routeGroup = segments.find(isRouteGroup);
-    if (routeGroup === "(main)") {
-      return { id: ownedRoute, key: "main-shell" };
-    }
-
-    const project = ownedRoute.match(/^\\/projects\\/[^/]+/)?.[0];
-    return { id: ownedRoute, key: project ?? ownedRoute };
-  }
-
-  if (name === "project-content") {
-    const project = pathname.match(/^\\/projects\\/[^/]+/)?.[0];
-    const child = pathFromSegments(segments);
-    const id = project && child ? project + child : project ?? ownedRoute;
-    return { id, key: id };
-  }
-
-  return { id: ownedRoute, key: ownedRoute };
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name,
-}: {
-  children: ReactNode;
-  name: BoundaryName;
-}) {
-  const pathname = usePathname();
-  const segments = useSelectedLayoutSegments("children");
-  const boundary = resolveBoundary(name, pathname, segments);
-
-  return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-      {children}
-    </div>
-  );
-}`}
-      />
-
-      <ul className="mt-8 space-y-3 text-sm leading-relaxed text-neutral-400">
+      <h2 className="mt-10 text-lg font-semibold text-neutral-100">
+        The situation
+      </h2>
+      <ul className="mt-4 space-y-2 text-sm leading-relaxed text-neutral-400">
         <li>
-          Layout files pass a semantic name such as{" "}
-          <code className="font-mono text-neutral-300">app-shell</code>,{" "}
-          <code className="font-mono text-neutral-300">main-content</code>, or{" "}
-          <code className="font-mono text-neutral-300">project-content</code>.
+          <code className="font-mono text-neutral-300">/</code>,{" "}
+          <code className="font-mono text-neutral-300">/collections</code>,{" "}
+          <code className="font-mono text-neutral-300">/create</code> — tab
+          pages. All share one common bottom nav.
         </li>
         <li>
-          The central resolver reuses a key only while that named shell should
-          remain mounted, and returns a different key when it should leave.
+          <code className="font-mono text-neutral-300">/photo/[id]</code> —
+          detail page. No nav.
+        </li>
+      </ul>
+      <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-400">
+        The motion you want: tab → tab transitions the content while the nav
+        stays perfectly still. Tab → detail sends the whole shell away — nav
+        included. Detail → tab brings it back.
+      </p>
+      <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-400">
+        With{" "}
+        <code className="font-mono text-neutral-300">key={"{pathname}"}</code>{" "}
+        that&apos;s impossible: the key changes on <em>every</em> navigation,
+        React remounts everything under the provider, and the nav animates away
+        even on tab → tab.
+      </p>
+
+      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
+        Why a boundary is two decisions
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        A route boundary carries two independent pieces of information, and the
+        fix is realizing they don&apos;t have to be the same value:
+      </p>
+      <ul className="mt-4 space-y-2 text-sm leading-relaxed text-neutral-400">
+        <li>
+          <code className="font-mono text-orange-400">key</code> — when does
+          this region remount? Its React lifetime. This is what SSGOI observes.
+        </li>
+        <li>
+          <code className="font-mono text-orange-400">id</code> (
+          <code className="font-mono text-neutral-300">
+            data-ssgoi-transition
+          </code>
+          ) — which route is this? This is what config rules match.
+        </li>
+      </ul>
+
+      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
+        The folder structure
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Next.js route groups change layout lifetime without changing URLs —
+        which puts the nav in a layout only tab pages share:
+      </p>
+      <CodeBlock
+        className="mt-5"
+        language="text"
+        code={`app/
+  layout.tsx                 # one provider + outer "app-shell" boundary
+  (main)/
+    layout.tsx               # inner content boundary + the common BottomNav
+    page.tsx                 # /
+    collections/page.tsx     # /collections
+    create/page.tsx          # /create
+  (detail)/
+    photo/[id]/page.tsx      # /photo/1 — no nav`}
+      />
+
+      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
+        What to achieve: a key scope
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        No new API — you scope the <em>key</em> so React&apos;s remounts happen
+        exactly where the motion should:
+      </p>
+      <ul className="mt-4 space-y-3 text-sm leading-relaxed text-neutral-400">
+        <li>
+          The boundary <code className="font-mono text-orange-400">id</code> is
+          always the real route.
+        </li>
+        <li>
+          The outer boundary&apos;s{" "}
+          <code className="font-mono text-orange-400">key</code> stays constant
+          (say{" "}
+          <code className="font-mono text-neutral-300">
+            &quot;main-shell&quot;
+          </code>
+          ) while the route is inside{" "}
+          <code className="font-mono text-neutral-300">(main)</code> — so tab →
+          tab never remounts the shell — and falls back to the pathname outside
+          it, so entering or leaving the shell transitions the whole shell, nav
+          included.
+        </li>
+        <li>
+          An inner boundary keyed on the pathname sits <em>above</em> the nav
+          and owns tab → tab transitions.
+        </li>
+      </ul>
+
+      <CodeBlock
+        className="mt-6"
+        language="text"
+        code={`┌─ outer boundary (key: "main-shell" inside (main)) ─────┐
+│  ┌─ inner boundary (key: pathname) ─────────────────┐  │
+│  │  tab page                                        │  │
+│  └──────────────────────────────────────────────────┘  │
+│  BottomNav (persistent, outside the inner boundary)    │
+└────────────────────────────────────────────────────────┘
+
+tab → tab     : inner boundary remounts · nav stays
+tab → detail  : outer boundary remounts · nav leaves with it
+detail → tab  : outer boundary re-enters with the nav`}
+      />
+
+      <p className="mt-6 max-w-xl text-sm leading-relaxed text-neutral-400">
+        When nested boundaries change in one DOM mutation, SSGOI uses the outer
+        changed boundary. A nested boundary owns a transition only while its
+        parent remains mounted.
+      </p>
+
+      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
+        The general rules
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Keep the key logic in one place (a small resolver component that layouts
+        call with a semantic name) instead of letting every layout invent its
+        own. Whatever shape it takes, it must follow:
+      </p>
+      <ul className="mt-4 space-y-3 text-sm leading-relaxed text-neutral-400">
+        <li>
+          Reuse a key only while that exact persistent shell should remain
+          mounted; return a different key when navigation leaves the shell.
         </li>
         <li>
           A constant key is safe only when the router itself unmounts the
           boundary outside that route layout.
         </li>
         <li>
-          The route id still identifies the route rendered by that boundary,
-          even when several routes share its React key.
+          The id still identifies the route rendered by that boundary, even when
+          several routes share its React key.
         </li>
       </ul>
 
       <h2 className="mt-12 text-lg font-semibold text-neutral-100">
-        Bottom navigation
+        The same scope trick elsewhere
       </h2>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        Use route groups to separate main screens from fullscreen details. One
-        named app-shell boundary spans both groups; the main layout owns only
-        its changing content boundary and bottom nav.
-      </p>
-
-      <CodeBlock
-        className="mt-6"
-        code={`app/
-  layout.tsx                 # one <Ssgoi> + named app-shell boundary
-  (main)/
-    layout.tsx               # content boundary + bottom nav
-    page.tsx                 # /
-    collections/page.tsx     # /collections
-    create/page.tsx          # /create
-  (detail)/
-    photo/[id]/page.tsx`}
-      />
-
-      <CodeBlock
-        className="mt-6"
-        code={`// app/layout.tsx — inside the single <Ssgoi>
-<SsgoiRouteBoundary name="app-shell">
-  {children}
-</SsgoiRouteBoundary>
-
-// app/(main)/layout.tsx
-export default function MainLayout({ children }) {
-  return (
-    <>
-      <SsgoiRouteBoundary name="main-content">
-        {children}
-      </SsgoiRouteBoundary>
-      <BottomNav />
-    </>
-  );
-}
-`}
-      />
-
-      <ul className="mt-8 space-y-4 text-sm leading-relaxed text-neutral-400">
+      <ul className="mt-4 space-y-3 text-sm leading-relaxed text-neutral-400">
         <li>
-          <code className="font-mono text-orange-400">tab → tab</code>: the
-          common app key stays <code>main-shell</code>; only the inner content
-          boundary remounts. The nav stays still.
+          <span className="text-neutral-200">
+            Sliding tabs under a persistent header
+          </span>{" "}
+          — the boundary above the header shares one key across the ordered
+          routes (e.g. the project base path); the content boundary below it
+          keys on the full path. The rule itself is just{" "}
+          <code className="font-mono text-neutral-300">
+            {"{ ordered: [...], transition: slide() }"}
+          </code>
+          .
         </li>
         <li>
-          <code className="font-mono text-orange-400">tab → detail</code>: the
-          common app key changes to the detail id. The nav is inside that
-          boundary and leaves with the page; no duplicate detail boundary is
-          needed.
-        </li>
-        <li>
-          When nested boundaries leave together, SSGOI uses the outer changed
-          boundary. When only the child changes, it uses the child.
+          <span className="text-neutral-200">Intercepting modals</span> — during
+          a soft interception the browser URL points at the modal while the
+          background slot is unchanged, so the background boundary must derive
+          its id and key from its own slot (
+          <code className="font-mono text-neutral-300">
+            useSelectedLayoutSegments(&quot;children&quot;)
+          </code>
+          ), not from the URL. Direct entry to the same URL resolves the detail
+          slot and gets a detail key.
         </li>
       </ul>
 
-      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
-        Sliding tabs inside a layout
-      </h2>
-
-      <CodeBlock
-        className="mt-6"
-        code={`const PROJECT_PATHS = [
-  "/projects/acme/overview",
-  "/projects/acme/docs",
-  "/projects/acme/activity",
-];
-
-const config = {
-  transitions: [
-    {
-      ordered: PROJECT_PATHS,
-      transition: slide(),
-    },
-  ],
-};
-
-// Common app layout
-<SsgoiRouteBoundary name="app-shell">
-  {children}
-</SsgoiRouteBoundary>
-
-export default function ProjectLayout({ children }) {
-  return (
-    <>
-      <ProjectHeader />
-      <ProjectTabs />
-      <SsgoiRouteBoundary name="project-content">
-        {children}
-      </SsgoiRouteBoundary>
-    </>
-  );
-}`}
-      />
-
-      <h2 className="mt-12 text-lg font-semibold text-neutral-100">
-        Intercepting modals
-      </h2>
-
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        During a soft interception, <code>usePathname()</code> points at the
-        modal URL while the background <code>children</code> slot is unchanged.
-        Resolve the background boundary id and key from{" "}
-        <code>useSelectedLayoutSegments(&quot;children&quot;)</code>. In the
-        layout that owns <code>@modal</code>,{" "}
-        <code>useSelectedLayoutSegment(&quot;modal&quot;) !== null</code> is an
-        explicit active-modal check. Direct entry to the same URL selects the
-        detail children slot, so it receives the detail key instead.
-      </p>
-
-      <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-        Keep one provider and one transition config. Boundary-name resolvers
-        describe routed-region ownership; they do not belong in{" "}
-        <code className="font-mono text-neutral-300">SsgoiConfig</code>. See the{" "}
-        <Link
-          href="/demo/google-photos"
-          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
-        >
-          Google Photos demo
-        </Link>{" "}
-        or the concise agent guide at{" "}
+      <p className="mt-10 max-w-xl text-sm leading-relaxed text-neutral-500">
+        Full implementation — resolver code, modal handling, pitfalls:{" "}
         <a
           href={LLMS_PATTERN}
           target="_blank"
@@ -250,6 +197,22 @@ export default function ProjectLayout({ children }) {
           className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
         >
           /llms/bottom-nav.txt
+        </a>
+        . See it live in the{" "}
+        <Link
+          href="/demo/google-photos"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+        >
+          Google Photos demo
+        </Link>{" "}
+        or clone the{" "}
+        <a
+          href="https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs"
+          target="_blank"
+          rel="noreferrer"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+        >
+          Next.js template
         </a>
         .
       </p>

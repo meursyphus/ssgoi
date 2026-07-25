@@ -12,7 +12,6 @@ const BASE = "/demo/airbnb-photo-tour";
 // silhouette, so we use hero's default static type — only the shared image
 // morphs, no chrome cross-fade.
 const config: SsgoiConfig = {
-  preserveScroll: true,
   transitions: [
     {
       from: BASE,

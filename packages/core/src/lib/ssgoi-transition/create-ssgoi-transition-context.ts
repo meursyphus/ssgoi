@@ -6,6 +6,7 @@ import type {
   SsgoiTransitionRule,
   SsgoiTransitionsFn,
   SsgoiTransitionContext,
+  PreserveScrollConfig,
   PrepareArgs,
   CreateElement,
 } from "@types";
@@ -25,6 +26,11 @@ type PendingSide = {
   element: HTMLElement;
   parent: Node | null;
   nextSibling: Node | null;
+  /**
+   * Applies the scroll policy selected by the rule that brings this side IN.
+   * OUT payloads do not need it.
+   */
+  applyScrollPolicy?: (preserves: boolean) => void;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
@@ -66,11 +72,8 @@ export function createSggoiTransitionContext(
   options: SsgoiConfig,
   contextOptions: CreateSsgoiTransitionContextOptions = {},
 ): SsgoiContext {
-  const {
-    transitions = [],
-    middleware = (from, to) => ({ from, to }),
-    preserveScroll = (isMobile: boolean) => isMobile,
-  } = options;
+  const { transitions = [], middleware = (from, to) => ({ from, to }) } =
+    options;
 
   const host = contextOptions.host ?? new HostAnimation();
   const unmountGroup = {};
@@ -112,12 +115,11 @@ export function createSggoiTransitionContext(
     initializeContext,
     calculateScrollOffset,
     evictScrollPosition,
-    shouldPreserve,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
     getIsMobile,
-  } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
+  } = createContextManager({ resolvePath: resolveScrollPath });
 
   // Resolve the flat route-rule list lazily. `isMobile` is
   // only reliable once the scroll container is known (measured on the first IN),
@@ -236,6 +238,7 @@ export function createSggoiTransitionContext(
     toPath: string,
     outSide: PendingSide,
     inSide: PendingSide,
+    preserveScroll: PreserveScrollConfig,
   ): void => {
     const fromOriginal = outSide.element;
     const toElement = inSide.element;
@@ -246,13 +249,19 @@ export function createSggoiTransitionContext(
       ? { parent: outSide.parent, nextSibling: outSide.nextSibling }
       : readAnchor(fromOriginal);
 
-    const scrollOffset = calculateScrollOffset(fromPath, toPath);
+    const scrollOffset = calculateScrollOffset(
+      fromPath,
+      toPath,
+      preserveScroll.to,
+    );
 
     const ssgoiContext: SsgoiTransitionContext = {
       direction,
       scrollOffset,
       from: { scroll: getScrollPosition(fromPath) },
-      to: { scroll: getScrollPosition(toPath) },
+      to: {
+        scroll: getScrollPosition(toPath, preserveScroll.to),
+      },
       get scrollingElement() {
         return getScrollContainer() || document.documentElement;
       },
@@ -292,7 +301,10 @@ export function createSggoiTransitionContext(
       prepareOutgoing(fromElement, ssgoiContext);
     }
 
-    if (!shouldPreserve(fromPath)) evictScrollPosition(fromPath);
+    // The OUT page has already contributed its original position to the
+    // transition context. Only now is it safe to discard a non-preserved
+    // position; resetting earlier would flatten the outgoing animation.
+    if (!preserveScroll.from) evictScrollPosition(fromPath);
 
     // Stamp ownership BEFORE host.attach force-completes any prior run (below):
     // the prior run's settle checks ownership and must already see THIS run
@@ -396,21 +408,6 @@ export function createSggoiTransitionContext(
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) return;
 
-      // Native swipe-back owns the visual animation, but it still changes our
-      // semantic history. Record it on the IN side before skipping playback so
-      // the next in-scope navigation does not see a stale stack.
-      if (isSwipeBack && side === "in") {
-        const transformed = middleware(pair.from, pair.to);
-        directionTracker.resolve(transformed.from, transformed.to);
-      }
-
-      if (isSwipeBack) {
-        if (side === "out" && pair.from && !shouldPreserve(pair.from)) {
-          evictScrollPosition(pair.from);
-        }
-        return;
-      }
-
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
 
@@ -438,7 +435,25 @@ export function createSggoiTransitionContext(
         historyDirection,
       );
 
-      if (!resolved) return;
+      // Reset is the safe fallback when no rule owns this navigation. The
+      // decision is applied to the IN registration only; OUT has kept its
+      // original scroll until this paired point.
+      if (!resolved) {
+        pair.in.applyScrollPolicy?.(false);
+        evictScrollPosition(pair.from);
+        return;
+      }
+
+      pair.in.applyScrollPolicy?.(resolved.preserveScroll.to);
+
+      // Native swipe-back owns playback, but the same resolved rule still owns
+      // scroll restoration and semantic history.
+      if (isSwipeBack) {
+        if (!resolved.preserveScroll.from) {
+          evictScrollPosition(pair.from);
+        }
+        return;
+      }
 
       runTransition(
         resolved.transition,
@@ -447,6 +462,7 @@ export function createSggoiTransitionContext(
         pair.to,
         pair.out,
         pair.in,
+        resolved.preserveScroll,
       );
     });
   };
@@ -526,13 +542,14 @@ export function createSggoiTransitionContext(
       }
     }
 
-    initializeContext(element, path);
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    const applyScrollPolicy = initializeContext(element, currentPath);
     const pendingSide: PendingSide = {
       element,
       parent: element.parentElement,
       nextSibling: element.nextElementSibling,
+      applyScrollPolicy,
     };
-    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
     handleArrival(currentPath, "in", pendingSide);
   };
 
@@ -609,11 +626,12 @@ export function createSggoiTransitionContext(
     if (!vis.isHidden) {
       captureVisibleDisplay(element, state);
       if (enter) {
-        initializeContext(element, path);
+        const applyScrollPolicy = initializeContext(element, path);
         const pendingSide: PendingSide = {
           element,
           parent: element.parentElement,
           nextSibling: element.nextElementSibling,
+          applyScrollPolicy,
         };
         handleArrival(path, "in", pendingSide);
       }

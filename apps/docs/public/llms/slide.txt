@@ -37,4 +37,6 @@ const config = {
 };
 ```
 
+`ordered` restores both pages automatically when either one comes back IN.
+
 > Tip: Add `overflow-x-clip` to the `<Ssgoi>` wrapper so the off-screen page doesn't cause a horizontal scrollbar flash during the slide.

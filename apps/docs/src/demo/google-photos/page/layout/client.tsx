@@ -8,8 +8,6 @@ import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 const BASE = "/demo/google-photos";
 
 const config: SsgoiConfig = {
-  // Always preserve scroll inside the mobile-frame.
-  preserveScroll: true,
   transitions: [
     {
       ordered: [BASE, `${BASE}/collections`, `${BASE}/create`],

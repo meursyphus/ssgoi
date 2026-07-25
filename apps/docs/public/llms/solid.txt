@@ -1,6 +1,16 @@
 # SSGOI with SolidStart
 
-Use one config and one `<Ssgoi>` at the router root.
+SolidStart wiring only. Config syntax, transition catalog, options:
+https://ssgoi.dev/llms.txt
+
+```bash
+npm install @ssgoi/solid
+```
+
+## Setup
+
+Everything wires at the router root — one `<Ssgoi>`, the shell classes, and
+the boundary component around the routed children:
 
 ```tsx
 // src/app.tsx
@@ -8,54 +18,76 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Ssgoi } from "@ssgoi/solid";
 import { config } from "./ssgoi-config";
+import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
 
-<Router
-  root={(props) => (
-    <main class="relative z-0 min-h-dvh overflow-x-clip">
-      <Ssgoi config={config}>{props.children}</Ssgoi>
-    </main>
-  )}
->
-  <FileRoutes />
-</Router>
-```
-
-## Page boundary
-
-```tsx
-export default function Post() {
-  const location = useLocation();
-
+export default function App() {
   return (
-    <article data-ssgoi-transition={location.pathname}>
-      {/* page */}
-    </article>
+    <Router
+      root={(props) => (
+        <main class="relative z-0 min-h-dvh overflow-x-clip">
+          <Ssgoi config={config}>
+            <SsgoiTransitionBoundary>{props.children}</SsgoiTransitionBoundary>
+          </Ssgoi>
+        </main>
+      )}
+    >
+      <FileRoutes />
+    </Router>
   );
 }
 ```
 
-## Persistent layout
+```ts
+// src/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/solid";
+import { drill } from "@ssgoi/solid/view-transitions";
 
-Put an outer boundary on the route layout and keep child page boundaries.
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+```
+
+## The boundary component
+
+`<Show keyed>` recreates its child when the id changes — that unmount/mount
+pair is what SSGOI animates:
 
 ```tsx
-export default function ProductsLayout(props) {
+// src/components/ssgoi-transition-boundary.tsx
+import { useLocation } from "@solidjs/router";
+import { Show, splitProps, type JSX } from "solid-js";
+
+type Props = JSX.HTMLAttributes<HTMLDivElement> & {
+  children?: JSX.Element;
+  getId?: (pathname: string) => string;
+};
+
+const pathnameId = (pathname: string) => pathname;
+
+export function SsgoiTransitionBoundary(props: Props) {
   const location = useLocation();
+  const [local, rest] = splitProps(props, ["children", "getId"]);
+  const transitionId = () => (local.getId ?? pathnameId)(location.pathname);
 
   return (
-    <section data-ssgoi-transition={location.pathname}>
-      <ProductTabs />
-      {props.children}
-    </section>
+    <Show when={transitionId()} keyed>
+      {(id) => (
+        <div {...rest} data-ssgoi-transition={id}>
+          {local.children}
+        </div>
+      )}
+    </Show>
   );
 }
 ```
 
-The child boundary handles tab changes. If the entire layout leaves, SSGOI uses
-the outer changed boundary.
+Verify: navigate `/` → any page slides in from the right; back slides out.
 
-## Reference
+## Beyond the basics
 
-- Shared config and route patterns: https://ssgoi.dev/llms.txt
-- SolidStart template: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
-- Effect options: `https://ssgoi.dev/llms/<effect>.txt`
+- Persistent layout (tabs stay while tab content changes): the route layout
+  puts `data-ssgoi-transition={location.pathname}` on its own root above
+  `props.children`; child pages keep their markers. When layout and page
+  leave together, the outer changed boundary wins.
+- Grouping several routes under one id: pass `getId` to the boundary.
+- Full example: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart

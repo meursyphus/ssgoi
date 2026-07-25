@@ -4,67 +4,66 @@ SSGOI adds route transitions without replacing the application router.
 
 Current core version: `@ssgoi/core@7.0.0-beta.2`
 
-## Contents
+This file is the React/Next.js setup plus an index. Deep topics live in their
+own files — fetch one only when its topic applies:
 
-1. Next.js setup
-2. Route boundaries and React lifetime
-3. Persistent layouts
-4. Sliding tabs
-5. Bottom navigation and route groups
-6. Transition config
-7. Transition index
-8. Other frameworks
-9. Troubleshooting
+- Effect options and variants: `https://ssgoi.dev/llms/<effect>.txt` (table below)
+- Persistent nav / complex routing: https://ssgoi.dev/llms/bottom-nav.txt
+- Other frameworks: `https://ssgoi.dev/llms/<framework>.txt` (table below)
+- Mechanism and debugging: https://ssgoi.dev/llms/how-it-works.txt
 
-## 1. Next.js setup
+## Setup
+
+### 1. Install
 
 ```bash
 npm install @ssgoi/react
 ```
 
-Keep one config and one `<Ssgoi>` above all route boundaries.
+### 2. Provider
+
+One config, one `<Ssgoi>`, above all routed content. One rule is enough to
+start:
 
 ```tsx
 // app/ssgoi-provider.tsx
 "use client";
 
+import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
-
-const productPaths = [
-  "/products/all",
-  "/products/electronics",
-  "/products/fashion",
-];
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    { on: "/posts/**", except: "/posts", transition: drill() },
-    {
-      ordered: productPaths,
-      transition: slide(),
-    },
-    {
-      from: "/gallery",
-      to: "/gallery/*",
-      transition: zoom({ type: "expand" }),
-    },
-  ],
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
-export function SsgoiProvider({ children }) {
+export function SsgoiProvider({ children }: { children: ReactNode }) {
   return <Ssgoi config={config}>{children}</Ssgoi>;
 }
 ```
 
+`transitions` also accepts `({ isMobile }) => rules` to branch mobile/desktop:
+
+```ts
+transitions: ({ isMobile }) =>
+  isMobile
+    ? [{ on: "/**", except: "/", transition: drill() }]
+    : [{ priority: -100, on: "/**", transition: fade() }],
+```
+
+Scroll behavior is derived from each matched rule. The automatic policy and
+exact override are covered in Scroll restoration and middleware below.
+
+### 3. Layout shell
+
 ```tsx
 // app/layout.tsx
+import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html>
+    <html lang="en">
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>{children}</SsgoiProvider>
@@ -75,395 +74,214 @@ export default function RootLayout({ children }) {
 }
 ```
 
-This layout shell is the first structural requirement. When a route boundary
-unmounts, SSGOI temporarily reinserts the detached outgoing DOM node with
-`position: absolute` so its OUT animation can finish over the incoming page:
+The three classes are required, on the element around `<Ssgoi>`:
 
-- `relative`: gives the OUT page the correct containing block.
-- `z-0`: creates a local stacking context above the shell background.
-- `overflow-x-clip`: prevents horizontal overflow during slide, drill, and
-  similar transitions.
+| class | role |
+| --- | --- |
+| `relative` | containing block for the leaving page (re-inserted with `position: absolute`) |
+| `z-0` | stacking context so the leaving page stays above the shell background |
+| `overflow-x-clip` | no horizontal scrollbar flash during slide/drill-style motion |
 
-Put these classes on the element around `<Ssgoi>`, not on each route boundary.
+Mechanism: https://ssgoi.dev/llms/how-it-works.txt
 
-## 2. Route boundaries and React lifetime
+### 4. Route boundary
 
-SSGOI does not replace the router and does not initiate route unmounts. A React
-route boundary is a keyed DOM element with a transition id:
-
-```tsx
-<div key={boundary.key} data-ssgoi-transition={boundary.id}>
-  {children}
-</div>
-```
-
-- A changed `key` makes React remove the old subtree and mount a new one.
-- `data-ssgoi-transition` identifies that routed region for config matching.
-- `<Ssgoi>` observes the real removal/insertion, preserves the detached OUT
-  node for its exit animation, and animates the new IN node.
-
-The boundary component can remain mounted in a common layout while its keyed
-DOM child is replaced.
-
-The deprecated `<SsgoiTransition>` component only rendered the transition
-attribute. Set the attribute directly in the application boundary.
-
-For a small app, `key` and id can both be the pathname. For persistent layouts,
-do not make every layout choose an ad hoc key. Define route ownership once and
-let consumers pass a semantic `name`:
+The base pattern — pathname as both React key and transition id:
 
 ```tsx
 // app/ssgoi-route-boundary.tsx
 "use client";
 
 import { type ReactNode } from "react";
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { usePathname } from "next/navigation";
 
-type BoundaryName = "app-shell" | "main-content" | "project-content";
-type BoundaryIdentity = { id: string; key: string };
-
-const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
-
-function isRouteGroup(segment: string) {
-  return segment.startsWith("(") && segment.endsWith(")");
-}
-
-function pathFromSegments(segments: string[]) {
-  const path = segments
-    .filter((segment) => !isRouteGroup(segment))
-    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
-    .filter(Boolean)
-    .join("/");
-
-  return path ? `/${path}` : null;
-}
-
-function resolveBoundary(
-  name: BoundaryName,
-  pathname: string,
-  segments: string[],
-): BoundaryIdentity {
-  const ownedRoute = pathFromSegments(segments) ?? pathname;
-
-  switch (name) {
-    case "app-shell": {
-      const routeGroup = segments.find(isRouteGroup);
-      if (routeGroup === "(main)") {
-        return { id: ownedRoute, key: "main-shell" };
-      }
-
-      const project = ownedRoute.match(/^\/projects\/[^/]+/)?.[0];
-      return { id: ownedRoute, key: project ?? ownedRoute };
-    }
-    case "project-content": {
-      const project = pathname.match(/^\/projects\/[^/]+/)?.[0];
-      const child = pathFromSegments(segments);
-      const id = project
-        ? child
-          ? `${project}${child}`
-          : project
-        : ownedRoute;
-      return { id, key: id };
-    }
-    case "main-content":
-      return { id: ownedRoute, key: ownedRoute };
-  }
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name,
-}: {
-  children: ReactNode;
-  name: BoundaryName;
-}) {
+export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const segments = useSelectedLayoutSegments("children");
-  const boundary = resolveBoundary(name, pathname, segments);
 
   return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
+    <div key={pathname} data-ssgoi-transition={pathname}>
       {children}
     </div>
   );
 }
-```
 
-`BoundaryName` and `resolveBoundary` are application code, not
-`@ssgoi/react` API. A name owns both the route id and its React-key partition:
-
-- Reuse a key only while that exact persistent shell should remain mounted.
-- Return a different key when navigation leaves the shell.
-- A constant key is safe only when the router itself removes the whole
-  boundary outside its route layout.
-- Put one `app-shell` boundary in the common app layout. Add child names only
-  for routed regions that change while the parent remains mounted.
-
-A public `scope(pathname)` callback can express the same mapping, but it is a
-low-level application pattern, not SSGOI API. Prefer names so one resolver owns
-the route policy.
-
-## 3. Persistent layouts
-
-The common app boundary can span main, detail, and standalone routes:
-
-```tsx
-// app/layout.tsx — replace the provider line from section 1.
+// app/layout.tsx — wrap the provider's children
 <SsgoiProvider>
-  <SsgoiRouteBoundary name="app-shell">{children}</SsgoiRouteBoundary>
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 </SsgoiProvider>
 ```
 
-A persistent child layout owns only the content boundary below its stable
-header, tabs, or navigation:
+The principle: a changed `key` makes React unmount the routed region and mount
+the new one — that unmount/mount pair is what SSGOI animates.
+`data-ssgoi-transition` is the id that rules match. Put the boundary once in a
+layout and every navigation under it transitions.
 
-```tsx
-export default function MainLayout({ children }) {
-  return (
-    <>
-      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
-      <BottomNav />
-    </>
-  );
-}
+(Deprecated: `<SsgoiTransition>` only rendered this attribute — set it
+directly.)
+
+### 5. Verify
+
+1. Navigate `/` → any page: the new page slides in from the right.
+2. Navigate back: it slides back out.
+3. No animation, or the wrong region moves → Troubleshooting below.
+
+## Choosing transitions
+
+One row = one decision: the effect, the rule form to write it with, and the
+file with full options and variants.
+
+| UX intent | transition | rule form | options |
+| --- | --- | --- | --- |
+| default / unrelated pages | `fade()` | `priority: -100, on: "/**"` | https://ssgoi.dev/llms/fade.txt |
+| list → detail, drilling deeper | `drill()` | `on` + `except` | https://ssgoi.dev/llms/drill.txt |
+| tabs / steps with left-right order | `slide()` | `ordered` | https://ssgoi.dev/llms/slide.txt |
+| sibling pages, Material shared-axis | `axis()` | `ordered` | https://ssgoi.dev/llms/axis.txt |
+| compose / filters / modal-like route | `sheet()` | `from`/`to` | https://ssgoi.dev/llms/sheet.txt |
+| card or image expands to detail | `zoom()` | `from`/`to` | https://ssgoi.dev/llms/zoom.txt |
+| shared element across two pages | `hero()` | `from`/`to` | https://ssgoi.dev/llms/hero.txt |
+| vertical sequence / editorial paging | `scroll()` | `ordered` | https://ssgoi.dev/llms/scroll.txt |
+
+Stylistic effects (any rule form): `film`, `strip`, `rotate`, `blind`,
+`jaemin` — each at `https://ssgoi.dev/llms/<name>.txt`.
+
+## Route rules
+
+| form | meaning | direction |
+| --- | --- | --- |
+| `on` (+ `except`) | route family | entering = forward, leaving = backward |
+| `from` / `to` | exact pair | as written = forward; reversed by default |
+| `ordered: [...]` | both routes in the list | increasing index = forward |
+
+| pattern | matches |
+| --- | --- |
+| `/posts` | exactly `/posts` |
+| `/posts/*` | exactly one extra segment |
+| `/posts/**` | `/posts` and every descendant |
+
+`priority`: higher wins before path specificity; ties resolve by specificity,
+then declaration order. A bare `*` is a compatibility alias for `/**`.
+
+## Persistent nav and complex routing
+
+The situation: some pages share a bottom nav, some don't. Tab → tab must keep
+the nav still; tab → detail must send the nav away with the page.
+
+```text
+app/
+  layout.tsx                 # one provider + outer "app-shell" boundary
+  (main)/
+    layout.tsx               # inner content boundary + the common BottomNav
+    page.tsx  collections/page.tsx  create/page.tsx
+  (detail)/
+    photo/[id]/page.tsx      # no nav
 ```
 
-- Main → main: the app-shell key stays; inner content remounts.
-- Main → detail: the app-shell key changes; the nav leaves with it.
-- Project tab → project tab: the current project base-path key stays; only a
-  project content boundary remounts below its header and tabs.
+The pathname-keyed boundary can't do this — its key changes on every
+navigation, so the nav remounts every time. What to achieve instead is a key
+scope:
 
-When nested boundaries change in one DOM mutation, SSGOI uses the outer changed
-boundary. A nested boundary owns a transition only while its parent remains
-mounted.
+- The boundary `id` is always the real route.
+- The outer boundary's `key` stays constant (e.g. `"main-shell"`) while the
+  route is inside `(main)` — tab → tab keeps the shell and nav mounted — and
+  falls back to the pathname outside it, so entering or leaving the shell
+  transitions the whole shell, nav included.
+- An inner boundary keyed on the pathname sits above the nav and owns
+  tab → tab transitions.
 
-## 4. Sliding tabs
+```text
+┌─ outer boundary (key: "main-shell" inside (main)) ─────┐
+│  ┌─ inner boundary (key: pathname) ─────────────────┐  │
+│  │  tab page                                        │  │
+│  └──────────────────────────────────────────────────┘  │
+│  BottomNav (persistent, outside the inner boundary)    │
+└────────────────────────────────────────────────────────┘
 
-Use `ordered` to define direction.
+tab → tab     : inner boundary remounts · nav stays
+tab → detail  : outer boundary remounts · nav leaves with it
+detail → tab  : outer boundary re-enters with the nav
+```
+
+Full pattern — resolver code, modal/intercepted routes, pitfalls:
+https://ssgoi.dev/llms/bottom-nav.txt
+
+## Scroll restoration and middleware
+
+Scroll behavior follows the matched route relationship automatically:
+
+- `on`: restore the forward `from` side outside the scope; reset the `to` side
+  matched by `on`.
+- `from`/`to`: restore `from`; reset `to`.
+- `ordered`: restore both sides.
+
+The policy is chosen per navigation, so the same path can restore under one
+rule and reset under another. The outgoing page always keeps its current scroll
+through its OUT animation. Reset or restoration happens only when a page
+becomes IN.
 
 ```ts
 const config = {
+  // rewrite (from, to) before rule matching, e.g. strip a locale prefix
+  middleware: (from, to) => ({
+    from: from.replace(/^\/(en|ko)/, ""),
+    to: to.replace(/^\/(en|ko)/, ""),
+  }),
   transitions: [
     {
-      ordered: [
-        "/projects/acme/overview",
-        "/projects/acme/docs",
-        "/projects/acme/activity",
-      ],
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+    {
+      ordered: ["/tabs/feed", "/tabs/search", "/tabs/profile"],
       transition: slide(),
+    },
+    // Exact override: preserve both sides of this pair.
+    {
+      from: "/gallery",
+      to: "/photo/*",
+      preserveScroll: { from: true, to: true },
+      transition: zoom(),
     },
   ],
 };
 ```
 
-Increasing index is forward. Decreasing index is backward.
+`preserveScroll.from` and `.to` always describe the rule's semantic forward
+relationship. Backward navigation reverses their physical OUT/IN mapping. For
+an `on` rule, paths outside the scope are semantic `from`, paths inside are
+semantic `to`, and an inside-to-inside navigation applies `to` to both pages.
+Use `preserveScroll: { from: boolean, to: boolean }` only to replace the
+automatic policy. For `ordered`, the lower-index side is semantic `from` and
+the higher-index side is semantic `to`. There is no separate mobile scroll
+default; a functional `transitions({ isMobile })` config simply supplies the
+active rules whose policies are resolved.
 
-The tab header belongs outside the named content boundary:
+## Other frameworks
 
-```tsx
-<>
-  <ProjectTabs />
-  <SsgoiRouteBoundary name="project-content">{children}</SsgoiRouteBoundary>
-</>
-```
+Each guide is self-contained — install through verify:
 
-## 5. Bottom navigation and route groups
+| framework | package | guide |
+| --- | --- | --- |
+| React Router | `@ssgoi/react` | https://ssgoi.dev/llms/react-router.txt |
+| TanStack Router | `@ssgoi/react` | https://ssgoi.dev/llms/tanstack-router.txt |
+| SvelteKit | `@ssgoi/svelte` | https://ssgoi.dev/llms/svelte.txt |
+| Nuxt / Vue | `@ssgoi/vue` | https://ssgoi.dev/llms/vue.txt |
+| SolidStart | `@ssgoi/solid` | https://ssgoi.dev/llms/solid.txt |
+| Qwik City | `@ssgoi/qwik` | https://ssgoi.dev/llms/qwik.txt |
+| Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/angular.txt |
 
-```text
-app/
-  layout.tsx                 # one SsgoiProvider + named app-shell boundary
-  (main)/
-    layout.tsx               # content boundary + bottom nav
-    page.tsx
-    collections/page.tsx
-    create/page.tsx
-  (detail)/
-    photo/[id]/page.tsx
-```
+## Troubleshooting
 
-```tsx
-// app/(main)/layout.tsx
-export default function MainLayout({ children }) {
-  return (
-    <>
-      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
-      <BottomNav />
-    </>
-  );
-}
-```
+- No animation: both routes inside one `<Ssgoi>`; both DOM nodes carry
+  `data-ssgoi-transition`; a rule matches both paths.
+- Wrong region animates: find the nearest boundary whose key changed; keep
+  persistent UI outside the inner boundary; fix the key scope so routes in
+  the same shell share a key.
+- Jumps or flickers: shell classes from Setup 3; full-height background on
+  route boundaries.
 
-- Tab → tab: only inner content remounts; nav stays.
-- Tab → detail: the common app-shell boundary remounts; nav leaves with it.
-- Detail → tab: the common app shell enters with the nav.
+Mechanism deep-dive: https://ssgoi.dev/llms/how-it-works.txt
 
-Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
-
-Route groups do not change URLs. During a soft parallel/intercepted route,
-`usePathname()` points at the modal URL while the background `children` slot
-can remain unchanged. Resolve the background boundary id/key from
-`useSelectedLayoutSegments("children")`. In the layout that owns `@modal`,
-`useSelectedLayoutSegment("modal") !== null` explicitly reports an active
-modal slot. The same URL opened directly selects the detail children slot and
-therefore receives a detail key.
-
-## 6. Transition config
-
-```ts
-type SsgoiConfig = {
-  transitions?: SsgoiTransitionRule[];
-  middleware?: (from: string, to: string) => { from: string; to: string };
-  preserveScroll?: PreserveScrollOption;
-};
-```
-
-Rule forms:
-
-```ts
-{ on: "/posts/**", except: "/posts", transition: drill() }
-
-{ from: "/gallery", to: "/gallery/*", transition: zoom() }
-
-{ ordered: ["/tabs/a", "/tabs/b"], transition: slide() }
-```
-
-- `on`: route family. Entering is forward; leaving is backward.
-- `from`/`to`: precise pair. Reverse matching is enabled by default.
-- `ordered`: direction comes from array order.
-- `priority`: higher values win before path specificity.
-
-Path patterns:
-
-- `/posts`: exact path.
-- `/posts/*`: exactly one arbitrary segment.
-- `/posts/**`: `/posts` and every descendant.
-
-A bare `*` remains a compatibility alias for `/**`. Named single-segment forms
-remain supported and rank above a single-segment `*` when rules overlap, but
-their names are not captured or exposed.
-
-`transitions` may depend on device context:
-
-```ts
-const config = {
-  transitions: ({ isMobile }) =>
-    isMobile
-      ? [{ on: "/posts/**", transition: drill() }]
-      : [{ on: "/posts/**", transition: fade() }],
-};
-```
-
-## 7. Transition index
-
-Use these links for effect-specific options.
-
-- `fade`: unrelated pages and quiet cross-fades. https://ssgoi.dev/llms/fade.txt
-- `drill`: list → detail hierarchy. https://ssgoi.dev/llms/drill.txt
-- `slide`: ordered tabs and steps. https://ssgoi.dev/llms/slide.txt
-- `axis`: sibling destinations with Material-style shared-axis motion. https://ssgoi.dev/llms/axis.txt
-- `sheet`: compose, filters, and modal-like routes. https://ssgoi.dev/llms/sheet.txt
-- `zoom`: card/image → detail expansion. https://ssgoi.dev/llms/zoom.txt
-- `hero`: shared elements with page chrome transitions. https://ssgoi.dev/llms/hero.txt
-- `scroll`: vertical sequences and editorial paging. https://ssgoi.dev/llms/scroll.txt
-- `strip`: perspective strip flip. https://ssgoi.dev/llms/strip.txt
-- `film`: cinematic gallery transition. https://ssgoi.dev/llms/film.txt
-- `rotate`: card-like rotation. https://ssgoi.dev/llms/rotate.txt
-- `blind`: window-blind reveal. https://ssgoi.dev/llms/blind.txt
-- `jaemin`: playful branded transition. https://ssgoi.dev/llms/jaemin.txt
-
-## 8. Other frameworks
-
-### React Router
-
-Use `useLocation()` and nested layout routes:
-
-```tsx
-const { pathname } = useLocation();
-
-return (
-  <div key={pathname} data-ssgoi-transition={pathname}>
-    <Outlet />
-  </div>
-);
-```
-
-### TanStack Router
-
-Use router state and parent routes:
-
-```tsx
-const pathname = useRouterState({
-  select: (state) => state.location.pathname,
-});
-```
-
-### SvelteKit
-
-Use `+layout.svelte` for persistent chrome and route pages for inner markers.
-Use a keyed block only when the layout must force a new DOM boundary.
-
-```svelte
-{#key resolveKey($page.url.pathname)}
-  <div data-ssgoi-transition={$page.url.pathname}>
-    {@render children()}
-  </div>
-{/key}
-```
-
-Guide: https://ssgoi.dev/llms/svelte.txt
-
-### Nuxt / Vue
-
-Use `useRoute()` and `:key="resolveKey(route.path)"`.
-
-Guide: https://ssgoi.dev/llms/vue.txt
-
-### SolidStart
-
-Put `data-ssgoi-transition` on route roots. Persistent route layouts naturally
-keep their outer DOM while child routes replace inner boundaries.
-
-Guide: https://ssgoi.dev/llms/solid.txt
-
-### Qwik City
-
-Use `useSsgoi(root, { config$ })`. Qwik configs must be QRL factories. Put
-transition attributes on route component roots under `<Slot />`.
-
-Guide: https://ssgoi.dev/llms/qwik.txt
-
-### Angular
-
-Guide: https://ssgoi.dev/llms/angular.txt
-
-## 9. Troubleshooting
-
-No animation:
-
-1. Confirm both routes are inside the same `<Ssgoi>`.
-2. Confirm outgoing and incoming DOM nodes have transition attributes.
-3. Confirm the rule matches both path values.
-4. Confirm no pathname-keyed ancestor remounts a persistent inner layout.
-
-Wrong region animates:
-
-1. Find the nearest boundary whose key changed.
-2. Keep persistent UI outside the inner boundary.
-3. Put UI that must leave inside the outer boundary.
-4. Fix that boundary name's resolver so routes in the same shell share a key.
-
-Layout jumps:
-
-1. Add `relative z-0` to the shell around `<Ssgoi>`.
-2. Add `overflow-x-clip` for horizontal effects.
-3. Give route boundaries a full-height background.
-
-Reference templates:
-
-- Next.js: https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs
-- React Router: https://github.com/meursyphus/ssgoi/tree/main/templates/react-router
-- TanStack Router: https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router
-- SvelteKit: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
-- Nuxt: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
-- SolidStart: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
-- Qwik City: https://github.com/meursyphus/ssgoi/tree/main/templates/qwik
+Runnable templates:
+https://github.com/meursyphus/ssgoi/tree/main/templates
+(nextjs · react-router · tanstack-router · sveltekit · nuxt · solidstart · qwik)

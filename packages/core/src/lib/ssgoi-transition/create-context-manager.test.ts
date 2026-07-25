@@ -140,25 +140,21 @@ describe("createContextManager", () => {
   });
 
   it("scrolls to top on first visit when preservation is enabled but nothing saved", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
-    });
+    const manager = createContextManager();
     const page = createFakeElement({
       parentElement: body,
     });
 
     documentElement.scrollTop = 320;
 
-    manager.initializeContext(page, "/feed");
+    manager.initializeContext(page, "/feed", true);
     flushAnimationFrames(2);
 
     expect(documentElement.scrollTop).toBe(0);
   });
 
-  it("scrolls to top for non-preserved paths' initial restore", () => {
-    const manager = createContextManager({
-      preserveScroll: false,
-    });
+  it("scrolls to top by default", () => {
+    const manager = createContextManager();
     const page = createFakeElement({
       parentElement: body,
     });
@@ -172,56 +168,11 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(0);
   });
 
-  it("shares a saved scroll position across paths with the same key", () => {
-    const manager = createContextManager({
-      preserveScroll: { key: "profile-tabs" },
-    });
-    const gridPage = createFakeElement({ parentElement: body });
-    const reelsPage = createFakeElement({ parentElement: body });
-
-    manager.initializeContext(gridPage, "/profile");
-    flushAnimationFrames(11);
-
-    documentElement.scrollTop = 420;
-    emitWindowScroll();
-
-    manager.initializeContext(reelsPage, "/profile/reels");
-    flushAnimationFrames(2);
-
-    expect(documentElement.scrollTop).toBe(420);
-    expect(manager.getScrollPosition("/profile/reels")).toEqual({
-      x: 0,
-      y: 420,
-    });
-    expect(manager.calculateScrollOffset("/profile", "/profile/reels")).toEqual(
-      {
-        x: 0,
-        y: 0,
-      },
-    );
-  });
-
-  it("leaves current scroll alone for shared-key paths without a saved value", () => {
-    const manager = createContextManager({
-      preserveScroll: { key: "profile-tabs" },
-    });
-    const page = createFakeElement({ parentElement: body });
-
-    documentElement.scrollTop = 320;
-
-    manager.initializeContext(page, "/profile");
-    flushAnimationFrames(2);
-
-    expect(documentElement.scrollTop).toBe(320);
-  });
-
   it("suppresses scroll capture during the transition settle window", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
-    });
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
 
     // Within the settle window, scroll events must not be captured —
     // otherwise an OUT-side router scroll reset could write 0 under /feed.
@@ -237,50 +188,74 @@ describe("createContextManager", () => {
   });
 
   it("restores a saved scroll position on return navigation", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
-    });
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
     const detailPage = createFakeElement({ parentElement: body });
     const returningFeedPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 480;
     emitWindowScroll();
 
-    manager.initializeContext(detailPage, "/detail");
+    manager.initializeContext(detailPage, "/detail", false);
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(0);
 
-    manager.initializeContext(returningFeedPage, "/feed");
+    manager.initializeContext(returningFeedPage, "/feed", true);
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(480);
   });
 
-  it("retries restore until the saved target becomes reachable", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
+  it("keeps OUT scroll intact while applying reset only to IN", () => {
+    const manager = createContextManager();
+    const listPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(listPage, "/list", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 640;
+    emitWindowScroll();
+
+    // The rule is not known at registration time. Resolving it selects reset
+    // for the incoming detail page.
+    const applyDetailPolicy = manager.initializeContext(detailPage, "/detail");
+    applyDetailPolicy(false);
+
+    // Before IN reset runs, transition preparation can still read the original
+    // outgoing position and build the correct absolute-page offset.
+    expect(manager.calculateScrollOffset("/list", "/detail", false)).toEqual({
+      x: 0,
+      y: 640,
     });
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 640 });
+
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(0);
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 640 });
+  });
+
+  it("retries restore until the saved target becomes reachable", () => {
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
     const detailPage = createFakeElement({ parentElement: body });
     const returningFeedPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 900;
     emitWindowScroll();
 
-    manager.initializeContext(detailPage, "/detail");
+    manager.initializeContext(detailPage, "/detail", false);
     flushAnimationFrames(11);
 
     // Page hasn't grown enough to reach 900 yet.
     documentElement.scrollHeight = 760;
     documentElement.scrollTop = 0;
 
-    manager.initializeContext(returningFeedPage, "/feed");
+    manager.initializeContext(returningFeedPage, "/feed", true);
     flushAnimationFrames(5);
     // Container clamps to maxY=160 until layout grows.
     expect(documentElement.scrollTop).toBe(160);
@@ -291,25 +266,23 @@ describe("createContextManager", () => {
   });
 
   it("stops calling scrollTo once the saved target has been reached", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
-    });
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
     const detailPage = createFakeElement({ parentElement: body });
     const returningFeedPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 480;
     emitWindowScroll();
 
-    manager.initializeContext(detailPage, "/detail");
+    manager.initializeContext(detailPage, "/detail", false);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 0;
 
-    manager.initializeContext(returningFeedPage, "/feed");
+    manager.initializeContext(returningFeedPage, "/feed", true);
 
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(480);
@@ -320,16 +293,14 @@ describe("createContextManager", () => {
   });
 
   it("invalidates an older settle when a new init starts", () => {
-    const manager = createContextManager({
-      preserveScroll: true,
-    });
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
     const detailPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
     // Halfway through /feed's settle window, a new init starts.
     flushAnimationFrames(5);
-    manager.initializeContext(detailPage, "/detail");
+    manager.initializeContext(detailPage, "/detail", false);
 
     // Burn enough frames that the OLD settle would have fired by now if it
     // were still alive (5 + 6 = 11). With the generation guard, only the
@@ -347,36 +318,88 @@ describe("createContextManager", () => {
     expect(manager.getScrollPosition("/detail")).toEqual({ x: 0, y: 320 });
   });
 
-  it("excludes paths matched by preserveScroll.exclude", () => {
-    const manager = createContextManager({
-      preserveScroll: { exclude: ["/feed"] },
-    });
+  it("uses the current transition's IN policy for the same path", () => {
+    const manager = createContextManager();
     const feedPage = createFakeElement({ parentElement: body });
     const detailPage = createFakeElement({ parentElement: body });
     const returningFeedPage = createFakeElement({ parentElement: body });
 
-    manager.initializeContext(feedPage, "/feed");
+    manager.initializeContext(feedPage, "/feed", true);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 480;
     emitWindowScroll();
-    // /feed IS captured (listener doesn't gate by shouldPreserve), but the
-    // restore on return ignores it because /feed is excluded.
+    // Positions are captured independently from the policy that will be chosen
+    // by a later transition.
     expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 480 });
 
-    manager.initializeContext(detailPage, "/detail");
+    manager.initializeContext(detailPage, "/detail", false);
     flushAnimationFrames(11);
 
     documentElement.scrollTop = 0;
-    manager.initializeContext(returningFeedPage, "/feed");
+    // This transition brings the same /feed path IN with reset semantics.
+    manager.initializeContext(returningFeedPage, "/feed", false);
     flushAnimationFrames(2);
 
     expect(documentElement.scrollTop).toBe(0);
+    expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 0 });
+  });
+
+  it("lets a late rule decision replace the provisional IN reset", () => {
+    const manager = createContextManager();
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail", false);
+    flushAnimationFrames(11);
+
+    const applyReturnPolicy = manager.initializeContext(
+      returningFeedPage,
+      "/feed",
+    );
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(0);
+
+    // A delayed OUT/IN pair can resolve after the first frame. The rule's
+    // decision still wins and uses the snapshot captured at IN registration.
+    applyReturnPolicy(true);
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(480);
+  });
+
+  it("shares one rule decision across nested IN boundaries for the same path", () => {
+    const manager = createContextManager();
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningOuter = createFakeElement({ parentElement: body });
+    const returningInner = createFakeElement({ parentElement: returningOuter });
+
+    manager.initializeContext(feedPage, "/feed", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail", false);
+    flushAnimationFrames(11);
+
+    const applyOuterPolicy = manager.initializeContext(returningOuter, "/feed");
+    manager.initializeContext(returningInner, "/feed");
+    applyOuterPolicy(true);
+    flushAnimationFrames(2);
+
+    // The nested registration's fallback must not replace the winning outer
+    // boundary's restore decision.
+    expect(documentElement.scrollTop).toBe(480);
   });
 
   it("keys scroll off resolvePath so aliased/rewritten routes share one position", () => {
     const manager = createContextManager({
-      preserveScroll: true,
       // Mirror a config `middleware` that aliases a mobile-only route to its
       // canonical id (e.g. `/m-p/[id]` → `/p/[id]`).
       resolvePath: (path) => path.replace(/^\/m-p\//, "/p/"),
@@ -386,7 +409,7 @@ describe("createContextManager", () => {
     const canonicalPost = createFakeElement({ parentElement: body });
 
     // Scroll the page while on the ALIAS path.
-    manager.initializeContext(mobilePost, "/m-p/123");
+    manager.initializeContext(mobilePost, "/m-p/123", true);
     flushAnimationFrames(11);
     documentElement.scrollTop = 540;
     emitWindowScroll();
@@ -403,11 +426,11 @@ describe("createContextManager", () => {
     });
 
     // Return via the CANONICAL path — scroll restores from the shared key.
-    manager.initializeContext(away, "/external");
+    manager.initializeContext(away, "/external", false);
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(0);
 
-    manager.initializeContext(canonicalPost, "/p/123");
+    manager.initializeContext(canonicalPost, "/p/123", true);
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(540);
   });

@@ -46,3 +46,7 @@ const config = {
   ],
 };
 ```
+
+`on` uses stack scroll behavior automatically: the route outside the scope
+restores when it comes back IN, while a route matched by `on` starts at `(0, 0)`
+when it comes IN. OUT always keeps its current scroll during animation.

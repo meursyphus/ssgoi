@@ -24,14 +24,20 @@ describe("on rules", () => {
   };
 
   it("uses the route-family boundary for enter and leave", () => {
-    expect(resolve("/profile", "/post/1", [rule])?.direction).toBe("forward");
-    expect(resolve("/post/1", "/profile", [rule])?.direction).toBe("backward");
+    const enter = resolve("/profile", "/post/1", [rule]);
+    const leave = resolve("/post/1", "/profile", [rule]);
+
+    expect(enter?.direction).toBe("forward");
+    expect(enter?.preserveScroll).toEqual({ from: true, to: false });
+    expect(leave?.direction).toBe("backward");
+    expect(leave?.preserveScroll).toEqual({ from: false, to: true });
   });
 
   it("uses semantic history only when both endpoints are members", () => {
-    expect(resolve("/post/1", "/post/2", [rule], "backward")?.direction).toBe(
-      "backward",
-    );
+    const result = resolve("/post/1", "/post/2", [rule], "backward");
+
+    expect(result?.direction).toBe("backward");
+    expect(result?.preserveScroll).toEqual({ from: false, to: false });
   });
 
   it("does not trigger when neither endpoint belongs to the scope", () => {
@@ -46,8 +52,13 @@ describe("ordered and pair rules", () => {
       { ordered: ["/", "/search", "/profile"], transition: effect },
     ];
 
-    expect(resolve("/", "/profile", rules)?.direction).toBe("forward");
-    expect(resolve("/profile", "/search", rules)?.direction).toBe("backward");
+    const forward = resolve("/", "/profile", rules);
+    const backward = resolve("/profile", "/search", rules);
+
+    expect(forward?.direction).toBe("forward");
+    expect(forward?.preserveScroll).toEqual({ from: true, to: true });
+    expect(backward?.direction).toBe("backward");
+    expect(backward?.preserveScroll).toEqual({ from: true, to: true });
     expect(resolve("/profile", "/post/1", rules)).toBeNull();
   });
 
@@ -61,8 +72,13 @@ describe("ordered and pair rules", () => {
       },
     ];
 
-    expect(resolve("/gallery", "/photo/1", rules)?.direction).toBe("forward");
-    expect(resolve("/photo/1", "/search", rules)?.direction).toBe("backward");
+    const forward = resolve("/gallery", "/photo/1", rules);
+    const backward = resolve("/photo/1", "/search", rules);
+
+    expect(forward?.direction).toBe("forward");
+    expect(forward?.preserveScroll).toEqual({ from: true, to: false });
+    expect(backward?.direction).toBe("backward");
+    expect(backward?.preserveScroll).toEqual({ from: false, to: true });
   });
 
   it("can disable the reverse pair", () => {
@@ -104,5 +120,66 @@ describe("competition", () => {
         { on: "/**", transition: specific },
       ])?.transition,
     ).toBe(fallback);
+  });
+});
+
+describe("scroll preservation policy", () => {
+  const effect = transition("effect");
+
+  it("maps an explicit on override to enter, leave, and in-scope history", () => {
+    const rules: SsgoiTransitionRule[] = [
+      {
+        on: "/posts/**",
+        except: "/posts",
+        transition: effect,
+        preserveScroll: { from: false, to: true },
+      },
+    ];
+
+    expect(resolve("/posts", "/posts/1", rules)?.preserveScroll).toEqual({
+      from: false,
+      to: true,
+    });
+    expect(resolve("/posts/1", "/posts", rules)?.preserveScroll).toEqual({
+      from: true,
+      to: false,
+    });
+    expect(resolve("/posts/1", "/posts/2", rules)?.preserveScroll).toEqual({
+      from: true,
+      to: true,
+    });
+  });
+
+  it("maps asymmetric pair and ordered overrides through backward navigation", () => {
+    const rules: SsgoiTransitionRule[] = [
+      {
+        from: "/gallery",
+        to: "/photo/:id",
+        transition: effect,
+        preserveScroll: { from: false, to: true },
+      },
+      {
+        ordered: ["/tabs/a", "/tabs/b"],
+        transition: effect,
+        preserveScroll: { from: true, to: false },
+      },
+    ];
+
+    expect(resolve("/gallery", "/photo/1", rules)?.preserveScroll).toEqual({
+      from: false,
+      to: true,
+    });
+    expect(resolve("/photo/1", "/gallery", rules)?.preserveScroll).toEqual({
+      from: true,
+      to: false,
+    });
+    expect(resolve("/tabs/a", "/tabs/b", rules)?.preserveScroll).toEqual({
+      from: true,
+      to: false,
+    });
+    expect(resolve("/tabs/b", "/tabs/a", rules)?.preserveScroll).toEqual({
+      from: false,
+      to: true,
+    });
   });
 });

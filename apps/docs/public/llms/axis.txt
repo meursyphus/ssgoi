@@ -70,3 +70,5 @@ const config = {
   ],
 };
 ```
+
+`ordered` restores both pages automatically when either one comes back IN.

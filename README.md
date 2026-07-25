@@ -334,6 +334,11 @@ Rule forms:
   mean “any of these patterns”.
 - `ordered` requires both routes to be in the list. Increasing index is forward
   and decreasing index is backward.
+- Scroll behavior follows the relationship automatically. `on` and
+  `from`/`to` restore the forward `from` side and reset the forward `to` side;
+  `ordered` restores both sides. Override a rule with
+  `preserveScroll: { from: boolean, to: boolean }` only when needed. Reset or
+  restoration is applied when that side becomes the incoming page.
 
 These selectors work with every effect; the usual convention is `drill` and
 `sheet` with `on`, `slide`/`axis`/directional `scroll` with `ordered`, and

@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/json-ld";
 import { PhoneFrame } from "@/components/phone-frame";
 import { breadcrumbSchema, buildOpenGraph, faqSchema } from "@/lib/seo";
 import { DocsHero } from "@/page/docs/sections";
-import { DOCS_NAV } from "@/page/docs/nav";
+import { DOCS_NAV_PRIMARY } from "@/page/docs/nav";
 
 export const metadata: Metadata = {
   title: "Docs — Setup, transitions, and how SSGOI works",
@@ -43,7 +43,7 @@ const DOCS_BREADCRUMB = breadcrumbSchema([
   { name: "Docs", path: "/docs" },
 ]);
 
-const QUICK_LINKS = DOCS_NAV.flatMap((g) => g.items).filter(
+const QUICK_LINKS = DOCS_NAV_PRIMARY.flatMap((g) => g.items).filter(
   (i) => i.href !== "/docs",
 );
 

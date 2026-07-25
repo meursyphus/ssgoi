@@ -57,6 +57,9 @@ Direction comes from the single config:
 }
 ```
 
+`ordered` routes restore scroll automatically. `on` and `from`/`to` rules
+restore the forward source and reset the forward destination.
+
 ## Other demos
 
 - Posts: `drill` for list → detail.

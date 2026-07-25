@@ -1,63 +1,128 @@
 # SSGOI with SvelteKit
 
-Use one config and one `<Ssgoi>` in the root layout.
+SvelteKit wiring only. Config syntax, transition catalog, options:
+https://ssgoi.dev/llms.txt
+
+```bash
+npm install @ssgoi/svelte
+```
+
+## Setup
+
+Everything wires in the root layout — one `<Ssgoi>`, the shell classes, and
+the boundary component:
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
   import { Ssgoi } from "@ssgoi/svelte";
   import { config } from "$lib/ssgoi-config";
+  import SsgoiTransitionBoundary from "$lib/components/ssgoi-transition-boundary.svelte";
 
   let { children } = $props();
 </script>
 
 <main class="relative z-0 min-h-dvh overflow-x-clip">
-  <Ssgoi {config}>{@render children()}</Ssgoi>
+  <Ssgoi {config}>
+    <SsgoiTransitionBoundary class="min-h-full">
+      {@render children()}
+    </SsgoiTransitionBoundary>
+  </Ssgoi>
 </main>
 ```
 
-## Page boundary
+```ts
+// src/lib/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/svelte";
+import { drill } from "@ssgoi/svelte/view-transitions";
 
-Put the transition id on the routed page root.
-
-```svelte
-<!-- src/routes/posts/[id]/+page.svelte -->
-<article data-ssgoi-transition="/posts/{post.id}">
-  <!-- page -->
-</article>
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
 ```
 
-## Persistent layout
+## The boundary component
 
-A route layout may own a boundary. It stays mounted while its child pages
-change.
+Why it exists: SvelteKit updates route DOM in place — no unmount, so SSGOI
+has no outgoing node to animate. The component detaches the old route in
+`onNavigate` first, then remounts under the new id:
 
 ```svelte
-<!-- src/routes/products/+layout.svelte -->
-<script>
+<!-- src/lib/components/ssgoi-transition-boundary.svelte -->
+<script lang="ts">
+  import { onNavigate } from "$app/navigation";
   import { page } from "$app/stores";
-  let { children } = $props();
+  import { flushSync, onDestroy, type Snippet } from "svelte";
+
+  interface Props {
+    children: Snippet;
+    as?: keyof HTMLElementTagNameMap;
+    class?: string;
+    getId?: (url: URL) => string;
+    [key: string]: unknown;
+  }
+
+  const pathnameId = (url: URL) => url.pathname;
+
+  let {
+    children,
+    as = "div",
+    class: className,
+    getId = pathnameId,
+    ...rest
+  }: Props = $props();
+
+  let currentId = $state(getId($page.url));
+  let mounted = $state(true);
+  let alive = true;
+
+  onDestroy(() => {
+    alive = false;
+  });
+
+  onNavigate((navigation) => {
+    if (!alive || !navigation.to) return;
+
+    const nextId = getId(navigation.to.url);
+
+    if (nextId === currentId) return;
+
+    // Detach the old route before SvelteKit updates its live `children`
+    // snippet. SSGOI can then retain the real outgoing DOM for its animation.
+    flushSync(() => {
+      mounted = false;
+    });
+
+    return () => {
+      if (!alive) return;
+
+      flushSync(() => {
+        currentId = nextId;
+        mounted = true;
+      });
+    };
+  });
 </script>
 
-<section data-ssgoi-transition={$page.url.pathname}>
-  <ProductTabs />
-  {@render children()}
-</section>
+{#if mounted}
+  <svelte:element
+    this={as}
+    data-ssgoi-transition={currentId}
+    class={className}
+    {...rest}
+  >
+    {@render children()}
+  </svelte:element>
+{/if}
 ```
 
-Keep a child page boundary for tab-to-tab transitions:
+Verify: navigate `/` → any page slides in from the right; back slides out.
 
-```svelte
-<main data-ssgoi-transition={$page.url.pathname}>
-  <!-- tab content -->
-</main>
-```
+## Beyond the basics
 
-When the layout and page leave together, SSGOI uses the outer changed
-boundary. When only the page changes, it uses the page boundary.
-
-## Reference
-
-- Shared config and route patterns: https://ssgoi.dev/llms.txt
-- SvelteKit template: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit
-- Effect options: `https://ssgoi.dev/llms/<effect>.txt`
+- Persistent layout (tabs stay while tab content changes): the route layout
+  puts `data-ssgoi-transition={$page.url.pathname}` on its own root above
+  `{@render children()}`; child pages keep their markers. When layout and
+  page leave together, the outer changed boundary wins.
+- Grouping several routes under one id: pass `getId` to the boundary.
+- Full example: https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit

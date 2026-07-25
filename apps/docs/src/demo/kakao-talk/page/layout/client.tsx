@@ -10,8 +10,6 @@ const BASE = "/demo/kakao-talk";
 // One config owns tab, sheet, and drill rules. Boundaries decide which layout
 // region leaves; the bottom nav stays mounted for tab-to-tab moves.
 const config: SsgoiConfig = {
-  // mobile-frame 안에서 항상 스크롤 보존
-  preserveScroll: true,
   transitions: [
     {
       ordered: [BASE, `${BASE}/chats`],

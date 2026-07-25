@@ -25,7 +25,11 @@ export function TransitionDetailBody({ doc }: { doc: TransitionDoc }) {
     }`
         : doc.ruleStyle === "target"
           ? `{ on: "/compose", transition: ${effect} }`
-          : `{ from: "/list", to: "/detail/*", transition: ${effect} }`;
+          : `{
+      from: "/list",
+      to: "/detail/*",
+      transition: ${effect},
+    }`;
 
   const setup = `import { ${doc.name} } from "@ssgoi/react/view-transitions";
 
