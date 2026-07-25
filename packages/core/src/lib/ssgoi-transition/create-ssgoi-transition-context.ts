@@ -75,7 +75,12 @@ export function createSggoiTransitionContext(
   const host = contextOptions.host ?? new HostAnimation();
   const unmountGroup = {};
 
-  const detector = createNavigationDetector();
+  const detector = createNavigationDetector<PendingSide>({
+    // Nested boundaries can be discovered in separate MutationObserver
+    // batches (notably when Suspense reveals a child later). When the same
+    // side/path repeats before pairing, the outermost DOM boundary owns it.
+    keepCurrent: ({ current, next }) => current.element.contains(next.element),
+  });
   const directionTracker = createNavigationDirectionTracker();
 
   // Normalize both accepted shapes to the functional form up front so the rest
@@ -132,9 +137,6 @@ export function createSggoiTransitionContext(
     }
     return processed;
   };
-
-  let pendingOut: PendingSide | null = null;
-  let pendingIn: PendingSide | null = null;
 
   const elementAnchors = new WeakMap<HTMLElement, ElementAnchor>();
 
@@ -382,12 +384,15 @@ export function createSggoiTransitionContext(
     });
   };
 
-  const handleArrival = (path: string, side: "in" | "out"): void => {
+  const handleArrival = (
+    path: string,
+    side: "in" | "out",
+    pendingSide: PendingSide,
+  ): void => {
     const isSwipeBack = swipeDetector.isSwipeBack();
-    detector.trigger(path, side);
 
     // .then chain — handleArrival returns immediately, dispatcher never blocks.
-    detector.get(side).then((pair) => {
+    detector.arrive(path, side, pendingSide).then((pair) => {
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) return;
 
@@ -403,8 +408,6 @@ export function createSggoiTransitionContext(
         if (side === "out" && pair.from && !shouldPreserve(pair.from)) {
           evictScrollPosition(pair.from);
         }
-        pendingOut = null;
-        pendingIn = null;
         return;
       }
 
@@ -435,20 +438,15 @@ export function createSggoiTransitionContext(
         historyDirection,
       );
 
-      const outSide = pendingOut;
-      const inSide = pendingIn;
-      pendingOut = null;
-      pendingIn = null;
-
-      if (!resolved || !outSide || !inSide) return;
+      if (!resolved) return;
 
       runTransition(
         resolved.transition,
         resolved.direction,
         pair.from,
         pair.to,
-        outSide,
-        inSide,
+        pair.out,
+        pair.in,
       );
     });
   };
@@ -489,14 +487,14 @@ export function createSggoiTransitionContext(
     if (alreadyHidden) return; // duplicate hide — kept revealed, don't re-pair
 
     const anchor = readAnchor(element);
-    pendingOut = {
+    const pendingSide: PendingSide = {
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
       mode: "hidden",
     };
     const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "out");
+    handleArrival(currentPath, "out", pendingSide);
   };
 
   // React revealed `element` (an <Activity> went mode="visible"): it is entering
@@ -529,13 +527,13 @@ export function createSggoiTransitionContext(
     }
 
     initializeContext(element, path);
-    pendingIn = {
+    const pendingSide: PendingSide = {
       element,
       parent: element.parentElement,
       nextSibling: element.nextElementSibling,
     };
     const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "in");
+    handleArrival(currentPath, "in", pendingSide);
   };
 
   const handleRemoval = (
@@ -554,8 +552,7 @@ export function createSggoiTransitionContext(
       // side that still points at this now-gone node so it can't mis-pair a
       // later arrival onto a detached element.
       if (state.intent === "hidden") {
-        if (pendingOut?.element === element) pendingOut = null;
-        if (pendingIn?.element === element) pendingIn = null;
+        detector.cancel((pendingSide) => pendingSide.element === element);
         return;
       }
     }
@@ -563,7 +560,7 @@ export function createSggoiTransitionContext(
     if (!emit) return;
 
     const anchor = removalAnchor ?? readAnchor(element);
-    pendingOut = {
+    const pendingSide: PendingSide = {
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
@@ -573,7 +570,7 @@ export function createSggoiTransitionContext(
     // so a mid-life id change (re-render with a new id prop on the same
     // element) leaves with its current identity, not the one it mounted with.
     const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "out");
+    handleArrival(currentPath, "out", pendingSide);
   };
 
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
@@ -613,12 +610,12 @@ export function createSggoiTransitionContext(
       captureVisibleDisplay(element, state);
       if (enter) {
         initializeContext(element, path);
-        pendingIn = {
+        const pendingSide: PendingSide = {
           element,
           parent: element.parentElement,
           nextSibling: element.nextElementSibling,
         };
-        handleArrival(path, "in");
+        handleArrival(path, "in", pendingSide);
       }
     }
 

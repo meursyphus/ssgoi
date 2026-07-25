@@ -2,7 +2,7 @@
 
 SSGOI adds route transitions without replacing the application router.
 
-Current core version: `@ssgoi/core@7.0.0-beta.0`
+Current core version: `@ssgoi/core@7.0.0-beta.2`
 
 ## Contents
 
