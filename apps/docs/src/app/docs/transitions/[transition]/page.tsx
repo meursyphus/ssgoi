@@ -56,7 +56,7 @@ export default async function DocsTransitionDetailPage({
           { name: doc.name, path },
         ])}
       />
-      <DocsPageHeading eyebrow="Transition" title={doc.name} lead={doc.intro} />
+      <DocsPageHeading title={doc.name} lead={doc.intro} />
       <TransitionDetailBody doc={doc} />
     </>
   );

@@ -29,22 +29,15 @@ const LLMS_TXT = "https://ssgoi.dev/llms.txt";
 /* -------------------------------------------------------------------------- */
 
 export function DocsPageHeading({
-  eyebrow,
   title,
   lead,
 }: {
-  eyebrow?: string;
   title: string;
   lead?: React.ReactNode;
 }) {
   return (
     <header className="border-b border-white/[0.06] pb-8">
-      {eyebrow && (
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-          {eyebrow}
-        </p>
-      )}
-      <h1 className="mt-3 text-balance text-3xl font-semibold leading-[1.1] tracking-tight md:text-4xl">
+      <h1 className="text-balance text-3xl font-semibold leading-[1.1] tracking-tight md:text-4xl">
         {title}
       </h1>
       {lead && (
@@ -61,10 +54,7 @@ export function DocsPageHeading({
 export function DocsHero() {
   return (
     <header className="border-b border-white/[0.06] pb-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Docs · llms-first
-      </p>
-      <h1 className="mt-4 text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
+      <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
         Drop the txt.{" "}
         <span className="text-neutral-400">Your AI sets it up.</span>
       </h1>
@@ -129,10 +119,7 @@ export function InstallBody() {
       </p>
 
       <div className="mt-12 border-t border-white/[0.06] pt-10">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-          Set up
-        </p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
           Build the shell, then mark routed regions
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
@@ -334,10 +321,7 @@ export function SsgoiRouteBoundary({
 function WhyStructure() {
   return (
     <div className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-6">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Why this shape
-      </p>
-      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
+      <h3 className="text-base font-semibold tracking-tight text-neutral-100">
         The wrapper classes aren&apos;t decoration
       </h3>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
@@ -396,11 +380,8 @@ function WhyStructure() {
 function NonReactBoundary() {
   return (
     <div className="mt-12 border-t border-white/[0.06] pt-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Svelte · Vue · Solid · Angular · Qwik
-      </p>
-      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
-        Mark each routed page directly
+      <h3 className="text-base font-semibold tracking-tight text-neutral-100">
+        Svelte, Vue, Solid, Angular, Qwik — mark each routed page directly
       </h3>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
         Outside React, skip the boundary utility and put{" "}
@@ -541,10 +522,7 @@ export default component$(() => {
 function ReferenceTemplates() {
   return (
     <div className="mt-12 border-t border-white/[0.06] pt-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Copy from a working app
-      </p>
-      <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
+      <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
         Reference templates
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">

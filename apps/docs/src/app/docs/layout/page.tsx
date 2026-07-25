@@ -22,7 +22,6 @@ export default function DocsLayoutPage() {
         ])}
       />
       <DocsPageHeading
-        eyebrow="Setup step 1"
         title="Layout shell"
         lead="Establish the OUT page's containing and stacking context before adding route boundaries."
       />

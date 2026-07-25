@@ -23,7 +23,6 @@ export default function DocsNestedBoundariesPage() {
         ])}
       />
       <DocsPageHeading
-        eyebrow="Setup step 2"
         title="Route boundaries"
         lead="A key creates the unmount SSGOI observes; a route id selects the transition. Name each owned region once."
       />

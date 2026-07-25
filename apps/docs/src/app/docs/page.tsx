@@ -60,10 +60,7 @@ export default function DocsOverviewPage() {
         />
         <div className="relative grid items-center gap-8 p-7 sm:p-9 md:grid-cols-[1fr_auto] md:gap-10">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-orange-400/90">
-              In production
-            </p>
-            <h2 className="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+            <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
               Not a demo. <span className="text-orange-400">It ships.</span>
             </h2>
             <p className="mt-4 max-w-sm text-pretty leading-relaxed text-neutral-400">
@@ -101,7 +98,7 @@ export default function DocsOverviewPage() {
       </section>
 
       <div className="mt-12">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
           Start here
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
