@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type ComponentType } from "react";
-import { ChevronRight, Menu } from "lucide-react";
+import { ChevronRight, Menu, Monitor, Smartphone } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/lib/link";
 import {
@@ -24,9 +24,10 @@ import {
 } from "@/components/router-logos";
 import {
   DOCS_NAV,
-  findDocsTrail,
+  findDocsLocation,
   type DocsNavIcon,
   type DocsNavNode,
+  type DocsNavPlatform,
 } from "./nav";
 
 const ICONS: Record<DocsNavIcon, ComponentType<{ className?: string }>> = {
@@ -38,6 +39,19 @@ const ICONS: Record<DocsNavIcon, ComponentType<{ className?: string }>> = {
   solidstart: SolidStartMark,
   qwik: QwikMark,
   angular: AngularMark,
+};
+
+/**
+ * Two glyphs rather than lucide's combined monitor-and-phone mark: at 14px the
+ * combined one collapses into a smudge, and "both" has to read at a glance.
+ */
+const PLATFORMS: Record<
+  DocsNavPlatform,
+  { icons: ComponentType<{ className?: string }>[]; label: string }
+> = {
+  web: { icons: [Monitor], label: "Built for web" },
+  mobile: { icons: [Smartphone], label: "Built for mobile" },
+  both: { icons: [Monitor, Smartphone], label: "Built for web and mobile" },
 };
 
 function normalize(value: string) {
@@ -71,6 +85,7 @@ function DocsNavItem({
 }) {
   const current = isCurrentPage(node, pathname);
   const Icon = node.icon ? ICONS[node.icon] : undefined;
+  const platform = node.platform ? PLATFORMS[node.platform] : undefined;
 
   const body = (
     <>
@@ -81,20 +96,44 @@ function DocsNavItem({
           <span className="h-4 w-4 shrink-0" aria-hidden />
         ))}
       <span className="min-w-0 truncate">{node.title}</span>
+      {platform && (
+        <span
+          title={platform.label}
+          className={[
+            "ml-auto flex shrink-0 items-center gap-1 transition-colors",
+            current
+              ? "text-ink-dim"
+              : "text-ink-faint/70 group-hover:text-ink-dim",
+          ].join(" ")}
+        >
+          {platform.icons.map((PlatformIcon, index) => (
+            <PlatformIcon key={index} className="h-3.5 w-3.5" aria-hidden />
+          ))}
+          <span className="sr-only">{platform.label}</span>
+        </span>
+      )}
     </>
   );
 
   const className = [
-    "relative flex min-w-0 items-center gap-2.5 rounded-md pl-3 pr-2 transition-colors",
+    "group relative flex min-w-0 items-center gap-2.5 rounded-md px-3 transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60",
-    touchFriendly ? "min-h-11" : "py-1",
+    touchFriendly ? "min-h-11" : "py-1.5",
     current
       ? "bg-raised font-medium text-ink"
       : "text-ink-dim hover:bg-raised/60 hover:text-ink",
   ].join(" ");
 
+  // Nested items carry the rail on the row itself rather than on the list, so
+  // the current page can light up its own segment of it. A separate indicator
+  // bar would draw a second vertical line a few pixels from the first.
+  const nested = depth > 0;
+  const itemClassName = nested
+    ? `border-l pl-2 ${current ? "border-brand" : "border-line"}`
+    : undefined;
+
   return (
-    <li>
+    <li className={itemClassName}>
       {node.href ? (
         <Link
           href={node.href}
@@ -102,7 +141,7 @@ function DocsNavItem({
           onClick={onNavigate}
           className={className}
         >
-          {current && (
+          {current && !nested && (
             <span
               aria-hidden
               className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand"
@@ -147,10 +186,9 @@ function DocsNavList({
   return (
     <ul
       aria-labelledby={labelledBy}
-      className={[
-        "flex flex-col",
-        depth > 0 ? "ml-3 mt-0.5 border-l border-line pl-2" : "mt-1",
-      ].join(" ")}
+      className={["flex flex-col", depth > 0 ? "ml-3 mt-0.5" : "mt-1.5"].join(
+        " ",
+      )}
     >
       {nodes.map((node) => (
         <DocsNavItem
@@ -179,14 +217,14 @@ function DocsNavigation({
   const labelId = useId();
 
   return (
-    <nav aria-label="Documentation" className="flex flex-col gap-6 text-sm">
+    <nav aria-label="Documentation" className="flex flex-col gap-7 text-sm">
       {DOCS_NAV.map((group) => {
         const groupLabelId = `${labelId}-${group.id}`;
         return (
           <section key={group.id} aria-labelledby={groupLabelId}>
             <h2
               id={groupLabelId}
-              className="px-3 text-[0.8125rem] font-semibold text-ink-dim"
+              className="px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.09em] text-ink-faint"
             >
               {group.label}
             </h2>
@@ -213,11 +251,12 @@ export function DocsSidebar() {
 
 function DocsMobileNavForPath({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
-  const trail = findDocsTrail(pathname);
-  const context =
-    trail.length > 0
-      ? trail.map((node) => node.title).join(" / ")
-      : "Documentation";
+  const location = findDocsLocation(pathname);
+  // Group over ancestors: "Transitions / Drill" places the page, where the
+  // literal trail would only say "Guide / Drill".
+  const context = location
+    ? `${location.group.label} / ${location.trail[location.trail.length - 1].title}`
+    : "Documentation";
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -250,7 +289,7 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
             Browse SSGOI documentation sections and pages.
           </SheetDescription>
         </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-6">
+        <div className="scrollbar-subtle min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-6">
           <DocsNavigation
             pathname={pathname}
             touchFriendly

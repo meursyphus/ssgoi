@@ -7,6 +7,11 @@
  *
  * Layout shell and Route boundaries sit directly under Quick start — that is
  * where they are first linked from, and a title alone would never earn a click.
+ *
+ * Transitions and Frameworks each open with a "Guide" overview and nest their
+ * pages underneath. Nobody navigates to a catalog on purpose, so the overview
+ * introduces the group rather than competing with it for a click, and the
+ * indent is what says the pages below belong to it.
  */
 
 /** Keys resolved to a logo component in the sidebar (nav stays JSX-free). */
@@ -20,12 +25,20 @@ export type DocsNavIcon =
   | "qwik"
   | "angular";
 
+/**
+ * Where a preset belongs. Every transition runs anywhere; this is the surface
+ * the motion was designed for, so the sidebar can be scanned by the product
+ * being built instead of by preset name.
+ */
+export type DocsNavPlatform = "web" | "mobile" | "both";
+
 export type DocsNavNode = {
   id: string;
   title: string;
   href?: string;
   blurb?: string;
   icon?: DocsNavIcon;
+  platform?: DocsNavPlatform;
   children?: readonly DocsNavNode[];
 };
 
@@ -77,87 +90,102 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
     items: [
       {
         id: "transitions",
-        title: "All transitions",
+        title: "Guide",
         href: "/docs/transitions",
         blurb: "Pick an effect from the navigation you are building.",
-      },
-      {
-        id: "transition-drill",
-        title: "Drill",
-        href: "/docs/transitions/drill",
-        blurb: "List to detail, one level deeper.",
-      },
-      {
-        id: "transition-sheet",
-        title: "Sheet",
-        href: "/docs/transitions/sheet",
-        blurb: "A temporary screen rises over the current one.",
-      },
-      {
-        id: "transition-slide",
-        title: "Slide",
-        href: "/docs/transitions/slide",
-        blurb: "Tabs and steps that have a left-to-right order.",
-      },
-      {
-        id: "transition-zoom",
-        title: "Zoom",
-        href: "/docs/transitions/zoom",
-        blurb: "A card or image opens into its own page.",
-      },
-      {
-        id: "transition-axis",
-        title: "Axis",
-        href: "/docs/transitions/axis",
-        blurb: "Material shared-axis motion between peer screens.",
-      },
-      {
-        id: "transition-scroll",
-        title: "Scroll",
-        href: "/docs/transitions/scroll",
-        blurb: "Vertical movement through an ordered sequence.",
-      },
-      {
-        id: "transition-hero",
-        title: "Hero",
-        href: "/docs/transitions/hero",
-        blurb: "One shared element travels between two pages.",
-      },
-      {
-        id: "transition-fade",
-        title: "Fade",
-        href: "/docs/transitions/fade",
-        blurb: "A calm cross-fade with no direction.",
-      },
-      {
-        id: "transition-film",
-        title: "Film",
-        href: "/docs/transitions/film",
-        blurb: "A cinematic scene built at runtime.",
-      },
-      {
-        id: "transition-strip",
-        title: "Strip",
-        href: "/docs/transitions/strip",
-        blurb: "Whole pages slide with a shallow perspective turn.",
-      },
-      {
-        id: "transition-blind",
-        title: "Blind",
-        href: "/docs/transitions/blind",
-        blurb: "The next page appears through animated blinds.",
-      },
-      {
-        id: "transition-rotate",
-        title: "Rotate",
-        href: "/docs/transitions/rotate",
-        blurb: "Pages spin through a flat half-turn.",
-      },
-      {
-        id: "transition-jaemin",
-        title: "Jaemin",
-        href: "/docs/transitions/jaemin",
-        blurb: "An expressive layered page transition.",
+        children: [
+          {
+            id: "transition-drill",
+            title: "Drill",
+            href: "/docs/transitions/drill",
+            platform: "mobile",
+            blurb: "List to detail, one level deeper.",
+          },
+          {
+            id: "transition-sheet",
+            title: "Sheet",
+            href: "/docs/transitions/sheet",
+            platform: "mobile",
+            blurb: "A temporary screen rises over the current one.",
+          },
+          {
+            id: "transition-slide",
+            title: "Slide",
+            href: "/docs/transitions/slide",
+            platform: "mobile",
+            blurb: "Tabs and steps that have a left-to-right order.",
+          },
+          {
+            id: "transition-zoom",
+            title: "Zoom",
+            href: "/docs/transitions/zoom",
+            platform: "mobile",
+            blurb: "A card or image opens into its own page.",
+          },
+          {
+            id: "transition-axis",
+            title: "Axis",
+            href: "/docs/transitions/axis",
+            platform: "mobile",
+            blurb: "Material shared-axis motion between peer screens.",
+          },
+          {
+            id: "transition-scroll",
+            title: "Scroll",
+            href: "/docs/transitions/scroll",
+            platform: "mobile",
+            blurb: "Vertical movement through an ordered sequence.",
+          },
+          {
+            id: "transition-hero",
+            title: "Hero",
+            href: "/docs/transitions/hero",
+            platform: "both",
+            blurb: "One shared element travels between two pages.",
+          },
+          {
+            id: "transition-fade",
+            title: "Fade",
+            href: "/docs/transitions/fade",
+            platform: "web",
+            blurb: "A calm cross-fade with no direction.",
+          },
+          {
+            id: "transition-film",
+            title: "Film",
+            href: "/docs/transitions/film",
+            platform: "web",
+            blurb: "A cinematic scene built at runtime.",
+          },
+          {
+            id: "transition-strip",
+            title: "Strip",
+            href: "/docs/transitions/strip",
+            platform: "web",
+            blurb: "Whole pages slide with a shallow perspective turn.",
+          },
+          {
+            id: "transition-blind",
+            title: "Blind",
+            href: "/docs/transitions/blind",
+            platform: "web",
+            blurb: "The next page appears through animated blinds.",
+          },
+          {
+            id: "transition-rotate",
+            title: "Rotate",
+            href: "/docs/transitions/rotate",
+            platform: "web",
+            blurb: "Pages spin through a flat half-turn.",
+          },
+          {
+            id: "transition-jaemin",
+            title: "Jaemin",
+            href: "/docs/transitions/jaemin",
+            platform: "web",
+            blurb: "An expressive layered page transition.",
+          },
+        ],
       },
     ],
   },
@@ -197,65 +225,67 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
     items: [
       {
         id: "frameworks-overview",
-        title: "All frameworks",
+        title: "Guide",
         href: "/docs/frameworks",
         blurb: "One page per framework and router.",
-      },
-      {
-        id: "framework-nextjs",
-        title: "React / Next.js",
-        href: "/docs/frameworks/nextjs",
-        icon: "nextjs",
-        blurb: "App Router provider and pathname boundary.",
-      },
-      {
-        id: "framework-react-router",
-        title: "React Router",
-        href: "/docs/frameworks/react-router",
-        icon: "react-router",
-        blurb: "Boundary built on useLocation().",
-      },
-      {
-        id: "framework-tanstack-router",
-        title: "TanStack Router",
-        href: "/docs/frameworks/tanstack-router",
-        icon: "tanstack-router",
-        blurb: "Boundary built on router state.",
-      },
-      {
-        id: "framework-sveltekit",
-        title: "SvelteKit",
-        href: "/docs/frameworks/sveltekit",
-        icon: "sveltekit",
-        blurb: "Boundary component built on onNavigate.",
-      },
-      {
-        id: "framework-nuxt",
-        title: "Vue / Nuxt",
-        href: "/docs/frameworks/nuxt",
-        icon: "nuxt",
-        blurb: "Keyed route boundary for Vue Router and Nuxt.",
-      },
-      {
-        id: "framework-solidstart",
-        title: "SolidStart",
-        href: "/docs/frameworks/solidstart",
-        icon: "solidstart",
-        blurb: "Keyed boundary component on useLocation().",
-      },
-      {
-        id: "framework-qwik",
-        title: "Qwik City",
-        href: "/docs/frameworks/qwik",
-        icon: "qwik",
-        blurb: "QRL config factory and direct markers.",
-      },
-      {
-        id: "framework-angular",
-        title: "Angular",
-        href: "/docs/frameworks/angular",
-        icon: "angular",
-        blurb: "ssgoi directive above the router outlet.",
+        children: [
+          {
+            id: "framework-nextjs",
+            title: "React / Next.js",
+            href: "/docs/frameworks/nextjs",
+            icon: "nextjs",
+            blurb: "App Router provider and pathname boundary.",
+          },
+          {
+            id: "framework-react-router",
+            title: "React Router",
+            href: "/docs/frameworks/react-router",
+            icon: "react-router",
+            blurb: "Boundary built on useLocation().",
+          },
+          {
+            id: "framework-tanstack-router",
+            title: "TanStack Router",
+            href: "/docs/frameworks/tanstack-router",
+            icon: "tanstack-router",
+            blurb: "Boundary built on router state.",
+          },
+          {
+            id: "framework-sveltekit",
+            title: "SvelteKit",
+            href: "/docs/frameworks/sveltekit",
+            icon: "sveltekit",
+            blurb: "Boundary component built on onNavigate.",
+          },
+          {
+            id: "framework-nuxt",
+            title: "Vue / Nuxt",
+            href: "/docs/frameworks/nuxt",
+            icon: "nuxt",
+            blurb: "Keyed route boundary for Vue Router and Nuxt.",
+          },
+          {
+            id: "framework-solidstart",
+            title: "SolidStart",
+            href: "/docs/frameworks/solidstart",
+            icon: "solidstart",
+            blurb: "Keyed boundary component on useLocation().",
+          },
+          {
+            id: "framework-qwik",
+            title: "Qwik City",
+            href: "/docs/frameworks/qwik",
+            icon: "qwik",
+            blurb: "QRL config factory and direct markers.",
+          },
+          {
+            id: "framework-angular",
+            title: "Angular",
+            href: "/docs/frameworks/angular",
+            icon: "angular",
+            blurb: "ssgoi directive above the router outlet.",
+          },
+        ],
       },
     ],
   },
@@ -310,7 +340,12 @@ function normalizePathname(pathname: string): string {
   return pathname;
 }
 
-export function findDocsTrail(pathname: string): DocsNavNode[] {
+export type DocsLocation = {
+  group: DocsNavGroup;
+  trail: DocsNavNode[];
+};
+
+export function findDocsLocation(pathname: string): DocsLocation | null {
   const currentPath = normalizePathname(pathname);
 
   function findInNodes(nodes: readonly DocsNavNode[]): DocsNavNode[] | null {
@@ -331,10 +366,10 @@ export function findDocsTrail(pathname: string): DocsNavNode[] {
 
   for (const group of DOCS_NAV) {
     const trail = findInNodes(group.items);
-    if (trail) return trail;
+    if (trail) return { group, trail };
   }
 
-  return [];
+  return null;
 }
 
 export function flattenDocsNav(
