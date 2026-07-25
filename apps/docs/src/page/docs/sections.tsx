@@ -1,4 +1,5 @@
 import { Link } from "@/lib/link";
+import { CopyPill } from "@/components/copy-pill";
 import { NpmPill } from "@/components/npm-pill";
 import { CodeBlock } from "@/components/code-block";
 import {
@@ -111,7 +112,9 @@ function LayoutClassTable() {
 export function InstallBody() {
   return (
     <div className="mt-8">
-      <p className={`${measure} ${proseDim}`}>
+      <AgentSetup />
+
+      <p className={`mt-10 ${measure} ${proseDim}`}>
         One package per framework. This quick start uses React and Next.js; the
         equivalent setup for every other stack is in{" "}
         <Link href="/docs/frameworks" className={link}>
@@ -119,13 +122,11 @@ export function InstallBody() {
         </Link>
         .
       </p>
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap gap-2">
         {PACKAGES.map((pkg) => (
-          <NpmPill key={pkg} pkg={pkg} />
+          <NpmPill key={pkg} pkg={pkg} size="sm" />
         ))}
       </div>
-
-      <AgentSetup />
 
       <Section
         title="Set it up"
@@ -329,30 +330,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }
 
+const LLMS_URL = "https://ssgoi.dev/llms.txt";
+
 /**
- * Sits above the manual steps rather than under them: handing this URL to an
- * agent replaces the steps outright, so finding it at the bottom of the page
- * would be finding it too late.
+ * The first thing on the page, and deliberately almost wordless: for anyone
+ * setting SSGOI up through an agent this URL *is* the quick start, and prose
+ * explaining that would be prose standing in front of the action.
  */
 function AgentSetup() {
   return (
-    <div className={`mt-8 ${card} ${measure}`}>
-      <p className={prose}>
-        Using an AI coding agent? Point it at one file and it has the whole
-        setup — the config, the route boundary, the layout classes and the
-        transition specs — as plain text.
-      </p>
-      <a
-        href="https://ssgoi.dev/llms.txt"
-        target="_blank"
-        rel="noreferrer"
-        className={`mt-4 inline-block ${link} font-mono text-[0.9em]`}
-      >
-        https://ssgoi.dev/llms.txt
-      </a>
-      <p className={`mt-4 ${caption}`}>
-        The rest of this page is that same setup, written for a person.
-      </p>
+    <div className="flex flex-wrap items-center gap-3">
+      <CopyPill value={LLMS_URL} label={`Copy: ${LLMS_URL}`} tone="brand">
+        <span>{LLMS_URL}</span>
+      </CopyPill>
+      <span className={caption}>
+        Setting up with an AI agent? Give it this file.
+      </span>
     </div>
   );
 }
