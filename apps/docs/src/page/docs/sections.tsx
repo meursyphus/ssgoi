@@ -125,6 +125,8 @@ export function InstallBody() {
         ))}
       </div>
 
+      <AgentSetup />
+
       <Section
         title="Set it up"
         lead="Two new files, plus one edit to the layout you already have. Copy each block as it is."
@@ -322,6 +324,34 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Transitions
         </Link>
         .
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Sits above the manual steps rather than under them: handing this URL to an
+ * agent replaces the steps outright, so finding it at the bottom of the page
+ * would be finding it too late.
+ */
+function AgentSetup() {
+  return (
+    <div className={`mt-8 ${card} ${measure}`}>
+      <p className={prose}>
+        Using an AI coding agent? Point it at one file and it has the whole
+        setup — the config, the route boundary, the layout classes and the
+        transition specs — as plain text.
+      </p>
+      <a
+        href="https://ssgoi.dev/llms.txt"
+        target="_blank"
+        rel="noreferrer"
+        className={`mt-4 inline-block ${link} font-mono text-[0.9em]`}
+      >
+        https://ssgoi.dev/llms.txt
+      </a>
+      <p className={`mt-4 ${caption}`}>
+        The rest of this page is that same setup, written for a person.
       </p>
     </div>
   );
