@@ -6,17 +6,19 @@ pnpm dev
 ```
 
 `utils/ssgoi-config.ts` contains one config. `components/demo-layout.vue`
-creates one `<Ssgoi>`.
-
-Pages mark their DOM roots:
+creates one `<Ssgoi>` and one centralized route boundary:
 
 ```vue
-<main data-ssgoi-transition="/posts">...</main>
+<Ssgoi :config="ssgoiConfig">
+  <SsgoiTransitionBoundary :get-id="getRootTransitionId">
+    <slot />
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
 
-`pages/products.vue` is the persistent outer boundary and renders child
-category pages with `<NuxtPage />`. Child roots own category transitions;
-leaving products uses the outer layout boundary.
+The root boundary maps every `/products/*` URL to `/products`.
+`pages/products.vue` remains mounted and wraps its `<NuxtPage />` in a second
+boundary, so category navigation slides only the child content.
 
 Effects:
 

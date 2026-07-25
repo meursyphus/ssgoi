@@ -5,18 +5,21 @@ pnpm install
 pnpm dev
 ```
 
-The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts`.
-
-Route components mark their DOM roots:
+The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` and one
+centralized route boundary:
 
 ```tsx
-<main data-ssgoi-transition="/posts">...</main>
+<Ssgoi config={ssgoiConfig}>
+  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+    {props.children}
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
 
-The products route layout has an outer marker and each product category page
-has an inner marker. SolidStart keeps the outer layout mounted during category
-navigation, so only the inner content slides. Leaving products uses the outer
-boundary.
+The root boundary maps every `/products/*` URL to `/products`. The persistent
+products route wraps its child route in a second boundary, so category
+navigation replaces only the inner content while the header and tabs stay
+mounted.
 
 Effects:
 

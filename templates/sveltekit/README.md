@@ -6,18 +6,21 @@ pnpm dev
 ```
 
 The root layout uses one config from `src/lib/ssgoi-config.ts` and one
-`<Ssgoi>`.
-
-Route pages mark their DOM roots:
+`<Ssgoi>`. Its centralized route boundary owns the outgoing and incoming page
+DOM:
 
 ```svelte
-<main data-ssgoi-transition="/posts">...</main>
+<Ssgoi config={ssgoiConfig}>
+  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+    {@render children()}
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
 
-`routes/products/+layout.svelte` is the persistent outer boundary. Product
-category pages render an inner boundary. SvelteKit keeps the outer layout
-mounted while child routes change, so the header and tabs remain still while
-the content slides.
+The root boundary maps every `/products/*` URL to `/products`.
+`routes/products/+layout.svelte` stays mounted and puts a second boundary
+around its child route. Category navigation therefore replaces only the inner
+boundary, keeping the header and tabs still while the content slides.
 
 Effects:
 

@@ -3,8 +3,15 @@
   import { page } from "$app/stores";
   import { ssgoiConfig } from "$lib/ssgoi-config";
   import NavItem from "./nav-item.svelte";
+  import SsgoiTransitionBoundary from "./ssgoi-transition-boundary.svelte";
 
   let { children } = $props();
+
+  function getRootTransitionId(url: URL) {
+    return url.pathname === "/products" || url.pathname.startsWith("/products/")
+      ? "/products"
+      : url.pathname;
+  }
 </script>
 
 <div class="h-full bg-[#121212] flex z-0">
@@ -16,7 +23,12 @@
       class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
     >
       <Ssgoi config={ssgoiConfig}>
-        {@render children()}
+        <SsgoiTransitionBoundary
+          getId={getRootTransitionId}
+          class="min-h-full bg-[#121212]"
+        >
+          {@render children()}
+        </SsgoiTransitionBoundary>
       </Ssgoi>
     </main>
 
