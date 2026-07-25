@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { ViewTransitionApiBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/view-transition-api";
@@ -9,7 +9,7 @@ const path = "/docs/view-transition-api";
 export const metadata: Metadata = {
   title: "Why SSGOI doesn't use the View Transition API",
   description:
-    "SSGOI owns the geometry, temporary visual layers, live outgoing DOM, and navigation policy needed to package complex motion as reusable presets.",
+    "SSGOI animates the real leaving DOM so a preset can measure geometry, add temporary layers, and own interruption and scroll policy.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -21,12 +21,12 @@ export default function ViewTransitionApiPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "View Transition API", path },
+          { name: "Why not View Transitions", path },
         ])}
       />
-      <DocsPageHeading
-        title="Why SSGOI doesn't use the View Transition API"
-        lead="The native API is capable and broadly available. SSGOI chooses a live DOM control model to package geometry, runtime layers, and navigation policy into reusable presets."
+      <PageHeading
+        title="Why not View Transitions"
+        lead="Where the browser's View Transition API stops and SSGOI's presets begin."
       />
       <ViewTransitionApiBody />
     </>

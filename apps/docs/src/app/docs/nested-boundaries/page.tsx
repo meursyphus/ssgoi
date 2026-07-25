@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { NestedBoundariesBody } from "@/page/docs/nested-boundaries";
 
 export const metadata: Metadata = {
   title: "Persistent layouts — keep navigation still while routes move",
   description:
-    "Use named route-boundary resolvers to control React lifetime, keep layouts mounted, and include or exclude navigation from page transitions.",
+    "Key a boundary by the part of the path that should remount, so a shared shell stays mounted while the pages inside it move.",
   alternates: { canonical: "/docs/nested-boundaries" },
   openGraph: buildOpenGraph({ path: "/docs/nested-boundaries" }),
 };
@@ -25,9 +25,9 @@ export default function DocsNestedBoundariesPage() {
           },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Persistent layouts"
-        lead="Keep a bottom nav or header mounted for inner navigation, then move the whole shell only when the route leaves it."
+        lead="Keep a bottom nav or header still while the pages under it change."
       />
       <NestedBoundariesBody />
     </>

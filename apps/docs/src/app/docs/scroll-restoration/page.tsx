@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { ScrollRestorationBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/scroll-restoration";
 
 export const metadata: Metadata = {
-  title: "Scroll restoration — automatic reset and restore defaults",
+  title: "Scroll behavior — automatic reset and restore defaults",
   description:
-    "See how SSGOI restores source pages, resets destination pages, handles ordered routes, and lets one rule override the policy with preserveScroll.",
+    "How SSGOI decides whether a page comes back where you left it or starts at the top, and how one rule overrides that with preserveScroll.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -21,12 +21,12 @@ export default function ScrollRestorationPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Scroll restoration", path },
+          { name: "Scroll behavior", path },
         ])}
       />
-      <DocsPageHeading
-        title="Scroll restoration"
-        lead="SSGOI chooses restore or reset from the matched UX relationship. Override it only when that default is wrong."
+      <PageHeading
+        title="Scroll behavior"
+        lead="A page you go back to keeps its scroll position; a page you open fresh starts at the top."
       />
       <ScrollRestorationBody />
     </>

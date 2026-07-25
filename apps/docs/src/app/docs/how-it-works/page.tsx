@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading, HowItWorksBody } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
+import { HowItWorksBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
   title: "How it works — unmount, reinsert, and animate",
   description:
-    "SSGOI preserves the detached leaving page and temporarily reinserts it with position: absolute while the new page mounts in place.",
+    "SSGOI keeps the real leaving node, puts it back with position: absolute while the new page mounts in place, animates both, then removes it.",
   alternates: { canonical: "/docs/how-it-works" },
   openGraph: buildOpenGraph({ path: "/docs/how-it-works" }),
 };
@@ -21,9 +22,9 @@ export default function DocsHowItWorksPage() {
           { name: "How it works", path: "/docs/how-it-works" },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="How it works"
-        lead="Unmount, reinsert, and animate. The lifecycle behind every SSGOI route transition."
+        lead="The page you just left is kept alive and animated out while the new one mounts in place."
       />
       <HowItWorksBody />
     </>

@@ -6,8 +6,9 @@ Create one SSGOI root above the router outlet.
 npm install @ssgoi/angular
 ```
 
-The inline shell style below uses modern `overflow-x:clip`. For older targets,
-use `overflow-x:hidden` and add `min-height:100vh`.
+The inline shell style below uses `overflow-x:clip`. Do not swap in
+`overflow-x:hidden`: it makes the wrapper the scroll container, and scroll
+restore then targets the wrong element. Add `min-height:100dvh`.
 
 ```ts
 import { Component, signal } from "@angular/core";

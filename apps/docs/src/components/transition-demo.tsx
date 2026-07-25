@@ -120,7 +120,7 @@ export function TransitionDemo({
           aria-label={`${playing ? "Pause" : "Play"} ${title} animation preview`}
           onClick={() => setPlaying((value) => !value)}
           className={
-            "mt-3 rounded-full border border-white/10 bg-white/[0.025] px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-white/20 hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60 " +
+            "mt-3 rounded-full border border-line-strong bg-panel px-3 py-1.5 text-sm text-ink-faint transition-colors hover:border-ink-faint hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-strong " +
             (platform === "web" ? "self-end" : "")
           }
         >
@@ -140,7 +140,7 @@ function DemoPlaceholder({ platform }: { platform: ShowcasePlatform }) {
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#28c840]" />
         </div>
-        <div className="relative aspect-[1280/800] overflow-hidden rounded-b-[11px] bg-neutral-950">
+        <div className="relative aspect-[1280/800] overflow-hidden rounded-b-[11px] bg-canvas">
           <IframeLoadingOverlay visible variant="dark" />
         </div>
       </div>

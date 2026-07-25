@@ -10,7 +10,7 @@ export function SiteLogo({ className }: Props) {
     <Link
       href="/"
       className={
-        "inline-flex items-center gap-2.5 text-xl font-bold tracking-tight text-neutral-100 hover:text-white" +
+        "inline-flex items-center gap-2.5 text-xl font-bold tracking-tight text-ink-soft hover:text-ink" +
         (className ? " " + className : "")
       }
     >

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { MiddlewareBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/middleware";
 
 export const metadata: Metadata = {
-  title: "Route middleware — normalize ids before matching",
+  title: "Middleware — rewrite route ids before matching",
   description:
-    "Normalize locale prefixes, tenant slugs, and rewritten URLs before SSGOI route matching while keeping transition and scroll identity consistent.",
+    "Strip locale prefixes, tenant slugs, and rewritten URLs before SSGOI matches a rule, so one set of rules covers every variant of a path.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -24,9 +24,9 @@ export default function MiddlewarePage() {
           { name: "Middleware", path },
         ])}
       />
-      <DocsPageHeading
-        title="Route middleware"
-        lead="Remove incidental URL structure once, before rules match and scroll state is recorded."
+      <PageHeading
+        title="Middleware"
+        lead="Rewrite the path SSGOI matches on, so a locale or tenant prefix does not need its own rules."
       />
       <MiddlewareBody />
     </>

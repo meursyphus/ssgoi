@@ -1,12 +1,24 @@
+import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/code-block";
 import { TransitionDemo } from "@/components/transition-demo";
 import { Link } from "@/lib/link";
 import {
   TRANSITION_DOCS,
-  USE_META,
   getTransitionDoc,
   type TransitionDoc,
 } from "@/page/docs/transitions-data";
+import {
+  DocsTable,
+  Heading3,
+  NextLinks,
+  Section,
+  caption,
+  card,
+  inlineCode,
+  link,
+  measure,
+  prose,
+} from "@/page/docs/ui";
 
 type Recommendation = {
   name: "drill" | "sheet" | "slide" | "zoom";
@@ -14,6 +26,11 @@ type Recommendation = {
   rule: string;
 };
 
+/**
+ * The four presets with live demos on this page. `rule` is the form the preset
+ * is normally written with and must agree with UX_DECISION_ROWS below and with
+ * `ruleStyle` in transitions-data.ts.
+ */
 const MOBILE_RECOMMENDATIONS: Recommendation[] = [
   {
     name: "drill",
@@ -37,6 +54,37 @@ const MOBILE_RECOMMENDATIONS: Recommendation[] = [
   },
 ];
 
+const UX_DECISION_ROWS: Array<{ ux: string; name: string; rule: string }> = [
+  { ux: "A list opens a detail page", name: "drill", rule: "on + except" },
+  {
+    ux: "Tabs or steps with a left-right order",
+    name: "slide",
+    rule: "ordered",
+  },
+  { ux: "Peer screens, Material shared axis", name: "axis", rule: "ordered" },
+  { ux: "Compose, filters, a modal-like route", name: "sheet", rule: "on" },
+  {
+    ux: "A card or image expands into detail",
+    name: "zoom",
+    rule: "from / to",
+  },
+  {
+    ux: "One element carries across two pages",
+    name: "hero",
+    rule: "from / to",
+  },
+  {
+    ux: "A vertical sequence, editorial paging",
+    name: "scroll",
+    rule: "ordered",
+  },
+  {
+    ux: "Anything unrelated (the fallback)",
+    name: "fade",
+    rule: `priority: -100, on: "/**"`,
+  },
+];
+
 const RECOMMENDED_NAMES = new Set(
   MOBILE_RECOMMENDATIONS.map(({ name }) => name),
 );
@@ -48,25 +96,106 @@ const MORE_TRANSITIONS = TRANSITION_DOCS.filter(
 export function TransitionsCatalog() {
   return (
     <div className="mt-8">
-      <section aria-labelledby="mobile-ux-heading">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-400">
-              Start with the interaction
-            </p>
-            <h2
-              id="mobile-ux-heading"
-              className="mt-2 text-xl font-semibold tracking-tight text-neutral-100"
-            >
-              Mobile UX recommendations
-            </h2>
-          </div>
-          <p className="max-w-sm text-sm leading-relaxed text-neutral-500">
-            Pick the relationship users should understand first. Variants and
-            exact props live on each effect page.
-          </p>
-        </div>
+      <p className={`${measure} ${prose}`}>
+        Start from what the user is doing — opening a detail page, switching
+        tabs, expanding a card — and pick the effect that matches. The Rule
+        column is the shape you write around it; the three shapes are explained
+        below.
+      </p>
 
+      <DocsTable
+        head={["What the user is doing", "Transition", "Rule"]}
+        rows={UX_DECISION_ROWS.map((row) => [
+          row.ux,
+          <Link
+            key={row.name}
+            href={`/docs/transitions/${row.name}`}
+            className={`font-mono ${link}`}
+          >
+            {row.name}
+          </Link>,
+          <code key="rule" className={inlineCode}>
+            {row.rule}
+          </code>,
+        ])}
+        minWidth="580px"
+      />
+
+      <p className={`mt-4 ${measure} ${prose}`}>
+        The rest — film, strip, rotate, blind, jaemin — are picked for tone
+        rather than for a route relationship, so any rule form works with them.
+      </p>
+
+      <Section
+        id="rule-forms-heading"
+        title="The three rule forms"
+        lead="An effect describes how pages move. The rule around it describes where that applies and which way is forward."
+      >
+        <DocsTable
+          head={["Rule", "What it matches"]}
+          rows={[
+            [
+              <code key="on" className={inlineCode}>
+                on
+              </code>,
+              <>
+                A family of routes. Entering it is forward, leaving it is
+                backward, and <code className={inlineCode}>except</code> carves
+                out the entry point. Both <code className={inlineCode}>on</code>{" "}
+                and <code className={inlineCode}>except</code> accept an array
+                of patterns.
+              </>,
+            ],
+            [
+              <code key="pair" className={inlineCode}>
+                from / to
+              </code>,
+              <>
+                One exact relationship. It matches both directions unless you
+                set <code className={inlineCode}>bidirectional: false</code>,
+                and each side accepts an array of patterns.
+              </>,
+            ],
+            [
+              <code key="ordered" className={inlineCode}>
+                ordered
+              </code>,
+              "A list of routes in order — one pattern per slot. Both ends must land on different entries; their index order decides the direction.",
+            ],
+          ]}
+          minWidth="520px"
+        />
+
+        <p className={`mt-6 ${measure} ${prose}`}>
+          When several rules match, the winner is decided by{" "}
+          <code className={inlineCode}>priority</code>, then by how specific the
+          paths are, then by declaration order — the earliest rule wins, not the
+          last. A rule with no <code className={inlineCode}>priority</code> is
+          0, which is why a negative value parks a broad fallback under
+          everything else.{" "}
+          <Link href="/docs/route-rules" className={link}>
+            Route rules
+          </Link>{" "}
+          has the full pattern syntax and the scoring.
+        </p>
+        <p className={`mt-4 ${measure} ${prose}`}>
+          Each form also carries a scroll default:{" "}
+          <code className={inlineCode}>from / to</code> and{" "}
+          <code className={inlineCode}>on</code> restore the source and reset
+          the destination, <code className={inlineCode}>ordered</code> restores
+          both.{" "}
+          <Link href="/docs/scroll-restoration" className={link}>
+            Scroll behavior
+          </Link>{" "}
+          covers the overrides.
+        </p>
+      </Section>
+
+      <Section
+        id="featured-heading"
+        title="See the four most common ones move"
+        lead="These four cover most mobile navigation. Open one for its variants and props."
+      >
         <ul className="mt-6 grid gap-4 sm:grid-cols-2">
           {MOBILE_RECOMMENDATIONS.map((recommendation) => {
             const doc = getTransitionDoc(recommendation.name);
@@ -81,27 +210,22 @@ export function TransitionsCatalog() {
             );
           })}
         </ul>
-      </section>
+      </Section>
 
-      <section
-        aria-labelledby="config-patterns-heading"
-        className="mt-14 border-t border-white/[0.06] pt-10"
+      <Section
+        id="config-patterns-heading"
+        title="Drill into a family, or open a sheet above tabs"
+        lead={
+          <>
+            Two configs you can paste. Both go in the array returned by{" "}
+            <code className={inlineCode}>transitions</code> in your{" "}
+            <code className={inlineCode}>&lt;Ssgoi&gt;</code> config.
+          </>
+        }
       >
-        <h2
-          id="config-patterns-heading"
-          className="text-xl font-semibold tracking-tight text-neutral-100"
-        >
-          Two useful config patterns
-        </h2>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Effects describe motion; the surrounding rule describes the route
-          relationship and resolves its forward and backward direction.
-        </p>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div className="mt-8 grid gap-10 lg:grid-cols-2">
           <ConfigPattern
-            eyebrow="Drill · on + except"
-            title="Enter a route family"
+            title="Drill into a route family"
             body="The list is the boundary. Entering any descendant drills in; returning to the list drills out."
             code={`{
   on: "/products/**",
@@ -110,9 +234,17 @@ export function TransitionsCatalog() {
 }`}
           />
           <ConfigPattern
-            eyebrow="Sheet · from / to"
-            title="Open a task above ordered tabs"
-            body="The tab order owns sideways movement. A separate relationship opens the compose route as a sheet from any tab."
+            title="Open a sheet above ordered tabs"
+            body={
+              <>
+                The tab order owns sideways movement. A second rule opens the
+                compose route as a sheet.{" "}
+                <code className={inlineCode}>on: &quot;/compose&quot;</code>{" "}
+                would cover arrivals from anywhere; listing the tabs as{" "}
+                <code className={inlineCode}>from</code> keeps the sheet to the
+                tab bar.
+              </>
+            }
             code={`const TABS = ["/feed", "/search", "/profile"];
 
 [
@@ -128,44 +260,53 @@ export function TransitionsCatalog() {
 ]`}
           />
         </div>
-      </section>
+      </Section>
 
-      <section
-        aria-labelledby="more-transitions-heading"
-        className="mt-14 border-t border-white/[0.06] pt-10"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
-              Full effect index
-            </p>
-            <h2
-              id="more-transitions-heading"
-              className="mt-2 text-xl font-semibold tracking-tight text-neutral-100"
+      <Section
+        id="more-transitions-heading"
+        title="More transitions"
+        lead={
+          <>
+            Reach for these when the screen needs a different spatial model or a
+            more expressive treatment. The same list in plain text:{" "}
+            <a
+              href="https://ssgoi.dev/llms/transitions.txt"
+              target="_blank"
+              rel="noreferrer"
+              className={link}
             >
-              More transitions
-            </h2>
-          </div>
-          <a
-            href="https://ssgoi.dev/llms/transitions.txt"
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-xs text-neutral-500 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-          >
-            agent catalog ↗
-          </a>
-        </div>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Reach for these when the product calls for a different spatial model
-          or a more expressive visual treatment.
-        </p>
-
+              transitions.txt
+            </a>
+            .
+          </>
+        }
+      >
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">
           {MORE_TRANSITIONS.map((doc) => (
             <CompactTransitionCard key={doc.name} doc={doc} />
           ))}
         </ul>
-      </section>
+      </Section>
+
+      <NextLinks
+        links={[
+          {
+            href: "/docs/route-rules",
+            title: "Route rules",
+            body: "Pattern syntax, specificity and priority in full",
+          },
+          {
+            href: "/docs/scroll-restoration",
+            title: "Scroll behavior",
+            body: "Which page keeps its scroll position",
+          },
+          {
+            href: "/docs/frameworks",
+            title: "Frameworks",
+            body: "Where the config goes in your stack",
+          },
+        ]}
+      />
     </div>
   );
 }
@@ -181,8 +322,8 @@ function FeaturedTransitionCard({
 
   return (
     <li>
-      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015]">
-        <div className="flex min-h-[428px] items-center justify-center bg-gradient-to-b from-[#17110d] to-[#0b0908] p-5">
+      <article className="flex h-full flex-col overflow-hidden rounded-xl border border-line-strong bg-panel">
+        <div className="flex min-h-[428px] items-center justify-center border-b border-line bg-canvas p-5">
           {preview ? (
             <TransitionDemo
               platform={preview.demo.platform ?? "mobile"}
@@ -191,39 +332,24 @@ function FeaturedTransitionCard({
               title={`${doc.name} · ${preview.variantLabel}`}
             />
           ) : (
-            <span className="text-xs text-neutral-500">Demo coming soon</span>
+            <span className={caption}>Demo coming soon</span>
           )}
         </div>
 
         <div className="flex flex-1 flex-col p-5">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium uppercase tracking-wider text-orange-300">
-              {recommendation.ux}
-            </span>
-            <span className="text-neutral-700" aria-hidden>
-              ·
-            </span>
-            <code className="font-mono text-neutral-500">
-              {recommendation.rule}
-            </code>
-          </div>
-          <h3 className="mt-3 font-mono text-lg font-semibold text-neutral-100">
+          <h3 className="font-mono text-lg font-semibold text-ink">
             {doc.name}
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-400">
-            {doc.blurb}
+          <p className={`mt-2 ${prose}`}>{doc.blurb}</p>
+          <p className={`mt-3 ${caption}`}>
+            {recommendation.ux} · rule:{" "}
+            <code className={inlineCode}>{recommendation.rule}</code>
           </p>
           <Link
             href={`/docs/transitions/${doc.name}`}
-            className="group mt-5 inline-flex items-center gap-2 self-start text-sm font-medium text-neutral-200 transition-colors hover:text-orange-400"
+            className={`mt-5 self-start text-[0.9375rem] ${link}`}
           >
             Variants and usage
-            <span
-              className="transition-transform group-hover:translate-x-0.5"
-              aria-hidden
-            >
-              →
-            </span>
           </Link>
         </div>
       </article>
@@ -232,66 +358,34 @@ function FeaturedTransitionCard({
 }
 
 function ConfigPattern({
-  eyebrow,
   title,
   body,
   code,
 }: {
-  eyebrow: string;
   title: string;
-  body: string;
+  body: ReactNode;
   code: string;
 }) {
   return (
-    <article className="rounded-2xl border border-white/[0.06] bg-white/[0.015] p-5">
-      <p className="font-mono text-xs text-orange-400">{eyebrow}</p>
-      <h3 className="mt-2 text-base font-semibold tracking-tight text-neutral-100">
-        {title}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-400">{body}</p>
-      <CodeBlock className="mt-5" language="ts" code={code} />
-    </article>
+    <div>
+      <Heading3>{title}</Heading3>
+      <p className={`mt-2 ${prose}`}>{body}</p>
+      <CodeBlock className="mt-4" language="ts" code={code} />
+    </div>
   );
 }
 
 function CompactTransitionCard({ doc }: { doc: TransitionDoc }) {
-  const meta = USE_META[doc.use];
-  const variantLabel =
-    doc.variants.length === 1
-      ? "1 behavior"
-      : `${doc.variants.length} variants`;
-
   return (
     <li>
       <Link
         href={`/docs/transitions/${doc.name}`}
-        className="group flex h-full flex-col rounded-2xl border border-white/[0.06] bg-white/[0.015] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
+        className={`flex h-full flex-col ${card} transition-colors hover:border-ink-faint`}
       >
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-base font-semibold text-neutral-100 transition-colors group-hover:text-orange-400">
-            {doc.name}
-          </span>
-          <span
-            className={
-              "rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider " +
-              meta.cls
-            }
-          >
-            {meta.label}
-          </span>
-          <span
-            className="ml-auto text-neutral-600 transition-all group-hover:translate-x-0.5 group-hover:text-orange-400"
-            aria-hidden
-          >
-            →
-          </span>
-        </div>
-        <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-          {doc.blurb}
-        </p>
-        <p className="mt-auto pt-4 font-mono text-xs text-neutral-600">
-          {variantLabel}
-        </p>
+        <span className="font-mono text-base font-semibold text-ink">
+          {doc.name}
+        </span>
+        <p className={`mt-2 ${prose}`}>{doc.blurb}</p>
       </Link>
     </li>
   );

@@ -1,10 +1,32 @@
+/**
+ * Docs information architecture.
+ *
+ * Order follows what a reader actually does: set it up, pick the motion,
+ * configure the routes, wire their framework. The pages that explain *why*
+ * come after, because nobody reads them before their first transition works.
+ *
+ * Layout shell and Route boundaries sit directly under Quick start — that is
+ * where they are first linked from, and a title alone would never earn a click.
+ */
+
+/** Keys resolved to a logo component in the sidebar (nav stays JSX-free). */
+export type DocsNavIcon =
+  | "nextjs"
+  | "react-router"
+  | "tanstack-router"
+  | "sveltekit"
+  | "nuxt"
+  | "solidstart"
+  | "qwik"
+  | "angular";
+
 export type DocsNavNode = {
   id: string;
   title: string;
   href?: string;
   blurb?: string;
+  icon?: DocsNavIcon;
   children?: readonly DocsNavNode[];
-  defaultOpen?: boolean;
 };
 
 export type DocsNavLink = DocsNavNode & {
@@ -27,137 +49,115 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         id: "overview",
         title: "Overview",
         href: "/docs",
-        blurb: "What SSGOI is and how these docs work.",
+        blurb: "What SSGOI does and where to go next.",
       },
       {
         id: "quick-start",
         title: "Quick start",
         href: "/docs/install",
-        blurb: "Install, change only 2–3 files, and see your first transition.",
+        blurb: "Two new files, one layout edit, and your first transition.",
+      },
+      {
+        id: "layout-shell",
+        title: "Layout shell",
+        href: "/docs/layout",
+        blurb: "The three classes the wrapper element needs, and why.",
+      },
+      {
+        id: "route-boundaries",
+        title: "Route boundaries",
+        href: "/docs/boundaries",
+        blurb: "The key decides what remounts. The id decides what matches.",
       },
     ],
   },
   {
-    id: "why-ssgoi",
-    label: "Why SSGOI",
-    items: [
-      {
-        id: "why-ssgoi",
-        title: "Why SSGOI",
-        href: "/docs/why-ssgoi",
-        blurb: "The problems SSGOI solves for mobile web apps.",
-      },
-      {
-        id: "compatibility",
-        title: "Compatibility",
-        href: "/docs/compatibility",
-        blurb: "Routers and browser support.",
-      },
-      {
-        id: "view-transition-api",
-        title: "Why SSGOI doesn't use the View Transition API",
-        href: "/docs/view-transition-api",
-        blurb: "Live DOM, runtime layers, and precise geometry.",
-      },
-    ],
-  },
-  {
-    id: "build-mobile-ux",
-    label: "Build mobile UX",
+    id: "transitions",
+    label: "Transitions",
     items: [
       {
         id: "transitions",
-        title: "Transitions",
+        title: "All transitions",
         href: "/docs/transitions",
-        blurb: "Choose a transition from the UX you are building.",
-        children: [
-          {
-            id: "transition-drill",
-            title: "Drill",
-            href: "/docs/transitions/drill",
-            blurb: "List-to-detail navigation with hierarchical depth.",
-          },
-          {
-            id: "transition-sheet",
-            title: "Sheet",
-            href: "/docs/transitions/sheet",
-            blurb: "Compose, filters, and other temporary routes.",
-          },
-          {
-            id: "transition-slide",
-            title: "Slide",
-            href: "/docs/transitions/slide",
-            blurb: "Ordered tabs and steps.",
-          },
-          {
-            id: "transition-zoom",
-            title: "Zoom",
-            href: "/docs/transitions/zoom",
-            blurb: "Expand a card or image into its detail route.",
-          },
-          {
-            id: "more-effects",
-            title: "More effects",
-            children: [
-              {
-                id: "transition-axis",
-                title: "Axis",
-                href: "/docs/transitions/axis",
-                blurb: "Material shared-axis motion between siblings.",
-              },
-              {
-                id: "transition-scroll",
-                title: "Scroll",
-                href: "/docs/transitions/scroll",
-                blurb: "Vertical movement through an ordered sequence.",
-              },
-              {
-                id: "transition-hero",
-                title: "Hero",
-                href: "/docs/transitions/hero",
-                blurb: "Move a shared element between two routes.",
-              },
-              {
-                id: "transition-fade",
-                title: "Fade",
-                href: "/docs/transitions/fade",
-                blurb: "A calm, direction-free fade-through.",
-              },
-              {
-                id: "transition-film",
-                title: "Film",
-                href: "/docs/transitions/film",
-                blurb:
-                  "A cinematic runtime scene with staggered springs and viewfinder corners.",
-              },
-              {
-                id: "transition-strip",
-                title: "Strip",
-                href: "/docs/transitions/strip",
-                blurb:
-                  "Swap whole pages with translation and a shallow perspective turn.",
-              },
-              {
-                id: "transition-blind",
-                title: "Blind",
-                href: "/docs/transitions/blind",
-                blurb: "Reveal the next route through animated blinds.",
-              },
-              {
-                id: "transition-rotate",
-                title: "Rotate",
-                href: "/docs/transitions/rotate",
-                blurb: "Spin whole pages through a planar half-turn.",
-              },
-              {
-                id: "transition-jaemin",
-                title: "Jaemin",
-                href: "/docs/transitions/jaemin",
-                blurb: "An expressive layered page transition.",
-              },
-            ],
-          },
-        ],
+        blurb: "Pick an effect from the navigation you are building.",
+      },
+      {
+        id: "transition-drill",
+        title: "Drill",
+        href: "/docs/transitions/drill",
+        blurb: "List to detail, one level deeper.",
+      },
+      {
+        id: "transition-sheet",
+        title: "Sheet",
+        href: "/docs/transitions/sheet",
+        blurb: "A temporary screen rises over the current one.",
+      },
+      {
+        id: "transition-slide",
+        title: "Slide",
+        href: "/docs/transitions/slide",
+        blurb: "Tabs and steps that have a left-to-right order.",
+      },
+      {
+        id: "transition-zoom",
+        title: "Zoom",
+        href: "/docs/transitions/zoom",
+        blurb: "A card or image opens into its own page.",
+      },
+      {
+        id: "transition-axis",
+        title: "Axis",
+        href: "/docs/transitions/axis",
+        blurb: "Material shared-axis motion between peer screens.",
+      },
+      {
+        id: "transition-scroll",
+        title: "Scroll",
+        href: "/docs/transitions/scroll",
+        blurb: "Vertical movement through an ordered sequence.",
+      },
+      {
+        id: "transition-hero",
+        title: "Hero",
+        href: "/docs/transitions/hero",
+        blurb: "One shared element travels between two pages.",
+      },
+      {
+        id: "transition-fade",
+        title: "Fade",
+        href: "/docs/transitions/fade",
+        blurb: "A calm cross-fade with no direction.",
+      },
+      {
+        id: "transition-film",
+        title: "Film",
+        href: "/docs/transitions/film",
+        blurb: "A cinematic scene built at runtime.",
+      },
+      {
+        id: "transition-strip",
+        title: "Strip",
+        href: "/docs/transitions/strip",
+        blurb: "Whole pages slide with a shallow perspective turn.",
+      },
+      {
+        id: "transition-blind",
+        title: "Blind",
+        href: "/docs/transitions/blind",
+        blurb: "The next page appears through animated blinds.",
+      },
+      {
+        id: "transition-rotate",
+        title: "Rotate",
+        href: "/docs/transitions/rotate",
+        blurb: "Pages spin through a flat half-turn.",
+      },
+      {
+        id: "transition-jaemin",
+        title: "Jaemin",
+        href: "/docs/transitions/jaemin",
+        blurb: "An expressive layered page transition.",
       },
     ],
   },
@@ -169,19 +169,25 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         id: "route-rules",
         title: "Route rules",
         href: "/docs/route-rules",
-        blurb: "Match routes with on, from/to, and ordered rules.",
+        blurb: "Match routes with on, from/to, and ordered.",
       },
       {
         id: "scroll-restoration",
         title: "Scroll behavior",
         href: "/docs/scroll-restoration",
-        blurb: "Automatic reset and restoration, with exact overrides.",
+        blurb: "When a page comes back where you left it, and when it resets.",
       },
       {
         id: "persistent-layouts",
         title: "Persistent layouts",
         href: "/docs/nested-boundaries",
-        blurb: "Keep a bottom nav or shell mounted across route changes.",
+        blurb: "Keep a bottom nav still while the pages under it change.",
+      },
+      {
+        id: "middleware",
+        title: "Middleware",
+        href: "/docs/middleware",
+        blurb: "Strip locale or tenant prefixes before rules match.",
       },
     ],
   },
@@ -191,95 +197,107 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
     items: [
       {
         id: "frameworks-overview",
-        title: "Overview",
+        title: "All frameworks",
         href: "/docs/frameworks",
-        blurb: "Choose the guide for your framework and router.",
-        children: [
-          {
-            id: "framework-nextjs",
-            title: "Next.js",
-            href: "/docs/frameworks/nextjs",
-            blurb: "App Router provider and pathname boundary.",
-          },
-          {
-            id: "framework-react-router",
-            title: "React Router",
-            href: "/docs/frameworks/react-router",
-            blurb: "Boundary utility on useLocation().",
-          },
-          {
-            id: "framework-tanstack-router",
-            title: "TanStack Router",
-            href: "/docs/frameworks/tanstack-router",
-            blurb: "Boundary utility on router state.",
-          },
-          {
-            id: "framework-sveltekit",
-            title: "SvelteKit",
-            href: "/docs/frameworks/sveltekit",
-            blurb: "Boundary component built on onNavigate.",
-          },
-          {
-            id: "framework-nuxt",
-            title: "Vue / Nuxt",
-            href: "/docs/frameworks/nuxt",
-            blurb: "Keyed route boundary for Vue Router and Nuxt.",
-          },
-          {
-            id: "framework-solidstart",
-            title: "SolidStart",
-            href: "/docs/frameworks/solidstart",
-            blurb: "Keyed boundary component on useLocation().",
-          },
-          {
-            id: "framework-qwik",
-            title: "Qwik City",
-            href: "/docs/frameworks/qwik",
-            blurb: "QRL config factory and direct markers.",
-          },
-          {
-            id: "framework-angular",
-            title: "Angular",
-            href: "/docs/frameworks/angular",
-            blurb: "ssgoi directive above the router outlet.",
-          },
-        ],
+        blurb: "One page per framework and router.",
+      },
+      {
+        id: "framework-nextjs",
+        title: "React / Next.js",
+        href: "/docs/frameworks/nextjs",
+        icon: "nextjs",
+        blurb: "App Router provider and pathname boundary.",
+      },
+      {
+        id: "framework-react-router",
+        title: "React Router",
+        href: "/docs/frameworks/react-router",
+        icon: "react-router",
+        blurb: "Boundary built on useLocation().",
+      },
+      {
+        id: "framework-tanstack-router",
+        title: "TanStack Router",
+        href: "/docs/frameworks/tanstack-router",
+        icon: "tanstack-router",
+        blurb: "Boundary built on router state.",
+      },
+      {
+        id: "framework-sveltekit",
+        title: "SvelteKit",
+        href: "/docs/frameworks/sveltekit",
+        icon: "sveltekit",
+        blurb: "Boundary component built on onNavigate.",
+      },
+      {
+        id: "framework-nuxt",
+        title: "Vue / Nuxt",
+        href: "/docs/frameworks/nuxt",
+        icon: "nuxt",
+        blurb: "Keyed route boundary for Vue Router and Nuxt.",
+      },
+      {
+        id: "framework-solidstart",
+        title: "SolidStart",
+        href: "/docs/frameworks/solidstart",
+        icon: "solidstart",
+        blurb: "Keyed boundary component on useLocation().",
+      },
+      {
+        id: "framework-qwik",
+        title: "Qwik City",
+        href: "/docs/frameworks/qwik",
+        icon: "qwik",
+        blurb: "QRL config factory and direct markers.",
+      },
+      {
+        id: "framework-angular",
+        title: "Angular",
+        href: "/docs/frameworks/angular",
+        icon: "angular",
+        blurb: "ssgoi directive above the router outlet.",
       },
     ],
   },
   {
-    id: "reference-debug",
-    label: "Reference & debug",
+    id: "core-concepts",
+    label: "Core concepts",
     items: [
       {
-        id: "route-boundaries",
-        title: "Route boundaries",
-        href: "/docs/boundaries",
-        blurb: "How a boundary's key and route id control transitions.",
+        id: "how-it-works",
+        title: "How it works",
+        href: "/docs/how-it-works",
+        blurb: "Unmount, put the old page back, animate, clean up.",
       },
       {
-        id: "layout-shell",
-        title: "Layout shell",
-        href: "/docs/layout",
-        blurb: "Set the OUT page's containing and stacking context.",
+        id: "why-ssgoi",
+        title: "Why SSGOI",
+        href: "/docs/why-ssgoi",
+        blurb: "What it is for, and what it deliberately leaves alone.",
       },
       {
-        id: "middleware",
-        title: "Middleware",
-        href: "/docs/middleware",
-        blurb: "Normalize logical routes before matching.",
+        id: "view-transition-api",
+        title: "Why not View Transitions",
+        href: "/docs/view-transition-api",
+        blurb: "Where the browser API ends and SSGOI's presets begin.",
+      },
+    ],
+  },
+  {
+    id: "reference",
+    label: "Reference",
+    items: [
+      {
+        id: "compatibility",
+        title: "Browser & router support",
+        href: "/docs/compatibility",
+        blurb: "Which browsers and routers are covered.",
       },
       {
         id: "troubleshooting",
         title: "Troubleshooting",
         href: "/docs/troubleshooting",
-        blurb: "Find the cause of missing, jumping, or incorrect motion.",
-      },
-      {
-        id: "how-it-works",
-        title: "How it works",
-        href: "/docs/how-it-works",
-        blurb: "Unmount, reinsert, and animate, step by step.",
+        blurb: "Nothing moves, the wrong thing moves, or the page jumps.",
       },
     ],
   },
@@ -290,22 +308,6 @@ function normalizePathname(pathname: string): string {
     return pathname.replace(/\/+$/, "");
   }
   return pathname;
-}
-
-export function hasActiveDescendant(
-  node: DocsNavNode,
-  pathname: string,
-): boolean {
-  const currentPath = normalizePathname(pathname);
-
-  return (
-    node.children?.some(
-      (child) =>
-        (child.href !== undefined &&
-          normalizePathname(child.href) === currentPath) ||
-        hasActiveDescendant(child, currentPath),
-    ) ?? false
-  );
 }
 
 export function findDocsTrail(pathname: string): DocsNavNode[] {
@@ -356,22 +358,3 @@ export function flattenDocsNav(
 }
 
 export const DOCS_NAV_FLAT: DocsNavLink[] = flattenDocsNav();
-
-/**
- * The small set of parent destinations shown as cards on the overview page.
- * Keep this intentionally shallower than the complete sidebar tree.
- */
-export const DOCS_NAV_PRIMARY: Array<{
-  label: string;
-  items: DocsNavLink[];
-}> = [
-  {
-    label: "Start here",
-    items: [
-      DOCS_NAV_FLAT.find((item) => item.href === "/docs/install")!,
-      DOCS_NAV_FLAT.find((item) => item.href === "/docs/transitions")!,
-      DOCS_NAV_FLAT.find((item) => item.href === "/docs/nested-boundaries")!,
-      DOCS_NAV_FLAT.find((item) => item.href === "/docs/frameworks")!,
-    ],
-  },
-];

@@ -20,7 +20,7 @@ const SECONDARY: Array<{ key: NavKey; label: string; href: string }> = [
 export function SiteNav({ active }: { active?: NavKey }) {
   return (
     <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
-      <nav className="pointer-events-auto inline-flex h-11 items-center gap-4 rounded-full border border-white/10 bg-[#0e0b08]/70 pl-3 pr-4 backdrop-blur md:h-12 md:gap-5 md:pl-4 md:pr-5">
+      <nav className="pointer-events-auto inline-flex h-11 items-center gap-4 rounded-full border border-line-strong bg-panel/75 pl-3 pr-4 backdrop-blur md:h-12 md:gap-5 md:pl-4 md:pr-5">
         <SiteLogo />
 
         <span className="ml-auto flex items-center gap-4 text-sm md:gap-5">
@@ -32,24 +32,22 @@ export function SiteNav({ active }: { active?: NavKey }) {
                 href={href}
                 aria-current={isActive ? "page" : undefined}
                 className={`relative transition-colors ${
-                  isActive
-                    ? "text-neutral-100"
-                    : "text-neutral-400 hover:text-neutral-100"
+                  isActive ? "text-ink" : "text-ink-dim hover:text-ink"
                 }`}
               >
                 {label}
                 {isActive && (
-                  <span className="absolute -bottom-1.5 left-0 right-0 h-0.5 rounded-full bg-orange-400" />
+                  <span className="absolute -bottom-1.5 left-0 right-0 h-0.5 rounded-full bg-brand" />
                 )}
               </Link>
             );
           })}
-          <span className="h-4 w-px bg-white/15" aria-hidden />
+          <span className="h-4 w-px bg-line-strong" aria-hidden />
           <a
             href="https://github.com/meursyphus/ssgoi"
             target="_blank"
             rel="noreferrer"
-            className="text-neutral-400 transition-colors hover:text-neutral-100"
+            className="text-ink-dim transition-colors hover:text-ink"
             aria-label="GitHub"
           >
             <GitHubIcon className="h-4 w-4" />

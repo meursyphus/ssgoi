@@ -22,7 +22,7 @@ export const FRAMEWORK_DOCS: FrameworkDoc[] = [
     slug: "nextjs",
     name: "React / Next.js",
     pkg: "@ssgoi/react",
-    lead: "Keep one provider above routed content and put the pathname boundary in its own client component. The common case changes only 2–3 files.",
+    lead: "Keep one provider above routed content and put the pathname boundary in its own client component. The common case is two new files plus one edit to the layout you already have.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/nextjs.txt",
     templateUrl: `${TEMPLATES}/nextjs`,
     sections: [

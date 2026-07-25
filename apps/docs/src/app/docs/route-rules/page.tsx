@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { RouteRulesBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/route-rules";
@@ -9,7 +9,7 @@ const path = "/docs/route-rules";
 export const metadata: Metadata = {
   title: "Route rules — on, except, from, to, and ordered",
   description:
-    "Choose SSGOI transitions with on and except route scopes, precise from/to pairs, ordered route sets, path patterns, specificity, and priority.",
+    "Pick SSGOI transitions with on and except scopes, from/to pairs, and ordered route sets, plus how path patterns, specificity, and priority resolve a winner.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -24,9 +24,9 @@ export default function RouteRulesPage() {
           { name: "Route rules", path },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Route rules"
-        lead="Describe the navigation relationship once; SSGOI resolves matching, direction, and scroll defaults from it."
+        lead="Say which navigation gets which transition, and SSGOI works out the direction and scroll from that."
       />
       <RouteRulesBody />
     </>

@@ -1,14 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type ComponentType } from "react";
 import { ChevronRight, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/lib/link";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/lib/components/ui/collapsible";
 import {
   Sheet,
   SheetContent,
@@ -18,155 +13,116 @@ import {
   SheetTrigger,
 } from "@/lib/components/ui/sheet";
 import {
+  AngularMark,
+  NextMark,
+  NuxtMark,
+  QwikMark,
+  ReactRouterMark,
+  SolidStartMark,
+  SvelteKitMark,
+  TanStackRouterMark,
+} from "@/components/router-logos";
+import {
   DOCS_NAV,
   findDocsTrail,
-  hasActiveDescendant,
+  type DocsNavIcon,
   type DocsNavNode,
 } from "./nav";
 
-function isCurrentPage(node: DocsNavNode, pathname: string): boolean {
-  const normalize = (value: string) =>
-    value.length > 1 ? value.replace(/\/+$/, "") : value;
+const ICONS: Record<DocsNavIcon, ComponentType<{ className?: string }>> = {
+  nextjs: NextMark,
+  "react-router": ReactRouterMark,
+  "tanstack-router": TanStackRouterMark,
+  sveltekit: SvelteKitMark,
+  nuxt: NuxtMark,
+  solidstart: SolidStartMark,
+  qwik: QwikMark,
+  angular: AngularMark,
+};
 
+function normalize(value: string) {
+  return value.length > 1 ? value.replace(/\/+$/, "") : value;
+}
+
+function isCurrentPage(node: DocsNavNode, pathname: string): boolean {
   return (
     node.href !== undefined && normalize(node.href) === normalize(pathname)
   );
 }
 
-function linkClassName({
-  current,
-  withinCurrentTrail,
-  touchFriendly,
-}: {
-  current: boolean;
-  withinCurrentTrail: boolean;
-  touchFriendly: boolean;
-}) {
-  return [
-    "relative min-w-0 flex-1 rounded-lg px-3 text-left transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60",
-    touchFriendly ? "flex min-h-11 items-center py-2" : "block py-1.5",
-    current
-      ? "bg-white/[0.07] font-medium text-neutral-100"
-      : withinCurrentTrail
-        ? "font-medium text-neutral-200 hover:bg-white/[0.03] hover:text-neutral-100"
-        : "text-neutral-400 hover:bg-white/[0.03] hover:text-neutral-100",
-  ].join(" ");
-}
-
-function DocsNavBranch({
+/**
+ * Every branch is rendered open. There is no disclosure control: a docs tree
+ * this size is faster to scan than to operate.
+ */
+function DocsNavItem({
   node,
   pathname,
   depth,
+  reserveIcon,
   touchFriendly,
   onNavigate,
 }: {
   node: DocsNavNode;
   pathname: string;
   depth: number;
+  reserveIcon: boolean;
   touchFriendly: boolean;
   onNavigate?: () => void;
 }) {
-  const hasChildren = Boolean(node.children?.length);
   const current = isCurrentPage(node, pathname);
-  const activeDescendant = hasActiveDescendant(node, pathname);
-  const [open, setOpen] = useState(
-    current || activeDescendant || node.defaultOpen === true,
+  const Icon = node.icon ? ICONS[node.icon] : undefined;
+
+  const body = (
+    <>
+      {reserveIcon &&
+        (Icon ? (
+          <Icon className="h-4 w-4 shrink-0" />
+        ) : (
+          <span className="h-4 w-4 shrink-0" aria-hidden />
+        ))}
+      <span className="min-w-0 truncate">{node.title}</span>
+    </>
   );
 
-  const currentMarker = current ? (
-    <span
-      aria-hidden
-      className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-orange-400"
-    />
-  ) : null;
+  const className = [
+    "relative flex min-w-0 items-center gap-2.5 rounded-md pl-3 pr-2 transition-colors",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60",
+    touchFriendly ? "min-h-11" : "py-1",
+    current
+      ? "bg-raised font-medium text-ink"
+      : "text-ink-dim hover:bg-raised/60 hover:text-ink",
+  ].join(" ");
 
-  if (!hasChildren) {
-    if (!node.href) return null;
-
-    return (
-      <li>
+  return (
+    <li>
+      {node.href ? (
         <Link
           href={node.href}
           aria-current={current ? "page" : undefined}
           onClick={onNavigate}
-          className={linkClassName({
-            current,
-            withinCurrentTrail: false,
-            touchFriendly,
-          })}
+          className={className}
         >
-          {currentMarker}
-          <span className="block truncate">{node.title}</span>
-        </Link>
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="flex min-w-0 items-center gap-0.5">
-          {node.href ? (
-            <Link
-              href={node.href}
-              aria-current={current ? "page" : undefined}
-              onClick={onNavigate}
-              className={linkClassName({
-                current,
-                withinCurrentTrail: activeDescendant,
-                touchFriendly,
-              })}
-            >
-              {currentMarker}
-              <span className="block truncate">{node.title}</span>
-            </Link>
-          ) : (
+          {current && (
             <span
-              className={[
-                "min-w-0 flex-1 px-3 text-sm",
-                touchFriendly ? "py-3" : "py-1.5",
-                activeDescendant
-                  ? "font-medium text-neutral-200"
-                  : "text-neutral-400",
-              ].join(" ")}
-            >
-              <span className="block truncate">{node.title}</span>
-            </span>
+              aria-hidden
+              className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand"
+            />
           )}
+          {body}
+        </Link>
+      ) : (
+        <span className={className}>{body}</span>
+      )}
 
-          <CollapsibleTrigger asChild>
-            <button
-              type="button"
-              aria-label={`${open ? "Collapse" : "Expand"} ${node.title}`}
-              className={[
-                "flex shrink-0 items-center justify-center rounded-lg text-neutral-500 transition-colors",
-                "hover:bg-white/[0.04] hover:text-neutral-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60",
-                touchFriendly ? "h-11 w-11" : "h-8 w-8",
-              ].join(" ")}
-            >
-              <ChevronRight
-                aria-hidden
-                className={[
-                  "h-3.5 w-3.5 transition-transform duration-200",
-                  open ? "rotate-90" : "",
-                ].join(" ")}
-              />
-            </button>
-          </CollapsibleTrigger>
-        </div>
-
-        <CollapsibleContent>
-          <DocsNavList
-            nodes={node.children ?? []}
-            pathname={pathname}
-            depth={depth + 1}
-            touchFriendly={touchFriendly}
-            onNavigate={onNavigate}
-          />
-        </CollapsibleContent>
-      </Collapsible>
+      {node.children && node.children.length > 0 && (
+        <DocsNavList
+          nodes={node.children}
+          pathname={pathname}
+          depth={depth + 1}
+          touchFriendly={touchFriendly}
+          onNavigate={onNavigate}
+        />
+      )}
     </li>
   );
 }
@@ -186,20 +142,23 @@ function DocsNavList({
   onNavigate?: () => void;
   labelledBy?: string;
 }) {
+  const reserveIcon = nodes.some((node) => node.icon);
+
   return (
     <ul
       aria-labelledby={labelledBy}
       className={[
-        "flex flex-col gap-0.5",
-        depth > 0 ? "ml-3 mt-0.5 border-l border-white/[0.07] pl-2" : "mt-2",
+        "flex flex-col",
+        depth > 0 ? "ml-3 mt-0.5 border-l border-line pl-2" : "mt-1",
       ].join(" ")}
     >
       {nodes.map((node) => (
-        <DocsNavBranch
+        <DocsNavItem
           key={node.id}
           node={node}
           pathname={pathname}
           depth={depth}
+          reserveIcon={reserveIcon}
           touchFriendly={touchFriendly}
           onNavigate={onNavigate}
         />
@@ -220,14 +179,14 @@ function DocsNavigation({
   const labelId = useId();
 
   return (
-    <nav aria-label="Documentation" className="flex flex-col gap-7 text-sm">
+    <nav aria-label="Documentation" className="flex flex-col gap-6 text-sm">
       {DOCS_NAV.map((group) => {
         const groupLabelId = `${labelId}-${group.id}`;
         return (
           <section key={group.id} aria-labelledby={groupLabelId}>
             <h2
               id={groupLabelId}
-              className="px-3 text-xs font-medium uppercase tracking-wider text-neutral-500"
+              className="px-3 text-[0.8125rem] font-semibold text-ink-dim"
             >
               {group.label}
             </h2>
@@ -249,7 +208,7 @@ function DocsNavigation({
 export function DocsSidebar() {
   const pathname = usePathname();
 
-  return <DocsNavigation key={pathname} pathname={pathname} />;
+  return <DocsNavigation pathname={pathname} />;
 }
 
 function DocsMobileNavForPath({ pathname }: { pathname: string }) {
@@ -262,24 +221,18 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <div className="mx-auto flex w-full max-w-6xl px-5 py-2">
+      <div className="mx-auto flex w-full max-w-6xl px-5">
         <SheetTrigger asChild>
           <button
             type="button"
-            className="flex min-h-11 w-full min-w-0 items-center gap-3 rounded-xl px-2 text-left text-sm text-neutral-300 transition-colors hover:bg-white/[0.03] hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60"
+            className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
             aria-label={`Open documentation navigation. Current page: ${context}`}
           >
-            <Menu aria-hidden className="h-4 w-4 shrink-0 text-orange-400" />
-            <span className="min-w-0 flex-1 truncate">
-              <span className="text-neutral-500">Docs</span>
-              <span aria-hidden className="px-2 text-neutral-700">
-                /
-              </span>
-              <span>{context}</span>
-            </span>
+            <Menu aria-hidden className="h-4 w-4 shrink-0 text-ink-faint" />
+            <span className="min-w-0 flex-1 truncate">{context}</span>
             <ChevronRight
               aria-hidden
-              className="h-4 w-4 shrink-0 text-neutral-600"
+              className="h-4 w-4 shrink-0 text-ink-faint"
             />
           </button>
         </SheetTrigger>
@@ -287,10 +240,10 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
 
       <SheetContent
         side="left"
-        className="w-[min(88vw,22rem)] gap-0 border-white/10 bg-[#0e0b08] p-0 text-neutral-100 [&>button]:flex [&>button]:h-11 [&>button]:w-11 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-lg [&>button]:text-neutral-400 [&>button]:focus-visible:ring-orange-400/60"
+        className="w-[min(88vw,22rem)] gap-0 border-line-strong bg-canvas p-0 text-ink [&>button]:flex [&>button]:h-11 [&>button]:w-11 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-lg [&>button]:text-ink-dim [&>button]:focus-visible:ring-brand/60"
       >
-        <SheetHeader className="border-b border-white/[0.07] px-5 py-5 pr-16">
-          <SheetTitle className="text-left text-base text-neutral-100">
+        <SheetHeader className="border-b border-line px-5 py-5 pr-16">
+          <SheetTitle className="text-left text-base text-ink">
             Documentation
           </SheetTitle>
           <SheetDescription className="sr-only">
@@ -312,9 +265,10 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
 export function DocsMobileNav() {
   const pathname = usePathname();
 
+  // Sits flush under the floating site pill so the page has one bar, not two.
   // Remounting on navigation closes the drawer even for browser back/forward.
   return (
-    <div className="sticky top-16 z-40 border-b border-white/[0.06] bg-black/85 backdrop-blur lg:hidden md:top-20">
+    <div className="sticky top-14 z-40 border-b border-line bg-canvas/90 backdrop-blur md:top-16 lg:hidden">
       <DocsMobileNavForPath key={pathname} pathname={pathname} />
     </div>
   );

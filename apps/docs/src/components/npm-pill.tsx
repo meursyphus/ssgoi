@@ -13,15 +13,14 @@ export function NpmPill({ pkg }: { pkg: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="group inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-mono text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/[0.05]"
+      className="group inline-flex items-center gap-2.5 rounded-full border border-line-strong bg-panel px-4 py-2.5 font-mono text-sm text-ink-soft transition-colors hover:border-ink-faint"
       aria-label={`Copy: npm i ${pkg}`}
     >
-      <span className="text-orange-500/80 select-none">$</span>
       <span>
-        npm i <span className="text-neutral-100">{pkg}</span>
+        npm i <span className="text-ink">{pkg}</span>
       </span>
       <span
-        className="ml-1 text-neutral-500 transition-colors group-hover:text-neutral-300"
+        className="ml-1 text-ink-faint transition-colors group-hover:text-ink-dim"
         aria-hidden
       >
         {copied ? (

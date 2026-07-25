@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { TransitionsCatalog } from "@/page/docs/transitions-catalog";
 
 export const metadata: Metadata = {
   title: "Transitions — the thirteen built-in SSGOI transitions",
   description:
-    "drill, fade, slide, axis, scroll, sheet, hero, zoom, strip, blind, film, rotate, jaemin. Each links to its variants, usage, live demos, and a self-contained .txt with the full API.",
+    "drill, fade, slide, axis, scroll, sheet, hero, zoom, strip, blind, film, rotate, jaemin. Each has its own page with variants, route config, live demos, and a self-contained .txt of the full API.",
   alternates: { canonical: "/docs/transitions" },
   openGraph: buildOpenGraph({ path: "/docs/transitions" }),
 };
@@ -22,9 +22,9 @@ export default function DocsTransitionsPage() {
           { name: "Transitions", path: "/docs/transitions" },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Transitions"
-        lead="Start from the mobile interaction you are building, then open an effect for its variants, route config, and live demos."
+        lead="Thirteen built-in effects. Pick the one that matches the navigation you are building."
       />
       <TransitionsCatalog />
     </>

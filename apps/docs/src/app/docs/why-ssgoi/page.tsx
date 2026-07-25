@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { WhySsgoiBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/why-ssgoi";
@@ -9,7 +9,7 @@ const path = "/docs/why-ssgoi";
 export const metadata: Metadata = {
   title: "Why SSGOI — mobile route transitions without replacing your router",
   description:
-    "Adopt native app-like mobile page transitions in 2–3 files, with router-agnostic boundaries, automatic scroll behavior, and Web Animations API control.",
+    "Add native app-like mobile page transitions with two new files and one layout edit, keeping your router, with route boundaries and scroll behavior handled for you.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -24,9 +24,9 @@ export default function WhySsgoiPage() {
           { name: "Why SSGOI", path },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Why SSGOI"
-        lead="Keep your router. Add a small boundary. Give each navigation a mobile-native spatial relationship."
+        lead="Keep the router you have and give every navigation the sense of direction a native app has."
       />
       <WhySsgoiBody />
     </>

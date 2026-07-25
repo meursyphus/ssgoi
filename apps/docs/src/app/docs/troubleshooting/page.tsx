@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { TroubleshootingBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/troubleshooting";
@@ -9,7 +9,7 @@ const path = "/docs/troubleshooting";
 export const metadata: Metadata = {
   title: "Troubleshooting — diagnose SSGOI route transitions",
   description:
-    "Diagnose missing animations, wrong transition regions, layout jumps, flicker, and unexpected scroll before reading SSGOI engine internals.",
+    "Fix a transition that never runs, moves the wrong part of the page, jumps, flickers, or lands at the wrong scroll position.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -24,9 +24,9 @@ export default function TroubleshootingPage() {
           { name: "Troubleshooting", path },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Troubleshooting"
-        lead="Check provider, markers, boundary ownership, the winning rule, and the layout shell—in that order."
+        lead="Work out why nothing moved, the wrong thing moved, or the page jumped."
       />
       <TroubleshootingBody />
     </>

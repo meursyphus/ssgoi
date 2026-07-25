@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { BoundariesBody } from "@/page/docs/guide-pages";
 
 const path = "/docs/boundaries";
 
 export const metadata: Metadata = {
-  title: "Route boundary basics — keys and transition ids",
+  title: "Route boundaries — keys and transition ids",
   description:
-    "Understand the two jobs of an SSGOI route boundary: the framework key that controls lifetime and the transition id matched by config rules.",
+    "A route boundary does two jobs: the framework key decides when the page remounts, and the transition id is what config rules match on.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };
@@ -21,12 +21,12 @@ export default function BoundariesPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Boundaries", path },
+          { name: "Route boundaries", path },
         ])}
       />
-      <DocsPageHeading
-        title="Route boundary basics"
-        lead="The key controls framework lifetime. The transition id tells SSGOI which logical route is moving."
+      <PageHeading
+        title="Route boundaries"
+        lead="Mark each page so SSGOI can tell which one just left and which one arrived."
       />
       <BoundariesBody />
     </>

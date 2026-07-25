@@ -2,29 +2,23 @@ import type { ShowcasePlatform } from "@/page/showcase/data";
 
 export type UseKind = "drill-in" | "sibling" | "top-level" | "decorative";
 
-export const USE_META: Record<
-  UseKind,
-  { label: string; when: string; cls: string }
-> = {
+/** Read by transition-detail.tsx to say what kind of navigation a preset is for. */
+export const USE_META: Record<UseKind, { label: string; when: string }> = {
   "drill-in": {
     label: "Drill-in",
     when: "List → detail, going one level deeper.",
-    cls: "border-orange-400/40 bg-orange-400/10 text-orange-200",
   },
   sibling: {
     label: "Sibling",
     when: "Between peer screens at the same level.",
-    cls: "border-sky-400/40 bg-sky-400/10 text-sky-200",
   },
   "top-level": {
     label: "Top-level",
     when: "Switching tabs or root sections.",
-    cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
   },
   decorative: {
     label: "Expressive",
     when: "Selected moments where motion supports the product tone.",
-    cls: "border-violet-400/40 bg-violet-400/10 text-violet-200",
   },
 };
 
@@ -99,7 +93,7 @@ export type TransitionDoc = {
   /** The product decision this motion should encode. */
   decision: TransitionDecision;
   /** Natural route rule for this effect in the usage example. */
-  ruleStyle: "stack" | "target" | "pair" | "ordered";
+  ruleStyle: "stack" | "target" | "pair" | "ordered" | "fallback";
   /** Shared identity markers required by Hero and Zoom. */
   identity?: TransitionIdentitySpec;
   variants: TransitionVariant[];
@@ -207,7 +201,9 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
       avoidWhen:
         "Avoid it when hierarchy, order, or travel direction should remain visible.",
     },
-    ruleStyle: "pair",
+    // Fade is the catch-all, so its usage example is the low-priority
+    // fallback rule the rest of the docs recommend — not a from/to pair.
+    ruleStyle: "fallback",
     variants: [
       {
         label: "fade-through",
@@ -940,8 +936,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     ],
   },
 ];
-
-export const TRANSITION_NAMES = TRANSITION_DOCS.map((t) => t.name);
 
 export function getTransitionDoc(name: string): TransitionDoc | undefined {
   return TRANSITION_DOCS.find((t) => t.name === name);

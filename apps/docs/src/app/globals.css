@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/*
+ * Docs design tokens.
+ *
+ * Names are intentionally outside the shadcn set (background, foreground,
+ * muted, card, popover, accent, …) so defining them here cannot silently
+ * repaint the primitives in src/lib/components/ui.
+ *
+ * Contrast against --color-canvas: ink 14:1 · ink-soft 13:1 · ink-dim 7.7:1
+ * · ink-faint 5.3:1 · brand 7.1:1.
+ */
+@theme {
+  --color-canvas: #080706;
+  --color-panel: #131110;
+  --color-raised: #1c1917;
+
+  --color-line: #2c2724;
+  --color-line-strong: #453e39;
+
+  --color-ink: #f5f0e9;
+  --color-ink-soft: #d9d2c9;
+  --color-ink-dim: #a9a19a;
+  --color-ink-faint: #8b837c;
+
+  --color-brand: #f97316;
+  --color-brand-soft: #fdba74;
+}
+
 @utility scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

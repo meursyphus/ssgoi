@@ -8,8 +8,10 @@ npm install @ssgoi/qwik
 ```
 
 Shell class strings below are Tailwind shorthand. Without Tailwind, apply
-`position:relative; z-index:0; min-height:100vh; overflow-x:hidden`; use
-`100dvh` and `overflow-x:clip` as progressive upgrades.
+`position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip`. Use
+`clip`, not `hidden`: `overflow-x: hidden` makes the wrapper the scroll
+container, and scroll restore then targets the wrong element. Fall back to
+`100vh` only where `dvh` is unsupported.
 
 ```tsx
 // src/lib/ssgoi-config.ts

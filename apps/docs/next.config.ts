@@ -26,7 +26,16 @@ const nextConfig: NextConfig = {
   // // so navigation animations work with cached/kept-alive pages.
   // cacheComponents: true,
   async redirects() {
-    return [{ source: "/showcase", destination: "/", permanent: true }];
+    return [
+      { source: "/showcase", destination: "/", permanent: true },
+      // /docs/core-options duplicated Scroll behavior and Middleware and was
+      // never in the sidebar. Its content lives on those two pages now.
+      {
+        source: "/docs/core-options",
+        destination: "/docs/scroll-restoration",
+        permanent: true,
+      },
+    ];
   },
 };
 
