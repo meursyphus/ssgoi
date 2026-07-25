@@ -18,7 +18,7 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {/* Main Content Area */}
         <main
           id="demo-content"
-          className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
+          className="relative z-0 flex-1 w-full overflow-y-scroll overflow-x-clip bg-[#121212] scrollbar-hide"
         >
           <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
         </main>

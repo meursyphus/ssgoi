@@ -1,10 +1,10 @@
 import { Outlet } from "react-router";
-import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "../components/ssgoi-route-boundary";
 
 export default function PageBoundaryLayout() {
   return (
-    <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+    <SsgoiRouteBoundary name="page" className="min-h-full bg-[#121212]">
       <Outlet />
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

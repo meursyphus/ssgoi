@@ -4,7 +4,7 @@ import {
   Outlet,
   useRouterState,
 } from "@tanstack/react-router";
-import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "../components/ssgoi-route-boundary";
 import { PRODUCT_CATEGORIES } from "../components/ssgoi-config";
 
 function ProductsLayout() {
@@ -14,8 +14,8 @@ function ProductsLayout() {
   const pathname = location.pathname;
 
   return (
-    <SsgoiTransitionBoundary
-      scope={() => "products-layout"}
+    <SsgoiRouteBoundary
+      name="products-shell"
       className="min-h-screen bg-[#121212] flex flex-col"
     >
       {/* Header - Fixed */}
@@ -43,11 +43,11 @@ function ProductsLayout() {
 
       {/* Tab Content - Slide transitions here */}
       <div className="flex-1 overflow-hidden relative">
-        <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
+        <SsgoiRouteBoundary name="page" className="min-h-full bg-[#121212]">
           <Outlet />
-        </SsgoiTransitionBoundary>
+        </SsgoiRouteBoundary>
       </div>
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }
 export const Route = createFileRoute("/products")({
