@@ -1,8 +1,5 @@
 <template>
-  <div
-    data-ssgoi-transition="/products"
-    class="min-h-screen bg-[#121212] flex flex-col"
-  >
+  <div class="min-h-screen bg-[#121212] flex flex-col">
     <!-- Header - Fixed -->
     <div class="px-4 pt-6 pb-3 flex-shrink-0">
       <h1 class="text-sm font-medium text-white mb-1">Shop</h1>
@@ -31,7 +28,9 @@
     <!-- Tab Content - Slide transitions here -->
     <div class="flex-1 overflow-hidden relative">
       <Ssgoi :config="config">
-        <NuxtPage />
+        <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
+          <NuxtPage />
+        </SsgoiTransitionBoundary>
       </Ssgoi>
     </div>
   </div>

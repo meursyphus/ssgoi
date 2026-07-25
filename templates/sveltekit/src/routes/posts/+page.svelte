@@ -4,7 +4,7 @@
   const posts = getAllPosts();
 </script>
 
-<div data-ssgoi-transition="/posts">
+<div>
   <div class="min-h-full bg-[#121212] px-4 py-6">
     <!-- Header -->
     <div class="mb-6">

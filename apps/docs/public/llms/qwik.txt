@@ -16,27 +16,31 @@ Qwik uses resumability and serializes component state, while SSGOI transition co
 
 In Qwik City layouts, prefer `useSsgoi(ref, { config$ })` over wrapping the route `<Slot />` in `<Ssgoi>`. Forwarding a Qwik City route slot through another component prevents routed content from being projected into the live DOM.
 
+Copy this root layout as a complete starting point:
+
 ```tsx
+// src/routes/layout.tsx
 import { $, Slot, component$, useSignal } from "@builder.io/qwik";
 import { useSsgoi } from "@ssgoi/qwik";
 import { drill, zoom } from "@ssgoi/qwik/view-transitions";
 
-const config$ = $(() => ({
+const ssgoiConfig$ = $(() => ({
   preserveScroll: { exclude: ["/post/*"] },
   transitions: [
     drill({ enter: "/post/*", exit: "/post" }),
-    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
+    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" as const }),
   ],
 }));
 
 export default component$(() => {
   const ssgoiRoot = useSignal<HTMLElement>();
 
-  useSsgoi(ssgoiRoot, { config$ });
+  useSsgoi(ssgoiRoot, { config$: ssgoiConfig$ });
 
   return (
     <main
       ref={ssgoiRoot}
+      data-ssgoi-root=""
       class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
     >
       <Slot />
@@ -47,24 +51,114 @@ export default component$(() => {
 
 ## Route boundary rule
 
-Each page component marks its own boundary:
+Each page component marks its own boundary. Copy the marker onto the outermost element of every routed page:
 
 ```tsx
+// src/routes/post/index.tsx
+import { component$ } from "@builder.io/qwik";
+
 export default component$(() => {
   return (
-    <section data-ssgoi-transition="/gallery">{/* page content */}</section>
+    <section data-ssgoi-transition="/post">
+      <h1>Posts</h1>
+      {/* page content */}
+    </section>
   );
 });
 ```
 
+Dynamic pages derive the same logical id used by the config:
+
+```tsx
+// src/routes/post/[id]/index.tsx
+import { component$ } from "@builder.io/qwik";
+import { Link, useLocation } from "@builder.io/qwik-city";
+
+export default component$(() => {
+  const location = useLocation();
+  const id = location.params.id;
+
+  return (
+    <article data-ssgoi-transition={`/post/${id}`}>
+      <Link href="/post/">Back</Link>
+      <h1>Post {id}</h1>
+    </article>
+  );
+});
+```
+
+Do not replace this with a keyed wrapper around the layout `<Slot />`. Qwik City moves projected slot content into the new wrapper before updating the routed subtree, so an incoming transition id can temporarily contain the outgoing page. `usePreventNavigate$` could stage a pre-navigation unmount, but it currently requires Qwik City's experimental `preventNavigate` flag; the stable template deliberately avoids that dependency.
+
 The value can be a hard-coded logical page id; it only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+
+## Nested route transitions
+
+For a persistent parent such as `/products`, the parent layout owns the outer `/products` marker and initializes a second SSGOI observer around its child `<Slot />`. Copy this layout:
+
+```tsx
+// src/routes/products/layout.tsx
+import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
+import { useSsgoi } from "@ssgoi/qwik";
+import { slide } from "@ssgoi/qwik/view-transitions";
+
+const paths = [
+  "/products/all",
+  "/products/electronics",
+  "/products/fashion",
+];
+
+const productConfig$ = $(() => ({
+  transitions: [slide({ paths })],
+}));
+
+export default component$(() => {
+  const ssgoiRoot = useSignal<HTMLElement>();
+
+  useSsgoi(ssgoiRoot, { config$: productConfig$ });
+
+  return (
+    <section data-ssgoi-transition="/products" class="min-h-full">
+      <nav>
+        {paths.map((path) => (
+          <Link key={path} href={`${path}/`}>
+            {path.split("/").at(-1)}
+          </Link>
+        ))}
+      </nav>
+
+      <div
+        ref={ssgoiRoot}
+        data-ssgoi-root=""
+        class="relative z-0 overflow-x-clip"
+      >
+        <Slot />
+      </div>
+    </section>
+  );
+});
+```
+
+Each nested page still owns its full-path marker:
+
+```tsx
+// src/routes/products/all/index.tsx
+import { component$ } from "@builder.io/qwik";
+
+export default component$(() => (
+  <div data-ssgoi-transition="/products/all">All products</div>
+));
+```
+
+Repeat that page file for the other configured paths. Keep the logical ids without Qwik City's optional trailing slash, exactly as written in `paths`.
 
 ## Troubleshooting checklist
 
 - The root layout imports `useSsgoi` from `@ssgoi/qwik` and calls it with a signal ref.
 - The config is declared with Qwik `$`, for example `const config$ = $(() => ({ transitions: [...] }))`.
-- Each page component has its own `data-ssgoi-transition` value that matches `paths`, `from`, or `to`.
+- Each page component has its own `data-ssgoi-transition` value that matches `paths`, `from`, or `to` exactly.
 - The SSGOI root element is the scroll/positioning shell (`relative z-0 overflow-x-clip`) and contains the route `<Slot />` directly.
+- There is no keyed transition wrapper around `<Slot />`.
 
 ## Shared reference
 

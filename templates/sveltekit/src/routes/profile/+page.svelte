@@ -2,7 +2,7 @@
   import { profile, posts } from "$lib/data/profile";
 </script>
 
-<div data-ssgoi-transition="/profile">
+<div>
   <div class="bg-[#121212]">
     <!-- Profile Header -->
     <div class="relative">

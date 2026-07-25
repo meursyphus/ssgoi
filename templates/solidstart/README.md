@@ -7,4 +7,21 @@ pnpm install
 pnpm dev
 ```
 
-SolidStart pages mark their own transition boundary with `data-ssgoi-transition`, matching the SvelteKit, Nuxt, and Qwik template pattern. The root app wraps file routes once with `<Ssgoi>`, while every route page provides the stable transition id that the config matches.
+SolidStart routes are wrapped once with `SsgoiTransitionBoundary`, so individual
+page components do not set `data-ssgoi-transition`. The boundary uses Solid's
+keyed `<Show>` to dispose the outgoing route owner before mounting the incoming
+one.
+
+Keep the boundary inside `<Suspense>` so lazy route content is ready before
+SSGOI observes the incoming marker:
+
+```tsx
+<Ssgoi config={config}>
+  <Suspense>
+    <SsgoiTransitionBoundary>{props.children}</SsgoiTransitionBoundary>
+  </Suspense>
+</Ssgoi>
+```
+
+Nested providers use the same component. The outer boundary maps
+`/products/*` to `/products`, while the nested boundary uses the full pathname.

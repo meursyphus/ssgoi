@@ -338,7 +338,7 @@ Everything outside the React core above lives in its own plain-text file. Fetch 
 - Angular: https://ssgoi.dev/llms/angular.txt
 - Qwik / Qwik City: https://ssgoi.dev/llms/qwik.txt
 
-The `SsgoiConfig` shape, transition catalog, and troubleshooting sections above are shared across all frameworks — only installation and the route boundary marker differ.
+The `SsgoiConfig` shape, transition catalog, and troubleshooting sections above are shared across all frameworks. Installation, provider wiring, and route-boundary lifecycle are documented only in the linked framework guides.
 
 ### Deep dive
 

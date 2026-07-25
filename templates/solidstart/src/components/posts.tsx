@@ -11,7 +11,7 @@ export function PostsPage() {
   const posts = getAllPosts();
 
   return (
-    <div data-ssgoi-transition="/posts" class="min-h-full bg-[#121212]">
+    <div class="min-h-full bg-[#121212]">
       <div class="px-4 py-6">
         <div class="mb-6">
           <h1 class="text-sm font-medium text-white mb-1">Latest Posts</h1>
@@ -84,19 +84,13 @@ export function PostDetailPage(props: { postId: string }) {
     <Show
       when={post()}
       fallback={
-        <div
-          data-ssgoi-transition={`/posts/${props.postId}`}
-          class="min-h-full bg-[#121212] px-4 py-8"
-        >
+        <div class="min-h-full bg-[#121212] px-4 py-8">
           <p class="text-gray-400">Post not found</p>
         </div>
       }
     >
       {(post) => (
-        <div
-          data-ssgoi-transition={`/posts/${post().id}`}
-          class="min-h-screen bg-[#121212]"
-        >
+        <div class="min-h-screen bg-[#121212]">
           <div class="px-4 py-4">
             <A
               href="/posts"

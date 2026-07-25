@@ -40,13 +40,13 @@
 </script>
 
 {#if !post}
-  <div data-ssgoi-transition="/posts/{postId}">
+  <div>
     <div class="min-h-screen bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Post not found</p>
     </div>
   </div>
 {:else}
-  <div data-ssgoi-transition="/posts/{postId}">
+  <div>
     <div class="min-h-screen bg-[#121212]">
       <!-- Back button -->
       <div class="px-4 py-4">

@@ -3,6 +3,7 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, type JSX } from "solid-js";
 import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
 import { drill, zoom } from "@ssgoi/solid/view-transitions";
+import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
 import "./app.css";
 
 const ssgoiConfig = {
@@ -23,15 +24,12 @@ const ssgoiConfig = {
   ],
 } satisfies SsgoiConfig;
 
+const getRootTransitionId = (path: string) =>
+  path === "/products" || path.startsWith("/products/") ? "/products" : path;
+
 export default function App() {
   return (
-    <Router
-      root={(props) => (
-        <AppFrame>
-          <Suspense>{props.children}</Suspense>
-        </AppFrame>
-      )}
-    >
+    <Router root={(props) => <AppFrame>{props.children}</AppFrame>}>
       <FileRoutes />
     </Router>
   );
@@ -52,7 +50,16 @@ function AppFrame(props: { children?: JSX.Element }) {
               data-ssgoi-root=""
               class="flex-1 min-h-0 w-full overflow-y-scroll overflow-x-clip relative z-0 bg-[#121212] scrollbar-hide"
             >
-              <Ssgoi config={ssgoiConfig}>{props.children}</Ssgoi>
+              <Ssgoi config={ssgoiConfig}>
+                <Suspense>
+                  <SsgoiTransitionBoundary
+                    getId={getRootTransitionId}
+                    class="min-h-full bg-[#121212]"
+                  >
+                    {props.children}
+                  </SsgoiTransitionBoundary>
+                </Suspense>
+              </Ssgoi>
             </main>
 
             <nav class="flex justify-around items-center bg-[#121212] border-t border-white/5 py-2 flex-shrink-0">

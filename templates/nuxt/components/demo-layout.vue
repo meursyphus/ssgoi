@@ -8,7 +8,12 @@
         class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
       >
         <Ssgoi :config="config">
-          <slot />
+          <SsgoiTransitionBoundary
+            :get-id="getRootTransitionId"
+            class="min-h-full bg-[#121212]"
+          >
+            <slot />
+          </SsgoiTransitionBoundary>
         </Ssgoi>
       </main>
 
@@ -105,6 +110,11 @@ import { drill, zoom } from '@ssgoi/vue/view-transitions';
 
 const route = useRoute();
 const pathname = computed(() => route.path);
+
+const getRootTransitionId = (path: string) =>
+  path === '/products' || path.startsWith('/products/')
+    ? '/products'
+    : path;
 
 const config: SsgoiConfig = {
   preserveScroll: { exclude: ['/posts/*'] },

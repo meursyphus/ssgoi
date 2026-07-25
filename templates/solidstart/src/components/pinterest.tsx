@@ -11,10 +11,7 @@ export function PinterestPage() {
   const rightColumnItems = pinterestItems.filter((_, index) => index % 2 === 1);
 
   return (
-    <div
-      data-ssgoi-transition="/pinterest"
-      class="min-h-screen bg-[#121212] px-4 py-6"
-    >
+    <div class="min-h-screen bg-[#121212] px-4 py-6">
       <div class="mb-6">
         <h1 class="text-sm font-medium text-white mb-1">Gallery</h1>
         <p class="text-xs text-neutral-500">
@@ -41,19 +38,13 @@ export function PinterestDetailPage(props: { pinId: string }) {
     <Show
       when={item()}
       fallback={
-        <div
-          data-ssgoi-transition={`/pinterest/${props.pinId}`}
-          class="min-h-screen bg-[#121212] px-4 py-8"
-        >
+        <div class="min-h-screen bg-[#121212] px-4 py-8">
           <p class="text-gray-400">Pin not found</p>
         </div>
       }
     >
       {(item) => (
-        <div
-          data-ssgoi-transition={`/pinterest/${item().id}`}
-          class="min-h-screen bg-[#121212]"
-        >
+        <div class="min-h-screen bg-[#121212]">
           <div class="px-4 py-4">
             <A
               href="/pinterest"

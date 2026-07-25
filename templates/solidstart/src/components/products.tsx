@@ -3,10 +3,9 @@ import { getProductsByCategory, type Product } from "../data/products";
 
 export function ProductGrid(props: { category: string }) {
   const products = () => getProductsByCategory(props.category);
-  const transitionId = () => `/products/${props.category}`;
 
   return (
-    <div data-ssgoi-transition={transitionId()}>
+    <div>
       <div class="px-4 pb-6 h-full overflow-y-auto">
         <Show
           when={products().length > 0}

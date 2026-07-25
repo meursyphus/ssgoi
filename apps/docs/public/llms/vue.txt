@@ -18,21 +18,132 @@ Same three rules as every framework (details in llms.txt):
 2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
 3. Mark routed content with `data-ssgoi-transition="..."`.
 
-## Route boundary rule (Nuxt/Vue-specific)
+## Nuxt/Vue route boundary
 
-Set `data-ssgoi-transition` **directly on each routed page's boundary element** — do NOT wrap the layout slot in a single shared boundary.
+Nuxt can mark routed content once in a persistent layout. A keyed Vue VNode retains its own slot subtree, so unmounting the old key gives SSGOI the outgoing page while the new key receives the incoming route.
 
-Nuxt slot content is live: during navigation the outgoing page wrapper can render the incoming page's children, so a layout-level boundary pairs the wrong subtrees. Each page marks itself:
+### 1. Copy the boundary component
+
+Create a small router-specific boundary:
 
 ```vue
+<!-- components/ssgoi-transition-boundary.vue -->
 <template>
-  <main data-ssgoi-transition="/gallery">
-    <!-- page content -->
-  </main>
+  <component
+    :is="as"
+    :key="transitionId"
+    :data-ssgoi-transition="transitionId"
+  >
+    <slot />
+  </component>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+interface Props {
+  as?: keyof HTMLElementTagNameMap;
+  getId?: (pathname: string) => string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  as: "div",
+  getId: (pathname: string) => pathname,
+});
+
+const route = useRoute();
+const transitionId = computed(() => props.getId(route.path));
+</script>
 ```
 
-The value can be a hard-coded logical page id; it does not have to be the framework's route pathname. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
+### 2. Wrap routed content once
+
+Copy the component above as-is, then use it in `app.vue`. This example includes all imports, a typed config, the required scroll/positioning shell, and a stable id for an optional nested `/products` layout:
+
+```vue
+<!-- app.vue -->
+<template>
+  <!-- This is the scroll element and the positioned ancestor for OUT clones. -->
+  <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
+    <Ssgoi :config="config">
+      <SsgoiTransitionBoundary
+        :get-id="getRootTransitionId"
+        class="min-h-full"
+      >
+        <NuxtPage />
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi } from "@ssgoi/vue";
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { drill, zoom } from "@ssgoi/vue/view-transitions";
+
+const config = {
+  preserveScroll: { exclude: ["/posts/*"] },
+  transitions: [
+    drill({ enter: "/posts/*", exit: "/posts" }),
+    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
+  ],
+} satisfies SsgoiConfig;
+
+const getRootTransitionId = (path: string) =>
+  path === "/products" || path.startsWith("/products/")
+    ? "/products"
+    : path;
+</script>
+```
+
+If the app has no nested transition provider, omit `:get-id="getRootTransitionId"` and the helper; the boundary defaults to the full `route.path`.
+
+### 3. Optional nested provider
+
+For nested transitions, the outer identity must stay stable while the nested boundary uses the full pathname. With the root setup above, copy this Nuxt parent page:
+
+```vue
+<!-- pages/products.vue -->
+<template>
+  <section class="min-h-full">
+    <nav>
+      <NuxtLink v-for="path in paths" :key="path" :to="path">
+        {{ path.split("/").at(-1) }}
+      </NuxtLink>
+    </nav>
+
+    <div class="relative z-0 overflow-x-clip">
+      <Ssgoi :config="config">
+        <!-- No get-id here: nested tabs need their full pathname. -->
+        <SsgoiTransitionBoundary class="min-h-full">
+          <NuxtPage />
+        </SsgoiTransitionBoundary>
+      </Ssgoi>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { Ssgoi } from "@ssgoi/vue";
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { slide } from "@ssgoi/vue/view-transitions";
+
+const paths = [
+  "/products/all",
+  "/products/electronics",
+  "/products/fashion",
+];
+
+const config = {
+  transitions: [slide({ paths })],
+} satisfies SsgoiConfig;
+</script>
+```
+
+Create the child pages at `pages/products/all.vue`, `pages/products/electronics.vue`, and `pages/products/fashion.vue`. They render ordinary page content and must not add another `data-ssgoi-transition` marker; the boundary owns it.
+
+For plain Vue without Vue Router, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`; match dynamic descendants with config wildcards such as `/post/*`.
 
 ## Shared reference
 
