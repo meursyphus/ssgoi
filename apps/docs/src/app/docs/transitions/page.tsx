@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading, TransitionsBody } from "@/page/docs/sections";
+import { DocsPageHeading } from "@/page/docs/sections";
+import { TransitionsCatalog } from "@/page/docs/transitions-catalog";
 
 export const metadata: Metadata = {
   title: "Transitions — the thirteen built-in SSGOI transitions",
@@ -23,9 +24,9 @@ export default function DocsTransitionsPage() {
       />
       <DocsPageHeading
         title="Transitions"
-        lead="Choose an effect, then attach it to an on, from/to, or ordered route rule."
+        lead="Start from the mobile interaction you are building, then open an effect for its variants, route config, and live demos."
       />
-      <TransitionsBody />
+      <TransitionsCatalog />
     </>
   );
 }

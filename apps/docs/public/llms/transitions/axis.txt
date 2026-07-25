@@ -1,0 +1,54 @@
+# SSGOI axis transition
+
+Use for sibling pages or tabs that should feel like a Material/Flutter
+shared-axis page swap.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { axis } from "@ssgoi/react/view-transitions";
+
+type AxisConfig =
+  | {
+      type?: "x";  // default
+      variant?: "default" | "snappy";
+      options?: Record<string, never>;
+    }
+  | {
+      type: "y";
+      variant?: "default" | "non-directional";
+      options?: Record<string, never>;
+    }
+  | {
+      type: "z";
+      variant?: "default";
+      options?: Record<string, never>;
+    };
+
+axis(config?: AxisConfig): TransitionConfig;
+```
+
+| type | variants |
+| --- | --- |
+| `x` | `default`, `snappy` |
+| `y` | `default`, `non-directional` |
+| `z` | `default` |
+
+Deprecated: `feel: "fluid" | "snappy"`; use `variant`.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      ordered: ["/friends", "/chats", "/settings"],
+      transition: axis({ type: "x", variant: "snappy" }),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

@@ -1,0 +1,34 @@
+# SSGOI rotate transition
+
+Use sparingly for a playful or emphatic full-screen switch. The outgoing page
+rotates to 180 degrees and disappears halfway; the incoming page unwinds from
+-180 degrees in the screen plane.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { rotate } from "@ssgoi/react/view-transitions";
+
+rotate({
+  variant?: "default";
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: "/campaign",
+      to: "/campaign/reveal",
+      transition: rotate(),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

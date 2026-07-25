@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title description">
+  <title id="title">Comwit persistent routing with one provider and two route boundaries</title>
+  <desc id="description">The app-shell boundary contains a top-level tab shell and detail routes. An inner main-content boundary changes between tabs while BottomNav stays mounted. Project routes share a project base key, and intercepted modals leave the background children slot mounted.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16110d"/>
+      <stop offset="1" stop-color="#090807"/>
+    </linearGradient>
+    <linearGradient id="outer" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a170d"/>
+      <stop offset="1" stop-color="#15100c"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000" flood-opacity=".38"/>
+    </filter>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fb923c"/>
+    </marker>
+    <style>
+      .sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 3px; }
+      .heading { font-size: 33px; font-weight: 720; letter-spacing: -1px; }
+      .label { font-size: 18px; font-weight: 700; }
+      .body { font-size: 15px; fill: #a8a29e; }
+      .small { font-size: 13px; fill: #78716c; }
+      .code { font-size: 14px; fill: #fdba74; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="900" rx="34" fill="url(#bg)"/>
+  <text x="68" y="70" class="sans eyebrow" fill="#fb923c">PRODUCTION ROUTE OWNERSHIP</text>
+  <text x="68" y="116" class="sans heading" fill="#fafaf9">One provider. Two boundaries. Four lifetimes.</text>
+  <text x="68" y="149" class="sans body">React keys decide what remains mounted; transition ids keep describing the real route.</text>
+
+  <rect x="62" y="190" width="1316" height="472" rx="30" fill="url(#outer)" stroke="#fb923c" stroke-opacity=".55" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="90" y="216" width="205" height="34" rx="17" fill="#fb923c" fill-opacity=".14" stroke="#fb923c" stroke-opacity=".55"/>
+  <text x="111" y="239" class="mono code">app-shell boundary</text>
+  <text x="1138" y="239" class="mono small">one &lt;Ssgoi&gt;</text>
+
+  <rect x="100" y="278" width="635" height="338" rx="24" fill="#0c1115" stroke="#38bdf8" stroke-opacity=".55" stroke-width="2"/>
+  <text x="130" y="315" class="sans label" fill="#e0f2fe">Top-level layout</text>
+  <text x="130" y="340" class="mono small">(top-level) · shared outer key: ssgoi-app-main</text>
+
+  <rect x="132" y="370" width="571" height="126" rx="18" fill="#0b1720" stroke="#38bdf8" stroke-opacity=".8"/>
+  <rect x="152" y="390" width="202" height="30" rx="15" fill="#38bdf8" fill-opacity=".13"/>
+  <text x="168" y="411" class="mono" font-size="13" fill="#7dd3fc">main-content boundary</text>
+  <text x="158" y="451" class="sans label" fill="#f5f5f4">Active tab page</text>
+  <text x="158" y="476" class="mono small">/projects · /showcase · /comwit-log · /profile</text>
+
+  <rect x="132" y="516" width="360" height="68" rx="17" fill="#121212" stroke="#a8a29e" stroke-opacity=".35"/>
+  <text x="158" y="546" class="sans label" fill="#f5f5f4">BottomNav</text>
+  <text x="158" y="568" class="sans small">outside inner · inside outer</text>
+
+  <rect x="510" y="516" width="193" height="68" rx="17" fill="#1c1124" stroke="#c084fc" stroke-opacity=".55"/>
+  <text x="536" y="546" class="sans label" fill="#e9d5ff">@modal</text>
+  <text x="536" y="568" class="sans small">parallel sibling</text>
+
+  <rect x="771" y="278" width="567" height="338" rx="24" fill="#12100f" stroke="#a8a29e" stroke-opacity=".35" stroke-width="2"/>
+  <text x="801" y="315" class="sans label" fill="#f5f5f4">Detail and project layouts</text>
+  <text x="801" y="340" class="mono small">(detail) · full page or dynamic project key</text>
+
+  <rect x="803" y="370" width="503" height="88" rx="18" fill="#171312" stroke="#78716c" stroke-opacity=".45"/>
+  <text x="829" y="402" class="sans label" fill="#f5f5f4">Generic detail</text>
+  <text x="829" y="430" class="mono code">id: /p/42 · key: /p/42</text>
+
+  <rect x="803" y="478" width="503" height="106" rx="18" fill="#111913" stroke="#4ade80" stroke-opacity=".45"/>
+  <text x="829" y="510" class="sans label" fill="#dcfce7">Project shell persists</text>
+  <text x="829" y="538" class="mono" font-size="14" fill="#86efac">id: /projects/acme/docs</text>
+  <text x="829" y="564" class="mono" font-size="14" fill="#86efac">key: /projects/acme</text>
+
+  <path d="M 717 438 C 748 438 748 420 778 420" fill="none" stroke="#fb923c" stroke-width="3" marker-end="url(#arrow-orange)"/>
+
+  <rect x="62" y="698" width="316" height="142" rx="22" fill="#0d1419" stroke="#38bdf8" stroke-opacity=".45"/>
+  <text x="86" y="730" class="mono" font-size="13" fill="#7dd3fc">TAB → TAB</text>
+  <text x="86" y="765" class="sans label" fill="#f5f5f4">Only content changes</text>
+  <text x="86" y="793" class="sans body">main-content remounts</text>
+  <text x="86" y="816" class="sans body">BottomNav stays still</text>
+
+  <rect x="395" y="698" width="316" height="142" rx="22" fill="#1a110c" stroke="#fb923c" stroke-opacity=".5"/>
+  <text x="419" y="730" class="mono" font-size="13" fill="#fdba74">TAB → DETAIL</text>
+  <text x="419" y="765" class="sans label" fill="#f5f5f4">The shell leaves</text>
+  <text x="419" y="793" class="sans body">app-shell remounts</text>
+  <text x="419" y="816" class="sans body">BottomNav leaves with it</text>
+
+  <rect x="728" y="698" width="316" height="142" rx="22" fill="#0e1710" stroke="#4ade80" stroke-opacity=".45"/>
+  <text x="752" y="730" class="mono" font-size="13" fill="#86efac">PROJECT → CHILD</text>
+  <text x="752" y="765" class="sans label" fill="#f5f5f4">Context persists</text>
+  <text x="752" y="793" class="sans body">project base key stays</text>
+  <text x="752" y="816" class="sans body">child swaps immediately</text>
+
+  <rect x="1061" y="698" width="317" height="142" rx="22" fill="#17101d" stroke="#c084fc" stroke-opacity=".5"/>
+  <text x="1085" y="730" class="mono" font-size="13" fill="#d8b4fe">SOFT INTERCEPTION</text>
+  <text x="1085" y="765" class="sans label" fill="#f5f5f4">Background persists</text>
+  <text x="1085" y="793" class="sans body">children slot key stays</text>
+  <text x="1085" y="816" class="sans body">modal renders as a sibling</text>
+</svg>

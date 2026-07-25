@@ -2,50 +2,26 @@
 
 React bindings for SSGOI.
 
-Native app-like page transitions for mobile web apps.
+[![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
-**Router agnostic · Cross-browser · SSR ready · Web Animations API powered**
-
-[Live showcase](https://ssgoi.dev) · [Documentation](https://ssgoi.dev/docs)
-
-|                                                               Drill                                                                |                                                                                    Sheet                                                                                    |
-| :--------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="https://ssgoi.dev/readme-drill.gif" alt="Drill transition opening and closing a chat in a mobile web app" width="280" /> | <img src="https://ssgoi.dev/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition opening a compose screen above a mobile web app" width="280" /> |
-|                                          Navigate through a mobile app with spatial depth                                          |                                                                Present focused tasks above the current page                                                                 |
-
-## Why SSGOI?
-
-|                                    |                                                                             |
-| ---------------------------------- | --------------------------------------------------------------------------- |
-| **Router agnostic**                | Keep your existing router and let it own navigation.                        |
-| **Cross-browser**                  | Use the same transitions across Chrome, Safari, Firefox, and Edge.          |
-| **Optimized motion**               | Spring physics are precomputed into Web Animations API keyframes.           |
-| **Beyond the View Transition API** | Build transitions that need live DOM, runtime layers, and precise geometry. |
-| **Easy to adopt**                  | Add SSGOI by changing only 2–3 files.                                       |
-
----
-
-## Set it up with one link
-
-Give the guide for your router to Claude, Codex, Cursor, or another coding
-agent:
-
-- [Next.js](https://ssgoi.dev/llms/frameworks/nextjs.txt)
-- [React Router](https://ssgoi.dev/llms/frameworks/react-router.txt)
-- [TanStack Router](https://ssgoi.dev/llms/frameworks/tanstack-router.txt)
-
-Each guide contains complete files, route-boundary ownership, persistent
-layouts, and troubleshooting guidance.
-
----
-
-## Or add it in just 2–3 files
+[Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)
 
 ```bash
 npm install @ssgoi/react
 ```
 
-### Next.js
+Agent setup guide: https://ssgoi.dev/llms.txt
+
+## Contents
+
+- Next.js
+- Persistent layouts and sliding tabs
+- React Router
+- TanStack Router
+- Config
+- Effect index
+
+## Next.js
 
 Keep one config and one `<Ssgoi>` above route boundaries.
 
@@ -53,7 +29,6 @@ Keep one config and one `<Ssgoi>` above route boundaries.
 // app/ssgoi-provider.tsx
 "use client";
 
-import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
 import { drill, slide } from "@ssgoi/react/view-transitions";
 
@@ -67,7 +42,7 @@ const config = {
   ],
 };
 
-export function SsgoiProvider({ children }: { children: ReactNode }) {
+export function SsgoiProvider({ children }) {
   return <Ssgoi config={config}>{children}</Ssgoi>;
 }
 ```
@@ -76,10 +51,9 @@ Build the layout shell next:
 
 ```tsx
 // app/layout.tsx
-import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <html>
       <body>
@@ -197,7 +171,7 @@ export function SsgoiRouteBoundary({
 }
 ```
 
-### Persistent layouts
+## Persistent layouts
 
 Place one named boundary in the common app layout, then add child boundaries
 only around routed content that changes while its parent remains mounted.
@@ -247,7 +221,7 @@ the same URL resolves to the detail slot and receives a detail key.
 
 Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
 
-### React Router
+## React Router
 
 Replace `usePathname()` with `useLocation()` and render the boundary in a
 nested layout route:
@@ -262,7 +236,7 @@ return (
 );
 ```
 
-### TanStack Router
+## TanStack Router
 
 Read the pathname from router state and place the boundary in a parent route:
 
@@ -272,7 +246,7 @@ const pathname = useRouterState({
 });
 ```
 
-### Config
+## Config
 
 ```ts
 import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
@@ -306,7 +280,7 @@ const config = {
 - Patterns support exact paths, a `*` path segment, and suffix `**`.
 - `priority` overrides path specificity.
 
-### Effect index
+## Effect index
 
 - `fade`: unrelated pages.
 - `drill`: list → detail.
@@ -318,49 +292,13 @@ const config = {
 - `scroll`: vertical sequences.
 - `strip`, `film`, `rotate`, `blind`, `jaemin`: expressive transitions.
 
-References: https://ssgoi.dev/llms/transitions.txt
+References: https://ssgoi.dev/llms.txt#7-transition-index
 
-### Low-level APIs
+## Low-level APIs
 
 `transition()` and the auto-key plugins remain available for element-level
 mount/unmount animations; they are separate from route boundaries.
 
----
-
-## Compatibility
-
-SSGOI depends on the broadly available Web Animations API instead of requiring
-the View Transition API.
-
-| <img src="https://ssgoi.dev/logos/chrome.svg" alt="Chrome" width="36" /><br />Chrome 84+ | <img src="https://ssgoi.dev/logos/safari.svg" alt="Safari" width="36" /><br />Safari 13.1+ | <img src="https://ssgoi.dev/logos/firefox.svg" alt="Firefox" width="36" /><br />Firefox 75+ | <img src="https://ssgoi.dev/logos/edge.svg" alt="Edge" width="36" /><br />Edge 84+ |
-| :--------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------: |
-
-It observes the DOM lifecycle your framework already owns, so routing and SSR
-stay with your existing stack.
-
-| <img src="https://ssgoi.dev/logos/nextjs.svg" alt="Next.js" width="42" /><br />Next.js | <img src="https://ssgoi.dev/logos/react-router.svg" alt="React Router" width="42" /><br />React Router | <img src="https://ssgoi.dev/logos/tanstack.svg" alt="TanStack Router" width="42" /><br />TanStack Router | <img src="https://ssgoi.dev/logos/svelte.svg" alt="SvelteKit" width="42" /><br />SvelteKit | <img src="https://ssgoi.dev/logos/nuxt.svg" alt="Nuxt" width="42" /><br />Nuxt |
-| :------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------: |
-
-React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
-
-[See complete compatibility and framework guides →](https://ssgoi.dev/docs/compatibility)
-
----
-
-## Why SSGOI doesn't use the View Transition API
-
-SSGOI owns the geometry, temporary visual layers, live outgoing DOM, and
-navigation policy needed to turn complex motion into reusable presets.
-
-|                                                                                     Zoom                                                                                      |                                                                              Film                                                                               |                                                                               Sheet                                                                                |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="https://ssgoi.dev/blog/view-transition-api-limitations/zoom-blur.gif" alt="Zoom transition that transforms and clips a detail page around its image" width="240" /> | <img src="https://ssgoi.dev/blog/view-transition-api-limitations/film.gif" alt="Film transition with runtime visual pieces and multiple springs" width="320" /> | <img src="https://ssgoi.dev/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition with a live backdrop between two pages" width="240" /> |
-|                                                                 The whole detail page unfolds from its image                                                                  |                                                         Runtime scene, live video, and multiple springs                                                         |                                                             A live backdrop sits between the two pages                                                             |
-
-[Read why SSGOI doesn't use the View Transition API →](https://ssgoi.dev/blog/view-transition-api-limitations)
-
----
-
 ## License
 
-MIT Licensed © [MeurSyphus](https://github.com/meursyphus)
+MIT

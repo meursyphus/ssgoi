@@ -1,58 +1,49 @@
 # SSGOI
 
-Native app-like page transitions for the web.
+Native app-like page transitions for mobile web apps.
 
-**[Try it live →](https://ssgoi.dev)**
+**Router agnostic · Cross-browser · SSR ready · Web Animations API powered**
 
-[![SSGOI live showcase](./apps/docs/public/readme.png)](https://ssgoi.dev)
+[Live showcase](https://ssgoi.dev) · [Documentation](https://ssgoi.dev/docs)
 
-## Transitions in motion
-
-|                                                                     Hero                                                                      |                                                                 Zoom                                                                 |                                                                    Sheet                                                                    |
-| :-------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="./apps/docs/public/blog/view-transition-api-limitations/hero-mobile-full.gif" alt="Hero transition in Google Photos" width="260" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/zoom-blur.gif" alt="Zoom blur transition in Airbnb" width="260" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet blur transition in Voyage" width="260" /> |
-
-[See how Hero, Zoom, Film, and Sheet go beyond the View Transition API →](https://ssgoi.dev/blog/view-transition-api-limitations)
-
----
-
-## AI-Assisted Setup
-
-Using Claude, Cursor, ChatGPT, or other AI assistants? Let them set it up for you.
-
-**Add this to your AI's context:**
-
-```
-https://ssgoi.dev/llms.txt
-```
-
-Contains complete setup guides, all transition types, troubleshooting, and API docs.
-
----
+|                                                                   Drill                                                                    |                                                                    Sheet                                                                    |
+| :----------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+| <img src="./apps/docs/public/readme-drill.gif" alt="Drill transition opening and closing a chat in a mobile web app" width="280" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition opening a compose screen above a mobile web app" width="280" /> |
+|                                  Navigate through a mobile app with spatial depth                                  |                                    Present focused tasks above the current page                                     |
 
 ## Why SSGOI?
 
-Web pages don't transition—they just swap. SSGOI changes that.
-
-|                    | View Transition API | Other Libraries | SSGOI |
-| ------------------ | :-----------------: | :-------------: | :---: |
-| All browsers       |   ❌ Chrome only    |       ✅        |  ✅   |
-| SSR support        |     ⚠️ Limited      |    ⚠️ Varies    |  ✅   |
-| Spring physics     |         ❌          |     ⚠️ Some     |  ✅   |
-| Router agnostic    |         ❌          |       ❌        |  ✅   |
-| Back/forward state |         ❌          |       ❌        |  ✅   |
-
-**60fps guaranteed** — Spring physics pre-computed to Web Animation API keyframes. GPU-accelerated, main thread free.
+| | |
+| --- | --- |
+| **Router agnostic** | Keep your existing router and let it own navigation. |
+| **Cross-browser** | Use the same transitions across Chrome, Safari, Firefox, and Edge. |
+| **Optimized motion** | Spring physics are precomputed into Web Animations API keyframes. |
+| **Beyond the View Transition API** | Build transitions that need live DOM, runtime layers, and precise geometry. |
+| **Easy to adopt** | Add SSGOI by changing only 2–3 files. |
 
 ---
 
-## Quick Start
+## Set it up with one link
+
+Give this URL to Claude, Codex, Cursor, or another coding agent:
+
+```text
+https://ssgoi.dev/llms.txt
+```
+
+It contains the full setup for React and Next.js, Svelte and SvelteKit, Vue and
+Nuxt, Solid and SolidStart, Angular, and Qwik.
+
+---
+
+## Or add it in just 2–3 files
+
+The React and Next.js setup is one config, one provider, and one simple
+`usePathname()` boundary.
 
 ```bash
 npm install @ssgoi/react
 ```
-
-### 1. Create the layout shell
 
 ```tsx
 // app/ssgoi-provider.tsx
@@ -60,35 +51,51 @@ npm install @ssgoi/react
 
 import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, fade } from "@ssgoi/react/view-transitions";
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
-  transitions: [
-    {
-      priority: -100,
-      on: "/**",
-      except: ["/", "/about"],
-      transition: drill(),
-    },
-    { from: "/", to: "/about", transition: fade() },
-  ],
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
 export function SsgoiProvider({ children }: { children: ReactNode }) {
   return <Ssgoi config={config}>{children}</Ssgoi>;
 }
+```
 
+Keep the route boundary separate so its ownership can evolve with the app:
+
+```tsx
+// app/ssgoi-route-boundary.tsx
+"use client";
+
+import { type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <div key={pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}
+```
+
+```tsx
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
+import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* Layout shell for the reinserted OUT page. */}
-        <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
-          <SsgoiProvider>{children}</SsgoiProvider>
+        <main className="relative z-0 min-h-dvh overflow-x-clip">
+          <SsgoiProvider>
+            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+          </SsgoiProvider>
         </main>
       </body>
     </html>
@@ -96,287 +103,55 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-Start with this shell before adding route boundaries. When React unmounts a
-leaving page, SSGOI temporarily reinserts that detached DOM node with
-`position: absolute` so its OUT animation can finish over the incoming page.
-The wrapper establishes the coordinate and paint context for that node:
+The class string above is Tailwind shorthand. Without Tailwind, apply
+`position: relative; z-index: 0; min-height: 100vh; overflow-x: hidden` to the
+shell; use `100dvh` and `overflow-x: clip` as progressive upgrades.
 
-| Class             | Why                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| `relative`        | Gives the absolutely positioned OUT page the correct containing block                 |
-| `z-0`             | Creates a local stacking context so the OUT page stays above the shell background     |
-| `overflow-x-clip` | Prevents horizontal overflow flashes during `slide`, `drill`, and similar transitions |
-
-These are layout-shell classes, not route-marker classes. Put them on the
-element around `<Ssgoi>`, not on every page boundary.
-
-### 2. Add a named route boundary
-
-A React route boundary is a keyed DOM element marked with
-`data-ssgoi-transition`:
-
-```tsx
-<div key={boundary.key} data-ssgoi-transition={boundary.id}>
-  {children}
-</div>
-```
-
-The two values have different jobs:
-
-- Changing `key` tells React to unmount the old region and mount a new one.
-- `data-ssgoi-transition` gives SSGOI the route id used to match transition
-  rules.
-
-SSGOI observes that real mount/unmount lifecycle; it does not perform the route
-swap itself. The `SsgoiRouteBoundary` component may stay mounted in a common
-layout while its keyed DOM child is replaced. The legacy `<SsgoiTransition>`
-wrapper is deprecated because the attribute is the complete marker contract.
-
-For a small app, both values can be the pathname. For an app with persistent
-shells, keep route logic inside one resolver and let layouts select a semantic
-boundary name:
-
-```tsx
-// app/ssgoi-route-boundary.tsx
-"use client";
-
-import { type ReactNode } from "react";
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
-
-type BoundaryName = "app-shell" | "main-content" | "project-content";
-type BoundaryIdentity = { id: string; key: string };
-
-const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
-
-function isRouteGroup(segment: string) {
-  return segment.startsWith("(") && segment.endsWith(")");
-}
-
-function pathFromSegments(segments: string[]) {
-  const path = segments
-    .filter((segment) => !isRouteGroup(segment))
-    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
-    .filter(Boolean)
-    .join("/");
-
-  return path ? `/${path}` : null;
-}
-
-function resolveBoundary(
-  name: BoundaryName,
-  pathname: string,
-  segments: string[],
-): BoundaryIdentity {
-  // This is the route rendered by this boundary's children slot. During a
-  // soft-intercepted modal it remains the background route, unlike pathname.
-  const ownedRoute = pathFromSegments(segments) ?? pathname;
-
-  switch (name) {
-    case "app-shell": {
-      const routeGroup = segments.find(isRouteGroup);
-      if (routeGroup === "(main)") {
-        return { id: ownedRoute, key: "main-shell" };
-      }
-
-      const project = ownedRoute.match(/^\/projects\/[^/]+/)?.[0];
-      return { id: ownedRoute, key: project ?? ownedRoute };
-    }
-    case "project-content": {
-      const project = pathname.match(/^\/projects\/[^/]+/)?.[0];
-      const child = pathFromSegments(segments);
-      const id = project
-        ? child
-          ? `${project}${child}`
-          : project
-        : ownedRoute;
-      return { id, key: id };
-    }
-    case "main-content":
-      return { id: ownedRoute, key: ownedRoute };
-  }
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name,
-}: {
-  children: ReactNode;
-  name: BoundaryName;
-}) {
-  const pathname = usePathname();
-  const segments = useSelectedLayoutSegments("children");
-  const boundary = resolveBoundary(name, pathname, segments);
-
-  return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-      {children}
-    </div>
-  );
-}
-```
-
-`BoundaryName` and `resolveBoundary` are application code. They are not
-`@ssgoi/react` props. The important part is that layout files choose ownership
-by name instead of repeating ad hoc pathname/key functions.
-
-Exposing a `scope(pathname)` callback can express the same key mapping, but it
-is a low-level application pattern, not SSGOI API. A named resolver is the
-recommended default because it keeps route ownership consistent across
-layouts.
-
-```tsx
-// app/layout.tsx — replace the provider line from step 1.
-// This boundary spans (main), (detail), and standalone app routes.
-<SsgoiProvider>
-  <SsgoiRouteBoundary name="app-shell">
-    {children}
-  </SsgoiRouteBoundary>
-</SsgoiProvider>
-
-// app/(main)/layout.tsx — the nav is inside the app shell, outside this child.
-<>
-  <SsgoiRouteBoundary name="main-content">
-    {children}
-  </SsgoiRouteBoundary>
-  <BottomNav />
-</>
-
-// app/(detail)/projects/[id]/layout.tsx
-<>
-  <ProjectHeader />
-  <ProjectTabs />
-  <SsgoiRouteBoundary name="project-content">
-    {children}
-  </SsgoiRouteBoundary>
-</>
-```
-
-Main → main changes only the inner content boundary, so the bottom nav stays
-still. Main → detail changes the common app-shell key, so the whole main shell
-and its nav leave together. Project tab navigation keeps the current project
-base-path key and changes only the project content boundary.
-If parent and child leave together, SSGOI uses the outer changed boundary. Do
-not create a nested `<Ssgoi>`.
-
-With Next.js parallel or intercepting routes, `usePathname()` is the browser
-URL and may point at a modal while the boundary’s background `children` slot
-has not changed. The example resolves the owned route from
-`useSelectedLayoutSegments("children")`. If the layout owns an `@modal` slot
-and also needs an explicit flag,
-`useSelectedLayoutSegment("modal") !== null` tells you that the modal slot is
-active. A soft-intercepted modal therefore keeps the background key; opening
-the same URL directly resolves to the detail slot and gets a detail key.
-
-React Router and TanStack Router use the same key/id contract with their own
-router state. SvelteKit, Nuxt, SolidStart, and Qwik City normally mark route and
-persistent layout roots directly with `data-ssgoi-transition`; their routers
-already own the DOM lifetime.
-
-### Framework templates
-
-Use the templates as reference implementations for each router/framework:
-
-- [Next.js](https://github.com/meursyphus/ssgoi/tree/main/templates/nextjs)
-- [React Router](https://github.com/meursyphus/ssgoi/tree/main/templates/react-router)
-- [TanStack Router](https://github.com/meursyphus/ssgoi/tree/main/templates/tanstack-router)
-- [SolidStart](https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart)
-- [SvelteKit](https://github.com/meursyphus/ssgoi/tree/main/templates/sveltekit)
-- [Nuxt](https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt)
-- [Qwik City](https://github.com/meursyphus/ssgoi/tree/main/templates/qwik)
-
-The Next.js template uses a named resolver. React Router and TanStack Router
-use the same key/id contract with their router state. SolidStart, SvelteKit,
-Nuxt, and Qwik mark route and layout roots directly.
+That is enough for a simple app. Other frameworks use the same small boundary
+model with their own router state. For complete files, persistent layouts,
+nested boundaries, and framework-specific setup, see the
+[documentation](https://ssgoi.dev/docs/install).
 
 ---
 
-## Transitions
+## Compatibility
 
-Transition factories describe effects only. Route rules decide where an effect
-applies and resolve its semantic `forward` / `backward` direction.
+SSGOI depends on the broadly available Web Animations API instead of requiring
+the View Transition API.
 
-```tsx
-import {
-  fade,
-  drill,
-  slide,
-  scroll,
-  axis,
-  sheet,
-  hero,
-  zoom,
-} from "@ssgoi/react/view-transitions";
+| <img src="./apps/docs/public/logos/chrome.svg" alt="Chrome" width="36" /><br />Chrome 84+ | <img src="./apps/docs/public/logos/safari.svg" alt="Safari" width="36" /><br />Safari 13.1+ | <img src="./apps/docs/public/logos/firefox.svg" alt="Firefox" width="36" /><br />Firefox 75+ | <img src="./apps/docs/public/logos/edge.svg" alt="Edge" width="36" /><br />Edge 84+ |
+| :---------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
 
-const config = {
-  transitions: [
-    { from: "/", to: "/about", transition: fade() },
-    { from: "/products", to: "/products/*", transition: hero() },
-    {
-      from: "/gallery",
-      to: "/photo/*",
-      transition: zoom({ type: "expand" }),
-    },
-    { on: "/compose", transition: sheet() },
-    {
-      ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
-      transition: slide(),
-    },
-  ],
-};
-```
+These are core Web Animations API runtime targets. The blur types in Sheet and
+Zoom also use `backdrop-filter` (Firefox 103+); earlier Firefox keeps the
+transition, scale, and dimming but omits the backdrop blur.
 
-Rule forms:
+It observes the DOM lifecycle your framework already owns, so routing and SSR
+stay with your existing stack.
 
-- `on` scopes a route family. Entering it is forward, leaving it is backward,
-  and navigation inside it uses popstate/semantic history. Use `except` to keep
-  top-level routes outside a catch-all stack.
-- `from`/`to` describes a precise pair. It is bidirectional by default; arrays
-  mean “any of these patterns”.
-- `ordered` requires both routes to be in the list. Increasing index is forward
-  and decreasing index is backward.
-- Scroll behavior follows the relationship automatically. `on` and
-  `from`/`to` restore the forward `from` side and reset the forward `to` side;
-  `ordered` restores both sides. Override a rule with
-  `preserveScroll: { from: boolean, to: boolean }` only when needed. Reset or
-  restoration is applied when that side becomes the incoming page.
+| <img src="./apps/docs/public/logos/nextjs.svg" alt="Next.js" width="42" /><br />Next.js | <img src="./apps/docs/public/logos/react-router.svg" alt="React Router" width="42" /><br />React Router | <img src="./apps/docs/public/logos/tanstack.svg" alt="TanStack Router" width="42" /><br />TanStack Router | <img src="./apps/docs/public/logos/svelte.svg" alt="SvelteKit" width="42" /><br />SvelteKit | <img src="./apps/docs/public/logos/nuxt.svg" alt="Nuxt" width="42" /><br />Nuxt |
+| :-----------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
 
-These selectors work with every effect; the usual convention is `drill` and
-`sheet` with `on`, `slide`/`axis`/directional `scroll` with `ordered`, and
-`zoom`/`hero` with `from`/`to`.
+React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
 
-Higher `priority` wins first, then more-specific paths, then declaration order.
-Inside a path, `*` matches exactly one arbitrary segment (`/photo/*`); suffix
-`**` matches zero or more (`/docs/**` includes `/docs`). A bare `*` remains a
-compatibility alias for `/**`. Named single-segment forms remain supported and
-rank above `*` when rules overlap, but their names are not captured or exposed.
-
-**All built-in transitions:** `fade` · `drill` · `slide` · `scroll` · `axis` · `sheet` · `hero` · `zoom` · `strip` · `blind` · `film` · `rotate` · `jaemin`.
-
-See them all live at [ssgoi.dev](https://ssgoi.dev) or in [llms.txt](https://ssgoi.dev/llms.txt).
+[See complete compatibility and framework guides →](https://ssgoi.dev/docs/compatibility)
 
 ---
 
-## Packages
+## Why SSGOI doesn't use the View Transition API
 
-| Package          | Framework                 |
-| ---------------- | ------------------------- |
-| `@ssgoi/react`   | React, Next.js            |
-| `@ssgoi/svelte`  | Svelte, SvelteKit         |
-| `@ssgoi/vue`     | Vue, Nuxt                 |
-| `@ssgoi/solid`   | Solid, SolidStart         |
-| `@ssgoi/angular` | Angular                   |
-| `@ssgoi/qwik`    | Qwik, Qwik City           |
-| `@ssgoi/core`    | Framework-agnostic engine |
+SSGOI owns the geometry, temporary visual layers, live outgoing DOM, and
+navigation policy needed to turn complex motion into reusable presets.
 
----
+|                                                                      Zoom                                                                       |                                                              Film                                                               |                                                                    Sheet                                                                    |
+| :---------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+| <img src="./apps/docs/public/blog/view-transition-api-limitations/zoom-blur.gif" alt="Zoom transition that transforms and clips a detail page around its image" width="240" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/film.gif" alt="Film transition with runtime visual pieces and multiple springs" width="320" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition with a live backdrop between two pages" width="240" /> |
+|                   The whole detail page unfolds from its image                    |                           Runtime scene, live video, and multiple springs                           |                         A live backdrop sits between the two pages                          |
 
-## Documentation
-
-**[ssgoi.dev](https://ssgoi.dev)** — Full docs, interactive examples, and API reference.
-**[ssgoi.dev/llms.txt](https://ssgoi.dev/llms.txt)** — Plain-text setup guide for AI assistants.
+[Read why SSGOI doesn't use the View Transition API →](https://ssgoi.dev/blog/view-transition-api-limitations)
 
 ---
 
 ## License
 
-MIT © [MeurSyphus](https://github.com/meursyphus)
+[MIT Licensed](./LICENSE) © [MeurSyphus](https://github.com/meursyphus)

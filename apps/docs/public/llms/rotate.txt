@@ -1,30 +1,3 @@
-# SSGOI - rotate transition
+# SSGOI rotate transition moved
 
-Card flip. Outgoing rotates 180° around the center and fades; incoming counter-rotates in from -180° while fading in. Playful, decisive — good for **sibling pages** where a flip metaphor fits (e.g. card front/back, two views of the same thing).
-
-Setup guide: https://ssgoi.dev/llms.txt
-
-## Behavior
-
-Both pages rotate around the Z axis simultaneously. Opacity is keyed to rotation so they don't visually overlap mid-flip.
-
-## Signature
-
-```ts
-import { rotate } from "@ssgoi/react/view-transitions";
-
-rotate({
-  variant?: "default";        // reserved — only "default" today
-  options?: {};               // reserved — no fields yet
-}): TransitionConfig;
-```
-
-## Usage
-
-```ts
-const config = {
-  transitions: [
-    { from: "/card/front", to: "/card/back", transition: rotate() },
-  ],
-};
-```
+Current spec: https://ssgoi.dev/llms/transitions/rotate.txt

@@ -1,0 +1,106 @@
+# SSGOI with Qwik City
+
+Qwik serializes component state, while transition configs contain functions.
+Expose the config through a QRL factory.
+
+```bash
+npm install @ssgoi/qwik
+```
+
+Shell class strings below are Tailwind shorthand. Without Tailwind, apply
+`position:relative; z-index:0; min-height:100vh; overflow-x:hidden`; use
+`100dvh` and `overflow-x:clip` as progressive upgrades.
+
+```tsx
+// src/lib/ssgoi-config.ts
+import { $ } from "@builder.io/qwik";
+import { drill } from "@ssgoi/qwik/view-transitions";
+
+export const config$ = $(() => ({
+  transitions: [
+    { on: "/posts/**", except: "/posts", transition: drill() },
+  ],
+}));
+```
+
+Attach SSGOI to the element that directly owns `<Slot />`.
+
+```tsx
+// src/routes/layout.tsx
+import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { useSsgoi } from "@ssgoi/qwik";
+import { config$ } from "../lib/ssgoi-config";
+
+export default component$(() => {
+  const root = useSignal<HTMLElement>();
+  useSsgoi(root, { config$ });
+
+  return (
+    <main
+      ref={root}
+      class="relative z-0 min-h-dvh overflow-x-clip"
+    >
+      <Slot />
+    </main>
+  );
+});
+```
+
+## Page boundary
+
+```tsx
+// src/routes/posts/index.tsx
+import { component$ } from "@builder.io/qwik";
+
+export default component$(() => (
+  <article data-ssgoi-transition="/posts">{/* page */}</article>
+));
+
+// src/routes/posts/[id]/index.tsx
+import { component$ } from "@builder.io/qwik";
+import { useLocation } from "@builder.io/qwik-city";
+
+export default component$(() => {
+  const location = useLocation();
+  const id = location.params.id;
+
+  return (
+    <article key={id} data-ssgoi-transition={`/posts/${id}`}>
+      {/* detail page */}
+    </article>
+  );
+});
+```
+
+The key forces an OUT/IN remount when Qwik City reuses the same route component
+for `/posts/1` → `/posts/2`. Changing only the marker on the same element is
+not a transition boundary change.
+
+## Persistent layout
+
+A Qwik City route layout may own an outer boundary:
+
+```tsx
+import { Slot, component$ } from "@builder.io/qwik";
+import { useLocation } from "@builder.io/qwik-city";
+
+export default component$(() => {
+  const location = useLocation();
+
+  return (
+    <section data-ssgoi-transition={location.url.pathname}>
+      <header>{/* persistent tabs */}</header>
+      <Slot />
+    </section>
+  );
+});
+```
+
+Keep child page boundaries for tab changes. Do not add another SSGOI root.
+
+## Reference
+
+- Shared config and route patterns: https://ssgoi.dev/llms/route-rules.txt
+- Qwik template: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/qwik
+- Transition catalog: https://ssgoi.dev/llms/transitions.txt
+- Framework index: https://ssgoi.dev/llms/frameworks.txt

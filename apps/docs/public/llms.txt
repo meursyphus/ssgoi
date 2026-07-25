@@ -1,18 +1,54 @@
 # SSGOI setup guide
 
-SSGOI adds route transitions without replacing the application router.
+SSGOI adds native app-like page transitions for mobile web apps without
+replacing the application router.
+
+Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
 
 Current core version: `@ssgoi/core@7.0.0-beta.2`
 
-This file is the React/Next.js setup plus an index. Deep topics live in their
-own files — fetch one only when its topic applies:
+This file contains the minimal React and Next.js setup. Read linked files only
+when their topic applies.
 
-- Effect options and variants: `https://ssgoi.dev/llms/<effect>.txt` (table below)
-- Persistent nav / complex routing: https://ssgoi.dev/llms/bottom-nav.txt
-- Other frameworks: `https://ssgoi.dev/llms/<framework>.txt` (table below)
-- Mechanism and debugging: https://ssgoi.dev/llms/how-it-works.txt
+## Choose a mobile interaction
 
-## Setup
+Start with the UX relationship, then open the linked transition spec for props
+and a focused example.
+
+| UX | transition | route rule | spec |
+| --- | --- | --- | --- |
+| list → detail, drill deeper | `drill()` | `on` + `except` | https://ssgoi.dev/llms/transitions/drill.txt |
+| compose, filters, temporary task | `sheet()` | `on` | https://ssgoi.dev/llms/transitions/sheet.txt |
+| ordered tabs or steps | `slide()` | `ordered` | https://ssgoi.dev/llms/transitions/slide.txt |
+| card or image → detail | `zoom()` | `from` / `to` | https://ssgoi.dev/llms/transitions/zoom.txt |
+
+Representative mobile config:
+
+```ts
+import { drill, sheet } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [
+    // A detail route drills in; returning to the list drills out.
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+
+    // A temporary task rises above the current page.
+    {
+      on: "/compose",
+      transition: sheet({ type: "blur" }),
+    },
+  ],
+};
+```
+
+For variants and more effects, open the transition catalog:
+https://ssgoi.dev/llms/transitions.txt
+
+## Minimal React and Next.js setup
 
 ### 1. Install
 
@@ -20,10 +56,9 @@ own files — fetch one only when its topic applies:
 npm install @ssgoi/react
 ```
 
-### 2. Provider
+### 2. Provider and config
 
-One config, one `<Ssgoi>`, above all routed content. One rule is enough to
-start:
+Keep one config and one `<Ssgoi>` above routed content:
 
 ```tsx
 // app/ssgoi-provider.tsx
@@ -42,51 +77,18 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-`transitions` also accepts `({ isMobile }) => rules` to branch mobile/desktop:
+To select different rules for mobile and desktop:
 
 ```ts
 transitions: ({ isMobile }) =>
   isMobile
     ? [{ on: "/**", except: "/", transition: drill() }]
-    : [{ priority: -100, on: "/**", transition: fade() }],
+    : [{ on: "/**", except: "/", transition: drill({ type: "slide" }) }],
 ```
 
-Scroll behavior is derived from each matched rule. The automatic policy and
-exact override are covered in Scroll restoration and middleware below.
+### 3. Route boundary
 
-### 3. Layout shell
-
-```tsx
-// app/layout.tsx
-import { type ReactNode } from "react";
-import { SsgoiProvider } from "./ssgoi-provider";
-
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        <main className="relative z-0 min-h-dvh overflow-x-clip">
-          <SsgoiProvider>{children}</SsgoiProvider>
-        </main>
-      </body>
-    </html>
-  );
-}
-```
-
-The three classes are required, on the element around `<Ssgoi>`:
-
-| class | role |
-| --- | --- |
-| `relative` | containing block for the leaving page (re-inserted with `position: absolute`) |
-| `z-0` | stacking context so the leaving page stays above the shell background |
-| `overflow-x-clip` | no horizontal scrollbar flash during slide/drill-style motion |
-
-Mechanism: https://ssgoi.dev/llms/how-it-works.txt
-
-### 4. Route boundary
-
-The base pattern — pathname as both React key and transition id:
+For a simple app, use the pathname as both the React key and transition id:
 
 ```tsx
 // app/ssgoi-route-boundary.tsx
@@ -104,184 +106,103 @@ export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-// app/layout.tsx — wrap the provider's children
-<SsgoiProvider>
-  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-</SsgoiProvider>
 ```
 
-The principle: a changed `key` makes React unmount the routed region and mount
-the new one — that unmount/mount pair is what SSGOI animates.
-`data-ssgoi-transition` is the id that rules match. Put the boundary once in a
-layout and every navigation under it transitions.
+### 4. Layout
 
-(Deprecated: `<SsgoiTransition>` only rendered this attribute — set it
-directly.)
+```tsx
+// app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
 
-### 5. Verify
-
-1. Navigate `/` → any page: the new page slides in from the right.
-2. Navigate back: it slides back out.
-3. No animation, or the wrong region moves → Troubleshooting below.
-
-## Choosing transitions
-
-One row = one decision: the effect, the rule form to write it with, and the
-file with full options and variants.
-
-| UX intent | transition | rule form | options |
-| --- | --- | --- | --- |
-| default / unrelated pages | `fade()` | `priority: -100, on: "/**"` | https://ssgoi.dev/llms/fade.txt |
-| list → detail, drilling deeper | `drill()` | `on` + `except` | https://ssgoi.dev/llms/drill.txt |
-| tabs / steps with left-right order | `slide()` | `ordered` | https://ssgoi.dev/llms/slide.txt |
-| sibling pages, Material shared-axis | `axis()` | `ordered` | https://ssgoi.dev/llms/axis.txt |
-| compose / filters / modal-like route | `sheet()` | `from`/`to` | https://ssgoi.dev/llms/sheet.txt |
-| card or image expands to detail | `zoom()` | `from`/`to` | https://ssgoi.dev/llms/zoom.txt |
-| shared element across two pages | `hero()` | `from`/`to` | https://ssgoi.dev/llms/hero.txt |
-| vertical sequence / editorial paging | `scroll()` | `ordered` | https://ssgoi.dev/llms/scroll.txt |
-
-Stylistic effects (any rule form): `film`, `strip`, `rotate`, `blind`,
-`jaemin` — each at `https://ssgoi.dev/llms/<name>.txt`.
-
-## Route rules
-
-| form | meaning | direction |
-| --- | --- | --- |
-| `on` (+ `except`) | route family | entering = forward, leaving = backward |
-| `from` / `to` | exact pair | as written = forward; reversed by default |
-| `ordered: [...]` | both routes in the list | increasing index = forward |
-
-| pattern | matches |
-| --- | --- |
-| `/posts` | exactly `/posts` |
-| `/posts/*` | exactly one extra segment |
-| `/posts/**` | `/posts` and every descendant |
-
-`priority`: higher wins before path specificity; ties resolve by specificity,
-then declaration order. A bare `*` is a compatibility alias for `/**`.
-
-## Persistent nav and complex routing
-
-The situation: some pages share a bottom nav, some don't. Tab → tab must keep
-the nav still; tab → detail must send the nav away with the page.
-
-```text
-app/
-  layout.tsx                 # one provider + outer "app-shell" boundary
-  (main)/
-    layout.tsx               # inner content boundary + the common BottomNav
-    page.tsx  collections/page.tsx  create/page.tsx
-  (detail)/
-    photo/[id]/page.tsx      # no nav
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <main className="relative z-0 min-h-dvh overflow-x-clip">
+          <SsgoiProvider>
+            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+          </SsgoiProvider>
+        </main>
+      </body>
+    </html>
+  );
+}
 ```
 
-The pathname-keyed boundary can't do this — its key changes on every
-navigation, so the nav remounts every time. What to achieve instead is a key
-scope:
+The class string above is Tailwind shorthand. Without Tailwind, apply
+`position: relative; z-index: 0; min-height: 100vh; overflow-x: hidden` to the
+shell; use `100dvh` and `overflow-x: clip` as progressive upgrades.
 
-- The boundary `id` is always the real route.
-- The outer boundary's `key` stays constant (e.g. `"main-shell"`) while the
-  route is inside `(main)` — tab → tab keeps the shell and nav mounted — and
-  falls back to the pathname outside it, so entering or leaving the shell
-  transitions the whole shell, nav included.
-- An inner boundary keyed on the pathname sits above the nav and owns
-  tab → tab transitions.
+That is the complete simple setup.
 
-```text
-┌─ outer boundary (key: "main-shell" inside (main)) ─────┐
-│  ┌─ inner boundary (key: pathname) ─────────────────┐  │
-│  │  tab page                                        │  │
-│  └──────────────────────────────────────────────────┘  │
-│  BottomNav (persistent, outside the inner boundary)    │
-└────────────────────────────────────────────────────────┘
+Browser note: the listed compatibility target is for the core Web Animations
+API runtime. `sheet({ type: "blur" })` and `zoom({ type: "blur" })` also use
+`backdrop-filter` (Firefox 103+). Earlier Firefox keeps the transition, scale,
+and dimming but omits the backdrop blur.
 
-tab → tab     : inner boundary remounts · nav stays
-tab → detail  : outer boundary remounts · nav leaves with it
-detail → tab  : outer boundary re-enters with the nav
-```
+SSGOI also chooses scroll reset or restoration from the matched UX
+relationship:
 
-Full pattern — resolver code, modal/intercepted routes, pitfalls:
-https://ssgoi.dev/llms/bottom-nav.txt
+- `from` / `to` restores the forward source and resets the destination.
+- `on` does the same when navigation crosses the scope boundary. Navigation
+  between two paths already inside the same `on` scope treats both as semantic
+  `to` and resets both by default. For stack UX, use `except` to keep the source
+  outside the scope.
+- `ordered` restores both sides.
 
-## Scroll restoration and middleware
+Override one rule with `preserveScroll` only when the default does not fit.
+Details: https://ssgoi.dev/llms/scroll-restoration.txt
 
-Scroll behavior follows the matched route relationship automatically:
+Complete Next.js guide:
+https://ssgoi.dev/llms/frameworks/nextjs.txt
 
-- `on`: restore the forward `from` side outside the scope; reset the `to` side
-  matched by `on`.
-- `from`/`to`: restore `from`; reset `to`.
-- `ordered`: restore both sides.
+## Route rules in one minute
 
-The policy is chosen per navigation, so the same path can restore under one
-rule and reset under another. The outgoing page always keeps its current scroll
-through its OUT animation. Reset or restoration happens only when a page
-becomes IN.
+Transitions describe motion. Route rules describe the navigation relationship:
 
 ```ts
 const config = {
-  // rewrite (from, to) before rule matching, e.g. strip a locale prefix
-  middleware: (from, to) => ({
-    from: from.replace(/^\/(en|ko)/, ""),
-    to: to.replace(/^\/(en|ko)/, ""),
-  }),
   transitions: [
+    // Entering the scope is forward; leaving is backward.
+    { on: "/posts/**", except: "/posts", transition: drill() },
+
+    // The written pair is forward; the reverse is backward.
+    { from: "/gallery", to: "/photo/*", transition: zoom() },
+
+    // Increasing index is forward; decreasing index is backward.
     {
-      on: "/posts/**",
-      except: "/posts",
-      transition: drill(),
-    },
-    {
-      ordered: ["/tabs/feed", "/tabs/search", "/tabs/profile"],
+      ordered: ["/tabs/home", "/tabs/search", "/tabs/profile"],
       transition: slide(),
-    },
-    // Exact override: preserve both sides of this pair.
-    {
-      from: "/gallery",
-      to: "/photo/*",
-      preserveScroll: { from: true, to: true },
-      transition: zoom(),
     },
   ],
 };
 ```
 
-`preserveScroll.from` and `.to` always describe the rule's semantic forward
-relationship. Backward navigation reverses their physical OUT/IN mapping. For
-an `on` rule, paths outside the scope are semantic `from`, paths inside are
-semantic `to`, and an inside-to-inside navigation applies `to` to both pages.
-Use `preserveScroll: { from: boolean, to: boolean }` only to replace the
-automatic policy. For `ordered`, the lower-index side is semantic `from` and
-the higher-index side is semantic `to`. There is no separate mobile scroll
-default; a functional `transitions({ isMobile })` config simply supplies the
-active rules whose policies are resolved.
+- `on` selects a route or route family.
+- `except` removes paths from an `on` scope.
+- `from` / `to` defines a precise pair, bidirectional by default. Set
+  `bidirectional: false` for a one-way pair.
+- `ordered` derives direction from path order.
 
-## Other frameworks
+Wildcards, arrays, priority, matching order, and mobile/desktop configs:
+https://ssgoi.dev/llms/route-rules.txt
 
-Each guide is self-contained — install through verify:
+## Read next
 
-| framework | package | guide |
-| --- | --- | --- |
-| React Router | `@ssgoi/react` | https://ssgoi.dev/llms/react-router.txt |
-| TanStack Router | `@ssgoi/react` | https://ssgoi.dev/llms/tanstack-router.txt |
-| SvelteKit | `@ssgoi/svelte` | https://ssgoi.dev/llms/svelte.txt |
-| Nuxt / Vue | `@ssgoi/vue` | https://ssgoi.dev/llms/vue.txt |
-| SolidStart | `@ssgoi/solid` | https://ssgoi.dev/llms/solid.txt |
-| Qwik City | `@ssgoi/qwik` | https://ssgoi.dev/llms/qwik.txt |
-| Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/angular.txt |
-
-## Troubleshooting
-
-- No animation: both routes inside one `<Ssgoi>`; both DOM nodes carry
-  `data-ssgoi-transition`; a rule matches both paths.
-- Wrong region animates: find the nearest boundary whose key changed; keep
-  persistent UI outside the inner boundary; fix the key scope so routes in
-  the same shell share a key.
-- Jumps or flickers: shell classes from Setup 3; full-height background on
-  route boundaries.
-
-Mechanism deep-dive: https://ssgoi.dev/llms/how-it-works.txt
+| Need | Read |
+| --- | --- |
+| choose or configure a transition | https://ssgoi.dev/llms/transitions.txt |
+| use another framework or router | https://ssgoi.dev/llms/frameworks.txt |
+| understand automatic scroll behavior or middleware | https://ssgoi.dev/llms/scroll-restoration.txt |
+| keep a bottom nav, intercepted background, or dynamic project shell persistent | https://ssgoi.dev/llms/complex-routing.txt |
+| diagnose a broken transition | https://ssgoi.dev/llms/troubleshooting.txt |
+| understand boundaries and the DOM lifecycle | https://ssgoi.dev/llms/how-it-works.txt |
+| verify browser and framework compatibility | https://ssgoi.dev/docs/compatibility |
+| understand the product-level reasons before implementation | https://ssgoi.dev/docs/why-ssgoi |
+| understand why SSGOI does not use the View Transition API | https://ssgoi.dev/docs/view-transition-api |
+| read the license | MIT — https://github.com/meursyphus/ssgoi/blob/HEAD/LICENSE |
 
 Runnable templates:
-https://github.com/meursyphus/ssgoi/tree/main/templates
-(nextjs · react-router · tanstack-router · sveltekit · nuxt · solidstart · qwik)
+https://github.com/meursyphus/ssgoi/tree/HEAD/templates

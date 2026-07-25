@@ -45,6 +45,7 @@ export default async function FrameworkDocPage({
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
+          { name: "Frameworks", path: "/docs/frameworks" },
           { name: doc.name, path: `/docs/frameworks/${doc.slug}` },
         ])}
       />

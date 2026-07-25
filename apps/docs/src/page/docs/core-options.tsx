@@ -120,8 +120,8 @@ logical       /posts/42    ──▶ /posts
         language="ts"
         code={`const config = {
   middleware: (from, to) => ({
-    from: from.replace(/^\\/(en|ko)/, ""),
-    to: to.replace(/^\\/(en|ko)/, ""),
+    from: from.replace(/^\\/(en|ko)(?=\\/|$)/, ""),
+    to: to.replace(/^\\/(en|ko)(?=\\/|$)/, ""),
   }),
   transitions: [
     {

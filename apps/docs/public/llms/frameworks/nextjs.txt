@@ -1,0 +1,87 @@
+# SSGOI with React and Next.js
+
+Use one provider above routed content and keep the pathname boundary in a
+separate client component.
+
+Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+## Install
+
+```bash
+npm install @ssgoi/react
+```
+
+Shell class strings below are Tailwind shorthand. Without Tailwind, apply
+`position:relative; z-index:0; min-height:100vh; overflow-x:hidden`; use
+`100dvh` and `overflow-x:clip` as progressive upgrades.
+
+## Provider
+
+```tsx
+// app/ssgoi-provider.tsx
+"use client";
+
+import { type ReactNode } from "react";
+import { Ssgoi } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
+export function SsgoiProvider({ children }: { children: ReactNode }) {
+  return <Ssgoi config={config}>{children}</Ssgoi>;
+}
+```
+
+## Route boundary
+
+```tsx
+// app/ssgoi-route-boundary.tsx
+"use client";
+
+import { type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <div key={pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}
+```
+
+## Layout
+
+```tsx
+// app/layout.tsx
+import { type ReactNode } from "react";
+import { SsgoiProvider } from "./ssgoi-provider";
+import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <main className="relative z-0 min-h-dvh overflow-x-clip">
+          <SsgoiProvider>
+            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+          </SsgoiProvider>
+        </main>
+      </body>
+    </html>
+  );
+}
+```
+
+For persistent layouts, parallel routes, or intercepting routes:
+https://ssgoi.dev/llms/complex-routing.txt
+
+Transition catalog:
+https://ssgoi.dev/llms/transitions.txt
+
+Runnable template:
+https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs

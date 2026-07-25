@@ -1,0 +1,461 @@
+# SSGOI complex routing and persistent layouts
+
+Use this pattern when a Next.js App Router application has persistent chrome,
+route groups, parallel routes, or intercepted routes. Keep one `<Ssgoi>` and one
+config. Add named boundaries only where routed DOM lifetimes differ.
+
+## Target behavior
+
+| Case | React lifetime | SSGOI result |
+| --- | --- | --- |
+| Top-level tab → tab | outer shell stays; inner content remounts | animate content; keep BottomNav still |
+| Top-level tab → generic detail | outer shell remounts | animate the whole shell; BottomNav leaves |
+| Same-project child → child | project shell stays; child swaps normally | no page transition |
+| Soft intercepted modal | background `children` slot stays | keep background state; render `@modal` above it |
+
+`key` and `data-ssgoi-transition` are independent:
+
+- `key` controls the React lifetime. A changed key unmounts the old routed
+  region and mounts the next one.
+- `data-ssgoi-transition` is the logical route id matched by SSGOI config.
+- A persistent shell may share one key across routes, but its id must remain the
+  real route.
+
+## Production route shape
+
+Route groups control layout lifetime without changing the public URL. Parallel
+slots belong to the layout that renders them.
+
+```text
+app/
+└─ (app)/
+   ├─ layout.tsx                         # one provider + outer app-shell
+   ├─ (top-level)/
+   │  ├─ layout.tsx                      # main-content + BottomNav + @modal
+   │  ├─ projects/page.tsx               # /projects
+   │  ├─ showcase/page.tsx               # /showcase
+   │  ├─ comwit-log/page.tsx             # /comwit-log
+   │  ├─ profile/page.tsx                # /profile
+   │  └─ @modal/
+   │     ├─ default.tsx
+   │     ├─ (.)p/[id]/page.tsx           # soft /p/:id
+   │     └─ (.)new/page.tsx              # soft /new
+   └─ (detail)/
+      ├─ p/[id]/page.tsx                 # direct /p/:id
+      └─ projects/[id]/
+         ├─ layout.tsx                   # persistent project header + tabs
+         ├─ page.tsx
+         ├─ members/page.tsx
+         ├─ board/
+         │  ├─ layout.tsx
+         │  └─ @taskSidebar/...
+         └─ docs/
+            ├─ layout.tsx
+            ├─ [docId]/page.tsx
+            └─ @docSidebar/...
+```
+
+## 1. One config
+
+The route ids below are public URLs, not layout keys:
+
+```tsx
+// app/ssgoi-config.ts
+import type { SsgoiConfig, SsgoiTransitionRule } from "@ssgoi/react";
+import { axis, drill, sheet } from "@ssgoi/react/view-transitions";
+
+const TOP_LEVEL = [
+  "/projects",
+  "/showcase",
+  "/comwit-log",
+  "/profile",
+] as const;
+
+const mobileTransitions = [
+  {
+    ordered: TOP_LEVEL,
+    transition: axis({ type: "x", variant: "snappy" }),
+  },
+  {
+    on: ["/new", "/projects/new"],
+    transition: sheet({ type: "static" }),
+  },
+  {
+    priority: -100,
+    on: "/**",
+    except: ["/", "/*"],
+    transition: drill(),
+  },
+] satisfies readonly SsgoiTransitionRule[];
+
+export const ssgoiConfig = {
+  transitions: ({ isMobile }) => (isMobile ? mobileTransitions : []),
+} satisfies SsgoiConfig;
+```
+
+## 2. Centralize the dynamic key resolver
+
+Layouts choose a semantic boundary name. The resolver alone decides the
+logical route id and React key.
+
+```tsx
+// app/ssgoi-boundary-definition.ts
+export type BoundaryName = "app-shell" | "main-content";
+
+export type NavigationState = {
+  pathname: string;
+  selectedSegments: string[];
+};
+
+export type ResolvedBoundary = {
+  id: string;
+  key: string;
+};
+
+const MAIN_SHELL_KEY = "ssgoi-app-main";
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+export function resolveBoundary(
+  name: BoundaryName,
+  navigation: NavigationState,
+): ResolvedBoundary {
+  return name === "app-shell"
+    ? resolveAppShell(navigation)
+    : resolveMainContent(navigation);
+}
+
+function resolveAppShell({
+  pathname,
+  selectedSegments,
+}: NavigationState): ResolvedBoundary {
+  const id =
+    selectedSegments.length > 0
+      ? selectedSegmentsToPath(selectedSegments)
+      : pathname;
+  const routeGroup = selectedSegments.find(isRouteGroup);
+
+  if (routeGroup === "(top-level)") {
+    return { id, key: MAIN_SHELL_KEY };
+  }
+
+  const projectBasePath =
+    routeGroup === "(detail)" ? getProjectBasePath(id) : null;
+
+  return {
+    id,
+    key: projectBasePath ?? id,
+  };
+}
+
+function resolveMainContent({
+  pathname,
+  selectedSegments,
+}: NavigationState): ResolvedBoundary {
+  const firstRouteSegment = selectedSegments
+    .filter((segment) => !isRouteGroup(segment))
+    .map(normalizeRouteSegment)
+    .find(Boolean);
+  const id = firstRouteSegment ? `/${firstRouteSegment}` : pathname;
+
+  return { id, key: id };
+}
+
+function selectedSegmentsToPath(segments: string[]): string {
+  const routeSegments = segments
+    .filter((segment) => !isRouteGroup(segment))
+    .map(normalizeRouteSegment)
+    .filter(Boolean);
+
+  return routeSegments.length > 0 ? `/${routeSegments.join("/")}` : "/";
+}
+
+function isRouteGroup(segment: string): boolean {
+  return segment.startsWith("(") && segment.endsWith(")");
+}
+
+function normalizeRouteSegment(segment: string): string {
+  return segment.replace(INTERCEPTION_PREFIX, "");
+}
+
+function getProjectBasePath(pathname: string): string | null {
+  return pathname.match(/^\/projects\/[^/]+/)?.[0] ?? null;
+}
+```
+
+Why each key is scoped this way:
+
+- Every `(top-level)` route shares `ssgoi-app-main`, so the outer shell and
+  BottomNav remain mounted across tab navigation.
+- A generic `(detail)` route uses its full route id as key, so entering or
+  leaving it replaces the whole outer shell.
+- Every child below `/projects/:id` uses `/projects/:id` as the outer key, so
+  the project header, tabs, state, and loaded context persist.
+- The id always stays equal to the full route owned by the boundary.
+
+## 3. Read the owned `children` slot
+
+`usePathname()` is the browser URL. During a soft interception it points at the
+modal route even though the background `children` slot did not change.
+`useSelectedLayoutSegments("children")` reports the route tree owned by the
+background boundary and distinguishes soft interception from direct entry.
+
+```tsx
+// app/ssgoi-route-boundary.tsx
+"use client";
+
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import type { ReactNode } from "react";
+
+import {
+  resolveBoundary,
+  type BoundaryName,
+} from "./ssgoi-boundary-definition";
+
+export function SsgoiRouteBoundary({
+  children,
+  name,
+}: {
+  children: ReactNode;
+  name: BoundaryName;
+}) {
+  const pathname = usePathname() ?? "";
+  const selectedSegments = useSelectedLayoutSegments("children");
+  const boundary = resolveBoundary(name, {
+    pathname,
+    selectedSegments,
+  });
+
+  return (
+    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
+      {children}
+    </div>
+  );
+}
+```
+
+Do not replace `selectedSegments` with a parsed pathname. The URL and the
+background slot intentionally disagree during a soft intercepted modal.
+
+## 4. Mount one provider above both route groups
+
+```tsx
+// app/app-transitions.tsx
+"use client";
+
+import { Ssgoi } from "@ssgoi/react";
+import type { ReactNode } from "react";
+
+import { ssgoiConfig } from "./ssgoi-config";
+import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
+
+export function AppTransitions({ children }: { children: ReactNode }) {
+  return (
+    <main className="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={ssgoiConfig}>
+        <SsgoiRouteBoundary name="app-shell">
+          {children}
+        </SsgoiRouteBoundary>
+      </Ssgoi>
+    </main>
+  );
+}
+```
+
+```tsx
+// app/(app)/layout.tsx
+import type { ReactNode } from "react";
+import { AppTransitions } from "../app-transitions";
+
+export default function AppLayout({ children }: { children: ReactNode }) {
+  return <AppTransitions>{children}</AppTransitions>;
+}
+```
+
+The shell classes matter. SSGOI temporarily reinserts the live outgoing page
+DOM with absolute positioning: `relative` provides its containing block, `z-0`
+provides a local stacking context, and `overflow-x-clip` prevents horizontal
+flashes.
+
+Do not create another `<Ssgoi>` in `(top-level)`, `(detail)`, a project layout,
+or a parallel slot.
+
+## 5. Keep BottomNav between the two boundaries
+
+```tsx
+// app/(app)/(top-level)/layout.tsx
+import type { ReactNode } from "react";
+import { BottomNav } from "./bottom-nav";
+import { SsgoiRouteBoundary } from "../../ssgoi-route-boundary";
+
+export default function TopLevelLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode;
+  modal: ReactNode;
+}) {
+  return (
+    <>
+      <SsgoiRouteBoundary name="main-content">
+        {children}
+      </SsgoiRouteBoundary>
+      <BottomNav />
+      {modal}
+    </>
+  );
+}
+```
+
+The outer `app-shell` includes the tab content and BottomNav. The inner
+`main-content` includes only the active tab page:
+
+```text
+app-shell
+├─ main-content
+│  └─ active tab
+├─ BottomNav
+└─ @modal
+```
+
+- Tab → tab: the outer key stays; the inner key changes; BottomNav stays.
+- Tab → detail: the outer key changes; the entire top-level shell leaves.
+- If parent and child boundaries leave in the same DOM mutation, SSGOI uses the
+  outer changed boundary. A child owns motion only while its parent stays.
+
+## 6. Keep the project shell, swap its child immediately
+
+```tsx
+// app/(app)/(detail)/projects/[id]/layout.tsx
+import type { ReactNode } from "react";
+import { ProjectShell } from "./project-shell";
+
+export default function ProjectLayout({ children }: { children: ReactNode }) {
+  return <ProjectShell>{children}</ProjectShell>;
+}
+```
+
+Do not add a marked boundary around `children` when project tabs should switch
+without page motion. The outer resolver shares `/projects/:id` as the React key,
+so the project shell persists. Its data transition id still updates to the full
+active path. Next.js replaces the immediate child normally, and SSGOI does not
+run a page transition because no marked boundary left and entered.
+
+If animated project tabs become a product requirement, add one inner boundary
+around only `children`, below the persistent header and tabs. Keep the same
+provider.
+
+## 7. Intercepted modal versus direct entry
+
+For a soft navigation from `/projects` to `/p/42`:
+
+```text
+usePathname()                              → /p/42
+useSelectedLayoutSegments("children")      → ["(top-level)", "projects"]
+app-shell id / key                         → /projects / ssgoi-app-main
+rendered parallel slot                     → @modal/(.)p/[id]
+```
+
+The background boundary remains mounted, preserving its scroll and state. The
+parallel modal is its sibling, not a replacement for the background child.
+
+For a hard load or direct navigation to the same `/p/42` URL:
+
+```text
+usePathname()                              → /p/42
+useSelectedLayoutSegments("children")      → ["(detail)", "p", "42"]
+app-shell id / key                         → /p/42 / /p/42
+rendered route                             → (detail)/p/[id]
+```
+
+The same URL now correctly renders as a full-page detail because the owned
+`children` slot is different.
+
+Normalize interception prefixes such as `(.)`, `(..)`, and `(...)` before
+building a route id. Ignore route-group segments because they are not part of
+the public URL.
+
+## Route matrix
+
+| Case | Browser URL | selected `children` segments | app-shell id | app-shell key | Changed boundary |
+| --- | --- | --- | --- | --- | --- |
+| top-level tab | `/projects` | `(top-level), projects` | `/projects` | `ssgoi-app-main` | inner `main-content` on tab change |
+| generic detail | `/p/42` | `(detail), p, 42` | `/p/42` | `/p/42` | outer `app-shell` |
+| same-project child | `/projects/acme/docs` | `(detail), projects, acme, docs` | `/projects/acme/docs` | `/projects/acme` | none; immediate child swap |
+| soft intercepted modal | `/p/42` | `(top-level), projects` | `/projects` | `ssgoi-app-main` | none in background |
+
+## Verification
+
+Unit-test the pure resolver separately from React and the router:
+
+```tsx
+expect(
+  resolveBoundary("app-shell", {
+    pathname: "/showcase",
+    selectedSegments: ["(top-level)", "showcase"],
+  }).key,
+).toBe("ssgoi-app-main");
+
+expect(
+  resolveBoundary("app-shell", {
+    pathname: "/p/42",
+    selectedSegments: ["(detail)", "p", "42"],
+  }),
+).toEqual({ id: "/p/42", key: "/p/42" });
+
+expect(
+  resolveBoundary("app-shell", {
+    pathname: "/projects/acme/docs",
+    selectedSegments: ["(detail)", "projects", "acme", "docs"],
+  }),
+).toEqual({
+  id: "/projects/acme/docs",
+  key: "/projects/acme",
+});
+
+expect(
+  resolveBoundary("app-shell", {
+    pathname: "/p/42",
+    selectedSegments: ["(top-level)", "projects"],
+  }),
+).toEqual({
+  id: "/projects",
+  key: "ssgoi-app-main",
+});
+```
+
+Then verify these browser behaviors:
+
+1. Tab → tab moves only tab content; BottomNav does not move or remount.
+2. Tab → detail removes BottomNav with the outgoing shell.
+3. Project overview → project docs preserves the project header and swaps the
+   child immediately.
+4. Soft modal open/close preserves background scroll and component state.
+5. Direct entry to the modal URL renders the full detail route.
+
+## Exact failure guide
+
+- **BottomNav moves on tab → tab:** it is inside `main-content`, or the outer
+  key uses the raw pathname. Put it outside the inner boundary and share the
+  top-level outer key.
+- **BottomNav remains on detail:** it is outside `app-shell`. Put it inside the
+  boundary that changes when leaving `(top-level)`.
+- **Modal open resets or animates the background:** the background boundary is
+  keyed from `usePathname()`. Resolve its `children` slot instead.
+- **A direct modal URL still looks like a background route:** the resolver uses
+  a globally constant key or ignores the `(detail)` slot.
+- **Ordered/from/to config no longer matches:** the shared lifetime key was used
+  as `data-ssgoi-transition`. Keep the data attribute equal to the real route.
+- **Project tabs animate the full shell:** the outer key uses the full pathname,
+  or a changing boundary wraps the project child. Share the project base key
+  and omit the inner marker for an intentional immediate swap.
+- **No detail transitions occur:** the outer key is constant outside its
+  persistent route group.
+- **Duplicate or conflicting transitions occur:** a nested provider was added.
+  Use one provider and nested boundaries.
+- **Intercepted route ids contain `(.)`, `(..)`, or route-group names:** normalize
+  interception prefixes and filter route groups before building the public id.
+
+Main guide: https://ssgoi.dev/llms.txt
+Boundary mechanism: https://ssgoi.dev/llms/how-it-works.txt
+Human-readable guide: https://ssgoi.dev/docs/nested-boundaries
+Troubleshooting: https://ssgoi.dev/llms/troubleshooting.txt

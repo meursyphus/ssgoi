@@ -22,39 +22,71 @@ export const USE_META: Record<
     cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
   },
   decorative: {
-    label: "Decorative",
-    when: "A flourish — use anywhere for effect.",
+    label: "Expressive",
+    when: "Selected moments where motion supports the product tone.",
     cls: "border-violet-400/40 bg-violet-400/10 text-violet-200",
   },
 };
 
 export type TransitionDemoExample = {
-  /** Route the iframe plays the "enter" leg to. */
+  /** Route the live demo enters. */
   enterPath: string;
-  /** Route it returns to — also the starting frame. */
+  /** Starting route for the live demo. */
   exitPath: string;
-  /** Frame style for this demo. Defaults to "mobile". */
   platform?: ShowcasePlatform;
 };
 
+export type TransitionGif = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export type TransitionSetting = {
+  kind: "type" | "variant" | "option";
+  value: string;
+};
+
 export type TransitionVariant = {
-  /** Section label, e.g. "parallax" or "x · snappy". */
+  /** Human-readable combination, e.g. "x · snappy". */
   label: string;
-  /** One-line UX note: what it looks/feels like, when to reach for it. */
+  /** The independent API dimensions represented by this example. */
+  settings?: TransitionSetting[];
+  /** What this exact combination communicates to the user. */
   ux: string;
   /**
    * Extra args shown inside the effect factory call, e.g. `type: "slide"`.
    * Route matching is configured separately on the transition rule.
    */
   args: string;
-  /** Marks the default behavior of the transition. */
+  /** Marks the default combination of the transition. */
   isDefault?: boolean;
-  /**
-   * Zero or more live demos for this variant — a variant can show several
-   * flows. Empty until real examples are wired; the renderer shows a
-   * "demo coming soon" placeholder until then.
-   */
+  /** Recorded enter-and-return example used as the primary visual. */
+  gif: TransitionGif;
+  /** Optional routes where the same configuration can be tried live. */
   demos?: TransitionDemoExample[];
+};
+
+export type TransitionDecision = {
+  whenToUse: string;
+  motion: string;
+  avoidWhen: string;
+};
+
+export type TransitionIdentitySpec = {
+  source: {
+    label: string;
+    attribute: "data-hero-exit-key" | "data-zoom-exit-key";
+  };
+  destination: {
+    label: string;
+    attribute: "data-hero-enter-key" | "data-zoom-enter-key";
+  };
+  keyRole: string;
+  rules: string[];
+  failure: string;
+  code: string;
 };
 
 export type TransitionDoc = {
@@ -64,25 +96,73 @@ export type TransitionDoc = {
   use: UseKind;
   /** Intro paragraph for the detail page header. */
   intro: string;
+  /** The product decision this motion should encode. */
+  decision: TransitionDecision;
   /** Natural route rule for this effect in the usage example. */
   ruleStyle: "stack" | "target" | "pair" | "ordered";
+  /** Shared identity markers required by Hero and Zoom. */
+  identity?: TransitionIdentitySpec;
   variants: TransitionVariant[];
 };
+
+function mobileGif(file: string, alt: string): TransitionGif {
+  return {
+    src: `/docs/transitions/${file}.gif`,
+    alt,
+    width: 360,
+    height: 696,
+  };
+}
+
+function webGif(
+  file: string,
+  alt: string,
+  height: 360 | 400 = 400,
+): TransitionGif {
+  return {
+    src: `/docs/transitions/${file}.gif`,
+    alt,
+    width: 640,
+    height,
+  };
+}
+
+const transitionLab = (
+  preset: string,
+  platform: ShowcasePlatform = "mobile",
+): TransitionDemoExample => ({
+  enterPath: `/demo/transition-lab/${preset}/b`,
+  exitPath: `/demo/transition-lab/${preset}/a`,
+  platform,
+});
 
 export const TRANSITION_DOCS: TransitionDoc[] = [
   {
     name: "drill",
-    blurb: "iOS-style hierarchical navigation.",
+    blurb: "Mobile hierarchy with an unmistakable back direction.",
     use: "drill-in",
     intro:
-      "Hierarchical push/pop, like an iOS navigation stack. Use it when the user goes one level deeper — a list into its detail — and back out again.",
+      "Drill gives parent-to-child navigation the push/pop language familiar from mobile navigation stacks.",
+    decision: {
+      whenToUse:
+        "Use it for a list opening a detail, or any parent route opening one child level.",
+      motion:
+        "The child enters from the side; going back reverses the motion and reveals the parent.",
+      avoidWhen:
+        "Avoid it for peer tabs, filters, or destinations with no parent-child relationship.",
+    },
     ruleStyle: "stack",
     variants: [
       {
         label: "parallax",
+        settings: [{ kind: "type", value: "parallax" }],
         isDefault: true,
         args: 'type: "parallax"',
-        ux: "Layered depth: the outgoing page recedes a touch while the new page slides over it. The default — reads as real hierarchy.",
+        ux: "The child slides over the parent while the parent recedes slightly. This layered depth makes hierarchy easiest to read.",
+        gif: mobileGif(
+          "drill-parallax",
+          "A product list recedes while its detail page slides in, then reverses back to the list.",
+        ),
         demos: [
           {
             enterPath: "/demo/gamja-market/products/p-001",
@@ -96,8 +176,13 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
       },
       {
         label: "slide",
+        settings: [{ kind: "type", value: "slide" }],
         args: 'type: "slide"',
-        ux: "Flat cross-faded horizontal slide, no parallax. Lighter and faster when depth feels like too much.",
+        ux: "Both pages move on one flat plane. Choose it when the parent-child relationship is clear without extra depth.",
+        gif: mobileGif(
+          "drill-slide",
+          "A search result page slides flat into its child page and back without parallax.",
+        ),
         demos: [
           {
             enterPath:
@@ -110,17 +195,29 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "fade",
-    blurb: "Calm cross-fade. Safe default.",
+    blurb: "A calm, directionless fade-through.",
     use: "top-level",
     intro:
-      "A calm symmetric cross-fade. The safe default for any navigation where you don't want to imply direction or hierarchy.",
+      "Fade uses a fade-through sequence: the outgoing page fades first, then the incoming page appears.",
+    decision: {
+      whenToUse:
+        "Use it for calm switches between unrelated screens or top-level destinations.",
+      motion:
+        "The old page fades out before the new page fades in, so the surfaces do not compete.",
+      avoidWhen:
+        "Avoid it when hierarchy, order, or travel direction should remain visible.",
+    },
     ruleStyle: "pair",
     variants: [
       {
-        label: "fade",
+        label: "fade-through",
         isDefault: true,
         args: "",
-        ux: "Both pages cross-fade. Neutral and direction-less — great for top-level/tab switches.",
+        ux: "A single neutral behavior with no directional cue. It is sequential, not a symmetric cross-fade.",
+        gif: webGif(
+          "fade-default",
+          "One editorial page fades away before the next page fades into view.",
+        ),
         demos: [
           {
             enterPath: "/demo/silent-room/tension",
@@ -133,17 +230,29 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "slide",
-    blurb: "Horizontal push.",
+    blurb: "Ordered sibling screens moving side to side.",
     use: "sibling",
     intro:
-      "A horizontal push between peer screens. Direction follows path order — forward slides left, back slides right.",
+      "Slide turns route order into a simple horizontal direction for peer screens.",
+    decision: {
+      whenToUse:
+        "Use it for tabs, steps, dates, or other siblings with an obvious previous and next.",
+      motion:
+        "Forward pushes the current page left; backward reverses the same movement.",
+      avoidWhen:
+        "Avoid it for parent-to-child navigation or unordered destinations.",
+    },
     ruleStyle: "ordered",
     variants: [
       {
         label: "slide",
         isDefault: true,
         args: "",
-        ux: "Pages push horizontally in the direction of travel. Good for moving between siblings at the same level.",
+        ux: "One behavior: a direct horizontal push whose direction comes from the ordered route list.",
+        gif: mobileGif(
+          "slide-default",
+          "Peer profile tabs push horizontally in route order and reverse when going back.",
+        ),
         demos: [
           {
             enterPath: "/demo/instagram/profile/deaseungseung94/reels",
@@ -155,22 +264,51 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "axis",
-    blurb: "Material shared-axis. Coordinated slide + fade.",
+    blurb: "Material shared-axis motion along x, y, or z.",
     use: "sibling",
     intro:
-      "Material Design shared-axis: a coordinated slide + fade along one axis. Pick the axis that matches the spatial relationship between screens.",
+      "Axis coordinates translation, scale, and fade along one spatial axis. Choose the axis that matches the relationship in your UI.",
+    decision: {
+      whenToUse:
+        "Use it for restrained Material-style movement between related peer screens.",
+      motion:
+        "Both pages coordinate along x, y, or z; route order supplies direction where the chosen type supports it.",
+      avoidWhen: "Avoid it when the screens have no believable spatial axis.",
+    },
     ruleStyle: "ordered",
     variants: [
       {
-        label: "x",
+        label: "x · default",
+        settings: [
+          { kind: "type", value: "x" },
+          { kind: "variant", value: "default" },
+        ],
         isDefault: true,
         args: 'type: "x"',
-        ux: "Horizontal shared-axis; direction follows path order. The default tone is fluid.",
+        ux: "A fluid horizontal shared-axis transition. Route order decides left and right.",
+        gif: mobileGif(
+          "axis-x-default",
+          "Two checkout steps move along a fluid horizontal shared axis.",
+        ),
+        demos: [
+          {
+            enterPath: "/demo/air-bnb/listings/l-003/checkout/method",
+            exitPath: "/demo/air-bnb/listings/l-003/checkout/review",
+          },
+        ],
       },
       {
         label: "x · snappy",
+        settings: [
+          { kind: "type", value: "x" },
+          { kind: "variant", value: "snappy" },
+        ],
         args: 'type: "x", variant: "snappy"',
-        ux: "Same horizontal axis with a tighter, snappier spring — feels more immediate.",
+        ux: "The same horizontal model with a tighter spring for fast, compact interfaces.",
+        gif: mobileGif(
+          "axis-x-snappy",
+          "Two messaging screens switch with a quick horizontal shared-axis spring.",
+        ),
         demos: [
           {
             enterPath: "/demo/kakao-talk/chats",
@@ -179,63 +317,121 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
       },
       {
-        label: "y",
+        label: "y · default",
+        settings: [
+          { kind: "type", value: "y" },
+          { kind: "variant", value: "default" },
+        ],
         args: 'type: "y"',
-        ux: "Vertical shared-axis; direction follows path order.",
+        ux: "A vertical shared axis whose direction reverses with route order.",
+        gif: mobileGif(
+          "axis-y-default",
+          "Two related screens move up and down along a directional vertical shared axis.",
+        ),
+        demos: [transitionLab("axis-y")],
       },
       {
         label: "y · non-directional",
+        settings: [
+          { kind: "type", value: "y" },
+          { kind: "variant", value: "non-directional" },
+        ],
         args: 'type: "y", variant: "non-directional"',
-        ux: "Vertical axis where every move slides the same way, ignoring path order.",
+        ux: "Every destination enters with the same vertical gesture, even when route order reverses.",
+        gif: mobileGif(
+          "axis-y-non-directional",
+          "Photo sections always enter with the same vertical shared-axis gesture.",
+        ),
+        demos: [
+          {
+            enterPath: "/demo/google-photos/collections",
+            exitPath: "/demo/google-photos",
+          },
+        ],
       },
       {
-        label: "z",
+        label: "z · default",
+        settings: [
+          { kind: "type", value: "z" },
+          { kind: "variant", value: "default" },
+        ],
         args: 'type: "z"',
-        ux: "Z-axis depth — pages scale through each other, the container-transform feel.",
+        ux: "Pages scale through depth, similar to a restrained container transform.",
+        gif: mobileGif(
+          "axis-z-default",
+          "One screen scales back while another advances along the z axis.",
+        ),
+        demos: [transitionLab("axis-z")],
       },
     ],
   },
   {
     name: "scroll",
-    blurb: "Vertical page scroll.",
+    blurb: "A vertical sequence between whole pages.",
     use: "sibling",
     intro:
-      "Pages scroll vertically as if stacked. Reads as continuous movement through a sequence.",
+      "Scroll makes whole pages travel like a vertical sequence. It is a page transition, not browser scroll-position restoration.",
+    decision: {
+      whenToUse:
+        "Use it for onboarding, chapters, or an editorial sequence that should feel vertically continuous.",
+      motion:
+        "The next page travels upward into view; directional mode reverses that travel when users go back.",
+      avoidWhen:
+        "Avoid it for ordinary document scrolling or when screens are not part of one sequence.",
+    },
     ruleStyle: "ordered",
     variants: [
       {
         label: "directional",
+        settings: [{ kind: "type", value: "directional" }],
         isDefault: true,
         args: 'type: "directional"',
-        ux: "Path order decides direction — earlier→later scrolls up, the reverse scrolls down.",
+        ux: "Route order decides direction: forward travels up and backward travels down.",
+        gif: mobileGif(
+          "scroll-directional",
+          "A vertical page sequence travels upward, then reverses downward on return.",
+        ),
+        demos: [transitionLab("scroll-directional")],
       },
       {
         label: "non-directional",
+        settings: [{ kind: "type", value: "non-directional" }],
         args: 'type: "non-directional"',
-        ux: "Every navigation scrolls upward regardless of order — good for paginated or onboarding flows.",
-        demos: [
-          {
-            enterPath: "/showcase",
-            exitPath: "/",
-            platform: "web",
-          },
-        ],
+        ux: "Every destination enters upward, including the return trip.",
+        gif: mobileGif(
+          "scroll-non-directional",
+          "Both forward and return navigation enter upward in a vertical page sequence.",
+        ),
+        demos: [transitionLab("scroll-non-directional")],
       },
     ],
   },
   {
     name: "sheet",
-    blurb: "Bottom sheet, slides up.",
+    blurb: "A temporary task rising over its origin.",
     use: "drill-in",
     intro:
-      "A bottom sheet that slides up over the current page — for modal-like detail that keeps the origin in context.",
+      "Sheet opens a temporary task from the bottom while preserving a visual relationship with the page beneath it.",
+    decision: {
+      whenToUse:
+        "Use it for compose, filters, settings, or a short task that should keep its origin in context.",
+      motion:
+        "The task rises from the bottom; the background can stay still, scale back, or blur.",
+      avoidWhen:
+        "Avoid it for a permanent top-level destination or a deep flow that needs its own navigation stack.",
+    },
     ruleStyle: "target",
     variants: [
       {
         label: "static",
+        settings: [{ kind: "type", value: "static" }],
         isDefault: true,
         args: 'type: "static"',
-        ux: "The sheet rises over a static background page. The default.",
+        ux: "The sheet rises while the page underneath stays fixed. The clearest, quietest option.",
+        gif: mobileGif(
+          "sheet-static",
+          "A temporary task slides up as a bottom sheet over a stationary page.",
+        ),
         demos: [
           {
             enterPath: "/demo/gamja-market/review/o-001",
@@ -250,8 +446,13 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
       },
       {
         label: "scale",
+        settings: [{ kind: "type", value: "scale" }],
         args: 'type: "scale"',
-        ux: "The background page scales down as the sheet rises — iOS-style stacked-card depth.",
+        ux: "The page scales back as the sheet rises, creating stacked-card depth.",
+        gif: mobileGif(
+          "sheet-scale",
+          "A compose sheet rises while the page beneath scales into the background.",
+        ),
         demos: [
           {
             enterPath: "/demo/material-mail/compose",
@@ -261,8 +462,13 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
       },
       {
         label: "blur",
+        settings: [{ kind: "type", value: "blur" }],
         args: 'type: "blur"',
-        ux: "The background page blurs and recedes behind the rising sheet — a modal pushing the page out of focus.",
+        ux: "A live backdrop sits between the two pages, blurring and dimming the origin while the sheet rises above it.",
+        gif: mobileGif(
+          "sheet-blur",
+          "A compose sheet rises while the originating page recedes into blur.",
+        ),
         demos: [
           {
             enterPath: "/demo/voyage/compose",
@@ -274,17 +480,98 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "hero",
-    blurb: "Shared element. data-hero-enter-key / data-hero-exit-key.",
+    blurb: "One or more shared elements continue into the next page.",
     use: "drill-in",
     intro:
-      "A shared-element transition: a tagged element flies from its spot on one page to its spot on the next. Mark the element with data-hero-enter-key / data-hero-exit-key.",
+      "Hero preserves the identity of matching elements across two pages while the surrounding surfaces change.",
+    decision: {
+      whenToUse:
+        "Use it when a thumbnail, avatar, or other stable entity appears on both pages and should visibly continue.",
+      motion:
+        "Each matched element morphs from its source bounds into its destination bounds; multiple distinct pairs can move together.",
+      avoidWhen:
+        "Avoid it when there is no stable shared identity. If one card should open into the whole page, Zoom is usually clearer.",
+    },
     ruleStyle: "pair",
+    identity: {
+      source: {
+        label: "Source page",
+        attribute: "data-hero-exit-key",
+      },
+      destination: {
+        label: "Destination page",
+        attribute: "data-hero-enter-key",
+      },
+      keyRole:
+        "The attribute value is the element's stable identity. Source and destination values must match exactly.",
+      rules: [
+        "You may mark multiple distinct key pairs; Hero animates every pair it can match.",
+        "Keep each identity unique on a page. If a key is duplicated, the first element in DOM order is used.",
+        "Pairs without a matching key on the other page are skipped.",
+      ],
+      failure:
+        "With no matching pairs, Hero has no shared element to animate and becomes a no-op.",
+      code: `{/* Source: list or collapsed page */}
+<img
+  data-hero-exit-key={item.id}
+  src={item.thumbnail}
+  alt={item.alt}
+/>
+
+{/* Destination: detail or expanded page */}
+<img
+  data-hero-enter-key={item.id}
+  src={item.full}
+  alt={item.alt}
+/>`,
+    },
     variants: [
       {
-        label: "static",
+        label: "static · default",
+        settings: [
+          { kind: "type", value: "static" },
+          { kind: "variant", value: "default" },
+        ],
         isDefault: true,
         args: 'type: "static"',
-        ux: "Incoming chrome snaps in while the shared element morphs to its new position. The default.",
+        ux: "The surrounding pages switch without a surface fade while the shared element continues between them.",
+        gif: mobileGif(
+          "hero-static-default",
+          "A shared image morphs between two pages while the surrounding surfaces switch directly.",
+        ),
+        demos: [transitionLab("hero-static-default")],
+      },
+      {
+        label: "fade · default",
+        settings: [
+          { kind: "type", value: "fade" },
+          { kind: "variant", value: "default" },
+        ],
+        args: 'type: "fade"',
+        ux: "The surrounding pages fade as the shared element continues, softening the hand-off.",
+        gif: mobileGif(
+          "hero-fade-default",
+          "A photo morphs into its detail position while the surrounding pages fade.",
+        ),
+        demos: [
+          {
+            enterPath: "/demo/google-photos/p/ph-001",
+            exitPath: "/demo/google-photos",
+          },
+        ],
+      },
+      {
+        label: "static · smooth",
+        settings: [
+          { kind: "type", value: "static" },
+          { kind: "variant", value: "smooth" },
+        ],
+        args: 'type: "static", variant: "smooth"',
+        ux: "Smooth changes the shared element's interpolation for a softer, more continuous morph. It is independent of the static/fade type.",
+        gif: webGif(
+          "hero-static-smooth",
+          "Several photo elements smoothly morph into a gallery while the page surfaces switch directly.",
+        ),
         demos: [
           {
             enterPath: "/demo/airbnb-photo-tour/photos/kitchen-1",
@@ -294,31 +581,82 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
       },
       {
-        label: "fade",
-        args: 'type: "fade"',
-        ux: "Both pages cross-fade as whole surfaces while the shared element morphs — softer hand-off.",
-        demos: [
-          {
-            enterPath: "/demo/google-photos/p/ph-001",
-            exitPath: "/demo/google-photos",
-          },
+        label: "fade · smooth",
+        settings: [
+          { kind: "type", value: "fade" },
+          { kind: "variant", value: "smooth" },
         ],
+        args: 'type: "fade", variant: "smooth"',
+        ux: "Combines the smooth shared-element interpolation with a fading page hand-off.",
+        gif: mobileGif(
+          "hero-fade-smooth",
+          "A shared image smoothly morphs as the surrounding pages cross into the new surface.",
+        ),
+        demos: [transitionLab("hero-fade-smooth")],
       },
     ],
   },
   {
     name: "zoom",
-    blurb: "Card expands to detail. data-zoom-*-key.",
+    blurb: "One selected card or image opens into a whole detail page.",
     use: "drill-in",
     intro:
-      "A card expands into its detail view. Tag the source and target with data-zoom-enter-key / data-zoom-exit-key.",
+      "The whole detail page unfolds from the selected card or image, using that element as its spatial anchor.",
+    decision: {
+      whenToUse:
+        "Use it when a selected card or image should visibly open into its dedicated detail page.",
+      motion:
+        "One matched source expands toward the destination while the rest of the page follows the chosen type.",
+      avoidWhen:
+        "Avoid it when several shared elements should move together, or when the detail page cannot provide exactly one destination marker.",
+    },
     ruleStyle: "pair",
+    identity: {
+      source: {
+        label: "Source page",
+        attribute: "data-zoom-exit-key",
+      },
+      destination: {
+        label: "Destination page",
+        attribute: "data-zoom-enter-key",
+      },
+      keyRole:
+        "The value identifies the selected entity. The destination key must exactly match the source card or image that opened it.",
+      rules: [
+        "A list may contain many exit markers as long as each key is unique.",
+        "The detail page must contain exactly one enter marker.",
+        "If the same exit key is duplicated, the first element in DOM order is used.",
+      ],
+      failure:
+        "An empty, missing, or mismatched key is a no-op. Zero or more than one enter marker on the destination is also a no-op.",
+      code: `{/* Source: many unique cards are allowed */}
+<img
+  data-zoom-exit-key={photo.id}
+  src={photo.thumbnail}
+  alt={photo.alt}
+/>
+
+{/* Destination: exactly one enter marker */}
+<img
+  data-zoom-enter-key={photo.id}
+  src={photo.full}
+  alt={photo.alt}
+/>`,
+    },
     variants: [
       {
-        label: "static",
+        label: "static · default",
+        settings: [
+          { kind: "type", value: "static" },
+          { kind: "variant", value: "default" },
+        ],
         isDefault: true,
         args: 'type: "static"',
-        ux: "The card holds in place while the detail expands over it. The default.",
+        ux: "The originating surface stays visually steady while the selected content opens above it.",
+        gif: mobileGif(
+          "zoom-static-default",
+          "A selected post opens into its detail page over a visually steady background.",
+        ),
         demos: [
           {
             enterPath: "/demo/instagram/feed/p-001",
@@ -327,9 +665,31 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
       },
       {
-        label: "expand",
+        label: "static · fade",
+        settings: [
+          { kind: "type", value: "static" },
+          { kind: "variant", value: "fade" },
+        ],
+        args: 'type: "static", variant: "fade"',
+        ux: "Adds a fade to the static background hand-off while retaining the same anchored zoom.",
+        gif: mobileGif(
+          "zoom-static-fade",
+          "A selected image zooms into detail as the otherwise static surrounding page fades.",
+        ),
+        demos: [transitionLab("zoom-static-fade")],
+      },
+      {
+        label: "expand · default",
+        settings: [
+          { kind: "type", value: "expand" },
+          { kind: "variant", value: "default" },
+        ],
         args: 'type: "expand"',
-        ux: "The card itself expands to become the full detail surface.",
+        ux: "The selected card grows into the detail surface, making containment feel explicit.",
+        gif: mobileGif(
+          "zoom-expand-default",
+          "A selected card expands until it becomes the full detail surface.",
+        ),
         demos: [
           {
             enterPath: "/demo/pinterest/feed/pin-1",
@@ -338,9 +698,45 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
       },
       {
-        label: "blur",
+        label: "expand · fade",
+        settings: [
+          { kind: "type", value: "expand" },
+          { kind: "variant", value: "fade" },
+        ],
+        args: 'type: "expand", variant: "fade"',
+        ux: "Keeps the card-to-surface expansion but fades surrounding content for a softer reveal.",
+        gif: mobileGif(
+          "zoom-expand-fade",
+          "A card expands into the detail surface while its surrounding content fades away.",
+        ),
+        demos: [transitionLab("zoom-expand-fade")],
+      },
+      {
+        label: "blur · default",
+        settings: [
+          { kind: "type", value: "blur" },
+          { kind: "variant", value: "default" },
+        ],
         args: 'type: "blur"',
-        ux: "The background blurs as the detail zooms in — a focus pull.",
+        ux: "The background loses focus as the selected content advances, creating a strong focus pull.",
+        gif: mobileGif(
+          "zoom-blur-default",
+          "A selected image advances into detail while the background falls out of focus.",
+        ),
+        demos: [transitionLab("zoom-blur-default")],
+      },
+      {
+        label: "blur · fade",
+        settings: [
+          { kind: "type", value: "blur" },
+          { kind: "variant", value: "fade" },
+        ],
+        args: 'type: "blur", variant: "fade"',
+        ux: "Combines the focus-pull blur type with the optional fade modifier.",
+        gif: mobileGif(
+          "zoom-blur-fade",
+          "A listing image zooms into detail as the background blurs and fades.",
+        ),
         demos: [
           {
             enterPath: "/demo/air-bnb/listings/l-003",
@@ -348,26 +744,33 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
           },
         ],
       },
-      {
-        label: "fade",
-        args: 'variant: "fade"',
-        ux: "Modifier on any zoom type: adds a cross-fade for a softer expand.",
-      },
     ],
   },
   {
     name: "strip",
-    blurb: "3D Y-axis flip.",
+    blurb: "A perspective page swap with card-deck energy.",
     use: "decorative",
     intro:
-      "A 3D flip around the Y-axis, like turning a card. A decorative flourish for moments that want a little drama.",
+      "Strip translates both pages through a shallow ±20° perspective turn, like exchanging cards in a deck.",
+    decision: {
+      whenToUse:
+        "Use it for a gallery, portfolio, or selected card-deck moment that benefits from a strong perspective cue.",
+      motion:
+        "Pages translate past one another while tilting in perspective; it is not a full Y-axis flip.",
+      avoidWhen:
+        "Avoid it for frequent utility navigation or motion-sensitive experiences.",
+    },
     ruleStyle: "pair",
     variants: [
       {
         label: "strip",
         isDefault: true,
         args: "",
-        ux: "Pages flip in 3D around the vertical axis.",
+        ux: "One expressive behavior: a translated perspective swap between whole pages.",
+        gif: webGif(
+          "strip-default",
+          "Two portfolio pages trade places with a shallow perspective turn.",
+        ),
         demos: [
           {
             enterPath: "/demo/nora-hale/about",
@@ -380,38 +783,71 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "blind",
-    blurb: "Window-blinds wipe.",
+    blurb: "A slatted reveal for a deliberate entrance.",
     use: "decorative",
     intro:
-      "A window-blinds wipe — the page reveals in slats. Decorative; pick the axis the slats open along.",
+      "Blind reveals the next page through animated slats along a chosen axis.",
+    decision: {
+      whenToUse:
+        "Use it for a one-time splash, campaign reveal, or deliberately theatrical entrance.",
+      motion:
+        "Bands open across the page horizontally or vertically to reveal the destination.",
+      avoidWhen:
+        "Avoid it for frequent navigation, reading flows, or motion-sensitive contexts.",
+    },
     ruleStyle: "pair",
     variants: [
       {
         label: "horizontal",
+        settings: [{ kind: "type", value: "horizontal" }],
         isDefault: true,
         args: 'type: "horizontal"',
-        ux: "Blinds wipe along the horizontal axis. The default.",
+        ux: "Slats progress across the horizontal axis.",
+        gif: mobileGif(
+          "blind-horizontal",
+          "Horizontal slats open to reveal a new editorial page.",
+        ),
+        demos: [transitionLab("blind-horizontal")],
       },
       {
         label: "vertical",
+        settings: [{ kind: "type", value: "vertical" }],
         args: 'type: "vertical"',
-        ux: "Blinds open along the vertical axis.",
+        ux: "Slats progress along the vertical axis.",
+        gif: mobileGif(
+          "blind-vertical",
+          "Vertical slats open to reveal a new editorial page.",
+        ),
+        demos: [transitionLab("blind-vertical")],
       },
     ],
   },
   {
     name: "film",
-    blurb: "Cinematic shrink + tile.",
+    blurb: "A cinematic shrink-and-tile with framed corners.",
     use: "decorative",
     intro:
-      "A cinematic shrink-and-tile with film-strip corner borders. Decorative — for a movie-reel feel.",
+      "Film builds a cinematic scene at runtime, keeps video live, and coordinates the pages and viewfinder corners with multiple springs.",
+    decision: {
+      whenToUse:
+        "Use it for a selected cinematic moment, title sequence, or media experience.",
+      motion:
+        "Whole pages shrink and tile through the frame while corner borders reinforce the film treatment.",
+      avoidWhen:
+        "Avoid it for frequent or simple navigation, and on performance-critical flows.",
+    },
     ruleStyle: "pair",
     variants: [
       {
-        label: "film",
+        label: "default",
         isDefault: true,
         args: "",
-        ux: "Pages shrink and tile with cinematic corner borders.",
+        ux: "A runtime scene keeps video live while the pages and viewfinder corners move on coordinated spring timelines.",
+        gif: webGif(
+          "film-default",
+          "Two cinematic pages shrink and tile through framed corners.",
+          360,
+        ),
         demos: [
           {
             enterPath: "/demo/lumen/cinematic-eye",
@@ -421,24 +857,43 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
       },
       {
-        label: "custom border",
+        label: "borderColor",
+        settings: [{ kind: "option", value: "borderColor" }],
         args: 'options: { borderColor: "#f97316" }',
-        ux: "Override the cinematic corner-border color via options.borderColor.",
+        ux: "This does not change the motion. It only customizes the cinematic corner-border color.",
+        gif: mobileGif(
+          "film-orange",
+          "The Film transition plays with customized orange corner borders.",
+        ),
+        demos: [transitionLab("film-orange")],
       },
     ],
   },
   {
     name: "rotate",
-    blurb: "Card flip.",
+    blurb: "A whole-page planar spin.",
     use: "decorative",
-    intro: "A full card flip between pages. A playful decorative transition.",
+    intro:
+      "Rotate spins the outgoing and incoming pages through opposite 180° turns in the screen plane.",
+    decision: {
+      whenToUse:
+        "Use it for a playful or emphatic switch where a full-screen spin fits the product personality.",
+      motion:
+        "The outgoing page rotates to 180° and disappears halfway; the incoming page unwinds from -180°.",
+      avoidWhen:
+        "Avoid it for frequent utility navigation, dense reading flows, or motion-sensitive contexts.",
+    },
     ruleStyle: "pair",
     variants: [
       {
         label: "rotate",
         isDefault: true,
         args: "",
-        ux: "One page flips over to reveal the next.",
+        ux: "One behavior: opposite planar half-turns with a clean midpoint hand-off.",
+        gif: webGif(
+          "rotate-default",
+          "One product page spins away as the destination spins into place.",
+        ),
         demos: [
           {
             enterPath: "/demo/honeydrop/drop",
@@ -451,17 +906,29 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
   },
   {
     name: "jaemin",
-    blurb: "Playful rotated zoom.",
+    blurb: "A playful rotated zoom for a signature moment.",
     use: "decorative",
     intro:
-      "A playful rotated zoom — the signature flourish. Decorative, for personality.",
+      "Jaemin combines zoom and rotation into one deliberately playful page change.",
+    decision: {
+      whenToUse:
+        "Use it for one special destination where product personality matters more than restraint.",
+      motion:
+        "The destination advances with a lively zoom and slight rotation.",
+      avoidWhen:
+        "Avoid it for everyday navigation, quick reading flows, or motion-sensitive contexts.",
+    },
     ruleStyle: "pair",
     variants: [
       {
         label: "jaemin",
         isDefault: true,
         args: "",
-        ux: "Pages zoom in with a slight rotation for a lively feel.",
+        ux: "One signature behavior: a rotated zoom that makes the destination feel celebratory.",
+        gif: webGif(
+          "jaemin-default",
+          "A playful page zooms and rotates into a colorful destination.",
+        ),
         demos: [
           {
             enterPath: "/demo/yuzu-club/flavors",
@@ -480,7 +947,7 @@ export function getTransitionDoc(name: string): TransitionDoc | undefined {
   return TRANSITION_DOCS.find((t) => t.name === name);
 }
 
-/** Effect-only factory call string for a variant, e.g. `drill({ type: "slide" })`. */
+/** Effect-only factory call string for a recorded combination. */
 export function variantCall(
   doc: TransitionDoc,
   variant: TransitionVariant,

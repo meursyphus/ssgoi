@@ -5,7 +5,7 @@ import { DocsPageHeading } from "@/page/docs/sections";
 import { NestedBoundariesBody } from "@/page/docs/nested-boundaries";
 
 export const metadata: Metadata = {
-  title: "Route boundaries — keys, ids, and persistent layouts",
+  title: "Persistent layouts — keep navigation still while routes move",
   description:
     "Use named route-boundary resolvers to control React lifetime, keep layouts mounted, and include or exclude navigation from page transitions.",
   alternates: { canonical: "/docs/nested-boundaries" },
@@ -19,12 +19,15 @@ export default function DocsNestedBoundariesPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Route boundaries", path: "/docs/nested-boundaries" },
+          {
+            name: "Persistent layouts",
+            path: "/docs/nested-boundaries",
+          },
         ])}
       />
       <DocsPageHeading
-        title="Route boundaries"
-        lead="A key creates the unmount SSGOI observes; a route id selects the transition. Name each owned region once."
+        title="Persistent layouts"
+        lead="Keep a bottom nav or header mounted for inner navigation, then move the whole shell only when the route leaves it."
       />
       <NestedBoundariesBody />
     </>

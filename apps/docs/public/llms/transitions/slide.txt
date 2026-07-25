@@ -1,0 +1,35 @@
+# SSGOI slide transition
+
+Use for ordered tabs, swipeable sections, or steps where left and right
+communicate forward and backward.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { slide } from "@ssgoi/react/view-transitions";
+
+slide({
+  variant?: "default";
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      ordered: ["/tabs/home", "/tabs/search", "/tabs/profile"],
+      transition: slide(),
+    },
+  ],
+};
+```
+
+The route order determines direction. Keep `overflow-x-clip` on the layout
+shell.
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

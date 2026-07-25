@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Link } from "@/lib/link";
 import { NpmPill } from "@/components/npm-pill";
 import { CodeBlock } from "@/components/code-block";
@@ -21,8 +22,6 @@ import {
   FirefoxMark,
   SafariMark,
 } from "@/components/browser-logos";
-
-const LLMS_TXT = "https://ssgoi.dev/llms.txt";
 
 /* -------------------------------------------------------------------------- */
 /* Shared heading                                                             */
@@ -54,39 +53,55 @@ export function DocsPageHeading({
 export function DocsHero() {
   return (
     <header className="border-b border-white/[0.06] pb-10">
-      <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
-        Drop the txt.{" "}
-        <span className="text-neutral-400">Your AI sets it up.</span>
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-400">
+        SSGOI documentation
+      </p>
+      <h1 className="mt-4 max-w-3xl text-balance text-4xl font-semibold leading-[1.02] tracking-tight md:text-6xl">
+        Native app-like page transitions.{" "}
+        <span className="text-neutral-500">Built for mobile web apps.</span>
       </h1>
-      <p className="mt-6 max-w-xl leading-relaxed text-neutral-400">
-        Setup and per-transition docs live in plain-text files. Hand the link to
-        Claude Code, Cursor, or any AI agent — it has everything it needs. These
-        pages are the human-readable companion: skim them when you want to
-        understand or debug.
+      <p className="mt-6 max-w-2xl text-pretty leading-relaxed text-neutral-300">
+        SSGOI adds route-aware, interruptible page transitions without taking
+        over navigation. Start with one config and one small route boundary,
+        then add deeper control only when your app needs it.
+      </p>
+      <p className="mt-4 font-mono text-xs leading-relaxed tracking-wide text-neutral-500">
+        Router agnostic · Cross-browser · SSR ready · Web Animations API powered
       </p>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <a
-          href={LLMS_TXT}
-          target="_blank"
-          rel="noreferrer"
+        <Link
+          href="/docs/install"
           className="group inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-[#0e0b08] transition-colors hover:bg-orange-400"
         >
-          /llms.txt
+          Add SSGOI in 2–3 files
           <span
             className="transition-transform group-hover:translate-x-0.5"
             aria-hidden
           >
-            ↗
+            →
           </span>
-        </a>
+        </Link>
         <Link
-          href="/docs/install"
+          href="/docs/transitions"
           className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/30 hover:bg-white/[0.06]"
         >
-          Quick start
+          Explore mobile transitions
         </Link>
       </div>
+
+      <dl className="mt-9 grid max-w-2xl gap-px overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-3">
+        {[
+          ["2–3 files", "Easy to adopt"],
+          ["Router agnostic", "Navigation stays yours"],
+          ["Cross-browser", "WAAPI powered"],
+        ].map(([value, label]) => (
+          <div key={value} className="bg-[#0b0907] px-5 py-4">
+            <dt className="text-sm text-neutral-500">{label}</dt>
+            <dd className="mt-1 font-semibold text-neutral-100">{value}</dd>
+          </div>
+        ))}
+      </dl>
     </header>
   );
 }
@@ -116,7 +131,7 @@ export function InstallBody() {
         One package per framework. This quick start uses React / Next.js — the
         same three steps for every other stack live in the{" "}
         <Link
-          href="/docs/frameworks/sveltekit"
+          href="/docs/frameworks"
           className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
         >
           Frameworks
@@ -126,12 +141,12 @@ export function InstallBody() {
 
       <div className="mt-12 border-t border-white/[0.06] pt-10">
         <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
-          Three small files, in order
+          2–3 small files, in order
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Provider first, then the layout shell around it, then the route
-          boundary inside it. Each step is copy-paste ready; nothing here
-          requires understanding the internals.
+          SSGOI usually changes only 2–3 files. This Next.js example uses three:
+          a provider and config, a separate route boundary, and one layout edit.
+          Nothing here requires understanding the internals.
         </p>
 
         <SetupStep
@@ -178,7 +193,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
         <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
           Scroll reset and restoration follow the matched transition rule; see{" "}
           <Link
-            href="/docs/core-options"
+            href="/docs/scroll-restoration"
             className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
           >
             Scroll &amp; middleware
@@ -188,25 +203,60 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 
         <SetupStep
           n="2"
-          title="Wrap it in the layout shell"
+          title="Keep the route boundary separate"
+          desc={
+            <>
+              The pathname starts as both the React{" "}
+              <code className="font-mono text-neutral-200">key</code> and the{" "}
+              <code className="font-mono text-neutral-200">
+                data-ssgoi-transition
+              </code>{" "}
+              id. Keeping this component separate lets its ownership evolve
+              later without changing pages or navigation.
+            </>
+          }
+          code={`// app/ssgoi-route-boundary.tsx
+"use client";
+
+import { type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <div key={pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}`}
+        />
+
+        <SetupStep
+          n="3"
+          title="Assemble them in the layout shell"
           desc={
             <>
               The element around{" "}
               <code className="font-mono text-neutral-200">&lt;Ssgoi&gt;</code>{" "}
-              needs three classes. They position the leaving page while it
-              animates out — skip them and transitions jump or flicker.
+              needs three shell classes. They position the leaving page while it
+              animates out; the provider and boundary stay as small imported
+              pieces.
             </>
           }
           code={`// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
+import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
-          <SsgoiProvider>{children}</SsgoiProvider>
+          <SsgoiProvider>
+            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+          </SsgoiProvider>
         </main>
       </body>
     </html>
@@ -229,6 +279,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </li>
           ))}
         </ul>
+        <p className="mt-4 max-w-xl text-xs leading-relaxed text-neutral-500">
+          These class names are Tailwind shorthand. Without Tailwind, apply{" "}
+          <code className="font-mono text-neutral-300">
+            position:relative; z-index:0; min-height:100vh; overflow-x:hidden
+          </code>{" "}
+          and progressively upgrade to{" "}
+          <code className="font-mono text-neutral-300">100dvh</code> and{" "}
+          <code className="font-mono text-neutral-300">overflow-x:clip</code>.
+        </p>
         <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
           The mechanism behind these classes is in{" "}
           <Link
@@ -239,42 +298,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </Link>{" "}
           — useful when debugging, not needed for setup.
         </p>
-
-        <SetupStep
-          n="3"
-          title="Add the route boundary (simple version)"
-          desc={
-            <>
-              A changed <code className="font-mono text-neutral-200">key</code>{" "}
-              makes React unmount the old page and mount the new one;{" "}
-              <code className="font-mono text-neutral-200">
-                data-ssgoi-transition
-              </code>{" "}
-              is the id config rules match against. For most apps the pathname
-              serves as both.
-            </>
-          }
-          code={`// app/ssgoi-route-boundary.tsx
-"use client";
-
-import { type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-
-export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}
-
-// app/layout.tsx — wrap the provider's children
-<SsgoiProvider>
-  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-</SsgoiProvider>`}
-        />
 
         <div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/[0.04] p-6">
           <h3 className="text-base font-semibold tracking-tight text-neutral-100">
@@ -305,7 +328,7 @@ export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
             href="/docs/nested-boundaries"
             className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
           >
-            Route boundaries
+            Persistent layouts
           </Link>
           .
         </p>
@@ -524,7 +547,11 @@ const config: SsgoiConfig = {
         <li className="rounded-xl border border-white/[0.06] p-4">
           <code className="font-mono text-orange-300">from / to</code> defines
           an exact relationship. It is bidirectional by default and accepts
-          pattern arrays.
+          pattern arrays; set{" "}
+          <code className="font-mono text-neutral-300">
+            bidirectional: false
+          </code>{" "}
+          for a one-way pair.
         </li>
         <li className="rounded-xl border border-white/[0.06] p-4">
           <code className="font-mono text-orange-300">ordered</code> requires
@@ -544,10 +571,11 @@ const config: SsgoiConfig = {
       </p>
       <p className="mt-3 max-w-2xl text-xs leading-relaxed text-neutral-500">
         Scroll follows the rule automatically:{" "}
-        <code className="font-mono">on</code> and{" "}
-        <code className="font-mono">from / to</code> restore the forward source
-        and reset the destination; <code className="font-mono">ordered</code>{" "}
-        restores both. Use{" "}
+        <code className="font-mono">from / to</code> restores the forward source
+        and resets the destination. <code className="font-mono">on</code> does
+        the same when crossing its scope; navigation entirely inside one{" "}
+        <code className="font-mono">on</code> scope resets both endpoints.{" "}
+        <code className="font-mono">ordered</code> restores both. Use{" "}
         <code className="font-mono">{"preserveScroll: { from, to }"}</code> only
         for an exact override.
       </p>
@@ -621,16 +649,9 @@ export function LayoutBody() {
       <p className="max-w-xl leading-relaxed text-neutral-400">
         The element that wraps{" "}
         <code className="font-mono text-neutral-200">&lt;Ssgoi&gt;</code> needs
-        these classes. Your AI agent reads this from{" "}
-        <a
-          href={LLMS_TXT}
-          target="_blank"
-          rel="noreferrer"
-          className="font-mono text-neutral-200 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          /llms.txt
-        </a>{" "}
-        — this page is for you, when something looks off.
+        these classes. The quick start gives you the copy-paste version; this
+        page explains why each class exists when positioning or stacking looks
+        off.
       </p>
 
       <CodeBlock
@@ -655,6 +676,39 @@ export function LayoutBody() {
           </li>
         ))}
       </ul>
+
+      <figure className="mt-10 overflow-hidden rounded-3xl border border-white/[0.07] bg-[#0e0b08]">
+        <Image
+          src="/docs/diagrams/route-lifecycle.png"
+          alt="Four route frames showing the outgoing page detached above the incoming page while their phases are coordinated before cleanup"
+          width={1672}
+          height={941}
+          className="h-auto w-full"
+          sizes="(min-width: 1024px) 768px, 100vw"
+        />
+        <figcaption className="border-t border-white/[0.06] px-5 py-4 text-sm leading-relaxed text-neutral-500">
+          The shell anchors the temporarily reinserted OUT page while the IN
+          page keeps its normal layout position.
+        </figcaption>
+      </figure>
+
+      <p className="mt-6 max-w-xl text-sm leading-relaxed text-neutral-500">
+        Continue to{" "}
+        <Link
+          href="/docs/how-it-works"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+        >
+          How it works
+        </Link>{" "}
+        for the complete lifecycle, or return to the{" "}
+        <Link
+          href="/docs/install"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+        >
+          quick start
+        </Link>{" "}
+        if you only need the required classes.
+      </p>
     </div>
   );
 }
@@ -674,18 +728,30 @@ export function HowItWorksBody() {
         so the OUT animation can play while the new page mounts in place.
       </p>
 
-      <CodeBlock
-        className="mt-8"
-        language="text"
-        code={`navigate /home → /about
-
-router unmounts /home ──▶ SSGOI re-inserts the detached node
-                          with position: absolute        (OUT)
-router mounts /about ───▶ new page in normal layout flow (IN)
-
-        OUT ∥ IN animate simultaneously
-        └─ animation ends → OUT node removed from DOM`}
-      />
+      <figure className="mt-8 overflow-hidden rounded-3xl border border-white/[0.07] bg-[#0e0b08]">
+        <Image
+          src="/docs/diagrams/route-lifecycle.png"
+          alt="A four-stage route lifecycle: the old route unmounts, SSGOI restores it as an outgoing layer, OUT and IN are coordinated, then the outgoing layer is removed"
+          width={1672}
+          height={941}
+          priority
+          className="h-auto w-full"
+          sizes="(min-width: 1024px) 768px, 100vw"
+        />
+        <figcaption className="grid gap-px border-t border-white/[0.06] bg-white/[0.06] text-xs text-neutral-400 sm:grid-cols-4">
+          {[
+            ["01", "Route unmounts"],
+            ["02", "OUT is reinserted"],
+            ["03", "OUT + IN coordinated"],
+            ["04", "OUT is cleaned up"],
+          ].map(([n, label]) => (
+            <span key={n} className="bg-[#0e0b08] px-4 py-3">
+              <span className="mr-2 font-mono text-orange-400">{n}</span>
+              {label}
+            </span>
+          ))}
+        </figcaption>
+      </figure>
 
       <ol className="mt-8 space-y-3 text-sm text-neutral-300">
         <FlowStep
@@ -697,7 +763,10 @@ router mounts /about ───▶ new page in normal layout flow (IN)
           body="SSGOI preserves the detached leaving node and reinserts it with position: absolute (OUT)."
         />
         <FlowStep n="3" body="The new page mounts at its natural place (IN)." />
-        <FlowStep n="4" body="OUT and IN animate at the same time." />
+        <FlowStep
+          n="4"
+          body="The preset coordinates OUT and IN in parallel or sequence."
+        />
         <FlowStep
           n="5"
           body="The reinserted OUT page is removed when its animation ends."
@@ -717,6 +786,39 @@ router mounts /about ───▶ new page in normal layout flow (IN)
           wrapper
         </Link>{" "}
         first.
+      </p>
+
+      <h2 className="mt-12 text-lg font-semibold tracking-tight text-neutral-100">
+        Which boundary owns the lifecycle?
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
+        SSGOI does not invent route keys. It observes the marked regions your
+        framework mounts and unmounts. If an outer boundary and its descendant
+        change in the same DOM mutation, the outer boundary owns the page
+        transition. A child owns it only while its parent remains mounted.
+      </p>
+      <CodeBlock
+        className="mt-5"
+        language="text"
+        code={`tab → tab
+app-shell stays ── main-content changes ── BottomNav stays
+
+tab → detail
+app-shell changes ── nested change is absorbed ── BottomNav leaves
+
+project child → child
+project key stays ── no marked child leaves ── content swaps immediately`}
+      />
+      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
+        See the complete production route tree, dynamic keys, and intercepted
+        modal behavior in{" "}
+        <Link
+          href="/docs/nested-boundaries"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+        >
+          Persistent layouts
+        </Link>
+        .
       </p>
     </div>
   );
@@ -826,18 +928,21 @@ export function CompatibilityBody() {
     <div className="mt-8">
       <div className="grid gap-3 md:grid-cols-2">
         <ReasonCard
-          title="Chrome-only"
-          desc="Firefox and Safari users get a hard cut — no transition at all."
-          ours="Every modern browser."
+          title="Router agnostic and SSR ready"
+          desc="SSGOI observes the route boundary your framework already mounts and unmounts; your stack keeps navigation, rendering, and data loading."
+          ours="No replacement router, navigation wrapper, or custom history layer."
         />
         <ReasonCard
-          title="CSS-locked"
-          desc="Snapshots and declarative CSS. No physics, no interrupts, no multi-element choreography."
-          ours="Web Animations API. Spring physics, interrupt-safe, paired hero transitions."
+          title="Cross-browser, optimized motion"
+          desc="The core engine turns precomputed spring motion into Web Animations API keyframes."
+          ours="The same transition config runs across the modern browser families below."
         />
       </div>
 
-      <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <h3 className="mt-12 text-base font-semibold tracking-tight text-neutral-100">
+        Core runtime targets
+      </h3>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {BROWSERS.map(({ name, v, icon: Icon }) => (
           <div
             key={name}
@@ -853,6 +958,20 @@ export function CompatibilityBody() {
           </div>
         ))}
       </div>
+      <p className="mt-4 max-w-2xl text-xs leading-relaxed text-neutral-500">
+        These versions describe the core Web Animations API runtime target. The
+        blur types in Sheet and Zoom also use{" "}
+        <code className="font-mono">backdrop-filter</code>, available by default
+        in Firefox 103+. Earlier Firefox keeps the transition, scale, and
+        dimming but omits the backdrop blur. Other unsupported decoration
+        degrades without changing your router or page lifecycle. Code samples
+        use Tailwind shorthand; without Tailwind, use{" "}
+        <code className="font-mono">
+          position:relative; z-index:0; min-height:100vh; overflow-x:hidden
+        </code>
+        , then progressively upgrade to <code className="font-mono">dvh</code>{" "}
+        and <code className="font-mono">overflow:clip</code>.
+      </p>
     </div>
   );
 }
