@@ -1,0 +1,39 @@
+# SSGOI sheet transition
+
+Use for compose screens, filters, settings panels, and other temporary tasks
+that rise above the current page.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { sheet } from "@ssgoi/react/view-transitions";
+
+sheet({
+  type?: "static" | "scale" | "blur";  // default: "static"
+  variant?: "default";
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+- `static`: only the sheet moves.
+- `scale`: the background scales down behind the sheet.
+- `blur`: a live backdrop blurs and dims the background.
+
+The blur type uses `backdrop-filter` (Firefox 103+). Earlier Firefox keeps the
+sheet motion, background scale, and dimming but omits the backdrop blur.
+
+Deprecated: `type: "background-scale"`; use `type: "scale"`.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    { on: "/compose", transition: sheet({ type: "blur" }) },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

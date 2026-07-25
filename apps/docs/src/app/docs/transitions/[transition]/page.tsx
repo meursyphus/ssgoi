@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { TransitionDetailBody } from "@/page/docs/transition-detail";
 import {
   TRANSITION_DOCS,
@@ -56,7 +56,7 @@ export default async function DocsTransitionDetailPage({
           { name: doc.name, path },
         ])}
       />
-      <DocsPageHeading title={doc.name} lead={doc.intro} />
+      <PageHeading title={doc.name} lead={doc.intro} />
       <TransitionDetailBody doc={doc} />
     </>
   );

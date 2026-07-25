@@ -1,0 +1,150 @@
+# SSGOI with Vue Router and Nuxt
+
+Nuxt wiring comes first; the plain Vue Router variant follows. Choose effects
+from:
+https://ssgoi.dev/llms/transitions.txt
+
+```bash
+npm install @ssgoi/vue
+```
+
+Shell class strings below are Tailwind shorthand. Without Tailwind, apply
+`position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip`. Use
+`clip`, not `hidden`: `overflow-x: hidden` makes the wrapper the scroll
+container, and scroll restore then targets the wrong element. Fall back to
+`100vh` only where `dvh` is unsupported.
+
+## Setup
+
+Everything wires in the app root — one `<Ssgoi>`, the shell classes, and the
+boundary component around `<NuxtPage />`:
+
+```vue
+<!-- app.vue -->
+<script setup>
+import { Ssgoi } from "@ssgoi/vue";
+import { config } from "~/utils/ssgoi-config";
+</script>
+
+<template>
+  <main class="relative z-0 min-h-dvh overflow-x-clip">
+    <Ssgoi :config="config">
+      <SsgoiTransitionBoundary>
+        <NuxtPage />
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  </main>
+</template>
+```
+
+```ts
+// utils/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { drill } from "@ssgoi/vue/view-transitions";
+
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+```
+
+## The boundary component
+
+A changed `:key` remounts the subtree — that unmount/mount pair is what SSGOI
+animates. Key and marker both come from `route.path`. Files under
+`components/` auto-import:
+
+```vue
+<!-- components/ssgoi-transition-boundary.vue -->
+<template>
+  <component :is="as" :key="transitionId" :data-ssgoi-transition="transitionId">
+    <slot />
+  </component>
+</template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+interface Props {
+  as?: keyof HTMLElementTagNameMap;
+  getId?: (pathname: string) => string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  as: "div",
+  getId: (pathname: string) => pathname,
+});
+
+const route = useRoute();
+const transitionId = computed(() => props.getId(route.path));
+</script>
+```
+
+## Plain Vue Router
+
+Without Nuxt auto-imports, import the components explicitly and key a wrapper
+around the current component from `<RouterView>`:
+
+```vue
+<!-- App.vue -->
+<script setup lang="ts">
+import { computed } from "vue";
+import { RouterView, useRoute } from "vue-router";
+import { Ssgoi } from "@ssgoi/vue";
+import { config } from "./ssgoi-config";
+
+const route = useRoute();
+const transitionId = computed(() => route.path);
+</script>
+
+<template>
+  <main class="relative z-0 min-h-dvh overflow-x-clip">
+    <Ssgoi :config="config">
+      <RouterView v-slot="{ Component }">
+        <div
+          :key="transitionId"
+          :data-ssgoi-transition="transitionId"
+        >
+          <component :is="Component" />
+        </div>
+      </RouterView>
+    </Ssgoi>
+  </main>
+</template>
+```
+
+Verify: navigate `/` → any page slides in from the right; back slides out.
+
+## Beyond the basics
+
+For a persistent `/products` shell, collapse that family in the root boundary:
+
+```vue
+<script setup lang="ts">
+const getRootTransitionId = (path: string) =>
+  path === "/products" || path.startsWith("/products/")
+    ? "/products"
+    : path;
+</script>
+
+<SsgoiTransitionBoundary :get-id="getRootTransitionId">
+  <NuxtPage />
+</SsgoiTransitionBoundary>
+```
+
+Then put a default pathname boundary only around the nested child:
+
+```vue
+<!-- pages/products.vue -->
+<ProductHeaderAndTabs />
+<SsgoiTransitionBoundary>
+  <NuxtPage />
+</SsgoiTransitionBoundary>
+```
+
+The stable outer id preserves the shell; the inner pathname boundary produces
+child OUT/IN. Use the same two-lifetime pattern around a nested `<RouterView>`
+in plain Vue Router.
+
+- Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nuxt
+- Framework index: https://ssgoi.dev/llms/frameworks.txt

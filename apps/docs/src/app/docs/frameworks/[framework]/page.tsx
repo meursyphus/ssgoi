@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
 import { FrameworkDetailBody } from "@/page/docs/framework-detail";
 import { FRAMEWORK_DOCS, getFrameworkDoc } from "@/page/docs/frameworks-data";
 
@@ -45,10 +45,11 @@ export default async function FrameworkDocPage({
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
+          { name: "Frameworks", path: "/docs/frameworks" },
           { name: doc.name, path: `/docs/frameworks/${doc.slug}` },
         ])}
       />
-      <DocsPageHeading title={doc.name} lead={doc.lead} />
+      <PageHeading title={doc.name} lead={doc.lead} />
       <FrameworkDetailBody doc={doc} />
     </>
   );

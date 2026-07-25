@@ -1,0 +1,47 @@
+# SSGOI troubleshooting
+
+Use this checklist after completing the framework guide.
+
+Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+## No animation
+
+- Confirm both routes render under the same single `<Ssgoi>`.
+- Confirm the outgoing and incoming roots carry `data-ssgoi-transition`.
+- Confirm the boundary key changes when the routed region changes.
+- Confirm one route rule matches the navigation pair.
+
+## The wrong region animates
+
+- Find the nearest boundary whose key changed.
+- Keep persistent UI outside the inner boundary that changes.
+- Give routes that share one persistent shell the same outer key.
+- Do not create nested `<Ssgoi>` providers.
+
+Complex routing pattern:
+https://ssgoi.dev/llms/complex-routing.txt
+
+## The page jumps or flickers
+
+The element around `<Ssgoi>` must establish the outgoing page's layout and
+paint context:
+
+```html
+<main class="relative z-0 min-h-dvh overflow-x-clip">
+```
+
+Also give routed pages a full-height background when the design requires one.
+
+## Scroll is unexpected
+
+Scroll behavior belongs to the matched route relationship, not to an effect.
+Read the automatic policy before overriding it:
+https://ssgoi.dev/llms/scroll-restoration.txt
+
+## Debug the mechanism
+
+Read this only when the checklist is insufficient:
+https://ssgoi.dev/llms/how-it-works.txt
+
+Runnable templates:
+https://github.com/meursyphus/ssgoi/tree/HEAD/templates

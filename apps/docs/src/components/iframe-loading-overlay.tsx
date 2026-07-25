@@ -27,7 +27,9 @@ export function IframeLoadingOverlay({
         "pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 transition-opacity duration-500 " +
         (visible ? "opacity-100" : "opacity-0") +
         " " +
-        (dark ? "bg-neutral-950" : "bg-white")
+        // The light variant keeps a literal white screen: it stands in for a
+        // real phone display, not for a docs surface.
+        (dark ? "bg-canvas" : "bg-white")
       }
     >
       <div className="flex items-center gap-2">
@@ -40,8 +42,8 @@ export function IframeLoadingOverlay({
         />
         <span
           className={
-            "text-[11px] font-semibold tracking-[0.22em] " +
-            (dark ? "text-neutral-300" : "text-neutral-700")
+            "text-xs font-semibold " +
+            (dark ? "text-ink-dim" : "text-ink-faint")
           }
         >
           SSGOI
@@ -50,11 +52,11 @@ export function IframeLoadingOverlay({
       <div
         className={
           "h-[2px] w-24 overflow-hidden rounded-full " +
-          (dark ? "bg-white/10" : "bg-black/10")
+          (dark ? "bg-raised" : "bg-line/20")
         }
       >
         <div
-          className="h-full w-1/3 rounded-full bg-gradient-to-r from-orange-400 to-amber-300"
+          className="h-full w-1/3 rounded-full bg-ink-faint"
           style={{ animation: "ssgoi-loader-slide 1.2s ease-in-out infinite" }}
         />
       </div>

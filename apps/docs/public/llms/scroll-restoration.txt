@@ -1,0 +1,62 @@
+# SSGOI scroll restoration and middleware
+
+SSGOI derives scroll reset and restoration from the matched route rule. Most
+applications should keep this automatic policy.
+
+Main setup: https://ssgoi.dev/llms.txt
+
+## Automatic policy
+
+| rule | forward `from` side | forward `to` side |
+| --- | --- | --- |
+| `on` (scope entry / leave) | restore | reset |
+| `from` / `to` | restore | reset |
+| `ordered` | restore | restore |
+
+The outgoing page always keeps its current scroll during its OUT animation.
+Reset or restoration runs only when a page becomes IN.
+
+For an `on` rule, paths outside the scope are semantic `from` and paths inside
+are semantic `to`. When both paths are already inside the same `on` scope, both
+endpoints are semantic `to`, so the default is reset / reset. For stack UX, use
+`except` to keep the source route outside the scope. For `ordered`, the
+lower-index side is semantic `from` and the higher-index side is semantic `to`.
+
+## Override one rule
+
+Use `preserveScroll` only when the automatic policy is wrong for that
+relationship:
+
+```ts
+{
+  from: "/gallery",
+  to: "/photo/*",
+  preserveScroll: { from: true, to: true },
+  transition: zoom(),
+}
+```
+
+`from` and `to` always refer to the rule's semantic forward relationship.
+Backward navigation reverses their physical OUT/IN roles.
+
+## Middleware
+
+Rewrite route ids before matching, for example to remove locale prefixes:
+
+```ts
+const config = {
+  middleware: (from, to) => ({
+    from: from.replace(/^\/(en|ko)(?=\/|$)/, ""),
+    to: to.replace(/^\/(en|ko)(?=\/|$)/, ""),
+  }),
+  transitions: [
+    { on: "/posts/**", except: "/posts", transition: drill() },
+  ],
+};
+```
+
+Route rule reference:
+https://ssgoi.dev/llms/route-rules.txt
+
+The `scroll()` page-transition effect is a different topic:
+https://ssgoi.dev/llms/transitions/scroll.txt

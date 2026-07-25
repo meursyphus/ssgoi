@@ -1,0 +1,120 @@
+# SSGOI with TanStack Router
+
+TanStack Router wiring. Choose effects from:
+https://ssgoi.dev/llms/transitions.txt
+
+```bash
+npm install @ssgoi/react
+```
+
+Shell class strings below are Tailwind shorthand. Without Tailwind, apply
+`position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip`. Use
+`clip`, not `hidden`: `overflow-x: hidden` makes the wrapper the scroll
+container, and scroll restore then targets the wrong element. Fall back to
+`100vh` only where `dvh` is unsupported.
+
+## Setup
+
+Config:
+
+```ts
+// app/components/ssgoi-config.ts
+import { drill } from "@ssgoi/react/view-transitions";
+
+export const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+```
+
+Everything wires in the root route — one `<Ssgoi>`, the shell classes, and
+the boundary around `<Outlet />`:
+
+```tsx
+// app/routes/__root.tsx
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { Ssgoi } from "@ssgoi/react";
+import { config } from "~/components/ssgoi-config";
+import { SsgoiRouteBoundary } from "~/components/ssgoi-route-boundary";
+
+export const Route = createRootRoute({
+  component: () => (
+    <main className="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={config}>
+        <SsgoiRouteBoundary>
+          <Outlet />
+        </SsgoiRouteBoundary>
+      </Ssgoi>
+    </main>
+  ),
+});
+```
+
+Boundary — pathname (from router state) as both React key and transition id:
+
+```tsx
+// app/components/ssgoi-route-boundary.tsx
+import { type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
+
+type BoundaryName = "page" | "products-shell";
+
+function resolveBoundary(name: BoundaryName, pathname: string) {
+  return {
+    id: pathname,
+    key: name === "products-shell" ? "products-layout" : pathname,
+  };
+}
+
+export function SsgoiRouteBoundary({
+  children,
+  name = "page",
+}: {
+  children: ReactNode;
+  name?: BoundaryName;
+}) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const boundary = resolveBoundary(name, pathname);
+
+  return (
+    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
+      {children}
+    </div>
+  );
+}
+```
+
+Verify: navigate `/` → any page slides in from the right; back slides out.
+
+## Beyond the basics
+
+When a section must persist, remove the full-path boundary from the root and
+leave only one provider there:
+
+```tsx
+<Ssgoi config={config}>
+  <Outlet />
+</Ssgoi>
+```
+
+Give ordinary routes their own pathname boundary. Give the persistent section
+a stable outer boundary plus a pathname boundary around its child outlet:
+
+```tsx
+// app/routes/products.tsx
+<SsgoiRouteBoundary name="products-shell">
+  <ProductHeaderAndTabs />
+  <SsgoiRouteBoundary name="page">
+    <Outlet />
+  </SsgoiRouteBoundary>
+</SsgoiRouteBoundary>
+```
+
+The boundary implementation above makes `products-shell` return the stable key
+`products-layout`, while `page` returns the pathname. The stable outer key
+preserves the shell; the inner pathname key produces child OUT/IN.
+
+- Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
+- Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
+- Framework index: https://ssgoi.dev/llms/frameworks.txt

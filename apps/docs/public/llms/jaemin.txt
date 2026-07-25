@@ -1,31 +1,3 @@
-# SSGOI - jaemin transition
+# SSGOI jaemin transition moved
 
-Quirky, playful. The incoming page is fixed-positioned at tiny scale (~1%) and rotated 45°, then unwinds rotation and scales up to fill the viewport while the outgoing page fades. Includes an animated border-radius (rounded → squared). Use sparingly for **special moments** — modal openings, easter-egg transitions, app launches.
-
-Setup guide: https://ssgoi.dev/llms.txt
-
-## Behavior
-
-Multi-phase: rotation eases out first (~70% of the timeline), then the final scale/translate completes. The incoming page lands aligned and full-screen.
-
-## Signature
-
-```ts
-import { jaemin } from "@ssgoi/react/view-transitions";
-
-jaemin({
-  variant?: "default";        // reserved — only "default" today
-}): TransitionConfig;
-```
-
-## Usage
-
-```ts
-const config = {
-  transitions: [
-    { from: "/", to: "/modal", transition: jaemin() },
-  ],
-};
-```
-
-Visually loud — best as a one-off accent transition, not a default.
+Current spec: https://ssgoi.dev/llms/transitions/jaemin.txt

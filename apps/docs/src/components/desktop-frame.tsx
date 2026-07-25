@@ -146,7 +146,7 @@ function Chrome({ urlLabel }: { urlLabel?: string }) {
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#28c840]" />
       </div>
       {urlLabel && (
-        <div className="ml-2 flex h-4 max-w-[60%] items-center truncate rounded-md bg-black/30 px-2 font-mono text-[9px] leading-none text-neutral-400">
+        <div className="ml-2 flex h-4 max-w-[60%] items-center truncate rounded-md bg-black/30 px-2 font-mono text-[9px] leading-none text-ink-faint">
           {urlLabel}
         </div>
       )}

@@ -34,6 +34,7 @@ export function TransitionDemo({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const [inView, setInView] = useState(false);
+  const [playing, setPlaying] = useState(true);
   const topLevel = useSyncExternalStore(
     () => () => {},
     () => {
@@ -60,10 +61,21 @@ export function TransitionDemo({
     return () => io.disconnect();
   }, []);
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncPreference = () => {
+      if (media.matches) setPlaying(false);
+    };
+
+    syncPreference();
+    media.addEventListener("change", syncPreference);
+    return () => media.removeEventListener("change", syncPreference);
+  }, []);
+
   const show = topLevel && hasBeenVisible;
 
   useEffect(() => {
-    if (!show || !inView) return;
+    if (!show || !inView || !playing) return;
     let onEnter = false;
     const id = window.setInterval(() => {
       const next = onEnter ? exitPath : enterPath;
@@ -74,33 +86,46 @@ export function TransitionDemo({
       );
     }, intervalMs);
     return () => window.clearInterval(id);
-  }, [show, inView, enterPath, exitPath, intervalMs]);
+  }, [show, inView, playing, enterPath, exitPath, intervalMs]);
 
   return (
-    <div
-      ref={containerRef}
-      className={platform === "web" ? "w-full" : "flex w-full justify-center"}
-    >
-      {show ? (
-        platform === "web" ? (
-          <DesktopFrame
-            ref={iframeRef}
-            src={exitPath}
-            title={title}
-            widthClassName="w-full"
-            interactive={false}
-          />
+    <div ref={containerRef} className="flex w-full flex-col items-center">
+      <div className={platform === "web" ? "w-full" : "flex justify-center"}>
+        {show ? (
+          platform === "web" ? (
+            <DesktopFrame
+              ref={iframeRef}
+              src={exitPath}
+              title={title}
+              widthClassName="w-full"
+              interactive={false}
+            />
+          ) : (
+            <ShowcasePhone
+              ref={iframeRef}
+              src={exitPath}
+              title={title}
+              widthClassName="w-[190px]"
+              interactive={false}
+            />
+          )
         ) : (
-          <ShowcasePhone
-            ref={iframeRef}
-            src={exitPath}
-            title={title}
-            widthClassName="w-[190px]"
-            interactive={false}
-          />
-        )
-      ) : (
-        <DemoPlaceholder platform={platform} />
+          <DemoPlaceholder platform={platform} />
+        )}
+      </div>
+      {show && (
+        <button
+          type="button"
+          aria-pressed={playing}
+          aria-label={`${playing ? "Pause" : "Play"} ${title} animation preview`}
+          onClick={() => setPlaying((value) => !value)}
+          className={
+            "mt-3 rounded-full border border-line-strong bg-panel px-3 py-1.5 text-sm text-ink-faint transition-colors hover:border-ink-faint hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-strong " +
+            (platform === "web" ? "self-end" : "")
+          }
+        >
+          {playing ? "Pause preview" : "Play preview"}
+        </button>
       )}
     </div>
   );
@@ -115,7 +140,7 @@ function DemoPlaceholder({ platform }: { platform: ShowcasePlatform }) {
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#28c840]" />
         </div>
-        <div className="relative aspect-[1280/800] overflow-hidden rounded-b-[11px] bg-neutral-950">
+        <div className="relative aspect-[1280/800] overflow-hidden rounded-b-[11px] bg-canvas">
           <IframeLoadingOverlay visible variant="dark" />
         </div>
       </div>

@@ -60,3 +60,7 @@ export function TanStackRouterMark({ className }: Props) {
     />
   );
 }
+
+export function AngularMark({ className }: Props) {
+  return <img src="/logos/angular.svg" alt="Angular" className={className} />;
+}

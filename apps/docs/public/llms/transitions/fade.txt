@@ -1,0 +1,30 @@
+# SSGOI fade transition
+
+Use for unrelated pages or as a quiet fallback when directional motion would
+imply a relationship that does not exist.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { fade } from "@ssgoi/react/view-transitions";
+
+fade({
+  type?: "fade-through";
+  variant?: "default";
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    { priority: -100, on: "/**", transition: fade() },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

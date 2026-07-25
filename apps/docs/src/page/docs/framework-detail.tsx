@@ -1,6 +1,11 @@
 import { NpmPill } from "@/components/npm-pill";
 import { CodeBlock } from "@/components/code-block";
+import { Link } from "@/lib/link";
 import { type FrameworkDoc } from "@/page/docs/frameworks-data";
+import { Section, link, measure, prose } from "@/page/docs/ui";
+
+const pillClass =
+  "inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-panel px-4 py-2.5 text-sm text-ink-soft transition-colors hover:border-ink-faint";
 
 export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
   return (
@@ -12,9 +17,9 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
             href={doc.llmsUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 font-mono text-xs text-neutral-200 transition-colors hover:border-white/30 hover:bg-white/[0.06]"
+            className={pillClass}
           >
-            agent guide ↗
+            Agent guide ↗
           </a>
         )}
         {doc.templateUrl && (
@@ -22,39 +27,35 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
             href={doc.templateUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 font-mono text-xs text-neutral-200 transition-colors hover:border-white/30 hover:bg-white/[0.06]"
+            className={pillClass}
           >
-            template ↗
+            Template ↗
           </a>
         )}
       </div>
 
       {doc.sections.map((section, i) => (
-        <section key={i} className={section.heading ? "mt-12" : "mt-5"}>
-          {section.heading && (
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-100">
-              {section.heading}
-            </h2>
-          )}
-          {section.body && (
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-              {section.body}
-            </p>
-          )}
+        <Section key={i} title={section.heading} lead={section.body}>
           {section.code && (
             <CodeBlock
-              className="mt-5"
+              className="mt-6"
               language={section.language ?? "tsx"}
               code={section.code}
             />
           )}
-        </section>
+        </Section>
       ))}
 
-      <p className="mt-12 max-w-xl border-t border-white/[0.06] pt-8 text-sm leading-relaxed text-neutral-500">
-        Transition config and route rules are shared across every framework —
-        pick effects on the Transitions page, and read Route boundaries for
-        persistent-layout key scoping. Those two pages apply here unchanged.
+      <p className={`mt-14 border-t border-line pt-8 ${measure} ${prose}`}>
+        Effects and route matching work the same everywhere, so{" "}
+        <Link href="/docs/transitions" className={link}>
+          Transitions
+        </Link>{" "}
+        and{" "}
+        <Link href="/docs/boundaries" className={link}>
+          Route boundaries
+        </Link>{" "}
+        apply here unchanged.
       </p>
     </div>
   );

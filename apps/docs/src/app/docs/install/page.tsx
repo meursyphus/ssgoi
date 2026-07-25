@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading, InstallBody } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
+import { InstallBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Quick start — SSGOI in three small files",
+  title: "Quick start — add SSGOI to your app",
   description:
-    "Install SSGOI, wire the provider, layout shell, and route boundary, and verify your first page transition. Copy-paste ready for React and Next.js.",
+    "Two new files, plus one edit to the layout you already have: write the config and the route boundary, wire them into the layout, then check your first page transition. Copy-paste ready for React and Next.js.",
   alternates: { canonical: "/docs/install" },
   openGraph: buildOpenGraph({ path: "/docs/install" }),
 };
@@ -18,12 +19,12 @@ export default function DocsInstallPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Install", path: "/docs/install" },
+          { name: "Quick start", path: "/docs/install" },
         ])}
       />
-      <DocsPageHeading
+      <PageHeading
         title="Quick start"
-        lead="Three small files, then verify. Copy each step as-is — understanding the internals comes later, if ever."
+        lead="Two new files, plus one edit to the layout you already have, and your first page transition runs."
       />
       <InstallBody />
     </>

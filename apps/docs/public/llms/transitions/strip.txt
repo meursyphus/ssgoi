@@ -1,0 +1,36 @@
+# SSGOI strip transition
+
+Use for a distinctive page swap with card-deck energy. Both pages translate
+past one another with a shallow perspective turn; this is not a full Y-axis
+flip.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { strip } from "@ssgoi/react/view-transitions";
+
+strip({
+  variant?: "default";
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: ["/cards/a", "/cards/b", "/cards/c"],
+      to: ["/cards/a", "/cards/b", "/cards/c"],
+      transition: strip(),
+    },
+  ],
+};
+```
+
+Keep `overflow-x-clip` on the layout shell.
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

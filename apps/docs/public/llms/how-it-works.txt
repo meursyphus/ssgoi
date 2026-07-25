@@ -1,8 +1,11 @@
 # SSGOI - How it works (for debugging)
 
-Deep-dive companion to https://ssgoi.dev/llms.txt. Read this when a transition misbehaves and you need the underlying mechanism.
+Deep-dive companion: https://ssgoi.dev/llms.txt
 
-When a route changes, SSGOI orchestrates two simultaneous animations:
+Read this when a transition misbehaves and you need the underlying mechanism.
+
+When a route changes, SSGOI coordinates two sides. A preset may overlap them,
+run them in parallel, or sequence them:
 
 - **OUT**: The leaving page animates out
 - **IN**: The entering page animates in
@@ -40,7 +43,7 @@ export const prepareOutgoing = (element, context) => {
 2. The boundary key changes, so React unmounts /home
 3. SSGOI preserves that detached node and reinserts it with position: absolute (OUT)
 4. React renders /about page (IN)
-5. Both pages animate simultaneously
+5. The preset coordinates the OUT and IN phases in parallel or sequence
 6. Animation complete, the reinserted /home node is removed from DOM
 ```
 
@@ -62,4 +65,7 @@ DOM hierarchically:
 
 This lets one provider handle sliding tab content while a bottom navigation
 remains still, then animate the full shell when its route group exits:
-https://ssgoi.dev/llms/bottom-nav.txt
+https://ssgoi.dev/llms/complex-routing.txt
+
+Symptom-based checklist:
+https://ssgoi.dev/llms/troubleshooting.txt

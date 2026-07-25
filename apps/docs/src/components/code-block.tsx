@@ -23,7 +23,7 @@ export function CodeBlock({
 
   return (
     <pre
-      className={`overflow-x-auto rounded-2xl border border-white/[0.06] bg-white/[0.015] p-5 font-mono text-[13px] leading-relaxed text-neutral-200 ${className}`}
+      className={`overflow-x-auto rounded-2xl border border-line-strong bg-panel p-5 font-mono text-[13.5px] leading-relaxed text-ink-soft ${className}`}
     >
       <code
         className="hljs bg-transparent"
