@@ -1,6 +1,6 @@
 # SSGOI - hero transition
 
-Shared element transition. The same logical object (a thumbnail, an avatar, a card image) is tweened in size and position from one page to the next. Use when the user should feel they're following the *same thing* across pages.
+Shared element transition. The same logical object (a thumbnail, an avatar, a card image) is tweened in size and position from one page to the next. Use when the user should feel they're following the _same thing_ across pages.
 
 Setup guide: https://ssgoi.dev/llms.txt
 
@@ -12,7 +12,7 @@ If a key has no match on the other side, that element falls back gracefully (no 
 
 `type` picks how the surrounding chrome behaves around the shared element:
 
-- **`type: "static"`** (default) — the incoming page's chrome snaps in; a temporary shared-element clone morphs via clip-path inset + uniform scale. Use when the destination chrome should feel like an *extension* of the list page (e.g., gallery → fullscreen viewer where the rest of the screen is just dark).
+- **`type: "static"`** (default) — the incoming page's chrome snaps in; a temporary shared-element clone morphs via clip-path inset + uniform scale. Use when the destination chrome should feel like an _extension_ of the list page (e.g., gallery → fullscreen viewer where the rest of the screen is just dark).
 - **`type: "fade"`** — both pages cross-fade as whole surfaces while a temporary shared-element clone morphs above them. Use when each side has its own chrome (e.g., a list page and a detail page with its own back button, title bar, or meta panel).
 
 ## Signature
@@ -21,11 +21,10 @@ If a key has no match on the other side, that element falls back gracefully (no 
 import { hero } from "@ssgoi/react/view-transitions";
 
 hero({
-  paths: readonly string[];        // routes participating in hero transitions
   type?: "static" | "fade";        // default: "static"
   variant?: "default";             // reserved — only "default" today
   options?: {};                    // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 ## Required: matching enter/exit keys
@@ -34,17 +33,19 @@ Mark the destination-side ("detail") element with `data-hero-enter-key` and the 
 
 ```tsx
 // List page (/items)
-{items.map((item) => (
-  <Link key={item.id} href={`/items/${item.id}`}>
-    <img
-      data-hero-exit-key={`item-${item.id}`}
-      src={item.thumbnail}
-      width={item.width}
-      height={item.height}
-      className="object-cover"
-    />
-  </Link>
-))}
+{
+  items.map((item) => (
+    <Link key={item.id} href={`/items/${item.id}`}>
+      <img
+        data-hero-exit-key={`item-${item.id}`}
+        src={item.thumbnail}
+        width={item.width}
+        height={item.height}
+        className="object-cover"
+      />
+    </Link>
+  ));
+}
 
 // Detail page (/items/[id])
 <img
@@ -53,7 +54,7 @@ Mark the destination-side ("detail") element with `data-hero-enter-key` and the 
   width={photo.width}
   height={photo.height}
   className="object-contain"
-/>
+/>;
 ```
 
 The transition matches enter/exit pairs in both navigation directions — forward (list→detail) and back (detail→list) — without extra configuration.
@@ -64,10 +65,7 @@ Hero automatically resolves image geometry when the keyed element is an `<img>`,
 
 ```tsx
 // The wrapper defines the visible crop and radius; the child defines media.
-<div
-  data-hero-exit-key={`item-${id}`}
-  className="overflow-hidden rounded-xl"
->
+<div data-hero-exit-key={`item-${id}`} className="overflow-hidden rounded-xl">
   <img
     src={photo.src}
     width={photo.width}
@@ -89,10 +87,14 @@ The original `data-hero-key` attribute is still supported for backwards compatib
 const config = {
   transitions: [
     // List ↔ detail where the detail screen is "just a fullscreen viewer"
-    hero({ paths: ["/items", "/items/*"] }),
+    { from: "/items", to: "/items/*", transition: hero() },
 
     // List ↔ detail where each page has its own chrome (back button, meta)
-    hero({ paths: ["/photos", "/photos/*"], type: "fade" }),
+    {
+      from: "/photos",
+      to: "/photos/*",
+      transition: hero({ type: "fade" }),
+    },
   ],
 };
 ```

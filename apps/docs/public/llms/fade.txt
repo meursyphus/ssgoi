@@ -14,23 +14,24 @@ Both pages overlap during the transition. The outgoing fades to 0 while the inco
 import { fade } from "@ssgoi/react/view-transitions";
 
 fade({
-  paths: readonly string[];   // every pair of paths gets the fade transition
   type?: "fade-through";      // default (and only public value today)
   variant?: "default";        // reserved — only "default" today
   options?: {};               // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
-Returns symmetric entries — one for every ordered pair within `paths`.
+The factory returns one effect config. Route matching is configured separately.
 
 ## Usage
 
 ```ts
 const config = {
   transitions: [
-    fade({ paths: ["/", "/about", "/contact"] }),
+    {
+      from: ["/", "/about", "/contact"],
+      to: ["/", "/about", "/contact"],
+      transition: fade(),
+    },
   ],
 };
 ```
-
-Drop the result directly into `transitions` — arrays are flattened automatically. Use wildcards in paths (`"/blog/*"`) to cover many routes at once.

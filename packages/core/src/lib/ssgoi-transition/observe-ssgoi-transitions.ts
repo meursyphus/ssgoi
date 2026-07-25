@@ -22,6 +22,45 @@ function isHTMLElement(element: Element): element is HTMLElement {
   return element instanceof HTMLElement;
 }
 
+function getElementDepth(element: HTMLElement): number {
+  let depth = 0;
+  let parent = element.parentElement;
+  while (parent) {
+    depth++;
+    parent = parent.parentElement;
+  }
+  return depth;
+}
+
+export function registerTransitionBatch(
+  elements: ReadonlySet<HTMLElement>,
+  ssgoi: SsgoiContext,
+  mountedElements: ReadonlySet<HTMLElement> = elements,
+): void {
+  // Parent watches must exist before child watches so a later subtree removal
+  // can promote the outer changed boundary reliably.
+  const ordered = Array.from(elements).sort(
+    (a, b) => getElementDepth(a) - getElementDepth(b),
+  );
+
+  for (const element of ordered) {
+    const path = element.getAttribute(TRANSITION_ATTRIBUTE);
+    if (path === null) continue;
+
+    let ancestor = element.parentElement;
+    let nestedInBatch = false;
+    while (ancestor) {
+      if (mountedElements.has(ancestor)) {
+        nestedInBatch = true;
+        break;
+      }
+      ancestor = ancestor.parentElement;
+    }
+
+    ssgoi.register(path, element, { enter: !nestedInBatch });
+  }
+}
+
 export function observeSsgoiTransitions(
   root: Element,
   ssgoi: SsgoiContext,
@@ -33,44 +72,53 @@ export function observeSsgoiTransitions(
   const ownsElement = (element: Element) =>
     element.closest(ROOT_SELECTOR) === root;
 
-  const registerElement = (element: Element) => {
+  const getTransitionElement = (element: Element): HTMLElement | null => {
     if (
       !isHTMLElement(element) ||
       !ownsElement(element) ||
       element.closest(CLONE_SELECTOR)
     ) {
-      return;
+      return null;
     }
 
     const path = element.getAttribute(TRANSITION_ATTRIBUTE);
-    if (path === null) return;
+    if (path === null) return null;
 
-    ssgoi.register(path, element);
+    return element;
   };
 
-  const scanNode = (node: Node) => {
+  const collectNode = (node: Node, elements: Set<HTMLElement>) => {
     if (!isElement(node)) return;
 
     if (node.matches(TRANSITION_SELECTOR)) {
-      registerElement(node);
+      const element = getTransitionElement(node);
+      if (element) elements.add(element);
     }
 
     for (const element of node.querySelectorAll(TRANSITION_SELECTOR)) {
-      registerElement(element);
+      const transitionElement = getTransitionElement(element);
+      if (transitionElement) elements.add(transitionElement);
     }
   };
 
   const observer = new MutationObserver((mutations) => {
+    const elements = new Set<HTMLElement>();
+    const mountedElements = new Set<HTMLElement>();
+
     for (const mutation of mutations) {
       if (mutation.type === "attributes") {
-        registerElement(mutation.target as Element);
+        const element = getTransitionElement(mutation.target as Element);
+        if (element) elements.add(element);
         continue;
       }
 
       for (const node of mutation.addedNodes) {
-        scanNode(node);
+        collectNode(node, mountedElements);
       }
     }
+
+    for (const element of mountedElements) elements.add(element);
+    registerTransitionBatch(elements, ssgoi, mountedElements);
   });
 
   observer.observe(root, {
@@ -79,7 +127,9 @@ export function observeSsgoiTransitions(
     attributes: true,
     attributeFilter: [TRANSITION_ATTRIBUTE],
   });
-  scanNode(root);
+  const initialElements = new Set<HTMLElement>();
+  collectNode(root, initialElements);
+  registerTransitionBatch(initialElements, ssgoi);
 
   return () => observer.disconnect();
 }

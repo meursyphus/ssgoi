@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { buildInput } from "./transition";
+import { buildInput, resolveZoom } from "./transition";
 import type { ZoomResolved } from "./types";
 
 type Rect = {
@@ -181,5 +181,44 @@ describe("zoom transition media inference", () => {
 
     expect(input.enterMedia).toBeUndefined();
     expect(input.exitMedia).toBeUndefined();
+  });
+});
+
+function keyedElement(attribute: string, value: string): HTMLElement {
+  return {
+    getAttribute: (name: string) => (name === attribute ? value : null),
+  } as unknown as HTMLElement;
+}
+
+function keyedPage(
+  enter: HTMLElement[] = [],
+  exit: HTMLElement[] = [],
+): HTMLElement {
+  return {
+    querySelectorAll: (selector: string) =>
+      selector.includes("enter") ? enter : exit,
+  } as unknown as HTMLElement;
+}
+
+describe("zoom semantic direction", () => {
+  it("uses forward for exit-key to enter-key geometry", () => {
+    const exit = keyedElement("data-zoom-exit-key", "photo");
+    const enter = keyedElement("data-zoom-enter-key", "photo");
+
+    expect(
+      resolveZoom(keyedPage([], [exit]), keyedPage([enter]), "forward"),
+    ).toEqual({ mode: "enter", enterEl: enter, exitEl: exit });
+    expect(
+      resolveZoom(keyedPage([], [exit]), keyedPage([enter]), "backward"),
+    ).toBeNull();
+  });
+
+  it("uses backward for enter-key to exit-key geometry", () => {
+    const enter = keyedElement("data-zoom-enter-key", "photo");
+    const exit = keyedElement("data-zoom-exit-key", "photo");
+
+    expect(
+      resolveZoom(keyedPage([enter]), keyedPage([], [exit]), "backward"),
+    ).toEqual({ mode: "exit", enterEl: enter, exitEl: exit });
   });
 });

@@ -1,20 +1,7 @@
 import { A, useLocation } from "@solidjs/router";
 import { For, type JSX } from "solid-js";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
-import { slide } from "@ssgoi/solid/view-transitions";
 import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
-
-const categories = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
-];
-
-const productConfig = {
-  transitions: [slide({ paths: categories.map((category) => category.path) })],
-} satisfies SsgoiConfig;
+import { PRODUCT_CATEGORIES } from "../ssgoi-config";
 
 export default function ProductsLayout(props: { children?: JSX.Element }) {
   const location = useLocation();
@@ -28,7 +15,7 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
 
       <div class="px-4 mb-4 flex-shrink-0">
         <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          <For each={categories}>
+          <For each={PRODUCT_CATEGORIES}>
             {(category) => (
               <A
                 href={category.path}
@@ -48,11 +35,9 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
       </div>
 
       <div class="flex-1 overflow-hidden relative">
-        <Ssgoi config={productConfig}>
-          <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
-            {props.children}
-          </SsgoiTransitionBoundary>
-        </Ssgoi>
+        <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
+          {props.children}
+        </SsgoiTransitionBoundary>
       </div>
     </div>
   );

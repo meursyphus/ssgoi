@@ -14,10 +14,9 @@ Both pages rotate around the Z axis simultaneously. Opacity is keyed to rotation
 import { rotate } from "@ssgoi/react/view-transitions";
 
 rotate({
-  paths: readonly string[];   // symmetric — every pair gets the flip
   variant?: "default";        // reserved — only "default" today
   options?: {};               // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 ## Usage
@@ -25,7 +24,7 @@ rotate({
 ```ts
 const config = {
   transitions: [
-    rotate({ paths: ["/card/front", "/card/back"] }),
+    { from: "/card/front", to: "/card/back", transition: rotate() },
   ],
 };
 ```

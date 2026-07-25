@@ -6,7 +6,6 @@ import {
 } from "../../animation";
 
 export interface SlideOptions {
-  direction?: "left" | "right";
   physics?: PhysicsOptions;
 }
 
@@ -17,12 +16,11 @@ const DEFAULT_PHYSICS: PhysicsOptions = {
 };
 
 export const slide = (options: SlideOptions = {}): TransitionConfig => {
-  const direction = options.direction ?? "left";
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  const isLeft = direction === "left";
 
   return {
-    prepare: ({ from, to }) => {
+    prepare: ({ from, to, context }) => {
+      const isLeft = context.direction === "forward";
       from.then((el) => {
         el.style.willChange = "transform";
         el.style.backfaceVisibility = "hidden";
@@ -40,7 +38,8 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
       });
       return {};
     },
-    animation: ({ from, to }) => {
+    animation: ({ from, to, context }) => {
+      const isLeft = context.direction === "forward";
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),

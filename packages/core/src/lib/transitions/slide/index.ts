@@ -1,5 +1,5 @@
-import type { SsgoiPathTransition } from "@types";
-import { createOrderedPathTransitions, type PresetConfig } from "../utils";
+import type { AnyTransitionConfig } from "@types";
+import { type PresetConfig } from "../utils";
 import { slide as transition } from "./transition";
 import type { SlideOptions, SlideVariant } from "./types";
 
@@ -12,20 +12,9 @@ export type { SlideOptions, SlideVariant } from "./types";
  * `{ variant, options }` slots are exposed so callers can adopt the v6
  * schema consistently across presets.
  */
-export type SlideConfig = PresetConfig<
-  { paths: readonly string[] },
-  never,
-  SlideVariant,
-  SlideOptions
->;
+export type SlideConfig = PresetConfig<never, SlideVariant, SlideOptions>;
 
-export function slide(config: SlideConfig): SsgoiPathTransition[] {
+export function slide(_config: SlideConfig = {}): AnyTransitionConfig {
   // `variant`/`options` are reserved for future extension; currently no-op.
-  const { paths } = config;
-
-  return createOrderedPathTransitions(
-    paths,
-    { forward: "left", backward: "right" },
-    (direction) => transition({ direction }),
-  );
+  return transition();
 }

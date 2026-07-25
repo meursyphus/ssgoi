@@ -29,22 +29,15 @@ const LLMS_TXT = "https://ssgoi.dev/llms.txt";
 /* -------------------------------------------------------------------------- */
 
 export function DocsPageHeading({
-  eyebrow,
   title,
   lead,
 }: {
-  eyebrow?: string;
   title: string;
   lead?: React.ReactNode;
 }) {
   return (
     <header className="border-b border-white/[0.06] pb-8">
-      {eyebrow && (
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-          {eyebrow}
-        </p>
-      )}
-      <h1 className="mt-3 text-balance text-3xl font-semibold leading-[1.1] tracking-tight md:text-4xl">
+      <h1 className="text-balance text-3xl font-semibold leading-[1.1] tracking-tight md:text-4xl">
         {title}
       </h1>
       {lead && (
@@ -61,10 +54,7 @@ export function DocsPageHeading({
 export function DocsHero() {
   return (
     <header className="border-b border-white/[0.06] pb-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Docs · llms-first
-      </p>
-      <h1 className="mt-4 text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
+      <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
         Drop the txt.{" "}
         <span className="text-neutral-400">Your AI sets it up.</span>
       </h1>
@@ -94,7 +84,7 @@ export function DocsHero() {
           href="/docs/install"
           className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/30 hover:bg-white/[0.06]"
         >
-          Install
+          Quick start
         </Link>
       </div>
     </header>
@@ -123,35 +113,36 @@ export function InstallBody() {
         ))}
       </div>
       <p className="mt-6 text-sm leading-relaxed text-neutral-500">
-        One package per framework. Pick the one that matches your stack — the
-        transition config shape is shared, while the wrapper and route marker
-        follow each framework&apos;s routing model.
+        One package per framework. This quick start uses React / Next.js — the
+        same three steps for every other stack live in the{" "}
+        <Link
+          href="/docs/frameworks/sveltekit"
+          className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+        >
+          Frameworks
+        </Link>{" "}
+        section.
       </p>
 
       <div className="mt-12 border-t border-white/[0.06] pt-10">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-          Set up
-        </p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
-          Wrap once, mark your pages
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
+          Three small files, in order
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Two steps and the router feels native. The example below is React /
-          Next.js; other frameworks place the page marker directly on each
-          routed page, and Qwik passes the config as a QRL factory.
+          Provider first, then the layout shell around it, then the route
+          boundary inside it. Each step is copy-paste ready; nothing here
+          requires understanding the internals.
         </p>
 
         <SetupStep
           n="1"
-          title="Wrap your app once"
+          title="Create the provider — one config, one <Ssgoi>"
           desc={
             <>
-              Add the{" "}
-              <code className="font-mono text-neutral-200">&lt;Ssgoi&gt;</code>{" "}
-              provider from your root layout, then put the layout shell classes
-              on the wrapper above it. Keep the layout and pages as server
-              components; only the small provider/boundary files need client
-              hooks.
+              One rule is enough to start:{" "}
+              <code className="font-mono text-neutral-200">drill()</code> on
+              everything except the home route. It&apos;s the most visible
+              transition, which makes the verify step unambiguous.
             </>
           }
           code={`// app/ssgoi-provider.tsx
@@ -159,28 +150,54 @@ export function InstallBody() {
 
 import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, fade } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
-  transitions: [
-    drill({ enter: "/post/*", exit: "*" }),
-    fade({ paths: ["/", "/about"] }),
-  ],
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
 export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return (
-    <Ssgoi config={config}>
-      {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
-      <SsgoiTransitionBoundary className="min-h-full bg-black">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
-}
+  return <Ssgoi config={config}>{children}</Ssgoi>;
+}`}
+        />
 
-// app/layout.tsx
+        <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-400">
+          <code className="font-mono text-neutral-200">transitions</code> also
+          accepts a function of device context — the standard way to branch
+          mobile and desktop:
+        </p>
+        <CodeBlock
+          className="mt-4"
+          code={`const config = {
+  transitions: ({ isMobile }) =>
+    isMobile
+      ? [{ on: "/**", except: "/", transition: drill() }]
+      : [{ priority: -100, on: "/**", transition: fade() }],
+};`}
+        />
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
+          Scroll reset and restoration follow the matched transition rule; see{" "}
+          <Link
+            href="/docs/core-options"
+            className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+          >
+            Scroll &amp; middleware
+          </Link>{" "}
+          for the automatic UX policy and exact override.
+        </p>
+
+        <SetupStep
+          n="2"
+          title="Wrap it in the layout shell"
+          desc={
+            <>
+              The element around{" "}
+              <code className="font-mono text-neutral-200">&lt;Ssgoi&gt;</code>{" "}
+              needs three classes. They position the leaving page while it
+              animates out — skip them and transitions jump or flicker.
+            </>
+          }
+          code={`// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
@@ -188,8 +205,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* Layout shell: positioned ancestor + stacking context for the OUT clone. */}
-        <main className="relative z-0 min-h-dvh overflow-x-clip bg-black">
+        <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>{children}</SsgoiProvider>
         </main>
       </body>
@@ -198,304 +214,114 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }`}
         />
 
-        <WhyStructure />
+        <ul className="mt-5 divide-y divide-white/[0.05] border-y border-white/[0.05]">
+          {LAYOUT_CLASSES.map(({ cls, why }) => (
+            <li
+              key={cls}
+              className="flex flex-col gap-1.5 py-3 md:flex-row md:items-baseline md:gap-5"
+            >
+              <code className="shrink-0 font-mono text-sm font-semibold text-orange-400">
+                {cls}
+              </code>
+              <span className="text-sm leading-relaxed text-neutral-400">
+                {why}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
+          The mechanism behind these classes is in{" "}
+          <Link
+            href="/docs/how-it-works"
+            className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+          >
+            How it works
+          </Link>{" "}
+          — useful when debugging, not needed for setup.
+        </p>
 
         <SetupStep
-          n="2"
-          title="Wrap React routed content"
+          n="3"
+          title="Add the route boundary (simple version)"
           desc={
             <>
-              In React adapters, use one pathname-based{" "}
+              A changed <code className="font-mono text-neutral-200">key</code>{" "}
+              makes React unmount the old page and mount the new one;{" "}
               <code className="font-mono text-neutral-200">
                 data-ssgoi-transition
               </code>{" "}
-              boundary utility in your layout. This is a React convenience
-              pattern: SSGOI only needs a logical page id, and the utility uses
-              the current pathname as that id. Match descendants with wildcards
-              like <code className="font-mono text-neutral-200">/post/*</code>{" "}
-              or include the parent path with{" "}
-              <code className="font-mono text-neutral-200">/docs/**</code>.
+              is the id config rules match against. For most apps the pathname
+              serves as both.
             </>
           }
-          code={`// ssgoi-transition-boundary.tsx
+          code={`// app/ssgoi-route-boundary.tsx
 "use client";
 
-import { type ElementType, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
-export function SsgoiTransitionBoundary({
-  children,
-  as,
-  className,
-}: {
-  children: ReactNode;
-  as?: ElementType;
-  className?: string;
-}) {
+export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const Component = as ?? "div";
 
   return (
-    <Component
-      key={pathname}
-      data-ssgoi-transition={pathname}
-      className={className}
-    >
+    <div key={pathname} data-ssgoi-transition={pathname}>
       {children}
-    </Component>
+    </div>
   );
 }
 
-// app/ssgoi-provider.tsx
-import { Ssgoi } from "@ssgoi/react";
-
-return (
-  <Ssgoi config={config}>
-    <SsgoiTransitionBoundary className="min-h-full bg-black">
-      {children}
-    </SsgoiTransitionBoundary>
-  </Ssgoi>
-);`}
+// app/layout.tsx — wrap the provider's children
+<SsgoiProvider>
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+</SsgoiProvider>`}
         />
 
-        <NonReactBoundary />
+        <div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/[0.04] p-6">
+          <h3 className="text-base font-semibold tracking-tight text-neutral-100">
+            Verify
+          </h3>
+          <ol className="mt-4 space-y-3 text-sm text-neutral-300">
+            <FlowStep
+              n="1"
+              body="Navigate from / to any other page: the new page slides in from the right."
+            />
+            <FlowStep
+              n="2"
+              body="Navigate back to /: the page slides back out to the right."
+            />
+            <FlowStep
+              n="3"
+              body="No animation, or the wrong region moves? Check the Layout shell page, then How it works."
+            />
+          </ol>
+        </div>
+
+        <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-400">
+          That&apos;s the whole setup. This simple boundary remounts the whole
+          routed area on every navigation — correct until the app needs a
+          persistent region, like a bottom nav that must stay while pages
+          change. When that day comes, read{" "}
+          <Link
+            href="/docs/nested-boundaries"
+            className="text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
+          >
+            Route boundaries
+          </Link>
+          .
+        </p>
       </div>
 
       <ReferenceTemplates />
 
       <p className="mt-10 max-w-xl text-sm leading-relaxed text-neutral-500">
-        Which transition goes where is just config — browse them in{" "}
+        Next: pick real transitions for your UX in{" "}
         <Link
           href="/docs/transitions"
           className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
         >
           Transitions
         </Link>
-        . If a transition ever looks off, the cause is almost always the wrapper
-        — see{" "}
-        <Link
-          href="/docs/layout"
-          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          Layout
-        </Link>{" "}
-        and{" "}
-        <Link
-          href="/docs/how-it-works"
-          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          How it works
-        </Link>
         .
-      </p>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Install — why the DOM structure                                            */
-/* -------------------------------------------------------------------------- */
-
-function WhyStructure() {
-  return (
-    <div className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-6">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Why this shape
-      </p>
-      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
-        The wrapper classes aren&apos;t decoration
-      </h3>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        When you navigate, the framework unmounts the leaving page. SSGOI clones
-        it back into the DOM with{" "}
-        <code className="font-mono text-neutral-200">position: absolute</code>{" "}
-        so its exit animation can play <em>over</em> the incoming page. An
-        absolutely-positioned clone needs the right ancestor, or it jumps and
-        flickers — that&apos;s what these three classes on the layout shell are
-        for:
-      </p>
-
-      <ul className="mt-5 divide-y divide-white/[0.05] border-y border-white/[0.05]">
-        {LAYOUT_CLASSES.map(({ cls, why }) => (
-          <li
-            key={cls}
-            className="flex flex-col gap-1.5 py-3 md:flex-row md:items-baseline md:gap-5"
-          >
-            <code className="shrink-0 font-mono text-sm font-semibold text-orange-400">
-              {cls}
-            </code>
-            <span className="text-sm leading-relaxed text-neutral-400">
-              {why}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
-        These belong on the outer layout shell that wraps{" "}
-        <code className="font-mono text-neutral-300">&lt;Ssgoi&gt;</code>, not
-        on the route marker. Full walkthrough in{" "}
-        <Link
-          href="/docs/layout"
-          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          Layout
-        </Link>{" "}
-        and{" "}
-        <Link
-          href="/docs/how-it-works"
-          className="text-neutral-300 underline decoration-white/20 underline-offset-4 transition-colors hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          How it works
-        </Link>
-        .
-      </p>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Install — non-React route boundary                                         */
-/* -------------------------------------------------------------------------- */
-
-function NonReactBoundary() {
-  return (
-    <div className="mt-12 border-t border-white/[0.06] pt-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Svelte · Vue · Solid · Angular · Qwik
-      </p>
-      <h3 className="mt-3 text-base font-semibold tracking-tight text-neutral-100">
-        Mark each routed page directly
-      </h3>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-        Outside React, skip the boundary utility and put{" "}
-        <code className="font-mono text-neutral-200">
-          data-ssgoi-transition
-        </code>{" "}
-        right on each routed page. The value is a stable logical page id — it
-        does <em>not</em> have to be the framework&apos;s route pathname; it
-        only has to match the{" "}
-        <code className="font-mono text-neutral-200">from</code>/
-        <code className="font-mono text-neutral-200">to</code>/
-        <code className="font-mono text-neutral-200">paths</code> values in your
-        config.
-      </p>
-
-      <CodeBlock
-        className="mt-5"
-        language="xml"
-        code={`<!-- SvelteKit · src/routes/gallery/+page.svelte -->
-<main data-ssgoi-transition="/gallery">
-  <!-- page content -->
-</main>
-
-<!-- Nuxt / Vue · pages/gallery.vue -->
-<template>
-  <main data-ssgoi-transition="/gallery">
-    <!-- page content -->
-  </main>
-</template>
-
-<!-- Angular · gallery.component.html -->
-<section data-ssgoi-transition="/gallery">
-  <!-- page content -->
-</section>
-
-// Qwik City · src/routes/gallery/index.tsx
-export default component$(() => {
-  return (
-    <main data-ssgoi-transition="/gallery">
-      {/* page content */}
-    </main>
-  );
-});`}
-      />
-
-      <p className="mt-5 max-w-xl text-sm leading-relaxed text-neutral-500">
-        <span className="text-neutral-300">Why not one shared boundary?</span>{" "}
-        SvelteKit and Nuxt render slot/snippet content live, so a single route
-        boundary in a parent layout would let the outgoing page wrapper render
-        the <em>incoming</em> page&apos;s children mid-navigation. Marking each
-        page directly keeps the outgoing and incoming boundaries cleanly
-        separated. (React&apos;s utility sidesteps this by keying the subtree on
-        the pathname.)
-      </p>
-
-      <div className="mt-8 border-t border-white/[0.06] pt-8">
-        <h4 className="text-sm font-semibold tracking-tight text-neutral-100">
-          Qwik City layout setup
-        </h4>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-          Qwik serializes component state for resumability, while SSGOI configs
-          contain transition functions. Pass the config as{" "}
-          <code className="font-mono text-neutral-200">config$</code> and call{" "}
-          <code className="font-mono text-neutral-200">useSsgoi</code> directly
-          in the Qwik City layout that owns the route{" "}
-          <code className="font-mono text-neutral-200">&lt;Slot /&gt;</code>.
-        </p>
-        <CodeBlock
-          className="mt-5"
-          language="tsx"
-          code={`import { $, Slot, component$, useSignal } from "@builder.io/qwik";
-import { useSsgoi } from "@ssgoi/qwik";
-import { drill } from "@ssgoi/qwik/view-transitions";
-
-const config$ = $(() => ({
-  transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
-}));
-
-export default component$(() => {
-  const ssgoiRoot = useSignal<HTMLElement>();
-
-  useSsgoi(ssgoiRoot, { config$ });
-
-  return (
-    <main
-      ref={ssgoiRoot}
-      class="relative z-0 h-dvh overflow-y-auto overflow-x-clip"
-    >
-      <Slot />
-    </main>
-  );
-});`}
-        />
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500">
-          Avoid wrapping a Qwik City route{" "}
-          <code className="font-mono text-neutral-300">&lt;Slot /&gt;</code>{" "}
-          inside the exported{" "}
-          <code className="font-mono text-neutral-300">&lt;Ssgoi&gt;</code>{" "}
-          component. Forwarding the route slot through another component can
-          keep routed content out of the live DOM during navigation.
-        </p>
-      </div>
-
-      <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-        Agent-readable setup for each framework lives in its own file:{" "}
-        {(["svelte", "vue", "solid", "angular", "qwik"] as const).map(
-          (fw, i) => (
-            <span key={fw}>
-              {i > 0 && " · "}
-              <a
-                href={`https://ssgoi.dev/llms/${fw}.txt`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
-              >
-                /llms/{fw}.txt
-              </a>
-            </span>
-          ),
-        )}
-        . The main{" "}
-        <a
-          href={LLMS_TXT}
-          target="_blank"
-          rel="noreferrer"
-          className="font-mono text-neutral-300 underline decoration-white/20 underline-offset-4 hover:text-orange-400 hover:decoration-orange-400/60"
-        >
-          /llms.txt
-        </a>{" "}
-        stays React-first and indexes the rest.
       </p>
     </div>
   );
@@ -508,10 +334,7 @@ export default component$(() => {
 function ReferenceTemplates() {
   return (
     <div className="mt-12 border-t border-white/[0.06] pt-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80">
-        Copy from a working app
-      </p>
-      <h2 className="mt-3 text-xl font-semibold tracking-tight text-neutral-100">
+      <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
         Reference templates
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
@@ -572,14 +395,161 @@ function SetupStep({
 /* Transitions                                                                */
 /* -------------------------------------------------------------------------- */
 
+const UX_DECISION_ROWS: Array<{
+  ux: string;
+  name: string;
+  rule: string;
+}> = [
+  {
+    ux: "Default / unrelated pages",
+    name: "fade",
+    rule: `priority: -100, on: "/**"`,
+  },
+  { ux: "List → detail, drilling deeper", name: "drill", rule: "on + except" },
+  { ux: "Tabs or steps with left-right order", name: "slide", rule: "ordered" },
+  { ux: "Sibling pages, Material shared-axis", name: "axis", rule: "ordered" },
+  {
+    ux: "Compose / filters / modal-like route",
+    name: "sheet",
+    rule: "from / to",
+  },
+  { ux: "Card or image expands to detail", name: "zoom", rule: "from / to" },
+  { ux: "Shared element across two pages", name: "hero", rule: "from / to" },
+  {
+    ux: "Vertical sequence, editorial paging",
+    name: "scroll",
+    rule: "ordered",
+  },
+];
+
 export function TransitionsBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl text-sm leading-relaxed text-neutral-400">
-        Every built-in transition, tagged with when it fits. Open one for its
-        variants, usage, and live demos — or grab the{" "}
+        Start from the UX you&apos;re building. One row is one decision: the
+        effect and the rule form to write it with.
+      </p>
+
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-white/[0.06]">
+        <table className="w-full min-w-[520px] text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.06] text-xs uppercase tracking-wider text-neutral-500">
+              <th className="px-4 py-3 font-medium">UX intent</th>
+              <th className="px-4 py-3 font-medium">Transition</th>
+              <th className="px-4 py-3 font-medium">Rule form</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/[0.05]">
+            {UX_DECISION_ROWS.map((row) => (
+              <tr key={row.name} className="group">
+                <td className="px-4 py-3 text-neutral-300">{row.ux}</td>
+                <td className="px-4 py-3">
+                  <Link
+                    href={`/docs/transitions/${row.name}`}
+                    className="font-mono font-semibold text-orange-400 underline decoration-orange-400/30 underline-offset-4 hover:decoration-orange-400"
+                  >
+                    {row.name}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-neutral-400">
+                  {row.rule}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-4 max-w-2xl text-xs leading-relaxed text-neutral-500">
+        Purely stylistic effects work with any rule form:{" "}
+        {["film", "strip", "rotate", "blind", "jaemin"].map((name, i) => (
+          <span key={name}>
+            {i > 0 && " · "}
+            <Link
+              href={`/docs/transitions/${name}`}
+              className="font-mono text-neutral-400 underline decoration-white/20 underline-offset-4 hover:text-orange-400"
+            >
+              {name}
+            </Link>
+          </span>
+        ))}
+        .
+      </p>
+
+      <p className="mt-10 max-w-xl text-sm leading-relaxed text-neutral-400">
+        Effects and route matching are separate: a factory describes how pages
+        move, while its surrounding rule describes where it applies. Open an
+        effect for variants and live demos — or grab the{" "}
         <span className="font-mono text-neutral-300">.txt</span> for the full
         API.
+      </p>
+
+      <CodeBlock
+        className="mt-6"
+        code={`const TOP_LEVEL = ["/", "/search", "/profile"] as const;
+
+const config: SsgoiConfig = {
+  transitions: ({ isMobile }) =>
+    isMobile
+      ? [
+          {
+            from: "/gallery",
+            to: "/photo/*",
+            transition: zoom({ type: "expand" }),
+          },
+          {
+            ordered: TOP_LEVEL,
+            transition: slide(),
+          },
+          {
+            priority: -100,
+            on: "/**",
+            except: TOP_LEVEL,
+            transition: drill(),
+          },
+        ]
+      : [
+          { ordered: TOP_LEVEL, transition: film() },
+          { priority: -100, on: "/**", transition: fade() },
+        ],
+};`}
+      />
+
+      <ul className="mt-6 grid gap-3 text-sm text-neutral-400 sm:grid-cols-3">
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">on</code> defines a route
+          family. Entering is forward, leaving is backward;{" "}
+          <code className="font-mono text-neutral-300">except</code> marks its
+          boundary.
+        </li>
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">from / to</code> defines
+          an exact relationship. It is bidirectional by default and accepts
+          pattern arrays.
+        </li>
+        <li className="rounded-xl border border-white/[0.06] p-4">
+          <code className="font-mono text-orange-300">ordered</code> requires
+          both routes in one ordered scope; index order resolves direction.
+        </li>
+      </ul>
+
+      <p className="mt-4 max-w-2xl text-xs leading-relaxed text-neutral-500">
+        Inside a path, <code className="font-mono">*</code> matches exactly one
+        segment; suffix <code className="font-mono">**</code> matches zero or
+        more. A bare <code className="font-mono">*</code> remains a
+        compatibility alias for <code className="font-mono">{"/**"}</code>.
+        Named single-segment forms remain supported and rank above a
+        single-segment <code className="font-mono">*</code> when rules overlap,
+        but their names are not captured or exposed. Winners are chosen by
+        priority, then path specificity, then declaration order.
+      </p>
+      <p className="mt-3 max-w-2xl text-xs leading-relaxed text-neutral-500">
+        Scroll follows the rule automatically:{" "}
+        <code className="font-mono">on</code> and{" "}
+        <code className="font-mono">from / to</code> restore the forward source
+        and reset the destination; <code className="font-mono">ordered</code>{" "}
+        restores both. Use{" "}
+        <code className="font-mono">{"preserveScroll: { from, to }"}</code> only
+        for an exact override.
       </p>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -633,7 +603,7 @@ function TransitionCard({ entry }: { entry: TransitionDoc }) {
 const LAYOUT_CLASSES: { cls: string; why: string }[] = [
   {
     cls: "relative",
-    why: "The outgoing page is cloned with position: absolute — it needs a positioned ancestor or it jumps.",
+    why: "The detached outgoing page is reinserted with position: absolute — it needs the correct containing block.",
   },
   {
     cls: "z-0",
@@ -665,7 +635,7 @@ export function LayoutBody() {
 
       <CodeBlock
         className="mt-8"
-        code={`<main className="overflow-y-auto relative z-0 overflow-x-clip h-dvh">
+        code={`<main className="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
   <Ssgoi config={config}>{children}</Ssgoi>
 </main>`}
       />
@@ -697,31 +667,45 @@ export function HowItWorksBody() {
   return (
     <div className="mt-8">
       <p className="max-w-xl leading-relaxed text-neutral-400">
-        When a route changes, the old page would normally unmount and vanish.
-        SSGOI clones it back into the DOM with{" "}
+        A boundary key change makes the framework unmount the old routed region
+        and mount a new one. SSGOI preserves the detached outgoing DOM node and
+        temporarily reinserts it with{" "}
         <code className="font-mono text-neutral-200">position: absolute</code>{" "}
         so the OUT animation can play while the new page mounts in place.
       </p>
 
+      <CodeBlock
+        className="mt-8"
+        language="text"
+        code={`navigate /home → /about
+
+router unmounts /home ──▶ SSGOI re-inserts the detached node
+                          with position: absolute        (OUT)
+router mounts /about ───▶ new page in normal layout flow (IN)
+
+        OUT ∥ IN animate simultaneously
+        └─ animation ends → OUT node removed from DOM`}
+      />
+
       <ol className="mt-8 space-y-3 text-sm text-neutral-300">
         <FlowStep
           n="1"
-          body="User navigates — framework unmounts the old page."
+          body="Navigation changes the boundary key, so the framework unmounts the old routed region."
         />
         <FlowStep
           n="2"
-          body="SSGOI clones the leaving page and re-inserts it with position: absolute (OUT)."
+          body="SSGOI preserves the detached leaving node and reinserts it with position: absolute (OUT)."
         />
         <FlowStep n="3" body="The new page mounts at its natural place (IN)." />
         <FlowStep n="4" body="OUT and IN animate at the same time." />
         <FlowStep
           n="5"
-          body="The cloned OUT page is removed when its animation ends."
+          body="The reinserted OUT page is removed when its animation ends."
         />
       </ol>
 
       <p className="mt-8 max-w-xl text-sm leading-relaxed text-neutral-500">
-        That clone is why the wrapper needs{" "}
+        That reinserted OUT page is why the wrapper needs{" "}
         <code className="font-mono text-neutral-300">relative z-0</code> —
         without a positioned, stacking-context ancestor, the absolute-positioned
         OUT page either jumps to the wrong spot or falls behind the background.

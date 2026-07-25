@@ -2,42 +2,23 @@ import type {
   AnyTransitionConfig,
   SsgoiConfig,
   SsgoiContext,
-  SsgoiPathTransition,
-  SsgoiPathTransitionInput,
+  NavigationDirection,
+  SsgoiTransitionRule,
   SsgoiTransitionsFn,
   SsgoiTransitionContext,
+  PreserveScrollConfig,
   PrepareArgs,
   CreateElement,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
-import { processSymmetricTransitions } from "./process-symmetric-transitions";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
-import { findMatchingTransition } from "./find-matching-transition";
+import { resolveTransitionRule } from "./resolve-transition-rule";
+import { createNavigationDirectionTracker } from "./navigation-direction";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
-
-function isTransitionGroup(
-  transition: SsgoiPathTransitionInput,
-): transition is readonly SsgoiPathTransitionInput[] {
-  return Array.isArray(transition);
-}
-
-function flattenTransitions(
-  transitions: readonly SsgoiPathTransitionInput[],
-): SsgoiPathTransition[] {
-  const flattened: SsgoiPathTransition[] = [];
-  for (const transition of transitions) {
-    if (isTransitionGroup(transition)) {
-      flattened.push(...flattenTransitions(transition));
-    } else {
-      flattened.push(transition);
-    }
-  }
-  return flattened;
-}
 
 type TransitionMode = "unmount" | "hidden";
 
@@ -45,6 +26,11 @@ type PendingSide = {
   element: HTMLElement;
   parent: Node | null;
   nextSibling: Node | null;
+  /**
+   * Applies the scroll policy selected by the rule that brings this side IN.
+   * OUT payloads do not need it.
+   */
+  applyScrollPolicy?: (preserves: boolean) => void;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
@@ -86,15 +72,19 @@ export function createSggoiTransitionContext(
   options: SsgoiConfig,
   contextOptions: CreateSsgoiTransitionContextOptions = {},
 ): SsgoiContext {
-  const {
-    transitions = [],
-    middleware = (from, to) => ({ from, to }),
-    preserveScroll = (isMobile: boolean) => isMobile,
-  } = options;
+  const { transitions = [], middleware = (from, to) => ({ from, to }) } =
+    options;
 
   const host = contextOptions.host ?? new HostAnimation();
+  const unmountGroup = {};
 
-  const detector = createNavigationDetector();
+  const detector = createNavigationDetector<PendingSide>({
+    // Nested boundaries can be discovered in separate MutationObserver
+    // batches (notably when Suspense reveals a child later). When the same
+    // side/path repeats before pairing, the outermost DOM boundary owns it.
+    keepCurrent: ({ current, next }) => current.element.contains(next.element),
+  });
+  const directionTracker = createNavigationDirectionTracker();
 
   // Normalize both accepted shapes to the functional form up front so the rest
   // of the file deals with exactly one shape: a static list becomes a function
@@ -125,33 +115,30 @@ export function createSggoiTransitionContext(
     initializeContext,
     calculateScrollOffset,
     evictScrollPosition,
-    shouldPreserve,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
     getIsMobile,
-  } = createContextManager({ preserveScroll, resolvePath: resolveScrollPath });
+  } = createContextManager({ resolvePath: resolveScrollPath });
 
-  // Resolve + flatten + process the path-transition list lazily. `isMobile` is
+  // Resolve the flat route-rule list lazily. `isMobile` is
   // only reliable once the scroll container is known (measured on the first IN),
-  // which always precedes findMatchingTransition. Memoized per device class so a
-  // static list is processed at most once per `isMobile` value and the resolver
+  // which always precedes route resolution. Memoized per device class so a
+  // static list is resolved at most once per `isMobile` value and the resolver
   // never runs on the hot path more than necessary.
-  const processedByIsMobile = new Map<boolean, SsgoiPathTransition[]>();
-  const getProcessedTransitions = (): SsgoiPathTransition[] => {
+  const processedByIsMobile = new Map<
+    boolean,
+    readonly SsgoiTransitionRule[]
+  >();
+  const getProcessedTransitions = (): readonly SsgoiTransitionRule[] => {
     const isMobile = getIsMobile();
     let processed = processedByIsMobile.get(isMobile);
     if (!processed) {
-      processed = processSymmetricTransitions(
-        flattenTransitions(resolveTransitions({ isMobile })),
-      );
+      processed = resolveTransitions({ isMobile });
       processedByIsMobile.set(isMobile, processed);
     }
     return processed;
   };
-
-  let pendingOut: PendingSide | null = null;
-  let pendingIn: PendingSide | null = null;
 
   const elementAnchors = new WeakMap<HTMLElement, ElementAnchor>();
 
@@ -246,10 +233,12 @@ export function createSggoiTransitionContext(
 
   const runTransition = (
     config: AnyTransitionConfig,
+    direction: NavigationDirection,
     fromPath: string,
     toPath: string,
     outSide: PendingSide,
     inSide: PendingSide,
+    preserveScroll: PreserveScrollConfig,
   ): void => {
     const fromOriginal = outSide.element;
     const toElement = inSide.element;
@@ -260,12 +249,19 @@ export function createSggoiTransitionContext(
       ? { parent: outSide.parent, nextSibling: outSide.nextSibling }
       : readAnchor(fromOriginal);
 
-    const scrollOffset = calculateScrollOffset(fromPath, toPath);
+    const scrollOffset = calculateScrollOffset(
+      fromPath,
+      toPath,
+      preserveScroll.to,
+    );
 
     const ssgoiContext: SsgoiTransitionContext = {
+      direction,
       scrollOffset,
       from: { scroll: getScrollPosition(fromPath) },
-      to: { scroll: getScrollPosition(toPath) },
+      to: {
+        scroll: getScrollPosition(toPath, preserveScroll.to),
+      },
       get scrollingElement() {
         return getScrollContainer() || document.documentElement;
       },
@@ -305,7 +301,10 @@ export function createSggoiTransitionContext(
       prepareOutgoing(fromElement, ssgoiContext);
     }
 
-    if (!shouldPreserve(fromPath)) evictScrollPosition(fromPath);
+    // The OUT page has already contributed its original position to the
+    // transition context. Only now is it safe to discard a non-preserved
+    // position; resetting earlier would flatten the outgoing animation.
+    if (!preserveScroll.from) evictScrollPosition(fromPath);
 
     // Stamp ownership BEFORE host.attach force-completes any prior run (below):
     // the prior run's settle checks ownership and must already see THIS run
@@ -397,30 +396,24 @@ export function createSggoiTransitionContext(
     });
   };
 
-  const handleArrival = (path: string, side: "in" | "out"): void => {
+  const handleArrival = (
+    path: string,
+    side: "in" | "out",
+    pendingSide: PendingSide,
+  ): void => {
     const isSwipeBack = swipeDetector.isSwipeBack();
-    detector.trigger(path, side);
 
     // .then chain — handleArrival returns immediately, dispatcher never blocks.
-    detector.get(side).then((pair) => {
+    detector.arrive(path, side, pendingSide).then((pair) => {
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) return;
-
-      if (isSwipeBack) {
-        if (side === "out" && pair.from && !shouldPreserve(pair.from)) {
-          evictScrollPosition(pair.from);
-        }
-        pendingOut = null;
-        pendingIn = null;
-        return;
-      }
 
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
 
       // `middleware` rewrites the path pair for matching (e.g. aliasing
       // `/m-p/[id]` → `/p/[id]`, or collapsing a deep route to a logical id). Use
-      // the transformed pair for `findMatchingTransition`, but hand `runTransition`
+      // the transformed pair to the rule resolver, but hand `runTransition`
       // the ORIGINAL pair: the context manager already funnels every scroll path
       // through the same `middleware` (via `resolveScrollPath`), so passing the
       // originals keeps record/restore on one identity. Passing the pre-transformed
@@ -431,20 +424,46 @@ export function createSggoiTransitionContext(
         pair.to,
       );
 
-      const config = findMatchingTransition(
+      const historyDirection = directionTracker.resolve(
+        transformedFrom,
+        transformedTo,
+      );
+      const resolved = resolveTransitionRule(
         transformedFrom,
         transformedTo,
         getProcessedTransitions(),
+        historyDirection,
       );
 
-      const outSide = pendingOut;
-      const inSide = pendingIn;
-      pendingOut = null;
-      pendingIn = null;
+      // Reset is the safe fallback when no rule owns this navigation. The
+      // decision is applied to the IN registration only; OUT has kept its
+      // original scroll until this paired point.
+      if (!resolved) {
+        pair.in.applyScrollPolicy?.(false);
+        evictScrollPosition(pair.from);
+        return;
+      }
 
-      if (!config || !outSide || !inSide) return;
+      pair.in.applyScrollPolicy?.(resolved.preserveScroll.to);
 
-      runTransition(config, pair.from, pair.to, outSide, inSide);
+      // Native swipe-back owns playback, but the same resolved rule still owns
+      // scroll restoration and semantic history.
+      if (isSwipeBack) {
+        if (!resolved.preserveScroll.from) {
+          evictScrollPosition(pair.from);
+        }
+        return;
+      }
+
+      runTransition(
+        resolved.transition,
+        resolved.direction,
+        pair.from,
+        pair.to,
+        pair.out,
+        pair.in,
+        resolved.preserveScroll,
+      );
     });
   };
 
@@ -484,14 +503,14 @@ export function createSggoiTransitionContext(
     if (alreadyHidden) return; // duplicate hide — kept revealed, don't re-pair
 
     const anchor = readAnchor(element);
-    pendingOut = {
+    const pendingSide: PendingSide = {
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
       mode: "hidden",
     };
     const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "out");
+    handleArrival(currentPath, "out", pendingSide);
   };
 
   // React revealed `element` (an <Activity> went mode="visible"): it is entering
@@ -523,20 +542,22 @@ export function createSggoiTransitionContext(
       }
     }
 
-    initializeContext(element, path);
-    pendingIn = {
+    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    const applyScrollPolicy = initializeContext(element, currentPath);
+    const pendingSide: PendingSide = {
       element,
       parent: element.parentElement,
       nextSibling: element.nextElementSibling,
+      applyScrollPolicy,
     };
-    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "in");
+    handleArrival(currentPath, "in", pendingSide);
   };
 
   const handleRemoval = (
     element: HTMLElement,
     path: string,
     removalAnchor?: UnmountAnchor,
+    emit = true,
   ) => {
     const state = hiddenState.get(element);
     if (state) {
@@ -548,14 +569,15 @@ export function createSggoiTransitionContext(
       // side that still points at this now-gone node so it can't mis-pair a
       // later arrival onto a detached element.
       if (state.intent === "hidden") {
-        if (pendingOut?.element === element) pendingOut = null;
-        if (pendingIn?.element === element) pendingIn = null;
+        detector.cancel((pendingSide) => pendingSide.element === element);
         return;
       }
     }
 
+    if (!emit) return;
+
     const anchor = removalAnchor ?? readAnchor(element);
-    pendingOut = {
+    const pendingSide: PendingSide = {
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
@@ -565,7 +587,7 @@ export function createSggoiTransitionContext(
     // so a mid-life id change (re-render with a new id prop on the same
     // element) leaves with its current identity, not the one it mounted with.
     const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "out");
+    handleArrival(currentPath, "out", pendingSide);
   };
 
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
@@ -573,7 +595,11 @@ export function createSggoiTransitionContext(
   // strict-mode double-mount.
   const registered = new WeakSet<HTMLElement>();
 
-  const register: SsgoiContext["register"] = (path, element) => {
+  const register: SsgoiContext["register"] = (
+    path,
+    element,
+    { enter = true } = {},
+  ) => {
     if (registered.has(element)) return;
     registered.add(element);
 
@@ -599,16 +625,24 @@ export function createSggoiTransitionContext(
     // not "entering" — set it up but don't fire an IN until React reveals it.
     if (!vis.isHidden) {
       captureVisibleDisplay(element, state);
-      initializeContext(element, path);
-      pendingIn = {
-        element,
-        parent: element.parentElement,
-        nextSibling: element.nextElementSibling,
-      };
-      handleArrival(path, "in");
+      if (enter) {
+        const applyScrollPolicy = initializeContext(element, path);
+        const pendingSide: PendingSide = {
+          element,
+          parent: element.parentElement,
+          nextSibling: element.nextElementSibling,
+          applyScrollPolicy,
+        };
+        handleArrival(path, "in", pendingSide);
+      }
     }
 
-    watchUnmount(element, (anchor) => handleRemoval(element, path, anchor));
+    watchUnmount(
+      element,
+      (anchor, options) =>
+        handleRemoval(element, path, anchor, options?.emit ?? true),
+      unmountGroup,
+    );
   };
 
   // Per-path ref callbacks are cached so adapters can drop `refFor(path)`

@@ -1,39 +1,55 @@
-# SSGOI - Vue / Nuxt setup
+# SSGOI with Nuxt
 
-Framework-specific setup for `@ssgoi/vue`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
+Nuxt wiring only. Config syntax, transition catalog, options:
+https://ssgoi.dev/llms.txt
 
 ```bash
 npm install @ssgoi/vue
 ```
 
-Reference template (Nuxt): https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt
+## Setup
 
-## Layout setup
+Everything wires in the app root — one `<Ssgoi>`, the shell classes, and the
+boundary component around `<NuxtPage />`:
 
-Same three rules as every framework (details in llms.txt):
+```vue
+<!-- app.vue -->
+<script setup>
+import { Ssgoi } from "@ssgoi/vue";
+import { config } from "~/utils/ssgoi-config";
+</script>
 
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
-3. Mark routed content with `data-ssgoi-transition="..."`.
+<template>
+  <main class="relative z-0 min-h-dvh overflow-x-clip">
+    <Ssgoi :config="config">
+      <SsgoiTransitionBoundary>
+        <NuxtPage />
+      </SsgoiTransitionBoundary>
+    </Ssgoi>
+  </main>
+</template>
+```
 
-## Nuxt/Vue route boundary
+```ts
+// utils/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/vue";
+import { drill } from "@ssgoi/vue/view-transitions";
 
-Nuxt can mark routed content once in a persistent layout. A keyed Vue VNode retains its own slot subtree, so unmounting the old key gives SSGOI the outgoing page while the new key receives the incoming route.
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+```
 
-### 1. Copy the boundary component
+## The boundary component
 
-Create a small router-specific boundary:
+A changed `:key` remounts the subtree — that unmount/mount pair is what SSGOI
+animates. Key and marker both come from `route.path`. Files under
+`components/` auto-import:
 
 ```vue
 <!-- components/ssgoi-transition-boundary.vue -->
 <template>
-  <component
-    :is="as"
-    :key="transitionId"
-    :data-ssgoi-transition="transitionId"
-  >
+  <component :is="as" :key="transitionId" :data-ssgoi-transition="transitionId">
     <slot />
   </component>
 </template>
@@ -57,96 +73,13 @@ const transitionId = computed(() => props.getId(route.path));
 </script>
 ```
 
-### 2. Wrap routed content once
+Verify: navigate `/` → any page slides in from the right; back slides out.
 
-Copy the component above as-is, then use it in `app.vue`. This example includes all imports, a typed config, the required scroll/positioning shell, and a stable id for an optional nested `/products` layout:
+## Beyond the basics
 
-```vue
-<!-- app.vue -->
-<template>
-  <!-- This is the scroll element and the positioned ancestor for OUT clones. -->
-  <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
-    <Ssgoi :config="config">
-      <SsgoiTransitionBoundary
-        :get-id="getRootTransitionId"
-        class="min-h-full"
-      >
-        <NuxtPage />
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  </main>
-</template>
-
-<script setup lang="ts">
-import { Ssgoi } from "@ssgoi/vue";
-import type { SsgoiConfig } from "@ssgoi/vue";
-import { drill, zoom } from "@ssgoi/vue/view-transitions";
-
-const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    drill({ enter: "/posts/*", exit: "/posts" }),
-    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
-  ],
-} satisfies SsgoiConfig;
-
-const getRootTransitionId = (path: string) =>
-  path === "/products" || path.startsWith("/products/")
-    ? "/products"
-    : path;
-</script>
-```
-
-If the app has no nested transition provider, omit `:get-id="getRootTransitionId"` and the helper; the boundary defaults to the full `route.path`.
-
-### 3. Optional nested provider
-
-For nested transitions, the outer identity must stay stable while the nested boundary uses the full pathname. With the root setup above, copy this Nuxt parent page:
-
-```vue
-<!-- pages/products.vue -->
-<template>
-  <section class="min-h-full">
-    <nav>
-      <NuxtLink v-for="path in paths" :key="path" :to="path">
-        {{ path.split("/").at(-1) }}
-      </NuxtLink>
-    </nav>
-
-    <div class="relative z-0 overflow-x-clip">
-      <Ssgoi :config="config">
-        <!-- No get-id here: nested tabs need their full pathname. -->
-        <SsgoiTransitionBoundary class="min-h-full">
-          <NuxtPage />
-        </SsgoiTransitionBoundary>
-      </Ssgoi>
-    </div>
-  </section>
-</template>
-
-<script setup lang="ts">
-import { Ssgoi } from "@ssgoi/vue";
-import type { SsgoiConfig } from "@ssgoi/vue";
-import { slide } from "@ssgoi/vue/view-transitions";
-
-const paths = [
-  "/products/all",
-  "/products/electronics",
-  "/products/fashion",
-];
-
-const config = {
-  transitions: [slide({ paths })],
-} satisfies SsgoiConfig;
-</script>
-```
-
-Create the child pages at `pages/products/all.vue`, `pages/products/electronics.vue`, and `pages/products/fashion.vue`. They render ordinary page content and must not add another `data-ssgoi-transition` marker; the boundary owns it.
-
-For plain Vue without Vue Router, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`; match dynamic descendants with config wildcards such as `/post/*`.
-
-## Shared reference
-
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/drill.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+- Persistent layout (tabs stay while tab content changes): a parent page puts
+  `:data-ssgoi-transition="route.path"` on its own root and renders
+  `<NuxtPage />` for children; child pages keep their boundaries. When parent
+  and child leave together, the outer changed boundary wins.
+- Grouping several routes under one id: pass `getId` to the boundary.
+- Full example: https://github.com/meursyphus/ssgoi/tree/main/templates/nuxt

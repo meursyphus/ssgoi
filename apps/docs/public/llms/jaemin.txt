@@ -14,9 +14,8 @@ Multi-phase: rotation eases out first (~70% of the timeline), then the final sca
 import { jaemin } from "@ssgoi/react/view-transitions";
 
 jaemin({
-  paths: readonly string[];   // symmetric
   variant?: "default";        // reserved — only "default" today
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 ## Usage
@@ -24,7 +23,7 @@ jaemin({
 ```ts
 const config = {
   transitions: [
-    jaemin({ paths: ["/", "/modal"] }),
+    { from: "/", to: "/modal", transition: jaemin() },
   ],
 };
 ```

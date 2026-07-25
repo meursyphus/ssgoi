@@ -1,28 +1,56 @@
-# SSGOI - Solid / SolidStart setup
+# SSGOI with SolidStart
 
-Framework-specific setup for `@ssgoi/solid`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
+SolidStart wiring only. Config syntax, transition catalog, options:
+https://ssgoi.dev/llms.txt
 
 ```bash
 npm install @ssgoi/solid
 ```
 
-Reference template: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart
+## Setup
 
-## Layout setup
+Everything wires at the router root — one `<Ssgoi>`, the shell classes, and
+the boundary component around the routed children:
 
-Same three rules as every framework (details in llms.txt):
+```tsx
+// src/app.tsx
+import { Router } from "@solidjs/router";
+import { FileRoutes } from "@solidjs/start/router";
+import { Ssgoi } from "@ssgoi/solid";
+import { config } from "./ssgoi-config";
+import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
 
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps `<Ssgoi>`.
-3. Mark routed content with `data-ssgoi-transition="..."`. SolidStart can do this once with a keyed layout boundary.
+export default function App() {
+  return (
+    <Router
+      root={(props) => (
+        <main class="relative z-0 min-h-dvh overflow-x-clip">
+          <Ssgoi config={config}>
+            <SsgoiTransitionBoundary>{props.children}</SsgoiTransitionBoundary>
+          </Ssgoi>
+        </main>
+      )}
+    >
+      <FileRoutes />
+    </Router>
+  );
+}
+```
 
-## SolidStart route boundary
+```ts
+// src/ssgoi-config.ts
+import type { SsgoiConfig } from "@ssgoi/solid";
+import { drill } from "@ssgoi/solid/view-transitions";
 
-Solid's keyed `<Show>` gives each pathname its own reactive owner. Disposing the old owner removes the outgoing subtree before the incoming owner mounts:
+export const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+```
 
-### 1. Copy the boundary component
+## The boundary component
+
+`<Show keyed>` recreates its child when the id changes — that unmount/mount
+pair is what SSGOI animates:
 
 ```tsx
 // src/components/ssgoi-transition-boundary.tsx
@@ -39,8 +67,7 @@ const pathnameId = (pathname: string) => pathname;
 export function SsgoiTransitionBoundary(props: Props) {
   const location = useLocation();
   const [local, rest] = splitProps(props, ["children", "getId"]);
-  const transitionId = () =>
-    (local.getId ?? pathnameId)(location.pathname);
+  const transitionId = () => (local.getId ?? pathnameId)(location.pathname);
 
   return (
     <Show when={transitionId()} keyed>
@@ -54,108 +81,13 @@ export function SsgoiTransitionBoundary(props: Props) {
 }
 ```
 
-### 2. Wrap routed content once
+Verify: navigate `/` → any page slides in from the right; back slides out.
 
-Copy the boundary as-is. Keep it inside `<Suspense>`: lazy route content must resolve before SSGOI observes the incoming marker. Putting `<Suspense>` inside the boundary can mount an empty incoming wrapper too early.
+## Beyond the basics
 
-```tsx
-// src/app.tsx
-import { Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
-import { Suspense } from "solid-js";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
-import { drill, zoom } from "@ssgoi/solid/view-transitions";
-import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
-
-const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    drill({ enter: "/posts/*", exit: "/posts" }),
-    zoom({ paths: ["/gallery", "/gallery/*"], type: "expand" }),
-  ],
-} satisfies SsgoiConfig;
-
-const getRootTransitionId = (path: string) =>
-  path === "/products" || path.startsWith("/products/")
-    ? "/products"
-    : path;
-
-export default function App() {
-  return (
-    <Router
-      root={(props) => (
-        <main class="relative z-0 h-dvh overflow-y-auto overflow-x-clip">
-          <Ssgoi config={config}>
-            <Suspense>
-              <SsgoiTransitionBoundary
-                getId={getRootTransitionId}
-                class="min-h-full"
-              >
-                {props.children}
-              </SsgoiTransitionBoundary>
-            </Suspense>
-          </Ssgoi>
-        </main>
-      )}
-    >
-      <FileRoutes />
-    </Router>
-  );
-}
-```
-
-If the app has no nested transition provider, omit `getId={getRootTransitionId}` and the helper; the boundary defaults to the full `location.pathname`.
-
-### 3. Optional nested provider
-
-For nested transitions, the outer identity must stay stable while the nested boundary uses the full pathname. With the root setup above, copy this route layout:
-
-```tsx
-// src/routes/products.tsx
-import { A } from "@solidjs/router";
-import { For, type JSX } from "solid-js";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
-import { slide } from "@ssgoi/solid/view-transitions";
-import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
-
-const paths = [
-  "/products/all",
-  "/products/electronics",
-  "/products/fashion",
-];
-
-const config = {
-  transitions: [slide({ paths })],
-} satisfies SsgoiConfig;
-
-export default function ProductsLayout(props: { children?: JSX.Element }) {
-  return (
-    <section class="min-h-full">
-      <nav>
-        <For each={paths}>
-          {(path) => <A href={path}>{path.split("/").at(-1)}</A>}
-        </For>
-      </nav>
-
-      <div class="relative z-0 overflow-x-clip">
-        <Ssgoi config={config}>
-          {/* No getId here: nested tabs need their full pathname. */}
-          <SsgoiTransitionBoundary class="min-h-full">
-            {props.children}
-          </SsgoiTransitionBoundary>
-        </Ssgoi>
-      </div>
-    </section>
-  );
-}
-```
-
-Create child routes such as `src/routes/products/all.tsx`. Routed page components render ordinary content and must not add another `data-ssgoi-transition` marker; the boundary owns it.
-
-For plain Solid without Solid Router, put `data-ssgoi-transition` directly on the routed page boundary. Its value only needs to match the config; match dynamic descendants with wildcards such as `/post/*`.
-
-## Shared reference
-
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/zoom.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+- Persistent layout (tabs stay while tab content changes): the route layout
+  puts `data-ssgoi-transition={location.pathname}` on its own root above
+  `props.children`; child pages keep their markers. When layout and page
+  leave together, the outer changed boundary wins.
+- Grouping several routes under one id: pass `getId` to the boundary.
+- Full example: https://github.com/meursyphus/ssgoi/tree/main/templates/solidstart

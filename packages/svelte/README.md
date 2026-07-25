@@ -1,245 +1,131 @@
 # @ssgoi/svelte
 
-Svelte bindings for SSGOI - Native app-like page transitions for Svelte and SvelteKit.
+Svelte and SvelteKit bindings for SSGOI.
 
-try this: [ssgoi.dev](https://ssgoi.dev)
+[![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
-![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
-
-## AI-Assisted Setup
-
-Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
-
-```
-https://ssgoi.dev/llms.txt
-```
-
-It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
-
-## What is SSGOI?
-
-SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
-
-### ✨ Key Features
-
-- **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
-- **🚀 SSR Ready** - Perfect compatibility with SvelteKit. No hydration issues, SEO-friendly
-- **🎯 Use Your Router** - Keep your existing routing. SvelteKit's built-in router works seamlessly
-- **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **🧩 Svelte Native** - Built specifically for Svelte components
-
-## Installation
+[Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)
 
 ```bash
 npm install @ssgoi/svelte
-# or
-yarn add @ssgoi/svelte
-# or
-pnpm add @ssgoi/svelte
 ```
 
-## Quick Start
+Agent setup guide: https://ssgoi.dev/llms/svelte.txt
 
-### 1. Wrap your app layout
+## Root
 
 ```svelte
-<!-- +layout.svelte -->
-<script>
+<!-- src/routes/+layout.svelte -->
+<script lang="ts">
   import { Ssgoi } from "@ssgoi/svelte";
-  import { fade } from "@ssgoi/svelte/view-transitions";
+  import { drill } from "@ssgoi/svelte/view-transitions";
+
+  let { children } = $props();
 
   const config = {
-    transitions: [fade({ paths: ["/", "/about"] })],
+    transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
   };
 </script>
 
-<Ssgoi {config}>
-  <!-- ⚠️ Important: position: relative + z-index: 0 are required (the outgoing page is cloned with position:absolute). Add overflow-x-clip if you use horizontal transitions. -->
-  <div style="position: relative; z-index: 0; min-height: 100vh;">
-    <slot />
+<main class="ssgoi-shell">
+  <Ssgoi {config}>
+    {@render children()}
+  </Ssgoi>
+</main>
+```
+
+```css
+.ssgoi-shell {
+  position: relative;
+  z-index: 0;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+```
+
+## Route boundary
+
+Mark each route root:
+
+```svelte
+<!-- src/routes/posts/+page.svelte -->
+<div data-ssgoi-transition="/posts">Posts</div>
+```
+
+For dynamic routes, use the real path:
+
+```svelte
+<div data-ssgoi-transition="/posts/{postId}">...</div>
+```
+
+## Persistent layouts
+
+A persistent `+layout.svelte` may own an outer boundary while child pages own
+inner boundaries:
+
+```svelte
+<div data-ssgoi-transition={$page.url.pathname}>
+  <ProductTabs />
+  {@render children()}
+</div>
+```
+
+SvelteKit keeps the layout DOM during child navigation. Leaving the layout
+uses the outer boundary; changing a child route uses the child boundary.
+
+Use a keyed block only when the router reuses the same DOM node and a new
+boundary must be forced:
+
+```svelte
+{#key resolveKey($page.url.pathname)}
+  <div data-ssgoi-transition={$page.url.pathname}>
+    {@render children()}
   </div>
-</Ssgoi>
+{/key}
 ```
 
-### 2. Mark your pages
+## Config
 
-```svelte
-<!-- +page.svelte -->
-<script>
-  import { page } from "$app/stores";
-</script>
+```ts
+import { drill, slide, zoom } from "@ssgoi/svelte/view-transitions";
 
-<main data-ssgoi-transition={$page.url.pathname}>
-  <h1>Welcome</h1>
-  <!-- Page content -->
-</main>
-```
-
-**That's it!** Your pages now transition smoothly with the configured effect.
-
-## Advanced Transitions
-
-### Route-based Transitions
-
-Define different transitions for different routes:
-
-```svelte
-<script>
-  import { Ssgoi } from "@ssgoi/svelte";
-  import { scroll, drill, zoom } from "@ssgoi/svelte/view-transitions";
-
-  const config = {
-    transitions: [
-      // Scroll between tabs
-      scroll({ paths: ["/home", "/about"] }),
-
-      // Drill in when entering details
-      drill({ enter: "/products/*", exit: "/products" }),
-
-      // Shared element image transitions
-      zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
-    ],
-  };
-</script>
-
-<Ssgoi {config}>
-  <slot />
-</Ssgoi>
-```
-
-The route helpers return path transition groups, so nested arrays are accepted in `config.transitions`.
-
-## SvelteKit App Example
-
-```svelte
-<!-- +layout.svelte -->
-<script>
-  import { Ssgoi } from '@ssgoi/svelte';
-  import { scroll } from '@ssgoi/svelte/view-transitions';
-
-  const config = {
-    transitions: [scroll({ paths: ['/', '/about', '/products'] })]
-  };
-</script>
-
-<Ssgoi {config}>
-  <div style="position: relative; z-index: 0; min-height: 100vh;">
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/products">Products</a>
-    </nav>
-    <slot />
-  </div>
-</Ssgoi>
-
-<!-- +page.svelte -->
-<script>
-  import { page } from '$app/stores';
-</script>
-
-<main data-ssgoi-transition={$page.url.pathname}>
-  <!-- Your page content -->
-</main>
-```
-
-## API Reference
-
-### Components
-
-#### `<Ssgoi>`
-
-The provider component that manages transition context.
-
-```svelte
-<Ssgoi config={ssgoiConfig}>
-  <slot />
-</Ssgoi>
-```
-
-Props:
-
-- `config` - Transition configuration object
-- `host` - Optional external playback host for debug tooling
-
-#### `data-ssgoi-transition`
-
-Attribute for pages that should transition. Set it on the page boundary element
-inside `<Ssgoi>`.
-
-```svelte
-<main data-ssgoi-transition="/page-id">
-  <slot />
-</main>
-```
-
-## Built-in Transitions
-
-### Page Transitions (`@ssgoi/svelte/view-transitions`)
-
-- `fade()` - Calm cross-fade. Safe default for unrelated pages
-- `drill()` - iOS-style hierarchical navigation (list → detail)
-- `slide()` - Horizontal push for tabs / sequential flows
-- `scroll()` - Vertical page scroll for onboarding / paginated views
-- `axis()` - Material/Flutter shared-axis swap for sibling/tab routes
-- `sheet()` - Bottom sheet that slides up (modal-like flows)
-- `hero()` - Shared element transition (matching `data-hero-enter-key` / `data-hero-exit-key`)
-- `zoom()` - Card-to-detail expansion (matching `data-zoom-enter-key` / `data-zoom-exit-key`)
-- `strip()` - 3D Y-axis perspective flip
-- `blind()` - Window-blinds wipe reveal
-- `film()` - Cinematic shrink + tile (gallery / lightbox)
-- `rotate()` - Card flip between siblings
-- `jaemin()` - Playful rotated zoom for special moments
-
-## Typed Preset Configuration
-
-Transition presets are fully typed and use the core animation engine internally:
-
-```javascript
-slide({
-  paths: ["/products/all", "/products/fashion"],
-});
-```
-
-## TypeScript Support
-
-SSGOI is written in TypeScript and provides full type definitions:
-
-```typescript
-import type { SsgoiConfig, TransitionConfig } from "@ssgoi/svelte";
-
-const config: SsgoiConfig = {
-  // Full type safety
+const config = {
+  transitions: [
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+    {
+      from: "/gallery",
+      to: "/gallery/*",
+      transition: zoom(),
+    },
+    {
+      ordered: ["/tabs/a", "/tabs/b"],
+      transition: slide(),
+    },
+  ],
 };
 ```
 
-## Browser Support
+Scroll is automatic: `on` and `from`/`to` restore `from` and reset `to`;
+`ordered` restores both. Override with
+`preserveScroll: { from: boolean, to: boolean }`.
 
-- Chrome/Edge 88+
-- Firefox 78+
-- Safari 14+
-- All modern mobile browsers
+## Effect index
 
-## Performance
+- `fade`: unrelated pages.
+- `drill`: list → detail.
+- `slide` or `axis`: ordered tabs.
+- `sheet`: modal-like routes.
+- `zoom` or `hero`: shared-element details.
+- `scroll`: vertical sequences.
 
-- Minimal bundle size (~8kb gzipped)
-- Hardware-accelerated animations
-- Automatic cleanup and memory management
-- Smart preloading for instant transitions
+All effects: https://ssgoi.dev/llms.txt#7-transition-index
 
-## Documentation
-
-Visit [https://ssgoi.dev](https://ssgoi.dev) for:
-
-- Complete API reference
-- Interactive examples
-- Advanced patterns
-- Migration guides
-
-## Contributing
-
-We welcome contributions! Please see our [contributing guide](https://github.com/meursyphus/ssgoi/blob/main/CONTRIBUTING.md) for details.
+`SsgoiTransition` is deprecated. Use the data attribute directly.
 
 ## License
 
-MIT © [MeurSyphus](https://github.com/meursyphus)
+MIT

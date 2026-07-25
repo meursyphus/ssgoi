@@ -11,12 +11,7 @@ import {
 } from "@/components/animation-dock";
 
 const config: SsgoiConfig = {
-  transitions: [
-    sheet({
-      enter: "/g/sheet1/compose",
-      exit: "/g/sheet1",
-    }),
-  ],
+  transitions: [{ on: "/g/sheet1/compose", transition: sheet() }],
 };
 
 function GLayoutInner({ children }: { children: ReactNode }) {

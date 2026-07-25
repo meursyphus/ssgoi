@@ -25,11 +25,10 @@ If no matching `enter` / `exit` element is found, the transition is a no-op.
 import { zoom } from "@ssgoi/react/view-transitions";
 
 zoom({
-  paths: readonly string[];
   type?: "static" | "expand" | "blur";   // default: "static"
   variant?: "default" | "fade";          // default: "default"
   options?: {};                          // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 > Deprecated: `fade: true` — use `variant: "fade"` instead.
@@ -37,23 +36,26 @@ zoom({
 ## Required: matching `data-zoom-exit-key` / `data-zoom-enter-key`
 
 Different attribute names describe stable semantic roles in both navigation directions:
+
 - **List/card side** marks the collapsed source element with `data-zoom-exit-key="<key>"`.
 - **Detail/expanded side** marks the expanded destination element with `data-zoom-enter-key="<key>"`.
 - The key VALUES must match across the two pages.
 
 ```tsx
 // Gallery page (/grid) — the card being tapped
-{photos.map((p) => (
-  <Link key={p.id} href={`/photo/${p.id}`}>
-    <img
-      data-zoom-exit-key={`photo-${p.id}`}
-      src={p.thumb}
-      width={p.width}
-      height={p.height}
-      className="aspect-square object-cover"
-    />
-  </Link>
-))}
+{
+  photos.map((p) => (
+    <Link key={p.id} href={`/photo/${p.id}`}>
+      <img
+        data-zoom-exit-key={`photo-${p.id}`}
+        src={p.thumb}
+        width={p.width}
+        height={p.height}
+        className="aspect-square object-cover"
+      />
+    </Link>
+  ));
+}
 
 // Detail page (/photo/[id]) — the destination
 <img
@@ -62,7 +64,7 @@ Different attribute names describe stable semantic roles in both navigation dire
   width={photo.width}
   height={photo.height}
   className="h-full w-full object-contain"
-/>
+/>;
 ```
 
 ## Automatic image geometry
@@ -76,8 +78,16 @@ A keyed wrapper with `overflow: hidden|clip` supplies the visible crop and a sim
 ```ts
 const config = {
   transitions: [
-    zoom({ paths: ["/grid", "/photo/*"], type: "expand" }),
-    zoom({ paths: ["/feed", "/post/*"], type: "static", variant: "fade" }),
+    {
+      from: "/grid",
+      to: "/photo/*",
+      transition: zoom({ type: "expand" }),
+    },
+    {
+      from: "/feed",
+      to: "/post/*",
+      transition: zoom({ type: "static", variant: "fade" }),
+    },
   ],
 };
 ```

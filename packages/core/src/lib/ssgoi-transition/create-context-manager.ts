@@ -1,25 +1,13 @@
-import type { PreserveScrollOption, PreserveScrollFn } from "@types";
 import { getScrollingElement } from "@utils";
 import { getPositionedParent } from "@utils";
-import { matchPath } from "./find-matching-transition";
 
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
-type ScrollPolicy = {
-  preserves: boolean;
-  shared: boolean;
-  storageKey: string;
-};
 
 export type ContextManagerOptions = {
-  /**
-   * Scroll preservation policy. See SsgoiConfig.preserveScroll for full semantics.
-   * @default (isMobile) => isMobile
-   */
-  preserveScroll?: PreserveScrollOption;
   /**
    * Resolves a raw path to the identity used for ALL scroll bookkeeping
    * (record, restore, offset, evict). Defaults to the path unchanged.
@@ -34,30 +22,21 @@ export type ContextManagerOptions = {
 };
 
 export function createContextManager(options: ContextManagerOptions = {}) {
-  const {
-    preserveScroll = (isMobile: boolean) => isMobile,
-    resolvePath = (path: string) => path,
-  } = options;
-
-  const resolvePreserve: PreserveScrollFn =
-    typeof preserveScroll === "function"
-      ? preserveScroll
-      : () => preserveScroll;
+  const { resolvePath = (path: string) => path } = options;
 
   let scrollContainer: HTMLElement | null = null;
 
-  // Mobile detection is based on the scroll container's width (not the
-  // viewport) so an iPhone-frame demo embedded in a desktop page still
-  // triggers mobile behavior. Cached + refreshed via ResizeObserver so reads
-  // on the hot path don't synchronously force layout.
+  // Device context for a functional `transitions` config is based on the
+  // scroll container's width (not the viewport). Cached + refreshed via
+  // ResizeObserver so reads on the hot path don't synchronously force layout.
   let cachedIsMobile = false;
   let isMobileMeasured = false;
 
   const measureIsMobile = (): boolean => {
     // Fall back to viewport width when the container hasn't been laid out
     // yet (clientWidth === 0). Without this, an early measurement on a
-    // not-yet-visible container caches `false` (desktop) and breaks the
-    // default `(isMobile) => isMobile` predicate on actual mobile devices.
+    // not-yet-visible container caches `false` and resolves functional
+    // transition configs as desktop on actual mobile devices.
     const containerWidth = scrollContainer?.clientWidth ?? 0;
     const width =
       containerWidth > 0
@@ -76,34 +55,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return cachedIsMobile;
   };
 
-  const getScrollPolicy = (rawPath: string): ScrollPolicy => {
+  const getStorageKey = (rawPath: string): string => {
     // Every scroll-key derivation funnels through here (record, restore, offset,
     // evict), so resolving the path once at the top normalizes ALL of them to a
     // single middleware-aware identity — no caller can sneak a raw path past it.
     const path = resolvePath(rawPath);
-    const value = resolvePreserve(detectIsMobile());
-
-    if (value === false) {
-      return { preserves: false, shared: false, storageKey: `path:${path}` };
-    }
-
-    if (value === true) {
-      return { preserves: true, shared: false, storageKey: `path:${path}` };
-    }
-
-    const excluded =
-      value.exclude?.some((pattern) => matchPath(path, pattern)) ?? false;
-    const shared = !excluded && Boolean(value.key);
-
-    return {
-      preserves: !excluded,
-      shared,
-      storageKey: shared ? `shared:${value.key}` : `path:${path}`,
-    };
-  };
-
-  const shouldPreserve = (path: string): boolean => {
-    return getScrollPolicy(path).preserves;
+    return `path:${path}`;
   };
 
   let contextElement: HTMLElement | null = null;
@@ -116,44 +73,57 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // rapid navigations can leave an earlier settle running that flips
   // isTransitioning back to false mid-way through a newer transition.
   let initGeneration = 0;
+  // A rule can resolve after the IN page registers. Each newer decision
+  // invalidates an already-scheduled reset/restore for that same registration.
+  let restorationGeneration = 0;
+  // Nested IN boundaries for the same path share one resolved rule decision.
+  let scrollPolicyDecisionGeneration = 0;
 
   const scrollListener = () => {
     if (scrollContainer && currentPath && !isTransitioning) {
-      scrollPositions.set(getScrollPolicy(currentPath).storageKey, {
+      scrollPositions.set(getStorageKey(currentPath), {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
       });
     }
   };
 
-  // Restore scroll position for the given path. For non-preserved paths the
-  // arrival starts at the top; for shared-key paths without a saved value, leave
-  // the current scroll alone because a parent transition context may own it.
-  // Saved targets are re-applied for up to 10 frames or until reached.
-  const restoreScrollPosition = (path: string) => {
+  // Apply the policy chosen by the transition that is bringing this path IN.
+  // The OUT page is never reset here; it keeps its original scroll through
+  // transition preparation and playback.
+  const restoreScrollPosition = (
+    path: string,
+    preserves: boolean,
+    contextGeneration: number,
+  ) => {
     if (!scrollContainer) return;
+
+    const myRestorationGeneration = ++restorationGeneration;
+    const storageKey = getStorageKey(path);
 
     // Resolve the target: saved value if preservation is on AND we have one,
     // otherwise (0, 0). These cases go through the same retry loop so a
     // router-side scroll restore (e.g., SvelteKit's `afterNavigate`) running
     // after our first scrollTo can be overridden within the retry window.
-    const policy = getScrollPolicy(path);
-    if (
-      policy.preserves &&
-      policy.shared &&
-      !scrollPositions.has(policy.storageKey)
-    ) {
-      return;
-    }
-
     const target: ScrollPosition =
-      policy.preserves && scrollPositions.has(policy.storageKey)
-        ? scrollPositions.get(policy.storageKey)!
+      preserves && scrollPositions.has(storageKey)
+        ? scrollPositions.get(storageKey)!
         : { x: 0, y: 0 };
 
     let retryCount = 0;
     const tryRestore = () => {
-      if (!scrollContainer) return;
+      if (
+        !scrollContainer ||
+        contextGeneration !== initGeneration ||
+        myRestorationGeneration !== restorationGeneration
+      ) {
+        return;
+      }
+
+      // A reset is also the latest known position for this page. Recording it
+      // prevents a later transition that opts into restoration from reviving a
+      // stale position that predates this reset.
+      if (!preserves) scrollPositions.set(storageKey, target);
 
       scrollContainer.scrollTo({
         top: target.y,
@@ -173,9 +143,16 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     requestAnimationFrame(tryRestore);
   };
 
-  const initializeContext = (element: HTMLElement, path: string) => {
+  const initializeContext = (
+    element: HTMLElement,
+    path: string,
+    preserves?: boolean,
+  ) => {
     isTransitioning = true;
-    const myGeneration = ++initGeneration;
+    // Nested boundaries for one route can register separately. They share one
+    // scroll decision; only a different path starts a new scroll generation.
+    const myGeneration =
+      currentPath === path ? initGeneration : ++initGeneration;
     contextElement = element;
 
     if (!scrollContainer) {
@@ -183,7 +160,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
       // Re-measure now that the real container is known; subsequent updates
       // come from the ResizeObserver below, which fires asynchronously after
-      // layout (no synchronous reflow on shouldPreserve calls).
+      // layout (no synchronous reflow while resolving transition rules).
       cachedIsMobile = measureIsMobile();
       isMobileMeasured = true;
       if (typeof ResizeObserver !== "undefined") {
@@ -204,7 +181,36 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     }
 
     currentPath = path;
-    restoreScrollPosition(path);
+    // Keep the pre-IN snapshot locally. If pairing is unusually late and the
+    // fallback reset has already run, a later restore decision can still use
+    // the position that existed when this page began entering.
+    const storageKeyAtEntry = getStorageKey(path);
+    const savedPositionAtEntry = scrollPositions.get(storageKeyAtEntry);
+
+    const applyScrollPolicy = (shouldRestore: boolean) => {
+      if (myGeneration !== initGeneration) return;
+      scrollPolicyDecisionGeneration = myGeneration;
+      if (shouldRestore && savedPositionAtEntry) {
+        scrollPositions.set(storageKeyAtEntry, savedPositionAtEntry);
+      }
+      restoreScrollPosition(path, shouldRestore, myGeneration);
+    };
+
+    if (preserves !== undefined) {
+      applyScrollPolicy(preserves);
+    } else {
+      // Pairing normally resolves in the microtask before this frame. A first
+      // page (or an unmatched boundary) has no pair, so it receives the safe
+      // default reset here.
+      requestAnimationFrame(() => {
+        if (
+          scrollPolicyDecisionGeneration !== myGeneration &&
+          myGeneration === initGeneration
+        ) {
+          applyScrollPolicy(false);
+        }
+      });
+    }
 
     // Re-enable scroll capture after the transition window settles. Spans
     // ~10 frames (~167ms) — long enough for most page transitions and any
@@ -224,6 +230,8 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       }
     };
     requestAnimationFrame(trySettle);
+
+    return applyScrollPolicy;
   };
 
   // Calculate scroll offset between two pages so transitions can use it as a
@@ -231,15 +239,15 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   const calculateScrollOffset = (
     from?: string,
     to?: string,
+    preserveTo = false,
   ): { x: number; y: number } => {
-    const fromKey = from ? getScrollPolicy(from).storageKey : null;
+    const fromKey = from ? getStorageKey(from) : null;
     const fromScroll =
       fromKey && scrollPositions.has(fromKey)
         ? scrollPositions.get(fromKey)!
         : { x: 0, y: 0 };
 
-    const toPolicy = to ? getScrollPolicy(to) : null;
-    const toKey = toPolicy?.preserves ? toPolicy.storageKey : null;
+    const toKey = to && preserveTo ? getStorageKey(to) : null;
     const toScroll =
       toKey && scrollPositions.has(toKey)
         ? scrollPositions.get(toKey)!
@@ -255,7 +263,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // for paths where preservation is disabled, so stale values don't leak
   // across navigations.
   const evictScrollPosition = (path: string) => {
-    scrollPositions.delete(getScrollPolicy(path).storageKey);
+    scrollPositions.delete(getStorageKey(path));
   };
 
   const getScrollContainer = () => scrollContainer;
@@ -265,8 +273,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     return getPositionedParent(contextElement);
   };
 
-  const getScrollPosition = (path?: string): { x: number; y: number } => {
-    const key = path ? getScrollPolicy(path).storageKey : null;
+  const getScrollPosition = (
+    path?: string,
+    preserves = true,
+  ): { x: number; y: number } => {
+    if (!preserves) return { x: 0, y: 0 };
+    const key = path ? getStorageKey(path) : null;
     return key && scrollPositions.has(key)
       ? scrollPositions.get(key)!
       : { x: 0, y: 0 };
@@ -276,12 +288,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     initializeContext,
     calculateScrollOffset,
     evictScrollPosition,
-    shouldPreserve,
     getScrollContainer,
     getPositionedParentElement,
     getScrollPosition,
-    // Same measurement that drives `preserveScroll`'s `isMobile`, exposed so a
-    // functional `transitions` config can branch on it too.
+    // Exposed so a functional `transitions` config can branch on device class.
     getIsMobile: detectIsMobile,
   };
 }

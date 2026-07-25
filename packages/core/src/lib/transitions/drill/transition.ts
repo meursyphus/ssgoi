@@ -23,18 +23,16 @@ function applyStartStyle(el: HTMLElement, side: DrillSideConfig): void {
 }
 
 export const drill = (options: DrillOptions = {}): TransitionConfig => {
-  const direction = options.direction ?? "enter";
   const provider = DRILL_PROVIDERS[options.type ?? DEFAULT_TYPE];
   const physicsOptions = provider.physics;
-  const config = provider.build(direction);
-
-  // enter: the incoming `to` covers the outgoing `from`; exit: the outgoing
-  // `from` drills back out on top of the revealed `to`.
-  const fromZ = direction === "enter" ? Z_BACKGROUND : Z_FOREGROUND;
-  const toZ = direction === "enter" ? Z_FOREGROUND : Z_BACKGROUND;
 
   return {
-    prepare: ({ from, to }) => {
+    prepare: ({ from, to, context }) => {
+      const direction = context.direction === "forward" ? "enter" : "exit";
+      const config = provider.build(direction);
+      // enter: incoming `to` covers outgoing `from`; exit reverses the stack.
+      const fromZ = direction === "enter" ? Z_BACKGROUND : Z_FOREGROUND;
+      const toZ = direction === "enter" ? Z_FOREGROUND : Z_BACKGROUND;
       from.then((el) => {
         applyStartStyle(el, config.out);
         el.style.pointerEvents = "none";
@@ -49,7 +47,10 @@ export const drill = (options: DrillOptions = {}): TransitionConfig => {
       });
       return {};
     },
-    animation: ({ from, to }) => {
+    animation: ({ from, to, context }) => {
+      const direction = context.direction === "forward" ? "enter" : "exit";
+      const config = provider.build(direction);
+      const toZ = direction === "enter" ? Z_FOREGROUND : Z_BACKGROUND;
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),

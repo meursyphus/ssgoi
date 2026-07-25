@@ -16,7 +16,8 @@ Setup guide: https://ssgoi.dev/llms.txt
   - **`variant: "non-directional"`** — direction-agnostic. The incoming page always rises from below; the outgoing page fades in place without translating. Use when navigation isn't a forward/backward pair (e.g. bottom-nav tabs that swap to whichever the user tapped).
 - **`type: "z"`** — depth shared axis: incoming scales up, outgoing scales down. Only `variant: "default"` today.
 
-Path order matters for `x` and `y`: earlier → later is the "forward" direction; the reverse plays as "backward". For `z` the effect is symmetric, so order has no UX impact.
+With an `ordered` rule, earlier → later is forward and the reverse is
+backward. For `z` the effect is visually symmetric.
 
 ## Signature
 
@@ -24,14 +25,13 @@ Path order matters for `x` and `y`: earlier → later is the "forward" direction
 import { axis } from "@ssgoi/react/view-transitions";
 
 axis({
-  paths: readonly string[];
   type?: "x" | "y" | "z";              // default: "x"
   // variant is "default" | "snappy"          when type is "x"
   //            "default" | "non-directional" when type is "y"
   //            "default"                     when type is "z"
   variant?: string;
   options?: {};                        // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 > Deprecated: `feel: "fluid" | "snappy"` — use `variant` instead (`feel: "fluid"` → omit `variant`, `feel: "snappy"` → `variant: "snappy"`).
@@ -42,23 +42,33 @@ axis({
 const config = {
   transitions: [
     // tabs with the relaxed default feel
-    axis({ paths: ["/tabs/a", "/tabs/b", "/tabs/c"] }),
+    {
+      ordered: ["/tabs/a", "/tabs/b", "/tabs/c"],
+      transition: axis(),
+    },
 
     // KakaoTalk-style tight tab swap
-    axis({ paths: ["/chats", "/friends"], type: "x", variant: "snappy" }),
+    {
+      ordered: ["/chats", "/friends"],
+      transition: axis({ type: "x", variant: "snappy" }),
+    },
 
     // Vertical shared axis — forward = bottom→top
-    axis({ paths: ["/feed", "/notifications"], type: "y" }),
+    {
+      ordered: ["/feed", "/notifications"],
+      transition: axis({ type: "y" }),
+    },
 
     // Vertical bottom-nav: incoming always rises from below
-    axis({
-      paths: ["/photos", "/collections", "/create"],
-      type: "y",
-      variant: "non-directional",
-    }),
+    {
+      ordered: ["/photos", "/collections", "/create"],
+      transition: axis({ type: "y", variant: "non-directional" }),
+    },
 
     // Depth shared axis
-    axis({ paths: ["/home", "/search"], type: "z" }),
+    { from: "/home", to: "/search", transition: axis({ type: "z" }) },
   ],
 };
 ```
+
+`ordered` restores both pages automatically when either one comes back IN.

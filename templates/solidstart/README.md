@@ -1,27 +1,35 @@
-# SSGOI + SolidStart Template
-
-This template demonstrates SSGOI page transitions with SolidStart SSR.
+# SSGOI + SolidStart
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-SolidStart routes are wrapped once with `SsgoiTransitionBoundary`, so individual
-page components do not set `data-ssgoi-transition`. The boundary uses Solid's
-keyed `<Show>` to dispose the outgoing route owner before mounting the incoming
-one.
-
-Keep the boundary inside `<Suspense>` so lazy route content is ready before
-SSGOI observes the incoming marker:
+The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` and one
+centralized route boundary:
 
 ```tsx
-<Ssgoi config={config}>
-  <Suspense>
-    <SsgoiTransitionBoundary>{props.children}</SsgoiTransitionBoundary>
-  </Suspense>
+<Ssgoi config={ssgoiConfig}>
+  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+    {props.children}
+  </SsgoiTransitionBoundary>
 </Ssgoi>
 ```
 
-Nested providers use the same component. The outer boundary maps
-`/products/*` to `/products`, while the nested boundary uses the full pathname.
+The root boundary maps every `/products/*` URL to `/products`. The persistent
+products route wraps its child route in a second boundary, so category
+navigation replaces only the inner content while the header and tabs stay
+mounted.
+
+Effects:
+
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
+
+Guide: https://ssgoi.dev/llms/solid.txt
+
+```bash
+pnpm typecheck
+pnpm build
+```

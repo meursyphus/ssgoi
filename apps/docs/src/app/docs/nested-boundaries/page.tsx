@@ -5,9 +5,9 @@ import { DocsPageHeading } from "@/page/docs/sections";
 import { NestedBoundariesBody } from "@/page/docs/nested-boundaries";
 
 export const metadata: Metadata = {
-  title: "Nested boundaries — a bottom nav that survives tab moves",
+  title: "Route boundaries — keys, ids, and persistent layouts",
   description:
-    "Nest a second <Ssgoi> provider to keep a bottom tab bar still on tab↔tab transitions while it still drills away with the page on tab→detail.",
+    "Use named route-boundary resolvers to control React lifetime, keep layouts mounted, and include or exclude navigation from page transitions.",
   alternates: { canonical: "/docs/nested-boundaries" },
   openGraph: buildOpenGraph({ path: "/docs/nested-boundaries" }),
 };
@@ -19,13 +19,12 @@ export default function DocsNestedBoundariesPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Nested boundaries", path: "/docs/nested-boundaries" },
+          { name: "Route boundaries", path: "/docs/nested-boundaries" },
         ])}
       />
       <DocsPageHeading
-        eyebrow="For app shells"
-        title="Nested boundaries"
-        lead="A bottom nav must ignore tab↔tab transitions but leave with the page on tab→detail. One provider can't do both — nest a second one."
+        title="Route boundaries"
+        lead="A key creates the unmount SSGOI observes; a route id selects the transition. Name each owned region once."
       />
       <NestedBoundariesBody />
     </>

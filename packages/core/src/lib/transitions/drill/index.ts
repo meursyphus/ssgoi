@@ -1,8 +1,4 @@
-import type { SsgoiPathTransition } from "@types";
-import {
-  createDirectionalPathTransitions,
-  type DirectionalTransitionPaths,
-} from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { drill as transition } from "./transition";
 import type { DrillType as InternalDrillType } from "./types";
 
@@ -20,31 +16,29 @@ export type DrillType = "parallax" | "slide";
  *
  * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
  * Migrate `type: "crossfade"` to `type: "slide"` — same behavior, new name.
- * Example: `drill({ enter: "/list", exit: "/detail", type: "slide" })`.
+ * Example: `{ on: "/detail/**", transition: drill({ type: "slide" }) }`.
  * Kept here only for backward compatibility — will be removed in a future major.
  */
 export type DrillTypeDeprecated = "crossfade";
 
-export type DrillConfig = DirectionalTransitionPaths &
-  (
-    | {
-        type?: "parallax";
-        variant?: "default";
-        options?: Record<string, never>;
-      }
-    | { type: "slide"; variant?: "default"; options?: Record<string, never> }
-    | {
-        /**
-         * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
-         * Migrate `type: "crossfade"` to `type: "slide"` — same behavior, new name.
-         * Example: `drill({ enter: "/list", exit: "/detail", type: "slide" })`.
-         * Kept here only for backward compatibility — will be removed in a future major.
-         */
-        type: "crossfade";
-        variant?: "default";
-        options?: Record<string, never>;
-      }
-  );
+export type DrillConfig =
+  | {
+      type?: "parallax";
+      variant?: "default";
+      options?: Record<string, never>;
+    }
+  | { type: "slide"; variant?: "default"; options?: Record<string, never> }
+  | {
+      /**
+       * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
+       * Migrate `type: "crossfade"` to `type: "slide"` — same behavior, new name.
+       * Example: `drill({ type: "slide" })`.
+       * Kept here only for backward compatibility — will be removed in a future major.
+       */
+      type: "crossfade";
+      variant?: "default";
+      options?: Record<string, never>;
+    };
 
 /**
  * Normalize the public `type` value to the internal provider key. The internal
@@ -60,14 +54,11 @@ function resolveInternalType(
   return "parallax";
 }
 
-export function drill(config: DrillConfig): SsgoiPathTransition[] {
-  const { enter, exit } = config;
+export function drill(config: DrillConfig = {}): AnyTransitionConfig {
   const type = (config as { type?: DrillType | DrillTypeDeprecated }).type;
   // `variant` / `options` are accepted in the public schema for forward
   // compatibility but currently have no implemented values to forward.
   const internalType = resolveInternalType(type);
 
-  return createDirectionalPathTransitions({ enter, exit }, (direction) =>
-    transition({ direction, type: internalType }),
-  );
+  return transition({ type: internalType });
 }

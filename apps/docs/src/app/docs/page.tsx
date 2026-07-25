@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/json-ld";
 import { PhoneFrame } from "@/components/phone-frame";
 import { breadcrumbSchema, buildOpenGraph, faqSchema } from "@/lib/seo";
 import { DocsHero } from "@/page/docs/sections";
-import { DOCS_NAV } from "@/page/docs/nav";
+import { DOCS_NAV_PRIMARY } from "@/page/docs/nav";
 
 export const metadata: Metadata = {
   title: "Docs — Setup, transitions, and how SSGOI works",
@@ -28,13 +28,13 @@ const DOCS_FAQ = faqSchema([
   {
     question: "How do SSGOI page transitions work?",
     answer:
-      "When a route changes the old page normally unmounts and vanishes. SSGOI clones the leaving page and re-inserts it with position: absolute so the OUT animation can play while the new page mounts in place (IN). Both animate at the same time, and the cloned OUT page is removed when its animation ends.",
+      "A route-boundary key change unmounts the old region and mounts the new one. SSGOI preserves the detached leaving DOM node, temporarily reinserts it with position: absolute, and runs its OUT animation beside the incoming region's IN animation.",
   },
   {
     question:
       "Why does the SSGOI wrapper need the classes relative, z-0, and overflow-x-clip?",
     answer:
-      "relative gives the absolutely-positioned cloned page a positioned ancestor so it does not jump; z-0 creates a stacking context so the OUT page does not fall behind backgrounds; and overflow-x-clip prevents horizontal scrollbar flashes during slide, drill, and strip transitions.",
+      "relative gives the absolutely positioned OUT page the correct containing block; z-0 creates a stacking context so it does not fall behind backgrounds; and overflow-x-clip prevents horizontal scrollbar flashes during slide, drill, and strip transitions.",
   },
 ]);
 
@@ -43,7 +43,7 @@ const DOCS_BREADCRUMB = breadcrumbSchema([
   { name: "Docs", path: "/docs" },
 ]);
 
-const QUICK_LINKS = DOCS_NAV.flatMap((g) => g.items).filter(
+const QUICK_LINKS = DOCS_NAV_PRIMARY.flatMap((g) => g.items).filter(
   (i) => i.href !== "/docs",
 );
 
@@ -60,10 +60,7 @@ export default function DocsOverviewPage() {
         />
         <div className="relative grid items-center gap-8 p-7 sm:p-9 md:grid-cols-[1fr_auto] md:gap-10">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-orange-400/90">
-              In production
-            </p>
-            <h2 className="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+            <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
               Not a demo. <span className="text-orange-400">It ships.</span>
             </h2>
             <p className="mt-4 max-w-sm text-pretty leading-relaxed text-neutral-400">
@@ -101,7 +98,7 @@ export default function DocsOverviewPage() {
       </section>
 
       <div className="mt-12">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-100">
           Start here
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">

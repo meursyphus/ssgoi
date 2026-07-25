@@ -12,7 +12,7 @@ const COURT = BASE;
 const DROP = `${BASE}/drop`;
 
 const config: SsgoiConfig = {
-  transitions: rotate({ paths: [COURT, DROP] }),
+  transitions: [{ from: COURT, to: DROP, transition: rotate() }],
 };
 
 export function HoneydropLayoutClient({ children }: { children: ReactNode }) {

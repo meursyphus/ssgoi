@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link, useLocation } from "react-router";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, zoom } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { ssgoiConfig } from "./ssgoi-config";
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -12,30 +11,6 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
   const location = useLocation();
   const pathname = location.pathname;
 
-  const config = useMemo(
-    () => ({
-      preserveScroll: { exclude: ["/posts/*"] },
-      transitions: [
-        // Pinterest transitions
-        zoom({
-          paths: ["/pinterest", "/pinterest/*"],
-          type: "expand",
-        }),
-        // Posts transitions - drill effect
-        drill({
-          enter: "/posts/*",
-          exit: "/posts",
-        }),
-        // Profile transitions
-        zoom({
-          paths: ["/profile", "/profile/*"],
-          type: "static",
-        }),
-      ],
-    }),
-    [],
-  );
-
   return (
     <div className="h-full bg-[#121212] flex z-0">
       {/* Mobile Frame */}
@@ -43,13 +18,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
         {/* Main Content Area */}
         <main
           id="demo-content"
-          className="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
+          className="relative z-0 flex-1 w-full overflow-y-scroll overflow-x-clip bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={config}>
-            <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-              {children}
-            </SsgoiTransitionBoundary>
-          </Ssgoi>
+          <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

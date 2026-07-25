@@ -4,9 +4,9 @@ import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { DocsPageHeading, HowItWorksBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "How it works — clone & absolute, step by step",
+  title: "How it works — unmount, reinsert, and animate",
   description:
-    "SSGOI clones the leaving page and re-inserts it with position: absolute so the OUT animation plays while the new page mounts in place. Here is the full flow.",
+    "SSGOI preserves the detached leaving page and temporarily reinserts it with position: absolute while the new page mounts in place.",
   alternates: { canonical: "/docs/how-it-works" },
   openGraph: buildOpenGraph({ path: "/docs/how-it-works" }),
 };
@@ -23,7 +23,7 @@ export default function DocsHowItWorksPage() {
       />
       <DocsPageHeading
         title="How it works"
-        lead="Clone & absolute. The mechanism behind every SSGOI transition."
+        lead="Unmount, reinsert, and animate. The lifecycle behind every SSGOI route transition."
       />
       <HowItWorksBody />
     </>

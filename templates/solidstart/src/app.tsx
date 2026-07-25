@@ -1,28 +1,10 @@
 import { Router, A, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, type JSX } from "solid-js";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/solid";
-import { drill, zoom } from "@ssgoi/solid/view-transitions";
+import { Ssgoi } from "@ssgoi/solid";
 import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
+import { ssgoiConfig } from "./ssgoi-config";
 import "./app.css";
-
-const ssgoiConfig = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    zoom({
-      paths: ["/pinterest", "/pinterest/*"],
-      type: "expand",
-    }),
-    drill({
-      enter: "/posts/*",
-      exit: "/posts",
-    }),
-    zoom({
-      paths: ["/profile", "/profile/*"],
-      type: "static",
-    }),
-  ],
-} satisfies SsgoiConfig;
 
 const getRootTransitionId = (path: string) =>
   path === "/products" || path.startsWith("/products/") ? "/products" : path;

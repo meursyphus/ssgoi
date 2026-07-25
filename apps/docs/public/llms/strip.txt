@@ -14,10 +14,9 @@ Both pages rotate around the Y axis with an 800px perspective. Outgoing rotates 
 import { strip } from "@ssgoi/react/view-transitions";
 
 strip({
-  paths: readonly string[];   // symmetric — every pair gets the strip effect
   variant?: "default";        // reserved — only "default" today
   options?: {};               // reserved — no fields yet
-}): SsgoiPathTransition[];
+}): TransitionConfig;
 ```
 
 ## Usage
@@ -25,7 +24,11 @@ strip({
 ```ts
 const config = {
   transitions: [
-    strip({ paths: ["/cards/a", "/cards/b", "/cards/c"] }),
+    {
+      from: ["/cards/a", "/cards/b", "/cards/c"],
+      to: ["/cards/a", "/cards/b", "/cards/c"],
+      transition: strip(),
+    },
   ],
 };
 ```

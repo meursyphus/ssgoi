@@ -1,9 +1,20 @@
-import { type RouteConfig, index, route, layout } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  route,
+  layout,
+} from "@react-router/dev/routes";
 
 export default [
   index("routes/home.tsx"),
-  route("posts", "routes/posts.tsx"),
-  route("posts/:postId", "routes/posts.$postId.tsx"),
+  layout("routes/page-boundary.layout.tsx", [
+    route("posts", "routes/posts.tsx"),
+    route("posts/:postId", "routes/posts.$postId.tsx"),
+    route("pinterest", "routes/pinterest.tsx"),
+    route("pinterest/:pinId", "routes/pinterest.$pinId.tsx"),
+    route("profile", "routes/profile.tsx"),
+    route("profile/:postId", "routes/profile.$postId.tsx"),
+  ]),
   route("products", "routes/products.tsx"),
   layout("routes/products_.layout.tsx", [
     route("products/all", "routes/products_.all.tsx"),
@@ -12,8 +23,4 @@ export default [
     route("products/home", "routes/products_.home.tsx"),
     route("products/beauty", "routes/products_.beauty.tsx"),
   ]),
-  route("pinterest", "routes/pinterest.tsx"),
-  route("pinterest/:pinId", "routes/pinterest.$pinId.tsx"),
-  route("profile", "routes/profile.tsx"),
-  route("profile/:postId", "routes/profile.$postId.tsx"),
 ] satisfies RouteConfig;

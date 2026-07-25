@@ -4,7 +4,7 @@ import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { DocsPageHeading, LayoutBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Layout — the three classes on the SSGOI wrapper",
+  title: "Layout shell — position and stack SSGOI's OUT page",
   description:
     "The element that wraps <Ssgoi> needs relative, z-0, and overflow-x-clip. Here is why each one matters when a transition looks off.",
   alternates: { canonical: "/docs/layout" },
@@ -22,9 +22,8 @@ export default function DocsLayoutPage() {
         ])}
       />
       <DocsPageHeading
-        eyebrow="For setup & debugging"
-        title="Layout"
-        lead="Three classes on the wrapper. Skim this when something looks off."
+        title="Layout shell"
+        lead="Establish the OUT page's containing and stacking context before adding route boundaries."
       />
       <LayoutBody />
     </>

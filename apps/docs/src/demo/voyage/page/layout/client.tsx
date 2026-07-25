@@ -11,14 +11,7 @@ const BASE = "/demo/voyage";
 // compose sheet while the feed underneath blurs and recedes — a modal pushing
 // the page out of focus, the way Gmail's compose floats over the inbox.
 const config: SsgoiConfig = {
-  preserveScroll: true,
-  transitions: [
-    ...sheet({
-      type: "blur",
-      enter: `${BASE}/compose`,
-      exit: BASE,
-    }),
-  ],
+  transitions: [{ on: `${BASE}/compose`, transition: sheet({ type: "blur" }) }],
 };
 
 export function VoyageLayoutClient({ children }: { children: ReactNode }) {

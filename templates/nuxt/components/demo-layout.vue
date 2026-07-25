@@ -7,7 +7,7 @@
         id="demo-content"
         class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
       >
-        <Ssgoi :config="config">
+        <Ssgoi :config="ssgoiConfig">
           <SsgoiTransitionBoundary
             :get-id="getRootTransitionId"
             class="min-h-full bg-[#121212]"
@@ -102,39 +102,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { Ssgoi } from '@ssgoi/vue';
-import type { SsgoiConfig } from '@ssgoi/vue';
-import { drill, zoom } from '@ssgoi/vue/view-transitions';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { Ssgoi } from "@ssgoi/vue";
+import { ssgoiConfig } from "~/utils/ssgoi-config";
 
 const route = useRoute();
 const pathname = computed(() => route.path);
-
 const getRootTransitionId = (path: string) =>
-  path === '/products' || path.startsWith('/products/')
-    ? '/products'
-    : path;
-
-const config: SsgoiConfig = {
-  preserveScroll: { exclude: ['/posts/*'] },
-  transitions: [
-    // Pinterest transitions
-    zoom({
-      paths: ['/pinterest', '/pinterest/*'],
-      type: 'expand',
-    }),
-    // Posts transitions - drill effect
-    drill({
-      enter: '/posts/*',
-      exit: '/posts',
-    }),
-    // Profile transitions
-    zoom({
-      paths: ['/profile', '/profile/*'],
-      type: 'static',
-    }),
-  ],
-};
-
+  path === "/products" || path.startsWith("/products/") ? "/products" : path;
 </script>

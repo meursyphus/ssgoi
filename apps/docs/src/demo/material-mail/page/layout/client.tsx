@@ -15,18 +15,14 @@ const BASE = "/demo/material-mail";
 // below should be uncommented. Today the underlying axis({ type: "z" })
 // provider exists in core but is not UX-verified for this app yet.
 const config: SsgoiConfig = {
-  preserveScroll: true,
   transitions: [
     // FAB ✏️ → Compose (the main showcase of sheet/scale)
-    ...sheet({
-      type: "scale",
-      enter: `${BASE}/compose`,
-      exit: BASE,
-    }),
-    // ...axis({
-    //   paths: [`${BASE}/m/*/reply`, `${BASE}/m/*`],
-    //   type: "z",
-    // }),
+    { on: `${BASE}/compose`, transition: sheet({ type: "scale" }) },
+    // {
+    //   from: `${BASE}/m/*`,
+    //   to: `${BASE}/m/*/reply`,
+    //   transition: axis({ type: "z" }),
+    // },
   ],
 };
 

@@ -1,5 +1,4 @@
-import type { SsgoiPathTransition } from "@types";
-import { createOrderedPathTransitions } from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { axis as transition } from "./transition";
 import type { AxisFeel, AxisType } from "./types";
 
@@ -40,14 +39,12 @@ export type AxisYVariant = "default" | "non-directional";
  * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
  * Migrate `feel: "fluid"` → omit `variant` (default tone),
  * `feel: "snappy"` → `variant: "snappy"`.
- * Example: `axis({ paths, type: "x", variant: "snappy" })`.
+ * Example: `axis({ type: "x", variant: "snappy" })`.
  * Kept here only for backward compatibility — will be removed in a future major.
  */
 export type AxisFeelDeprecated = "snappy" | "fluid";
 
-export type AxisConfig = {
-  paths: readonly string[];
-} & (
+export type AxisConfig = {} & (
   | {
       type?: "x";
       variant?: AxisXVariant;
@@ -56,7 +53,7 @@ export type AxisConfig = {
        * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
        * Migrate `feel: "fluid"` → omit `variant` (default tone),
        * `feel: "snappy"` → `variant: "snappy"`.
-       * Example: `axis({ paths, type: "x", variant: "snappy" })`.
+       * Example: `axis({ type: "x", variant: "snappy" })`.
        * Kept here only for backward compatibility — will be removed in a future major.
        */
       feel?: AxisFeelDeprecated;
@@ -94,16 +91,11 @@ function resolveInternalFeel(
   return "fluid";
 }
 
-export function axis(config: AxisConfig): SsgoiPathTransition[] {
-  const { paths } = config;
+export function axis(config: AxisConfig = {}): AnyTransitionConfig {
   const type: AxisType = config.type ?? "x";
   const variant = (config as { variant?: string }).variant;
   const legacyFeel = (config as { feel?: AxisFeelDeprecated }).feel;
   const internalFeel = resolveInternalFeel(type, variant, legacyFeel);
 
-  return createOrderedPathTransitions(
-    paths,
-    { forward: "forward", backward: "backward" },
-    (direction) => transition({ type, direction, feel: internalFeel }),
-  );
+  return transition({ type, feel: internalFeel });
 }

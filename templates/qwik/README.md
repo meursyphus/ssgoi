@@ -1,19 +1,32 @@
-# SSGOI Qwik Template
-
-This template demonstrates SSGOI page transitions with Qwik City SSR.
+# SSGOI + Qwik City
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Qwik pages mark their own transition boundary with `data-ssgoi-transition`.
-The root layout calls `useSsgoi(ref, { config$ })` directly because Qwik
-serializes component state and SSGOI configs contain transition functions.
+`src/lib/ssgoi-config.ts` exports one QRL config factory. The root route layout
+calls `useSsgoi(root, { config$ })`.
 
-Keep the marker on each Qwik City page. A keyed wrapper around the layout
-`<Slot />` is not a safe route boundary: Qwik moves the projected slot into the
-new wrapper before updating its routed content, so the incoming id can briefly
-contain the outgoing page. The navigation interception API that could stage the
-unmount is currently experimental, so this template deliberately keeps the
-page-owned boundary pattern.
+Route components mark their DOM roots:
+
+```tsx
+<main data-ssgoi-transition="/posts">...</main>
+```
+
+The products route layout is the persistent outer boundary. Category route
+components under `<Slot />` render inner boundaries. Child navigation slides
+the inner content; leaving products uses the outer boundary.
+
+Effects:
+
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
+
+Guide: https://ssgoi.dev/llms/qwik.txt
+
+```bash
+pnpm build.types
+pnpm build
+```

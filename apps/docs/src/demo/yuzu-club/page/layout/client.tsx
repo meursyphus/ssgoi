@@ -11,7 +11,7 @@ const HOME = BASE;
 const FLAVORS = `${BASE}/flavors`;
 
 const config: SsgoiConfig = {
-  transitions: jaemin({ paths: [HOME, FLAVORS] }),
+  transitions: [{ from: HOME, to: FLAVORS, transition: jaemin() }],
 };
 
 export function YuzuClubLayoutClient({ children }: { children: ReactNode }) {
