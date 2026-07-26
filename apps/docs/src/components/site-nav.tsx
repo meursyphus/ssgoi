@@ -17,9 +17,20 @@ const SECONDARY: Array<{ key: NavKey; label: string; href: string }> = [
   { key: "blog", label: "Blog", href: "/blog" },
 ];
 
-export function SiteNav({ active }: { active?: NavKey }) {
+export function SiteNav({
+  active,
+  desktopOnly = false,
+}: {
+  active?: NavKey;
+  desktopOnly?: boolean;
+}) {
   return (
-    <header className="pointer-events-none sticky top-3 z-50 mt-3 flex justify-center px-3 md:top-4 md:mt-4">
+    <header
+      className={[
+        "pointer-events-none sticky top-3 z-50 mt-3 justify-center px-3 md:top-4 md:mt-4",
+        desktopOnly ? "hidden lg:flex" : "flex",
+      ].join(" ")}
+    >
       <nav className="pointer-events-auto inline-flex h-11 items-center gap-4 rounded-full border border-line-strong bg-panel/75 pl-3 pr-4 backdrop-blur md:h-12 md:gap-5 md:pl-4 md:pr-5">
         <SiteLogo />
 

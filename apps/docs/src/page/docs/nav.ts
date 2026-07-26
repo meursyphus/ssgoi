@@ -105,8 +105,9 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             id: "transition-sheet",
             title: "Sheet",
             href: "/docs/transitions/sheet",
-            platform: "mobile",
-            blurb: "A temporary screen rises over the current one.",
+            platform: "both",
+            blurb:
+              "A temporary mobile or web screen rises over the current one.",
           },
           {
             id: "transition-slide",
@@ -133,8 +134,8 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             id: "transition-scroll",
             title: "Scroll",
             href: "/docs/transitions/scroll",
-            platform: "mobile",
-            blurb: "Vertical movement through an ordered sequence.",
+            platform: "web",
+            blurb: "Vertical movement through an ordered web sequence.",
           },
           {
             id: "transition-hero",
@@ -163,13 +164,6 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             href: "/docs/transitions/strip",
             platform: "web",
             blurb: "Whole pages slide with a shallow perspective turn.",
-          },
-          {
-            id: "transition-blind",
-            title: "Blind",
-            href: "/docs/transitions/blind",
-            platform: "web",
-            blurb: "The next page appears through animated blinds.",
           },
           {
             id: "transition-rotate",

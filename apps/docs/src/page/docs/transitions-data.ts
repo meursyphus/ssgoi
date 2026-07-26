@@ -35,6 +35,7 @@ export type TransitionGif = {
   alt: string;
   width: number;
   height: number;
+  label?: string;
 };
 
 export type TransitionSetting = {
@@ -56,8 +57,10 @@ export type TransitionVariant = {
   args: string;
   /** Marks the default combination of the transition. */
   isDefault?: boolean;
-  /** Recorded enter-and-return example used as the primary visual. */
-  gif: TransitionGif;
+  /** Recorded enter-and-return example from a demo published on ssgoi.dev. */
+  gif?: TransitionGif;
+  /** Additional published demos for the same configuration on another platform. */
+  extraGifs?: TransitionGif[];
   /** Optional routes where the same configuration can be tried live. */
   demos?: TransitionDemoExample[];
 };
@@ -120,15 +123,6 @@ function webGif(
     height,
   };
 }
-
-const transitionLab = (
-  preset: string,
-  platform: ShowcasePlatform = "mobile",
-): TransitionDemoExample => ({
-  enterPath: `/demo/transition-lab/${preset}/b`,
-  exitPath: `/demo/transition-lab/${preset}/a`,
-  platform,
-});
 
 export const TRANSITION_DOCS: TransitionDoc[] = [
   {
@@ -320,11 +314,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "y"',
         ux: "A vertical shared axis whose direction reverses with route order.",
-        gif: mobileGif(
-          "axis-y-default",
-          "Two related screens move up and down along a directional vertical shared axis.",
-        ),
-        demos: [transitionLab("axis-y")],
       },
       {
         label: "y · non-directional",
@@ -353,27 +342,22 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "z"',
         ux: "Pages scale through depth, similar to a restrained container transform.",
-        gif: mobileGif(
-          "axis-z-default",
-          "One screen scales back while another advances along the z axis.",
-        ),
-        demos: [transitionLab("axis-z")],
       },
     ],
   },
   {
     name: "scroll",
-    blurb: "A vertical sequence between whole pages.",
+    blurb: "A vertical sequence between full web pages.",
     use: "sibling",
     intro:
-      "Scroll makes whole pages travel like a vertical sequence. It is a page transition, not browser scroll-position restoration.",
+      "Scroll makes full web pages travel like a vertical sequence. It is a page transition, not browser scroll-position restoration.",
     decision: {
       whenToUse:
-        "Use it for onboarding, chapters, or an editorial sequence that should feel vertically continuous.",
+        "Use it for full-viewport web chapters, showcases, or an editorial sequence that should feel vertically continuous.",
       motion:
         "The next page travels upward into view; directional mode reverses that travel when users go back.",
       avoidWhen:
-        "Avoid it for ordinary document scrolling or when screens are not part of one sequence.",
+        "Avoid it for mobile app navigation, ordinary document scrolling, or pages that are not part of one sequence.",
     },
     ruleStyle: "ordered",
     variants: [
@@ -383,31 +367,33 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         isDefault: true,
         args: 'type: "directional"',
         ux: "Route order decides direction: forward travels up and backward travels down.",
-        gif: mobileGif(
-          "scroll-directional",
-          "A vertical page sequence travels upward, then reverses downward on return.",
-        ),
-        demos: [transitionLab("scroll-directional")],
       },
       {
         label: "non-directional",
         settings: [{ kind: "type", value: "non-directional" }],
         args: 'type: "non-directional"',
         ux: "Every destination enters upward, including the return trip.",
-        gif: mobileGif(
+        gif: webGif(
           "scroll-non-directional",
-          "Both forward and return navigation enter upward in a vertical page sequence.",
+          "The ssgoi.dev home page and an Airbnb demo detail page replace each other with upward web-page motion.",
+          360,
         ),
-        demos: [transitionLab("scroll-non-directional")],
+        demos: [
+          {
+            enterPath: "/showcase/air-bnb",
+            exitPath: "/",
+            platform: "web",
+          },
+        ],
       },
     ],
   },
   {
     name: "sheet",
-    blurb: "A temporary task rising over its origin.",
+    blurb: "A temporary task rising over its origin on mobile or web.",
     use: "drill-in",
     intro:
-      "Sheet opens a temporary task from the bottom while preserving a visual relationship with the page beneath it.",
+      "Sheet opens a temporary task from the bottom on mobile or web while preserving a visual relationship with the page beneath it.",
     decision: {
       whenToUse:
         "Use it for compose, filters, settings, or a short task that should keep its origin in context.",
@@ -424,10 +410,23 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         isDefault: true,
         args: 'type: "static"',
         ux: "The sheet rises while the page underneath stays fixed. The clearest, quietest option.",
-        gif: mobileGif(
-          "sheet-static",
-          "A temporary task slides up as a bottom sheet over a stationary page.",
-        ),
+        gif: {
+          ...mobileGif(
+            "sheet-static",
+            "A temporary task slides up as a bottom sheet over a stationary page.",
+          ),
+          label: "Mobile · Gamja Market",
+        },
+        extraGifs: [
+          {
+            ...webGif(
+              "sheet-static-web",
+              "A YouTube Music now-playing screen rises over the stationary desktop web app, then closes back to the home screen.",
+              360,
+            ),
+            label: "Web · YouTube Music",
+          },
+        ],
         demos: [
           {
             enterPath: "/demo/gamja-market/review/o-001",
@@ -531,11 +530,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         isDefault: true,
         args: 'type: "static"',
         ux: "The surrounding pages switch without a surface fade while the shared element continues between them.",
-        gif: mobileGif(
-          "hero-static-default",
-          "A shared image morphs between two pages while the surrounding surfaces switch directly.",
-        ),
-        demos: [transitionLab("hero-static-default")],
       },
       {
         label: "fade · default",
@@ -584,11 +578,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "fade", variant: "smooth"',
         ux: "Combines the smooth shared-element interpolation with a fading page hand-off.",
-        gif: mobileGif(
-          "hero-fade-smooth",
-          "A shared image smoothly morphs as the surrounding pages cross into the new surface.",
-        ),
-        demos: [transitionLab("hero-fade-smooth")],
       },
     ],
   },
@@ -668,11 +657,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "static", variant: "fade"',
         ux: "Adds a fade to the static background hand-off while retaining the same anchored zoom.",
-        gif: mobileGif(
-          "zoom-static-fade",
-          "A selected image zooms into detail as the otherwise static surrounding page fades.",
-        ),
-        demos: [transitionLab("zoom-static-fade")],
       },
       {
         label: "expand · default",
@@ -701,11 +685,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "expand", variant: "fade"',
         ux: "Keeps the card-to-surface expansion but fades surrounding content for a softer reveal.",
-        gif: mobileGif(
-          "zoom-expand-fade",
-          "A card expands into the detail surface while its surrounding content fades away.",
-        ),
-        demos: [transitionLab("zoom-expand-fade")],
       },
       {
         label: "blur · default",
@@ -715,11 +694,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "blur"',
         ux: "The background loses focus as the selected content advances, creating a strong focus pull.",
-        gif: mobileGif(
-          "zoom-blur-default",
-          "A selected image advances into detail while the background falls out of focus.",
-        ),
-        demos: [transitionLab("zoom-blur-default")],
       },
       {
         label: "blur · fade",
@@ -778,47 +752,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
     ],
   },
   {
-    name: "blind",
-    blurb: "A slatted reveal for a deliberate entrance.",
-    use: "decorative",
-    intro:
-      "Blind reveals the next page through animated slats along a chosen axis.",
-    decision: {
-      whenToUse:
-        "Use it for a one-time splash, campaign reveal, or deliberately theatrical entrance.",
-      motion:
-        "Bands open across the page horizontally or vertically to reveal the destination.",
-      avoidWhen:
-        "Avoid it for frequent navigation, reading flows, or motion-sensitive contexts.",
-    },
-    ruleStyle: "pair",
-    variants: [
-      {
-        label: "horizontal",
-        settings: [{ kind: "type", value: "horizontal" }],
-        isDefault: true,
-        args: 'type: "horizontal"',
-        ux: "Slats progress across the horizontal axis.",
-        gif: mobileGif(
-          "blind-horizontal",
-          "Horizontal slats open to reveal a new editorial page.",
-        ),
-        demos: [transitionLab("blind-horizontal")],
-      },
-      {
-        label: "vertical",
-        settings: [{ kind: "type", value: "vertical" }],
-        args: 'type: "vertical"',
-        ux: "Slats progress along the vertical axis.",
-        gif: mobileGif(
-          "blind-vertical",
-          "Vertical slats open to reveal a new editorial page.",
-        ),
-        demos: [transitionLab("blind-vertical")],
-      },
-    ],
-  },
-  {
     name: "film",
     blurb: "A cinematic shrink-and-tile with framed corners.",
     use: "decorative",
@@ -857,11 +790,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         settings: [{ kind: "option", value: "borderColor" }],
         args: 'options: { borderColor: "#f97316" }',
         ux: "This does not change the motion. It only customizes the cinematic corner-border color.",
-        gif: mobileGif(
-          "film-orange",
-          "The Film transition plays with customized orange corner borders.",
-        ),
-        demos: [transitionLab("film-orange")],
       },
     ],
   },

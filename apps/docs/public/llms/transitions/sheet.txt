@@ -1,7 +1,7 @@
 # SSGOI sheet transition
 
-Use for compose screens, filters, settings panels, and other temporary tasks
-that rise above the current page.
+Use on mobile or desktop web for compose screens, filters, settings panels, and
+other temporary tasks that rise above the current page.
 
 Catalog: https://ssgoi.dev/llms/transitions.txt
 
