@@ -22,6 +22,7 @@ import {
   SvelteKitMark,
   TanStackRouterMark,
 } from "@/components/router-logos";
+import { SiteLogo } from "@/components/site-logo";
 import {
   DOCS_NAV,
   findDocsLocation,
@@ -260,11 +261,13 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <div className="mx-auto flex w-full max-w-6xl px-5">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-5">
+        <SiteLogo className="shrink-0" />
+        <span className="h-5 w-px shrink-0 bg-line-strong" aria-hidden />
         <SheetTrigger asChild>
           <button
             type="button"
-            className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
+            className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
             aria-label={`Open documentation navigation. Current page: ${context}`}
           >
             <Menu aria-hidden className="h-4 w-4 shrink-0 text-ink-faint" />
@@ -304,10 +307,11 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
 export function DocsMobileNav() {
   const pathname = usePathname();
 
-  // Sits flush under the floating site pill so the page has one bar, not two.
+  // This is the only mobile header in docs. The logo provides a direct route
+  // home while the rest of the bar opens the documentation navigation.
   // Remounting on navigation closes the drawer even for browser back/forward.
   return (
-    <div className="sticky top-14 z-40 border-b border-line bg-canvas/90 backdrop-blur md:top-16 lg:hidden">
+    <div className="sticky top-0 z-50 border-b border-line bg-canvas/90 backdrop-blur lg:hidden">
       <DocsMobileNavForPath key={pathname} pathname={pathname} />
     </div>
   );
