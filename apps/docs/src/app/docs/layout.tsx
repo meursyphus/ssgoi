@@ -5,7 +5,7 @@ import { DocsSidebar, DocsMobileNav } from "@/page/docs/sidebar";
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-dvh bg-canvas">
-      <SiteNav active="docs" />
+      <SiteNav active="docs" desktopOnly />
       <DocsMobileNav />
       <div className="mx-auto flex w-full max-w-6xl gap-10 px-6 pt-10 lg:gap-14 lg:pt-16">
         <aside className="hidden w-60 shrink-0 lg:block">
