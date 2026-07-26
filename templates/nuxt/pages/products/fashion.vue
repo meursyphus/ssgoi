@@ -1,5 +1,5 @@
 <template>
-  <ProductsProductGrid :products="products" category="fashion" />
+  <ProductsProductGrid :products="products" />
 </template>
 
 <script setup lang="ts">

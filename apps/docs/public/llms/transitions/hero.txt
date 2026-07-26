@@ -1,0 +1,54 @@
+# SSGOI hero transition
+
+Use when the user should follow the same logical object, such as a thumbnail or
+avatar, from one page to another.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { hero } from "@ssgoi/react/view-transitions";
+
+hero({
+  type?: "static" | "fade";  // default: "static"
+  variant?: "default" | "smooth";  // default: "default"
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+- `static`: morph the shared element while surrounding chrome stays quiet.
+- `fade`: cross-fade both pages while the shared element morphs above them.
+- `variant: "smooth"`: use a softer follower spring for the element morph;
+  this can be combined with either type.
+
+## Required markup
+
+Use the same stable value on the list-side and detail-side elements. Hero can
+animate multiple distinct pairs in one transition:
+
+```tsx
+<img data-hero-exit-key={item.id} src={item.thumbnail} />
+<img data-hero-enter-key={item.id} src={item.full} />
+```
+
+- Keep each key unique on each page. If a key is duplicated, the first element
+  in DOM order is used.
+- Pairs without a matching key on the other page are skipped.
+- If no matching pair exists, Hero is a no-op.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: "/items",
+      to: "/items/*",
+      transition: hero({ type: "fade" }),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

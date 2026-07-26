@@ -1,130 +1,36 @@
-# SSGOI SvelteKit Template
-
-A demo template showcasing SSGOI page transitions in SvelteKit.
-
-## Features
-
-- **Posts**: Drill transition between list and detail views
-- **Shop**: Slide transitions with category tabs using nested Ssgoi
-- **Gallery**: Pinterest-style masonry layout with zoom expand transition
-- **Profile**: Instagram-style grid with zoom static transition
-
-## Getting Started
-
-### Installation
+# SSGOI + SvelteKit
 
 ```bash
 pnpm install
-```
-
-### Development
-
-```bash
 pnpm dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) to view the demo.
+The root layout uses one config from `src/lib/ssgoi-config.ts` and one
+`<Ssgoi>`. Its centralized route boundary owns the outgoing and incoming page
+DOM:
 
-### Build
+```svelte
+<Ssgoi config={ssgoiConfig}>
+  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+    {@render children()}
+  </SsgoiTransitionBoundary>
+</Ssgoi>
+```
+
+The root boundary maps every `/products/*` URL to `/products`.
+`routes/products/+layout.svelte` stays mounted and puts a second boundary
+around its child route. Category navigation therefore replaces only the inner
+boundary, keeping the header and tabs still while the content slides.
+
+Effects:
+
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
+
+Guide: https://ssgoi.dev/llms/svelte.txt
 
 ```bash
+pnpm check
 pnpm build
 ```
-
-## Project Structure
-
-```
-src/
-├── lib/
-│   ├── components/
-│   │   ├── demo-layout.svelte      # Main layout with Ssgoi provider and navigation
-│   │   ├── demo-wrapper.svelte     # iPhone frame wrapper
-│   │   └── product-grid.svelte     # Product grid component
-│   └── data/
-│       ├── posts.ts                # Posts mock data
-│       ├── products.ts             # Products mock data
-│       ├── pinterest.ts            # Pinterest items mock data
-│       └── profile.ts              # Profile and posts mock data
-└── routes/
-    ├── +layout.svelte              # Root layout
-    ├── +page.server.ts             # Redirect to /posts
-    ├── posts/                      # Posts demo
-    ├── products/                   # Shop demo with nested Ssgoi
-    ├── pinterest/                  # Gallery demo
-    └── profile/                    # Profile demo
-```
-
-## Route Boundaries
-
-SvelteKit pages mark their own transition boundary with `data-ssgoi-transition`.
-Use a stable logical id that matches your config; it does not have to be the
-actual route pathname.
-Do not use a single slot-based layout boundary here; the outgoing slot can
-render the incoming page content.
-
-```svelte
-<div data-ssgoi-transition="/posts">
-  <!-- page content -->
-</div>
-```
-
-## Transitions
-
-### Drill Transition (Posts)
-
-```svelte
-<script>
-  import { drill } from "@ssgoi/svelte/view-transitions";
-
-  const config = {
-    transitions: [drill({ enter: "/posts/*", exit: "/posts" })],
-  };
-</script>
-```
-
-### Slide Transition (Shop)
-
-```svelte
-<script>
-  import { slide } from "@ssgoi/svelte/view-transitions";
-
-  const config = {
-    transitions: [
-      slide({
-        paths: ["/products/all", "/products/electronics", "/products/fashion"],
-      }),
-    ],
-  };
-</script>
-```
-
-### Zoom Transition (Gallery)
-
-```svelte
-<script>
-  import { zoom } from "@ssgoi/svelte/view-transitions";
-
-  const config = {
-    transitions: [
-      zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
-    ],
-  };
-</script>
-```
-
-### Zoom Transition (Profile)
-
-```svelte
-<script>
-  import { zoom } from "@ssgoi/svelte/view-transitions";
-
-  const config = {
-    transitions: [zoom({ paths: ["/profile", "/profile/*"], type: "static" })],
-  };
-</script>
-```
-
-## Learn More
-
-- [SSGOI Documentation](https://ssgoi.dev)
-- [SvelteKit Documentation](https://svelte.dev/docs/kit)

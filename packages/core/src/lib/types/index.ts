@@ -78,6 +78,7 @@ export type Timeline = {
 
 export type ScrollOffset = { x: number; y: number };
 export type ScrollPosition = { x: number; y: number };
+export type NavigationDirection = "forward" | "backward";
 
 /**
  * Context provided by the dispatcher to a transition.
@@ -86,6 +87,11 @@ export type ScrollPosition = { x: number; y: number };
  * — `from.scroll` is the outgoing page's scroll, `to.scroll` the incoming page.
  */
 export type SsgoiTransitionContext = {
+  /**
+   * Semantic navigation direction resolved from the route rule. Transitions
+   * map this to their own visual vocabulary (enter/exit, left/right, up/down).
+   */
+  readonly direction: NavigationDirection;
   scrollOffset: ScrollOffset;
   from: {
     scroll: ScrollPosition;
@@ -175,26 +181,90 @@ export type TransitionConfig<TExtras extends object = object> = {
 export type AnyTransitionConfig = TransitionConfig<any>;
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Path-matched config (Ssgoi top-level)
+ * Route rules (Ssgoi top-level)
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type SsgoiPathTransition = {
-  from: string;
-  to: string;
-  transition: AnyTransitionConfig;
-  symmetric?: boolean;
+export type PathPatterns = string | readonly string[];
+
+export type PreserveScrollConfig = {
+  /**
+   * Restore the forward relationship's source when it becomes the incoming
+   * page again.
+   */
+  from: boolean;
+  /**
+   * Restore the forward relationship's destination when it becomes the
+   * incoming page again.
+   */
+  to: boolean;
 };
 
-export type SsgoiPathTransitionInput =
-  | SsgoiPathTransition
-  | readonly SsgoiPathTransitionInput[];
+type SsgoiTransitionRuleBase = {
+  transition: AnyTransitionConfig;
+  /**
+   * Override this rule's automatic scroll-restoration policy.
+   *
+   * `from` and `to` describe the rule's semantic forward relationship, not the
+   * current navigation's physical OUT and IN pages. On backward navigation the
+   * mapping is reversed automatically.
+   *
+   * Omitted defaults:
+   * - `on`: `{ from: true, to: false }`
+   * - `from`/`to`: `{ from: true, to: false }`
+   * - `ordered`: `{ from: true, to: true }`
+   */
+  preserveScroll?: PreserveScrollConfig;
+  /**
+   * Higher values win before path specificity. Defaults to 0.
+   * Useful for an exceptional effect declared below a broad fallback.
+   */
+  priority?: number;
+};
 
-export type PreserveScrollValue =
-  | boolean
-  | { exclude: string[]; key?: string }
-  | { key: string; exclude?: string[] };
-export type PreserveScrollFn = (isMobile: boolean) => PreserveScrollValue;
-export type PreserveScrollOption = PreserveScrollValue | PreserveScrollFn;
+/**
+ * A route-family rule. Entering the family is forward, leaving it is
+ * backward, and navigation within it uses semantic history/pop detection.
+ */
+export type SsgoiOnTransitionRule = SsgoiTransitionRuleBase & {
+  on: PathPatterns;
+  except?: PathPatterns;
+  from?: never;
+  to?: never;
+  ordered?: never;
+  bidirectional?: never;
+};
+
+/**
+ * A precise relationship between two route families. The normal from → to
+ * orientation is forward; the reverse is backward when bidirectional
+ * (the default).
+ */
+export type SsgoiPairTransitionRule = SsgoiTransitionRuleBase & {
+  from: PathPatterns;
+  to: PathPatterns;
+  bidirectional?: boolean;
+  on?: never;
+  except?: never;
+  ordered?: never;
+};
+
+/**
+ * An ordered set of routes. Both endpoints must match the set; increasing
+ * index is forward and decreasing index is backward.
+ */
+export type SsgoiOrderedTransitionRule = SsgoiTransitionRuleBase & {
+  ordered: readonly string[];
+  on?: never;
+  except?: never;
+  from?: never;
+  to?: never;
+  bidirectional?: never;
+};
+
+export type SsgoiTransitionRule =
+  | SsgoiOnTransitionRule
+  | SsgoiPairTransitionRule
+  | SsgoiOrderedTransitionRule;
 
 /**
  * Argument handed to a functional `transitions` config. Destructured at the
@@ -210,20 +280,19 @@ export type TransitionsResolverArgs = { isMobile: boolean };
  */
 export type SsgoiTransitionsFn = (
   args: TransitionsResolverArgs,
-) => readonly SsgoiPathTransitionInput[];
+) => readonly SsgoiTransitionRule[];
 
 /**
- * `transitions` accepts either the plain list (existing form) or a function of
- * device context. Both normalize to the functional form internally.
+ * `transitions` accepts either a flat rule list or a function of device
+ * context. Both normalize to the functional form internally.
  */
 export type SsgoiTransitionsOption =
-  | readonly SsgoiPathTransitionInput[]
+  | readonly SsgoiTransitionRule[]
   | SsgoiTransitionsFn;
 
 export type SsgoiConfig = {
   transitions?: SsgoiTransitionsOption;
   middleware?: (from: string, to: string) => { from: string; to: string };
-  preserveScroll?: PreserveScrollOption;
 };
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -246,7 +315,20 @@ export type SsgoiContext = {
    * transition, and watching for removal via a shared MutationObserver.
    * Idempotent per element — repeat calls with the same node are no-ops.
    */
-  register: (path: string, element: HTMLElement) => void;
+  register: (
+    path: string,
+    element: HTMLElement,
+    options?: {
+      /**
+       * Whether this registration represents an entering transition boundary.
+       *
+       * Nested boundaries discovered inside a newly-mounted parent boundary
+       * are registered with `enter: false`: they must be watched for future
+       * child-route changes, but the parent owns the current IN event.
+       */
+      enter?: boolean;
+    },
+  ) => void;
 
   /**
    * Returns a path-bound ref callback. Stable across calls for the same

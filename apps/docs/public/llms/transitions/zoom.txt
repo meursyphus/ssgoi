@@ -1,0 +1,59 @@
+# SSGOI zoom transition
+
+Use when a card or image opens into a detail page. Zoom uses the selected media
+as an anchor and transforms the detail page around it.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { zoom } from "@ssgoi/react/view-transitions";
+
+zoom({
+  type?: "static" | "expand" | "blur";  // default: "static"
+  variant?: "default" | "fade";         // default: "default"
+  options?: Record<string, never>;
+}): TransitionConfig;
+```
+
+- `static`: the source stays visually anchored.
+- `expand`: the detail page expands from the source.
+- `blur`: a live backdrop separates the source and detail page.
+- `variant: "fade"`: also fades surrounding page content.
+
+The blur type uses `backdrop-filter` (Firefox 103+). Earlier Firefox keeps the
+zoom motion, background scale, and dimming but omits the backdrop blur.
+
+Deprecated: `fade: true`; use `variant: "fade"`.
+
+## Required markup
+
+Use the same stable value on the collapsed and expanded media:
+
+```tsx
+<img data-zoom-exit-key={photo.id} src={photo.thumbnail} />
+<img data-zoom-enter-key={photo.id} src={photo.full} />
+```
+
+- The source page may contain many exit markers, but every key must be unique.
+  If an exit key is duplicated, the first element in DOM order is used.
+- The destination page must contain exactly one enter marker.
+- An empty, missing, or mismatched key is a no-op. Zero or more than one enter
+  marker on the destination is also a no-op.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: "/gallery",
+      to: "/photo/*",
+      transition: zoom({ type: "expand" }),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

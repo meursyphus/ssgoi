@@ -85,30 +85,28 @@ function findZoomExit(node: HTMLElement, key: string): HTMLElement | null {
   return null;
 }
 
-function resolveZoom(
+export function resolveZoom(
   fromNode: HTMLElement,
   toNode: HTMLElement,
+  direction: "forward" | "backward",
 ): ZoomResolved | null {
-  const fromEnter = findZoomEnter(fromNode);
-  const toEnter = findZoomEnter(toNode);
-
-  if (!fromEnter && toEnter) {
-    const key = toEnter.getAttribute(ZOOM_ENTER_KEY);
+  if (direction === "forward") {
+    const enterEl = findZoomEnter(toNode);
+    if (!enterEl) return null;
+    const key = enterEl.getAttribute(ZOOM_ENTER_KEY);
     if (!key) return null;
     const exitEl = findZoomExit(fromNode, key);
     if (!exitEl) return null;
-    return { mode: "enter", enterEl: toEnter, exitEl };
+    return { mode: "enter", enterEl, exitEl };
   }
 
-  if (fromEnter && !toEnter) {
-    const key = fromEnter.getAttribute(ZOOM_ENTER_KEY);
-    if (!key) return null;
-    const exitEl = findZoomExit(toNode, key);
-    if (!exitEl) return null;
-    return { mode: "exit", enterEl: fromEnter, exitEl };
-  }
-
-  return null;
+  const enterEl = findZoomEnter(fromNode);
+  if (!enterEl) return null;
+  const key = enterEl.getAttribute(ZOOM_ENTER_KEY);
+  if (!key) return null;
+  const exitEl = findZoomExit(toNode, key);
+  if (!exitEl) return null;
+  return { mode: "exit", enterEl, exitEl };
 }
 
 export function buildInput(
@@ -403,7 +401,7 @@ export const zoom = (
       return extras;
     },
     animation: ({ from, to, context, ...extras }) => {
-      const resolved = resolveZoom(from, to);
+      const resolved = resolveZoom(from, to, context.direction);
 
       // No matching zoom pair → noop so the dispatcher still cleans up.
       if (!resolved) {

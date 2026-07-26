@@ -1,5 +1,5 @@
 <template>
-  <div :data-ssgoi-transition="`/profile/${id}`">
+  <div>
     <div v-if="!post" class="bg-[#121212] px-4 py-8">
       <p class="text-gray-400">Post not found</p>
     </div>

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading, InstallBody } from "@/page/docs/sections";
+import { PageHeading } from "@/page/docs/ui";
+import { InstallBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Install SSGOI — one package per framework",
+  title: "Quick start — add SSGOI to your app",
   description:
-    "Install SSGOI for React, Svelte, Vue, Solid, Angular, or Qwik. One package per framework, with setup patterns for each router.",
+    "Two new files, plus one edit to the layout you already have: write the config and the route boundary, wire them into the layout, then check your first page transition. Copy-paste ready for React and Next.js.",
   alternates: { canonical: "/docs/install" },
   openGraph: buildOpenGraph({ path: "/docs/install" }),
 };
@@ -18,12 +19,12 @@ export default function DocsInstallPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Install", path: "/docs/install" },
+          { name: "Quick start", path: "/docs/install" },
         ])}
       />
-      <DocsPageHeading
-        title="Install"
-        lead="Add the package that matches your framework. The transition model is shared; the setup follows each router."
+      <PageHeading
+        title="Quick start"
+        lead="Two new files, plus one edit to the layout you already have, and your first page transition runs."
       />
       <InstallBody />
     </>

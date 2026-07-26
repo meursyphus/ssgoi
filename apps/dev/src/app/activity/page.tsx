@@ -19,7 +19,7 @@ const A = "/activity/a";
 const B = "/activity/b";
 
 const config: SsgoiConfig = {
-  transitions: drill({ enter: B, exit: A }),
+  transitions: [{ from: A, to: B, transition: drill() }],
 };
 
 const page = (bg: string): CSSProperties => ({

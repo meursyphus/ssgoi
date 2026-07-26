@@ -12,7 +12,13 @@ const TENSION = `${BASE}/tension`;
 const LIGHT = `${BASE}/light`;
 
 const config: SsgoiConfig = {
-  transitions: fade({ paths: [STILLNESS, TENSION, LIGHT] }),
+  transitions: [
+    {
+      from: [STILLNESS, TENSION, LIGHT],
+      to: [STILLNESS, TENSION, LIGHT],
+      transition: fade(),
+    },
+  ],
 };
 
 export function SilentRoomLayoutClient({ children }: { children: ReactNode }) {

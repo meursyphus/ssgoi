@@ -2,27 +2,28 @@
 
 import type { ReactNode } from "react";
 import { type SsgoiConfig } from "@ssgoi/react";
-import { drill, hero, sheet } from "@ssgoi/react/view-transitions";
+import { axis, drill, hero, sheet } from "@ssgoi/react/view-transitions";
 import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 
 const BASE = "/demo/google-photos";
 
 const config: SsgoiConfig = {
-  // Always preserve scroll inside the mobile-frame.
-  preserveScroll: true,
   transitions: [
-    // Listed before hero so collections↔c/* wins matching (the dispatcher
-    // is first-hit; no exact-vs-wildcard priority).
-    drill({ enter: `${BASE}/c/*`, exit: `${BASE}/collections` }),
+    {
+      ordered: [BASE, `${BASE}/collections`, `${BASE}/create`],
+      transition: axis({ type: "y", variant: "non-directional" }),
+    },
+    { on: `${BASE}/c/*`, transition: drill() },
     // Collage maker rises as a sheet over the Create tab.
-    ...sheet({ enter: `${BASE}/collage`, exit: `${BASE}/create` }),
+    { on: `${BASE}/collage`, transition: sheet() },
     // Every detail screen has its own chrome (back button, meta) that the
     // surrounding tabs don't share, so cross-fade chrome on both pairs.
-    // BASE↔c/* pair also gets generated but no UI flow triggers it.
-    hero({
-      paths: [BASE, `${BASE}/c/*`, `${BASE}/p/*`],
-      type: "fade",
-    }),
+    // BASE↔c/* also matches this rule, but no UI flow triggers it.
+    {
+      from: [BASE, `${BASE}/c/*`, `${BASE}/p/*`],
+      to: [BASE, `${BASE}/c/*`, `${BASE}/p/*`],
+      transition: hero({ type: "fade" }),
+    },
   ],
 };
 
@@ -32,10 +33,7 @@ export function GooglePhotosLayoutClient({
   children: ReactNode;
 }) {
   return (
-    // No shared pathname boundary here: the `(tabs)` group brings its own
-    // stable-key double boundary (MobileTabsShell) and `(detail)` brings a
-    // per-route boundary (MobileDetailShell). A layout-level boundary would
-    // remount the tab shell — bottom nav included — on every tab move.
+    // Boundaries live in the `(tabs)` and `(detail)` route-group layouts.
     <MobileShowcaseShell
       config={config}
       contentClassName="bg-white"

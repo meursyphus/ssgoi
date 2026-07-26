@@ -12,12 +12,13 @@ const BASE = "/demo/airbnb-photo-tour";
 // silhouette, so we use hero's default static type — only the shared image
 // morphs, no chrome cross-fade.
 const config: SsgoiConfig = {
-  preserveScroll: true,
-  transitions: hero({
-    type: "static",
-    variant: "smooth",
-    paths: [BASE, `${BASE}/photos/*`],
-  }),
+  transitions: [
+    {
+      from: BASE,
+      to: `${BASE}/photos/*`,
+      transition: hero({ type: "static", variant: "smooth" }),
+    },
+  ],
 };
 
 export function AirbnbPhotoTourLayoutClient({

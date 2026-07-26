@@ -1,30 +1,14 @@
-import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { Slot, component$ } from "@builder.io/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
-import { useSsgoi } from "@ssgoi/qwik";
-import { slide } from "@ssgoi/qwik/view-transitions";
-
-const categories = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
-];
-
-const productConfig$ = $(() => ({
-  transitions: [slide({ paths: categories.map((category) => category.path) })],
-}));
+import { PRODUCT_CATEGORIES } from "../../lib/ssgoi-config";
 
 export default component$(() => {
   const location = useLocation();
   const pathname = location.url.pathname.replace(/\/$/, "");
-  const ssgoiRoot = useSignal<HTMLElement>();
-
-  useSsgoi(ssgoiRoot, { config$: productConfig$ });
 
   return (
     <div
-      data-ssgoi-transition="/products"
+      data-ssgoi-transition={pathname}
       class="min-h-screen bg-[#121212] flex flex-col"
     >
       <div class="px-4 pt-6 pb-3 flex-shrink-0">
@@ -34,7 +18,7 @@ export default component$(() => {
 
       <div class="px-4 mb-4 flex-shrink-0">
         <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {categories.map((category) => (
+          {PRODUCT_CATEGORIES.map((category) => (
             <Link
               key={category.id}
               href={`${category.path}/`}
@@ -50,11 +34,7 @@ export default component$(() => {
         </div>
       </div>
 
-      <div
-        ref={ssgoiRoot}
-        data-ssgoi-root=""
-        class="flex-1 overflow-hidden relative"
-      >
+      <div class="flex-1 overflow-hidden relative">
         <Slot />
       </div>
     </div>

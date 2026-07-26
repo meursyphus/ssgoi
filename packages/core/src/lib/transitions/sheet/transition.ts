@@ -22,10 +22,7 @@ interface SheetExtras {
 export const sheet = (
   options: SheetOptions = {},
 ): TransitionConfig<SheetExtras> => {
-  const direction = options.direction ?? "enter";
   const provider = SHEET_PROVIDERS[options.type ?? DEFAULT_TYPE];
-  const physics =
-    direction === "enter" ? provider.enterPhysics : provider.exitPhysics;
   const bg = provider.background;
   const overlayConfig = provider.overlay;
   // Empty willChange == "don't touch the background at all" (zoom-style static).
@@ -33,6 +30,7 @@ export const sheet = (
 
   return {
     prepare: ({ from, to, context, createElement }) => {
+      const direction = context.direction === "forward" ? "enter" : "exit";
       const sheet = direction === "enter" ? to : from;
       const background = direction === "enter" ? from : to;
 
@@ -90,6 +88,9 @@ export const sheet = (
       return { overlay };
     },
     animation: ({ from, to, context, overlay }) => {
+      const direction = context.direction === "forward" ? "enter" : "exit";
+      const physics =
+        direction === "enter" ? provider.enterPhysics : provider.exitPhysics;
       const sheetEl = direction === "enter" ? to : from;
       const backgroundEl = direction === "enter" ? from : to;
       const sheetRect = getViewportRect(

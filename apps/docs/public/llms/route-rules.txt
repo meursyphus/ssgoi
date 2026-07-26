@@ -1,0 +1,90 @@
+# SSGOI route rules
+
+Transitions describe effects. Route rules describe which navigation
+relationship receives an effect and what forward/backward means.
+
+Main setup: https://ssgoi.dev/llms.txt
+
+## `on` and `except`
+
+Use `on` for a route family. Entering the scope is forward, leaving is
+backward, and navigation inside the scope uses semantic history.
+
+```ts
+{
+  on: "/posts/**",
+  except: "/posts",
+  transition: drill(),
+}
+```
+
+Both `on` and `except` accept one pattern or an array of patterns. `on` adds
+route families to the scope; `except` removes matching routes from it.
+
+## `from` and `to`
+
+Use `from` / `to` for a precise pair. The written relationship is forward and
+the reverse relationship is backward by default.
+
+```ts
+{
+  from: "/gallery",
+  to: "/photo/*",
+  transition: zoom(),
+}
+```
+
+Each side may also be an array of patterns.
+Set `bidirectional: false` when only the written `from` → `to` direction should
+match.
+
+## `ordered`
+
+Use `ordered` when route position defines direction. Increasing index is
+forward; decreasing index is backward.
+
+```ts
+{
+  ordered: ["/tabs/home", "/tabs/search", "/tabs/profile"],
+  transition: slide(),
+}
+```
+
+Both routes must be present in the array.
+
+## Patterns and matching
+
+| pattern | matches |
+| --- | --- |
+| `/posts` | exactly `/posts` |
+| `/posts/*` | exactly one additional segment |
+| `/posts/**` | `/posts` and all descendants |
+
+Higher `priority` wins first, then more-specific paths, then declaration order.
+A bare `*` remains a compatibility alias for `/**`.
+
+```ts
+const config = {
+  transitions: [
+    { priority: -100, on: "/**", transition: fade() },
+    { on: "/posts/**", except: "/posts", transition: drill() },
+  ],
+};
+```
+
+## Mobile and desktop configs
+
+`transitions` may be a function of device context:
+
+```ts
+transitions: ({ isMobile }) =>
+  isMobile
+    ? [{ on: "/**", except: "/", transition: drill() }]
+    : [{ priority: -100, on: "/**", transition: fade() }],
+```
+
+Scroll behavior is resolved from the active matched rule:
+https://ssgoi.dev/llms/scroll-restoration.txt
+
+Transition catalog:
+https://ssgoi.dev/llms/transitions.txt

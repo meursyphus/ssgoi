@@ -1,0 +1,3 @@
+# SSGOI TanStack Router guide moved
+
+Current guide: https://ssgoi.dev/llms/frameworks/tanstack-router.txt

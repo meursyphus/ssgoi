@@ -1,63 +1,46 @@
-# SSGOI + React Router Template
-
-This template demonstrates SSGOI page transitions with React Router 7.
-
-## Getting Started
+# SSGOI + React Router
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5173 to view the demo.
+## Structure
 
-## Features
+- `app/components/ssgoi-config.ts`: one transition config.
+- `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
+  `relative z-0 overflow-x-clip` shell.
+- `app/components/ssgoi-route-boundary.tsx`: name → route id/key resolver
+  using `useLocation()`.
+- `app/routes/page-boundary.layout.tsx`: standard named page boundary.
+- `app/routes/products_.layout.tsx`: persistent product shell plus inner tab
+  boundary.
 
-- **Drill Transition**: Posts list-to-detail navigation
-- **Slide Transition**: Product category tabs with nested `Ssgoi`
-- **Zoom Expand Transition**: Gallery grid-to-detail shared image animation
-- **Zoom Static Transition**: Profile feed-to-detail shared image animation
-- **Scroll Preservation**: Keeps scroll state where configured
-
-## Integration
-
-The main provider lives in `app/components/demo-layout.tsx`:
-
-```tsx
-import { Ssgoi } from "@ssgoi/react";
-import { drill, zoom } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
-
-const config = {
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    drill({ enter: "/posts/*", exit: "/posts" }),
-    zoom({ paths: ["/pinterest", "/pinterest/*"], type: "expand" }),
-    zoom({ paths: ["/profile", "/profile/*"], type: "static" }),
-  ],
-};
-```
-
-The demo layout wraps routed content once with a small boundary utility.
+Layouts pass a semantic name; the boundary resolver owns the key policy:
 
 ```tsx
-export default function DemoLayout({ children }) {
-  return (
-    <Ssgoi config={config}>
-      <SsgoiTransitionBoundary className="min-h-full bg-[#121212]">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
-}
+const { pathname } = useLocation();
+const boundary = resolveBoundary(name, pathname);
+
+return (
+  <div key={boundary.key} data-ssgoi-transition={boundary.id}>
+    {children}
+  </div>
+);
 ```
 
-Page components do not set `data-ssgoi-transition` themselves. Dynamic routes
-stay as real pathnames and are matched by wildcard patterns in config. Use
-`/posts/*` for descendants and `/posts/**` when the parent path should match
-too.
+`page` uses the pathname for both values. `products-shell` returns a stable
+outer key because the products layout owns that boundary's lifetime; its inner
+`<Outlet />` uses `page`. Category navigation therefore slides only the inner
+content.
 
-## Build
+Effects:
+
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
+
+Guide: https://ssgoi.dev/llms.txt#8-other-frameworks
 
 ```bash
 pnpm typecheck

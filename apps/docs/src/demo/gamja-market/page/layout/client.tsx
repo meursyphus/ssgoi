@@ -8,27 +8,20 @@ import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 const BASE = "/demo/gamja-market";
 
 const config: SsgoiConfig = {
-  // 모바일 데모 — 데스크탑 viewport에서도 mobile-frame 안에서는 항상 스크롤 보존
-  preserveScroll: true,
   transitions: [
     // home ↔ product detail (drill)
-    ...drill({ enter: `${BASE}/products/*`, exit: BASE }),
+    { on: `${BASE}/products/*`, transition: drill() },
     // home ↔ orders list (drill)
-    ...drill({ enter: `${BASE}/orders`, exit: BASE }),
-    // orders list ↔ order detail (drill)
-    ...drill({ enter: `${BASE}/orders/*`, exit: `${BASE}/orders` }),
-    // order detail ↔ review write (sheet)
-    ...sheet({
-      type: "static",
-      enter: `${BASE}/review/*`,
-      exit: `${BASE}/orders/*`,
-    }),
-    // home ↔ review write (sheet) — FAB 진입
-    ...sheet({
-      type: "static",
-      enter: `${BASE}/review/*`,
-      exit: BASE,
-    }),
+    // orders is one nested drill stack, including its detail pages
+    {
+      on: `${BASE}/orders/**`,
+      transition: drill(),
+    },
+    // review write is a sheet regardless of whether it opens from home or an order
+    {
+      on: `${BASE}/review/*`,
+      transition: sheet({ type: "static" }),
+    },
   ],
 };
 

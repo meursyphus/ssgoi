@@ -1,27 +1,29 @@
 "use client";
 
-import { type ElementType, type ReactNode } from "react";
+import { type ElementType, type Key, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+
+export type BoundaryScope = (pathname: string) => Key;
+
+const pathnameScope: BoundaryScope = (pathname) => pathname;
 
 export function SsgoiTransitionBoundary({
   children,
   as,
   className,
   id,
-  stableKey = false,
+  scope = pathnameScope,
 }: {
   children: ReactNode;
   as?: ElementType;
   className?: string;
   id?: string;
   /**
-   * Pin the React key while `data-ssgoi-transition` keeps tracking the route.
-   * For shell boundaries that must survive child-route changes (e.g. a tab
-   * shell owning a bottom nav): no remount means the owning provider sees no
-   * OUT/IN on tab↔tab, but on a real unmount (tab→detail) ssgoi reads the
-   * attribute at that moment, so path-based matching still works.
+   * Maps the current pathname to this boundary's React key. Returning the same
+   * key keeps a persistent layout mounted while its transition id continues
+   * to track the real route.
    */
-  stableKey?: boolean;
+  scope?: BoundaryScope;
 }) {
   const pathname = usePathname();
   const transitionId = id ?? pathname;
@@ -29,7 +31,7 @@ export function SsgoiTransitionBoundary({
 
   return (
     <Component
-      key={stableKey ? "ssgoi-stable-boundary" : transitionId}
+      key={scope(pathname)}
       data-ssgoi-transition={transitionId}
       className={className}
     >

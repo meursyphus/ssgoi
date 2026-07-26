@@ -1,10 +1,35 @@
-# SSGOI + SolidStart Template
-
-This template demonstrates SSGOI page transitions with SolidStart SSR.
+# SSGOI + SolidStart
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-SolidStart pages mark their own transition boundary with `data-ssgoi-transition`, matching the SvelteKit, Nuxt, and Qwik template pattern. The root app wraps file routes once with `<Ssgoi>`, while every route page provides the stable transition id that the config matches.
+The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` and one
+centralized route boundary:
+
+```tsx
+<Ssgoi config={ssgoiConfig}>
+  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+    {props.children}
+  </SsgoiTransitionBoundary>
+</Ssgoi>
+```
+
+The root boundary maps every `/products/*` URL to `/products`. The persistent
+products route wraps its child route in a second boundary, so category
+navigation replaces only the inner content while the header and tabs stay
+mounted.
+
+Effects:
+
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
+
+Guide: https://ssgoi.dev/llms/solid.txt
+
+```bash
+pnpm typecheck
+pnpm build
+```

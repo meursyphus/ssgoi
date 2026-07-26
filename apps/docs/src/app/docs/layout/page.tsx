@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import { DocsPageHeading, LayoutBody } from "@/page/docs/sections";
+import { PageHeading, inlineCode } from "@/page/docs/ui";
+import { LayoutBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Layout — the three classes on the SSGOI wrapper",
+  title: "Layout shell — the wrapper the leaving page is positioned against",
   description:
-    "The element that wraps <Ssgoi> needs relative, z-0, and overflow-x-clip. Here is why each one matters when a transition looks off.",
+    "The element you wrap <Ssgoi> in needs a positioning context and horizontal clipping. Here is what to set, and what breaks when it is missing.",
   alternates: { canonical: "/docs/layout" },
   openGraph: buildOpenGraph({ path: "/docs/layout" }),
 };
@@ -18,13 +19,18 @@ export default function DocsLayoutPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Layout", path: "/docs/layout" },
+          { name: "Layout shell", path: "/docs/layout" },
         ])}
       />
-      <DocsPageHeading
-        eyebrow="For setup & debugging"
-        title="Layout"
-        lead="Three classes on the wrapper. Skim this when something looks off."
+      <PageHeading
+        title="Layout shell"
+        lead={
+          <>
+            The element you wrap{" "}
+            <code className={inlineCode}>&lt;Ssgoi&gt;</code> in needs a few
+            classes, so the leaving page animates in place instead of jumping.
+          </>
+        }
       />
       <LayoutBody />
     </>

@@ -11,7 +11,7 @@ const ARCHIVE = BASE;
 const ABOUT = `${BASE}/about`;
 
 const config: SsgoiConfig = {
-  transitions: strip({ paths: [ARCHIVE, ABOUT] }),
+  transitions: [{ from: ARCHIVE, to: ABOUT, transition: strip() }],
 };
 
 export function NoraHaleLayoutClient({ children }: { children: ReactNode }) {

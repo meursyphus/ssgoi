@@ -1,0 +1,37 @@
+# SSGOI film transition
+
+Use for a selected cinematic moment such as gallery → lightbox. Film composes
+multiple springs with temporary viewfinder corners.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { film } from "@ssgoi/react/view-transitions";
+
+film({
+  variant?: "default";
+  options?: {
+    borderColor?: string;
+  };
+}): TransitionConfig;
+```
+
+`borderColor` accepts any CSS color.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: "/gallery",
+      to: "/photo/*",
+      transition: film({ options: { borderColor: "#ffcc00" } }),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

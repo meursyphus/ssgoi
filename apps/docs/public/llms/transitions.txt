@@ -1,0 +1,38 @@
+# SSGOI mobile transition catalog
+
+Choose the effect from the mobile interaction the user should understand. Each
+linked spec contains its variants, supported props, required markup, and a
+focused route-config example.
+
+Main setup: https://ssgoi.dev/llms.txt
+
+## Mobile UX patterns
+
+| UX intent | transition | usual rule | spec |
+| --- | --- | --- | --- |
+| list → detail, hierarchical depth | `drill()` | `on` + `except` | https://ssgoi.dev/llms/transitions/drill.txt |
+| compose, filters, temporary task | `sheet()` | `on` | https://ssgoi.dev/llms/transitions/sheet.txt |
+| tabs or ordered horizontal steps | `slide()` | `ordered` | https://ssgoi.dev/llms/transitions/slide.txt |
+| sibling pages with Material shared-axis motion | `axis()` | `ordered` | https://ssgoi.dev/llms/transitions/axis.txt |
+| card or image expands into detail | `zoom()` | `from` / `to` | https://ssgoi.dev/llms/transitions/zoom.txt |
+| vertical onboarding or editorial sequence | `scroll()` | `ordered` | https://ssgoi.dev/llms/transitions/scroll.txt |
+
+## More effects
+
+Open an individual spec to see its variants and a route-config fragment.
+
+| Visual intent | transition | spec |
+| --- | --- | --- |
+| shared visual object across two pages | `hero()` | https://ssgoi.dev/llms/transitions/hero.txt |
+| quiet sequential fade-through | `fade()` | https://ssgoi.dev/llms/transitions/fade.txt |
+| cinematic viewfinder swap | `film()` | https://ssgoi.dev/llms/transitions/film.txt |
+| shallow perspective page swap | `strip()` | https://ssgoi.dev/llms/transitions/strip.txt |
+| staggered window-blind reveal | `blind()` | https://ssgoi.dev/llms/transitions/blind.txt |
+| playful whole-page planar spin | `rotate()` | https://ssgoi.dev/llms/transitions/rotate.txt |
+| dramatic rotate-and-scale entrance | `jaemin()` | https://ssgoi.dev/llms/transitions/jaemin.txt |
+
+Route rule syntax and matching:
+https://ssgoi.dev/llms/route-rules.txt
+
+Automatic scroll reset and restoration:
+https://ssgoi.dev/llms/scroll-restoration.txt

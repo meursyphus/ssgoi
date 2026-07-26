@@ -1,25 +1,7 @@
-import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { Slot, component$, useSignal } from "@builder.io/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
 import { useSsgoi } from "@ssgoi/qwik";
-import { drill, zoom } from "@ssgoi/qwik/view-transitions";
-
-const ssgoiConfig$ = $(() => ({
-  preserveScroll: { exclude: ["/posts/*"] },
-  transitions: [
-    zoom({
-      paths: ["/pinterest", "/pinterest/*"],
-      type: "expand" as const,
-    }),
-    drill({
-      enter: "/posts/*",
-      exit: "/posts",
-    }),
-    zoom({
-      paths: ["/profile", "/profile/*"],
-      type: "static" as const,
-    }),
-  ],
-}));
+import { ssgoiConfig$ } from "../lib/ssgoi-config";
 
 export default component$(() => {
   const location = useLocation();

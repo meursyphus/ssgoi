@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { showcases } from "@/page/showcase/data";
 import { getAllPosts } from "@/lib/blog";
 import { DOCS_NAV_FLAT } from "@/page/docs/nav";
-import { TRANSITION_DOCS } from "@/page/docs/transitions-data";
 
 const BASE_URL = "https://ssgoi.dev";
 
@@ -39,13 +38,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "weekly",
   }));
 
-  const transitionRoutes: MetadataRoute.Sitemap = TRANSITION_DOCS.map((t) => ({
-    url: `${BASE_URL}/docs/transitions/${t.name}`,
-    lastModified: now,
-    priority: 0.7,
-    changeFrequency: "monthly",
-  }));
-
   const showcaseRoutes: MetadataRoute.Sitemap = showcases.map((s) => ({
     url: `${BASE_URL}/showcase/${s.slug}`,
     lastModified: now,
@@ -60,11 +52,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  return [
+  const routes = [
     ...staticRoutes,
     ...docsRoutes,
-    ...transitionRoutes,
     ...showcaseRoutes,
     ...blogRoutes,
   ];
+
+  return Array.from(
+    new Map(routes.map((route) => [route.url, route])).values(),
+  );
 }

@@ -1,0 +1,37 @@
+# SSGOI scroll transition
+
+Use for vertical onboarding, paginated long-form content, or a sequential flow
+where up and down communicate progress.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { scroll } from "@ssgoi/react/view-transitions";
+
+scroll({
+  type?: "directional" | "non-directional";  // default: "directional"
+  variant?: "default";
+  options?: object;
+}): TransitionConfig;
+```
+
+- `directional`: route-rule direction controls the motion.
+- `non-directional`: every transition moves upward.
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      ordered: ["/onboarding/1", "/onboarding/2", "/onboarding/3"],
+      transition: scroll(),
+    },
+  ],
+};
+```
+
+This effect is separate from automatic browser scroll-position behavior:
+https://ssgoi.dev/llms/scroll-restoration.txt

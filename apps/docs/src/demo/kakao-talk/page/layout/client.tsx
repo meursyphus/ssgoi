@@ -2,36 +2,34 @@
 
 import type { ReactNode } from "react";
 import { type SsgoiConfig } from "@ssgoi/react";
-import { drill, sheet } from "@ssgoi/react/view-transitions";
+import { axis, drill, sheet } from "@ssgoi/react/view-transitions";
 import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 
 const BASE = "/demo/kakao-talk";
 
-// Outer provider — screen-level moves only. The 친구↔채팅 axis lives in the
-// nested provider inside tabs-shell, which is also what keeps the bottom tab
-// bar stationary on tab moves and lets it drill/sheet out on tab→detail.
+// One config owns tab, sheet, and drill rules. Boundaries decide which layout
+// region leaves; the bottom nav stays mounted for tab-to-tab moves.
 const config: SsgoiConfig = {
-  // mobile-frame 안에서 항상 스크롤 보존
-  preserveScroll: true,
   transitions: [
+    {
+      ordered: [BASE, `${BASE}/chats`],
+      transition: axis({ type: "x", variant: "snappy" }),
+    },
     // home / chats → profile detail — sheet static (배경 가만, 시트만 올라옴)
-    ...sheet({ type: "static", enter: `${BASE}/profile/*`, exit: BASE }),
-    ...sheet({
-      type: "static",
-      enter: `${BASE}/profile/*`,
-      exit: `${BASE}/chats`,
-    }),
+    { on: `${BASE}/profile/*`, transition: sheet({ type: "static" }) },
 
     // chats → chat detail — drill
-    ...drill({ enter: `${BASE}/chats/*`, exit: `${BASE}/chats` }),
+    {
+      on: `${BASE}/chats/**`,
+      except: `${BASE}/chats`,
+      transition: drill(),
+    },
   ],
 };
 
 export function KakaoTalkLayoutClient({ children }: { children: ReactNode }) {
   return (
-    // Boundaries live in the (tabs)/(detail) group shells, not here — a
-    // layout-level pathname boundary would remount the tab shell (bar
-    // included) on every tab move.
+    // The (tabs)/(detail) route-group layouts own their boundaries.
     <MobileShowcaseShell
       config={config}
       contentClassName="bg-white"

@@ -1,15 +1,10 @@
-import type { SsgoiPathTransition } from "@types";
-import {
-  createOrderedPathTransitions,
-  createSymmetricPathTransitions,
-} from "../utils";
+import type { AnyTransitionConfig } from "@types";
 import { scroll as transition } from "./transition";
 
 export type ScrollConfig = {
-  paths: readonly string[];
   /**
-   * - `"directional"` (default): path order decides direction. Earlier → later
-   *   scrolls up; later → earlier scrolls down.
+   * - `"directional"` (default): the surrounding rule decides direction.
+   *   An ordered rule maps earlier → later to forward.
    * - `"non-directional"`: every transition scrolls upward (pages slide up, new
    *   page enters from the bottom). Direction is fixed — not user-configurable.
    */
@@ -18,17 +13,7 @@ export type ScrollConfig = {
   options?: object;
 };
 
-export function scroll(config: ScrollConfig): SsgoiPathTransition[] {
-  const { paths, type = "directional" } = config;
-
-  if (type === "non-directional") {
-    return createSymmetricPathTransitions(paths, () =>
-      transition({ direction: "up" }),
-    );
-  }
-  return createOrderedPathTransitions(
-    paths,
-    { forward: "up", backward: "down" },
-    (dir) => transition({ direction: dir }),
-  );
+export function scroll(config: ScrollConfig = {}): AnyTransitionConfig {
+  const { type = "directional" } = config;
+  return transition({ directional: type === "directional" });
 }

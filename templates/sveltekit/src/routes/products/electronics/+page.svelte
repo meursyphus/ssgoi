@@ -5,4 +5,4 @@
 	const products = getProductsByCategory('electronics');
 </script>
 
-<ProductGrid {products} category="electronics" />
+<ProductGrid {products} />

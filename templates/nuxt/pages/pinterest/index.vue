@@ -1,5 +1,5 @@
 <template>
-  <div data-ssgoi-transition="/pinterest">
+  <div>
     <div class="min-h-screen bg-[#121212] px-4 py-6">
       <!-- Header -->
       <div class="mb-6">

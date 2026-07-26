@@ -16,14 +16,40 @@ export type UnmountAnchor = {
   nextSibling: Node | null;
 };
 
-type UnmountCallback = (anchor?: UnmountAnchor) => void;
+export type UnmountOptions = {
+  /**
+   * `false` when this element left inside another watched boundary owned by
+   * the same transition context. The nested element still needs cleanup, but
+   * the outer boundary owns the navigation OUT event.
+   */
+  emit: boolean;
+};
 
-const watched = new Map<HTMLElement, UnmountCallback>();
+type UnmountCallback = (
+  anchor?: UnmountAnchor,
+  options?: UnmountOptions,
+) => void;
+
+type WatchGroup = object;
+
+type WatchedEntry = {
+  element: HTMLElement;
+  callback: UnmountCallback;
+  group: WatchGroup;
+  parent: WatchedEntry | null;
+};
+
+const defaultGroup: WatchGroup = {};
+const watched = new Map<HTMLElement, WatchedEntry>();
 
 let sharedObserver: MutationObserver | null = null;
 let initialized = false;
 
-function checkRemovedSubtree(node: Node, anchor: UnmountAnchor): void {
+function collectRemovedSubtree(
+  node: Node,
+  anchor: UnmountAnchor,
+  removed: Map<HTMLElement, { entry: WatchedEntry; anchor: UnmountAnchor }>,
+): void {
   // A childList "removed" record also fires when a node is MOVED (removed then
   // re-inserted within the same commit) — e.g. Next.js reorders its bfcache
   // `<Activity>` siblings on back/forward navigation, so React detaches and
@@ -33,14 +59,36 @@ function checkRemovedSubtree(node: Node, anchor: UnmountAnchor): void {
   // unmount may fire the leave callback; a moved node keeps its watch, otherwise
   // its visibility tracking would be torn down and later transitions break.
   if (node instanceof HTMLElement && watched.has(node) && !node.isConnected) {
-    const cb = watched.get(node)!;
-    watched.delete(node);
-    // Defer to microtask so we never mutate the DOM inside the observer
-    // callback (some browsers complain).
-    queueMicrotask(() => cb(anchor));
+    removed.set(node, { entry: watched.get(node)!, anchor });
   }
   for (const child of Array.from(node.childNodes)) {
-    checkRemovedSubtree(child, anchor);
+    collectRemovedSubtree(child, anchor, removed);
+  }
+}
+
+function flushRemoved(
+  removed: Map<HTMLElement, { entry: WatchedEntry; anchor: UnmountAnchor }>,
+): void {
+  const removedEntries = new Set(
+    Array.from(removed.values(), ({ entry }) => entry),
+  );
+
+  for (const [element, { entry, anchor }] of removed) {
+    watched.delete(element);
+
+    let parent = entry.parent;
+    let nested = false;
+    while (parent) {
+      if (parent.group === entry.group && removedEntries.has(parent)) {
+        nested = true;
+        break;
+      }
+      parent = parent.parent;
+    }
+
+    // Defer to microtask so we never mutate the DOM inside the observer
+    // callback (some browsers complain).
+    queueMicrotask(() => entry.callback(anchor, { emit: !nested }));
   }
 }
 
@@ -49,15 +97,22 @@ function init(): void {
   initialized = true;
 
   sharedObserver = new MutationObserver((mutations) => {
+    const removed = new Map<
+      HTMLElement,
+      { entry: WatchedEntry; anchor: UnmountAnchor }
+    >();
+
     for (const m of mutations) {
       const anchor = {
         parent: m.target,
         nextSibling: m.nextSibling,
       };
-      for (const removed of Array.from(m.removedNodes)) {
-        checkRemovedSubtree(removed, anchor);
+      for (const removedNode of Array.from(m.removedNodes)) {
+        collectRemovedSubtree(removedNode, anchor, removed);
       }
     }
+
+    flushRemoved(removed);
   });
 
   const start = () => {
@@ -75,9 +130,28 @@ function init(): void {
 export function watchUnmount(
   element: HTMLElement,
   cb: UnmountCallback,
+  group: WatchGroup = defaultGroup,
 ): () => void {
   init();
-  watched.set(element, cb);
+
+  let parentElement = element.parentElement;
+  let parent: WatchedEntry | null = null;
+  while (parentElement) {
+    const candidate = watched.get(parentElement);
+    if (candidate?.group === group) {
+      parent = candidate;
+      break;
+    }
+    parentElement = parentElement.parentElement;
+  }
+
+  watched.set(element, {
+    element,
+    callback: cb,
+    group,
+    parent,
+  });
+
   return () => {
     watched.delete(element);
   };

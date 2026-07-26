@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
+import { Link } from "@/lib/link";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
-import {
-  CompatibilityBody,
-  DocsPageHeading,
-  RoutersBody,
-} from "@/page/docs/sections";
+import { PageHeading, Section, link, measure, prose } from "@/page/docs/ui";
+import { CompatibilityBody, RoutersBody } from "@/page/docs/sections";
 
 export const metadata: Metadata = {
-  title: "Compatibility — routers and browser support",
+  title: "Browser and router support — what SSGOI runs on",
   description:
-    "SSGOI is router-agnostic (Next.js, React Router, TanStack, SvelteKit, Nuxt, Qwik City) and runs on every modern browser — Chrome 84+, Safari 13.1+, Firefox 75+, Edge 84+.",
+    "SSGOI keeps the router you already use and animates through the browser's own Web Animations API, so nothing in your navigation or rendering stack is replaced.",
   alternates: { canonical: "/docs/compatibility" },
   openGraph: buildOpenGraph({ path: "/docs/compatibility" }),
 };
@@ -22,39 +20,39 @@ export default function DocsCompatibilityPage() {
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "Compatibility", path: "/docs/compatibility" },
+          { name: "Browser & router support", path: "/docs/compatibility" },
         ])}
       />
-      <DocsPageHeading
-        title="Compatibility"
-        lead={
-          <>
-            Use your router, ship to every browser. SSGOI runs on the Web
-            Animations API — unlike View Transitions, which only Chrome
-            supports.
-          </>
-        }
+      <PageHeading
+        title="Browser & router support"
+        lead="SSGOI runs in the browsers you already support, with the router you already use."
       />
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold tracking-tight text-neutral-100">
-          Routers
-        </h2>
-        <p className="mt-2 text-sm text-neutral-400">
-          Router-agnostic, SSR included.
-        </p>
-        <RoutersBody />
-      </section>
-
-      <section className="mt-14 border-t border-white/[0.06] pt-10">
-        <h2 className="text-lg font-semibold tracking-tight text-neutral-100">
-          Why not View Transitions?
-        </h2>
-        <p className="mt-2 text-sm text-neutral-400">
-          Two reasons. SSGOI answers both — on every browser below.
-        </p>
+      <Section
+        title="Browser runtime"
+        lead="Springs are simulated up front and handed to the browser as keyframes, so the animation itself runs natively."
+      >
         <CompatibilityBody />
-      </section>
+      </Section>
+
+      <Section
+        title="Routers and frameworks"
+        lead="SSGOI follows your framework's route lifecycle instead of replacing it, so navigation and SSR stay as they are."
+      >
+        <RoutersBody />
+        <p className={`mt-6 ${measure} ${prose}`}>
+          Each stack has its own setup page in the{" "}
+          <Link href="/docs/frameworks" className={link}>
+            framework guides
+          </Link>
+          . For how this relates to the browser&apos;s own View Transition API,
+          see{" "}
+          <Link href="/docs/view-transition-api" className={link}>
+            why not View Transitions
+          </Link>
+          .
+        </p>
+      </Section>
     </>
   );
 }

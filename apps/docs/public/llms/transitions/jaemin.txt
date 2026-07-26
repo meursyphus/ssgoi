@@ -1,0 +1,32 @@
+# SSGOI jaemin transition
+
+Use sparingly for playful special moments. The incoming page rotates, scales,
+and changes radius as it fills the viewport.
+
+Catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Props
+
+```ts
+import { jaemin } from "@ssgoi/react/view-transitions";
+
+jaemin({
+  variant?: "default";
+}): TransitionConfig;
+```
+
+## Example
+
+```ts
+const config = {
+  transitions: [
+    {
+      from: "/",
+      to: "/surprise",
+      transition: jaemin(),
+    },
+  ],
+};
+```
+
+Route rules: https://ssgoi.dev/llms/route-rules.txt

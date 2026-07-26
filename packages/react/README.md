@@ -1,324 +1,63 @@
 # @ssgoi/react
 
-React bindings for SSGOI - Native app-like page transitions for React applications.
+React bindings for SSGOI.
 
-try this: [ssgoi.dev](https://ssgoi.dev)
+[![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
-![https://ssgoi.dev](https://ssgoi.dev/ssgoi.gif)
-
-## AI-Assisted Setup
-
-Using Claude, Cursor, ChatGPT, or another AI assistant? Point it at:
-
-```
-https://ssgoi.dev/llms.txt
-```
-
-It has the full setup guide, every transition, the API, and troubleshooting — everything an agent needs to wire SSGOI into your app.
-
-## What is SSGOI?
-
-SSGOI brings native app-like page transitions to the web. Transform your static page navigations into smooth, delightful experiences that users love.
-
-### ✨ Key Features
-
-- **🌍 Works Everywhere** - Unlike the browser's View Transition API, SSGOI works in all modern browsers (Chrome, Firefox, Safari)
-- **🚀 SSR Ready** - Perfect compatibility with Next.js. No hydration issues, SEO-friendly
-- **🎯 Use Your Router** - Keep your existing routing. React Router, Next.js App Router - all work seamlessly
-- **💾 State Persistence** - Remembers animation state during navigation, even with browser back/forward
-- **⚛️ React Optimized** - Built specifically for React with hooks and modern patterns
-
-## Installation
+[Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)
 
 ```bash
 npm install @ssgoi/react
-# or
-yarn add @ssgoi/react
-# or
-pnpm add @ssgoi/react
 ```
 
-## Quick Start
+Agent setup guide: https://ssgoi.dev/llms.txt
 
-### 1. Wrap your app
+## Contents
 
-```tsx
-import { Ssgoi } from "@ssgoi/react";
-import { fade } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+- Next.js
+- Persistent layouts and sliding tabs
+- React Router
+- TanStack Router
+- Config
+- Effect index
 
-const config = {
-  transitions: [fade({ paths: ["/", "/about"] })],
-};
+## Next.js
 
-export default function App() {
-  return (
-    <div className="relative z-0 min-h-dvh bg-white">
-      {/* Layout shell above: positioned ancestor + stacking context for the OUT clone. */}
-      <Ssgoi config={config}>
-        {/* Routed content marker. Layout positioning belongs to the outer wrapper. */}
-        <SsgoiTransitionBoundary className="min-h-full bg-white">
-          {/* Your app */}
-        </SsgoiTransitionBoundary>
-      </Ssgoi>
-    </div>
-  );
-}
-```
-
-### 2. Keep pages unmarked
-
-```tsx
-export default function HomePage() {
-  return (
-    <main>
-      <h1>Welcome</h1>
-      {/* Page content */}
-    </main>
-  );
-}
-```
-
-Create one router-specific `SsgoiTransitionBoundary` utility in your layout.
-It reads the current pathname internally, sets the transition boundary key, and
-uses that pathname as a logical page id matched by config such as
-`/products/*`. Use `/products/**` when the parent path itself should match too.
-
-Next.js implementation:
-
-```tsx
-"use client";
-
-import { type ElementType, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-
-export function SsgoiTransitionBoundary({
-  children,
-  as,
-  className,
-}: {
-  children: ReactNode;
-  as?: ElementType;
-  className?: string;
-}) {
-  const pathname = usePathname();
-  const Component = as ?? "div";
-
-  return (
-    <Component
-      key={pathname}
-      data-ssgoi-transition={pathname}
-      className={className}
-    >
-      {children}
-    </Component>
-  );
-}
-```
-
-React Router and TanStack Router use the same component body with their own
-pathname hook.
-
-**That's it!** Your configured pages now transition smoothly with a fade effect.
-
-## Layout Requirements
-
-The outer element wrapping the SSGOI provider / `<Ssgoi>` needs
-`position: relative` and `z-index: 0` (`relative z-0` in Tailwind).
-
-When a page leaves, SSGOI clones it back into the DOM with `position: absolute`
-so it can animate out while the new page animates in. Without a positioned,
-stacking-context ancestor the clone jumps to the wrong place or falls behind the
-background. Add `overflow-x-clip` too if you use horizontal transitions
-(`slide`, `drill`). Keep these layout classes on the outer wrapper, not on the
-route boundary marker.
-
-## Advanced Transitions
-
-### Route-based Transitions
-
-Each transition factory returns a path-transition group. Drop the results straight into `config.transitions` — nested arrays are flattened automatically:
-
-```tsx
-import { fade, drill, zoom } from "@ssgoi/react/view-transitions";
-
-const config = {
-  transitions: [
-    // Calm cross-fade between tabs
-    fade({ paths: ["/home", "/about"] }),
-
-    // iOS-style drill-in when entering details
-    drill({ enter: "/products/*", exit: "/products" }),
-
-    // Card-to-detail zoom (needs matching data-zoom-*-key)
-    zoom({ paths: ["/gallery", "/photo/*"], type: "expand" }),
-  ],
-};
-```
-
-Transitions come in three shapes:
-
-- **`{ paths }`** — symmetric: every pair animates with the same physics (`fade`, `hero`, `zoom`, `blind`, `film`, `rotate`, `strip`, `jaemin`)
-- **`{ enter, exit, type? }`** — directional: enter and exit get different physics (`drill`, `sheet`)
-- **`{ paths }`** — ordered: path order decides forward / back direction (`slide`, `scroll`, `axis`)
-
-### Individual Element Animations
-
-Animate specific elements during mount/unmount with `transition()`:
-
-```tsx
-import { transition } from "@ssgoi/react";
-import { fade, slide } from "@ssgoi/react/transitions";
-
-function Card() {
-  return (
-    <div
-      ref={transition({
-        key: "card",
-        in: fade(),
-        out: slide({ direction: "up" }),
-      })}
-    >
-      <h2>Animated Card</h2>
-    </div>
-  );
-}
-```
-
-### Auto Key Plugin
-
-The Auto Key Plugin automatically generates unique keys for your transitions based on the file location (`file:line:column`), eliminating the need to manually provide keys.
-
-**Benefits:**
-
-- **Automatic Key Generation**: No need to manually specify `key` in `transition()` calls
-- **Collision-Free**: Keys are based on exact code location
-- **Cleaner Code**: Less boilerplate in your components
-
-**⚠️ Important**: For list items rendered with `.map()`, just use JSX key prop - the plugin automatically appends it to generate unique keys.
-
-#### Setup with Next.js
-
-```tsx
-// next.config.ts
-import type { NextConfig } from "next";
-import SsgoiAutoKey from "@ssgoi/react/unplugin/webpack";
-
-const nextConfig: NextConfig = {
-  webpack: (config) => {
-    config.plugins.push(SsgoiAutoKey());
-    return config;
-  },
-};
-
-export default nextConfig;
-```
-
-#### Setup with Vite
-
-```ts
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import SsgoiAutoKey from "@ssgoi/react/unplugin/vite";
-
-export default defineConfig({
-  plugins: [react(), SsgoiAutoKey()],
-});
-```
-
-#### Usage Examples
-
-**WITH Auto Key Plugin (Recommended):**
-
-```tsx
-import { transition } from "@ssgoi/react";
-import { fade, slide } from "@ssgoi/react/transitions";
-
-function SimpleCard() {
-  return (
-    <div ref={transition(fade())}>
-      <h2>Fades in on mount</h2>
-    </div>
-  );
-}
-```
-
-**WITHOUT Auto Key Plugin:**
-
-```tsx
-// Explicit key required for transition state tracking
-function Card() {
-  return (
-    <div
-      ref={transition({
-        key: "my-card",
-        ...fade(),
-      })}
-    >
-      <h2>Animated Card</h2>
-    </div>
-  );
-}
-```
-
-**List Items:**
-
-```tsx
-// In .map() lists, just use JSX key - the plugin appends it automatically
-function List() {
-  return (
-    <ul>
-      {items.map((item) => (
-        <li
-          key={item.id} // JSX key is enough - plugin generates file:line:col:${key}
-          ref={transition(fade())}
-        >
-          {item.name}
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-## Next.js App Router Example
+Keep one config and one `<Ssgoi>` above route boundaries.
 
 ```tsx
 // app/ssgoi-provider.tsx
 "use client";
 
-import { type ReactNode } from "react";
 import { Ssgoi } from "@ssgoi/react";
-import { drill, fade } from "@ssgoi/react/view-transitions";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { drill, slide } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [
-    drill({ enter: "/post/*", exit: "*" }),
-    fade({ paths: ["/", "/about"] }),
+    { on: "/posts/**", except: "/posts", transition: drill() },
+    {
+      ordered: ["/products/all", "/products/electronics", "/products/fashion"],
+      transition: slide(),
+    },
   ],
 };
 
-export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return (
-    <Ssgoi config={config}>
-      <SsgoiTransitionBoundary className="min-h-full bg-white">
-        {children}
-      </SsgoiTransitionBoundary>
-    </Ssgoi>
-  );
+export function SsgoiProvider({ children }) {
+  return <Ssgoi config={config}>{children}</Ssgoi>;
 }
+```
 
+Build the layout shell next:
+
+```tsx
 // app/layout.tsx
-import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <main className="relative z-0 min-h-screen bg-white">
+        <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>{children}</SsgoiProvider>
         </main>
       </body>
@@ -327,146 +66,239 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-```tsx
-// app/page.tsx
-export default function Page() {
-  return <main>{/* Your page content */}</main>;
-}
-```
+When React removes an outgoing route, SSGOI temporarily reinserts that
+detached DOM node with `position: absolute`. `relative` gives it a containing
+block, `z-0` creates the local stacking context, and `overflow-x-clip` prevents
+horizontal transition flashes. These classes belong on the shell around
+`<Ssgoi>`, not on route boundaries.
 
-## API Reference
+### Route boundary
 
-### Components
-
-#### `<Ssgoi>`
-
-The provider component that manages transition context.
+A React route boundary is a keyed element marked with a route id:
 
 ```tsx
-<Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
-```
-
-#### Route boundary
-
-Use one route boundary utility inside `<Ssgoi>`. It sets
-`data-ssgoi-transition` from the current pathname internally, so individual page
-components do not need transition markers.
-
-```tsx
-<SsgoiTransitionBoundary className="min-h-full bg-white">
+<div key={boundary.key} data-ssgoi-transition={boundary.id}>
   {children}
-</SsgoiTransitionBoundary>
-```
-
-### Hooks
-
-#### `useTransition()`
-
-Access transition state and controls.
-
-```tsx
-const { isTransitioning, direction } = useTransition();
-```
-
-### Functions
-
-#### `transition()`
-
-Apply transitions to individual elements.
-
-```tsx
-<div
-  ref={transition({
-    key: "unique-key",
-    in: fade(),
-    out: fade(),
-  })}
->
-  Content
 </div>
 ```
 
-## Built-in Transitions
+- Changing `key` makes React unmount the old region and mount the new one.
+- The attribute identifies those regions for SSGOI config matching.
+- `<Ssgoi>` observes that lifecycle and runs OUT/IN; it does not navigate or
+  change the key.
 
-### Page Transitions (`@ssgoi/react/view-transitions`)
+The legacy `<SsgoiTransition>` wrapper only added this attribute and is
+deprecated. Set `data-ssgoi-transition` directly on the keyed application
+boundary.
 
-- `fade()` - Calm cross-fade. Safe default for unrelated pages
-- `drill()` - iOS-style hierarchical navigation (list → detail)
-- `slide()` - Horizontal push for tabs / sequential flows
-- `scroll()` - Vertical page scroll for onboarding / paginated views
-- `axis()` - Material/Flutter shared-axis swap for sibling/tab routes
-- `sheet()` - Bottom sheet that slides up (modal-like flows)
-- `hero()` - Shared element transition (matching `data-hero-enter-key` / `data-hero-exit-key`)
-- `zoom()` - Card-to-detail expansion (matching `data-zoom-enter-key` / `data-zoom-exit-key`)
-- `strip()` - 3D Y-axis perspective flip
-- `blind()` - Window-blinds wipe reveal
-- `film()` - Cinematic shrink + tile (gallery / lightbox)
-- `rotate()` - Card flip between siblings
-- `jaemin()` - Playful rotated zoom for special moments
-
-### Element Transitions (`@ssgoi/react/transitions`)
-
-- `fade()` - Fade in/out
-- `scale()` - Scale in/out
-- `slide()` - Slide (direction: up/down/left/right)
-- `rotate()` - Rotate
-- `bounce()` - Bounce
-- `blur()` - Blur
-- `fly()` - Fly (custom x, y position)
-
-## Spring Physics Configuration
-
-All transitions use spring physics for natural motion:
+Create a router-aware utility in the application. Keep its route logic behind
+semantic names so layouts cannot invent inconsistent keys:
 
 ```tsx
-slide({
-  direction: "left",
-  spring: {
-    stiffness: 300, // 1-1000, higher = faster
-    damping: 30, // 0-100, higher = less oscillation
-  },
+// app/ssgoi-route-boundary.tsx
+"use client";
+
+import { type ReactNode } from "react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+
+type BoundaryName = "app-shell" | "main-content" | "project-content";
+type BoundaryIdentity = { id: string; key: string };
+
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+function isRouteGroup(segment: string) {
+  return segment.startsWith("(") && segment.endsWith(")");
+}
+
+function pathFromSegments(segments: string[]) {
+  const path = segments
+    .filter((segment) => !isRouteGroup(segment))
+    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+    .filter(Boolean)
+    .join("/");
+
+  return path ? `/${path}` : null;
+}
+
+function resolveBoundary(
+  name: BoundaryName,
+  pathname: string,
+  segments: string[],
+): BoundaryIdentity {
+  const ownedRoute = pathFromSegments(segments) ?? pathname;
+
+  switch (name) {
+    case "app-shell": {
+      const routeGroup = segments.find(isRouteGroup);
+      if (routeGroup === "(main)") {
+        return { id: ownedRoute, key: "main-shell" };
+      }
+
+      const project = ownedRoute.match(/^\/projects\/[^/]+/)?.[0];
+      return { id: ownedRoute, key: project ?? ownedRoute };
+    }
+    case "project-content": {
+      const project = pathname.match(/^\/projects\/[^/]+/)?.[0];
+      const child = pathFromSegments(segments);
+      const id = project
+        ? child
+          ? `${project}${child}`
+          : project
+        : ownedRoute;
+      return { id, key: id };
+    }
+    case "main-content":
+      return { id: ownedRoute, key: ownedRoute };
+  }
+}
+
+export function SsgoiRouteBoundary({
+  children,
+  name,
+}: {
+  children: ReactNode;
+  name: BoundaryName;
+}) {
+  const pathname = usePathname();
+  const segments = useSelectedLayoutSegments("children");
+  const boundary = resolveBoundary(name, pathname, segments);
+
+  return (
+    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
+      {children}
+    </div>
+  );
+}
+```
+
+## Persistent layouts
+
+Place one named boundary in the common app layout, then add child boundaries
+only around routed content that changes while its parent remains mounted.
+
+```tsx
+// app/layout.tsx — replace the provider line from the shell example.
+<SsgoiProvider>
+  <SsgoiRouteBoundary name="app-shell">{children}</SsgoiRouteBoundary>
+</SsgoiProvider>
+```
+
+```tsx
+// app/(main)/layout.tsx
+export default function MainLayout({ children }) {
+  return (
+    <>
+      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
+      <BottomNav />
+    </>
+  );
+}
+```
+
+- Main → main: only the inner content boundary changes; the nav stays.
+- Main → detail: the common app-shell key changes; the nav leaves with it.
+- Project tab → project tab: the current project base-path key stays; a project
+  content boundary can change below its header and tabs.
+
+Use Next.js route groups to describe layout ownership, not to duplicate the
+outer boundary:
+
+```text
+app/
+  layout.tsx                 # one <Ssgoi> + one named app-shell boundary
+  (main)/layout.tsx
+  (main)/page.tsx
+  (main)/search/page.tsx
+  (detail)/post/[id]/page.tsx
+```
+
+For Next.js parallel and intercepting routes, the browser pathname may point at
+a modal while the background `children` slot has not changed. Resolve that
+boundary’s id/key from `useSelectedLayoutSegments("children")`. In the layout
+that owns `@modal`, `useSelectedLayoutSegment("modal") !== null` is an explicit
+active-modal check. A soft intercept keeps the background key; direct entry to
+the same URL resolves to the detail slot and receives a detail key.
+
+Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
+
+## React Router
+
+Replace `usePathname()` with `useLocation()` and render the boundary in a
+nested layout route:
+
+```tsx
+const { pathname } = useLocation();
+
+return (
+  <div key={pathname} data-ssgoi-transition={pathname}>
+    <Outlet />
+  </div>
+);
+```
+
+## TanStack Router
+
+Read the pathname from router state and place the boundary in a parent route:
+
+```tsx
+const pathname = useRouterState({
+  select: (state) => state.location.pathname,
 });
 ```
 
-## TypeScript Support
+## Config
 
-SSGOI is written in TypeScript and provides full type definitions:
+```ts
+import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
 
-```tsx
-import type { SsgoiConfig, TransitionConfig } from "@ssgoi/react";
-
-const config: SsgoiConfig = {
-  // Full type safety
+const config = {
+  transitions: [
+    {
+      on: "/posts/**",
+      except: "/posts",
+      transition: drill(),
+    },
+    {
+      from: "/gallery",
+      to: "/gallery/*",
+      transition: zoom(),
+    },
+    {
+      ordered: ["/tabs/a", "/tabs/b"],
+      transition: slide(),
+    },
+  ],
 };
 ```
 
-## Browser Support
+- `on`: route family.
+- `from`/`to`: precise pair.
+- `ordered`: directional sequence.
+- Scroll is automatic: `on` and `from`/`to` restore `from` and reset `to`;
+  `ordered` restores both. Override with
+  `preserveScroll: { from: boolean, to: boolean }`.
+- Patterns support exact paths, a `*` path segment, and suffix `**`.
+- `priority` overrides path specificity.
 
-- Chrome/Edge 88+
-- Firefox 78+
-- Safari 14+
-- All modern mobile browsers
+## Effect index
 
-## Performance
+- `fade`: unrelated pages.
+- `drill`: list → detail.
+- `slide`: ordered tabs.
+- `axis`: sibling destinations.
+- `sheet`: modal-like routes.
+- `zoom`: card/image → detail.
+- `hero`: shared elements and page chrome.
+- `scroll`: vertical sequences.
+- `strip`, `film`, `rotate`, `blind`, `jaemin`: expressive transitions.
 
-- Minimal bundle size (~8kb gzipped)
-- Hardware-accelerated animations
-- Automatic cleanup and memory management
-- Smart preloading for instant transitions
+References: https://ssgoi.dev/llms.txt#7-transition-index
 
-## Documentation
+## Low-level APIs
 
-Visit [https://ssgoi.dev](https://ssgoi.dev) for:
-
-- Complete API reference
-- Interactive examples
-- Advanced patterns
-- Migration guides
-
-## Contributing
-
-We welcome contributions! Please see our [contributing guide](https://github.com/meursyphus/ssgoi/blob/main/CONTRIBUTING.md) for details.
+`transition()` and the auto-key plugins remain available for element-level
+mount/unmount animations; they are separate from route boundaries.
 
 ## License
 
-MIT © [MeurSyphus](https://github.com/meursyphus)
+MIT

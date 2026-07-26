@@ -1,115 +1,33 @@
-# SSGOI Nuxt Template
-
-A Nuxt 3 template showcasing SSGOI page transitions with various demo pages.
-
-## Features
-
-- **Posts**: Blog-style list-to-detail with drill transition
-- **Shop**: Product catalog with category tabs and slide transitions
-- **Gallery**: Pinterest-style masonry grid with zoom expand transition
-- **Profile**: Instagram-style profile with feed and zoom static transition
-
-## Getting Started
-
-### Installation
+# SSGOI + Nuxt
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Run development server
 pnpm dev
-
-# Build for production
-pnpm build
-
-# Preview production build
-pnpm preview
 ```
 
-### From Root
-
-```bash
-# Run from project root
-pnpm template:nuxt
-
-# Build from project root
-pnpm template:nuxt:build
-```
-
-## Project Structure
-
-```
-nuxt/
-├── app.vue                    # Root component
-├── assets/css/                # Tailwind CSS
-├── components/                # Reusable components
-│   ├── demolayout.vue        # Main layout with navigation
-│   ├── demowrapper.vue       # iPhone frame wrapper
-│   ├── navitem.vue           # Navigation item
-│   ├── pincard.vue           # Pinterest card
-│   ├── postcard.vue          # Profile post card
-│   ├── profilefeed.vue       # Profile feed grid
-│   └── products/             # Product components
-├── composables/               # Vue composables
-│   ├── use-posts.ts          # Posts data
-│   ├── use-products.ts       # Products data
-│   ├── use-pinterest.ts      # Pinterest data
-│   └── use-profile.ts        # Profile data
-├── pages/                     # Nuxt pages
-│   ├── index.vue             # Redirects to /posts
-│   ├── posts/                # Blog posts
-│   ├── products/             # Product pages
-│   ├── pinterest/            # Gallery pages
-│   └── profile/              # Profile pages
-└── public/demo/              # Static demo images
-```
-
-## Route Boundaries
-
-Nuxt pages mark their own transition boundary with `data-ssgoi-transition`.
-Use a stable logical id that matches your config; it does not have to be the
-actual route pathname.
-Do not use a single slot-based layout boundary here; the outgoing slot can
-render the incoming page content.
+`utils/ssgoi-config.ts` contains one config. `components/demo-layout.vue`
+creates one `<Ssgoi>` and one centralized route boundary:
 
 ```vue
-<template>
-  <div data-ssgoi-transition="/posts">
-    <!-- page content -->
-  </div>
-</template>
+<Ssgoi :config="ssgoiConfig">
+  <SsgoiTransitionBoundary :get-id="getRootTransitionId">
+    <slot />
+  </SsgoiTransitionBoundary>
+</Ssgoi>
 ```
 
-## Transitions
+The root boundary maps every `/products/*` URL to `/products`.
+`pages/products.vue` remains mounted and wraps its `<NuxtPage />` in a second
+boundary, so category navigation slides only the child content.
 
-### Drill Transition (Posts)
+Effects:
 
-- List to detail: drill enter
-- Detail to list: drill exit
+- Posts: `drill`.
+- Product tabs: ordered `slide`.
+- Gallery and profile: `zoom`.
 
-### Slide Transition (Products)
+Guide: https://ssgoi.dev/llms/vue.txt
 
-- Horizontal slide between category tabs
-- Dynamic direction based on tab order
-
-### Zoom Transition (Gallery)
-
-- Expand from grid to detail view
-- Smooth scaling animation
-
-### Zoom Transition (Profile)
-
-- Feed grid to post detail
-- Static shared image expansion
-
-## Technologies
-
-- **Nuxt 3**: The Intuitive Vue Framework
-- **Vue 3**: Progressive JavaScript Framework
-- **SSGOI**: Page transition library
-- **Tailwind CSS**: Utility-first CSS framework
-
-## License
-
-MIT
+```bash
+pnpm build
+```

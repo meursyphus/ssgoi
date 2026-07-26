@@ -7,8 +7,12 @@ export type {
 } from "./animation";
 export type {
   SsgoiConfig,
-  SsgoiPathTransition,
-  SsgoiPathTransitionInput,
+  SsgoiTransitionRule,
+  SsgoiOnTransitionRule,
+  SsgoiPairTransitionRule,
+  SsgoiOrderedTransitionRule,
+  PathPatterns,
+  NavigationDirection,
   TransitionConfig,
   PrepareArgs,
   AnimationFactoryArgs,

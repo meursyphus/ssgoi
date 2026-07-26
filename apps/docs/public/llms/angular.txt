@@ -1,35 +1,3 @@
-# SSGOI - Angular setup
+# SSGOI Angular guide moved
 
-Framework-specific setup for `@ssgoi/angular`. The `SsgoiConfig` shape, transition catalog, and troubleshooting are shared across frameworks — read https://ssgoi.dev/llms.txt for those.
-
-## Installation
-
-```bash
-npm install @ssgoi/angular
-```
-
-## Layout setup
-
-Same three rules as every framework (details in llms.txt):
-
-1. Pick the scroll element whose position SSGOI should preserve.
-2. Put `relative z-0` (plus `overflow-x-clip` for horizontal transitions) on the outer element that wraps the SSGOI provider.
-3. Mark routed content with `data-ssgoi-transition="..."` directly on each routed page's template.
-
-## Route boundary rule
-
-Each routed component marks its own boundary in its template:
-
-```html
-<section data-ssgoi-transition="/home">
-  <h1>Home Page</h1>
-</section>
-```
-
-The value can be a hard-coded logical page id; it does not have to be the router's URL. It only needs to match the `from`, `to`, or `paths` values in `SsgoiConfig`. For dynamic routes, match with wildcards in the config (`/post/*`).
-
-## Shared reference
-
-- Config & transition catalog: https://ssgoi.dev/llms.txt
-- Per-transition options: https://ssgoi.dev/llms/<name>.txt (e.g. https://ssgoi.dev/llms/fade.txt)
-- How it works / debugging: https://ssgoi.dev/llms/how-it-works.txt
+Current guide: https://ssgoi.dev/llms/frameworks/angular.txt

@@ -32,7 +32,7 @@ export const airBnbShowcase: ShowcaseApp = {
       transition: "axis",
       enterPath: "/demo/air-bnb/listings/l-003/checkout/method",
       exitPath: "/demo/air-bnb/listings/l-003/checkout/review",
-      caption: "Nested Ssgoi axis x — review ↔ method inside the sheet",
+      caption: "Axis x — review ↔ method inside the persistent sheet",
     },
   ],
 };
