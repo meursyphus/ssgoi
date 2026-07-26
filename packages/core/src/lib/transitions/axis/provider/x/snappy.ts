@@ -28,11 +28,9 @@ const KAKAO_SLIDE_PX = 8;
 // changing the perceived motion.
 const SNAPPY_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 800,
+    stiffness: 600,
     damping: 40,
     doubleSpring: 1.2,
-    restDelta: 0.1,
-    restSpeed: 0.1,
   },
 };
 
