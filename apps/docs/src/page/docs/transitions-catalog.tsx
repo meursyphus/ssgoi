@@ -122,8 +122,8 @@ export function TransitionsCatalog() {
       />
 
       <p className={`mt-4 ${measure} ${prose}`}>
-        The rest — film, strip, rotate, blind, jaemin — are picked for tone
-        rather than for a route relationship, so any rule form works with them.
+        The rest — film, strip, rotate and jaemin — are picked for tone rather
+        than for a route relationship, so any rule form works with them.
       </p>
 
       <Section

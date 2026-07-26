@@ -1,7 +1,8 @@
 # SSGOI scroll transition
 
-Use for vertical onboarding, paginated long-form content, or a sequential flow
-where up and down communicate progress.
+Use on full web pages for vertical chapters, showcases, paginated long-form
+content, or another sequence where up and down communicate progress. Do not use
+it as a mobile app-navigation preset.
 
 Catalog: https://ssgoi.dev/llms/transitions.txt
 
@@ -26,7 +27,7 @@ scroll({
 const config = {
   transitions: [
     {
-      ordered: ["/onboarding/1", "/onboarding/2", "/onboarding/3"],
+      ordered: ["/chapters/1", "/chapters/2", "/chapters/3"],
       transition: scroll(),
     },
   ],
