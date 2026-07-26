@@ -5,6 +5,7 @@ import {
   USE_META,
   variantCall,
   type TransitionDoc,
+  type TransitionGif,
   type TransitionIdentitySpec,
   type TransitionSetting,
   type TransitionVariant,
@@ -107,7 +108,9 @@ const config = {
               <code className={inlineCode}>type</code>,{" "}
               <code className={inlineCode}>variant</code> and{" "}
               <code className={inlineCode}>option</code> are independent. Each
-              clip below is one combination, recorded from a real route.
+              clip is recorded from a demo published on ssgoi.dev. Combinations
+              without a published demo keep the API details without a substitute
+              clip.
             </>
           ) : undefined
         }
@@ -137,7 +140,7 @@ const config = {
           {
             href: "/docs/transitions",
             title: "All transitions",
-            body: "Compare the 13 effects side by side",
+            body: "Compare the 12 documented effects side by side",
           },
           {
             href: "/docs/route-rules",
@@ -212,7 +215,10 @@ function VariantRow({
   variant: TransitionVariant;
 }) {
   const demos = variant.demos ?? [];
-  const isMobile = variant.gif.width <= 360;
+  const gifs = [
+    ...(variant.gif ? [variant.gif] : []),
+    ...(variant.extraGifs ?? []),
+  ];
 
   return (
     <li>
@@ -229,28 +235,9 @@ function VariantRow({
 
       <p className={`mt-2 ${measure} ${prose}`}>{variant.ux}</p>
 
-      <figure className="mt-6">
-        <div
-          className={
-            "flex justify-center overflow-hidden rounded-xl border border-line bg-panel " +
-            (isMobile ? "p-5 sm:p-7" : "")
-          }
-        >
-          <Image
-            src={variant.gif.src}
-            alt={variant.gif.alt}
-            width={variant.gif.width}
-            height={variant.gif.height}
-            sizes={isMobile ? "360px" : "(min-width: 1024px) 640px, 100vw"}
-            unoptimized
-            className={
-              isMobile
-                ? "h-auto w-full max-w-[360px] rounded-[1.5rem] border border-line-strong"
-                : "h-auto w-full"
-            }
-          />
-        </div>
-      </figure>
+      {gifs.map((gif) => (
+        <TransitionFigure key={gif.src} gif={gif} />
+      ))}
 
       <CodeBlock
         className="mt-5"
@@ -274,6 +261,38 @@ function VariantRow({
         </p>
       )}
     </li>
+  );
+}
+
+function TransitionFigure({ gif }: { gif: TransitionGif }) {
+  const isMobile = gif.width <= 360;
+
+  return (
+    <figure className="mt-6">
+      <div
+        className={
+          "flex justify-center overflow-hidden rounded-xl border border-line bg-panel " +
+          (isMobile ? "p-5 sm:p-7" : "")
+        }
+      >
+        <Image
+          src={gif.src}
+          alt={gif.alt}
+          width={gif.width}
+          height={gif.height}
+          sizes={isMobile ? "360px" : "(min-width: 1024px) 640px, 100vw"}
+          unoptimized
+          className={
+            isMobile
+              ? "h-auto w-full max-w-[360px] rounded-[1.5rem] border border-line-strong"
+              : "h-auto w-full"
+          }
+        />
+      </div>
+      {gif.label && (
+        <figcaption className={`mt-2 ${caption}`}>{gif.label}</figcaption>
+      )}
+    </figure>
   );
 }
 

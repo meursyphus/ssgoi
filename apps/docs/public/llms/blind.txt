@@ -1,3 +1,0 @@
-# SSGOI blind transition moved
-
-Current spec: https://ssgoi.dev/llms/transitions/blind.txt

@@ -5,9 +5,9 @@ import { PageHeading } from "@/page/docs/ui";
 import { TransitionsCatalog } from "@/page/docs/transitions-catalog";
 
 export const metadata: Metadata = {
-  title: "Transitions — the thirteen built-in SSGOI transitions",
+  title: "Transitions — twelve documented SSGOI transitions",
   description:
-    "drill, fade, slide, axis, scroll, sheet, hero, zoom, strip, blind, film, rotate, jaemin. Each has its own page with variants, route config, live demos, and a self-contained .txt of the full API.",
+    "drill, fade, slide, axis, scroll, sheet, hero, zoom, strip, film, rotate, jaemin. Each has its own page with variants, route config, published demos, and a self-contained .txt of the full API.",
   alternates: { canonical: "/docs/transitions" },
   openGraph: buildOpenGraph({ path: "/docs/transitions" }),
 };
@@ -24,7 +24,7 @@ export default function DocsTransitionsPage() {
       />
       <PageHeading
         title="Transitions"
-        lead="Thirteen built-in effects. Pick the one that matches the navigation you are building."
+        lead="Twelve documented effects. Pick the one that matches the navigation you are building."
       />
       <TransitionsCatalog />
     </>
