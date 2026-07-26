@@ -10,7 +10,6 @@ import { lumenShowcase } from "@/demo/lumen/showcase";
 import { noraHaleShowcase } from "@/demo/nora-hale/showcase";
 import { pinterestShowcase } from "@/demo/pinterest/showcase";
 import { silentRoomShowcase } from "@/demo/silent-room/showcase";
-import { ssgoiDocsShowcase } from "@/demo/ssgoi-docs/showcase";
 import { voyageShowcase } from "@/demo/voyage/showcase";
 import { youtubeMusicWebShowcase } from "@/demo/youtube-music-web/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
@@ -40,7 +39,6 @@ export const showcases: ShowcaseApp[] = [
   airbnbPhotoTourShowcase,
   lumenShowcase,
   yuzuClubShowcase,
-  ssgoiDocsShowcase,
   silentRoomShowcase,
   honeydropShowcase,
   noraHaleShowcase,

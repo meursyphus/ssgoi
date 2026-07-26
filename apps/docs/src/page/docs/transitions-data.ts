@@ -373,18 +373,6 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         settings: [{ kind: "type", value: "non-directional" }],
         args: 'type: "non-directional"',
         ux: "Every destination enters upward, including the return trip.",
-        gif: webGif(
-          "scroll-non-directional",
-          "The ssgoi.dev home page and an Airbnb demo detail page replace each other with upward web-page motion.",
-          360,
-        ),
-        demos: [
-          {
-            enterPath: "/showcase/air-bnb",
-            exitPath: "/",
-            platform: "web",
-          },
-        ],
       },
     ],
   },
