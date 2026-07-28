@@ -5,8 +5,7 @@ description: Add native app-like navigation and page animations to mobile web ap
 
 # Mobile Web App with SSGOI
 
-Read `https://ssgoi.dev/llms.txt` before changing code. Treat it as the single
-source of truth for the current version and setup.
+Read `https://ssgoi.dev/llms.txt` before changing code. 
 
 Inspect the application's framework, router, route-folder structure, and
 persistent layouts. Follow the matching framework guide linked from
