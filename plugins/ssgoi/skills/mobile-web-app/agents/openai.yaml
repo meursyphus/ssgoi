@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mobile Web App"
+  short_description: "Build mobile web navigation with SSGOI"
+  default_prompt: "Use $mobile-web-app to apply SSGOI to this app by following its canonical llms.txt guide."

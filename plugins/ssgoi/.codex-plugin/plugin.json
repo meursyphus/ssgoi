@@ -1,0 +1,37 @@
+{
+  "name": "ssgoi",
+  "version": "0.1.0",
+  "description": "Build mobile web app routing, layouts, and native app-like page transitions with SSGOI.",
+  "author": {
+    "name": "MeurSyphus",
+    "email": "tmdeoans@snu.ac.kr",
+    "url": "https://github.com/meursyphus"
+  },
+  "homepage": "https://ssgoi.dev",
+  "repository": "https://github.com/meursyphus/ssgoi",
+  "license": "MIT",
+  "keywords": [
+    "mobile-web",
+    "page-transitions",
+    "animation",
+    "ssgoi"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SSGOI",
+    "shortDescription": "Build native app-like mobile web experiences",
+    "longDescription": "Apply SSGOI to a mobile web app by following its canonical framework, routing, layout, and transition guides.",
+    "developerName": "MeurSyphus",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://ssgoi.dev",
+    "defaultPrompt": [
+      "Turn this project into a native app-like mobile web experience with SSGOI.",
+      "Apply SSGOI to this app's routing and layouts.",
+      "Fix the SSGOI setup in this mobile web app."
+    ]
+  }
+}

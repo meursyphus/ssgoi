@@ -36,6 +36,30 @@ Nuxt, Solid and SolidStart, Angular, and Qwik.
 
 ---
 
+## Or install the agent plugin
+
+The same `mobile-web-app` skill works in Codex and Claude Code.
+
+Codex:
+
+```bash
+codex plugin marketplace add meursyphus/ssgoi
+codex plugin add ssgoi@ssgoi
+```
+
+Claude Code:
+
+```bash
+claude plugin marketplace add meursyphus/ssgoi
+claude plugin install ssgoi@ssgoi
+```
+
+Then ask the agent to apply SSGOI to the current mobile web app. The skill reads
+the canonical `llms.txt`, selects the matching framework guide, and follows the
+app's existing router and layout structure.
+
+---
+
 ## Or add it in just 2–3 files
 
 The React and Next.js setup is one config, one provider, and one simple

@@ -1,0 +1,20 @@
+{
+  "name": "ssgoi",
+  "interface": {
+    "displayName": "SSGOI"
+  },
+  "plugins": [
+    {
+      "name": "ssgoi",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ssgoi"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
