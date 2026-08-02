@@ -184,6 +184,9 @@ export function createSggoiTransitionContext(
     intent: "visible" | "hidden";
     visibleDisplay: string;
     computedDisplay: string;
+    currentPath: string;
+    pendingOutPath: string | null;
+    pathRevision: number;
   };
   const hiddenState = new WeakMap<HTMLElement, HiddenState>();
   const owner = new WeakMap<HTMLElement, number>();
@@ -229,6 +232,29 @@ export function createSggoiTransitionContext(
       state.vis.setDisplay(null);
       captureVisibleDisplay(el, state);
     }
+  };
+
+  // handleHide reveals a React-hidden node before route matching so an OUT can
+  // start without a flash. Every path that decides not to run an animation must
+  // therefore settle that library-owned reveal explicitly; otherwise an
+  // unmatched/cancelled Activity navigation leaves the outgoing page visible.
+  // Claim the affected real nodes before completing a prior run, mirroring
+  // runTransition's ownership handoff, so the older cleanup cannot overwrite
+  // the latest React visibility intent.
+  const settleHiddenWithoutTransition = (
+    outSide: PendingSide,
+    inSide?: PendingSide,
+  ): void => {
+    if (outSide.mode !== "hidden") return;
+
+    const elements = Array.from(
+      new Set([outSide.element, inSide?.element].filter(Boolean)),
+    ) as HTMLElement[];
+    const epoch = ++transitionEpoch;
+    for (const element of elements) owner.set(element, epoch);
+
+    host.complete();
+    for (const element of elements) reconcileResting(element, epoch);
   };
 
   const runTransition = (
@@ -406,7 +432,13 @@ export function createSggoiTransitionContext(
     // .then chain — handleArrival returns immediately, dispatcher never blocks.
     detector.arrive(path, side, pendingSide).then((pair) => {
       if (side === "in") swipeDetector.onPageEnter();
-      if (!pair) return;
+      if (!pair) {
+        // A hidden OUT was already revealed by handleHide. If pairing rejects
+        // it (same-path mismatch, superseded side, or a late duplicate), return
+        // the real node to React's latest visible/hidden intent.
+        if (side === "out") settleHiddenWithoutTransition(pendingSide);
+        return;
+      }
 
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
@@ -441,6 +473,7 @@ export function createSggoiTransitionContext(
       if (!resolved) {
         pair.in.applyScrollPolicy?.(false);
         evictScrollPosition(pair.from);
+        settleHiddenWithoutTransition(pair.out, pair.in);
         return;
       }
 
@@ -452,6 +485,7 @@ export function createSggoiTransitionContext(
         if (!resolved.preserveScroll.from) {
           evictScrollPosition(pair.from);
         }
+        settleHiddenWithoutTransition(pair.out, pair.in);
         return;
       }
 
@@ -509,7 +543,12 @@ export function createSggoiTransitionContext(
       nextSibling: anchor.nextSibling,
       mode: "hidden",
     };
-    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    // A usePathname-driven boundary can receive its NEXT route id in the same
+    // React commit that hides it. Repeated register() calls preserve the route
+    // this node represented while visible in pendingOutPath; reading the live
+    // attribute here would turn a real B -> A navigation into A -> A.
+    const currentPath = state.pendingOutPath ?? state.currentPath ?? path;
+    state.pendingOutPath = null;
     handleArrival(currentPath, "out", pendingSide);
   };
 
@@ -522,6 +561,15 @@ export function createSggoiTransitionContext(
     // Dedupe redundant reveals (see handleHide): only an intent flip enters.
     if (state.intent === "visible") return;
     state.intent = "visible";
+    // IN owns the new pathname. The attribute observer normally updates this
+    // through register() first, but read it here as well so observer callback
+    // order cannot leave a revealed Activity on its previous hidden route id.
+    state.currentPath =
+      element.getAttribute("data-ssgoi-transition") ??
+      state.currentPath ??
+      path;
+    state.pendingOutPath = null;
+    state.pathRevision++;
     // Capture React's visible display BEFORE the restore below mutates it.
     captureVisibleDisplay(element, state);
 
@@ -542,7 +590,7 @@ export function createSggoiTransitionContext(
       }
     }
 
-    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
+    const currentPath = state.currentPath;
     const applyScrollPolicy = initializeContext(element, currentPath);
     const pendingSide: PendingSide = {
       element,
@@ -560,6 +608,10 @@ export function createSggoiTransitionContext(
     emit = true,
   ) => {
     const state = hiddenState.get(element);
+    // If usePathname changed this boundary immediately before React removed it,
+    // the route it is leaving is the pre-change visible path. If the change was
+    // older, the microtask below has already promoted currentPath instead.
+    const removalPath = state?.pendingOutPath ?? state?.currentPath ?? path;
     if (state) {
       state.vis.stop();
       hiddenState.delete(element);
@@ -583,11 +635,7 @@ export function createSggoiTransitionContext(
       nextSibling: anchor.nextSibling,
       mode: "unmount",
     };
-    // Read the latest id from the DOM rather than the closure-captured path
-    // so a mid-life id change (re-render with a new id prop on the same
-    // element) leaves with its current identity, not the one it mounted with.
-    const currentPath = element.getAttribute("data-ssgoi-transition") ?? path;
-    handleArrival(currentPath, "out", pendingSide);
+    handleArrival(removalPath, "out", pendingSide);
   };
 
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
@@ -600,7 +648,26 @@ export function createSggoiTransitionContext(
     element,
     { enter = true } = {},
   ) => {
-    if (registered.has(element)) return;
+    if (registered.has(element)) {
+      const state = hiddenState.get(element);
+      if (state && state.currentPath !== path) {
+        // observeSsgoiTransitions reports data-attribute changes by registering
+        // the same node again. For a visible usePathname boundary, retain the
+        // old route until all MutationObserver callbacks for this commit have
+        // run: Activity's style hide may be delivered before OR after this
+        // attribute callback. An attribute-only update that is not followed by
+        // a hide promotes the new route at the end of the microtask.
+        if (state.intent === "visible" && state.pendingOutPath === null) {
+          state.pendingOutPath = state.currentPath;
+        }
+        state.currentPath = path;
+        const revision = ++state.pathRevision;
+        queueMicrotask(() => {
+          if (state.pathRevision === revision) state.pendingOutPath = null;
+        });
+      }
+      return;
+    }
     registered.add(element);
 
     captureAnchor(element);
@@ -618,6 +685,9 @@ export function createSggoiTransitionContext(
       intent: vis.isHidden ? "hidden" : "visible",
       visibleDisplay: "",
       computedDisplay: "block",
+      currentPath: path,
+      pendingOutPath: null,
+      pathRevision: 0,
     };
     hiddenState.set(element, state);
 

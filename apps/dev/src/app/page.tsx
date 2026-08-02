@@ -17,6 +17,11 @@ const ROUTES: { href: string; title: string; description: string }[] = [
     description:
       "React <Activity> 전환 테스트 — display:none hide/show로 unmount 없이 페이지 전환",
   },
+  {
+    href: "/activity-next/keyed/a",
+    title: "/activity-next",
+    description: "Next 16.3 cacheComponents + usePathname 경계 실환경 테스트",
+  },
 ];
 
 export default function Home() {
