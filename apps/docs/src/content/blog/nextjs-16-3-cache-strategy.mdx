@@ -1,0 +1,485 @@
+---
+title: "Next.js 16.3 Caching Strategy: What Junior Developers Should Know"
+description: "Next.js 16.3 changes how the App Router prefetches shared route shells. This guide connects HTML, RSC payloads, Client Cache, use cache, Suspense, and React Activity."
+date: "2026-08-05"
+author: "MeurSyphus"
+image: "/blog/nextjs-16-3-cache-strategy/thumbnail.png"
+imageAlt: "Next.js cache strategy 16.3 in a bold typographic cover"
+imageWidth: 1536
+imageHeight: 864
+tags:
+  [
+    "next.js",
+    "react server components",
+    "caching",
+    "prefetching",
+    "web performance",
+  ]
+faq:
+  - question: "Does Next.js use SSR only for the first page?"
+    answer: "No. A client-side navigation can still request an RSC payload from the server. Next.js merges that payload into the current React tree instead of downloading a complete HTML document."
+  - question: "Where does Next.js cache RSC payloads?"
+    answer: "The Next.js Client Cache can keep RSC payloads and prefetched App Shells in browser memory. This is separate from the browser cache for JavaScript, CSS, and images."
+  - question: "What does prefetch={true} fetch in Next.js 16.3?"
+    answer: "With Partial Prefetching enabled, a normal Link shares one route-level App Shell. prefetch={true} also resolves that link's params, searchParams, and full URL, then continues through cacheable work until it reaches an uncached Suspense boundary."
+  - question: "Can a dynamic [id] route be cached?"
+    answer: "Yes. The id can become part of a use cache key, while UI shared by every id can live in one reusable App Shell. A dynamic segment is not the same thing as uncached dynamic rendering."
+---
+
+I was building a responsive service that already looked fine on a phone. The layout was not the problem. The small pause after tapping a link was.
+
+No amount of transition polish can remove a network round trip that starts only after the click. I wanted the web version to feel more like an installed app, so I went back through what Next.js downloads during navigation and where it keeps each result.
+
+Then Next.js 16.3 arrived with a substantial change to App Router navigation.
+
+**A dynamic route such as `/chat/[id]` can now prefetch one shared App Shell instead of caching the same common RSC output once for every visible URL.** The URL-specific data still arrives separately, but the browser can show much more of the destination immediately.
+
+The release notes use terms such as RSC Payload, Client Cache, App Shell, Runtime Prefetching, and Cache Components together. If you are new to the App Router, two reasonable questions appear immediately:
+
+- Is only the first page server-rendered, while every later page is client-rendered?
+- Does prefetching only download the next route's JavaScript chunk?
+
+I was confused by the same boundary. This article starts with those questions and connects RSC, browser and server caches, `prefetch`, `'use cache'`, Suspense, and React Activity. The goal is to explain the strategy as a flow rather than memorize a list of APIs.
+
+## Start with the cache map
+
+"The Next.js cache" is not one storage area.
+
+```text
+                     Next.js cache map
+
+┌──────────────────────── Browser ────────────────────────┐
+│                                                         │
+│  1. Resource cache          2. Next.js Client Cache     │
+│  ─────────────────          ───────────────────────     │
+│  JavaScript / CSS           RSC Payload / App Shell     │
+│  Images                     Visited or prefetched routes│
+│                                                         │
+│  3. React Activity                                      │
+│  ─────────────────                                      │
+│  React state + real DOM for recently visited screens    │
+└────────────────────────────┬────────────────────────────┘
+                             │ RSC request
+                             ▼
+┌────────────────────────── Server ────────────────────────┐
+│                                                         │
+│  4. Server or remote cache                              │
+│  ────────────────────────                               │
+│  'use cache' results / prerendered HTML and RSC / ISR   │
+└─────────────────────────────────────────────────────────┘
+```
+
+Each area removes a different cost.
+
+- The browser resource cache avoids downloading the same static file again.
+- The Next.js Client Cache avoids an RSC round trip after a click.
+- A server cache avoids repeating data access and server rendering work.
+- React Activity avoids rebuilding recently visited UI and losing its state.
+
+A server cache hit can make the response cheap, but the response still crosses the network. For an immediate visual reaction, the browser needs the destination RSC payload or at least its App Shell before the click.
+
+The reverse is also true. A complete Client Cache hit does not make React render and DOM commit free. We will return to that cost when we discuss Activity and Concurrent Rendering.
+
+## Is only the first page SSR?
+
+Not quite. If the next route contains Server Components, the server still has work to do during a client navigation.
+
+Four terms help separate the stages:
+
+- **SSR** creates the initial HTML on the server.
+- **CSR** runs JavaScript in the browser to produce or update UI.
+- **RSC** runs Server Components on the server and sends their serialized result.
+- **Hydration** connects client-side state and event handlers to server-produced HTML.
+
+On the initial request, an App Router page receives roughly three kinds of output:
+
+```text
+Initial navigation
+
+Server
+├─ HTML              → paints before all JavaScript is ready
+├─ RSC Payload       → describes the Server Component tree
+└─ Client JS chunks  → hydrate Client Components
+```
+
+The RSC payload is not another HTML document. It contains rendered Server Component output, placeholders for Client Components, references to their JavaScript, and serialized props that cross the server-client boundary.
+
+A component marked with `'use client'` can still contribute HTML to the initial server response. The directive does not mean "CSR only." It marks the point where Next.js must also ship browser JavaScript and React must hydrate the interactive subtree.
+
+During a `<Link>` navigation, Next.js does not download a complete document again. It requests the missing RSC payload and any client chunks the new route needs. React merges the payload into the existing tree and commits the necessary DOM changes.
+
+```text
+Client navigation
+
+RSC Payload ──→ update React tree ──→ commit required DOM changes
+Client JS   ──→ load when a new Client Component needs it
+```
+
+So "the first page uses SSR and everything after it uses CSR" leaves out the Server Component part of client navigation. A route made entirely from already-loaded Client Components may behave like a familiar SPA screen, but that is not the general App Router model.
+
+## RSC reduces JavaScript, not network latency
+
+Server Components can keep database access, Markdown parsers, and server-only libraries out of the browser bundle. Users do not have to download, parse, or execute that code. That is already a meaningful performance benefit.
+
+RSC does not remove the network by itself. If the browser does not have the next Server Component result, navigation still follows this path:
+
+```text
+click → request → server work → RSC response → React render → paint
+```
+
+Even a fast server and a warm server cache leave round-trip latency between the click and the first new frame.
+
+Next.js therefore keeps visited or prefetched RSC results in its in-memory **Client Cache**. Older articles and documentation often call it the Router Cache. It is not Cache Storage or Local Storage, and a full refresh clears the in-memory entries.
+
+The three optimizations solve different problems:
+
+- RSC reduces browser JavaScript.
+- A server cache reduces the time required to produce an RSC response.
+- The Client Cache can remove the post-click RSC request entirely.
+
+That distinction explains how an RSC-heavy application can still feel slow to navigate.
+
+## JavaScript chunks and RSC payloads are different cargo
+
+Next.js does not ship every route's JavaScript on the first page. Code splitting creates route-level chunks and sends the current route first.
+
+The first visit to another route can pause while the browser downloads its missing chunk. `<Link>` prefetching can fetch JavaScript, CSS, and RSC data before the user clicks, but those resources have different roles and storage paths.
+
+| Resource         | What it contains                             | Where it usually lives                    |
+| ---------------- | -------------------------------------------- | ----------------------------------------- |
+| JavaScript chunk | Client Component code                        | Browser resource cache and module runtime |
+| RSC Payload      | Server Component output and tree information | Next.js Client Cache                      |
+| HTML             | The document used for an initial navigation  | Browser, CDN, or prerender cache          |
+
+Moving code to Server Components can shrink a JavaScript chunk. It does not remove the RSC payload for a new server-rendered screen. Likewise, having the JavaScript chunk does not remove an RSC request when the route still needs fresh server data.
+
+Bundle size, RSC payload size, and request count are related performance concerns, but they are not the same metric.
+
+## What changed in Next.js 16.3?
+
+Next.js 16.3 introduces Instant Navigations and Partial Prefetching behind two opt-in settings:
+
+```ts
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  cacheComponents: true,
+  partialPrefetching: true,
+};
+
+export default nextConfig;
+```
+
+The Next.js team plans to make the behavior the default in the next major version. In 16.3, both settings remain explicit.
+
+With them enabled, a normal `<Link>` entering the viewport prefetches a reusable **App Shell** rather than a full URL-specific route.
+
+Consider `/chat/[id]`:
+
+```text
+/chat/[id]
+├─ shared chat frame             ┐
+├─ message composer              │ one App Shell
+├─ shared header actions         │ shared by every id
+├─ message-list skeleton         ┘
+└─ room title and messages       ← URL-specific RSC
+```
+
+Before 16.3, visible links for `/chat/1`, `/chat/2`, and `/chat/3` could each prefetch duplicate common UI. Partial Prefetching can fetch the `/chat/[id]` shell once and share it among all three links.
+
+"Once per route" means the filesystem route pattern, not each concrete URL.
+
+The shell is not limited to `layout.tsx`. Synchronous UI inside `page.tsx`, Suspense fallbacks, and cached results with a sufficient lifetime can also become part of it. This is the important part of the change: Next.js can reuse common UI from deeper inside a page, not only the layout chain.
+
+## Read `params` as low in the tree as possible
+
+If the page component awaits `params` at the top, everything below it becomes tied to one URL.
+
+```tsx
+// Shared UI is now below the URL-specific boundary.
+export default async function ChatPage({ params }: PageProps<"/chat/[id]">) {
+  const { id } = await params;
+  const messages = await getMessages(id);
+
+  return <ChatScreen messages={messages} />;
+}
+```
+
+Return the common frame first, then move the `params` read into the smallest child that needs it:
+
+```tsx
+import { Suspense } from "react";
+
+export default function ChatPage({ params }: PageProps<"/chat/[id]">) {
+  return (
+    <ChatFrame>
+      <MessageComposer />
+      <Suspense fallback={<MessageListSkeleton />}>
+        <Messages params={params} />
+      </Suspense>
+    </ChatFrame>
+  );
+}
+
+async function Messages({ params }: Pick<PageProps<"/chat/[id]">, "params">) {
+  const { id } = await params;
+  const messages = await getMessages(id);
+  return <MessageList messages={messages} />;
+}
+```
+
+`ChatFrame`, `MessageComposer`, and `MessageListSkeleton` can now join the shared App Shell. Only the child that reads `id` and fetches messages needs URL-specific work.
+
+This is the core Partial Prefetching pattern: keep common UI in the browser, then stream variable data through a small Suspense boundary.
+
+## How far does `prefetch={true}` go?
+
+With Partial Prefetching enabled, links fall into three useful groups:
+
+| Link                                     | What Next.js prepares                  | Request granularity    |
+| ---------------------------------------- | -------------------------------------- | ---------------------- |
+| `<Link href="/chat/1">`                  | Shared `/chat/[id]` App Shell          | Once per route pattern |
+| `<Link href="/chat/1" prefetch>`         | Shell plus work resolvable with `id=1` | Once per link URL      |
+| `<Link href="/chat/1" prefetch={false}>` | Nothing                                | Fetch after click      |
+
+The explicit `prefetch={true}` form gives Next.js the link's `params`, `searchParams`, and complete URL before navigation. Next.js calls this Runtime Prefetching and can walk further into the destination tree.
+
+It still does not guarantee the entire page:
+
+- Synchronous work can join the prefetched result.
+- Results with an appropriate `'use cache'` lifetime can join it.
+- An uncached database call or `fetch` stops at its Suspense fallback.
+- Data that must be current can stream after the click.
+
+Suppose a chat room title can be cached for a few minutes but its messages must remain current:
+
+```tsx
+import { cacheLife } from "next/cache";
+
+async function getChatHeader(id: string) {
+  "use cache";
+  cacheLife("minutes");
+  return db.chat.findHeader(id);
+}
+```
+
+An explicit prefetch can resolve `id`, prepare the cached header, and stop at the uncached message boundary. The user sees the room frame and title immediately; current messages stream into their smaller region.
+
+There is a cost. The default shell request is shared per route pattern, while explicit prefetching can run once for every URL. Adding it to 100 product cards can produce 100 URL-specific prefetches. A long list may be better with the shared shell by default and a deeper prefetch only after hover, focus, or another signal of intent.
+
+Automatic prefetching runs in production. A development Network panel does not represent the final behavior reliably.
+
+## What does `'use cache'` store on the server?
+
+`'use cache'` marks a function or component result as cacheable. Its arguments and captured values contribute to the cache key.
+
+```tsx
+async function getProduct(id: string) {
+  "use cache";
+  return db.product.find(id);
+}
+```
+
+`getProduct('1')` and `getProduct('2')` use different entries. A variable URL such as `/product/[id]` can still cache data by id when its freshness requirements are known.
+
+`cacheLife()` describes that freshness:
+
+- `stale`: how long the browser can reuse a Client Cache entry without checking the server
+- `revalidate`: when the server should refresh the cached result in the background
+- `expire`: when an idle entry requires the next request to wait for fresh work
+
+The current default profile uses `stale: 5 minutes`, `revalidate: 15 minutes`, and `expire: never`.
+
+```tsx
+import { cacheLife } from "next/cache";
+
+async function ProductSummary({ id }: { id: string }) {
+  "use cache";
+  cacheLife({
+    stale: 5 * 60,
+    revalidate: 15 * 60,
+    expire: 24 * 60 * 60,
+  });
+
+  const product = await db.product.find(id);
+  return <Summary product={product} />;
+}
+```
+
+Cached output needs a `stale` duration of at least five minutes to join the prefetched App Shell. Faster-changing data belongs behind a Suspense boundary instead.
+
+The older `experimental.staleTimes` option is a separate global Client Cache setting. Its defaults classify dynamic pages as 0 seconds and static or fully prefetched pages as 5 minutes. With Cache Components, `cacheLife` next to the function usually makes the intention easier to see.
+
+## "Dynamic" can mean three different things
+
+Next.js documentation uses dynamic for separate concepts:
+
+1. a **dynamic segment** such as `[id]`
+2. **dynamic rendering** performed for a request
+3. the **client cache category** configured by `staleTimes.dynamic`
+
+A `/product/[id]` route does not have to rerender everything on every request. `generateStaticParams` can prerender known ids, and `'use cache'` can store `getProduct(id)` separately for each id.
+
+`params` and `searchParams` vary by URL, so they cannot enter a route-wide shared shell. An explicit `prefetch={true}` can resolve them early and prepare deeper URL-specific RSC.
+
+`cookies()` and `headers()` represent session or request data rather than URL data. A normal `'use cache'` block cannot read them directly. Read the value outside and pass it as an argument, or use `'use cache: private'` for data that belongs only in the current browser session.
+
+For an interview question such as "Can a dynamic route be cached?", a precise answer is:
+
+> A dynamic segment and uncached dynamic rendering are different concepts. The id can become part of a cache key, while UI shared by every id can use one App Shell in Next.js 16.3.
+
+## Why does Cache Components require Suspense?
+
+With `cacheComponents: true`, Next.js does not silently cache every network or database operation. When it encounters asynchronous work, it asks the application to choose one of three behaviors:
+
+1. Wrap it in `<Suspense>`, show a fallback, and stream the result.
+2. Add `'use cache'` and allow a previous result to appear immediately.
+3. Set `export const instant = false` and declare that this route waits for a server response.
+
+```tsx
+import { Suspense } from "react";
+
+export default function Page() {
+  return (
+    <Suspense fallback={<ProductSkeleton />}>
+      <ProductList />
+    </Suspense>
+  );
+}
+
+async function ProductList() {
+  const products = await db.product.findMany();
+  return <List products={products} />;
+}
+```
+
+It can feel as if the framework is forcing Suspense. The reason is practical: Next.js needs to know what it can show before the server finishes if it is going to build an instant App Shell.
+
+Inventory may need a small streamed boundary because freshness matters. A blog article may tolerate a cached result with a clear lifetime. The right boundary follows the data, not a framework preference for one option.
+
+## Prefetching does not build the next DOM tree
+
+I initially assumed that prefetching rendered a hidden virtual DOM or real DOM for every destination. App Router route prefetching does not do that.
+
+It downloads JavaScript, CSS, and RSC data into caches. After the click, React still renders the destination tree and commits its DOM. Prefetching can remove network latency without removing a complex screen's initial rendering cost.
+
+React's `<Activity mode="hidden">` can render a deliberately hidden subtree at lower priority, prepare its code and Suspense data, and reveal it later. Next.js does not mount every visible link destination this way. A large page would otherwise accumulate DOM nodes, memory use, and background rendering work for routes the user may never visit.
+
+Partial Prefetching keeps a reusable RSC App Shell in the Client Cache without pre-mounting the destination.
+
+## Activity preserves screens after a visit
+
+With Cache Components enabled, Next.js uses React `<Activity>` to hide recently visited screens.
+
+Activity applies `display: none` to the child DOM, keeps React state and the real DOM nodes, cleans up Effects while hidden, and runs them again on reveal. A form draft, open `<details>`, and DOM-owned scroll position can survive a back navigation.
+
+```text
+Destination not visited yet
+prefetched RSC and JS → no destination DOM yet
+
+Screen visited and then left
+hidden Activity → state and DOM remain, Effects are cleaned up
+```
+
+Partial Prefetching reduces network delay before the first visit. Activity reduces rendering and mount work when returning to a visited screen.
+
+Preserving DOM uses memory, so Next.js retains up to three recent screens and discards older ones. Elements such as video and iframes may continue their own work despite `display: none`; Effect cleanup still deserves testing.
+
+## A 200 ms render is slow even with a warm cache
+
+While building a declarative rendering library, I saw complex widget trees take more than 200 ms to mount. The browser still has to calculate a React tree and create real DOM even when every file and RSC payload is already local.
+
+In Google's INP guidance, 200 ms or less is the "good" range. Browsers do not block a screen after that number. INP measures how long it takes from an interaction until the next visual update, so a long render and DOM commit can make a cached navigation feel unresponsive.
+
+React addresses responsiveness with **Concurrent Rendering**. It can work on the next tree at a lower priority, pause when an urgent click or input arrives, resume later, or abandon stale work when the underlying data changes.
+
+```text
+keep the current screen visible
+    │
+    ├─ calculate the next tree ── interruptible ── resume or discard
+    │
+    └─ calculation complete ── commit ── replace the screen
+```
+
+People sometimes describe this as dual rendering or React keeping two trees. The important React term is **interruptible concurrent rendering**. It does not remove the total computation. It prevents one long calculation from monopolizing the main thread while higher-priority work waits.
+
+React's snapshot model supports this. Props and state belong to one render, and pure rendering does not mutate outside values. React can restart or discard a render without leaving half-applied mutations behind.
+
+The virtual tree has calculation and comparison costs. The same model also enables server rendering, priority scheduling, interruptible work, and Activity. It is useful, but it does not make first mount free.
+
+## A one-minute interview answer
+
+If an interviewer asks, "How does caching work in the Next.js App Router?", this is a reasonable short answer:
+
+> On the first request, an App Router page receives HTML, an RSC payload, and JavaScript for its Client Components. A client navigation fetches the missing RSC payload and chunks rather than another complete HTML document.
+>
+> The browser resource cache stores JavaScript and CSS, while the Next.js Client Cache keeps visited or prefetched RSC results in memory. On the server, `'use cache'` can cache data or component output, and `cacheLife` describes its freshness.
+>
+> Next.js 16.3 Partial Prefetching shares one App Shell among URLs such as `/chat/1` and `/chat/2`. Only an explicit `prefetch={true}` resolves the concrete params and searchParams early and prepares additional URL-specific cached content. Uncached work streams after the click through a Suspense boundary.
+
+Several common follow-ups fit the same model:
+
+| Question                                           | Short answer                                                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Does `'use client'` mean CSR only?                 | No. It can contribute server-rendered HTML on the first request and marks the hydration boundary. |
+| Where is RSC cached?                               | The in-memory Next.js Client Cache can keep visited and prefetched RSC payloads.                  |
+| Does a server cache hit remove the request?        | No. It reduces server work; a Client Cache hit removes the post-click round trip.                 |
+| Can `[id]` routes be cached?                       | Yes. Cache by id and share URL-independent UI through one App Shell.                              |
+| Does `prefetch={true}` always fetch the full page? | No. It can stop at an uncached Suspense boundary.                                                 |
+| Does Activity preserve prefetched DOM?             | It preserves recently visited screens, not every unvisited link destination.                      |
+
+The most useful frame is simple: **what is stored, where is it stored, and which delay does that storage remove?**
+
+## What about Cloudflare?
+
+As of August 2026, OpenNext's Cloudflare documentation lists support for Next.js 16 minor and patch releases, PPR, and Composable Caching with `'use cache'`. It is no longer accurate to say Cache Components simply cannot run on Cloudflare.
+
+The storage design is not identical to Vercel's by default. Persistent revalidation may require an R2 Incremental Cache, a queue, and a tag cache configured for the deployment. OpenNext also documents a current limitation: cache interception does not work together with PPR.
+
+Because 16.3 is new, verify `partialPrefetching` in a production build and inspect the real Network panel. The framework setting is only one side of the system; the deployment adapter decides where server cache entries live and how invalidation reaches them.
+
+## Summary
+
+The App Router does more than SSR the first page and CSR every page after it. Client navigation can still fetch Server Component output as an RSC payload.
+
+RSC reduces browser JavaScript, but it does not remove network latency. A server `'use cache'` hit reduces production work. A Client Cache hit removes the RSC round trip after the click. React Activity can then reduce the cost of returning to a screen that has already mounted.
+
+Next.js 16.3 makes the browser cache more efficient for repeated dynamic routes:
+
+- A normal `<Link>` prefetches one common App Shell per route pattern.
+- `prefetch={true}` resolves the concrete URL and prepares additional cacheable content.
+- `'use cache'` marks results that may appear immediately and gives them a freshness policy.
+- `<Suspense>` marks data that should stream after navigation.
+- Activity preserves state and DOM for recently visited screens.
+
+An app-like web experience does not require every value to arrive in 0 ms. It needs enough UI already present to react to the click, then lets the small variable region finish without freezing the whole screen.
+
+## References
+
+- [Next.js 16.3](https://nextjs.org/blog/next-16-3)
+- [Next.js 16.3: Instant Navigations](https://nextjs.org/blog/next-16-3-instant-navigations)
+- [Ensuring instant navigations](https://nextjs.org/docs/app/guides/instant-navigation)
+- [Adopting Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)
+- [Runtime prefetching](https://nextjs.org/docs/app/guides/runtime-prefetching)
+- [Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+- [Cache Components](https://nextjs.org/docs/app/getting-started/caching)
+- [`cacheLife`](https://nextjs.org/docs/app/api-reference/functions/cacheLife)
+- [How Next.js preserves UI state with Activity](https://nextjs.org/docs/app/guides/preserving-ui-state)
+- [React `<Activity>`](https://react.dev/reference/react/Activity)
+- [Keeping Components Pure](https://react.dev/learn/keeping-components-pure)
+- [React 18: Concurrent Rendering](https://react.dev/blog/2022/03/29/react-v18)
+- [Interaction to Next Paint](https://web.dev/articles/inp)
+- [Next.js on Cloudflare Workers](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/)
+- [OpenNext Cloudflare caching](https://opennext.js.org/cloudflare/caching)
+
+_Cover illustration generated with OpenAI ImageGen on August 5, 2026._
+
+## Where I used this in practice
+
+This did not start as a documentation exercise. I tested Next.js 16.3 Canary in a real project because I wanted its mobile web experience to react more like an installed application.
+
+That service is [Comwit](https://comwit.io). I moved URL-specific server work into small Suspense boundaries so the shared App Shell could appear first, and enabled Cache Components to preserve state and DOM for recent screens.
+
+Caching prepares the next screen. The page transition library I build, [SSGOI](/), connects the visual context between the old and new screens. RSC and the Client Cache reduce the wait; SSGOI handles how the transition itself feels.
+
+Responsive CSS made the layout fit a phone. App Shells, Activity, and page transitions were what made the interaction begin to feel like an app.
