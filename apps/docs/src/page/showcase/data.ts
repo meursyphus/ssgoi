@@ -13,6 +13,7 @@ import { silentRoomShowcase } from "@/demo/silent-room/showcase";
 import { ssgoiDocsShowcase } from "@/demo/ssgoi-docs/showcase";
 import { voyageShowcase } from "@/demo/voyage/showcase";
 import { youtubeMusicWebShowcase } from "@/demo/youtube-music-web/showcase";
+import { youtubeMobileShowcase } from "@/demo/youtube-mobile/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
 import type { ShowcaseApp, ShowcaseClip } from "./types";
 
@@ -27,6 +28,7 @@ export function githubUrl(path: string): string {
 
 export const showcases: ShowcaseApp[] = [
   //mobile
+  youtubeMobileShowcase,
   googlePhotosShowcase,
   airBnbShowcase,
   instagramShowcase,
