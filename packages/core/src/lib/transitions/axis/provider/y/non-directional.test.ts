@@ -18,7 +18,7 @@ function settleDurationMs(
 }
 
 describe("non-directional y axis provider", () => {
-  it("cross-fades both sides while the incoming page rises 20px", () => {
+  it("cross-fades both sides while the incoming page rises 40px", () => {
     const provider = createNonDirectionalYProvider();
     const forward = provider.build({ direction: "forward" });
     const backward = provider.build({ direction: "backward" });
@@ -28,11 +28,11 @@ describe("non-directional y axis provider", () => {
       startAt: [0, 0],
     });
     expect(forward.in.startStyle).toEqual({
-      transform: "translate3d(0, 20px, 0)",
+      transform: "translate3d(0, 40px, 0)",
       opacity: "0",
     });
     expect(forward.in.animate(0.5)).toEqual({
-      transform: "translate3d(0, 10px, 0)",
+      transform: "translate3d(0, 20px, 0)",
       opacity: "0.5",
     });
     expect(forward.out.animate(0.5)).toEqual({ opacity: "0.5" });

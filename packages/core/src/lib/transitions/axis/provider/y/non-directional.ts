@@ -12,7 +12,7 @@ import type {
 // for roughly twice as long as the outgoing page. The outgoing curve borrows
 // x/fluid's quick inertia falloff; the incoming curve chains two fast springs
 // so it still reads as a soft arrival without making tab switches feel heavy.
-const TRANSLATE_PX = 20;
+const TRANSLATE_PX = 40;
 
 // See x/fluid.ts — settle thresholds loosened 10× across all axis providers.
 const Y_NON_DIRECTIONAL_OUT_PHYSICS: PhysicsOptions = {
