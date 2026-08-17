@@ -21,8 +21,8 @@ export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
     stiffness: 380,
     damping: 30,
-    restDelta: 0.5,
-    restSpeed: 0.5,
+    restDelta: 0.1,
+    restSpeed: 0.1,
     doubleSpring: {
       stiffness: 260,
       damping: 30,
