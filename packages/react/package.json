@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "description": "React bindings for SSGOI - Native app-like page transitions for React applications",
   "private": false,
   "type": "module",
