@@ -4,7 +4,7 @@ import type { SheetProvider } from "../types";
 // ease-out (Material decelerated): sheet rises and lands gracefully (incoming).
 const ENTER_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 230,
+    stiffness: 190,
     damping: 25,
   },
 };
@@ -12,7 +12,7 @@ const ENTER_PHYSICS: PhysicsOptions = {
 // ease-in (Material accelerated): sheet falls away (outgoing).
 const EXIT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 230,
+    stiffness: 190,
     damping: 25,
   },
 };
