@@ -21,8 +21,8 @@ const Y_NON_DIRECTIONAL_OUT_PHYSICS: PhysicsOptions = {
 
 const Y_NON_DIRECTIONAL_IN_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 1000,
-    damping: 50,
+    stiffness: 400,
+    damping: 30,
     doubleSpring: 1.2,
     restDelta: 0.1,
     restSpeed: 0.1,
