@@ -11,9 +11,9 @@ import type { AxisFeel, AxisType } from "./types";
 //   y:
 //     - omit (default) — directional fade-through: forward goes bottom→top
 //       (out exits up, in rises from below), 8 px slide, sequence composition.
-//     - "non-directional" — same fade-through but the incoming side always
-//       rises from below; outgoing fades in place without translating. Use
-//       when navigation isn't a forward/backward pair.
+//     - "non-directional" — overlapping cross-fade where the incoming side
+//       always rises from below; outgoing fades in place without translating.
+//       Use when navigation isn't a forward/backward pair.
 //   z: snappy only — no `variant` slot.
 
 /**
@@ -28,8 +28,8 @@ export type AxisXVariant = "default" | "snappy";
  * Public `variant` value for `axis({ type: "y" })`.
  *
  * - `"default"` — directional fade-through. Forward = bottom→top.
- * - `"non-directional"` — direction-agnostic. Incoming always rises from
- *   below; outgoing fades in place.
+ * - `"non-directional"` — direction-agnostic cross-fade. Incoming always
+ *   rises from below; outgoing fades in place.
  */
 export type AxisYVariant = "default" | "non-directional";
 

@@ -8,12 +8,11 @@ import type {
 // "Non-directional" y — direction-agnostic. Outgoing fades in place with no
 // translation; incoming always rises from below. Used when navigation isn't a
 // back-and-forth pair (e.g. switching modes where forward/backward look the
-// same). Composition is `sequence` (fade-through), same as directional y.
-//
-// Physics shape mirrors directional y for now (inertia out + spring in) — kept
-// as separate constants so the two can drift independently if either feel
-// needs its own tuning later.
-const TRANSLATE_PX = 8;
+// same). The two sides overlap as a cross-fade, but the incoming page settles
+// for roughly twice as long as the outgoing page. The outgoing curve borrows
+// x/fluid's quick inertia falloff; the incoming curve chains two fast springs
+// so it still reads as a soft arrival without making tab switches feel heavy.
+const TRANSLATE_PX = 40;
 
 // See x/fluid.ts — settle thresholds loosened 10× across all axis providers.
 const Y_NON_DIRECTIONAL_OUT_PHYSICS: PhysicsOptions = {
@@ -21,7 +20,13 @@ const Y_NON_DIRECTIONAL_OUT_PHYSICS: PhysicsOptions = {
 };
 
 const Y_NON_DIRECTIONAL_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 34, restDelta: 0.1, restSpeed: 0.1 },
+  spring: {
+    stiffness: 400,
+    damping: 30,
+    doubleSpring: 1.2,
+    restDelta: 0.1,
+    restSpeed: 0.1,
+  },
 };
 
 function buildNonDirectionalY(
@@ -55,7 +60,7 @@ export function createNonDirectionalYProvider(): AxisProvider {
   return {
     outPhysics: Y_NON_DIRECTIONAL_OUT_PHYSICS,
     inPhysics: Y_NON_DIRECTIONAL_IN_PHYSICS,
-    composition: { mode: "sequence" },
+    composition: { mode: "parallel", startAt: [0, 0] },
     build: buildNonDirectionalY,
   };
 }
