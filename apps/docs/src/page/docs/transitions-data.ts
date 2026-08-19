@@ -325,12 +325,12 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ux: "Every destination enters with the same vertical gesture, even when route order reverses.",
         gif: mobileGif(
           "axis-y-non-directional",
-          "Photo sections always enter with the same vertical shared-axis gesture.",
+          "Video destinations always enter with the same vertical shared-axis gesture.",
         ),
         demos: [
           {
-            enterPath: "/demo/google-photos/collections",
-            exitPath: "/demo/google-photos",
+            enterPath: "/demo/youtube-mobile/subscriptions",
+            exitPath: "/demo/youtube-mobile",
           },
         ],
       },

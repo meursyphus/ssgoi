@@ -5,7 +5,7 @@ replacing the application router.
 
 Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
 
-Current version: `@ssgoi/core@7.0.0`. Every `@ssgoi/*` framework package
+Current version: `@ssgoi/core@7.0.4`. Every `@ssgoi/*` framework package
 is released in lockstep with core, so install the same version across them.
 
 This file contains the minimal React and Next.js setup. Read linked files only

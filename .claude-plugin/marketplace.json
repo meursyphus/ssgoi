@@ -1,0 +1,28 @@
+{
+  "name": "ssgoi",
+  "owner": {
+    "name": "MeurSyphus",
+    "email": "tmdeoans@snu.ac.kr"
+  },
+  "description": "Official SSGOI skills for native app-like mobile web apps.",
+  "plugins": [
+    {
+      "name": "ssgoi",
+      "source": "./plugins/ssgoi",
+      "description": "Build mobile web app routing, layouts, and native app-like page transitions with SSGOI.",
+      "author": {
+        "name": "MeurSyphus",
+        "email": "tmdeoans@snu.ac.kr"
+      },
+      "homepage": "https://ssgoi.dev",
+      "repository": "https://github.com/meursyphus/ssgoi",
+      "license": "MIT",
+      "category": "development",
+      "tags": [
+        "mobile-web",
+        "page-transitions",
+        "animation"
+      ]
+    }
+  ]
+}
