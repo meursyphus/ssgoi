@@ -36,7 +36,6 @@ axis(config?: AxisConfig): TransitionConfig;
 | `y` | `default`, `non-directional` |
 | `z` | `default` |
 
-Deprecated: `feel: "fluid" | "snappy"`; use `variant`.
 
 ## Example
 

@@ -6,6 +6,8 @@ export {
   MultiAnimation,
   HostAnimation,
 } from "./animation";
+export { simulate } from "./runtime/timeline";
+export { labelByIdentity } from "./motion/with-override";
 export type {
   SsgoiConfig,
   SsgoiContext,

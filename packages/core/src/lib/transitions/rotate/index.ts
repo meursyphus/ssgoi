@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { rotate as transition } from "./transition";
 import type { RotateOptions, RotateVariant } from "./types";
@@ -13,6 +14,9 @@ export type { RotateOptions, RotateVariant } from "./types";
  */
 export type RotateConfig = PresetConfig<never, RotateVariant, RotateOptions>;
 
-export function rotate(_config: RotateConfig = {}): AnyTransitionConfig {
-  return transition();
+export function rotate(
+  _config: RotateConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
+  return withOverride(transition(), extras.override);
 }

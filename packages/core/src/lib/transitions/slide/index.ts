@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { slide as transition } from "./transition";
 import type { SlideOptions, SlideVariant } from "./types";
@@ -14,7 +15,10 @@ export type { SlideOptions, SlideVariant } from "./types";
  */
 export type SlideConfig = PresetConfig<never, SlideVariant, SlideOptions>;
 
-export function slide(_config: SlideConfig = {}): AnyTransitionConfig {
+export function slide(
+  _config: SlideConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
   // `variant`/`options` are reserved for future extension; currently no-op.
-  return transition();
+  return withOverride(transition(), extras.override, { coupled: true });
 }

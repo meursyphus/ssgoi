@@ -24,7 +24,6 @@ sheet({
 The blur type uses `backdrop-filter` (Firefox 103+). Earlier Firefox keeps the
 sheet motion, background scale, and dimming but omits the backdrop blur.
 
-Deprecated: `type: "background-scale"`; use `type: "scale"`.
 
 ## Example
 

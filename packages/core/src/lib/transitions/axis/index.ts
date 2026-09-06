@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { axis as transition } from "./transition";
 import type { AxisFeel, AxisType } from "./types";
 
@@ -33,43 +34,15 @@ export type AxisXVariant = "default" | "snappy";
  */
 export type AxisYVariant = "default" | "non-directional";
 
-/**
- * Legacy `feel` axis. Kept for source compatibility only.
- *
- * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
- * Migrate `feel: "fluid"` → omit `variant` (default tone),
- * `feel: "snappy"` → `variant: "snappy"`.
- * Example: `axis({ type: "x", variant: "snappy" })`.
- * Kept here only for backward compatibility — will be removed in a future major.
- */
-export type AxisFeelDeprecated = "snappy" | "fluid";
-
-export type AxisConfig = {} & (
-  | {
-      type?: "x";
-      variant?: AxisXVariant;
-      options?: Record<string, never>;
-      /**
-       * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
-       * Migrate `feel: "fluid"` → omit `variant` (default tone),
-       * `feel: "snappy"` → `variant: "snappy"`.
-       * Example: `axis({ type: "x", variant: "snappy" })`.
-       * Kept here only for backward compatibility — will be removed in a future major.
-       */
-      feel?: AxisFeelDeprecated;
-    }
+export type AxisConfig =
+  | { type?: "x"; variant?: AxisXVariant; options?: Record<string, never> }
   | { type: "y"; variant?: AxisYVariant; options?: Record<string, never> }
-  | { type: "z"; variant?: "default"; options?: Record<string, never> }
-);
+  | { type: "z"; variant?: "default"; options?: Record<string, never> };
 
 /**
- * Resolve the public ({type, variant, feel}) tuple into the internal `feel`
- * value accepted by the underlying transition. The internal transition still
- * keys on `feel`, so the transition / provider code stays untouched.
- *
- * Public default for x (omitted variant) maps to internal `"fluid"` — this is
- * the intentional UX shift from the legacy internal default of `"snappy"`.
- * Legacy callers passing `feel: "snappy"` keep getting snappy.
+ * Resolve the public `{ type, variant }` pair into the internal `feel` value
+ * accepted by the underlying transition. The transition still keys on `feel`,
+ * so the transition / provider code stays untouched.
  *
  * For y/z, only the snappy provider exists today (`resolveAxisProvider` falls
  * back to snappy if fluid is requested), so we always send `"snappy"` to make
@@ -78,24 +51,22 @@ export type AxisConfig = {} & (
 function resolveInternalFeel(
   type: AxisType,
   variant: string | undefined,
-  legacyFeel: AxisFeelDeprecated | undefined,
 ): AxisFeel {
   if (type === "y") {
     return variant === "non-directional" ? "non-directional" : "directional";
   }
   if (type !== "x") return "snappy";
-  if (variant === "snappy") return "snappy";
-  if (legacyFeel === "snappy") return "snappy";
-  // variant is "default" / undefined and legacy feel is undefined or "fluid":
-  // fall through to the new default tone.
-  return "fluid";
+  return variant === "snappy" ? "snappy" : "fluid";
 }
 
-export function axis(config: AxisConfig = {}): AnyTransitionConfig {
+export function axis(
+  config: AxisConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
   const type: AxisType = config.type ?? "x";
-  const variant = (config as { variant?: string }).variant;
-  const legacyFeel = (config as { feel?: AxisFeelDeprecated }).feel;
-  const internalFeel = resolveInternalFeel(type, variant, legacyFeel);
-
-  return transition({ type, feel: internalFeel });
+  const internalFeel = resolveInternalFeel(type, config.variant);
+  return withOverride(
+    transition({ type, feel: internalFeel }),
+    extras.override,
+  );
 }

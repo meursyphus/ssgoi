@@ -1,0 +1,100 @@
+# SSGOI motion tuning
+
+Every transition preset takes a second argument, `{ override }`, to retune its
+timing without changing the effect. The transition builds its animation as
+usual; the override runs on that result right before playback.
+
+Main setup: https://ssgoi.dev/llms.txt
+Transition catalog: https://ssgoi.dev/llms/transitions.txt
+
+## Shape
+
+```ts
+import { drill } from "@ssgoi/react/view-transitions";
+import { smooth, swift } from "@ssgoi/react";
+
+drill({ type: "parallax" }, {
+  override: {
+    forward:  (anim) => anim.set("in",  { integrator: smooth }),
+    backward: (anim) => anim.set("out", { integrator: swift }),
+  },
+});
+```
+
+- Pass one function to apply it in both navigation directions, or
+  `{ forward, backward }` to tune each direction on its own.
+- `anim` is the preset's `MultiAnimation`. Its tracks are labelled by role:
+  `"out"` (leaving page), `"in"` (arriving page), `"shared"` (hero clone),
+  `"overlay"` (sheet / zoom blur layer).
+- `anim.set(label, { integrator })` swaps the physics of that track.
+  `drill`, `slide`, `sheet` and `zoom` run every track on one spring, so any
+  label patches all of them there.
+- `anim.startAt = [...]` changes overlap: entry `i` is the progress the
+  previous track must reach before track `i` starts (`0` together, `1` after
+  it settles). `axis` default variant and `fade` are `[0, 1]`; `axis`
+  `snappy` and `slide` are `[0, 0]`.
+- `film` ignores overrides (its springs are pre-baked into keyframes).
+
+## Integrators
+
+Semantic presets, all ready-made instances:
+
+| name | feel |
+| --- | --- |
+| `smooth` | no overshoot, default arrival (0.40 s) |
+| `snappy` | short travel with slight elasticity (0.30 s, bounce 0.15) |
+| `bouncy` | visible overshoot for emphasis (0.45 s, bounce 0.3) |
+| `gentle` | large surfaces such as sheets (0.55 s) |
+| `swift` | effects and fast exits (0.20 s) |
+| `accelerate` | accelerating fall-away for outgoing pages (0.20 s) |
+
+Manual:
+
+```ts
+import { spring, easeIn, scale, SpringIntegrator } from "@ssgoi/react";
+
+spring({ duration: 0.28, bounce: 0.05 })   // Apple-style duration + bounce
+spring({ stiffness: 400, damping: 30 })    // raw physics
+easeIn({ duration: 0.15 })                 // outgoing inertia
+scale(snappy, 1.2)                         // same feel, 20% faster
+new SpringIntegrator({ stiffness: 400, damping: 30 })
+anim.set("in", { integrator: { spring: { stiffness: 400, damping: 30 } } })   // plain-object leaf also accepted
+```
+
+Any object with `step(state, target, dt)` and `isSettled(state, target)` is an
+integrator. Keep it stateless; ssgoi shares one instance across animations.
+
+## Examples
+
+```ts
+// axis: independent out / in tracks, plus overlap
+axis({ type: "x" }, {
+  override: (anim) => {
+    anim.set("in", { integrator: snappy }).set("out", { integrator: accelerate });
+    anim.startAt = [0, 0.3];   // incoming starts when outgoing reaches 30%
+  },
+});
+
+// sheet: one spring for sheet + background + overlay, direction picks the lead
+sheet({ type: "blur" }, {
+  override: {
+    forward:  (anim) => anim.set("in",  { integrator: gentle }),
+    backward: (anim) => anim.set("out", { integrator: accelerate }),
+  },
+});
+
+// hero: tune the shared clone separately from the page cross-fade
+hero({ type: "fade" }, {
+  override: (anim) => {
+    anim.set("shared", { integrator: spring({ duration: 0.45, bounce: 0.15 }) });
+    anim.set("in", { integrator: swift }).set("out", { integrator: swift });
+  },
+});
+```
+
+Custom transitions get the same extension by wrapping their config:
+
+```ts
+import { withOverride } from "@ssgoi/react";
+export const myPush = (extras = {}) => withOverride(base(), extras.override);
+```

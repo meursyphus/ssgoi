@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { blind as transition } from "./transition";
 
 /**
@@ -14,10 +15,13 @@ export type BlindConfig = {
   options?: object;
 };
 
-export function blind(config: BlindConfig = {}): AnyTransitionConfig {
+export function blind(
+  config: BlindConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
   const { type = "horizontal" } = config;
   // Internal `blind()` keys on `direction` (horizontal/vertical). The public
   // `type` slot is just a rename — the value space is identical. Slat count
   // and color stay on internal defaults; not exposed in v6 public surface.
-  return transition({ direction: type });
+  return withOverride(transition({ direction: type }), extras.override);
 }

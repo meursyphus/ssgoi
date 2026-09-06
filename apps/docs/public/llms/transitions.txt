@@ -30,6 +30,9 @@ Open an individual spec to see its variants and a route-config fragment.
 | playful whole-page planar spin | `rotate()` | https://ssgoi.dev/llms/transitions/rotate.txt |
 | dramatic rotate-and-scale entrance | `jaemin()` | https://ssgoi.dev/llms/transitions/jaemin.txt |
 
+Retune any preset's timing with the `{ override }` second argument:
+https://ssgoi.dev/llms/motion.txt
+
 Route rule syntax and matching:
 https://ssgoi.dev/llms/route-rules.txt
 

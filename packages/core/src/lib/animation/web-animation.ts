@@ -21,6 +21,12 @@ export interface WebAnimationOptions {
   upperBound?: number;
   onUpdate?: (poses: Pose[]) => void;
   onComplete?: () => void;
+  /**
+   * Role label for this track (`"out"`, `"in"`, `"shared"`, `"overlay"`).
+   * Presets usually leave it unset; `withOverride` fills it in from element
+   * identity so user overrides can address tracks by role.
+   */
+  label?: string;
 }
 
 /**
@@ -47,8 +53,10 @@ export interface WebAnimationOptions {
  * animation's pose is handed in via `matchInto`, we look up by element.
  */
 export class WebAnimation extends Animation {
-  private element: HTMLElement;
-  private integrator: Integrator;
+  private readonly _element: HTMLElement;
+  private _integrator: Integrator;
+  /** Role label, see `WebAnimationOptions.label`. */
+  label: string | undefined;
   private styleFn: (t: number, u: number) => StyleObject;
   private lowerBound: number;
   private upperBound: number;
@@ -70,14 +78,32 @@ export class WebAnimation extends Animation {
 
   constructor(opts: WebAnimationOptions) {
     super();
-    this.element = opts.element;
-    this.integrator = opts.integrator;
+    this._element = opts.element;
+    this._integrator = opts.integrator;
+    this.label = opts.label;
     this.styleFn = opts.style;
     this.lowerBound = opts.lowerBound ?? 0;
     this.upperBound = opts.upperBound ?? 1;
     this.currentValue = this.lowerBound;
     this.onUpdate = opts.onUpdate;
     this.onComplete = opts.onComplete;
+  }
+
+  /** The DOM node this track drives. */
+  get element(): HTMLElement {
+    return this._element;
+  }
+
+  /**
+   * Physics that drives this track. Read lazily at `play()` / `reverse()`
+   * (the simulation runs then), so replacing it before playback takes effect
+   * for the next run — this is what `withOverride` relies on.
+   */
+  get integrator(): Integrator {
+    return this._integrator;
+  }
+  set integrator(integrator: Integrator) {
+    this._integrator = integrator;
   }
 
   play(): void {
@@ -189,7 +215,7 @@ export class WebAnimation extends Animation {
     // reflects the live state at this instant.
     return [
       {
-        element: this.element,
+        element: this._element,
         value: this.currentValue,
         velocity: this.currentVelocity,
       },
@@ -207,11 +233,11 @@ export class WebAnimation extends Animation {
         style: this.styleFn(t, u),
       };
     });
-    return [{ element: this.element, frames }];
+    return [{ element: this._element, frames }];
   }
 
   matchInto(poses: Pose[]): void {
-    const match = poses.find((p) => p.element === this.element);
+    const match = poses.find((p) => p.element === this._element);
     if (!match) return;
     this.currentValue = match.value;
     this.currentVelocity = match.velocity;
@@ -227,7 +253,7 @@ export class WebAnimation extends Animation {
     this.settled = false;
 
     this.frames = simulate(
-      this.integrator,
+      this._integrator,
       this.currentValue,
       target,
       this.currentVelocity,
@@ -253,7 +279,7 @@ export class WebAnimation extends Animation {
     const duration = lastFrame.time;
     const runId = ++this.runId;
 
-    const waapi = this.element.animate(keyframes, {
+    const waapi = this._element.animate(keyframes, {
       duration,
       fill: "both",
       easing: "linear",
@@ -314,7 +340,7 @@ export class WebAnimation extends Animation {
       // been presented, so keep the animation held through the frame barrier.
       await waapi.ready;
       if (typeof requestAnimationFrame !== "undefined") {
-        await waitPaint(this.element);
+        await waitPaint(this._element);
       }
     } catch {
       return;
@@ -344,7 +370,7 @@ export class WebAnimation extends Animation {
     // style while the animation is still pending.
     if (this.pendingFirstFrame) {
       for (const prop of Object.keys(this.pendingFirstFrame)) {
-        (this.element.style as unknown as Record<string, string>)[prop] = "";
+        (this._element.style as unknown as Record<string, string>)[prop] = "";
       }
     }
 
@@ -427,7 +453,7 @@ export class WebAnimation extends Animation {
     const u = this.lowerBound + this.upperBound - value;
     const style = this.styleFn(value, u);
     for (const [key, val] of Object.entries(style)) {
-      (this.element.style as unknown as Record<string, string>)[key] =
+      (this._element.style as unknown as Record<string, string>)[key] =
         typeof val === "number" ? String(val) : val;
     }
   }
