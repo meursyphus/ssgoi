@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { jaemin as transition } from "./transition";
 import type { JaeminVariant } from "./types";
@@ -14,6 +15,9 @@ export type { JaeminVariant } from "./types";
  */
 export type JaeminConfig = PresetConfig<never, JaeminVariant>;
 
-export function jaemin(_config: JaeminConfig = {}): AnyTransitionConfig {
-  return transition();
+export function jaemin(
+  _config: JaeminConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
+  return withOverride(transition(), extras.override);
 }

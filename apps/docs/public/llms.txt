@@ -197,6 +197,7 @@ https://ssgoi.dev/llms/route-rules.txt
 | Need | Read |
 | --- | --- |
 | choose or configure a transition | https://ssgoi.dev/llms/transitions.txt |
+| retune a transition's timing (springs, overlap) | https://ssgoi.dev/llms/motion.txt |
 | use another framework or router | https://ssgoi.dev/llms/frameworks.txt |
 | understand automatic scroll behavior or middleware | https://ssgoi.dev/llms/scroll-restoration.txt |
 | keep a bottom nav, intercepted background, or dynamic project shell persistent | https://ssgoi.dev/llms/complex-routing.txt |

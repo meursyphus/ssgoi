@@ -6,6 +6,8 @@ export {
   MultiAnimation,
   HostAnimation,
 } from "./animation";
+export { simulate } from "./animation/web-animation";
+export { labelByIdentity } from "./motion/with-override";
 export type {
   SsgoiConfig,
   SsgoiContext,

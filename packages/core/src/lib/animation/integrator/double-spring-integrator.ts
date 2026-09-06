@@ -42,12 +42,17 @@ interface DoubleSpringState extends IntegratorState {
 }
 
 export class DoubleSpringIntegrator implements Integrator {
+  /** Leader spring values (the follower is derived; see `follower`). */
+  readonly stiffness: number;
+  readonly damping: number;
   private readonly leader: SpringIntegrator;
   private readonly follower: SpringIntegrator;
   private readonly restDelta: number;
   private readonly restSpeed: number;
 
   constructor(config: DoubleSpringIntegratorConfig) {
+    this.stiffness = config.stiffness;
+    this.damping = config.damping;
     this.restDelta = config.restDelta ?? POSITION_THRESHOLD;
     this.restSpeed = config.restSpeed ?? VELOCITY_THRESHOLD;
 

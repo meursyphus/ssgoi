@@ -42,8 +42,8 @@ export interface InertiaIntegratorConfig {
 }
 
 export class InertiaIntegrator implements Integrator {
-  private readonly acceleration: number;
-  private readonly resistance: number;
+  readonly acceleration: number;
+  readonly resistance: number;
   private readonly resistanceType: ResistanceType;
   private readonly min: number | undefined;
   private readonly max: number | undefined;
