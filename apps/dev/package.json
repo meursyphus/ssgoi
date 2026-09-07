@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "motion:inspect": "bash tools/motion-analyzer/run.sh inspect",
+    "motion:analyze": "bash tools/motion-analyzer/run.sh measure",
+    "motion:render": "bash tools/motion-analyzer/run.sh render",
+    "motion:view": "bash tools/motion-analyzer/run.sh serve",
+    "motion:test": "bash tools/motion-analyzer/run.sh test"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:*",

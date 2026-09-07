@@ -1,4 +1,25 @@
-# Motion Analyzer — 요구사항
+# Motion Analyzer — Codex 도구로 구현 (2026-09-07)
+
+현재 요청은 **Codex가 영상을 보고 구간과 요소의 의미를 판단하고, 측정 엔진을 호출하는 도구**다.
+스크립트만으로 시맨틱 분할까지 전부 자동 해결하는 제품으로 제한하지 않는다. 개별 요소의
+물리 피팅과 베지어 비교 시각화도 포함한다. 아래의 예전 요구사항 중 스크립트 전용,
+개별 요소 제외, 베지어 제외 문구는 현재 범위에 적용되지 않는다.
+
+- Codex 스킬: [ssgoi-motion-analyzer](../../.agents/skills/ssgoi-motion-analyzer/SKILL.md)
+- 도구와 입력/출력 명세: [PROTOCOL.md](../../apps/dev/tools/motion-analyzer/PROTOCOL.md)
+- 실행: `bash apps/dev/tools/motion-analyzer/run.sh inspect VIDEO --out OUTPUT/inspection`
+  → Codex가 프레임을 보고 분석 계획 JSON 작성
+  → `bash apps/dev/tools/motion-analyzer/run.sh measure VIDEO --plan PLAN.json --out OUTPUT/report`
+- 결과: 요소/속성별 타이밍 PNG·SVG, 클립·프레임, 베지어 비교·잔차,
+  물리 적분기 설정·SSGOI 코드, HTML/Markdown/JSON/CSV.
+- HTML은 사람이 읽는 통합 뷰어다. 원본 영상 옆에 그래프를 두고 재생 커서를 동기화한다.
+  구간 선택, 프레임 이동, 배속·반복, 그래프 탐색, 요소별 설정 복사와 베지어 비교를 지원한다.
+  `pnpm motion:render OUTPUT/report.json`으로 측정값을 보존한 채 결과지만 다시 만들 수 있다.
+- 파이썬의 후보 시뮬레이션은 최종 출력 전에 현재 SSGOI TypeScript 원본과 매번 대조한다.
+- 가림·블러·비선형 크롭·미지의 제스처는 관측 한계를 표시한다. 소스 물리값의 유일성이나
+  모든 앱에 대한 무보정 자동 측정을 주장하지 않는다.
+
+## 이전 요구사항 (설계 배경 / 미검증 인수 목표 포함)
 
 앱 화면 녹화 영상에서 페이지 전환의 타이밍을 뽑아, SSGOI가 쓰는 물리값(spring / inertia)으로
 환산해 보고서로 내는 **스크립트 도구**를 만든다. 웹 앱이 아니다. 영상 하나를 넣으면 그 안의
