@@ -21,6 +21,8 @@ export interface SpringIntegratorConfig {
 }
 
 export class SpringIntegrator implements Integrator {
+  readonly stiffness: number;
+  readonly damping: number;
   private readonly omega: number; // Angular frequency
   private readonly zeta: number; // Damping ratio
   private readonly restDelta: number;
@@ -29,6 +31,9 @@ export class SpringIntegrator implements Integrator {
   constructor(config: SpringIntegratorConfig) {
     const { stiffness, damping } = config;
     const mass = 1;
+
+    this.stiffness = stiffness;
+    this.damping = damping;
 
     this.omega = Math.sqrt(stiffness / mass);
     this.zeta = damping / (2 * Math.sqrt(stiffness * mass));

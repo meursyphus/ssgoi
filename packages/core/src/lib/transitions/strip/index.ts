@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { strip as transition } from "./transition";
 import type { StripOptions, StripVariant } from "./types";
@@ -14,6 +15,9 @@ export type { StripOptions, StripVariant } from "./types";
  */
 export type StripConfig = PresetConfig<never, StripVariant, StripOptions>;
 
-export function strip(_config: StripConfig = {}): AnyTransitionConfig {
-  return transition();
+export function strip(
+  _config: StripConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
+  return withOverride(transition(), extras.override);
 }

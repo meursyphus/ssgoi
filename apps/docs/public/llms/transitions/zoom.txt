@@ -25,7 +25,6 @@ zoom({
 The blur type uses `backdrop-filter` (Firefox 103+). Earlier Firefox keeps the
 zoom motion, background scale, and dimming but omits the backdrop blur.
 
-Deprecated: `fade: true`; use `variant: "fade"`.
 
 ## Required markup
 

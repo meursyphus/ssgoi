@@ -5,6 +5,11 @@
   "private": true,
   "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Qwik).",
   "scripts": {
+    "motion:inspect": "bash apps/dev/tools/motion-analyzer/run.sh inspect",
+    "motion:analyze": "bash apps/dev/tools/motion-analyzer/run.sh measure",
+    "motion:render": "bash apps/dev/tools/motion-analyzer/run.sh render",
+    "motion:view": "bash apps/dev/tools/motion-analyzer/run.sh serve",
+    "motion:test": "bash apps/dev/tools/motion-analyzer/run.sh test",
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",
     "core:build": "pnpm --filter @ssgoi/core build",

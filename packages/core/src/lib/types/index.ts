@@ -1,5 +1,6 @@
 import type { Integrator } from "../animation/integrator";
 import type { Animation } from "../animation/animation";
+import type { MultiAnimation } from "../animation/multi-animation";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Style / Style objects
@@ -43,6 +44,31 @@ export type PhysicsOptions = {
   spring?: SpringConfig;
   inertia?: InertiaConfig;
   integrator?: IntegratorFactory;
+};
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Preset override
+ *
+ * Every preset accepts `{ override }` as its second argument. The callback
+ * receives the `MultiAnimation` the preset built — tracks are labelled by
+ * role (`"out"` / `"in"` / `"shared"` / `"overlay"`) — and may patch each
+ * track's `integrator` via `set(label, { integrator })` and the composite's
+ * `startAt` before playback starts. Pass one function for both directions
+ * or `{ forward, backward }` to tune each navigation direction on its own.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+export type OverrideFn = (
+  animation: MultiAnimation,
+  context: SsgoiTransitionContext,
+) => void;
+
+export type Override =
+  | OverrideFn
+  | { forward?: OverrideFn; backward?: OverrideFn };
+
+/** Second argument shared by every preset factory. */
+export type PresetExtras = {
+  override?: Override;
 };
 
 /* ────────────────────────────────────────────────────────────────────────────

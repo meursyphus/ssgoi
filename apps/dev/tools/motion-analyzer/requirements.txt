@@ -1,0 +1,5 @@
+numpy==2.0.2
+scipy==1.13.1
+opencv-python-headless==4.11.0.86
+Pillow==11.3.0
+matplotlib==3.9.4

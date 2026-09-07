@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { scroll as transition } from "./transition";
 
 export type ScrollConfig = {
@@ -13,7 +14,13 @@ export type ScrollConfig = {
   options?: object;
 };
 
-export function scroll(config: ScrollConfig = {}): AnyTransitionConfig {
+export function scroll(
+  config: ScrollConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
   const { type = "directional" } = config;
-  return transition({ directional: type === "directional" });
+  return withOverride(
+    transition({ directional: type === "directional" }),
+    extras.override,
+  );
 }

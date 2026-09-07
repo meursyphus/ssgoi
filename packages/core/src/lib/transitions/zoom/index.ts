@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { AnyTransitionConfig, PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { zoom as transition } from "./transition";
 import type { NormalizedZoomOptions, ZoomType, ZoomVariant } from "./types";
 
@@ -13,33 +14,24 @@ export type ZoomConfig = {
   // Reserved for future per-type knobs. Kept as an empty shape so call sites
   // can write `options: {}` today without churn when fields are added.
   options?: Record<string, never>;
-  /**
-   * @deprecated Do not use in new code. v6 only supports `{ type, variant, options }`.
-   * Migrate `fade: true` to `variant: "fade"`.
-   * Example: `zoom({ type: "static", variant: "fade" })`.
-   * Kept here only for backward compatibility — will be removed in a future major.
-   */
-  fade?: boolean;
 };
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Normalization
- *
- * Single entry point that turns the public config + deprecated options into
- * the strict internal shape consumed by `transition.ts`. Doing this here
- * keeps the rest of the module free of legacy branches.
- * ──────────────────────────────────────────────────────────────────────────── */
-
 function normalize(config: ZoomConfig): NormalizedZoomOptions {
-  const type: ZoomType = config.type ?? "static";
-  // Prefer the new `variant`; fall back to the deprecated `fade` boolean.
-  // Both supplied together: `variant` wins.
-  const variant: ZoomVariant =
-    config.variant ?? (config.fade ? "fade" : "default");
-  return { type, variant };
+  return {
+    type: config.type ?? "static",
+    variant: config.variant ?? "default",
+  };
 }
 
-export function zoom(config: ZoomConfig = {}): AnyTransitionConfig {
+export function zoom(
+  config: ZoomConfig = {},
+  extras: PresetExtras = {},
+): AnyTransitionConfig {
   const normalized = normalize(config);
-  return transition(normalized);
+  // Tile, background and overlay all run on one spring (the background
+  // shrinks toward the tile), so any override label patches the whole
+  // composite.
+  return withOverride(transition(normalized), extras.override, {
+    coupled: true,
+  });
 }
