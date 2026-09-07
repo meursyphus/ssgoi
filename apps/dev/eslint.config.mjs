@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone development tools have their own verification commands.
+    "tools/**",
   ]),
 ]);
 
