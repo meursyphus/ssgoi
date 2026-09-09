@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/qwik",
-  "version": "7.1.0-beta.0",
+  "version": "7.1.0-beta.2",
   "description": "Qwik bindings for SSGOI - Native app-like page transitions for Qwik and Qwik City applications",
   "private": false,
   "sideEffects": false,
