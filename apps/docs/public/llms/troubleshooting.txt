@@ -32,6 +32,25 @@ paint context:
 
 Also give routed pages a full-height background when the design requires one.
 
+## Back uses a different effect
+
+Rules are matched again for the return path pair; history direction does not
+remember or replay the entry rule. A `bidirectional: false` pair is excluded on
+its reverse, so the return may select a different fallback effect. Include the
+source (for example `/cart`) in a specific bidirectional supplier rule if that
+relationship should use the same effect on return. Keep it specific when other
+supplier relationships, such as opening a product, should use another effect.
+
+## The outgoing page paints beneath the incoming page
+
+Inspect ancestor stacking contexts as well as each boundary's z-index. A portal
+host with a high z-index traps its entire subtree above an ordinary sibling
+page, even when that outgoing sibling has the foreground z-index. Full-page
+route portals should share the page stacking context: keep the host mounted and
+positioned, but leave its z-index auto and avoid ancestor transform, opacity or
+isolation that would create a separate stacking context. Apply transition styles
+to the page boundaries themselves. Ordinary dialogs can keep their own layers.
+
 ## Scroll is unexpected
 
 Scroll behavior belongs to the matched route relationship, not to an effect.
