@@ -1,0 +1,81 @@
+# SSGOI + React Native / Expo Router (experimental source preview)
+
+This first native integration is under development. Use templates/expo from
+the matching source checkout until @ssgoi/react-native is released. Do not
+assume the existing core version means a native package is already on npm.
+
+Baseline: Expo 56.0.21, Expo Router 56.2.20, React Native 0.85.3, React 19.2.3,
+Reanimated 4.3.1, Worklets 0.8.3. Expo's standard navigator API is alpha.
+
+## Run the source example
+
+pnpm install
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/react-native build
+pnpm --filter ssgoi-expo-template start
+
+## File-based setup
+
+```tsx
+// app/_layout.tsx
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
+import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
+import { slide } from "@ssgoi/react-native/view-transitions";
+
+const config = {
+  transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
+} satisfies SsgoiConfig;
+
+export default function Layout() {
+  return (
+    <Ssgoi config={config}>
+      <SsgoiRouteBoundary />
+    </Ssgoi>
+  );
+}
+```
+
+Create app/posts/index.tsx and app/posts/[id].tsx normally. Expo discovers
+the files; users do not list every page in .Screen declarations. Keep using
+Link and router.push/replace/back from expo-router. On a cold detail link,
+check router.canGoBack() before back, or replace with the list route.
+
+The boundary internally owns a navigator and supplies a transition surface
+for each route. Replace the layout's existing Stack with the boundary; do not
+wrap Stack or Slot inside it. Supply safe areas and native screen backgrounds
+in the application. DOM attributes, CSS, Next.js Suspense props, and web
+TransitionConfig objects do not apply to native screens.
+
+Ssgoi selects native playback automatically. The root package does not import
+Expo Router; only the optional /expo-router entry loads that router.
+
+## Rules and options
+
+on/except, from/to, ordered, priority, bidirectional and middleware share the
+web matching semantics. Functional rules use container width < 768 logical
+units for isMobile. Import fade/slide from the native view-transitions entry.
+fade runs OUT then IN; slide moves both screens together. Both reuse the
+existing numerical physics and play on Reanimated's UI runtime.
+
+Boundary resolve({ pathname, route }) returns { id, key? }. It sees each
+screen's own route, even while retained. id is an absolute matching path.
+routeKey overrides key; both are scoped by the native route instance and
+cannot merge distinct pushes. Defaults require no configuration.
+
+Ssgoi reducedMotion defaults to "system"; "always" and "never" are supported.
+onTransitionError receives preparation errors while the latest route is
+revealed and retained outgoing resources are released.
+
+## Scope and verification
+
+One stack on iOS/Android, fade/slide, push/pop/replace, direct entry, rapid
+navigation cleanup. Pushed screens retain their mounted input/scroll state.
+Explicit preserveScroll restoration is rejected. No native headers, modal
+presentation, interactive swipe, predictive-back progress, shared elements,
+nested-navigator coordination, public playback controls, or Expo Web support
+are claimed yet. Do not copy the web transition catalog into a native config.
+
+Tests use real Expo Router with native module mocks and a controlled frame
+clock. Type checks and Hermes exports verify integration/building, not actual
+pixels or UI-thread performance. Verify list/detail/back, retained inputs,
+scroll, replace, reduced motion, rotation and background recovery on devices.

@@ -27,6 +27,10 @@ const routers = [
   "vue-router",
   "@solidjs/router",
   "nuxt",
+  "expo-router",
+  "react-native",
+  "react-native-reanimated",
+  "react-native-worklets",
 ];
 function run(command, args, cwd = fixture) {
   try {
@@ -88,6 +92,9 @@ import { Ssgoi as SvelteSsgoi } from "@ssgoi/svelte";
 import { Ssgoi as VueSsgoi } from "@ssgoi/vue";
 import { Ssgoi as SolidSsgoi } from "@ssgoi/solid";
 import { drill } from "@ssgoi/react/view-transitions";
+import type { Pose, Timeline } from "@ssgoi/core";
+export const pose: Pose = { element: document.createElement("div"), value: 0, velocity: 0 };
+export const timeline: Timeline = { element: pose.element, frames: [] };
 const config: SsgoiConfig = { transitions: [{ on: "/**", transition: drill() }] };
 export const app = <ReactSsgoi config={config}><div>Page</div></ReactSsgoi>;
 export { SvelteSsgoi, VueSsgoi, SolidSsgoi };

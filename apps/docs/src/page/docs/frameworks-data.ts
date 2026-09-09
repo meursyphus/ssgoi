@@ -12,6 +12,7 @@ export type FrameworkDoc = {
   lead: string;
   llmsUrl?: string;
   templateUrl?: string;
+  sourcePreview?: boolean;
   sections: FrameworkSection[];
 };
 
@@ -76,6 +77,47 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       {
         heading: "When the pathname boundary is not enough",
         body: "Use routeKey for a persistent layout or resolve({ pathname, selectedSegments }) for slot-specific ids and keys. Interception also needs the app’s route/slot files and compatible middleware (Next 13–15) or proxy (Next 16+) rules. The boundary does not create rewrites or redirects; verify soft navigation, back, and direct entry.",
+      },
+    ],
+  },
+  {
+    slug: "expo",
+    name: "React Native / Expo (experimental)",
+    pkg: "@ssgoi/react-native",
+    sourcePreview: true,
+    lead: "A native source preview with fade/slide and file-based Expo Router boundaries. Start with the workspace template; this package has not been released yet.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/expo.txt",
+    templateUrl: `${TEMPLATES}/expo`,
+    sections: [
+      {
+        heading: "Run the source example",
+        body: "The template pins Expo 56.0.21, Expo Router 56.2.20, React Native 0.85.3, React 19.2.3, Reanimated 4.3.1 and Worklets 0.8.3. The Expo standard navigator API is alpha. Use a matching Expo Go build or development build.",
+        language: "bash",
+        code: "pnpm install\npnpm --filter @ssgoi/core build\npnpm --filter @ssgoi/react-native build\npnpm --filter ssgoi-expo-template start",
+      },
+      {
+        heading: "Provider and file-based route boundary",
+        body: "Create page files normally and keep using Expo Link and router.push/replace/back. The boundary supplies one native surface per screen and retains outgoing instances until animation completion. It replaces the layout navigator; do not wrap an existing Stack or Slot inside it. The app supplies safe areas and screen backgrounds.",
+        code: `// app/_layout.tsx
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
+import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
+import { slide } from "@ssgoi/react-native/view-transitions";
+
+const config = {
+  transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
+} satisfies SsgoiConfig;
+
+export default function Layout() {
+  return <Ssgoi config={config}><SsgoiRouteBoundary /></Ssgoi>;
+}`,
+      },
+      {
+        heading: "Configuration and scope",
+        body: "Route rules and middleware share the web semantics. The native provider selects Reanimated playback automatically. resolve and routeKey use each screen's own route and keep pushed instances separate. Mounted screens preserve input and scroll state. Explicit scroll restoration is rejected. The preview targets one iOS/Android stack with fade/slide; headers, modal presentation, interactive gestures, shared elements, nested navigator coordination, and Expo Web are follow-up work.",
+      },
+      {
+        heading: "Verify on devices",
+        body: "The tests use real Expo Router with native mocks and a controlled frame clock. Type checks and Hermes exports validate integration and building, not pixels or UI-thread performance. Check list/detail/back, retained inputs and scroll, replace, system reduced motion, rotation and background recovery on iOS and Android before production use.",
       },
     ],
   },

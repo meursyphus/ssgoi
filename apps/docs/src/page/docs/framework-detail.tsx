@@ -11,7 +11,11 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
   return (
     <div className="mt-8">
       <div className="flex flex-wrap items-center gap-3">
-        <NpmPill pkg={doc.pkg} />
+        {doc.sourcePreview ? (
+          <span className={pillClass}>Experimental source preview</span>
+        ) : (
+          <NpmPill pkg={doc.pkg} />
+        )}
         {doc.llmsUrl && (
           <a
             href={doc.llmsUrl}
@@ -47,15 +51,25 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
       ))}
 
       <p className={`mt-14 border-t border-line pt-8 ${measure} ${prose}`}>
-        Effects and route matching work the same everywhere, so{" "}
-        <Link href="/docs/transitions" className={link}>
-          Transitions
-        </Link>{" "}
-        and{" "}
-        <Link href="/docs/boundaries" className={link}>
-          Route boundaries
-        </Link>{" "}
-        apply here unchanged.
+        {doc.sourcePreview ? (
+          <>
+            Use the native guide and template for supported presets and
+            lifecycle behavior. The web effect catalog and DOM boundary setup do
+            not apply unchanged to this preview.
+          </>
+        ) : (
+          <>
+            Effects and route matching work the same everywhere, so{" "}
+            <Link href="/docs/transitions" className={link}>
+              Transitions
+            </Link>{" "}
+            and{" "}
+            <Link href="/docs/boundaries" className={link}>
+              Route boundaries
+            </Link>{" "}
+            apply here unchanged.
+          </>
+        )}
       </p>
     </div>
   );

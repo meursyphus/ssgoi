@@ -5,20 +5,19 @@ import {
   WebAnimation,
 } from "../../animation";
 
-const DEFAULT_OUT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 20, doubleSpring: true },
-};
-const DEFAULT_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 170, damping: 20, doubleSpring: true },
-};
+import {
+  FADE_OUT_PHYSICS,
+  FADE_IN_PHYSICS,
+  pageMotionStyle,
+} from "../../runtime/page-motion";
 
 export interface FadeOptions {
   physics?: PhysicsOptions;
 }
 
 export const fade = (options: FadeOptions = {}): TransitionConfig => {
-  const inPhysics = options.physics ?? DEFAULT_IN_PHYSICS;
-  const outPhysics = options.physics ?? DEFAULT_OUT_PHYSICS;
+  const inPhysics = options.physics ?? FADE_IN_PHYSICS;
+  const outPhysics = options.physics ?? FADE_OUT_PHYSICS;
 
   return {
     prepare: ({ to }) => {
@@ -36,7 +35,9 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
         integrator: IntegratorProvider.from(outPhysics),
         // Default bounds (0, 1). `u` runs 1→0 as the animation moves
         // forward, mapping opacity from fully visible to invisible.
-        style: (_t, u) => ({ opacity: u }),
+        style: (t) => ({
+          opacity: pageMotionStyle("fade", "out", "forward", t).opacity,
+        }),
         onComplete: () => {
           // The outgoing node is the real page and gets reused (re-hidden,
           // shown again next navigation), so clear every inline style we
@@ -50,7 +51,9 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
       const inAnim = new WebAnimation({
         element: to,
         integrator: IntegratorProvider.from(inPhysics),
-        style: (t) => ({ opacity: t }),
+        style: (t) => ({
+          opacity: pageMotionStyle("fade", "in", "forward", t).opacity,
+        }),
         onComplete: () => {
           to.style.willChange = "auto";
           to.style.opacity = "";

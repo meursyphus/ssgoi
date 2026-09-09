@@ -25,6 +25,12 @@
       "import": "./dist/internal.js",
       "require": "./dist/internal.cjs",
       "default": "./dist/internal.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs",
+      "default": "./dist/runtime.js"
     }
   },
   "files": [
