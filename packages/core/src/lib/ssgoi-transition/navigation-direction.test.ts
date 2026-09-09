@@ -6,11 +6,11 @@ afterEach(() => {
 });
 
 describe("navigation direction tracker", () => {
-  it("treats a push to the immediately previous path as backward", () => {
+  it("keeps an explicit navigation to the previous path forward", () => {
     const tracker = createNavigationDirectionTracker();
     expect(tracker.resolve("/", "/posts")).toBe("forward");
     expect(tracker.resolve("/posts", "/posts/1")).toBe("forward");
-    expect(tracker.resolve("/posts/1", "/posts")).toBe("backward");
+    expect(tracker.resolve("/posts/1", "/posts")).toBe("forward");
     tracker.dispose();
   });
 

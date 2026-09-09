@@ -556,13 +556,11 @@ export function RouteRulesBody() {
         <p className={`mt-4 ${body}`}>
           When both routes are inside the same{" "}
           <code className={inlineCode}>on</code> scope, SSGOI cannot tell
-          entering from leaving, so it falls back to its own history tracking: a
-          destination it recognises as the route you came from — or any
-          navigation that followed a{" "}
-          <code className={inlineCode}>popstate</code> — counts as backward.
-          That is SSGOI&apos;s route stack, not the browser&apos;s, so a
-          &ldquo;back&rdquo; button implemented with{" "}
-          <code className={inlineCode}>push()</code> still reads as backward.
+          entering from leaving, so it uses the browser navigation signal. A
+          navigation following <code className={inlineCode}>popstate</code>
+          counts as backward; explicit router navigation such as{" "}
+          <code className={inlineCode}>push()</code> counts as forward, even
+          when it returns to the previous path.
         </p>
       </Section>
 
