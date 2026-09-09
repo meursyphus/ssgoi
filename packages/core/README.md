@@ -49,6 +49,9 @@ Rule forms:
 - `from`/`to`: precise pair. Reverse matching is enabled by default.
 - `ordered`: array order decides forward and backward.
 - `priority`: higher values win before path specificity.
+- Web Back reverses the effect recorded for the exact visited entry pair;
+  Forward replays it. Fresh push/replace rematch these rules. Unrecorded returns
+  also rematch. See [history behavior](https://ssgoi.dev/llms/route-rules.txt).
 - Scroll is automatic: `on` and `from`/`to` restore the forward `from` side
   and reset `to`; `ordered` restores both. Use
   `preserveScroll: { from: boolean, to: boolean }` for an exact override.

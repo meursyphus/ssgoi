@@ -32,6 +32,25 @@ paint context:
 
 Also give routed pages a full-height background when the design requires one.
 
+## Back uses a different effect
+
+Browser Back replays the effect recorded for the exact entry pair in reverse,
+even for a `bidirectional: false` entry rule. Confirm the button performs a
+history traversal: push/replace deliberately match the current rules instead.
+Also check that the same provider observed the entry and return. Reloads,
+untracked entries, replaced routes and unrecorded multi-step jumps must rematch.
+Details: https://ssgoi.dev/llms/route-rules.txt
+
+## The outgoing page paints beneath the incoming page
+
+Inspect ancestor stacking contexts as well as each boundary's z-index. A portal
+host with a high z-index traps its entire subtree above an ordinary sibling
+page, even when that outgoing sibling has the foreground z-index. Full-page
+route portals should share the page stacking context: keep the host mounted and
+positioned, but leave its z-index auto and avoid ancestor transform, opacity or
+isolation that would create a separate stacking context. Apply transition styles
+to the page boundaries themselves. Ordinary dialogs can keep their own layers.
+
 ## Scroll is unexpected
 
 Scroll behavior belongs to the matched route relationship, not to an effect.

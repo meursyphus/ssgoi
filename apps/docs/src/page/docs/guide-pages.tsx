@@ -545,8 +545,8 @@ export function RouteRulesBody() {
           <code className={inlineCode}>to</code> pair matches in both
           orientations. Set{" "}
           <code className={inlineCode}>bidirectional: false</code> when only the
-          orientation you wrote should match at all — it does not mean &ldquo;
-          match, but always play forward&rdquo;.
+          orientation you wrote should match for a fresh navigation. Browser
+          Back can still undo an observed entry using its recorded effect.
         </p>
         <p className={`mt-4 ${body}`}>
           In an <code className={inlineCode}>ordered</code> array both routes
@@ -554,13 +554,14 @@ export function RouteRulesBody() {
           same one, the rule does not match.
         </p>
         <p className={`mt-4 ${body}`}>
-          When both routes are inside the same{" "}
-          <code className={inlineCode}>on</code> scope, SSGOI cannot tell
-          entering from leaving, so it uses the browser navigation signal. A
-          navigation following <code className={inlineCode}>popstate</code>
-          counts as backward; explicit router navigation such as{" "}
-          <code className={inlineCode}>push()</code> counts as forward, even
-          when it returns to the previous path.
+          Browser Back to a recorded entry&apos;s source uses the same effect
+          with reversed direction and scroll endpoints. Browser Forward replays
+          the original selection. Links and{" "}
+          <code className={inlineCode}>push()</code> match current rules, even
+          when revisiting the previous URL. Within one{" "}
+          <code className={inlineCode}>on</code> scope that fresh visit is
+          forward. Direct entries and unrecorded history pairs fall back to
+          current rules.
         </p>
       </Section>
 

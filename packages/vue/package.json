@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "7.1.0-beta.0",
+  "version": "7.1.0-beta.4",
   "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
   "private": false,
   "type": "module",
