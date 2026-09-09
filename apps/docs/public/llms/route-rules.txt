@@ -5,6 +5,32 @@ relationship receives an effect and what forward/backward means.
 
 Main setup: https://ssgoi.dev/llms.txt
 
+## Browser Back and Forward
+
+On web, SSGOI remembers the selected effect, semantic direction, and physical
+scroll policy for each observed pushed history entry. Back to that entry's
+source reuses the same effect with its direction and scroll endpoints reversed.
+Forward to that entry replays the original selection. This also works when the
+entry rule has `bidirectional: false`: undoing an observed visit does not need
+another matching rule.
+
+Links, push, and replace always match the current rules below. A fresh push to
+the same URL is a new visit; it does not reuse an older visit's effect. The rule
+still determines semantic direction (`ordered` and explicit pairs retain their
+orientation). Within one `on` scope, a fresh push defaults to forward.
+
+Only exact observed entry pairs are replayed. Reloads/provider disconnection,
+unknown entries, replacements of a route, and multi-step jumps without a saved
+direct pair use current matching. The last 100 entry effects are retained in
+memory, without page DOM or animation instances. Pushing after Back discards
+the old forward branch. The portable native rule matcher is unchanged.
+
+Entry identity comes from the Navigation API where available. Older browsers
+use an `__ssgoi_entry_v1` field in null/plain-object history.state while keeping
+router fields. Primitive/array state is not reshaped and cannot support recorded
+replay there. Observation starts on boundary registration and is released when
+the root observer disconnects; manual integrations can call context.disconnect().
+
 ## `on` and `except`
 
 Use `on` for a route family. Entering the scope is forward, leaving is

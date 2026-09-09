@@ -184,6 +184,8 @@ export type SsgoiConfig =
  * cancellation helpers) without breaking call sites that destructure.
  */
 export type SsgoiContext = {
+  /** Release browser-history observation when the owning root disconnects. */
+  disconnect?: () => void;
   /**
    * Tell the dispatcher this DOM node has mounted under `path`. The
    * dispatcher handles pairing with the outgoing page, running the matched

@@ -34,12 +34,12 @@ Also give routed pages a full-height background when the design requires one.
 
 ## Back uses a different effect
 
-Rules are matched again for the return path pair; history direction does not
-remember or replay the entry rule. A `bidirectional: false` pair is excluded on
-its reverse, so the return may select a different fallback effect. Include the
-source (for example `/cart`) in a specific bidirectional supplier rule if that
-relationship should use the same effect on return. Keep it specific when other
-supplier relationships, such as opening a product, should use another effect.
+Browser Back replays the effect recorded for the exact entry pair in reverse,
+even for a `bidirectional: false` entry rule. Confirm the button performs a
+history traversal: push/replace deliberately match the current rules instead.
+Also check that the same provider observed the entry and return. Reloads,
+untracked entries, replaced routes and unrecorded multi-step jumps must rematch.
+Details: https://ssgoi.dev/llms/route-rules.txt
 
 ## The outgoing page paints beneath the incoming page
 

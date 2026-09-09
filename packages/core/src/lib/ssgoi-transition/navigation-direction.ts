@@ -1,101 +1,74 @@
 import type { NavigationDirection } from "@types";
+import {
+  connectBrowserHistory,
+  type BrowserHistory,
+  type HistoryEntry,
+} from "./browser-history";
+import { normalizePath } from "./path-pattern";
 
-export interface NavigationDirectionTracker {
-  resolve(from: string, to: string): NavigationDirection;
-  dispose(): void;
-}
+export type NavigationChange = {
+  kind: "push" | "replace" | "back" | "forward" | "unknown";
+  direction: NavigationDirection;
+  from: HistoryEntry | null;
+  to: HistoryEntry | null;
+};
 
-/**
- * Navigation hint used only where a route rule cannot determine direction
- * from its own boundary/order. A browser pop is backward; every explicit
- * navigation is forward, even when its destination equals the previous path.
- */
-export function createNavigationDirectionTracker(): NavigationDirectionTracker {
-  let pendingDirection: NavigationDirection | null = null;
-  let programmaticTraversal: NavigationDirection | null = null;
-  let traversalTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  const clearTraversalTimeout = () => {
-    if (traversalTimeout !== null) clearTimeout(traversalTimeout);
-    traversalTimeout = null;
+/** Created during render, connected only when a boundary is actually observed. */
+export function createNavigationDirectionTracker() {
+  let history: BrowserHistory | null = null;
+  let current: HistoryEntry | null = null;
+  const visited = new Set<string>();
+  const remember = (entry: HistoryEntry | null) => {
+    if (entry) visited.add(entry.key);
+    if (visited.size > 200) visited.delete(visited.values().next().value!);
   };
-  const markProgrammaticTraversal = (direction: NavigationDirection) => {
-    pendingDirection = direction;
-    programmaticTraversal = direction;
-    clearTraversalTimeout();
-    // history.back() can be a no-op at the beginning of the session. Do not
-    // let that uncommitted hint leak into a later explicit navigation.
-    traversalTimeout = setTimeout(() => {
-      if (programmaticTraversal !== direction) return;
-      programmaticTraversal = null;
-      if (pendingDirection === direction) pendingDirection = null;
-      traversalTimeout = null;
-    }, 1_000);
+  const connect = () => {
+    if (history) return;
+    history = connectBrowserHistory();
+    current = history.read();
+    remember(current);
   };
-  const onPopState = () => {
-    if (programmaticTraversal !== null) {
-      // The method wrapper already marked this traversal before the router
-      // could commit. Ignore its later popstate so it cannot poison the next
-      // explicit navigation after the current hint has been consumed.
-      programmaticTraversal = null;
-      clearTraversalTimeout();
-      return;
-    }
-    pendingDirection = "backward";
-  };
-
-  let historyRef: History | null = null;
-  let originalBack: History["back"] | null = null;
-  let originalForward: History["forward"] | null = null;
-  let originalGo: History["go"] | null = null;
-  let wrappedBack: History["back"] | null = null;
-  let wrappedForward: History["forward"] | null = null;
-  let wrappedGo: History["go"] | null = null;
-
-  if (typeof window !== "undefined") {
-    window.addEventListener("popstate", onPopState, true);
-
-    historyRef = window.history;
-    originalBack = historyRef.back;
-    originalForward = historyRef.forward;
-    originalGo = historyRef.go;
-    wrappedBack = () => {
-      markProgrammaticTraversal("backward");
-      return originalBack?.call(historyRef);
-    };
-    wrappedForward = () => {
-      markProgrammaticTraversal("forward");
-      return originalForward?.call(historyRef);
-    };
-    wrappedGo = (delta = 0) => {
-      if (delta < 0) markProgrammaticTraversal("backward");
-      else if (delta > 0) markProgrammaticTraversal("forward");
-      return originalGo?.call(historyRef, delta);
-    };
-    historyRef.back = wrappedBack;
-    historyRef.forward = wrappedForward;
-    historyRef.go = wrappedGo;
-  }
 
   return {
-    resolve(_rawFrom, _rawTo) {
-      const direction = pendingDirection ?? "forward";
-      pendingDirection = null;
-      return direction;
+    connect,
+    resolve(rawFrom: string, _rawTo: string): NavigationChange {
+      connect();
+      const to = history!.read();
+      let from = current;
+      let kind: NavigationChange["kind"] = "unknown";
+      if (from && to) {
+        if (to.key === from.key || to.index === from.index) kind = "replace";
+        else if (to.index < from.index) kind = "back";
+        else kind = visited.has(to.key) ? "forward" : "push";
+      }
+      if (kind === "push") {
+        // Query/hash-only history entries may not mount a new page boundary.
+        // Use the actual predecessor when it still represents the OUT route.
+        const predecessor = history!.previous();
+        if (
+          predecessor &&
+          predecessor.index === to!.index - 1 &&
+          normalizePath(new URL(predecessor.url).pathname) ===
+            normalizePath(rawFrom)
+        ) {
+          from = predecessor;
+        }
+      }
+      current = to;
+      remember(from);
+      remember(to);
+      return {
+        kind,
+        direction: kind === "back" ? "backward" : "forward",
+        from,
+        to,
+      };
     },
     dispose() {
-      clearTraversalTimeout();
-      if (typeof window !== "undefined") {
-        window.removeEventListener("popstate", onPopState, true);
-      }
-      if (historyRef) {
-        if (historyRef.back === wrappedBack && originalBack)
-          historyRef.back = originalBack;
-        if (historyRef.forward === wrappedForward && originalForward)
-          historyRef.forward = originalForward;
-        if (historyRef.go === wrappedGo && originalGo)
-          historyRef.go = originalGo;
-      }
+      history?.dispose();
+      history = null;
+      current = null;
+      visited.clear();
     },
   };
 }

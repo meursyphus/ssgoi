@@ -5,7 +5,7 @@ replacing the application router.
 
 Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
 
-Current version: `@ssgoi/core@7.1.0-beta.2`. Every `@ssgoi/*` framework package
+Current version: `@ssgoi/core@7.1.0-beta.3`. Every `@ssgoi/*` framework package
 is released in lockstep with core, so install the same version across them.
 
 This file contains the minimal Next.js App Router setup. The root React package
@@ -200,6 +200,10 @@ const config = {
 - `from` / `to` defines a precise pair, bidirectional by default. Set
   `bidirectional: false` for a one-way pair.
 - `ordered` derives direction from path order.
+
+On web, Back to an observed entry's source reuses its recorded effect with
+direction and scroll endpoints reversed; Forward replays the original choice.
+Links/push/replace match current rules. Unrecorded returns also rematch.
 
 Wildcards, arrays, priority, matching order, and mobile/desktop configs:
 https://ssgoi.dev/llms/route-rules.txt
