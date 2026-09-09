@@ -44,7 +44,9 @@ const version = arg
 // 2) Build. pnpm -r runs in dependency order (core before the adapters).
 if (!run("pnpm", ["-r", "--filter", "./packages/*", "run", "build"])) {
   if (!dry) {
-    console.error("\n✗ Build failed — rolling back version changes. Nothing published.");
+    console.error(
+      "\n✗ Build failed — rolling back version changes. Nothing published.",
+    );
     rollback();
   } else {
     console.error("\n✗ Build failed (dry run — nothing was written).");
@@ -53,18 +55,34 @@ if (!run("pnpm", ["-r", "--filter", "./packages/*", "run", "build"])) {
 }
 
 if (noPublish) {
-  console.log(`\n✓ Build OK at ${version}. --no-publish set, skipping publish.`);
+  console.log(
+    `\n✓ Build OK at ${version}. --no-publish set, skipping publish.`,
+  );
   process.exit(0);
 }
 
 // 3) Publish. workspace:^ is rewritten to ^<version> on publish.
-const pubArgs = ["-r", "--filter", "./packages/*", "publish", "--access", "public", "--no-git-checks"];
+const pubArgs = [
+  "-r",
+  "--filter",
+  "./packages/*",
+  "publish",
+  "--access",
+  "public",
+  "--no-git-checks",
+];
+const prereleaseTag = version.match(/-([0-9A-Za-z-]+)/)?.[1];
+if (prereleaseTag) pubArgs.push("--tag", prereleaseTag);
 if (dry) pubArgs.push("--dry-run");
 if (!run("pnpm", pubArgs)) {
   // Do NOT roll back here: a publish may have partially succeeded on npm, and
   // reverting local versions would desync git from what's already published.
-  console.error("\n✗ Publish failed. Versions left as-is — fix and re-run; npm rejects duplicate versions.");
+  console.error(
+    "\n✗ Publish failed. Versions left as-is — fix and re-run; npm rejects duplicate versions.",
+  );
   process.exit(1);
 }
 
-console.log(`\n✓ Released @ssgoi/* at ${version}${dry ? " (dry run — nothing published)" : ""}`);
+console.log(
+  `\n✓ Released @ssgoi/* at ${version}${dry ? " (dry run — nothing published)" : ""}`,
+);
