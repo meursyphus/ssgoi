@@ -68,7 +68,7 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         id: "quick-start",
         title: "Quick start",
         href: "/docs/install",
-        blurb: "Two new files, one layout edit, and your first transition.",
+        blurb: "One provider file, one layout edit, and your first transition.",
       },
       {
         id: "layout-shell",

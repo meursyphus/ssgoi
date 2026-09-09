@@ -1,5 +1,8 @@
 # SSGOI + React Router
 
+Import `SsgoiRouteBoundary` from `@ssgoi/react/react-router`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -10,29 +13,21 @@ pnpm dev
 - `app/components/ssgoi-config.ts`: one transition config.
 - `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
   `relative z-0 overflow-x-clip` shell.
-- `app/components/ssgoi-route-boundary.tsx`: name → route id/key resolver
-  using `useLocation()`.
-- `app/routes/page-boundary.layout.tsx`: standard named page boundary.
-- `app/routes/products_.layout.tsx`: persistent product shell plus inner tab
-  boundary.
-
-Layouts pass a semantic name; the boundary resolver owns the key policy:
+- `@ssgoi/react/react-router`: the shipped pathname boundary.
+- Route layouts place a stable shell boundary around a pathname child boundary.
 
 ```tsx
-const { pathname } = useLocation();
-const boundary = resolveBoundary(name, pathname);
-
-return (
-  <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-    {children}
-  </div>
-);
+<SsgoiRouteBoundary routeKey="products-layout">
+  <ProductHeaderAndTabs />
+  <SsgoiRouteBoundary>
+    <Outlet />
+  </SsgoiRouteBoundary>
+</SsgoiRouteBoundary>
 ```
 
-`page` uses the pathname for both values. `products-shell` returns a stable
-outer key because the products layout owns that boundary's lifetime; its inner
-`<Outlet />` uses `page`. Category navigation therefore slides only the inner
-content.
+The products route owns the stable outer lifetime. Its marker follows the full
+pathname while category navigation replaces only the inner content. The root
+contains one provider; it does not remount the products shell for each tab.
 
 Effects:
 
@@ -40,7 +35,7 @@ Effects:
 - Product tabs: ordered `slide`.
 - Gallery and profile: `zoom`.
 
-Guide: https://ssgoi.dev/llms.txt#8-other-frameworks
+Guide: https://ssgoi.dev/llms/frameworks/react-router.txt
 
 ```bash
 pnpm typecheck

@@ -27,3 +27,27 @@ https://ssgoi.dev/llms/transitions.txt
 
 Persistent layouts and complex route ownership:
 https://ssgoi.dev/llms/complex-routing.txt
+
+## Optional router entries
+
+Import SsgoiRouteBoundary from the entry for your installed router:
+
+- Next.js App Router: `@ssgoi/react/nextjs`
+- React Router 6/7: `@ssgoi/react/react-router`
+- TanStack Router 1: `@ssgoi/react/tanstack-router`
+- SvelteKit 2 / Svelte 5: `@ssgoi/svelte/sveltekit`
+- Nuxt / Vue Router 4: `@ssgoi/vue/nuxt` or `@ssgoi/vue/vue-router`
+- SolidStart / Solid Router 0.15–0.16: `@ssgoi/solid/solidstart`
+
+These are subpaths, not separate packages. Routers are optional peers, excluded
+from library bundles and root exports. A plain React/Svelte/Vue/Solid app does
+not install or load any router by using the root package. The Nuxt and Vue Router entries each
+use only their matching optional peer.
+
+Manual/custom-router boundaries: https://ssgoi.dev/llms/manual-boundaries.txt
+Qwik and Angular keep their page-root markers rather than a wrapper component.
+
+Optional peer ranges are intentionally broad because package managers cannot
+scope them to subpaths. An unused adapter must not force a router upgrade. The
+versions listed above describe the adapters; older or custom routers can keep
+using the root package and manual boundaries.

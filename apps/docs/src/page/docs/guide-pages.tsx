@@ -41,8 +41,8 @@ export function WhySsgoiBody() {
         SSGOI animates the page that leaves against the page that arrives. It
         does not route: your router keeps URLs, data loading, history and SSR,
         and SSGOI only watches the routed element unmount and mount. Adding it
-        means two new files, plus one edit to the layout you already have — so
-        you can try it on an existing app and take it out again just as fast.
+        means one provider file, plus one edit to the layout you already have —
+        so you can try it on an existing app and take it out again just as fast.
       </p>
       <p className={`mt-4 ${body}`}>
         Motion is simulated, not hand-tuned. A spring is integrated up front,
@@ -66,7 +66,6 @@ export function WhySsgoiBody() {
           language="text"
           code={`app/
   ssgoi-provider.tsx         # new — config + <Ssgoi>
-  ssgoi-route-boundary.tsx   # new — pathname → key + transition id
   layout.tsx                 # already yours — wrap routed content`}
         />
         <p className={`mt-4 ${body}`}>
@@ -337,8 +336,8 @@ export function BoundariesBody() {
         <Link href="/docs/install" className={link}>
           quick start
         </Link>{" "}
-        creates it in step 2; here is what each of its two values decides. For
-        most apps both are just the pathname.
+        imports it in step 2; below is the manual equivalent explaining its
+        values. For most apps both are just the pathname.
       </p>
 
       <CodeBlock
@@ -366,7 +365,15 @@ export function SsgoiRouteBoundary({ children }) {
         <Link href="/docs/frameworks" className={link}>
           Frameworks
         </Link>{" "}
-        has the version for your stack.
+        has the version for your stack. For a custom router or direct DOM
+        control, see the{" "}
+        <Link
+          href="https://ssgoi.dev/llms/manual-boundaries.txt"
+          className={link}
+        >
+          manual boundary guide
+        </Link>
+        .
       </p>
 
       <Section

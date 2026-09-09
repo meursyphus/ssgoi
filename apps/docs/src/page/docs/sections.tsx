@@ -130,7 +130,7 @@ export function InstallBody() {
 
       <Section
         title="Set it up"
-        lead="Two new files, plus one edit to the layout you already have. Copy each block as it is."
+        lead="One provider file, plus one edit to your layout. The route boundary is included."
       >
         <Steps>
           <Step n={1} title="Create the provider">
@@ -158,10 +158,11 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 }`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              Both new files are client components. SSGOI reads and moves real
-              DOM nodes, and <code className={inlineCode}>usePathname</code>{" "}
-              only exists on the client. The pages inside the boundary stay
-              server components.
+              The provider and shipped boundary are client components. SSGOI
+              reads and moves real DOM nodes, and{" "}
+              <code className={inlineCode}>usePathname</code> is read inside the
+              shipped boundary. The pages passed into it can stay server
+              components.
             </p>
             <p className={`mt-4 ${measure} ${prose}`}>
               <code className={inlineCode}>transitions</code> also accepts a
@@ -200,7 +201,7 @@ const config = {
             </p>
           </Step>
 
-          <Step n={2} title="Mark the region that changes">
+          <Step n={2} title="Import the route boundary">
             <p className={`${measure} ${prose}`}>
               The <code className={inlineCode}>key</code> is what makes the
               framework throw the old page away — SSGOI reacts to the framework
@@ -210,25 +211,13 @@ const config = {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`// app/ssgoi-route-boundary.tsx
-"use client";
+              code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
-import { type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-
-export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}`}
+<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              If the wrong part of the screen ends up moving, it is this key
-              that decides —{" "}
+              Next.js is an optional peer, loaded only by this subpath. If the
+              wrong part of the screen moves, the boundary key that decides —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
               </Link>{" "}
@@ -248,7 +237,7 @@ export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
               code={`// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -293,7 +282,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             />
             <p className={`mt-5 ${measure} ${prose}`}>
               If nothing moves, or the wrong region moves, the cause is almost
-              always one of two files: check{" "}
+              in the layout or boundary placement: check{" "}
               <Link href="/docs/layout" className={link}>
                 Layout shell
               </Link>{" "}

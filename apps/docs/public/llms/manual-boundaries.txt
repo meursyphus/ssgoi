@@ -1,0 +1,83 @@
+# Manual SSGOI boundaries and custom routers
+
+The root framework packages are router agnostic. Importing `@ssgoi/react`,
+`@ssgoi/svelte`, `@ssgoi/vue`, or `@ssgoi/solid` does not import or require a router.
+The ready-made router entries are optional conveniences, not required wrappers.
+
+Use one `<Ssgoi>` and mark the real DOM element the framework removes when
+routed content changes. `data-ssgoi-transition` is the logical route id matched
+by your config. The framework key controls when that element is recreated.
+Changing only the attribute on a persistent element does not produce OUT/IN.
+
+## React with any router
+
+Feed your router's committed pathname into this component in the same render
+as its routed children. No Next.js dependency is involved:
+
+```tsx
+import type { HTMLAttributes, ReactNode } from "react";
+
+type Props = HTMLAttributes<HTMLDivElement> & {
+  children: ReactNode;
+  pathname: string;
+  routeKey?: string | number;
+};
+
+export function ManualRouteBoundary({
+  children, pathname, routeKey, ...props
+}: Props) {
+  return (
+    <div {...props} key={routeKey ?? pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}
+```
+
+Put it inside `<Ssgoi>` around the active outlet/children. Use a pathname value
+from your router, not a mount-time `window.location` read. In Next.js, a local
+wrapper calling URL hooks needs `"use client"` and an outer Suspense boundary
+when those hooks can suspend. Pages Router users can feed the resolved path
+from `next/router`; ensure it is ready and keep the initial server/client marker
+consistent (route.pathname can be a pattern such as `/posts/[id]`).
+
+For persistent layouts, give the shell a stable routeKey and wrap only changing
+content with another pathname boundary. Keep the full logical route id on the
+shell. Compute id and key synchronously; effect-delayed keys can destroy the
+old content before SSGOI captures it.
+
+## Svelte and SvelteKit
+
+For your own router with stable, captured page data, a keyed block can own the
+DOM lifetime:
+
+```svelte
+{#key routeKey}
+  <div data-ssgoi-transition={routeId}>
+    <!-- Render the page data/component owned by this key. -->
+  </div>
+{/key}
+```
+
+SvelteKit's live `children` snippet needs more care: detach the outgoing region
+in `onNavigate` before Kit changes the snippet, then remount in the callback
+returned from `onNavigate` (after Kit updates the DOM). A key around the live
+snippet alone is not sufficient. The complete optional implementation is:
+https://github.com/meursyphus/ssgoi/blob/HEAD/packages/svelte/src/lib/sveltekit/ssgoi-route-boundary.svelte
+It can be copied into an app when custom lifecycle control is needed.
+
+## Vue and Solid
+
+Vue: key a DOM wrapper around the current RouterView component or NuxtPage.
+Solid: use a keyed Show/Dynamic boundary that recreates its child when the
+route's lifetime changes. Keep the transition id reactive even for stable keys.
+The optional adapters contain the corresponding implementations:
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/vue/src/lib/vue-router.ts
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/solid/src/lib/solidstart.tsx
+
+Qwik and Angular own routed DOM differently; use their page-root markers:
+- https://ssgoi.dev/llms/frameworks/qwik.txt
+- https://ssgoi.dev/llms/frameworks/angular.txt
+
+Main setup/config: https://ssgoi.dev/llms.txt
+Boundary lifecycle: https://ssgoi.dev/llms/how-it-works.txt

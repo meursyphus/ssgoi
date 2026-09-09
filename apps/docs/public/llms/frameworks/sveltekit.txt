@@ -23,16 +23,16 @@ the boundary component:
 <script>
   import { Ssgoi } from "@ssgoi/svelte";
   import { config } from "$lib/ssgoi-config";
-  import SsgoiTransitionBoundary from "$lib/components/ssgoi-transition-boundary.svelte";
+  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
 
   let { children } = $props();
 </script>
 
 <main class="relative z-0 min-h-dvh overflow-x-clip">
   <Ssgoi {config}>
-    <SsgoiTransitionBoundary class="min-h-full">
+    <SsgoiRouteBoundary class="min-h-full">
       {@render children()}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   </Ssgoi>
 </main>
 ```
@@ -54,74 +54,9 @@ snippet updates, so a marker on that wrapper has no outgoing node. The
 component detaches the old routed region in `onNavigate` first, then remounts
 under the new id:
 
-```svelte
-<!-- src/lib/components/ssgoi-transition-boundary.svelte -->
-<script lang="ts">
-  import { onNavigate } from "$app/navigation";
-  import { page } from "$app/stores";
-  import { flushSync, onDestroy, type Snippet } from "svelte";
-
-  interface Props {
-    children: Snippet;
-    as?: keyof HTMLElementTagNameMap;
-    class?: string;
-    getId?: (url: URL) => string;
-    [key: string]: unknown;
-  }
-
-  const pathnameId = (url: URL) => url.pathname;
-
-  let {
-    children,
-    as = "div",
-    class: className,
-    getId = pathnameId,
-    ...rest
-  }: Props = $props();
-
-  let currentId = $state(getId($page.url));
-  let mounted = $state(true);
-  let alive = true;
-
-  onDestroy(() => {
-    alive = false;
-  });
-
-  onNavigate((navigation) => {
-    if (!alive || !navigation.to) return;
-
-    const nextId = getId(navigation.to.url);
-
-    if (nextId === currentId) return;
-
-    // Detach the old route before SvelteKit updates its live `children`
-    // snippet. SSGOI can then retain the real outgoing DOM for its animation.
-    flushSync(() => {
-      mounted = false;
-    });
-
-    return () => {
-      if (!alive) return;
-
-      flushSync(() => {
-        currentId = nextId;
-        mounted = true;
-      });
-    };
-  });
-</script>
-
-{#if mounted}
-  <svelte:element
-    this={as}
-    data-ssgoi-transition={currentId}
-    class={className}
-    {...rest}
-  >
-    {@render children()}
-  </svelte:element>
-{/if}
-```
+Import `SsgoiRouteBoundary` from `@ssgoi/svelte/sveltekit`; the package owns this
+lifecycle. Svelte 5 and SvelteKit 2 are supported. Kit is an optional peer and
+is never imported through the root `@ssgoi/svelte` entry.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 
@@ -139,9 +74,9 @@ For a persistent `/products` shell, collapse that family at the root:
   }
 </script>
 
-<SsgoiTransitionBoundary getId={getRootTransitionId}>
+<SsgoiRouteBoundary resolve={({ url }) => ({ id: url.pathname, key: getRootTransitionId(url) })}>
   {@render children()}
-</SsgoiTransitionBoundary>
+</SsgoiRouteBoundary>
 ```
 
 Then add a default pathname boundary only around the changing child:
@@ -149,14 +84,23 @@ Then add a default pathname boundary only around the changing child:
 ```svelte
 <!-- src/routes/products/+layout.svelte -->
 <ProductHeaderAndTabs />
-<SsgoiTransitionBoundary>
+<SsgoiRouteBoundary>
   {@render children()}
-</SsgoiTransitionBoundary>
+</SsgoiRouteBoundary>
 ```
 
-The stable outer id preserves the shell; the inner pathname boundary produces
+The stable outer key preserves the shell; the inner pathname boundary produces
 child OUT/IN. Holding only one boundary constant preserves state but produces
 no child transition.
 
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/sveltekit
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+`as`, HTML attributes, `routeKey`, and `resolve({ pathname, url })` are supported.
+The resolver returns `{ id, key? }`; omitted key defaults to id. Keep a shell's
+key stable while its id tracks the full pathname. `routeKey` overrides that key.
+Search/hash-only changes do not remount by default. Use the URL in `resolve`
+when query changes should animate. Use router navigation for those changes;
+shallow `pushState`/`replaceState` calls do not trigger `onNavigate`.
+
+Custom router/manual guide: https://ssgoi.dev/llms/manual-boundaries.txt

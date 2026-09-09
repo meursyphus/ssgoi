@@ -36,6 +36,13 @@
       "import": "./dist/view-transitions.js",
       "require": "./dist/view-transitions.cjs",
       "default": "./dist/view-transitions.js"
+    },
+    "./solidstart": {
+      "solid": "./src/lib/solidstart.tsx",
+      "types": "./dist/solidstart.d.ts",
+      "import": "./dist/solidstart.js",
+      "require": "./dist/solidstart.cjs",
+      "default": "./dist/solidstart.js"
     }
   },
   "scripts": {
@@ -56,15 +63,17 @@
     "eslint": "^9.30.1",
     "globals": "^16.3.0",
     "rollup-plugin-preserve-directives": "^0.4.0",
-    "solid-js": "^1.9.10",
+    "solid-js": "^1.9.13",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.2.4",
     "vite-plugin-dts": "^4.5.4",
-    "vite-plugin-solid": "^2.11.10"
+    "vite-plugin-solid": "^2.11.10",
+    "@solidjs/router": "^0.16.1"
   },
   "peerDependencies": {
-    "solid-js": "^1.0.0"
+    "solid-js": "^1.0.0",
+    "@solidjs/router": "*"
   },
   "keywords": [
     "solid",
@@ -90,5 +99,10 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@solidjs/router": {
+      "optional": true
+    }
   }
 }

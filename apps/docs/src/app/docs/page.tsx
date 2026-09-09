@@ -22,13 +22,13 @@ import {
 export const metadata: Metadata = {
   title: "Docs — Native app-like page transitions for mobile web apps",
   description:
-    "Understand why SSGOI exists, add it with two new files and one layout edit, choose a mobile transition, and go deeper only when your routing UX needs it.",
+    "Understand why SSGOI exists, add it with one provider file and one layout edit, choose a mobile transition, and go deeper only when your routing UX needs it.",
   alternates: { canonical: "/docs" },
   openGraph: buildOpenGraph({
     path: "/docs",
     title: "SSGOI Docs — Native app-like motion, without replacing your router",
     description:
-      "Add route-aware, interruptible page transitions with two new files and one layout edit, then grow into scroll restoration and persistent layouts when needed.",
+      "Add route-aware, interruptible page transitions with one provider file and one layout edit, then grow into scroll restoration and persistent layouts when needed.",
   }),
 };
 
@@ -97,7 +97,7 @@ const WHY_SSGOI = [
   },
   {
     title: "Set it up",
-    body: "Two new files, plus one edit to the layout you already have. Everything else stays optional until the app needs it.",
+    body: "One provider file, plus one edit to the layout you already have. Everything else stays optional until the app needs it.",
     href: "/docs/install",
   },
   {

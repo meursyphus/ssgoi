@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SsgoiRouteBoundary } from "@/components/ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { PRODUCT_CATEGORIES } from "@/components/ssgoi-config";
 
 export default function ProductsLayout({
@@ -15,7 +15,7 @@ export default function ProductsLayout({
 
   return (
     <SsgoiRouteBoundary
-      name="products-shell"
+      routeKey="products-layout"
       className="min-h-screen bg-[#121212] flex flex-col"
     >
       {/* Header - Fixed */}
@@ -43,7 +43,7 @@ export default function ProductsLayout({
 
       {/* Tab Content - Slide transitions here */}
       <div className="flex-1 overflow-hidden relative">
-        <SsgoiRouteBoundary name="page" className="min-h-full bg-[#121212]">
+        <SsgoiRouteBoundary className="min-h-full bg-[#121212]">
           {children}
         </SsgoiRouteBoundary>
       </div>

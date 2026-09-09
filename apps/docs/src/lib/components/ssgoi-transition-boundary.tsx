@@ -1,7 +1,7 @@
 "use client";
 
 import { type ElementType, type Key, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export type BoundaryScope = (pathname: string) => Key;
 
@@ -25,17 +25,16 @@ export function SsgoiTransitionBoundary({
    */
   scope?: BoundaryScope;
 }) {
-  const pathname = usePathname();
-  const transitionId = id ?? pathname;
-  const Component = as ?? "div";
-
   return (
-    <Component
-      key={scope(pathname)}
-      data-ssgoi-transition={transitionId}
+    <SsgoiRouteBoundary
+      as={as}
       className={className}
+      resolve={({ pathname }) => ({
+        id: id ?? pathname,
+        key: scope(pathname).toString(),
+      })}
     >
       {children}
-    </Component>
+    </SsgoiRouteBoundary>
   );
 }

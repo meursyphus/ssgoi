@@ -118,29 +118,48 @@ detail → tab    : app-shell key changes · the shell re-enters with the nav`}
           <code className={inlineCode}>children</code> slot still renders{" "}
           <code className={inlineCode}>/projects</code>. Derive the background
           boundary&apos;s id and key from{" "}
-          <code className={inlineCode}>useSelectedLayoutSegments()</code>, with
-          the pathname as the fallback.
+          <code className={inlineCode}>useSelectedLayoutSegments()</code>, as
+          supplied to the adapter’s resolve callback. For nested layouts, pass
+          the owning layout’s base path to selectedSegmentsToPath.
         </p>
         <p className={`mt-4 ${measure} ${prose}`}>
-          <code className={inlineCode}>resolveBoundary</code> is your own
-          helper: one function that turns a boundary name plus the current route
-          into an id and a key, so the decision lives in a single file instead
-          of in every layout. A complete one is in the pattern file linked at
-          the bottom of this page.
+          The adapter reads the hooks and supplies Suspense. Use a stable
+          routeKey when a layout owns the shell, or define one resolve policy
+          that returns its logical id and lifetime key. Function props belong in
+          a client component. The complete pattern is linked below.
         </p>
         <CodeBlock
           className="mt-6"
           language="tsx"
-          code={`const pathname = usePathname() ?? "";
-const segments = useSelectedLayoutSegments("children");
-const { id, key } = resolveBoundary(name, { pathname, segments });
+          code={`import {
+  SsgoiRouteBoundary,
+  selectedSegmentsToPath,
+} from "@ssgoi/react/nextjs";
 
-return (
-  <div key={key} data-ssgoi-transition={id}>
-    {children}
-  </div>
-);`}
+<SsgoiRouteBoundary
+  resolve={({ selectedSegments }) => ({
+    id: selectedSegmentsToPath(selectedSegments),
+    key: selectedSegments.includes("(top-level)")
+      ? "app-shell"
+      : selectedSegmentsToPath(selectedSegments),
+  })}
+>
+  {children}
+</SsgoiRouteBoundary>`}
         />
+      </Section>
+
+      <Section title="Interception and middleware / proxy">
+        <p className={`mt-4 ${measure} ${prose}`}>
+          The boundary controls DOM lifetime. Your app still owns intercepting
+          route files, parallel slot fallbacks, and any redirects or rewrites in
+          middleware.ts (Next 13–15) or proxy.ts (Next 16+). Review those rules
+          for soft navigation and direct entry, preserve Next’s request headers,
+          and test open, close/back, and reload with that configuration enabled.
+          Ordinary navigation needs no extra middleware. This is separate from
+          SSGOI’s animation middleware. See the agent guide for the short
+          checklist.
+        </p>
       </Section>
 
       <Section title="A production tree">

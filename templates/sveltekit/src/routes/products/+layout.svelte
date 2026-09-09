@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import SsgoiTransitionBoundary from "$lib/components/ssgoi-transition-boundary.svelte";
+  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
   import { PRODUCT_CATEGORIES } from "$lib/ssgoi-config";
 
   let { children } = $props();
@@ -32,8 +32,8 @@
 
   <!-- Tab Content - Slide transitions here -->
   <div class="flex-1 overflow-hidden relative">
-    <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
+    <SsgoiRouteBoundary class="min-h-full bg-[#121212]">
       {@render children()}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   </div>
 </div>
