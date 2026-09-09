@@ -8,7 +8,8 @@ Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
 Current version: `@ssgoi/core@7.0.4`. Every `@ssgoi/*` framework package
 is released in lockstep with core, so install the same version across them.
 
-This file contains the minimal React and Next.js setup. Read linked files only
+This file contains the minimal Next.js App Router setup. The root React package
+remains router agnostic. Read linked files only
 when their topic applies.
 
 ## Choose a mobile interaction
@@ -49,7 +50,7 @@ const config = {
 For variants and more effects, open the transition catalog:
 https://ssgoi.dev/llms/transitions.txt
 
-## Minimal React and Next.js setup
+## Minimal Next.js App Router setup
 
 ### 1. Install
 
@@ -89,24 +90,14 @@ transitions: ({ isMobile }) =>
 
 ### 3. Route boundary
 
-For a simple app, use the pathname as both the React key and transition id:
+Import the ready-made boundary. It reads the pathname and sets the key and
+transition id together; it also handles URL-hook Suspense. No local boundary
+file is needed:
 
 ```tsx
-// app/ssgoi-route-boundary.tsx
-"use client";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
-import { type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-
-export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}
+<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 ```
 
 ### 4. Layout
@@ -115,7 +106,7 @@ export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -138,7 +129,24 @@ The class string above is Tailwind shorthand. Without Tailwind, apply
 container, and scroll restore then targets the wrong element. Fall back to
 `100vh` only where `dvh` is unsupported.
 
-That is the complete simple setup.
+That is the complete simple setup. The `nextjs` entry is a subpath of
+`@ssgoi/react`, not a separate package to install. Next.js is an optional peer;
+installing or importing `@ssgoi/react` does not install or load it.
+
+Next.js interception, redirects, and rewrites remain application routing
+concerns. If your app uses middleware (Next 13–15) or proxy (Next 16+), keep its
+matcher and rewrite/redirect rules compatible with both soft intercepted
+navigation and direct page entry. The boundary does not configure these rules.
+For background slots, resolve from `selectedSegments` rather than the modal URL.
+Short setup and verification: https://ssgoi.dev/llms/complex-routing.txt
+
+Other ready-made entries: `@ssgoi/react/react-router`,
+`@ssgoi/react/tanstack-router`, `@ssgoi/svelte/sveltekit`,
+`@ssgoi/vue/nuxt`, `@ssgoi/vue/vue-router`, `@ssgoi/solid/solidstart`.
+Each router is an optional peer, external to the build, and only loaded by its
+entry. Use the installed router's entry; do not install all the routers.
+For a custom router or direct DOM control, use the manual guide:
+https://ssgoi.dev/llms/manual-boundaries.txt
 
 Browser note: the listed compatibility target is for the core Web Animations
 API runtime. `sheet({ type: "blur" })` and `zoom({ type: "blur" })` also use
@@ -197,6 +205,7 @@ https://ssgoi.dev/llms/route-rules.txt
 | Need | Read |
 | --- | --- |
 | choose or configure a transition | https://ssgoi.dev/llms/transitions.txt |
+| build a manual boundary or use a custom router | https://ssgoi.dev/llms/manual-boundaries.txt |
 | use another framework or router | https://ssgoi.dev/llms/frameworks.txt |
 | understand automatic scroll behavior or middleware | https://ssgoi.dev/llms/scroll-restoration.txt |
 | keep a bottom nav, intercepted background, or dynamic project shell persistent | https://ssgoi.dev/llms/complex-routing.txt |

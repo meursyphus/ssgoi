@@ -1,5 +1,8 @@
 # SSGOI + TanStack Router
 
+Import `SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -10,26 +13,21 @@ pnpm dev
 - `app/components/ssgoi-config.ts`: one transition config.
 - `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
   `relative z-0 overflow-x-clip` shell.
-- `app/components/ssgoi-route-boundary.tsx`: name → route id/key resolver
-  using router state.
-- Parent route files select boundary names around `<Outlet />`.
+- `@ssgoi/react/tanstack-router`: the shipped pathname boundary.
+- Route layouts place a stable shell boundary around a pathname child boundary.
 
 ```tsx
-const pathname = useRouterState({
-  select: (state) => state.location.pathname,
-});
-const boundary = resolveBoundary(name, pathname);
-
-return (
-  <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-    {children}
-  </div>
-);
+<SsgoiRouteBoundary routeKey="products-layout">
+  <ProductHeaderAndTabs />
+  <SsgoiRouteBoundary>
+    <Outlet />
+  </SsgoiRouteBoundary>
+</SsgoiRouteBoundary>
 ```
 
-`page` uses the pathname for both values. `products-shell` keeps the
-route-owned outer layout key stable and the inner content uses `page`. Ordered
-paths in the root config decide slide direction.
+The products route owns the stable outer lifetime. Its marker follows the full
+pathname while category navigation replaces only the inner content. The root
+contains one provider; it does not remount the products shell for each tab.
 
 Effects:
 
@@ -37,7 +35,7 @@ Effects:
 - Product tabs: ordered `slide`.
 - Gallery and profile: `zoom`.
 
-Guide: https://ssgoi.dev/llms.txt#8-other-frameworks
+Guide: https://ssgoi.dev/llms/frameworks/tanstack-router.txt
 
 ```bash
 pnpm typecheck

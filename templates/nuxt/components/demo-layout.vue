@@ -8,12 +8,17 @@
         class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
       >
         <Ssgoi :config="ssgoiConfig">
-          <SsgoiTransitionBoundary
-            :get-id="getRootTransitionId"
+          <SsgoiRouteBoundary
+            :resolve="
+              ({ pathname }) => ({
+                id: pathname,
+                key: getRootTransitionId(pathname),
+              })
+            "
             class="min-h-full bg-[#121212]"
           >
             <slot />
-          </SsgoiTransitionBoundary>
+          </SsgoiRouteBoundary>
         </Ssgoi>
       </main>
 
@@ -102,6 +107,7 @@
 </template>
 
 <script setup lang="ts">
+import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { Ssgoi } from "@ssgoi/vue";

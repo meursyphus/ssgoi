@@ -1,5 +1,8 @@
 # SSGOI + Nuxt
 
+Import `SsgoiRouteBoundary` from `@ssgoi/vue/nuxt`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -10,13 +13,13 @@ creates one `<Ssgoi>` and one centralized route boundary:
 
 ```vue
 <Ssgoi :config="ssgoiConfig">
-  <SsgoiTransitionBoundary :get-id="getRootTransitionId">
+  <SsgoiRouteBoundary :resolve="({ pathname }) => ({ id: pathname, key: getRootTransitionId(pathname) })">
     <slot />
-  </SsgoiTransitionBoundary>
+  </SsgoiRouteBoundary>
 </Ssgoi>
 ```
 
-The root boundary maps every `/products/*` URL to `/products`.
+The root boundary keeps a `/products` key for that route family while its id tracks the real pathname.
 `pages/products.vue` remains mounted and wraps its `<NuxtPage />` in a second
 boundary, so category navigation slides only the child content.
 

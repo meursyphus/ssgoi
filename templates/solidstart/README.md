@@ -1,5 +1,8 @@
 # SSGOI + SolidStart
 
+Import `SsgoiRouteBoundary` from `@ssgoi/solid/solidstart`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -10,13 +13,18 @@ centralized route boundary:
 
 ```tsx
 <Ssgoi config={ssgoiConfig}>
-  <SsgoiTransitionBoundary getId={getRootTransitionId}>
+  <SsgoiRouteBoundary
+    resolve={({ pathname }) => ({
+      id: pathname,
+      key: getRootTransitionId(pathname),
+    })}
+  >
     {props.children}
-  </SsgoiTransitionBoundary>
+  </SsgoiRouteBoundary>
 </Ssgoi>
 ```
 
-The root boundary maps every `/products/*` URL to `/products`. The persistent
+The root boundary keeps a `/products` key for that route family while its id tracks the real pathname. The persistent
 products route wraps its child route in a second boundary, so category
 navigation replaces only the inner content while the header and tabs stay
 mounted.

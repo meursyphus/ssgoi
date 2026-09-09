@@ -9,7 +9,7 @@ const path = "/docs/why-ssgoi";
 export const metadata: Metadata = {
   title: "Why SSGOI — mobile route transitions without replacing your router",
   description:
-    "Add native app-like mobile page transitions with two new files and one layout edit, keeping your router, with route boundaries and scroll behavior handled for you.",
+    "Add native app-like mobile page transitions with one provider file and one layout edit, keeping your router, with route boundaries and scroll behavior handled for you.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };

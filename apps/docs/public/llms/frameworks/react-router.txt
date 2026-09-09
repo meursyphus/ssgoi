@@ -49,23 +49,8 @@ Boundary — pathname as both React key and transition id, wired once with a
 pathless layout route:
 
 ```tsx
-// app/components/ssgoi-route-boundary.tsx
-import { type ReactNode } from "react";
-import { useLocation } from "react-router";
-
-type BoundaryName = "page" | "products-shell";
-
-function resolveBoundary(name: BoundaryName, pathname: string) {
-  return {
-    id: pathname,
-    key: name === "products-shell" ? "products-layout" : pathname,
-  };
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name = "page",
-}: {
+import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
+: {
   children: ReactNode;
   name?: BoundaryName;
 }) {
@@ -81,7 +66,7 @@ export function SsgoiRouteBoundary({
 
 // app/routes/page-boundary.layout.tsx
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "../components/ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
 
 export default function PageBoundaryLayout() {
   return (
@@ -116,13 +101,13 @@ A persistent route family needs two boundaries:
 ```tsx
 // app/routes/products_.layout.tsx
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "../components/ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
 
 export default function ProductsLayout() {
   return (
-    <SsgoiRouteBoundary name="products-shell">
+    <SsgoiRouteBoundary routeKey="products-layout">
       <ProductHeaderAndTabs />
-      <SsgoiRouteBoundary name="page">
+      <SsgoiRouteBoundary>
         <Outlet />
       </SsgoiRouteBoundary>
     </SsgoiRouteBoundary>
@@ -138,3 +123,13 @@ preserves state but produces no child transition.
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/react-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+The `@ssgoi/react/react-router` subpath uses only its optional router peer.
+Root imports and other router entries do not load it. `as`, DOM attributes,
+`routeKey`, and `resolve` are supported. Resolve returns `{ id, key? }`; key
+defaults to id, and routeKey overrides it. Query-only navigation keeps the
+boundary by default. For direct control or a custom router:
+https://ssgoi.dev/llms/manual-boundaries.txt
+
+If a React Router 6 app only lists react-router-dom, add the matching version
+of react-router as a direct dependency too (especially with strict pnpm layouts).

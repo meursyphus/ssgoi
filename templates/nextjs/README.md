@@ -1,5 +1,8 @@
 # SSGOI + Next.js
 
+Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -9,34 +12,22 @@ pnpm dev
 
 - `src/components/ssgoi-config.ts`: one transition config.
 - `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `src/components/ssgoi-route-boundary.tsx`: name → route id/key utility.
+- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
-The template keeps route lifetime rules in the boundary resolver. Layouts pass
-only a semantic name:
-
-```tsx
-const boundary = resolveBoundary(name, pathname);
-
-<div key={boundary.key} data-ssgoi-transition={boundary.id}>
-  {children}
-</div>;
-```
-
-`page` uses the pathname for both values and remounts on every route change.
-`products-shell` uses a stable key for the persistent products layout while
-keeping the pathname as its transition id.
+The default boundary uses the pathname for its id and key. `routeKey` keeps a
+layout shell mounted while its transition id follows the actual route.
 
 ## Product tabs
 
 The products layout has two boundaries:
 
 ```tsx
-<SsgoiRouteBoundary name="products-shell">
+<SsgoiRouteBoundary routeKey="products-layout">
   <ProductHeader />
   <ProductTabs />
 
-  <SsgoiRouteBoundary name="page">{children}</SsgoiRouteBoundary>
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 </SsgoiRouteBoundary>
 ```
 
@@ -45,7 +36,7 @@ The products layout has two boundaries:
 
 The constant outer key is safe here because `app/products/layout.tsx` itself
 unmounts outside `/products`. If the boundary moves into a common app layout,
-its named resolver must return `"products-layout"` only for product category
+its resolve callback must return `"products-layout"` only for product category
 paths and a different key for routes outside them.
 
 Direction comes from the single config:

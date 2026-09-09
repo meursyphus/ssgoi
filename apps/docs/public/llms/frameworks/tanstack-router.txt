@@ -34,7 +34,7 @@ the boundary around `<Outlet />`:
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { Ssgoi } from "@ssgoi/react";
 import { config } from "~/components/ssgoi-config";
-import { SsgoiRouteBoundary } from "~/components/ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
 
 export const Route = createRootRoute({
   component: () => (
@@ -52,23 +52,8 @@ export const Route = createRootRoute({
 Boundary — pathname (from router state) as both React key and transition id:
 
 ```tsx
-// app/components/ssgoi-route-boundary.tsx
-import { type ReactNode } from "react";
-import { useRouterState } from "@tanstack/react-router";
-
-type BoundaryName = "page" | "products-shell";
-
-function resolveBoundary(name: BoundaryName, pathname: string) {
-  return {
-    id: pathname,
-    key: name === "products-shell" ? "products-layout" : pathname,
-  };
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name = "page",
-}: {
+import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+: {
   children: ReactNode;
   name?: BoundaryName;
 }) {
@@ -103,18 +88,24 @@ a stable outer boundary plus a pathname boundary around its child outlet:
 
 ```tsx
 // app/routes/products.tsx
-<SsgoiRouteBoundary name="products-shell">
+<SsgoiRouteBoundary routeKey="products-layout">
   <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary name="page">
+  <SsgoiRouteBoundary>
     <Outlet />
   </SsgoiRouteBoundary>
 </SsgoiRouteBoundary>
 ```
 
-The boundary implementation above makes `products-shell` return the stable key
-`products-layout`, while `page` returns the pathname. The stable outer key
+The outer `routeKey` is stable; the inner boundary defaults to the pathname. The stable outer key
 preserves the shell; the inner pathname key produces child OUT/IN.
 
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+The `@ssgoi/react/tanstack-router` subpath uses only its optional router peer.
+Root imports and other router entries do not load it. `as`, DOM attributes,
+`routeKey`, and `resolve` are supported. Resolve returns `{ id, key? }`; key
+defaults to id, and routeKey overrides it. Query-only navigation keeps the
+boundary by default. For direct control or a custom router:
+https://ssgoi.dev/llms/manual-boundaries.txt

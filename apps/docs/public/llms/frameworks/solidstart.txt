@@ -24,7 +24,7 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Ssgoi } from "@ssgoi/solid";
 import { config } from "./ssgoi-config";
-import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
 
 export default function App() {
   return (
@@ -32,7 +32,7 @@ export default function App() {
       root={(props) => (
         <main class="relative z-0 min-h-dvh overflow-x-clip">
           <Ssgoi config={config}>
-            <SsgoiTransitionBoundary>{props.children}</SsgoiTransitionBoundary>
+            <SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
           </Ssgoi>
         </main>
       )}
@@ -58,34 +58,7 @@ export const config: SsgoiConfig = {
 `<Show keyed>` recreates its child when the id changes — that unmount/mount
 pair is what SSGOI animates:
 
-```tsx
-// src/components/ssgoi-transition-boundary.tsx
-import { useLocation } from "@solidjs/router";
-import { Show, splitProps, type JSX } from "solid-js";
-
-type Props = JSX.HTMLAttributes<HTMLDivElement> & {
-  children?: JSX.Element;
-  getId?: (pathname: string) => string;
-};
-
-const pathnameId = (pathname: string) => pathname;
-
-export function SsgoiTransitionBoundary(props: Props) {
-  const location = useLocation();
-  const [local, rest] = splitProps(props, ["children", "getId"]);
-  const transitionId = () => (local.getId ?? pathnameId)(location.pathname);
-
-  return (
-    <Show when={transitionId()} keyed>
-      {(id) => (
-        <div {...rest} data-ssgoi-transition={id}>
-          {local.children}
-        </div>
-      )}
-    </Show>
-  );
-}
-```
+The route boundary is shipped in `@ssgoi/solid/solidstart`; no local component is needed.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 
@@ -99,9 +72,9 @@ const getRootTransitionId = (path: string) =>
     ? "/products"
     : path;
 
-<SsgoiTransitionBoundary getId={getRootTransitionId}>
+<SsgoiRouteBoundary resolve={({ pathname }) => ({ id: pathname, key: getRootTransitionId(pathname) })}>
   {props.children}
-</SsgoiTransitionBoundary>
+</SsgoiRouteBoundary>
 ```
 
 Then add a default pathname boundary only around the changing child:
@@ -109,14 +82,22 @@ Then add a default pathname boundary only around the changing child:
 ```tsx
 // src/routes/products.tsx
 <ProductHeaderAndTabs />
-<SsgoiTransitionBoundary>
+<SsgoiRouteBoundary>
   {props.children}
-</SsgoiTransitionBoundary>
+</SsgoiRouteBoundary>
 ```
 
-The stable outer id preserves the shell; the inner pathname boundary produces
+The stable outer key preserves the shell; the inner pathname boundary produces
 child OUT/IN. Holding only one boundary constant preserves state but produces
 no child transition.
 
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/solidstart
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
+
+`@ssgoi/solid/solidstart` loads only its optional Solid Router 0.15–0.16 peer.
+The root `@ssgoi/solid` import has no router dependency. The boundary accepts
+`as`, DOM attributes, `routeKey`, and `resolve({ pathname })`. Return `{ id, key? }`;
+key defaults to id and routeKey overrides it. Query/hash-only changes keep the
+boundary by default. Keep the logical id current even when the key is stable.
+
+Manual/custom-router guide: https://ssgoi.dev/llms/manual-boundaries.txt
