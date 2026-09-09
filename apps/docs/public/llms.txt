@@ -12,6 +12,10 @@ This file contains the minimal Next.js App Router setup. The root React package
 remains router agnostic. Read linked files only
 when their topic applies.
 
+React Native / Expo Router has a separate experimental source preview:
+https://ssgoi.dev/llms/frameworks/expo.txt
+The web setup and preset catalog below do not apply unchanged to native views.
+
 ## Choose a mobile interaction
 
 Start with the UX relationship, then open the linked transition spec for props

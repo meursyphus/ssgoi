@@ -19,6 +19,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
+        runtime: resolve(__dirname, "src/lib/runtime/index.ts"),
         internal: resolve(__dirname, "src/lib/internal.ts"),
         types: resolve(__dirname, "src/lib/types/index.ts"),
       },

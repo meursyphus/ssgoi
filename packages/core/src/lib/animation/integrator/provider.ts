@@ -5,7 +5,7 @@
  * Acts as a factory for strategy pattern implementation.
  */
 
-import type { SpringConfig, InertiaConfig } from "@types";
+import type { SpringConfig, InertiaConfig } from "../../runtime/physics";
 import type { Integrator } from "./types";
 import { SpringIntegrator } from "./spring-integrator";
 import { DoubleSpringIntegrator } from "./double-spring-integrator";

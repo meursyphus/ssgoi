@@ -231,6 +231,13 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             blurb: "App Router provider and pathname boundary.",
           },
           {
+            id: "framework-expo",
+            title: "React Native / Expo (preview)",
+            href: "/docs/frameworks/expo",
+            blurb:
+              "Experimental native fade/slide and file-based screen boundaries.",
+          },
+          {
             id: "framework-react-router",
             title: "React Router",
             href: "/docs/frameworks/react-router",

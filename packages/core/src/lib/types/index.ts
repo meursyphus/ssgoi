@@ -1,49 +1,24 @@
-import type { Integrator } from "../animation/integrator";
 import type { Animation } from "../animation/animation";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Style / Style objects
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type StyleObject = Record<string, number | string>;
+import type { StyleObject } from "../runtime/motion-state";
+export type { StyleObject } from "../runtime/motion-state";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Physics configuration
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type DoubleSpringFollowerConfig = {
-  stiffness: number;
-  damping: number;
-};
-
-export type SpringConfig = {
-  stiffness: number;
-  damping: number;
-  doubleSpring?: boolean | number | DoubleSpringFollowerConfig;
-  restDelta?: number;
-  restSpeed?: number;
-};
-
-export type ResistanceType = "linear" | "quadratic";
-
-export type InertiaConfig = {
-  acceleration: number;
-  resistance: number;
-  resistanceType?: ResistanceType;
-  min?: number;
-  max?: number;
-  bounceStiffness?: number;
-  bounceDamping?: number;
-  restDelta?: number;
-};
-
-export type IntegratorFactory = () => Integrator;
-
-export type PhysicsOptions = {
-  spring?: SpringConfig;
-  inertia?: InertiaConfig;
-  integrator?: IntegratorFactory;
-};
+export type {
+  DoubleSpringFollowerConfig,
+  SpringConfig,
+  ResistanceType,
+  InertiaConfig,
+  IntegratorFactory,
+  PhysicsOptions,
+} from "../runtime/physics";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Animation state — motion matching domain
@@ -52,25 +27,15 @@ export type PhysicsOptions = {
  * Timeline  — full simulation data for one element (frame array)
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type Pose = {
-  /** Identity for motion matching — same DOM node across animations means
-   * the same pose. */
-  element: HTMLElement;
-  value: number;
-  velocity: number;
-};
-
-export type TimelineFrame = {
-  time: number;
-  value: number;
-  velocity: number;
-  style?: StyleObject;
-};
-
-export type Timeline = {
-  element: HTMLElement;
-  frames: TimelineFrame[];
-};
+/** Existing web imports default to DOM targets; the runtime types require an explicit target. */
+export type Pose<TTarget = HTMLElement> =
+  import("../runtime/motion-state").Pose<TTarget>;
+export type TimelineFrame<TStyle = StyleObject> =
+  import("../runtime/motion-state").TimelineFrame<TStyle>;
+export type Timeline<
+  TTarget = HTMLElement,
+  TStyle = StyleObject,
+> = import("../runtime/motion-state").Timeline<TTarget, TStyle>;
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Transition context (passed to prepare + animation factory)
@@ -78,7 +43,8 @@ export type Timeline = {
 
 export type ScrollOffset = { x: number; y: number };
 export type ScrollPosition = { x: number; y: number };
-export type NavigationDirection = "forward" | "backward";
+import type { NavigationDirection } from "../runtime/types";
+export type { NavigationDirection } from "../runtime/types";
 
 /**
  * Context provided by the dispatcher to a transition.
@@ -184,116 +150,25 @@ export type AnyTransitionConfig = TransitionConfig<any>;
  * Route rules (Ssgoi top-level)
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type PathPatterns = string | readonly string[];
-
-export type PreserveScrollConfig = {
-  /**
-   * Restore the forward relationship's source when it becomes the incoming
-   * page again.
-   */
-  from: boolean;
-  /**
-   * Restore the forward relationship's destination when it becomes the
-   * incoming page again.
-   */
-  to: boolean;
-};
-
-type SsgoiTransitionRuleBase = {
-  transition: AnyTransitionConfig;
-  /**
-   * Override this rule's automatic scroll-restoration policy.
-   *
-   * `from` and `to` describe the rule's semantic forward relationship, not the
-   * current navigation's physical OUT and IN pages. On backward navigation the
-   * mapping is reversed automatically.
-   *
-   * Omitted defaults:
-   * - `on`: `{ from: true, to: false }`
-   * - `from`/`to`: `{ from: true, to: false }`
-   * - `ordered`: `{ from: true, to: true }`
-   */
-  preserveScroll?: PreserveScrollConfig;
-  /**
-   * Higher values win before path specificity. Defaults to 0.
-   * Useful for an exceptional effect declared below a broad fallback.
-   */
-  priority?: number;
-};
-
-/**
- * A route-family rule. Entering the family is forward, leaving it is
- * backward, and navigation within it uses semantic history/pop detection.
- */
-export type SsgoiOnTransitionRule = SsgoiTransitionRuleBase & {
-  on: PathPatterns;
-  except?: PathPatterns;
-  from?: never;
-  to?: never;
-  ordered?: never;
-  bidirectional?: never;
-};
-
-/**
- * A precise relationship between two route families. The normal from → to
- * orientation is forward; the reverse is backward when bidirectional
- * (the default).
- */
-export type SsgoiPairTransitionRule = SsgoiTransitionRuleBase & {
-  from: PathPatterns;
-  to: PathPatterns;
-  bidirectional?: boolean;
-  on?: never;
-  except?: never;
-  ordered?: never;
-};
-
-/**
- * An ordered set of routes. Both endpoints must match the set; increasing
- * index is forward and decreasing index is backward.
- */
-export type SsgoiOrderedTransitionRule = SsgoiTransitionRuleBase & {
-  ordered: readonly string[];
-  on?: never;
-  except?: never;
-  from?: never;
-  to?: never;
-  bidirectional?: never;
-};
-
+export type {
+  PathPatterns,
+  PreserveScrollConfig,
+  TransitionsResolverArgs,
+} from "../runtime/types";
+export type SsgoiOnTransitionRule =
+  import("../runtime/types").OnRouteRule<AnyTransitionConfig>;
+export type SsgoiPairTransitionRule =
+  import("../runtime/types").PairRouteRule<AnyTransitionConfig>;
+export type SsgoiOrderedTransitionRule =
+  import("../runtime/types").OrderedRouteRule<AnyTransitionConfig>;
 export type SsgoiTransitionRule =
-  | SsgoiOnTransitionRule
-  | SsgoiPairTransitionRule
-  | SsgoiOrderedTransitionRule;
-
-/**
- * Argument handed to a functional `transitions` config. Destructured at the
- * call site (`({ isMobile }) => …`) so the boolean's meaning is self-documenting
- * — and so the object can grow more fields later without breaking signatures.
- */
-export type TransitionsResolverArgs = { isMobile: boolean };
-
-/**
- * Functional form of `transitions`: receives device context and returns the
- * path-transition list. Lets a config branch on viewport (e.g. drawer on
- * mobile, fade on desktop) without an outer wrapper.
- */
-export type SsgoiTransitionsFn = (
-  args: TransitionsResolverArgs,
-) => readonly SsgoiTransitionRule[];
-
-/**
- * `transitions` accepts either a flat rule list or a function of device
- * context. Both normalize to the functional form internally.
- */
+  import("../runtime/types").RouteRule<AnyTransitionConfig>;
+export type SsgoiTransitionsFn =
+  import("../runtime/types").TransitionsFn<AnyTransitionConfig>;
 export type SsgoiTransitionsOption =
-  | readonly SsgoiTransitionRule[]
-  | SsgoiTransitionsFn;
-
-export type SsgoiConfig = {
-  transitions?: SsgoiTransitionsOption;
-  middleware?: (from: string, to: string) => { from: string; to: string };
-};
+  import("../runtime/types").TransitionsOption<AnyTransitionConfig>;
+export type SsgoiConfig =
+  import("../runtime/types").RouteConfig<AnyTransitionConfig>;
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Dispatcher output — what the framework adapter consumes

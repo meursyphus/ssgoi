@@ -9,14 +9,10 @@ export interface SlideOptions {
   physics?: PhysicsOptions;
 }
 
-// ease-out (Material decelerated): horizontal page push, incoming page settles in.
-// 170/22 mirrors drill character; doubleSpring 0.8 softens both ends, ~330ms total.
-const DEFAULT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 170, damping: 22, doubleSpring: 0.8 },
-};
+import { SLIDE_PHYSICS, pageMotionStyle } from "../../runtime/page-motion";
 
 export const slide = (options: SlideOptions = {}): TransitionConfig => {
-  const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
+  const physicsOptions: PhysicsOptions = options.physics ?? SLIDE_PHYSICS;
 
   return {
     prepare: ({ from, to, context }) => {
@@ -39,12 +35,12 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
       return {};
     },
     animation: ({ from, to, context }) => {
-      const isLeft = context.direction === "forward";
       const outAnim = new WebAnimation({
         element: from,
         integrator: IntegratorProvider.from(physicsOptions),
         style: (t) => {
-          const translateX = isLeft ? -100 * t : 100 * t;
+          const translateX =
+            100 * pageMotionStyle("slide", "out", context.direction, t).x;
           return { transform: `translate3d(${translateX}%, 0, 0)` };
         },
         // The outgoing node is the real Activity page and gets reused on the
@@ -63,8 +59,9 @@ export const slide = (options: SlideOptions = {}): TransitionConfig => {
       const inAnim = new WebAnimation({
         element: to,
         integrator: IntegratorProvider.from(physicsOptions),
-        style: (_t, u) => {
-          const translateX = isLeft ? u * 100 : u * -100;
+        style: (t) => {
+          const translateX =
+            100 * pageMotionStyle("slide", "in", context.direction, t).x;
           return { transform: `translate3d(${translateX}%, 0, 0)` };
         },
         onComplete: () => {
