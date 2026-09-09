@@ -294,6 +294,34 @@ describe.each([true, false])(
 );
 
 describe("history observation lifetime", () => {
+  it("records the winning slide even when Navigation API entries lag behind History API commits", () => {
+    const target = browser(true);
+    const nativeEntry = { ...target.navigation!.currentEntry! };
+    Object.defineProperty(target.navigation, "currentEntry", {
+      value: nativeEntry,
+    });
+    const transitions = resolver();
+    target.history.pushState({ __NA: true }, "", "/shops/one");
+    expect(transitions.select("/cart", "/shops/one")).toMatchObject({
+      transition: slide,
+    });
+    target.history.back();
+    expect(transitions.select("/shops/one", "/cart")).toMatchObject({
+      transition: slide,
+      direction: "backward",
+    });
+    target.history.forward();
+    expect(transitions.select("/cart", "/shops/one")).toMatchObject({
+      transition: slide,
+      direction: "forward",
+    });
+    target.history.pushState({}, "", "/cart");
+    expect(transitions.select("/shops/one", "/cart")).toMatchObject({
+      transition: parallax,
+      direction: "forward",
+    });
+  });
+
   it("does not touch the browser while constructing a render-time context", () => {
     const { history } = browser(false);
     const push = history.pushState;
@@ -303,13 +331,16 @@ describe("history observation lifetime", () => {
     transitions.dispose();
   });
 
-  it("uses native entry identities without patching history or its state", () => {
+  it("tracks History API commits even when a Navigation API is exposed", () => {
     const { history } = browser(true);
     const original = { ...history };
-    resolver();
+    const transitions = resolver();
+    expect(history.pushState).not.toBe(original.pushState);
+    expect(history.replaceState).not.toBe(original.replaceState);
+    expect(history.state).toMatchObject({ __NA: true, tree: "owned" });
+    transitions.dispose();
     expect(history.pushState).toBe(original.pushState);
     expect(history.replaceState).toBe(original.replaceState);
-    expect(history.replaceState).not.toHaveBeenCalled();
   });
 
   it("shares legacy wrappers, preserves router fields and cleans up the last subscriber", () => {

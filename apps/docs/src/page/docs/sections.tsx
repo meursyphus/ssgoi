@@ -697,9 +697,10 @@ export function CompatibilityBody() {
       <p className={`mt-3 ${measure} ${prose}`}>
         SSGOI watches the route boundary your framework already mounts and
         unmounts. It reads browser history entry identities to remember each
-        visit&apos;s effect. Where the Navigation API is unavailable, it wraps
-        pushState/replaceState to retain a namespaced entry marker alongside
-        existing router state. Your router still owns URLs and navigation.
+        visit&apos;s effect. It wraps pushState/replaceState to retain a
+        namespaced entry marker alongside existing router state, even when
+        native entry information arrives late. Your router still owns URLs and
+        navigation.
       </p>
 
       <div className="mt-8">

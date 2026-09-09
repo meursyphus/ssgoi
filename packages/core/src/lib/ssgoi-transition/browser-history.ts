@@ -25,23 +25,10 @@ export function connectBrowserHistory(): BrowserHistory {
   if (typeof window === "undefined") return emptyHistory;
   const navigation = (window as Window & { navigation?: NavigationPort })
     .navigation;
-  if (navigation?.currentEntry?.key && navigation.currentEntry.index >= 0) {
-    return {
-      read: () => snapshot(navigation.currentEntry),
-      previous: () => {
-        const index = navigation.currentEntry?.index;
-        return snapshot(
-          navigation.entries().find((e) => e.index === (index ?? 0) - 1),
-        );
-      },
-      dispose() {},
-    };
-  }
-
   const target = window;
   let shared = histories.get(target);
   if (!shared) {
-    shared = createLegacyHistory(target);
+    shared = createTrackedHistory(target, navigation);
     histories.set(target, shared);
   }
   shared.users++;
@@ -79,8 +66,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   );
 }
 
-/** Older browsers have no entry keys. Add only our namespaced state field. */
-function createLegacyHistory(target: Window): SharedHistory {
+/**
+ * History API commits are authoritative, including when a browser exposes a
+ * Navigation API whose currentEntry has not caught up. Merely detecting that
+ * API is insufficient: a push can otherwise look like replace and lose the
+ * selected entry effect. Keep one marker alongside the router's own state.
+ */
+function createTrackedHistory(
+  target: Window,
+  navigation?: NavigationPort,
+): SharedHistory {
   const history = target.history;
   const push = history.pushState;
   const replace = history.replaceState;
@@ -88,6 +83,13 @@ function createLegacyHistory(target: Window): SharedHistory {
   let serial = 0;
   let active = true;
   let previous: HistoryEntry | null = null;
+  let previousForKey: string | null = null;
+  const readNative = () => {
+    const entry = snapshot(navigation?.currentEntry);
+    // An opaque History state cannot carry our marker. Use native identity
+    // only if it describes the committed URL, never a stale previous page.
+    return entry?.url === target.location.href ? entry : null;
+  };
   const read = (): HistoryEntry | null => {
     const state: unknown = history.state;
     const stamp = isRecord(state) ? state[STATE_KEY] : null;
@@ -97,7 +99,7 @@ function createLegacyHistory(target: Window): SharedHistory {
       !stamp.key.startsWith(prefix) ||
       !Number.isSafeInteger(stamp.index)
     )
-      return null;
+      return readNative();
     return {
       key: stamp.key,
       index: stamp.index as number,
@@ -112,10 +114,14 @@ function createLegacyHistory(target: Window): SharedHistory {
   const fresh = (index: number) => ({ key: `${prefix}${++serial}`, index });
 
   try {
-    replace.call(history, stamp(history.state, fresh(0)), "");
+    replace.call(
+      history,
+      stamp(history.state, fresh(readNative()?.index ?? 0)),
+      "",
+    );
   } catch {
     // A sandbox may deny history writes. Keep route matching available.
-    return { ...emptyHistory, users: 0 };
+    return { ...emptyHistory, read: readNative, users: 0 };
   }
 
   const wrappedPush: History["pushState"] = function (
@@ -129,6 +135,7 @@ function createLegacyHistory(target: Window): SharedHistory {
     const next = fresh((from?.index ?? 0) + 1);
     push.call(this, stamp(data, next), unused, url);
     previous = from;
+    previousForKey = read()?.key ?? null;
   };
   const wrappedReplace: History["replaceState"] = function (
     this: History,
@@ -146,7 +153,15 @@ function createLegacyHistory(target: Window): SharedHistory {
   return {
     users: 0,
     read,
-    previous: () => previous,
+    previous: () => {
+      if (read()?.key === previousForKey) return previous;
+      const entry = readNative();
+      return entry
+        ? snapshot(
+            navigation?.entries().find((e) => e.index === entry.index - 1),
+          )
+        : null;
+    },
     dispose() {
       active = false;
       if (history.pushState === wrappedPush) history.pushState = push;

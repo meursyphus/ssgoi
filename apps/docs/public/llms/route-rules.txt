@@ -25,10 +25,12 @@ direct pair use current matching. The last 100 entry effects are retained in
 memory, without page DOM or animation instances. Pushing after Back discards
 the old forward branch. The portable native rule matcher is unchanged.
 
-Entry identity comes from the Navigation API where available. Older browsers
-use an `__ssgoi_entry_v1` field in null/plain-object history.state while keeping
-router fields. Primitive/array state is not reshaped and cannot support recorded
-replay there. Observation starts on boundary registration and is released when
+History API commits carry an `__ssgoi_entry_v1` field in null/plain-object
+history.state while keeping router fields. This is authoritative even when a
+browser exposes a Navigation API whose entries lag behind pushState. Native
+entry identity is a fallback for opaque state only when its URL matches the
+committed location. Primitive/array state is never reshaped; without reliable
+native entry identity it cannot support replay. Observation starts on boundary registration and is released when
 the root observer disconnects; manual integrations can call context.disconnect().
 
 ## `on` and `except`
