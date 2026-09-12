@@ -64,7 +64,12 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
             <Link href="/docs/boundaries" className={link}>
               Route boundaries
             </Link>{" "}
-            apply here unchanged.
+            explain the shared behavior. For persistent headers, tabs, or
+            intercepted backgrounds, continue to{" "}
+            <Link href="/docs/nested-boundaries" className={link}>
+              Nested boundaries
+            </Link>
+            ; its routing examples use Next.js.
           </>
         )}
       </p>

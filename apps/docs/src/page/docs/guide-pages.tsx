@@ -354,10 +354,9 @@ export function BoundariesBody() {
       />
 
       <p className={`mt-6 ${body}`}>
-        Next.js, React Router, TanStack Router, SvelteKit and Nuxt have optional
-        router entries that own this wrapper. The SolidStart template wires its
-        wrapper locally; in Qwik and Angular you put the key and the attribute
-        on the routed page root itself —{" "}
+        Next.js, React Router, TanStack Router, SvelteKit, Nuxt and SolidStart
+        have optional router entries that own this wrapper. In Qwik and Angular
+        you put the key and the attribute on the routed page root itself —{" "}
         <Link href="/docs/frameworks" className={link}>
           Frameworks
         </Link>{" "}

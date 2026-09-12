@@ -129,7 +129,7 @@ export function InstallBody() {
       </div>
 
       <Section
-        title="Set it up"
+        title="Next.js App Router setup"
         lead="One provider file, plus one edit to your layout. The route boundary is included."
       >
         <Steps>
@@ -217,7 +217,7 @@ const config = {
             />
             <p className={`mt-4 ${measure} ${prose}`}>
               Next.js is an optional peer, loaded only by this subpath. If the
-              wrong part of the screen moves, the boundary key that decides —{" "}
+              wrong part of the screen moves, adjust the boundary lifetime —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
               </Link>{" "}
