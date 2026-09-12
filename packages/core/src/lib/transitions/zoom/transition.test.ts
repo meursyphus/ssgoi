@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { buildInput, resolveZoom } from "./transition";
-import type { ZoomResolved } from "./types";
+import { buildInput, resolveZoom, zoom } from "./transition";
+import type { ZoomResolved, ZoomType } from "./types";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 
 type Rect = {
@@ -108,6 +108,7 @@ function wrapper({
 
 function page(width = 400, height = 800): HTMLElement {
   return {
+    style: style(),
     offsetWidth: width,
     offsetHeight: height,
     getBoundingClientRect: () => rect(0, 0, width, height),
@@ -272,3 +273,58 @@ describe("zoom semantic direction", () => {
     ).toEqual({ mode: "exit", enterEl: enter, exitEl: exit });
   });
 });
+
+function previewTransition(type: ZoomType = "static") {
+  const pair = resolvedPair({
+    enterAttributes: { "data-zoom-enter-key": "photo" },
+    exitAttributes: { "data-zoom-exit-key": "photo" },
+  });
+  pair.exitEl.style.opacity = "0.8";
+  const other = image({ box: rect(130, 30, 100, 100), fit: "cover" });
+  other.style.opacity = "1";
+  const list = Object.assign(page(), keyedPage([], [pair.exitEl, other]));
+  const detail = Object.assign(page(), keyedPage([pair.enterEl]));
+  const config = zoom({ type, variant: "default" });
+  return {
+    preview: pair.exitEl,
+    other,
+    create(direction: "forward" | "backward") {
+      return config.animation({
+        from: direction === "forward" ? list : detail,
+        to: direction === "forward" ? detail : list,
+        context: { direction, scrollOffset: { x: 0, y: 0 } } as Parameters<
+          typeof config.animation
+        >[0]["context"],
+      });
+    },
+  };
+}
+
+describe.each<ZoomType>(["static", "expand", "blur"])(
+  "zoom %s preview compositing",
+  (type) => {
+    it.each(["forward", "backward"] as const)(
+      "paints the shared visual only once on %s and restores the original opacity",
+      (direction) => {
+        const { preview, other, create } = previewTransition(type);
+        const animation = create(direction);
+        expect(preview.style.opacity).toBe("0");
+        expect(other.style.opacity).toBe("1");
+        expect(preview.getBoundingClientRect()).toEqual(rect(20, 30, 100, 100));
+        animation.complete();
+        expect(preview.style.opacity).toBe("0.8");
+        expect(other.style.opacity).toBe("1");
+      },
+    );
+
+    it("keeps a reused preview hidden when a new navigation interrupts the previous run", () => {
+      const { preview, create } = previewTransition(type);
+      const outgoing = create("forward");
+      const incoming = create("backward");
+      outgoing.complete();
+      expect(preview.style.opacity).toBe("0");
+      incoming.complete();
+      expect(preview.style.opacity).toBe("0.8");
+    });
+  },
+);

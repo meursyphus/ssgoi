@@ -180,6 +180,33 @@ export function buildInput(
  * the same element it animates.
  * ──────────────────────────────────────────────────────────────────────────── */
 
+const hiddenPreviews = new WeakMap<
+  HTMLElement,
+  { opacity: string; users: number }
+>();
+
+function hidePreview(preview: HTMLElement): () => void {
+  const state = hiddenPreviews.get(preview) ?? {
+    opacity: preview.style.opacity,
+    users: 0,
+  };
+  state.users++;
+  hiddenPreviews.set(preview, state);
+  preview.style.opacity = "0";
+
+  // A replacement transition is created before the previous run completes.
+  // Share the original opacity so that old cleanup neither reveals a preview
+  // still in use nor leaves a reused/cached card permanently transparent.
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--state.users > 0) return;
+    if (preview.style.opacity === "0") preview.style.opacity = state.opacity;
+    hiddenPreviews.delete(preview);
+  };
+}
+
 class TileStrategy implements ZoomStrategy {
   prepare(ctx: ZoomPrepareCtx): void {
     // Outgoing styling that doesn't depend on rect math. Applied as soon as
@@ -200,6 +227,11 @@ class TileStrategy implements ZoomStrategy {
     const tileConfig = isEnter ? createZoomIn(input) : createZoomOut(input);
     const tileEl = isEnter ? to : from;
     const feedDir: "t" | "u" = isEnter ? "t" : "u";
+
+    // Only the moving tile should paint the shared visual. Otherwise its
+    // antialiased rounded edge composites over the identical preview edge,
+    // making the final corner look fuller despite matching radius geometry.
+    onComplete(hidePreview(resolved.exitEl));
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
