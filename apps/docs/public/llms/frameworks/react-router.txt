@@ -49,21 +49,6 @@ Boundary — pathname as both React key and transition id, wired once with a
 pathless layout route:
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
-: {
-  children: ReactNode;
-  name?: BoundaryName;
-}) {
-  const { pathname } = useLocation();
-  const boundary = resolveBoundary(name, pathname);
-
-  return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-      {children}
-    </div>
-  );
-}
-
 // app/routes/page-boundary.layout.tsx
 import { Outlet } from "react-router";
 import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";

@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,10 +19,8 @@ export function MobileDetailShell({
   className?: string;
 }) {
   return (
-    <SsgoiTransitionBoundary
-      className={cn("h-full min-h-full bg-white", className)}
-    >
+    <SsgoiRouteBoundary className={cn("h-full min-h-full bg-white", className)}>
       {children}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

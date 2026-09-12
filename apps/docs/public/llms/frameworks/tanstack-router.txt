@@ -49,26 +49,8 @@ export const Route = createRootRoute({
 });
 ```
 
-Boundary — pathname (from router state) as both React key and transition id:
-
-```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
-: {
-  children: ReactNode;
-  name?: BoundaryName;
-}) {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-  const boundary = resolveBoundary(name, pathname);
-
-  return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-      {children}
-    </div>
-  );
-}
-```
+The imported boundary uses the committed pathname as both its React key and
+transition id. No local router hook or boundary component is needed.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 

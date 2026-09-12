@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,19 +28,19 @@ export function MobileTabsShell({
   contentClassName?: string;
 }) {
   return (
-    <SsgoiTransitionBoundary
-      scope={() => "mobile-tabs-shell"}
+    <SsgoiRouteBoundary
+      routeKey="mobile-tabs-shell"
       className={cn("relative flex min-h-full flex-col bg-white", className)}
     >
       {topBar}
       <div className="relative z-0 flex-1">
-        <SsgoiTransitionBoundary
+        <SsgoiRouteBoundary
           className={cn("min-h-full bg-white", contentClassName)}
         >
           {children}
-        </SsgoiTransitionBoundary>
+        </SsgoiRouteBoundary>
       </div>
       {nav}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

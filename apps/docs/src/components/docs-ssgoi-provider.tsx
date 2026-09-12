@@ -6,7 +6,7 @@ import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { HostAnimation } from "@ssgoi/core/internal";
 import { HostContext } from "@/lib/components/host-context";
 import { useShowcaseFrameBridge } from "@/lib/hooks";
-import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 const config: SsgoiConfig = {
   transitions: [],
@@ -22,9 +22,9 @@ function DocsRouteBoundary({ children }: { children: ReactNode }) {
   if (!isShowcaseRoute) return <>{children}</>;
 
   return (
-    <SsgoiTransitionBoundary className="min-h-dvh bg-black">
+    <SsgoiRouteBoundary className="min-h-dvh bg-black">
       {children}
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }
 

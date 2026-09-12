@@ -8,7 +8,7 @@ import { DetailStats } from "./stats";
 import { PerksCard } from "./perks-card";
 import { AmenitiesGrid } from "./amenities-grid";
 import { BookingBar } from "./booking-bar";
-import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 export default function ListingDetailPage({
   initialData,
 }: {
@@ -21,7 +21,7 @@ export default function ListingDetailPage({
   listing.actions.init(initialData);
   const detail = listing.current ?? initialData;
   return (
-    <SsgoiTransitionBoundary className="relative block min-h-full w-full bg-white">
+    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
       <DetailHero detail={detail} />
       <DetailHeader />
       <div className="relative -mt-6 rounded-t-3xl bg-white px-5 pt-5 pb-6">
@@ -31,6 +31,6 @@ export default function ListingDetailPage({
         <AmenitiesGrid amenities={detail.amenities} />
       </div>
       <BookingBar detail={detail} />
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }
