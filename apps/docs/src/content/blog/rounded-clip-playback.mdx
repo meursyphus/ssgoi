@@ -1,51 +1,179 @@
 ---
-title: "Case study: rounded clips that change when you press pause"
-description: "A rounded image looked correct when paused but less rounded during playback. A small reproduction exposed a high-DPI rendering edge case."
+title: "Why rounded clips change shape when you press pause"
+description: "A Chromium rendering-path discrepancy made pixel radii smaller during playback. How clip masks, coordinate systems, and percentage geometry explain the workaround."
 date: "2026-09-12"
 author: "MeurSyphus"
 tags: ["css", "clip-path", "animation", "debugging", "edge cases"]
 ---
 
-While testing the Airbnb demo's backward Zoom transition, we noticed that the moving image looked less rounded than its destination card. Pausing the animation made the corners look correct again.
+The failure was a **disagreement between Chromium's composited clip rendering and its ordinary clip rendering for pixel-valued geometry**. Our animation could request the correct radius and still paint smaller corners while running. Pausing made the corners look correct again.
 
-Checking the final radius was not enough. The geometry could be correct while the running animation painted a different shape.
+We isolated it on Chromium 152 on macOS at device pixel ratio 2. Keeping the animation running but forcing the clip out of the composited path also restored the expected shape. Expressing the same geometry in percentages fixed it without forcing that fallback.
 
-## Where it happened
+The rendering-path discrepancy is confirmed by that experiment. A mismatch in the conversion of absolute lengths into mask coordinates is the explanation consistent with the results; we have not identified the exact faulty Chromium operation or the full affected version range. The distinction matters: the workaround is verified, while a claim such as “Chromium divides this radius by DPR twice” would go beyond our evidence.
 
-We reproduced the discrepancy on **Chromium 152 on macOS, with a device pixel ratio of 2**, using the Web Animations API to animate `transform: scale(...)` and a rounded `clip-path: inset(...)` on the same element. The rounded clip used pixel-valued radii.
+## Why playing and pausing can paint different pixels
 
-That is the confirmed environment for this case; we have not established the full affected browser or version range.
+An animation's computed CSS value is an input to rendering, not a measurement of the pixels already painted. Chromium has separate machinery for ordinary clipping and eligible composited clip animations.
 
-## The comparison that exposed it
+In the [ordinary clip implementation](https://chromium.googlesource.com/chromium/src/+/2aa685dcadc3d5c97d946061031b7efe2217e41f/third_party/blink/renderer/core/paint/clip_path_clipper.cc), `PathBasedClipInternal` obtains a geometric path from the computed shape and reference box. `PathBasedClip` declines that route when a composited clip animation is active.
 
-We put a static reference beside two animations at effectively the same pose. A tiny oscillation kept the animations running without a visible change in size or radius.
+The [composited implementation](https://chromium.googlesource.com/chromium/src/+/2aa685dcadc3d5c97d946061031b7efe2217e41f/third_party/blink/renderer/modules/csspaint/nativepaint/clip_path_paint_definition.cc) instead extracts shapes from keyframes, constructs Skia paths, interpolates them at the animation's progress, and paints a mask through a paint worklet. These are different implementations of the same intended geometry:
 
-| Rendering state   | Pixel-valued radius     | Equivalent percentage radius |
-| ----------------- | ----------------------- | ---------------------------- |
-| Static            | Expected corners        | Expected corners             |
-| Paused animation  | Expected corners        | Expected corners             |
-| Running animation | Visibly smaller corners | Expected corners             |
+```text
+Ordinary clip:
+computed shape + reference box → geometric clip
 
-The computed values agreed, but the running pixel clip looked different. Pausing removed the discrepancy. Our earlier checks had frozen the animation before inspecting it, which hid the condition we needed to test.
+Composited animation:
+keyframes → shapes → paths → interpolated path → painted clip mask
+```
 
-## The workaround
+Those pinned sources establish the architecture; they are not a debugger trace of the exact browser binary we tested.
 
-SSGOI now expresses the clip's insets and elliptical radii as percentages of the **full clipping element's border box**. The denominator is the page or clone being clipped, not the smaller visible photo window.
+To isolate the path difference, our fixture adds `will-change: contents` to one copy of the pixel-based animation. Chromium's [clip fallback check](https://chromium.googlesource.com/chromium/src/+/2aa685dcadc3d5c97d946061031b7efe2217e41f/third_party/blink/renderer/core/paint/clip_path_clipper.cc) explicitly excludes that case from composited clipping. The copy keeps playing, with the same scale and radius, but its corners become correct.
 
-For a 400×900 element, these describe approximately the same clip:
+| Comparison                                | Observed corners |
+| ----------------------------------------- | ---------------- |
+| Static pixel clip                         | Correct          |
+| Paused pixel animation                    | Correct          |
+| Running pixel animation                   | Smaller          |
+| Running pixel animation with the fallback | Correct          |
+| Running percentage animation              | Correct          |
+
+This explains why inspecting only paused frames missed the bug. It also separates the issue from the radius interpolation: changing the rendering route fixed the shape without changing the requested radius.
+
+## The coordinate-system problem
+
+There are three quantities to keep separate:
+
+- **Local CSS geometry:** the element's dimensions, insets, and radius before its transform.
+- **Visible CSS geometry:** what remains after `scaleX` and `scaleY` shrink or enlarge that element.
+- **Mask raster coordinates:** the coordinates used to paint the clipping mask, which must stay consistent with the box it clips.
+
+Suppose a page is scaled to `0.4` and the visible corner should be `16px`. Its local clip radius must be `40px`:
+
+```text
+local radius × element scale = visible radius
+40px × 0.4 = 16px
+```
+
+Now consider a simplified rasterization model in which the mask uses two physical pixels per CSS pixel. Its box and its absolute radius both need the same conversion. A local `40px` radius would become 80 mask pixels before the element's scale is applied.
+
+If the box gets that conversion but the radius remains numerically 40, the radius becomes too small relative to the box. Mapping it back and applying the transform would produce:
+
+```text
+Correct: 80 mask pixels ÷ 2 × 0.4 = 16 CSS pixels
+Mismatch: 40 mask pixels ÷ 2 × 0.4 = 8 CSS pixels
+```
+
+That is an illustration of the kind of coordinate mismatch our results indicate, not a proven account of the exact internal factor that failed. Changing the application's intended radius would conceal the symptom in one rendering state and make another state wrong.
+
+## Why percentages avoid that mismatch
+
+An absolute `40px` length and a relative `10%` length describe the same horizontal radius on a 400px-wide reference box, but they carry different information into shape construction.
+
+The absolute value needs the correct length conversion. The percentage can be resolved from the reference box already used by the shape. [CSS Shapes defines percentage lengths against that reference box](https://www.w3.org/TR/css-shapes-1/#basic-shape-functions), and Chromium's [inset path construction](https://chromium.googlesource.com/chromium/src/+/2aa685dcadc3d5c97d946061031b7efe2217e41f/third_party/blink/renderer/core/style/basic_shapes.cc) resolves corner sizes using the supplied box dimensions.
+
+For any common scale factor `k`, the ratio stays attached to the box:
+
+```text
+percentage = radius / boxWidth
+resolved radius = percentage × (k × boxWidth)
+                = k × radius
+```
+
+That relationship is why normalizing the geometry is useful here. In our reproduction, the relative representation stays consistent across both rendering paths.
+
+Percentages do not mean that we should multiply by `window.devicePixelRatio` ourselves. Pixel density belongs to the browser's rendering conversion. Hard-coding an extra factor would change the intended geometry and can break the correct paused state.
+
+## Step 1: compensate for the element's current scale
+
+Before formatting CSS, SSGOI calculates the radius the user should see at the current transition progress. For one corner, the following combines the logic from [Zoom's radius interpolation](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/src/lib/transitions/zoom/zoom-element.ts):
+
+```ts
+// u = 1 at the thumbnail; u = 0 at the full detail page.
+const sx = 1 + (scaleX - 1) * u;
+const sy = 1 + (scaleY - 1) * u;
+const visibleRadius = Math.max(0, exitRadius * u + enterRadius * (1 - u));
+
+const epsilon = 0.000001;
+const rx = visibleRadius / Math.max(Math.abs(sx), epsilon);
+const ry = visibleRadius / Math.max(Math.abs(sy), epsilon);
+```
+
+`scaleX` and `scaleY` are the thumbnail-to-detail size ratios. `sx` and `sy` are the interpolated scales for this frame. Dividing by them gives the local radii that will become the requested visible radius after the transform. The epsilon prevents division by zero.
+
+The axes are independent. If the page is scaled by `0.5` horizontally and `0.25` vertically, a visible 16px circular corner needs local radii of 32px and 64px. Using one uncorrected local radius would produce an ellipse on screen.
+
+This calculation was already present. The playback fix changes how its result is serialized, not the interpolation policy.
+
+## Step 2: normalize every clip length against the full element
+
+This is the [shared serializer used by Zoom and Hero](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/src/lib/transitions/inset-clip.ts):
+
+```ts
+export function insetClipPath(
+  box: { width: number; height: number },
+  insets: MediaInsets,
+  radii: readonly { x: number; y: number }[],
+): string {
+  const percent = (value: number, size: number): string =>
+    `${size > 0 ? (value / size) * 100 : 0}%`;
+  const offsets = [
+    percent(insets.top, box.height),
+    percent(insets.right, box.width),
+    percent(insets.bottom, box.height),
+    percent(insets.left, box.width),
+  ].join(" ");
+  const rx = radii.map((radius) => percent(radius.x, box.width)).join(" ");
+  const ry = radii.map((radius) => percent(radius.y, box.height)).join(" ");
+  return `inset(${offsets} round ${rx} / ${ry})`;
+}
+```
+
+Each part has a specific job:
+
+- `percent` changes the unit while preserving the ratio. The zero-size guard avoids emitting `NaN` or infinity.
+- Top and bottom insets use the element's height; left and right use its width. Their order remains CSS's top, right, bottom, left order.
+- Horizontal radii use width and vertical radii use height. The `/` separates those two radius lists.
+- A single radius pair describes uniform corners. Four pairs preserve top-left, top-right, bottom-right, and bottom-left separately, including corners removed by ancestor clipping.
+
+The `box` is the **full border box of the element receiving `clip-path`**. Zoom supplies the detail page's dimensions. Hero supplies the dimensions of its temporary media clone. It is not the thumbnail's box or the visible area left after applying the insets.
+
+## Step 3: check the numbers on a tall page
+
+Take a 400×900 page, expose its top 400×400 image, and use local radii of 40px on both axes:
+
+```ts
+insetClipPath(
+  { width: 400, height: 900 },
+  { top: 0, right: 0, bottom: 500, left: 0 },
+  [{ x: 40, y: 40 }],
+);
+```
+
+The conversion is:
+
+```text
+bottom inset: 500 / 900 × 100 = 55.5556%
+horizontal radius: 40 / 400 × 100 = 10%
+vertical radius: 40 / 900 × 100 = 4.4444%
+```
+
+Rounded for readability, the result is:
 
 ```css
-/* Pixel radius */
-clip-path: inset(0% 0% 55.5556% 0% round 40px);
-
-/* Equivalent percentages: 40 / 400 and 40 / 900 */
 clip-path: inset(0% 0% 55.5556% 0% round 10% / 4.4444%);
 ```
 
-Scale compensation still comes first: divide the desired visible radius by the current X/Y scale, then convert those lengths to percentages. This changes the CSS representation without increasing the intended radius or changing its interpolation.
+At `scale(0.4)`, both visible radii remain 16px. The different percentages do not make the corner elliptical: they multiply different reference dimensions to recover the same local 40px length.
 
-The [shared serializer](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/src/lib/transitions/inset-clip.ts) is used by both Zoom and Hero. In the reproduction, the percentage clip stays consistent during playback and after pausing.
+Using the cropped image's 400px height as the vertical denominator would be wrong. It would emit `10%` vertically, which the browser resolves against the full 900px page: a 90px local radius rather than 40px.
 
-The [browser fixture](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/tests/browser/rounded-clip.html) is included in the repository. Run `pnpm --filter @ssgoi/core dev`, open `/tests/browser/rounded-clip.html` on the printed Vite URL, and toggle Pause/Resume on a high-DPI display.
+## Reproduce the distinction, not just the endpoints
 
-For animation edge cases, compare **static, paused, and running** states in the browser and display environment where the problem occurs. A correct paused screenshot does not establish that live playback is correct.
+The [browser fixture](https://github.com/meursyphus/ssgoi/blob/88091101c039b7789a38bea402316d41a7b56a2a/packages/core/tests/browser/rounded-clip.html) contains the static reference, running pixel clip, running percentage clip, and running pixel clip with the compositor fallback.
+
+Run `pnpm --filter @ssgoi/core dev`, then open `/tests/browser/rounded-clip.html` on the printed Vite URL. The animations oscillate by only 0.002% around the same pose, so the renderer stays active without a visible geometry change. Toggle Pause/Resume and compare the corners on the display where the problem occurs.
+
+Our unit tests verify the percentage conversion and the visible radius through intermediate frames, including unequal X/Y scales and a tall page. The live browser comparison covers what those tests cannot: whether the running renderer paints the geometry they calculated. `will-change: contents` remains a diagnostic comparison; the library uses percentage clips rather than requiring that fallback.
