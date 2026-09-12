@@ -1,5 +1,5 @@
 import type { TransitionConfig } from "@types";
-import { getRect } from "@utils";
+import { getClientRect } from "@utils";
 import {
   Animation,
   IntegratorProvider,
@@ -17,6 +17,7 @@ import {
   type MediaFit,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { insetClipPath } from "../inset-clip";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
@@ -50,18 +51,26 @@ function getHeroRect(
   container: HTMLElement,
   el: HTMLElement,
   fit: MediaFit,
+  clipRoot: HTMLElement,
 ): MediaGeometry {
-  const bbox = getRect(container, el);
-  return resolveElementMediaGeometry(
-    el,
-    bbox,
-    (mediaEl) => getRect(container, mediaEl),
-    {
-      fallbackFit: fit,
-      legacyAspectRatioAttribute: LEGACY_HERO_ASPECT_KEY,
-      legacyRadiusAttribute: LEGACY_HERO_RADIUS_KEY,
-    },
-  );
+  const measure = (target: HTMLElement) => {
+    const rect = getClientRect(container, target);
+    // The clone is absolutely positioned inside this container. Restore its
+    // own scroll offset after measuring nested transforms / scrolling.
+    return {
+      left: rect.left + container.scrollLeft,
+      top: rect.top + container.scrollTop,
+      width: rect.width,
+      height: rect.height,
+    };
+  };
+  const bbox = measure(el);
+  return resolveElementMediaGeometry(el, bbox, measure, {
+    clipRoot,
+    fallbackFit: fit,
+    legacyAspectRatioAttribute: LEGACY_HERO_ASPECT_KEY,
+    legacyRadiusAttribute: LEGACY_HERO_RADIUS_KEY,
+  });
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -207,15 +216,17 @@ export function shouldResetHeroCloneRadius(
   );
 }
 
-function buildHeroMorphPlan(
+export function buildHeroMorphPlan(
   root: HTMLElement,
   pair: HeroPair,
   maxDistance: number,
+  fromPage: HTMLElement,
+  toPage: HTMLElement,
 ): HeroMorphPlan | null {
   const { fromEl, toEl } = pair;
   const [fromHero, toHero] = normalizeHeroGeometryPair(
-    getHeroRect(root, fromEl, pair.fromFit),
-    getHeroRect(root, toEl, pair.toFit),
+    getHeroRect(root, fromEl, pair.fromFit, fromPage),
+    getHeroRect(root, toEl, pair.toFit, toPage),
   );
   const fromContent = fromHero.content;
   const fromWindow = fromHero.window;
@@ -273,17 +284,42 @@ function buildHeroMorphPlan(
       const tx = u * dx;
       const ty = u * dy;
       const s = t + u * sMax;
-      const visibleRadius = Math.max(0, fromRadius * u + toRadius * t);
       // clip-path is resolved before transform; divide by the current scale
       // so the on-screen corner radius matches the visible hero window.
-      const clipRadius = visibleRadius / Math.max(Math.abs(s), 0.000001);
+      const fromCorners = fromHero.cornerRadii ?? [
+        fromRadius,
+        fromRadius,
+        fromRadius,
+        fromRadius,
+      ];
+      const toCorners = toHero.cornerRadii ?? [
+        toRadius,
+        toRadius,
+        toRadius,
+        toRadius,
+      ];
+      const radii = fromCorners.map((corner, i) => {
+        const radius =
+          Math.max(0, corner * u + toCorners[i]! * t) /
+          Math.max(Math.abs(s), 0.000001);
+        return { x: radius, y: radius };
+      });
       const insetT = fromClipInset.top * u + toClipInset.top * t;
       const insetR = fromClipInset.right * u + toClipInset.right * t;
       const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
       const insetL = fromClipInset.left * u + toClipInset.left * t;
       return {
         transform: `translate(${tx}px, ${ty}px) scale(${s})`,
-        clipPath: `inset(${insetT}px ${insetR}px ${insetB}px ${insetL}px round ${clipRadius}px)`,
+        clipPath: insetClipPath(
+          toContent,
+          {
+            top: insetT,
+            right: insetR,
+            bottom: insetB,
+            left: insetL,
+          },
+          radii,
+        ),
       };
     },
   };
@@ -310,7 +346,13 @@ class HeroTileStrategy implements HeroStrategy {
     const animations: Animation[] = [];
 
     for (const pair of resolved.pairs) {
-      const morph = buildHeroMorphPlan(positionedParent, pair, maxDistance);
+      const morph = buildHeroMorphPlan(
+        positionedParent,
+        pair,
+        maxDistance,
+        ctx.from,
+        ctx.to,
+      );
       if (!morph) continue;
       const { fromVisualEl, toVisualEl } = morph;
 

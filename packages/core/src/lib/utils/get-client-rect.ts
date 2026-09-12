@@ -26,8 +26,13 @@
 export function getClientRect(root: HTMLElement, el: HTMLElement): DOMRect {
   const rootRect = root.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
-  const sx = root.offsetWidth > 0 ? rootRect.width / root.offsetWidth : 1;
-  const sy = root.offsetHeight > 0 ? rootRect.height / root.offsetHeight : 1;
+  // offset dimensions are rounded to integer CSS pixels. A fractional layout
+  // size is not a transform: treating it as scale distorts square image boxes
+  // and can make a projected crop fall outside its destination window.
+  const scale = (size: number, offset: number): number =>
+    offset > 0 && Math.abs(size - offset) > 0.5 ? size / offset : 1;
+  const sx = scale(rootRect.width, root.offsetWidth);
+  const sy = scale(rootRect.height, root.offsetHeight);
   return new DOMRect(
     (elRect.left - rootRect.left) / sx,
     (elRect.top - rootRect.top) / sy,

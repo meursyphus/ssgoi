@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Running rounded clip regression</title>
+  <style>
+    body {
+      font: 14px system-ui;
+      margin: 24px;
+      background: white;
+      color: #111;
+    }
+    h1 {
+      font-size: 22px;
+    }
+    button {
+      padding: 8px 14px;
+      margin: 8px 0;
+    }
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    section {
+      width: 176px;
+    }
+    h2 {
+      font-size: 16px;
+    }
+    .stage {
+      position: relative;
+      width: 176px;
+      height: 190px;
+      overflow: hidden;
+      background: #eee;
+    }
+    .tile {
+      position: absolute;
+      width: 400px;
+      height: 900px;
+      background: white;
+      transform-origin: 200px 200px;
+      will-change: transform, clip-path;
+    }
+    .photo {
+      width: 400px;
+      height: 400px;
+      background: #132f3c;
+    }
+    output {
+      display: block;
+      margin-top: 8px;
+    }
+    #environment {
+      font-size: 11px;
+    }
+  </style>
+  <h1>Running rounded clip regression</h1>
+  <p>
+    Run <code>pnpm --filter @ssgoi/core dev</code>, then open
+    <code>/tests/browser/rounded-clip.html</code> on a high-DPI display.
+  </p>
+  <p>
+    The percent animation must match the static reference while running and
+    paused. Chromium 152 at DPR 2 paints the legacy pixel radius smaller only
+    while running.
+  </p>
+  <p>
+    The animations move by just 0.002% around the same pose. The fallback
+    comparison adds will-change: contents, which disables Chromium's composited
+    clip-path path without pausing playback.
+  </p>
+  <button id="toggle">Pause animations</button>
+  <main></main>
+  <p id="environment"></p>
+  <script type="module">
+    import { insetClipPath } from "../../src/lib/transitions/inset-clip.ts";
+
+    const box = { width: 400, height: 900 };
+    const progress = 0.98;
+    const animations = [];
+    const outputs = [];
+    function pose(t, percent) {
+      const scale = 1 + (0.36 - 1) * t;
+      const radius = (16 * t) / scale;
+      return {
+        transform: `translate(${-128 * t}px, ${-128 * t}px) scale(${scale})`,
+        clipPath: percent
+          ? insetClipPath(box, { top: 0, right: 0, bottom: 500 * t, left: 0 }, [
+              { x: radius, y: radius },
+            ])
+          : `inset(0% 0% ${(500 / 900) * 100 * t}% 0% round ${radius}px / ${radius}px)`,
+      };
+    }
+    for (const name of [
+      "Static reference",
+      "Legacy pixel radius",
+      "Percent radius",
+      "Pixel radius (fallback)",
+    ]) {
+      const section = document.createElement("section");
+      section.innerHTML = `<h2>${name}</h2><div class="stage"><div class="tile"><div class="photo"></div></div></div><output></output>`;
+      document.querySelector("main").append(section);
+      const tile = section.querySelector(".tile");
+      if (name === "Static reference") {
+        Object.assign(tile.style, pose(progress, false));
+        section.querySelector("output").textContent =
+          "Static: 15.68px visible radius";
+      } else {
+        const percent = name === "Percent radius";
+        if (name === "Pixel radius (fallback)") {
+          tile.style.willChange = "contents";
+        }
+        animations.push(
+          tile.animate(
+            [
+              pose(progress - 0.00001, percent),
+              pose(progress + 0.00001, percent),
+            ],
+            {
+              duration: 2000,
+              iterations: Infinity,
+              direction: "alternate",
+              fill: "both",
+            },
+          ),
+        );
+        outputs.push(section.querySelector("output"));
+      }
+    }
+    const button = document.querySelector("#toggle");
+    button.onclick = () => {
+      const pause = animations[0].playState === "running";
+      for (const animation of animations)
+        pause ? animation.pause() : animation.play();
+      button.textContent = pause ? "Resume animations" : "Pause animations";
+    };
+    function renderState() {
+      outputs.forEach(
+        (output, i) =>
+          (output.textContent = `${animations[i].playState}: 15.68px expected radius`),
+      );
+      requestAnimationFrame(renderState);
+    }
+    document.querySelector("#environment").textContent =
+      `${navigator.userAgent}; DPR ${devicePixelRatio}`;
+    renderState();
+  </script>
+</html>
