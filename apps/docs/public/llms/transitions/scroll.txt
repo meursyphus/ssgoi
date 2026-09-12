@@ -36,3 +36,9 @@ const config = {
 
 This effect is separate from automatic browser scroll-position behavior:
 https://ssgoi.dev/llms/scroll-restoration.txt
+
+## Motion overrides
+
+Pass a second { override: { forward, backward } } argument to retune named
+animations before playback. Each callback receives { animation, context }.
+Names and scheduling: https://ssgoi.dev/llms/motion.txt

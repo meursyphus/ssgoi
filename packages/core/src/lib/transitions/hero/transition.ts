@@ -1,11 +1,11 @@
-import type { TransitionConfig } from "@types";
-import { getClientRect } from "@utils";
 import {
-  Animation,
-  IntegratorProvider,
-  MultiAnimation,
-  WebAnimation,
-} from "../../animation";
+  animationGroup,
+  type AnimationContributions,
+} from "../animation-group";
+import { defineTransition } from "../../transition/define-transition";
+import type { TransitionDirection } from "@types";
+import { getClientRect } from "@utils";
+import { Animation, IntegratorProvider, WebAnimation } from "../../animation";
 import {
   centerX,
   centerY,
@@ -21,6 +21,7 @@ import { insetClipPath } from "../inset-clip";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
+  HeroAnimationName,
   HeroContributeCtx,
   HeroPair,
   HeroPrepareCtx,
@@ -340,7 +341,9 @@ function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 class HeroTileStrategy implements HeroStrategy {
-  contribute(ctx: HeroContributeCtx): Animation[] {
+  contribute(
+    ctx: HeroContributeCtx,
+  ): AnimationContributions<HeroAnimationName> {
     const { resolved, physics, positionedParent, maxDistance, onComplete } =
       ctx;
     const animations: Animation[] = [];
@@ -395,7 +398,7 @@ class HeroTileStrategy implements HeroStrategy {
       );
     }
 
-    return animations;
+    return { shared: animations };
   }
 }
 
@@ -414,17 +417,15 @@ function heroStrategiesFor(opts: NormalizedHeroOptions): HeroStrategy[] {
  * symmetric for every type.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-type HeroExtras = { resolved: HeroResolved };
+type HeroExtras = { resolved: HeroResolved; strategies: HeroStrategy[] };
 
-export const hero = (
-  options: NormalizedHeroOptions,
-): TransitionConfig<HeroExtras> => {
-  const strategies = heroStrategiesFor(options);
+export const hero = (options: NormalizedHeroOptions) => {
   const physics = HERO_VARIANT_PROVIDERS[options.variant]();
   const maxDistance = DEFAULT_MAX_DISTANCE;
 
-  return {
+  const shared = {
     prepare: (args): Promise<HeroExtras> => {
+      const strategies = heroStrategiesFor(options);
       const resolved: Promise<HeroResolved> = Promise.all([
         args.from,
         args.to,
@@ -439,11 +440,11 @@ export const hero = (
         strategy.prepare?.(ctx);
       }
 
-      return resolved.then((r) => ({ resolved: r }));
+      return resolved.then((r) => ({ resolved: r, strategies }));
     },
-    animation: ({ from, to, context, resolved }) => {
+    animation: ({ from, to, context, resolved, strategies }) => {
       if (resolved.pairs.length === 0) {
-        return new MultiAnimation([], { mode: "parallel" });
+        return animationGroup({ shared: [], out: [], in: [] });
       }
 
       // Shared `onComplete` registry — strategies push restore callbacks
@@ -465,17 +466,20 @@ export const hero = (
         onComplete,
       };
 
-      const anims: Animation[] = [];
+      const groups: Record<HeroAnimationName, Animation[]> = {
+        shared: [],
+        out: [],
+        in: [],
+      };
       for (const strategy of strategies) {
-        if (!strategy.contribute) continue;
-        anims.push(...strategy.contribute(ctx));
+        const contribution = strategy.contribute?.(ctx);
+        if (!contribution) continue;
+        for (const name of Object.keys(groups) as HeroAnimationName[]) {
+          groups[name].push(...(contribution[name] ?? []));
+        }
       }
 
-      if (anims.length === 0) {
-        return new MultiAnimation([], { mode: "parallel" });
-      }
-
-      const composite = new MultiAnimation(anims, { mode: "parallel" });
+      const composite = animationGroup(groups);
       const prevOnComplete = composite.onComplete;
       composite.onComplete = () => {
         prevOnComplete?.();
@@ -491,5 +495,10 @@ export const hero = (
 
       return composite;
     },
-  };
+  } satisfies TransitionDirection<HeroExtras>;
+
+  return defineTransition({
+    forward: shared,
+    backward: shared,
+  });
 };

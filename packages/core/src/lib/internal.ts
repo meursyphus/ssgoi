@@ -6,6 +6,7 @@ export {
   MultiAnimation,
   HostAnimation,
 } from "./animation";
+export { simulate } from "./runtime/timeline";
 export type {
   SsgoiConfig,
   SsgoiContext,

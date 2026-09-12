@@ -1,0 +1,155 @@
+# Writing custom SSGOI web transitions
+
+Use defineTransition to register a pair of direction-specific lifecycles. Each
+contains optional prepare and required animation. A factory may return any
+Animation implementation; MultiAnimation is not required.
+
+Motion editing: https://ssgoi.dev/llms/motion.txt
+Website guide: https://ssgoi.dev/docs/custom-transitions
+Route direction: https://ssgoi.dev/llms/route-rules.txt
+
+## Definition and type inference
+
+```ts
+import { defineTransition, MultiAnimation, WebAnimation, spring } from "@ssgoi/core";
+
+const physics = spring({ stiffness: 300, damping: 30 });
+
+export const customFade = defineTransition({
+  forward: {
+    async prepare({ from, to }) {
+      const [outgoing, incoming] = await Promise.all([from, to]);
+      const saved = { out: outgoing.style.opacity, in: incoming.style.opacity };
+      incoming.style.opacity = "0";
+      return { saved };
+    },
+    animation({ from, to, saved }) {
+      const outgoing = new WebAnimation({
+        element: from,
+        integrator: physics,
+        style: (_t, u) => ({ opacity: u }),
+        onComplete() {
+          from.style.opacity = saved.out;
+          outgoing.releaseFill();
+        },
+      });
+      const incoming = new WebAnimation({
+        element: to,
+        integrator: physics,
+        style: (t) => ({ opacity: t }),
+        onComplete() {
+          to.style.opacity = saved.in;
+          incoming.releaseFill();
+        },
+      });
+      incoming.set({ startAt: { after: outgoing, at: 0.3 } });
+      return new MultiAnimation({ out: outgoing, in: incoming });
+    },
+  },
+  backward: {
+    async prepare({ from }) {
+      return { previousOpacity: (await from).style.opacity };
+    },
+    animation({ from, previousOpacity }) {
+      const animation = new WebAnimation({
+        element: from,
+        integrator: physics,
+        style: (_t, u) => ({ opacity: u }),
+        onComplete() {
+          from.style.opacity = previousOpacity;
+          animation.releaseFill();
+        },
+      });
+      return animation;
+    },
+  },
+});
+
+export const config = {
+  transitions: [{ from: "/gallery", to: "/photo/*", transition: customFade }],
+};
+```
+
+forward.animation receives the resolved forward.prepare result. The backward
+pair infers a separate prepared shape and return type. Here forward returns
+MultiAnimation<"out" | "in"> and backward returns WebAnimation. The named
+constructor infers its key union; an explicit MultiAnimation<"out" | "in">
+is also allowed. A bare MultiAnimation type defaults to string, so avoid
+widening a factory's inferred result before passing it to defineTransition.
+
+## Overriding a custom definition
+
+```ts
+import { withOverride, spring } from "@ssgoi/core";
+import { customFade } from "./custom-fade";
+
+export const tuned = withOverride(customFade, {
+  forward({ animation }) {
+    animation.select("in").set({ integrator: spring({ stiffness: 420, damping: 36 }) });
+  },
+  backward({ animation }) {
+    animation.set({ integrator: spring({ stiffness: 480, damping: 40 }) });
+  },
+});
+```
+
+withOverride returns a new reusable definition. It does not mutate the original.
+defineTransition also accepts a second { override } argument with the same
+callback shape. Built-in presets accept { type, variant, options } first and
+{ override } second.
+
+## Lifecycle and ownership
+
+1. The core resolves a route rule and authoritative context.direction.
+2. Only that direction's prepare runs. from and to are promises of the real
+   leaving and arriving page elements. Use from.then/to.then for early styles,
+   and return an object or Promise<object> for data needed by animation.
+3. The core waits for preparation, then inserts the outgoing page. Keep layout
+   measurements that need the inserted DOM in animation rather than prepare.
+4. The matching animation factory receives resolved from/to, the original
+   context, and that direction's prepared data. It returns a fresh Animation.
+5. The matching override receives { animation, context } before playback.
+6. The host owns playback, pause/reverse state, and transition cleanup.
+
+A shared preset definition can have overlapping asynchronous preparations.
+Keep per-run DOM references and snapshots in prepared data or animation closures,
+not in mutable variables on the reusable preset/provider. The selected lifecycle
+is captured per run; prepared data never switches to the other direction.
+
+Use createElement(id, tag?) in prepare for temporary nodes. The core tracks and
+removes them on transition cleanup. Restore any inline styles your code changes
+on reused page nodes. releaseFill() removes a completed WebAnimation's WAAPI
+fill so restored inline styles become authoritative. Do not replace cleanup
+callbacks in an override just to retune motion; use set().
+
+The core receives the common Animation contract (play, pause, reverse, complete,
+pose/timeline reads). Concrete return types remain available in overrides.
+Extending the web Animation base also provides set({ startAt }); custom drivers
+can implement the protected setIntegrator method to support physics editing.
+The shared base does not manufacture spring behavior for a custom driver.
+
+WebAnimation can accept a pose and simulate a new target using its current
+position/velocity. Cross-composite pose handoff is not yet implemented by
+MultiAnimation.matchInto; defining a custom integrator does not automatically
+provide interruptible motion matching for an arbitrary composite.
+
+## Direction belongs to the core
+
+The core uses explicit from/to relationships, on/except scopes, ordered rules,
+and history. Transitions never rewrite direction. With gallery -> photo/*,
+a fresh push from detail back to gallery is backward. Within photo/* -> photo/*,
+a fresh push is forward and browser Back reverses the recorded navigation.
+
+Keep data-zoom-enter-key/data-zoom-exit-key and data-hero-enter-key/
+data-hero-exit-key. They describe expanded/collapsed element roles, not a second
+navigation direction. A detail page may have one enter-marked main photo and
+many exit-marked related thumbnails. Zoom follows the core direction to choose
+exit -> enter or enter -> exit. Missing/ambiguous pairs retain the preset's
+existing no-op behavior; there is no effect-direction resolver.
+
+## Compatibility
+
+Legacy custom { prepare, animation } configs remain accepted by the dispatcher.
+Use defineTransition for new definitions and concrete direction-specific override
+inference. Existing type/variant defaults and deprecated public option aliases
+remain supported.

@@ -1,0 +1,131 @@
+# SSGOI motion overrides
+
+Choose a preset with { type, variant, options }. Pass a second { override }
+argument to change its motion before playback. This is the web API; the
+experimental React Native transition API has a separate runtime.
+
+Main setup: https://ssgoi.dev/llms.txt
+Custom transitions: https://ssgoi.dev/llms/custom-transitions.txt
+Website guide: https://ssgoi.dev/docs/motion
+
+## Direction-specific overrides
+
+```ts
+import { axis, spring, InertiaIntegrator } from "@ssgoi/core";
+
+const transition = axis({ type: "x", variant: "default" }, {
+  override: {
+    forward({ animation }) {
+      const outgoing = animation.select("out");
+      const incoming = animation.select("in");
+      outgoing.set({
+        integrator: new InertiaIntegrator({ acceleration: 150, resistance: 1.5 }),
+      });
+      incoming.set({
+        integrator: spring({ stiffness: 320, damping: 30 }),
+        startAt: { after: outgoing, at: 0.3 },
+      });
+    },
+    backward({ animation }) {
+      animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+    },
+  },
+});
+```
+
+The same exports are available from your web framework adapter, including
+@ssgoi/react and @ssgoi/react/view-transitions. No manual callback annotation
+is needed. The preset preserves its concrete return type and registered child
+names. Callbacks receive { animation, context }; return values are not used.
+There is no unqualified callback shared across both directions. Omit a direction
+or a patch field to keep its preset default.
+
+The core decides context.direction from route rules and history. Transitions and
+overrides consume that direction unchanged. No preset reinterprets DOM roles as
+a different navigation direction.
+
+## Selection and editing
+
+animation.select(name) returns the actual registered child Animation. A child
+can be a WebAnimation or a group containing several animations. It is not a DOM
+query and does not infer roles from node identity or child indices.
+
+select(name).set({ integrator }) changes only that child or group.
+animation.set({ integrator }) explicitly changes the whole composite.
+There is no hidden coupled flag that makes a named patch affect other groups.
+An unknown name is a type error for inferred names and a runtime error for
+untyped callers. An empty optional group is a valid selection with no tracks.
+
+| Preset | Named children |
+| --- | --- |
+| axis, drill, slide, fade, scroll, strip, rotate, jaemin | out, in |
+| blind | out, in (each is a group of blind strips) |
+| sheet | sheet, background, overlay |
+| zoom | tile, background, content, overlay |
+| hero | shared, out, in |
+| film | out, in, borders |
+
+Absent sheet/zoom/hero effects are represented by empty named groups. Their
+names remain stable across optional DOM matches and preset variants.
+For geometric effects whose parts should stay synchronized, patch the root
+animation. Independently changing a group intentionally changes its timing
+relative to the other groups.
+
+Film's styles contain its existing baked scale/translate choreography. Its
+integrator override changes progression through that path; the individual
+internal scale-down/translate/scale-up springs are not separate public children.
+
+## Start conditions
+
+```ts
+const outgoing = animation.select("out");
+animation.select("in").set({
+  startAt: { after: outgoing, at: 0.3 },
+});
+```
+
+- A numeric at from 0 to 1 means first crossing of that progress. It is relative
+  to the current playback direction. A bouncing spring may reach 1 before it
+  stops moving.
+- at: "settled" waits for the referenced animation to finish completely.
+- after must reference a sibling in the same MultiAnimation. Cycles, references
+  outside the parent, and invalid progress values throw before playback.
+- startAt: null restores the parent's original scheduling for this child.
+- Existing positional constructor startAt arrays remain supported. Their
+  numeric thresholds, including 1, keep their original first-crossing behavior.
+  Existing mode: "sequence" is the legacy [0, 1, ...] shorthand; use an explicit
+  "settled" condition when completion rather than first arrival is required.
+- Configure timing before playback. A run captures its dependency graph once;
+  changing it does not reschedule an animation already playing.
+
+## Integrators
+
+```ts
+import {
+  spring, SpringIntegrator, DoubleSpringIntegrator, InertiaIntegrator,
+  LinearIntegrator, scale, smooth, snappy, bouncy, gentle, swift, accelerate,
+} from "@ssgoi/core";
+
+spring({ stiffness: 320, damping: 30 });
+spring({ stiffness: 320, damping: 30, doubleSpring: 0.8 });
+new SpringIntegrator({ stiffness: 320, damping: 30 });
+new InertiaIntegrator({ acceleration: 150, resistance: 1.5 });
+new LinearIntegrator({ durationSec: 0.3 });
+scale(snappy, 1.2);
+```
+
+Springs are configured with stiffness and damping, not duration/bounce. The
+spring() helper rejects duration-only recipes and invalid physical parameters.
+Semantic integrators are reusable stateless instances: smooth (no overshoot),
+snappy (slight elasticity), bouncy (visible overshoot), gentle (large surfaces),
+swift (fast effects), accelerate (accelerating exit).
+
+An Integrator implements step(state, target, dt) and isSettled(state, target).
+State contains position and velocity; dt is seconds. Keep mutable simulation
+state in the state argument, not on the shared integrator instance. The target
+is supplied on each step. WebAnimation simulates from its current pose toward
+its target before WAAPI playback. Custom integrators can use different numerical
+methods; the public contract does not require a built-in class.
+
+Custom definitions and lifecycle details:
+https://ssgoi.dev/llms/custom-transitions.txt

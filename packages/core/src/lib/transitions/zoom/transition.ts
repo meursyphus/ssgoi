@@ -1,11 +1,9 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { animationGroup, releaseFillOnComplete } from "../animation-group";
+import type { NavigationDirection } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import { getClientRect } from "@utils";
-import {
-  IntegratorProvider,
-  MultiAnimation,
-  WebAnimation,
-  Animation,
-} from "../../animation";
+import { IntegratorProvider, WebAnimation, Animation } from "../../animation";
 import { OverlayStrategy, createBackgroundStrategy } from "./provider";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
@@ -15,6 +13,7 @@ import {
 } from "../media-geometry";
 import type {
   NormalizedZoomOptions,
+  ZoomAnimationName,
   ZoomAnimationInput,
   ZoomContributeCtx,
   ZoomExtras,
@@ -208,6 +207,7 @@ function hidePreview(preview: HTMLElement): () => void {
 }
 
 class TileStrategy implements ZoomStrategy {
+  readonly name = "tile";
   prepare(ctx: ZoomPrepareCtx): void {
     // Outgoing styling that doesn't depend on rect math. Applied as soon as
     // the `from` side resolves so pre-paint hints land before layout.
@@ -319,6 +319,7 @@ class TileStrategy implements ZoomStrategy {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 class FadeStrategy implements ZoomStrategy {
+  readonly name = "content";
   contribute(ctx: ZoomContributeCtx): Animation[] {
     const { resolved, physics, from, to, onComplete } = ctx;
     const zoomedPage = resolved.mode === "enter" ? to : from;
@@ -353,6 +354,7 @@ class FadeStrategy implements ZoomStrategy {
 }
 
 class NoopStrategy implements ZoomStrategy {
+  readonly name = "content";
   contribute(): Animation[] {
     return [];
   }
@@ -366,15 +368,6 @@ const FADE_STRATEGIES: Record<ZoomVariant, () => ZoomStrategy> = {
 function createFadeStrategy(variant: ZoomVariant): ZoomStrategy {
   return FADE_STRATEGIES[variant]();
 }
-
-/* ────────────────────────────────────────────────────────────────────────────
- * CrossfadeStrategy — placeholder for cross-page opacity blending. v5 had
- * no implementation here, so the strategy is a no-op for now. Kept in the
- * pipeline so future tones (e.g. `expand.dim`) can swap it in without
- * touching the dispatcher.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-class CrossfadeStrategy extends NoopStrategy {}
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Strategy assembly — *no* `if/switch` on `type` or `variant` here. Each
@@ -393,7 +386,6 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
     new TileStrategy(),
     background,
     createFadeStrategy(opts.variant),
-    new CrossfadeStrategy(),
     // Overlay is intrinsically tied to backdrop-filter-driven types. Today
     // that's only `blur`; the table-driven factory above owns the mapping
     // so this conditional is the single line that knows the relationship.
@@ -410,108 +402,104 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
  * No type/variant branching lives in this function.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export const zoom = (
-  options: NormalizedZoomOptions,
-): TransitionConfig<ZoomExtras> => {
+export const zoom = (options: NormalizedZoomOptions) => {
   const { strategies, physics } = zoomStrategiesFor(options);
 
-  return {
-    prepare: (args): ZoomExtras => {
-      const ctx: ZoomPrepareCtx = {
-        from: args.from,
-        to: args.to,
-        context: { positionedParent: args.context.positionedParent },
-        // `createElement` from the dispatcher is generic over tag; the
-        // strategy interface narrows the cast to keep both signatures
-        // compatible.
-        createElement: args.createElement as ZoomPrepareCtx["createElement"],
-      };
-      const extras: ZoomExtras = {};
-      for (const strategy of strategies) {
-        if (!strategy.prepare) continue;
-        const contributed = strategy.prepare(ctx);
-        if (contributed) Object.assign(extras, contributed);
-      }
-      return extras;
-    },
-    animation: ({ from, to, context, ...extras }) => {
-      const resolved = resolveZoom(from, to, context.direction);
+  const createDirection = (navigationDirection: NavigationDirection) =>
+    ({
+      prepare: (args): ZoomExtras => {
+        const ctx: ZoomPrepareCtx = {
+          from: args.from,
+          to: args.to,
+          context: { positionedParent: args.context.positionedParent },
+          // `createElement` from the dispatcher is generic over tag; the
+          // strategy interface narrows the cast to keep both signatures
+          // compatible.
+          createElement: args.createElement as ZoomPrepareCtx["createElement"],
+        };
+        const extras: ZoomExtras = {};
+        for (const strategy of strategies) {
+          if (!strategy.prepare) continue;
+          const contributed = strategy.prepare(ctx);
+          if (contributed) Object.assign(extras, contributed);
+        }
+        return extras;
+      },
+      animation: ({ from, to, context, ...extras }) => {
+        const resolved = resolveZoom(from, to, navigationDirection);
 
-      // No matching zoom pair → noop so the dispatcher still cleans up.
-      if (!resolved) {
-        return new MultiAnimation([], { mode: "parallel" });
-      }
+        // No matching zoom pair → noop so the dispatcher still cleans up.
+        if (!resolved) {
+          return animationGroup({
+            tile: [],
+            background: [],
+            content: [],
+            overlay: [],
+          });
+        }
 
-      const input = buildInput(resolved, from, to, context.scrollOffset);
+        const input = buildInput(resolved, from, to, context.scrollOffset);
 
-      // Shared `onComplete` registry — strategies push restore callbacks
-      // here, and the *first* animation in the list (tile) fires them all.
-      // Doing it on tile completion mirrors v5's behavior where the inAnim
-      // owned all cleanup.
-      const cleanups: Array<() => void> = [];
-      const onComplete = (fn: () => void): void => {
-        cleanups.push(fn);
-      };
+        // Shared restoration runs after every named group finishes, allowing
+        // overrides to retime groups independently without early DOM resets.
+        const cleanups: Array<() => void> = [];
+        const onComplete = (fn: () => void): void => {
+          cleanups.push(fn);
+        };
 
-      const ctx: ZoomContributeCtx = {
-        from,
-        to,
-        resolved,
-        input,
-        physics,
-        context,
-        extras: extras as ZoomExtras,
-        onComplete,
-      };
+        const ctx: ZoomContributeCtx = {
+          from,
+          to,
+          resolved,
+          input,
+          physics,
+          context,
+          extras: extras as ZoomExtras,
+          onComplete,
+        };
 
-      // Flatten every strategy's contribution into a single ordered list.
-      const anims: Animation[] = [];
-      for (const strategy of strategies) {
-        if (!strategy.contribute) continue;
-        anims.push(...strategy.contribute(ctx));
-      }
-
-      // Attach cleanup to the first animation's onComplete (tile, by
-      // construction). v5 fired all restores from the inAnim onComplete;
-      // we mirror that — the tile animation is always present (created by
-      // TileStrategy) and is the natural cleanup hook because it owns the
-      // longest-lived inline styles (z-index on `from`, will-change/
-      // transform on the tile element).
-      const head = anims[0];
-      if (head) {
-        const prevOnComplete = head.onComplete;
-        head.onComplete = () => {
-          prevOnComplete?.();
-          for (const fn of cleanups) {
+        const groups: Record<ZoomAnimationName, Animation[]> = {
+          tile: [],
+          background: [],
+          content: [],
+          overlay: [],
+        };
+        for (const strategy of strategies) {
+          groups[strategy.name].push(...(strategy.contribute?.(ctx) ?? []));
+        }
+        const anims = Object.values(groups).flat();
+        const composite = animationGroup(groups);
+        // Independent overrides can make any group finish last. Restore shared
+        // geometry only when the complete transition finishes or is interrupted.
+        composite.onComplete = () => {
+          for (const cleanup of cleanups) {
             try {
-              fn();
-            } catch (e) {
-              // Don't let one faulty restore tear down sibling cleanups.
-              console.error("[zoom] cleanup error", e);
+              cleanup();
+            } catch (error) {
+              console.error("[zoom] cleanup error", error);
             }
           }
         };
-      }
 
-      // Release each animation's WAAPI forwards-fill once its OWN run settles,
-      // so the inline styles (cleared during playback, reset by the cleanups
-      // above) govern the resting visual instead of a lingering fill. Wrapped on
-      // each animation's own onComplete — which fires after its onfinish but
-      // before MultiAnimation's completion count — so every child is still
-      // counted as done. Without this the exit tile stays shrunk to the card and
-      // the background stays scaled; React <Activity> / Next cacheComponents then
-      // preserve that on the real node, so the NEXT transition measures (and
-      // renders) the page at the wrong size.
-      for (const anim of anims) {
-        if (!(anim instanceof WebAnimation)) continue;
-        const prev = anim.onComplete;
-        anim.onComplete = () => {
-          prev?.();
-          anim.releaseFill();
-        };
-      }
+        // Release each animation's WAAPI forwards-fill once its OWN run settles,
+        // so the inline styles (cleared during playback, reset by the cleanups
+        // above) govern the resting visual instead of a lingering fill. Wrapped on
+        // each animation's own onComplete — which fires after its onfinish but
+        // before MultiAnimation's completion count — so every child is still
+        // counted as done. Without this the exit tile stays shrunk to the card and
+        // the background stays scaled; React <Activity> / Next cacheComponents then
+        // preserve that on the real node, so the NEXT transition measures (and
+        // renders) the page at the wrong size.
+        for (const anim of anims) {
+          if (anim instanceof WebAnimation) releaseFillOnComplete(anim);
+        }
 
-      return new MultiAnimation(anims, { mode: "parallel" });
-    },
-  };
+        return composite;
+      },
+    }) satisfies TransitionDirection<ZoomExtras>;
+
+  return defineTransition({
+    forward: createDirection("forward"),
+    backward: createDirection("backward"),
+  });
 };

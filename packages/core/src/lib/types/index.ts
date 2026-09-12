@@ -20,6 +20,12 @@ export type {
   PhysicsOptions,
 } from "../runtime/physics";
 
+export type {
+  Override,
+  OverrideFn,
+  PresetExtras,
+} from "../transition/define-transition";
+
 /* ────────────────────────────────────────────────────────────────────────────
  * Animation state — motion matching domain
  *
@@ -114,13 +120,18 @@ export type AnimationFactoryArgs<TExtras> = {
  *   },
  * });
  */
-export function defineTransition<TExtras extends object>(
-  config: TransitionConfig<TExtras>,
-): TransitionConfig<TExtras> {
-  return config;
-}
+export { defineTransition } from "../transition/define-transition";
+export type {
+  Transition,
+  TransitionDefinition,
+  TransitionDirection,
+  OverrideArgs,
+} from "../transition/define-transition";
 
-export type TransitionConfig<TExtras extends object = object> = {
+export type TransitionConfig<
+  TExtras extends object = object,
+  TAnimation extends Animation = Animation,
+> = {
   /**
    * Synchronous setup that returns extras (or a Promise of them).
    *
@@ -135,7 +146,7 @@ export type TransitionConfig<TExtras extends object = object> = {
    * and `animation` runs once all three resolve.
    */
   prepare?: (args: PrepareArgs) => TExtras | Promise<TExtras>;
-  animation: (args: AnimationFactoryArgs<TExtras>) => Animation;
+  animation: (args: AnimationFactoryArgs<TExtras>) => TAnimation;
 };
 
 /**

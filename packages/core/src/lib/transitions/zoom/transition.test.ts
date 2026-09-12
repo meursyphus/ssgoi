@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { buildInput, resolveZoom, zoom } from "./transition";
+import { withOverride } from "../../transition/define-transition";
 import type { ZoomResolved, ZoomType } from "./types";
 import { createZoomIn, createZoomOut } from "./zoom-element";
 
@@ -274,7 +275,10 @@ describe("zoom semantic direction", () => {
   });
 });
 
-function previewTransition(type: ZoomType = "static") {
+function previewTransition(
+  type: ZoomType = "static",
+  observe?: (direction: "forward" | "backward") => void,
+) {
   const pair = resolvedPair({
     enterAttributes: { "data-zoom-enter-key": "photo" },
     exitAttributes: { "data-zoom-exit-key": "photo" },
@@ -284,17 +288,21 @@ function previewTransition(type: ZoomType = "static") {
   other.style.opacity = "1";
   const list = Object.assign(page(), keyedPage([], [pair.exitEl, other]));
   const detail = Object.assign(page(), keyedPage([pair.enterEl]));
-  const config = zoom({ type, variant: "default" });
+  const config = withOverride(zoom({ type, variant: "default" }), {
+    forward: ({ context }) => observe?.(context.direction),
+    backward: ({ context }) => observe?.(context.direction),
+  });
   return {
     preview: pair.exitEl,
     other,
-    create(direction: "forward" | "backward") {
+    create(direction: "forward" | "backward", coreDirection = direction) {
       return config.animation({
         from: direction === "forward" ? list : detail,
         to: direction === "forward" ? detail : list,
-        context: { direction, scrollOffset: { x: 0, y: 0 } } as Parameters<
-          typeof config.animation
-        >[0]["context"],
+        context: {
+          direction: coreDirection,
+          scrollOffset: { x: 0, y: 0 },
+        } as Parameters<typeof config.animation>[0]["context"],
       });
     },
   };
@@ -328,3 +336,19 @@ describe.each<ZoomType>(["static", "expand", "blur"])(
     });
   },
 );
+
+describe("zoom consumes the authoritative core direction", () => {
+  it("does not reinterpret endpoint roles as a different direction", () => {
+    const observed: string[] = [];
+    const { create, preview } = previewTransition("static", (direction) =>
+      observed.push(direction),
+    );
+    // Physical pages have detail -> list roles, but the core supplied forward.
+    // Keep the existing no-match behavior instead of silently choosing backward.
+    const animation = create("backward", "forward");
+    expect(observed).toEqual(["forward"]);
+    expect(animation.getTimeline()).toEqual([]);
+    expect(preview.style.opacity).toBe("0.8");
+    animation.complete();
+  });
+});

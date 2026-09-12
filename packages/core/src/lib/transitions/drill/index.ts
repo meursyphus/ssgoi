@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { drill as transition } from "./transition";
 import type { DrillType as InternalDrillType } from "./types";
 
@@ -54,11 +55,14 @@ function resolveInternalType(
   return "parallax";
 }
 
-export function drill(config: DrillConfig = {}): AnyTransitionConfig {
+export function drill(
+  config: DrillConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const type = (config as { type?: DrillType | DrillTypeDeprecated }).type;
   // `variant` / `options` are accepted in the public schema for forward
   // compatibility but currently have no implemented values to forward.
   const internalType = resolveInternalType(type);
 
-  return transition({ type: internalType });
+  return withOverride(transition({ type: internalType }), extras.override);
 }

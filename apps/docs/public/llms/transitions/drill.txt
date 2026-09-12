@@ -22,7 +22,6 @@ drill({
 - `slide`: both pages translate a full viewport width—the new page enters from
   the right while the old page exits left—and opacity shifts between 0.5 and 1.
 
-Deprecated: `type: "crossfade"`; use `type: "slide"`.
 
 ## Example
 
@@ -39,3 +38,9 @@ const config = {
 ```
 
 Route rules: https://ssgoi.dev/llms/route-rules.txt
+
+## Motion overrides
+
+Pass a second { override: { forward, backward } } argument to retune named
+animations before playback. Each callback receives { animation, context }.
+Names and scheduling: https://ssgoi.dev/llms/motion.txt

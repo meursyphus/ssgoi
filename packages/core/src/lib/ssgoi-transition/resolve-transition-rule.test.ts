@@ -183,3 +183,44 @@ describe("scroll preservation policy", () => {
     });
   });
 });
+
+describe("photo navigation direction", () => {
+  const effect = transition("zoom");
+
+  it("treats a fresh detail-to-list push as backward for an explicit pair", () => {
+    const result = resolve(
+      "/photo/b",
+      "/gallery",
+      [
+        {
+          from: "/gallery",
+          to: "/photo/*",
+          transition: effect,
+        },
+      ],
+      "forward",
+    );
+    expect(result?.direction).toBe("backward");
+    expect(result?.preserveScroll).toEqual({ from: false, to: true });
+  });
+
+  it("uses history for related photos whose pair patterns are equal", () => {
+    const rules: SsgoiTransitionRule[] = [
+      {
+        from: "/photo/*",
+        to: "/photo/*",
+        transition: effect,
+      },
+    ];
+    expect(resolve("/photo/a", "/photo/b", rules, "forward")?.direction).toBe(
+      "forward",
+    );
+    expect(resolve("/photo/b", "/photo/a", rules, "backward")?.direction).toBe(
+      "backward",
+    );
+    // Revisiting a previous URL with a fresh push remains a new forward visit.
+    expect(resolve("/photo/b", "/photo/a", rules, "forward")?.direction).toBe(
+      "forward",
+    );
+  });
+});

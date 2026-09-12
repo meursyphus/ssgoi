@@ -98,6 +98,7 @@ const overlay: ZoomOverlayConfig = {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export class BlurBackgroundStrategy implements ZoomStrategy {
+  readonly name = "background";
   readonly physics = BLUR_PHYSICS;
 
   contribute(ctx: ZoomContributeCtx): Animation[] {
@@ -127,6 +128,7 @@ export class BlurBackgroundStrategy implements ZoomStrategy {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export class OverlayStrategy implements ZoomStrategy {
+  readonly name = "overlay";
   prepare(ctx: ZoomPrepareCtx): Partial<ZoomExtras> {
     const overlayEl = ctx.createElement("zoom-overlay");
     Object.assign(overlayEl.style, overlay.initialStyle);

@@ -33,3 +33,9 @@ The route order determines direction. Keep `overflow-x-clip` on the layout
 shell.
 
 Route rules: https://ssgoi.dev/llms/route-rules.txt
+
+## Motion overrides
+
+Pass a second { override: { forward, backward } } argument to retune named
+animations before playback. Each callback receives { animation, context }.
+Names and scheduling: https://ssgoi.dev/llms/motion.txt
