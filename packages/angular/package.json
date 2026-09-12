@@ -1,10 +1,27 @@
 {
   "name": "@ssgoi/angular",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "description": "Angular bindings for SSGOI - Native app-like page transitions for Angular applications",
   "private": false,
   "type": "module",
+  "module": "./dist/fesm2022/ssgoi-angular.mjs",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular.mjs"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions/index.d.ts",
+      "default": "./dist/fesm2022/ssgoi-angular-view-transitions.mjs"
+    },
+    "./package.json": {
+      "default": "./package.json"
+    }
+  },
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "watch": "ng-packagr -p ng-package.json --watch",
