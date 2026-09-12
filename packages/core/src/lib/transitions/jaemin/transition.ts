@@ -1,4 +1,5 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import { getViewportRect } from "@utils";
 import {
   IntegratorProvider,
@@ -30,13 +31,13 @@ export interface JaeminOptions {
  * multi-stage easing inside the style function (originally three sequential
  * tick branches).
  */
-export const jaemin = (options: JaeminOptions = {}): TransitionConfig => {
+export const jaemin = (options: JaeminOptions = {}) => {
   const inPhysics = options.physics ?? DEFAULT_PHYSICS;
   const initialRotation = options.initialRotation ?? 45;
   const initialScale = options.initialScale ?? 0.01;
   const rotationTriggerPoint = options.rotationTriggerPoint ?? 0.8;
 
-  return {
+  const shared = {
     prepare: ({ from, to, context }) => {
       from.then((el) => {
         el.style.opacity = "1";
@@ -141,7 +142,12 @@ export const jaemin = (options: JaeminOptions = {}): TransitionConfig => {
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+      return new MultiAnimation(
+        { out: outAnim, in: inAnim },
+        { mode: "parallel" },
+      );
     },
-  };
+  } satisfies TransitionDirection<object>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };

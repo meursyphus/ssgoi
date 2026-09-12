@@ -1,4 +1,4 @@
-import type { AnyTransitionConfig, PresetExtras } from "@types";
+import type { PresetExtras } from "@types";
 import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { film as transition } from "./transition";
@@ -17,8 +17,8 @@ export type FilmConfig = PresetConfig<never, FilmVariant, FilmOptions>;
 
 export function film(
   config: FilmConfig = {},
-  extras: PresetExtras = {},
-): AnyTransitionConfig {
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const { options } = config;
 
   // Normalize public `options.borderColor` onto the internal transition's
@@ -29,7 +29,5 @@ export function film(
       ? { border: { color: options.borderColor } }
       : undefined;
 
-  return withOverride(transition(innerOptions), extras.override, {
-    labels: false,
-  });
+  return withOverride(transition(innerOptions), extras.override);
 }

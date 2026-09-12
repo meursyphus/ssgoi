@@ -1,4 +1,5 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -15,11 +16,11 @@ export interface FadeOptions {
   physics?: PhysicsOptions;
 }
 
-export const fade = (options: FadeOptions = {}): TransitionConfig => {
+export const fade = (options: FadeOptions = {}) => {
   const inPhysics = options.physics ?? FADE_IN_PHYSICS;
   const outPhysics = options.physics ?? FADE_OUT_PHYSICS;
 
-  return {
+  const shared = {
     prepare: ({ to }) => {
       // Lay down the incoming page invisible before paint so it doesn't flash
       // at full opacity ahead of the spring.
@@ -60,7 +61,12 @@ export const fade = (options: FadeOptions = {}): TransitionConfig => {
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "sequence" });
+      return new MultiAnimation(
+        { out: outAnim, in: inAnim },
+        { mode: "sequence" },
+      );
     },
-  };
+  } satisfies TransitionDirection<object>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };

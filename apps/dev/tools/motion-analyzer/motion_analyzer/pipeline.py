@@ -398,14 +398,12 @@ def relationships(tracks):
                 second["fit"]["t0Ms"] + second["fit"]["settleMs"],
             )
             overlap = max(0, common_end - second["fit"]["t0Ms"])
-            # SSGOI uses first crossing, while threshold 1 waits for settling.
+            # Numeric SSGOI thresholds always use first crossing, including 1.
             sim = f["simulation"]
             hit = next(
                 (t for t, p in zip(sim["timeMs"], sim["progress"]) if p >= threshold),
                 f["settleMs"],
             )
-            if threshold == 1:
-                hit = f["settleMs"]
             scheduling_error = hit - delay
             valid = abs(scheduling_error) <= 1000 / 60 + 0.01
             relationships.append(
@@ -525,8 +523,8 @@ def code_for(event, preset=None):
     if preset:
         lines += [
             "",
-            f"// Requested preset: {preset}. Check its labels, child order, and coupled flag before overriding.",
-            "// Do not apply separate integrators to a preset whose tracks are geometrically coupled.",
+            f"// Requested preset: {preset}. Check its named children and choreography before overriding.",
+            "// Use animation.set({ integrator }) when the whole group must keep shared progress.",
         ]
     imports = ["WebAnimation"]
     if any(t["fit"]["model"] != "inertia" for t in fitted):

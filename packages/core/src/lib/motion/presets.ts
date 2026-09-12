@@ -10,20 +10,35 @@ import { easeIn, spring } from "./spring";
  * Every export is a stateless `Integrator` instance — share it freely.
  */
 
-/** No overshoot, the default arriving feel. 0.40 s. */
-export const smooth = spring({ duration: 0.4 });
+/** No overshoot, the default arriving feel. */
+export const smooth = spring({
+  stiffness: 246.74011002723395,
+  damping: 31.41592653589793,
+});
 
-/** Short travel with a hint of elasticity (tab swaps). 0.30 s, bounce 0.15. */
-export const snappy = spring({ duration: 0.3, bounce: 0.15 });
+/** Short travel with a hint of elasticity for tab swaps. */
+export const snappy = spring({
+  stiffness: 438.6490844928604,
+  damping: 35.604716740684324,
+});
 
-/** Visible overshoot for emphasis. 0.45 s, bounce 0.3 — the UI ceiling. */
-export const bouncy = spring({ duration: 0.45, bounce: 0.3 });
+/** Visible overshoot for emphasis. */
+export const bouncy = spring({
+  stiffness: 194.9551486634935,
+  damping: 19.54768762233649,
+});
 
-/** Large surfaces such as sheets. 0.55 s, no overshoot. */
-export const gentle = spring({ duration: 0.55 });
+/** No overshoot for large surfaces such as sheets. */
+export const gentle = spring({
+  stiffness: 130.5071656342394,
+  damping: 22.84794657156213,
+});
 
-/** Effects (opacity, blur) and fast exits. 0.20 s, no overshoot. */
-export const swift = spring({ duration: 0.2 });
+/** No overshoot for opacity, blur, and fast exits. */
+export const swift = spring({
+  stiffness: 986.9604401089358,
+  damping: 62.83185307179586,
+});
 
 /** Accelerating fall-away for outgoing surfaces. Reaches target in 0.20 s. */
 export const accelerate = easeIn({ duration: 0.2 });

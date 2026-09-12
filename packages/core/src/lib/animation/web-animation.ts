@@ -106,6 +106,10 @@ export class WebAnimation extends Animation {
     this._integrator = integrator;
   }
 
+  protected setIntegrator(integrator: Integrator): void {
+    this._integrator = integrator;
+  }
+
   play(): void {
     this.reversing = false;
     if (this.paused && this.waapi) {

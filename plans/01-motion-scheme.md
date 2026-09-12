@@ -1,3 +1,6 @@
+> Superseded by [the transition definition refactor](03-transition-definition-refactor.md).
+> This document records the original proposal; use the current docs for the public API.
+
 # Plan 1 — Motion Theme (애니메이션 타이밍 테마 인터페이스)
 
 브랜치: `feat/motion-theme-and-video-analyzer` (latest `9774ea0`에서 분기).

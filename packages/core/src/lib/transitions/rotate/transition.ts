@@ -1,4 +1,5 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -13,9 +14,9 @@ export interface RotateOptions {
   physics?: PhysicsOptions;
 }
 
-export const rotate = (options: RotateOptions = {}): TransitionConfig => {
+export const rotate = (options: RotateOptions = {}) => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  return {
+  const shared = {
     prepare: ({ from, to }) => {
       from.then((el) => {
         el.style.transformOrigin = "center center";
@@ -64,7 +65,12 @@ export const rotate = (options: RotateOptions = {}): TransitionConfig => {
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "parallel" });
+      return new MultiAnimation(
+        { out: outAnim, in: inAnim },
+        { mode: "parallel" },
+      );
     },
-  };
+  } satisfies TransitionDirection<object>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };

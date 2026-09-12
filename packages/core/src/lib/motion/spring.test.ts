@@ -50,10 +50,14 @@ describe("duration/bounce ⇄ stiffness/damping", () => {
 });
 
 describe("spring()", () => {
-  it("builds a SpringIntegrator from duration/bounce", () => {
-    const integrator = spring({ duration: 0.4 }) as SpringIntegrator;
+  it("builds a SpringIntegrator from physical parameters", () => {
+    const integrator = spring({
+      stiffness: 320,
+      damping: 28,
+    }) as SpringIntegrator;
     expect(integrator).toBeInstanceOf(SpringIntegrator);
-    expect(integrator.stiffness).toBeCloseTo(((2 * Math.PI) / 0.4) ** 2, 6);
+    expect(integrator.stiffness).toBe(320);
+    expect(integrator.damping).toBe(28);
   });
 
   it("accepts the raw stiffness/damping shape too", () => {
@@ -65,8 +69,25 @@ describe("spring()", () => {
     expect(integrator.damping).toBe(30);
   });
 
+  it("rejects invalid physical inputs and duration-shaped spring recipes", () => {
+    expect(() => spring({ stiffness: Infinity, damping: 30 })).toThrow(
+      "stiffness",
+    );
+    expect(() => spring({ stiffness: 300, damping: -1 })).toThrow("damping");
+    expect(() => spring({ stiffness: 300, damping: 30, restDelta: 0 })).toThrow(
+      "restDelta",
+    );
+    expect(() => {
+      // @ts-expect-error Springs are configured with physical parameters.
+      spring({ duration: 0.12 });
+    }).toThrow("stiffness");
+    expect(() =>
+      scale(new SpringIntegrator({ stiffness: 300, damping: 30 }), Infinity),
+    ).toThrow("finite");
+  });
+
   it("converges to the target at 60 fps", () => {
-    const frames = simulate(spring({ duration: 0.3, bounce: 0.15 }), 0, 1, 0);
+    const frames = simulate(spring({ stiffness: 400, damping: 30 }), 0, 1, 0);
     expect(frames[frames.length - 1]!.position).toBe(1);
     expect(frames[frames.length - 1]!.time).toBeGreaterThan(200);
     expect(frames[frames.length - 1]!.time).toBeLessThan(700);
@@ -112,7 +133,7 @@ describe("scale()", () => {
   }
 
   it("reproduces the base curve exactly for an integer factor", () => {
-    const basis = spring({ duration: 0.4, bounce: 0.2 });
+    const basis = spring({ stiffness: 250, damping: 25 });
     const slowFrames = simulate(basis, 0, 1, 0);
     const slow = sampler(slowFrames);
     const fastFrames = simulate(scale(basis, 2), 0, 1, 0);
@@ -131,7 +152,7 @@ describe("scale()", () => {
 
   it("approximates the base curve for a fractional factor", () => {
     const factor = 1.5;
-    const basis = spring({ duration: 0.4, bounce: 0.2 });
+    const basis = spring({ stiffness: 250, damping: 25 });
     const slowFrames = simulate(basis, 0, 1, 0);
     const slow = sampler(slowFrames);
     const fastFrames = simulate(scale(basis, factor), 0, 1, 0);

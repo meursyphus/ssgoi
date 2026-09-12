@@ -16,6 +16,13 @@ const config: SsgoiConfig = {
       to: `${BASE}/feed/*`,
       transition: zoom({ type: "expand" }),
     },
+    // Related-pin detail -> detail: equal patterns defer to history direction.
+    // A normal link pushes forward; router.back() returns to the prior pin.
+    {
+      from: `${BASE}/feed/*`,
+      to: `${BASE}/feed/*`,
+      transition: zoom({ type: "expand" }),
+    },
     // search ↔ search result drill
     {
       on: `${BASE}/search/**`,

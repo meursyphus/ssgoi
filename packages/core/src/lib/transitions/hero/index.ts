@@ -1,4 +1,4 @@
-import type { AnyTransitionConfig, PresetExtras } from "@types";
+import type { PresetExtras } from "@types";
 import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { hero as transition } from "./transition";
@@ -21,8 +21,8 @@ export type HeroConfig = PresetConfig<HeroType, HeroVariant, HeroOptions>;
 
 export function hero(
   config: HeroConfig = {},
-  extras: PresetExtras = {},
-): AnyTransitionConfig {
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const type: HeroType = config.type ?? "static";
   const variant: HeroVariant = config.variant ?? "default";
   return withOverride(transition({ type, variant }), extras.override);

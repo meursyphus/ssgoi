@@ -124,6 +124,23 @@ class PhysicsTests(unittest.TestCase):
         b["t0Ms"] = a["settleMs"] + 200
         self.assertIsNone(relationships(tracks)[0]["startAt"])
 
+    def test_overshoot_completion_is_not_a_numeric_progress_threshold(self):
+        params = dict(stiffness=250, damping=16)
+        p, v, _ = simulate("spring", params)
+        times = np.arange(len(p)) * 1000 / 60
+        fit = dict(
+            model="spring", params=params, t0Ms=0, initialVelocity=0,
+            restDelta=.01, restSpeed=.01, settleMs=float(times[-1]),
+            simulation=dict(timeMs=times, progress=p, velocity=v),
+        )
+        tracks = [
+            dict(id="out", name="out", fit=fit, confidence="high"),
+            dict(id="in", name="in", fit=dict(fit, t0Ms=fit["settleMs"]), confidence="high"),
+        ]
+        relation = relationships(tracks)[0]
+        self.assertIsNone(relation["startAt"])
+        self.assertLess(relation["scheduleErrorMs"], -100)
+
 
 class VisionTests(unittest.TestCase):
     def test_container_edge_is_distinct_from_internal_content(self):

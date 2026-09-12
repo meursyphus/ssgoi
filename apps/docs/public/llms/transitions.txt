@@ -38,3 +38,6 @@ https://ssgoi.dev/llms/route-rules.txt
 
 Automatic scroll reset and restoration:
 https://ssgoi.dev/llms/scroll-restoration.txt
+
+Custom direction-specific definitions and integrators:
+https://ssgoi.dev/llms/custom-transitions.txt

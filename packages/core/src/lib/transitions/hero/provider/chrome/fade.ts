@@ -1,6 +1,10 @@
 import { IntegratorProvider, WebAnimation } from "../../../../animation";
-import type { Animation } from "../../../../animation";
-import type { HeroContributeCtx, HeroStrategy } from "../../types";
+import type { AnimationContributions } from "../../../animation-group";
+import type {
+  HeroAnimationName,
+  HeroContributeCtx,
+  HeroStrategy,
+} from "../../types";
 
 /**
  * Chrome handling for `type: "fade"`.
@@ -11,7 +15,9 @@ import type { HeroContributeCtx, HeroStrategy } from "../../types";
  * both pages.
  */
 class PageCrossfadeChromeStrategy implements HeroStrategy {
-  contribute(ctx: HeroContributeCtx): Animation[] {
+  contribute(
+    ctx: HeroContributeCtx,
+  ): AnimationContributions<HeroAnimationName> {
     const { from, to, physics, onComplete } = ctx;
 
     const previousFromOpacity = from.style.opacity;
@@ -30,18 +36,22 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
       to.style.willChange = previousToWillChange;
     });
 
-    return [
-      new WebAnimation({
-        element: from,
-        integrator: IntegratorProvider.from(physics),
-        style: (_t, u) => ({ opacity: u }),
-      }),
-      new WebAnimation({
-        element: to,
-        integrator: IntegratorProvider.from(physics),
-        style: (t) => ({ opacity: t }),
-      }),
-    ];
+    return {
+      out: [
+        new WebAnimation({
+          element: from,
+          integrator: IntegratorProvider.from(physics),
+          style: (_t, u) => ({ opacity: u }),
+        }),
+      ],
+      in: [
+        new WebAnimation({
+          element: to,
+          integrator: IntegratorProvider.from(physics),
+          style: (t) => ({ opacity: t }),
+        }),
+      ],
+    };
   }
 }
 

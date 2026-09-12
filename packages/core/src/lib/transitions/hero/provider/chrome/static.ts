@@ -1,5 +1,6 @@
-import type { Animation } from "../../../../animation";
+import type { AnimationContributions } from "../../../animation-group";
 import type {
+  HeroAnimationName,
   HeroContributeCtx,
   HeroPrepareCtx,
   HeroStrategy,
@@ -24,7 +25,9 @@ class SnapHideChromeStrategy implements HeroStrategy {
     });
   }
 
-  contribute(ctx: HeroContributeCtx): Animation[] {
+  contribute(
+    ctx: HeroContributeCtx,
+  ): AnimationContributions<HeroAnimationName> {
     // `from` is the real outgoing node and gets re-shown on the next
     // navigation (React Activity / Next cacheComponents), so restore the
     // opacity we snapped to "0" in `prepare` — otherwise the reused page
@@ -32,7 +35,7 @@ class SnapHideChromeStrategy implements HeroStrategy {
     ctx.onComplete(() => {
       ctx.from.style.opacity = this.previousFromOpacity;
     });
-    return [];
+    return {};
   }
 }
 

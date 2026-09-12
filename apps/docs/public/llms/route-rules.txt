@@ -66,6 +66,29 @@ Each side may also be an array of patterns.
 Set `bidirectional: false` when only the written `from` → `to` direction should
 match.
 
+## Detail-to-list links and related-detail navigation
+
+With from: "/gallery", to: "/photo/*", a fresh push from a photo back to the
+gallery is backward because the explicit relationship is reversed. It does not
+require router.back(). The core is the sole owner of direction; presets never
+rewrite context.direction based on their elements.
+
+If both endpoints have the same pattern, the rule cannot establish an
+orientation, so history supplies it:
+
+```ts
+{
+  from: "/photo/*",
+  to: "/photo/*",
+  transition: zoom(),
+}
+```
+
+Opening another related photo with a new push is forward. Browser Back reverses
+the recorded transition. Keep zoom/hero enter/exit keys: the main expanded photo
+is enter-marked, while related thumbnails are exit-marked. These are element
+roles used for matching in the core-selected direction.
+
 ## `ordered`
 
 Use `ordered` when route position defines direction. Increasing index is

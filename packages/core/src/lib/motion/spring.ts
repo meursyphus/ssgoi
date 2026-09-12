@@ -50,34 +50,25 @@ export function springToDurationBounce(
   return { duration, bounce, zeta };
 }
 
-export type DurationBounceInput = {
-  /** Perceptual duration in seconds. */
-  duration: number;
-  /** Overshoot amount, `0` = critically damped. Keep UI values ≤ 0.4. */
-  bounce?: number;
-  doubleSpring?: SpringConfig["doubleSpring"];
-  restDelta?: number;
-  restSpeed?: number;
-};
+export type SpringInput = SpringConfig;
 
-export type SpringInput = DurationBounceInput | SpringConfig;
-
-/**
- * Build a spring integrator from either `{ duration, bounce }` or the raw
- * `{ stiffness, damping }` shape. Returns a plain `Integrator` instance you
- * can hand to `set(label, { integrator })` or share across animations.
- */
+/** Build a stateless spring from stiffness, damping and optional follower physics. */
 export function spring(input: SpringInput): Integrator {
-  const config: SpringConfig =
-    "duration" in input
-      ? {
-          ...durationBounceToSpring(input.duration, input.bounce),
-          doubleSpring: input.doubleSpring,
-          restDelta: input.restDelta,
-          restSpeed: input.restSpeed,
-        }
-      : input;
-  return IntegratorProvider.from({ spring: config });
+  if (!Number.isFinite(input.stiffness) || input.stiffness <= 0) {
+    throw new Error("spring(): stiffness must be finite and > 0");
+  }
+  if (!Number.isFinite(input.damping) || input.damping < 0) {
+    throw new Error("spring(): damping must be finite and >= 0");
+  }
+  for (const [name, value] of [
+    ["restDelta", input.restDelta],
+    ["restSpeed", input.restSpeed],
+  ] as const) {
+    if (value !== undefined && (!Number.isFinite(value) || value <= 0)) {
+      throw new Error(`spring(): ${name} must be finite and > 0`);
+    }
+  }
+  return IntegratorProvider.from({ spring: input });
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -108,7 +99,8 @@ function reachMs(integrator: Integrator): number {
  */
 export function easeIn(input: EaseInInput): Integrator {
   const { duration, resistance = 1.5, restDelta } = input;
-  if (!(duration > 0)) throw new Error("easeIn(): duration must be > 0");
+  if (!Number.isFinite(duration) || !(duration > 0))
+    throw new Error("easeIn(): duration must be finite and > 0");
   const targetMs = duration * 1000;
   let lo = 0.01;
   let hi = 1e6;
@@ -140,7 +132,8 @@ export class ScaledIntegrator implements Integrator {
     readonly inner: Integrator,
     readonly factor: number,
   ) {
-    if (!(factor > 0)) throw new Error("scale(): factor must be > 0");
+    if (!Number.isFinite(factor) || !(factor > 0))
+      throw new Error("scale(): factor must be finite and > 0");
   }
 
   step(state: IntegratorState, target: number, dt: number): IntegratorState {

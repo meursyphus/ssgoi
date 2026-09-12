@@ -1,5 +1,5 @@
 import type { PhysicsOptions } from "@types";
-import type { Animation } from "../../animation";
+import type { AnimationContributions } from "../animation-group";
 import type { MediaFit } from "../media-geometry";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -86,7 +86,11 @@ export interface HeroContributeCtx {
  * Strategy interface. Both methods are optional — a no-op strategy is a
  * legitimate factory return value (e.g. static chrome).
  */
+export type HeroAnimationName = "shared" | "out" | "in";
+
 export interface HeroStrategy {
   prepare?: (ctx: HeroPrepareCtx) => void;
-  contribute?: (ctx: HeroContributeCtx) => Animation[];
+  contribute?: (
+    ctx: HeroContributeCtx,
+  ) => AnimationContributions<HeroAnimationName>;
 }

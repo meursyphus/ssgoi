@@ -1,253 +1,246 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import type {
   AnimationFactoryArgs,
-  AnyTransitionConfig,
   NavigationDirection,
+  PrepareArgs,
   SsgoiTransitionContext,
 } from "@types";
 import { Animation } from "../animation/animation";
 import { MultiAnimation } from "../animation/multi-animation";
 import { WebAnimation } from "../animation/web-animation";
-import { InertiaIntegrator, SpringIntegrator } from "../animation/integrator";
-import { snappy, swift } from "./presets";
-import {
-  labelByIdentity,
-  resolveOverride,
-  withOverride,
-} from "./with-override";
+import { SpringIntegrator } from "../animation/integrator";
+import { defineTransition } from "../transition/define-transition";
+import { withOverride } from "./with-override";
 
-const el = (ssgoiId?: string): HTMLElement =>
-  ({ dataset: ssgoiId ? { ssgoiId } : {} }) as unknown as HTMLElement;
-
-const base = new SpringIntegrator({ stiffness: 100, damping: 10 });
-
-function track(element: HTMLElement): WebAnimation {
-  return new WebAnimation({ element, integrator: base, style: () => ({}) });
-}
-
+const element = (): HTMLElement => ({ style: {} }) as HTMLElement;
+const original = new SpringIntegrator({ stiffness: 300, damping: 30 });
+const replacement = new SpringIntegrator({ stiffness: 400, damping: 35 });
+const track = (target = element()) =>
+  new WebAnimation({
+    element: target,
+    integrator: original,
+    style: () => ({}),
+  });
 function context(direction: NavigationDirection): SsgoiTransitionContext {
-  return { direction } as SsgoiTransitionContext;
+  const root = element();
+  return {
+    direction,
+    scrollOffset: { x: 0, y: 0 },
+    from: { scroll: { x: 0, y: 0 } },
+    to: { scroll: { x: 0, y: 0 } },
+    scrollingElement: root,
+    positionedParent: root,
+  };
 }
-
 function args(
-  from: HTMLElement,
-  to: HTMLElement,
   direction: NavigationDirection = "forward",
 ): AnimationFactoryArgs<object> {
-  return { from, to, context: context(direction) };
+  return { from: element(), to: element(), context: context(direction) };
+}
+function preparation(input: AnimationFactoryArgs<object>): PrepareArgs {
+  return {
+    ...input,
+    from: Promise.resolve(input.from),
+    to: Promise.resolve(input.to),
+    createElement: () => element() as HTMLDivElement,
+  };
 }
 
-function preset(build: () => Animation): AnyTransitionConfig {
-  return { animation: () => build() };
-}
-
-describe("labelByIdentity", () => {
-  it("labels from → out, to → in, *-overlay → overlay, others → shared", () => {
-    const from = el();
-    const to = el();
-    const overlay = el("sheet-overlay");
-    const clone = el();
-    const anim = new MultiAnimation([
-      track(from),
-      track(to),
-      track(overlay),
-      track(clone),
-    ]);
-
-    labelByIdentity(anim, from, to);
-
-    expect(anim.tracks().map((t) => t.label)).toEqual([
-      "out",
-      "in",
-      "overlay",
-      "shared",
-    ]);
+describe("named animation editing", () => {
+  it("infers registered names and edits only the selected child", () => {
+    const outgoing = track(),
+      incoming = track();
+    const animation = new MultiAnimation({ out: outgoing, in: incoming });
+    expectTypeOf(animation).toEqualTypeOf<MultiAnimation<"out" | "in">>();
+    animation.select("in").set({ integrator: replacement });
+    expect(incoming.integrator).toBe(replacement);
+    expect(outgoing.integrator).toBe(original);
+    expect(animation.select("in")).toBe(incoming);
+    expect(() => {
+      // @ts-expect-error This preset does not register an overlay.
+      animation.select("overlay");
+    }).toThrow("Unknown animation child");
   });
-
-  it("reads data-ssgoi-id through getAttribute when dataset is absent", () => {
-    const from = el();
-    const to = el();
-    const overlay = {
-      getAttribute: (name: string) =>
-        name === "data-ssgoi-id" ? "zoom-overlay" : null,
-    } as unknown as HTMLElement;
-    const anim = new MultiAnimation([track(overlay)]);
-
-    labelByIdentity(anim, from, to);
-
-    expect(anim.select("overlay")).toHaveLength(1);
-  });
-
-  it("nested composites inherit out / in from their index (blind)", () => {
-    const from = el();
-    const to = el();
-    const outStrips = new MultiAnimation([track(el()), track(el())]);
-    const inStrips = new MultiAnimation([track(el()), track(el())]);
-    const anim = new MultiAnimation([outStrips, inStrips], {
-      mode: "sequence",
-    });
-
-    labelByIdentity(anim, from, to);
-
-    expect(anim.select("out")).toHaveLength(2);
-    expect(anim.select("in")).toHaveLength(2);
-    expect(anim.select("shared")).toHaveLength(0);
+  it("edits an explicitly selected nested group or the entire composite", () => {
+    const first = track(),
+      second = track(),
+      other = track();
+    const shared = new MultiAnimation([first, second]);
+    const animation = new MultiAnimation({ shared, in: other });
+    animation.select("shared").set({ integrator: replacement });
+    expect(first.integrator).toBe(replacement);
+    expect(second.integrator).toBe(replacement);
+    expect(other.integrator).toBe(original);
+    animation.set({ integrator: original });
+    expect(
+      animation.tracks().every((child) => child.integrator === original),
+    ).toBe(true);
   });
 });
 
-describe("MultiAnimation.set / startAt", () => {
-  it("patches only the labelled tracks when not coupled", () => {
-    const from = el();
-    const to = el();
-    const anim = new MultiAnimation([track(from), track(to)]);
-    labelByIdentity(anim, from, to);
-
-    anim.set("in", { integrator: snappy });
-
-    expect(anim.select("in")[0]!.integrator).toBe(snappy);
-    expect(anim.select("out")[0]!.integrator).toBe(base);
-  });
-
-  it("patches every track when coupled, whatever the label", () => {
-    const from = el();
-    const to = el();
-    const anim = new MultiAnimation([track(from), track(to), track(el())]);
-    labelByIdentity(anim, from, to);
-    anim.coupled = true;
-
-    anim.set("in", { integrator: swift });
-
-    for (const t of anim.tracks()) expect(t.integrator).toBe(swift);
-  });
-
-  it("normalizes a PhysicsOptions leaf into an integrator instance", () => {
-    const from = el();
-    const to = el();
-    const anim = new MultiAnimation([track(from), track(to)]);
-    labelByIdentity(anim, from, to);
-
-    anim
-      .set("in", { integrator: { spring: { stiffness: 400, damping: 30 } } })
-      .set("out", {
-        integrator: { inertia: { acceleration: 150, resistance: 1.5 } },
-      });
-
-    const inn = anim.select("in")[0]!.integrator as SpringIntegrator;
-    expect(inn).toBeInstanceOf(SpringIntegrator);
-    expect(inn.stiffness).toBe(400);
-    expect(anim.select("out")[0]!.integrator).toBeInstanceOf(InertiaIntegrator);
-  });
-
-  it("ignores unknown labels and exposes startAt for replacement", () => {
-    const anim = new MultiAnimation([track(el()), track(el())], {
-      mode: "sequence",
-    });
-    expect(anim.startAt).toEqual([0, 1]);
-
-    expect(() => anim.set("nope", { integrator: snappy })).not.toThrow();
-    anim.startAt = [0, 0.3];
-
-    expect(anim.startAt).toEqual([0, 0.3]);
-  });
-});
-
-describe("resolveOverride", () => {
-  it("serves a bare function to both directions", () => {
-    const fn = vi.fn();
-    expect(resolveOverride(fn, "forward")).toBe(fn);
-    expect(resolveOverride(fn, "backward")).toBe(fn);
-  });
-
-  it("picks the matching direction from an object", () => {
-    const forward = vi.fn();
-    expect(resolveOverride({ forward }, "forward")).toBe(forward);
-    expect(resolveOverride({ forward }, "backward")).toBeUndefined();
-  });
-});
-
-describe("withOverride", () => {
-  it("returns the config untouched when there is nothing to apply", () => {
-    const config = preset(() => new MultiAnimation([]));
-    expect(withOverride(config, undefined)).toBe(config);
-    expect(withOverride(config, vi.fn(), { labels: false })).toBe(config);
-  });
-
-  it("labels the built composite, marks coupling, then runs the override", () => {
-    const from = el();
-    const to = el();
-    const built = new MultiAnimation([track(from), track(to)]);
-    const override = vi.fn((anim: MultiAnimation) => {
-      anim.set("in", { integrator: snappy });
-      anim.startAt = [0, 0.4];
-    });
-
-    const wrapped = withOverride(
-      preset(() => built),
-      override,
-      { coupled: false },
+describe("defineTransition and overrides", () => {
+  it("infers each direction's prepared data and concrete return independently", async () => {
+    const forward = vi.fn(),
+      backward = vi.fn();
+    const transition = defineTransition(
+      {
+        forward: {
+          prepare: async () => ({ overlay: "forward-overlay" }),
+          animation({ overlay, from, to }) {
+            expectTypeOf(overlay).toEqualTypeOf<string>();
+            expect(overlay).toBe("forward-overlay");
+            return new MultiAnimation({ out: track(from), in: track(to) });
+          },
+        },
+        backward: {
+          prepare: () => ({ restore: 42 }),
+          animation({ restore, from }) {
+            expectTypeOf(restore).toEqualTypeOf<number>();
+            expect(restore).toBe(42);
+            return track(from);
+          },
+        },
+      },
+      {
+        override: {
+          forward({ animation }) {
+            expectTypeOf(animation).toEqualTypeOf<
+              MultiAnimation<"out" | "in">
+            >();
+            animation.select("in").set({ integrator: replacement });
+            forward();
+          },
+          backward({ animation }) {
+            expectTypeOf(animation).toEqualTypeOf<WebAnimation>();
+            animation.set({ integrator: replacement });
+            backward();
+          },
+        },
+      },
     );
-    const result = wrapped.animation(args(from, to));
-
-    expect(result).toBe(built);
-    expect(override).toHaveBeenCalledWith(built, expect.anything());
-    expect(built.coupled).toBe(false);
-    expect(built.select("in")[0]!.integrator).toBe(snappy);
-    expect(built.select("out")[0]!.integrator).toBe(base);
-    expect(built.startAt).toEqual([0, 0.4]);
-  });
-
-  it("runs only the callback for the current navigation direction", () => {
-    const from = el();
-    const to = el();
-    const forward = vi.fn();
-    const backward = vi.fn();
-    const wrapped = withOverride(
-      preset(() => new MultiAnimation([track(from), track(to)])),
-      { forward, backward },
-    );
-
-    wrapped.animation(args(from, to, "backward"));
-
-    expect(forward).not.toHaveBeenCalled();
+    for (const direction of ["forward", "backward"] as const) {
+      const input = args(direction);
+      const prepared = await transition.prepare!(preparation(input));
+      const result: Animation = transition.animation({ ...input, ...prepared });
+      expect(result).toBeInstanceOf(Animation);
+    }
+    expect(forward).toHaveBeenCalledTimes(1);
     expect(backward).toHaveBeenCalledTimes(1);
   });
-
-  it("propagates coupled to the composite", () => {
-    const from = el();
-    const to = el();
-    const built = new MultiAnimation([track(from), track(to)]);
-    const wrapped = withOverride(
-      preset(() => built),
-      (anim) => anim.set("out", { integrator: swift }),
-      { coupled: true },
+  it("uses the core's chosen direction and identical context throughout", async () => {
+    const events: string[] = [];
+    const input = args("backward");
+    const transition = defineTransition(
+      {
+        forward: {
+          prepare: () => {
+            throw new Error("wrong prepare");
+          },
+          animation: () => {
+            throw new Error("wrong animation");
+          },
+        },
+        backward: {
+          prepare({ context }) {
+            expect(context).toBe(input.context);
+            expect(context.direction).toBe("backward");
+            events.push("prepare");
+            return { value: 12 };
+          },
+          animation({ value, context }) {
+            expect(value).toBe(12);
+            expect(context).toBe(input.context);
+            events.push("animation");
+            return track();
+          },
+        },
+      },
+      {
+        override: {
+          backward({ animation, context }) {
+            expect(animation).toBeInstanceOf(WebAnimation);
+            expect(context).toBe(input.context);
+            expect(context.direction).toBe("backward");
+            events.push("override");
+          },
+        },
+      },
     );
-
-    wrapped.animation(args(from, to));
-
-    expect(built.coupled).toBe(true);
-    for (const t of built.tracks()) expect(t.integrator).toBe(swift);
+    const prepared = await transition.prepare!(preparation(input));
+    transition.animation({ ...input, ...prepared });
+    expect(events).toEqual(["prepare", "animation", "override"]);
+    expect(input.context.direction).toBe("backward");
   });
-
-  it("passes non-composite animations through without calling the override", () => {
-    const from = el();
-    const to = el();
-    const single = track(from);
-    const override = vi.fn();
-    const wrapped = withOverride(
-      preset(() => single),
-      override,
-    );
-
-    expect(wrapped.animation(args(from, to))).toBe(single);
-    expect(override).not.toHaveBeenCalled();
+  it("keeps overlapping preparations attached to their own direction", async () => {
+    let release!: (value: { value: string }) => void;
+    const calls: string[] = [];
+    const transition = defineTransition({
+      forward: {
+        prepare: () =>
+          new Promise<{ value: string }>((resolve) => {
+            release = resolve;
+          }),
+        animation({ value }) {
+          calls.push(`forward:${value}`);
+          return track();
+        },
+      },
+      backward: {
+        prepare: () => ({ value: 42 }),
+        animation({ value }) {
+          calls.push(`backward:${value}`);
+          return track();
+        },
+      },
+    });
+    const f = args("forward"),
+      b = args("backward");
+    const pending = transition.prepare!(preparation(f));
+    const backwardData = await transition.prepare!(preparation(b));
+    transition.animation({ ...b, ...backwardData });
+    release({ value: "first-run" });
+    const forwardData = await pending;
+    transition.animation({ ...f, ...forwardData });
+    expect(calls).toEqual(["backward:42", "forward:first-run"]);
   });
-
-  it("keeps prepare from the wrapped config", () => {
+  it("preserves synchronous preparation and only constructs the selected direction", () => {
     const prepare = vi.fn(() => ({}));
-    const wrapped = withOverride(
-      { prepare, animation: () => new MultiAnimation([]) },
-      vi.fn(),
-    );
-    expect(wrapped.prepare).toBe(prepare);
+    const forward = vi.fn(() => track()),
+      backward = vi.fn(() => track());
+    const transition = defineTransition({
+      forward: { prepare, animation: forward },
+      backward: { animation: backward },
+    });
+    const input = args();
+    const data = transition.prepare!(preparation(input));
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(data).not.toBeInstanceOf(Promise);
+    expect(forward).not.toHaveBeenCalled();
+    transition.animation({ ...input, ...data });
+    expect(forward).toHaveBeenCalledTimes(1);
+    expect(backward).not.toHaveBeenCalled();
+  });
+  it("wraps reusable definitions without mutation and chains overrides", () => {
+    const calls: string[] = [];
+    const base = defineTransition({
+      forward: { animation: () => track() },
+      backward: { animation: () => track() },
+    });
+    const first = withOverride(base, {
+      forward: ({ animation }) => {
+        animation.set({ integrator: replacement });
+        calls.push("first");
+      },
+    });
+    const second = withOverride(first, {
+      forward: ({ animation }) => {
+        expect(animation.integrator).toBe(replacement);
+        calls.push("second");
+      },
+    });
+    expect(withOverride(base, undefined)).toBe(base);
+    expect(base.animation(args()).integrator).toBe(original);
+    second.animation(args());
+    expect(calls).toEqual(["first", "second"]);
   });
 });

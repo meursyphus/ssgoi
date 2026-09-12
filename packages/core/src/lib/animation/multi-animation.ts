@@ -1,5 +1,9 @@
 import type { PhysicsOptions, Pose, Timeline } from "@types";
-import { Animation } from "./animation";
+import {
+  Animation,
+  type AnimationPatch,
+  type AnimationStart,
+} from "./animation";
 import { frameScheduler } from "./frame-scheduler";
 import { IntegratorProvider, type Integrator } from "./integrator";
 import { WebAnimation } from "./web-animation";
@@ -37,35 +41,47 @@ export interface MultiAnimationOptions {
  * Composite that drives several child Animations.
  *
  * - `parallel`: all children play together (optionally staggered via `startAt`)
- * - `sequence`: each child waits for the previous to settle, then plays
+ * - `sequence`: legacy numeric first-arrival chaining; use startCondition with
+ *   at: "settled" for explicit completion dependencies
  *
  * Pose/Timeline reads fan out to every child for diagnostic / inspection use.
  */
-export class MultiAnimation extends Animation {
+export class MultiAnimation<Name extends string = string> extends Animation {
   private readonly _children: Animation[];
+  private readonly progressChildren: Animation[];
   private _startAt: number[];
-  /**
-   * Every child shares one physics (drill's parallax pair, sheet's
-   * sheet + background + overlay, zoom's tile + background). When set,
-   * `set(label, …)` patches every `WebAnimation` regardless of label so the
-   * geometric coupling is never broken. Assigned by `withOverride`.
-   */
-  coupled = false;
+  private readonly namedChildren: Map<string, Animation>;
+  private restoreChildCallbacks: Array<() => void> = [];
+  private runId = 0;
   private pendingComplete = 0;
   private running = false;
   private pendingStartObservers: Array<() => void> = [];
 
-  constructor(children: Animation[], opts: MultiAnimationOptions = {}) {
+  constructor(
+    children: readonly Animation[] | Record<Name, Animation>,
+    opts: MultiAnimationOptions = {},
+  ) {
     super();
-    this._children = children;
+    this.namedChildren = new Map(
+      Array.isArray(children) ? [] : Object.entries(children),
+    );
+    this._children = Array.isArray(children)
+      ? [...children]
+      : [...this.namedChildren.values()];
+    // Empty named groups keep optional selectors stable, but are not motion
+    // and must not dilute a parent's progress (e.g. static zoom's overlay).
+    this.progressChildren = this._children.filter(
+      (child) =>
+        !(child instanceof MultiAnimation) || child.progressChildren.length > 0,
+    );
     // Both `sequence` and `parallel` collapse onto a single scheduling
     // mechanism: each child waits for its predecessor to hit a progress
     // threshold. `sequence` is just `startAt = [0, 1, 1, …]` (next child
-    // starts when the previous fully settles); `parallel` defaults to
+    // starts when the previous first reaches progress 1); `parallel` defaults to
     // `[0, 0, …]` (everyone starts together). Public API keeps both modes
     // for clarity, but only one code path runs.
     if ((opts.mode ?? "parallel") === "sequence") {
-      this._startAt = children.map((_, i) => (i === 0 ? 0 : 1));
+      this._startAt = this._children.map((_, i) => (i === 0 ? 0 : 1));
     } else {
       this._startAt = opts.startAt ?? [];
     }
@@ -97,23 +113,30 @@ export class MultiAnimation extends Animation {
     return out;
   }
 
-  /** `WebAnimation`s whose `label` matches, nested composites included. */
-  select(label: string): WebAnimation[] {
-    return this.tracks().filter((track) => track.label === label);
+  /** Select a registered child, which may itself be a composite. */
+  select(name: Name): Animation {
+    const child = this.namedChildren.get(name);
+    if (!child) throw new Error(`Unknown animation child: ${name}`);
+    return child;
   }
 
-  /**
-   * Patch the tracks with this label (all tracks when `coupled`). Unknown
-   * labels are a no-op so app-wide overrides can address roles a preset
-   * doesn't have.
-   */
-  set(label: string, patch: TrackPatch): this {
-    const targets = this.coupled ? this.tracks() : this.select(label);
-    if (patch.integrator !== undefined) {
-      const integrator = toIntegrator(patch.integrator);
-      for (const track of targets) track.integrator = integrator;
+  set(patch: AnimationPatch): this;
+  /** @deprecated Prefer select(name).set({ integrator }). */
+  set(name: Name, patch: TrackPatch): this;
+  set(patchOrName: AnimationPatch | Name, patch?: TrackPatch): this {
+    if (typeof patchOrName === "string") {
+      const target = this.select(patchOrName);
+      if (patch?.integrator !== undefined) {
+        target.set({ integrator: toIntegrator(patch.integrator) });
+      }
+      return this;
     }
-    return this;
+    return super.set(patchOrName);
+  }
+
+  /** Setting the composite explicitly retunes every child in the group. */
+  protected setIntegrator(integrator: Integrator): void {
+    for (const child of this._children) child.set({ integrator });
   }
 
   play(): void {
@@ -133,15 +156,16 @@ export class MultiAnimation extends Animation {
   complete(): void {
     this.running = false;
     this.clearPendingStartObservers();
+    this.restoreCompletionHandlers();
     for (const child of this._children) child.complete();
     this.onComplete?.();
   }
 
   get progress(): number {
-    if (this._children.length === 0) return 0;
+    if (this.progressChildren.length === 0) return 0;
     let sum = 0;
-    for (const child of this._children) sum += child.progress;
-    return sum / this._children.length;
+    for (const child of this.progressChildren) sum += child.progress;
+    return sum / this.progressChildren.length;
   }
 
   getPose(): Pose[] {
@@ -186,64 +210,117 @@ export class MultiAnimation extends Animation {
   /* ───────────────────────────────────────────────────────── private */
 
   private startRun(method: "play" | "reverse") {
+    const dependencies = this.buildDependencies();
     if (this.running) this.pause();
+    this.restoreCompletionHandlers();
+    const runId = ++this.runId;
     this.running = true;
     this.pendingComplete = this._children.length;
     if (this.pendingComplete === 0) {
       this.handleFinished();
       return;
     }
+
+    const completed = new Set<Animation>();
     for (const child of this._children) {
-      const prevOnComplete = child.onComplete;
-      child.onComplete = () => {
-        prevOnComplete?.();
-        this.handleChildComplete();
+      const previous = child.onComplete;
+      const callback = () => {
+        previous?.();
+        if (this.runId !== runId || !this.running || completed.has(child))
+          return;
+        completed.add(child);
+        if (--this.pendingComplete === 0) this.handleFinished();
       };
+      child.onComplete = callback;
+      this.restoreChildCallbacks.push(() => {
+        if (child.onComplete === callback) child.onComplete = previous;
+      });
     }
-    this.scheduleStart(0, method);
+
+    const started = new Set<Animation>();
+    const pump = () => {
+      // Revisit the list when a dependency started later in insertion order.
+      // Each child is started once; independent children retain authored order.
+      let changed = true;
+      while (this.running && changed) {
+        changed = false;
+        for (const child of this._children) {
+          if (!this.running || started.has(child)) continue;
+          const dependency = dependencies.get(child);
+          if (dependency) {
+            if (!started.has(dependency.after)) continue;
+            if (
+              !this.hasReachedThreshold(dependency.after, dependency.at, method)
+            )
+              continue;
+          }
+          started.add(child);
+          child[method]();
+          changed = true;
+        }
+      }
+      if (started.size === this._children.length)
+        this.clearPendingStartObservers();
+    };
+    pump();
+    if (this.running && started.size !== this._children.length) {
+      this.pendingStartObservers.push(
+        frameScheduler.subscribe(pump, "observe"),
+      );
+    }
   }
 
-  // Chained start: play child `index`, then observe its actual progress before
-  // starting the next one. A wall-clock timeout starts counting before WAAPI's
-  // asynchronous startup has completed, so mount/layout delays can otherwise
-  // make a sequence or stagger run early. The shared frame scheduler evaluates
-  // observers after frame-paced drivers, matching the pose painted this frame.
-  private scheduleStart(index: number, method: "play" | "reverse") {
-    if (!this.running) return;
-    if (index >= this._children.length) return;
-    this._children[index]![method]();
-    const next = index + 1;
-    if (next >= this._children.length) return;
-
-    const threshold = this._startAt[next];
-    if (threshold === undefined || threshold <= 0) {
-      this.scheduleStart(next, method);
-      return;
-    }
-    const child = this._children[index]!;
-    if (this.hasReachedThreshold(child, threshold, method)) {
-      this.scheduleStart(next, method);
-      return;
-    }
-
-    const stop = frameScheduler.subscribe(() => {
-      if (!this.running) return;
-      if (!this.hasReachedThreshold(child, threshold, method)) return;
-      stop();
-      this.pendingStartObservers = this.pendingStartObservers.filter(
-        (candidate) => candidate !== stop,
+  private buildDependencies(): Map<Animation, AnimationStart> {
+    const dependencies = new Map<Animation, AnimationStart>();
+    const siblings = new Set(this._children);
+    if (siblings.size !== this._children.length) {
+      throw new Error(
+        "Each child animation must occur once in a MultiAnimation",
       );
-      this.scheduleStart(next, method);
-    }, "observe");
-    this.pendingStartObservers.push(stop);
+    }
+    this._children.forEach((child, index) => {
+      const explicit = child.startCondition;
+      if (explicit) {
+        if (!siblings.has(explicit.after)) {
+          throw new Error(
+            "startAt.after must reference a sibling in the same MultiAnimation",
+          );
+        }
+        dependencies.set(child, { ...explicit });
+      } else if (index > 0 && this._startAt.some((value) => value > 0)) {
+        // Legacy constructor thresholds retain their first-crossing behavior.
+        // Even zero waits for the predecessor to start, preserving chained
+        // schedules such as [0, 0.4, 0] without changing preset defaults.
+        dependencies.set(child, {
+          after: this._children[index - 1]!,
+          at: this._startAt[index] ?? 0,
+        });
+      }
+    });
+    const visited = new Set<Animation>();
+    const visiting = new Set<Animation>();
+    const visit = (child: Animation) => {
+      if (visiting.has(child))
+        throw new Error("Animation startAt dependencies form a cycle");
+      if (visited.has(child)) return;
+      visiting.add(child);
+      const dependency = dependencies.get(child);
+      if (dependency) visit(dependency.after);
+      visiting.delete(child);
+      visited.add(child);
+    };
+    this._children.forEach(visit);
+    return dependencies;
   }
 
   private hasReachedThreshold(
     child: Animation,
-    threshold: number,
+    threshold: number | "settled",
     method: "play" | "reverse",
   ): boolean {
     if (child.isComplete) return true;
+    if (threshold === "settled") return false;
+    if (threshold <= 0) return true;
     const runProgress = method === "play" ? child.progress : 1 - child.progress;
     return runProgress >= threshold;
   }
@@ -253,22 +330,23 @@ export class MultiAnimation extends Animation {
     this.pendingStartObservers = [];
   }
 
-  private handleChildComplete() {
-    this.pendingComplete--;
-    if (this.pendingComplete <= 0) this.handleFinished();
+  private restoreCompletionHandlers() {
+    for (const restore of this.restoreChildCallbacks) restore();
+    this.restoreChildCallbacks = [];
   }
 
   private handleFinished() {
+    if (!this.running) return;
     this.running = false;
     this.clearPendingStartObservers();
+    this.restoreCompletionHandlers();
     this.onComplete?.();
   }
 
   findTimeForProgress(_threshold: number): number | null {
-    // A composite's "progress" is an average across children that may start
-    // at different times — there is no single timeline to consult. Return
-    // null so callers (e.g. an outer MultiAnimation) fall through to an
-    // immediate start rather than guessing a wrong ms value.
+    // A composite's progress averages children that may start at different
+    // times. There is no single precomputed timestamp; parents observe live
+    // progress on the shared frame clock instead.
     return null;
   }
 }

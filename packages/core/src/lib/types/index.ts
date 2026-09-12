@@ -1,5 +1,4 @@
 import type { Animation } from "../animation/animation";
-import type { MultiAnimation } from "../animation/multi-animation";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Style / Style objects
@@ -21,30 +20,11 @@ export type {
   PhysicsOptions,
 } from "../runtime/physics";
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Preset override
- *
- * Every preset accepts `{ override }` as its second argument. The callback
- * receives the `MultiAnimation` the preset built — tracks are labelled by
- * role (`"out"` / `"in"` / `"shared"` / `"overlay"`) — and may patch each
- * track's `integrator` via `set(label, { integrator })` and the composite's
- * `startAt` before playback starts. Pass one function for both directions
- * or `{ forward, backward }` to tune each navigation direction on its own.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-export type OverrideFn = (
-  animation: MultiAnimation,
-  context: SsgoiTransitionContext,
-) => void;
-
-export type Override =
-  | OverrideFn
-  | { forward?: OverrideFn; backward?: OverrideFn };
-
-/** Second argument shared by every preset factory. */
-export type PresetExtras = {
-  override?: Override;
-};
+export type {
+  Override,
+  OverrideFn,
+  PresetExtras,
+} from "../transition/define-transition";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Animation state — motion matching domain
@@ -140,13 +120,18 @@ export type AnimationFactoryArgs<TExtras> = {
  *   },
  * });
  */
-export function defineTransition<TExtras extends object>(
-  config: TransitionConfig<TExtras>,
-): TransitionConfig<TExtras> {
-  return config;
-}
+export { defineTransition } from "../transition/define-transition";
+export type {
+  Transition,
+  TransitionDefinition,
+  TransitionDirection,
+  OverrideArgs,
+} from "../transition/define-transition";
 
-export type TransitionConfig<TExtras extends object = object> = {
+export type TransitionConfig<
+  TExtras extends object = object,
+  TAnimation extends Animation = Animation,
+> = {
   /**
    * Synchronous setup that returns extras (or a Promise of them).
    *
@@ -161,7 +146,7 @@ export type TransitionConfig<TExtras extends object = object> = {
    * and `animation` runs once all three resolve.
    */
   prepare?: (args: PrepareArgs) => TExtras | Promise<TExtras>;
-  animation: (args: AnimationFactoryArgs<TExtras>) => Animation;
+  animation: (args: AnimationFactoryArgs<TExtras>) => TAnimation;
 };
 
 /**

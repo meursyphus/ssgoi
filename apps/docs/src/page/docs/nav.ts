@@ -188,6 +188,18 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
     label: "Configure",
     items: [
       {
+        id: "motion-overrides",
+        title: "Motion overrides",
+        href: "/docs/motion",
+        blurb: "Tune named animations, physics, and overlap by direction.",
+      },
+      {
+        id: "custom-transitions",
+        title: "Custom transitions",
+        href: "/docs/custom-transitions",
+        blurb: "Define direction-specific lifecycles and custom integrators.",
+      },
+      {
         id: "route-rules",
         title: "Route rules",
         href: "/docs/route-rules",

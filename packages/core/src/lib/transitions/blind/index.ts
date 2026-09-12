@@ -1,4 +1,4 @@
-import type { AnyTransitionConfig, PresetExtras } from "@types";
+import type { PresetExtras } from "@types";
 import { withOverride } from "../../motion/with-override";
 import { blind as transition } from "./transition";
 
@@ -17,8 +17,8 @@ export type BlindConfig = {
 
 export function blind(
   config: BlindConfig = {},
-  extras: PresetExtras = {},
-): AnyTransitionConfig {
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const { type = "horizontal" } = config;
   // Internal `blind()` keys on `direction` (horizontal/vertical). The public
   // `type` slot is just a rename — the value space is identical. Slat count

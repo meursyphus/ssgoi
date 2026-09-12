@@ -1,4 +1,6 @@
-import type { TransitionConfig } from "@types";
+import type { NavigationDirection } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { TransitionDirection } from "@types";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -43,57 +45,66 @@ function clearFromStyle(el: HTMLElement): void {
   el.style.pointerEvents = "";
 }
 
-export const axis = (options: AxisOptions = {}): TransitionConfig => {
+export const axis = (options: AxisOptions = {}) => {
   const type = options.type ?? DEFAULT_TYPE;
   const feel = options.feel ?? DEFAULT_FEEL;
   const provider = resolveAxisProvider(type, feel);
 
-  return {
-    prepare: ({ from, to, context }) => {
-      const config = provider.build({ direction: context.direction });
-      from.then((el) => {
-        applyStartStyle(el, config.out);
-        el.style.pointerEvents = "none";
-      });
-      to.then((el) => {
-        applyStartStyle(el, config.in);
-      });
-      return {};
-    },
-    animation: ({ from, to, context }) => {
-      const config = provider.build({ direction: context.direction });
-      // Z scales the page element in place. Without clipping to the viewport
-      // slice, scale-up paints over chrome / scroll overflow and scale-down
-      // exposes neighbouring layout. Mirror sheet's inset trick.
-      if (type === "z") {
-        const fromRect = getViewportRect(context, "from");
-        const toRect = getViewportRect(context, "to");
-        from.style.clipPath = `inset(${fromRect.top}px 0 calc(100% - ${fromRect.top + fromRect.height}px) 0)`;
-        to.style.clipPath = `inset(${toRect.top}px 0 calc(100% - ${toRect.top + toRect.height}px) 0)`;
-      }
+  const createDirection = (navigationDirection: NavigationDirection) => {
+    const config = provider.build({ direction: navigationDirection });
+    return {
+      prepare: ({ from, to }) => {
+        from.then((el) => {
+          applyStartStyle(el, config.out);
+          el.style.pointerEvents = "none";
+        });
+        to.then((el) => {
+          applyStartStyle(el, config.in);
+        });
+        return {};
+      },
+      animation: ({ from, to, context }) => {
+        // Z scales the page element in place. Without clipping to the viewport
+        // slice, scale-up paints over chrome / scroll overflow and scale-down
+        // exposes neighbouring layout. Mirror sheet's inset trick.
+        if (type === "z") {
+          const fromRect = getViewportRect(context, "from");
+          const toRect = getViewportRect(context, "to");
+          from.style.clipPath = `inset(${fromRect.top}px 0 calc(100% - ${fromRect.top + fromRect.height}px) 0)`;
+          to.style.clipPath = `inset(${toRect.top}px 0 calc(100% - ${toRect.top + toRect.height}px) 0)`;
+        }
 
-      const outAnim = new WebAnimation({
-        element: from,
-        integrator: IntegratorProvider.from(provider.outPhysics),
-        style: (t) => config.out.animate(t),
-        // Restore the reused from node's inline styles on complete. This
-        // covers willChange/backfaceVisibility/contain/transform/opacity (from
-        // applyStartStyle + the WAAPI final frame), pointerEvents (set in
-        // prepare), and clipPath (set above for z; harmless no-op otherwise).
-        onComplete: () => clearFromStyle(from),
-      });
+        const outAnim = new WebAnimation({
+          element: from,
+          integrator: IntegratorProvider.from(provider.outPhysics),
+          style: (t) => config.out.animate(t),
+          // Restore the reused from node's inline styles on complete. This
+          // covers willChange/backfaceVisibility/contain/transform/opacity (from
+          // applyStartStyle + the WAAPI final frame), pointerEvents (set in
+          // prepare), and clipPath (set above for z; harmless no-op otherwise).
+          onComplete: () => clearFromStyle(from),
+        });
 
-      const inAnim = new WebAnimation({
-        element: to,
-        integrator: IntegratorProvider.from(provider.inPhysics),
-        style: (t) => config.in.animate(t),
-        onComplete: () => clearStyle(to),
-      });
+        const inAnim = new WebAnimation({
+          element: to,
+          integrator: IntegratorProvider.from(provider.inPhysics),
+          style: (t) => config.in.animate(t),
+          onComplete: () => clearStyle(to),
+        });
 
-      // Composition (mode / startAt overlap) is decided by the provider —
-      // x, y, z have meaningfully different timings, so this file just
-      // forwards what the provider gives us.
-      return new MultiAnimation([outAnim, inAnim], provider.composition);
-    },
+        // Composition (mode / startAt overlap) is decided by the provider —
+        // x, y, z have meaningfully different timings, so this file just
+        // forwards what the provider gives us.
+        return new MultiAnimation(
+          { out: outAnim, in: inAnim },
+          provider.composition,
+        );
+      },
+    } satisfies TransitionDirection<object>;
   };
+
+  return defineTransition({
+    forward: createDirection("forward"),
+    backward: createDirection("backward"),
+  });
 };
