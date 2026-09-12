@@ -1,0 +1,51 @@
+---
+title: "Case study: rounded clips that change when you press pause"
+description: "A rounded image looked correct when paused but less rounded during playback. A small reproduction exposed a high-DPI rendering edge case."
+date: "2026-09-12"
+author: "MeurSyphus"
+tags: ["css", "clip-path", "animation", "debugging", "edge cases"]
+---
+
+While testing the Airbnb demo's backward Zoom transition, we noticed that the moving image looked less rounded than its destination card. Pausing the animation made the corners look correct again.
+
+Checking the final radius was not enough. The geometry could be correct while the running animation painted a different shape.
+
+## Where it happened
+
+We reproduced the discrepancy on **Chromium 152 on macOS, with a device pixel ratio of 2**, using the Web Animations API to animate `transform: scale(...)` and a rounded `clip-path: inset(...)` on the same element. The rounded clip used pixel-valued radii.
+
+That is the confirmed environment for this case; we have not established the full affected browser or version range.
+
+## The comparison that exposed it
+
+We put a static reference beside two animations at effectively the same pose. A tiny oscillation kept the animations running without a visible change in size or radius.
+
+| Rendering state   | Pixel-valued radius     | Equivalent percentage radius |
+| ----------------- | ----------------------- | ---------------------------- |
+| Static            | Expected corners        | Expected corners             |
+| Paused animation  | Expected corners        | Expected corners             |
+| Running animation | Visibly smaller corners | Expected corners             |
+
+The computed values agreed, but the running pixel clip looked different. Pausing removed the discrepancy. Our earlier checks had frozen the animation before inspecting it, which hid the condition we needed to test.
+
+## The workaround
+
+SSGOI now expresses the clip's insets and elliptical radii as percentages of the **full clipping element's border box**. The denominator is the page or clone being clipped, not the smaller visible photo window.
+
+For a 400×900 element, these describe approximately the same clip:
+
+```css
+/* Pixel radius */
+clip-path: inset(0% 0% 55.5556% 0% round 40px);
+
+/* Equivalent percentages: 40 / 400 and 40 / 900 */
+clip-path: inset(0% 0% 55.5556% 0% round 10% / 4.4444%);
+```
+
+Scale compensation still comes first: divide the desired visible radius by the current X/Y scale, then convert those lengths to percentages. This changes the CSS representation without increasing the intended radius or changing its interpolation.
+
+The [shared serializer](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/src/lib/transitions/inset-clip.ts) is used by both Zoom and Hero. In the reproduction, the percentage clip stays consistent during playback and after pausing.
+
+The [browser fixture](https://github.com/meursyphus/ssgoi/blob/75de939e053fd126f1108bd7272ce456360c9e5f/packages/core/tests/browser/rounded-clip.html) is included in the repository. Run `pnpm --filter @ssgoi/core dev`, open `/tests/browser/rounded-clip.html` on the printed Vite URL, and toggle Pause/Resume on a high-DPI display.
+
+For animation edge cases, compare **static, paused, and running** states in the browser and display environment where the problem occurs. A correct paused screenshot does not establish that live playback is correct.
