@@ -696,10 +696,11 @@ export function CompatibilityBody() {
       <Heading3>Your router keeps navigation</Heading3>
       <p className={`mt-3 ${measure} ${prose}`}>
         SSGOI watches the route boundary your framework already mounts and
-        unmounts. There is no replacement router and no navigation wrapper, and
-        it never writes to history — it only listens for{" "}
-        <code className={inlineCode}>popstate</code> to tell forward from
-        backward.
+        unmounts. It reads browser history entry identities to remember each
+        visit&apos;s effect. It wraps pushState/replaceState to retain a
+        namespaced entry marker alongside existing router state, even when
+        native entry information arrives late. Your router still owns URLs and
+        navigation.
       </p>
 
       <div className="mt-8">

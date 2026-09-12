@@ -14,7 +14,7 @@ import { prepareOutgoing, promiseAll } from "@utils";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { resolveTransitionRule } from "./resolve-transition-rule";
-import { createNavigationDirectionTracker } from "./navigation-direction";
+import { createNavigationTransitionResolver } from "./navigation-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
@@ -84,7 +84,8 @@ export function createSggoiTransitionContext(
     // side/path repeats before pairing, the outermost DOM boundary owns it.
     keepCurrent: ({ current, next }) => current.element.contains(next.element),
   });
-  const directionTracker = createNavigationDirectionTracker();
+  const navigationResolver =
+    createNavigationTransitionResolver<AnyTransitionConfig>();
 
   // Normalize both accepted shapes to the functional form up front so the rest
   // of the file deals with exactly one shape: a static list becomes a function
@@ -456,15 +457,16 @@ export function createSggoiTransitionContext(
         pair.to,
       );
 
-      const historyDirection = directionTracker.resolve(
-        transformedFrom,
-        transformedTo,
-      );
-      const resolved = resolveTransitionRule(
-        transformedFrom,
-        transformedTo,
-        getProcessedTransitions(),
-        historyDirection,
+      const resolved = navigationResolver.resolve(
+        pair.from,
+        pair.to,
+        (historyDirection) =>
+          resolveTransitionRule(
+            transformedFrom,
+            transformedTo,
+            getProcessedTransitions(),
+            historyDirection,
+          ),
       );
 
       // Reset is the safe fallback when no rule owns this navigation. The
@@ -648,6 +650,7 @@ export function createSggoiTransitionContext(
     element,
     { enter = true } = {},
   ) => {
+    navigationResolver.connect();
     if (registered.has(element)) {
       const state = hiddenState.get(element);
       if (state && state.currentPath !== path) {
@@ -731,5 +734,5 @@ export function createSggoiTransitionContext(
     return cb;
   };
 
-  return { register, refFor };
+  return { register, refFor, disconnect: navigationResolver.dispose };
 }
