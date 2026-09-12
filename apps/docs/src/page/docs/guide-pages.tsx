@@ -336,32 +336,27 @@ export function BoundariesBody() {
         <Link href="/docs/install" className={link}>
           quick start
         </Link>{" "}
-        imports it in step 2; below is the manual equivalent explaining its
-        values. For most apps both are just the pathname.
+        imports the router adapter in step 2. It resolves the route id and DOM
+        lifetime together; both default to the pathname.
       </p>
 
       <CodeBlock
         className="mt-6"
-        code={`"use client";
+        code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
-import { usePathname } from "next/navigation";
+<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 
-export function SsgoiRouteBoundary({ children }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}`}
+// Inside a persistent section layout:
+<SsgoiRouteBoundary routeKey="section-shell">
+  <Header />
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+</SsgoiRouteBoundary>`}
       />
 
       <p className={`mt-6 ${body}`}>
-        React needs a wrapper component because the router does not own the
-        routed element. The SvelteKit, Nuxt and SolidStart templates use the
-        same wrapper shape; in Qwik and Angular you put the key and the
-        attribute on the routed page root itself —{" "}
+        Next.js, React Router, TanStack Router, SvelteKit, Nuxt and SolidStart
+        have optional router entries that own this wrapper. In Qwik and Angular
+        you put the key and the attribute on the routed page root itself —{" "}
         <Link href="/docs/frameworks" className={link}>
           Frameworks
         </Link>{" "}

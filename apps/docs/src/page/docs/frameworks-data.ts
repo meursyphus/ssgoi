@@ -75,8 +75,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }`,
       },
       {
-        heading: "When the pathname boundary is not enough",
-        body: "Use routeKey for a persistent layout or resolve({ pathname, selectedSegments }) for slot-specific ids and keys. Interception also needs the app’s route/slot files and compatible middleware (Next 13–15) or proxy (Next 16+) rules. The boundary does not create rewrites or redirects; verify soft navigation, back, and direct entry.",
+        heading: "Persistent layouts",
+        body: "A layout-owned routeKey preserves the header while the inner boundary replaces the changing content. Keep the provider above these section layouts, without a full-path boundary remounting every section from above.",
+        code: `// app/products/layout.tsx
+import type { ReactNode } from "react";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+
+export default function ProductsLayout({ children }: { children: ReactNode }) {
+  return (
+    <SsgoiRouteBoundary routeKey="products-layout">
+      <header>Products</header>
+      <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+    </SsgoiRouteBoundary>
+  );
+}`,
+      },
+      {
+        heading: "Parallel slots and interception",
+        body: "Use resolve({ pathname, selectedSegments }) for slot-specific ids and keys. Function props belong in a client component. selectedSegmentsToPath(selectedSegments, basePath) resolves the owned slot beneath its layout; an empty slot is its index route, even when the browser URL points at a modal. Interception also needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry; the boundary includes URL-hook Suspense and accepts a fallback for Cache Components.",
       },
     ],
   },
@@ -130,27 +146,47 @@ export default function Layout() {
     templateUrl: `${TEMPLATES}/react-router`,
     sections: [
       {
-        heading: "Setup",
+        heading: "1. Provider and config",
         body: "One <Ssgoi> and the shell classes in the root; the boundary keys on the pathname and wraps every page via a pathless layout route.",
         code: `// app/root.tsx — the App component
-<main className="relative z-0 min-h-dvh overflow-x-clip">
-  <Ssgoi config={config}>
-    <Outlet />
-  </Ssgoi>
-</main>
+import { Outlet } from "react-router";
+import { Ssgoi } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
 
+const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
+export default function App() {
+  return (
+    <main className="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={config}><Outlet /></Ssgoi>
+    </main>
+  );
+}`,
+      },
+      {
+        heading: "2. Route boundary",
+        code: `// app/routes/page-boundary.layout.tsx
+import { Outlet } from "react-router";
 import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
 
-// app/routes/page-boundary.layout.tsx
 export default function PageBoundaryLayout() {
   return <SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>;
-}
+}`,
+      },
+      {
+        heading: "3. Route registration",
+        body: "In framework mode, put existing page routes under the boundary layout. Keep the document Layout and other root exports from your React Router app.",
+        code: `// app/routes.ts
+import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
 
-// app/routes.ts — wrap your pages with the boundary layout
-layout("routes/page-boundary.layout.tsx", [
-  index("routes/home.tsx"),
-  route("posts/:postId", "routes/posts.$postId.tsx"),
-]),`,
+export default [
+  layout("routes/page-boundary.layout.tsx", [
+    index("routes/home.tsx"),
+    route("posts/:postId", "routes/posts.$postId.tsx"),
+  ]),
+] satisfies RouteConfig;`,
       },
       {
         heading: "Beyond the basics",
@@ -169,6 +205,15 @@ layout("routes/page-boundary.layout.tsx", [
       {
         heading: "Setup",
         code: `// app/routes/__root.tsx
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { Ssgoi } from "@ssgoi/react";
+import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+import { drill } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
 export const Route = createRootRoute({
   component: () => (
     <main className="relative z-0 min-h-dvh overflow-x-clip">
@@ -179,9 +224,7 @@ export const Route = createRootRoute({
       </Ssgoi>
     </main>
   ),
-});
-
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";`,
+});`,
       },
       {
         heading: "Beyond the basics",
@@ -296,26 +339,39 @@ import { config } from "./ssgoi-config";
     slug: "solidstart",
     name: "SolidStart",
     pkg: "@ssgoi/solid",
-    lead: "A keyed <Show> recreates its child when the id changes. Wire the boundary once at the router root.",
+    lead: "Import @ssgoi/solid/solidstart at the router root. Its boundary reads the router location and owns the keyed DOM lifetime.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/solidstart.txt",
     templateUrl: `${TEMPLATES}/solidstart`,
     sections: [
       {
         heading: "Setup",
         code: `// src/app.tsx
+import { Router } from "@solidjs/router";
+import { FileRoutes } from "@solidjs/start/router";
+import { Suspense } from "solid-js";
+import { Ssgoi } from "@ssgoi/solid";
 import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
-<Router
-  root={(props) => (
-    <main class="relative z-0 min-h-dvh overflow-x-clip">
-      <Ssgoi config={config}>
-        <SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
-      </Ssgoi>
-    </main>
-  )}
->
-  <FileRoutes />
-</Router>;
-`,
+import { drill } from "@ssgoi/solid/view-transitions";
+
+const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
+export default function App() {
+  return (
+    <Router root={(props) => (
+      <main class="relative z-0 min-h-dvh overflow-x-clip">
+        <Ssgoi config={config}>
+          <Suspense>
+            <SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
+          </Suspense>
+        </Ssgoi>
+      </main>
+    )}>
+      <FileRoutes />
+    </Router>
+  );
+}`,
       },
       {
         heading: "Beyond the basics",

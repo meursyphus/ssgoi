@@ -59,7 +59,7 @@ const DOCS_BREADCRUMB = breadcrumbSchema([
 const START_PATHS = [
   {
     title: "Set it up",
-    body: "Install the package for your framework, write the config and the route boundary, then edit the layout you already have.",
+    body: "Start with the Next.js example, or choose your framework guide. Write the config, import the router boundary, and wire them into your layout.",
     href: "/docs/install",
   },
   {

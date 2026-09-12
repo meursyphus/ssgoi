@@ -112,6 +112,73 @@ A project child boundary belongs around only its changing content. The outer
 project key stays `/projects/:id`; inner tabs can animate independently.
 If child transitions are not wanted, omit that inner boundary.
 
+```tsx
+// Render inside app/(app)/(detail)/projects/[id]/layout.tsx, passing its id param.
+export function ProjectContent({
+  projectId,
+  children,
+}: {
+  projectId: string;
+  children: ReactNode;
+}) {
+  return (
+    <SsgoiRouteBoundary
+      resolve={({ selectedSegments }) => ({
+        id: selectedSegmentsToPath(selectedSegments, `/projects/${projectId}`),
+      })}
+      fallback={<div className="min-h-px" aria-hidden="true" />}
+    >
+      {children}
+    </SsgoiRouteBoundary>
+  );
+}
+```
+
+Use the owning layout's projectId for the base, so an intercepted sidebar URL
+cannot change the background's identity. Empty selected segments mean the
+layout's index route, not "unknown": at the root this is `/`, and inside a
+project it is `/projects/:id`. Do not fall back to the browser pathname for an
+empty slot, since that pathname may already describe the intercepted modal.
+
+## Existing named boundary policies
+
+Applications may retain their own names (landing-content, app-shell,
+main-content, project-content) and pure resolver. Replace only the hook,
+Suspense, and keyed-DOM implementation with the adapter:
+
+```tsx
+"use client";
+
+import type { ReactNode } from "react";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { resolveBoundary, type BoundaryName } from "./boundary-policy";
+
+export function AppRouteBoundary({
+  name,
+  children,
+}: {
+  name: BoundaryName;
+  children: ReactNode;
+}) {
+  return (
+    <SsgoiRouteBoundary
+      resolve={(location) => resolveBoundary(name, location)}
+      fallback={<div className="min-h-px" aria-hidden="true" />}
+    >
+      {children}
+    </SsgoiRouteBoundary>
+  );
+}
+```
+
+The policy receives `{ pathname, selectedSegments }` and returns `{ id, key? }`.
+The library does not need application-specific boundary names. A boundary's
+HTML `id` prop is an ordinary DOM attribute; use `resolve` for its transition id.
+Setting a fixed transition id alone does not preserve a shell: set its key too.
+The Instagram demo uses `{ id: profileBase, key: profileBase }` for its profile
+shell and a pathname boundary for its tabs; the checkout and mobile-tab demos
+use `routeKey` for their persistent shells.
+
 ## 3. Middleware / proxy remains app configuration
 
 Next.js route interception is provided by your route/slot tree. SSGOI does not

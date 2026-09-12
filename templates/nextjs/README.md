@@ -57,6 +57,52 @@ restore the forward source and reset the forward destination.
 - Gallery: expanding `zoom`.
 - Profile: static `zoom`.
 
+## Shared boundary contract
+
+This template uses the shipped adapter directly in every routed section;
+there is no local keyed-DOM wrapper. The React Router, TanStack Router,
+SvelteKit, and Nuxt templates use their corresponding router entries with
+the same `{ id, key? }` resolver contract.
+
+For an application with named boundaries, keep its policy in a client component:
+
+```tsx
+<SsgoiRouteBoundary
+  resolve={(location) => resolveBoundary("app-shell", location)}
+  fallback={<div className="min-h-px" aria-hidden="true" />}
+>
+  {children}
+</SsgoiRouteBoundary>
+```
+
+`resolveBoundary` is application code, not an extra library API. Next.js passes
+both `pathname` and the owning layout's `selectedSegments`. Use
+`selectedSegmentsToPath(selectedSegments, projectBase)` from the same entry for
+a nested slot; a soft `@modal` navigation must keep its background's slot id
+and key even though the browser URL changes. An empty slot is the index route.
+The adapter includes Suspense for Cache Components, but the template leaves
+Cache Components disabled so it also demonstrates ordinary App Router setup.
+
+The complete policy example is in
+[complex routing](https://ssgoi.dev/llms/complex-routing.txt).
+
+## Verify boundary ownership
+
+- Shop → Tech → Fashion: the product header and tabs keep their DOM; only the
+  inner boundary changes. Its outgoing DOM still contains the old category.
+- Shop → Posts: the products shell leaves and the post boundary enters.
+- Post list → detail → browser Back: the real routed roots leave and enter,
+  and the list scroll position is restored.
+- Query-only navigation keeps a boundary mounted by default.
+
+The React adapter regression suite also covers an app shell shared across
+top-level tabs, per-project shell lifetimes, intercepted modal open/back/forward,
+direct detail entry, index backgrounds, nested sidebars, and unresolved URLs:
+
+```bash
+pnpm --filter @ssgoi/react test:run
+```
+
 Full boundary guide: https://ssgoi.dev/llms.txt
 
 ```bash
