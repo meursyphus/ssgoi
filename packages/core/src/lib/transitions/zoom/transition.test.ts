@@ -175,7 +175,7 @@ describe("zoom transition media inference", () => {
       expect(style.transform).toContain("scale(0.36, 0.36)");
       expect(style.clipPath).toContain("44.44444444444444% 50% 0%");
       expect(style.clipPath).toContain(
-        "round 44.44444444444444px 0px 0px 44.44444444444444px",
+        "round 11.11111111111111% 0% 0% 11.11111111111111%",
       );
     },
   );

@@ -78,9 +78,7 @@ describe("hero clipped media morph", () => {
       expect(plan?.fromVisualEl.tagName).toBe("IMG");
       const clipped = reverse ? plan!.styleFor(1, 0) : plan!.styleFor(0, 1);
       expect(clipped.clipPath).toBe(
-        reverse
-          ? "inset(0px 20px 0px 0px round 16px 0px 0px 16px)"
-          : "inset(0px 80px 0px 0px round 64px 0px 0px 64px)",
+        "inset(0% 20% 0% 0% round 16% 0% 0% 16% / 16% 0% 0% 16%)",
       );
     },
   );

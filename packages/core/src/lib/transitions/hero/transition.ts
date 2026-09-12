@@ -17,6 +17,7 @@ import {
   type MediaFit,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { insetClipPath } from "../inset-clip";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
@@ -297,19 +298,28 @@ export function buildHeroMorphPlan(
         toRadius,
         toRadius,
       ];
-      const clipRadius = fromCorners
-        .map(
-          (corner, i) =>
-            `${Math.max(0, corner * u + toCorners[i]! * t) / Math.max(Math.abs(s), 0.000001)}px`,
-        )
-        .join(" ");
+      const radii = fromCorners.map((corner, i) => {
+        const radius =
+          Math.max(0, corner * u + toCorners[i]! * t) /
+          Math.max(Math.abs(s), 0.000001);
+        return { x: radius, y: radius };
+      });
       const insetT = fromClipInset.top * u + toClipInset.top * t;
       const insetR = fromClipInset.right * u + toClipInset.right * t;
       const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
       const insetL = fromClipInset.left * u + toClipInset.left * t;
       return {
         transform: `translate(${tx}px, ${ty}px) scale(${s})`,
-        clipPath: `inset(${insetT}px ${insetR}px ${insetB}px ${insetL}px round ${clipRadius})`,
+        clipPath: insetClipPath(
+          toContent,
+          {
+            top: insetT,
+            right: insetR,
+            bottom: insetB,
+            left: insetL,
+          },
+          radii,
+        ),
       };
     },
   };

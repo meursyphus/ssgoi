@@ -1,4 +1,5 @@
 import type { ZoomAnimationConfig, ZoomAnimationInput } from "./types";
+import { insetClipPath } from "../inset-clip";
 import {
   centerX,
   centerY,
@@ -82,13 +83,10 @@ function clipInsets(
   pageRect: DOMRect,
 ): { top: number; right: number; bottom: number; left: number } {
   return {
-    top: (window.top / pageRect.height) * 100,
-    right:
-      ((pageRect.width - (window.left + window.width)) / pageRect.width) * 100,
-    bottom:
-      ((pageRect.height - (window.top + window.height)) / pageRect.height) *
-      100,
-    left: (window.left / pageRect.width) * 100,
+    top: window.top,
+    right: pageRect.width - (window.left + window.width),
+    bottom: pageRect.height - (window.top + window.height),
+    left: window.left,
   };
 }
 
@@ -104,22 +102,21 @@ function clipRadius(
   };
 }
 
-function roundedClip(
+function interpolatedRadii(
   exitRadius: number,
   enterRadius: number,
   exitCorners: MediaCornerRadii | undefined,
   tileProgress: number,
   scaleX: number,
   scaleY: number,
-): string {
-  const radii = (exitCorners ?? [exitRadius]).map((corner) =>
+): { x: number; y: number }[] {
+  return (exitCorners ?? [exitRadius]).map((corner) =>
     clipRadius(
       Math.max(0, corner * tileProgress + enterRadius * (1 - tileProgress)),
       scaleX,
       scaleY,
     ),
   );
-  return `${radii.map((radius) => `${radius.x}px`).join(" ")} / ${radii.map((radius) => `${radius.y}px`).join(" ")}`;
 }
 
 export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
@@ -145,7 +142,7 @@ export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
       const u = 1 - progress;
       const sx = 1 + (scaleX - 1) * u;
       const sy = 1 + (scaleY - 1) * u;
-      const radius = roundedClip(
+      const radii = interpolatedRadii(
         exitRadius,
         enterRadius,
         geometry.exitCornerRadii,
@@ -155,7 +152,16 @@ export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
       );
 
       return {
-        clipPath: `inset(${start.top * u}% ${start.right * u}% ${start.bottom * u}% ${start.left * u}% round ${radius})`,
+        clipPath: insetClipPath(
+          pageRect,
+          {
+            top: start.top * u,
+            right: start.right * u,
+            bottom: start.bottom * u,
+            left: start.left * u,
+          },
+          radii,
+        ),
         transform: `translate(${dx * u}px, ${dy * u}px) scale(${sx}, ${sy})`,
       };
     },
@@ -185,7 +191,7 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
       const t = 1 - progress;
       const sx = 1 + (scaleX - 1) * t;
       const sy = 1 + (scaleY - 1) * t;
-      const radius = roundedClip(
+      const radii = interpolatedRadii(
         exitRadius,
         enterRadius,
         geometry.exitCornerRadii,
@@ -195,7 +201,16 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
       );
 
       return {
-        clipPath: `inset(${start.top * t}% ${start.right * t}% ${start.bottom * t}% ${start.left * t}% round ${radius})`,
+        clipPath: insetClipPath(
+          pageRect,
+          {
+            top: start.top * t,
+            right: start.right * t,
+            bottom: start.bottom * t,
+            left: start.left * t,
+          },
+          radii,
+        ),
         transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t}px) scale(${sx}, ${sy})`,
       };
     },
