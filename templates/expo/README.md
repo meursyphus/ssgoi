@@ -1,6 +1,6 @@
 # SSGOI + Expo Router
 
-Source preview for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
+Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
 
 From the repository root:
 

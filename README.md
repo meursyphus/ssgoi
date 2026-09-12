@@ -147,7 +147,7 @@ stay with your existing stack.
 
 React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
 
-An experimental [React Native / Expo Router source preview](./packages/react-native/README.md)
+An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
 adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.
 Try the [Expo template](./templates/expo) for the current implementation and device checks.
 

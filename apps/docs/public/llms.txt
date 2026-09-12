@@ -5,14 +5,14 @@ replacing the application router.
 
 Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
 
-Current version: `@ssgoi/core@7.1.0-beta.4`. Every `@ssgoi/*` framework package
+Current version: `@ssgoi/core@7.1.0`. Every `@ssgoi/*` framework package
 is released in lockstep with core, so install the same version across them.
 
 This file contains the minimal Next.js App Router setup. The root React package
 remains router agnostic. Read linked files only
 when their topic applies.
 
-React Native / Expo Router has a separate experimental source preview:
+React Native / Expo Router has a separate experimental integration:
 https://ssgoi.dev/llms/frameworks/expo.txt
 The web setup and preset catalog below do not apply unchanged to native views.
 

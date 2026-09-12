@@ -11,11 +11,8 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
   return (
     <div className="mt-8">
       <div className="flex flex-wrap items-center gap-3">
-        {doc.sourcePreview ? (
-          <span className={pillClass}>Experimental source preview</span>
-        ) : (
-          <NpmPill pkg={doc.pkg} />
-        )}
+        <NpmPill pkg={doc.pkg} />
+        {doc.experimental && <span className={pillClass}>Experimental</span>}
         {doc.llmsUrl && (
           <a
             href={doc.llmsUrl}
@@ -51,7 +48,7 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
       ))}
 
       <p className={`mt-14 border-t border-line pt-8 ${measure} ${prose}`}>
-        {doc.sourcePreview ? (
+        {doc.experimental ? (
           <>
             Use the native guide and template for supported presets and
             lifecycle behavior. The web effect catalog and DOM boundary setup do

@@ -12,7 +12,7 @@ export type FrameworkDoc = {
   lead: string;
   llmsUrl?: string;
   templateUrl?: string;
-  sourcePreview?: boolean;
+  experimental?: boolean;
   sections: FrameworkSection[];
 };
 
@@ -84,8 +84,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     slug: "expo",
     name: "React Native / Expo (experimental)",
     pkg: "@ssgoi/react-native",
-    sourcePreview: true,
-    lead: "A native source preview with fade/slide and file-based Expo Router boundaries. Start with the workspace template; this package has not been released yet.",
+    experimental: true,
+    lead: "Experimental native fade/slide transitions and file-based Expo Router boundaries, published in lockstep with the web packages. Start with the workspace template for the supported dependency baseline and device checks.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/expo.txt",
     templateUrl: `${TEMPLATES}/expo`,
     sections: [

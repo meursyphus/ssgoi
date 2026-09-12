@@ -1,8 +1,9 @@
-# SSGOI + React Native / Expo Router (experimental source preview)
+# SSGOI + React Native / Expo Router (experimental)
 
-This first native integration is under development. Use templates/expo from
-the matching source checkout until @ssgoi/react-native is released. Do not
-assume the existing core version means a native package is already on npm.
+This first native integration is published as @ssgoi/react-native in lockstep
+with the web packages. It remains experimental: a stable package version does
+not imply production-ready native support. Use templates/expo from the
+matching source checkout for the supported dependency baseline and device checks.
 
 Baseline: Expo 56.0.21, Expo Router 56.2.20, React Native 0.85.3, React 19.2.3,
 Reanimated 4.3.1, Worklets 0.8.3. Expo's standard navigator API is alpha.
