@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { buildInput, resolveZoom } from "./transition";
 import type { ZoomResolved } from "./types";
+import { createZoomIn, createZoomOut } from "./zoom-element";
 
 type Rect = {
   left: number;
@@ -141,6 +142,42 @@ function resolvedPair({
 }
 
 describe("zoom transition media inference", () => {
+  it.each(["enter", "exit"] as const)(
+    "preserves a partially visible Airbnb card and its surviving corners on %s",
+    (mode) => {
+      const enterEl = image({ box: rect(0, 0, 400, 400), fit: "cover" });
+      const exitImage = image({ box: rect(320, 280, 144, 144), fit: "cover" });
+      const exitEl = wrapper({
+        box: rect(320, 280, 144, 144),
+        child: exitImage,
+      });
+      const viewport = wrapper({
+        box: rect(0, 260, 400, 220),
+        child: exitEl,
+        radius: "0px",
+      });
+      const exitPage = page();
+      Object.defineProperty(exitEl, "parentElement", { value: viewport });
+      Object.defineProperty(viewport, "parentElement", { value: exitPage });
+      const input = buildInput(
+        { mode, enterEl, exitEl },
+        mode === "enter" ? exitPage : page(),
+        mode === "enter" ? page() : exitPage,
+        { x: 0, y: 0 },
+      );
+      expect(input.exitMedia?.window).toEqual(rect(320, 280, 80, 144));
+      expect(input.exitMedia?.cornerRadii).toEqual([16, 0, 0, 16]);
+      const style = (
+        mode === "enter" ? createZoomIn(input) : createZoomOut(input)
+      ).animate(0);
+      // 64 of the 144 source pixels are hidden; the image keeps its 0.36 scale.
+      expect(style.transform).toContain("scale(0.36, 0.36)");
+      expect(style.clipPath).toContain("44.44444444444444% 50% 0%");
+      expect(style.clipPath).toContain(
+        "round 44.44444444444444px 0px 0px 44.44444444444444px",
+      );
+    },
+  );
   it("connects inferred image geometry and wrapper radius to zoom input", () => {
     const input = buildInput(resolvedPair(), page(), page(), { x: 0, y: 0 });
 
@@ -149,6 +186,19 @@ describe("zoom transition media inference", () => {
     expect(input.exitRadius).toBe(16);
     // A radius on an image region inside the page must not round the whole page.
     expect(input.enterRadius).toBe(0);
+  });
+
+  it("keeps content-aware crop geometry on a fractionally sized detail page", () => {
+    const pair = resolvedPair();
+    const detail = page(400, 878);
+    detail.getBoundingClientRect = () => rect(0, 0, 400, 877.75) as DOMRect;
+    const input = buildInput(pair, page(), detail, { x: 0, y: 0 });
+    expect(input.enterRect.height).toBe(400);
+    expect(input.enterMedia?.content.width).toBe(400);
+    expect(input.enterMedia?.content.height).toBe(400);
+    expect(createZoomIn(input).animate(0).transform).toContain(
+      "scale(0.25, 0.25)",
+    );
   });
 
   it("keeps deprecated zero and px radius overrides working", () => {

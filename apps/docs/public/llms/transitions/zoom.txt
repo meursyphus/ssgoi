@@ -42,6 +42,20 @@ Use the same stable value on the collapsed and expanded media:
 - An empty, missing, or mismatched key is a no-op. Zero or more than one enter
   marker on the destination is also a no-op.
 
+## Automatic image geometry
+
+A keyed image or a wrapper with one direct image child automatically supplies
+intrinsic dimensions and centered CSS object-fit: cover/contain. Clipping
+ancestors inside the page supply rectangular overflow crops and simple uniform
+pixel radii, including when the key is on an image inside a rounded wrapper.
+Partially visible cards retain their surviving rounded corners. No
+data-zoom-radius is needed; legacy radius values remain explicit overrides.
+
+Inference stays conservative for ambiguous media, incompatible intrinsic
+ratios, custom object-position, and complex clipping. Bordered clipping
+ancestors, reserved scrollbar gutters, nonuniform/percentage radii, and clips
+that cut partway through a rounded corner retain the existing geometry path.
+
 ## Example
 
 ```ts

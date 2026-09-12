@@ -4,6 +4,7 @@ import {
   centerY,
   isCompatibleMediaGeometryPair,
   projectedWindowRect,
+  type MediaCornerRadii,
   type MediaRect,
 } from "../media-geometry";
 
@@ -13,6 +14,7 @@ type TileGeometry = {
   startWindow: MediaRect;
   scaleX: number;
   scaleY: number;
+  exitCornerRadii?: MediaCornerRadii;
 };
 
 function containsRect(outer: MediaRect, inner: MediaRect): boolean {
@@ -65,7 +67,14 @@ function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   // impossible region.
   if (!containsRect(enterMedia.window, startWindow)) return fallback();
 
-  return { enterContent, exitContent, startWindow, scaleX, scaleY };
+  return {
+    enterContent,
+    exitContent,
+    startWindow,
+    scaleX,
+    scaleY,
+    exitCornerRadii: exitMedia.cornerRadii,
+  };
 }
 
 function clipInsets(
@@ -95,6 +104,24 @@ function clipRadius(
   };
 }
 
+function roundedClip(
+  exitRadius: number,
+  enterRadius: number,
+  exitCorners: MediaCornerRadii | undefined,
+  tileProgress: number,
+  scaleX: number,
+  scaleY: number,
+): string {
+  const radii = (exitCorners ?? [exitRadius]).map((corner) =>
+    clipRadius(
+      Math.max(0, corner * tileProgress + enterRadius * (1 - tileProgress)),
+      scaleX,
+      scaleY,
+    ),
+  );
+  return `${radii.map((radius) => `${radius.x}px`).join(" ")} / ${radii.map((radius) => `${radius.y}px`).join(" ")}`;
+}
+
 export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
   const { pageRect, scrollOffset, enterRadius, exitRadius } = input;
   const geometry = buildTileGeometry(input);
@@ -118,11 +145,17 @@ export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
       const u = 1 - progress;
       const sx = 1 + (scaleX - 1) * u;
       const sy = 1 + (scaleY - 1) * u;
-      const visibleRadius = Math.max(0, exitRadius * u + enterRadius * (1 - u));
-      const radius = clipRadius(visibleRadius, sx, sy);
+      const radius = roundedClip(
+        exitRadius,
+        enterRadius,
+        geometry.exitCornerRadii,
+        u,
+        sx,
+        sy,
+      );
 
       return {
-        clipPath: `inset(${start.top * u}% ${start.right * u}% ${start.bottom * u}% ${start.left * u}% round ${radius.x}px / ${radius.y}px)`,
+        clipPath: `inset(${start.top * u}% ${start.right * u}% ${start.bottom * u}% ${start.left * u}% round ${radius})`,
         transform: `translate(${dx * u}px, ${dy * u}px) scale(${sx}, ${sy})`,
       };
     },
@@ -152,11 +185,17 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
       const t = 1 - progress;
       const sx = 1 + (scaleX - 1) * t;
       const sy = 1 + (scaleY - 1) * t;
-      const visibleRadius = Math.max(0, enterRadius * (1 - t) + exitRadius * t);
-      const radius = clipRadius(visibleRadius, sx, sy);
+      const radius = roundedClip(
+        exitRadius,
+        enterRadius,
+        geometry.exitCornerRadii,
+        t,
+        sx,
+        sy,
+      );
 
       return {
-        clipPath: `inset(${start.top * t}% ${start.right * t}% ${start.bottom * t}% ${start.left * t}% round ${radius.x}px / ${radius.y}px)`,
+        clipPath: `inset(${start.top * t}% ${start.right * t}% ${start.bottom * t}% ${start.left * t}% round ${radius})`,
         transform: `translate(${dx * t - scrollOffset.x}px, ${dy * t}px) scale(${sx}, ${sy})`,
       };
     },

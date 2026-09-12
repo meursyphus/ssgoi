@@ -124,6 +124,7 @@ export function buildInput(
     enterRect,
     (mediaEl) => getClientRect(enterPage, mediaEl),
     {
+      clipRoot: enterPage,
       legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
     },
   );
@@ -132,6 +133,7 @@ export function buildInput(
     exitRect,
     (mediaEl) => getClientRect(exitPage, mediaEl),
     {
+      clipRoot: exitPage,
       legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
     },
   );
