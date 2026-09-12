@@ -66,8 +66,9 @@
     while running.
   </p>
   <p>
-    Both animations move by just 0.002% around the same pose, keeping them
-    active on the compositor without a visible geometry change.
+    The animations move by just 0.002% around the same pose. The fallback
+    comparison adds will-change: contents, which disables Chromium's composited
+    clip-path path without pausing playback.
   </p>
   <button id="toggle">Pause animations</button>
   <main></main>
@@ -95,6 +96,7 @@
       "Static reference",
       "Legacy pixel radius",
       "Percent radius",
+      "Pixel radius (fallback)",
     ]) {
       const section = document.createElement("section");
       section.innerHTML = `<h2>${name}</h2><div class="stage"><div class="tile"><div class="photo"></div></div></div><output></output>`;
@@ -106,6 +108,9 @@
           "Static: 15.68px visible radius";
       } else {
         const percent = name === "Percent radius";
+        if (name === "Pixel radius (fallback)") {
+          tile.style.willChange = "contents";
+        }
         animations.push(
           tile.animate(
             [
