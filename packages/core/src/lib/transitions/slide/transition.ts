@@ -48,7 +48,7 @@ export const slide = (options: SlideOptions = {}) => {
           // The outgoing node is the real Activity page and gets reused on the
           // next navigation, so reset every inline style we wrote to it (mirror
           // the incoming cleanup, plus the out-only pointerEvents).
-          onComplete: () => {
+          onDispose: () => {
             from.style.willChange = "auto";
             from.style.backfaceVisibility = "";
             (from.style as CSSStyleDeclaration & { contain: string }).contain =
@@ -66,7 +66,7 @@ export const slide = (options: SlideOptions = {}) => {
               100 * pageMotionStyle("slide", "in", navigationDirection, t).x;
             return { transform: `translate3d(${translateX}%, 0, 0)` };
           },
-          onComplete: () => {
+          onDispose: () => {
             to.style.willChange = "auto";
             to.style.backfaceVisibility = "";
             (to.style as CSSStyleDeclaration & { contain: string }).contain =

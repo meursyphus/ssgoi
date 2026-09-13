@@ -1,8 +1,45 @@
 import type { Pose, StyleObject, Timeline, TimelineFrame } from "@types";
-import type { Integrator } from "./integrator";
-import { simulate, interpolateFrame, type SimFrame } from "../runtime/timeline";
+import type { Integrator, IntegratorState } from "./integrator";
+import {
+  simulate,
+  interpolateFrame,
+  sampleIntegratorState,
+  type SimFrame,
+} from "../runtime/timeline";
 import { waitPaint } from "../utils/wait-paint";
-import { Animation } from "./animation";
+import {
+  Animation,
+  finishedDisposal,
+  type AnimationDisposal,
+} from "./animation";
+import {
+  compatibleChannel,
+  residualAt,
+  type MotionChannel,
+  type MotionSnapshot,
+} from "../runtime/motion-matching";
+import {
+  createWebPresentationCodec,
+  type PresentationCodec,
+} from "./web-presentation";
+
+export interface WebMotionOptions {
+  /** Semantic identity, scoped by HostAnimation; never inferred from array position. */
+  key?: string;
+  role?: string;
+  space?: unknown;
+  lifetime?: "persistent" | "temporary";
+  codec?: PresentationCodec;
+  /** Time allowed for the old path's residual to disappear, in milliseconds. */
+  handoffDuration?: number;
+  /** Default for disappearing targets is a short fade. */
+  release?:
+    | "fade"
+    | "remove"
+    | ((snapshot: MotionSnapshot<HTMLElement>) => WebAnimation);
+  /** Opaque/incompatible CSS can crossfade a frozen copy, or explicitly finish. */
+  fallback?: "crossfade" | "finish";
+}
 import {
   frameScheduler,
   STABLE_FRAME_THRESHOLD,
@@ -10,6 +47,12 @@ import {
 } from "./frame-scheduler";
 
 const STARTUP_STABLE_FRAMES = 2;
+
+export interface WebMotionSnapshot extends MotionSnapshot<HTMLElement> {
+  displayStyle: StyleObject;
+  inlineStyle: string;
+  frame?: PresentationCodec["frame"];
+}
 
 export interface WebAnimationOptions {
   element: HTMLElement;
@@ -27,6 +70,8 @@ export interface WebAnimationOptions {
    * identity so user overrides can address tracks by role.
    */
   label?: string;
+  motion?: WebMotionOptions;
+  onDispose?: (context: AnimationDisposal) => void;
 }
 
 /**
@@ -49,8 +94,8 @@ export interface WebAnimationOptions {
  *      using WAAPI's `currentTime`, so browser setup latency is not counted as
  *      animation progress.
  *
- * Identity for motion matching is the DOM element itself — when a previous
- * animation's pose is handed in via `matchInto`, we look up by element.
+ * Scalar matchInto is a legacy, same-coordinate operation. Host handoff uses
+ * scoped target identities and typed presentation channels instead.
  */
 export class WebAnimation extends Animation {
   private readonly _element: HTMLElement;
@@ -63,6 +108,10 @@ export class WebAnimation extends Animation {
 
   private currentValue: number;
   private currentVelocity = 0;
+  private solverState: IntegratorState | undefined;
+  private solverTarget = 1;
+  private presentationTime = 0;
+  private renderedStyles: StyleObject[] = [];
   private frames: SimFrame[] = [];
   private waapi: globalThis.Animation | null = null;
   private runId = 0;
@@ -75,6 +124,25 @@ export class WebAnimation extends Animation {
   private paused = false;
   private settled = false;
   private reversing = false;
+  private disposed = false;
+  private readonly legacyCompletionCleanup: boolean;
+  readonly motion: WebMotionOptions;
+  private codec: PresentationCodec | undefined;
+  private adopted: MotionSnapshot<HTMLElement> | undefined;
+  private presentationFrames: Array<{
+    time: number;
+    channels: Record<string, MotionChannel>;
+  }> = [];
+  private hold: globalThis.Animation | null = null;
+  private fallbackCopy: WebAnimation | null = null;
+  private fallbackChannels = new Set<string>();
+  private fallbackMode: "crossfade" | "finish" | undefined;
+  get handoffFallbackMode() {
+    return this.fallbackMode;
+  }
+  get handoffFallbacks(): readonly string[] {
+    return [...this.fallbackChannels];
+  }
 
   constructor(opts: WebAnimationOptions) {
     super();
@@ -86,7 +154,10 @@ export class WebAnimation extends Animation {
     this.upperBound = opts.upperBound ?? 1;
     this.currentValue = this.lowerBound;
     this.onUpdate = opts.onUpdate;
+    this.legacyCompletionCleanup = !!opts.onComplete && !opts.onDispose;
     this.onComplete = opts.onComplete;
+    this.onDispose = opts.onDispose;
+    this.motion = opts.motion ?? {};
   }
 
   /** The DOM node this track drives. */
@@ -104,15 +175,18 @@ export class WebAnimation extends Animation {
   }
   set integrator(integrator: Integrator) {
     this._integrator = integrator;
+    this.solverState = undefined;
   }
 
   protected setIntegrator(integrator: Integrator): void {
     this._integrator = integrator;
+    this.solverState = undefined;
   }
 
   play(): void {
+    const wasReversing = this.reversing;
     this.reversing = false;
-    if (this.paused && this.waapi) {
+    if (this.paused && this.waapi && !wasReversing) {
       // Resume the same WAAPI run — currentTime is preserved, so motion
       // continues exactly where it was halted.
       this.paused = false;
@@ -122,6 +196,7 @@ export class WebAnimation extends Animation {
         return;
       }
       this.waapi.play();
+      this.fallbackCopy?.play();
       return;
     }
     this.runToward(this.upperBound);
@@ -141,6 +216,7 @@ export class WebAnimation extends Animation {
     // resume from the exact frame — no inline-style pinning needed.
     this.captureLiveState();
     this.waapi?.pause();
+    this.fallbackCopy?.pause();
     this.stopStartupClock?.();
     this.stopStartupClock = null;
     this.running = false;
@@ -148,6 +224,7 @@ export class WebAnimation extends Animation {
   }
 
   complete(): void {
+    if (this.settled) return;
     this.clearWaapi();
     this.running = false;
     this.paused = false;
@@ -155,7 +232,259 @@ export class WebAnimation extends Animation {
     this.currentVelocity = 0;
     this.applyStyleAt(this.currentValue);
     this.settled = true;
+    this.finish();
+  }
+
+  validate(): void {
+    const duration = this.motion.handoffDuration ?? 280;
+    if (!Number.isFinite(duration) || duration < 0 || duration > 10000)
+      throw new Error(
+        "handoffDuration must be finite and between 0 and 10000 ms",
+      );
+  }
+
+  getMotionTracks(): readonly WebAnimation[] {
+    return [this];
+  }
+
+  get supportsInterruption(): boolean {
+    return !this.legacyCompletionCleanup;
+  }
+
+  stop(): void {
+    this.captureLiveState();
+    this.clearWaapi();
+    this.hold?.cancel();
+    this.hold = null;
+    this.fallbackCopy?.cancel({ reason: "disposed", owns: () => true });
+    this.fallbackCopy = null;
+    this.running = false;
+    this.paused = false;
+  }
+
+  cancel(context: AnimationDisposal): void {
+    this.stop();
+    this.disposeResources(context);
+  }
+
+  private disposeResources(context: AnimationDisposal): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    if (context.owns(this.element)) {
+      try {
+        this.onDispose?.(context);
+      } catch (error) {
+        console.error("[ssgoi] animation cleanup failed", error);
+      }
+    }
+  }
+
+  private finish(): void {
+    this.presentationTime = this.frames[this.frames.length - 1]?.time ?? 0;
+    this.solverState = undefined;
+    this.hold?.cancel();
+    this.hold = null;
+    this.applyStyleAt(this.currentValue);
+    this.clearWaapi();
+    this.fallbackCopy?.cancel({ reason: "disposed", owns: () => true });
+    this.fallbackCopy = null;
+    if (!this.deferDisposal) this.disposeResources(finishedDisposal);
     this.onComplete?.();
+  }
+
+  get motionIdentity() {
+    return {
+      target: this.element,
+      key: this.motion.key,
+      role: this.motion.role,
+      space: this.motion.space,
+      lifetime: this.motion.lifetime,
+    };
+  }
+
+  /** Final output, including any earlier residual, is the next handoff's source. */
+  getMotionSnapshot(): WebMotionSnapshot {
+    if (this.running) this.captureLiveState();
+    const channels = this.samplePresentation(
+      readAnimationTime(this.waapi) ?? this.presentationTime,
+    );
+    const rate =
+      this.paused || (this.waitingForStart && !readAnimationTime(this.waapi))
+        ? 0
+        : this.playbackRate;
+    const displayStyle = {
+      ...this.styleFn(
+        this.currentValue,
+        this.lowerBound + this.upperBound - this.currentValue,
+      ),
+      ...this.codec?.write(channels),
+    };
+    return {
+      ...this.motionIdentity,
+      displayStyle,
+      inlineStyle: this.element.style.cssText,
+      frame: this.codec?.frame,
+      channels: Object.fromEntries(
+        Object.entries(channels).map(([key, c]) => [
+          key,
+          {
+            ...c,
+            velocity: c.velocity.map((v) => v * rate),
+          },
+        ]),
+      ),
+    };
+  }
+
+  adopt(snapshot: MotionSnapshot<HTMLElement>): void {
+    this.codec ??=
+      this.motion.codec ?? createWebPresentationCodec(this.element);
+    this.adopted = snapshot;
+    const destination = this.codec.read({
+      transform: "none",
+      opacity: 1,
+      ...this.styleFn(
+        this.currentValue,
+        this.lowerBound + this.upperBound - this.currentValue,
+      ),
+    });
+    this.fallbackChannels.clear();
+    this.fallbackMode = undefined;
+    const authoredStyle = this.styleFn(
+      this.currentValue,
+      this.lowerBound + this.upperBound - this.currentValue,
+    );
+    const previousStyle = (snapshot as Partial<WebMotionSnapshot>).displayStyle;
+    for (const [property, value] of Object.entries(previousStyle ?? {})) {
+      if (
+        property in authoredStyle &&
+        String(value) !== String(authoredStyle[property]) &&
+        (!snapshot.channels[property] || !destination[property])
+      )
+        this.fallbackChannels.add(property);
+    }
+    for (const [property, source] of Object.entries(snapshot.channels)) {
+      const next = destination[property];
+      if (next && !compatibleChannel(source, next))
+        this.fallbackChannels.add(property);
+    }
+    if (this.fallbackChannels.size) this.fallbackMode = "finish";
+    if (this.fallbackChannels.size && this.motion.fallback !== "finish") {
+      const visual = snapshot as Partial<WebMotionSnapshot>;
+      if (
+        visual.frame &&
+        visual.displayStyle &&
+        snapshot.target.cloneNode &&
+        snapshot.target.parentElement &&
+        !snapshot.target.shadowRoot &&
+        !snapshot.target.matches?.(
+          "canvas, video, audio, iframe, object, embed",
+        ) &&
+        !snapshot.target.querySelector?.(
+          "canvas, video, audio, iframe, object, embed",
+        )
+      ) {
+        this.fallbackMode = "crossfade";
+        const clone = snapshot.target.cloneNode(true) as HTMLElement;
+        clone.removeAttribute("id");
+        clone.removeAttribute("data-ssgoi-transition");
+        for (const child of clone.querySelectorAll(
+          "[id], [data-ssgoi-transition]",
+        )) {
+          child.removeAttribute("id");
+          child.removeAttribute("data-ssgoi-transition");
+        }
+        clone.style.cssText = visual.inlineStyle ?? "";
+        Object.assign(clone.style, visual.displayStyle, {
+          position: "fixed",
+          left: `${visual.frame.left}px`,
+          top: `${visual.frame.top}px`,
+          width: `${visual.frame.width}px`,
+          height: `${visual.frame.height}px`,
+          margin: "0",
+          pointerEvents: "none",
+          zIndex: "2147483646",
+        });
+        clone.setAttribute("aria-hidden", "true");
+        clone.inert = true;
+        snapshot.target.parentElement.appendChild(clone);
+        const opacity = Number(visual.displayStyle.opacity ?? 1);
+        this.fallbackCopy = new WebAnimation({
+          element: clone,
+          integrator: {
+            step: (state, target, dt) => ({
+              position: Math.min(target, state.position + dt / 0.18),
+              velocity: 0,
+            }),
+            isSettled: (state, target) => state.position >= target,
+          },
+          style: (_t, u) => ({ opacity: opacity * u }),
+          onDispose: () => clone.remove(),
+        });
+        this.adopted = {
+          ...snapshot,
+          channels: {
+            ...snapshot.channels,
+            opacity: { schema: "css:#", value: [0], velocity: [0] },
+          },
+        };
+      }
+    }
+    // A delayed child holds its transferred presentation until its dependency
+    // actually starts it. It does not borrow the previous sequence's clock.
+    const style = this.codec.write(this.adopted.channels);
+    this.hold?.cancel();
+    if (Object.keys(style).length) {
+      this.hold = this.element.animate([style as Keyframe], {
+        duration: 1,
+        fill: "both",
+      });
+      this.hold.pause();
+      this.hold.currentTime = 0;
+    }
+  }
+
+  private samplePresentation(time: number): Record<string, MotionChannel> {
+    const frames = this.presentationFrames;
+    if (!frames.length) {
+      if (this.adopted) return { ...this.adopted.channels };
+      this.codec ??=
+        this.motion.codec ?? createWebPresentationCodec(this.element);
+      return this.codec.read({
+        transform: "none",
+        opacity: 1,
+        ...this.styleFn(
+          this.currentValue,
+          this.lowerBound + this.upperBound - this.currentValue,
+        ),
+      });
+    }
+    let index = frames.findIndex((f) => f.time > time);
+    if (index < 0) index = frames.length - 1;
+    const a = frames[Math.max(0, index - 1)]!;
+    const b = frames[index]!;
+    const dt = (b.time - a.time) / 1000;
+    const fraction = dt
+      ? Math.max(0, Math.min(1, (time - a.time) / (dt * 1000)))
+      : 0;
+    const output: Record<string, MotionChannel> = {};
+    for (const [property, c] of Object.entries(a.channels)) {
+      const end = b.channels[property];
+      if (!end || !compatibleChannel(c, end)) {
+        output[property] = c;
+        continue;
+      }
+      output[property] = {
+        schema: c.schema,
+        value: c.value.map((v, i) => v + (end.value[i]! - v) * fraction),
+        velocity: c.value.map((v, i) =>
+          time >= frames[frames.length - 1]!.time || !dt
+            ? 0
+            : (end.value[i]! - v) / dt,
+        ),
+      };
+    }
+    return output;
   }
 
   /**
@@ -227,14 +556,14 @@ export class WebAnimation extends Animation {
   }
 
   getTimeline(): Timeline[] {
-    const frames: TimelineFrame[] = this.frames.map((f) => {
+    const frames: TimelineFrame[] = this.frames.map((f, index) => {
       const t = f.position;
       const u = this.lowerBound + this.upperBound - t;
       return {
         time: f.time,
         value: f.position,
         velocity: f.velocity,
-        style: this.styleFn(t, u),
+        style: this.renderedStyles[index] ?? this.styleFn(t, u),
       };
     });
     return [{ element: this._element, frames }];
@@ -245,46 +574,170 @@ export class WebAnimation extends Animation {
     if (!match) return;
     this.currentValue = match.value;
     this.currentVelocity = match.velocity;
+    this.solverState = undefined;
   }
 
   /* ───────────────────────────────────────────────────────── private */
 
   private runToward(target: number) {
-    if (this.running) this.captureLiveState();
+    this.validate();
+    if (this.running || this.paused) {
+      const snapshot = this.getMotionSnapshot();
+      this.captureLiveState();
+      this.adopted = snapshot;
+    }
     this.clearWaapi();
     this.running = false;
     this.paused = false;
     this.settled = false;
+    this.disposed = false;
+    this.codec = this.motion.codec ?? createWebPresentationCodec(this.element);
 
+    this.presentationTime = 0;
+    this.solverTarget = target;
     this.frames = simulate(
       this._integrator,
       this.currentValue,
       target,
       this.currentVelocity,
+      this.solverState,
+      true,
     );
 
+    if (this.frames.length === 0 && this.adopted) {
+      this.frames = [{ time: 0, position: target, velocity: 0 }];
+    }
     if (this.frames.length === 0) {
       this.currentValue = target;
       this.currentVelocity = 0;
       this.applyStyleAt(target);
       this.settled = true;
-      this.onComplete?.();
+      this.finish();
       return;
     }
 
-    const keyframes: Keyframe[] = this.frames.map((f) => {
-      const t = f.position;
-      const u = this.lowerBound + this.upperBound - t;
-      return this.styleFn(t, u) as Keyframe;
+    const duration = this.adopted
+      ? Math.max(16, this.motion.handoffDuration ?? 280)
+      : 0;
+    const lastAuthored = this.frames[this.frames.length - 1]!;
+    for (
+      let time = lastAuthored.time + 1000 / 60;
+      time < duration + 1000 / 60;
+      time += 1000 / 60
+    ) {
+      this.frames.push({ time, position: lastAuthored.position, velocity: 0 });
+    }
+    const authored = this.frames.map((f) =>
+      this.codec!.read({
+        transform: "none",
+        opacity: 1,
+        ...this.styleFn(
+          f.position,
+          this.lowerBound + this.upperBound - f.position,
+        ),
+      }),
+    );
+    for (let i = 1; i < authored.length; i++) {
+      const a = authored[i - 1]!.transform,
+        b = authored[i]!.transform;
+      if (a?.schema === "viewport-plane-v1" && b?.schema === a.schema) {
+        const values = [...b.value];
+        values[2] =
+          a.value[2]! +
+          Math.atan2(
+            Math.sin(values[2]! - a.value[2]!),
+            Math.cos(values[2]! - a.value[2]!),
+          );
+        authored[i]!.transform = { ...b, value: values };
+      }
+    }
+    const first = authored[0]!;
+    const second = authored[1] ?? first;
+    const corrections: Record<
+      string,
+      { offset: number[]; velocity: number[] }
+    > = {};
+    for (const [property, source] of Object.entries(
+      this.adopted?.channels ?? {},
+    )) {
+      let destination = first[property];
+      if (!destination) {
+        // An unused channel returns to its base presentation; the element stays.
+        const neutral: StyleObject =
+          property === "transform"
+            ? { transform: "none" }
+            : property === "opacity"
+              ? { opacity: 1 }
+              : {};
+        destination = this.codec.read(neutral)[property];
+        if (destination)
+          for (const frame of authored) frame[property] = destination;
+      }
+      if (!destination || !compatibleChannel(source, destination)) continue;
+      const next = second[property] ?? destination;
+      corrections[property] = {
+        offset: source.value.map((v, i) => {
+          let delta = v - destination!.value[i]!;
+          if (
+            property === "transform" &&
+            source.schema === "viewport-plane-v1" &&
+            i === 2
+          )
+            delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+          return delta;
+        }),
+        velocity: source.velocity.map(
+          (v, i) =>
+            v / Math.max(Math.abs(this.playbackRate), 0.0001) -
+            (next.value[i]! - destination!.value[i]!) * 60,
+        ),
+      };
+    }
+    this.presentationFrames = this.frames.map((f, index) => {
+      const channels = { ...authored[index]! };
+      for (const [property, correction] of Object.entries(corrections)) {
+        const base = channels[property]!;
+        channels[property] = {
+          ...base,
+          value: base.value.map(
+            (v, i) =>
+              v +
+              residualAt(
+                correction.offset[i]!,
+                correction.velocity[i]!,
+                f.time / 1000,
+                duration / 1000,
+              ).value,
+          ),
+        };
+      }
+      return { time: f.time, channels };
     });
+    const keyframes: Keyframe[] = this.frames.map((f, index) => {
+      const style = this.styleFn(
+        f.position,
+        this.lowerBound + this.upperBound - f.position,
+      );
+      const channels = this.presentationFrames[index]!.channels;
+      return {
+        ...style,
+        ...this.codec!.write(
+          Object.fromEntries(
+            Object.keys(corrections).map((key) => [key, channels[key]!]),
+          ),
+        ),
+      } as Keyframe;
+    });
+    this.renderedStyles = keyframes as StyleObject[];
+    this.adopted = undefined;
 
     const firstFrame = keyframes[0];
     const lastFrame = this.frames[this.frames.length - 1]!;
-    const duration = lastFrame.time;
+    const playbackDuration = lastFrame.time;
     const runId = ++this.runId;
 
     const waapi = this._element.animate(keyframes, {
-      duration,
+      duration: playbackDuration,
       fill: "both",
       easing: "linear",
       composite: "replace",
@@ -297,6 +750,9 @@ export class WebAnimation extends Animation {
     waapi.pause();
 
     this.waapi = waapi;
+    this.fallbackCopy?.play();
+    this.hold?.cancel();
+    this.hold = null;
     this.waitingForStart = true;
     this.startReady = false;
     this.pendingFirstFrame = firstFrame;
@@ -308,7 +764,7 @@ export class WebAnimation extends Animation {
       this.settled = true;
       this.currentValue = lastFrame.position;
       this.currentVelocity = 0;
-      this.onComplete?.();
+      this.finish();
     };
 
     void this.startWhenReady(waapi, runId);
@@ -330,9 +786,16 @@ export class WebAnimation extends Animation {
     if (this.frames.length === 0) return;
     const elapsed = readAnimationTime(this.waapi);
     if (elapsed === null) return;
+    this.presentationTime = elapsed;
     const { position, velocity } = interpolateFrame(this.frames, elapsed);
     this.currentValue = position;
     this.currentVelocity = velocity;
+    this.solverState = sampleIntegratorState(
+      this.frames,
+      elapsed,
+      this._integrator,
+      this.solverTarget,
+    );
   }
 
   private async startWhenReady(
@@ -450,7 +913,7 @@ export class WebAnimation extends Animation {
     this.settled = true;
     this.currentValue = lastFrame.position;
     this.currentVelocity = 0;
-    this.onComplete?.();
+    this.finish();
   }
 
   private applyStyleAt(value: number) {

@@ -82,14 +82,14 @@ export const axis = (options: AxisOptions = {}) => {
           // covers willChange/backfaceVisibility/contain/transform/opacity (from
           // applyStartStyle + the WAAPI final frame), pointerEvents (set in
           // prepare), and clipPath (set above for z; harmless no-op otherwise).
-          onComplete: () => clearFromStyle(from),
+          onDispose: () => clearFromStyle(from),
         });
 
         const inAnim = new WebAnimation({
           element: to,
           integrator: IntegratorProvider.from(provider.inPhysics),
           style: (t) => config.in.animate(t),
-          onComplete: () => clearStyle(to),
+          onDispose: () => clearStyle(to),
         });
 
         // Composition (mode / startAt overlap) is decided by the provider —

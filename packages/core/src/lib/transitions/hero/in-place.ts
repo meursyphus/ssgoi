@@ -29,17 +29,23 @@ export function markHeroTransitioning(element: HTMLElement): () => void {
   };
 }
 
-/** Keep the incoming page above the positioned outgoing page, including its media. */
-export function stackHeroPages(from: HTMLElement, to: HTMLElement): () => void {
+/**
+ * Keep the incoming page above the positioned outgoing page, including its
+ * media. The restore skips a page a newer run already owns (`owns`).
+ */
+export function stackHeroPages(
+  from: HTMLElement,
+  to: HTMLElement,
+): (owns?: (element: HTMLElement) => boolean) => void {
   const restoreFrom = preserveStyles(from, ["z-index"]);
   const restoreTo = preserveStyles(to, ["z-index", "position"]);
   from.style.zIndex = Z_BACKGROUND;
   to.style.zIndex = Z_FOREGROUND;
   if (getComputedStyle(to).position === "static")
     to.style.position = "relative";
-  return () => {
-    restoreFrom();
-    restoreTo();
+  return (owns = () => true) => {
+    if (owns(from)) restoreFrom();
+    if (owns(to)) restoreTo();
   };
 }
 
