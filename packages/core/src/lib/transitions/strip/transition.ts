@@ -51,7 +51,7 @@ export const strip = (options: StripOptions = {}) => {
         // The outgoing node is reused (Activity/cacheComponents re-hide it),
         // so restore every inline style we wrote to `from` — mirroring the
         // incoming cleanup below, plus the out-only `pointerEvents`.
-        onComplete: () => {
+        onDispose: () => {
           from.style.transform = "";
           from.style.willChange = "auto";
           from.style.backfaceVisibility = "";
@@ -71,7 +71,7 @@ export const strip = (options: StripOptions = {}) => {
             transform: `perspective(${PERSPECTIVE}px) rotateY(${rotate}deg) translate3d(${translateX}%, 0, 0)`,
           };
         },
-        onComplete: () => {
+        onDispose: () => {
           to.style.transform = "";
           to.style.willChange = "auto";
           to.style.backfaceVisibility = "";

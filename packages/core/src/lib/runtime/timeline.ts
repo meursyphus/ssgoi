@@ -8,6 +8,8 @@ export interface SimFrame {
   time: number;
   position: number;
   velocity: number;
+  /** Optional driver-owned solver state; ordinary exported timelines stay compact. */
+  state?: IntegratorState;
 }
 
 export function simulate(
@@ -15,17 +17,33 @@ export function simulate(
   from: number,
   to: number,
   initialVelocity: number,
+  initialState?: IntegratorState,
+  captureState = false,
 ): SimFrame[] {
-  if (from === to && initialVelocity === 0) return [];
+  if (
+    from === to &&
+    initialVelocity === 0 &&
+    (!initialState || integrator.isSettled(initialState, to))
+  )
+    return [];
 
   const MAX_FRAMES = 600;
-  let state: IntegratorState = { position: from, velocity: initialVelocity };
+  let state: IntegratorState = {
+    ...initialState,
+    position: from,
+    velocity: initialVelocity,
+  };
   let settleTime = 0;
   const frames: SimFrame[] = [];
 
   for (let i = 0; i < MAX_FRAMES; i++) {
     const time = i * FRAME_TIME;
-    frames.push({ time, position: state.position, velocity: state.velocity });
+    frames.push({
+      time,
+      position: state.position,
+      velocity: state.velocity,
+      ...(captureState ? { state } : {}),
+    });
 
     state = integrator.step(state, to, FRAME_TIME / 1000);
 
@@ -76,4 +94,26 @@ export function interpolateFrame(
     position: a.position + (b.position - a.position) * t,
     velocity: a.velocity + (b.velocity - a.velocity) * t,
   };
+}
+
+/** Read a compatible solver's hidden state as well as its visible output. */
+export function sampleIntegratorState(
+  frames: SimFrame[],
+  elapsed: number,
+  integrator: Integrator,
+  target: number,
+): IntegratorState {
+  const visible = interpolateFrame(frames, elapsed);
+  let frame = frames[0];
+  for (const candidate of frames) {
+    if (candidate.time > elapsed) break;
+    frame = candidate;
+  }
+  if (!frame?.state) return visible;
+  const remainder =
+    Math.max(0, Math.min(1000 / 60, elapsed - frame.time)) / 1000;
+  const state = remainder
+    ? integrator.step(frame.state, target, remainder)
+    : frame.state;
+  return { ...state, ...visible };
 }

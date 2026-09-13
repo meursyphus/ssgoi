@@ -3,10 +3,12 @@ import {
   Animation,
   type AnimationPatch,
   type AnimationStart,
+  type AnimationDisposal,
+  finishedDisposal,
 } from "./animation";
 import { frameScheduler } from "./frame-scheduler";
 import { IntegratorProvider, type Integrator } from "./integrator";
-import { WebAnimation } from "./web-animation";
+import type { WebAnimation } from "./web-animation";
 
 export interface TrackPatch {
   /** New physics — an `Integrator` instance or the `{ spring | inertia }` shape. */
@@ -55,6 +57,11 @@ export class MultiAnimation<Name extends string = string> extends Animation {
   private runId = 0;
   private pendingComplete = 0;
   private running = false;
+  private disposed = false;
+  private settled = false;
+  private startedChildren = new Set<Animation>();
+  private lastMethod: "play" | "reverse" = "play";
+  private pausedRun = false;
   private pendingStartObservers: Array<() => void> = [];
 
   constructor(
@@ -68,6 +75,7 @@ export class MultiAnimation<Name extends string = string> extends Animation {
     this._children = Array.isArray(children)
       ? [...children]
       : [...this.namedChildren.values()];
+    for (const child of this._children) child.deferDisposal = true;
     // Empty named groups keep optional selectors stable, but are not motion
     // and must not dilute a parent's progress (e.g. static zoom's overlay).
     this.progressChildren = this._children.filter(
@@ -105,12 +113,16 @@ export class MultiAnimation<Name extends string = string> extends Animation {
 
   /** Every `WebAnimation` in this composite, nested composites included. */
   tracks(): WebAnimation[] {
-    const out: WebAnimation[] = [];
-    for (const child of this._children) {
-      if (child instanceof WebAnimation) out.push(child);
-      else if (child instanceof MultiAnimation) out.push(...child.tracks());
-    }
-    return out;
+    return this._children.flatMap((child) => [...child.getMotionTracks()]);
+  }
+
+  getMotionTracks(): readonly WebAnimation[] {
+    return this.tracks();
+  }
+
+  validate(): void {
+    this.buildDependencies();
+    for (const child of this._children) child.validate();
   }
 
   /** Select a registered child, which may itself be a composite. */
@@ -148,17 +160,52 @@ export class MultiAnimation<Name extends string = string> extends Animation {
   }
 
   pause(): void {
+    this.pausedRun = this.running || this.pausedRun;
     this.running = false;
     this.clearPendingStartObservers();
     for (const child of this._children) child.pause();
   }
 
   complete(): void {
+    if (this.settled) return;
+    this.settled = true;
     this.running = false;
     this.clearPendingStartObservers();
     this.restoreCompletionHandlers();
     for (const child of this._children) child.complete();
+    if (!this.deferDisposal) {
+      for (const child of this._children) child.cancel(finishedDisposal);
+      this.disposeResources(finishedDisposal);
+    }
     this.onComplete?.();
+  }
+
+  get supportsInterruption(): boolean {
+    return this._children.every((child) => child.supportsInterruption);
+  }
+
+  stop(): void {
+    this.runId++;
+    this.running = false;
+    this.clearPendingStartObservers();
+    this.restoreCompletionHandlers();
+    for (const child of this._children) child.stop();
+  }
+
+  cancel(context: AnimationDisposal): void {
+    this.stop();
+    for (const child of this._children) child.cancel(context);
+    this.disposeResources(context);
+  }
+
+  private disposeResources(context: AnimationDisposal): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    try {
+      this.onDispose?.(context);
+    } catch (error) {
+      console.error("[ssgoi] composite cleanup failed", error);
+    }
   }
 
   get progress(): number {
@@ -176,11 +223,10 @@ export class MultiAnimation<Name extends string = string> extends Animation {
     return this._children.flatMap((c) => c.getTimeline());
   }
 
-  matchInto(_poses: Pose[]): void {
-    // TODO: handing a flat pose list to a composite isn't well-defined yet —
-    // sequence/stagger progress, mode mismatches, and active-child awareness
-    // all need a richer protocol than per-child broadcast. Left as a no-op
-    // for now so we don't pretend to support cross-multi handoff.
+  matchInto(poses: Pose[]): void {
+    // Explicit legacy scalar handoff only; Host uses typed presentation channels.
+    // Matching changes initial state, never dependency timing or child activation.
+    for (const child of this._children) child.matchInto(poses);
   }
 
   get isAnimating(): boolean {
@@ -193,7 +239,7 @@ export class MultiAnimation<Name extends string = string> extends Animation {
     );
   }
   get isComplete(): boolean {
-    return this._children.every((c) => c.isComplete);
+    return this.settled;
   }
   get isReversing(): boolean {
     return this._children.some((c) => c.isReversing);
@@ -210,24 +256,79 @@ export class MultiAnimation<Name extends string = string> extends Animation {
   /* ───────────────────────────────────────────────────────── private */
 
   private startRun(method: "play" | "reverse") {
-    const dependencies = this.buildDependencies();
+    const authored = this.buildDependencies();
+    const resuming = this.pausedRun && method === this.lastMethod;
+    const changingDirection = method !== this.lastMethod;
+    const activated = new Set(this.startedChildren);
+    const wasComplete = new Set(
+      this._children.filter((child) => child.isComplete),
+    );
+    // Reversing a partially executed sequence cannot invent its pending stages.
+    const participating =
+      method === "reverse" && activated.size
+        ? this._children.filter((child) => activated.has(child))
+        : [...this._children];
+    const order =
+      method === "reverse" ? [...participating].reverse() : participating;
+    const dependencies = new Map<Animation, AnimationStart[]>();
+    if (method === "reverse") {
+      for (const [child, dependency] of authored) {
+        if (
+          !participating.includes(child) ||
+          !participating.includes(dependency.after)
+        )
+          continue;
+        const list = dependencies.get(dependency.after) ?? [];
+        list.push({
+          after: child,
+          at: dependency.at === "settled" ? "settled" : 1 - dependency.at,
+        });
+        dependencies.set(dependency.after, list);
+      }
+    } else
+      for (const [child, dependency] of authored)
+        dependencies.set(child, [dependency]);
+    // Active motions reverse immediately; completed predecessors unwind when
+    // their reversed dependencies are ready. No wall-clock guesses are used.
+    if (changingDirection || resuming)
+      for (const child of activated) {
+        if (!wasComplete.has(child)) dependencies.delete(child);
+      }
     if (this.running) this.pause();
     this.restoreCompletionHandlers();
     const runId = ++this.runId;
     this.running = true;
-    this.pendingComplete = this._children.length;
+    this.pausedRun = false;
+    this.lastMethod = method;
+    this.disposed = false;
+    this.settled = false;
+    this.pendingComplete = participating.length;
+    if (!resuming && !changingDirection) this.startedChildren.clear();
     if (this.pendingComplete === 0) {
       this.handleFinished();
       return;
     }
 
     const completed = new Set<Animation>();
-    for (const child of this._children) {
+    const started = new Set<Animation>();
+    if (resuming)
+      for (const child of participating) {
+        if (activated.has(child) && wasComplete.has(child)) {
+          started.add(child);
+          completed.add(child);
+          this.pendingComplete--;
+        }
+      }
+    for (const child of participating) {
       const previous = child.onComplete;
       const callback = () => {
-        previous?.();
         if (this.runId !== runId || !this.running || completed.has(child))
           return;
+        try {
+          previous?.();
+        } catch (error) {
+          console.error("[ssgoi] animation completion failed", error);
+        }
         completed.add(child);
         if (--this.pendingComplete === 0) this.handleFinished();
       };
@@ -236,38 +337,40 @@ export class MultiAnimation<Name extends string = string> extends Animation {
         if (child.onComplete === callback) child.onComplete = previous;
       });
     }
-
-    const started = new Set<Animation>();
     const pump = () => {
-      // Revisit the list when a dependency started later in insertion order.
-      // Each child is started once; independent children retain authored order.
       let changed = true;
-      while (this.running && changed) {
+      while (this.running && this.runId === runId && changed) {
         changed = false;
-        for (const child of this._children) {
+        for (const child of order) {
           if (!this.running || started.has(child)) continue;
-          const dependency = dependencies.get(child);
-          if (dependency) {
-            if (!started.has(dependency.after)) continue;
-            if (
-              !this.hasReachedThreshold(dependency.after, dependency.at, method)
+          const requirements = dependencies.get(child) ?? [];
+          if (
+            requirements.some(
+              (dependency) =>
+                !started.has(dependency.after) ||
+                !this.hasReachedThreshold(
+                  dependency.after,
+                  dependency.at,
+                  method,
+                ),
             )
-              continue;
-          }
+          )
+            continue;
           started.add(child);
+          this.startedChildren.add(child);
           child[method]();
           changed = true;
         }
       }
-      if (started.size === this._children.length)
+      if (started.size === participating.length)
         this.clearPendingStartObservers();
     };
     pump();
-    if (this.running && started.size !== this._children.length) {
+    if (this.pendingComplete === 0) this.handleFinished();
+    if (this.running && started.size !== participating.length)
       this.pendingStartObservers.push(
         frameScheduler.subscribe(pump, "observe"),
       );
-    }
   }
 
   private buildDependencies(): Map<Animation, AnimationStart> {
@@ -338,8 +441,13 @@ export class MultiAnimation<Name extends string = string> extends Animation {
   private handleFinished() {
     if (!this.running) return;
     this.running = false;
+    this.settled = true;
     this.clearPendingStartObservers();
     this.restoreCompletionHandlers();
+    if (!this.deferDisposal) {
+      for (const child of this._children) child.cancel(finishedDisposal);
+      this.disposeResources(finishedDisposal);
+    }
     this.onComplete?.();
   }
 

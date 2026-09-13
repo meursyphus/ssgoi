@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ko">
+  <meta charset="utf-8" />
+  <title>SSGOI — 전환 중단 실험실</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #101827;
+      color: #e9edf5;
+      font: 15px system-ui;
+    }
+    main {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    p {
+      line-height: 1.65;
+      color: #adbbd0;
+    }
+    button,
+    select {
+      font: inherit;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #526581;
+      background: #23344e;
+      color: #fff;
+      cursor: pointer;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .columns {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    #scene {
+      position: relative;
+      width: 390px;
+      height: 580px;
+      overflow: hidden;
+      background: white;
+      color: #17243a;
+      flex-shrink: 0;
+      border-radius: 16px;
+    }
+    .page {
+      width: 390px;
+      min-height: 650px;
+      padding: 24px;
+      background: #f3f7fc;
+    }
+    .page.detail {
+      padding: 24px 0;
+      background: #f9ecd8;
+    }
+    .page h2,
+    .page p {
+      margin: 16px 24px;
+      color: #243955;
+    }
+    .card {
+      width: 144px;
+      height: 140px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .detail img {
+      display: block;
+      width: 390px;
+      height: 280px;
+      object-fit: contain;
+    }
+    pre {
+      font:
+        12px/1.6 ui-monospace,
+        monospace;
+      white-space: pre-wrap;
+      max-height: 580px;
+      overflow: auto;
+      flex: 1;
+      min-width: 300px;
+      background: #19263b;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    small {
+      color: #adbbd0;
+    }
+  </style>
+  <main>
+    <h1>중간에 목적지가 바뀌어도, 움직임은 이어지게</h1>
+    <p>
+      효과를 바꾸면서 다음/뒤로를 빠르게 눌러보세요. 현재 페이지와 아직 퇴장
+      중인 페이지, 공유 이미지의 연결을 같은 Host가 관리합니다.
+    </p>
+    <nav>
+      <select id="effect"></select
+      ><button id="next">다음 페이지</button><button id="back">뒤로</button
+      ><button id="reverse">현재 동작 반전</button
+      ><button id="pause">일시정지</button><button id="play">재생</button
+      ><button id="matrix">전체 효과 조합 검사</button>
+    </nav>
+    <div class="columns">
+      <div id="scene"></div>
+      <pre id="log">준비됨</pre>
+    </div>
+    <p>
+      <small
+        >이 화면은 개발용 재현 도구입니다. 직전/직후 사각형의 변화, CSS 수치,
+        정리와 메모리 상한을 별도로 검사합니다.</small
+      >
+    </p>
+  </main>
+  <script type="module">
+    import * as effects from "/src/lib/index.ts";
+    import { HostAnimation } from "/src/lib/animation/host-animation.ts";
+    const scene = document.querySelector("#scene"),
+      log = document.querySelector("#log"),
+      select = document.querySelector("#effect");
+    const picture =
+      "data:image/svg+xml," +
+      encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600"><rect width="900" height="600" fill="#78b2d8"/><circle cx="650" cy="180" r="95" fill="#ffe5a3"/><path d="M0 600L310 130L650 600ZM350 600L650 240L900 600Z" fill="#305f69"/></svg>',
+      );
+    const cases = [
+      ["slide", {}],
+      ["drill", {}],
+      ["fade", {}],
+      ["axis", { type: "x" }],
+      ["axis", { type: "y" }],
+      ["axis", { type: "z" }],
+      ["sheet", {}],
+      ["sheet", { type: "scale" }],
+      ["sheet", { type: "blur" }],
+      ["zoom", { type: "expand" }],
+      ["zoom", { type: "blur", variant: "fade" }],
+      ["hero", { type: "fade" }],
+      ["blind", {}],
+      ["blind", { direction: "vertical", blindCount: 20 }],
+      ["scroll", {}],
+      ["rotate", {}],
+      ["strip", {}],
+      ["jaemin", {}],
+      ["film", {}],
+    ];
+    const label = ([name, options]) =>
+      name + (Object.keys(options).length ? " " + JSON.stringify(options) : "");
+    cases.forEach((entry, i) =>
+      select.add(new Option(label(entry), String(i))),
+    );
+    let host = new HostAnimation(),
+      active = 0,
+      pages = [],
+      events = [];
+    function addPage(i) {
+      const el = document.createElement("div");
+      el.className = "page" + (i % 2 ? " detail" : " list");
+      el.dataset.page = String(i);
+      el.innerHTML =
+        i % 2
+          ? `<h2>장면 ${i + 1} · 상세</h2><img data-zoom-enter-key="photo" data-hero-enter-key="photo" src="${picture}"><p>움직이는 도중에 다른 목적지를 선택해보세요.</p>`
+          : `<h2>장면 ${i + 1} · 목록</h2><div class="card" data-zoom-exit-key="photo" data-hero-exit-key="photo"><img src="${picture}"></div><p>페이지, 공유 이미지, 임시 패널은 서로 다른 수명을 가집니다.</p>`;
+      return el;
+    }
+    function reset() {
+      host.cancel({ reason: "disposed", owns: () => true });
+      host = new HostAnimation();
+      events = [];
+      host.onHandoff = (items) => {
+        events.push(
+          ...items.map((e) => ({
+            kind: e.kind,
+            key: e.key,
+            page: e.target?.dataset.page,
+          })),
+        );
+        log.textContent = events
+          .slice(-30)
+          .map((e) => JSON.stringify(e))
+          .join("\n");
+      };
+      active = 0;
+      pages = [0, 1, 2].map(addPage);
+      scene.replaceChildren(pages[0]);
+    }
+    const nextFrame = () => new Promise(requestAnimationFrame);
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const rect = (el) => {
+      const r = el.getBoundingClientRect();
+      return [r.x, r.y, r.width, r.height];
+    };
+    async function navigate(destination, entry, measure = false) {
+      const from = pages[active],
+        to = pages[destination];
+      const before = rect(from),
+        opacityBefore = Number(getComputedStyle(from).opacity);
+      host.prepareHandoff();
+      if (!to.isConnected) scene.appendChild(to);
+      from.style.position = "absolute";
+      from.style.top = "0";
+      from.style.left = "0";
+      to.style.position = "relative";
+      to.style.top = "";
+      to.style.left = "";
+      const [name, options] = entry,
+        transition = effects[name](options);
+      const context = {
+        direction: destination % 2 ? "forward" : "backward",
+        scrollOffset: { x: 0, y: 0 },
+        from: { scroll: { x: 0, y: 0 } },
+        to: { scroll: { x: 0, y: 0 } },
+        scrollingElement: scene,
+        positionedParent: scene,
+      };
+      const created = [],
+        cleanups = [];
+      const extras =
+        (await transition.prepare?.({
+          from: Promise.resolve(from),
+          to: Promise.resolve(to),
+          context,
+          createElement(id, tag = "div") {
+            const el = document.createElement(tag);
+            el.dataset.ssgoiId = id;
+            created.push(el);
+            return el;
+          },
+          onCleanup(fn) {
+            cleanups.push(fn);
+          },
+        })) ?? {};
+      const animation = transition.animation({ from, to, context, ...extras });
+      const previousDispose = animation.onDispose;
+      animation.onDispose = (disposal) => {
+        previousDispose?.(disposal);
+        if (disposal.owns(from) && from !== pages[active]) from.remove();
+        created.forEach((el) => el.remove());
+        cleanups.forEach((fn) => fn());
+      };
+      active = destination;
+      host.attach(animation, { targets: [from, to] });
+      const after = rect(from),
+        opacityAfter = Number(getComputedStyle(from).opacity);
+      const error = Math.max(...before.map((v, i) => Math.abs(v - after[i])));
+      const invalid = [...scene.querySelectorAll("*")].some((el) =>
+        /NaN|Infinity/.test(el.getAttribute("style") || ""),
+      );
+      return {
+        error,
+        before,
+        after,
+        opacityJump: Math.abs(opacityBefore - opacityAfter),
+        invalid,
+        retiring: host.retiringCount,
+        events: events.slice(-20),
+      };
+    }
+    async function runMatrix() {
+      const results = [];
+      window.matrixProgress = { done: 0, total: cases.length ** 2 };
+      for (const first of cases)
+        for (const second of cases) {
+          reset();
+          try {
+            await navigate(1, first);
+            await nextFrame();
+            await nextFrame();
+            await sleep(85);
+            const result = await navigate(2, second, true);
+            const hasElement = result.events.some(
+              (e) => e.kind === "element" && e.page === "1",
+            );
+            results.push({
+              first: label(first),
+              second: label(second),
+              ...result,
+              hasElement,
+            });
+          } catch (error) {
+            results.push({
+              first: label(first),
+              second: label(second),
+              error: String(error.stack || error),
+              invalid: true,
+            });
+          }
+          window.matrixProgress.done = results.length;
+        }
+      host.cancel({ reason: "disposed", owns: () => true });
+      window.matrixResult = {
+        total: results.length,
+        positionContinuous: results.filter(
+          (r) => typeof r.error === "number" && r.error < 1,
+        ).length,
+        valid: results.filter((r) => !r.invalid).length,
+        results,
+      };
+      log.textContent = JSON.stringify(window.matrixResult, null, 2);
+      return window.matrixResult;
+    }
+    document.querySelector("#next").onclick = () =>
+      navigate((active + 1) % pages.length, cases[Number(select.value)]);
+    document.querySelector("#back").onclick = () =>
+      navigate(
+        (active + pages.length - 1) % pages.length,
+        cases[Number(select.value)],
+      );
+    document.querySelector("#reverse").onclick = () => host.reverse();
+    document.querySelector("#pause").onclick = () => host.pause();
+    document.querySelector("#play").onclick = () => host.play();
+    document.querySelector("#matrix").onclick = runMatrix;
+    async function runScenarios() {
+      const results = [];
+      for (const effect of [
+        cases[0],
+        cases[12],
+        cases[13],
+        cases[11],
+        cases[18],
+      ]) {
+        reset();
+        try {
+          for (let i = 0; i < 9; i++) {
+            await navigate((active + 1) % pages.length, effect);
+            await sleep(65);
+          }
+          host.complete();
+          results.push({
+            scenario: "rapid " + label(effect),
+            passed:
+              host.retiringCount === 0 &&
+              scene.getAnimations({ subtree: true }).length === 0 &&
+              pages[active].isConnected,
+            retiring: host.retiringCount,
+            animations: scene.getAnimations({ subtree: true }).length,
+          });
+        } catch (error) {
+          results.push({
+            scenario: "rapid " + label(effect),
+            passed: false,
+            error: String(error.stack || error),
+          });
+        }
+      }
+      // A physically rendered fallback for incompatible clip schemas.
+      reset();
+      const element = pages[0],
+        integrator = new effects.SpringIntegrator({
+          stiffness: 140,
+          damping: 22,
+        });
+      host.attach(
+        new effects.WebAnimation({
+          element,
+          integrator,
+          style: (t) => ({ clipPath: `circle(${25 + t * 10}% at 50% 50%)` }),
+        }),
+      );
+      await sleep(100);
+      host.attach(
+        new effects.WebAnimation({
+          element,
+          integrator,
+          style: (t) => ({
+            clipPath: `polygon(0 0, 100% 0, ${100 - t * 10}% 100%, 0 100%)`,
+          }),
+        }),
+      );
+      const during = scene.querySelectorAll(
+        '[inert][aria-hidden="true"]',
+      ).length;
+      await sleep(1400);
+      const after = scene.querySelectorAll(
+        '[inert][aria-hidden="true"]',
+      ).length;
+      results.push({
+        scenario: "incompatible CSS crossfade",
+        passed:
+          during === 1 &&
+          after === 0 &&
+          scene.getAnimations({ subtree: true }).length === 0,
+        during,
+        after,
+      });
+      window.scenarioResult = {
+        total: results.length,
+        passed: results.filter((r) => r.passed).length,
+        results,
+      };
+      log.textContent = JSON.stringify(window.scenarioResult, null, 2);
+      return window.scenarioResult;
+    }
+    window.continuityLab = {
+      reset,
+      navigate,
+      runMatrix,
+      runScenarios,
+      cases,
+      get host() {
+        return host;
+      },
+      get pages() {
+        return pages;
+      },
+    };
+    reset();
+  </script>
+</html>
