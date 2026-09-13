@@ -1,5 +1,7 @@
 # SSGOI + Expo Router
 
+The router helper used by this template is an experimental API.
+
 Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
 
 From the repository root:

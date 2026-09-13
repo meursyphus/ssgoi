@@ -6,11 +6,12 @@ import {
   RouteBoundary,
   type RouteBoundaryProps,
   type RouteLocation,
-} from "../route-boundary";
+} from "./route-boundary";
 
 export type SsgoiRouteBoundaryProps<T extends ElementType = "div"> =
   RouteBoundaryProps<RouteLocation, T>;
 
+/** @experimental TanStack Router integration. The API may change. */
 export function SsgoiRouteBoundary<T extends ElementType = "div">({
   resolve,
   ...props
@@ -22,3 +23,5 @@ export function SsgoiRouteBoundary<T extends ElementType = "div">({
   const boundary = resolve?.(location) ?? { id: location.pathname };
   return <RouteBoundary {...props} boundary={boundary} />;
 }
+
+export type { RouteBoundaryState } from "./route-boundary";

@@ -1,5 +1,7 @@
 # SSGOI with React Router
 
+Experimental API: the router integration may change.
+
 React Router framework-mode wiring. Choose effects from:
 https://ssgoi.dev/llms/transitions.txt
 

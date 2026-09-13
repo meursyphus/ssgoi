@@ -1,5 +1,7 @@
 # SSGOI with Vue Router and Nuxt
 
+Experimental API: the router integration may change.
+
 Nuxt wiring comes first; the plain Vue Router variant follows. Choose effects
 from:
 https://ssgoi.dev/llms/transitions.txt

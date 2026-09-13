@@ -5,7 +5,7 @@ import {
   SsgoiRouteBoundary,
   selectedSegmentsToPath,
   type NextjsRouteLocation,
-} from "../src/lib/nextjs";
+} from "../../src/routers/nextjs";
 
 // Model the hooks at each owning layout, rather than giving nested boundaries
 // the root's segments. This is the persistent-shell/parallel-slot shape used by

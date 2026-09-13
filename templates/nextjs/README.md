@@ -118,13 +118,16 @@ only the backward direction; the template's default config remains unchanged.
 ```ts
 import { drill, spring } from "@ssgoi/react";
 
-const tunedDrill = drill({}, {
-  override: {
-    backward({ animation }) {
-      animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+const tunedDrill = drill(
+  {},
+  {
+    override: {
+      backward({ animation }) {
+        animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+      },
     },
   },
-});
+);
 ```
 
 The core decides direction from route relationships and history. An explicit

@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbSchema, buildOpenGraph } from "@/lib/seo";
 import { PageHeading } from "@/page/docs/ui";
 import { FrameworkDetailBody } from "@/page/docs/framework-detail";
-import { FRAMEWORK_DOCS, getFrameworkDoc } from "@/page/docs/frameworks-data";
+import {
+  FRAMEWORK_DOCS,
+  LEGACY_FRAMEWORK_PATHS,
+  getFrameworkDoc,
+  getLegacyFrameworkPath,
+} from "@/page/docs/frameworks-data";
 
 type Params = { framework: string };
 
 export function generateStaticParams(): Params[] {
-  return FRAMEWORK_DOCS.map((doc) => ({ framework: doc.slug }));
+  return [
+    ...FRAMEWORK_DOCS.map((doc) => ({ framework: doc.slug })),
+    ...Object.keys(LEGACY_FRAMEWORK_PATHS).map((framework) => ({ framework })),
+  ];
 }
 
 export async function generateMetadata({
@@ -18,7 +26,10 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { framework } = await params;
-  const doc = getFrameworkDoc(framework);
+  const alias = getLegacyFrameworkPath(framework);
+  const doc = getFrameworkDoc(
+    alias ? alias.split("/").at(-1)!.split("#")[0] : framework,
+  );
   if (!doc) return {};
 
   const path = `/docs/frameworks/${doc.slug}`;
@@ -36,6 +47,8 @@ export default async function FrameworkDocPage({
   params: Promise<Params>;
 }) {
   const { framework } = await params;
+  const alias = getLegacyFrameworkPath(framework);
+  if (alias) permanentRedirect(alias);
   const doc = getFrameworkDoc(framework);
   if (!doc) notFound();
 

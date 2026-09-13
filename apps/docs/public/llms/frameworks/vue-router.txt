@@ -1,0 +1,29 @@
+# SSGOI with Vue Router
+
+Experimental API: this router helper may change.
+
+Install @ssgoi/vue in an existing Vue Router application.
+Use the helper with Vue Router 4 inside the common Vue provider.
+
+Keep one common provider above the following boundary.
+
+## Wrap the routed region
+
+The boundary follows the committed router path and replaces its DOM root when the route key changes.
+
+```vue
+<script setup lang="ts">
+import { RouterView } from "vue-router";
+import { SsgoiRouteBoundary } from "@ssgoi/vue/vue-router";
+</script>
+
+<template>
+  <SsgoiRouteBoundary><RouterView /></SsgoiRouteBoundary>
+</template>
+```
+
+## Persistent shells
+
+Use routeKey for the outer shell and a changing inner boundary for the page. resolve receives { pathname } and returns { id, key? }.
+
+Common setup: https://ssgoi.dev/llms/frameworks/vue.txt

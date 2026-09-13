@@ -1,4 +1,4 @@
-import { useRouter } from "vue-router";
+import { useRouter } from "nuxt/app";
 import { createRouteBoundary } from "./route-boundary";
 
 export type {
@@ -6,6 +6,7 @@ export type {
   SsgoiRouteBoundaryProps,
 } from "./route-boundary";
 
+/** @experimental nuxt integration. The API may change. */
 export const SsgoiRouteBoundary = createRouteBoundary(() => {
   const router = useRouter();
   return () => router.currentRoute.value.path;

@@ -38,11 +38,18 @@
       "default": "./dist/view-transitions.js"
     },
     "./solidstart": {
-      "solid": "./src/lib/solidstart.tsx",
-      "types": "./dist/solidstart.d.ts",
+      "solid": "./src/lib/routers/solidstart.ts",
+      "types": "./dist/routers/solidstart.d.ts",
       "import": "./dist/solidstart.js",
       "require": "./dist/solidstart.cjs",
       "default": "./dist/solidstart.js"
+    },
+    "./solid-router": {
+      "solid": "./src/lib/routers/solid-router.tsx",
+      "types": "./dist/routers/solid-router.d.ts",
+      "import": "./dist/solid-router.js",
+      "require": "./dist/solid-router.cjs",
+      "default": "./dist/solid-router.js"
     }
   },
   "scripts": {

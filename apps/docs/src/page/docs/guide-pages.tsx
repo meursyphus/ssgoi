@@ -1,16 +1,6 @@
 import Image from "next/image";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/code-block";
-import {
-  AngularMark,
-  NextMark,
-  NuxtMark,
-  QwikMark,
-  ReactRouterMark,
-  SolidStartMark,
-  SvelteKitMark,
-  TanStackRouterMark,
-} from "@/components/router-logos";
 import { Link } from "@/lib/link";
 import { FRAMEWORK_DOCS } from "@/page/docs/frameworks-data";
 import {
@@ -332,41 +322,25 @@ export function BoundariesBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        This is the component that marks a routed page. The{" "}
-        <Link href="/docs/install" className={link}>
-          quick start
-        </Link>{" "}
-        imports the router adapter in step 2. It resolves the route id and DOM
-        lifetime together; both default to the pathname.
+        A route boundary is the real DOM element that owns a changing page. The
+        framework creates and removes it; SSGOI observes that lifetime and
+        animates the region. Router helpers are optional conveniences around
+        this pattern, so a router does not need a dedicated SSGOI package.
       </p>
-
       <CodeBlock
         className="mt-6"
-        code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
-
-<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-
-// Inside a persistent section layout:
-<SsgoiRouteBoundary routeKey="section-shell">
-  <Header />
-  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-</SsgoiRouteBoundary>`}
+        code={`// React: use the committed pathname from your router.
+<div key={pathname} data-ssgoi-transition={pathname}>
+  {children}
+</div>`}
       />
-
       <p className={`mt-6 ${body}`}>
-        Next.js, React Router, TanStack Router, SvelteKit, Nuxt and SolidStart
-        have optional router entries that own this wrapper. In Qwik and Angular
-        you put the key and the attribute on the routed page root itself —{" "}
+        Place the boundary inside one provider. Get the pathname from the router
+        in the same render as its children; a mount-time window.location read or
+        an effect-delayed key can miss the outgoing page. Ready-made helpers are
+        listed within each{" "}
         <Link href="/docs/frameworks" className={link}>
-          Frameworks
-        </Link>{" "}
-        has the version for your stack. For a custom router or direct DOM
-        control, see the{" "}
-        <Link
-          href="https://ssgoi.dev/llms/manual-boundaries.txt"
-          className={link}
-        >
-          manual boundary guide
+          framework guide
         </Link>
         .
       </p>
@@ -403,6 +377,45 @@ export function BoundariesBody() {
             remount triggers it.
           </Note>
         </div>
+      </Section>
+
+      <Section
+        title="Build a boundary for your router"
+        id="manual-boundary"
+        lead="The React wrapper only needs the route id and the lifetime of its DOM root."
+      >
+        <CodeBlock
+          className="mt-5"
+          code={`import type { HTMLAttributes, ReactNode } from "react";
+
+type Props = HTMLAttributes<HTMLDivElement> & {
+  children: ReactNode;
+  pathname: string;
+  routeKey?: string | number;
+};
+
+export function RouteBoundary({ children, pathname, routeKey, ...props }: Props) {
+  return (
+    <div {...props} key={routeKey ?? pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}`}
+        />
+        <p className={`mt-5 ${body}`}>
+          Feed this wrapper the active route's committed pathname and its
+          children. A stable routeKey preserves a shell; changing page content
+          still needs its own boundary. Do not put a browser-URL key around a
+          background slot that an intercepted route should preserve.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          Other frameworks use their own lifetime primitives: Vue uses keyed
+          elements, Solid uses a keyed Show, and SvelteKit detaches the outgoing
+          snippet in onNavigate before its content changes. Qwik keeps the
+          marker and key on the page's own root; Angular can recreate an
+          embedded template. The framework guides show those connections and
+          their limits.
+        </p>
       </Section>
 
       <Section
@@ -1076,40 +1089,23 @@ export function TroubleshootingBody() {
 /* Frameworks                                                                 */
 /* -------------------------------------------------------------------------- */
 
-const FRAMEWORK_MARKS: Record<string, ComponentType<{ className?: string }>> = {
-  nextjs: NextMark,
-  "react-router": ReactRouterMark,
-  "tanstack-router": TanStackRouterMark,
-  sveltekit: SvelteKitMark,
-  nuxt: NuxtMark,
-  solidstart: SolidStartMark,
-  qwik: QwikMark,
-  angular: AngularMark,
-};
-
 export function FrameworksIndexBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        Pick the guide for the framework that owns your routed DOM. Transition
-        factories and route rules are identical everywhere; the provider and
-        boundary wiring differ per stack — Qwik takes a QRL config factory,
-        Angular an <code className={inlineCode}>ssgoi</code> directive.
+        Choose your rendering framework first, then the helper for your router.
+        Transition factories and route rules are identical everywhere; the
+        provider and boundary wiring differ per stack — Qwik takes a QRL config
+        factory, Angular an <code className={inlineCode}>ssgoi</code> directive.
       </p>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">
         {FRAMEWORK_DOCS.map((doc) => {
           const href = `/docs/frameworks/${doc.slug}`;
-          const Mark = FRAMEWORK_MARKS[doc.slug];
 
           return (
             <li key={doc.slug} className="py-5">
               <div className="flex gap-4">
-                {Mark && (
-                  <span className="mt-0.5 shrink-0" aria-hidden>
-                    <Mark className="h-6 w-6" />
-                  </span>
-                )}
                 <div className="min-w-0">
                   <h2 className="text-base font-semibold text-ink">
                     <Link href={href} className="hover:underline">
@@ -1134,16 +1130,15 @@ export function FrameworksIndexBody() {
                         Agent guide
                       </a>
                     )}
-                    {doc.templateUrl && (
-                      <a
-                        href={doc.templateUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                    {doc.routers.map((router) => (
+                      <Link
+                        key={router.slug}
+                        href={`${href}#${router.slug}`}
                         className={link}
                       >
-                        Template
-                      </a>
-                    )}
+                        {router.name}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>

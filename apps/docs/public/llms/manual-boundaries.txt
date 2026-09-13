@@ -63,7 +63,7 @@ SvelteKit's live `children` snippet needs more care: detach the outgoing region
 in `onNavigate` before Kit changes the snippet, then remount in the callback
 returned from `onNavigate` (after Kit updates the DOM). A key around the live
 snippet alone is not sufficient. The complete optional implementation is:
-https://github.com/meursyphus/ssgoi/blob/HEAD/packages/svelte/src/lib/sveltekit/ssgoi-route-boundary.svelte
+https://github.com/meursyphus/ssgoi/blob/HEAD/packages/svelte/src/lib/routers/sveltekit/ssgoi-route-boundary.svelte
 It can be copied into an app when custom lifecycle control is needed.
 
 ## Vue and Solid
@@ -72,8 +72,8 @@ Vue: key a DOM wrapper around the current RouterView component or NuxtPage.
 Solid: use a keyed Show/Dynamic boundary that recreates its child when the
 route's lifetime changes. Keep the transition id reactive even for stable keys.
 The optional adapters contain the corresponding implementations:
-- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/vue/src/lib/vue-router.ts
-- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/solid/src/lib/solidstart.tsx
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/vue/src/lib/routers/vue-router.ts
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/solid/src/lib/routers/solid-router.tsx
 
 Qwik and Angular own routed DOM differently; use their page-root markers:
 - https://ssgoi.dev/llms/frameworks/qwik.txt

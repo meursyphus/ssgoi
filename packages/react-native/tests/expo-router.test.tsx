@@ -9,7 +9,7 @@ import {
   cleanup,
 } from "expo-router/testing-library";
 import { Ssgoi } from "../src/ssgoi";
-import { SsgoiRouteBoundary } from "../src/expo-router";
+import { SsgoiRouteBoundary } from "../src/routers/expo-router";
 import { slide } from "../src/view-transitions";
 import { activeClocks, advanceFrames } from "./frame-clock";
 

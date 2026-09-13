@@ -13,7 +13,7 @@ export type SsgoiRouteBoundaryProps = JSX.HTMLAttributes<HTMLElement> & {
   resolve?: (location: { pathname: string }) => RouteBoundaryState;
 };
 
-/** Solid Router boundary, including SolidStart. */
+/** @experimental Solid Router integration, including SolidStart. The API may change. */
 export function SsgoiRouteBoundary(props: SsgoiRouteBoundaryProps) {
   const location = useLocation();
   const [local, rest] = splitProps(props, [

@@ -10,7 +10,7 @@ import {
   type BoundaryOptions,
   type NavigatorEvents,
   type ScreenOptions,
-} from "./navigator.js";
+} from "../navigator.js";
 
 const navigator = createStandardNavigator<
   ScreenOptions,
@@ -34,9 +34,12 @@ const ExpoBoundary = unstable_integrateWithRouter<
 export interface SsgoiRouteBoundaryProps extends BoundaryOptions {
   initialRouteName?: string;
 }
-/** Place in app/_layout.tsx. Expo discovers page files; no manual Screen list is required. */
+/**
+ * @experimental Expo Router integration. The API may change.
+ * Place in app/_layout.tsx. Expo discovers page files; no manual Screen list is required.
+ */
 export function SsgoiRouteBoundary(props: SsgoiRouteBoundaryProps) {
   return <ExpoBoundary {...props} />;
 }
-export type { ExpoRouteLocation } from "./navigator.js";
-export type { RouteBoundaryState } from "./types.js";
+export type { ExpoRouteLocation } from "../navigator.js";
+export type { RouteBoundaryState } from "../types.js";

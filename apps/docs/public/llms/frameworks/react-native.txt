@@ -1,0 +1,20 @@
+# SSGOI with React Native
+
+Native rendering and UI-thread playback use the same matching and physics concepts, with native fade/slide presets. This native integration remains experimental.
+
+Install @ssgoi/react-native. Keep one provider above the changing page region.
+
+## Common setup
+
+Use @ssgoi/react-native for the provider and native presets. Web transition presets and DOM attributes do not apply to native views.
+
+```ts
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
+import { slide } from "@ssgoi/react-native/view-transitions";
+```
+
+## Router helpers
+
+- Expo Router (experimental): https://ssgoi.dev/llms/frameworks/expo.txt
+
+Full framework guide: https://ssgoi.dev/docs/frameworks/react-native

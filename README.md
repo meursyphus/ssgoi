@@ -6,20 +6,20 @@ Native app-like page transitions for mobile web apps.
 
 [Live showcase](https://ssgoi.dev) · [Documentation](https://ssgoi.dev/docs)
 
-|                                                                   Drill                                                                    |                                                                    Sheet                                                                    |
+|                                                                Drill                                                                |                                                                                    Sheet                                                                                     |
 | :---------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="./apps/docs/public/readme-drill.gif" alt="Drill transition opening and closing a chat in a mobile web app" width="280" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition opening a compose screen above a mobile web app" width="280" /> |
-|                                  Navigate through a mobile app with spatial depth                                  |                                    Present focused tasks above the current page                                     |
+|                                          Navigate through a mobile app with spatial depth                                           |                                                                 Present focused tasks above the current page                                                                 |
 
 ## Why SSGOI?
 
-| | |
+|                                    |                                                                             |
 | ---------------------------------- | --------------------------------------------------------------------------- |
-| **Router agnostic** | Keep your existing router and let it own navigation. |
-| **Cross-browser** | Use the same transitions across Chrome, Safari, Firefox, and Edge. |
-| **Optimized motion** | Spring physics are precomputed into Web Animations API keyframes. |
+| **Router agnostic**                | Keep your existing router and let it own navigation.                        |
+| **Cross-browser**                  | Use the same transitions across Chrome, Safari, Firefox, and Edge.          |
+| **Optimized motion**               | Spring physics are precomputed into Web Animations API keyframes.           |
 | **Beyond the View Transition API** | Build transitions that need live DOM, runtime layers, and precise geometry. |
-| **Easy to adopt** | Add SSGOI by changing only two files. |
+| **Easy to adopt**                  | Add SSGOI by changing only two files.                                       |
 
 ---
 
@@ -160,10 +160,10 @@ Try the [Expo template](./templates/expo) for the current implementation and dev
 SSGOI owns the geometry, temporary visual layers, live outgoing DOM, and
 navigation policy needed to turn complex motion into reusable presets.
 
-|                                                                      Zoom                                                                       |                                                              Film                                                               |                                                                    Sheet                                                                    |
+|                                                                                      Zoom                                                                                      |                                                                               Film                                                                               |                                                                                Sheet                                                                                |
 | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="./apps/docs/public/blog/view-transition-api-limitations/zoom-blur.gif" alt="Zoom transition that transforms and clips a detail page around its image" width="240" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/film.gif" alt="Film transition with runtime visual pieces and multiple springs" width="320" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition with a live backdrop between two pages" width="240" /> |
-|                   The whole detail page unfolds from its image                    |                           Runtime scene, live video, and multiple springs                           |                         A live backdrop sits between the two pages                          |
+|                                                                  The whole detail page unfolds from its image                                                                  |                                                         Runtime scene, live video, and multiple springs                                                          |                                                             A live backdrop sits between the two pages                                                              |
 
 [Read why SSGOI doesn't use the View Transition API →](https://ssgoi.dev/blog/view-transition-api-limitations)
 

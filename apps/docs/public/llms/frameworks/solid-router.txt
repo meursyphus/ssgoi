@@ -1,0 +1,24 @@
+# SSGOI with Solid Router
+
+Experimental API: this router helper may change.
+
+Install @ssgoi/solid in an existing Solid Router application.
+Use the Solid Router entry for Solid applications. SolidStart’s existing entry uses this same implementation.
+
+Keep one common provider above the following boundary.
+
+## Wrap the routed children
+
+The keyed boundary recreates the changing region while routeKey can preserve an outer shell.
+
+```tsx
+import { SsgoiRouteBoundary } from "@ssgoi/solid/solid-router";
+
+<SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
+```
+
+## Route lifetime
+
+The default key follows the pathname. resolve can return separate id and key values; use a stable shell key only around content that should remain mounted.
+
+Common setup: https://ssgoi.dev/llms/frameworks/solid.txt

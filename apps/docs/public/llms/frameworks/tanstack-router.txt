@@ -1,5 +1,7 @@
 # SSGOI with TanStack Router
 
+Experimental API: the router integration may change.
+
 TanStack Router wiring. Choose effects from:
 https://ssgoi.dev/llms/transitions.txt
 

@@ -233,70 +233,153 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         id: "frameworks-overview",
         title: "Guide",
         href: "/docs/frameworks",
-        blurb: "One page per framework and router.",
+        blurb:
+          "Choose the framework that owns your page, then connect its router.",
+      },
+      {
+        id: "framework-react",
+        title: "React",
+        href: "/docs/frameworks/react",
+        blurb:
+          "Use SSGOI with React independently of your router. Router helpers are optional conveniences that connect a pathname and a page lifetime to the same React implementation.",
         children: [
           {
-            id: "framework-nextjs",
-            title: "React / Next.js",
-            href: "/docs/frameworks/nextjs",
-            icon: "nextjs",
-            blurb: "App Router provider and pathname boundary.",
-          },
-          {
-            id: "framework-expo",
-            title: "React Native / Expo (preview)",
-            href: "/docs/frameworks/expo",
+            id: "router-nextjs",
+            title: "Next.js",
+            href: "/docs/frameworks/react#nextjs",
             blurb:
-              "Experimental native fade/slide and file-based screen boundaries.",
+              "Use the App Router helper to read the committed pathname, handle URL-hook suspension, and mark the routed region. It is included in @ssgoi/react.",
           },
           {
-            id: "framework-react-router",
+            id: "router-remix",
+            title: "Remix",
+            href: "/docs/frameworks/react#remix",
+            blurb:
+              "Use the Remix 2 entry with @remix-run/react. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.",
+          },
+          {
+            id: "router-react-router",
             title: "React Router",
-            href: "/docs/frameworks/react-router",
-            icon: "react-router",
-            blurb: "Boundary built on useLocation().",
+            href: "/docs/frameworks/react#react-router",
+            blurb:
+              "Use the helper inside React Router 6 or 7. It follows the committed location; query-only navigation preserves the boundary.",
           },
           {
-            id: "framework-tanstack-router",
+            id: "router-tanstack-router",
             title: "TanStack Router",
-            href: "/docs/frameworks/tanstack-router",
-            icon: "tanstack-router",
-            blurb: "Boundary built on router state.",
+            href: "/docs/frameworks/react#tanstack-router",
+            blurb:
+              "Use this entry for TanStack Router 1, including React applications built with TanStack Start. Both use the same router context.",
           },
+        ],
+      },
+      {
+        id: "framework-svelte",
+        title: "Svelte",
+        href: "/docs/frameworks/svelte",
+        blurb:
+          "The Svelte package provides the common provider and transition API. Add the SvelteKit helper when Kit owns navigation.",
+        children: [
           {
-            id: "framework-sveltekit",
+            id: "router-sveltekit",
             title: "SvelteKit",
-            href: "/docs/frameworks/sveltekit",
-            icon: "sveltekit",
-            blurb: "Boundary component built on onNavigate.",
+            href: "/docs/frameworks/svelte#sveltekit",
+            blurb:
+              "Use onNavigate to detach outgoing content before SvelteKit updates its live children snippet. A key around that snippet alone is not sufficient.",
+          },
+        ],
+      },
+      {
+        id: "framework-vue",
+        title: "Vue",
+        href: "/docs/frameworks/vue",
+        blurb:
+          "Use the Vue package for the provider and effects. Choose the helper for the router already installed in your app.",
+        children: [
+          {
+            id: "router-vue-router",
+            title: "Vue Router",
+            href: "/docs/frameworks/vue#vue-router",
+            blurb:
+              "Use the helper with Vue Router 4 inside the common Vue provider.",
           },
           {
-            id: "framework-nuxt",
-            title: "Vue / Nuxt",
-            href: "/docs/frameworks/nuxt",
-            icon: "nuxt",
-            blurb: "Keyed route boundary for Vue Router and Nuxt.",
+            id: "router-nuxt",
+            title: "Nuxt",
+            href: "/docs/frameworks/vue#nuxt",
+            blurb:
+              "Use the Nuxt-specific entry inside the common Vue provider. It observes the committed router state rather than Nuxt’s delayed useRoute value.",
+          },
+        ],
+      },
+      {
+        id: "framework-solid",
+        title: "Solid",
+        href: "/docs/frameworks/solid",
+        blurb:
+          "Use the Solid package for common rendering and effects. Solid Router and SolidStart share the same boundary implementation.",
+        children: [
+          {
+            id: "router-solid-router",
+            title: "Solid Router",
+            href: "/docs/frameworks/solid#solid-router",
+            blurb:
+              "Use the Solid Router entry for Solid applications. SolidStart’s existing entry uses this same implementation.",
           },
           {
-            id: "framework-solidstart",
+            id: "router-solidstart",
             title: "SolidStart",
-            href: "/docs/frameworks/solidstart",
-            icon: "solidstart",
-            blurb: "Keyed boundary component on useLocation().",
+            href: "/docs/frameworks/solid#solidstart",
+            blurb:
+              "Use the same Solid Router boundary through the SolidStart entry.",
           },
+        ],
+      },
+      {
+        id: "framework-qwik",
+        title: "Qwik",
+        href: "/docs/frameworks/qwik",
+        blurb:
+          "Qwik keeps ownership of projected content and serializes state. Supply transition functions through a QRL factory and attach SSGOI to the layout that owns the routed slot.",
+        children: [
           {
-            id: "framework-qwik",
+            id: "router-qwik-city",
             title: "Qwik City",
-            href: "/docs/frameworks/qwik",
-            icon: "qwik",
-            blurb: "QRL config factory and direct markers.",
+            href: "/docs/frameworks/qwik#qwik-city",
+            blurb:
+              "The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
           },
+        ],
+      },
+      {
+        id: "framework-angular",
+        title: "Angular",
+        href: "/docs/frameworks/angular",
+        blurb:
+          "Use the common ssgoi directive above the changing page region. The optional Angular Router directive supplies each page’s boundary.",
+        children: [
           {
-            id: "framework-angular",
-            title: "Angular",
-            href: "/docs/frameworks/angular",
-            icon: "angular",
-            blurb: "ssgoi directive above the router outlet.",
+            id: "router-angular-router",
+            title: "Angular Router",
+            href: "/docs/frameworks/angular#angular-router",
+            blurb:
+              "A structural directive marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.",
+          },
+        ],
+      },
+      {
+        id: "framework-react-native",
+        title: "React Native",
+        href: "/docs/frameworks/react-native",
+        blurb:
+          "Native rendering and UI-thread playback use the same matching and physics concepts, with native fade/slide presets. This native integration remains experimental.",
+        children: [
+          {
+            id: "router-expo-router",
+            title: "Expo Router",
+            href: "/docs/frameworks/react-native#expo-router",
+            blurb:
+              "The file-based boundary discovers screens and retains outgoing native views until playback completes. It replaces the Stack in that layout.",
           },
         ],
       },
@@ -393,7 +476,12 @@ export function flattenDocsNav(
 
   function visit(nodes: readonly DocsNavNode[]) {
     for (const node of nodes) {
-      if (node.href && node.blurb && !seen.has(node.href)) {
+      if (
+        node.href &&
+        !node.href.includes("#") &&
+        node.blurb &&
+        !seen.has(node.href)
+      ) {
         seen.add(node.href);
         links.push(node as DocsNavLink);
       }

@@ -35,7 +35,10 @@
     "docs:cf-build": "pnpm release:build && pnpm --filter docs exec opennextjs-cloudflare build --skipWranglerConfigCheck",
     "prepare": "husky",
     "test:transition-examples": "node scripts/check-transition-examples.mjs",
-    "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs"
+    "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs",
+    "test:router-exports": "node scripts/check-router-exports.mjs",
+    "test:router-docs": "node scripts/check-router-docs.mjs",
+    "test:router-isolation": "node scripts/check-router-isolation.mjs && node scripts/check-isolated-platforms.mjs && node scripts/check-native-isolation.mjs"
   },
   "author": "meursyphus",
   "license": "MIT",

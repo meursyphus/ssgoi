@@ -1,5 +1,7 @@
 # SSGOI + React Native / Expo Router (experimental)
 
+Experimental API: the router integration may change.
+
 This first native integration is published as @ssgoi/react-native in lockstep
 with the web packages. It remains experimental: a stable package version does
 not imply production-ready native support. Use templates/expo from the

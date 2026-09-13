@@ -11,6 +11,7 @@ export interface SveltekitRouteLocation {
   url: URL;
 }
 
+/** @experimental SvelteKit route boundary options. */
 export interface SsgoiRouteBoundaryProps extends HTMLAttributes<HTMLElement> {
   children: Snippet;
   as?: keyof HTMLElementTagNameMap;

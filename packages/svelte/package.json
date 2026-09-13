@@ -99,9 +99,9 @@
       "import": "./dist/view-transitions.js"
     },
     "./sveltekit": {
-      "types": "./dist/sveltekit/index.d.ts",
-      "svelte": "./dist/sveltekit/index.js",
-      "import": "./dist/sveltekit/index.js"
+      "types": "./dist/routers/sveltekit/index.d.ts",
+      "svelte": "./dist/routers/sveltekit/index.js",
+      "import": "./dist/routers/sveltekit/index.js"
     }
   },
   "peerDependenciesMeta": {

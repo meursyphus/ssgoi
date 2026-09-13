@@ -632,10 +632,13 @@ export function RoutersBody() {
           </a>
         ))}
       </div>
+      <p className="mt-5 text-xs text-ink-faint">
+        Router integrations other than Next.js are experimental APIs.
+      </p>
       <p className={`mt-6 ${measure} ${prose}`}>
-        The React, SvelteKit, Nuxt and SolidStart templates wrap routed content
-        in a boundary component. Qwik and Angular have no equivalent wrapper, so
-        each routed page root carries the key and the marker itself.{" "}
+        Router helpers are grouped under their rendering framework. Qwik keeps
+        the key and marker on the page root; Angular offers a structural
+        directive that recreates that root when its key changes.{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

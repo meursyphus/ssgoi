@@ -6,9 +6,9 @@ import { MemoryRouter, useNavigate, type NavigateFunction } from "react-router";
 import {
   SsgoiRouteBoundary as NextBoundary,
   selectedSegmentsToPath,
-} from "../src/lib/nextjs";
-import { SsgoiRouteBoundary as ReactRouterBoundary } from "../src/lib/react-router";
-import { SsgoiRouteBoundary as TanstackBoundary } from "../src/lib/tanstack-router";
+} from "../../src/routers/nextjs";
+import { SsgoiRouteBoundary as ReactRouterBoundary } from "../../src/routers/react-router";
+import { SsgoiRouteBoundary as TanstackBoundary } from "../../src/routers/tanstack-router";
 
 const navigation = vi.hoisted(() => ({
   pathname: "/projects" as string | null,

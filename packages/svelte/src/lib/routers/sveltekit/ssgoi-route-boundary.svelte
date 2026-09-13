@@ -1,3 +1,6 @@
+<!-- @component
+@experimental SvelteKit route boundary. The API may change.
+-->
 <script lang="ts">
   import { onNavigate } from "$app/navigation";
   // Stores work throughout SvelteKit 2, including releases before $app/state.

@@ -1,5 +1,7 @@
 # SSGOI with SolidStart
 
+Experimental API: the router integration may change.
+
 SolidStart wiring. Choose effects from:
 https://ssgoi.dev/llms/transitions.txt
 

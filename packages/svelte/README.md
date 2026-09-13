@@ -12,6 +12,17 @@ npm install @ssgoi/svelte
 
 Agent setup guide: https://ssgoi.dev/llms/svelte.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+These router helpers are experimental APIs and may change.
+
+| Router    | Import                    | API                  |
+| --------- | ------------------------- | -------------------- |
+| SvelteKit | `@ssgoi/svelte/sveltekit` | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring and limits.
+
 ## Root
 
 ```svelte

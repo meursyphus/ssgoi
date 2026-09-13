@@ -12,6 +12,18 @@ npm install @ssgoi/solid
 
 Agent setup guide: https://ssgoi.dev/llms/solid.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+These router helpers are experimental APIs and may change.
+
+| Router       | Import                      | API                  |
+| ------------ | --------------------------- | -------------------- |
+| Solid Router | `@ssgoi/solid/solid-router` | `SsgoiRouteBoundary` |
+| SolidStart   | `@ssgoi/solid/solidstart`   | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/solid) for wiring and limits.
+
 ## Root
 
 Use one `<Ssgoi>` around file routes.
