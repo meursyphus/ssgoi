@@ -107,3 +107,119 @@ describe("MultiAnimation", () => {
     expect(second.play).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("named start conditions", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it("does not dilute progress with empty optional groups", () => {
+    const main = new FakeAnimation();
+    const animation = new MultiAnimation({
+      main,
+      optional: new MultiAnimation({ nested: new MultiAnimation([]) }),
+    });
+    expect(animation.progress).toBe(0);
+    main.value = 0.4;
+    expect(animation.progress).toBe(0.4);
+    main.complete();
+    expect(animation.progress).toBe(1);
+  });
+
+  it("distinguishes first crossing at 1 from actual settling", () => {
+    const frames = installAnimationFrameHarness();
+    const outgoing = new FakeAnimation();
+    const crossing = new FakeAnimation();
+    const settled = new FakeAnimation();
+    const animation = new MultiAnimation({ outgoing, crossing, settled });
+    crossing.set({ startAt: { after: outgoing, at: 1 } });
+    settled.set({ startAt: { after: outgoing, at: "settled" } });
+    animation.play();
+    outgoing.value = 1;
+    frames.flush();
+    expect(crossing.play).toHaveBeenCalledTimes(1);
+    expect(settled.play).not.toHaveBeenCalled();
+    outgoing.complete();
+    frames.flush();
+    expect(settled.play).toHaveBeenCalledTimes(1);
+    animation.complete();
+  });
+
+  it("supports sibling dependencies independently of insertion order", () => {
+    const frames = installAnimationFrameHarness();
+    const first = new FakeAnimation();
+    const second = new FakeAnimation();
+    const animation = new MultiAnimation({ first, second });
+    first.set({ startAt: { after: second, at: 0.3 } });
+    animation.play();
+    expect(first.play).not.toHaveBeenCalled();
+    expect(second.play).toHaveBeenCalledTimes(1);
+    second.value = 0.3;
+    frames.flush();
+    expect(first.play).toHaveBeenCalledTimes(1);
+    animation.complete();
+  });
+
+  it("retains legacy chained zero offsets after a stagger", () => {
+    const frames = installAnimationFrameHarness();
+    const first = new FakeAnimation(),
+      second = new FakeAnimation(),
+      third = new FakeAnimation();
+    const animation = new MultiAnimation([first, second, third], {
+      startAt: [0, 0.4, 0],
+    });
+    animation.play();
+    expect(second.play).not.toHaveBeenCalled();
+    expect(third.play).not.toHaveBeenCalled();
+    first.value = 0.4;
+    frames.flush();
+    expect(second.play).toHaveBeenCalledTimes(1);
+    expect(third.play).toHaveBeenCalledTimes(1);
+    animation.complete();
+  });
+
+  it("rejects cycles and references outside the parent before starting", () => {
+    const first = new FakeAnimation(),
+      second = new FakeAnimation(),
+      foreign = new FakeAnimation();
+    const animation = new MultiAnimation({ first, second });
+    first.set({ startAt: { after: second, at: 0.5 } });
+    second.set({ startAt: { after: first, at: 0.5 } });
+    expect(() => animation.play()).toThrow("cycle");
+    expect(first.play).not.toHaveBeenCalled();
+    second.set({ startAt: null });
+    first.set({ startAt: { after: foreign, at: 0.5 } });
+    expect(() => animation.play()).toThrow("sibling");
+    expect(() => first.set({ startAt: { after: second, at: NaN } })).toThrow(
+      "progress",
+    );
+    expect(() => first.set({ startAt: { after: first, at: 0 } })).toThrow(
+      "itself",
+    );
+  });
+
+  it("does not accumulate completion callbacks across replay or forced completion", () => {
+    const first = new FakeAnimation(),
+      second = new FakeAnimation();
+    const animation = new MultiAnimation({ first, second });
+    const childComplete = vi.fn(),
+      complete = vi.fn();
+    first.onComplete = childComplete;
+    animation.onComplete = complete;
+    animation.play();
+    first.complete();
+    second.complete();
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(first.onComplete).toBe(childComplete);
+    animation.play();
+    first.complete();
+    expect(complete).toHaveBeenCalledTimes(1);
+    second.complete();
+    expect(complete).toHaveBeenCalledTimes(2);
+    animation.play();
+    animation.complete();
+    expect(complete).toHaveBeenCalledTimes(3);
+    expect(childComplete).toHaveBeenCalledTimes(3);
+  });
+});

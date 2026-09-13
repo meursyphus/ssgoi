@@ -558,6 +558,15 @@ export function RouteRulesBody() {
           forward. Direct entries and unrecorded history pairs fall back to
           current rules.
         </p>
+        <p className={`mt-4 ${body}`}>
+          With an explicit gallery → photo/* pair, a new link from detail back
+          to gallery is backward even when it uses push rather than browser
+          Back. If both from and to are photo/*, their equal patterns defer to
+          history: a related-photo push is forward and Back reverses the
+          recorded visit. The transition consumes this direction unchanged; zoom
+          and hero enter/exit markers identify element roles, not another
+          direction.
+        </p>
       </Section>
 
       <Section

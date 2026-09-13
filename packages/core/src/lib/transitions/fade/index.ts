@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { fade as transition } from "./transition";
 import type { FadeOptions, FadeType, FadeVariant } from "./types";
@@ -11,6 +12,9 @@ export type { FadeOptions, FadeType, FadeVariant } from "./types";
  */
 export type FadeConfig = PresetConfig<FadeType, FadeVariant, FadeOptions>;
 
-export function fade(_config: FadeConfig = {}): AnyTransitionConfig {
-  return transition();
+export function fade(
+  _config: FadeConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
+  return withOverride(transition(), extras.override);
 }

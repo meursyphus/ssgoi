@@ -1,4 +1,5 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import {
   IntegratorProvider,
   MultiAnimation,
@@ -15,9 +16,9 @@ export interface StripOptions {
   physics?: PhysicsOptions;
 }
 
-export const strip = (options: StripOptions = {}): TransitionConfig => {
+export const strip = (options: StripOptions = {}) => {
   const physicsOptions: PhysicsOptions = options.physics ?? DEFAULT_PHYSICS;
-  return {
+  const shared = {
     prepare: ({ from, to }) => {
       from.then((el) => {
         el.style.willChange = "transform";
@@ -78,7 +79,12 @@ export const strip = (options: StripOptions = {}): TransitionConfig => {
         },
       });
 
-      return new MultiAnimation([outAnim, inAnim], { mode: "sequence" });
+      return new MultiAnimation(
+        { out: outAnim, in: inAnim },
+        { mode: "sequence" },
+      );
     },
-  };
+  } satisfies TransitionDirection<object>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };

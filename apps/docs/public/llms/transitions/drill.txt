@@ -22,7 +22,6 @@ drill({
 - `slide`: both pages translate a full viewport width—the new page enters from
   the right while the old page exits left—and opacity shifts between 0.5 and 1.
 
-Deprecated: `type: "crossfade"`; use `type: "slide"`.
 
 ## Example
 

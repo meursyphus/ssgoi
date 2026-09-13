@@ -1,4 +1,5 @@
-import type { PhysicsOptions, TransitionConfig } from "@types";
+import { defineTransition } from "../../transition/define-transition";
+import type { PhysicsOptions, TransitionDirection } from "@types";
 import {
   Animation,
   IntegratorProvider,
@@ -92,15 +93,13 @@ type BlindExtras = {
   toContainer: HTMLDivElement;
 };
 
-export const blind = (
-  options: BlindOptions = {},
-): TransitionConfig<BlindExtras> => {
+export const blind = (options: BlindOptions = {}) => {
   const blindCount = options.blindCount ?? DEFAULT_BLIND_COUNT;
   const direction = options.direction ?? DEFAULT_DIRECTION;
   const blindColor = options.blindColor ?? DEFAULT_BLIND_COLOR;
   const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
-  return {
+  const shared = {
     prepare: async ({ from, to }): Promise<BlindExtras> => {
       const fromEl = await from;
       const toEl = await to;
@@ -182,7 +181,12 @@ export const blind = (
       const outPhase = new MultiAnimation(out, { mode: "parallel" });
       const inPhase = new MultiAnimation(inAnims, { mode: "parallel" });
 
-      return new MultiAnimation([outPhase, inPhase], { mode: "sequence" });
+      return new MultiAnimation(
+        { out: outPhase, in: inPhase },
+        { mode: "sequence" },
+      );
     },
-  };
+  } satisfies TransitionDirection<BlindExtras>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };

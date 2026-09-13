@@ -21,6 +21,18 @@ Agent setup guide: https://ssgoi.dev/llms.txt
 - Config
 - Effect index
 
+## Tune or define motion
+
+Built-in presets accept `{ override: { forward, backward } }` as their second
+argument. Callbacks receive `{ animation, context }`, preserve the preset's
+concrete animation type, and edit named children with
+`animation.select("in").set({ integrator })`. Use `animation.set({ integrator })`
+to retune the whole group. Springs use stiffness/damping; custom integrator
+instances are accepted.
+
+[Motion overrides](https://ssgoi.dev/docs/motion) ·
+[Custom definitions and integrators](https://ssgoi.dev/docs/custom-transitions)
+
 ## Next.js
 
 Keep one config and one `<Ssgoi>` above route boundaries.

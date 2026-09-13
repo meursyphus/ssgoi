@@ -33,7 +33,9 @@
     "release:publish": "pnpm -r --filter \"./packages/*\" publish --access public --no-git-checks",
     "release": "node scripts/release.mjs",
     "docs:cf-build": "pnpm release:build && pnpm --filter docs exec opennextjs-cloudflare build --skipWranglerConfigCheck",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:transition-examples": "node scripts/check-transition-examples.mjs",
+    "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs"
   },
   "author": "meursyphus",
   "license": "MIT",

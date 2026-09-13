@@ -1,5 +1,30 @@
 export * from "./transitions";
+export * from "./motion";
+export { defineTransition } from "./transition/define-transition";
+export type {
+  Transition,
+  TransitionDefinition,
+  TransitionDirection,
+  OverrideArgs,
+} from "./transition/define-transition";
+export type { AnimationPatch, AnimationStart } from "./animation/animation";
 export { Animation, WebAnimation, MultiAnimation } from "./animation";
+export {
+  SpringIntegrator,
+  DoubleSpringIntegrator,
+  InertiaIntegrator,
+  LinearIntegrator,
+  IntegratorProvider,
+} from "./animation/integrator";
+export type { TrackPatch } from "./animation/multi-animation";
+export type {
+  Integrator,
+  IntegratorState,
+  SpringIntegratorConfig,
+  DoubleSpringIntegratorConfig,
+  InertiaIntegratorConfig,
+  LinearIntegratorConfig,
+} from "./animation/integrator";
 export type {
   WebAnimationOptions,
   MultiAnimationOptions,
@@ -25,4 +50,7 @@ export type {
   PhysicsOptions,
   SpringConfig,
   InertiaConfig,
+  Override,
+  OverrideFn,
+  PresetExtras,
 } from "@types";

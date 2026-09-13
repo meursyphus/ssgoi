@@ -83,24 +83,72 @@ DOM lifetime:
 This supports persistent layouts, inner tab transitions, and bottom navigation
 with one SSGOI instance.
 
-## Transition context
+## Motion overrides
 
-Custom effects receive semantic direction through `context`:
+Keep the preset's defaults and change only the selected direction or named group:
 
 ```ts
-import { defineTransition } from "@ssgoi/core";
+import { axis, spring } from "@ssgoi/core";
 
-const effect = defineTransition({
-  prepare: ({ from, to, context }) => {
-    // Pre-paint setup.
-    return {};
-  },
-  animation: ({ from, to, context }) => {
-    // context.direction is "forward" or "backward".
-    return animation;
+const tuned = axis({ type: "x" }, {
+  override: {
+    forward({ animation }) {
+      const out = animation.select("out");
+      animation.select("in").set({
+        integrator: spring({ stiffness: 320, damping: 30 }),
+        startAt: { after: out, at: 0.3 },
+      });
+    },
   },
 });
 ```
+
+The callback receives `{ animation, context }`. Named children are inferred from
+that preset's return type. `animation.set({ integrator })` explicitly retunes the
+whole group. Numeric start thresholds use first crossing; `at: "settled"` waits
+for completion. Custom `Integrator` instances are supported.
+
+[Motion guide](https://ssgoi.dev/docs/motion) ·
+[Plain-text API](https://ssgoi.dev/llms/motion.txt)
+
+## Custom transitions
+
+`defineTransition` pairs each direction's preparation with its animation factory.
+Prepared values and concrete return types are inferred independently. The core
+accepts any `Animation`; it does not require `MultiAnimation`.
+
+```ts
+import { defineTransition, WebAnimation, spring } from "@ssgoi/core";
+
+const physics = spring({ stiffness: 300, damping: 30 });
+const makeDirection = () => ({
+  animation({ from }: { from: HTMLElement }) {
+    const previousOpacity = from.style.opacity;
+    const animation = new WebAnimation({
+      element: from,
+      integrator: physics,
+      style: (_t, u) => ({ opacity: u }),
+      onComplete() {
+        from.style.opacity = previousOpacity;
+        animation.releaseFill();
+      },
+    });
+    return animation;
+  },
+});
+
+const effect = defineTransition({
+  forward: makeDirection(),
+  backward: makeDirection(),
+});
+```
+
+The core determines `context.direction` from route rules and history. Transitions
+consume it unchanged. Keep per-run DOM snapshots in prepared data or animation
+closures and restore styles when reusable page nodes finish animating.
+
+[Complete custom transition example](https://ssgoi.dev/docs/custom-transitions) ·
+[Custom integrators and lifecycle reference](https://ssgoi.dev/llms/custom-transitions.txt)
 
 ## Effect index
 

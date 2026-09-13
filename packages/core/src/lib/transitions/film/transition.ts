@@ -1,11 +1,13 @@
+import { animationGroup } from "../animation-group";
+import { defineTransition } from "../../transition/define-transition";
 import type {
   PhysicsOptions,
   SpringConfig,
   StyleObject,
-  TransitionConfig,
+  TransitionDirection,
 } from "@types";
 import { getRect, getViewportRect } from "@utils";
-import { Animation, MultiAnimation, WebAnimation } from "../../animation";
+import { Animation, WebAnimation } from "../../animation";
 import {
   LinearIntegrator,
   SETTLE_THRESHOLD,
@@ -406,14 +408,12 @@ type FilmExtras = {
   toRect: FilmRect;
 };
 
-export const film = (
-  options: FilmOptions = {},
-): TransitionConfig<FilmExtras> => {
+export const film = (options: FilmOptions = {}) => {
   const borderColor = options.border?.color ?? DEFAULT_BORDER_COLOR;
   const scale = DEFAULT_SCALE;
   const physicsOverride = options.physics;
 
-  return {
+  const shared = {
     prepare: ({ from, to, context }) => {
       const fromRect = getViewportRect(context, "from");
       const toRect = getViewportRect(context, "to");
@@ -509,8 +509,10 @@ export const film = (
         );
       });
 
-      const composite = new MultiAnimation([mainOut, mainIn, ...borderAnims], {
-        mode: "parallel",
+      const composite = animationGroup({
+        out: mainOut,
+        in: mainIn,
+        borders: borderAnims,
       });
 
       const prevOnComplete = composite.onComplete;
@@ -532,5 +534,7 @@ export const film = (
 
       return composite;
     },
-  };
+  } satisfies TransitionDirection<FilmExtras>;
+
+  return defineTransition({ forward: shared, backward: shared });
 };
