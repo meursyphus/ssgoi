@@ -1,5 +1,5 @@
-import type { SsgoiConfig } from "@ssgoi/react";
-import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
+import type { SsgoiConfig } from "@ssgoi/tanstack-router";
+import { drill, slide, zoom } from "@ssgoi/tanstack-router/view-transitions";
 
 export const PRODUCT_CATEGORIES = [
   { id: "all", label: "All", path: "/products/all" },

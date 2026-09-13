@@ -8,7 +8,7 @@ import { CompanyNotice } from "./company-notice";
 import { ListingRow } from "./listing-row";
 import { PopularSection } from "./popular-section";
 import { BottomNav } from "./bottom-nav";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 export default function HomePage() {
   const listing = useListing((state) => ({
     feed: state.feed,

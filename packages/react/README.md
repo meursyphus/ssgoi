@@ -2,6 +2,16 @@
 
 React bindings for SSGOI.
 
+For an application using a supported router, install one of
+[`@ssgoi/nextjs`](../nextjs/README.md),
+[`@ssgoi/react-router`](../react-router/README.md), or
+[`@ssgoi/tanstack-router`](../tanstack-router/README.md). Each includes the public
+React API and adds `SsgoiRouteBoundary`; no separate `@ssgoi/react` install is
+needed for those application imports.
+
+This common package remains router-independent for shared React libraries and
+custom integrations. The examples below show manual boundary wiring.
+
 [![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
 [Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)

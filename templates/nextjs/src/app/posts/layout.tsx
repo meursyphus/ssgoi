@@ -1,4 +1,4 @@
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function PostsLayout({
   children,

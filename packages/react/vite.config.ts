@@ -25,9 +25,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        nextjs: resolve(__dirname, "src/lib/nextjs.ts"),
-        "react-router": resolve(__dirname, "src/lib/react-router.ts"),
-        "tanstack-router": resolve(__dirname, "src/lib/tanstack-router.ts"),
+        internal: resolve(__dirname, "src/lib/internal.ts"),
         types: resolve(__dirname, "src/lib/types.ts"),
         "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
         "unplugin/index": resolve(__dirname, "src/unplugin/index.ts"),
@@ -40,9 +38,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        /^next(?:\/|$)/,
-        /^react-router(?:\/|$)/,
-        /^@tanstack\/react-router(?:\/|$)/,
         "react",
         "react-dom",
         "react/jsx-runtime",

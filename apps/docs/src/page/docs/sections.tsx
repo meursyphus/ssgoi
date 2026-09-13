@@ -67,6 +67,10 @@ export function DocsHero() {
 /* -------------------------------------------------------------------------- */
 
 const PACKAGES = [
+  "@ssgoi/nextjs",
+  "@ssgoi/react-router",
+  "@ssgoi/tanstack-router",
+  "@ssgoi/expo-router",
   "@ssgoi/react",
   "@ssgoi/svelte",
   "@ssgoi/vue",
@@ -146,8 +150,8 @@ export function InstallBody() {
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/nextjs";
+import { drill } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -171,7 +175,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`import { drill, fade } from "@ssgoi/react/view-transitions";
+              code={`import { drill, fade } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: ({ isMobile }) =>
@@ -211,13 +215,14 @@ const config = {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+              code={`import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              Next.js is an optional peer, loaded only by this subpath. If the
-              wrong part of the screen moves, adjust the boundary lifetime —{" "}
+              The Next.js package includes the common React API and this
+              boundary. If the wrong part of the screen moves, adjust the
+              boundary lifetime —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
               </Link>{" "}
@@ -237,7 +242,7 @@ const config = {
               code={`// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

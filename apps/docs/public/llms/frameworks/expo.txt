@@ -1,6 +1,6 @@
 # SSGOI + React Native / Expo Router (experimental)
 
-This first native integration is published as @ssgoi/react-native in lockstep
+This native integration is published as @ssgoi/expo-router in lockstep
 with the web packages. It remains experimental: a stable package version does
 not imply production-ready native support. Use templates/expo from the
 matching source checkout for the supported dependency baseline and device checks.
@@ -11,17 +11,16 @@ Reanimated 4.3.1, Worklets 0.8.3. Expo's standard navigator API is alpha.
 ## Run the source example
 
 pnpm install
-pnpm --filter @ssgoi/core build
-pnpm --filter @ssgoi/react-native build
+pnpm --filter @ssgoi/expo-router... build
 pnpm --filter ssgoi-expo-template start
 
 ## File-based setup
 
 ```tsx
 // app/_layout.tsx
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
-import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
-import { slide } from "@ssgoi/react-native/view-transitions";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/expo-router";
+import { SsgoiRouteBoundary } from "@ssgoi/expo-router";
+import { slide } from "@ssgoi/expo-router/view-transitions";
 
 const config = {
   transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
@@ -47,8 +46,10 @@ wrap Stack or Slot inside it. Supply safe areas and native screen backgrounds
 in the application. DOM attributes, CSS, Next.js Suspense props, and web
 TransitionConfig objects do not apply to native screens.
 
-Ssgoi selects native playback automatically. The root package does not import
-Expo Router; only the optional /expo-router entry loads that router.
+Ssgoi selects native playback automatically. Install @ssgoi/expo-router in
+an existing Expo application; it includes the common native API and requires
+the validated Expo Router version. @ssgoi/react-native itself remains independent
+of Expo Router.
 
 ## Rules and options
 

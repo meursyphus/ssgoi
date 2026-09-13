@@ -2,11 +2,11 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/nextjs";
 import { HostAnimation } from "@ssgoi/core/internal";
 import { HostContext } from "@/lib/components/host-context";
 import { useShowcaseFrameBridge } from "@/lib/hooks";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 const config: SsgoiConfig = {
   transitions: [],

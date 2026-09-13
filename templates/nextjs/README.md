@@ -1,7 +1,8 @@
 # SSGOI + Next.js
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
-optional peer and is loaded only by this entry.
+Import `SsgoiRouteBoundary` from `@ssgoi/nextjs`. This package includes
+the common React API and declares its router as a required peer. Install only
+this SSGOI package in an application using these imports.
 
 ```bash
 pnpm install
@@ -12,7 +13,7 @@ pnpm dev
 
 - `src/components/ssgoi-config.ts`: one transition config.
 - `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
+- `@ssgoi/nextjs`: shipped pathname boundary with Suspense.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
 The default boundary uses the pathname for its id and key. `routeKey` keeps a
@@ -100,7 +101,7 @@ top-level tabs, per-project shell lifetimes, intercepted modal open/back/forward
 direct detail entry, index backgrounds, nested sidebars, and unresolved URLs:
 
 ```bash
-pnpm --filter @ssgoi/react test:run
+pnpm --filter @ssgoi/nextjs test:run
 ```
 
 Full boundary guide: https://ssgoi.dev/llms.txt
@@ -116,15 +117,18 @@ Presets accept a second `{ override }` argument. This optional example retunes
 only the backward direction; the template's default config remains unchanged.
 
 ```ts
-import { drill, spring } from "@ssgoi/react";
+import { drill, spring } from "@ssgoi/nextjs";
 
-const tunedDrill = drill({}, {
-  override: {
-    backward({ animation }) {
-      animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+const tunedDrill = drill(
+  {},
+  {
+    override: {
+      backward({ animation }) {
+        animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+      },
     },
   },
-});
+);
 ```
 
 The core decides direction from route relationships and history. An explicit

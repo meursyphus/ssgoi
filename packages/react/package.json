@@ -62,23 +62,11 @@
       "require": "./dist/unplugin/esbuild.cjs",
       "default": "./dist/unplugin/esbuild.js"
     },
-    "./nextjs": {
-      "types": "./dist/nextjs.d.ts",
-      "import": "./dist/nextjs.js",
-      "require": "./dist/nextjs.cjs",
-      "default": "./dist/nextjs.js"
-    },
-    "./react-router": {
-      "types": "./dist/react-router.d.ts",
-      "import": "./dist/react-router.js",
-      "require": "./dist/react-router.cjs",
-      "default": "./dist/react-router.js"
-    },
-    "./tanstack-router": {
-      "types": "./dist/tanstack-router.d.ts",
-      "import": "./dist/tanstack-router.js",
-      "require": "./dist/tanstack-router.cjs",
-      "default": "./dist/tanstack-router.js"
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js",
+      "require": "./dist/internal.cjs",
+      "default": "./dist/internal.js"
     }
   },
   "scripts": {
@@ -88,11 +76,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build",
-    "prepare": "pnpm run build",
-    "test:run": "vitest run"
+    "prepare": "pnpm run build"
   },
   "dependencies": {
-    "@ssgoi/core": "workspace:^",
+    "@ssgoi/core": "workspace:*",
     "unplugin": "^2.3.2",
     "@babel/core": "^7.26.10"
   },
@@ -114,13 +101,8 @@
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
     "vite-plugin-dts": "^4.5.4",
-    "next": "16.1.0",
-    "react-router": "7.10.1",
-    "@tanstack/react-router": "^1.93.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "vitest": "^3.2.4",
-    "jsdom": "^26.1.0"
+    "react-dom": "^19.2.3"
   },
   "keywords": [
     "react",
@@ -158,19 +140,7 @@
     "node": ">=18.0.0"
   },
   "peerDependencies": {
-    "next": "*",
-    "react-router": "*",
-    "@tanstack/react-router": "*"
-  },
-  "peerDependenciesMeta": {
-    "next": {
-      "optional": true
-    },
-    "react-router": {
-      "optional": true
-    },
-    "@tanstack/react-router": {
-      "optional": true
-    }
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   }
 }

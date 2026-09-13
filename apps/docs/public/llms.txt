@@ -31,7 +31,7 @@ and a focused example.
 Representative mobile config:
 
 ```ts
-import { drill, sheet } from "@ssgoi/react/view-transitions";
+import { drill, sheet } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [
@@ -59,7 +59,7 @@ https://ssgoi.dev/llms/transitions.txt
 ### 1. Install
 
 ```bash
-npm install @ssgoi/react
+npm install @ssgoi/nextjs
 ```
 
 ### 2. Provider and config
@@ -71,8 +71,8 @@ Keep one config and one `<Ssgoi>` above routed content:
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/nextjs";
+import { drill } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -99,7 +99,7 @@ transition id together; it also handles URL-hook Suspense. No local boundary
 file is needed:
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 ```
@@ -110,7 +110,7 @@ import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -133,9 +133,10 @@ The class string above is Tailwind shorthand. Without Tailwind, apply
 container, and scroll restore then targets the wrong element. Fall back to
 `100vh` only where `dvh` is unsupported.
 
-That is the complete simple setup. The `nextjs` entry is a subpath of
-`@ssgoi/react`, not a separate package to install. Next.js is an optional peer;
-installing or importing `@ssgoi/react` does not install or load it.
+That is the complete simple setup. `@ssgoi/nextjs` includes the common React
+API and the Next.js boundary. Install only that SSGOI package in a Next.js app;
+it depends on `@ssgoi/react` internally and declares Next.js as a required peer.
+Plain React and custom-router apps can still install `@ssgoi/react` alone.
 
 Next.js interception, redirects, and rewrites remain application routing
 concerns. If your app uses middleware (Next 13–15) or proxy (Next 16+), keep its
@@ -144,11 +145,13 @@ navigation and direct page entry. The boundary does not configure these rules.
 For background slots, resolve from `selectedSegments` rather than the modal URL.
 Short setup and verification: https://ssgoi.dev/llms/complex-routing.txt
 
-Other ready-made entries: `@ssgoi/react/react-router`,
-`@ssgoi/react/tanstack-router`, `@ssgoi/svelte/sveltekit`,
+Other ready-made entries: `@ssgoi/react-router`,
+`@ssgoi/tanstack-router`, `@ssgoi/svelte/sveltekit`,
 `@ssgoi/vue/nuxt`, `@ssgoi/vue/vue-router`, `@ssgoi/solid/solidstart`.
-Each router is an optional peer, external to the build, and only loaded by its
-entry. Use the installed router's entry; do not install all the routers.
+The React router packages declare their routers as required peers and include
+the React API. `@ssgoi/expo-router` similarly includes the native API. Svelte,
+Vue, and Solid currently keep optional router subpaths. Choose the integration
+for your router; do not install the other router packages.
 For a custom router or direct DOM control, use the manual guide:
 https://ssgoi.dev/llms/manual-boundaries.txt
 

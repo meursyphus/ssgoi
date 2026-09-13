@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/react";
-import { film } from "@ssgoi/react/view-transitions";
+import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { film } from "@ssgoi/nextjs/view-transitions";
 import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 
 const BASE = "/demo/lumen";

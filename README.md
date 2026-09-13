@@ -6,20 +6,20 @@ Native app-like page transitions for mobile web apps.
 
 [Live showcase](https://ssgoi.dev) · [Documentation](https://ssgoi.dev/docs)
 
-|                                                                   Drill                                                                    |                                                                    Sheet                                                                    |
+|                                                                Drill                                                                |                                                                                    Sheet                                                                                     |
 | :---------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="./apps/docs/public/readme-drill.gif" alt="Drill transition opening and closing a chat in a mobile web app" width="280" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition opening a compose screen above a mobile web app" width="280" /> |
-|                                  Navigate through a mobile app with spatial depth                                  |                                    Present focused tasks above the current page                                     |
+|                                          Navigate through a mobile app with spatial depth                                           |                                                                 Present focused tasks above the current page                                                                 |
 
 ## Why SSGOI?
 
-| | |
+|                                    |                                                                             |
 | ---------------------------------- | --------------------------------------------------------------------------- |
-| **Router agnostic** | Keep your existing router and let it own navigation. |
-| **Cross-browser** | Use the same transitions across Chrome, Safari, Firefox, and Edge. |
-| **Optimized motion** | Spring physics are precomputed into Web Animations API keyframes. |
+| **Router agnostic**                | Keep your existing router and let it own navigation.                        |
+| **Cross-browser**                  | Use the same transitions across Chrome, Safari, Firefox, and Edge.          |
+| **Optimized motion**               | Spring physics are precomputed into Web Animations API keyframes.           |
 | **Beyond the View Transition API** | Build transitions that need live DOM, runtime layers, and precise geometry. |
-| **Easy to adopt** | Add SSGOI by changing only two files. |
+| **Easy to adopt**                  | Add SSGOI by changing only two files.                                       |
 
 ---
 
@@ -66,7 +66,7 @@ The Next.js setup is one config, one provider, and one simple
 ready-made route boundary.
 
 ```bash
-npm install @ssgoi/react
+npm install @ssgoi/nextjs
 ```
 
 ```tsx
@@ -74,8 +74,8 @@ npm install @ssgoi/react
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/nextjs";
+import { drill } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -89,7 +89,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 Import the route boundary directly; it reads the pathname and handles URL-hook Suspense:
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>;
 ```
@@ -98,7 +98,7 @@ import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -119,8 +119,9 @@ The class string above is Tailwind shorthand. Without Tailwind, apply
 `position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip` to the
 shell. Use `100vh` only where `dvh` is unsupported.
 
-That is enough for a simple app. Router subpaths use optional peers, so importing
-`@ssgoi/react` does not install or load Next.js. Other frameworks use the same small boundary
+That is enough for a simple app. `@ssgoi/nextjs` includes the React API and
+requires Next.js; no separate SSGOI React install is needed. Plain React apps
+can use `@ssgoi/react` without any router. Other frameworks use the same small boundary
 model with their own router state. For complete files, persistent layouts,
 nested boundaries, and framework-specific setup, see the
 [documentation](https://ssgoi.dev/docs/install).
@@ -147,7 +148,7 @@ stay with your existing stack.
 
 React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
 
-An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
+An experimental [React Native / Expo Router integration](./packages/expo-router/README.md)
 adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.
 Try the [Expo template](./templates/expo) for the current implementation and device checks.
 
@@ -160,10 +161,10 @@ Try the [Expo template](./templates/expo) for the current implementation and dev
 SSGOI owns the geometry, temporary visual layers, live outgoing DOM, and
 navigation policy needed to turn complex motion into reusable presets.
 
-|                                                                      Zoom                                                                       |                                                              Film                                                               |                                                                    Sheet                                                                    |
+|                                                                                      Zoom                                                                                      |                                                                               Film                                                                               |                                                                                Sheet                                                                                |
 | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="./apps/docs/public/blog/view-transition-api-limitations/zoom-blur.gif" alt="Zoom transition that transforms and clips a detail page around its image" width="240" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/film.gif" alt="Film transition with runtime visual pieces and multiple springs" width="320" /> | <img src="./apps/docs/public/blog/view-transition-api-limitations/sheet-blur-full.gif" alt="Sheet transition with a live backdrop between two pages" width="240" /> |
-|                   The whole detail page unfolds from its image                    |                           Runtime scene, live video, and multiple springs                           |                         A live backdrop sits between the two pages                          |
+|                                                                  The whole detail page unfolds from its image                                                                  |                                                         Runtime scene, live video, and multiple springs                                                          |                                                             A live backdrop sits between the two pages                                                              |
 
 [Read why SSGOI doesn't use the View Transition API →](https://ssgoi.dev/blog/view-transition-api-limitations)
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+import { SsgoiRouteBoundary } from "@ssgoi/tanstack-router";
 
 export const Route = createFileRoute("/profile")({
   component: () => (

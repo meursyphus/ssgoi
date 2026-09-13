@@ -4,7 +4,7 @@ import {
   Outlet,
   useRouterState,
 } from "@tanstack/react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+import { SsgoiRouteBoundary } from "@ssgoi/tanstack-router";
 import { PRODUCT_CATEGORIES } from "../components/ssgoi-config";
 
 function ProductsLayout() {

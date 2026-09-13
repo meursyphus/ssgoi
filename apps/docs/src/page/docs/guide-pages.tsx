@@ -342,7 +342,7 @@ export function BoundariesBody() {
 
       <CodeBlock
         className="mt-6"
-        code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+        code={`import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 

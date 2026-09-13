@@ -156,8 +156,8 @@ export { SvelteSsgoi, VueSsgoi, SolidSsgoi };
     assert(consumer(entry), `${entry} CommonJS entry failed`);
   }
   // An installed legacy router must not constrain a consumer of root exports.
-  // npm cannot scope peer ranges to subpath imports, so optional router peers
-  // deliberately use *. Supported adapter versions are documented separately.
+  // React router integrations are separate packages; @ssgoi/react must not
+  // declare or constrain any router peer.
   run("npm", [
     "install",
     "--ignore-scripts",

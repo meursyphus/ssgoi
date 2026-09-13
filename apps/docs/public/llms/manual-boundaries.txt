@@ -1,5 +1,9 @@
 # Manual SSGOI boundaries and custom routers
 
+Import examples use @ssgoi/react for custom React apps. If you installed a
+router package such as @ssgoi/nextjs, use that package and its /view-transitions
+subpath instead; it includes the same public React API.
+
 The root framework packages are router agnostic. Importing `@ssgoi/react`,
 `@ssgoi/svelte`, `@ssgoi/vue`, or `@ssgoi/solid` does not import or require a router.
 The ready-made router entries are optional conveniences, not required wrappers.

@@ -16,13 +16,14 @@ container, and scroll restore then targets the wrong element. Fall back to
 
 | framework or router | package | guide |
 | --- | --- | --- |
-| React / Next.js | `@ssgoi/react` | https://ssgoi.dev/llms/frameworks/nextjs.txt |
-| React Router | `@ssgoi/react` | https://ssgoi.dev/llms/frameworks/react-router.txt |
-| TanStack Router | `@ssgoi/react` | https://ssgoi.dev/llms/frameworks/tanstack-router.txt |
+| React / Next.js | `@ssgoi/nextjs` | https://ssgoi.dev/llms/frameworks/nextjs.txt |
+| React Router | `@ssgoi/react-router` | https://ssgoi.dev/llms/frameworks/react-router.txt |
+| TanStack Router | `@ssgoi/tanstack-router` | https://ssgoi.dev/llms/frameworks/tanstack-router.txt |
 | SvelteKit | `@ssgoi/svelte` | https://ssgoi.dev/llms/frameworks/sveltekit.txt |
 | Vue / Nuxt | `@ssgoi/vue` | https://ssgoi.dev/llms/frameworks/nuxt.txt |
 | SolidStart | `@ssgoi/solid` | https://ssgoi.dev/llms/frameworks/solidstart.txt |
 | Qwik City | `@ssgoi/qwik` | https://ssgoi.dev/llms/frameworks/qwik.txt |
+| Expo Router (experimental) | `@ssgoi/expo-router` | https://ssgoi.dev/llms/frameworks/expo.txt |
 | Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/frameworks/angular.txt |
 
 Choose transitions after the framework is wired:
@@ -31,27 +32,31 @@ https://ssgoi.dev/llms/transitions.txt
 Persistent layouts and complex route ownership:
 https://ssgoi.dev/llms/complex-routing.txt
 
-## Optional router entries
+## Router integrations
 
 Import SsgoiRouteBoundary from the entry for your installed router:
 
-- Next.js App Router: `@ssgoi/react/nextjs`
-- React Router 6/7: `@ssgoi/react/react-router`
-- TanStack Router 1: `@ssgoi/react/tanstack-router`
+- Next.js App Router: `@ssgoi/nextjs`
+- React Router 6/7: `@ssgoi/react-router`
+- TanStack Router 1: `@ssgoi/tanstack-router`
 - SvelteKit 2 / Svelte 5: `@ssgoi/svelte/sveltekit`
 - Nuxt / Vue Router 4: `@ssgoi/vue/nuxt` or `@ssgoi/vue/vue-router`
 - SolidStart / Solid Router 0.15–0.16: `@ssgoi/solid/solidstart`
-- Expo Router 56.2 (experimental): `@ssgoi/react-native/expo-router`
+- Expo Router 56.2 (experimental): `@ssgoi/expo-router`
 
-These are subpaths, not separate packages. Routers are optional peers, excluded
-from library bundles and root exports. A plain React/Svelte/Vue/Solid app does
-not install or load any router by using the root package. The Nuxt and Vue Router entries each
-use only their matching optional peer.
+The Next.js, React Router, TanStack Router, and Expo Router entries above are
+separate packages. Install the one for your application; each re-exports the
+common platform API and adds its boundary. Host routers are required peers with
+supported versions. Platform packages remain independent of those routers.
+
+SvelteKit, Nuxt, Vue Router, and SolidStart currently remain optional subpaths
+of their platform packages. Those routers are excluded from root exports and
+are optional peers, so plain platform imports do not require a router.
 
 Manual/custom-router boundaries: https://ssgoi.dev/llms/manual-boundaries.txt
 Qwik and Angular keep their page-root markers rather than a wrapper component.
 
-Optional peer ranges are intentionally broad because package managers cannot
-scope them to subpaths. An unused adapter must not force a router upgrade. The
-versions listed above describe the adapters; older or custom routers can keep
-using the root package and manual boundaries.
+The remaining optional subpaths use broad peer ranges because package managers
+cannot scope them to a subpath. The separate router packages instead declare
+their supported ranges directly. Older or custom routers can use the platform
+package and manual boundaries.

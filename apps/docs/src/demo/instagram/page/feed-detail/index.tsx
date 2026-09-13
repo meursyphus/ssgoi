@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePost, type PostDetail } from "@/demo/instagram/state/post";
 import { useProfile } from "@/demo/instagram/state/profile";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 import { FeedDetailHeader } from "./header";
 import { FeedDetailImage } from "./image";
 import { FeedDetailActions } from "./actions";

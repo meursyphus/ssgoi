@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/react";
-import { hero } from "@ssgoi/react/view-transitions";
+import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { hero } from "@ssgoi/nextjs/view-transitions";
 import { SsgoiWithHost } from "@/lib/components/demo-shell";
 import { WebShowcaseShell } from "@/lib/components/web-showcase-shell";
 

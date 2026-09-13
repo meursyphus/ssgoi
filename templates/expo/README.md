@@ -1,13 +1,12 @@
 # SSGOI + Expo Router
 
-Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
+Experimental example for `@ssgoi/expo-router`, using the file-based `SsgoiRouteBoundary` integration.
 
 From the repository root:
 
 ```sh
 pnpm install
-pnpm --filter @ssgoi/core build
-pnpm --filter @ssgoi/react-native build
+pnpm --filter @ssgoi/expo-router... build
 pnpm --filter ssgoi-expo-template start
 ```
 

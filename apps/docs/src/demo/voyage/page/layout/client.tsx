@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/react";
-import { sheet } from "@ssgoi/react/view-transitions";
+import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { sheet } from "@ssgoi/nextjs/view-transitions";
 import { MobileShowcaseShell } from "@/lib/components/mobile-showcase-shell";
 
 const BASE = "/demo/voyage";

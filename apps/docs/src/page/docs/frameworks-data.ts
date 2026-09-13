@@ -22,8 +22,8 @@ export const FRAMEWORK_DOCS: FrameworkDoc[] = [
   {
     slug: "nextjs",
     name: "React / Next.js",
-    pkg: "@ssgoi/react",
-    lead: "One provider file and one layout edit. Import the ready-made boundary from @ssgoi/react/nextjs; its optional Next.js peer stays out of other React apps.",
+    pkg: "@ssgoi/nextjs",
+    lead: "One provider file and one layout edit. Install @ssgoi/nextjs for the common React API and the ready-made Next.js boundary.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/nextjs.txt",
     templateUrl: `${TEMPLATES}/nextjs`,
     sections: [
@@ -34,8 +34,8 @@ export const FRAMEWORK_DOCS: FrameworkDoc[] = [
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/nextjs";
+import { drill } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -48,7 +48,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
       {
         heading: "2. Route boundary",
         body: "Import the boundary directly. It resolves pathname and key together and includes Suspense for unresolved URL data. Pass fallback for a prerender placeholder.",
-        code: `import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+        code: `import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`,
       },
@@ -58,7 +58,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
         code: `// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -79,7 +79,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         body: "A layout-owned routeKey preserves the header while the inner boundary replaces the changing content. Keep the provider above these section layouts, without a full-path boundary remounting every section from above.",
         code: `// app/products/layout.tsx
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 
 export default function ProductsLayout({ children }: { children: ReactNode }) {
   return (
@@ -99,7 +99,7 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
   {
     slug: "expo",
     name: "React Native / Expo (experimental)",
-    pkg: "@ssgoi/react-native",
+    pkg: "@ssgoi/expo-router",
     experimental: true,
     lead: "Experimental native fade/slide transitions and file-based Expo Router boundaries, published in lockstep with the web packages. Start with the workspace template for the supported dependency baseline and device checks.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/expo.txt",
@@ -109,15 +109,15 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
         heading: "Run the source example",
         body: "The template pins Expo 56.0.21, Expo Router 56.2.20, React Native 0.85.3, React 19.2.3, Reanimated 4.3.1 and Worklets 0.8.3. The Expo standard navigator API is alpha. Use a matching Expo Go build or development build.",
         language: "bash",
-        code: "pnpm install\npnpm --filter @ssgoi/core build\npnpm --filter @ssgoi/react-native build\npnpm --filter ssgoi-expo-template start",
+        code: "pnpm install\npnpm --filter @ssgoi/expo-router... build\npnpm --filter ssgoi-expo-template start",
       },
       {
         heading: "Provider and file-based route boundary",
         body: "Create page files normally and keep using Expo Link and router.push/replace/back. The boundary supplies one native surface per screen and retains outgoing instances until animation completion. It replaces the layout navigator; do not wrap an existing Stack or Slot inside it. The app supplies safe areas and screen backgrounds.",
         code: `// app/_layout.tsx
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
-import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
-import { slide } from "@ssgoi/react-native/view-transitions";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/expo-router";
+import { SsgoiRouteBoundary } from "@ssgoi/expo-router";
+import { slide } from "@ssgoi/expo-router/view-transitions";
 
 const config = {
   transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
@@ -140,8 +140,8 @@ export default function Layout() {
   {
     slug: "react-router",
     name: "React Router",
-    pkg: "@ssgoi/react",
-    lead: "Same package as Next.js — only the pathname source changes. Import @ssgoi/react/react-router inside React Router 6 or 7 and wrap the outlet.",
+    pkg: "@ssgoi/react-router",
+    lead: "Install @ssgoi/react-router for the common React API and a boundary that follows React Router 6 or 7.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/react-router.txt",
     templateUrl: `${TEMPLATES}/react-router`,
     sections: [
@@ -150,8 +150,8 @@ export default function Layout() {
         body: "One <Ssgoi> and the shell classes in the root; the boundary keys on the pathname and wraps every page via a pathless layout route.",
         code: `// app/root.tsx — the App component
 import { Outlet } from "react-router";
-import { Ssgoi } from "@ssgoi/react";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/react-router";
+import { drill } from "@ssgoi/react-router/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -169,7 +169,7 @@ export default function App() {
         heading: "2. Route boundary",
         code: `// app/routes/page-boundary.layout.tsx
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
+import { SsgoiRouteBoundary } from "@ssgoi/react-router";
 
 export default function PageBoundaryLayout() {
   return <SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>;
@@ -197,8 +197,8 @@ export default [
   {
     slug: "tanstack-router",
     name: "TanStack Router",
-    pkg: "@ssgoi/react",
-    lead: "Same package as Next.js — import @ssgoi/react/tanstack-router and wrap the root outlet.",
+    pkg: "@ssgoi/tanstack-router",
+    lead: "Install @ssgoi/tanstack-router for the common React API and a boundary around the root outlet.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/tanstack-router.txt",
     templateUrl: `${TEMPLATES}/tanstack-router`,
     sections: [
@@ -206,9 +206,9 @@ export default [
         heading: "Setup",
         code: `// app/routes/__root.tsx
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { Ssgoi } from "@ssgoi/react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
-import { drill } from "@ssgoi/react/view-transitions";
+import { Ssgoi } from "@ssgoi/tanstack-router";
+import { SsgoiRouteBoundary } from "@ssgoi/tanstack-router";
+import { drill } from "@ssgoi/tanstack-router/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],

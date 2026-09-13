@@ -49,7 +49,7 @@ export function TransitionDetailBody({ doc }: { doc: TransitionDoc }) {
       transition: ${effect},
     }`;
 
-  const setup = `import { ${doc.name} } from "@ssgoi/react/view-transitions";
+  const setup = `import { ${doc.name} } from "@ssgoi/nextjs/view-transitions";
 
 const config = {
   transitions: [

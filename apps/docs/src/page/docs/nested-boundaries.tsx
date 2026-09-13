@@ -134,7 +134,7 @@ detail → tab    : app-shell key changes · the shell re-enters with the nav`}
           code={`import {
   SsgoiRouteBoundary,
   selectedSegmentsToPath,
-} from "@ssgoi/react/nextjs";
+} from "@ssgoi/nextjs";
 
 <SsgoiRouteBoundary
   resolve={({ selectedSegments }) => ({

@@ -35,7 +35,8 @@
     "docs:cf-build": "pnpm release:build && pnpm --filter docs exec opennextjs-cloudflare build --skipWranglerConfigCheck",
     "prepare": "husky",
     "test:transition-examples": "node scripts/check-transition-examples.mjs",
-    "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs"
+    "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs",
+    "test:react-adapters": "node scripts/check-react-adapters.mjs"
   },
   "author": "meursyphus",
   "license": "MIT",
@@ -71,7 +72,11 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "prettier": "^3.6.2",
-    "prettier-plugin-svelte": "^3.4.0"
+    "prettier-plugin-svelte": "^3.4.0",
+    "vite": "^7.0.4",
+    "vite-plugin-dts": "^4.5.4",
+    "rollup-plugin-preserve-directives": "^0.4.0",
+    "@types/node": "^22"
   },
   "lint-staged": {
     "packages/core/**/*.{ts,tsx}": [

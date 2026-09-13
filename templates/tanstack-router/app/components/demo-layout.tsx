@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { Ssgoi } from "@ssgoi/tanstack-router";
 import { ssgoiConfig } from "./ssgoi-config";
 
 interface DemoLayoutProps {

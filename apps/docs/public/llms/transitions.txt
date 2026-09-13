@@ -1,5 +1,9 @@
 # SSGOI transition catalog
 
+Import examples use @ssgoi/react for custom React apps. If you installed a
+router package such as @ssgoi/nextjs, use that package and its /view-transitions
+subpath instead; it includes the same public React API.
+
 Choose the effect from the interaction the user should understand. Each linked
 spec contains its variants, supported props, required markup, and a focused
 route-config example.

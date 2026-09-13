@@ -1,6 +1,6 @@
 # SSGOI complex routing and persistent layouts
 
-Start with `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. Keep one `<Ssgoi>`
+Start with `SsgoiRouteBoundary` from `@ssgoi/nextjs`. Keep one `<Ssgoi>`
 and config. Add boundaries only where routed DOM lifetimes differ.
 
 - `id` is the route matched by SSGOI rules.
@@ -15,7 +15,7 @@ If a route layout already owns a whole section, no resolver is needed:
 ```tsx
 // app/products/layout.tsx
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 import { ProductHeaderAndTabs } from "./product-header-and-tabs";
 
 export default function ProductsLayout({ children }: { children: ReactNode }) {
@@ -65,7 +65,7 @@ import {
   SsgoiRouteBoundary,
   selectedSegmentsToPath,
   type NextjsRouteLocation,
-} from "@ssgoi/react/nextjs";
+} from "@ssgoi/nextjs";
 
 function resolveApp({ selectedSegments }: NextjsRouteLocation) {
   // This boundary is at a URL-root layout. [] means its actual index route,
@@ -150,7 +150,7 @@ Suspense, and keyed-DOM implementation with the adapter:
 "use client";
 
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 import { resolveBoundary, type BoundaryName } from "./boundary-policy";
 
 export function AppRouteBoundary({

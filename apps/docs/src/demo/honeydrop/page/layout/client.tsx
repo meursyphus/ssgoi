@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/react";
-import { rotate } from "@ssgoi/react/view-transitions";
+import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { rotate } from "@ssgoi/nextjs/view-transitions";
 import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 import { HiveMenu } from "../shared/hive-menu";
 import { CornerMarks } from "../shared/corner-marks";

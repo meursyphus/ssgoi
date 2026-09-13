@@ -8,7 +8,7 @@ import { DetailStats } from "./stats";
 import { PerksCard } from "./perks-card";
 import { AmenitiesGrid } from "./amenities-grid";
 import { BookingBar } from "./booking-bar";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 export default function ListingDetailPage({
   initialData,
 }: {

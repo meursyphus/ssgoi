@@ -1,6 +1,6 @@
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
-import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
-import { fade, slide } from "@ssgoi/react-native/view-transitions";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/expo-router";
+import { SsgoiRouteBoundary } from "@ssgoi/expo-router";
+import { fade, slide } from "@ssgoi/expo-router/view-transitions";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const config = {
