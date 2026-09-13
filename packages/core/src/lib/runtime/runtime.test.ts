@@ -95,3 +95,52 @@ describe("portable numerical playback", () => {
     ).toMatchObject({ direction: "backward", transition: rule.transition });
   });
 });
+
+describe("hidden integrator state at interruption", () => {
+  it("preserves the double spring leader when the same solver changes direction", async () => {
+    const { sampleIntegratorState } = await import("./timeline");
+    const solver = new DoubleSpringIntegrator({
+      stiffness: 170,
+      damping: 22,
+      follower: 0.5,
+    });
+    const frames = simulate(solver, 0, 1, 0, undefined, true);
+    const state = sampleIntegratorState(frames, 120, solver, 1);
+    expect(state).toHaveProperty("_leader");
+    const resumed = simulate(
+      solver,
+      state.position,
+      0,
+      state.velocity,
+      state,
+      true,
+    );
+    const reset = simulate(
+      solver,
+      state.position,
+      0,
+      state.velocity,
+      undefined,
+      true,
+    );
+    expect(resumed[0]?.state).toEqual(state);
+    expect(resumed[1]?.velocity).not.toBeCloseTo(reset[1]!.velocity, 5);
+    expect(resumed[0]?.velocity).toBeGreaterThan(0);
+  });
+});
+
+it("does not discard a moving hidden leader just because the output is at rest", () => {
+  const solver = new DoubleSpringIntegrator({
+    stiffness: 170,
+    damping: 22,
+    follower: 0.5,
+  });
+  const state = {
+    position: 0,
+    velocity: 0,
+    _leader: { position: 1, velocity: 2 },
+  };
+  const frames = simulate(solver, 0, 0, 0, state, true);
+  expect(frames.length).toBeGreaterThan(1);
+  expect(frames[1]!.position).toBeGreaterThan(0);
+});

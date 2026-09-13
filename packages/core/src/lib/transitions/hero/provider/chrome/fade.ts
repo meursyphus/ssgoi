@@ -18,7 +18,7 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
   ): AnimationContributions<HeroAnimationName> {
-    const { from, to, physics, onComplete } = ctx;
+    const { from, to, physics, onDispose } = ctx;
 
     const previousFromOpacity = from.style.opacity;
     const previousToOpacity = to.style.opacity;
@@ -29,11 +29,15 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
     from.style.willChange = "opacity";
     to.style.willChange = "opacity";
 
-    onComplete(() => {
-      from.style.opacity = previousFromOpacity;
-      to.style.opacity = previousToOpacity;
-      from.style.willChange = previousFromWillChange;
-      to.style.willChange = previousToWillChange;
+    onDispose((disposal) => {
+      if (disposal.owns(from)) {
+        from.style.opacity = previousFromOpacity;
+        from.style.willChange = previousFromWillChange;
+      }
+      if (disposal.owns(to)) {
+        to.style.opacity = previousToOpacity;
+        to.style.willChange = previousToWillChange;
+      }
     });
 
     return {

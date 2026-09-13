@@ -59,7 +59,7 @@ export const drill = (options: DrillOptions = {}) => {
           // The outgoing node is the real, reused element (re-hidden on navigate),
           // so clear every inline style we set on it — mirroring the `to` cleanup,
           // plus the out-only `pointerEvents` / `zIndex`.
-          onComplete: () => {
+          onDispose: () => {
             from.style.willChange = "auto";
             from.style.backfaceVisibility = "";
             (from.style as CSSStyleDeclaration & { contain: string }).contain =
@@ -75,7 +75,7 @@ export const drill = (options: DrillOptions = {}) => {
           element: to,
           integrator: IntegratorProvider.from(physicsOptions),
           style: (t) => config.in.animate(t),
-          onComplete: () => {
+          onDispose: () => {
             to.style.willChange = "auto";
             to.style.backfaceVisibility = "";
             (to.style as CSSStyleDeclaration & { contain: string }).contain =

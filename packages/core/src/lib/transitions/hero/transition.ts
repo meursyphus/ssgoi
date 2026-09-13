@@ -1,3 +1,5 @@
+import { hideSharedElement } from "../shared-visibility";
+import type { AnimationDisposal } from "../../animation/animation";
 import {
   animationGroup,
   type AnimationContributions,
@@ -344,8 +346,7 @@ class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
   ): AnimationContributions<HeroAnimationName> {
-    const { resolved, physics, positionedParent, maxDistance, onComplete } =
-      ctx;
+    const { resolved, physics, positionedParent, maxDistance, onDispose } = ctx;
     const animations: Animation[] = [];
 
     for (const pair of resolved.pairs) {
@@ -378,20 +379,23 @@ class HeroTileStrategy implements HeroStrategy {
 
       positionedParent.appendChild(clone);
 
-      const previousFromOpacity = fromVisualEl.style.opacity;
-      const previousToOpacity = toVisualEl.style.opacity;
-      fromVisualEl.style.opacity = "0";
-      toVisualEl.style.opacity = "0";
-
-      onComplete(() => {
-        fromVisualEl.style.opacity = previousFromOpacity;
-        toVisualEl.style.opacity = previousToOpacity;
+      const releaseFrom = hideSharedElement(fromVisualEl);
+      const releaseTo = hideSharedElement(toVisualEl);
+      onDispose(() => {
+        releaseFrom();
+        releaseTo();
         if (clone.parentElement) clone.parentElement.removeChild(clone);
       });
 
       animations.push(
         new WebAnimation({
           element: clone,
+          motion: {
+            key: pair.key,
+            role: "shared-media",
+            space: positionedParent,
+            lifetime: "temporary",
+          },
           integrator: IntegratorProvider.from(physics),
           style: morph.styleFor,
         }),
@@ -447,12 +451,12 @@ export const hero = (options: NormalizedHeroOptions) => {
         return animationGroup({ shared: [], out: [], in: [] });
       }
 
-      // Shared `onComplete` registry — strategies push restore callbacks
+      // Shared `onDispose` registry — strategies push restore callbacks
       // here, and the composite fires them after every child has settled.
       // Fade uses page-level opacity plus overlay clones, so restoring on
       // the first child can reveal originals while sibling fades are active.
-      const cleanups: Array<() => void> = [];
-      const onComplete = (fn: () => void): void => {
+      const cleanups: Array<(disposal: AnimationDisposal) => void> = [];
+      const onDispose = (fn: (disposal: AnimationDisposal) => void): void => {
         cleanups.push(fn);
       };
 
@@ -463,7 +467,7 @@ export const hero = (options: NormalizedHeroOptions) => {
         physics,
         positionedParent: context.positionedParent,
         maxDistance,
-        onComplete,
+        onDispose,
       };
 
       const groups: Record<HeroAnimationName, Animation[]> = {
@@ -480,12 +484,12 @@ export const hero = (options: NormalizedHeroOptions) => {
       }
 
       const composite = animationGroup(groups);
-      const prevOnComplete = composite.onComplete;
-      composite.onComplete = () => {
-        prevOnComplete?.();
+      const prevOnComplete = composite.onDispose;
+      composite.onDispose = (disposal) => {
+        prevOnComplete?.(disposal);
         for (const fn of cleanups) {
           try {
-            fn();
+            fn(disposal);
           } catch (e) {
             // Don't let one faulty restore tear down sibling cleanups.
             console.error("[hero] cleanup error", e);

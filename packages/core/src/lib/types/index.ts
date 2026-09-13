@@ -96,6 +96,10 @@ export type PrepareArgs = {
   to: Promise<HTMLElement>;
   context: SsgoiTransitionContext;
   createElement: CreateElement;
+  /** Preparation is cooperative: check after awaiting external work. */
+  signal?: AbortSignal;
+  /** Register resources allocated during prepare, including rejected/stale prepares. */
+  onCleanup?: (cleanup: () => void) => void;
 };
 
 export type AnimationFactoryArgs<TExtras> = {

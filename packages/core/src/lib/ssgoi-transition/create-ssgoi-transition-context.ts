@@ -192,6 +192,18 @@ export function createSggoiTransitionContext(
   const hiddenState = new WeakMap<HTMLElement, HiddenState>();
   const owner = new WeakMap<HTMLElement, number>();
   let transitionEpoch = 0;
+  let navigationGeneration = 0;
+  let preparation: AbortController | null = null;
+  let releasePreparation: (() => void) | null = null;
+  let disconnected = false;
+  const restingStyles = new WeakMap<HTMLElement, string>();
+
+  const supersedePreparation = () => {
+    navigationGeneration++;
+    preparation?.abort();
+    releasePreparation?.();
+    releasePreparation = null;
+  };
 
   const readComputedDisplay = (el: HTMLElement): string => {
     const d =
@@ -246,7 +258,11 @@ export function createSggoiTransitionContext(
     outSide: PendingSide,
     inSide?: PendingSide,
   ): void => {
-    if (outSide.mode !== "hidden") return;
+    supersedePreparation();
+    if (outSide.mode !== "hidden") {
+      host.complete();
+      return;
+    }
 
     const elements = Array.from(
       new Set([outSide.element, inSide?.element].filter(Boolean)),
@@ -267,8 +283,21 @@ export function createSggoiTransitionContext(
     inSide: PendingSide,
     preserveScroll: PreserveScrollConfig,
   ): void => {
+    supersedePreparation();
+    const generation = navigationGeneration;
+    preparation = new AbortController();
+    const signal = preparation.signal;
+    host.prepareHandoff();
     const fromOriginal = outSide.element;
     const toElement = inSide.element;
+    for (const element of [fromOriginal, toElement]) {
+      if (!restingStyles.has(element)) {
+        restingStyles.set(
+          element,
+          hiddenState.get(element)?.savedCss ?? element.style.cssText,
+        );
+      }
+    }
     const outMode: TransitionMode = outSide.mode ?? "unmount";
     const isHidden = outMode === "hidden";
 
@@ -339,16 +368,38 @@ export function createSggoiTransitionContext(
     // Hidden mode reuses mounted real nodes; unmount mode reuses a detached real
     // node and removes it on settle, so ownership guards are only needed for
     // hidden mode's persistent nodes.
-    const epoch = isHidden ? ++transitionEpoch : 0;
-    if (isHidden) {
-      owner.set(toElement, epoch);
-      owner.set(fromOriginal, epoch);
-    }
+    const epoch = ++transitionEpoch;
+    owner.set(toElement, epoch);
+    owner.set(fromOriginal, epoch);
 
     const fromPromise: Promise<HTMLElement> = Promise.resolve(fromElement);
     const toPromise: Promise<HTMLElement> = Promise.resolve(toElement);
 
     const createdElements: HTMLElement[] = [];
+    const prepareCleanups: Array<() => void> = [];
+    let resourcesReleased = false;
+    const releaseResources = () => {
+      if (resourcesReleased) return;
+      resourcesReleased = true;
+      for (const cleanup of prepareCleanups) {
+        try {
+          cleanup();
+        } catch (error) {
+          console.error("[ssgoi] prepare cleanup", error);
+        }
+      }
+      for (const extra of createdElements) extra.remove();
+    };
+    releasePreparation = () => {
+      releaseResources();
+      for (const element of [fromOriginal, toElement]) {
+        if (owner.get(element) !== epoch) continue;
+        const baseline = restingStyles.get(element);
+        if (baseline !== undefined) element.style.cssText = baseline;
+        restingStyles.delete(element);
+        reconcileResting(element, epoch);
+      }
+    };
     const createElement: CreateElement = ((
       id: string,
       tag: keyof HTMLElementTagNameMap = "div",
@@ -364,11 +415,17 @@ export function createSggoiTransitionContext(
       to: toPromise,
       context: ssgoiContext,
       createElement,
+      signal,
+      onCleanup: (cleanup) => {
+        if (resourcesReleased) cleanup();
+        else prepareCleanups.push(cleanup);
+      },
     };
 
-    const extrasPromise: Promise<object> = Promise.resolve(
-      config.prepare ? config.prepare(prepareArgs) : {},
-    );
+    const extrasPromise: Promise<object> = Promise.resolve().then(() => {
+      if (signal.aborted) return {};
+      return config.prepare ? config.prepare(prepareArgs) : {};
+    });
 
     // Resolve from/to + prepare extras in parallel via promiseAll util.
     // The entire function returns synchronously; .then fires when ready.
@@ -376,51 +433,95 @@ export function createSggoiTransitionContext(
       from: fromPromise,
       to: toPromise,
       extras: extrasPromise,
-    }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
-      // Now that prepare's microtasks have all run (initial styles, extras
-      // built), drop the outgoing node into place. Order is:
-      //   prepare → out insert → animation create/play
-      // Hidden mode skips insertion: the real node is already in place.
-      if (!isHidden && parent) {
-        if (nextSibling && parent.contains(nextSibling)) {
-          parent.insertBefore(fromElement, nextSibling);
-        } else {
-          parent.appendChild(fromElement);
+    })
+      .then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
+        if (
+          signal.aborted ||
+          disconnected ||
+          generation !== navigationGeneration
+        ) {
+          releaseResources();
+          return;
         }
-      }
+        releasePreparation = null;
+        // Now that prepare's microtasks have all run (initial styles, extras
+        // built), drop the outgoing node into place. Order is:
+        //   prepare → out insert → animation create/play
+        // Hidden mode skips insertion: the real node is already in place.
+        if (!isHidden && parent) {
+          if (nextSibling && parent.contains(nextSibling)) {
+            parent.insertBefore(fromElement, nextSibling);
+          } else {
+            parent.appendChild(fromElement);
+          }
+        }
 
-      const animation = config.animation({
-        from: resolvedFrom,
-        to: resolvedTo,
-        context: ssgoiContext,
-        ...(extras as Record<string, unknown>),
+        const animation = config.animation({
+          from: resolvedFrom,
+          to: resolvedTo,
+          context: ssgoiContext,
+          ...(extras as Record<string, unknown>),
+        });
+
+        // Per-transition settle. Wire this BEFORE attach — host.attach hooks
+        // onComplete itself and chains through prior hooks, so cleanup still
+        // fires once the run settles (natural finish OR host force-completing it).
+        const tracks = animation.getMotionTracks();
+        for (const track of tracks)
+          if (createdElements.includes(track.element)) {
+            track.motion.lifetime ??= "temporary";
+            track.motion.role ??= "overlay";
+            track.motion.key ??=
+              track.element.getAttribute("data-ssgoi-id") ?? undefined;
+            track.motion.space ??= ssgoiContext.positionedParent;
+          }
+        const previousDispose = animation.onDispose;
+        animation.onDispose = (disposal) => {
+          try {
+            previousDispose?.(disposal);
+          } catch (error) {
+            console.error("[ssgoi] effect cleanup failed", error);
+          }
+          for (const element of [fromOriginal, toElement]) {
+            if (owner.get(element) !== epoch || !disposal.owns(element))
+              continue;
+            const baseline = restingStyles.get(element);
+            if (baseline !== undefined) element.style.cssText = baseline;
+            restingStyles.delete(element);
+            if (hiddenState.has(element)) reconcileResting(element, epoch);
+            else owner.delete(element);
+          }
+          if (
+            !isHidden &&
+            disposal.owns(fromElement) &&
+            fromElement.parentNode &&
+            !owner.has(fromElement)
+          )
+            fromElement.parentNode.removeChild(fromElement);
+          releaseResources();
+        };
+
+        host.attach(animation, { targets: [fromOriginal, toElement] });
+      })
+      .catch((error: unknown) => {
+        releaseResources();
+        if (
+          signal.aborted ||
+          disconnected ||
+          generation !== navigationGeneration
+        )
+          return;
+        host.cancel({ reason: "disposed", owns: () => true });
+        for (const element of [fromOriginal, toElement]) {
+          if (owner.get(element) !== epoch) continue;
+          const baseline = restingStyles.get(element);
+          if (baseline !== undefined) element.style.cssText = baseline;
+          restingStyles.delete(element);
+          reconcileResting(element, epoch);
+        }
+        if (!isHidden) fromElement.remove();
+        console.error("[ssgoi] transition preparation failed", error);
       });
-
-      // Per-transition settle. Wire this BEFORE attach — host.attach hooks
-      // onComplete itself and chains through prior hooks, so cleanup still
-      // fires once the run settles (natural finish OR host force-completing it).
-      const prevOnComplete = animation.onComplete;
-      animation.onComplete = () => {
-        prevOnComplete?.();
-        if (isHidden) {
-          // Reuse: re-hide the real outgoing node (or leave it visible if a
-          // follow-up navigation re-claimed it as an incoming page) and wipe
-          // every inline style the transition leaked onto it. Both reconciles
-          // no-op if a newer run now owns the node.
-          reconcileResting(fromOriginal, epoch);
-          reconcileResting(toElement, epoch);
-        } else if (fromElement.parentNode) {
-          fromElement.parentNode.removeChild(fromElement);
-        }
-        for (const extra of createdElements) {
-          if (extra.parentNode) extra.parentNode.removeChild(extra);
-        }
-      };
-
-      // Host owns pose handoff, playbackRate carry-over, and starts the run
-      // according to its own play/pause/reverse state.
-      host.attach(animation);
-    });
   };
 
   const handleArrival = (
@@ -650,6 +751,7 @@ export function createSggoiTransitionContext(
     element,
     { enter = true } = {},
   ) => {
+    disconnected = false;
     navigationResolver.connect();
     if (registered.has(element)) {
       const state = hiddenState.get(element);
@@ -734,5 +836,14 @@ export function createSggoiTransitionContext(
     return cb;
   };
 
-  return { register, refFor, disconnect: navigationResolver.dispose };
+  return {
+    register,
+    refFor,
+    disconnect: () => {
+      disconnected = true;
+      supersedePreparation();
+      host.cancel({ reason: "disposed", owns: () => true });
+      navigationResolver.dispose();
+    },
+  };
 }

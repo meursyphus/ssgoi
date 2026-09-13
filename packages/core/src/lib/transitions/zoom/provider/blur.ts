@@ -159,6 +159,7 @@ export class OverlayStrategy implements ZoomStrategy {
     return [
       new WebAnimation({
         element: overlayEl,
+        motion: { lifetime: "temporary", role: "overlay" },
         integrator: IntegratorProvider.from(ctx.physics),
         style: (t) => overlay.style(ctx.resolved.mode, t),
       }),

@@ -1,3 +1,5 @@
+import { hideSharedElement } from "../shared-visibility";
+import type { AnimationDisposal } from "../../animation/animation";
 import { animationGroup, releaseFillOnComplete } from "../animation-group";
 import type { NavigationDirection } from "@types";
 import { defineTransition } from "../../transition/define-transition";
@@ -179,33 +181,6 @@ export function buildInput(
  * the same element it animates.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-const hiddenPreviews = new WeakMap<
-  HTMLElement,
-  { opacity: string; users: number }
->();
-
-function hidePreview(preview: HTMLElement): () => void {
-  const state = hiddenPreviews.get(preview) ?? {
-    opacity: preview.style.opacity,
-    users: 0,
-  };
-  state.users++;
-  hiddenPreviews.set(preview, state);
-  preview.style.opacity = "0";
-
-  // A replacement transition is created before the previous run completes.
-  // Share the original opacity so that old cleanup neither reveals a preview
-  // still in use nor leaves a reused/cached card permanently transparent.
-  let released = false;
-  return () => {
-    if (released) return;
-    released = true;
-    if (--state.users > 0) return;
-    if (preview.style.opacity === "0") preview.style.opacity = state.opacity;
-    hiddenPreviews.delete(preview);
-  };
-}
-
 class TileStrategy implements ZoomStrategy {
   readonly name = "tile";
   prepare(ctx: ZoomPrepareCtx): void {
@@ -220,7 +195,7 @@ class TileStrategy implements ZoomStrategy {
   }
 
   contribute(ctx: ZoomContributeCtx): Animation[] {
-    const { from, to, resolved, input, physics, onComplete } = ctx;
+    const { from, to, resolved, input, physics, onDispose } = ctx;
     const isEnter = resolved.mode === "enter";
     // Tile motion is applied to the page that owns the zoomed area.
     // Enter: that's `to` (incoming detail). Exit: that's `from` (outgoing).
@@ -231,7 +206,7 @@ class TileStrategy implements ZoomStrategy {
     // Only the moving tile should paint the shared visual. Otherwise its
     // antialiased rounded edge composites over the identical preview edge,
     // making the final corner look fuller despite matching radius geometry.
-    onComplete(hidePreview(resolved.exitEl));
+    onDispose(hideSharedElement(resolved.exitEl));
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
@@ -256,40 +231,27 @@ class TileStrategy implements ZoomStrategy {
     to.style.zIndex = toZ;
     to.style.position = "relative";
 
-    onComplete(() => {
-      tileEl.style.willChange = "auto";
-      tileEl.style.backfaceVisibility = "";
-      tileEl.style.transformOrigin = "";
-      (tileEl.style as CSSStyleDeclaration & { contain: string }).contain = "";
-      from.style.zIndex = previousFromZIndex;
-      // `to` is the surviving page; restore the stacking props raised above.
-      // Guard each reset: if a follow-up navigation already re-claimed this
-      // node (e.g. as the next outgoing `from`, now position:absolute), its
-      // stacking has changed — don't strip the fresh values.
-      if (to.style.zIndex === toZ) to.style.zIndex = previousToZIndex;
-      if (to.style.position === "relative")
+    onDispose((disposal) => {
+      if (disposal.owns(tileEl)) {
+        tileEl.style.willChange = "auto";
+        tileEl.style.backfaceVisibility = "";
+        tileEl.style.transformOrigin = "";
+        tileEl.style.contain = "";
+      }
+      if (disposal.owns(from)) {
+        from.style.zIndex = previousFromZIndex;
+        from.style.willChange = "auto";
+        from.style.backfaceVisibility = "";
+        from.style.transformOrigin = "";
+        from.style.contain = "";
+        from.style.transform = "";
+        from.style.clipPath = "";
+      }
+      if (disposal.owns(to)) {
+        to.style.zIndex = previousToZIndex;
         to.style.position = previousToPosition;
-      // The exit-mode background animation writes transformOrigin onto `to`
-      // (bgEl === to) and nothing else clears it — reset it here too.
-      to.style.transformOrigin = "";
-      // `from` is the REAL outgoing page now (React <Activity> / Next
-      // cacheComponents re-hide and reuse this node on the next nav), so any
-      // inline style left on it persists and corrupts the page when it
-      // reappears. Mirror the tile-side (`to`) reset above for every prop the
-      // prepare hook / out animations write to `from`, regardless of mode:
-      //   - prepare(): willChange, backfaceVisibility, contain.
-      //   - background/tile out animations: transformOrigin (set here for the
-      //     `from`-owned config) plus the WAAPI forwards-fill final frame
-      //     (transform on the expand/blur background, transform + clipPath on
-      //     the exit-mode tile). When `tileEl === from` (exit) the resets
-      //     above already cover those props; the lines below make the cleanup
-      //     correct in enter mode too, where `tileEl === to`.
-      from.style.willChange = "auto";
-      from.style.backfaceVisibility = "";
-      from.style.transformOrigin = "";
-      (from.style as CSSStyleDeclaration & { contain: string }).contain = "";
-      from.style.transform = "";
-      from.style.clipPath = "";
+        to.style.transformOrigin = "";
+      }
     });
 
     return [
@@ -321,7 +283,7 @@ class TileStrategy implements ZoomStrategy {
 class FadeStrategy implements ZoomStrategy {
   readonly name = "content";
   contribute(ctx: ZoomContributeCtx): Animation[] {
-    const { resolved, physics, from, to, onComplete } = ctx;
+    const { resolved, physics, from, to, onDispose } = ctx;
     const zoomedPage = resolved.mode === "enter" ? to : from;
     const targets = collectFadeTargets(zoomedPage, resolved.enterEl);
     if (targets.length === 0) return [];
@@ -333,10 +295,11 @@ class FadeStrategy implements ZoomStrategy {
       for (const el of targets) el.style.opacity = "0";
     }
 
-    onComplete(() => {
+    onDispose((disposal) => {
       for (let i = 0; i < targets.length; i++) {
         const el = targets[i];
-        if (el) el.style.opacity = previousOpacities[i] ?? "";
+        if (el && disposal.owns(el))
+          el.style.opacity = previousOpacities[i] ?? "";
       }
     });
 
@@ -403,11 +366,12 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export const zoom = (options: NormalizedZoomOptions) => {
-  const { strategies, physics } = zoomStrategiesFor(options);
+  const { physics } = zoomStrategiesFor(options);
 
   const createDirection = (navigationDirection: NavigationDirection) =>
     ({
-      prepare: (args): ZoomExtras => {
+      prepare: (args) => {
+        const { strategies } = zoomStrategiesFor(options);
         const ctx: ZoomPrepareCtx = {
           from: args.from,
           to: args.to,
@@ -423,9 +387,15 @@ export const zoom = (options: NormalizedZoomOptions) => {
           const contributed = strategy.prepare(ctx);
           if (contributed) Object.assign(extras, contributed);
         }
-        return extras;
+        return { ...extras, strategies };
       },
-      animation: ({ from, to, context, ...extras }) => {
+      animation: ({
+        from,
+        to,
+        context,
+        strategies = zoomStrategiesFor(options).strategies,
+        ...extras
+      }) => {
         const resolved = resolveZoom(from, to, navigationDirection);
 
         // No matching zoom pair → noop so the dispatcher still cleans up.
@@ -442,8 +412,8 @@ export const zoom = (options: NormalizedZoomOptions) => {
 
         // Shared restoration runs after every named group finishes, allowing
         // overrides to retime groups independently without early DOM resets.
-        const cleanups: Array<() => void> = [];
-        const onComplete = (fn: () => void): void => {
+        const cleanups: Array<(disposal: AnimationDisposal) => void> = [];
+        const onDispose = (fn: (disposal: AnimationDisposal) => void): void => {
           cleanups.push(fn);
         };
 
@@ -455,7 +425,7 @@ export const zoom = (options: NormalizedZoomOptions) => {
           physics,
           context,
           extras: extras as ZoomExtras,
-          onComplete,
+          onDispose,
         };
 
         const groups: Record<ZoomAnimationName, Animation[]> = {
@@ -471,10 +441,10 @@ export const zoom = (options: NormalizedZoomOptions) => {
         const composite = animationGroup(groups);
         // Independent overrides can make any group finish last. Restore shared
         // geometry only when the complete transition finishes or is interrupted.
-        composite.onComplete = () => {
+        composite.onDispose = (disposal) => {
           for (const cleanup of cleanups) {
             try {
-              cleanup();
+              cleanup(disposal);
             } catch (error) {
               console.error("[zoom] cleanup error", error);
             }
@@ -484,7 +454,7 @@ export const zoom = (options: NormalizedZoomOptions) => {
         // Release each animation's WAAPI forwards-fill once its OWN run settles,
         // so the inline styles (cleared during playback, reset by the cleanups
         // above) govern the resting visual instead of a lingering fill. Wrapped on
-        // each animation's own onComplete — which fires after its onfinish but
+        // each animation's own onDispose — which fires after its onfinish but
         // before MultiAnimation's completion count — so every child is still
         // counted as done. Without this the exit tile stays shrunk to the card and
         // the background stays scaled; React <Activity> / Next cacheComponents then
@@ -496,7 +466,9 @@ export const zoom = (options: NormalizedZoomOptions) => {
 
         return composite;
       },
-    }) satisfies TransitionDirection<ZoomExtras>;
+    }) satisfies TransitionDirection<
+      ZoomExtras & { strategies?: ZoomStrategy[] }
+    >;
 
   return defineTransition({
     forward: createDirection("forward"),

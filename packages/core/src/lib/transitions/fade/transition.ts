@@ -39,7 +39,7 @@ export const fade = (options: FadeOptions = {}) => {
         style: (t) => ({
           opacity: pageMotionStyle("fade", "out", "forward", t).opacity,
         }),
-        onComplete: () => {
+        onDispose: () => {
           // The outgoing node is the real page and gets reused (re-hidden,
           // shown again next navigation), so clear every inline style we
           // wrote — willChange and the final opacity:0 frame — exactly like
@@ -55,7 +55,7 @@ export const fade = (options: FadeOptions = {}) => {
         style: (t) => ({
           opacity: pageMotionStyle("fade", "in", "forward", t).opacity,
         }),
-        onComplete: () => {
+        onDispose: () => {
           to.style.willChange = "auto";
           to.style.opacity = "";
         },
