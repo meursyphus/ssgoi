@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { useProfile } from "@/demo/instagram/state/profile";
 import { ProfileHeader } from "../profile-shell/header";
 import { ProfileHeaderSkeleton } from "../profile-shell/header-skeleton";

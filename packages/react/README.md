@@ -2,16 +2,6 @@
 
 React bindings for SSGOI.
 
-For an application using a supported router, install one of
-[`@ssgoi/nextjs`](../nextjs/README.md),
-[`@ssgoi/react-router`](../react-router/README.md), or
-[`@ssgoi/tanstack-router`](../tanstack-router/README.md). Each includes the public
-React API and adds `SsgoiRouteBoundary`; no separate `@ssgoi/react` install is
-needed for those application imports.
-
-This common package remains router-independent for shared React libraries and
-custom integrations. The examples below show manual boundary wiring.
-
 [![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
 [Live demos](https://ssgoi.dev) · [Hero, Zoom, Film, and Sheet in motion](https://ssgoi.dev/blog/view-transition-api-limitations)
@@ -21,6 +11,20 @@ npm install @ssgoi/react
 ```
 
 Agent setup guide: https://ssgoi.dev/llms.txt
+
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+Next.js is the only helper not marked experimental. The other router helpers are experimental APIs.
+
+| Router                  | Import                         | API                  |
+| ----------------------- | ------------------------------ | -------------------- |
+| Next.js                 | `@ssgoi/react/nextjs`          | `SsgoiRouteBoundary` |
+| Remix 2                 | `@ssgoi/react/remix`           | `SsgoiRouteBoundary` |
+| React Router            | `@ssgoi/react/react-router`    | `SsgoiRouteBoundary` |
+| TanStack Router / Start | `@ssgoi/react/tanstack-router` | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring and limits.
 
 ## Contents
 
@@ -113,7 +117,8 @@ The legacy `<SsgoiTransition>` wrapper only added this attribute and is
 deprecated. Set `data-ssgoi-transition` directly on the keyed application
 boundary.
 
-Create a router-aware utility in the application. Keep its route logic behind
+Use `@ssgoi/react/nextjs` for the ready-made boundary. If the application needs
+its own policy layer, the following manual example keeps route logic behind
 semantic names so layouts cannot invent inconsistent keys:
 
 ```tsx

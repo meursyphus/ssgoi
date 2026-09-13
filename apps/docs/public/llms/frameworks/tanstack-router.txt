@@ -1,10 +1,12 @@
 # SSGOI with TanStack Router
 
+Experimental API: the router integration may change.
+
 TanStack Router wiring. Choose effects from:
 https://ssgoi.dev/llms/transitions.txt
 
 ```bash
-npm install @ssgoi/tanstack-router
+npm install @ssgoi/react
 ```
 
 Shell class strings below are Tailwind shorthand. Without Tailwind, apply
@@ -19,7 +21,7 @@ Config:
 
 ```ts
 // app/components/ssgoi-config.ts
-import { drill } from "@ssgoi/tanstack-router/view-transitions";
+import { drill } from "@ssgoi/react/view-transitions";
 
 export const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -32,9 +34,9 @@ the boundary around `<Outlet />`:
 ```tsx
 // app/routes/__root.tsx
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { Ssgoi } from "@ssgoi/tanstack-router";
+import { Ssgoi } from "@ssgoi/react";
 import { config } from "~/components/ssgoi-config";
-import { SsgoiRouteBoundary } from "@ssgoi/tanstack-router";
+import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
 
 export const Route = createRootRoute({
   component: () => (
@@ -85,8 +87,8 @@ preserves the shell; the inner pathname key produces child OUT/IN.
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-The `@ssgoi/tanstack-router` package includes the common React API and requires
-its matching router peer. Other SSGOI packages do not depend on this adapter. `as`, DOM attributes,
+The `@ssgoi/react/tanstack-router` subpath uses only its optional router peer.
+Root imports and other router entries do not load it. `as`, DOM attributes,
 `routeKey`, and `resolve` are supported. Resolve returns `{ id, key? }`; key
 defaults to id, and routeKey overrides it. Query-only navigation keeps the
 boundary by default. For direct control or a custom router:

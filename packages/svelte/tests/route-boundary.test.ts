@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it } from "vitest";
 import { flushSync, mount, unmount } from "svelte";
 import BoundaryFixture from "./BoundaryFixture.svelte";
 import { page, content, startNavigation } from "./navigation";
-import type { SsgoiRouteBoundaryProps } from "../src/lib/sveltekit";
+import type { SsgoiRouteBoundaryProps } from "../src/lib/routers/sveltekit";
 
 let host: HTMLDivElement;
 let app: ReturnType<typeof mount> | undefined;

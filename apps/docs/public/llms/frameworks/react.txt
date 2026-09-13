@@ -1,0 +1,36 @@
+# SSGOI with React
+
+Use SSGOI with React independently of your router. Router helpers are optional conveniences that connect a pathname and a page lifetime to the same React implementation.
+
+Install @ssgoi/react. Keep one provider above the changing page region.
+
+## Common setup
+
+Install @ssgoi/react. Keep one provider and a stable config above routed content. The surrounding layout supplies position: relative, z-index: 0, min-height: 100dvh, and overflow-x: clip.
+
+```tsx
+import type { ReactNode } from "react";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
+
+const config: SsgoiConfig = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
+export function SsgoiProvider({ children }: { children: ReactNode }) {
+  return <Ssgoi config={config}>{children}</Ssgoi>;
+}
+```
+
+## Using another router
+
+A dedicated helper is not required. Connect your router’s committed pathname to a keyed DOM boundary in the same render as its children. The Route boundaries guide explains the general pattern.
+
+## Router helpers
+
+- Next.js: https://ssgoi.dev/llms/frameworks/nextjs.txt
+- Remix (experimental): https://ssgoi.dev/llms/frameworks/remix.txt
+- React Router (experimental): https://ssgoi.dev/llms/frameworks/react-router.txt
+- TanStack Router (experimental): https://ssgoi.dev/llms/frameworks/tanstack-router.txt
+
+Full framework guide: https://ssgoi.dev/docs/frameworks/react

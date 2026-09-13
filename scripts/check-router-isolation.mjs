@@ -21,6 +21,9 @@ const fixture = mkdtempSync(join(tmpdir(), "ssgoi-router-isolation-"));
 const packages = ["core", "react", "svelte", "vue", "solid"];
 const routers = [
   "next",
+  "@remix-run/react",
+  "@builder.io/qwik-city",
+  "@angular/router",
   "react-router",
   "@tanstack/react-router",
   "@sveltejs/kit",
@@ -36,6 +39,7 @@ function run(command, args, cwd = fixture) {
   try {
     return execFileSync(command, args, {
       cwd,
+      env: { ...process.env, npm_config_ignore_scripts: "true" },
       encoding: "utf8",
       stdio: "pipe",
     });
@@ -156,8 +160,8 @@ export { SvelteSsgoi, VueSsgoi, SolidSsgoi };
     assert(consumer(entry), `${entry} CommonJS entry failed`);
   }
   // An installed legacy router must not constrain a consumer of root exports.
-  // React router integrations are separate packages; @ssgoi/react must not
-  // declare or constrain any router peer.
+  // npm cannot scope peer ranges to subpath imports, so optional router peers
+  // deliberately use *. Supported adapter versions are documented separately.
   run("npm", [
     "install",
     "--ignore-scripts",

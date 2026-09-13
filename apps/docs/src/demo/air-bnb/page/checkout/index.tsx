@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { useCheckout } from "@/demo/air-bnb/state/checkout";
 import { CheckoutHeader } from "./header";

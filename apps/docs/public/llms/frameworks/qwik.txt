@@ -1,5 +1,7 @@
 # SSGOI with Qwik City
 
+Experimental API: the router integration may change.
+
 Qwik serializes component state, while transition configs contain functions.
 Expose the config through a QRL factory.
 
@@ -48,35 +50,32 @@ export default component$(() => {
 });
 ```
 
-## Page boundary
+## Router boundary helper
+
+The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.
+
+### Mark the page root
+
+Call the hook in a Qwik City page or layout, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key.
 
 ```tsx
-// src/routes/posts/index.tsx
 import { component$ } from "@builder.io/qwik";
-
-export default component$(() => (
-  <article data-ssgoi-transition="/posts">{/* page */}</article>
-));
-
-// src/routes/posts/[id]/index.tsx
-import { component$ } from "@builder.io/qwik";
-import { useLocation } from "@builder.io/qwik-city";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
 
 export default component$(() => {
-  const location = useLocation();
-  const id = location.params.id;
-
+  const boundary = useSsgoiRouteBoundary();
   return (
-    <article key={id} data-ssgoi-transition={`/posts/${id}`}>
-      {/* detail page */}
+    <article key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+      {/* Page content */}
     </article>
   );
 });
 ```
 
-The key forces an OUT/IN remount when Qwik City reuses the same route component
-for `/posts/1` → `/posts/2`. Changing only the marker on the same element is
-not a transition boundary change.
+### Persistent layouts
+
+Pass a stable route key to useSsgoiRouteBoundary("shell") for an outer shell, and retain separately keyed page roots below it. The helper does not wrap or move Slot content.
+
 
 ## Persistent layout
 

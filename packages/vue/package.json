@@ -32,13 +32,13 @@
       "default": "./dist/view-transitions.js"
     },
     "./vue-router": {
-      "types": "./dist/vue-router.d.ts",
+      "types": "./dist/routers/vue-router.d.ts",
       "import": "./dist/vue-router.js",
       "require": "./dist/vue-router.cjs",
       "default": "./dist/vue-router.js"
     },
     "./nuxt": {
-      "types": "./dist/nuxt.d.ts",
+      "types": "./dist/routers/nuxt.d.ts",
       "import": "./dist/nuxt.js",
       "require": "./dist/nuxt.cjs",
       "default": "./dist/nuxt.js"

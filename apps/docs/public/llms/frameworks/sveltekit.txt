@@ -1,5 +1,7 @@
 # SSGOI with SvelteKit
 
+Experimental API: the router integration may change.
+
 SvelteKit wiring. Choose effects from:
 https://ssgoi.dev/llms/transitions.txt
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/nextjs";
-import { jaemin } from "@ssgoi/nextjs/view-transitions";
+import { type SsgoiConfig } from "@ssgoi/react";
+import { jaemin } from "@ssgoi/react/view-transitions";
 import { DemoShell, SsgoiWithHost } from "@/lib/components/demo-shell";
 import { FloatingHeader } from "../shared/floating-header";
 

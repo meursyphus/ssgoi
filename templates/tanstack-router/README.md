@@ -1,8 +1,9 @@
 # SSGOI + TanStack Router
 
-Import `SsgoiRouteBoundary` from `@ssgoi/tanstack-router`. This package includes
-the common React API and declares its router as a required peer. Install only
-this SSGOI package in an application using these imports.
+The router helper used by this template is an experimental API.
+
+Import `SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router`. The router is an
+optional peer and is loaded only by this entry.
 
 ```bash
 pnpm install
@@ -14,7 +15,7 @@ pnpm dev
 - `app/components/ssgoi-config.ts`: one transition config.
 - `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
   `relative z-0 overflow-x-clip` shell.
-- `@ssgoi/tanstack-router`: the shipped pathname boundary.
+- `@ssgoi/react/tanstack-router`: the shipped pathname boundary.
 - Route layouts place a stable shell boundary around a pathname child boundary.
 
 ```tsx
@@ -49,7 +50,7 @@ Presets accept a second `{ override }` argument. This optional example retunes
 only the backward direction; the template's default config remains unchanged.
 
 ```ts
-import { drill, spring } from "@ssgoi/tanstack-router";
+import { drill, spring } from "@ssgoi/react";
 
 const tunedDrill = drill(
   {},

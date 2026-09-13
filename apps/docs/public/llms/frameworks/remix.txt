@@ -1,0 +1,27 @@
+# SSGOI with Remix
+
+Experimental API: this router helper may change.
+
+Install @ssgoi/react in an existing Remix application.
+Use the Remix 2 entry with @remix-run/react. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.
+
+Keep one common provider above the following boundary.
+
+## Wrap a layout outlet
+
+Keep the common provider in root.tsx and place this boundary in a route layout. Follow Remix 2’s own React 18 dependency requirements. React Router 7 framework mode uses the React Router helper instead.
+
+```tsx
+import { Outlet } from "@remix-run/react";
+import { SsgoiRouteBoundary } from "@ssgoi/react/remix";
+
+export default function Layout() {
+  return <SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>;
+}
+```
+
+## Persistent route families
+
+Use routeKey for a persistent shell and a separate inner boundary for changing content. resolve receives Remix’s location and returns { id, key? }; keys are resolved during render.
+
+Common setup: https://ssgoi.dev/llms/frameworks/react.txt

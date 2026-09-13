@@ -10,24 +10,25 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       outDir: "dist",
-      include: ["src/lib/**/*", "src/unplugin/**/*"],
+      include: ["src/**/*"],
+      entryRoot: "src",
       exclude: ["src/vite-env.d.ts"],
       tsconfigPath: "./tsconfig.app.json",
-      beforeWriteFile: (filePath, content) => ({
-        filePath: filePath
-          .replace("/src/lib", "")
-          .replace("/src/unplugin", "/unplugin"),
-        content,
-      }),
     }),
   ],
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/lib/index.ts"),
-        internal: resolve(__dirname, "src/lib/internal.ts"),
-        types: resolve(__dirname, "src/lib/types.ts"),
-        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
+        index: resolve(__dirname, "src/index.ts"),
+        nextjs: resolve(__dirname, "src/routers/nextjs/index.ts"),
+        "react-router": resolve(__dirname, "src/routers/react-router.tsx"),
+        "tanstack-router": resolve(
+          __dirname,
+          "src/routers/tanstack-router.tsx",
+        ),
+        remix: resolve(__dirname, "src/routers/remix.tsx"),
+        types: resolve(__dirname, "src/types.ts"),
+        "view-transitions": resolve(__dirname, "src/view-transitions.ts"),
         "unplugin/index": resolve(__dirname, "src/unplugin/index.ts"),
         "unplugin/webpack": resolve(__dirname, "src/unplugin/webpack.ts"),
         "unplugin/vite": resolve(__dirname, "src/unplugin/vite.ts"),
@@ -38,6 +39,10 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
+        /^@remix-run\/react(?:\/|$)/,
+        /^next(?:\/|$)/,
+        /^react-router(?:\/|$)/,
+        /^@tanstack\/react-router(?:\/|$)/,
         "react",
         "react-dom",
         "react/jsx-runtime",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router";
-import { Ssgoi } from "@ssgoi/react-router";
+import { Ssgoi } from "@ssgoi/react";
 import { ssgoiConfig } from "./ssgoi-config";
 
 interface DemoLayoutProps {

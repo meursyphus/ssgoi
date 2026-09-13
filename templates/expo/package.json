@@ -12,7 +12,7 @@
     "export:android": "expo export --platform android"
   },
   "dependencies": {
-    "@ssgoi/expo-router": "workspace:*",
+    "@ssgoi/react-native": "workspace:*",
     "expo": "56.0.21",
     "expo-router": "56.2.20",
     "expo-constants": "~56.0.25",

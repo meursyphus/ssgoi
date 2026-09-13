@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ssgoi/tanstack-router": "workspace:*",
+    "@ssgoi/react": "workspace:*",
     "@tanstack/react-router": "^1.93.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

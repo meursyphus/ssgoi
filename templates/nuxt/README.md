@@ -1,5 +1,7 @@
 # SSGOI + Nuxt
 
+The router helper used by this template is an experimental API.
+
 Import `SsgoiRouteBoundary` from `@ssgoi/vue/nuxt`. The router is an
 optional peer and is loaded only by this entry.
 
@@ -43,13 +45,16 @@ only the backward direction; the template's default config remains unchanged.
 ```ts
 import { drill, spring } from "@ssgoi/vue";
 
-const tunedDrill = drill({}, {
-  override: {
-    backward({ animation }) {
-      animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+const tunedDrill = drill(
+  {},
+  {
+    override: {
+      backward({ animation }) {
+        animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+      },
     },
   },
-});
+);
 ```
 
 The core decides direction from route relationships and history. An explicit

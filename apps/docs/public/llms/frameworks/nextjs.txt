@@ -1,16 +1,15 @@
 # SSGOI with React and Next.js
 
-Use one provider and import `SsgoiRouteBoundary` from `@ssgoi/nextjs`.
-This package includes the common React API and supports Next.js App Router
-13.4–16 as a required peer. It installs `@ssgoi/react` internally. Plain React
-applications can use `@ssgoi/react` without Next.js.
+Use one provider and import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`.
+This is an optional subpath for Next.js App Router 13.4–16; Next.js is neither
+bundled nor required by the root `@ssgoi/react` entry.
 
 Framework index: https://ssgoi.dev/llms/frameworks.txt
 
 ## Install
 
 ```bash
-npm install @ssgoi/nextjs
+npm install @ssgoi/react
 ```
 
 Shell class strings below are Tailwind shorthand. Without Tailwind, apply
@@ -26,8 +25,8 @@ container, and scroll restore then targets the wrong element. Fall back to
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/nextjs";
-import { drill } from "@ssgoi/nextjs/view-transitions";
+import { Ssgoi } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -49,7 +48,7 @@ Pages Router.
 
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 ```
@@ -60,7 +59,7 @@ import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

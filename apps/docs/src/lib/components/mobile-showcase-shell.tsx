@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { type SsgoiConfig } from "@ssgoi/react";
 import { OverlayProvider } from "overlay-kit";
 import { Toaster } from "sonner";
 import { StateProvider } from "@/lib/state";

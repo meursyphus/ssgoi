@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react-router";
+import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
 
 export default function PageBoundaryLayout() {
   return (

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { PRODUCT_CATEGORIES } from "@/components/ssgoi-config";
 
 export default function ProductsLayout({

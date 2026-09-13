@@ -22,6 +22,7 @@ const run = (command, args, cwd = fixture) => {
   try {
     return execFileSync(command, args, {
       cwd,
+      env: { ...process.env, npm_config_ignore_scripts: "true" },
       encoding: "utf8",
       stdio: "pipe",
     });

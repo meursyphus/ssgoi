@@ -12,6 +12,17 @@ npm install @ssgoi/qwik
 
 Agent setup guide: https://ssgoi.dev/llms/qwik.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+These router helpers are experimental APIs and may change.
+
+| Router    | Import                  | API                     |
+| --------- | ----------------------- | ----------------------- |
+| Qwik City | `@ssgoi/qwik/qwik-city` | `useSsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/qwik) for wiring and limits.
+
 ## Root
 
 Qwik configs contain functions, so pass a QRL factory.
@@ -39,19 +50,24 @@ export default component$(() => {
 
 ## Route boundary
 
-Mark route component roots:
+Use the experimental Qwik City helper on the page's own root:
 
 ```tsx
-export default component$(() => (
-  <section data-ssgoi-transition="/posts">Posts</section>
-));
+import { component$ } from "@builder.io/qwik";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
+
+export default component$(() => {
+  const boundary = useSsgoiRouteBoundary();
+  return (
+    <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+      Page
+    </section>
+  );
+});
 ```
 
-Dynamic route:
-
-```tsx
-<section data-ssgoi-transition={`/posts/${postId}`}>...</section>
-```
+The key replaces the root when City reuses a parameterized page. A stable key
+can be passed for a persistent shell. Keep Slot ownership in the route/layout.
 
 ## Persistent layouts
 

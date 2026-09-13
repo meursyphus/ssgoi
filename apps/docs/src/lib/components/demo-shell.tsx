@@ -1,9 +1,9 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/nextjs";
+import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
 import { useShowcaseHost } from "./host-context";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 // Re-export so existing imports (`from "@/lib/components/demo-shell"`) keep
 // working after the host moved up to `DocsSsgoiProvider`.

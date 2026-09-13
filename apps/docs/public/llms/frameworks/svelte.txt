@@ -1,0 +1,20 @@
+# SSGOI with Svelte
+
+The Svelte package provides the common provider and transition API. Add the SvelteKit helper when Kit owns navigation.
+
+Install @ssgoi/svelte. Keep one provider above the changing page region.
+
+## Common setup
+
+Install @ssgoi/svelte and keep one Ssgoi provider above the changing page region. Transition factories and route rules are shared with the other web packages.
+
+```ts
+import { Ssgoi } from "@ssgoi/svelte";
+import { drill } from "@ssgoi/svelte/view-transitions";
+```
+
+## Router helpers
+
+- SvelteKit (experimental): https://ssgoi.dev/llms/frameworks/sveltekit.txt
+
+Full framework guide: https://ssgoi.dev/docs/frameworks/svelte

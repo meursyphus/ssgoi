@@ -23,7 +23,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        solidstart: resolve(__dirname, "src/lib/solidstart.tsx"),
+        solidstart: resolve(__dirname, "src/lib/routers/solidstart.ts"),
+        "solid-router": resolve(__dirname, "src/lib/routers/solid-router.tsx"),
         types: resolve(__dirname, "src/lib/types.ts"),
         "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },

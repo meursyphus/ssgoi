@@ -1,8 +1,7 @@
 # SSGOI + Next.js
 
-Import `SsgoiRouteBoundary` from `@ssgoi/nextjs`. This package includes
-the common React API and declares its router as a required peer. Install only
-this SSGOI package in an application using these imports.
+Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
+optional peer and is loaded only by this entry.
 
 ```bash
 pnpm install
@@ -13,7 +12,7 @@ pnpm dev
 
 - `src/components/ssgoi-config.ts`: one transition config.
 - `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `@ssgoi/nextjs`: shipped pathname boundary with Suspense.
+- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
 The default boundary uses the pathname for its id and key. `routeKey` keeps a
@@ -101,7 +100,7 @@ top-level tabs, per-project shell lifetimes, intercepted modal open/back/forward
 direct detail entry, index backgrounds, nested sidebars, and unresolved URLs:
 
 ```bash
-pnpm --filter @ssgoi/nextjs test:run
+pnpm --filter @ssgoi/react test:run
 ```
 
 Full boundary guide: https://ssgoi.dev/llms.txt
@@ -117,7 +116,7 @@ Presets accept a second `{ override }` argument. This optional example retunes
 only the backward direction; the template's default config remains unchanged.
 
 ```ts
-import { drill, spring } from "@ssgoi/nextjs";
+import { drill, spring } from "@ssgoi/react";
 
 const tunedDrill = drill(
   {},

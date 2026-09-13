@@ -34,14 +34,14 @@ import { useSsgoi } from "./ssgoi.js";
 import type { RouteBoundaryState } from "./types.js";
 import type { NativeSurfaceHandle } from "./native-surface-handle.js";
 
-export interface NativeRouteLocation {
+export interface ExpoRouteLocation {
   pathname: string;
   route: Readonly<NavigatorRoute>;
 }
 export interface BoundaryOptions {
   style?: StyleProp<ViewStyle>;
   /** Evaluated against each screen's own route, including retained screens. */
-  resolve?: (location: NativeRouteLocation) => RouteBoundaryState;
+  resolve?: (location: ExpoRouteLocation) => RouteBoundaryState;
   /** Scoped by the native route key; never merges distinct pushed screen instances. */
   routeKey?: string | number;
 }
@@ -97,7 +97,7 @@ function screenFor(
   };
 }
 
-/** The Expo adapter supplies router descriptors; native rendering remains independent of Expo. */
+/** The Expo subpath supplies router descriptors; native rendering remains independent of Expo. */
 export function NativeNavigator({
   state,
   descriptors,

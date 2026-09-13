@@ -1,231 +1,60 @@
-# SSGOI setup guide
+# SSGOI quick start for Next.js
 
-SSGOI adds native app-like page transitions for mobile web apps without
-replacing the application router.
+SSGOI adds page transitions without replacing your application router.
+This quick start assumes Next.js App Router. Use the existing router and page files.
 
-Router agnostic. Cross-browser. SSR ready. Web Animations API powered.
+Current version: `@ssgoi/core@7.1.2`. All `@ssgoi/*` packages release together.
 
-Current version: `@ssgoi/core@7.1.2`. Every `@ssgoi/*` framework package
-is released in lockstep with core, so install the same version across them.
-
-This file contains the minimal Next.js App Router setup. The root React package
-remains router agnostic. Read linked files only
-when their topic applies.
-
-React Native / Expo Router has a separate experimental integration:
-https://ssgoi.dev/llms/frameworks/expo.txt
-The web setup and preset catalog below do not apply unchanged to native views.
-
-## Choose a mobile interaction
-
-Start with the UX relationship, then open the linked transition spec for props
-and a focused example.
-
-| UX | transition | route rule | spec |
-| --- | --- | --- | --- |
-| list → detail, drill deeper | `drill()` | `on` + `except` | https://ssgoi.dev/llms/transitions/drill.txt |
-| compose, filters, temporary task | `sheet()` | `on` | https://ssgoi.dev/llms/transitions/sheet.txt |
-| ordered tabs or steps | `slide()` | `ordered` | https://ssgoi.dev/llms/transitions/slide.txt |
-| card or image → detail | `zoom()` | `from` / `to` | https://ssgoi.dev/llms/transitions/zoom.txt |
-
-Representative mobile config:
-
-```ts
-import { drill, sheet } from "@ssgoi/nextjs/view-transitions";
-
-const config = {
-  transitions: [
-    // A detail route drills in; returning to the list drills out.
-    {
-      on: "/posts/**",
-      except: "/posts",
-      transition: drill(),
-    },
-
-    // A temporary task rises above the current page.
-    {
-      on: "/compose",
-      transition: sheet({ type: "blur" }),
-    },
-  ],
-};
-```
-
-For variants and more effects, open the transition catalog:
-https://ssgoi.dev/llms/transitions.txt
-
-## Minimal Next.js App Router setup
-
-### 1. Install
+## Install
 
 ```bash
-npm install @ssgoi/nextjs
+npm install @ssgoi/react
 ```
 
-### 2. Provider and config
-
-Keep one config and one `<Ssgoi>` above routed content:
+## Add one provider and the Next.js boundary
 
 ```tsx
 // app/ssgoi-provider.tsx
 "use client";
 
-import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/nextjs";
-import { drill } from "@ssgoi/nextjs/view-transitions";
+import type { ReactNode } from "react";
+import { Ssgoi } from "@ssgoi/react";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
 export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return <Ssgoi config={config}>{children}</Ssgoi>;
-}
-```
-
-To select different rules for mobile and desktop:
-
-```ts
-transitions: ({ isMobile }) =>
-  isMobile
-    ? [{ on: "/**", except: "/", transition: drill() }]
-    : [{ on: "/**", except: "/", transition: drill({ type: "slide" }) }],
-```
-
-### 3. Route boundary
-
-Import the ready-made boundary. It reads the pathname and sets the key and
-transition id together; it also handles URL-hook Suspense. No local boundary
-file is needed:
-
-```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
-
-<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-```
-
-### 4. Layout
-
-```tsx
-// app/layout.tsx
-import { type ReactNode } from "react";
-import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
-
-export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <main className="relative z-0 min-h-dvh overflow-x-clip">
-          <SsgoiProvider>
-            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-          </SsgoiProvider>
-        </main>
-      </body>
-    </html>
+    <main style={{ position: "relative", zIndex: 0, minHeight: "100dvh", overflowX: "clip" }}>
+      <Ssgoi config={config}>
+        <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+      </Ssgoi>
+    </main>
   );
 }
 ```
 
-The class string above is Tailwind shorthand. Without Tailwind, apply
-`position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip`. Use
-`clip`, not `hidden`: `overflow-x: hidden` makes the wrapper the scroll
-container, and scroll restore then targets the wrong element. Fall back to
-`100vh` only where `dvh` is unsupported.
+In app/layout.tsx, wrap the existing children with SsgoiProvider inside body.
+Keep one provider above the routed region. The Next.js helper supplies the
+pathname, DOM key, transition marker, and URL-hook Suspense handling.
+Use overflow-x: clip rather than hidden so the wrapper does not become a scroll container.
 
-That is the complete simple setup. `@ssgoi/nextjs` includes the common React
-API and the Next.js boundary. Install only that SSGOI package in a Next.js app;
-it depends on `@ssgoi/react` internally and declares Next.js as a required peer.
-Plain React and custom-router apps can still install `@ssgoi/react` alone.
+Verify a link navigation and browser Back: the page should animate in and out.
+For persistent headers or tabs, follow the nested-layout guide before changing boundary keys.
 
-Next.js interception, redirects, and rewrites remain application routing
-concerns. If your app uses middleware (Next 13–15) or proxy (Next 16+), keep its
-matcher and rewrite/redirect rules compatible with both soft intercepted
-navigation and direct page entry. The boundary does not configure these rules.
-For background slots, resolve from `selectedSegments` rather than the modal URL.
-Short setup and verification: https://ssgoi.dev/llms/complex-routing.txt
+## Read next when needed
 
-Other ready-made entries: `@ssgoi/react-router`,
-`@ssgoi/tanstack-router`, `@ssgoi/svelte/sveltekit`,
-`@ssgoi/vue/nuxt`, `@ssgoi/vue/vue-router`, `@ssgoi/solid/solidstart`.
-The React router packages declare their routers as required peers and include
-the React API. `@ssgoi/expo-router` similarly includes the native API. Svelte,
-Vue, and Solid currently keep optional router subpaths. Choose the integration
-for your router; do not install the other router packages.
-For a custom router or direct DOM control, use the manual guide:
-https://ssgoi.dev/llms/manual-boundaries.txt
-
-Browser note: the listed compatibility target is for the core Web Animations
-API runtime. `sheet({ type: "blur" })` and `zoom({ type: "blur" })` also use
-`backdrop-filter` (Firefox 103+). Earlier Firefox keeps the transition, scale,
-and dimming but omits the backdrop blur.
-
-SSGOI also chooses scroll reset or restoration from the matched UX
-relationship:
-
-- `from` / `to` restores the forward source and resets the destination.
-- `on` does the same when navigation crosses the scope boundary. Navigation
-  between two paths already inside the same `on` scope treats both as semantic
-  `to` and resets both by default. For stack UX, use `except` to keep the source
-  outside the scope.
-- `ordered` restores both sides.
-
-Override one rule with `preserveScroll` only when the default does not fit.
-Details: https://ssgoi.dev/llms/scroll-restoration.txt
-
-Complete Next.js guide:
-https://ssgoi.dev/llms/frameworks/nextjs.txt
-
-## Route rules in one minute
-
-Transitions describe motion. Route rules describe the navigation relationship:
-
-```ts
-const config = {
-  transitions: [
-    // Entering the scope is forward; leaving is backward.
-    { on: "/posts/**", except: "/posts", transition: drill() },
-
-    // The written pair is forward; the reverse is backward.
-    { from: "/gallery", to: "/photo/*", transition: zoom() },
-
-    // Increasing index is forward; decreasing index is backward.
-    {
-      ordered: ["/tabs/home", "/tabs/search", "/tabs/profile"],
-      transition: slide(),
-    },
-  ],
-};
-```
-
-- `on` selects a route or route family.
-- `except` removes paths from an `on` scope.
-- `from` / `to` defines a precise pair, bidirectional by default. Set
-  `bidirectional: false` for a one-way pair.
-- `ordered` derives direction from path order.
-
-On web, Back to an observed entry's source reuses its recorded effect with
-direction and scroll endpoints reversed; Forward replays the original choice.
-Links/push/replace match current rules. Unrecorded returns also rematch.
-
-Wildcards, arrays, priority, matching order, and mobile/desktop configs:
-https://ssgoi.dev/llms/route-rules.txt
-
-## Read next
-
-| Need | Read |
+| Need | Guide |
 | --- | --- |
-| choose or configure a transition | https://ssgoi.dev/llms/transitions.txt |
-| build a manual boundary or use a custom router | https://ssgoi.dev/llms/manual-boundaries.txt |
-| use another framework or router | https://ssgoi.dev/llms/frameworks.txt |
-| understand automatic scroll behavior or middleware | https://ssgoi.dev/llms/scroll-restoration.txt |
-| keep a bottom nav, intercepted background, or dynamic project shell persistent | https://ssgoi.dev/llms/complex-routing.txt |
+| complete Next.js setup and supported versions | https://ssgoi.dev/llms/frameworks/nextjs.txt |
+| choose and configure an effect | https://ssgoi.dev/llms/transitions.txt |
+| configure route patterns and navigation direction | https://ssgoi.dev/llms/route-rules.txt |
+| keep layouts, parallel slots, or intercepted backgrounds persistent | https://ssgoi.dev/llms/complex-routing.txt |
+| configure scroll restoration | https://ssgoi.dev/llms/scroll-restoration.txt |
 | diagnose a broken transition | https://ssgoi.dev/llms/troubleshooting.txt |
-| understand boundaries and the DOM lifecycle | https://ssgoi.dev/llms/how-it-works.txt |
-| verify browser and framework compatibility | https://ssgoi.dev/docs/compatibility |
-| understand the product-level reasons before implementation | https://ssgoi.dev/docs/why-ssgoi |
-| understand why SSGOI does not use the View Transition API | https://ssgoi.dev/docs/view-transition-api |
-| read the license | MIT — https://github.com/meursyphus/ssgoi/blob/HEAD/LICENSE |
+| check browser support | https://ssgoi.dev/docs/compatibility |
 
-Runnable templates:
-https://github.com/meursyphus/ssgoi/tree/HEAD/templates
+Runnable Next.js template: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs

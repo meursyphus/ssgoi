@@ -67,10 +67,6 @@ export function DocsHero() {
 /* -------------------------------------------------------------------------- */
 
 const PACKAGES = [
-  "@ssgoi/nextjs",
-  "@ssgoi/react-router",
-  "@ssgoi/tanstack-router",
-  "@ssgoi/expo-router",
   "@ssgoi/react",
   "@ssgoi/svelte",
   "@ssgoi/vue",
@@ -150,8 +146,8 @@ export function InstallBody() {
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/nextjs";
-import { drill } from "@ssgoi/nextjs/view-transitions";
+import { Ssgoi } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
@@ -175,7 +171,7 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`import { drill, fade } from "@ssgoi/nextjs/view-transitions";
+              code={`import { drill, fade } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: ({ isMobile }) =>
@@ -215,14 +211,13 @@ const config = {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+              code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              The Next.js package includes the common React API and this
-              boundary. If the wrong part of the screen moves, adjust the
-              boundary lifetime —{" "}
+              Next.js is an optional peer, loaded only by this subpath. If the
+              wrong part of the screen moves, adjust the boundary lifetime —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
               </Link>{" "}
@@ -242,7 +237,7 @@ const config = {
               code={`// app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -637,10 +632,13 @@ export function RoutersBody() {
           </a>
         ))}
       </div>
+      <p className="mt-5 text-xs text-ink-faint">
+        Router integrations other than Next.js are experimental APIs.
+      </p>
       <p className={`mt-6 ${measure} ${prose}`}>
-        The React, SvelteKit, Nuxt and SolidStart templates wrap routed content
-        in a boundary component. Qwik and Angular have no equivalent wrapper, so
-        each routed page root carries the key and the marker itself.{" "}
+        Router helpers are grouped under their rendering framework. Qwik keeps
+        the key and marker on the page root; Angular offers a structural
+        directive that recreates that root when its key changes.{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

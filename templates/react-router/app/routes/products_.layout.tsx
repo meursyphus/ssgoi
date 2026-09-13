@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react-router";
+import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
 import { PRODUCT_CATEGORIES } from "../components/ssgoi-config";
 
 export default function ProductsLayout() {

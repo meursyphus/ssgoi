@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
-import { type SsgoiConfig } from "@ssgoi/nextjs";
+import { type SsgoiConfig } from "@ssgoi/react";
 import {
   axis,
   blind,
@@ -9,7 +9,7 @@ import {
   hero,
   scroll,
   zoom,
-} from "@ssgoi/nextjs/view-transitions";
+} from "@ssgoi/react/view-transitions";
 import { SsgoiWithHost } from "@/lib/components/demo-shell";
 import type { TransitionLabPreset } from "./presets";
 

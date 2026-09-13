@@ -1,4 +1,4 @@
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function ProfileLayout({
   children,

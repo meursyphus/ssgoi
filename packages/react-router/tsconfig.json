@@ -1,4 +1,0 @@
-{
-  "extends": "../../tooling/react-library/tsconfig.json",
-  "include": ["src", "tests"]
-}

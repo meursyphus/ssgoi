@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/react-native",
   "version": "7.1.2",
-  "description": "Router-independent React Native rendering and playback for SSGOI",
+  "description": "React Native screen transitions for SSGOI with optional Expo Router integration",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,9 +14,9 @@
       "types": "./dist/view-transitions.d.ts",
       "default": "./dist/view-transitions.js"
     },
-    "./internal": {
-      "types": "./dist/internal.d.ts",
-      "default": "./dist/internal.js"
+    "./expo-router": {
+      "types": "./dist/routers/expo-router.d.ts",
+      "default": "./dist/routers/expo-router.js"
     }
   },
   "files": [
@@ -30,14 +30,20 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@ssgoi/core": "workspace:*",
+    "@ssgoi/core": "workspace:^",
     "standard-navigation": "0.0.9"
   },
   "peerDependencies": {
     "react": "^19.2.3",
     "react-native": ">=0.85.3 <0.86",
     "react-native-reanimated": "~4.3.1",
-    "react-native-worklets": "0.8.3"
+    "react-native-worklets": "0.8.3",
+    "expo-router": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-router": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

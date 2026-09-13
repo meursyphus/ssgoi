@@ -61,7 +61,7 @@ if (noPublish) {
   process.exit(0);
 }
 
-// 3) Publish. workspace:* pins and workspace:^ ranges are rewritten on publish.
+// 3) Publish. workspace:^ is rewritten to ^<version> on publish.
 const pubArgs = [
   "-r",
   "--filter",

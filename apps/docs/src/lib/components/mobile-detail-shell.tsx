@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/nextjs";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { cn } from "@/lib/utils";
 
 /**
