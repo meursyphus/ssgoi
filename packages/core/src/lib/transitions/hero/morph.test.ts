@@ -47,6 +47,38 @@ function element(
 afterEach(() => vi.unstubAllGlobals());
 
 describe("hero clipped media morph", () => {
+  it("maps the real image's local box to the measured destination content", () => {
+    vi.stubGlobal("DOMRect", Rect);
+    const from = element(new Rect(20, 30, 100, 100));
+    const to = element(new Rect(50, 50, 400, 400));
+    const fromPage = element(new Rect(0, 0, 800, 800), [from]);
+    const toPage = element(new Rect(0, 0, 800, 800), [to]);
+    const root = element(new Rect(0, 0, 800, 800), [fromPage, toPage]);
+    const plan = buildHeroMorphPlan(
+      root,
+      {
+        key: "image",
+        fromEl: from,
+        toEl: to,
+        fromFit: "cover",
+        toFit: "cover",
+      },
+      700,
+      fromPage,
+      toPage,
+    )!;
+    const reference = { box: new Rect(0, 0, 400, 400), scaleX: 1, scaleY: 1 };
+    expect(plan.styleFor(0, 1, reference).transform).toBe(
+      "translate(-130px, -120px) scale(0.25, 0.25)",
+    );
+    expect(plan.styleFor(1, 0, reference).transform).toBe(
+      "translate(50px, 50px) scale(1, 1)",
+    );
+    expect(
+      plan.styleFor(1, 0, { ...reference, scaleX: 2, scaleY: 2 }).transform,
+    ).toBe("translate(25px, 25px) scale(1, 1)");
+  });
+
   it.each([false, true])(
     "preserves the scroller crop and corners (reverse: %s)",
     (reverse) => {

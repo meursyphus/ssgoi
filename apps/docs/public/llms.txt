@@ -3,8 +3,8 @@
 SSGOI adds page transitions without replacing your application router.
 This quick start assumes Next.js App Router. Use the existing router and page files.
 
-Current version: `@ssgoi/core@7.1.3-beta.0` (beta). All `@ssgoi/*` packages release together.
-The stable `latest` channel remains on `7.1.2`; install the beta explicitly to try the incoming hero content fade.
+Current version: `@ssgoi/core@7.1.3-beta.1` (beta). All `@ssgoi/*` packages release together.
+The stable `latest` channel remains on `7.1.2`; install the beta explicitly to try the in-page hero rendering and content fade.
 
 ## Install
 

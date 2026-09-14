@@ -15,8 +15,15 @@ import {
   resolveElementMediaGeometry,
   type MediaGeometry,
   type MediaFit,
+  type MediaRect,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import {
+  fitHeroImage,
+  markHeroTransitioning,
+  preserveStyles,
+  stackHeroPages,
+} from "./in-place";
 import { insetClipPath } from "../inset-clip";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
@@ -56,8 +63,8 @@ function getHeroRect(
 ): MediaGeometry {
   const measure = (target: HTMLElement) => {
     const rect = getClientRect(container, target);
-    // The clone is absolutely positioned inside this container. Restore its
-    // own scroll offset after measuring nested transforms / scrolling.
+    // Keep every endpoint in the same root coordinate space, including the
+    // root scroll offset and translated/nested scrolling ancestors.
     return {
       left: rect.left + container.scrollLeft,
       top: rect.top + container.scrollTop,
@@ -182,12 +189,14 @@ type HeroMorphStyle = {
   clipPath: string;
 };
 
+type HeroReference = { box: MediaRect; scaleX: number; scaleY: number };
+
 type HeroMorphPlan = {
   toContent: MediaGeometry["content"];
   fromVisualEl: HTMLElement;
   toVisualEl: HTMLElement;
-  resetCloneRadius: boolean;
-  styleFor: (t: number, u: number) => HeroMorphStyle;
+  resetRadius: boolean;
+  styleFor: (t: number, u: number, reference?: HeroReference) => HeroMorphStyle;
 };
 
 export function normalizeHeroGeometryPair(
@@ -197,7 +206,7 @@ export function normalizeHeroGeometryPair(
   return normalizeMediaGeometryPair(from, to);
 }
 
-export function shouldResetHeroCloneRadius(
+export function shouldResetHeroRadius(
   from: MediaGeometry,
   to: MediaGeometry,
 ): boolean {
@@ -234,11 +243,11 @@ export function buildHeroMorphPlan(
   const toContent = toHero.content;
   const toWindow = toHero.window;
   const toClipInset = toHero.clipInset;
-  const preserveCloneRadius =
+  const preserveRadius =
     fromHero.radiusSource === "unsupported" ||
     toHero.radiusSource === "unsupported";
-  const fromRadius = preserveCloneRadius ? 0 : fromHero.radius;
-  const toRadius = preserveCloneRadius ? 0 : toHero.radius;
+  const fromRadius = preserveRadius ? 0 : fromHero.radius;
+  const toRadius = preserveRadius ? 0 : toHero.radius;
 
   if (
     fromContent.width === 0 ||
@@ -280,10 +289,14 @@ export function buildHeroMorphPlan(
     toContent,
     fromVisualEl: fromHero.mediaElement ?? fromEl,
     toVisualEl: toHero.mediaElement ?? toEl,
-    resetCloneRadius: shouldResetHeroCloneRadius(fromHero, toHero),
-    styleFor: (t, u) => {
-      const tx = u * dx;
-      const ty = u * dy;
+    resetRadius: shouldResetHeroRadius(fromHero, toHero),
+    styleFor: (t, u, reference) => {
+      const tx =
+        (u * dx + (reference ? cxTo - centerX(reference.box) : 0)) /
+        (reference?.scaleX ?? 1);
+      const ty =
+        (u * dy + (reference ? cyTo - centerY(reference.box) : 0)) /
+        (reference?.scaleY ?? 1);
       const s = t + u * sMax;
       // clip-path is resolved before transform; divide by the current scale
       // so the on-screen corner radius matches the visible hero window.
@@ -310,7 +323,9 @@ export function buildHeroMorphPlan(
       const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
       const insetL = fromClipInset.left * u + toClipInset.left * t;
       return {
-        transform: `translate(${tx}px, ${ty}px) scale(${s})`,
+        transform: reference
+          ? `translate(${tx}px, ${ty}px) scale(${(s * toContent.width) / reference.box.width}, ${(s * toContent.height) / reference.box.height})`
+          : `translate(${tx}px, ${ty}px) scale(${s})`,
         clipPath: insetClipPath(
           toContent,
           {
@@ -331,73 +346,90 @@ function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
   el.style.clipPath = style.clipPath;
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * HeroTileStrategy — shared by every hero type.
- *
- * The moving hero lives as a temporary clone above both pages. That keeps
- * static/fade pair resolution, content/window rect math, distance filtering, and
- * aspect-ratio clipping identical; chrome strategies only decide whether
- * page surfaces snap or cross-fade around this shared tile morph.
- * ──────────────────────────────────────────────────────────────────────────── */
-
+/** Animate the actual destination visual in its authored stacking context. */
 class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
   ): AnimationContributions<HeroAnimationName> {
     const { resolved, physics, positionedParent, maxDistance, onComplete } =
       ctx;
-    const animations: Animation[] = [];
-
-    for (const pair of resolved.pairs) {
-      const morph = buildHeroMorphPlan(
+    onComplete(stackHeroPages(ctx.from, ctx.to));
+    // Measure every pair before changing any visual or caller-owned CSS hook.
+    const matches = resolved.pairs.flatMap((pair) => {
+      const plan = buildHeroMorphPlan(
         positionedParent,
         pair,
         maxDistance,
         ctx.from,
         ctx.to,
       );
-      if (!morph) continue;
+      return plan ? [{ pair, plan }] : [];
+    });
+    // Chrome only excludes visuals that actually morph. Distance/geometry
+    // fallbacks should still fade their ordinary incoming content.
+    ctx.resolved = { pairs: matches.map(({ pair }) => pair) };
+
+    const animations: Animation[] = [];
+    for (const { plan: morph } of matches) {
       const { fromVisualEl, toVisualEl } = morph;
-
-      const clone = toVisualEl.cloneNode(true) as HTMLElement;
-      clone.style.position = "absolute";
-      clone.style.left = `${morph.toContent.left}px`;
-      clone.style.top = `${morph.toContent.top}px`;
-      clone.style.width = `${morph.toContent.width}px`;
-      clone.style.height = `${morph.toContent.height}px`;
-      clone.style.margin = "0";
-      clone.style.transformOrigin = "center center";
-      clone.style.zIndex = "1000";
-      clone.style.willChange = "transform, clip-path";
-      clone.style.pointerEvents = "none";
-      clone.style.maxWidth = "none";
-      clone.style.maxHeight = "none";
-      if (morph.resetCloneRadius) clone.style.borderRadius = "0";
-
-      applyMorphStyle(clone, morph.styleFor(0, 1));
-
-      positionedParent.appendChild(clone);
-
-      const previousFromOpacity = fromVisualEl.style.opacity;
-      const previousToOpacity = toVisualEl.style.opacity;
+      const restoreMarker = markHeroTransitioning(toVisualEl);
+      const restoreFrom = preserveStyles(fromVisualEl, ["opacity"]);
+      const restoreTo = preserveStyles(toVisualEl, [
+        "transform",
+        "transform-origin",
+        "clip-path",
+        "object-fit",
+        "border-radius",
+        "will-change",
+      ]);
+      // Keep the real decoded image and its parent. The image's fitted content
+      // size uses an empty placeholder to retain its original flow footprint.
+      // Keeping object-fit also avoids SVG viewport changes at completion.
+      toVisualEl.style.transform = "none";
+      toVisualEl.style.transformOrigin = "center center";
+      toVisualEl.style.willChange = "transform, clip-path";
+      if (morph.resetRadius) toVisualEl.style.borderRadius = "0";
+      const restoreFit = fitHeroImage(
+        toVisualEl,
+        morph.toContent,
+        getClientRect(positionedParent, toVisualEl),
+      );
+      const box = getClientRect(positionedParent, toVisualEl);
+      const reference = {
+        box: {
+          left: box.left + positionedParent.scrollLeft,
+          top: box.top + positionedParent.scrollTop,
+          width: box.width,
+          height: box.height,
+        },
+        scaleX:
+          toVisualEl.offsetWidth &&
+          Math.abs(box.width - toVisualEl.offsetWidth) > 0.5
+            ? box.width / toVisualEl.offsetWidth
+            : 1,
+        scaleY:
+          toVisualEl.offsetHeight &&
+          Math.abs(box.height - toVisualEl.offsetHeight) > 0.5
+            ? box.height / toVisualEl.offsetHeight
+            : 1,
+      };
+      const style = (t: number, u: number) => morph.styleFor(t, u, reference);
+      applyMorphStyle(toVisualEl, style(0, 1));
       fromVisualEl.style.opacity = "0";
-      toVisualEl.style.opacity = "0";
-
       onComplete(() => {
-        fromVisualEl.style.opacity = previousFromOpacity;
-        toVisualEl.style.opacity = previousToOpacity;
-        if (clone.parentElement) clone.parentElement.removeChild(clone);
+        restoreFit();
+        restoreTo();
+        restoreFrom();
+        restoreMarker();
       });
-
       animations.push(
         new WebAnimation({
-          element: clone,
+          element: toVisualEl,
           integrator: IntegratorProvider.from(physics),
-          style: morph.styleFor,
+          style,
         }),
       );
     }
-
     return { shared: animations };
   }
 }
@@ -449,8 +481,7 @@ export const hero = (options: NormalizedHeroOptions) => {
 
       // Shared `onComplete` registry — strategies push restore callbacks
       // here, and the composite fires them after every child has settled.
-      // Fade uses page-level opacity plus overlay clones, so restoring on
-      // the first child can reveal originals while sibling fades are active.
+      // Keep the in-place fit/clip until every sibling fade has settled.
       const cleanups: Array<() => void> = [];
       const onComplete = (fn: () => void): void => {
         cleanups.push(fn);
@@ -483,6 +514,10 @@ export const hero = (options: NormalizedHeroOptions) => {
       const prevOnComplete = composite.onComplete;
       composite.onComplete = () => {
         prevOnComplete?.();
+        // A forwards-filled transform must not override the restored image fit.
+        for (const animation of Object.values(groups).flat()) {
+          if (animation instanceof WebAnimation) animation.releaseFill();
+        }
         for (const fn of cleanups) {
           try {
             fn();

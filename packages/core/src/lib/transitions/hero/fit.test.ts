@@ -4,7 +4,7 @@ import { fallbackHeroFit, type HeroEndpoint } from "./fit";
 import {
   normalizeHeroGeometryPair,
   resolveNewStylePairs,
-  shouldResetHeroCloneRadius,
+  shouldResetHeroRadius,
 } from "./transition";
 
 function element(attributes: Record<string, string>): HTMLElement {
@@ -105,7 +105,7 @@ describe("hero fit inference", () => {
     from.bboxRadiusSource = "computed";
     to.bboxRadiusSource = "computed";
 
-    expect(shouldResetHeroCloneRadius(from, to)).toBe(true);
+    expect(shouldResetHeroRadius(from, to)).toBe(true);
   });
 
   it("preserves native CSS radius for unsupported bbox fallback", () => {
@@ -114,6 +114,6 @@ describe("hero fit inference", () => {
     const to = createMediaGeometry(bbox, null, null);
     from.radiusSource = "unsupported";
 
-    expect(shouldResetHeroCloneRadius(from, to)).toBe(false);
+    expect(shouldResetHeroRadius(from, to)).toBe(false);
   });
 });

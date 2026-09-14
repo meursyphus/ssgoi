@@ -17,11 +17,11 @@ hero({
 }): TransitionConfig;
 ```
 
-- `static`: morph the shared element while surrounding chrome stays quiet.
-- `fade`: cross-fade both pages while the shared element morphs above them.
-  Incoming content outside the shared visuals (titles, buttons, body) also fades
-  in independently, on forward and back navigation. Shared visuals and their
-  ancestors are excluded from this additional fade. No extra option is needed.
+- `static`: morph the actual shared visual while incoming content appears immediately.
+- `fade`: fade out the outgoing page and fade in destination sibling content and
+  ancestor background colors. The shared visual and its ancestors do not receive
+  opacity fades. CSS background images/gradients on ancestors keep their authored
+  rendering. No extra option is needed.
 - `variant: "smooth"`: use a softer follower spring for the element morph;
   this can be combined with either type.
 
@@ -70,3 +70,25 @@ const config = {
 ```
 
 Route rules: https://ssgoi.dev/llms/route-rules.txt
+
+## In-page rendering and clipping
+
+Hero animates the actual destination image in its existing parent. It does not
+clone the image or portal it above the pages. An empty, aria-hidden placeholder
+reserves a flow image's original layout space while it uses its fitted content
+size; completion removes the placeholder and restores the image styles. Overlay
+content such as a rounded detail sheet retains its authored stacking order.
+
+The library never changes ancestor overflow, containment, or scroll positions.
+Those clipping choices belong to the application. If a crop should open during
+the transition, opt in at that specific wrapper:
+
+```css
+.gallery:has([data-hero-transitioning]) {
+  overflow: visible;
+}
+```
+
+The marker is on the real animated visual and is restored on completion. It can
+also be used on a caller-owned carousel viewport. The caller remains responsible
+for clipping other carousel items and preserving native scroll-container layout.

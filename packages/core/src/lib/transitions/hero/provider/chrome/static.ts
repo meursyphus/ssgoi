@@ -10,7 +10,7 @@ import type {
  * Chrome handling for `type: "static"`.
  *
  * The outgoing page snaps invisible the moment the transition starts. The
- * shared tile morph is handled by the always-on clone strategy; non-hero
+ * shared visual morphs in its original parent; non-hero
  * chrome on the incoming page appears instantly in its final state.
  *
  * Equivalent to v5/v6 hero default behavior.

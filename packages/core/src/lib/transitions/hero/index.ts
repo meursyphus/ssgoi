@@ -9,14 +9,13 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
 /**
  * Hero preset configuration.
  *
- * - `type: "static"` (default) — incoming-page chrome snaps in; a temporary
- *   shared-element clone morphs via clip-path inset + uniform scale.
- * - `type: "fade"` — both pages cross-fade as whole surfaces while a
- *   temporary shared-element clone morphs above them. Incoming non-shared content
- *   also fades in independently. Use when each side has
- *   its own chrome (e.g., a detail screen with its own back button / app bar).
- * - `variant: "default"` — only value today; reserved for future tonal
- *   variants without re-shaping the public API.
+ * - `type: "static"` (default) — morph the actual destination visual in place;
+ *   incoming page content appears immediately.
+ * - `type: "fade"` — fade the outgoing page and incoming non-shared content
+ *   and surface colors. The image remains in its authored stacking context.
+ * - `variant: "smooth"` — use a softer follower spring for the morph.
+ * Ancestor overflow belongs to the application. The animated visual carries
+ * `data-hero-transitioning` until completion for optional caller-owned CSS.
  */
 export type HeroConfig = PresetConfig<HeroType, HeroVariant, HeroOptions>;
 

@@ -10,7 +10,8 @@ vi.mock("../../../../animation", () => ({
 }));
 
 class Element {
-  style = { opacity: "", willChange: "" };
+  style = { opacity: "", willChange: "", backgroundColor: "" };
+  computedBackground = "rgba(0, 0, 0, 0)";
   computedOpacity = "1";
   parentElement: Element | null = null;
   constructor(
@@ -37,7 +38,10 @@ function run(from: Element, to: Element, visuals: Element[]) {
           animation as unknown as {
             options: {
               element: Element;
-              style: (t: number, u: number) => { opacity: number };
+              style: (
+                t: number,
+                u: number,
+              ) => { opacity?: number; backgroundColor?: string };
             };
           }
         ).options,
@@ -53,11 +57,58 @@ beforeEach(() => {
   vi.stubGlobal("HTMLElement", Element);
   vi.stubGlobal("getComputedStyle", (el: Element) => ({
     opacity: el.computedOpacity,
+    backgroundColor: el.computedBackground,
   }));
 });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("hero fade incoming content", () => {
+  it("fades the whole destination if geometry filtering leaves no animated visual", () => {
+    const to = new Element("MAIN", [new Element("IMG")]);
+    const result = run(new Element(), to, []);
+    expect(result.incoming.map((track) => track.element)).toEqual([to]);
+    expect(to.style.opacity).toBe("0");
+    expect(result.incoming[0]!.style(0.5, 0.5)).toEqual({ opacity: 0.5 });
+    result.cleanup();
+    expect(to.style.opacity).toBe("");
+  });
+
+  it("fades ancestor surface colors without applying opacity to the image's page", () => {
+    const image = new Element("IMG");
+    const gallery = new Element("DIV", [image]);
+    gallery.computedBackground = "rgb(200, 210, 220)";
+    const body = new Element("ARTICLE");
+    const to = new Element("MAIN", [gallery, body]);
+    to.computedBackground = "rgb(255, 255, 255)";
+    const result = run(new Element(), to, [gallery]);
+
+    expect([
+      to.style.opacity,
+      gallery.style.opacity,
+      image.style.opacity,
+    ]).toEqual(["", "", ""]);
+    expect([to.style.backgroundColor, gallery.style.backgroundColor]).toEqual([
+      "transparent",
+      "transparent",
+    ]);
+    expect(result.incoming.map((track) => track.style(0.5, 0.5))).toEqual([
+      { opacity: 0.5 },
+      {
+        backgroundColor:
+          "color-mix(in srgb, rgb(200, 210, 220) 50%, transparent)",
+      },
+      {
+        backgroundColor:
+          "color-mix(in srgb, rgb(255, 255, 255) 50%, transparent)",
+      },
+    ]);
+    result.cleanup();
+    expect([to.style.backgroundColor, gallery.style.backgroundColor]).toEqual([
+      "",
+      "",
+    ]);
+  });
+
   it("fades gallery controls and nested content while excluding the shared image and ancestors", () => {
     const image = new Element("IMG");
     const control = new Element("BUTTON");
@@ -70,7 +121,6 @@ describe("hero fade incoming content", () => {
     const result = run(from, to, [gallery]);
 
     expect(result.incoming.map((track) => track.element)).toEqual([
-      to,
       header,
       control,
       body,
@@ -87,7 +137,7 @@ describe("hero fade incoming content", () => {
     ]).toEqual(["", "", ""]);
     expect(
       result.incoming.map((track) => track.style(0.5, 0.5).opacity),
-    ).toEqual([0.5, 0.5, 0.5, 0.5]);
+    ).toEqual([0.5, 0.5, 0.5]);
     expect(result.outgoing[0]!.style(0.5, 0.5).opacity).toBe(0.5);
     result.cleanup();
     expect([
@@ -108,7 +158,6 @@ describe("hero fade incoming content", () => {
     const result = run(new Element(), to, [first, second]);
 
     expect(result.incoming.map((track) => track.element)).toEqual([
-      to,
       caption,
       body,
     ]);
@@ -123,24 +172,44 @@ describe("hero fade incoming content", () => {
   it("preserves CSS opacity and restores inline styles after completion", () => {
     const image = new Element("IMG");
     const caption = new Element("P");
-    caption.style = { opacity: "0.6", willChange: "transform" };
+    caption.style = {
+      opacity: "0.6",
+      willChange: "transform",
+      backgroundColor: "",
+    };
     caption.computedOpacity = "0.6";
     const hidden = new Element("DIV");
     hidden.computedOpacity = "0";
     const to = new Element("MAIN", [image, caption, hidden]);
-    to.style = { opacity: "0.9", willChange: "contents" };
+    to.style = { opacity: "0.9", willChange: "contents", backgroundColor: "" };
     const from = new Element();
-    from.style = { opacity: "0.8", willChange: "transform" };
+    from.style = {
+      opacity: "0.8",
+      willChange: "transform",
+      backgroundColor: "",
+    };
     const result = run(from, to, [image]);
 
-    expect(result.incoming[1]!.style(0.5, 0.5).opacity).toBe(0.3);
-    expect(result.incoming[1]!.style(1.05, -0.05).opacity).toBe(0.6);
-    expect(result.incoming[1]!.style(-0.05, 1.05).opacity).toBe(0);
-    expect(result.incoming[2]!.style(1, 0).opacity).toBe(0);
+    expect(result.incoming[0]!.style(0.5, 0.5).opacity).toBe(0.3);
+    expect(result.incoming[0]!.style(1.05, -0.05).opacity).toBe(0.6);
+    expect(result.incoming[0]!.style(-0.05, 1.05).opacity).toBe(0);
+    expect(result.incoming[1]!.style(1, 0).opacity).toBe(0);
     result.cleanup();
-    expect(caption.style).toEqual({ opacity: "0.6", willChange: "transform" });
-    expect(from.style).toEqual({ opacity: "0.8", willChange: "transform" });
-    expect(to.style).toEqual({ opacity: "0.9", willChange: "contents" });
+    expect(caption.style).toEqual({
+      opacity: "0.6",
+      willChange: "transform",
+      backgroundColor: "",
+    });
+    expect(from.style).toEqual({
+      opacity: "0.8",
+      willChange: "transform",
+      backgroundColor: "",
+    });
+    expect(to.style).toEqual({
+      opacity: "0.9",
+      willChange: "contents",
+      backgroundColor: "",
+    });
     expect(hidden.style.opacity).toBe("");
   });
 
@@ -153,10 +222,7 @@ describe("hero fade incoming content", () => {
     const list = new Element("MAIN", [listImage, otherCard]);
     const result = run(detail, list, [listImage]);
 
-    expect(result.incoming.map((track) => track.element)).toEqual([
-      list,
-      otherCard,
-    ]);
+    expect(result.incoming.map((track) => track.element)).toEqual([otherCard]);
     expect(otherCard.style.opacity).toBe("0");
     expect(detailBody.style.opacity).toBe("");
     expect(listImage.style.opacity).toBe("");
@@ -171,7 +237,7 @@ describe("hero fade incoming content", () => {
     const to = new Element("MAIN", [sharedCard, body]);
     const result = run(new Element(), to, [sharedCard]);
 
-    expect(result.incoming.map((track) => track.element)).toEqual([to, body]);
+    expect(result.incoming.map((track) => track.element)).toEqual([body]);
     expect(sharedCard.children.map((child) => child.style.opacity)).toEqual([
       "",
       "",
