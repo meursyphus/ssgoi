@@ -1,0 +1,234 @@
+<!-- Build core, serve the repo, and open this fixture to inspect in-page morph/cleanup. -->
+<!doctype html><meta charset="utf-8" /><title>In-page hero regression</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #e9edf2;
+    font: 16px system-ui;
+  }
+  #root {
+    position: relative;
+    margin: 48px auto;
+    width: min(900px, 100vw);
+    height: 790px;
+    overflow: clip;
+  }
+  .page {
+    position: absolute;
+    inset: 0;
+    background: white;
+    padding: 24px;
+  }
+  .crop {
+    overflow: hidden;
+    border-radius: 24px;
+    background: #dde5ec;
+  }
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .scroller {
+    overflow: hidden;
+    margin-top: 60px;
+  }
+  .track {
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    transform: translateX(-110px);
+  }
+  .card {
+    width: 320px;
+    flex-shrink: 0;
+  }
+  .card .crop {
+    aspect-ratio: 4/3;
+  }
+  .gallery {
+    position: relative;
+    aspect-ratio: 16/9;
+  }
+  .sheet {
+    position: relative;
+    z-index: 1;
+    margin-top: -24px;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 32px;
+    min-height: 280px;
+  }
+  h1 {
+    margin: 0 0 20px;
+  }
+  .controls {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    background: #3338;
+    color: white;
+    border-radius: 100%;
+    padding: 16px;
+  }
+  .nav {
+    position: fixed;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 50;
+  }
+  .caller-clips .crop:has([data-hero-transitioning]),
+  .caller-clips .scroller:has([data-hero-transitioning]) {
+    overflow: visible;
+  }
+  #detail {
+    display: none;
+  }
+  @media (max-width: 600px) {
+    #root {
+      margin: 12px auto;
+      height: 860px;
+    }
+    .page {
+      padding: 0;
+    }
+    .gallery {
+      aspect-ratio: 4/3;
+      border-radius: 0;
+    }
+    .card {
+      width: 80vw;
+    }
+    .sheet {
+      padding: 24px;
+    }
+  }
+</style>
+<div class="nav">
+  <button id="forward">Forward</button><button id="back">Back</button
+  ><button id="finish">Finish</button>
+</div>
+<div id="root" class="caller-clips">
+  <div id="list" class="page">
+    <h1>Shared gallery</h1>
+    <div class="scroller">
+      <div class="track">
+        <div class="card">
+          <div class="crop" data-hero-exit-key="one"><img class="image" /></div>
+          <h2>Seoul in view</h2>
+        </div>
+        <div class="card">
+          <div class="crop"><img class="image" /></div>
+          <h2>Second card</h2>
+        </div>
+        <div class="card">
+          <div class="crop"><img class="image" /></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="detail" class="page">
+    <div class="gallery crop" data-hero-enter-key="one">
+      <img class="image" /><span class="controls">→</span>
+    </div>
+    <article class="sheet">
+      <h1>Seoul in view</h1>
+      <p>
+        The rounded content sheet stays above the actual image during the entire
+        transition.
+      </p>
+    </article>
+  </div>
+</div>
+<script type="module">
+  import { hero } from "../dist/index.js";
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#87b8ed"/><stop offset="1" stop-color="#e4eefa"/></linearGradient></defs><rect width="1200" height="800" fill="url(#sky)"/><circle cx="900" cy="180" r="90" fill="#ffd662"/><path d="M0 670L250 220L500 640L750 360L1200 730V800H0Z" fill="#607e73"/><path d="M0 700L300 400L700 730L1000 400L1200 690V800H0Z" fill="#395e52"/><text x="220" y="430" fill="white" font-size="90" font-family="sans-serif">SEOUL 2026</text></svg>';
+  document
+    .querySelectorAll("img")
+    .forEach(
+      (img) => (img.src = "data:image/svg+xml," + encodeURIComponent(svg)),
+    );
+  await Promise.all([...document.images].map((img) => img.decode()));
+  const root = document.querySelector("#root"),
+    list = document.querySelector("#list"),
+    detail = document.querySelector("#detail");
+  const originalImage = detail.querySelector("img"),
+    originalParent = originalImage.parentElement;
+  let animation, destination, source;
+  window.fixture = {
+    ready: true,
+    async start(back = false) {
+      if (animation) animation.complete();
+      source = back ? detail : list;
+      destination = back ? list : detail;
+      source.style.display = "block";
+      destination.style.display = "block";
+      const transition = hero({ type: "fade", variant: "smooth" });
+      const context = {
+        positionedParent: root,
+        scrollOffset: { x: 0, y: 0 },
+        direction: back ? "backward" : "forward",
+      };
+      const extras = await transition.prepare({
+        from: Promise.resolve(source),
+        to: Promise.resolve(destination),
+        context,
+        createElement: (tag) => document.createElement(tag),
+      });
+      animation = transition.animation({
+        from: source,
+        to: destination,
+        context,
+        ...extras,
+      });
+      animation.play();
+      window.fixture.animation = animation;
+    },
+    freeze(progress = 0.7) {
+      const timelines = animation.getTimeline();
+      document.getAnimations().forEach((a) => {
+        a.pause();
+        const timeline = timelines.find((t) => t.element === a.effect.target);
+        const frame = timeline?.frames.find((f) => f.value >= progress);
+        if (frame) a.currentTime = frame.time;
+      });
+    },
+    finish() {
+      animation.complete();
+      source.style.display = "none";
+    },
+    inspect() {
+      const image =
+        destination?.querySelector("[data-hero-transitioning]") ??
+        originalImage;
+      const sheet = detail.querySelector(".sheet");
+      const rect = sheet.getBoundingClientRect();
+      return {
+        sameImage: originalImage === detail.querySelector("img"),
+        sameParent: originalImage.parentElement === originalParent,
+        imageCount: document.images.length,
+        rootChildren: root.children.length,
+        imageOpacity: getComputedStyle(image).opacity,
+        pageOpacity: getComputedStyle(destination ?? detail).opacity,
+        coveredBy: document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + 10,
+        )?.className,
+        transform: getComputedStyle(image).transform,
+        marker: image.hasAttribute("data-hero-transitioning"),
+        imageStyle: image.getAttribute("style"),
+        cropStyle: image.parentElement.getAttribute("style"),
+      };
+    },
+  };
+  document.querySelector("#forward").onclick = () => fixture.start(false);
+  document.querySelector("#back").onclick = () => fixture.start(true);
+  document.querySelector("#finish").onclick = () => fixture.finish();
+</script>
