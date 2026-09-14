@@ -19,6 +19,9 @@ hero({
 
 - `static`: morph the shared element while surrounding chrome stays quiet.
 - `fade`: cross-fade both pages while the shared element morphs above them.
+  Incoming content outside the shared visuals (titles, buttons, body) also fades
+  in independently, on forward and back navigation. Shared visuals and their
+  ancestors are excluded from this additional fade. No extra option is needed.
 - `variant: "smooth"`: use a softer follower spring for the element morph;
   this can be combined with either type.
 

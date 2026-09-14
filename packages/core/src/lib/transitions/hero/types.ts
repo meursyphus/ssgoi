@@ -10,7 +10,8 @@ import type { MediaFit } from "../media-geometry";
  * - `static` — a temporary shared-element clone morphs above the incoming
  *   page while page chrome snaps to its final state. Default.
  * - `fade` — both pages cross-fade as whole surfaces while a temporary hero
- *   clone morphs above them.
+ *   clone morphs above them. Incoming non-shared content also fades in
+ *   independently.
  */
 export type HeroType = "static" | "fade";
 /**
