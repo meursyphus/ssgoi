@@ -92,6 +92,7 @@ export function findMediaElement(keyedEl: HTMLElement): HTMLElement | null {
   const candidates: HTMLElement[] = [];
   for (const child of Array.from(keyedEl.children)) {
     const childEl = child as HTMLElement;
+    if (childEl.getAttribute?.("data-ssgoi-crossfade") != null) continue;
     if (isImageElement(childEl)) candidates.push(childEl);
   }
 

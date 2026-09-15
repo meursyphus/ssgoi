@@ -41,6 +41,15 @@ Use the same stable value on the collapsed and expanded media:
 - An empty, missing, or mismatched key is a no-op. Zero or more than one enter
   marker on the destination is also a no-op.
 
+## Shared-image crossfade
+
+Zoom paints a temporary copy of the preview beside the real detail visual inside
+the moving page. The outgoing image fades out while the incoming image fades in,
+so matching keys can use different thumbnails, full-size images, or aspect ratios.
+Both visuals share the page's motion and clipping. This applies to every type and
+variant, including backward navigation. The copy is removed and original opacity
+is restored when the transition completes.
+
 ## Automatic image geometry
 
 A keyed image or a wrapper with one direct image child automatically supplies

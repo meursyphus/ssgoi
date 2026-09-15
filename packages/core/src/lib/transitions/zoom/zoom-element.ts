@@ -10,6 +10,7 @@ import {
 } from "../media-geometry";
 
 type TileGeometry = {
+  contentAware: boolean;
   enterContent: MediaRect;
   exitContent: MediaRect;
   startWindow: MediaRect;
@@ -28,8 +29,9 @@ function containsRect(outer: MediaRect, inner: MediaRect): boolean {
   );
 }
 
-function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
+export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   const fallback = (): TileGeometry => ({
+    contentAware: false,
     enterContent: input.enterRect,
     exitContent: input.exitRect,
     startWindow: input.enterRect,
@@ -69,6 +71,7 @@ function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   if (!containsRect(enterMedia.window, startWindow)) return fallback();
 
   return {
+    contentAware: true,
     enterContent,
     exitContent,
     startWindow,

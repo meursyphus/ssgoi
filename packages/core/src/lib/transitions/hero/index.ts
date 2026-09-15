@@ -14,6 +14,7 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
  * - `type: "fade"` — fade the outgoing page and incoming non-shared content
  *   and surface colors. The image remains in its authored stacking context.
  * - `variant: "smooth"` — use a softer follower spring for the morph.
+ * Both types crossfade a source copy with the real destination visual.
  * Ancestor overflow belongs to the application. The animated visual carries
  * `data-hero-transitioning` until completion for optional caller-owned CSS.
  */
