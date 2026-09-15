@@ -33,7 +33,10 @@ class TestDOMRect {
   }
 }
 
-beforeAll(() => vi.stubGlobal("DOMRect", TestDOMRect));
+beforeAll(() => {
+  vi.stubGlobal("DOMRect", TestDOMRect);
+  vi.stubGlobal("getComputedStyle", (element: HTMLElement) => element.style);
+});
 afterAll(() => vi.unstubAllGlobals());
 
 function rect(left: number, top: number, width: number, height: number): Rect {
@@ -49,7 +52,9 @@ function style({
   overflow?: string;
   radius?: string;
 } = {}): CSSStyleDeclaration {
-  return {
+  const values: Record<string, string> = {};
+  const declaration = {
+    opacity: "",
     objectFit: fit,
     objectPosition: "50% 50%",
     overflowX: overflow,
@@ -58,7 +63,61 @@ function style({
     borderTopRightRadius: radius,
     borderBottomRightRadius: radius,
     borderBottomLeftRadius: radius,
-  } as CSSStyleDeclaration;
+    getPropertyValue(name: string) {
+      return name === "opacity" ? this.opacity : (values[name] ?? "");
+    },
+    getPropertyPriority: () => "",
+    setProperty(name: string, value: string) {
+      if (name === "opacity") this.opacity = value;
+      else values[name] = value;
+    },
+    removeProperty(name: string) {
+      if (name === "opacity") this.opacity = "";
+      else delete values[name];
+      return "";
+    },
+  };
+  return declaration as unknown as CSSStyleDeclaration;
+}
+
+function withDOM(el: HTMLElement): HTMLElement {
+  const attributes = new Map<string, string>();
+  const originalGet = el.getAttribute?.bind(el);
+  Object.assign(el, {
+    scrollLeft: 0,
+    scrollTop: 0,
+    children: el.children ?? [],
+    attributes: [],
+    getAttribute: (name: string) =>
+      attributes.get(name) ?? originalGet?.(name) ?? null,
+    setAttribute: (name: string, value: string) => attributes.set(name, value),
+    removeAttribute: (name: string) => attributes.delete(name),
+    hasAttribute: (name: string) => attributes.has(name),
+    cloneNode: () =>
+      withDOM({
+        ...el,
+        style: Object.assign(style(), el.style),
+        children: Array.from(el.children).map((child) => child.cloneNode(true)),
+      } as unknown as HTMLElement),
+    after: (node: HTMLElement) => {
+      const children = el.parentElement!.children as unknown as HTMLElement[];
+      children.splice(children.indexOf(el) + 1, 0, node);
+      Object.defineProperty(node, "parentElement", {
+        value: el.parentElement,
+        configurable: true,
+      });
+    },
+    remove: () => {
+      const children = el.parentElement!.children as unknown as HTMLElement[];
+      children.splice(children.indexOf(el), 1);
+    },
+  });
+  for (const child of Array.from(el.children))
+    Object.defineProperty(child, "parentElement", {
+      value: el,
+      configurable: true,
+    });
+  return el;
 }
 
 function image({
@@ -72,7 +131,7 @@ function image({
   radius?: string;
   attributes?: Record<string, string>;
 }): HTMLElement {
-  return {
+  return withDOM({
     tagName: "IMG",
     children: [],
     naturalWidth: 1000,
@@ -82,7 +141,7 @@ function image({
     style: style({ fit, radius }),
     getBoundingClientRect: () => box,
     getAttribute: (name: string) => attributes[name] ?? null,
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function wrapper({
@@ -96,7 +155,7 @@ function wrapper({
   radius?: string;
   attributes?: Record<string, string>;
 }): HTMLElement {
-  return {
+  return withDOM({
     tagName: "DIV",
     children: [child],
     offsetWidth: box.width,
@@ -104,16 +163,16 @@ function wrapper({
     style: style({ overflow: "hidden", radius }),
     getBoundingClientRect: () => box,
     getAttribute: (name: string) => attributes[name] ?? null,
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function page(width = 400, height = 800): HTMLElement {
-  return {
+  return withDOM({
     style: style(),
     offsetWidth: width,
     offsetHeight: height,
     getBoundingClientRect: () => rect(0, 0, width, height),
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function resolvedPair({
@@ -287,13 +346,19 @@ function previewTransition(
   const other = image({ box: rect(130, 30, 100, 100), fit: "cover" });
   other.style.opacity = "1";
   const list = Object.assign(page(), keyedPage([], [pair.exitEl, other]));
-  const detail = Object.assign(page(), keyedPage([pair.enterEl]));
+  const detail = withDOM(
+    Object.assign(page(), keyedPage([pair.enterEl]), {
+      children: [pair.enterEl],
+    }),
+  );
   const config = withOverride(zoom({ type, variant: "default" }), {
     forward: ({ context }) => observe?.(context.direction),
     backward: ({ context }) => observe?.(context.direction),
   });
   return {
     preview: pair.exitEl,
+    detail,
+    visual: pair.enterEl,
     other,
     create(direction: "forward" | "backward", coreDirection = direction) {
       return config.animation({
@@ -312,7 +377,7 @@ describe.each<ZoomType>(["static", "expand", "blur"])(
   "zoom %s preview compositing",
   (type) => {
     it.each(["forward", "backward"] as const)(
-      "paints the shared visual only once on %s and restores the original opacity",
+      "hides the stationary preview on %s and restores the original opacity",
       (direction) => {
         const { preview, other, create } = previewTransition(type);
         const animation = create(direction);
@@ -326,13 +391,15 @@ describe.each<ZoomType>(["static", "expand", "blur"])(
     );
 
     it("keeps a reused preview hidden when a new navigation interrupts the previous run", () => {
-      const { preview, create } = previewTransition(type);
+      const { preview, visual, detail, create } = previewTransition(type);
       const outgoing = create("forward");
       const incoming = create("backward");
       outgoing.complete();
       expect(preview.style.opacity).toBe("0");
       incoming.complete();
       expect(preview.style.opacity).toBe("0.8");
+      expect(visual.style.opacity).toBe("");
+      expect(detail.children).toEqual([visual]);
     });
   },
 );

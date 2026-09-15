@@ -83,6 +83,18 @@ function resolve(
 }
 
 describe("media geometry", () => {
+  it("ignores temporary crossfade images when resolving a keyed wrapper", () => {
+    const image = element({
+      naturalWidth: 800,
+      naturalHeight: 600,
+      objectFit: "cover",
+    });
+    const clone = element({ attributes: { "data-ssgoi-crossfade": "" } });
+    const wrapper = element({ tagName: "DIV", children: [image, clone] });
+    expect(findMediaElement(wrapper)).toBe(image);
+    expect(resolve(wrapper, rect(0, 0, 160, 120)).contentAware).toBe(true);
+  });
+
   it("auto-resolves intrinsic cover geometry and a simple CSS radius", () => {
     const geometry = resolve(
       element({
