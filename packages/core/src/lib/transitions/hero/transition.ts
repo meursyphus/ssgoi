@@ -17,6 +17,7 @@ import {
   type MediaFit,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
   clampOpacity,
   cloneCrossfadeVisual,
@@ -111,7 +112,8 @@ function collectByAttr(
  * `data-hero-exit-key` (list side). Direction-agnostic: enter elements on
  * `to` pair with exit elements on `from` (forward navigation), and enter
  * elements on `from` pair with exit elements on `to` (reverse). In both
- * cases both visuals crossfade in the parent of the element living on `to`.
+ * cases the pair crossfades: in the destination parent on enter, above both
+ * pages on exit.
  */
 export function resolveNewStylePairs(
   fromNode: HTMLElement,
@@ -356,7 +358,7 @@ function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
   el.style.clipPath = style.clipPath;
 }
 
-/** Crossfade both visuals in the destination's authored stacking context. */
+/** Enter crossfades in-page; exit crossfades in a layer above both pages. */
 class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
@@ -380,10 +382,55 @@ class HeroTileStrategy implements HeroStrategy {
     ctx.resolved = { pairs: matches.map(({ pair }) => pair) };
 
     const animations: Animation[] = [];
-    for (const { plan: morph } of matches) {
+    for (const { pair, plan: morph } of matches) {
       const { fromVisualEl, toVisualEl } = morph;
       const sourceOpacity = retainOpacity(fromVisualEl);
       const targetOpacity = retainOpacity(toVisualEl);
+      if (usesHeroExitLayer(pair, ctx.direction)) {
+        const { layer, source, destination } = createHeroExitLayer(
+          fromVisualEl,
+          toVisualEl,
+          morph.fromContent,
+          morph.toContent,
+          morph.resetRadius,
+        );
+        const sourceReference = {
+          box: morph.fromContent,
+          scaleX: 1,
+          scaleY: 1,
+        };
+        const sourceStyle = (t: number, u: number) => ({
+          ...morph.styleFor(t, u, sourceReference),
+          opacity: clampOpacity(u) * sourceOpacity.opacity,
+        });
+        const destinationStyle = (t: number, u: number) => ({
+          ...morph.styleFor(t, u),
+          opacity: clampOpacity(t) * targetOpacity.opacity,
+        });
+        Object.assign(source.style, sourceStyle(0, 1));
+        Object.assign(destination.style, destinationStyle(0, 1));
+        positionedParent.appendChild(layer);
+        sourceOpacity.set(0);
+        targetOpacity.set(0);
+        onComplete(() => {
+          layer.remove();
+          sourceOpacity.restore();
+          targetOpacity.restore();
+        });
+        animations.push(
+          new WebAnimation({
+            element: source,
+            integrator: IntegratorProvider.from(physics),
+            style: sourceStyle,
+          }),
+          new WebAnimation({
+            element: destination,
+            integrator: IntegratorProvider.from(physics),
+            style: destinationStyle,
+          }),
+        );
+        continue;
+      }
       // Snapshot before hiding the source or changing layout/CSS hooks.
       const source = cloneCrossfadeVisual(fromVisualEl);
       const restoreMarker = markHeroTransitioning(toVisualEl);
@@ -505,6 +552,7 @@ export const hero = (options: NormalizedHeroOptions) => {
       };
 
       const ctx: HeroContributeCtx = {
+        direction: context.direction,
         from,
         to,
         resolved,

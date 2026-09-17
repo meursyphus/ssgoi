@@ -228,10 +228,13 @@
                 });
                 await setup(kind, differentRatio, wrapped);
                 await start({ kind, type, variant, back });
-                const clone = root.querySelector("[data-ssgoi-crossfade]");
+                const clone =
+                  root.querySelector("[data-hero-layer-source]") ??
+                  root.querySelector("[data-ssgoi-crossfade]");
                 const real =
                   kind === "hero"
-                    ? to.querySelector("[data-hero-transitioning]")
+                    ? (root.querySelector("[data-hero-layer-destination]") ??
+                      to.querySelector("[data-hero-transitioning]"))
                     : records.find(
                         ({ element }) =>
                           element === detailImage ||
