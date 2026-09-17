@@ -17,10 +17,9 @@ hero({
 }): TransitionConfig;
 ```
 
-- `static`: morph the actual shared visual while incoming content appears immediately.
+- `static`: morph the shared visual while incoming content appears immediately.
 - `fade`: fade out the outgoing page and fade in destination sibling content and
-  ancestor background colors. The shared visual and its ancestors do not receive
-  opacity fades. CSS background images/gradients on ancestors keep their authored
+  ancestor background colors. The animated shared visual does not receive opacity fades. CSS background images/gradients on ancestors keep their authored
   rendering. No extra option is needed.
 - `variant: "smooth"`: use a softer follower spring for the element morph;
   this can be combined with either type.
@@ -73,11 +72,22 @@ Route rules: https://ssgoi.dev/llms/route-rules.txt
 
 ## In-page rendering and clipping
 
-Hero animates the actual destination image in its existing parent. It does not
-clone the image or portal it above the pages. An empty, aria-hidden placeholder
+Hero enter (exit-key to enter-key, usually list to detail) animates the actual
+destination image in its existing parent. An empty, aria-hidden placeholder
 reserves a flow image's original layout space while it uses its fitted content
-size; completion removes the placeholder and restores the image styles. Overlay
-content such as a rounded detail sheet retains its authored stacking order.
+size. Overlay content such as a rounded detail sheet retains its authored
+stacking order.
+
+Hero exit (enter-key to exit-key, usually detail to list) animates a temporary
+copy of the destination visual in a separate layer above both pages. This keeps
+the moving image above list chrome and outside nested carousel clipping. Both
+real endpoints stay hidden until the layer finishes. Completion or interruption
+removes the layer and restores the original styles. The image's measured crop
+and rounded corners still morph to the destination.
+
+Endpoint keys determine enter/exit independently of browser history direction.
+Legacy data-hero-key pairs use history direction, with a layer on backward
+navigation. Both static and fade types use this direction-specific rendering.
 
 The library never changes ancestor overflow, containment, or scroll positions.
 Those clipping choices belong to the application. If a crop should open during
@@ -89,6 +99,7 @@ the transition, opt in at that specific wrapper:
 }
 ```
 
-The marker is on the real animated visual and is restored on completion. It can
+On enter, the marker is on the real animated visual and is restored on completion.
+Exit uses the separate layer without adding a marker to the real destination. It can
 also be used on a caller-owned carousel viewport. The caller remains responsible
 for clipping other carousel items and preserving native scroll-container layout.

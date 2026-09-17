@@ -1,4 +1,4 @@
-import type { PhysicsOptions } from "@types";
+import type { NavigationDirection, PhysicsOptions } from "@types";
 import type { AnimationContributions } from "../animation-group";
 import type { MediaFit } from "../media-geometry";
 
@@ -7,10 +7,11 @@ import type { MediaFit } from "../media-geometry";
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * - `static` — morph the actual destination visual in its existing parent;
+ * - `static` — morph the shared visual;
  *   incoming page content appears immediately. Default.
  * - `fade` — fade outgoing page and incoming non-shared content/surface colors
- *   while the actual shared visual stays opaque in the destination page.
+ *   while the shared visual stays opaque.
+ * Enter renders in-page; exit renders in a temporary layer above both pages.
  */
 export type HeroType = "static" | "fade";
 /**
@@ -68,6 +69,7 @@ export interface HeroPrepareCtx {
 }
 
 export interface HeroContributeCtx {
+  direction: NavigationDirection;
   from: HTMLElement;
   to: HTMLElement;
   resolved: HeroResolved;

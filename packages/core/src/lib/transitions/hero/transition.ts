@@ -18,8 +18,10 @@ import {
   type MediaRect,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
   fitHeroImage,
+  hideHeroVisual,
   markHeroTransitioning,
   preserveStyles,
   stackHeroPages,
@@ -105,7 +107,8 @@ function collectByAttr(
  * `data-hero-exit-key` (list side). Direction-agnostic: enter elements on
  * `to` pair with exit elements on `from` (forward navigation), and enter
  * elements on `from` pair with exit elements on `to` (reverse). In both
- * cases the animated element is the one living on `to`.
+ * cases the destination visual supplies the image. Enter animates it in place;
+ * exit animates a copy above the pages.
  */
 export function resolveNewStylePairs(
   fromNode: HTMLElement,
@@ -346,7 +349,7 @@ function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
   el.style.clipPath = style.clipPath;
 }
 
-/** Animate the actual destination visual in its authored stacking context. */
+/** Enter in the destination context; exit above both pages to escape list chrome. */
 class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
@@ -370,10 +373,34 @@ class HeroTileStrategy implements HeroStrategy {
     ctx.resolved = { pairs: matches.map(({ pair }) => pair) };
 
     const animations: Animation[] = [];
-    for (const { plan: morph } of matches) {
+    for (const { pair, plan: morph } of matches) {
       const { fromVisualEl, toVisualEl } = morph;
+      if (usesHeroExitLayer(pair, ctx.direction)) {
+        const layer = createHeroExitLayer(
+          toVisualEl,
+          morph.toContent,
+          morph.resetRadius,
+        );
+        applyMorphStyle(layer, morph.styleFor(0, 1));
+        positionedParent.appendChild(layer);
+        const restoreFrom = hideHeroVisual(fromVisualEl);
+        const restoreTo = hideHeroVisual(toVisualEl);
+        onComplete(() => {
+          layer.remove();
+          restoreFrom();
+          restoreTo();
+        });
+        animations.push(
+          new WebAnimation({
+            element: layer,
+            integrator: IntegratorProvider.from(physics),
+            style: (t, u) => morph.styleFor(t, u),
+          }),
+        );
+        continue;
+      }
       const restoreMarker = markHeroTransitioning(toVisualEl);
-      const restoreFrom = preserveStyles(fromVisualEl, ["opacity"]);
+      const restoreFrom = hideHeroVisual(fromVisualEl);
       const restoreTo = preserveStyles(toVisualEl, [
         "transform",
         "transform-origin",
@@ -415,7 +442,6 @@ class HeroTileStrategy implements HeroStrategy {
       };
       const style = (t: number, u: number) => morph.styleFor(t, u, reference);
       applyMorphStyle(toVisualEl, style(0, 1));
-      fromVisualEl.style.opacity = "0";
       onComplete(() => {
         restoreFit();
         restoreTo();
@@ -488,6 +514,7 @@ export const hero = (options: NormalizedHeroOptions) => {
       };
 
       const ctx: HeroContributeCtx = {
+        direction: context.direction,
         from,
         to,
         resolved,

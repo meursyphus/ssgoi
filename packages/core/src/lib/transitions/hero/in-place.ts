@@ -19,6 +19,38 @@ export function preserveStyles(
   };
 }
 
+const hiddenVisuals = new WeakMap<
+  HTMLElement,
+  { users: number; opacity: string; restore: () => void }
+>();
+
+/** A replacement layer must copy authored opacity, not a previous run's hide. */
+export function heroVisualOpacity(element: HTMLElement): string {
+  return (
+    hiddenVisuals.get(element)?.opacity ?? getComputedStyle(element).opacity
+  );
+}
+
+/** Keep cached endpoints hidden until the last overlapping transition releases them. */
+export function hideHeroVisual(element: HTMLElement): () => void {
+  const state = hiddenVisuals.get(element) ?? {
+    users: 0,
+    opacity: getComputedStyle(element).opacity,
+    restore: preserveStyles(element, ["opacity"]),
+  };
+  state.users++;
+  hiddenVisuals.set(element, state);
+  element.style.opacity = "0";
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--state.users > 0) return;
+    state.restore();
+    hiddenVisuals.delete(element);
+  };
+}
+
 /** CSS hooks are caller-owned; the engine never relaxes ancestor clipping. */
 export function markHeroTransitioning(element: HTMLElement): () => void {
   const previous = element.getAttribute("data-hero-transitioning");

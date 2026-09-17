@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   fitHeroImage,
+  hideHeroVisual,
+  heroVisualOpacity,
   markHeroTransitioning,
   preserveStyles,
   stackHeroPages,
@@ -41,6 +43,7 @@ class Element {
   parentElement: Element | null = null;
   children: Element[] = [];
   computed = {
+    opacity: "1",
     position: "static",
     display: "block",
     boxSizing: "border-box",
@@ -91,6 +94,27 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("in-page hero lifecycle", () => {
+  it.each([true, false])(
+    "restores hidden endpoints after the final overlapping run (old first: %s)",
+    (oldFirst) => {
+      const image = new Element("IMG");
+      image.style.setProperty("opacity", "0.7", "important");
+      image.computed.opacity = "0.7";
+      const old = hideHeroVisual(dom(image));
+      image.computed.opacity = "0";
+      const next = hideHeroVisual(dom(image));
+      expect(heroVisualOpacity(dom(image))).toBe("0.7");
+      const first = oldFirst ? old : next;
+      const last = oldFirst ? next : old;
+      first();
+      first();
+      expect(image.style.opacity).toBe("0");
+      last();
+      expect(image.style.opacity).toBe("0.7");
+      expect(image.style.getPropertyPriority("opacity")).toBe("important");
+    },
+  );
+
   it("reserves layout with an empty placeholder and retains the same real image and parent", () => {
     const parent = new Element();
     parent.style.overflow = "hidden";

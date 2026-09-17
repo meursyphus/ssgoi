@@ -9,11 +9,12 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
 /**
  * Hero preset configuration.
  *
- * - `type: "static"` (default) — morph the actual destination visual in place;
+ * - `type: "static"` (default) — morph the shared visual;
  *   incoming page content appears immediately.
  * - `type: "fade"` — fade the outgoing page and incoming non-shared content
- *   and surface colors. The image remains in its authored stacking context.
+ *   and surface colors. The shared visual stays opaque.
  * - `variant: "smooth"` — use a softer follower spring for the morph.
+ * Enter animates in the destination's parent; exit uses a layer above both pages.
  * Ancestor overflow belongs to the application. The animated visual carries
  * `data-hero-transitioning` until completion for optional caller-owned CSS.
  */
