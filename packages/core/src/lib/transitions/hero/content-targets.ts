@@ -1,3 +1,5 @@
+import { CROSSFADE_ATTRIBUTE } from "../crossfade";
+
 /** Select disjoint sibling subtrees without dimming shared visuals or their ancestors. */
 export function collectContentTargets(
   page: HTMLElement,
@@ -17,6 +19,7 @@ export function collectContentTargets(
   const visit = (node: HTMLElement): void => {
     if (
       visuals.has(node) ||
+      node.getAttribute?.(CROSSFADE_ATTRIBUTE) != null ||
       node.getAttribute?.("data-hero-placeholder") != null
     )
       return;

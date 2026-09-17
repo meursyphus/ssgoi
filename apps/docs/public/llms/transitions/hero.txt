@@ -19,9 +19,9 @@ hero({
 
 - `static`: morph the actual shared visual while incoming content appears immediately.
 - `fade`: fade out the outgoing page and fade in destination sibling content and
-  ancestor background colors. The shared visual and its ancestors do not receive
-  opacity fades. CSS background images/gradients on ancestors keep their authored
-  rendering. No extra option is needed.
+  ancestor background colors. Shared-image crossfading runs independently of
+  these content fades. CSS background images/gradients on ancestors keep their
+  authored rendering. No extra option is needed.
 - `variant: "smooth"`: use a softer follower spring for the element morph;
   this can be combined with either type.
 
@@ -73,11 +73,26 @@ Route rules: https://ssgoi.dev/llms/route-rules.txt
 
 ## In-page rendering and clipping
 
-Hero animates the actual destination image in its existing parent. It does not
-clone the image or portal it above the pages. An empty, aria-hidden placeholder
-reserves a flow image's original layout space while it uses its fitted content
-size; completion removes the placeholder and restores the image styles. Overlay
-content such as a rounded detail sheet retains its authored stacking order.
+Hero enter (exit-key to enter-key, usually list to detail) animates the actual
+destination visual in its existing parent and adds a temporary copy of the source
+visual beside it. Both follow the same geometry:
+the source fades out while the destination fades in, even when the images or
+intrinsic aspect ratios differ. This applies to every type/variant and both
+navigation directions, without an extra option.
+
+An empty, aria-hidden placeholder reserves a flow image's original layout space
+while it uses its fitted content size. Completion removes the copy and placeholder
+and restores the original styles. Overlay content such as a rounded detail sheet
+retains its authored stacking order.
+
+Hero exit (enter-key to exit-key, usually detail to list) crossfades temporary
+copies of both visuals in a separate image layer above both pages. The layer
+escapes list chrome and nested carousel clipping while preserving the measured
+crop and corner geometry. Both real endpoints stay hidden until completion;
+cleanup removes the layer and restores their original opacity.
+
+Endpoint keys determine enter/exit independently of history direction. Legacy
+data-hero-key pairs use backward history navigation to select the exit layer.
 
 The library never changes ancestor overflow, containment, or scroll positions.
 Those clipping choices belong to the application. If a crop should open during
@@ -89,6 +104,7 @@ the transition, opt in at that specific wrapper:
 }
 ```
 
-The marker is on the real animated visual and is restored on completion. It can
+On enter, the marker is on the real animated visual and is restored on completion.
+Exit uses its own layer without marking the real destination. It can
 also be used on a caller-owned carousel viewport. The caller remains responsible
 for clipping other carousel items and preserving native scroll-container layout.

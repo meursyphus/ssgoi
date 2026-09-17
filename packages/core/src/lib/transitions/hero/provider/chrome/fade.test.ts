@@ -63,6 +63,24 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("hero fade incoming content", () => {
+  it("excludes a crossfade copy while still fading gallery controls", () => {
+    const image = new Element("IMG");
+    const clone = new Element("IMG");
+    Object.assign(clone, {
+      getAttribute: (name: string) =>
+        name === "data-ssgoi-crossfade" ? "" : null,
+    });
+    const controls = new Element("BUTTON");
+    const gallery = new Element("DIV", [image, clone, controls]);
+    const to = new Element("MAIN", [gallery]);
+    const result = run(new Element(), to, [gallery]);
+    expect(result.incoming.map((track) => track.element)).toEqual([controls]);
+    expect(clone.style.opacity).toBe("");
+    expect(controls.style.opacity).toBe("0");
+    result.cleanup();
+    expect(controls.style.opacity).toBe("");
+  });
+
   it("fades the whole destination if geometry filtering leaves no animated visual", () => {
     const to = new Element("MAIN", [new Element("IMG")]);
     const result = run(new Element(), to, []);

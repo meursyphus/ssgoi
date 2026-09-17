@@ -47,6 +47,56 @@ function element(
 afterEach(() => vi.unstubAllGlobals());
 
 describe("hero clipped media morph", () => {
+  it.each([false, true])(
+    "aligns different aspect ratios at both endpoints (reverse: %s)",
+    (reverse) => {
+      vi.stubGlobal("DOMRect", Rect);
+      const thumbnail = element(new Rect(20, 30, 160, 120));
+      const full = element(new Rect(50, 50, 400, 320));
+      Object.assign(full, { naturalWidth: 60, naturalHeight: 80 });
+      const from = reverse ? full : thumbnail;
+      const to = reverse ? thumbnail : full;
+      const fromPage = element(new Rect(0, 0, 800, 800), [from]);
+      const toPage = element(new Rect(0, 0, 800, 800), [to]);
+      const root = element(new Rect(0, 0, 800, 800), [fromPage, toPage]);
+      const plan = buildHeroMorphPlan(
+        root,
+        {
+          key: "photo",
+          fromEl: from,
+          toEl: to,
+          fromFit: "cover",
+          toFit: "cover",
+        },
+        700,
+        fromPage,
+        toPage,
+      )!;
+      for (const referenceBox of [plan.fromContent, plan.toContent]) {
+        const reference = { box: referenceBox, scaleX: 1, scaleY: 1 };
+        for (const t of [0, 1]) {
+          const style = plan.styleFor(t, 1 - t, reference);
+          const [, x, y, sx, sy] =
+            /translate\((.*)px, (.*)px\) scale\((.*), (.*)\)/.exec(
+              style.transform,
+            )!;
+          const expected =
+            t === 0 ? from.getBoundingClientRect() : to.getBoundingClientRect();
+          const width = referenceBox.width * Number(sx);
+          const height = referenceBox.height * Number(sy);
+          expect(width).toBeCloseTo(expected.width);
+          expect(height).toBeCloseTo(expected.height);
+          expect(
+            referenceBox.left + referenceBox.width / 2 + Number(x) - width / 2,
+          ).toBeCloseTo(expected.left);
+          expect(
+            referenceBox.top + referenceBox.height / 2 + Number(y) - height / 2,
+          ).toBeCloseTo(expected.top);
+        }
+      }
+    },
+  );
+
   it("maps the real image's local box to the measured destination content", () => {
     vi.stubGlobal("DOMRect", Rect);
     const from = element(new Rect(20, 30, 100, 100));

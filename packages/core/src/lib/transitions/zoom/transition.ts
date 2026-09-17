@@ -6,6 +6,8 @@ import { getClientRect } from "@utils";
 import { IntegratorProvider, WebAnimation, Animation } from "../../animation";
 import { OverlayStrategy, createBackgroundStrategy } from "./provider";
 import { createZoomIn, createZoomOut } from "./zoom-element";
+import { crossfadeZoomVisuals } from "./crossfade";
+import { CROSSFADE_ATTRIBUTE } from "../crossfade";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 import {
   normalizeMediaGeometryPair,
@@ -59,7 +61,11 @@ function collectFadeTargets(
     const parent: HTMLElement | null = current.parentElement;
     if (!parent) break;
     for (const sibling of Array.from(parent.children)) {
-      if (sibling !== current && sibling instanceof HTMLElement) {
+      if (
+        sibling !== current &&
+        sibling instanceof HTMLElement &&
+        !sibling.hasAttribute(CROSSFADE_ATTRIBUTE)
+      ) {
         targets.push(sibling);
       }
     }
@@ -228,7 +234,9 @@ class TileStrategy implements ZoomStrategy {
     const tileEl = isEnter ? to : from;
     const feedDir: "t" | "u" = isEnter ? "t" : "u";
 
-    // Only the moving tile should paint the shared visual. Otherwise its
+    const crossfade = crossfadeZoomVisuals(ctx);
+
+    // Only the moving tile should paint the shared visuals. Otherwise its
     // antialiased rounded edge composites over the identical preview edge,
     // making the final corner look fuller despite matching radius geometry.
     onComplete(hidePreview(resolved.exitEl));
@@ -293,6 +301,7 @@ class TileStrategy implements ZoomStrategy {
     });
 
     return [
+      ...crossfade,
       new WebAnimation({
         element: tileEl,
         integrator: IntegratorProvider.from(physics),

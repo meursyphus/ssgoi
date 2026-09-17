@@ -140,8 +140,8 @@
     <article class="sheet">
       <h1>Seoul in view</h1>
       <p>
-        The rounded content sheet stays above the actual image during the entire
-        transition.
+        The rounded content sheet stays above the actual image when entering the
+        detail page. On exit, the image moves in a layer above both pages.
       </p>
     </article>
   </div>
@@ -164,13 +164,20 @@
   let animation, destination, source;
   window.fixture = {
     ready: true,
-    async start(back = false) {
-      if (animation) animation.complete();
+    async start(
+      back = false,
+      type = "fade",
+      variant = "smooth",
+      interrupt = false,
+    ) {
+      const previous = animation;
+      if (animation && !animation.isComplete && !interrupt)
+        animation.complete();
       source = back ? detail : list;
       destination = back ? list : detail;
       source.style.display = "block";
       destination.style.display = "block";
-      const transition = hero({ type: "fade", variant: "smooth" });
+      const transition = hero({ type, variant });
       const context = {
         positionedParent: root,
         scrollOffset: { x: 0, y: 0 },
@@ -188,8 +195,133 @@
         context,
         ...extras,
       });
+      if (interrupt) previous?.complete();
       animation.play();
       window.fixture.animation = animation;
+    },
+    sample(progress = 0.7) {
+      animation.pause();
+      document.getAnimations().forEach((a) => a.cancel());
+      for (const { element, frames } of animation.getTimeline()) {
+        const frame = frames.reduce((a, b) =>
+          Math.abs(a.value - progress) < Math.abs(b.value - progress) ? a : b,
+        );
+        Object.assign(element.style, frame.style);
+      }
+    },
+    async verify() {
+      const assert = (value, message) => {
+        if (!value) throw new Error(message);
+      };
+      let passed = 0;
+      for (const type of ["static", "fade"])
+        for (const variant of ["default", "smooth"])
+          for (const back of [false, true]) {
+            await this.start(back, type, variant);
+            this.sample(0.5);
+            const layer = root.querySelector("[data-hero-layer]");
+            const visual = destination.querySelector("img");
+            assert(
+              Boolean(layer) === back,
+              `wrong render mode: ${type}/${variant}/${back}`,
+            );
+            assert(
+              originalImage === detail.querySelector("img") &&
+                originalImage.parentElement === originalParent,
+              "real image moved",
+            );
+            if (back) {
+              assert(
+                layer.parentElement === root,
+                "exit layer trapped inside page",
+              );
+              assert(
+                Number(getComputedStyle(layer).zIndex) >
+                  Number(getComputedStyle(destination).zIndex),
+                "exit layer below destination",
+              );
+              assert(
+                layer.getAttribute("aria-hidden") === "true" &&
+                  layer.hasAttribute("inert"),
+                "interactive exit copy",
+              );
+              assert(
+                !layer.hasAttribute("data-hero-exit-key") &&
+                  !layer.querySelector("[data-hero-exit-key]"),
+                "duplicate matching key",
+              );
+              assert(
+                getComputedStyle(visual).opacity === "0",
+                "stationary thumbnail visible",
+              );
+              assert(
+                getComputedStyle(originalImage).opacity === "0",
+                "stationary detail visible",
+              );
+              assert(
+                layer.children.length === 2,
+                "exit lost a crossfade visual",
+              );
+              const opacity = Array.from(layer.children).map((el) =>
+                Number(el.style.opacity),
+              );
+              assert(
+                opacity.every((value) => value > 0 && value < 1) &&
+                  Math.abs(opacity[0] + opacity[1] - 1) < 0.001,
+                "exit crossfade missing",
+              );
+              assert(
+                !visual.hasAttribute("data-hero-transitioning"),
+                "exit relaxes caller clipping",
+              );
+            } else {
+              assert(
+                visual.hasAttribute("data-hero-transitioning"),
+                "enter lost in-place marker",
+              );
+              assert(
+                this.inspect().coveredBy === "sheet",
+                "enter image paints above detail sheet",
+              );
+            }
+            this.finish();
+            assert(
+              !root.querySelector(
+                "[data-hero-layer], [data-hero-placeholder], [data-hero-transitioning]",
+              ),
+              "temporary state leaked",
+            );
+            assert(
+              visual.style.opacity === "" && originalImage.style.opacity === "",
+              "opacity leaked",
+            );
+            assert(
+              document.images.length === 4 && root.children.length === 2,
+              "DOM leaked",
+            );
+            passed++;
+          }
+      for (const type of ["static", "fade"]) {
+        await this.start(true, type);
+        this.sample(0.5);
+        await this.start(true, type, "smooth", true);
+        this.sample(0.5);
+        assert(
+          root.querySelectorAll("[data-hero-layer]").length === 1,
+          "interrupted layer leaked",
+        );
+        assert(
+          root.querySelector("[data-hero-layer]").style.opacity !== "0",
+          "replacement copied hidden opacity",
+        );
+        this.finish();
+        assert(
+          !root.querySelector("[data-hero-layer]"),
+          "replacement cleanup failed",
+        );
+        passed++;
+      }
+      return { passed };
     },
     freeze(progress = 0.7) {
       const timelines = animation.getTimeline();
@@ -206,11 +338,13 @@
     },
     inspect() {
       const image =
+        root.querySelector("[data-hero-layer-source]") ??
         destination?.querySelector("[data-hero-transitioning]") ??
         originalImage;
       const sheet = detail.querySelector(".sheet");
       const rect = sheet.getBoundingClientRect();
       return {
+        exitLayers: root.querySelectorAll("[data-hero-layer]").length,
         sameImage: originalImage === detail.querySelector("img"),
         sameParent: originalImage.parentElement === originalParent,
         imageCount: document.images.length,

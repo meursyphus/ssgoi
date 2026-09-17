@@ -15,9 +15,16 @@ import {
   resolveElementMediaGeometry,
   type MediaGeometry,
   type MediaFit,
-  type MediaRect,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
+import {
+  clampOpacity,
+  cloneCrossfadeVisual,
+  measureVisual,
+  retainOpacity,
+  type VisualReference,
+} from "../crossfade";
 import {
   fitHeroImage,
   markHeroTransitioning,
@@ -105,7 +112,8 @@ function collectByAttr(
  * `data-hero-exit-key` (list side). Direction-agnostic: enter elements on
  * `to` pair with exit elements on `from` (forward navigation), and enter
  * elements on `from` pair with exit elements on `to` (reverse). In both
- * cases the animated element is the one living on `to`.
+ * cases the pair crossfades: in the destination parent on enter, above both
+ * pages on exit.
  */
 export function resolveNewStylePairs(
   fromNode: HTMLElement,
@@ -189,14 +197,17 @@ type HeroMorphStyle = {
   clipPath: string;
 };
 
-type HeroReference = { box: MediaRect; scaleX: number; scaleY: number };
-
 type HeroMorphPlan = {
+  fromContent: MediaGeometry["content"];
   toContent: MediaGeometry["content"];
   fromVisualEl: HTMLElement;
   toVisualEl: HTMLElement;
   resetRadius: boolean;
-  styleFor: (t: number, u: number, reference?: HeroReference) => HeroMorphStyle;
+  styleFor: (
+    t: number,
+    u: number,
+    reference?: VisualReference,
+  ) => HeroMorphStyle;
 };
 
 export function normalizeHeroGeometryPair(
@@ -262,12 +273,10 @@ export function buildHeroMorphPlan(
     return null;
   }
 
-  // Uniform scale on content-to-content. Window clips then express either
-  // object-cover crop (exit side) or object-contain content (enter side).
-  const sMax = Math.max(
-    fromContent.width / toContent.width,
-    fromContent.height / toContent.height,
-  );
+  // Compatible media scales uniformly. Bbox fallbacks can have different
+  // aspect ratios; map both axes so both visuals match the source at t=0.
+  const scaleX = fromContent.width / toContent.width;
+  const scaleY = fromContent.height / toContent.height;
 
   // Translate so the scaled destination content lands on source content.
   const cxFrom = centerX(fromContent);
@@ -282,10 +291,11 @@ export function buildHeroMorphPlan(
   // Pre-transform source window expressed inside the destination content.
   const fromClipInset = insetWithin(
     toContent,
-    projectedWindowRect(toContent, fromContent, fromWindow, sMax, sMax),
+    projectedWindowRect(toContent, fromContent, fromWindow, scaleX, scaleY),
   );
 
   return {
+    fromContent,
     toContent,
     fromVisualEl: fromHero.mediaElement ?? fromEl,
     toVisualEl: toHero.mediaElement ?? toEl,
@@ -297,7 +307,8 @@ export function buildHeroMorphPlan(
       const ty =
         (u * dy + (reference ? cyTo - centerY(reference.box) : 0)) /
         (reference?.scaleY ?? 1);
-      const s = t + u * sMax;
+      const sx = t + u * scaleX;
+      const sy = t + u * scaleY;
       // clip-path is resolved before transform; divide by the current scale
       // so the on-screen corner radius matches the visible hero window.
       const fromCorners = fromHero.cornerRadii ?? [
@@ -313,10 +324,11 @@ export function buildHeroMorphPlan(
         toRadius,
       ];
       const radii = fromCorners.map((corner, i) => {
-        const radius =
-          Math.max(0, corner * u + toCorners[i]! * t) /
-          Math.max(Math.abs(s), 0.000001);
-        return { x: radius, y: radius };
+        const radius = Math.max(0, corner * u + toCorners[i]! * t);
+        return {
+          x: radius / Math.max(Math.abs(sx), 0.000001),
+          y: radius / Math.max(Math.abs(sy), 0.000001),
+        };
       });
       const insetT = fromClipInset.top * u + toClipInset.top * t;
       const insetR = fromClipInset.right * u + toClipInset.right * t;
@@ -324,8 +336,8 @@ export function buildHeroMorphPlan(
       const insetL = fromClipInset.left * u + toClipInset.left * t;
       return {
         transform: reference
-          ? `translate(${tx}px, ${ty}px) scale(${(s * toContent.width) / reference.box.width}, ${(s * toContent.height) / reference.box.height})`
-          : `translate(${tx}px, ${ty}px) scale(${s})`,
+          ? `translate(${tx}px, ${ty}px) scale(${(sx * toContent.width) / reference.box.width}, ${(sy * toContent.height) / reference.box.height})`
+          : `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`,
         clipPath: insetClipPath(
           toContent,
           {
@@ -346,7 +358,7 @@ function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
   el.style.clipPath = style.clipPath;
 }
 
-/** Animate the actual destination visual in its authored stacking context. */
+/** Enter crossfades in-page; exit crossfades in a layer above both pages. */
 class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
@@ -370,10 +382,58 @@ class HeroTileStrategy implements HeroStrategy {
     ctx.resolved = { pairs: matches.map(({ pair }) => pair) };
 
     const animations: Animation[] = [];
-    for (const { plan: morph } of matches) {
+    for (const { pair, plan: morph } of matches) {
       const { fromVisualEl, toVisualEl } = morph;
+      const sourceOpacity = retainOpacity(fromVisualEl);
+      const targetOpacity = retainOpacity(toVisualEl);
+      if (usesHeroExitLayer(pair, ctx.direction)) {
+        const { layer, source, destination } = createHeroExitLayer(
+          fromVisualEl,
+          toVisualEl,
+          morph.fromContent,
+          morph.toContent,
+          morph.resetRadius,
+        );
+        const sourceReference = {
+          box: morph.fromContent,
+          scaleX: 1,
+          scaleY: 1,
+        };
+        const sourceStyle = (t: number, u: number) => ({
+          ...morph.styleFor(t, u, sourceReference),
+          opacity: clampOpacity(u) * sourceOpacity.opacity,
+        });
+        const destinationStyle = (t: number, u: number) => ({
+          ...morph.styleFor(t, u),
+          opacity: clampOpacity(t) * targetOpacity.opacity,
+        });
+        Object.assign(source.style, sourceStyle(0, 1));
+        Object.assign(destination.style, destinationStyle(0, 1));
+        positionedParent.appendChild(layer);
+        sourceOpacity.set(0);
+        targetOpacity.set(0);
+        onComplete(() => {
+          layer.remove();
+          sourceOpacity.restore();
+          targetOpacity.restore();
+        });
+        animations.push(
+          new WebAnimation({
+            element: source,
+            integrator: IntegratorProvider.from(physics),
+            style: sourceStyle,
+          }),
+          new WebAnimation({
+            element: destination,
+            integrator: IntegratorProvider.from(physics),
+            style: destinationStyle,
+          }),
+        );
+        continue;
+      }
+      // Snapshot before hiding the source or changing layout/CSS hooks.
+      const source = cloneCrossfadeVisual(fromVisualEl);
       const restoreMarker = markHeroTransitioning(toVisualEl);
-      const restoreFrom = preserveStyles(fromVisualEl, ["opacity"]);
       const restoreTo = preserveStyles(toVisualEl, [
         "transform",
         "transform-origin",
@@ -387,42 +447,46 @@ class HeroTileStrategy implements HeroStrategy {
       // Keeping object-fit also avoids SVG viewport changes at completion.
       toVisualEl.style.transform = "none";
       toVisualEl.style.transformOrigin = "center center";
-      toVisualEl.style.willChange = "transform, clip-path";
+      toVisualEl.style.willChange = "transform, clip-path, opacity";
       if (morph.resetRadius) toVisualEl.style.borderRadius = "0";
       const restoreFit = fitHeroImage(
         toVisualEl,
         morph.toContent,
         getClientRect(positionedParent, toVisualEl),
       );
-      const box = getClientRect(positionedParent, toVisualEl);
-      const reference = {
-        box: {
-          left: box.left + positionedParent.scrollLeft,
-          top: box.top + positionedParent.scrollTop,
-          width: box.width,
-          height: box.height,
-        },
-        scaleX:
-          toVisualEl.offsetWidth &&
-          Math.abs(box.width - toVisualEl.offsetWidth) > 0.5
-            ? box.width / toVisualEl.offsetWidth
-            : 1,
-        scaleY:
-          toVisualEl.offsetHeight &&
-          Math.abs(box.height - toVisualEl.offsetHeight) > 0.5
-            ? box.height / toVisualEl.offsetHeight
-            : 1,
-      };
-      const style = (t: number, u: number) => morph.styleFor(t, u, reference);
+      const reference = measureVisual(positionedParent, toVisualEl);
+      source.style.width = `${morph.fromContent.width / reference.scaleX}px`;
+      source.style.height = `${morph.fromContent.height / reference.scaleY}px`;
+      source.style.zIndex = getComputedStyle(toVisualEl).zIndex;
+      if (morph.resetRadius) source.style.borderRadius = "0";
+      toVisualEl.after(source);
+      const sourceReference = measureVisual(positionedParent, source);
+      const sourceStyle = (t: number, u: number) => ({
+        ...morph.styleFor(t, u, sourceReference),
+        opacity: clampOpacity(u) * sourceOpacity.opacity,
+      });
+      const style = (t: number, u: number) => ({
+        ...morph.styleFor(t, u, reference),
+        opacity: clampOpacity(t) * targetOpacity.opacity,
+      });
       applyMorphStyle(toVisualEl, style(0, 1));
-      fromVisualEl.style.opacity = "0";
+      Object.assign(source.style, sourceStyle(0, 1));
+      targetOpacity.set(0);
+      sourceOpacity.set(0);
       onComplete(() => {
         restoreFit();
         restoreTo();
-        restoreFrom();
+        sourceOpacity.restore();
+        targetOpacity.restore();
         restoreMarker();
+        source.remove();
       });
       animations.push(
+        new WebAnimation({
+          element: source,
+          integrator: IntegratorProvider.from(physics),
+          style: sourceStyle,
+        }),
         new WebAnimation({
           element: toVisualEl,
           integrator: IntegratorProvider.from(physics),
@@ -488,6 +552,7 @@ export const hero = (options: NormalizedHeroOptions) => {
       };
 
       const ctx: HeroContributeCtx = {
+        direction: context.direction,
         from,
         to,
         resolved,
