@@ -8,7 +8,13 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
   },
   projects: [
-    { name: "chromium", use: { browserName: "chromium" } },
+    {
+      name: "chromium",
+      use: {
+        browserName: "chromium",
+        launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] },
+      },
+    },
     { name: "webkit", use: { browserName: "webkit" } },
   ],
   webServer: {

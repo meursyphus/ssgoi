@@ -181,9 +181,11 @@ export type SsgoiTransitionsOption =
 export type SsgoiConfig =
   import("../runtime/types").RouteConfig<AnyTransitionConfig> & {
     /**
-     * Lock user scrolling in the detected scroll container during preparation
-     * and playback. Defaults to true. Programmatic scroll restoration remains
-     * available; set false when the application owns scroll locking.
+     * Suppress wheel, single-finger touchmove and page-scroll keys during
+     * preparation and playback without changing CSS or native scrollbars.
+     * Defaults to true. Native scrollbar interaction and programmatic scrolling
+     * remain available; already-running native momentum is not rewound.
+     * Set false when the application owns scroll locking.
      */
     scrollLock?: boolean;
   };

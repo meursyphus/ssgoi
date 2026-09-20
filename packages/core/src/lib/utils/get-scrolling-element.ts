@@ -1,5 +1,3 @@
-import { isScrollLocked } from "./scroll-lock";
-
 const SCROLLABLE_OVERFLOW_VALUES = new Set(["auto", "scroll", "overlay"]);
 
 /**
@@ -13,7 +11,6 @@ export const getScrollingElement = (element: HTMLElement): HTMLElement => {
     const style = window.getComputedStyle(current);
 
     if (
-      isScrollLocked(current) ||
       SCROLLABLE_OVERFLOW_VALUES.has(style.overflowY) ||
       SCROLLABLE_OVERFLOW_VALUES.has(style.overflowX)
     ) {

@@ -771,16 +771,22 @@ export function ScrollRestorationBody() {
 
       <Section
         title="Scrolling during a transition"
-        lead="SSGOI locks user scrolling while a page transition prepares and plays. A tall leaving page cannot let you scroll below the shorter arriving page."
+        lead="SSGOI suppresses accidental scroll input while a page transition prepares and plays, so a tall leaving page does not expose blank space below the arriving page during ordinary scrolling."
       >
         <p className={`mt-6 ${body}`}>
-          The detected scroll container stays in its normal layout. Wheel,
-          touch, and page-scroll keys are blocked while programmatic restoration
-          remains available. Overlapping transitions share the lock, and
-          scrolling resumes after the leaving page is removed or hidden. Errors
-          and provider teardown also release it. Async preparation has a
+          Wheel, single-finger touchmove, and page-scroll keys are blocked
+          without changing CSS, native scrollbars, gutters, padding, or
+          container dimensions. Taps, text editing and zoom gestures remain
+          available. Overlapping transitions share the input listeners, which
+          are released after the leaving page is removed or hidden. Errors and
+          provider teardown also release them. Async preparation has a
           five-second deadline; paused playback keeps its lock until completion
           or teardown.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          Native scrollbar clicking or dragging and programmatic scroll
+          restoration remain available. Already-running native momentum is not
+          rewound.
         </p>
         <p className={`mt-4 ${body}`}>
           If your app already manages scroll locking, set{" "}

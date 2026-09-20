@@ -1,4 +1,5 @@
 import { createSggoiTransitionContext } from "../src/lib/ssgoi-transition/create-ssgoi-transition-context";
+import { isScrollLocked } from "../src/lib/utils/scroll-lock";
 import { HostAnimation } from "../src/lib/animation/host-animation";
 import { fade } from "../src/lib/transitions/fade/transition";
 
@@ -65,7 +66,15 @@ function state() {
     y: scroller.scrollTop,
     height: scroller.scrollHeight,
     viewport: scroller.clientHeight,
-    locked: getComputedStyle(scroller).overflowY === "hidden",
+    locked: isScrollLocked(scroller),
+    scrollStyles: [scroller, document.documentElement, document.body].map(
+      (element) => ({
+        inline: element.style.cssText,
+        overflow: getComputedStyle(element).overflow,
+        gutter: getComputedStyle(element).scrollbarGutter,
+        scrollbarWidth: getComputedStyle(element).scrollbarWidth,
+      }),
+    ),
     active: !!host.activeChild,
     pages: scene.querySelectorAll(".page").length,
     width: current.getBoundingClientRect().width,

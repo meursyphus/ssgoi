@@ -10,9 +10,11 @@ pnpm --filter @ssgoi/core test:browser
 The suite tests native wheel and keyboard scrolling in Chromium and WebKit,
 covering document/custom containers, unmounted/Activity-hidden pages, scroll
 restoration, rapid navigation, and teardown. The opt-out control reproduces the
-original blank tail and subsequent scroll clamp. Touch-event cancellation is
-checked too; this does not replace testing momentum/rubber-band scrolling on a
-physical iOS device.
+original blank tail and subsequent scroll clamp. Tests also assert that the
+scroller/root/body styles stay unchanged and exercise a native touch sequence
+through Chromium's mobile emulation. This does not replace testing momentum on a
+physical iOS device. Native scrollbar dragging/clicking and programmatic scrolling
+are intentionally outside the input lock's scope.
 
 For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/scroll-lock.html`. Add `?custom`, `?hidden`, or `?unlocked` (combinable)

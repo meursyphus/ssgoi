@@ -19,6 +19,7 @@ for (const custom of [false, true]) {
         y: 0,
         active: true,
         width: before.width,
+        scrollStyles: before.scrollStyles,
       });
 
       await page.mouse.move(300, 300);
@@ -38,6 +39,7 @@ for (const custom of [false, true]) {
         return window.harness.state();
       });
       expect(afterInput.y).toBe(0);
+      expect(afterInput.scrollStyles).toEqual(before.scrollStyles);
       expect(
         await page.evaluate(() => {
           const event = new Event("touchmove", {
@@ -97,4 +99,56 @@ test("opt-out reproduces the long OUT scroll extent and end-of-transition jump",
   expect(before.y).toBeGreaterThan(1000);
   const after = await page.evaluate(() => window.harness.finish());
   expect(after.y).toBeLessThan(before.y);
+});
+
+test("suppresses a mobile touch scroll without modifying CSS", async ({
+  browser,
+  browserName,
+}) => {
+  test.skip(
+    browserName !== "chromium",
+    "Native touch sequences use Chromium CDP",
+  );
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 640 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto("/tests/scroll-lock.html");
+    await page.waitForFunction(() => document.title.includes("ready"));
+    const before = await page.evaluate(() => window.harness.state());
+    await page.evaluate(() => window.harness.navigate());
+    const session = await context.newCDPSession(page);
+    const swipe = async () => {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: 200, y: 550 }],
+      });
+      for (let y = 500; y >= 150; y -= 50) {
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: 200, y }],
+        });
+      }
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await page.evaluate(() => window.harness.frames(20));
+    };
+    await swipe();
+    expect(await page.evaluate(() => window.harness.state())).toMatchObject({
+      y: 0,
+      scrollStyles: before.scrollStyles,
+    });
+    await page.evaluate(() => window.harness.finish());
+    await swipe();
+    expect(await page.evaluate(() => window.harness.state().y)).toBeGreaterThan(
+      0,
+    );
+  } finally {
+    await context.close();
+  }
 });
