@@ -179,7 +179,14 @@ export type SsgoiTransitionsFn =
 export type SsgoiTransitionsOption =
   import("../runtime/types").TransitionsOption<AnyTransitionConfig>;
 export type SsgoiConfig =
-  import("../runtime/types").RouteConfig<AnyTransitionConfig>;
+  import("../runtime/types").RouteConfig<AnyTransitionConfig> & {
+    /**
+     * Lock user scrolling in the detected scroll container during preparation
+     * and playback. Defaults to true. Programmatic scroll restoration remains
+     * available; set false when the application owns scroll locking.
+     */
+    scrollLock?: boolean;
+  };
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Dispatcher output — what the framework adapter consumes
@@ -195,7 +202,7 @@ export type SsgoiConfig =
  * cancellation helpers) without breaking call sites that destructure.
  */
 export type SsgoiContext = {
-  /** Release browser-history observation when the owning root disconnects. */
+  /** Finish transitions and release scroll locks and observers on disconnect. */
   disconnect?: () => void;
   /**
    * Tell the dispatcher this DOM node has mounted under `path`. The

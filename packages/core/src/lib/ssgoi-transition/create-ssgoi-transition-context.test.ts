@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Animation } from "../animation/animation";
+import type { AnyTransitionConfig } from "@types";
+import { HostAnimation } from "../animation/host-animation";
+
+const lifecycle = vi.hoisted(() => ({ active: 0, options: [] as boolean[] }));
+
 type VisibilityHandlers = { onHide: () => void; onShow: () => void };
 
 const activity = vi.hoisted(() => ({
@@ -35,6 +41,16 @@ vi.mock("./visibility-observer", () => ({
 vi.mock("./create-context-manager", () => ({
   createContextManager: () => ({
     initializeContext: () => () => {},
+    beginTransition: (enabled: boolean) => {
+      lifecycle.active++;
+      lifecycle.options.push(enabled);
+      let released = false;
+      return () => {
+        if (!released) lifecycle.active--;
+        released = true;
+      };
+    },
+    disconnect: () => {},
     calculateScrollOffset: () => ({ x: 0, y: 0 }),
     evictScrollPosition: () => {},
     getScrollContainer: () => null,
@@ -138,10 +154,13 @@ function reactShow(element: FakeElement): void {
 }
 
 beforeEach(() => {
+  lifecycle.active = 0;
+  lifecycle.options = [];
   vi.stubGlobal("getComputedStyle", () => ({ display: "block" }));
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -219,5 +238,195 @@ describe("createSggoiTransitionContext Activity cleanup", () => {
     expect(pageB.style.getPropertyValue("display")).toBe("none");
     expect(pageB.style.getPropertyPriority("display")).toBe("important");
     expect(pageA.style.getPropertyValue("display")).toBe("");
+  });
+});
+
+function animation(instant = false): Animation {
+  return {
+    play(this: Animation) {
+      if (instant) this.complete();
+    },
+    pause() {},
+    reverse() {},
+    complete(this: Animation) {
+      this.onComplete?.();
+    },
+    getPose: () => [],
+    getTimeline: () => [],
+    matchInto() {},
+    playbackRate: 1,
+  } as unknown as Animation;
+}
+
+async function flushPromises() {
+  for (let i = 0; i < 12; i++) await Promise.resolve();
+}
+
+function navigation(transition: AnyTransitionConfig, scrollLock?: boolean) {
+  const pages = ["/a", "/b", "/c"].map((path, i) => {
+    const page = new FakeElement();
+    page.setAttribute("data-ssgoi-transition", path);
+    if (i) page.style.setProperty("display", "none", "important");
+    return page;
+  });
+  const host = new HostAnimation();
+  const context = createSggoiTransitionContext(
+    { transitions: [{ on: "/**", transition }], scrollLock },
+    { host },
+  );
+  pages.forEach((page, i) =>
+    context.register(["/a", "/b", "/c"][i]!, page as unknown as HTMLElement),
+  );
+  const go = (from: number, to: number) => {
+    reactHide(pages[from]!);
+    reactShow(pages[to]!);
+  };
+  return { pages, context, host, go };
+}
+
+describe("transition scroll lifetime", () => {
+  it("holds through preparation and paused playback; hands off without unlocking", async () => {
+    const runs: Animation[] = [];
+    const state = navigation({
+      animation: () => {
+        const run = animation();
+        runs.push(run);
+        return run;
+      },
+    });
+    state.host.pause();
+    state.go(0, 1);
+    await flushPromises();
+    expect(lifecycle.active).toBe(1);
+    expect(lifecycle.options).toEqual([true]);
+    state.go(1, 2);
+    await flushPromises();
+    expect(runs).toHaveLength(2);
+    expect(lifecycle.active).toBe(1);
+    state.host.complete();
+    expect(lifecycle.active).toBe(0);
+    expect(state.pages[1]!.style.getPropertyValue("display")).toBe("none");
+    state.context.disconnect?.();
+  });
+
+  it.each(["throw", "reject", "animation"])(
+    "releases and reconciles pages after %s failure",
+    async (failure) => {
+      const error = new Error("test failure");
+      const report = vi.spyOn(console, "error").mockImplementation(() => {});
+      const state = navigation({
+        prepare: () => {
+          if (failure === "throw") throw error;
+          if (failure === "reject") return Promise.reject(error);
+          return {};
+        },
+        animation: () => {
+          throw error;
+        },
+      });
+      state.go(0, 1);
+      await flushPromises();
+      expect(lifecycle.active).toBe(0);
+      expect(state.pages[0]!.style.position).toBe("");
+      expect(state.pages[0]!.style.getPropertyValue("display")).toBe("none");
+      expect(report).toHaveBeenCalledWith(
+        "[SSGOI] Page transition failed",
+        error,
+      );
+      state.context.disconnect?.();
+      report.mockRestore();
+    },
+  );
+
+  it("discards a superseded async preparation without unlocking the new run", async () => {
+    let resolve!: (value: object) => void;
+    const oldPrepare = new Promise<object>((done) => {
+      resolve = done;
+    });
+    let count = 0;
+    const factory = vi.fn(() => animation());
+    const state = navigation({
+      prepare: () => (++count === 1 ? oldPrepare : {}),
+      animation: factory,
+    });
+    state.go(0, 1);
+    await flushPromises();
+    state.go(1, 2);
+    await flushPromises();
+    expect(lifecycle.active).toBe(1);
+    resolve({});
+    await flushPromises();
+    expect(factory).toHaveBeenCalledTimes(1);
+    state.context.disconnect?.();
+    expect(lifecycle.active).toBe(0);
+  });
+
+  it("disconnects during async preparation and ignores its late result", async () => {
+    let resolve!: (value: object) => void;
+    const factory = vi.fn(() => animation());
+    const state = navigation({
+      prepare: () =>
+        new Promise<object>((done) => {
+          resolve = done;
+        }),
+      animation: factory,
+    });
+    state.go(0, 1);
+    await flushPromises();
+    expect(lifecycle.active).toBe(1);
+    state.context.disconnect?.();
+    expect(lifecycle.active).toBe(0);
+    resolve({});
+    await flushPromises();
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  it("bounds abandoned preparation without timing out paused playback", async () => {
+    vi.useFakeTimers();
+    const report = vi.spyOn(console, "error").mockImplementation(() => {});
+    const state = navigation({
+      prepare: () => new Promise(() => {}),
+      animation: () => animation(),
+    });
+    state.go(0, 1);
+    await flushPromises();
+    expect(lifecycle.active).toBe(1);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(lifecycle.active).toBe(0);
+    expect(report).toHaveBeenCalledOnce();
+    state.context.disconnect?.();
+    report.mockRestore();
+
+    const paused = navigation({ animation: () => animation() });
+    paused.host.pause();
+    paused.go(0, 1);
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(lifecycle.active).toBe(1);
+    paused.context.disconnect?.();
+    expect(lifecycle.active).toBe(0);
+  });
+
+  it("releases on synchronous completion and supports opting out", async () => {
+    const state = navigation({ animation: () => animation(true) }, false);
+    state.go(0, 1);
+    await flushPromises();
+    expect(lifecycle.options).toEqual([false]);
+    expect(lifecycle.active).toBe(0);
+    state.context.disconnect?.();
+  });
+
+  it("releases even when the user's completion hook throws", async () => {
+    const run = animation();
+    run.onComplete = () => {
+      throw new Error("completion");
+    };
+    const state = navigation({ animation: () => run });
+    state.go(0, 1);
+    await flushPromises();
+    expect(() => state.host.complete()).toThrow("completion");
+    expect(lifecycle.active).toBe(0);
+    run.onComplete = undefined;
+    state.context.disconnect?.();
   });
 });

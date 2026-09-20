@@ -770,6 +770,34 @@ export function ScrollRestorationBody() {
       </Section>
 
       <Section
+        title="Scrolling during a transition"
+        lead="SSGOI locks user scrolling while a page transition prepares and plays. A tall leaving page cannot let you scroll below the shorter arriving page."
+      >
+        <p className={`mt-6 ${body}`}>
+          The detected scroll container stays in its normal layout. Wheel,
+          touch, and page-scroll keys are blocked while programmatic restoration
+          remains available. Overlapping transitions share the lock, and
+          scrolling resumes after the leaving page is removed or hidden. Errors
+          and provider teardown also release it. Async preparation has a
+          five-second deadline; paused playback keeps its lock until completion
+          or teardown.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          If your app already manages scroll locking, set{" "}
+          <code className={inlineCode}>scrollLock: false</code> on the top-level
+          config. This leaves the rule&apos;s scroll restoration policy intact.
+        </p>
+        <CodeBlock
+          className="mt-6"
+          language="ts"
+          code={`const config = {
+  scrollLock: false,
+  transitions: [{ from: "/gallery", to: "/photo/*", transition: zoom() }],
+};`}
+        />
+      </Section>
+
+      <Section
         title="Override one relationship"
         lead="Reach for preserveScroll only when the automatic behaviour is wrong for that rule. Both keys are required."
       >

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>SSGOI scroll lock regression</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      font: 18px system-ui;
+      background: #eee;
+    }
+    #scene {
+      position: relative;
+    }
+    #scene.custom {
+      margin: 40px;
+      width: 600px;
+      height: 500px;
+      overflow: auto;
+      border: 2px solid;
+    }
+    .page {
+      padding: 80px 24px 24px;
+      width: 100%;
+    }
+    .long {
+      height: 4000px;
+      background: linear-gradient(#c8e8ff, #375cff);
+    }
+    .short {
+      height: 1000px;
+      background: linear-gradient(#ffe3a1, #f18342);
+    }
+    nav {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      left: 8px;
+      padding: 8px;
+      background: white;
+    }
+    button {
+      padding: 8px;
+    }
+    footer {
+      position: absolute;
+      bottom: 0;
+    }
+  </style>
+  <nav>
+    <button id="go">Navigate</button>
+    <button id="finish">Finish transition</button>
+    <button id="disconnect">Disconnect</button>
+  </nav>
+  <main id="scene"></main>
+  <script type="module" src="./scroll-lock.ts"></script>
+</html>

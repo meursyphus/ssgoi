@@ -30,5 +30,12 @@
     "declarationMap": true,
     "outDir": "./dist"
   },
-  "include": ["src", "src/lib", "vite.config.ts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "src/lib",
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
 }

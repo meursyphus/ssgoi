@@ -5,6 +5,30 @@ applications should keep this automatic policy.
 
 Main setup: https://ssgoi.dev/llms.txt
 
+## Scrolling during a transition
+
+User scrolling is locked by default in the automatically detected scroll
+container, from transition preparation until the outgoing page has been removed
+or hidden. This prevents a tall outgoing page from exposing blank space below a
+short incoming page. Wheel, single-finger touch, and page-scroll keys are blocked;
+programmatic scroll restoration still runs. The body stays in its normal layout,
+and overlapping transitions share ownership of the lock.
+
+Set `scrollLock: false` on the top-level web config if your application manages
+scroll locking itself:
+
+```ts
+const config = {
+  scrollLock: false,
+  transitions: [{ from: "/gallery", to: "/photo/*", transition: zoom() }],
+};
+```
+
+The option does not change `preserveScroll`. A navigation with no matching
+transition, and a native swipe-back handled by the browser, acquire no lock.
+Completion, interruption, preparation errors and provider teardown release it.
+Async preparation has a 5-second deadline; paused animation playback does not.
+
 ## Automatic policy
 
 | rule | forward `from` side | forward `to` side |
