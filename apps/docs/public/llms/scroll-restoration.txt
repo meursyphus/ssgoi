@@ -5,6 +5,36 @@ applications should keep this automatic policy.
 
 Main setup: https://ssgoi.dev/llms.txt
 
+## Scrolling during a transition
+
+SSGOI suppresses accidental wheel, single-finger touchmove, and page-scroll key
+input by default in the automatically detected scroll container. The listeners
+run from transition preparation until the outgoing page has been removed or
+hidden, preventing ordinary scroll input from exposing blank space below a short
+incoming page while a tall outgoing page is still present.
+
+The lock does not read or change CSS, scrollbar visibility, gutter, padding, or
+container dimensions. Native scrollbar clicking/dragging and programmatic
+scrolling remain available. It does not rewind native momentum that was already
+running when the transition started. Text editing, button activation and zoom
+gestures retain their normal behavior. Overlapping transitions share ownership
+of the input listeners.
+
+Set `scrollLock: false` on the top-level web config if your application manages
+scroll locking itself:
+
+```ts
+const config = {
+  scrollLock: false,
+  transitions: [{ from: "/gallery", to: "/photo/*", transition: zoom() }],
+};
+```
+
+The option does not change `preserveScroll`. A navigation with no matching
+transition, and a native swipe-back handled by the browser, acquire no lock.
+Completion, interruption, preparation errors and provider teardown release it.
+Async preparation has a 5-second deadline; paused animation playback does not.
+
 ## Automatic policy
 
 | rule | forward `from` side | forward `to` side |

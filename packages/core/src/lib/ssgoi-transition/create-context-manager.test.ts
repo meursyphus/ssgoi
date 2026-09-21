@@ -139,6 +139,60 @@ describe("createContextManager", () => {
     vi.unstubAllGlobals();
   });
 
+  it("holds scroll capture for the full transition, including overlapping runs", () => {
+    const manager = createContextManager();
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/page",
+      true,
+    );
+    const finishFirst = manager.beginTransition(false);
+    const finishSecond = manager.beginTransition(false);
+    flushAnimationFrames(30);
+    documentElement.scrollTop = 900;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/page").y).toBe(0);
+    finishFirst();
+    finishFirst();
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/page").y).toBe(0);
+    finishSecond();
+    documentElement.scrollTop = 100;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/page").y).toBe(100);
+  });
+
+  it("restores immediately even when the site uses smooth scrolling", () => {
+    const manager = createContextManager();
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/page",
+      false,
+    );
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  });
+
+  it("disconnects scroll observation and invalidates queued restorations", () => {
+    const manager = createContextManager();
+    const page = createFakeElement({ parentElement: body });
+    manager.initializeContext(page, "/page", false);
+    manager.beginTransition(false);
+    manager.disconnect();
+    flushAnimationFrames(20);
+    expect(documentElement.scrollTo).not.toHaveBeenCalled();
+    expect(windowListeners.get("scroll")?.size).toBe(0);
+    manager.initializeContext(page, "/page", false);
+    flushAnimationFrames(20);
+    documentElement.scrollTop = 100;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/page").y).toBe(100);
+  });
+
   it("scrolls to top on first visit when preservation is enabled but nothing saved", () => {
     const manager = createContextManager();
     const page = createFakeElement({
