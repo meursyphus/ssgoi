@@ -2,7 +2,7 @@
 
 Experimental SSGOI screen transitions for React Native. `fade` and `slide` share the web route matcher, physics integrators, timeline simulation, and motion geometry. Reanimated plays the numerical timelines on the UI thread.
 
-This is the experimental first milestone in [#402](https://github.com/meursyphus/ssgoi/issues/402), published in lockstep with the web packages. A stable package version does not imply production-ready native support. Start with [`templates/expo`](https://github.com/meursyphus/ssgoi/tree/v7.1.0/templates/expo) from the matching release for the supported dependency baseline and device checks.
+This is the experimental first milestone in [#402](https://github.com/meursyphus/ssgoi/issues/402), published in lockstep with the web packages. A stable package version does not imply production-ready native support. Start with [`templates/expo`](https://github.com/meursyphus/ssgoi/tree/v7.2.0/templates/expo) from the matching release for the supported dependency baseline and device checks.
 
 ## Expo Router
 
