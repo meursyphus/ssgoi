@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePost, type PostDetail } from "@/demo/instagram/state/post";
 import { useProfile } from "@/demo/instagram/state/profile";
-import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 import { FeedDetailHeader } from "./header";
 import { FeedDetailImage } from "./image";
 import { FeedDetailActions } from "./actions";
@@ -28,13 +28,13 @@ export default function FeedDetailPage({
   const detail = post.current ?? initialData;
   const me = profile.me.data;
   return (
-    <SsgoiTransitionBoundary className="relative block min-h-full w-full bg-white">
+    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
       <FeedDetailHeader
         backHref={`/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`}
       />
       <FeedDetailImage post={detail} author={me} />
       <FeedDetailActions />
       <FeedDetailMeta post={detail} author={me} />
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

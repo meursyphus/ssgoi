@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { zoom as transition } from "./transition";
 import type { NormalizedZoomOptions, ZoomType, ZoomVariant } from "./types";
 
@@ -39,7 +40,10 @@ function normalize(config: ZoomConfig): NormalizedZoomOptions {
   return { type, variant };
 }
 
-export function zoom(config: ZoomConfig = {}): AnyTransitionConfig {
+export function zoom(
+  config: ZoomConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const normalized = normalize(config);
-  return transition(normalized);
+  return withOverride(transition(normalized), extras.override);
 }

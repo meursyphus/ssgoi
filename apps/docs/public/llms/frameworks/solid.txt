@@ -1,0 +1,21 @@
+# SSGOI with Solid
+
+Use the Solid package for common rendering and effects. Solid Router and SolidStart share the same boundary implementation.
+
+Install @ssgoi/solid. Keep one provider above the changing page region.
+
+## Common setup
+
+Install @ssgoi/solid and keep one Ssgoi provider above the routed children. The provider is independent of Solid Router.
+
+```ts
+import { Ssgoi } from "@ssgoi/solid";
+import { drill } from "@ssgoi/solid/view-transitions";
+```
+
+## Router helpers
+
+- Solid Router (experimental): https://ssgoi.dev/llms/frameworks/solid-router.txt
+- SolidStart (experimental): https://ssgoi.dev/llms/frameworks/solidstart.txt
+
+Full framework guide: https://ssgoi.dev/docs/frameworks/solid

@@ -2,7 +2,7 @@ import { Router, A, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, type JSX } from "solid-js";
 import { Ssgoi } from "@ssgoi/solid";
-import { SsgoiTransitionBoundary } from "./components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
 import { ssgoiConfig } from "./ssgoi-config";
 import "./app.css";
 
@@ -34,12 +34,15 @@ function AppFrame(props: { children?: JSX.Element }) {
             >
               <Ssgoi config={ssgoiConfig}>
                 <Suspense>
-                  <SsgoiTransitionBoundary
-                    getId={getRootTransitionId}
+                  <SsgoiRouteBoundary
+                    resolve={({ pathname }) => ({
+                      id: pathname,
+                      key: getRootTransitionId(pathname),
+                    })}
                     class="min-h-full bg-[#121212]"
                   >
                     {props.children}
-                  </SsgoiTransitionBoundary>
+                  </SsgoiRouteBoundary>
                 </Suspense>
               </Ssgoi>
             </main>

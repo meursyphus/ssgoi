@@ -49,19 +49,47 @@ describe("zoom-element", () => {
 
     // Pre-transform elliptical radii become a circular 16px radius after the
     // independent 0.5 × 0.25 page scale.
-    expect(animation.animate(0).clipPath).toContain("round 32px / 64px");
+    expect(animation.animate(0).clipPath).toContain("round 16% / 16%");
     // At progress=1: visibleR = 0 → no rounding.
-    expect(animation.animate(1).clipPath).toContain("round 0px / 0px");
+    expect(animation.animate(1).clipPath).toContain("round 0% / 0%");
   });
 
   it("rounds the tile clip-path so visible radius matches exitRadius on zoom-out end", () => {
     const animation = createZoomOut(input({ exitRadius: 16 }));
 
     // animate(0) corresponds to the tile state (t=1): scale (0.5, 0.25).
-    expect(animation.animate(0).clipPath).toContain("round 32px / 64px");
+    expect(animation.animate(0).clipPath).toContain("round 16% / 16%");
     // animate(1) is the full-page state (t=0): no rounding.
-    expect(animation.animate(1).clipPath).toContain("round 0px / 0px");
+    expect(animation.animate(1).clipPath).toContain("round 0% / 0%");
   });
+
+  it.each([createZoomIn, createZoomOut])(
+    "keeps percentage radii circular through playback on a tall page",
+    (createAnimation) => {
+      const animation = createAnimation(
+        input({
+          pageRect: rect(0, 0, 400, 900),
+          enterRect: rect(0, 0, 400, 400),
+          exitRect: rect(20, 30, 144, 144),
+          exitRadius: 16,
+        }),
+      );
+      for (const progress of [0, 0.02, 0.25, 0.5, 1]) {
+        const clip = animation.animate(progress).clipPath;
+        const radii = /round ([\d.e-]+)% \/ ([\d.e-]+)%/.exec(clip!);
+        expect(radii).not.toBeNull();
+        const scale = 0.36 + 0.64 * progress;
+        // Percent radii resolve against the whole 400x900 element, not the
+        // inset photo window. Both axes must paint the same radius after scale.
+        expect((Number(radii![1]) / 100) * 400 * scale).toBeCloseTo(
+          16 * (1 - progress),
+        );
+        expect((Number(radii![2]) / 100) * 900 * scale).toBeCloseTo(
+          16 * (1 - progress),
+        );
+      }
+    },
+  );
 
   it("maps contain content into a cropped cover window without distortion", () => {
     const enterRect = rect(0, 100, 400, 400);
@@ -80,7 +108,7 @@ describe("zoom-element", () => {
     expect(zoomInStart.transform).toBe(
       "translate(-130px, -220px) scale(0.5, 0.5)",
     );
-    expect(zoomInStart.clipPath).toBe("inset(25% 25% 50% 25% round 0px / 0px)");
+    expect(zoomInStart.clipPath).toBe("inset(25% 25% 50% 25% round 0% / 0%)");
     expect(zoomOutEnd).toEqual(zoomInStart);
   });
 

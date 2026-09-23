@@ -1,5 +1,6 @@
-import type { Animation } from "../../../../animation";
+import type { AnimationContributions } from "../../../animation-group";
 import type {
+  HeroAnimationName,
   HeroContributeCtx,
   HeroPrepareCtx,
   HeroStrategy,
@@ -9,7 +10,7 @@ import type {
  * Chrome handling for `type: "static"`.
  *
  * The outgoing page snaps invisible the moment the transition starts. The
- * shared tile morph is handled by the always-on clone strategy; non-hero
+ * shared visual morphs in its original parent; non-hero
  * chrome on the incoming page appears instantly in its final state.
  *
  * Equivalent to v5/v6 hero default behavior.
@@ -24,7 +25,9 @@ class SnapHideChromeStrategy implements HeroStrategy {
     });
   }
 
-  contribute(ctx: HeroContributeCtx): Animation[] {
+  contribute(
+    ctx: HeroContributeCtx,
+  ): AnimationContributions<HeroAnimationName> {
     // `from` is the real outgoing node and gets re-shown on the next
     // navigation (React Activity / Next cacheComponents), so restore the
     // opacity we snapped to "0" in `prepare` — otherwise the reused page
@@ -32,7 +35,7 @@ class SnapHideChromeStrategy implements HeroStrategy {
     ctx.onComplete(() => {
       ctx.from.style.opacity = this.previousFromOpacity;
     });
-    return [];
+    return {};
   }
 }
 

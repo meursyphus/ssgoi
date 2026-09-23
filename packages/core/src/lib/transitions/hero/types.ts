@@ -1,5 +1,5 @@
-import type { PhysicsOptions } from "@types";
-import type { Animation } from "../../animation";
+import type { NavigationDirection, PhysicsOptions } from "@types";
+import type { AnimationContributions } from "../animation-group";
 import type { MediaFit } from "../media-geometry";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -7,10 +7,11 @@ import type { MediaFit } from "../media-geometry";
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * - `static` — a temporary shared-element clone morphs above the incoming
- *   page while page chrome snaps to its final state. Default.
- * - `fade` — both pages cross-fade as whole surfaces while a temporary hero
- *   clone morphs above them.
+ * - `static` — morph the actual destination visual in its existing parent;
+ *   incoming page content appears immediately. Default.
+ * - `fade` — fade outgoing page and incoming non-shared content/surface colors
+ *   while both shared visuals crossfade.
+ * Enter renders in-page; exit renders in a layer above both pages.
  */
 export type HeroType = "static" | "fade";
 /**
@@ -68,6 +69,7 @@ export interface HeroPrepareCtx {
 }
 
 export interface HeroContributeCtx {
+  direction: NavigationDirection;
   from: HTMLElement;
   to: HTMLElement;
   resolved: HeroResolved;
@@ -86,7 +88,11 @@ export interface HeroContributeCtx {
  * Strategy interface. Both methods are optional — a no-op strategy is a
  * legitimate factory return value (e.g. static chrome).
  */
+export type HeroAnimationName = "shared" | "out" | "in";
+
 export interface HeroStrategy {
   prepare?: (ctx: HeroPrepareCtx) => void;
-  contribute?: (ctx: HeroContributeCtx) => Animation[];
+  contribute?: (
+    ctx: HeroContributeCtx,
+  ) => AnimationContributions<HeroAnimationName>;
 }

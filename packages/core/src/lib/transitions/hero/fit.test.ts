@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createMediaGeometry } from "../media-geometry";
 import { fallbackHeroFit, type HeroEndpoint } from "./fit";
+import { usesHeroExitLayer } from "./exit-layer";
 import {
   normalizeHeroGeometryPair,
   resolveNewStylePairs,
-  shouldResetHeroCloneRadius,
+  shouldResetHeroRadius,
 } from "./transition";
 
 function element(attributes: Record<string, string>): HTMLElement {
@@ -25,6 +26,36 @@ function page(elements: HTMLElement[]): HTMLElement {
 }
 
 describe("hero fit inference", () => {
+  it.each(["forward", "backward"] as const)(
+    "uses a layer only for semantic exits even with %s history direction",
+    (direction) => {
+      const exit = element({
+        "data-hero-exit-key": "photo",
+        "data-hero-key": "photo",
+      });
+      const enter = element({
+        "data-hero-enter-key": "photo",
+        "data-hero-key": "photo",
+      });
+      const [inPair] = resolveNewStylePairs(page([exit]), page([enter]));
+      const [outPair] = resolveNewStylePairs(page([enter]), page([exit]));
+      expect(usesHeroExitLayer(inPair!, direction)).toBe(false);
+      expect(usesHeroExitLayer(outPair!, direction)).toBe(true);
+    },
+  );
+
+  it("uses history direction for legacy symmetric hero keys", () => {
+    const pair = {
+      key: "photo",
+      fromEl: element({ "data-hero-key": "photo" }),
+      toEl: element({ "data-hero-key": "photo" }),
+      fromFit: "contain" as const,
+      toFit: "contain" as const,
+    };
+    expect(usesHeroExitLayer(pair, "forward")).toBe(false);
+    expect(usesHeroExitLayer(pair, "backward")).toBe(true);
+  });
+
   it.each<[HeroEndpoint, "contain" | "cover"]>([
     ["enter", "contain"],
     ["exit", "cover"],
@@ -105,7 +136,7 @@ describe("hero fit inference", () => {
     from.bboxRadiusSource = "computed";
     to.bboxRadiusSource = "computed";
 
-    expect(shouldResetHeroCloneRadius(from, to)).toBe(true);
+    expect(shouldResetHeroRadius(from, to)).toBe(true);
   });
 
   it("preserves native CSS radius for unsupported bbox fallback", () => {
@@ -114,6 +145,6 @@ describe("hero fit inference", () => {
     const to = createMediaGeometry(bbox, null, null);
     from.radiusSource = "unsupported";
 
-    expect(shouldResetHeroCloneRadius(from, to)).toBe(false);
+    expect(shouldResetHeroRadius(from, to)).toBe(false);
   });
 });

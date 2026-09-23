@@ -1,7 +1,8 @@
 # SSGOI with React and Next.js
 
-Use one provider above routed content and keep the pathname boundary in a
-separate client component.
+Use one provider and import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`.
+This is an optional subpath for Next.js App Router 13.4–16; Next.js is neither
+bundled nor required by the root `@ssgoi/react` entry.
 
 Framework index: https://ssgoi.dev/llms/frameworks.txt
 
@@ -38,22 +39,18 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 
 ## Route boundary
 
+No local component is needed. The exported component calls `usePathname()`
+and reads the selected `children` slot. It includes Suspense for Cache
+Components and accepts `fallback` (default `null`) while URL data is unresolved.
+It never registers a guessed route when the pathname is null in a mixed
+app/pages project. The adapter targets App Router; use the manual guide for
+Pages Router.
+
+
 ```tsx
-// app/ssgoi-route-boundary.tsx
-"use client";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
-import { type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-
-export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}
+<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 ```
 
 ## Layout
@@ -62,7 +59,7 @@ export function SsgoiRouteBoundary({ children }: { children: ReactNode }) {
 // app/layout.tsx
 import { type ReactNode } from "react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "./ssgoi-route-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -87,3 +84,54 @@ https://ssgoi.dev/llms/transitions.txt
 
 Runnable template:
 https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs
+
+## Boundary options
+
+- `as`: wrapper element or React component; defaults to `div`. Custom components
+  must forward DOM attributes to their root.
+- DOM attributes (`id`, `className`, `style`, events, `aria-*`, `data-*`) pass through.
+  HTML `id` is not the transition id. The adapter owns `data-ssgoi-transition`.
+- `routeKey`: a stable string/number for a boundary inside a layout that owns its
+  lifetime. It overrides the resolver key. Do not set React `key` on the adapter.
+- `resolve({ pathname, selectedSegments })`: return `{ id, key? }`; omitted key
+  defaults to id. This runs synchronously with the routed children.
+- `parallelRoutesKey`: slot name without `@`, default `children`.
+- `fallback`: Suspense and unresolved-path fallback, default `null`. Prefer a
+  lightweight placeholder; rendering routed children here can mount them twice.
+
+A persistent products layout can use `routeKey="products-layout"` outside its
+header/tabs and a default boundary around its children. For dynamic projects,
+return the full route as id and `/projects/:id` as key. Function props must be
+defined in a client component; plain usage can be imported by a server layout.
+
+## Interception and middleware / proxy
+
+The component manages DOM lifetime. Your application still owns intercepted
+route files, parallel slots, and any middleware/proxy redirects or rewrites.
+Middleware is called `middleware.ts` in Next 13–15 and `proxy.ts` in Next 16+.
+No SSGOI middleware is required for ordinary App Router navigation.
+
+If you already rewrite or redirect, review the matcher and rules for both
+client navigation (including RSC/prefetch requests) and direct entry. Avoid
+turning an intended soft interception into a redirect/full document load. When
+forwarding request headers, retain the existing headers instead of rebuilding
+them from only application headers. Keep authorization checks on the server.
+Do not install a generic interception rewrite: it depends on your route tree.
+
+For `@modal`, use `resolve` with `selectedSegments` so opening the modal does
+not remount the background using its URL. Add `default.tsx`/slot fallback routes
+as required by Next.js. Verify click → modal, close/back → unchanged background,
+and reload/direct URL → full page. See the focused example:
+https://ssgoi.dev/llms/complex-routing.txt
+
+Rewrites can make server and browser pathnames differ. Suspense alone does not
+fix rewrite hydration mismatches. Scope the boundary to a stable owned slot
+when possible, or use a custom wrapper with a stable server fallback as in
+Next.js's rewrite guidance; do not defer every navigation key to an effect.
+
+References:
+- https://nextjs.org/docs/app/api-reference/functions/use-pathname
+- https://nextjs.org/docs/app/api-reference/file-conventions/intercepting-routes
+- https://nextjs.org/docs/app/api-reference/file-conventions/proxy
+
+Manual/custom-router setup: https://ssgoi.dev/llms/manual-boundaries.txt

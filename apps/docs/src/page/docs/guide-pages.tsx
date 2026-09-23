@@ -1,16 +1,6 @@
 import Image from "next/image";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/code-block";
-import {
-  AngularMark,
-  NextMark,
-  NuxtMark,
-  QwikMark,
-  ReactRouterMark,
-  SolidStartMark,
-  SvelteKitMark,
-  TanStackRouterMark,
-} from "@/components/router-logos";
 import { Link } from "@/lib/link";
 import { FRAMEWORK_DOCS } from "@/page/docs/frameworks-data";
 import {
@@ -41,8 +31,8 @@ export function WhySsgoiBody() {
         SSGOI animates the page that leaves against the page that arrives. It
         does not route: your router keeps URLs, data loading, history and SSR,
         and SSGOI only watches the routed element unmount and mount. Adding it
-        means two new files, plus one edit to the layout you already have — so
-        you can try it on an existing app and take it out again just as fast.
+        means one provider file, plus one edit to the layout you already have —
+        so you can try it on an existing app and take it out again just as fast.
       </p>
       <p className={`mt-4 ${body}`}>
         Motion is simulated, not hand-tuned. A spring is integrated up front,
@@ -66,7 +56,6 @@ export function WhySsgoiBody() {
           language="text"
           code={`app/
   ssgoi-provider.tsx         # new — config + <Ssgoi>
-  ssgoi-route-boundary.tsx   # new — pathname → key + transition id
   layout.tsx                 # already yours — wrap routed content`}
         />
         <p className={`mt-4 ${body}`}>
@@ -333,40 +322,27 @@ export function BoundariesBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        This is the component that marks a routed page. The{" "}
-        <Link href="/docs/install" className={link}>
-          quick start
-        </Link>{" "}
-        creates it in step 2; here is what each of its two values decides. For
-        most apps both are just the pathname.
+        A route boundary is the real DOM element that owns a changing page. The
+        framework creates and removes it; SSGOI observes that lifetime and
+        animates the region. Router helpers are optional conveniences around
+        this pattern, so a router does not need a dedicated SSGOI package.
       </p>
-
       <CodeBlock
         className="mt-6"
-        code={`"use client";
-
-import { usePathname } from "next/navigation";
-
-export function SsgoiRouteBoundary({ children }) {
-  const pathname = usePathname();
-
-  return (
-    <div key={pathname} data-ssgoi-transition={pathname}>
-      {children}
-    </div>
-  );
-}`}
+        code={`// React: use the committed pathname from your router.
+<div key={pathname} data-ssgoi-transition={pathname}>
+  {children}
+</div>`}
       />
-
       <p className={`mt-6 ${body}`}>
-        React needs a wrapper component because the router does not own the
-        routed element. The SvelteKit, Nuxt and SolidStart templates use the
-        same wrapper shape; in Qwik and Angular you put the key and the
-        attribute on the routed page root itself —{" "}
+        Place the boundary inside one provider. Get the pathname from the router
+        in the same render as its children; a mount-time window.location read or
+        an effect-delayed key can miss the outgoing page. Ready-made helpers are
+        listed within each{" "}
         <Link href="/docs/frameworks" className={link}>
-          Frameworks
-        </Link>{" "}
-        has the version for your stack.
+          framework guide
+        </Link>
+        .
       </p>
 
       <Section
@@ -401,6 +377,45 @@ export function SsgoiRouteBoundary({ children }) {
             remount triggers it.
           </Note>
         </div>
+      </Section>
+
+      <Section
+        title="Build a boundary for your router"
+        id="manual-boundary"
+        lead="The React wrapper only needs the route id and the lifetime of its DOM root."
+      >
+        <CodeBlock
+          className="mt-5"
+          code={`import type { HTMLAttributes, ReactNode } from "react";
+
+type Props = HTMLAttributes<HTMLDivElement> & {
+  children: ReactNode;
+  pathname: string;
+  routeKey?: string | number;
+};
+
+export function RouteBoundary({ children, pathname, routeKey, ...props }: Props) {
+  return (
+    <div {...props} key={routeKey ?? pathname} data-ssgoi-transition={pathname}>
+      {children}
+    </div>
+  );
+}`}
+        />
+        <p className={`mt-5 ${body}`}>
+          Feed this wrapper the active route's committed pathname and its
+          children. A stable routeKey preserves a shell; changing page content
+          still needs its own boundary. Do not put a browser-URL key around a
+          background slot that an intercepted route should preserve.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          Other frameworks use their own lifetime primitives: Vue uses keyed
+          elements, Solid uses a keyed Show, and SvelteKit detaches the outgoing
+          snippet in onNavigate before its content changes. Qwik keeps the
+          marker and key on the page's own root; Angular can recreate an
+          embedded template. The framework guides show those connections and
+          their limits.
+        </p>
       </Section>
 
       <Section
@@ -538,8 +553,8 @@ export function RouteRulesBody() {
           <code className={inlineCode}>to</code> pair matches in both
           orientations. Set{" "}
           <code className={inlineCode}>bidirectional: false</code> when only the
-          orientation you wrote should match at all — it does not mean &ldquo;
-          match, but always play forward&rdquo;.
+          orientation you wrote should match for a fresh navigation. Browser
+          Back can still undo an observed entry using its recorded effect.
         </p>
         <p className={`mt-4 ${body}`}>
           In an <code className={inlineCode}>ordered</code> array both routes
@@ -547,15 +562,23 @@ export function RouteRulesBody() {
           same one, the rule does not match.
         </p>
         <p className={`mt-4 ${body}`}>
-          When both routes are inside the same{" "}
-          <code className={inlineCode}>on</code> scope, SSGOI cannot tell
-          entering from leaving, so it falls back to its own history tracking: a
-          destination it recognises as the route you came from — or any
-          navigation that followed a{" "}
-          <code className={inlineCode}>popstate</code> — counts as backward.
-          That is SSGOI&apos;s route stack, not the browser&apos;s, so a
-          &ldquo;back&rdquo; button implemented with{" "}
-          <code className={inlineCode}>push()</code> still reads as backward.
+          Browser Back to a recorded entry&apos;s source uses the same effect
+          with reversed direction and scroll endpoints. Browser Forward replays
+          the original selection. Links and{" "}
+          <code className={inlineCode}>push()</code> match current rules, even
+          when revisiting the previous URL. Within one{" "}
+          <code className={inlineCode}>on</code> scope that fresh visit is
+          forward. Direct entries and unrecorded history pairs fall back to
+          current rules.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          With an explicit gallery → photo/* pair, a new link from detail back
+          to gallery is backward even when it uses push rather than browser
+          Back. If both from and to are photo/*, their equal patterns defer to
+          history: a related-photo push is forward and Back reverses the
+          recorded visit. The transition consumes this direction unchanged; zoom
+          and hero enter/exit markers identify element roles, not another
+          direction.
         </p>
       </Section>
 
@@ -744,6 +767,40 @@ export function ScrollRestorationBody() {
           UX, use <code className={inlineCode}>except</code> to keep the source
           route outside the scope.
         </p>
+      </Section>
+
+      <Section
+        title="Scrolling during a transition"
+        lead="SSGOI suppresses accidental scroll input while a page transition prepares and plays, so a tall leaving page does not expose blank space below the arriving page during ordinary scrolling."
+      >
+        <p className={`mt-6 ${body}`}>
+          Wheel, single-finger touchmove, and page-scroll keys are blocked
+          without changing CSS, native scrollbars, gutters, padding, or
+          container dimensions. Taps, text editing and zoom gestures remain
+          available. Overlapping transitions share the input listeners, which
+          are released after the leaving page is removed or hidden. Errors and
+          provider teardown also release them. Async preparation has a
+          five-second deadline; paused playback keeps its lock until completion
+          or teardown.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          Native scrollbar clicking or dragging and programmatic scroll
+          restoration remain available. Already-running native momentum is not
+          rewound.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          If your app already manages scroll locking, set{" "}
+          <code className={inlineCode}>scrollLock: false</code> on the top-level
+          config. This leaves the rule&apos;s scroll restoration policy intact.
+        </p>
+        <CodeBlock
+          className="mt-6"
+          language="ts"
+          code={`const config = {
+  scrollLock: false,
+  transitions: [{ from: "/gallery", to: "/photo/*", transition: zoom() }],
+};`}
+        />
       </Section>
 
       <Section
@@ -1066,40 +1123,23 @@ export function TroubleshootingBody() {
 /* Frameworks                                                                 */
 /* -------------------------------------------------------------------------- */
 
-const FRAMEWORK_MARKS: Record<string, ComponentType<{ className?: string }>> = {
-  nextjs: NextMark,
-  "react-router": ReactRouterMark,
-  "tanstack-router": TanStackRouterMark,
-  sveltekit: SvelteKitMark,
-  nuxt: NuxtMark,
-  solidstart: SolidStartMark,
-  qwik: QwikMark,
-  angular: AngularMark,
-};
-
 export function FrameworksIndexBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        Pick the guide for the framework that owns your routed DOM. Transition
-        factories and route rules are identical everywhere; the provider and
-        boundary wiring differ per stack — Qwik takes a QRL config factory,
-        Angular an <code className={inlineCode}>ssgoi</code> directive.
+        Choose your rendering framework first, then the helper for your router.
+        Transition factories and route rules are identical everywhere; the
+        provider and boundary wiring differ per stack — Qwik takes a QRL config
+        factory, Angular an <code className={inlineCode}>ssgoi</code> directive.
       </p>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">
         {FRAMEWORK_DOCS.map((doc) => {
           const href = `/docs/frameworks/${doc.slug}`;
-          const Mark = FRAMEWORK_MARKS[doc.slug];
 
           return (
             <li key={doc.slug} className="py-5">
               <div className="flex gap-4">
-                {Mark && (
-                  <span className="mt-0.5 shrink-0" aria-hidden>
-                    <Mark className="h-6 w-6" />
-                  </span>
-                )}
                 <div className="min-w-0">
                   <h2 className="text-base font-semibold text-ink">
                     <Link href={href} className="hover:underline">
@@ -1124,16 +1164,15 @@ export function FrameworksIndexBody() {
                         Agent guide
                       </a>
                     )}
-                    {doc.templateUrl && (
-                      <a
-                        href={doc.templateUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                    {doc.routers.map((router) => (
+                      <Link
+                        key={router.slug}
+                        href={`${href}#${router.slug}`}
                         className={link}
                       >
-                        Template
-                      </a>
-                    )}
+                        {router.name}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>

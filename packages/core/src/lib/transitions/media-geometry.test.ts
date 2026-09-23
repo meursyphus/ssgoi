@@ -34,7 +34,7 @@ function element({
   naturalWidth?: number;
   naturalHeight?: number;
 } = {}): HTMLElement {
-  return {
+  const result = {
     tagName,
     naturalWidth,
     naturalHeight,
@@ -53,6 +53,13 @@ function element({
       return attributes[name] ?? null;
     },
   } as unknown as HTMLElement;
+  for (const child of children) {
+    Object.defineProperty(child, "parentElement", {
+      value: result,
+      configurable: true,
+    });
+  }
+  return result;
 }
 
 const options: ElementMediaGeometryOptions = {
@@ -76,6 +83,18 @@ function resolve(
 }
 
 describe("media geometry", () => {
+  it("ignores temporary crossfade images when resolving a keyed wrapper", () => {
+    const image = element({
+      naturalWidth: 800,
+      naturalHeight: 600,
+      objectFit: "cover",
+    });
+    const clone = element({ attributes: { "data-ssgoi-crossfade": "" } });
+    const wrapper = element({ tagName: "DIV", children: [image, clone] });
+    expect(findMediaElement(wrapper)).toBe(image);
+    expect(resolve(wrapper, rect(0, 0, 160, 120)).contentAware).toBe(true);
+  });
+
   it("auto-resolves intrinsic cover geometry and a simple CSS radius", () => {
     const geometry = resolve(
       element({
@@ -196,6 +215,147 @@ describe("media geometry", () => {
     expect(findMediaElement(wrapper)).toBeNull();
     expect(findMediaElement(picture)).toBeNull();
     expect(findMediaElement(element({ tagName: "VIDEO" }))).toBeNull();
+  });
+
+  it("infers a clipping parent radius when the key is on its image", () => {
+    const media = element({
+      naturalWidth: 100,
+      naturalHeight: 100,
+      objectFit: "cover",
+    });
+    const wrapper = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "16px",
+    });
+    const root = element({ tagName: "DIV", children: [wrapper] });
+    const box = rect(0, 0, 100, 100);
+    const geometry = resolve(media, box, new Map([[wrapper, box]]), {
+      clipRoot: root,
+    });
+    expect(geometry.radius).toBe(16);
+    expect(geometry.radiusSource).toBe("computed");
+    expect(geometry.bboxRadius).toBe(16);
+    expect(geometry.mediaElement).toBe(media);
+  });
+
+  it.each(["hidden", "clip", "auto", "scroll"])(
+    "detects the Airbnb edge-card crop through an overflow:%s ancestor",
+    (overflow) => {
+      const media = element({
+        naturalWidth: 900,
+        naturalHeight: 900,
+        objectFit: "cover",
+      });
+      const card = element({
+        tagName: "DIV",
+        children: [media, element({ tagName: "SPAN" })],
+        overflow: "hidden",
+        radius: "16px",
+      });
+      const link = element({ tagName: "A", children: [card] });
+      const track = element({ tagName: "DIV", children: [link] });
+      const viewport = element({ tagName: "DIV", children: [track], overflow });
+      const root = element({ tagName: "DIV", children: [viewport] });
+      const box = rect(328, 277, 144, 144);
+      const geometry = resolve(
+        card,
+        box,
+        new Map([
+          [media, box],
+          [viewport, rect(0, 265, 412, 205)],
+        ]),
+        { clipRoot: root },
+      );
+      expect(geometry.content).toEqual(box);
+      expect(geometry.window).toEqual(rect(328, 277, 84, 144));
+      expect(geometry.clipInset.right).toBe(60);
+      expect(geometry.cornerRadii).toEqual([16, 0, 0, 16]);
+      expect(geometry.radius).toBe(16);
+      expect(geometry.contentAware).toBe(true);
+    },
+  );
+
+  it("intersects nested clips independently on each axis", () => {
+    const media = element({
+      naturalWidth: 100,
+      naturalHeight: 100,
+      objectFit: "cover",
+      radius: "12px",
+    });
+    const inner = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "clip",
+    });
+    inner.style.overflowY = "visible";
+    const outer = element({
+      tagName: "DIV",
+      children: [inner],
+      overflow: "clip",
+    });
+    outer.style.overflowX = "visible";
+    const root = element({ tagName: "DIV", children: [outer] });
+    const geometry = resolve(
+      media,
+      rect(0, 0, 100, 100),
+      new Map([
+        [inner, rect(20, 200, 80, 10)],
+        [outer, rect(200, 0, 10, 80)],
+      ]),
+      { clipRoot: root },
+    );
+    expect(geometry.window).toEqual(rect(20, 0, 80, 80));
+    expect(geometry.cornerRadii).toEqual([0, 12, 0, 0]);
+  });
+
+  it("does not bake the page or its shared viewport into the moving clip", () => {
+    const media = element({
+      naturalWidth: 100,
+      naturalHeight: 100,
+      objectFit: "cover",
+    });
+    const root = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "24px",
+    });
+    const box = rect(0, 0, 100, 100);
+    const geometry = resolve(
+      media,
+      box,
+      new Map([[root, rect(0, 0, 80, 80)]]),
+      { clipRoot: root },
+    );
+    expect(geometry.window).toEqual(box);
+    expect(geometry.radius).toBe(0);
+  });
+
+  it("keeps unsupported partial-arc intersections on the existing path", () => {
+    const media = element({
+      naturalWidth: 100,
+      naturalHeight: 100,
+      objectFit: "cover",
+      radius: "16px",
+    });
+    const viewport = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+    });
+    const root = element({ tagName: "DIV", children: [viewport] });
+    const box = rect(0, 0, 100, 100);
+    const geometry = resolve(
+      media,
+      box,
+      new Map([[viewport, rect(0, 0, 95, 100)]]),
+      { clipRoot: root },
+    );
+    expect(geometry.window).toEqual(box);
+    expect(geometry.radius).toBe(16);
+    expect(geometry.cornerRadii).toBeUndefined();
   });
 
   it("rejects ambiguous wrappers with multiple direct media children", () => {

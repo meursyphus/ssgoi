@@ -16,6 +16,9 @@ export interface MediaInsets {
 
 type RadiusSource = "computed" | "legacy" | "none" | "unsupported";
 
+/** Clockwise from top left. Only present when clipping removes some corners. */
+export type MediaCornerRadii = [number, number, number, number];
+
 export interface MediaGeometry {
   bbox: MediaRect;
   content: MediaRect;
@@ -29,9 +32,12 @@ export interface MediaGeometry {
   bboxRadiusSource: RadiusSource;
   contentAware: boolean;
   mediaElement: HTMLElement | null;
+  cornerRadii?: MediaCornerRadii;
 }
 
 export interface ElementMediaGeometryOptions {
+  /** Ancestors inside this page can clip the shared visual. Excludes the page. */
+  clipRoot?: HTMLElement;
   /** Compatibility fit used only when a legacy aspect-ratio hint is present. */
   fallbackFit?: MediaFit;
   /** @deprecated Compatibility only. Intrinsic media dimensions are inferred. */
@@ -86,6 +92,7 @@ export function findMediaElement(keyedEl: HTMLElement): HTMLElement | null {
   const candidates: HTMLElement[] = [];
   for (const child of Array.from(keyedEl.children)) {
     const childEl = child as HTMLElement;
+    if (childEl.getAttribute?.("data-ssgoi-crossfade") != null) continue;
     if (isImageElement(childEl)) candidates.push(childEl);
   }
 
@@ -364,7 +371,7 @@ export function normalizeMediaGeometryPair(
     : [collapseMediaGeometryToBbox(from), collapseMediaGeometryToBbox(to)];
 }
 
-export function resolveElementMediaGeometry(
+function resolveLocalMediaGeometry(
   keyedEl: HTMLElement,
   keyedBox: MediaRect,
   measure: (el: HTMLElement) => MediaRect,
@@ -454,6 +461,128 @@ export function resolveElementMediaGeometry(
     bboxRadius,
     bboxRadiusSource,
     mediaElement: base.contentAware ? mediaEl : null,
+  };
+}
+
+/**
+ * Read local clipping ancestors, including wrappers around a keyed image.
+ * The page and its shared viewport stay in place during the transition, so
+ * their clipping must not be baked into the moving visual.
+ */
+export function resolveElementMediaGeometry(
+  keyedEl: HTMLElement,
+  keyedBox: MediaRect,
+  measure: (el: HTMLElement) => MediaRect,
+  options: ElementMediaGeometryOptions,
+): MediaGeometry {
+  const geometry = resolveLocalMediaGeometry(
+    keyedEl,
+    keyedBox,
+    measure,
+    options,
+  );
+  if (!options.clipRoot || geometry.radiusSource === "unsupported")
+    return geometry;
+
+  let window = geometry.window;
+  let radius = geometry.radius;
+  let corners: MediaCornerRadii = [radius, radius, radius, radius];
+  let radiusSource = geometry.radiusSource;
+  let ancestor = keyedEl.parentElement;
+  while (ancestor && ancestor !== options.clipRoot) {
+    const style = styleFor(ancestor);
+    const clips = (value: string): boolean =>
+      value === "hidden" ||
+      value === "clip" ||
+      value === "auto" ||
+      value === "scroll";
+    const clipX = clips(style.overflowX);
+    const clipY = clips(style.overflowY);
+    if (clipX || clipY) {
+      // Overflow clips at the padding box. Leave bordered / scrollbar boxes
+      // on the existing path until their inner geometry can be resolved.
+      const borders = [
+        style.borderTopWidth,
+        style.borderRightWidth,
+        style.borderBottomWidth,
+        style.borderLeftWidth,
+      ];
+      if (
+        !borders.every((value) => parsePixelRadius(value) === 0) ||
+        (ancestor.offsetWidth &&
+          ancestor.clientWidth &&
+          ancestor.offsetWidth - ancestor.clientWidth > 1) ||
+        (ancestor.offsetHeight &&
+          ancestor.clientHeight &&
+          ancestor.offsetHeight - ancestor.clientHeight > 1)
+      )
+        return geometry;
+      const box = measure(ancestor);
+      const clipBox = {
+        left: clipX ? box.left : window.left,
+        top: clipY ? box.top : window.top,
+        width: clipX ? box.width : window.width,
+        height: clipY ? box.height : window.height,
+      };
+      const clipped = intersection(window, clipBox);
+      if (!clipped) return geometry;
+      const ancestorRadius = readUniformRadius(ancestor);
+      if (!ancestorRadius.supported) return geometry;
+      if (clipX && clipY && sameRect(window, box)) {
+        if (radiusSource !== "legacy") {
+          radius = Math.max(radius, ancestorRadius.radius);
+          corners = corners.map((corner) =>
+            Math.max(corner, ancestorRadius.radius),
+          ) as MediaCornerRadii;
+          if (radius > 0) radiusSource = "computed";
+        }
+      } else if (ancestorRadius.radius > 0) {
+        // Offset rounded clips can cut through arcs; do not invent a new shape.
+        const inner = {
+          left: box.left + ancestorRadius.radius,
+          top: box.top + ancestorRadius.radius,
+          width: box.width - 2 * ancestorRadius.radius,
+          height: box.height - 2 * ancestorRadius.radius,
+        };
+        if (!sameRect(intersection(window, inner) ?? box, window))
+          return geometry;
+      }
+      const cuts = insetWithin(window, clipped);
+      const cornerCuts = [
+        [cuts.top, cuts.left],
+        [cuts.top, cuts.right],
+        [cuts.bottom, cuts.right],
+        [cuts.bottom, cuts.left],
+      ];
+      for (let i = 0; i < 4; i++) {
+        const amount = Math.max(...cornerCuts[i]!);
+        const corner = corners[i]!;
+        // A rectangular inset can represent surviving or fully removed
+        // corners, but not an arc cut partway through by another rectangle.
+        if (amount > 0.01 && amount < corner) return geometry;
+        if (amount > 0.01) corners[i] = 0;
+      }
+      // A very narrow remainder can also slice through the opposite arc.
+      const largestCorner = Math.max(...corners);
+      if (clipped.width < largestCorner || clipped.height < largestCorner)
+        return geometry;
+      window = clipped;
+    }
+    ancestor = ancestor.parentElement;
+  }
+  const bboxMatchesWindow = sameRect(geometry.bbox, window);
+  return {
+    ...geometry,
+    window,
+    clipInset: insetWithin(geometry.content, window),
+    radius,
+    radiusSource,
+    ...(corners.some((corner) => corner !== radius)
+      ? { cornerRadii: corners }
+      : {}),
+    ...(bboxMatchesWindow
+      ? { bboxRadius: radius, bboxRadiusSource: radiusSource }
+      : {}),
   };
 }
 

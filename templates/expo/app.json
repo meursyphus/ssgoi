@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "SSGOI Native",
+    "slug": "ssgoi-native",
+    "scheme": "ssgoi-native",
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "bundleIdentifier": "dev.ssgoi.example"
+    },
+    "android": {
+      "package": "dev.ssgoi.example"
+    }
+  }
+}

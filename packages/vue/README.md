@@ -12,6 +12,18 @@ npm install @ssgoi/vue
 
 Agent setup guide: https://ssgoi.dev/llms/vue.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+These router helpers are experimental APIs and may change.
+
+| Router     | Import                  | API                  |
+| ---------- | ----------------------- | -------------------- |
+| Vue Router | `@ssgoi/vue/vue-router` | `SsgoiRouteBoundary` |
+| Nuxt       | `@ssgoi/vue/nuxt`       | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and limits.
+
 ## Root
 
 ```vue

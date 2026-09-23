@@ -1,9 +1,6 @@
 import type { Pose, StyleObject, Timeline, TimelineFrame } from "@types";
-import {
-  type Integrator,
-  type IntegratorState,
-  SETTLE_THRESHOLD,
-} from "./integrator";
+import type { Integrator } from "./integrator";
+import { simulate, interpolateFrame, type SimFrame } from "../runtime/timeline";
 import { waitPaint } from "../utils/wait-paint";
 import { Animation } from "./animation";
 import {
@@ -12,7 +9,6 @@ import {
   type FrameTick,
 } from "./frame-scheduler";
 
-const FRAME_TIME = 1000 / 60;
 const STARTUP_STABLE_FRAMES = 2;
 
 export interface WebAnimationOptions {
@@ -25,12 +21,12 @@ export interface WebAnimationOptions {
   upperBound?: number;
   onUpdate?: (poses: Pose[]) => void;
   onComplete?: () => void;
-}
-
-interface SimFrame {
-  time: number;
-  position: number;
-  velocity: number;
+  /**
+   * Role label for this track (`"out"`, `"in"`, `"shared"`, `"overlay"`).
+   * Presets usually leave it unset; `withOverride` fills it in from element
+   * identity so user overrides can address tracks by role.
+   */
+  label?: string;
 }
 
 /**
@@ -57,8 +53,10 @@ interface SimFrame {
  * animation's pose is handed in via `matchInto`, we look up by element.
  */
 export class WebAnimation extends Animation {
-  private element: HTMLElement;
-  private integrator: Integrator;
+  private readonly _element: HTMLElement;
+  private _integrator: Integrator;
+  /** Role label, see `WebAnimationOptions.label`. */
+  label: string | undefined;
   private styleFn: (t: number, u: number) => StyleObject;
   private lowerBound: number;
   private upperBound: number;
@@ -80,14 +78,36 @@ export class WebAnimation extends Animation {
 
   constructor(opts: WebAnimationOptions) {
     super();
-    this.element = opts.element;
-    this.integrator = opts.integrator;
+    this._element = opts.element;
+    this._integrator = opts.integrator;
+    this.label = opts.label;
     this.styleFn = opts.style;
     this.lowerBound = opts.lowerBound ?? 0;
     this.upperBound = opts.upperBound ?? 1;
     this.currentValue = this.lowerBound;
     this.onUpdate = opts.onUpdate;
     this.onComplete = opts.onComplete;
+  }
+
+  /** The DOM node this track drives. */
+  get element(): HTMLElement {
+    return this._element;
+  }
+
+  /**
+   * Physics that drives this track. Read lazily at `play()` / `reverse()`
+   * (the simulation runs then), so replacing it before playback takes effect
+   * for the next run — this is what `withOverride` relies on.
+   */
+  get integrator(): Integrator {
+    return this._integrator;
+  }
+  set integrator(integrator: Integrator) {
+    this._integrator = integrator;
+  }
+
+  protected setIntegrator(integrator: Integrator): void {
+    this._integrator = integrator;
   }
 
   play(): void {
@@ -199,7 +219,7 @@ export class WebAnimation extends Animation {
     // reflects the live state at this instant.
     return [
       {
-        element: this.element,
+        element: this._element,
         value: this.currentValue,
         velocity: this.currentVelocity,
       },
@@ -217,11 +237,11 @@ export class WebAnimation extends Animation {
         style: this.styleFn(t, u),
       };
     });
-    return [{ element: this.element, frames }];
+    return [{ element: this._element, frames }];
   }
 
   matchInto(poses: Pose[]): void {
-    const match = poses.find((p) => p.element === this.element);
+    const match = poses.find((p) => p.element === this._element);
     if (!match) return;
     this.currentValue = match.value;
     this.currentVelocity = match.velocity;
@@ -237,7 +257,7 @@ export class WebAnimation extends Animation {
     this.settled = false;
 
     this.frames = simulate(
-      this.integrator,
+      this._integrator,
       this.currentValue,
       target,
       this.currentVelocity,
@@ -263,7 +283,7 @@ export class WebAnimation extends Animation {
     const duration = lastFrame.time;
     const runId = ++this.runId;
 
-    const waapi = this.element.animate(keyframes, {
+    const waapi = this._element.animate(keyframes, {
       duration,
       fill: "both",
       easing: "linear",
@@ -324,7 +344,7 @@ export class WebAnimation extends Animation {
       // been presented, so keep the animation held through the frame barrier.
       await waapi.ready;
       if (typeof requestAnimationFrame !== "undefined") {
-        await waitPaint(this.element);
+        await waitPaint(this._element);
       }
     } catch {
       return;
@@ -354,7 +374,7 @@ export class WebAnimation extends Animation {
     // style while the animation is still pending.
     if (this.pendingFirstFrame) {
       for (const prop of Object.keys(this.pendingFirstFrame)) {
-        (this.element.style as unknown as Record<string, string>)[prop] = "";
+        (this._element.style as unknown as Record<string, string>)[prop] = "";
       }
     }
 
@@ -437,7 +457,7 @@ export class WebAnimation extends Animation {
     const u = this.lowerBound + this.upperBound - value;
     const style = this.styleFn(value, u);
     for (const [key, val] of Object.entries(style)) {
-      (this.element.style as unknown as Record<string, string>)[key] =
+      (this._element.style as unknown as Record<string, string>)[key] =
         typeof val === "number" ? String(val) : val;
     }
   }
@@ -446,73 +466,6 @@ export class WebAnimation extends Animation {
 /* ────────────────────────────────────────────────────────────────────────────
  * Simulation helpers
  * ──────────────────────────────────────────────────────────────────────────── */
-
-function simulate(
-  integrator: Integrator,
-  from: number,
-  to: number,
-  initialVelocity: number,
-): SimFrame[] {
-  if (from === to && initialVelocity === 0) return [];
-
-  const MAX_FRAMES = 600;
-  let state: IntegratorState = { position: from, velocity: initialVelocity };
-  let settleTime = 0;
-  const frames: SimFrame[] = [];
-
-  for (let i = 0; i < MAX_FRAMES; i++) {
-    const time = i * FRAME_TIME;
-    frames.push({ time, position: state.position, velocity: state.velocity });
-
-    state = integrator.step(state, to, FRAME_TIME / 1000);
-
-    if (integrator.isSettled(state, to)) {
-      settleTime += FRAME_TIME / 1000;
-      if (settleTime >= SETTLE_THRESHOLD) {
-        frames.push({
-          time: (i + 1) * FRAME_TIME,
-          position: to,
-          velocity: 0,
-        });
-        break;
-      }
-    } else {
-      settleTime = 0;
-    }
-  }
-
-  return frames;
-}
-
-function interpolateFrame(
-  frames: SimFrame[],
-  elapsed: number,
-): { position: number; velocity: number } {
-  if (frames.length === 0) return { position: 0, velocity: 0 };
-
-  const first = frames[0]!;
-  const last = frames[frames.length - 1]!;
-
-  if (elapsed <= 0)
-    return { position: first.position, velocity: first.velocity };
-  if (elapsed >= last.time)
-    return { position: last.position, velocity: last.velocity };
-
-  let lo = 0;
-  let hi = frames.length - 1;
-  while (lo < hi - 1) {
-    const mid = (lo + hi) >> 1;
-    if (frames[mid]!.time <= elapsed) lo = mid;
-    else hi = mid;
-  }
-  const a = frames[lo]!;
-  const b = frames[hi]!;
-  const t = (elapsed - a.time) / (b.time - a.time);
-  return {
-    position: a.position + (b.position - a.position) * t,
-    velocity: a.velocity + (b.velocity - a.velocity) * t,
-  };
-}
 
 function readAnimationTime(
   animation: globalThis.Animation | null,

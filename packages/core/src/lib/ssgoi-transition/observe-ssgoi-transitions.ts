@@ -131,5 +131,8 @@ export function observeSsgoiTransitions(
   collectNode(root, initialElements);
   registerTransitionBatch(initialElements, ssgoi);
 
-  return () => observer.disconnect();
+  return () => {
+    observer.disconnect();
+    ssgoi.disconnect?.();
+  };
 }

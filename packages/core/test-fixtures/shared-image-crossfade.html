@@ -1,0 +1,346 @@
+<!-- Build @ssgoi/core, serve the repo, then run fixture.runAll() in this page. -->
+<!doctype html>
+<meta charset="utf-8" />
+<title>Hero and zoom image crossfade regression</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 24px;
+    background: #e9edf2;
+    font: 16px system-ui;
+  }
+  nav {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  #root {
+    position: relative;
+    width: min(640px, 90vw);
+    height: 640px;
+    overflow: clip;
+  }
+  .page {
+    position: absolute;
+    inset: 0;
+    background: white;
+    padding: 24px;
+  }
+  .preview {
+    position: relative;
+    width: 160px;
+    height: 120px;
+    margin-top: 80px;
+  }
+  .gallery {
+    position: relative;
+    width: 100%;
+    height: 320px;
+  }
+  .crop {
+    overflow: hidden;
+    border-radius: 18px;
+  }
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .crop:has([data-hero-transitioning]) {
+    overflow: visible;
+  }
+  .controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: white;
+    background: #333;
+    padding: 12px;
+  }
+  .sheet {
+    position: relative;
+    z-index: 1;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin-top: -20px;
+  }
+  #results {
+    white-space: pre-wrap;
+  }
+</style>
+<nav>
+  <select id="preset">
+    <option>hero</option>
+    <option>zoom</option>
+  </select>
+  <button id="forward">Forward</button><button id="backward">Backward</button>
+  <button id="half">Show midpoint</button><button id="finish">Finish</button>
+  <button id="tests">Run regression cases</button>
+</nav>
+<div id="root"></div>
+<pre id="results"></pre>
+<script type="module">
+  import { hero, zoom } from "../dist/index.js";
+  const root = document.querySelector("#root");
+  const result = document.querySelector("#results");
+  const svg = (color, label, width, height) =>
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${color}"/><circle cx="25%" cy="50%" r="70" fill="white" opacity=".4"/><text x="50%" y="55%" text-anchor="middle" font-family="sans-serif" font-size="48" fill="white">${label}</text></svg>`,
+    );
+  let animation, from, to, detailImage, previewImage, baseline, records;
+  function assert(value, message) {
+    if (!value) throw new Error(message);
+  }
+  async function setup(kind = "hero", differentRatio = false, wrapped = true) {
+    animation?.complete();
+    animation = null;
+    const media = (side, className) =>
+      wrapped
+        ? `<div class="${className} crop" data-${kind}-${side}-key="photo"><img /></div>`
+        : `<img class="${className} crop" data-${kind}-${side}-key="photo" />`;
+    root.innerHTML = `<div id="list" class="page"><h2>Thumbnail</h2>${media("exit", "preview")}</div>
+      <div id="detail" class="page">${media("enter", "gallery")}<article class="sheet"><h2>Full image</h2><p>Content stays above the image.</p></article></div>`;
+    previewImage = root.querySelector("#list img");
+    detailImage = root.querySelector("#detail img");
+    previewImage.src = svg("#df623c", "PREVIEW", 800, 600);
+    detailImage.src = svg(
+      "#336bd6",
+      "DETAIL",
+      differentRatio ? 600 : 800,
+      differentRatio ? 800 : 600,
+    );
+    await Promise.all([previewImage.decode(), detailImage.decode()]);
+    baseline = [
+      ...new Set([
+        previewImage,
+        detailImage,
+        ...root.querySelectorAll(
+          `[data-${kind}-enter-key], [data-${kind}-exit-key]`,
+        ),
+      ]),
+    ].map((element) => ({
+      element,
+      parent: element.parentElement,
+      style: element.style.cssText,
+    }));
+    root.querySelector("#detail").style.display = "none";
+  }
+  async function start({
+    kind = "hero",
+    type = "fade",
+    variant = "default",
+    back = false,
+    interrupt = false,
+  } = {}) {
+    const previous = animation;
+    if (!interrupt) previous?.complete();
+    from = root.querySelector(back ? "#detail" : "#list");
+    to = root.querySelector(back ? "#list" : "#detail");
+    from.style.display = to.style.display = "block";
+    const created = [];
+    const config = (kind === "hero" ? hero : zoom)({ type, variant });
+    const context = {
+      scrollingElement: root,
+      from: { scroll: { x: 0, y: 0 } },
+      to: { scroll: { x: 0, y: 0 } },
+      positionedParent: root,
+      scrollOffset: { x: 0, y: 0 },
+      direction: back ? "backward" : "forward",
+    };
+    const extras = await config.prepare?.({
+      from: Promise.resolve(from),
+      to: Promise.resolve(to),
+      context,
+      createElement: (_id, tag = "div") => {
+        const el = document.createElement(tag);
+        created.push(el);
+        root.append(el);
+        return el;
+      },
+    });
+    animation = config.animation({ from, to, context, ...extras });
+    const cleanup = animation.onComplete;
+    animation.onComplete = () => {
+      cleanup?.();
+      created.forEach((element) => element.remove());
+    };
+    if (interrupt) previous?.complete();
+    animation.play();
+    animation.pause();
+    records = animation.getTimeline();
+    // The fixture renders sampled styles without wall-clock/WAAPI timing noise.
+    document.getAnimations().forEach((a) => a.cancel());
+    sample(0);
+  }
+  function sample(progress) {
+    for (const { element, frames } of records) {
+      const frame = frames.reduce(
+        (best, f) =>
+          Math.abs(f.value - progress) < Math.abs(best.value - progress)
+            ? f
+            : best,
+        frames[0],
+      );
+      if (frame) Object.assign(element.style, frame.style);
+    }
+  }
+  function finish() {
+    animation.complete();
+    from.style.display = "none";
+    assert(
+      root.querySelectorAll("[data-ssgoi-crossfade], [data-hero-placeholder]")
+        .length === 0,
+      "temporary nodes leaked",
+    );
+    for (const { element, parent, style } of baseline) {
+      assert(element.parentElement === parent, "real image moved");
+      assert(
+        element.style.cssText === style,
+        `image styles leaked: ${element.style.cssText}`,
+      );
+    }
+  }
+  async function runAll() {
+    const cases = [];
+    for (const kind of ["hero", "zoom"])
+      for (const type of kind === "hero"
+        ? ["static", "fade"]
+        : ["static", "expand", "blur"])
+        for (const variant of kind === "hero"
+          ? ["default", "smooth"]
+          : ["default", "fade"])
+          for (const back of [false, true])
+            for (const differentRatio of [false, true])
+              for (const wrapped of [false, true]) {
+                const name = JSON.stringify({
+                  kind,
+                  type,
+                  variant,
+                  back,
+                  differentRatio,
+                  wrapped,
+                });
+                await setup(kind, differentRatio, wrapped);
+                await start({ kind, type, variant, back });
+                const clone =
+                  root.querySelector("[data-hero-layer-source]") ??
+                  root.querySelector("[data-ssgoi-crossfade]");
+                const real =
+                  kind === "hero"
+                    ? (root.querySelector("[data-hero-layer-destination]") ??
+                      to.querySelector("[data-hero-transitioning]"))
+                    : records.find(
+                        ({ element }) =>
+                          element === detailImage ||
+                          element ===
+                            detailImage.closest("[data-zoom-enter-key]"),
+                      ).element;
+                assert(clone, `${name}: missing second visual`);
+                assert(
+                  clone.getAttribute("aria-hidden") === "true" &&
+                    clone.hasAttribute("inert"),
+                  `${name}: interactive clone`,
+                );
+                assert(
+                  (clone.src ?? clone.querySelector("img")?.src) ===
+                    (kind === "hero" && back ? detailImage : previewImage).src,
+                  `${name}: wrong source image`,
+                );
+                assert(
+                  root.querySelectorAll(`[data-${kind}-enter-key]`).length ===
+                    1,
+                  `${name}: duplicate key`,
+                );
+                const previewAtStart = kind === "hero" || !back;
+                assert(
+                  Number(clone.style.opacity) === (previewAtStart ? 1 : 0),
+                  `${name}: wrong clone start`,
+                );
+                assert(
+                  Number(real.style.opacity) === (previewAtStart ? 0 : 1),
+                  `${name}: wrong real start`,
+                );
+                sample(0.5);
+                assert(
+                  Number(clone.style.opacity) > 0.25 &&
+                    Number(clone.style.opacity) < 0.75,
+                  `${name}: no midpoint crossfade`,
+                );
+                assert(
+                  Math.abs(
+                    Number(clone.style.opacity) +
+                      Number(real.style.opacity) -
+                      1,
+                  ) < 0.001,
+                  `${name}: opacity tracks diverged`,
+                );
+                if (kind === "hero" || differentRatio) {
+                  const a = clone.getBoundingClientRect(),
+                    b = real.getBoundingClientRect();
+                  for (const key of ["x", "y", "width", "height"])
+                    assert(
+                      Math.abs(a[key] - b[key]) < 0.1,
+                      `${name}: ${key} misaligned: ${a[key]} vs ${b[key]}`,
+                    );
+                }
+                sample(1);
+                assert(
+                  Number(clone.style.opacity) === (previewAtStart ? 0 : 1),
+                  `${name}: wrong clone end`,
+                );
+                finish();
+                cases.push(name);
+              }
+    const interruptions = [];
+    for (const kind of ["hero", "zoom"])
+      for (const type of kind === "hero"
+        ? ["static", "fade"]
+        : ["static", "expand", "blur"]) {
+        await setup(kind, true, true);
+        await start({ kind, type });
+        sample(0.5);
+        await start({ kind, type, back: true, interrupt: true });
+        sample(0.5);
+        finish();
+        interruptions.push(`${kind}:${type}`);
+      }
+    result.textContent = `${cases.length} transition cases and ${interruptions.length} interruption cases passed`;
+    return { passed: cases.length, interruptions: interruptions.length };
+  }
+  window.fixture = {
+    setup,
+    start,
+    sample,
+    finish,
+    runAll,
+    get records() {
+      return records;
+    },
+  };
+  const selected = () => document.querySelector("#preset").value;
+  document.querySelector("#forward").onclick = async () => {
+    const kind = selected();
+    await setup(kind, true);
+    await start({ kind, type: kind === "hero" ? "fade" : "expand" });
+  };
+  document.querySelector("#backward").onclick = async () => {
+    const kind = selected();
+    await setup(kind, true);
+    await start({
+      kind,
+      type: kind === "hero" ? "fade" : "expand",
+      back: true,
+    });
+  };
+  document.querySelector("#half").onclick = () => sample(0.5);
+  document.querySelector("#finish").onclick = finish;
+  document.querySelector("#tests").onclick = () =>
+    runAll().catch((error) => (result.textContent = error.stack));
+  await setup();
+</script>

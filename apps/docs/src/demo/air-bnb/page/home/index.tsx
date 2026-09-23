@@ -8,7 +8,7 @@ import { CompanyNotice } from "./company-notice";
 import { ListingRow } from "./listing-row";
 import { PopularSection } from "./popular-section";
 import { BottomNav } from "./bottom-nav";
-import { SsgoiTransitionBoundary } from "@/lib/components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 export default function HomePage() {
   const listing = useListing((state) => ({
     feed: state.feed,
@@ -18,7 +18,7 @@ export default function HomePage() {
     listing.actions.loadFeed();
   }, [listing.actions]);
   return (
-    <SsgoiTransitionBoundary className="flex min-h-full flex-col bg-white">
+    <SsgoiRouteBoundary className="flex min-h-full flex-col bg-white">
       <HomeHeader />
       <CategoryTabs />
       <div className="flex-1 pb-6">
@@ -34,6 +34,6 @@ export default function HomePage() {
         />
       </div>
       <BottomNav />
-    </SsgoiTransitionBoundary>
+    </SsgoiRouteBoundary>
   );
 }

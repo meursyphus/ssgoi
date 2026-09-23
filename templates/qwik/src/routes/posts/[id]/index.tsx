@@ -1,16 +1,18 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
 import { Link, useLocation } from "@builder.io/qwik-city";
 import { getPost, getRelatedPosts } from "~/data/posts";
 
 export default component$(() => {
   const location = useLocation();
+  const boundary = useSsgoiRouteBoundary();
   const postId = location.params.id;
   const post = getPost(postId);
   const relatedPosts = getRelatedPosts(postId, 3);
 
   if (!post) {
     return (
-      <div data-ssgoi-transition={`/posts/${postId}`}>
+      <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
         <div class="min-h-screen bg-[#121212] px-4 py-8">
           <p class="text-gray-400">Post not found</p>
         </div>
@@ -19,7 +21,7 @@ export default component$(() => {
   }
 
   return (
-    <div data-ssgoi-transition={`/posts/${post.id}`}>
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       <div class="min-h-screen bg-[#121212]">
         <div class="px-4 py-4">
           <Link

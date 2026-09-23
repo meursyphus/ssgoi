@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { axis as transition } from "./transition";
 import type { AxisFeel, AxisType } from "./types";
 
@@ -91,11 +92,17 @@ function resolveInternalFeel(
   return "fluid";
 }
 
-export function axis(config: AxisConfig = {}): AnyTransitionConfig {
+export function axis(
+  config: AxisConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const type: AxisType = config.type ?? "x";
   const variant = (config as { variant?: string }).variant;
   const legacyFeel = (config as { feel?: AxisFeelDeprecated }).feel;
   const internalFeel = resolveInternalFeel(type, variant, legacyFeel);
 
-  return transition({ type, feel: internalFeel });
+  return withOverride(
+    transition({ type, feel: internalFeel }),
+    extras.override,
+  );
 }

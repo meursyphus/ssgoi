@@ -31,6 +31,7 @@ function noopAnimation(): ZoomAnimationConfig {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export class StaticBackgroundStrategy implements ZoomStrategy {
+  readonly name = "background";
   readonly physics = STATIC_PHYSICS;
 
   contribute(_ctx: ZoomContributeCtx): Animation[] {

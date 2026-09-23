@@ -14,11 +14,15 @@ import { prepareOutgoing, promiseAll } from "@utils";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { resolveTransitionRule } from "./resolve-transition-rule";
-import { createNavigationDirectionTracker } from "./navigation-direction";
+import { createNavigationTransitionResolver } from "./navigation-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
 import { HostAnimation } from "../animation/host-animation";
+
+// Bound an abandoned async prepare, not animation playback (which may be
+// deliberately slow or paused by a host).
+const PREPARE_TIMEOUT_MS = 5000;
 
 type TransitionMode = "unmount" | "hidden";
 
@@ -84,7 +88,8 @@ export function createSggoiTransitionContext(
     // side/path repeats before pairing, the outermost DOM boundary owns it.
     keepCurrent: ({ current, next }) => current.element.contains(next.element),
   });
-  const directionTracker = createNavigationDirectionTracker();
+  const navigationResolver =
+    createNavigationTransitionResolver<AnyTransitionConfig>();
 
   // Normalize both accepted shapes to the functional form up front so the rest
   // of the file deals with exactly one shape: a static list becomes a function
@@ -113,6 +118,8 @@ export function createSggoiTransitionContext(
 
   const {
     initializeContext,
+    beginTransition,
+    disconnect: disconnectScroll,
     calculateScrollOffset,
     evictScrollPosition,
     getScrollContainer,
@@ -257,6 +264,11 @@ export function createSggoiTransitionContext(
     for (const element of elements) reconcileResting(element, epoch);
   };
 
+  const activeRuns = new Set<() => void>();
+  let cancelPreparation: (() => void) | undefined;
+  let connectionGeneration = 0;
+  let disconnected = false;
+
   const runTransition = (
     config: AnyTransitionConfig,
     direction: NavigationDirection,
@@ -365,47 +377,18 @@ export function createSggoiTransitionContext(
       createElement,
     };
 
-    const extrasPromise: Promise<object> = Promise.resolve(
-      config.prepare ? config.prepare(prepareArgs) : {},
-    );
-
-    // Resolve from/to + prepare extras in parallel via promiseAll util.
-    // The entire function returns synchronously; .then fires when ready.
-    promiseAll({
-      from: fromPromise,
-      to: toPromise,
-      extras: extrasPromise,
-    }).then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
-      // Now that prepare's microtasks have all run (initial styles, extras
-      // built), drop the outgoing node into place. Order is:
-      //   prepare → out insert → animation create/play
-      // Hidden mode skips insertion: the real node is already in place.
-      if (!isHidden && parent) {
-        if (nextSibling && parent.contains(nextSibling)) {
-          parent.insertBefore(fromElement, nextSibling);
-        } else {
-          parent.appendChild(fromElement);
-        }
-      }
-
-      const animation = config.animation({
-        from: resolvedFrom,
-        to: resolvedTo,
-        context: ssgoiContext,
-        ...(extras as Record<string, unknown>),
-      });
-
-      // Per-transition settle. Wire this BEFORE attach — host.attach hooks
-      // onComplete itself and chains through prior hooks, so cleanup still
-      // fires once the run settles (natural finish OR host force-completing it).
-      const prevOnComplete = animation.onComplete;
-      animation.onComplete = () => {
-        prevOnComplete?.();
+    // Acquire before cancelling a pending predecessor: shared container locks
+    // stay held continuously across interrupted preparations and host handoff.
+    const finishScroll = beginTransition(options.scrollLock !== false);
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(prepareTimer);
+      activeRuns.delete(settle);
+      if (cancelPreparation === settle) cancelPreparation = undefined;
+      try {
         if (isHidden) {
-          // Reuse: re-hide the real outgoing node (or leave it visible if a
-          // follow-up navigation re-claimed it as an incoming page) and wipe
-          // every inline style the transition leaked onto it. Both reconciles
-          // no-op if a newer run now owns the node.
           reconcileResting(fromOriginal, epoch);
           reconcileResting(toElement, epoch);
         } else if (fromElement.parentNode) {
@@ -414,12 +397,69 @@ export function createSggoiTransitionContext(
         for (const extra of createdElements) {
           if (extra.parentNode) extra.parentNode.removeChild(extra);
         }
-      };
+      } finally {
+        // Remove the outgoing scroll extent BEFORE unlocking. Never restore
+        // the departure position over the incoming page's scroll policy.
+        finishScroll();
+      }
+    };
+    activeRuns.add(settle);
+    cancelPreparation?.();
+    cancelPreparation = settle;
+    const fail = (error: unknown) => {
+      settle();
+      console.error("[SSGOI] Page transition failed", error);
+    };
+    const prepareTimer = setTimeout(() => {
+      fail(new Error("Page transition preparation timed out"));
+    }, PREPARE_TIMEOUT_MS);
 
-      // Host owns pose handoff, playbackRate carry-over, and starts the run
-      // according to its own play/pause/reverse state.
-      host.attach(animation);
-    });
+    let extrasPromise: Promise<object>;
+    try {
+      extrasPromise = Promise.resolve(
+        config.prepare ? config.prepare(prepareArgs) : {},
+      );
+    } catch (error) {
+      fail(error);
+      return;
+    }
+
+    promiseAll({
+      from: fromPromise,
+      to: toPromise,
+      extras: extrasPromise,
+    })
+      .then(({ from: resolvedFrom, to: resolvedTo, extras }) => {
+        // Async prepare can resolve after a newer navigation or provider teardown.
+        // It must never reinsert an obsolete OUT page or restart its animation.
+        if (settled) return;
+        clearTimeout(prepareTimer);
+        if (cancelPreparation === settle) cancelPreparation = undefined;
+        if (!isHidden && parent) {
+          if (nextSibling && parent.contains(nextSibling)) {
+            parent.insertBefore(fromElement, nextSibling);
+          } else {
+            parent.appendChild(fromElement);
+          }
+        }
+
+        const animation = config.animation({
+          from: resolvedFrom,
+          to: resolvedTo,
+          context: ssgoiContext,
+          ...(extras as Record<string, unknown>),
+        });
+        const prevOnComplete = animation.onComplete;
+        animation.onComplete = () => {
+          try {
+            prevOnComplete?.();
+          } finally {
+            settle();
+          }
+        };
+        host.attach(animation);
+      })
+      .catch(fail);
   };
 
   const handleArrival = (
@@ -427,10 +467,13 @@ export function createSggoiTransitionContext(
     side: "in" | "out",
     pendingSide: PendingSide,
   ): void => {
+    if (disconnected) return;
+    const generation = connectionGeneration;
     const isSwipeBack = swipeDetector.isSwipeBack();
 
     // .then chain — handleArrival returns immediately, dispatcher never blocks.
     detector.arrive(path, side, pendingSide).then((pair) => {
+      if (disconnected || generation !== connectionGeneration) return;
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) {
         // A hidden OUT was already revealed by handleHide. If pairing rejects
@@ -456,15 +499,16 @@ export function createSggoiTransitionContext(
         pair.to,
       );
 
-      const historyDirection = directionTracker.resolve(
-        transformedFrom,
-        transformedTo,
-      );
-      const resolved = resolveTransitionRule(
-        transformedFrom,
-        transformedTo,
-        getProcessedTransitions(),
-        historyDirection,
+      const resolved = navigationResolver.resolve(
+        pair.from,
+        pair.to,
+        (historyDirection) =>
+          resolveTransitionRule(
+            transformedFrom,
+            transformedTo,
+            getProcessedTransitions(),
+            historyDirection,
+          ),
       );
 
       // Reset is the safe fallback when no rule owns this navigation. The
@@ -474,6 +518,8 @@ export function createSggoiTransitionContext(
         pair.in.applyScrollPolicy?.(false);
         evictScrollPosition(pair.from);
         settleHiddenWithoutTransition(pair.out, pair.in);
+        cancelPreparation?.();
+        host.complete();
         return;
       }
 
@@ -486,6 +532,8 @@ export function createSggoiTransitionContext(
           evictScrollPosition(pair.from);
         }
         settleHiddenWithoutTransition(pair.out, pair.in);
+        cancelPreparation?.();
+        host.complete();
         return;
       }
 
@@ -611,9 +659,11 @@ export function createSggoiTransitionContext(
     // If usePathname changed this boundary immediately before React removed it,
     // the route it is leaving is the pre-change visible path. If the change was
     // older, the microtask below has already promoted currentPath instead.
+    unmountHandles.delete(element);
     const removalPath = state?.pendingOutPath ?? state?.currentPath ?? path;
     if (state) {
       state.vis.stop();
+      visibilityHandles.delete(state.vis);
       hiddenState.delete(element);
       owner.delete(element);
       // An Activity page evicted WHILE hidden (e.g. dropped from Next's bfcache)
@@ -641,13 +691,18 @@ export function createSggoiTransitionContext(
   // Dedupe so the dispatcher tolerates repeat registers for the same node —
   // either from React re-firing a ref or a host that bounces in/out under
   // strict-mode double-mount.
-  const registered = new WeakSet<HTMLElement>();
+  let registered = new WeakSet<HTMLElement>();
+  const visibilityHandles = new Set<VisibilityHandle>();
+  const unmountHandles = new Map<HTMLElement, () => void>();
 
   const register: SsgoiContext["register"] = (
     path,
     element,
     { enter = true } = {},
   ) => {
+    disconnected = false;
+    navigationResolver.connect();
+    swipeDetector.initialize();
     if (registered.has(element)) {
       const state = hiddenState.get(element);
       if (state && state.currentPath !== path) {
@@ -669,6 +724,7 @@ export function createSggoiTransitionContext(
       return;
     }
     registered.add(element);
+    const registeredGeneration = connectionGeneration;
 
     captureAnchor(element);
 
@@ -679,6 +735,7 @@ export function createSggoiTransitionContext(
       onHide: () => handleHide(element, path),
       onShow: () => handleShow(element, path),
     });
+    visibilityHandles.add(vis);
     const state: HiddenState = {
       vis,
       savedCss: null,
@@ -707,12 +764,16 @@ export function createSggoiTransitionContext(
       }
     }
 
-    watchUnmount(
+    const stopUnmount = watchUnmount(
       element,
-      (anchor, options) =>
-        handleRemoval(element, path, anchor, options?.emit ?? true),
+      (anchor, options) => {
+        if (registeredGeneration === connectionGeneration) {
+          handleRemoval(element, path, anchor, options?.emit ?? true);
+        }
+      },
       unmountGroup,
     );
+    unmountHandles.set(element, stopUnmount);
   };
 
   // Per-path ref callbacks are cached so adapters can drop `refFor(path)`
@@ -731,5 +792,26 @@ export function createSggoiTransitionContext(
     return cb;
   };
 
-  return { register, refFor };
+  return {
+    register,
+    refFor,
+    disconnect() {
+      disconnected = true;
+      connectionGeneration++;
+      detector.cancel(() => true);
+      try {
+        host.complete();
+      } finally {
+        for (const settle of activeRuns) settle();
+        for (const visibility of visibilityHandles) visibility.stop();
+        visibilityHandles.clear();
+        for (const stopUnmount of unmountHandles.values()) stopUnmount();
+        unmountHandles.clear();
+        registered = new WeakSet();
+        disconnectScroll();
+        swipeDetector.destroy();
+        navigationResolver.dispose();
+      }
+    },
+  };
 }

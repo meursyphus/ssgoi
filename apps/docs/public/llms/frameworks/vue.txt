@@ -1,0 +1,21 @@
+# SSGOI with Vue
+
+Use the Vue package for the provider and effects. Choose the helper for the router already installed in your app.
+
+Install @ssgoi/vue. Keep one provider above the changing page region.
+
+## Common setup
+
+Install @ssgoi/vue and keep one Ssgoi provider above RouterView or NuxtPage. It receives the shared route configuration.
+
+```ts
+import { Ssgoi } from "@ssgoi/vue";
+import { drill } from "@ssgoi/vue/view-transitions";
+```
+
+## Router helpers
+
+- Vue Router (experimental): https://ssgoi.dev/llms/frameworks/vue-router.txt
+- Nuxt (experimental): https://ssgoi.dev/llms/frameworks/nuxt.txt
+
+Full framework guide: https://ssgoi.dev/docs/frameworks/vue

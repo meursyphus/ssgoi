@@ -146,7 +146,10 @@ export interface ZoomContributeCtx {
  * Strategy interface. Both methods are optional — a no-op strategy is
  * a legitimate factory return value (e.g. `FadeStrategy.forVariant("default")`).
  */
+export type ZoomAnimationName = "tile" | "background" | "content" | "overlay";
+
 export interface ZoomStrategy {
+  readonly name: ZoomAnimationName;
   /**
    * Pre-paint setup. May mutate the outgoing/incoming pages via the
    * promises in `ctx`, or stage DOM via `createElement`. Returns extras

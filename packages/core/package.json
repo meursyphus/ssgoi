@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "7.0.4",
+  "version": "7.2.0",
   "description": "Core animation engine for SSGOI - Native app-like page transitions with spring physics",
   "private": false,
   "type": "module",
@@ -25,6 +25,12 @@
       "import": "./dist/internal.js",
       "require": "./dist/internal.cjs",
       "default": "./dist/internal.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs",
+      "default": "./dist/runtime.js"
     }
   },
   "files": [
@@ -42,7 +48,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:browser": "playwright test"
   },
   "keywords": [
     "page-transition",
@@ -79,6 +86,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
+    "@playwright/test": "1.58.2",
     "@types/node": "^22.10.6",
     "eslint": "^9.34.0",
     "globals": "^16.3.0",

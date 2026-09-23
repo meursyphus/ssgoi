@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,7 +16,7 @@ export const discoverPackages = () =>
     .filter((rel) => {
       try {
         const pkg = JSON.parse(
-          readFileSync(join(ROOT, rel, "package.json"), "utf8")
+          readFileSync(join(ROOT, rel, "package.json"), "utf8"),
         );
         return !pkg.private;
       } catch {
@@ -26,10 +26,42 @@ export const discoverPackages = () =>
 
 const read = (p) =>
   JSON.parse(readFileSync(join(ROOT, p, "package.json"), "utf8"));
+
+const SEMVER_RE =
+  /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+const parseSemVer = (version) => {
+  const match = SEMVER_RE.exec(version);
+  if (!match) throw new Error(`Invalid version: ${version}`);
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+    prerelease: match[4]?.split(".") ?? [],
+  };
+};
+const comparePrerelease = (a, b) => {
+  if (!a.length || !b.length) return a.length ? -1 : b.length ? 1 : 0;
+  for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+    if (a[index] === undefined) return -1;
+    if (b[index] === undefined) return 1;
+    if (a[index] === b[index]) continue;
+    const aNumeric = /^\d+$/.test(a[index]);
+    const bNumeric = /^\d+$/.test(b[index]);
+    if (aNumeric && bNumeric) return Number(a[index]) - Number(b[index]);
+    if (aNumeric !== bNumeric) return aNumeric ? -1 : 1;
+    return a[index].localeCompare(b[index]);
+  }
+  return 0;
+};
 const cmp = (a, b) => {
-  const A = a.split(".").map(Number);
-  const B = b.split(".").map(Number);
-  return A[0] - B[0] || A[1] - B[1] || A[2] - B[2];
+  const A = parseSemVer(a);
+  const B = parseSemVer(b);
+  return (
+    A.major - B.major ||
+    A.minor - B.minor ||
+    A.patch - B.patch ||
+    comparePrerelease(A.prerelease, B.prerelease)
+  );
 };
 
 // Resolve the next lockstep version and (unless write:false) apply it to every
@@ -37,13 +69,16 @@ const cmp = (a, b) => {
 export function bump(arg, { write = true } = {}) {
   const PKGS = discoverPackages();
   const current = PKGS.map((p) => ({ p, v: read(p).version }));
-  const max = current.map((x) => x.v).sort(cmp).at(-1);
+  const max = current
+    .map((x) => x.v)
+    .sort(cmp)
+    .at(-1);
 
   let next;
-  if (/^\d+\.\d+\.\d+$/.test(arg)) {
+  if (SEMVER_RE.test(arg)) {
     next = arg;
   } else {
-    const [maj, min, pat] = max.split(".").map(Number);
+    const { major: maj, minor: min, patch: pat } = parseSemVer(max);
     if (arg === "major") next = `${maj + 1}.0.0`;
     else if (arg === "minor") next = `${maj}.${min + 1}.0`;
     else if (arg === "patch") next = `${maj}.${min}.${pat + 1}`;
@@ -56,7 +91,7 @@ export function bump(arg, { write = true } = {}) {
 
   console.log(
     `${write ? "Bumping" : "[dry] would bump"} ${PKGS.length} packages ` +
-      `(lockstep): max ${max} -> ${next}\n`
+      `(lockstep): max ${max} -> ${next}\n`,
   );
   for (const { p, v } of current) {
     if (write) {
@@ -69,7 +104,9 @@ export function bump(arg, { write = true } = {}) {
     }
     console.log(`  ${p}: ${v} -> ${next}`);
   }
-  console.log(`\n${write ? "Done. All packages now at" : "[dry] target"} ${next}.`);
+  console.log(
+    `\n${write ? "Done. All packages now at" : "[dry] target"} ${next}.`,
+  );
   return next;
 }
 
@@ -79,7 +116,10 @@ export function bump(arg, { write = true } = {}) {
 export function syncToCurrent({ write = true } = {}) {
   const PKGS = discoverPackages();
   const current = PKGS.map((p) => ({ p, v: read(p).version }));
-  const max = current.map((x) => x.v).sort(cmp).at(-1);
+  const max = current
+    .map((x) => x.v)
+    .sort(cmp)
+    .at(-1);
   const laggards = current.filter((x) => cmp(x.v, max) < 0);
 
   if (!laggards.length) {
@@ -89,7 +129,7 @@ export function syncToCurrent({ write = true } = {}) {
 
   console.log(
     `${write ? "Syncing" : "[dry] would sync"} ${laggards.length} package(s) ` +
-      `up to current ${max}\n`
+      `up to current ${max}\n`,
   );
   for (const { p, v } of current) {
     if (cmp(v, max) >= 0) continue;
@@ -103,16 +143,22 @@ export function syncToCurrent({ write = true } = {}) {
     }
     console.log(`  ${p}: ${v} -> ${max}`);
   }
-  console.log(`\n${write ? "Done. All packages now at" : "[dry] target"} ${max}.`);
+  console.log(
+    `\n${write ? "Done. All packages now at" : "[dry] target"} ${max}.`,
+  );
   return max;
 }
 
-// Allow running standalone: `node scripts/bump-version.mjs <major|minor|patch|x.y.z>`
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Allow running standalone:
+// `node scripts/bump-version.mjs <major|minor|patch|x.y.z[-prerelease]>`
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1])
+) {
   const arg = process.argv[2];
   if (!arg) {
     console.error(
-      "Usage: node scripts/bump-version.mjs <major|minor|patch|x.y.z>"
+      "Usage: node scripts/bump-version.mjs <major|minor|patch|x.y.z[-prerelease]>",
     );
     process.exit(1);
   }

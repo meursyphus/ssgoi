@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { sheet as transition } from "./transition";
 import type { SheetType as InternalSheetType } from "./types";
 
@@ -55,11 +56,14 @@ function resolveInternalType(
   return "static";
 }
 
-export function sheet(config: SheetConfig = {}): AnyTransitionConfig {
+export function sheet(
+  config: SheetConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const type = (config as { type?: SheetType | SheetTypeDeprecated }).type;
   // `variant` / `options` are accepted in the public schema for forward
   // compatibility but currently have no implemented values to forward.
   const internalType = resolveInternalType(type);
 
-  return transition({ type: internalType });
+  return withOverride(transition({ type: internalType }), extras.override);
 }

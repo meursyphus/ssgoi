@@ -12,6 +12,17 @@ npm install @ssgoi/angular
 
 Agent setup guide: https://ssgoi.dev/llms.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+These router helpers are experimental APIs and may change.
+
+| Router         | Import                  | API                  |
+| -------------- | ----------------------- | -------------------- |
+| Angular Router | `@ssgoi/angular/router` | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/angular) for wiring and limits.
+
 ## Setup
 
 Create one SSGOI root above the router outlet.
@@ -45,22 +56,24 @@ export class AppComponent {
 
 ## Route boundary
 
-Mark the root element of each routed component.
+Use the experimental standalone directive on the routed page's single DOM root:
 
 ```ts
+import { Component } from "@angular/core";
+import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
+
 @Component({
-  selector: "app-post",
   standalone: true,
-  template: `
-    <article data-ssgoi-transition="/posts/42">
-      <!-- page -->
-    </article>
-  `,
+  imports: [SsgoiRouteBoundary],
+  template: `<article *ssgoiRouteBoundary="let route">{{ route.id }}</article>`,
 })
 export class PostComponent {}
 ```
 
-The id must match the config route patterns.
+It recreates the embedded view on pathname changes, including parameterized
+routes that reuse the same component. Query-only navigation preserves it. Use
+`key: 'shell'` for a persistent region. Keep RouterOutlet in the application;
+custom reuse caches and auxiliary outlet coordination are not handled.
 
 ## Config
 

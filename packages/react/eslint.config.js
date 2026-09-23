@@ -20,8 +20,23 @@ export default tseslint.config([
       globals: globals.browser,
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
-        project: ["./tsconfig.app.json", "./tsconfig.node.json"],
+        project: [
+          "./tsconfig.app.json",
+          "./tsconfig.node.json",
+          "./tsconfig.test.json",
+        ],
       },
+    },
+  },
+  {
+    files: ["src/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [{
+          group: ["next", "next/*", "react-router", "react-router/*", "@remix-run/*", "@tanstack/react-router", "./routers/*", "./routers/**"],
+          message: "Keep router imports in src/routers and expose them only through router subpaths.",
+        }],
+      }],
     },
   },
 ]);

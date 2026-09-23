@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>SSGOI transition behavior parity</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e8edf3;color:#17243a;font:14px system-ui}header{padding:16px}button{padding:8px 16px}#scene{position:relative;width:390px;height:640px;overflow:auto;margin:16px;background:white}.page{width:390px;min-height:740px;background:#fff;color:#19263b}.list{padding:32px 24px}.detail{padding:20px 0}.card{width:144px;height:144px;border-radius:20px;overflow:hidden}.card img{width:180px;height:144px;object-fit:cover;transform:translateX(-18px)}.detail img{display:block;width:390px;height:300px;object-fit:contain}.page h2,.page p{margin:16px 24px}#log{padding:16px;white-space:pre-wrap}
+</style>
+<header><button id="run">Compare all default transitions</button> <span id="status">Ready</span></header>
+<div id="scene"></div><pre id="log"></pre>
+<script src="baseline.js"></script><script src="current.js"></script>
+<script>
+const scene = document.querySelector('#scene');
+const status = document.querySelector('#status');
+const log = document.querySelector('#log');
+const picture = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600"><rect width="900" height="600" fill="#78b2d8"/><circle cx="650" cy="180" r="95" fill="#ffe5a3"/><path d="M0 600L310 130L650 600ZM350 600L650 240L900 600Z" fill="#305f69"/></svg>');
+const cases = [
+  ['axis',{type:'x'}],['axis',{type:'x',variant:'snappy'}],['axis',{type:'y'}],['axis',{type:'y',variant:'non-directional'}],['axis',{type:'z'}],
+  ['drill',{}],['drill',{type:'slide'}],['slide',{}],['fade',{}],
+  ['sheet',{}],['sheet',{type:'scale'}],['sheet',{type:'blur'}],
+  ['zoom',{}],['zoom',{type:'expand'}],['zoom',{type:'blur'}],['zoom',{type:'expand',variant:'fade'}],
+  ['hero',{}],['hero',{type:'fade'}],['hero',{type:'fade',variant:'smooth'}],
+  ['blind',{}],['blind',{type:'vertical'}],['scroll',{}],['scroll',{type:'non-directional'}],['rotate',{}],['strip',{}],['jaemin',{}],['film',{}],
+];
+function styleOf(el) { return Object.fromEntries([...el.style].sort().map(key=>[key,el.style.getPropertyValue(key)])); }
+function stable(value) {
+  if(Array.isArray(value)) return value.map(stable);
+  if(value && typeof value==='object') return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stable(value[key])]));
+  return value;
+}
+async function runOne(api, name, options, direction) {
+  scene.replaceChildren(); scene.scrollTop=0;
+  const list=document.createElement('div'), detail=document.createElement('div');
+  list.className='page list'; detail.className='page detail';
+  list.innerHTML=`<h2>Gallery</h2><div class="card" data-zoom-exit-key="photo" data-hero-exit-key="photo"><img src="${picture}" alt="Landscape"></div><p>A shared picture with a rounded crop.</p>`;
+  detail.innerHTML=`<h2>Photo</h2><img data-zoom-enter-key="photo" data-hero-enter-key="photo" src="${picture}" alt="Landscape"><p>The full image and its surrounding page.</p>`;
+  const from=direction==='forward'?list:detail, to=direction==='forward'?detail:list;
+  from.dataset.parity='from'; to.dataset.parity='to';
+  from.style.position='absolute'; from.style.top='0'; from.style.left='0';
+  scene.append(from,to);
+  await Promise.all([...scene.querySelectorAll('img')].map(img=>img.decode()));
+  from.remove();
+  const context={direction,scrollOffset:{x:0,y:0},from:{scroll:{x:0,y:0}},to:{scroll:{x:0,y:0}},scrollingElement:scene,positionedParent:scene};
+  const created=[];
+  const transition=api[name](options);
+  const extras=await transition.prepare?.({from:Promise.resolve(from),to:Promise.resolve(to),context,createElement(id,tag='div'){const el=document.createElement(tag);el.dataset.ssgoiId=id;created.push(el);return el;}})??{};
+  scene.insertBefore(from,to);
+  const prepared={from:styleOf(from),to:styleOf(to)};
+  const animation=transition.animation({from,to,context,...extras});
+  const identity=el=>el===from?'from':el===to?'to':el.dataset.ssgoiId||el.getAttribute('data-hero-enter-key')||el.getAttribute('data-hero-exit-key')||el.tagName.toLowerCase();
+  let timeout;
+  await new Promise((resolve,reject)=>{
+    const previous=animation.onComplete;
+    animation.onComplete=()=>{try{previous?.();resolve();}catch(error){reject(error);}};
+    timeout=setTimeout(()=>{animation.complete();reject(new Error('Timed out'));},15000);
+    animation.playbackRate=30;
+    animation.play();
+  });
+  clearTimeout(timeout);
+  const timelines=animation.getTimeline().map(t=>({element:identity(t.element),frames:t.frames.map(f=>({time:f.time,value:f.value,velocity:f.velocity,style:f.style}))}));
+  const after={from:styleOf(from),to:styleOf(to),fromImage:from.querySelector('img')?.style.cssText,toImage:to.querySelector('img')?.style.cssText};
+  for(const el of created) el.remove();
+  return stable({prepared,timelines,after,progress:animation.progress});
+}
+window.runParity=async function(){
+  const results=[]; window.parityDetails=[];
+  for(const [name,options] of cases) for(const direction of ['forward','backward']) {
+    const label=`${name} ${JSON.stringify(options)} ${direction}`;
+    status.textContent=label;
+    try {
+      const before=await runOne(baseline,name,options,direction);
+      const after=await runOne(current,name,options,direction);
+      const differences=['prepared','timelines','after','progress'].filter(key=>JSON.stringify(before[key])!==JSON.stringify(after[key]));
+      results.push({label,passed:!differences.length,differences,tracks:after.timelines.length});
+      if(differences.length) window.parityDetails.push({label,before,after});
+    } catch(error) { results.push({label,passed:false,error:String(error.stack||error)}); }
+    log.textContent=results.map(r=>`${r.passed?'PASS':'FAIL'} ${r.label}${r.differences?.length?' ['+r.differences.join(', ')+']':''}${r.error?' '+r.error:''}`).join('\n');
+  }
+  window.parityResult={total:results.length,passed:results.filter(r=>r.passed).length,results};
+  status.textContent=`${window.parityResult.passed}/${results.length} passed`;
+  return window.parityResult;
+};
+document.querySelector('#run').onclick=()=>window.runParity();
+</script>
+</html>

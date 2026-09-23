@@ -1,4 +1,4 @@
-import type { PathPatterns } from "@types";
+import type { PathPatterns } from "../runtime/types";
 
 export type PathMatch = {
   matched: boolean;

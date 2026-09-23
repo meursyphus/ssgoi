@@ -1,6 +1,6 @@
 import { A, useLocation } from "@solidjs/router";
 import { For, type JSX } from "solid-js";
-import { SsgoiTransitionBoundary } from "../components/ssgoi-transition-boundary";
+import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
 import { PRODUCT_CATEGORIES } from "../ssgoi-config";
 
 export default function ProductsLayout(props: { children?: JSX.Element }) {
@@ -35,9 +35,9 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
       </div>
 
       <div class="flex-1 overflow-hidden relative">
-        <SsgoiTransitionBoundary class="min-h-full bg-[#121212]">
+        <SsgoiRouteBoundary class="min-h-full bg-[#121212]">
           {props.children}
-        </SsgoiTransitionBoundary>
+        </SsgoiRouteBoundary>
       </div>
     </div>
   );

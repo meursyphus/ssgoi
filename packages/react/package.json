@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "7.0.4",
+  "version": "7.2.0",
   "description": "React bindings for SSGOI - Native app-like page transitions for React applications",
   "private": false,
   "type": "module",
@@ -61,6 +61,30 @@
       "import": "./dist/unplugin/esbuild.js",
       "require": "./dist/unplugin/esbuild.cjs",
       "default": "./dist/unplugin/esbuild.js"
+    },
+    "./nextjs": {
+      "types": "./dist/routers/nextjs/index.d.ts",
+      "import": "./dist/nextjs.js",
+      "require": "./dist/nextjs.cjs",
+      "default": "./dist/nextjs.js"
+    },
+    "./react-router": {
+      "types": "./dist/routers/react-router.d.ts",
+      "import": "./dist/react-router.js",
+      "require": "./dist/react-router.cjs",
+      "default": "./dist/react-router.js"
+    },
+    "./tanstack-router": {
+      "types": "./dist/routers/tanstack-router.d.ts",
+      "import": "./dist/tanstack-router.js",
+      "require": "./dist/tanstack-router.cjs",
+      "default": "./dist/tanstack-router.js"
+    },
+    "./remix": {
+      "types": "./dist/routers/remix.d.ts",
+      "import": "./dist/remix.js",
+      "require": "./dist/remix.cjs",
+      "default": "./dist/remix.js"
     }
   },
   "scripts": {
@@ -70,7 +94,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "vite build",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@ssgoi/core": "workspace:^",
@@ -78,6 +103,8 @@
     "@babel/core": "^7.26.10"
   },
   "devDependencies": {
+    "@babel/traverse": "7.28.5",
+    "@babel/types": "7.28.5",
     "@types/babel__core": "^7.20.5",
     "@eslint/js": "^9.30.1",
     "@types/react": "^19.1.8",
@@ -92,7 +119,15 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "next": "16.1.0",
+    "react-router": "7.10.1",
+    "@tanstack/react-router": "^1.93.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "vitest": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "@remix-run/react": "2.17.5"
   },
   "keywords": [
     "react",
@@ -128,5 +163,27 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "next": "*",
+    "react-router": "*",
+    "@tanstack/react-router": "*",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "@remix-run/react": "*"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    },
+    "@tanstack/react-router": {
+      "optional": true
+    },
+    "@remix-run/react": {
+      "optional": true
+    }
   }
 }

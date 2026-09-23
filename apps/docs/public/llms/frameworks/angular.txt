@@ -1,5 +1,7 @@
 # SSGOI with Angular
 
+Experimental API: the router integration may change.
+
 Create one SSGOI root above the router outlet.
 
 ```bash
@@ -39,50 +41,34 @@ export class AppComponent {
 }
 ```
 
-## Page boundary
+## Router boundary helper
 
-Mark the routed component root:
+A structural directive marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.
 
-```html
-<article data-ssgoi-transition="/posts/42">
-  <!-- page -->
-</article>
-```
+### Connect a routed page
 
-The id must match the config route patterns.
-
-Angular may reuse the same routed component when only route params change.
-Changing the attribute on the same DOM element does not create an OUT/IN pair.
-For param-to-param transitions, force the marked root to remount:
+Import the standalone directive in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component.
 
 ```ts
-// post-detail.component.ts
-import { Component, inject } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { ActivatedRoute } from "@angular/router";
-import { map } from "rxjs";
+import { Component } from "@angular/core";
+import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
 
 @Component({
   standalone: true,
+  imports: [SsgoiRouteBoundary],
   template: `
-    @for (transitionId of transitionIds(); track transitionId) {
-      <article [attr.data-ssgoi-transition]="transitionId">
-        <!-- detail page -->
-      </article>
-    }
+    <article *ssgoiRouteBoundary="let boundary">
+      {{ boundary.id }}
+    </article>
   `,
 })
-export class PostDetailComponent {
-  private readonly route = inject(ActivatedRoute);
-
-  protected readonly transitionIds = toSignal(
-    this.route.paramMap.pipe(
-      map((params) => [`/posts/${params.get("id")}`]),
-    ),
-    { initialValue: [] as string[] },
-  );
-}
+export class PageComponent {}
 ```
+
+### Persistent shells
+
+Use *ssgoiRouteBoundary="let boundary; key: 'shell'" to preserve the embedded view. A resolver can return { id, key? }. Query-only and cancelled navigation preserve the default view. This helper does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+
 
 ## Reference
 

@@ -10,3 +10,8 @@ apps/docs/src/lib/blog.generated.ts
 
 # Project-scoped MCP config (may contain tokens)
 .mcp.json
+
+# Playwright browser regression artifacts
+/test-results/
+/packages/core/test-results/
+/packages/core/playwright-report/

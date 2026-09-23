@@ -1,60 +1,74 @@
 import type { NavigationDirection } from "@types";
+import {
+  connectBrowserHistory,
+  type BrowserHistory,
+  type HistoryEntry,
+} from "./browser-history";
 import { normalizePath } from "./path-pattern";
 
-export interface NavigationDirectionTracker {
-  resolve(from: string, to: string): NavigationDirection;
-  dispose(): void;
-}
+export type NavigationChange = {
+  kind: "push" | "replace" | "back" | "forward" | "unknown";
+  direction: NavigationDirection;
+  from: HistoryEntry | null;
+  to: HistoryEntry | null;
+};
 
-/**
- * Lightweight semantic history used only where a route rule cannot determine
- * direction from its own boundary/order. A browser pop wins; otherwise a
- * navigation to the immediately previous route is backward even when an app
- * implemented its back button with push().
- */
-export function createNavigationDirectionTracker(): NavigationDirectionTracker {
-  const stack: string[] = [];
-  let popPending = false;
-  const onPopState = () => {
-    popPending = true;
+/** Created during render, connected only when a boundary is actually observed. */
+export function createNavigationDirectionTracker() {
+  let history: BrowserHistory | null = null;
+  let current: HistoryEntry | null = null;
+  const visited = new Set<string>();
+  const remember = (entry: HistoryEntry | null) => {
+    if (entry) visited.add(entry.key);
+    if (visited.size > 200) visited.delete(visited.values().next().value!);
+  };
+  const connect = () => {
+    if (history) return;
+    history = connectBrowserHistory();
+    current = history.read();
+    remember(current);
   };
 
-  if (typeof window !== "undefined") {
-    window.addEventListener("popstate", onPopState);
-  }
-
   return {
-    resolve(rawFrom, rawTo) {
-      const from = normalizePath(rawFrom);
-      const to = normalizePath(rawTo);
-
-      if (stack.length === 0) {
-        stack.push(from);
-      } else if (stack[stack.length - 1] !== from) {
-        const knownFrom = stack.lastIndexOf(from);
-        if (knownFrom >= 0) stack.splice(knownFrom + 1);
-        else stack.push(from);
+    connect,
+    resolve(rawFrom: string, _rawTo: string): NavigationChange {
+      connect();
+      const to = history!.read();
+      let from = current;
+      let kind: NavigationChange["kind"] = "unknown";
+      if (from && to) {
+        if (to.key === from.key || to.index === from.index) kind = "replace";
+        else if (to.index < from.index) kind = "back";
+        else kind = visited.has(to.key) ? "forward" : "push";
       }
-
-      const previous = stack[stack.length - 2];
-      const direction: NavigationDirection =
-        popPending || previous === to ? "backward" : "forward";
-      popPending = false;
-
-      if (direction === "backward") {
-        const knownTo = stack.lastIndexOf(to);
-        if (knownTo >= 0) stack.splice(knownTo + 1);
-        else stack.push(to);
-      } else if (stack[stack.length - 1] !== to) {
-        stack.push(to);
+      if (kind === "push") {
+        // Query/hash-only history entries may not mount a new page boundary.
+        // Use the actual predecessor when it still represents the OUT route.
+        const predecessor = history!.previous();
+        if (
+          predecessor &&
+          predecessor.index === to!.index - 1 &&
+          normalizePath(new URL(predecessor.url).pathname) ===
+            normalizePath(rawFrom)
+        ) {
+          from = predecessor;
+        }
       }
-
-      return direction;
+      current = to;
+      remember(from);
+      remember(to);
+      return {
+        kind,
+        direction: kind === "back" ? "backward" : "forward",
+        from,
+        to,
+      };
     },
     dispose() {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("popstate", onPopState);
-      }
+      history?.dispose();
+      history = null;
+      current = null;
+      visited.clear();
     },
   };
 }

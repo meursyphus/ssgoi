@@ -1,4 +1,5 @@
-import type { AnyTransitionConfig } from "@types";
+import type { PresetExtras } from "@types";
+import { withOverride } from "../../motion/with-override";
 import { type PresetConfig } from "../utils";
 import { hero as transition } from "./transition";
 import type { HeroOptions, HeroType, HeroVariant } from "./types";
@@ -8,18 +9,23 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
 /**
  * Hero preset configuration.
  *
- * - `type: "static"` (default) — incoming-page chrome snaps in; a temporary
- *   shared-element clone morphs via clip-path inset + uniform scale.
- * - `type: "fade"` — both pages cross-fade as whole surfaces while a
- *   temporary shared-element clone morphs above them. Use when each side has
- *   its own chrome (e.g., a detail screen with its own back button / app bar).
- * - `variant: "default"` — only value today; reserved for future tonal
- *   variants without re-shaping the public API.
+ * - `type: "static"` (default) — morph the actual destination visual in place;
+ *   incoming page content appears immediately.
+ * - `type: "fade"` — fade the outgoing page and incoming non-shared content
+ *   and surface colors. The image remains in its authored stacking context.
+ * - `variant: "smooth"` — use a softer follower spring for the morph.
+ * Both types crossfade source and destination visuals. Enter stays in-page;
+ * exit uses a temporary layer above both pages.
+ * Ancestor overflow belongs to the application. The animated visual carries
+ * `data-hero-transitioning` until completion for optional caller-owned CSS.
  */
 export type HeroConfig = PresetConfig<HeroType, HeroVariant, HeroOptions>;
 
-export function hero(config: HeroConfig = {}): AnyTransitionConfig {
+export function hero(
+  config: HeroConfig = {},
+  extras: PresetExtras<ReturnType<typeof transition>> = {},
+) {
   const type: HeroType = config.type ?? "static";
   const variant: HeroVariant = config.variant ?? "default";
-  return transition({ type, variant });
+  return withOverride(transition({ type, variant }), extras.override);
 }

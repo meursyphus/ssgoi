@@ -7,7 +7,7 @@ import { InstallBody } from "@/page/docs/sections";
 export const metadata: Metadata = {
   title: "Quick start — add SSGOI to your app",
   description:
-    "Two new files, plus one edit to the layout you already have: write the config and the route boundary, wire them into the layout, then check your first page transition. Copy-paste ready for React and Next.js.",
+    "One provider file, plus one edit to the layout you already have: write the config, import the route boundary, wire them into the layout, then check your first page transition. Copy-paste ready for React and Next.js.",
   alternates: { canonical: "/docs/install" },
   openGraph: buildOpenGraph({ path: "/docs/install" }),
 };
@@ -24,7 +24,7 @@ export default function DocsInstallPage() {
       />
       <PageHeading
         title="Quick start"
-        lead="Two new files, plus one edit to the layout you already have, and your first page transition runs."
+        lead="One provider file, plus one edit to the layout you already have, and your first page transition runs."
       />
       <InstallBody />
     </>

@@ -5,6 +5,34 @@ relationship receives an effect and what forward/backward means.
 
 Main setup: https://ssgoi.dev/llms.txt
 
+## Browser Back and Forward
+
+On web, SSGOI remembers the selected effect, semantic direction, and physical
+scroll policy for each observed pushed history entry. Back to that entry's
+source reuses the same effect with its direction and scroll endpoints reversed.
+Forward to that entry replays the original selection. This also works when the
+entry rule has `bidirectional: false`: undoing an observed visit does not need
+another matching rule.
+
+Links, push, and replace always match the current rules below. A fresh push to
+the same URL is a new visit; it does not reuse an older visit's effect. The rule
+still determines semantic direction (`ordered` and explicit pairs retain their
+orientation). Within one `on` scope, a fresh push defaults to forward.
+
+Only exact observed entry pairs are replayed. Reloads/provider disconnection,
+unknown entries, replacements of a route, and multi-step jumps without a saved
+direct pair use current matching. The last 100 entry effects are retained in
+memory, without page DOM or animation instances. Pushing after Back discards
+the old forward branch. The portable native rule matcher is unchanged.
+
+History API commits carry an `__ssgoi_entry_v1` field in null/plain-object
+history.state while keeping router fields. This is authoritative even when a
+browser exposes a Navigation API whose entries lag behind pushState. Native
+entry identity is a fallback for opaque state only when its URL matches the
+committed location. Primitive/array state is never reshaped; without reliable
+native entry identity it cannot support replay. Observation starts on boundary registration and is released when
+the root observer disconnects; manual integrations can call context.disconnect().
+
 ## `on` and `except`
 
 Use `on` for a route family. Entering the scope is forward, leaving is
@@ -37,6 +65,29 @@ the reverse relationship is backward by default.
 Each side may also be an array of patterns.
 Set `bidirectional: false` when only the written `from` → `to` direction should
 match.
+
+## Detail-to-list links and related-detail navigation
+
+With from: "/gallery", to: "/photo/*", a fresh push from a photo back to the
+gallery is backward because the explicit relationship is reversed. It does not
+require router.back(). The core is the sole owner of direction; presets never
+rewrite context.direction based on their elements.
+
+If both endpoints have the same pattern, the rule cannot establish an
+orientation, so history supplies it:
+
+```ts
+{
+  from: "/photo/*",
+  to: "/photo/*",
+  transition: zoom(),
+}
+```
+
+Opening another related photo with a new push is forward. Browser Back reverses
+the recorded transition. Keep zoom/hero enter/exit keys: the main expanded photo
+is enter-marked, while related thumbnails are exit-marked. These are element
+roles used for matching in the core-selected direction.
 
 ## `ordered`
 

@@ -107,6 +107,7 @@ function createExitIn({
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export class ExpandBackgroundStrategy implements ZoomStrategy {
+  readonly name = "background";
   readonly physics = EXPAND_PHYSICS;
 
   contribute(ctx: ZoomContributeCtx): Animation[] {

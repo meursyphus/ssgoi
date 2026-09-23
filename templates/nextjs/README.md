@@ -1,5 +1,8 @@
 # SSGOI + Next.js
 
+Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
+optional peer and is loaded only by this entry.
+
 ```bash
 pnpm install
 pnpm dev
@@ -9,34 +12,22 @@ pnpm dev
 
 - `src/components/ssgoi-config.ts`: one transition config.
 - `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `src/components/ssgoi-route-boundary.tsx`: name → route id/key utility.
+- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
-The template keeps route lifetime rules in the boundary resolver. Layouts pass
-only a semantic name:
-
-```tsx
-const boundary = resolveBoundary(name, pathname);
-
-<div key={boundary.key} data-ssgoi-transition={boundary.id}>
-  {children}
-</div>;
-```
-
-`page` uses the pathname for both values and remounts on every route change.
-`products-shell` uses a stable key for the persistent products layout while
-keeping the pathname as its transition id.
+The default boundary uses the pathname for its id and key. `routeKey` keeps a
+layout shell mounted while its transition id follows the actual route.
 
 ## Product tabs
 
 The products layout has two boundaries:
 
 ```tsx
-<SsgoiRouteBoundary name="products-shell">
+<SsgoiRouteBoundary routeKey="products-layout">
   <ProductHeader />
   <ProductTabs />
 
-  <SsgoiRouteBoundary name="page">{children}</SsgoiRouteBoundary>
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
 </SsgoiRouteBoundary>
 ```
 
@@ -45,7 +36,7 @@ The products layout has two boundaries:
 
 The constant outer key is safe here because `app/products/layout.tsx` itself
 unmounts outside `/products`. If the boundary moves into a common app layout,
-its named resolver must return `"products-layout"` only for product category
+its resolve callback must return `"products-layout"` only for product category
 paths and a different key for routes outside them.
 
 Direction comes from the single config:
@@ -59,6 +50,11 @@ Direction comes from the single config:
 
 `ordered` routes restore scroll automatically. `on` and `from`/`to` rules
 restore the forward source and reset the forward destination.
+During a matched transition, SSGOI also suppresses wheel, single-finger touch,
+and page-scroll key input until the outgoing page is gone. This leaves CSS and
+scrollbar behavior alone. Set `scrollLock: false` in the top-level config only
+if the app manages transition input itself; see the
+[scroll restoration guide](https://ssgoi.dev/llms/scroll-restoration.txt).
 
 ## Other demos
 
@@ -66,9 +62,83 @@ restore the forward source and reset the forward destination.
 - Gallery: expanding `zoom`.
 - Profile: static `zoom`.
 
+## Shared boundary contract
+
+This template uses the shipped adapter directly in every routed section;
+there is no local keyed-DOM wrapper. The React Router, TanStack Router,
+SvelteKit, and Nuxt templates use their corresponding router entries with
+the same `{ id, key? }` resolver contract.
+
+For an application with named boundaries, keep its policy in a client component:
+
+```tsx
+<SsgoiRouteBoundary
+  resolve={(location) => resolveBoundary("app-shell", location)}
+  fallback={<div className="min-h-px" aria-hidden="true" />}
+>
+  {children}
+</SsgoiRouteBoundary>
+```
+
+`resolveBoundary` is application code, not an extra library API. Next.js passes
+both `pathname` and the owning layout's `selectedSegments`. Use
+`selectedSegmentsToPath(selectedSegments, projectBase)` from the same entry for
+a nested slot; a soft `@modal` navigation must keep its background's slot id
+and key even though the browser URL changes. An empty slot is the index route.
+The adapter includes Suspense for Cache Components, but the template leaves
+Cache Components disabled so it also demonstrates ordinary App Router setup.
+
+The complete policy example is in
+[complex routing](https://ssgoi.dev/llms/complex-routing.txt).
+
+## Verify boundary ownership
+
+- Shop → Tech → Fashion: the product header and tabs keep their DOM; only the
+  inner boundary changes. Its outgoing DOM still contains the old category.
+- Shop → Posts: the products shell leaves and the post boundary enters.
+- Post list → detail → browser Back: the real routed roots leave and enter,
+  and the list scroll position is restored.
+- Query-only navigation keeps a boundary mounted by default.
+
+The React adapter regression suite also covers an app shell shared across
+top-level tabs, per-project shell lifetimes, intercepted modal open/back/forward,
+direct detail entry, index backgrounds, nested sidebars, and unresolved URLs:
+
+```bash
+pnpm --filter @ssgoi/react test:run
+```
+
 Full boundary guide: https://ssgoi.dev/llms.txt
 
 ```bash
 pnpm lint
 pnpm build
 ```
+
+## Customize motion
+
+Presets accept a second `{ override }` argument. This optional example retunes
+only the backward direction; the template's default config remains unchanged.
+
+```ts
+import { drill, spring } from "@ssgoi/react";
+
+const tunedDrill = drill(
+  {},
+  {
+    override: {
+      backward({ animation }) {
+        animation.set({ integrator: spring({ stiffness: 400, damping: 35 }) });
+      },
+    },
+  },
+);
+```
+
+The core decides direction from route relationships and history. An explicit
+list/detail rule also treats a fresh detail-to-list link as backward. Equal
+from/to patterns use history direction. Keep zoom/hero enter and exit markers;
+they identify expanded media and related thumbnails within those pages.
+
+[Named groups and overlap](https://ssgoi.dev/docs/motion) ·
+[Writing custom transitions with defineTransition](https://ssgoi.dev/docs/custom-transitions)

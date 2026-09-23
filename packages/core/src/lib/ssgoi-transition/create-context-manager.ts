@@ -1,5 +1,6 @@
 import { getScrollingElement } from "@utils";
 import { getPositionedParent } from "@utils";
+import { lockScroll } from "../utils/scroll-lock";
 
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;
@@ -25,6 +26,21 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   const { resolvePath = (path: string) => path } = options;
 
   let scrollContainer: HTMLElement | null = null;
+  let resizeObserver: ResizeObserver | null = null;
+  const activeTransitions = new Set<() => void>();
+
+  const beginTransition = (lockUserScroll: boolean) => {
+    const unlock =
+      lockUserScroll && scrollContainer
+        ? lockScroll(scrollContainer)
+        : () => {};
+    const finish = () => {
+      if (!activeTransitions.delete(finish)) return;
+      unlock();
+    };
+    activeTransitions.add(finish);
+    return finish;
+  };
 
   // Device context for a functional `transitions` config is based on the
   // scroll container's width (not the viewport). Cached + refreshed via
@@ -80,7 +96,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   let scrollPolicyDecisionGeneration = 0;
 
   const scrollListener = () => {
-    if (scrollContainer && currentPath && !isTransitioning) {
+    if (
+      scrollContainer &&
+      currentPath &&
+      !isTransitioning &&
+      !activeTransitions.size
+    ) {
       scrollPositions.set(getStorageKey(currentPath), {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
@@ -128,6 +149,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       scrollContainer.scrollTo({
         top: target.y,
         left: target.x,
+        behavior: "instant",
       });
 
       const targetReached =
@@ -164,10 +186,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       cachedIsMobile = measureIsMobile();
       isMobileMeasured = true;
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => {
+        resizeObserver = new ResizeObserver(() => {
           cachedIsMobile = measureIsMobile();
         });
-        observer.observe(scrollContainer);
+        resizeObserver.observe(scrollContainer);
       }
 
       // IMPORTANT: When the scrolling element is document.documentElement,
@@ -212,10 +234,8 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       });
     }
 
-    // Re-enable scroll capture after the transition window settles. Spans
-    // ~10 frames (~167ms) — long enough for most page transitions and any
-    // router-driven scroll reset to land before we start trusting the
-    // listener again.
+    // Let initial/unmatched registrations settle too. Matched transitions
+    // additionally hold capture until their actual preparation/playback ends.
     let settleCount = 0;
     const trySettle = () => {
       // A newer init started its own settle; this older one must not be the
@@ -285,6 +305,25 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   };
 
   return {
+    beginTransition,
+    disconnect() {
+      ++initGeneration;
+      ++restorationGeneration;
+      for (const finish of activeTransitions) finish();
+      if (scrollContainer) {
+        const target =
+          scrollContainer === document.documentElement
+            ? window
+            : scrollContainer;
+        target.removeEventListener("scroll", scrollListener);
+      }
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+      scrollContainer = null;
+      contextElement = null;
+      currentPath = null;
+      isMobileMeasured = false;
+    },
     initializeContext,
     calculateScrollOffset,
     evictScrollPosition,

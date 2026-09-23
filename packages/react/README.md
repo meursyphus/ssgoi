@@ -12,6 +12,20 @@ npm install @ssgoi/react
 
 Agent setup guide: https://ssgoi.dev/llms.txt
 
+## Router helpers
+
+Install this framework package once; router helpers are optional subpaths.
+Next.js is the only helper not marked experimental. The other router helpers are experimental APIs.
+
+| Router                  | Import                         | API                  |
+| ----------------------- | ------------------------------ | -------------------- |
+| Next.js                 | `@ssgoi/react/nextjs`          | `SsgoiRouteBoundary` |
+| Remix 2                 | `@ssgoi/react/remix`           | `SsgoiRouteBoundary` |
+| React Router            | `@ssgoi/react/react-router`    | `SsgoiRouteBoundary` |
+| TanStack Router / Start | `@ssgoi/react/tanstack-router` | `SsgoiRouteBoundary` |
+
+See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring and limits.
+
 ## Contents
 
 - Next.js
@@ -20,6 +34,18 @@ Agent setup guide: https://ssgoi.dev/llms.txt
 - TanStack Router
 - Config
 - Effect index
+
+## Tune or define motion
+
+Built-in presets accept `{ override: { forward, backward } }` as their second
+argument. Callbacks receive `{ animation, context }`, preserve the preset's
+concrete animation type, and edit named children with
+`animation.select("in").set({ integrator })`. Use `animation.set({ integrator })`
+to retune the whole group. Springs use stiffness/damping; custom integrator
+instances are accepted.
+
+[Motion overrides](https://ssgoi.dev/docs/motion) ·
+[Custom definitions and integrators](https://ssgoi.dev/docs/custom-transitions)
 
 ## Next.js
 
@@ -91,7 +117,8 @@ The legacy `<SsgoiTransition>` wrapper only added this attribute and is
 deprecated. Set `data-ssgoi-transition` directly on the keyed application
 boundary.
 
-Create a router-aware utility in the application. Keep its route logic behind
+Use `@ssgoi/react/nextjs` for the ready-made boundary. If the application needs
+its own policy layer, the following manual example keeps route logic behind
 semantic names so layouts cannot invent inconsistent keys:
 
 ```tsx

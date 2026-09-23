@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { buildInput, resolveZoom } from "./transition";
-import type { ZoomResolved } from "./types";
+import { buildInput, resolveZoom, zoom } from "./transition";
+import { withOverride } from "../../transition/define-transition";
+import type { ZoomResolved, ZoomType } from "./types";
+import { createZoomIn, createZoomOut } from "./zoom-element";
 
 type Rect = {
   left: number;
@@ -31,7 +33,10 @@ class TestDOMRect {
   }
 }
 
-beforeAll(() => vi.stubGlobal("DOMRect", TestDOMRect));
+beforeAll(() => {
+  vi.stubGlobal("DOMRect", TestDOMRect);
+  vi.stubGlobal("getComputedStyle", (element: HTMLElement) => element.style);
+});
 afterAll(() => vi.unstubAllGlobals());
 
 function rect(left: number, top: number, width: number, height: number): Rect {
@@ -47,7 +52,9 @@ function style({
   overflow?: string;
   radius?: string;
 } = {}): CSSStyleDeclaration {
-  return {
+  const values: Record<string, string> = {};
+  const declaration = {
+    opacity: "",
     objectFit: fit,
     objectPosition: "50% 50%",
     overflowX: overflow,
@@ -56,7 +63,61 @@ function style({
     borderTopRightRadius: radius,
     borderBottomRightRadius: radius,
     borderBottomLeftRadius: radius,
-  } as CSSStyleDeclaration;
+    getPropertyValue(name: string) {
+      return name === "opacity" ? this.opacity : (values[name] ?? "");
+    },
+    getPropertyPriority: () => "",
+    setProperty(name: string, value: string) {
+      if (name === "opacity") this.opacity = value;
+      else values[name] = value;
+    },
+    removeProperty(name: string) {
+      if (name === "opacity") this.opacity = "";
+      else delete values[name];
+      return "";
+    },
+  };
+  return declaration as unknown as CSSStyleDeclaration;
+}
+
+function withDOM(el: HTMLElement): HTMLElement {
+  const attributes = new Map<string, string>();
+  const originalGet = el.getAttribute?.bind(el);
+  Object.assign(el, {
+    scrollLeft: 0,
+    scrollTop: 0,
+    children: el.children ?? [],
+    attributes: [],
+    getAttribute: (name: string) =>
+      attributes.get(name) ?? originalGet?.(name) ?? null,
+    setAttribute: (name: string, value: string) => attributes.set(name, value),
+    removeAttribute: (name: string) => attributes.delete(name),
+    hasAttribute: (name: string) => attributes.has(name),
+    cloneNode: () =>
+      withDOM({
+        ...el,
+        style: Object.assign(style(), el.style),
+        children: Array.from(el.children).map((child) => child.cloneNode(true)),
+      } as unknown as HTMLElement),
+    after: (node: HTMLElement) => {
+      const children = el.parentElement!.children as unknown as HTMLElement[];
+      children.splice(children.indexOf(el) + 1, 0, node);
+      Object.defineProperty(node, "parentElement", {
+        value: el.parentElement,
+        configurable: true,
+      });
+    },
+    remove: () => {
+      const children = el.parentElement!.children as unknown as HTMLElement[];
+      children.splice(children.indexOf(el), 1);
+    },
+  });
+  for (const child of Array.from(el.children))
+    Object.defineProperty(child, "parentElement", {
+      value: el,
+      configurable: true,
+    });
+  return el;
 }
 
 function image({
@@ -70,7 +131,7 @@ function image({
   radius?: string;
   attributes?: Record<string, string>;
 }): HTMLElement {
-  return {
+  return withDOM({
     tagName: "IMG",
     children: [],
     naturalWidth: 1000,
@@ -80,7 +141,7 @@ function image({
     style: style({ fit, radius }),
     getBoundingClientRect: () => box,
     getAttribute: (name: string) => attributes[name] ?? null,
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function wrapper({
@@ -94,7 +155,7 @@ function wrapper({
   radius?: string;
   attributes?: Record<string, string>;
 }): HTMLElement {
-  return {
+  return withDOM({
     tagName: "DIV",
     children: [child],
     offsetWidth: box.width,
@@ -102,15 +163,16 @@ function wrapper({
     style: style({ overflow: "hidden", radius }),
     getBoundingClientRect: () => box,
     getAttribute: (name: string) => attributes[name] ?? null,
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function page(width = 400, height = 800): HTMLElement {
-  return {
+  return withDOM({
+    style: style(),
     offsetWidth: width,
     offsetHeight: height,
     getBoundingClientRect: () => rect(0, 0, width, height),
-  } as unknown as HTMLElement;
+  } as unknown as HTMLElement);
 }
 
 function resolvedPair({
@@ -141,6 +203,42 @@ function resolvedPair({
 }
 
 describe("zoom transition media inference", () => {
+  it.each(["enter", "exit"] as const)(
+    "preserves a partially visible Airbnb card and its surviving corners on %s",
+    (mode) => {
+      const enterEl = image({ box: rect(0, 0, 400, 400), fit: "cover" });
+      const exitImage = image({ box: rect(320, 280, 144, 144), fit: "cover" });
+      const exitEl = wrapper({
+        box: rect(320, 280, 144, 144),
+        child: exitImage,
+      });
+      const viewport = wrapper({
+        box: rect(0, 260, 400, 220),
+        child: exitEl,
+        radius: "0px",
+      });
+      const exitPage = page();
+      Object.defineProperty(exitEl, "parentElement", { value: viewport });
+      Object.defineProperty(viewport, "parentElement", { value: exitPage });
+      const input = buildInput(
+        { mode, enterEl, exitEl },
+        mode === "enter" ? exitPage : page(),
+        mode === "enter" ? page() : exitPage,
+        { x: 0, y: 0 },
+      );
+      expect(input.exitMedia?.window).toEqual(rect(320, 280, 80, 144));
+      expect(input.exitMedia?.cornerRadii).toEqual([16, 0, 0, 16]);
+      const style = (
+        mode === "enter" ? createZoomIn(input) : createZoomOut(input)
+      ).animate(0);
+      // 64 of the 144 source pixels are hidden; the image keeps its 0.36 scale.
+      expect(style.transform).toContain("scale(0.36, 0.36)");
+      expect(style.clipPath).toContain("44.44444444444444% 50% 0%");
+      expect(style.clipPath).toContain(
+        "round 11.11111111111111% 0% 0% 11.11111111111111%",
+      );
+    },
+  );
   it("connects inferred image geometry and wrapper radius to zoom input", () => {
     const input = buildInput(resolvedPair(), page(), page(), { x: 0, y: 0 });
 
@@ -149,6 +247,19 @@ describe("zoom transition media inference", () => {
     expect(input.exitRadius).toBe(16);
     // A radius on an image region inside the page must not round the whole page.
     expect(input.enterRadius).toBe(0);
+  });
+
+  it("keeps content-aware crop geometry on a fractionally sized detail page", () => {
+    const pair = resolvedPair();
+    const detail = page(400, 878);
+    detail.getBoundingClientRect = () => rect(0, 0, 400, 877.75) as DOMRect;
+    const input = buildInput(pair, page(), detail, { x: 0, y: 0 });
+    expect(input.enterRect.height).toBe(400);
+    expect(input.enterMedia?.content.width).toBe(400);
+    expect(input.enterMedia?.content.height).toBe(400);
+    expect(createZoomIn(input).animate(0).transform).toContain(
+      "scale(0.25, 0.25)",
+    );
   });
 
   it("keeps deprecated zero and px radius overrides working", () => {
@@ -220,5 +331,91 @@ describe("zoom semantic direction", () => {
     expect(
       resolveZoom(keyedPage([enter]), keyedPage([], [exit]), "backward"),
     ).toEqual({ mode: "exit", enterEl: enter, exitEl: exit });
+  });
+});
+
+function previewTransition(
+  type: ZoomType = "static",
+  observe?: (direction: "forward" | "backward") => void,
+) {
+  const pair = resolvedPair({
+    enterAttributes: { "data-zoom-enter-key": "photo" },
+    exitAttributes: { "data-zoom-exit-key": "photo" },
+  });
+  pair.exitEl.style.opacity = "0.8";
+  const other = image({ box: rect(130, 30, 100, 100), fit: "cover" });
+  other.style.opacity = "1";
+  const list = Object.assign(page(), keyedPage([], [pair.exitEl, other]));
+  const detail = withDOM(
+    Object.assign(page(), keyedPage([pair.enterEl]), {
+      children: [pair.enterEl],
+    }),
+  );
+  const config = withOverride(zoom({ type, variant: "default" }), {
+    forward: ({ context }) => observe?.(context.direction),
+    backward: ({ context }) => observe?.(context.direction),
+  });
+  return {
+    preview: pair.exitEl,
+    detail,
+    visual: pair.enterEl,
+    other,
+    create(direction: "forward" | "backward", coreDirection = direction) {
+      return config.animation({
+        from: direction === "forward" ? list : detail,
+        to: direction === "forward" ? detail : list,
+        context: {
+          direction: coreDirection,
+          scrollOffset: { x: 0, y: 0 },
+        } as Parameters<typeof config.animation>[0]["context"],
+      });
+    },
+  };
+}
+
+describe.each<ZoomType>(["static", "expand", "blur"])(
+  "zoom %s preview compositing",
+  (type) => {
+    it.each(["forward", "backward"] as const)(
+      "hides the stationary preview on %s and restores the original opacity",
+      (direction) => {
+        const { preview, other, create } = previewTransition(type);
+        const animation = create(direction);
+        expect(preview.style.opacity).toBe("0");
+        expect(other.style.opacity).toBe("1");
+        expect(preview.getBoundingClientRect()).toEqual(rect(20, 30, 100, 100));
+        animation.complete();
+        expect(preview.style.opacity).toBe("0.8");
+        expect(other.style.opacity).toBe("1");
+      },
+    );
+
+    it("keeps a reused preview hidden when a new navigation interrupts the previous run", () => {
+      const { preview, visual, detail, create } = previewTransition(type);
+      const outgoing = create("forward");
+      const incoming = create("backward");
+      outgoing.complete();
+      expect(preview.style.opacity).toBe("0");
+      incoming.complete();
+      expect(preview.style.opacity).toBe("0.8");
+      expect(visual.style.opacity).toBe("");
+      expect(detail.children).toEqual([visual]);
+    });
+  },
+);
+
+describe("zoom consumes the authoritative core direction", () => {
+  it("does not reinterpret endpoint roles as a different direction", () => {
+    const observed: string[] = [];
+    const { create, preview } = previewTransition("static", (direction) =>
+      observed.push(direction),
+    );
+    // Physical pages have detail -> list roles, but the core supplied forward.
+    // Keep the existing no-match behavior instead of silently choosing backward.
+    const animation = create("backward", "forward");
+    expect(observed).toEqual(["forward"]);
+    expect(animation.getTimeline()).toEqual([]);
+    expect(preview.style.opacity).toBe("0.8");
+    animation.complete();
   });
 });
