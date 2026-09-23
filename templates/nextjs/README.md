@@ -50,6 +50,11 @@ Direction comes from the single config:
 
 `ordered` routes restore scroll automatically. `on` and `from`/`to` rules
 restore the forward source and reset the forward destination.
+During a matched transition, SSGOI also suppresses wheel, single-finger touch,
+and page-scroll key input until the outgoing page is gone. This leaves CSS and
+scrollbar behavior alone. Set `scrollLock: false` in the top-level config only
+if the app manages transition input itself; see the
+[scroll restoration guide](https://ssgoi.dev/llms/scroll-restoration.txt).
 
 ## Other demos
 
