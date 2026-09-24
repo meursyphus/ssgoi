@@ -268,11 +268,7 @@ export function createSggoiTransitionContext(
     outSide: PendingSide,
     inSide?: PendingSide,
   ): void => {
-    supersedePreparation();
-    if (outSide.mode !== "hidden") {
-      host.complete();
-      return;
-    }
+    if (outSide.mode !== "hidden") return;
 
     const elements = Array.from(
       new Set([outSide.element, inSide?.element].filter(Boolean)),
@@ -646,7 +642,10 @@ export function createSggoiTransitionContext(
       if (!resolved) {
         pair.in.applyScrollPolicy?.(false);
         evictScrollPosition(pair.from);
+        // This paired navigation supersedes any preparation still pending.
+        supersedePreparation();
         settleHiddenWithoutTransition(pair.out, pair.in);
+        host.complete();
         return;
       }
 
@@ -658,7 +657,9 @@ export function createSggoiTransitionContext(
         if (!resolved.preserveScroll.from) {
           evictScrollPosition(pair.from);
         }
+        supersedePreparation();
         settleHiddenWithoutTransition(pair.out, pair.in);
+        host.complete();
         return;
       }
 
