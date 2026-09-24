@@ -6,7 +6,6 @@ import {
   sampleIntegratorState,
   type SimFrame,
 } from "../runtime/timeline";
-import { waitPaint } from "../utils/wait-paint";
 import {
   Animation,
   finishedDisposal,
@@ -652,7 +651,7 @@ export class WebAnimation extends Animation {
     const firstFrame = keyframes[0];
     const lastFrame = this.frames[this.frames.length - 1]!;
     const playbackDuration = lastFrame.time;
-    const runId = ++this.runId;
+    this.runId++;
 
     const waapi = this._element.animate(keyframes, {
       duration: playbackDuration,
@@ -672,7 +671,7 @@ export class WebAnimation extends Animation {
     this.hold?.cancel();
     this.hold = null;
     this.waitingForStart = true;
-    this.startReady = false;
+    this.startReady = true;
     this.pendingFirstFrame = firstFrame;
     this.running = true;
 
@@ -685,7 +684,10 @@ export class WebAnimation extends Animation {
       this.finish();
     };
 
-    void this.startWhenReady(waapi, runId);
+    // The paused 0 ms frame is rendered in this frame; the first scheduler
+    // tick seeks past it. Nothing waits for `ready` or an extra paint, so an
+    // element that was already moving does not freeze at the handoff.
+    this.startFramePacedPlayback(waapi);
   }
 
   /**
@@ -828,30 +830,6 @@ export class WebAnimation extends Animation {
     );
   }
 
-  private async startWhenReady(
-    waapi: globalThis.Animation,
-    runId: number,
-  ): Promise<void> {
-    try {
-      // This acknowledges the pending pause. It does not prove that pixels have
-      // been presented, so keep the animation held through the frame barrier.
-      await waapi.ready;
-      if (typeof requestAnimationFrame !== "undefined") {
-        await waitPaint(this._element);
-      }
-    } catch {
-      return;
-    }
-
-    if (this.runId !== runId || this.waapi !== waapi) {
-      return;
-    }
-
-    this.startReady = true;
-    if (!this.running || this.paused) return;
-    this.startFramePacedPlayback(waapi);
-  }
-
   private startFramePacedPlayback(waapi: globalThis.Animation): void {
     if (
       this.waapi !== waapi ||
@@ -862,17 +840,8 @@ export class WebAnimation extends Animation {
       return;
     }
 
-    // Clear inline styles only after the browser has applied the paused 0 ms
-    // WAAPI frame. Clearing earlier can expose the underlying, unanimated
-    // style while the animation is still pending.
-    if (this.pendingFirstFrame) {
-      for (const prop of Object.keys(this.pendingFirstFrame)) {
-        (this._element.style as unknown as Record<string, string>)[prop] = "";
-      }
-    }
-
-    this.pendingFirstFrame = undefined;
     if (typeof requestAnimationFrame === "undefined" || this.playbackRate < 0) {
+      this.clearStartStyles();
       this.handOffToWaapi(waapi);
       return;
     }
@@ -880,6 +849,21 @@ export class WebAnimation extends Animation {
     this.stopStartupClock = frameScheduler.subscribe((tick) => {
       this.advanceFramePacedStartup(waapi, tick);
     });
+  }
+
+  /**
+   * Inline start styles are cleared in the same rendering update as the first
+   * seek, after the paused 0 ms WAAPI frame has had its own frame. Clearing
+   * earlier can expose the underlying, unanimated style while the animation is
+   * still pending.
+   */
+  private clearStartStyles(): void {
+    if (this.pendingFirstFrame) {
+      for (const prop of Object.keys(this.pendingFirstFrame)) {
+        (this._element.style as unknown as Record<string, string>)[prop] = "";
+      }
+    }
+    this.pendingFirstFrame = undefined;
   }
 
   private advanceFramePacedStartup(
@@ -903,7 +887,10 @@ export class WebAnimation extends Animation {
       lastFrame.time,
       currentTime + tick.delta * Math.max(0, this.playbackRate),
     );
+    // Seeking completes the pending pause synchronously, so the effect is
+    // applied in this rendering update together with the cleared inline styles.
     waapi.currentTime = nextTime;
+    this.clearStartStyles();
     this.captureLiveState();
 
     if (nextTime >= lastFrame.time) {
@@ -926,6 +913,16 @@ export class WebAnimation extends Animation {
     this.waitingForStart = false;
     this.startReady = false;
     this.startupStableFrames = 0;
+    // `play()` resolves its start time on a later frame, which advances the
+    // animation by an extra frame relative to the last seek. Assigning the
+    // start time keeps this frame at the seeked time and the next one +1 frame.
+    const now = waapi.timeline?.currentTime;
+    const current = readAnimationTime(waapi);
+    const rate = this.playbackRate;
+    if (typeof now === "number" && current !== null && rate !== 0) {
+      waapi.startTime = now - current / rate;
+      return;
+    }
     waapi.play();
   }
 

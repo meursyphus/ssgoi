@@ -112,9 +112,9 @@ describe("WebAnimation", () => {
     vi.unstubAllGlobals();
   });
 
-  it("frame-paces startup before handing playback to WAAPI", async () => {
+  it("frame-paces startup from the first frame, then hands playback to WAAPI", () => {
     const frames = installAnimationFrameHarness();
-    const { waapi, ready, calls, advance } = createFakeWaapi();
+    const { waapi, calls, advance } = createFakeWaapi();
     const { element, style } = createFakeElement(waapi);
     const animation = new WebAnimation({
       element,
@@ -124,37 +124,25 @@ describe("WebAnimation", () => {
 
     animation.play();
 
+    // The paused 0 ms frame renders with the inline start style still in
+    // place; nothing waits for `ready` or an extra paint.
     expect(calls).toEqual(["seek", "pause"]);
     expect(waapi.pause).toHaveBeenCalledTimes(1);
     expect(waapi.currentTime).toBe(0);
     expect(waapi.play).not.toHaveBeenCalled();
     expect(style.opacity).toBe("0");
+    expect(frames.pending).toBe(1);
 
     advance(1000);
     expect(waapi.currentTime).toBe(0);
 
-    ready.resolve(waapi);
-    await Promise.resolve();
-
-    expect(frames.pending).toBe(1);
+    // First tick: seek one frame and clear the inline start style together.
     frames.flush();
-    expect(frames.pending).toBe(1);
-    advance(1000);
-    expect(waapi.currentTime).toBe(0);
-    expect(waapi.play).not.toHaveBeenCalled();
-    expect(style.opacity).toBe("0");
-
-    frames.flush();
-    await Promise.resolve();
-
     expect(style.opacity).toBe("");
-    expect(waapi.play).not.toHaveBeenCalled();
-    expect(waapi.currentTime).toBe(0);
-
-    frames.flush();
     expect(waapi.play).not.toHaveBeenCalled();
     expect(waapi.currentTime).toBeCloseTo(1000 / 60);
 
+    // Second stable tick: hand the clock to WAAPI (no timeline here → play()).
     frames.flush();
     expect(waapi.play).toHaveBeenCalledTimes(1);
     expect(waapi.currentTime).toBeCloseTo(1000 / 30);
@@ -165,9 +153,42 @@ describe("WebAnimation", () => {
     expect(pose?.value).toBeLessThan(0.5);
   });
 
-  it("does not charge a long startup frame to animation progress", async () => {
+  it("hands off by assigning a start time so the WAAPI clock continues from the last seek", () => {
     const frames = installAnimationFrameHarness();
-    const { waapi, ready } = createFakeWaapi();
+    const { waapi } = createFakeWaapi();
+    let timelineNow = 0;
+    Object.defineProperty(waapi, "timeline", {
+      get: () => ({ currentTime: timelineNow }),
+    });
+    let startTime: number | null = null;
+    Object.defineProperty(waapi, "startTime", {
+      get: () => startTime,
+      set: (value: number) => {
+        startTime = value;
+      },
+    });
+    const { element } = createFakeElement(waapi);
+    const animation = new WebAnimation({
+      element,
+      integrator: testIntegrator,
+      style: (t) => ({ opacity: t }),
+    });
+    animation.playbackRate = 2;
+    animation.play();
+    timelineNow = 500;
+    frames.flush();
+    timelineNow = 516.67;
+    frames.flush();
+    expect(waapi.play).not.toHaveBeenCalled();
+    // current time = (timeline − start) × rate holds at the seeked value.
+    expect((timelineNow - startTime!) * 2).toBeCloseTo(
+      Number(waapi.currentTime),
+    );
+  });
+
+  it("does not charge a long startup frame to animation progress", () => {
+    const frames = installAnimationFrameHarness();
+    const { waapi } = createFakeWaapi();
     const { element } = createFakeElement(waapi);
     const animation = new WebAnimation({
       element,
@@ -176,12 +197,6 @@ describe("WebAnimation", () => {
     });
 
     animation.play();
-    ready.resolve(waapi);
-    await Promise.resolve();
-    frames.flush();
-    frames.flush();
-    await Promise.resolve();
-
     frames.flush();
     expect(waapi.currentTime).toBeCloseTo(1000 / 60);
 
