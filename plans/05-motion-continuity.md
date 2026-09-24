@@ -147,3 +147,20 @@ Review before graduating this draft:
 - Opaque custom drivers and custom effects using completion callbacks for cleanup require migration to `onDispose`. Constructor-based legacy WebAnimation cleanup takes the finish fallback; arbitrary later callback assignments cannot be inferred as cleanup automatically. Native presence/playback integration remains separate work.
 
 No package version or release is part of this draft.
+
+## Rebase and review revisions
+
+Rebased onto `latest` after 7.2.0 (`cb48248`). Two features landed there in the meantime and were merged with this contract rather than replaced:
+
+- **Scroll lock lifetime (#418).** A run still acquires its container lock before superseding a pending predecessor. It is released exactly once by whichever path ends the run: disposal (finished or retired), supersession before attach, failure, or the 5 s abandoned-prepare bound. Retired runs therefore keep their lock until their release motion is disposed, while the newer run already holds its own.
+- **In-place hero (#415, #416).** The real destination image stays the persistent track and carries the photo key with role `shared-media`; source copies are unkeyed (`shared-media-source`), so a redirected navigation transfers the flight to the new destination node and never matches a copy. Layout restoration (`fitHeroImage`, CSS hooks) runs regardless of ownership: a newer track on the same image only drives transform/clip/opacity, and opacity is arbitrated by the existing lease.
+
+Review changes to the draft itself:
+
+- **Presentation decoding is lazy.** An uninterrupted run no longer measures the element, walks its ancestors or decodes every authored frame through the codec; it plays plain authored keyframes. The codec is consulted when a snapshot is taken (two frames around the current time) or when an adopted presentation is bridged into new keyframes.
+- **Restoration does not take ownership.** A restoration track only returns transform/opacity toward rest, so the previous effect keeps ownership of that target and its cleanup still clears everything else it wrote (`will-change`, `contain`, clip, stacking). Restoration is only created when the snapshot has a transform or opacity channel; other channels are returned by the previous effect's cleanup. A restoration clears the resting frame it wrote inline where nothing was set before.
+- **Descendants of a surviving page are never released on their own.** They belong to their page; releasing them would fade content of a page that is still visible.
+- **A persistent source whose flight moved to another node is hidden** (via the shared opacity lease) until the run that carries its identity is disposed, so the in-page image does not show at rest beside its own flight.
+- **Ownership is stamped before supersession.** A run claims its pages before the superseded preparation restores its own, so a page that is about to animate out again is not hidden by the older run's cleanup.
+
+Known limits kept from the draft: a channel with no known base (clip, filter, color) on a persistent descendant pops to the previous effect's resting value at handoff; `prepareHandoff()` pauses the running transition for the duration of the next `prepare`, so a slow asynchronous prepare shows a stall rather than stale measurements.

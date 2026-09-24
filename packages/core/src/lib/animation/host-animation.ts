@@ -5,9 +5,16 @@ import { WebAnimation } from "./web-animation";
 import { SpringIntegrator } from "./integrator/spring-integrator";
 import { createWebPresentationCodec } from "./web-presentation";
 import { matchMotion, type MotionSnapshot } from "../runtime/motion-matching";
+import { retainOpacity } from "../utils/retain-opacity";
 
 type HostState = "idle" | "playing" | "paused" | "reversing";
-type Run = { animation: Animation; epoch: number; targets: Set<HTMLElement> };
+type Run = {
+  animation: Animation;
+  epoch: number;
+  targets: Set<HTMLElement>;
+  /** Persistent sources whose identity this run carries on another node. */
+  hidden: Array<() => void>;
+};
 type RetiringRun = Run & { releases: WebAnimation[] };
 export interface HandoffEvent {
   kind: "element" | "key" | "enter" | "ambiguous" | "release" | "fallback";
@@ -62,20 +69,38 @@ export class HostAnimation extends Animation {
           !authoredTracks.some((track) => track.element === source.target) &&
           (options.targets ?? []).some(
             (root) => root === source.target || root.contains?.(source.target),
-          ),
+          ) &&
+          // Only channels with a known base presentation can be restored.
+          // Anything else (clip, filter, color) is returned by the previous
+          // effect's own cleanup, which keeps ownership of that target.
+          ("transform" in source.channels || "opacity" in source.channels),
       )
-      .map(
-        (source) =>
-          new WebAnimation({
-            element: source.target,
-            integrator: new SpringIntegrator({ stiffness: 200, damping: 24 }),
-            style: () => ({
-              transform: "none",
-              opacity: source.target.style.opacity || 1,
-            }),
-            motion: { key: source.key, role: source.role, space: source.space },
-          }),
-      );
+      .map((source) => {
+        const target = source.target;
+        const before = {
+          transform: target.style.transform,
+          opacity: target.style.opacity,
+        };
+        const opacity = target.style.opacity || 1;
+        return new WebAnimation({
+          element: target,
+          integrator: new SpringIntegrator({ stiffness: 200, damping: 24 }),
+          style: () => ({ transform: "none", opacity }),
+          motion: { key: source.key, role: source.role, space: source.space },
+          // A restoration writes its resting frame inline when it settles.
+          // Leave no trace where nothing was set before, so the element's
+          // stylesheet values govern again.
+          onDispose: () => {
+            if (!before.transform && target.style.transform === "none")
+              target.style.transform = "";
+            if (
+              !before.opacity &&
+              String(target.style.opacity) === String(opacity)
+            )
+              target.style.opacity = "";
+          },
+        });
+      });
     if (restorations.length) {
       const dispose = next.onDispose;
       next.onDispose = undefined;
@@ -90,9 +115,14 @@ export class HostAnimation extends Animation {
       ...(options.targets ?? []),
       ...nextTracks.map((t) => t.element),
     ]);
-    for (const target of targets) this.owners.set(target, epoch);
+    // Ownership covers the pages and the effect's own tracks. A restoration
+    // track only returns transform/opacity to rest; the previous effect keeps
+    // ownership so its cleanup still clears everything else it wrote there.
+    for (const target of options.targets ?? []) this.owners.set(target, epoch);
+    for (const track of authoredTracks) this.owners.set(track.element, epoch);
     this.child = next;
-    this.run = { animation: next, epoch, targets };
+    const current: Run = { animation: next, epoch, targets, hidden: [] };
+    this.run = current;
     this._settled = false;
     const events: HandoffEvent[] = [];
 
@@ -120,11 +150,18 @@ export class HostAnimation extends Animation {
           });
       });
       for (const match of matches) {
-        if (
-          match.previous?.lifetime === "temporary" &&
-          match.previous.target !== match.next.target
-        )
+        if (!match.previous || match.previous.target === match.next.target)
+          continue;
+        if (match.previous.lifetime === "temporary") {
           match.previous.target.remove();
+          continue;
+        }
+        // A persistent source (an in-page image) whose flight moved to a new
+        // node must not also stay visible at rest inside its page. The lease
+        // outlives the previous run's own cleanup, which re-asserts it.
+        const lease = retainOpacity(match.previous.target);
+        lease.set(0);
+        current.hidden.push(lease.restore);
       }
       // Reclaim an older exiting surface too (A -> B -> C -> A), not only B/C.
       for (const run of [...this.retiring]) {
@@ -159,6 +196,14 @@ export class HostAnimation extends Animation {
     }
 
     next.playbackRate = this.playbackRate;
+    const previousDispose = next.onDispose;
+    next.onDispose = (disposal) => {
+      try {
+        previousDispose?.(disposal);
+      } finally {
+        for (const restore of current.hidden.splice(0)) restore();
+      }
+    };
     const previousDone = next.onComplete;
     next.onComplete = () => {
       previousDone?.();
@@ -240,15 +285,16 @@ export class HostAnimation extends Animation {
     previous.animation.stop();
     const oldTracks = tracks(previous.animation);
     const run: RetiringRun = { ...previous, releases: [] };
+    const containers = new Set([...previous.targets, ...targets]);
     for (const target of previous.targets) {
       if (targets.has(target)) continue;
-      // Fade a page once, rather than fading it and all its animated descendants.
+      // Fade a page once, rather than fading it and all its animated
+      // descendants. A descendant of a page that survives is not released
+      // either: it belongs to its page, and the previous effect's cleanup
+      // returns it to rest.
       if (
-        [...previous.targets].some(
-          (parent) =>
-            parent !== target &&
-            !targets.has(parent) &&
-            parent.contains?.(target),
+        [...containers].some(
+          (parent) => parent !== target && parent.contains?.(target),
         )
       )
         continue;

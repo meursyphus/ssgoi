@@ -12,10 +12,20 @@ function node(width = 400, height = 600, left = 0, top = 0) {
     duration: number;
     waapi: globalThis.Animation;
   }> = [];
+  const style: Record<string, unknown> = {
+    getPropertyValue: (name: string) => String(style[name] ?? ""),
+    getPropertyPriority: () => "",
+    setProperty: (name: string, value: string) => {
+      style[name] = value;
+    },
+    removeProperty: (name: string) => {
+      style[name] = "";
+    },
+  };
   const element = {
     offsetWidth: width,
     offsetHeight: height,
-    style: {} as Record<string, string>,
+    style: style as unknown as CSSStyleDeclaration,
     getBoundingClientRect: () => ({ left, top, width, height }),
     contains: (el: HTMLElement) => el === element,
     animate: vi.fn((frames: Keyframe[], options: KeyframeAnimationOptions) => {
@@ -345,4 +355,122 @@ it("keeps legacy constructor completion cleanup on the explicit finish fallback"
   host.attach(track(el.element, (_t, u) => ({ opacity: u })));
   expect(cleanup).toHaveBeenCalledOnce();
   host.complete();
+});
+
+describe("ownership of surviving pages", () => {
+  const page = (...children: HTMLElement[]) => {
+    const root = node();
+    root.element.contains = (el: HTMLElement) =>
+      el === root.element || children.includes(el);
+    return root;
+  };
+
+  it("does not fade a descendant of a page that survives; the previous effect cleans it", () => {
+    const surface = node(),
+      host = new HostAnimation();
+    const b = page(surface.element);
+    const cleanup = vi.fn();
+    const surfaceTrack = new WebAnimation({
+      element: surface.element,
+      integrator: spring(),
+      // Neither transform nor opacity: nothing the host could restore.
+      style: (t) => ({ backgroundColor: `rgba(0, 0, 0, ${t})` }),
+      onDispose: cleanup,
+    });
+    host.attach(
+      new MultiAnimation([
+        track(b.element, (t) => ({ opacity: t })),
+        surfaceTrack,
+      ]),
+      { targets: [b.element] },
+    );
+    const events = vi.fn();
+    host.onHandoff = events;
+    host.attach(
+      track(b.element, (_t, u) => ({ opacity: u })),
+      {
+        targets: [b.element],
+      },
+    );
+    expect(host.retiringCount).toBe(0);
+    expect(events.mock.lastCall?.[0]).not.toContainEqual(
+      expect.objectContaining({ kind: "release", target: surface.element }),
+    );
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(cleanup.mock.calls[0]![0].owns(surface.element)).toBe(true);
+    host.cancel({ reason: "disposed", owns: () => true });
+  });
+
+  it("restores transform without taking ownership from the previous effect's cleanup", () => {
+    const tile = node(),
+      host = new HostAnimation();
+    const b = page(tile.element);
+    const cleanup = vi.fn();
+    host.attach(
+      new MultiAnimation([
+        track(b.element, (t) => ({ opacity: t })),
+        new WebAnimation({
+          element: tile.element,
+          integrator: spring(),
+          style: (t) => ({ transform: `scale(${1 + t})`, clipPath: "none" }),
+          onDispose: cleanup,
+        }),
+      ]),
+      { targets: [b.element] },
+    );
+    tile.last().waapi.currentTime = 120;
+    host.attach(
+      track(b.element, (_t, u) => ({ opacity: u })),
+      {
+        targets: [b.element],
+      },
+    );
+    // The tile is restored toward its base presentation…
+    const restoration = host
+      .activeChild!.getMotionTracks()
+      .find((t) => t.element === tile.element);
+    expect(restoration).toBeDefined();
+    expect(
+      restoration!.getMotionSnapshot().channels.transform?.value[3],
+    ).toBeGreaterThan(1);
+    // …while the previous effect still owns it and clears what it wrote.
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(cleanup.mock.calls[0]![0].owns(tile.element)).toBe(true);
+    host.complete();
+    // The restoration leaves no inline resting frame behind.
+    expect(tile.element.style.transform).toBe("");
+    expect(tile.element.style.opacity).toBe("");
+  });
+
+  it("keeps a persistent source hidden while its flight continues on another node", () => {
+    const image = node(120, 90, 10, 20),
+      flight = node(400, 300, 0, 0),
+      space = {},
+      host = new HostAnimation();
+    host.attach(
+      new WebAnimation({
+        element: image.element,
+        integrator: spring(),
+        style: (t) => ({ transform: `translateX(${100 * t}px)` }),
+        motion: { key: "photo42", role: "shared-media", space },
+      }),
+    );
+    image.last().waapi.currentTime = 120;
+    host.attach(
+      new WebAnimation({
+        element: flight.element,
+        integrator: spring(),
+        style: () => ({ transform: "none" }),
+        motion: {
+          key: "photo42",
+          role: "shared-media",
+          space,
+          lifetime: "temporary",
+        },
+      }),
+    );
+    expect(image.element.style.opacity).toBe("0");
+    host.complete();
+    expect(image.element.style.opacity).toBe("");
+  });
 });

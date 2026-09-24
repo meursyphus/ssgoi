@@ -74,7 +74,8 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
         element.style.willChange = willChange;
       }
       for (const { element, previousColor } of surfaces) {
-        if (disposal.owns(element)) element.style.backgroundColor = previousColor;
+        if (disposal.owns(element))
+          element.style.backgroundColor = previousColor;
       }
     });
 

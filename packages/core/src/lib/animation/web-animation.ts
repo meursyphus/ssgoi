@@ -444,8 +444,25 @@ export class WebAnimation extends Animation {
     }
   }
 
+  /** Presentation channels of frame `index`, corrected when a handoff applied. */
+  private channelsAt(index: number): Record<string, MotionChannel> {
+    const corrected = this.presentationFrames[index];
+    if (corrected) return corrected.channels;
+    const frame = this.frames[index]!;
+    this.codec ??=
+      this.motion.codec ?? createWebPresentationCodec(this.element);
+    return this.codec.read({
+      transform: "none",
+      opacity: 1,
+      ...this.styleFn(
+        frame.position,
+        this.lowerBound + this.upperBound - frame.position,
+      ),
+    });
+  }
+
   private samplePresentation(time: number): Record<string, MotionChannel> {
-    const frames = this.presentationFrames;
+    const frames = this.frames;
     if (!frames.length) {
       if (this.adopted) return { ...this.adopted.channels };
       this.codec ??=
@@ -459,28 +476,33 @@ export class WebAnimation extends Animation {
         ),
       });
     }
+    // Only the two frames around `time` are decoded. An uninterrupted run
+    // never pays for a per-frame presentation timeline.
     let index = frames.findIndex((f) => f.time > time);
     if (index < 0) index = frames.length - 1;
-    const a = frames[Math.max(0, index - 1)]!;
+    const first = Math.max(0, index - 1);
+    const a = frames[first]!;
     const b = frames[index]!;
+    const start = this.channelsAt(first);
+    const end = first === index ? start : this.channelsAt(index);
     const dt = (b.time - a.time) / 1000;
     const fraction = dt
       ? Math.max(0, Math.min(1, (time - a.time) / (dt * 1000)))
       : 0;
     const output: Record<string, MotionChannel> = {};
-    for (const [property, c] of Object.entries(a.channels)) {
-      const end = b.channels[property];
-      if (!end || !compatibleChannel(c, end)) {
+    for (const [property, c] of Object.entries(start)) {
+      const next = end[property];
+      if (!next || !compatibleChannel(c, next)) {
         output[property] = c;
         continue;
       }
       output[property] = {
         schema: c.schema,
-        value: c.value.map((v, i) => v + (end.value[i]! - v) * fraction),
+        value: c.value.map((v, i) => v + (next.value[i]! - v) * fraction),
         velocity: c.value.map((v, i) =>
           time >= frames[frames.length - 1]!.time || !dt
             ? 0
-            : (end.value[i]! - v) / dt,
+            : (next.value[i]! - v) / dt,
         ),
       };
     }
@@ -591,9 +613,9 @@ export class WebAnimation extends Animation {
     this.paused = false;
     this.settled = false;
     this.disposed = false;
-    this.codec = this.motion.codec ?? createWebPresentationCodec(this.element);
 
     this.presentationTime = 0;
+    this.presentationFrames = [];
     this.solverTarget = target;
     this.frames = simulate(
       this._integrator,
@@ -616,9 +638,68 @@ export class WebAnimation extends Animation {
       return;
     }
 
-    const duration = this.adopted
-      ? Math.max(16, this.motion.handoffDuration ?? 280)
-      : 0;
+    const authoredStyle = (f: SimFrame): StyleObject =>
+      this.styleFn(f.position, this.lowerBound + this.upperBound - f.position);
+    // The presentation codec is only consulted when bridging an adopted
+    // presentation: measuring the element and decoding every authored frame
+    // is handoff work, not something every uninterrupted transition pays.
+    const keyframes: Keyframe[] = this.adopted
+      ? this.bridgeKeyframes(authoredStyle)
+      : this.frames.map((f) => authoredStyle(f) as Keyframe);
+    this.renderedStyles = keyframes as StyleObject[];
+    this.adopted = undefined;
+
+    const firstFrame = keyframes[0];
+    const lastFrame = this.frames[this.frames.length - 1]!;
+    const playbackDuration = lastFrame.time;
+    const runId = ++this.runId;
+
+    const waapi = this._element.animate(keyframes, {
+      duration: playbackDuration,
+      fill: "both",
+      easing: "linear",
+      composite: "replace",
+    });
+    waapi.playbackRate = this.playbackRate;
+    // Element.animate() auto-plays. Seek while that play is pending, then pause:
+    // setting currentTime after pause would synchronously complete the pending
+    // pause, making `ready` useless as an acknowledgement of the pause request.
+    waapi.currentTime = 0;
+    waapi.pause();
+
+    this.waapi = waapi;
+    this.fallbackCopy?.play();
+    this.hold?.cancel();
+    this.hold = null;
+    this.waitingForStart = true;
+    this.startReady = false;
+    this.pendingFirstFrame = firstFrame;
+    this.running = true;
+
+    waapi.onfinish = () => {
+      if (!this.running || this.waapi !== waapi) return;
+      this.running = false;
+      this.settled = true;
+      this.currentValue = lastFrame.position;
+      this.currentVelocity = 0;
+      this.finish();
+    };
+
+    void this.startWhenReady(waapi, runId);
+  }
+
+  /**
+   * Bake the residual correction into the keyframes: each authored frame is
+   * decoded through the codec, offset by the decaying residual, and encoded
+   * back. `presentationFrames` records the corrected output so a later
+   * interruption samples what is actually displayed.
+   */
+  private bridgeKeyframes(
+    authoredStyle: (frame: SimFrame) => StyleObject,
+  ): Keyframe[] {
+    this.codec = this.motion.codec ?? createWebPresentationCodec(this.element);
+    const codec = this.codec;
+    const duration = Math.max(16, this.motion.handoffDuration ?? 280);
     const lastAuthored = this.frames[this.frames.length - 1]!;
     for (
       let time = lastAuthored.time + 1000 / 60;
@@ -628,14 +709,7 @@ export class WebAnimation extends Animation {
       this.frames.push({ time, position: lastAuthored.position, velocity: 0 });
     }
     const authored = this.frames.map((f) =>
-      this.codec!.read({
-        transform: "none",
-        opacity: 1,
-        ...this.styleFn(
-          f.position,
-          this.lowerBound + this.upperBound - f.position,
-        ),
-      }),
+      codec.read({ transform: "none", opacity: 1, ...authoredStyle(f) }),
     );
     for (let i = 1; i < authored.length; i++) {
       const a = authored[i - 1]!.transform,
@@ -669,7 +743,7 @@ export class WebAnimation extends Animation {
             : property === "opacity"
               ? { opacity: 1 }
               : {};
-        destination = this.codec.read(neutral)[property];
+        destination = codec.read(neutral)[property];
         if (destination)
           for (const frame of authored) frame[property] = destination;
       }
@@ -713,61 +787,17 @@ export class WebAnimation extends Animation {
       }
       return { time: f.time, channels };
     });
-    const keyframes: Keyframe[] = this.frames.map((f, index) => {
-      const style = this.styleFn(
-        f.position,
-        this.lowerBound + this.upperBound - f.position,
-      );
+    return this.frames.map((f, index) => {
       const channels = this.presentationFrames[index]!.channels;
       return {
-        ...style,
-        ...this.codec!.write(
+        ...authoredStyle(f),
+        ...codec.write(
           Object.fromEntries(
             Object.keys(corrections).map((key) => [key, channels[key]!]),
           ),
         ),
       } as Keyframe;
     });
-    this.renderedStyles = keyframes as StyleObject[];
-    this.adopted = undefined;
-
-    const firstFrame = keyframes[0];
-    const lastFrame = this.frames[this.frames.length - 1]!;
-    const playbackDuration = lastFrame.time;
-    const runId = ++this.runId;
-
-    const waapi = this._element.animate(keyframes, {
-      duration: playbackDuration,
-      fill: "both",
-      easing: "linear",
-      composite: "replace",
-    });
-    waapi.playbackRate = this.playbackRate;
-    // Element.animate() auto-plays. Seek while that play is pending, then pause:
-    // setting currentTime after pause would synchronously complete the pending
-    // pause, making `ready` useless as an acknowledgement of the pause request.
-    waapi.currentTime = 0;
-    waapi.pause();
-
-    this.waapi = waapi;
-    this.fallbackCopy?.play();
-    this.hold?.cancel();
-    this.hold = null;
-    this.waitingForStart = true;
-    this.startReady = false;
-    this.pendingFirstFrame = firstFrame;
-    this.running = true;
-
-    waapi.onfinish = () => {
-      if (!this.running || this.waapi !== waapi) return;
-      this.running = false;
-      this.settled = true;
-      this.currentValue = lastFrame.position;
-      this.currentVelocity = 0;
-      this.finish();
-    };
-
-    void this.startWhenReady(waapi, runId);
   }
 
   private clearWaapi() {
