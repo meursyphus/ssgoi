@@ -1,0 +1,8 @@
+# Lower bounds are the oldest releases with the APIs used here; upper bounds
+# exclude untested majors. Wheels exist for CPython 3.9 through 3.14 on
+# macOS/Linux/Windows, so `run.sh` never builds from source.
+numpy>=1.26,<3
+scipy>=1.11,<2
+opencv-python-headless>=4.9,<5
+Pillow>=10.1,<13
+matplotlib>=3.8,<4

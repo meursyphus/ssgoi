@@ -14,6 +14,19 @@
       "runtimeArgs": ["--filter", "dev", "dev"],
       "port": 3000,
       "autoPort": false
+    },
+    {
+      "name": "motion-viewer",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "apps/dev/tools/motion-analyzer/run.sh",
+        "serve",
+        "apps/dev/tools/motion-analyzer/output/demo/report",
+        "--port",
+        "8765"
+      ],
+      "port": 8765,
+      "autoPort": false
     }
   ]
 }
