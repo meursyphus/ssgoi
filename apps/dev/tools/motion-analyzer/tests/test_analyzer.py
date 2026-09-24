@@ -11,6 +11,7 @@ import numpy as np
 
 from motion_analyzer.physics import simulate, sample, fit_physics, fit_bezier
 from motion_analyzer.pipeline import verify_core, relationships, code_for, clean
+from motion_analyzer.reference import simulate_with_core
 from motion_analyzer.segment import measure_activity, segment
 from motion_analyzer.track import extract_tracks, alpha_series, edge_series
 from motion_analyzer.video import decode
@@ -19,14 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def actual_curves(configs):
-    result = subprocess.run(
-        ["node", str(ROOT / "core-reference.mjs")],
-        input=json.dumps(configs),
-        text=True,
-        capture_output=True,
-        check=True,
-    )
-    return json.loads(result.stdout)
+    return simulate_with_core(configs)
 
 
 class PhysicsTests(unittest.TestCase):
@@ -42,15 +36,27 @@ class PhysicsTests(unittest.TestCase):
                 ("doubleSpring", dict(stiffness=300, damping=30, doubleSpring=.8)),
                 ("inertia", dict(acceleration=150, resistance=1.5)),
             ]:
-                track = dict(
-                    id="photo", name="Photo", confidence="high",
+                incoming = dict(
+                    id="photo", name="Photo", role="in", confidence="high",
                     fit=dict(fit, model=model, params=params),
                     properties={"x": {"from": 296.0, "to": 0.0}},
                 )
-                recipe = code_for(dict(tracks=[track], overlaps=[]))
+                outgoing = dict(
+                    id="page", name="Page", role="out", confidence="medium",
+                    fit=dict(fit, t0Ms=fit["t0Ms"] - 40),
+                    properties={"x": {"from": 0.0, "to": -98.0}},
+                )
+                event = dict(
+                    direction="forward",
+                    tracks=[outgoing, incoming],
+                    overlaps=relationships([outgoing, incoming]),
+                )
+                recipe = code_for(event)
                 self.assertIn('from "@ssgoi/core/runtime"', recipe)
-                self.assertNotIn("spring(", recipe)
-                self.assertNotIn("new InertiaIntegrator", recipe)
+                self.assertIn('animation.select("in").set({ integrator:', recipe)
+                self.assertIn('animation.select("out").set({ integrator:', recipe)
+                self.assertIn('startAt: { after: animation.select("out"), at:', recipe)
+                self.assertIn('satisfies Override<MultiAnimation<"out" | "in">>', recipe)
                 file = Path(temp) / f"{model}.ts"
                 file.write_text(recipe)
                 files.append(str(file))

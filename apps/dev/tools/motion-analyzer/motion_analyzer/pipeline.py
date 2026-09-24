@@ -11,6 +11,7 @@ import numpy as np
 
 from . import __version__
 from .physics import fit_physics, fit_bezier, sample
+from .reference import CORE_LIB, simulate_with_core
 from .report import strip, activity_plot, timeline_plot, curve_plot, render
 from .segment import measure_activity, segment
 from .track import extract_tracks, nanmedian
@@ -149,22 +150,13 @@ def fingerprint(path):
 
 
 def verify_core(fits):
-    script = Path(__file__).resolve().parents[1] / "core-reference.mjs"
-    payload = [
+    actual = simulate_with_core(
         {
             k: f[k]
             for k in ("model", "params", "initialVelocity", "restDelta", "restSpeed")
         }
         for f in fits
-    ]
-    result = subprocess.run(
-        ["node", str(script)],
-        input=json.dumps(payload),
-        text=True,
-        capture_output=True,
-        check=True,
     )
-    actual = json.loads(result.stdout)
     max_error = 0.0
     for fit, reference in zip(fits, actual):
         expected = fit["simulation"]
@@ -190,19 +182,20 @@ def verify_core(fits):
         raise ValueError(
             f"Physics parity failure against current SSGOI source: {max_error}"
         )
-    core = script.parents[4] / "packages/core/src/lib"
     paths = [
-        core / "runtime/timeline.ts",
-        core / "animation/integrator/spring-integrator.ts",
-        core / "animation/integrator/double-spring-integrator.ts",
-        core / "animation/integrator/inertia-integrator.ts",
+        CORE_LIB / "runtime/timeline.ts",
+        CORE_LIB / "animation/integrator/spring-integrator.ts",
+        CORE_LIB / "animation/integrator/double-spring-integrator.ts",
+        CORE_LIB / "animation/integrator/inertia-integrator.ts",
+        CORE_LIB / "motion/spring.ts",
+        CORE_LIB / "motion/presets.ts",
     ]
     return {
         "status": "passed",
         "engine": "current TypeScript sources bundled with esbuild",
         "curvesChecked": len(fits),
         "maxAbsoluteError": max_error,
-        "sourceHashes": {str(p.relative_to(core)): fingerprint(p) for p in paths},
+        "sourceHashes": {str(p.relative_to(CORE_LIB)): fingerprint(p) for p in paths},
     }
 
 
@@ -228,7 +221,7 @@ def inspect_video(args):
             indices = np.unique(
                 [np.argmin(abs(pts - t)) for t in np.arange(0, pts[-1] + 1, 500)]
             )
-        # Page contact sheets so long recordings remain legible and cheap for Codex to inspect.
+        # Page contact sheets so long recordings remain legible and cheap for an agent to inspect.
         sheets = []
         for page, offset in enumerate(range(0, len(indices), 24)):
             name = f"contact-{page+1:02d}.png"
@@ -326,9 +319,17 @@ def fit_tracks(tracks, times, args):
                 )
             matrix = np.column_stack([tr["properties"][p]["progress"] for p in group])
             onset = min(p["startMs"] for p in tr["properties"].values())
+            explicit = bool(tr.get("explicitEndpoints"))
             # Explicit geometry can expose a clipped early portion; retain the annotated onset.
-            if tr.get("explicitEndpoints"):
+            if explicit:
                 onset = source.get("onsetMs", 0.0)
+            props = tr["properties"].values()
+            # A rest position that was never observed is inferred by the fit itself.
+            free_start = not explicit and any(p["observedStartIndex"] > 0 for p in props)
+            free_end = not explicit and any(
+                not p["settledAtEnd"] or p["observedEndIndex"] < p["sampleCount"] - 2
+                for p in props
+            )
             try:
                 f = fit_physics(
                     times,
@@ -339,8 +340,17 @@ def fit_tracks(tracks, times, args):
                     args.initial_velocity,
                     args.rest_delta,
                     args.rest_speed,
+                    free_start,
+                    free_end,
                 )
                 tr["fit"] = f
+                inferred = apply_inferred_endpoints(tr, group, f)
+                if inferred:
+                    tr["notes"].append(
+                        "Rest positions outside the visible range were inferred by the physics fit: "
+                        + "; ".join(inferred)
+                        + ". Supply endpoints in the plan when the layout geometry is known."
+                    )
                 tr["bezier"] = fit_bezier(
                     times,
                     nanmedian(matrix, axis=1),
@@ -348,29 +358,79 @@ def fit_tracks(tracks, times, args):
                     max(p["endMs"] for p in tr["properties"].values()),
                 )
                 score = tr["trackingScore"]
-                incomplete = tr["incomplete"] and not tr.get("explicitEndpoints")
-                tr["confidence"] = (
-                    "high"
-                    if f["rmse"] < 0.035 and score > 0.7 and not incomplete
-                    else (
+                extrapolation = f["extrapolation"]
+                if explicit:
+                    tr["confidence"] = (
+                        "high"
+                        if f["rmse"] < 0.035 and score > 0.7 and not tr["incomplete"]
+                        else "medium" if f["rmse"] < 0.06 and score > 0.4 else "review"
+                    )
+                elif inferred:
+                    # An inferred rest position is a model extrapolation, never a measurement.
+                    tr["confidence"] = (
                         "medium"
-                        if f["rmse"] < 0.08 and score > 0.4 and not incomplete
+                        if f["rmse"] < 0.06 and score > 0.4 and extrapolation <= 0.6
                         else "review"
                     )
-                )
+                else:
+                    tr["confidence"] = (
+                        "high"
+                        if f["rmse"] < 0.035 and score > 0.7 and not tr["incomplete"]
+                        else (
+                            "medium"
+                            if f["rmse"] < 0.08 and score > 0.4 and not tr["incomplete"]
+                            else "review"
+                        )
+                    )
+                if "opacityProxy" in tr["properties"] and tr["confidence"] == "high":
+                    # Layered fades mix nonlinearly (a top layer at alpha p over a
+                    # bottom layer at 1 - p weighs the bottom by (1 - p)^2).
+                    tr["confidence"] = "medium"
                 if f["rmse"] > 0.08:
                     tr["notes"].append(
                         "Large residual: recheck ROI, segmentation, a gesture-driven phase, or unsupported deformation."
                     )
-                if tr.get("explicitEndpoints") and tr["incomplete"]:
-                    tr["confidence"] = (
-                        "medium" if f["rmse"] < 0.06 and score > 0.4 else "review"
+                if inferred and extrapolation > 0.6:
+                    tr["notes"].append(
+                        "More than 60% of the travel was never visible; several physics settings reproduce the visible part equally well."
                     )
             except ValueError as error:
                 tr.update(fitError=str(error), confidence="review")
             tr["id"] = f"track-{len(result)+1}"
             result.append(tr)
     return result
+
+
+def apply_inferred_endpoints(track, group, fit):
+    """Re-normalize measured properties over the endpoints the fit placed."""
+    inferred = []
+    for j, name in enumerate(group):
+        prop = track["properties"][name]
+        a, b = fit["endpointScale"]["start"][j], fit["endpointScale"]["end"][j]
+        prop["endpointSource"] = "plan" if track.get("explicitEndpoints") else "observed"
+        if a == 0 and b == 1:
+            continue
+        observed_from, observed_to, delta = prop["from"], prop["to"], prop["delta"]
+        start, end = observed_from + a * delta, observed_from + b * delta
+        prop.update(
+            {
+                "from": start,
+                "to": end,
+                "delta": end - start,
+                "progress": (np.asarray(prop["values"], dtype=float) - start) / (end - start),
+                "observedFrom": observed_from,
+                "observedTo": observed_to,
+                "endpointSource": "inferred",
+            }
+        )
+        unit = "×" if name == "scale" else "" if name == "opacityProxy" else " px"
+        parts = []
+        if a != 0:
+            parts.append(f"start {start:.1f}{unit} (first seen {observed_from:.1f}{unit})")
+        if b != 1:
+            parts.append(f"end {end:.1f}{unit} (last seen {observed_to:.1f}{unit})")
+        inferred.append(f"{name} " + ", ".join(parts))
+    return inferred
 
 
 def relationships(tracks):
@@ -432,34 +492,133 @@ def relationships(tracks):
     return relationships
 
 
-def code_for(event, preset=None):
+CONFIDENCE_RANK = {"high": 0, "medium": 1, "review": 2, "unmeasured": 3}
+
+
+def integrator_expression(fit):
+    """`IntegratorProvider.from({...})` as TypeScript, rounded for reading."""
+    config = dict(fit["params"], restDelta=fit["restDelta"])
+    if fit["model"] != "inertia":
+        config["restSpeed"] = fit["restSpeed"]
+    kind = "inertia" if fit["model"] == "inertia" else "spring"
+    fields = ", ".join(f"{key}: {round(value, 4):g}" for key, value in config.items())
+    return f"IntegratorProvider.from({{ {kind}: {{ {fields} }} }})"
+
+
+def compact_params(fit):
+    return ", ".join(f"{k} {v:.4g}" for k, v in fit["params"].items())
+
+
+def override_for(event):
+    """A preset `override` that retunes the registered "out" / "in" children.
+
+    Every shipped page preset registers its pages under those two names, so the
+    measured physics can be applied without rewriting the transition. Roles
+    without a registered child are listed as comments for a custom transition.
+    """
+    fitted = [tr for tr in event["tracks"] if tr.get("fit")]
+    if not fitted:
+        return None
+    direction = event.get("direction", "unknown")
+    key = direction if direction in ("forward", "backward") else "forward"
+    by_role = {}
+    for tr in sorted(
+        fitted, key=lambda t: (CONFIDENCE_RANK.get(t["confidence"], 3), t["fit"]["rmse"])
+    ):
+        by_role.setdefault(tr.get("role", "unknown"), []).append(tr)
     lines = [
-        'import { WebAnimation, MultiAnimation } from "@ssgoi/core";',
-        'import { IntegratorProvider } from "@ssgoi/core/runtime";',
-        "",
-        "// Values reproduce the measured curves; element identity and endpoints are in analysis-plan.json.",
-        "// REVIEW tracks are provisional. Translation coordinates are recording pixels, not CSS pixels.",
-        "// Convert them using your app's CSS-pixel / recording-pixel ratio.",
-        "export const measuredTracks = [",
+        "// Retune the preset that plays this transition with the measured physics,",
+        '// e.g. axis({ type: "x" }, { override }). Presets register their pages as',
+        '// "out" and "in"; the geometry (travel, fade) stays the preset\'s own.',
     ]
+    if direction not in ("forward", "backward"):
+        lines.append(
+            "// The recording's direction was not identified; move this under `backward` if it shows a return."
+        )
+    lines += ["export const override = {", f"  {key}: ({{ animation }}) => {{"]
+    chosen = {}
+    for role in ("out", "in"):
+        tracks = by_role.get(role, [])
+        if not tracks:
+            continue
+        tr = tracks[0]
+        chosen[role] = tr
+        f = tr["fit"]
+        lines.append(
+            f"    // {tr['name'].replace(chr(10), ' ')}: {tr['confidence']}, RMSE {f['rmse']:.4f}"
+        )
+        lines.append(
+            f'    animation.select("{role}").set({{ integrator: {integrator_expression(f)} }});'
+        )
+        for other in tracks[1:]:
+            lines.append(
+                f"    // Also measured as {role}: {other['name']} ({other['fit']['model']} {compact_params(other['fit'])}, {other['confidence']})."
+            )
+    for role, tracks in by_role.items():
+        if role in ("out", "in"):
+            continue
+        for tr in tracks:
+            lines.append(
+                f"    // {tr['name']} ({role}): {tr['fit']['model']} {compact_params(tr['fit'])}. "
+                "No preset child has this role; bind it with createMeasuredTracks below."
+            )
+    if "out" in chosen and "in" in chosen:
+        ids = {chosen["out"]["id"], chosen["in"]["id"]}
+        relation = next(
+            (r for r in event.get("overlaps", []) if {r["first"], r["second"]} == ids),
+            None,
+        )
+        if relation and relation["delayMs"] < 1000 / 60 - 0.01:
+            lines.append(
+                f"    // Both pages start within one frame ({relation['delayMs']:.0f} ms apart): keep the preset's parallel start."
+            )
+        elif relation and relation["first"] == chosen["out"]["id"]:
+            if relation["startAt"] is not None:
+                lines.append(
+                    f"    // The incoming page starts {relation['delayMs']:.0f} ms later, when the outgoing page reaches {relation['startAt'] * 100:.0f}%."
+                )
+                lines.append(
+                    f'    animation.select("in").set({{ startAt: {{ after: animation.select("out"), at: {relation["startAt"]:.3f} }} }});'
+                )
+            else:
+                lines.append(
+                    f"    // The incoming page starts {relation['delayMs']:.0f} ms later, after the outgoing page settled; a progress threshold cannot express that delay."
+                )
+        elif relation:
+            lines.append(
+                f"    // The incoming page starts {relation['delayMs']:.0f} ms before the outgoing page; presets start pages together, so this lead is not reproduced."
+            )
+    lines += ["  },", '} satisfies Override<MultiAnimation<"out" | "in">>;']
+    return "\n".join(lines)
+
+
+def code_for(event, preset=None):
     fitted = [tr for tr in event["tracks"] if tr.get("fit")]
     if not fitted:
         return "// No reliable physical measurements for this segment. Refine its ROI or measurement method.\nexport const measuredTracks = [] as const;\n"
+    override = override_for(event)
+    lines = [
+        'import { MultiAnimation, WebAnimation, type Override } from "@ssgoi/core";',
+        'import { IntegratorProvider } from "@ssgoi/core/runtime";',
+        "",
+        override,
+        "",
+        "// Every measured element, for a custom transition. Element identity and",
+        "// endpoints are in analysis-plan.json; positions are recording pixels, not",
+        "// CSS pixels, so convert with your app's CSS-pixel / recording-pixel ratio.",
+        "// Inferred endpoints (see report.json) are model extrapolations.",
+        "export const measuredTracks = [",
+    ]
     base = min((tr["fit"]["t0Ms"] for tr in fitted), default=0)
     for tr in fitted:
         f = tr["fit"]
-        config = dict(f["params"], restDelta=f["restDelta"])
-        if f["model"] != "inertia":
-            config["restSpeed"] = f["restSpeed"]
-        physics = {"inertia" if f["model"] == "inertia" else "spring": config}
-        expression = "IntegratorProvider.from(" + json.dumps(physics) + ")"
         lines.extend(
             [
-                f"  // {tr['name'].replace(chr(10),' ')} · {tr['confidence']} · RMSE {f['rmse']:.4f}",
+                f"  // {tr['name'].replace(chr(10), ' ')}: {tr['confidence']}, RMSE {f['rmse']:.4f}",
                 "  {",
-                f"    id: {json.dumps(tr['id'])}, name: {json.dumps(tr['name'],ensure_ascii=False)},",
-                f"    delayMs: {f['t0Ms']-base:.5f}, initialVelocity: {f['initialVelocity']},",
-                f"    integrator: {expression},",
+                f"    id: {json.dumps(tr['id'])}, name: {json.dumps(tr['name'], ensure_ascii=False)}, role: {json.dumps(tr.get('role', 'unknown'))},",
+                f"    delayMs: {f['t0Ms'] - base:.5f}, initialVelocity: {f['initialVelocity']},",
+                f"    integrator: {integrator_expression(f)},",
                 "    from: "
                 + json.dumps({p: v["from"] for p, v in tr["properties"].items()})
                 + ",",
@@ -473,7 +632,6 @@ def code_for(event, preset=None):
         "] as const;",
         "",
         "// Bind each measurement to its element's own geometry/style.",
-        "// This factory returns physical animations and their measured delays.",
         "export function createMeasuredTracks(",
         "  bind: (id: string) => { element: HTMLElement; style: (progress: number) => Record<string, string> },",
         ") {",
@@ -521,12 +679,7 @@ def code_for(event, preset=None):
         lines += [
             "",
             f"// Requested preset: {preset}. Match its geometry before choosing a preset or custom animation.",
-            "// This recipe uses the existing core/runtime API and does not require preset overrides.",
         ]
-    imports = ["WebAnimation"]
-    if schedule is not None and order:
-        imports.append("MultiAnimation")
-    lines[0] = "import { " + ", ".join(imports) + ' } from "@ssgoi/core";'
     return "\n".join(lines) + "\n"
 
 
@@ -569,7 +722,7 @@ def measure_video(args):
                 "source": source,
                 "segments": segments,
                 "excluded": [],
-                "interpretation": "Automatic geometric proposals. Codex review of identity and ranges is pending.",
+                "interpretation": "Automatic geometric proposals. Agent review of identity and ranges is pending.",
             }
         if not segments:
             raise ValueError(
@@ -644,9 +797,10 @@ def measure_video(args):
                     or any(t["confidence"] in ("review", "unmeasured") for t in fitted)
                     else "medium"
                 ),
-                "semanticSource": "codex-plan" if args.plan else "geometric-heuristic",
+                "semanticSource": "agent-plan" if args.plan else "geometric-heuristic",
             }
             event["overlaps"] = relationships(fitted)
+            event["override"] = override_for(event)
             event["code"] = code_for(event, args.preset)
             (directory / "motion.ts").write_text(event["code"])
             with (directory / "curves.csv").open("w", newline="") as file:

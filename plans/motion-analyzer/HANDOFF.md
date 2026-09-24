@@ -1,5 +1,15 @@
 > Standalone analyzer branch: `codex/motion-analyzer`. Current outputs target the existing core/runtime API; no transition-refactor dependency.
 
+# 2026-09-25 보완 (Claude)
+
+- 폐루프 검증 추가: `synth`가 현재 SSGOI 엔진 곡선으로 앱 녹화를 렌더링(`truth.json` 포함)하고,
+  `tests/test_closed_loop.py`가 그것을 다시 측정해 물리값 복원을 단언한다. 이 검증이 드러낸 결함 —
+  화면 밖에서 들어오거나 덮여서 끝나는 페이지의 "보이는 구간"을 0→1로 정규화해 잘못된 스프링을
+  완벽히 맞추던 문제 — 를 미관측 시작/끝점 공동 추정으로 고쳤다(60 fps push 2% 이내, 기하 제공 시 5% 이내).
+- `motion.ts`가 `latest`의 프리셋 `override` API(`select("in").set({ integrator, startAt })`)를 먼저 내보낸다.
+- 시맨틱 프리셋 비교는 `motion/presets.ts`를 core 브리지로 읽는다. requirements는 Python 3.9–3.14 휠 범위.
+- 뷰어와 PNG 보고서 디자인을 계기판 형태로 다시 잡았고, 스킬은 `.claude/skills`에서도 보인다.
+
 # Motion Analyzer — Codex 도구로 구현 (2026-09-07)
 
 현재 요청은 **Codex가 영상을 보고 구간과 요소의 의미를 판단하고, 측정 엔진을 호출하는 도구**다.

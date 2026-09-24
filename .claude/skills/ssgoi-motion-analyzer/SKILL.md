@@ -1,0 +1,1 @@
+../../../.agents/skills/ssgoi-motion-analyzer/SKILL.md

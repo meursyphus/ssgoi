@@ -113,7 +113,8 @@ def similarity_series(bank, anchor, ids):
             maxIters=500,
             confidence=0.99,
         )
-        if matrix is None or inliers.sum() < max(3, len(ids) * 0.2):
+        # A partly visible layer still yields its translation from a few points.
+        if matrix is None or inliers.sum() < max(3, len(ids) * 0.1):
             continue
         scale = float(np.hypot(matrix[0, 0], matrix[1, 0]))
         if not 0.15 < scale < 6:
@@ -181,7 +182,14 @@ def normalize_property(raw, times, min_change):
     # Final band must hold for all remaining observed samples; retain spring bounce.
     outside = valid[np.abs(progress[valid] - 1) > 0.025]
     end = min(valid[-1], int(outside[-1]) + 1) if len(outside) else valid[-1]
+    # The final value is a rest position only if the last observed samples agree.
+    tail = progress[valid[-3:]]
+    settled = bool(len(tail) >= 3 and np.ptp(tail) <= 0.025)
     return {
+        "settledAtEnd": settled,
+        "observedStartIndex": int(valid[0]),
+        "observedEndIndex": int(valid[-1]),
+        "sampleCount": int(len(times)),
         "from": first,
         "to": last,
         "delta": delta,
@@ -222,7 +230,7 @@ def alpha_series(frames, box, anchor):
 
 
 def edge_series(frames, box, axis="x", side="right", threshold=220):
-    """Boundary of a bright panel adjoining one side of a Codex-selected strip.
+    """Boundary of a bright panel adjoining one side of an agent-selected strip.
 
     This deliberately measures the container, not texture moving inside it.
     The caller supplies the semantic contrast/side assumption from viewed frames.
@@ -336,7 +344,7 @@ def extract_tracks(
                             "support": [1.0] * n,
                             "featureIds": [],
                             "anchorPoints": [],
-                            "semanticSource": "codex-plan",
+                            "semanticSource": "agent-plan",
                             "geometryEvidence": roi.get("evidence", ""),
                             "explicitEndpoints": False,
                             "measurementMethod": "brightness-boundary",
@@ -374,7 +382,7 @@ def extract_tracks(
                         "support": [1.0] * n,
                         "featureIds": [],
                         "anchorPoints": [],
-                        "semanticSource": "codex-plan",
+                        "semanticSource": "agent-plan",
                         "geometryEvidence": roi.get("evidence", ""),
                         "explicitEndpoints": False,
                     }
@@ -384,6 +392,7 @@ def extract_tracks(
                 continue
             values, support, center = similarity_series(active_bank, anchor, ids)
             properties = {}
+            unsettled = []
             for j, prop in enumerate(["x", "y", "scale"]):
                 if roi and prop not in roi.get("properties", ["x", "y", "scale"]):
                     continue
@@ -393,6 +402,8 @@ def extract_tracks(
                     1.5 * pixel_scale if j < 2 else 0.025,
                 )
                 if norm is not None:
+                    if not norm["settledAtEnd"]:
+                        unsettled.append(prop)
                     endpoints = roi.get("endpoints", {}).get(prop) if roi else None
                     if roi and prop in roi.get("offsetFromEnd", {}):
                         endpoints = [
@@ -439,6 +450,10 @@ def extract_tracks(
                 notes.append(
                     "Opacity during motion is unobserved; occlusion and alpha cannot be separated reliably."
                 )
+            if unsettled:
+                notes.append(
+                    f"Still moving at the segment end ({', '.join(unsettled)}): the final value is the last observed sample, not a rest position. Extend the segment if the motion continues."
+                )
             valid = np.flatnonzero(np.any(np.isfinite(values), axis=1))
             incomplete = not len(valid) or valid[0] > 1 or valid[-1] < n - 2
             if incomplete:
@@ -453,7 +468,7 @@ def extract_tracks(
             )
             if explicit:
                 notes.append(
-                    "Normalization uses explicit geometric endpoints supplied in the Codex plan."
+                    "Normalization uses explicit geometric endpoints supplied in the analysis plan."
                 )
             if kind == "surface" and box[2] * box[3] < w * h * 0.08:
                 kind = "element"
@@ -477,7 +492,7 @@ def extract_tracks(
                 "support": support.tolist(),
                 "featureIds": ids.tolist(),
                 "anchorPoints": active_bank[anchor, ids].tolist(),
-                "semanticSource": "codex-plan" if roi else "geometric-heuristic",
+                "semanticSource": "agent-plan" if roi else "geometric-heuristic",
                 "geometryEvidence": roi.get("evidence", "") if roi else "",
                 "explicitEndpoints": explicit,
                 "onsetMs": roi.get("onsetMs", 0.0) if roi else 0.0,
@@ -504,7 +519,9 @@ def extract_tracks(
                 0, min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])
             )
             iou = overlap / max(1, a[2] * a[3] + b[2] * b[3] - overlap)
-            errors = []
+            # A region inside a larger surface that moves with it is that surface.
+            containment = overlap / max(1, min(a[2] * a[3], b[2] * b[3]))
+            errors, displacement_errors = [], []
             for p in shared:
                 diff = (
                     track["properties"][p]["progress"]
@@ -512,7 +529,28 @@ def extract_tracks(
                 )
                 if np.isfinite(diff).sum() >= 6:
                     errors.append(np.sqrt(np.nanmean(diff**2)))
-            if track["kind"] != "manual" and iou > 0.5 and errors and max(errors) < 0.1:
+                # Raw displacement from the last common frame is independent of
+                # how much of the motion each region happened to see.
+                a_raw = np.asarray(track["properties"][p]["values"], dtype=float)
+                b_raw = np.asarray(prev["properties"][p]["values"], dtype=float)
+                common = np.flatnonzero(np.isfinite(a_raw) & np.isfinite(b_raw))
+                if len(common) >= 6:
+                    ref = common[-1]
+                    residual = (a_raw - a_raw[ref]) - (b_raw - b_raw[ref])
+                    tolerance = 0.03 if p == "scale" else 2.0 * pixel_scale
+                    displacement_errors.append(
+                        np.sqrt(np.mean(residual[common] ** 2)) / tolerance
+                    )
+            if track["kind"] != "manual" and (
+                (iou > 0.5 and errors and max(errors) < 0.1)
+                or (
+                    containment > 0.8
+                    and prev["kind"] == "surface"
+                    and track["role"] == prev["role"]
+                    and displacement_errors
+                    and max(displacement_errors) < 1
+                )
+            ):
                 duplicate = True
                 break
         if not duplicate:
@@ -533,7 +571,7 @@ def extract_tracks(
                         "No coherent measurement: insufficient texture, occlusion, deformation, or too few visible frames. Refine this ROI or use another anchor."
                     ],
                     "fitError": "This requested element could not be measured reliably.",
-                    "semanticSource": "codex-plan",
+                    "semanticSource": "agent-plan",
                     "trackingScore": 0.0,
                     "incomplete": True,
                     "pointCount": 0,

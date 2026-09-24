@@ -46,6 +46,15 @@
     "Video source supports seeking",
   );
   assert(
+    $("video-error").hidden &&
+      getComputedStyle($("video-error")).display === "none",
+    "Error overlay stays hidden while the clip plays",
+  );
+  assert(
+    !$("copy-override").hidden === !!data.segments[chosen].override,
+    "Override copy button follows the segment's recipe",
+  );
+  assert(
     $("segment-title").textContent.length > 0,
     "Segment selection changes the title",
   );

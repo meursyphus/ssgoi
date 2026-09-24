@@ -122,7 +122,7 @@
     $("segments").innerHTML = report.segments
       .map(
         (e, i) =>
-          `<button class="segment-button${i === state.index ? " active" : ""}" data-segment="${i}" aria-pressed="${i === state.index}" aria-label="${i + 1}번 전환: ${escape(nameOf(e))}"><img class="segment-thumb" src="${asset(e, "thumbnail.jpg")}" alt="" loading="lazy"><span class="segment-copy"><span class="segment-number">TRANSITION ${String(i + 1).padStart(2, "0")}</span><span class="segment-name">${escape(nameOf(e))}</span><span class="segment-time">${num(e.startMs / 1000, 2)}–${num(e.endMs / 1000, 2)} s <span aria-hidden="true">·</span> ${num(e.durationMs)} ms</span></span></button>`,
+          `<button class="segment${i === state.index ? " active" : ""}" data-segment="${i}" aria-pressed="${i === state.index}" aria-label="${i + 1}번 전환: ${escape(nameOf(e))}"><span class="segment-no">${i + 1}</span><img class="segment-thumb" src="${asset(e, "thumbnail.jpg")}" alt="" loading="lazy"><span class="segment-text"><span class="segment-name">${escape(nameOf(e))}</span><span class="segment-time">${num(e.startMs / 1000, 2)}–${num(e.endMs / 1000, 2)} s<span class="sep"></span>${num(e.durationMs)} ms</span></span></button>`,
       )
       .join("");
   }
@@ -148,11 +148,12 @@
     }
     makeRail();
     $("segment-index").textContent =
-      `TRANSITION ${String(index + 1).padStart(2, "0")} / ${String(report.segments.length).padStart(2, "0")}`;
+      `전환 ${index + 1} / ${report.segments.length}`;
     $("segment-title").textContent = nameOf(e);
     const fitted = e.tracks.filter((t) => t.fit).length;
     $("segment-meta").innerHTML =
-      `<span class="meta-pill">${e.direction === "forward" ? "진입" : e.direction === "backward" ? "복귀" : "방향 미지정"}</span><span class="meta-pill">${num(e.durationMs)} ms</span><span>${fitted}개 측정${e.tracks.length > fitted ? ` · ${e.tracks.length - fitted}개 미측정` : ""}</span>`;
+      `<span>${e.direction === "forward" ? "진입" : e.direction === "backward" ? "복귀" : "방향 미지정"}</span><span>${num(e.durationMs)} ms</span><span>${fitted}개 요소 측정${e.tracks.length > fitted ? `, ${e.tracks.length - fitted}개 미측정` : ""}</span>`;
+    $("copy-override").hidden = !e.override;
     $("recording-range").textContent =
       `${num(e.startMs / 1000, 3)}–${num(e.endMs / 1000, 3)} s`;
     $("segment-notes").replaceChildren(
@@ -252,7 +253,9 @@
     }
     state.pending = target;
     updateTime(target);
-    video.currentTime = target / 1000;
+    // A time exactly on a frame boundary can round down into the previous
+    // frame; half a millisecond inside the frame presents the intended one.
+    video.currentTime = (target + (target > 0 ? 0.5 : 0)) / 1000;
     // Seeking to the same timestamp need not emit seeked.
     if (!video.seeking) state.pending = null;
   }
@@ -330,7 +333,7 @@
     return values;
   }
   function cursorMarkup(top, bottom) {
-    return `<g id="time-cursor" pointer-events="none"><line class="cursor-line" x1="0" y1="${top - 8}" x2="0" y2="${bottom}"/><rect x="-28" y="${top - 29}" width="56" height="20" rx="5" fill="#526b91"/><text id="cursor-text" class="cursor-label" x="0" y="${top - 15}" text-anchor="middle">0 ms</text></g>`;
+    return `<g id="time-cursor" pointer-events="none"><line class="cursor-line" x1="0" y1="${top - 8}" x2="0" y2="${bottom}"/><rect x="-28" y="${top - 29}" width="56" height="20" rx="4" fill="#141821"/><text id="cursor-text" class="cursor-label" x="0" y="${top - 15}" text-anchor="middle">0 ms</text></g>`;
   }
   function renderChart() {
     const e = event(),
@@ -368,7 +371,7 @@
       plotGeometry = { x, left, right, top, bottom, W, H };
       let markup = `<defs><clipPath id="plot-bounds"><rect x="${left}" y="${top - 2}" width="${right - left}" height="${bottom - top + 4}"/></clipPath></defs>`;
       ticks(e.durationMs).forEach((t) => {
-        markup += `<line x1="${x(t)}" y1="${top - 4}" x2="${x(t)}" y2="${bottom}" stroke="#edf0f5"/><text class="axis-label" x="${x(t)}" y="${bottom + 24}" text-anchor="middle">${num(t)}</text>`;
+        markup += `<line x1="${x(t)}" y1="${top - 4}" x2="${x(t)}" y2="${bottom}" stroke="#eceef2"/><text class="axis-label" x="${x(t)}" y="${bottom + 24}" text-anchor="middle">${num(t)}</text>`;
       });
       markup += `<text class="axis-label" x="${right + 21}" y="${bottom + 24}">ms</text>`;
       all.forEach((r, i) => {
@@ -377,11 +380,11 @@
           ceiling = y0 + 11,
           p = r.track.properties[r.property],
           active = i === state.row;
-        markup += `<g class="row-pick" data-row="${i}" tabindex="0" role="button" aria-label="${escape(r.track.name)} ${escape(propertyNames[r.property] || "측정 불가")} 선택"><rect class="row-wash" x="5" y="${y0}" width="${W - 21}" height="${rowHeight - 4}" rx="7" fill="${active ? "#f5f8fd" : "#fafbfd"}" opacity="${active ? 1 : 0}"/><circle cx="18" cy="${y0 + 24}" r="3" fill="${r.color}"/><text class="row-name" x="31" y="${y0 + 22}">${escape(r.track.name.length > (compact ? 9 : 19) ? r.track.name.slice(0, compact ? 8 : 18) + "…" : r.track.name)}</text><text class="row-property" x="31" y="${y0 + 39}">${escape(propertyNames[r.property] || "측정 불가")}</text>`;
+        markup += `<g class="row-pick" data-row="${i}" tabindex="0" role="button" aria-label="${escape(r.track.name)} ${escape(propertyNames[r.property] || "측정 불가")} 선택"><rect class="row-wash" x="5" y="${y0}" width="${W - 21}" height="${rowHeight - 4}" rx="7" fill="#f4f5f7" opacity="${active ? 1 : 0}"/><circle cx="18" cy="${y0 + 24}" r="3" fill="${r.color}"/><text class="row-name" x="31" y="${y0 + 22}">${escape(r.track.name.length > (compact ? 9 : 19) ? r.track.name.slice(0, compact ? 8 : 18) + "…" : r.track.name)}</text><text class="row-property" x="31" y="${y0 + 39}">${escape(propertyNames[r.property] || "측정 불가")}</text>`;
         if (p) {
           const y = (v) => base - clamp(v, -0.14, 1.14) * (base - ceiling);
           const fit = r.track.fit;
-          markup += `<g clip-path="url(#plot-bounds)"><line x1="${left}" y1="${base}" x2="${right}" y2="${base}" stroke="#eef2f7"/>`;
+          markup += `<g clip-path="url(#plot-bounds)"><line x1="${left}" y1="${base}" x2="${right}" y2="${base}" stroke="#e4e7ec"/>`;
           if (fit) {
             const times = fit.simulation.timeMs.map((t) => t + fit.t0Ms),
               ys = fit.simulation.progress;
@@ -410,7 +413,7 @@
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
       svg.innerHTML = markup;
       $("chart-footnote").textContent =
-        "색은 요소, 각 행은 속성입니다. 행을 선택해 설정을 확인하세요.";
+        "색은 요소, 행은 속성입니다. 행을 선택하면 아래 설정이 바뀝니다.";
     } else {
       const left = compact ? 42 : 66,
         right = W - (compact ? 25 : 50),
@@ -465,7 +468,7 @@
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
       svg.innerHTML = markup;
       $("chart-footnote").textContent =
-        "베지어는 형태 비교용입니다. 재현 설정은 물리 적분기에서 계산합니다.";
+        "베지어는 형태 비교용입니다. 재현 설정은 물리 적분기로 계산합니다.";
     }
     updateTime(state.time);
   }
@@ -511,13 +514,17 @@
         "",
       )}<circle cx="15" cy="${y(0)}" r="2.5" fill="#b88e41"/><circle cx="123" cy="${y(1)}" r="2.5" fill="#b88e41"/></svg>`;
   }
+  function bezierCard(bx) {
+    return `<div class="bezier-card">${bezierDiagram(bx.controlPoints)}<div><span>베지어로 보면</span><code>cubic-bezier(${bx.controlPoints.map((v) => num(v, 3)).join(", ")})</code><span>오차 ${num(bx.rmse * 100, 2)} %, 형태 비교용 참고값</span></div></div>`;
+  }
   function renderInspector() {
     const s = selected(),
       container = $("inspector-content");
     if (!s) {
       $("selected-title").textContent = "측정된 요소 없음";
-      container.innerHTML = "";
+      $("selected-confidence").innerHTML = "";
       $("track-picker").innerHTML = "";
+      container.innerHTML = "";
       return;
     }
     const tr = s.track,
@@ -525,35 +532,69 @@
       p = tr.properties[s.property];
     $("selected-dot").style.background = s.color;
     $("selected-title").textContent =
-      tr.name + (s.property ? " · " + propertyNames[s.property] : "");
+      tr.name + (s.property ? " " + propertyNames[s.property] : "");
     $("selected-confidence").innerHTML = badge(tr.confidence);
     $("track-picker").innerHTML = event()
       .tracks.map(
         (track, i) =>
-          `<button class="track-chip${i === s.trackIndex ? " active" : ""}" data-track="${i}" aria-pressed="${i === s.trackIndex}"><i style="background:${colors[i % colors.length]}"></i>${escape(track.name)}</button>`,
+          `<button class="chip${i === s.trackIndex ? " active" : ""}" data-track="${i}" aria-pressed="${i === s.trackIndex}"><i style="background:${colors[i % colors.length]}"></i>${escape(track.name)}</button>`,
       )
       .join("");
+    const notes = (tr.notes || []).length
+      ? `<ul class="notes">${tr.notes.map((n) => `<li>${escape(n)}</li>`).join("")}</ul>`
+      : "";
     if (!fit) {
-      container.innerHTML =
-        '<p class="empty-measurement">안정적으로 추적할 수 있는 측정점이 부족합니다.<br>이 요소는 수치를 제안하지 않았습니다. 다른 프레임이나 관심 영역으로 다시 측정할 수 있습니다.</p>';
+      container.innerHTML = `<p class="empty">이 요소는 안정적으로 추적되지 않아 설정을 제안하지 않았습니다. 다른 프레임이나 관심 영역으로 다시 측정할 수 있습니다.</p>${notes}`;
       return;
     }
-    const compactCode = codeFor(fit, 3, false);
-    const bounce = finite(fit.bounce)
-      ? `duration ${num(fit.duration, 3)} s · bounce ${num(fit.bounce, 3)}`
-      : "quadratic resistance · mass 1";
-    const delta = p
-      ? `${p.delta > 0 ? "+" : ""}${num(p.delta, 1)}${s.property === "scale" ? "×" : s.property === "opacityProxy" ? "" : " px"}`
-      : "—";
-    const bx = tr.bezier;
-    container.innerHTML = `<div class="settings-body"><div class="settings-left"><div class="code-heading"><span class="code-label">${fit.model === "doubleSpring" ? "DOUBLE SPRING" : fit.model.toUpperCase()}</span><button class="copy-button" id="copy-physics" aria-label="선택한 요소의 물리 설정 복사"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="8" height="9" rx="1.5"/><path d="M10 4V2H2v9h2"/></svg>설정 복사</button></div><pre class="integrator-code">${highlight(compactCode)}</pre><p class="code-note">${escape(bounce)}<br>가장 가까운 프리셋: <b>${escape(fit.nearestPreset.name)}</b> · 오차 ${num(fit.nearestPreset.rmse * 100, 2)}%</p></div><div class="metrics"><div class="metric"><span class="metric-label" title="구간 시작 기준, 물리 모델의 시작 시각">시작 시각</span><b class="metric-value">${num(fit.t0Ms, 0)}<small>ms</small></b></div><div class="metric"><span class="metric-label" title="구간 시작 기준, 목표 ±2%에 처음 도달">시각적 도착</span><b class="metric-value">${num(fit.t0Ms + fit.arrivalMs, 0)}<small>ms</small></b></div><div class="metric"><span class="metric-label">${escape(propertyNames[s.property] || "속성")} 변화</span><b class="metric-value" style="font-size:16px">${escape(delta)}</b></div><div class="metric"><span class="metric-label" title="정규화한 진행률의 RMSE">곡선 오차</span><b class="metric-value">${num(fit.rmse * 100, 2)}<small>%</small></b></div><div class="current-metric"><span>현재 관측 <b id="current-progress">—</b></span><span>물리 <b id="current-physics">—</b></span></div></div>${state.view === "curve" && bx ? `<div class="bezier-card">${bezierDiagram(bx.controlPoints)}<div><h4>베지어로 보면 이런 모양</h4><code>cubic-bezier(${bx.controlPoints.map((v) => num(v, 3)).join(", ")})</code><p>곡선 오차 ${num(bx.rmse * 100, 2)}% · 형태를 비교하는 참고값입니다.</p></div></div>` : ""}</div><details class="inspector-extra"><summary>정착 시간 · 대안 모델 · 측정 근거</summary><p>물리적 정착은 구간 시작 후 <b>${num(fit.t0Ms + fit.settleMs)} ms</b>입니다. 표시된 코드 값은 읽기 쉽게 반올림했으며, 복사할 때 정밀도와 정착 임계값을 함께 포함합니다.</p>${tr.incomplete ? `<p>${tr.explicitEndpoints ? "보이지 않는 구간은 분석 계획에 지정한 이동량에 의존합니다." : "이 설정은 보이는 구간을 기준으로 맞췄습니다. 가려진 시작과 끝은 확정할 수 없습니다."}</p>` : ""}<p>${escape(tr.geometryEvidence || "이름과 영역은 분석 계획에, 관측값은 CSV에 기록되어 있습니다.")}</p><ul>${fit.alternatives.map((a) => `<li>${escape(a.model)} · 오차 ${num(a.rmse * 100, 2)}%${a.equivalent ? " · 동등한 대안" : ""}</li>`).join("")}</ul><div class="geometry-row">${Object.entries(
-      tr.properties,
-    )
+    const modelName = {
+      spring: "spring",
+      doubleSpring: "double spring",
+      inertia: "inertia",
+    }[fit.model];
+    const figures = Object.entries(fit.params)
       .map(
-        ([key, v]) =>
-          `<span class="geometry-tag">${escape(key)} ${num(v.from, 2)} → ${num(v.to, 2)}</span>`,
+        ([key, value]) =>
+          `<div class="figure"><b>${num(value, key === "doubleSpring" ? 2 : 1)}</b><span>${escape(key)}</span></div>`,
       )
-      .join("")}</div></details>`;
+      .join("");
+    const feel = finite(fit.bounce)
+      ? `duration ${num(fit.duration, 3)} s, bounce ${num(fit.bounce, 2)}`
+      : "가속하며 도착, 2차 저항";
+    const unit =
+      s.property === "scale" ? "×" : s.property === "opacityProxy" ? "" : " px";
+    const travel = p
+      ? `${num(p.from, 1)}${unit} → ${num(p.to, 1)}${unit}` +
+        (p.endpointSource === "inferred"
+          ? "<em>추정</em>"
+          : p.endpointSource === "plan"
+            ? "<em>계획값</em>"
+            : "")
+      : "—";
+    const stats = [
+      ["시작", `${num(fit.t0Ms)} ms`],
+      ["도착", `${num(fit.t0Ms + fit.arrivalMs)} ms`],
+      ["정착", `${num(fit.t0Ms + fit.settleMs)} ms`],
+      [`${escape(propertyNames[s.property] || "값")} 이동`, travel],
+      ["곡선 오차", `${num(fit.rmse * 100, 2)} %`],
+      [
+        "가까운 프리셋",
+        `${escape(fit.nearestPreset.name)} (오차 ${num(fit.nearestPreset.rmse * 100, 1)} %)`,
+      ],
+    ];
+    const bx = tr.bezier;
+    container.innerHTML = `<div class="readout-grid"><div class="physics"><p class="model">${escape(modelName)}<span>${escape(feel)}</span></p><div class="figures">${figures}</div><dl class="stats">${stats.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl><p class="live"><span>지금 관측 <b id="current-progress">—</b></span><span>물리 <b id="current-physics">—</b></span></p></div><div class="code"><div class="code-head"><span>적분기 설정</span><button class="copy" id="copy-physics" aria-label="선택한 요소의 적분기 설정 복사">복사</button></div><pre>${highlight(codeFor(fit, 3, false))}</pre>${state.view === "curve" && bx ? bezierCard(bx) : ""}</div></div><details class="more"><summary>대안 모델, 측정 근거, 주의할 점</summary><ul class="alternatives">${fit.alternatives
+      .map(
+        (a) =>
+          `<li>${escape(a.model)} ${escape(
+            Object.entries(a.params)
+              .map(([k, v]) => `${k} ${num(v, 1)}`)
+              .join(", "),
+          )}, 오차 ${num(a.rmse * 100, 2)} %${a.equivalent ? ", 동등한 대안" : ""}</li>`,
+      )
+      .join(
+        "",
+      )}</ul>${tr.geometryEvidence ? `<p>${escape(tr.geometryEvidence)}</p>` : ""}${notes}</details>`;
     $("copy-physics").onclick = () => copyText(codeFor(fit));
     updateTime(state.time);
   }
@@ -566,15 +607,15 @@
             const simultaneous =
               r.delayMs < report.video.frameIntervalMs.median;
             const label = simultaneous
-              ? "같은 프레임 간격 안에서 시작"
+              ? "같은 프레임 안에서 시작"
               : `${num(r.delayMs)} ms 뒤에 시작`;
             const threshold = finite(r.startAt)
-              ? `startAt ≈ ${num(r.startAt, 3)}`
-              : "진행률 기준으로 정확히 예약할 수 없음";
-            return `<div class="relationship"><div class="relation-names"><span>${escape(byId[r.first]?.name || r.first)}</span><span class="arrow">→</span><span>${escape(byId[r.second]?.name || r.second)}</span></div><div class="relation-data"><b>${label}</b><span>${threshold}${r.confidence === "review" ? " · 추정 관계" : ""}</span></div></div>`;
+              ? `앞 요소가 ${num(r.startAt * 100)} %에 이르렀을 때, startAt ${num(r.startAt, 3)}`
+              : "진행률 기준으로는 정확히 예약할 수 없는 지연";
+            return `<div class="relation"><span class="relation-names">${escape(byId[r.first]?.name || r.first)}<span class="arrow" aria-hidden="true">→</span>${escape(byId[r.second]?.name || r.second)}</span><span class="relation-value">${label}</span><span class="relation-note">${threshold}${r.confidence === "review" ? ", 추정 관계" : ""}</span></div>`;
           })
           .join("")
-      : '<p class="empty-relationship">비교할 수 있는 측정 트랙이 하나뿐입니다.</p>';
+      : '<p class="empty-relationship">비교할 수 있는 측정 요소가 하나뿐입니다.</p>';
   }
   function pickRow(index) {
     state.row = clamp(index, 0, Math.max(0, rows().length - 1));
@@ -592,12 +633,14 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => ($("toast").hidden = true), 2400);
   }
-  async function copyText(text) {
+  $("copy-override").onclick = () =>
+    copyText(event().override || "", "오버라이드를 복사했습니다.");
+  async function copyText(text, done = "적분기 설정을 복사했습니다.") {
     try {
       if (navigator.clipboard?.writeText)
         await navigator.clipboard.writeText(text);
       else throw new Error("Clipboard unavailable");
-      toast("물리 설정을 복사했습니다.");
+      toast(done);
     } catch (_) {
       const input = document.createElement("textarea");
       input.value = text;
@@ -609,8 +652,8 @@
       input.remove();
       toast(
         copied
-          ? "물리 설정을 복사했습니다."
-          : "복사를 허용하거나 아래에서 SSGOI 코드 파일을 내려받으세요.",
+          ? done
+          : "복사가 막혀 있습니다. 아래에서 SSGOI 코드 파일을 내려받으세요.",
       );
     }
   }
@@ -761,7 +804,7 @@
       "style",
     );
     style.textContent =
-      "text{font-family:-apple-system,Arial,sans-serif}.axis-label{font:11px monospace;fill:#9ba6b5}.row-name{font-size:13px;fill:#506179}.row-property{font-size:10px;fill:#99a5b6}.cursor-label{font:11px monospace;fill:white}.cursor-line{stroke:#547196;stroke-width:1;stroke-dasharray:3 3}";
+      "text{font-family:-apple-system,Arial,sans-serif}.axis-label{font:11px monospace;fill:#9aa2ae}.row-name{font-size:13px;fill:#141821}.row-property{font-size:11px;fill:#6b7380}.cursor-label{font:11px monospace;fill:white}.cursor-line{stroke:#141821;stroke-width:1.2}";
     svg.prepend(style);
     const url = URL.createObjectURL(
       new Blob([new XMLSerializer().serializeToString(svg)], {
@@ -786,11 +829,11 @@
   });
   $("source-name").textContent = report.source.name;
   $("source-specs").textContent =
-    `${report.video.width} × ${report.video.height} · 평균 ${num(report.video.averageFps, 1)} fps · ${num(report.video.durationMs / 1000, 2)}초 녹화`;
+    `${report.video.width} × ${report.video.height}, ${num(report.video.averageFps, 1)} fps, ${num(report.video.durationMs / 1000, 2)} s`;
   $("verification").textContent =
     report.physicsVerification?.status === "passed"
-      ? "SSGOI 물리 검증 완료"
-      : "물리 검증 정보 없음";
+      ? "현재 SSGOI 소스와 대조함"
+      : "";
   $("interpretation").textContent = report.interpretation;
   $("excluded").innerHTML =
     (report.excluded || [])

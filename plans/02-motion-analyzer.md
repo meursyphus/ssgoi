@@ -4,7 +4,8 @@
 전환 리팩토링과 독립된 개발 도구다. 실제 구현은 Python/FFmpeg 측정 엔진과
 브라우저 뷰어이며, 아래의 초기 브라우저 전용 구상보다
 [현재 프로토콜](../apps/dev/tools/motion-analyzer/PROTOCOL.md)이 우선한다.
-생성 코드는 기존 `@ssgoi/core/runtime`의 `IntegratorProvider`를 사용한다.
+생성 코드는 프리셋 `override`(`select("in").set({ integrator })`)와 `IntegratorProvider`를 사용한다.
+§5의 폐루프 골든은 `synth` 합성 녹화와 `tests/test_closed_loop.py`로 구현되어 있다.
 
 ## 0. 한 줄 요약
 

@@ -17,7 +17,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .video import color_frame
 
-COLORS = ["#4c7ce5", "#d78d65", "#4ca394", "#9c84cb", "#c3a154", "#679aae", "#bd85a7"]
+COLORS = ["#3B6FE0", "#E0743C", "#2E9C8B", "#8A6BD1", "#B8901F", "#4F8FAE", "#C26F9C"]
+INK, MUTED, HAIRLINE, PAPER = "#141821", "#6B7380", "#E4E7EC", "#FFFFFF"
 for font in [
     "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
     "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
@@ -28,14 +29,23 @@ for font in [
         break
 plt.rcParams.update(
     {
-        "font.size": 10,
+        "font.size": 9.5,
         "axes.spines.top": False,
         "axes.spines.right": False,
-        "axes.labelcolor": "#74849c",
-        "axes.edgecolor": "#e4eaf2",
-        "xtick.color": "#657188",
-        "ytick.color": "#24314b",
-        "savefig.facecolor": "white",
+        "axes.spines.left": False,
+        "axes.labelcolor": MUTED,
+        "axes.edgecolor": HAIRLINE,
+        "axes.titlecolor": INK,
+        "xtick.color": MUTED,
+        "ytick.color": INK,
+        "xtick.labelsize": 8.5,
+        "ytick.labelsize": 9,
+        "grid.color": HAIRLINE,
+        "grid.linewidth": 0.6,
+        "legend.frameon": False,
+        "legend.fontsize": 8,
+        "savefig.facecolor": PAPER,
+        "axes.facecolor": PAPER,
         "axes.unicode_minus": False,
     }
 )
@@ -49,7 +59,7 @@ def strip(video, pts, indices, output, width=178, columns=6, tracks=None):
     canvas = Image.new(
         "RGB",
         (cols * (width + 12) + 12, math.ceil(len(indices) / cols) * (height + 38) + 12),
-        "#f2f5fa",
+        PAPER,
     )
     draw = ImageDraw.Draw(canvas)
     font = ImageFont.load_default(size=15)
@@ -74,34 +84,31 @@ def strip(video, pts, indices, output, width=178, columns=6, tracks=None):
         draw.text(
             (x, y + height + 6),
             f"{pts[index]:.0f} ms · f{index}",
-            fill="#24314b",
+            fill=INK,
             font=font,
         )
     canvas.save(output)
 
 
 def activity_plot(pts, energy, threshold, segments, output):
-    fig, ax = plt.subplots(figsize=(13, 2.6))
-    ax.plot(pts / 1000, energy, color="#59708e", lw=1)
-    ax.axhline(threshold, color="#b16b28", ls="--", lw=1)
+    fig, ax = plt.subplots(figsize=(13, 2.4))
+    ax.plot(pts / 1000, energy, color=INK, lw=0.9)
+    ax.axhline(threshold, color=MUTED, ls=(0, (3, 3)), lw=0.8)
     for i, s in enumerate(segments):
-        ax.axvspan(
-            s["startMs"] / 1000,
-            s["endMs"] / 1000,
-            color=COLORS[i % len(COLORS)],
-            alpha=0.16,
-        )
+        c = COLORS[i % len(COLORS)]
+        ax.axvspan(s["startMs"] / 1000, s["endMs"] / 1000, color=c, alpha=0.1, lw=0)
         ax.text(
             (s["startMs"] + s["endMs"]) / 2000,
-            ax.get_ylim()[1] * 0.9,
+            ax.get_ylim()[1] * 0.92,
             str(i + 1),
             ha="center",
+            color=c,
+            fontsize=9,
         )
-    ax.set(
-        xlabel="Recording time (s)",
-        ylabel="Frame change",
-        title="Motion candidates · measured on original presentation timestamps",
-    )
+    ax.set_xlabel("녹화 시간 (s)")
+    ax.set_ylabel("프레임 변화")
+    ax.set_title("움직임 후보 구간", loc="left", fontsize=11, pad=10)
+    ax.grid(axis="y", alpha=0.6)
     fig.tight_layout()
     fig.savefig(output, dpi=150)
     plt.close(fig)
@@ -109,50 +116,50 @@ def activity_plot(pts, energy, threshold, segments, output):
 
 def timeline_plot(event, output):
     rows = [(tr, p) for tr in event["tracks"] for p in tr["properties"]]
-    fig, ax = plt.subplots(figsize=(13, max(3, 1.25 + len(rows) * 0.55)))
+    fig, ax = plt.subplots(figsize=(13, max(2.8, 1.4 + len(rows) * 0.62)))
+    labels = {"x": "가로", "y": "세로", "scale": "크기", "opacityProxy": "불투명도"}
     for row, (tr, p) in enumerate(rows):
         c = COLORS[event["tracks"].index(tr) % len(COLORS)]
         prop = tr["properties"][p]
         fit = tr.get("fit")
         times = np.array(tr["timeMs"])
-        valid = np.isfinite(np.array(prop["progress"], dtype=float))
-        start, end = prop["startMs"], prop["endMs"]
-        lo, hi = row + 0.28, row - 0.28
         values = np.array(prop["progress"], dtype=float)
-        ax.plot(
-            times[valid],
-            lo - (lo - hi) * np.clip(values[valid], -0.15, 1.2),
-            ".",
-            ms=3,
-            color=c,
-            alpha=0.65,
-        )
+        valid = np.isfinite(values)
+        lo, hi = row + 0.3, row - 0.3
+        y = lambda v: lo - (lo - hi) * np.clip(v, -0.15, 1.2)
+        ax.hlines(lo, 0, event["durationMs"], color=HAIRLINE, lw=0.8)
         if fit:
             sim = fit["simulation"]
             t = np.array(sim["timeMs"]) + fit["t0Ms"]
-            curve = lo - (lo - hi) * np.clip(sim["progress"], -0.15, 1.2)
+            curve = y(np.array(sim["progress"]))
             measured = (t >= prop["observedFromMs"]) & (t <= prop["observedToMs"])
-            ax.plot(t, curve, color=c, lw=1, ls="--", alpha=0.6)
-            ax.plot(t[measured], curve[measured], color=c, lw=1.8)
-            ax.fill_between(t[measured], lo, curve[measured], color=c, alpha=0.17)
-            ax.vlines(fit["t0Ms"], row - 0.33, row + 0.33, color=c, lw=1.2)
+            ax.plot(t, curve, color=c, lw=1, ls=(0, (3, 3)), alpha=0.7)
+            ax.plot(t[measured], curve[measured], color=c, lw=2)
+            ax.vlines(fit["t0Ms"], lo, hi, color=c, lw=1)
+        ax.plot(times[valid], y(values[valid]), ".", ms=3.5, color=c, alpha=0.8)
         ax.text(
-            event["durationMs"] + 20,
+            event["durationMs"] + 18,
             row,
-            f"관측 {start:.0f}–{end:.0f} ms",
+            f"관측 {prop['startMs']:.0f}–{prop['endMs']:.0f} ms",
             va="center",
-            fontsize=7,
-            color="#657188",
+            fontsize=8,
+            color=MUTED,
         )
-    ax.set_yticks(range(len(rows)), [f"{tr['name']} / {p}" for tr, p in rows])
+    ax.set_yticks(range(len(rows)), [f"{tr['name']}  {labels.get(p, p)}" for tr, p in rows])
+    ax.tick_params(axis="y", length=0)
     ax.invert_yaxis()
-    ax.set_xlim(-20, event["durationMs"] + 145)
-    ax.set_xlabel(
-        "구간 시간 (ms)   ·   점: 측정값   /   실선: 물리 곡선   /   점선: 관측 밖 추정"
+    ax.set_xlim(-12, event["durationMs"] + 150)
+    ax.set_xlabel("구간 시간 (ms)")
+    ax.set_title(event["name"], loc="left", fontsize=12, fontweight="bold", pad=18)
+    ax.text(
+        0,
+        1.02,
+        "점 측정값   실선 물리 곡선   점선 관측 밖 추정   세로선 시작 시각",
+        transform=ax.transAxes,
+        fontsize=8,
+        color=MUTED,
     )
-    ax.set_title(event["name"], loc="left", fontweight="bold", pad=25, fontsize=16)
-    ax.grid(axis="x", alpha=0.14)
-    ax.spines["left"].set_visible(False)
+    ax.grid(axis="x", alpha=0.7)
     fig.tight_layout()
     fig.savefig(output.with_suffix(".png"), dpi=160)
     fig.savefig(output.with_suffix(".svg"))
@@ -166,9 +173,10 @@ def curve_plot(event, output):
         ax.text(
             0.5,
             0.5,
-            "No reliable curve measurements. Refine the semantic plan or ROI.",
+            "측정 곡선이 없습니다. 분석 계획이나 관심 영역을 보정하세요.",
             ha="center",
             va="center",
+            color=MUTED,
         )
         ax.axis("off")
         fig.savefig(output, dpi=120)
@@ -177,19 +185,19 @@ def curve_plot(event, output):
     fig, axes = plt.subplots(
         len(tracks),
         2,
-        figsize=(13, max(3, len(tracks) * 2.5)),
+        figsize=(13, max(3, len(tracks) * 2.6)),
         squeeze=False,
         gridspec_kw={"width_ratios": [2.2, 1]},
     )
     for i, tr in enumerate(tracks):
         ax, res = axes[i]
-        c = COLORS[i % len(COLORS)]
+        c = COLORS[event["tracks"].index(tr) % len(COLORS)]
         fit = tr["fit"]
         t = np.array(tr["timeMs"])
         for p, prop in tr["properties"].items():
             obs = np.array(prop["progress"], dtype=float)
-            ax.plot(t, obs, ".", ms=4, alpha=0.6, label=f"measured {p}")
-            res.plot(t, obs - np.array(fit["predicted"]), ".-", ms=2, lw=0.7, label=p)
+            ax.plot(t, obs, ".", ms=4, color=c, alpha=0.55, label=f"측정 {p}")
+            res.plot(t, obs - np.array(fit["predicted"]), ".-", ms=2, lw=0.7, color=c, label=p)
         sim = fit["simulation"]
         ax.plot(
             np.array(sim["timeMs"]) + fit["t0Ms"],
@@ -202,25 +210,21 @@ def curve_plot(event, output):
             ax.plot(
                 t,
                 tr["bezier"]["predicted"],
-                color="#c19030",
-                ls="--",
-                lw=1.2,
-                label="Bezier reference",
+                color="#B8901F",
+                ls=(0, (4, 3)),
+                lw=1.1,
+                label="베지어 참고",
             )
-        ax.axhline(1, color="#b2bdce", lw=0.7)
-        ax.set(
-            title=f"{tr['name']} · RMSE {fit['rmse']:.3f}",
-            ylabel="Progress",
-            xlim=(-20, event["durationMs"] + 30),
-        )
-        ax.legend(loc="lower right", fontsize=7, ncol=2)
-        res.axhline(0, color="#8895aa", lw=0.7)
-        res.set(
-            title="Measured − physics",
-            ylim=(-max(0.08, fit["rmse"] * 3), max(0.08, fit["rmse"] * 3)),
-        )
+        ax.axhline(1, color=HAIRLINE, lw=0.8)
+        ax.set_title(f"{tr['name']}   RMSE {fit['rmse']:.3f}", loc="left", fontsize=10)
+        ax.set_ylabel("진행률")
+        ax.set_xlim(-12, event["durationMs"] + 30)
+        ax.legend(loc="lower right", ncol=2)
+        res.axhline(0, color=MUTED, lw=0.7)
+        res.set_title("측정 − 물리", loc="left", fontsize=10)
+        res.set_ylim(-max(0.08, fit["rmse"] * 3), max(0.08, fit["rmse"] * 3))
         for a in (ax, res):
-            a.grid(alpha=0.14)
+            a.grid(alpha=0.7)
             a.set_xlabel("ms")
     fig.tight_layout(h_pad=2)
     fig.savefig(output, dpi=145)

@@ -11,6 +11,7 @@
     "motion:analyze": "bash tools/motion-analyzer/run.sh measure",
     "motion:render": "bash tools/motion-analyzer/run.sh render",
     "motion:view": "bash tools/motion-analyzer/run.sh serve",
+    "motion:synth": "bash tools/motion-analyzer/run.sh synth",
     "motion:test": "bash tools/motion-analyzer/run.sh test"
   },
   "dependencies": {

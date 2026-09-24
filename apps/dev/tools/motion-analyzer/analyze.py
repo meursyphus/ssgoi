@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Codex's inspect → semantic plan → measurement → visual verification tool."""
+"""Inspect → semantic plan → measurement → visual verification, for coding agents."""
 import argparse
 import json
 import sys
@@ -16,6 +16,17 @@ def main():
     presentation.add_argument(
         "report", help="Path to report.json; output is written beside it"
     )
+    synth = commands.add_parser(
+        "synth",
+        help="Render a recording with known SSGOI physics plus truth.json and plan.json",
+    )
+    synth.add_argument("--out", required=True)
+    synth.add_argument("--fps", type=float, default=60)
+    synth.add_argument("--codec", choices=["h264", "hevc"], default="h264")
+    synth.add_argument(
+        "--drop", type=float, default=0, help="Fraction of frames to drop (VFR)"
+    )
+    synth.add_argument("--seed", type=int, default=7)
     preview = commands.add_parser(
         "serve", help="Open a local preview server with video seeking support"
     )
@@ -41,7 +52,7 @@ def main():
             cmd.add_argument("--step-ms", type=float, default=50)
         else:
             cmd.add_argument(
-                "--plan", help="Codex-authored semantic ranges / element ROIs JSON"
+                "--plan", help="Agent-authored semantic ranges / element ROIs JSON"
             )
             cmd.add_argument(
                 "--direction",
@@ -72,6 +83,10 @@ def main():
         or getattr(args, "step_ms", 1) <= 0
     ):
         parser.error("Width must be >= 32; time steps / gap must be positive")
+    if args.command == "synth" and (
+        not 1 <= args.fps <= 240 or not 0 <= args.drop < 0.9
+    ):
+        parser.error("fps must be within 1-240 and drop within [0, 0.9)")
     if args.command == "measure" and (
         args.max_tracks < 1
         or args.rest_delta <= 0
@@ -91,6 +106,10 @@ def main():
             from motion_analyzer.server import serve
 
             result = serve(args.directory, args.port)
+        elif args.command == "synth":
+            from motion_analyzer.synth import synthesize
+
+            result = synthesize(args)
         elif args.command == "render":
             from motion_analyzer.report import rerender
 

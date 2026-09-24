@@ -9,6 +9,7 @@
     "motion:analyze": "bash apps/dev/tools/motion-analyzer/run.sh measure",
     "motion:render": "bash apps/dev/tools/motion-analyzer/run.sh render",
     "motion:view": "bash apps/dev/tools/motion-analyzer/run.sh serve",
+    "motion:synth": "bash apps/dev/tools/motion-analyzer/run.sh synth",
     "motion:test": "bash apps/dev/tools/motion-analyzer/run.sh test",
     "build": "pnpm --filter ssgoi package",
     "core:watch": "pnpm --filter @ssgoi/core watch",

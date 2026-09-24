@@ -1,6 +1,6 @@
 """SSGOI's 60 Hz semi-implicit Euler and bounded inverse fitting.
 
-Parity is checked against the repository's actual TypeScript in tests/check-core.mjs.
+Parity is checked against the repository's actual TypeScript through core-reference.mjs.
 No continuous-time analytical spring or Bezier is used to choose physics values.
 """
 
@@ -10,8 +10,18 @@ import math
 import numpy as np
 from scipy.optimize import least_squares
 
+from .reference import preset_curves
+
 DT = 1 / 60
 FRAME_MS = 1000 / 60
+# Inferring an unobserved rest position is a mild extrapolation prior: placing an
+# endpoint one observed-span away costs as much as 0.1% RMSE of travel, so the
+# fit only extends off-screen travel when the visible curve demands it.
+EXTRAPOLATION_WEIGHT = 0.001
+# Fits closer than this (in progress units) are indistinguishable given pixel
+# tracking noise; the parsimony rule then prefers fewer parameters and the
+# smaller off-screen extrapolation.
+EQUIVALENT_RMSE = 0.001
 
 
 def simulate(model, params, initial_velocity=0.0, rest_delta=0.01, rest_speed=0.01):
@@ -104,19 +114,6 @@ def spring_params(duration, bounce=0.0):
     }
 
 
-def ease_in_params(duration=0.2, resistance=1.5):
-    lo, hi = 0.01, 1e6
-    for _ in range(60):
-        mid = math.sqrt(lo * hi)
-        p, _, _ = simulate("inertia", {"acceleration": mid, "resistance": resistance})
-        hits = np.flatnonzero(p >= 1)
-        reach = hits[0] * DT if len(hits) else math.inf
-        if reach > duration:
-            lo = mid
-        else:
-            hi = mid
-    return {"acceleration": hi, "resistance": resistance}
-
 
 def fit_physics(
     times,
@@ -127,8 +124,18 @@ def fit_physics(
     initial_velocity=0.0,
     rest_delta=0.01,
     rest_speed=0.01,
+    free_start=False,
+    free_end=False,
 ):
-    """Fit all independent properties jointly; NaN marks invisible/unmeasured points."""
+    """Fit all independent properties jointly; NaN marks invisible/unmeasured points.
+
+    `observations` are normalized over their observed endpoints (0 → 1). When a
+    property's rest position was not observed — an incoming page starts off
+    screen, an outgoing page ends fully covered — `free_start` / `free_end` let
+    the fit place that endpoint itself, in the same units. The returned
+    `endpointScale` holds the fitted start/end per column so callers can
+    re-normalize; RMSE and residuals are reported over the fitted full travel.
+    """
     times = np.asarray(times, dtype=float)
     values = np.asarray(observations, dtype=float)
     if values.ndim == 1:
@@ -136,7 +143,27 @@ def fit_physics(
     mask = np.isfinite(values)
     if np.sum(mask) < 6:
         raise ValueError("At least six measured samples are required")
-    lo_t, hi_t = onset_ms - frame_ms, onset_ms + 3 * frame_ms
+    columns = values.shape[1]
+    # An unobserved start means motion began before the first visible sample,
+    # possibly at the segment start; widen the onset window accordingly.
+    lo_t = -frame_ms if free_start else onset_ms - frame_ms
+    hi_t = onset_ms + 3 * frame_ms
+    t0_starts = sorted({onset_ms, 0.0} if free_start else {onset_ms})
+    end_lower = [-6.0] * columns * free_start + [0.4] * columns * free_end
+    end_upper = [0.6] * columns * free_start + [7.0] * columns * free_end
+    end_start = [-0.05] * columns * free_start + [1.05] * columns * free_end
+
+    def endpoints(x):
+        start = np.zeros(columns)
+        end = np.ones(columns)
+        tail = list(x)
+        if free_end:
+            end = np.array(tail[-columns:])
+            tail = tail[:-columns]
+        if free_start:
+            start = np.array(tail[-columns:])
+        return start, end
+
     candidates = []
     for model in (
         ["spring"]
@@ -144,17 +171,15 @@ def fit_physics(
         else ["spring", "inertia", "doubleSpring"]
     ):
         if mode == "duration-bounce":
-            lower, upper = [0.14, -0.45, lo_t], [2.0, 0.65, hi_t]
-            starts = [[d, b, onset_ms] for d, b in [(0.3, 0), (0.5, 0.2), (0.8, 0)]]
+            lower, upper = [0.14, -0.45], [2.0, 0.65]
+            starts = [[d, b] for d, b in [(0.3, 0), (0.5, 0.2), (0.8, 0)]]
         elif model == "inertia":
-            lower, upper = [math.log(0.5), math.log(0.001), lo_t], [
+            lower, upper = [math.log(0.5), math.log(0.001)], [
                 math.log(3000),
                 math.log(12),
-                hi_t,
             ]
             starts = [
-                [math.log(a), math.log(r), onset_ms]
-                for a, r in [(25, 1.5), (150, 1.5), (500, 0.2)]
+                [math.log(a), math.log(r)] for a, r in [(25, 1.5), (150, 1.5), (500, 0.2)]
             ]
         else:
             lower, upper = [math.log(10), math.log(1)], [math.log(2400), math.log(100)]
@@ -165,9 +190,10 @@ def fit_physics(
                 lower += [0.5]
                 upper += [2.0]
                 starts = [p + [r] for p, r in zip(starts, [0.7, 1.2, 1.8])]
-            lower += [lo_t]
-            upper += [hi_t]
-            starts = [p + [onset_ms] for p in starts]
+        physics_count = len(lower)
+        lower += [lo_t] + end_lower
+        upper += [hi_t] + end_upper
+        starts = [p + [t0] + end_start for p in starts for t0 in t0_starts]
 
         def unpack(x):
             if mode == "duration-bounce":
@@ -178,14 +204,18 @@ def fit_physics(
                 params = {"stiffness": math.exp(x[0]), "damping": math.exp(x[1])}
                 if model == "doubleSpring":
                     params["doubleSpring"] = x[2]
-            return params, x[-1]
+            return params, x[physics_count]
 
         def residual(x):
             params, t0 = unpack(x)
+            start, end = endpoints(x)
             predicted = sample(
                 model, params, times, t0, initial_velocity, rest_delta, rest_speed
             )
-            return np.clip((predicted[:, None] - values)[mask], -1e5, 1e5)
+            modelled = start[None, :] + (end - start)[None, :] * predicted[:, None]
+            data = np.clip((modelled - values)[mask], -1e5, 1e5)
+            prior = EXTRAPOLATION_WEIGHT * math.sqrt(len(data))
+            return np.concatenate([data, prior * start, prior * (end - 1)])
 
         best = min(
             (
@@ -193,7 +223,7 @@ def fit_physics(
                     residual,
                     x,
                     bounds=(lower, upper),
-                    max_nfev=140,
+                    max_nfev=180,
                     ftol=1e-8,
                     xtol=1e-8,
                     gtol=1e-8,
@@ -203,6 +233,7 @@ def fit_physics(
             key=lambda r: np.mean(r.fun**2),
         )
         params, t0 = unpack(best.x)
+        start, end = endpoints(best.x)
         sim, vel, settled = simulate(
             model, params, initial_velocity, rest_delta, rest_speed
         )
@@ -211,6 +242,9 @@ def fit_physics(
         predicted = sample(
             model, params, times, t0, initial_velocity, rest_delta, rest_speed
         )
+        # Observations and residuals in full-travel progress units.
+        travel = (values - start[None, :]) / (end - start)[None, :]
+        residuals = travel - predicted[:, None]
         hit = np.flatnonzero(np.abs(sim - 1) <= 0.02)
         candidate = {
             "model": model,
@@ -219,10 +253,13 @@ def fit_physics(
             "initialVelocity": initial_velocity,
             "restDelta": rest_delta,
             "restSpeed": rest_speed,
-            "rmse": float(np.sqrt(np.mean(best.fun**2))),
+            "rmse": float(np.sqrt(np.mean(residuals[mask] ** 2))),
             "settleMs": (len(sim) - 1) * FRAME_MS,
             "arrivalMs": float(hit[0] * FRAME_MS) if len(hit) else None,
+            "endpointScale": {"start": start.tolist(), "end": end.tolist()},
+            "extrapolation": float(max(np.abs(start).max(), np.abs(end - 1).max())),
             "predicted": predicted.tolist(),
+            "travel": travel,
             "simulation": {
                 "timeMs": (np.arange(len(sim)) * FRAME_MS).tolist(),
                 "progress": sim.tolist(),
@@ -235,47 +272,45 @@ def fit_physics(
     if not candidates:
         raise ValueError("No stable integrator fits this track")
     candidates.sort(key=lambda c: c["rmse"])
-    # Prefer fewer parameters when within 10% of the best RMSE.
+    # Prefer fewer parameters, then the smaller inferred off-screen travel, among
+    # fits within 10% (or the noise floor) of the best RMSE.
     equivalent = [
-        c for c in candidates if c["rmse"] <= candidates[0]["rmse"] * 1.1 + 1e-7
+        c
+        for c in candidates
+        if c["rmse"] <= candidates[0]["rmse"] * 1.1 + EQUIVALENT_RMSE
     ]
-    selected = min(equivalent, key=lambda c: (c["model"] == "doubleSpring", c["rmse"]))
+    selected = min(
+        equivalent,
+        key=lambda c: (c["model"] == "doubleSpring", c["extrapolation"], c["rmse"]),
+    )
     selected = dict(selected)
+    travel = selected.pop("travel")
     selected["alternatives"] = [
-        {k: v for k, v in c.items() if k not in ("simulation", "predicted")}
+        {k: v for k, v in c.items() if k not in ("simulation", "predicted", "travel")}
         | {"equivalent": c in equivalent}
         for c in candidates
         if c["model"] != selected["model"]
     ]
     selected["residuals"] = [
         [float(v) if np.isfinite(v) else None for v in row]
-        for row in values - np.array(selected["predicted"])[:, None]
+        for row in travel - np.array(selected["predicted"])[:, None]
     ]
-    presets = [
-        (name, "spring", spring_params(d, b))
-        for name, d, b in [
-            ("smooth", 0.4, 0),
-            ("snappy", 0.3, 0.15),
-            ("bouncy", 0.45, 0.3),
-            ("gentle", 0.55, 0),
-            ("swift", 0.2, 0),
-        ]
-    ] + [("accelerate", "inertia", ease_in_params())]
+    # Semantic presets come from packages/core/src/lib/motion/presets.ts via the
+    # core bridge, so a recalibrated preset never leaves this comparison stale.
     ranking = []
-    for name, model, params in presets:
-        pred = sample(
-            model,
-            params,
-            times,
-            selected["t0Ms"],
-            initial_velocity,
-            rest_delta,
-            rest_speed,
+    for preset in preset_curves():
+        pred = np.interp(
+            times - selected["t0Ms"],
+            preset["timeMs"],
+            preset["progress"],
+            left=0,
+            right=preset["progress"][-1],
         )
         ranking.append(
             {
-                "name": name,
-                "rmse": float(np.sqrt(np.mean(((pred[:, None] - values)[mask]) ** 2))),
+                "name": preset["name"],
+                "kind": preset["kind"],
+                "rmse": float(np.sqrt(np.mean(((pred[:, None] - travel)[mask]) ** 2))),
             }
         )
     selected["nearestPreset"] = min(ranking, key=lambda c: c["rmse"])
