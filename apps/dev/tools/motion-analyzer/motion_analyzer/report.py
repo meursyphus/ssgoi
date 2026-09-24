@@ -151,14 +151,6 @@ def timeline_plot(event, output):
     ax.set_xlim(-12, event["durationMs"] + 150)
     ax.set_xlabel("구간 시간 (ms)")
     ax.set_title(event["name"], loc="left", fontsize=12, fontweight="bold", pad=18)
-    ax.text(
-        0,
-        1.02,
-        "점 측정값   실선 물리 곡선   점선 관측 밖 추정   세로선 시작 시각",
-        transform=ax.transAxes,
-        fontsize=8,
-        color=MUTED,
-    )
     ax.grid(axis="x", alpha=0.7)
     fig.tight_layout()
     fig.savefig(output.with_suffix(".png"), dpi=160)

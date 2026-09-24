@@ -113,10 +113,6 @@
                 </p>
               </div>
               <p class="player-range">녹화 <span id="recording-range"></span></p>
-              <p class="player-hint">
-                그래프를 드래그하거나 <kbd>←</kbd> <kbd>→</kbd>로 프레임을 넘기면
-                영상도 같은 시점으로 이동합니다.
-              </p>
               <details class="segment-notes">
                 <summary>이 구간의 해석과 관측 한계</summary>
                 <div id="segment-notes"></div>
@@ -129,7 +125,7 @@
               <div class="chart-head">
                 <div>
                   <h2 id="chart-title">요소별 타이밍</h2>
-                  <p id="chart-subtitle">시작과 끝, 겹치는 순간을 같은 시간축에서.</p>
+                  <p id="chart-subtitle"></p>
                 </div>
                 <div class="segmented" role="group" aria-label="그래프 보기">
                   <button id="view-timing" class="active" aria-pressed="true">타이밍</button
@@ -152,7 +148,6 @@
                 ></svg>
               </div>
               <p class="chart-foot">
-                <span id="chart-footnote">행을 선택하면 아래에서 재현 설정을 볼 수 있습니다.</span>
                 <a id="chart-download" download>SVG 저장</a>
               </p>
             </div>
@@ -184,11 +179,8 @@
                   <a id="curves-download" target="_blank" rel="noopener">잔차 그래프</a>
                   <a href="analysis-plan.json" download>분석 계획 JSON</a>
                 </p>
-                <h3>이번 분석에서 제외한 동작</h3>
+                <h3>제외한 구간</h3>
                 <ul id="excluded"></ul>
-                <h3>측정 방식과 검증</h3>
-                <ul id="warnings"></ul>
-                <p id="verification-detail"></p>
                 <h3>전체 재현 코드</h3>
                 <pre id="full-code"></pre>
               </div>

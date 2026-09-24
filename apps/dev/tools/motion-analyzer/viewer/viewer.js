@@ -351,8 +351,8 @@
       state.view === "timing" ? "요소별 타이밍" : "측정 곡선과 재현 곡선";
     $("chart-subtitle").textContent =
       state.view === "timing"
-        ? "시작과 끝, 겹치는 순간을 같은 시간축에서."
-        : `${s?.track.name || "요소 선택"}${s?.property ? " · " + propertyNames[s.property] : ""}`;
+        ? ""
+        : `${s?.track.name || ""}${s?.property ? " " + propertyNames[s.property] : ""}`;
     if (!all.length) {
       svg.setAttribute("viewBox", "0 0 1000 160");
       svg.innerHTML =
@@ -412,8 +412,6 @@
       markup += cursorMarkup(top, bottom);
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
       svg.innerHTML = markup;
-      $("chart-footnote").textContent =
-        "색은 요소, 행은 속성입니다. 행을 선택하면 아래 설정이 바뀝니다.";
     } else {
       const left = compact ? 42 : 66,
         right = W - (compact ? 25 : 50),
@@ -467,8 +465,6 @@
         cursorMarkup(top, bottom);
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
       svg.innerHTML = markup;
-      $("chart-footnote").textContent =
-        "베지어는 형태 비교용입니다. 재현 설정은 물리 적분기로 계산합니다.";
     }
     updateTime(state.time);
   }
@@ -544,7 +540,7 @@
       ? `<ul class="notes">${tr.notes.map((n) => `<li>${escape(n)}</li>`).join("")}</ul>`
       : "";
     if (!fit) {
-      container.innerHTML = `<p class="empty">이 요소는 안정적으로 추적되지 않아 설정을 제안하지 않았습니다. 다른 프레임이나 관심 영역으로 다시 측정할 수 있습니다.</p>${notes}`;
+      container.innerHTML = `<p class="empty">측정 불가</p>${notes}`;
       return;
     }
     const modelName = {
@@ -583,7 +579,7 @@
       ],
     ];
     const bx = tr.bezier;
-    container.innerHTML = `<div class="readout-grid"><div class="physics"><p class="model">${escape(modelName)}<span>${escape(feel)}</span></p><div class="figures">${figures}</div><dl class="stats">${stats.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl><p class="live"><span>지금 관측 <b id="current-progress">—</b></span><span>물리 <b id="current-physics">—</b></span></p></div><div class="code"><div class="code-head"><span>적분기 설정</span><button class="copy" id="copy-physics" aria-label="선택한 요소의 적분기 설정 복사">복사</button></div><pre>${highlight(codeFor(fit, 3, false))}</pre>${state.view === "curve" && bx ? bezierCard(bx) : ""}</div></div><details class="more"><summary>대안 모델, 측정 근거, 주의할 점</summary><ul class="alternatives">${fit.alternatives
+    container.innerHTML = `<div class="readout-grid"><div class="physics"><p class="model">${escape(modelName)}<span>${escape(feel)}</span></p><div class="figures">${figures}</div><dl class="stats">${stats.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl><p class="live"><span>관측 <b id="current-progress">—</b></span><span>물리 <b id="current-physics">—</b></span></p></div><div class="code"><div class="code-head"><span>적분기 설정</span><button class="copy" id="copy-physics" aria-label="선택한 요소의 적분기 설정 복사">복사</button></div><pre>${highlight(codeFor(fit, 3, false))}</pre>${state.view === "curve" && bx ? bezierCard(bx) : ""}</div></div><details class="more"><summary>대안 모델, 측정 근거, 주의할 점</summary><ul class="alternatives">${fit.alternatives
       .map(
         (a) =>
           `<li>${escape(a.model)} ${escape(
@@ -610,12 +606,12 @@
               ? "같은 프레임 안에서 시작"
               : `${num(r.delayMs)} ms 뒤에 시작`;
             const threshold = finite(r.startAt)
-              ? `앞 요소가 ${num(r.startAt * 100)} %에 이르렀을 때, startAt ${num(r.startAt, 3)}`
-              : "진행률 기준으로는 정확히 예약할 수 없는 지연";
-            return `<div class="relation"><span class="relation-names">${escape(byId[r.first]?.name || r.first)}<span class="arrow" aria-hidden="true">→</span>${escape(byId[r.second]?.name || r.second)}</span><span class="relation-value">${label}</span><span class="relation-note">${threshold}${r.confidence === "review" ? ", 추정 관계" : ""}</span></div>`;
+              ? `startAt ${num(r.startAt, 3)}`
+              : "startAt 없음";
+            return `<div class="relation"><span class="relation-names">${escape(byId[r.first]?.name || r.first)}<span class="arrow" aria-hidden="true">→</span>${escape(byId[r.second]?.name || r.second)}</span><span class="relation-value">${label}</span><span class="relation-note">${threshold}</span></div>`;
           })
           .join("")
-      : '<p class="empty-relationship">비교할 수 있는 측정 요소가 하나뿐입니다.</p>';
+      : "";
   }
   function pickRow(index) {
     state.row = clamp(index, 0, Math.max(0, rows().length - 1));
@@ -842,13 +838,6 @@
           `<li>${num(e.startMs / 1000, 2)}–${num(e.endMs / 1000, 2)} s · ${escape(e.reason)}</li>`,
       )
       .join("") || "<li>없음</li>";
-  $("warnings").innerHTML = (report.warnings || [])
-    .map((t) => `<li>${escape(t)}</li>`)
-    .join("");
-  $("verification-detail").textContent =
-    report.physicsVerification?.status === "passed"
-      ? `현재 SSGOI 소스와 ${report.physicsVerification.curvesChecked}개 곡선을 대조했습니다. 최대 수치 차이 ${report.physicsVerification.maxAbsoluteError.toExponential(2)}. 녹화의 프레임 간격은 ${num(report.video.frameIntervalMs.min)}–${num(report.video.frameIntervalMs.max)} ms이며, 프레임 간 움직임은 직접 관측되지 않습니다.`
-      : "현재 소스와의 수치 대조 정보가 없습니다.";
   const initial = report.segments.findIndex(
     (e) => `#${e.id}` === location.hash,
   );
