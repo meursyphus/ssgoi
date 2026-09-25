@@ -17,16 +17,34 @@ import { createZoomIn, createZoomOut } from "../zoom-element";
 import { Z_OVERLAY } from "../../stacking";
 import { getOverlayRect } from "@utils";
 
+/*
+ * Timing measured from the Airbnb iOS app's card → listing zoom (30 fps screen
+ * recording, tile top-edge tracking, fitted with apps/dev/tools/motion-analyzer):
+ *
+ *   enter (card expands into the page): spring 70 / 16 — 50 % at ~180 ms,
+ *     90 % at ~430 ms, then a long soft tail (98 % at ~670 ms), no overshoot.
+ *   exit (page shrinks back into the card): spring 196 / 22 — 50 % at ~100 ms,
+ *     90 % at ~220 ms, settles by ~300 ms with a barely visible (<1 %) bounce.
+ *
+ * The two directions are deliberately asymmetric: the reference opens slowly
+ * and closes about twice as fast. The blur overlay, the background scale and
+ * the sibling fade all share the tile's integrator so the layers stay locked.
+ */
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 380,
-    damping: 30,
+    stiffness: 70,
+    damping: 16,
     restDelta: 0.1,
     restSpeed: 0.1,
-    doubleSpring: {
-      stiffness: 260,
-      damping: 30,
-    },
+  },
+};
+
+export const BLUR_EXIT_PHYSICS: PhysicsOptions = {
+  spring: {
+    stiffness: 196,
+    damping: 22,
+    restDelta: 0.1,
+    restSpeed: 0.1,
   },
 };
 
@@ -100,6 +118,7 @@ const overlay: ZoomOverlayConfig = {
 export class BlurBackgroundStrategy implements ZoomStrategy {
   readonly name = "background";
   readonly physics = BLUR_PHYSICS;
+  readonly exitPhysics = BLUR_EXIT_PHYSICS;
 
   contribute(ctx: ZoomContributeCtx): Animation[] {
     const { from, to, resolved, physics } = ctx;
@@ -174,6 +193,7 @@ export class OverlayStrategy implements ZoomStrategy {
 export function createBlurProvider(): ZoomProvider {
   return {
     physics: BLUR_PHYSICS,
+    exitPhysics: BLUR_EXIT_PHYSICS,
     in: createZoomIn,
     out: createZoomOut,
     backgroundIn,

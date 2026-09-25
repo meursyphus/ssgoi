@@ -1,8 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { buildInput, resolveZoom, zoom } from "./transition";
+import { buildInput, physicsForMode, resolveZoom, zoom } from "./transition";
 import { withOverride } from "../../transition/define-transition";
 import type { ZoomResolved, ZoomType } from "./types";
 import { createZoomIn, createZoomOut } from "./zoom-element";
+import { createBackgroundStrategy } from "./provider";
+import { BLUR_EXIT_PHYSICS, BLUR_PHYSICS } from "./provider/blur";
 
 type Rect = {
   left: number;
@@ -403,6 +405,30 @@ describe.each<ZoomType>(["static", "expand", "blur"])(
     });
   },
 );
+
+describe("zoom per-mode physics", () => {
+  it("plays the blur exit with its own faster spring and the enter with the reference spring", () => {
+    const blur = createBackgroundStrategy("blur");
+    expect(blur.physics).toBe(BLUR_PHYSICS);
+    expect(blur.exitPhysics).toBe(BLUR_EXIT_PHYSICS);
+    expect(physicsForMode(blur, "enter")).toBe(BLUR_PHYSICS);
+    expect(physicsForMode(blur, "exit")).toBe(BLUR_EXIT_PHYSICS);
+    // Airbnb reference: the card closes about twice as fast as it opens.
+    expect(BLUR_EXIT_PHYSICS.spring!.stiffness).toBeGreaterThan(
+      BLUR_PHYSICS.spring!.stiffness * 2,
+    );
+  });
+
+  it.each<ZoomType>(["static", "expand"])(
+    "falls back to the shared physics for %s exits",
+    (type) => {
+      const background = createBackgroundStrategy(type);
+      expect(background.exitPhysics).toBeUndefined();
+      expect(physicsForMode(background, "exit")).toBe(background.physics);
+      expect(physicsForMode(background, "enter")).toBe(background.physics);
+    },
+  );
+});
 
 describe("zoom consumes the authoritative core direction", () => {
   it("does not reinterpret endpoint roles as a different direction", () => {

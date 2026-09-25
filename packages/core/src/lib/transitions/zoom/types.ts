@@ -58,6 +58,8 @@ export interface ZoomOverlayConfig {
 
 export interface ZoomProvider {
   physics: PhysicsOptions;
+  /** Physics used when the tile shrinks back (`exit`); defaults to `physics`. */
+  exitPhysics?: PhysicsOptions;
   in: (input: ZoomAnimationInput) => ZoomAnimationConfig;
   out: (input: ZoomAnimationInput) => ZoomAnimationConfig;
   backgroundIn: (input: ZoomAnimationInput) => ZoomAnimationConfig;
@@ -120,8 +122,9 @@ export interface ZoomPrepareCtx {
 
 /**
  * Inputs each strategy receives at `contribute` time. `physics` is sourced
- * from the BackgroundStrategy that owns the active `type` and is reused by
- * every other strategy so progress is locked.
+ * from the BackgroundStrategy that owns the active `type` (its `exitPhysics`
+ * when the resolved mode is `exit`) and is reused by every other strategy so
+ * progress is locked.
  */
 export interface ZoomContributeCtx {
   from: HTMLElement;
