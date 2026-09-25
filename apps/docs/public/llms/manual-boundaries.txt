@@ -44,7 +44,10 @@ consistent (route.pathname can be a pattern such as `/posts/[id]`).
 For persistent layouts, give the shell a stable routeKey and wrap only changing
 content with another pathname boundary. Keep the full logical route id on the
 shell. Compute id and key synchronously; effect-delayed keys can destroy the
-old content before SSGOI captures it.
+old content before SSGOI captures it. Put the inner boundary inside its own
+positioned element (`<div className="relative z-0">`): the leaving page is
+placed `position: absolute` against its nearest positioned ancestor, which
+should be the content area rather than the whole shell and its header.
 
 ## Svelte and SvelteKit
 

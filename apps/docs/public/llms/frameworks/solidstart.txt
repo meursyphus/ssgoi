@@ -84,14 +84,18 @@ Then add a default pathname boundary only around the changing child:
 ```tsx
 // src/routes/products.tsx
 <ProductHeaderAndTabs />
-<SsgoiRouteBoundary>
-  {props.children}
-</SsgoiRouteBoundary>
+<div class="relative z-0">
+  <SsgoiRouteBoundary>
+    {props.children}
+  </SsgoiRouteBoundary>
+</div>
 ```
 
 The stable outer key preserves the shell; the inner pathname boundary produces
 child OUT/IN. Holding only one boundary constant preserves state but produces
-no child transition.
+no child transition. The `relative z-0` wrapper is the inner boundary's
+positioned parent, so the leaving child stays below the header instead of being
+placed against the whole shell.
 
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/solidstart
 - Framework index: https://ssgoi.dev/llms/frameworks.txt

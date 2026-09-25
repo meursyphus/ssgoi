@@ -32,6 +32,19 @@ paint context:
 
 Also give routed pages a full-height background when the design requires one.
 
+A nested boundary under a persistent header, side rail or nav needs the same
+around it — its own positioned parent:
+
+```html
+<div class="relative z-0 flex-1"><!-- inner boundary --></div>
+```
+
+The leaving page is taken out of flow as `position: absolute; left: 0;
+width: 100%` against its nearest positioned ancestor. Without this wrapper that
+ancestor is the whole shell, so the leaving child page can jump to the top of
+the layout (above the header) or widen over a side rail until the transition
+ends. Keep `flex-1` only if the boundary was a flex item.
+
 ## Back uses a different effect
 
 Browser Back replays the effect recorded for the exact entry pair in reverse,

@@ -22,11 +22,21 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
   return (
     <SsgoiRouteBoundary routeKey="products-layout">
       <ProductHeaderAndTabs />
-      <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+      <div className="relative z-0">
+        <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+      </div>
     </SsgoiRouteBoundary>
   );
 }
 ```
+
+The `relative z-0` wrapper gives the inner boundary its own positioned parent.
+A leaving page is taken out of flow as `position: absolute; left: 0; width: 100%`
+against its nearest positioned ancestor. Without the wrapper that ancestor is the
+whole shell, so the leaving child can jump above the header or widen over a side
+rail for the length of the transition. `z-0` keeps the pages' transition z-index
+below the header and nav. If the boundary was a flex item (`flex-1`), move that
+class to the wrapper.
 
 The outer marker keeps the current pathname while its key stays stable. Child
 navigation animates only the inner content. The section layout unmounts when

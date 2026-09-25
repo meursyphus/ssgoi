@@ -100,7 +100,9 @@ https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs
   lightweight placeholder; rendering routed children here can mount them twice.
 
 A persistent products layout can use `routeKey="products-layout"` outside its
-header/tabs and a default boundary around its children. For dynamic projects,
+header/tabs and a default boundary around its children, wrapped in
+`<div className="relative z-0">` so the leaving child is positioned against the
+content area, not the whole shell (see complex-routing.txt). For dynamic projects,
 return the full route as id and `/projects/:id` as key. Function props must be
 defined in a client component; plain usage can be imported by a server layout.
 

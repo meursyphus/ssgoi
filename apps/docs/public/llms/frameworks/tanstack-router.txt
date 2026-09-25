@@ -74,14 +74,18 @@ a stable outer boundary plus a pathname boundary around its child outlet:
 // app/routes/products.tsx
 <SsgoiRouteBoundary routeKey="products-layout">
   <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary>
-    <Outlet />
-  </SsgoiRouteBoundary>
+  <div className="relative z-0">
+    <SsgoiRouteBoundary>
+      <Outlet />
+    </SsgoiRouteBoundary>
+  </div>
 </SsgoiRouteBoundary>
 ```
 
 The outer `routeKey` is stable; the inner boundary defaults to the pathname. The stable outer key
-preserves the shell; the inner pathname key produces child OUT/IN.
+preserves the shell; the inner pathname key produces child OUT/IN. The `relative z-0`
+wrapper is the inner boundary's positioned parent, so the leaving child stays below
+the header instead of being placed against the whole shell.
 
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
