@@ -349,7 +349,9 @@ function createFadeStrategy(variant: ZoomVariant): ZoomStrategy {
 
 interface AssembledStrategies {
   strategies: ZoomStrategy[];
+  /** Physics for `enter`, and for `exit` when the type has no `exitPhysics`. */
   physics: PhysicsOptions;
+  exitPhysics?: PhysicsOptions;
 }
 
 function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
@@ -363,7 +365,26 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
     // so this conditional is the single line that knows the relationship.
     ...(opts.type === "blur" ? [new OverlayStrategy()] : []),
   ];
-  return { strategies, physics: background.physics };
+  return {
+    strategies,
+    physics: background.physics,
+    exitPhysics: background.exitPhysics,
+  };
+}
+
+/**
+ * A zoom type may open and close at different speeds (the blur reference
+ * closes about twice as fast as it opens). The resolved mode — not the
+ * navigation direction — decides which one plays, so a backward navigation
+ * that lands on a page with the enter key still expands with `physics`.
+ */
+export function physicsForMode(
+  assembled: Pick<AssembledStrategies, "physics" | "exitPhysics">,
+  mode: ZoomResolved["mode"],
+): PhysicsOptions {
+  return mode === "exit"
+    ? (assembled.exitPhysics ?? assembled.physics)
+    : assembled.physics;
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -375,7 +396,7 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export const zoom = (options: NormalizedZoomOptions) => {
-  const { physics } = zoomStrategiesFor(options);
+  const { physics, exitPhysics } = zoomStrategiesFor(options);
 
   const createDirection = (navigationDirection: NavigationDirection) =>
     ({
@@ -431,7 +452,7 @@ export const zoom = (options: NormalizedZoomOptions) => {
           to,
           resolved,
           input,
-          physics,
+          physics: physicsForMode({ physics, exitPhysics }, resolved.mode),
           context,
           extras: extras as ZoomExtras,
           onDispose,

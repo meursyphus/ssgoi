@@ -17,16 +17,50 @@ import { createZoomIn, createZoomOut } from "../zoom-element";
 import { Z_OVERLAY } from "../../stacking";
 import { getOverlayRect } from "@utils";
 
+/*
+ * Timing measured from the Airbnb iOS app's card → listing zoom (30 fps screen
+ * recording, tile top-edge tracking, fitted with apps/dev/tools/motion-analyzer):
+ *
+ *   enter (card expands into the page): best fit spring 70 / 16 — 50 % at
+ *     ~180 ms, 90 % at ~430 ms, then a long soft tail (98 % at ~670 ms).
+ *   exit (page shrinks back into the card): best fit spring 196 / 22 — 50 % at
+ *     ~100 ms, 90 % at ~220 ms, ~0.3 % overshoot.
+ *
+ * What ships was then tuned by eye on the docs demo (desktop and phone):
+ *   - the soft enter fit crawled through its last few percent and read as a
+ *     stall followed by a snap, and even a 0.2 % overshoot showed as a tick at
+ *     the tile's edges, so both directions use the exit pace with zero
+ *     overshoot (the 60 Hz simulation never exceeds 1.0): 50 % at ~100 ms,
+ *     90 % at ~250 ms, done by ~550 ms;
+ *   - enter is a doubleSpring (leader 500 / 49, follower ×2) with the same
+ *     milestones as a single 280 / 33.5 spring but a gentle first ~50 ms, so a
+ *     low-end phone gets a couple of cheap frames before the tile, the blur
+ *     overlay and the sibling fade all move at once;
+ *   - exit is the plain 280 / 33.5 spring.
+ *
+ * The blur overlay, the background scale and the sibling fade all share the
+ * tile's integrator so the layers stay locked. `exitPhysics` keeps the two
+ * directions independently tunable.
+ */
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 380,
-    damping: 30,
+    stiffness: 500,
+    damping: 49,
+    // Follower at 2× the leader: same 50 % / 90 % / end as a single 280/33.5
+    // spring, but the first ~50 ms ramp in gently so low-end phones get a
+    // couple of cheap frames before the tile, blur and fade all move at once.
+    doubleSpring: 2,
+    restDelta: 0.05,
+    restSpeed: 0.05,
+  },
+};
+
+export const BLUR_EXIT_PHYSICS: PhysicsOptions = {
+  spring: {
+    stiffness: 280,
+    damping: 33.5,
     restDelta: 0.1,
     restSpeed: 0.1,
-    doubleSpring: {
-      stiffness: 260,
-      damping: 30,
-    },
   },
 };
 
@@ -100,6 +134,7 @@ const overlay: ZoomOverlayConfig = {
 export class BlurBackgroundStrategy implements ZoomStrategy {
   readonly name = "background";
   readonly physics = BLUR_PHYSICS;
+  readonly exitPhysics = BLUR_EXIT_PHYSICS;
 
   contribute(ctx: ZoomContributeCtx): Animation[] {
     const { from, to, resolved, physics } = ctx;
@@ -174,6 +209,7 @@ export class OverlayStrategy implements ZoomStrategy {
 export function createBlurProvider(): ZoomProvider {
   return {
     physics: BLUR_PHYSICS,
+    exitPhysics: BLUR_EXIT_PHYSICS,
     in: createZoomIn,
     out: createZoomOut,
     backgroundIn,
