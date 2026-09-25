@@ -161,6 +161,37 @@ function summarize(samples: Sample[], mark: number) {
     const d = delta(a, b);
     return Math.max(d.x, d.y, d.w, d.h);
   };
+  // Browsers do not paint on a fixed cadence around a navigation: the task
+  // that rebuilds the scene can hold the next paint for tens of ms (WebKit,
+  // film) and a catch-up frame can repeat the previous one. Motion is
+  // time-based, so continuity is judged on speed, px per ms between painted
+  // frames, over a small window on each side of the handoff.
+  const speed = (i: number) => {
+    const a = samples[i - 1],
+      b = samples[i];
+    if (!a || !b || a.detached || b.detached) return null;
+    const dt = b.t - a.t;
+    if (dt < 2) return null;
+    const d = delta(a, b);
+    return {
+      box: Math.max(d.x, d.y, d.w, d.h) / dt,
+      opacity: d.opacity / dt,
+      dt,
+    };
+  };
+  const window = (from: number, to: number) => {
+    let box = 0,
+      opacity = 0;
+    for (let i = from; i <= to; i++) {
+      const v = speed(i);
+      if (!v) continue;
+      box = Math.max(box, v.box);
+      opacity = Math.max(opacity, v.opacity);
+    }
+    return { box, opacity };
+  };
+  const before = window(preIndex - 3, preIndex);
+  const after = window(preIndex + 2, preIndex + 5);
   let maxStep = 0;
   for (let i = 1; i < samples.length; i++) {
     if (i === preIndex + 1) continue;
@@ -170,8 +201,13 @@ function summarize(samples: Sample[], mark: number) {
     frames: samples.length,
     detachedFrames: samples.filter((s) => s.detached).length,
     handoff: pre && post ? delta(pre, post) : null,
-    // Motion continues through a handoff, so the step across it should be
-    // close to the steps on either side of it, not close to zero.
+    /** px/ms and opacity/ms across the handoff frame. */
+    handoffSpeed: speed(preIndex + 1),
+    /** The fastest painted step in the frames on either side of it. */
+    neighbourSpeed: {
+      box: Math.max(before.box, after.box),
+      opacity: Math.max(before.opacity, after.opacity),
+    },
     stepBefore: magnitude(preIndex),
     stepAfter: magnitude(preIndex + 2),
     pre: pre && [pre.x, pre.y, pre.w, pre.h, pre.opacity, pre.scroll],

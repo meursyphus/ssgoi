@@ -6,12 +6,11 @@ import { expect, test } from "@playwright/test";
 // exactly as a framework adapter would drive it, and every sample is read
 // after paint. `packages/core/tests/interrupt-reentry.html` documents the
 // harness.
-type Step = { x: number; y: number; w: number; h: number; opacity: number };
+type Speed = { box: number; opacity: number };
 type Summary = {
-  handoff: Step | null;
-  stepBefore: number | null;
-  stepAfter: number | null;
-  maxStep: number;
+  handoff: { x: number; y: number; w: number; h: number } | null;
+  handoffSpeed: (Speed & { dt: number }) | null;
+  neighbourSpeed: Speed;
 };
 type Result = {
   effect: string;
@@ -19,21 +18,29 @@ type Result = {
   outgoing: Summary;
   reentering?: Summary;
   invalid: boolean;
-  settled: boolean;
 };
 
-const magnitude = (step: Step) => Math.max(step.x, step.y, step.w, step.h);
-
 function expectContinuous(effect: string, summary: Summary) {
-  const handoff = summary.handoff!;
-  expect(handoff, effect).not.toBeNull();
-  // Continuity: the step across the handoff is bounded by the motion on
-  // either side of it. An empty or shifted frame shows up as hundreds of px.
-  const neighbours = Math.max(summary.stepBefore ?? 0, summary.stepAfter ?? 0);
-  expect(magnitude(handoff), `${effect} handoff step`).toBeLessThanOrEqual(
-    neighbours + 12,
+  expect(summary.handoff, effect).not.toBeNull();
+  const speed = summary.handoffSpeed!;
+  expect(speed, `${effect} handoff frame`).not.toBeNull();
+  // Continuity: the page may not move faster across the handoff than it does
+  // in the frames around it. An empty or shifted frame decodes into hundreds
+  // of px inside one frame (tens of px/ms) where neighbours move a few px/ms.
+  // Speeds, not steps, because a browser can hold the first paint after a
+  // navigation for tens of ms and then repeat a frame while catching up.
+  // A stalled first paint (headless WebKit takes 60-100 ms to rebuild film's
+  // scene) averages the fastest part of the bridge into one frame, so a long
+  // frame may run up to twice as fast as its neighbours; a wrong frame still
+  // decodes far beyond that.
+  const headroom = speed.dt > 40 ? summary.neighbourSpeed.box : 0;
+  expect(
+    speed.box,
+    `${effect} box speed px/ms over ${speed.dt.toFixed(0)} ms`,
+  ).toBeLessThanOrEqual(summary.neighbourSpeed.box + headroom + 0.6);
+  expect(speed.opacity, `${effect} opacity speed /ms`).toBeLessThanOrEqual(
+    summary.neighbourSpeed.opacity + 0.005,
   );
-  expect(handoff.opacity, `${effect} opacity`).toBeLessThan(0.15);
 }
 
 for (const hidden of [false, true]) {
