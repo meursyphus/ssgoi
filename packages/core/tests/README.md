@@ -1,11 +1,26 @@
-# Scroll lock browser regression
+# Browser regressions
 
-From the repository root:
+Two Playwright suites live here. Both run with:
 
 ```sh
 pnpm --filter @ssgoi/core exec playwright install chromium webkit
 pnpm --filter @ssgoi/core test:browser
 ```
+
+## Interrupted entry (`interrupt-reentry`)
+
+A page that is still entering when the user navigates away must keep moving
+from where it is. The fixture drives the real transition context through
+unmount and Activity-hidden pages, interrupts an `A → B` entry 120 ms in with
+`B → A`, and samples the leaving page's box after every paint. The step across
+the handoff has to stay within the steps on either side of it, for every
+page-level preset, with and without a saved scroll on `A`.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev` and open
+`/tests/interrupt-reentry.html` (add `?hidden` for Activity pages). Pick a
+preset, press **B**, then **A** before it settles.
+
+## Scroll lock (`scroll-lock`)
 
 The suite tests native wheel and keyboard scrolling in Chromium and WebKit,
 covering document/custom containers, unmounted/Activity-hidden pages, scroll

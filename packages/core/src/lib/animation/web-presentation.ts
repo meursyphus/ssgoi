@@ -1,6 +1,20 @@
 import type { StyleObject } from "../runtime/motion-state";
 import type { MotionChannel } from "../runtime/motion-matching";
 
+/**
+ * Where the scroll container rests once the run being measured has applied
+ * its scroll policy. The incoming page's scroll restores in the rendering
+ * update after a run attaches, so a box read at attach time is still offset
+ * by the outgoing page's scroll. Expressing every frame at its own run's
+ * resting scroll keeps successive runs in one viewport space, which is what
+ * a handoff compares.
+ */
+export interface ViewportHint {
+  container: HTMLElement;
+  x: number;
+  y: number;
+}
+
 export interface PresentationCodec {
   readonly frame?: { left: number; top: number; width: number; height: number };
   /** Codecs must use stable schemas and physical units across effects. */
@@ -177,6 +191,7 @@ const PLANE_SCHEMA = "viewport-plane-v1";
  */
 export function createWebPresentationCodec(
   element: HTMLElement,
+  viewport?: ViewportHint,
 ): PresentationCodec {
   const width = element.offsetWidth || 1;
   const height = element.offsetHeight || 1;
@@ -188,13 +203,23 @@ export function createWebPresentationCodec(
   const ox = Number.parseFloat(origin[0]!) || 0;
   const oy = Number.parseFloat(origin[1]!) || 0;
   let supportedFrame = true;
+  // A box inside the scroll container moves with its pending restoration,
+  // unless it is fixed somewhere below the container.
+  let scrolls =
+    !!viewport &&
+    viewport.container !== element &&
+    viewport.container.contains(element) &&
+    computed?.position !== "fixed";
   if (typeof getComputedStyle === "function") {
+    let inside = scrolls;
     for (
       let parent = element.parentElement;
       parent;
       parent = parent.parentElement
     ) {
+      if (parent === viewport?.container) inside = false;
       const style = getComputedStyle(parent);
+      if (inside && style.position === "fixed") scrolls = false;
       if (
         (style.transform && style.transform !== "none") ||
         (style.perspective && style.perspective !== "none")
@@ -204,6 +229,8 @@ export function createWebPresentationCodec(
       }
     }
   }
+  const dx = scrolls ? viewport!.container.scrollLeft - viewport!.x : 0;
+  const dy = scrolls ? viewport!.container.scrollTop - viewport!.y : 0;
   const rect = element.getBoundingClientRect?.();
   const current =
     readPlane(computed?.transform || "", width, height) ?? plane(identity);
@@ -223,8 +250,8 @@ export function createWebPresentationCodec(
       (aroundOrigin[3] * x! + aroundOrigin[4] * y! + aroundOrigin[5]) / w,
     ];
   });
-  const left = (rect?.left ?? 0) - Math.min(...corners.map((p) => p[0]!));
-  const top = (rect?.top ?? 0) - Math.min(...corners.map((p) => p[1]!));
+  const left = (rect?.left ?? 0) + dx - Math.min(...corners.map((p) => p[0]!));
+  const top = (rect?.top ?? 0) + dy - Math.min(...corners.map((p) => p[1]!));
   const before = translate(left + ox, top + oy);
   const after = mul(translate(-ox, -oy), scale(width, height));
   const beforeInverse = plane(inverse(before)!);

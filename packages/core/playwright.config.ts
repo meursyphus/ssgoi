@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "scroll-lock.spec.ts",
+  testMatch: "*.spec.ts",
   use: {
     baseURL: "http://127.0.0.1:4174",
     viewport: { width: 1280, height: 720 },

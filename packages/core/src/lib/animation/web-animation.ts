@@ -20,6 +20,7 @@ import {
 import {
   createWebPresentationCodec,
   type PresentationCodec,
+  type ViewportHint,
 } from "./web-presentation";
 
 export interface WebMotionOptions {
@@ -121,6 +122,7 @@ export class WebAnimation extends Animation {
   private readonly legacyCompletionCleanup: boolean;
   readonly motion: WebMotionOptions;
   private codec: PresentationCodec | undefined;
+  private viewport: ViewportHint | undefined;
   private adopted: MotionSnapshot<HTMLElement> | undefined;
   private presentationFrames: Array<{
     time: number;
@@ -289,6 +291,24 @@ export class WebAnimation extends Animation {
     };
   }
 
+  /**
+   * Read the element's rendered box while the scene is laid out for this run.
+   * The next navigation snapshots this track only after the framework has
+   * unmounted the element or an Activity hide has taken it out of flow, so a
+   * box measured at that point is empty or shifted and the handoff would
+   * decode the pose against the wrong frame. Playback never needs this; an
+   * uninterrupted run still decodes nothing.
+   */
+  measure(viewport?: ViewportHint): void {
+    this.viewport = viewport ?? this.viewport;
+    if (this.codec) return;
+    const element = this._element;
+    if (!element.isConnected || !(element.offsetWidth || element.offsetHeight))
+      return;
+    this.codec =
+      this.motion.codec ?? createWebPresentationCodec(element, this.viewport);
+  }
+
   /** Final output, including any earlier residual, is the next handoff's source. */
   getMotionSnapshot(): WebMotionSnapshot {
     if (this.running) this.captureLiveState();
@@ -322,7 +342,8 @@ export class WebAnimation extends Animation {
 
   adopt(snapshot: MotionSnapshot<HTMLElement>): void {
     this.codec ??=
-      this.motion.codec ?? createWebPresentationCodec(this.element);
+      this.motion.codec ??
+      createWebPresentationCodec(this.element, this.viewport);
     this.adopted = snapshot;
     const destination = this.codec.read({
       transform: "none",
@@ -419,7 +440,10 @@ export class WebAnimation extends Animation {
     const style = this.codec.write(this.adopted.channels);
     this.hold?.cancel();
     if (Object.keys(style).length) {
-      this.hold = this.element.animate([style as Keyframe], {
+      // Both keyframes carry the pose. A lone keyframe sits at offset 1 and
+      // interpolates from the underlying style, so a hold paused at 0 would
+      // show the staged start style (fade's `opacity: 0`) instead.
+      this.hold = this.element.animate([style, style] as Keyframe[], {
         duration: 1,
         fill: "both",
       });
@@ -434,7 +458,8 @@ export class WebAnimation extends Animation {
     if (corrected) return corrected.channels;
     const frame = this.frames[index]!;
     this.codec ??=
-      this.motion.codec ?? createWebPresentationCodec(this.element);
+      this.motion.codec ??
+      createWebPresentationCodec(this.element, this.viewport);
     return this.codec.read({
       transform: "none",
       opacity: 1,
@@ -450,7 +475,8 @@ export class WebAnimation extends Animation {
     if (!frames.length) {
       if (this.adopted) return { ...this.adopted.channels };
       this.codec ??=
-        this.motion.codec ?? createWebPresentationCodec(this.element);
+        this.motion.codec ??
+        createWebPresentationCodec(this.element, this.viewport);
       return this.codec.read({
         transform: "none",
         opacity: 1,
@@ -677,7 +703,9 @@ export class WebAnimation extends Animation {
   private bridgeKeyframes(
     authoredStyle: (frame: SimFrame) => StyleObject,
   ): Keyframe[] {
-    this.codec = this.motion.codec ?? createWebPresentationCodec(this.element);
+    this.codec =
+      this.motion.codec ??
+      createWebPresentationCodec(this.element, this.viewport);
     const codec = this.codec;
     const duration = Math.max(16, this.motion.handoffDuration ?? 280);
     const lastAuthored = this.frames[this.frames.length - 1]!;
