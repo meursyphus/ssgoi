@@ -413,10 +413,9 @@ describe("zoom per-mode physics", () => {
     expect(blur.exitPhysics).toBe(BLUR_EXIT_PHYSICS);
     expect(physicsForMode(blur, "enter")).toBe(BLUR_PHYSICS);
     expect(physicsForMode(blur, "exit")).toBe(BLUR_EXIT_PHYSICS);
-    // Airbnb reference: the card closes about twice as fast as it opens.
-    expect(BLUR_EXIT_PHYSICS.spring!.stiffness).toBeGreaterThan(
-      BLUR_PHYSICS.spring!.stiffness * 2,
-    );
+    // Enter eases in through a doubleSpring follower; exit is a plain spring.
+    expect(BLUR_PHYSICS.spring!.doubleSpring).toBe(2);
+    expect(BLUR_EXIT_PHYSICS.spring!.doubleSpring).toBeUndefined();
   });
 
   it.each<ZoomType>(["static", "expand"])(
