@@ -21,8 +21,13 @@ import { getOverlayRect } from "@utils";
  * Timing measured from the Airbnb iOS app's card → listing zoom (30 fps screen
  * recording, tile top-edge tracking, fitted with apps/dev/tools/motion-analyzer):
  *
- *   enter (card expands into the page): spring 70 / 16 — 50 % at ~180 ms,
- *     90 % at ~430 ms, then a long soft tail (98 % at ~670 ms), no overshoot.
+ *   enter (card expands into the page): reference fit spring 70 / 16 — 50 % at
+ *     ~180 ms, 90 % at ~430 ms, then a long soft tail (98 % at ~670 ms).
+ *     Shipped as 70 / 14: same 50 % point, 90 % at ~380 ms, 98 % at ~520 ms,
+ *     0.2 % overshoot. The fitted tail crawled for ~300 ms and read as a stall
+ *     followed by a snap when the rest threshold cut it, so the enter spring is
+ *     a little livelier than the reference and keeps the default rest
+ *     thresholds so it plays out to a natural stop (~780 ms).
  *   exit (page shrinks back into the card): spring 196 / 22 — 50 % at ~100 ms,
  *     90 % at ~220 ms, settles by ~300 ms with a barely visible (<1 %) bounce.
  *
@@ -33,9 +38,7 @@ import { getOverlayRect } from "@utils";
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
     stiffness: 70,
-    damping: 16,
-    restDelta: 0.1,
-    restSpeed: 0.1,
+    damping: 14,
   },
 };
 
