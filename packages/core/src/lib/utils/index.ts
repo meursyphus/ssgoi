@@ -1,4 +1,8 @@
-export { prepareOutgoing } from "./prepare-outgoing";
+export {
+  prepareOutgoing,
+  measureOutgoingSlot,
+  placeOutgoing,
+} from "./prepare-outgoing";
 export { getScrollingElement } from "./get-scrolling-element";
 export { getPositionedParent } from "./get-positioned-parent";
 export { sleep } from "./sleep";

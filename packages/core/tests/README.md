@@ -21,3 +21,13 @@ For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 for the corresponding scenario. The fixture starts 600px down the long page and
 pauses the next transition so there is time to try scrolling. Use **Finish
 transition** to check that scrolling resumes and **Disconnect** to test cleanup.
+
+# Nested boundary placement
+
+`nested-boundary.spec.ts` covers a nested boundary under a persistent app bar
+(meursyphus/ssgoi#421). While a paused transition holds, the outgoing page must
+stay where the user saw it (scrolled and at the top) and the incoming page must
+sit below the bar, for unmounted and Activity-hidden pages, with and without a
+positioned wrapper, and with `jaemin` (whose `prepare` pins the incoming page
+`position: fixed`). Open `/tests/nested-boundary.html` with `?hidden`,
+`?wrapped` or `?jaemin` to inspect a case by hand.

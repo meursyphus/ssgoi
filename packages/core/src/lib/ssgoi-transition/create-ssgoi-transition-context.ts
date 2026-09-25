@@ -10,7 +10,12 @@ import type {
   PrepareArgs,
   CreateElement,
 } from "@types";
-import { prepareOutgoing, promiseAll } from "@utils";
+import {
+  measureOutgoingSlot,
+  placeOutgoing,
+  prepareOutgoing,
+  promiseAll,
+} from "@utils";
 import { createContextManager } from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { resolveTransitionRule } from "./resolve-transition-rule";
@@ -344,6 +349,11 @@ export function createSggoiTransitionContext(
       },
     };
 
+    // The incoming page took over the outgoing one's slot. Read it now, before
+    // `prepare` styles the incoming page, so the outgoing page can be placed
+    // back there instead of at the top of its containing block.
+    const outgoingSlot = measureOutgoingSlot(toElement, parent);
+
     // The element handed to the animation as `from`:
     //  - unmount mode: the detached real node, reinserted after `prepare` and
     //    removed on settle.
@@ -357,6 +367,7 @@ export function createSggoiTransitionContext(
       // scrollOffset is only known now — finish the out-of-flow placement begun
       // in handleHide so the incoming page lines up with the prior scroll.
       fromElement.style.top = `${-1 * (scrollOffset?.y ?? 0)}px`;
+      placeOutgoing(fromElement, outgoingSlot, ssgoiContext);
       // Snapshot the incoming node's clean inline styles BEFORE `prepare` paints
       // starting styles onto it, so settle can wipe transition leakage off this
       // reused real node. (The outgoing node was snapshotted in handleHide.)
@@ -512,6 +523,7 @@ export function createSggoiTransitionContext(
           } else {
             parent.appendChild(fromElement);
           }
+          placeOutgoing(fromElement, outgoingSlot, ssgoiContext);
         }
 
         const animation = config.animation({

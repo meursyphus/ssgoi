@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSGOI nested boundary placement</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font: 18px system-ui;
+      background: #eee;
+    }
+    /* A persistent shell: positioned root, app bar in flow above the content,
+       bottom nav below it. Only the inner boundary changes. */
+    #shell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    #bar {
+      height: 56px;
+      padding: 16px;
+      background: #222;
+      color: white;
+    }
+    #content.wrapped {
+      position: relative;
+      flex: 1;
+    }
+    #nav {
+      height: 64px;
+      background: #ddd;
+    }
+    .page {
+      height: 2000px;
+      padding: 24px;
+    }
+    .a {
+      background: linear-gradient(#c8e8ff, #375cff);
+    }
+    .b {
+      background: linear-gradient(#ffe3a1, #f18342);
+    }
+  </style>
+  <main id="shell">
+    <header id="bar">App bar</header>
+    <div id="content"></div>
+    <footer id="nav">Bottom nav</footer>
+  </main>
+  <script type="module" src="./nested-boundary.ts"></script>
+</html>
