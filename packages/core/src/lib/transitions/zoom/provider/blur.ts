@@ -23,13 +23,16 @@ import { getOverlayRect } from "@utils";
  *
  *   enter (card expands into the page): reference fit spring 70 / 16 — 50 % at
  *     ~180 ms, 90 % at ~430 ms, then a long soft tail (98 % at ~670 ms).
- *     Shipped as 70 / 14: same 50 % point, 90 % at ~380 ms, 98 % at ~520 ms,
- *     0.2 % overshoot. The fitted tail crawled for ~300 ms and read as a stall
- *     followed by a snap when the rest threshold cut it, so the enter spring is
- *     a little livelier than the reference and keeps the default rest
- *     thresholds so it plays out to a natural stop (~780 ms).
- *   exit (page shrinks back into the card): spring 196 / 22 — 50 % at ~100 ms,
- *     90 % at ~220 ms, settles by ~300 ms with a barely visible (<1 %) bounce.
+ *   exit (page shrinks back into the card): reference fit spring 196 / 22 —
+ *     50 % at ~100 ms, 90 % at ~220 ms, ~0.3 % overshoot.
+ *
+ * Shipped as critically damped springs (damping = 2·√stiffness) at the same
+ * 50 % points, because even a sub-1 % overshoot reads as a visible tick at the
+ * tile's edges on the docs demo:
+ *   enter 100 / 20 — 50 % at ~170 ms, 90 % at ~400 ms, 98 % at ~630 ms, and
+ *     the default rest thresholds so it plays out to a natural stop (~1.05 s)
+ *     instead of stalling and snapping shut when a loose threshold cuts it.
+ *   exit 280 / 33.5 — 50 % at ~100 ms, 90 % at ~250 ms, 98 % at ~400 ms.
  *
  * The two directions are deliberately asymmetric: the reference opens slowly
  * and closes about twice as fast. The blur overlay, the background scale and
@@ -37,15 +40,15 @@ import { getOverlayRect } from "@utils";
  */
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 70,
-    damping: 14,
+    stiffness: 100,
+    damping: 20,
   },
 };
 
 export const BLUR_EXIT_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 196,
-    damping: 22,
+    stiffness: 280,
+    damping: 33.5,
     restDelta: 0.1,
     restSpeed: 0.1,
   },
