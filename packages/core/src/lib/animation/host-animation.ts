@@ -3,7 +3,11 @@ import { Animation, type AnimationDisposal } from "./animation";
 import { MultiAnimation } from "./multi-animation";
 import { WebAnimation } from "./web-animation";
 import { SpringIntegrator } from "./integrator/spring-integrator";
-import { createWebPresentationCodec } from "./web-presentation";
+import {
+  createWebPresentationCodec,
+  type PresentationCodec,
+  type ViewportHint,
+} from "./web-presentation";
 import { matchMotion, type MotionSnapshot } from "../runtime/motion-matching";
 import { retainOpacity } from "../utils/retain-opacity";
 
@@ -14,6 +18,9 @@ type Run = {
   targets: Set<HTMLElement>;
   /** Persistent sources whose identity this run carries on another node. */
   hidden: Array<() => void>;
+  /** Rendered boxes of presence-only targets, read when the scene was laid out. */
+  layouts: Map<HTMLElement, PresentationCodec>;
+  scroll?: ViewportHint;
 };
 type RetiringRun = Run & { releases: WebAnimation[] };
 export interface HandoffEvent {
@@ -26,6 +33,8 @@ export interface HandoffEvent {
 export interface HostAttachOptions {
   /** Presence is independent of tracks: blind/static hero can leave pages unanimated. */
   targets?: readonly HTMLElement[];
+  /** Where the scroll container rests for this run; boxes are read before it gets there. */
+  scroll?: ViewportHint;
 }
 
 function tracks(animation: Animation): WebAnimation[] {
@@ -120,8 +129,30 @@ export class HostAnimation extends Animation {
     // ownership so its cleanup still clears everything else it wrote there.
     for (const target of options.targets ?? []) this.owners.set(target, epoch);
     for (const track of authoredTracks) this.owners.set(track.element, epoch);
+    // Read every participant's box now, while the scene is laid out for this
+    // run. A later navigation snapshots this scene only after the framework
+    // has unmounted the outgoing page (an empty box) or an Activity hide has
+    // moved it out of flow (a shifted box); either way the pose would be
+    // decoded against a frame the user never saw.
+    const layouts = new Map<HTMLElement, PresentationCodec>();
+    if (next.supportsInterruption) {
+      for (const track of nextTracks) track.measure(options.scroll);
+      for (const target of targets) {
+        if (nextTracks.some((track) => track.element === target)) continue;
+        if (!target.isConnected || !(target.offsetWidth || target.offsetHeight))
+          continue;
+        layouts.set(target, createWebPresentationCodec(target, options.scroll));
+      }
+    }
     this.child = next;
-    const current: Run = { animation: next, epoch, targets, hidden: [] };
+    const current: Run = {
+      animation: next,
+      epoch,
+      targets,
+      hidden: [],
+      layouts,
+      scroll: options.scroll,
+    };
     this.run = current;
     this._settled = false;
     const events: HandoffEvent[] = [];
@@ -250,7 +281,10 @@ export class HostAnimation extends Animation {
             )
             .map((target) => ({
               target,
-              channels: createWebPresentationCodec(target).read({
+              channels: (
+                this.run!.layouts.get(target) ??
+                createWebPresentationCodec(target, this.run!.scroll)
+              ).read({
                 transform:
                   typeof getComputedStyle === "function"
                     ? getComputedStyle(target).transform || "none"
@@ -312,6 +346,7 @@ export class HostAnimation extends Animation {
           if (release.element !== target)
             throw new Error("Release must own the retiring target");
           release.validate();
+          release.measure(this.run?.scroll);
           const done = release.onComplete;
           release.onComplete = () => {
             done?.();
@@ -328,7 +363,7 @@ export class HostAnimation extends Animation {
           events.push({ kind: "fallback", target });
         }
       }
-      const codec = createWebPresentationCodec(target);
+      const codec = createWebPresentationCodec(target, this.run?.scroll);
       const style = codec.write(source.channels);
       const opacity = Number(style.opacity ?? 1);
       const release = new WebAnimation({
@@ -350,6 +385,7 @@ export class HostAnimation extends Animation {
             this.disposeRetiring(run);
         },
       });
+      release.measure(this.run?.scroll);
       release.adopt(source);
       release.playbackRate = this.playbackRate;
       run.releases.push(release);

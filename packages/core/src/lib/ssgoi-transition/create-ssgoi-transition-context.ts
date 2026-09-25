@@ -582,7 +582,16 @@ export function createSggoiTransitionContext(
           }
         };
 
-        host.attach(animation, { targets: [fromOriginal, toElement] });
+        // The incoming page's scroll restores in this frame's rendering
+        // update, after attach. Boxes read now are expressed where this run
+        // rests, so they line up with the frames of the runs before and after.
+        const container = getScrollContainer();
+        host.attach(animation, {
+          targets: [fromOriginal, toElement],
+          scroll: container
+            ? { container, ...ssgoiContext.to.scroll }
+            : undefined,
+        });
       })
       .catch(fail);
   };

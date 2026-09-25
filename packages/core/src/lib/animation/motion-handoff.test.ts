@@ -12,6 +12,7 @@ function node(width = 400, height = 600, left = 0, top = 0) {
     duration: number;
     waapi: globalThis.Animation;
   }> = [];
+  const box = { width, height, left, top, connected: true };
   const style: Record<string, unknown> = {
     getPropertyValue: (name: string) => String(style[name] ?? ""),
     getPropertyPriority: () => "",
@@ -23,10 +24,20 @@ function node(width = 400, height = 600, left = 0, top = 0) {
     },
   };
   const element = {
-    offsetWidth: width,
-    offsetHeight: height,
+    get offsetWidth() {
+      return box.connected ? box.width : 0;
+    },
+    get offsetHeight() {
+      return box.connected ? box.height : 0;
+    },
+    get isConnected() {
+      return box.connected;
+    },
     style: style as unknown as CSSStyleDeclaration,
-    getBoundingClientRect: () => ({ left, top, width, height }),
+    getBoundingClientRect: () =>
+      box.connected
+        ? { left: box.left, top: box.top, width: box.width, height: box.height }
+        : { left: 0, top: 0, width: 0, height: 0 },
     contains: (el: HTMLElement) => el === element,
     animate: vi.fn((frames: Keyframe[], options: KeyframeAnimationOptions) => {
       const waapi = {
@@ -45,9 +56,12 @@ function node(width = 400, height = 600, left = 0, top = 0) {
   return {
     element,
     animations,
+    box,
     last: () => animations[animations.length - 1]!,
   };
 }
+const translation = (frame: Keyframe | undefined) =>
+  readTransform(String(frame?.transform ?? "none"), 400, 600)!;
 const spring = () => new SpringIntegrator({ stiffness: 100, damping: 18 });
 const track = (
   element: HTMLElement,
@@ -197,6 +211,13 @@ describe("handoff boundaries", () => {
     expect(
       delayed.getMotionSnapshot().channels.opacity?.value[0],
     ).toBeGreaterThan(0);
+    // The hold carries the pose on both keyframes: a lone keyframe would
+    // interpolate from the staged start style at time 0 and show that instead.
+    const hold = el.last();
+    expect(hold.duration).toBe(1);
+    expect(hold.frames).toHaveLength(2);
+    expect(hold.frames[0]!.opacity).toEqual(hold.frames[1]!.opacity);
+    expect(Number(hold.frames[0]!.opacity)).toBeGreaterThan(0);
     host.cancel({ reason: "disposed", owns: () => true });
   });
   it("samples the final frame after WAAPI fill has been released", () => {
@@ -358,6 +379,63 @@ it("keeps legacy constructor completion cleanup on the explicit finish fallback"
   host.attach(track(el.element, (_t, u) => ({ opacity: u })));
   expect(cleanup).toHaveBeenCalledOnce();
   host.complete();
+});
+
+describe("frames of interrupted pages", () => {
+  it("decodes a page unmounted mid-entry against the box it had on screen", () => {
+    const page = node(400, 600, 0, 0);
+    const host = new HostAnimation();
+    const entering = track(page.element, (_t, u) => ({
+      transform: `translateX(${u * 100}%)`,
+    }));
+    host.attach(entering);
+    page.last().waapi.currentTime = 120;
+    // Read the pose without sampling presentation, which would measure now.
+    const shown = (1 - entering.getPose()[0]!.value) * 400;
+    expect(shown).toBeGreaterThan(50);
+    // The framework removes the page; the OUT side is only paired afterwards.
+    page.box.connected = false;
+    host.prepareHandoff();
+    // Reinserted out of flow at the incoming page's scroll delta.
+    page.box.connected = true;
+    page.box.top = -100;
+    const leaving = track(page.element, (t) => ({
+      transform: `translateX(${t * 100}%)`,
+    }));
+    host.attach(leaving);
+    // The first frame continues from where the page was, not from the empty
+    // box of a detached node (which would have collapsed it to 1 px).
+    expect(translation(page.last().frames[0])[4]).toBeCloseTo(shown, 0);
+    host.cancel({ reason: "disposed", owns: () => true });
+  });
+  it("expresses each run's boxes at the scroll it rests on", () => {
+    const container = { scrollLeft: 0, scrollTop: 300, contains: () => true };
+    const scroll = (y: number) => ({
+      container: container as unknown as HTMLElement,
+      x: 0,
+      y,
+    });
+    const page = node(400, 600, 0, -300);
+    const host = new HostAnimation();
+    // Entering while the outgoing page's scroll (300) is still applied; this
+    // run rests at 0.
+    const entering = track(page.element, (_t, u) => ({
+      transform: `translateX(${u * 100}%)`,
+    }));
+    host.attach(entering, { scroll: scroll(0) });
+    page.last().waapi.currentTime = 120;
+    host.prepareHandoff();
+    // Back to the first page: its scroll (300) restores after attach, and
+    // the leaving page is placed 300px down to stay put once it does.
+    container.scrollTop = 0;
+    page.box.top = 300;
+    const leaving = track(page.element, (t) => ({
+      transform: `translateX(${t * 100}%)`,
+    }));
+    host.attach(leaving, { scroll: scroll(300) });
+    expect(translation(page.last().frames[0])[5]).toBeCloseTo(0, 0);
+    host.cancel({ reason: "disposed", owns: () => true });
+  });
 });
 
 describe("ownership of surviving pages", () => {

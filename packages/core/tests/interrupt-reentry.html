@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSGOI interrupted entry</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font: 16px system-ui;
+      background: #e8ebf0;
+    }
+    nav {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      background: white;
+    }
+    #shell {
+      width: 390px;
+      margin: 0 auto;
+    }
+    #header {
+      height: 0;
+      background: #1f2a44;
+      color: white;
+      line-height: 56px;
+      text-align: center;
+    }
+    #header.tall {
+      height: 56px;
+    }
+    #scene {
+      position: relative;
+    }
+    #scene.static {
+      position: static;
+    }
+    .page {
+      width: 100%;
+      min-height: 1200px;
+      padding: 24px;
+    }
+    .page.a {
+      background: linear-gradient(#d5f0ff, #4d7cff);
+    }
+    .page.b {
+      background: linear-gradient(#ffe7bf, #ff7a3d);
+    }
+    .page.c {
+      background: linear-gradient(#dcf7d8, #2f9e5b);
+    }
+    .page img {
+      display: block;
+      width: 120px;
+      height: 120px;
+      border-radius: 16px;
+    }
+    .page.b img {
+      width: 342px;
+      height: 240px;
+    }
+  </style>
+  <nav>
+    <select id="effect"></select>
+    <button id="a">A</button>
+    <button id="b">B</button>
+    <button id="c">C</button>
+    <button id="finish">Finish</button>
+  </nav>
+  <div id="shell">
+    <div id="header">header</div>
+    <main id="scene"></main>
+  </div>
+  <script type="module" src="./interrupt-reentry.ts"></script>
+</html>
