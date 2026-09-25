@@ -26,13 +26,14 @@ import { getOverlayRect } from "@utils";
  *   exit (page shrinks back into the card): reference fit spring 196 / 22 —
  *     50 % at ~100 ms, 90 % at ~220 ms, ~0.3 % overshoot.
  *
- * Shipped as critically damped springs (damping = 2·√stiffness) at the same
- * 50 % points, because even a sub-1 % overshoot reads as a visible tick at the
- * tile's edges on the docs demo:
- *   enter 100 / 20 — 50 % at ~170 ms, 90 % at ~400 ms, 98 % at ~630 ms, and
- *     the default rest thresholds so it plays out to a natural stop (~1.05 s)
- *     instead of stalling and snapping shut when a loose threshold cuts it.
- *   exit 280 / 33.5 — 50 % at ~100 ms, 90 % at ~250 ms, 98 % at ~400 ms.
+ * Shipped without overshoot (the 60 Hz simulation never exceeds 1.0), because
+ * even a sub-1 % overshoot reads as a visible tick at the tile's edges on the
+ * docs demo:
+ *   enter 110 / 20 (ζ ≈ 0.95) — 50 % at ~150 ms, 90 % at ~350 ms, 98 % at
+ *     ~550 ms, a touch quicker than the reference, and the default rest
+ *     thresholds so it plays out to a natural stop (~0.93 s) instead of
+ *     stalling and snapping shut when a loose threshold cuts it.
+ *   exit 280 / 33.5 (ζ = 1) — 50 % at ~100 ms, 90 % at ~250 ms, 98 % at ~400 ms.
  *
  * The two directions are deliberately asymmetric: the reference opens slowly
  * and closes about twice as fast. The blur overlay, the background scale and
@@ -40,7 +41,7 @@ import { getOverlayRect } from "@utils";
  */
 export const BLUR_PHYSICS: PhysicsOptions = {
   spring: {
-    stiffness: 100,
+    stiffness: 110,
     damping: 20,
   },
 };
