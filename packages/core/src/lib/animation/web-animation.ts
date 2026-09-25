@@ -39,13 +39,12 @@ export interface WebMotionOptions {
   /** Opaque/incompatible CSS can crossfade a frozen copy, or explicitly finish. */
   fallback?: "crossfade" | "finish";
 }
-import {
-  frameScheduler,
-  STABLE_FRAME_THRESHOLD,
-  type FrameTick,
-} from "./frame-scheduler";
-
-const STARTUP_STABLE_FRAMES = 2;
+/**
+ * A run is created between two rendering updates, so its first painted frame
+ * is one frame after the pose its first keyframe describes. Seeking this far
+ * up front keeps a handoff from repeating the frame that is already on screen.
+ */
+const NOMINAL_FRAME_TIME = 1000 / 60;
 
 export interface WebMotionSnapshot extends MotionSnapshot<HTMLElement> {
   displayStyle: StyleObject;
@@ -80,16 +79,16 @@ export interface WebAnimationOptions {
  * Lifecycle:
  *   1. `play()` / `reverse()` calls `simulate()` from the current (position,
  *      velocity) toward the target bound, producing a frame list.
- *   2. Frames are converted to WAAPI keyframes; `element.animate(...)` is held
- *      at 0 ms until the pending pause is acknowledged and the browser has had
- *      a rendering opportunity.
- *   3. Startup is advanced by a shared frame clock until two rendering
- *      opportunities arrive without a long gap. Delayed mount work during
- *      this startup window therefore cannot be charged to the document
- *      timeline in one catch-up jump.
- *   4. Playback is handed to native WAAPI once rendering is stable, preserving
- *      compositor playback for the remainder of the transition.
- *   5. While playing, `getPose()` interpolates the live position from frames
+ *   2. Frames are converted to WAAPI keyframes and `element.animate(...)`
+ *      plays natively from the start. Its start time is pending until the
+ *      browser's next rendering update, so main-thread work still queued in
+ *      the current task (page mount effects, forced layout) is never charged
+ *      to the animation. The effect applies while pending, which is why the
+ *      inline start styles are cleared at once.
+ *   3. The run is seeked one nominal frame in before that first update, so a
+ *      handoff from a moving element does not repeat the pose the previous
+ *      frame already painted.
+ *   4. While playing, `getPose()` interpolates the live position from frames
  *      using WAAPI's `currentTime`, so browser setup latency is not counted as
  *      animation progress.
  *
@@ -114,11 +113,6 @@ export class WebAnimation extends Animation {
   private frames: SimFrame[] = [];
   private waapi: globalThis.Animation | null = null;
   private runId = 0;
-  private waitingForStart = false;
-  private startReady = false;
-  private pendingFirstFrame: Keyframe | undefined;
-  private stopStartupClock: (() => void) | null = null;
-  private startupStableFrames = 0;
   private running = false;
   private paused = false;
   private settled = false;
@@ -190,10 +184,6 @@ export class WebAnimation extends Animation {
       // continues exactly where it was halted.
       this.paused = false;
       this.running = true;
-      if (this.waitingForStart) {
-        if (this.startReady) this.startFramePacedPlayback(this.waapi);
-        return;
-      }
       this.waapi.play();
       this.fallbackCopy?.play();
       return;
@@ -216,8 +206,6 @@ export class WebAnimation extends Animation {
     this.captureLiveState();
     this.waapi?.pause();
     this.fallbackCopy?.pause();
-    this.stopStartupClock?.();
-    this.stopStartupClock = null;
     this.running = false;
     this.paused = true;
   }
@@ -307,10 +295,7 @@ export class WebAnimation extends Animation {
     const channels = this.samplePresentation(
       readAnimationTime(this.waapi) ?? this.presentationTime,
     );
-    const rate =
-      this.paused || (this.waitingForStart && !readAnimationTime(this.waapi))
-        ? 0
-        : this.playbackRate;
+    const rate = this.paused ? 0 : this.playbackRate;
     const displayStyle = {
       ...this.styleFn(
         this.currentValue,
@@ -660,19 +645,11 @@ export class WebAnimation extends Animation {
       composite: "replace",
     });
     waapi.playbackRate = this.playbackRate;
-    // Element.animate() auto-plays. Seek while that play is pending, then pause:
-    // setting currentTime after pause would synchronously complete the pending
-    // pause, making `ready` useless as an acknowledgement of the pause request.
-    waapi.currentTime = 0;
-    waapi.pause();
 
     this.waapi = waapi;
     this.fallbackCopy?.play();
     this.hold?.cancel();
     this.hold = null;
-    this.waitingForStart = true;
-    this.startReady = true;
-    this.pendingFirstFrame = firstFrame;
     this.running = true;
 
     waapi.onfinish = () => {
@@ -684,10 +661,11 @@ export class WebAnimation extends Animation {
       this.finish();
     };
 
-    // The paused 0 ms frame is rendered in this frame; the first scheduler
-    // tick seeks past it. Nothing waits for `ready` or an extra paint, so an
-    // element that was already moving does not freeze at the handoff.
-    this.startFramePacedPlayback(waapi);
+    // The effect applies from this point on, pending start time or not, so
+    // the inline start styles are redundant now. Leaving them until later
+    // would let snapshots and clones copy stale values.
+    this.clearInlineStyle(firstFrame);
+    this.beginPlayback(waapi, playbackDuration);
   }
 
   /**
@@ -806,12 +784,6 @@ export class WebAnimation extends Animation {
     this.runId++;
     this.waapi?.cancel();
     this.waapi = null;
-    this.waitingForStart = false;
-    this.startReady = false;
-    this.pendingFirstFrame = undefined;
-    this.stopStartupClock?.();
-    this.stopStartupClock = null;
-    this.startupStableFrames = 0;
   }
 
   private captureLiveState() {
@@ -830,117 +802,30 @@ export class WebAnimation extends Animation {
     );
   }
 
-  private startFramePacedPlayback(waapi: globalThis.Animation): void {
-    if (
-      this.waapi !== waapi ||
-      !this.waitingForStart ||
-      !this.startReady ||
-      this.stopStartupClock
-    ) {
-      return;
-    }
-
-    if (typeof requestAnimationFrame === "undefined" || this.playbackRate < 0) {
-      this.clearStartStyles();
-      this.handOffToWaapi(waapi);
-      return;
-    }
-    this.startupStableFrames = 0;
-    this.stopStartupClock = frameScheduler.subscribe((tick) => {
-      this.advanceFramePacedStartup(waapi, tick);
-    });
-  }
-
   /**
-   * Inline start styles are cleared in the same rendering update as the first
-   * seek, after the paused 0 ms WAAPI frame has had its own frame. Clearing
-   * earlier can expose the underlying, unanimated style while the animation is
-   * still pending.
+   * `Element.animate()` auto-plays with a pending start time that the browser
+   * resolves at its next rendering update, after whatever the current task
+   * still has to do. The run is seeked one nominal frame in while pending, so
+   * its first painted frame follows the frame that showed its first keyframe.
+   * A negative rate takes WAAPI's own auto-rewind: `play()` seeks to the end
+   * and runs the baked path backwards.
    */
-  private clearStartStyles(): void {
-    if (this.pendingFirstFrame) {
-      for (const prop of Object.keys(this.pendingFirstFrame)) {
-        (this._element.style as unknown as Record<string, string>)[prop] = "";
-      }
-    }
-    this.pendingFirstFrame = undefined;
-  }
-
-  private advanceFramePacedStartup(
-    waapi: globalThis.Animation,
-    tick: FrameTick,
-  ): void {
-    if (
-      this.waapi !== waapi ||
-      !this.running ||
-      this.paused ||
-      !this.waitingForStart
-    ) {
-      return;
-    }
-
-    const lastFrame = this.frames[this.frames.length - 1];
-    if (!lastFrame) return;
-
-    const currentTime = readAnimationTime(waapi) ?? 0;
-    const nextTime = Math.min(
-      lastFrame.time,
-      currentTime + tick.delta * Math.max(0, this.playbackRate),
-    );
-    // Seeking completes the pending pause synchronously, so the effect is
-    // applied in this rendering update together with the cleared inline styles.
-    waapi.currentTime = nextTime;
-    this.clearStartStyles();
-    this.captureLiveState();
-
-    if (nextTime >= lastFrame.time) {
-      this.finishFramePacedRun(waapi, lastFrame);
-      return;
-    }
-
-    if (tick.rawDelta <= STABLE_FRAME_THRESHOLD) this.startupStableFrames++;
-    else this.startupStableFrames = 0;
-
-    if (this.startupStableFrames < STARTUP_STABLE_FRAMES) return;
-
-    this.handOffToWaapi(waapi);
-  }
-
-  private handOffToWaapi(waapi: globalThis.Animation): void {
-    if (this.waapi !== waapi || !this.running || this.paused) return;
-    this.stopStartupClock?.();
-    this.stopStartupClock = null;
-    this.waitingForStart = false;
-    this.startReady = false;
-    this.startupStableFrames = 0;
-    // `play()` resolves its start time on a later frame, which advances the
-    // animation by an extra frame relative to the last seek. Assigning the
-    // start time keeps this frame at the seeked time and the next one +1 frame.
-    const now = waapi.timeline?.currentTime;
-    const current = readAnimationTime(waapi);
+  private beginPlayback(waapi: globalThis.Animation, duration: number): void {
     const rate = this.playbackRate;
-    if (typeof now === "number" && current !== null && rate !== 0) {
-      waapi.startTime = now - current / rate;
+    if (rate < 0) {
+      waapi.play();
       return;
     }
-    waapi.play();
+    if (rate > 0) {
+      waapi.currentTime = Math.min(duration, NOMINAL_FRAME_TIME * rate);
+    }
   }
 
-  private finishFramePacedRun(
-    waapi: globalThis.Animation,
-    lastFrame: SimFrame,
-  ): void {
-    if (this.waapi !== waapi || !this.running) return;
-    this.stopStartupClock?.();
-    this.stopStartupClock = null;
-    this.waitingForStart = false;
-    this.startReady = false;
-    this.startupStableFrames = 0;
-    this.running = false;
-    this.settled = true;
-    this.currentValue = lastFrame.position;
-    this.currentVelocity = 0;
-    this.finish();
+  private clearInlineStyle(frame: Keyframe | undefined): void {
+    if (!frame) return;
+    for (const prop of Object.keys(frame)) {
+      (this._element.style as unknown as Record<string, string>)[prop] = "";
+    }
   }
 
   private applyStyleAt(value: number) {

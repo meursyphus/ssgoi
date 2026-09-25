@@ -368,9 +368,7 @@ export class MultiAnimation<Name extends string = string> extends Animation {
     pump();
     if (this.pendingComplete === 0) this.handleFinished();
     if (this.running && started.size !== participating.length)
-      this.pendingStartObservers.push(
-        frameScheduler.subscribe(pump, "observe"),
-      );
+      this.pendingStartObservers.push(frameScheduler.subscribe(pump));
   }
 
   private buildDependencies(): Map<Animation, AnimationStart> {

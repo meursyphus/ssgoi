@@ -93,7 +93,10 @@ describe("web presentation matching", () => {
       source.channels.transform!.value[0]!,
       6,
     );
-    expect(b.getPose()[0]?.value).toBe(0);
+    // b is one nominal frame into its own run, not 120 ms into the source's.
+    const pose = b.getPose()[0]?.value ?? NaN;
+    expect(pose).toBeGreaterThanOrEqual(0);
+    expect(pose).toBeLessThan(0.05);
     expect(cleanup).not.toHaveBeenCalled();
     host.cancel({ reason: "disposed", owns: () => true });
   });
