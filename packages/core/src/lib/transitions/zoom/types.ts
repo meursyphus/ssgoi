@@ -1,3 +1,4 @@
+import type { AnimationDisposal } from "../../animation/animation";
 import type { PhysicsOptions, SsgoiTransitionContext } from "@types";
 import type { Animation } from "../../animation";
 import type { MediaGeometry } from "../media-geometry";
@@ -139,7 +140,7 @@ export interface ZoomContributeCtx {
    * dispatcher fires them on completion. Keeps cleanup local to each
    * strategy instead of leaking back into the dispatcher.
    */
-  onComplete: (fn: () => void) => void;
+  onDispose: (fn: (disposal: AnimationDisposal) => void) => void;
 }
 
 /**

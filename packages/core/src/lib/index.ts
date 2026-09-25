@@ -54,3 +54,15 @@ export type {
   OverrideFn,
   PresetExtras,
 } from "@types";
+
+export type { AnimationDisposal } from "./animation/animation";
+export type {
+  WebMotionOptions,
+  WebMotionSnapshot,
+} from "./animation/web-animation";
+export type { PresentationCodec } from "./animation/web-presentation";
+export type {
+  MotionIdentity,
+  MotionChannel,
+  MotionSnapshot,
+} from "./runtime/motion-matching";

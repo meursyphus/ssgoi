@@ -71,7 +71,7 @@ export const scroll = (options: ScrollOptions = {}) => {
           // also reset the out-only props applied in prepare (zIndex,
           // pointerEvents) — otherwise the leftover inline styles corrupt the
           // page the next time it appears.
-          onComplete: () => {
+          onDispose: () => {
             from.style.willChange = "auto";
             from.style.backfaceVisibility = "";
             (from.style as CSSStyleDeclaration & { contain: string }).contain =
@@ -89,7 +89,7 @@ export const scroll = (options: ScrollOptions = {}) => {
             const translateY = isUp ? u * height : u * -height;
             return { transform: `translate3d(0, ${translateY}px, 0)` };
           },
-          onComplete: () => {
+          onDispose: () => {
             to.style.willChange = "auto";
             to.style.backfaceVisibility = "";
             (to.style as CSSStyleDeclaration & { contain: string }).contain =

@@ -14,7 +14,7 @@ import type { ZoomContributeCtx } from "./types";
 
 /** Both images ride inside the moving page, sharing its transform and clip. */
 export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
-  const { resolved, input, from, to, physics, onComplete } = ctx;
+  const { resolved, input, from, to, physics, onDispose } = ctx;
   const entering = resolved.mode === "enter";
   const tile = entering ? to : from;
   const geometry = buildTileGeometry(input);
@@ -79,7 +79,9 @@ export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
   clone.style.opacity = String(previewStyle(0, 1).opacity);
   previewOpacity.set(0);
   detailOpacity.set(detailStyle(0, 1).opacity);
-  onComplete(() => {
+  // The clone is this run's own resource; opacity leases arbitrate with a
+  // newer run that reuses the same image, so they are released regardless.
+  onDispose(() => {
     clone.remove();
     previewOpacity.restore();
     detailOpacity.restore();
@@ -87,6 +89,7 @@ export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
   return [
     new WebAnimation({
       element: clone,
+      motion: { lifetime: "temporary", role: "shared-media-source" },
       integrator: IntegratorProvider.from(physics),
       style: previewStyle,
     }),

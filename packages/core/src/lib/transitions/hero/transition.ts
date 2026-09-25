@@ -1,3 +1,4 @@
+import type { AnimationDisposal } from "../../animation/animation";
 import {
   animationGroup,
   type AnimationContributions,
@@ -353,6 +354,32 @@ export function buildHeroMorphPlan(
   };
 }
 
+/**
+ * Motion identity for the flight. The destination track carries the shared
+ * photo's key so a redirected navigation (A→B→A) can pick the flight up from
+ * wherever it currently is, even on a different DOM instance. Source copies
+ * are unkeyed: they only ever enter and release.
+ */
+function heroDestinationMotion(
+  key: string,
+  space: HTMLElement,
+  temporary: boolean,
+) {
+  return {
+    key,
+    role: "shared-media",
+    space,
+    lifetime: temporary ? ("temporary" as const) : ("persistent" as const),
+  };
+}
+function heroSourceMotion(space: HTMLElement) {
+  return {
+    role: "shared-media-source",
+    space,
+    lifetime: "temporary" as const,
+  };
+}
+
 function applyMorphStyle(el: HTMLElement, style: HeroMorphStyle): void {
   el.style.transform = style.transform;
   el.style.clipPath = style.clipPath;
@@ -363,9 +390,9 @@ class HeroTileStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
   ): AnimationContributions<HeroAnimationName> {
-    const { resolved, physics, positionedParent, maxDistance, onComplete } =
-      ctx;
-    onComplete(stackHeroPages(ctx.from, ctx.to));
+    const { resolved, physics, positionedParent, maxDistance, onDispose } = ctx;
+    const restoreStack = stackHeroPages(ctx.from, ctx.to);
+    onDispose((disposal) => restoreStack(disposal.owns));
     // Measure every pair before changing any visual or caller-owned CSS hook.
     const matches = resolved.pairs.flatMap((pair) => {
       const plan = buildHeroMorphPlan(
@@ -412,7 +439,9 @@ class HeroTileStrategy implements HeroStrategy {
         positionedParent.appendChild(layer);
         sourceOpacity.set(0);
         targetOpacity.set(0);
-        onComplete(() => {
+        // Opacity leases and the layer are this run's own resources; the
+        // lease itself arbitrates with a newer run that reuses the image.
+        onDispose(() => {
           layer.remove();
           sourceOpacity.restore();
           targetOpacity.restore();
@@ -420,11 +449,13 @@ class HeroTileStrategy implements HeroStrategy {
         animations.push(
           new WebAnimation({
             element: source,
+            motion: heroSourceMotion(positionedParent),
             integrator: IntegratorProvider.from(physics),
             style: sourceStyle,
           }),
           new WebAnimation({
             element: destination,
+            motion: heroDestinationMotion(pair.key, positionedParent, true),
             integrator: IntegratorProvider.from(physics),
             style: destinationStyle,
           }),
@@ -473,7 +504,10 @@ class HeroTileStrategy implements HeroStrategy {
       Object.assign(source.style, sourceStyle(0, 1));
       targetOpacity.set(0);
       sourceOpacity.set(0);
-      onComplete(() => {
+      // Layout (fit/placeholder) and CSS hooks are restored regardless of
+      // ownership: a newer track on the same image only drives transform,
+      // clip and opacity, and inline writes under its live WAAPI are inert.
+      onDispose(() => {
         restoreFit();
         restoreTo();
         sourceOpacity.restore();
@@ -484,11 +518,13 @@ class HeroTileStrategy implements HeroStrategy {
       animations.push(
         new WebAnimation({
           element: source,
+          motion: heroSourceMotion(positionedParent),
           integrator: IntegratorProvider.from(physics),
           style: sourceStyle,
         }),
         new WebAnimation({
           element: toVisualEl,
+          motion: heroDestinationMotion(pair.key, positionedParent, false),
           integrator: IntegratorProvider.from(physics),
           style,
         }),
@@ -543,11 +579,11 @@ export const hero = (options: NormalizedHeroOptions) => {
         return animationGroup({ shared: [], out: [], in: [] });
       }
 
-      // Shared `onComplete` registry — strategies push restore callbacks
+      // Shared `onDispose` registry — strategies push restore callbacks
       // here, and the composite fires them after every child has settled.
       // Keep the in-place fit/clip until every sibling fade has settled.
-      const cleanups: Array<() => void> = [];
-      const onComplete = (fn: () => void): void => {
+      const cleanups: Array<(disposal: AnimationDisposal) => void> = [];
+      const onDispose = (fn: (disposal: AnimationDisposal) => void): void => {
         cleanups.push(fn);
       };
 
@@ -559,7 +595,7 @@ export const hero = (options: NormalizedHeroOptions) => {
         physics,
         positionedParent: context.positionedParent,
         maxDistance,
-        onComplete,
+        onDispose,
       };
 
       const groups: Record<HeroAnimationName, Animation[]> = {
@@ -576,16 +612,16 @@ export const hero = (options: NormalizedHeroOptions) => {
       }
 
       const composite = animationGroup(groups);
-      const prevOnComplete = composite.onComplete;
-      composite.onComplete = () => {
-        prevOnComplete?.();
+      const prevOnDispose = composite.onDispose;
+      composite.onDispose = (disposal) => {
+        prevOnDispose?.(disposal);
         // A forwards-filled transform must not override the restored image fit.
         for (const animation of Object.values(groups).flat()) {
           if (animation instanceof WebAnimation) animation.releaseFill();
         }
         for (const fn of cleanups) {
           try {
-            fn();
+            fn(disposal);
           } catch (e) {
             // Don't let one faulty restore tear down sibling cleanups.
             console.error("[hero] cleanup error", e);

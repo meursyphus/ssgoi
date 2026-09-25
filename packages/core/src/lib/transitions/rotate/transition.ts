@@ -41,7 +41,7 @@ export const rotate = (options: RotateOptions = {}) => {
         // The outgoing node is reused (re-hidden, shown again on the next
         // navigation), so clear every inline style we wrote to `from`
         // (prepare + the final WAAPI frame), mirroring the `to` cleanup.
-        onComplete: () => {
+        onDispose: () => {
           from.style.willChange = "auto";
           from.style.transform = "";
           from.style.transformOrigin = "";
@@ -57,7 +57,7 @@ export const rotate = (options: RotateOptions = {}) => {
           transform: `rotate(${-u * 180}deg)`,
           opacity: t > 0.5 ? 1 : 0,
         }),
-        onComplete: () => {
+        onDispose: () => {
           to.style.willChange = "auto";
           to.style.transform = "";
           to.style.transformOrigin = "";
