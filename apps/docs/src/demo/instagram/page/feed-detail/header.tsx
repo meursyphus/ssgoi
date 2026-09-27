@@ -1,13 +1,14 @@
 "use client";
 
-import { Link } from "@/lib/link";
+import { DemoBackLink } from "@/lib/components/demo-back-link";
 
-export function FeedDetailHeader({ backHref }: { backHref: string }) {
+export function FeedDetailHeader({ fallbackHref }: { fallbackHref: string }) {
+  // 그리드·태그됨·탐색·홈 어디서 열었든 온 곳으로 돌아가야 zoom이 원래 타일로 접힌다
   return (
     <div className="flex items-center gap-3 border-b border-neutral-200 px-3 py-3">
-      <Link
-        href={backHref}
-        scroll={false}
+      <DemoBackLink
+        fallback={fallbackHref}
+        aria-label="뒤로"
         className="-ml-1 grid h-9 w-9 place-items-center text-neutral-900"
       >
         <svg
@@ -24,7 +25,7 @@ export function FeedDetailHeader({ backHref }: { backHref: string }) {
             strokeLinejoin="round"
           />
         </svg>
-      </Link>
+      </DemoBackLink>
       <span className="text-[14px] font-semibold text-neutral-900">게시물</span>
     </div>
   );

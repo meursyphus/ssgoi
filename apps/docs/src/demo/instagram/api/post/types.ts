@@ -3,10 +3,18 @@ export interface PostAPI {
   findAll: () => Promise<PostSimple[]>;
   /** 게시물 상세 */
   find: (id: string) => Promise<PostDetail>;
+  /** 댓글 시트 — 게시물의 전체 댓글 */
+  findComments: (id: string) => Promise<PostComment[]>;
   /** 릴스 탭 목록 */
   findReels: () => Promise<Reel[]>;
+  /** 릴스 뷰어 */
+  findReel: (id: string) => Promise<ReelDetail>;
   /** 태그됨 탭 목록 */
   findTagged: () => Promise<TaggedPost[]>;
+  /** 탐색 탭 그리드 — 내 게시물과 친구 게시물이 섞인 순서 */
+  findExplore: () => Promise<PostSimple[]>;
+  /** 홈 피드 — 팔로우 중인 계정 + 내 최근 게시물 */
+  findFeed: () => Promise<PostDetail[]>;
 }
 
 export type PostKind = "image" | "video" | "carousel";
@@ -15,6 +23,12 @@ export type PostSimple = {
   id: string;
   image: string;
   kind: PostKind;
+};
+
+/** 다른 사람이 올린 게시물의 작성자. 없으면 내 게시물. */
+export type PostAuthor = {
+  username: string;
+  avatar: string;
 };
 
 export type PostDetail = {
@@ -32,6 +46,8 @@ export type PostDetail = {
   publishedAtLabel: string;
   /** 미리 가공된 인기 댓글 목록 — 상세 페이지 본문 채움 */
   topComments: PostComment[];
+  /** 친구가 올린 게시물(태그됨)일 때만 존재 */
+  author?: PostAuthor;
 };
 
 export type PostComment = {
@@ -50,9 +66,19 @@ export type Reel = {
   viewsLabel: string;
 };
 
+export type ReelDetail = Reel & {
+  caption: string;
+  likesLabel: string;
+  commentsLabel: string;
+  sharesLabel: string;
+  /** "deaseungseung94 · 원본 오디오" */
+  audioLabel: string;
+  author: PostAuthor;
+};
+
 export type TaggedPost = {
   id: string;
   image: string;
-  /** "@friend_a" */
+  /** "@miso_devv" */
   userLabel: string;
 };
