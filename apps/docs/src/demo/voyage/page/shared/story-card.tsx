@@ -2,27 +2,30 @@
 
 import { useState } from "react";
 import { Bookmark, Heart, MapPin } from "lucide-react";
-import { toast } from "sonner";
-import type { StorySimple } from "@/demo/voyage/state/story";
+import { Link } from "@/lib/link";
+import { useStory, type StorySimple } from "@/demo/voyage/state/story";
+import { BASE } from "./routes";
 
+/**
+ * Feed/Saved card. The title link is stretched over the whole card (its
+ * ::after covers the article), so the cover, excerpt and author row all open
+ * the story while the Save and Like buttons stay separate controls above it —
+ * a <button> nested inside an <a> would be invalid HTML.
+ */
 export function StoryCard({ story }: { story: StorySimple }) {
-  const [saved, setSaved] = useState(story.saved);
+  const storyState = useStory((s) => ({ actions: s.actions }));
   const [liked, setLiked] = useState(false);
 
   return (
     <article className="relative flex flex-col">
-      {/* The cover is the only <button> over the image. The save control is a
-          sibling overlay (not nested) — nesting <button> in <button> is invalid
-          HTML and trips a hydration error. */}
-      <button
-        type="button"
-        onClick={() => toast("Story detail is mocked in this demo")}
-        className="relative block aspect-[4/5] w-full overflow-hidden rounded-3xl bg-neutral-100 text-left"
-      >
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-neutral-100">
         <img
           src={story.cover}
           alt={story.location}
+          width={880}
+          height={1100}
           loading="lazy"
+          data-zoom-exit-key={story.id}
           className="h-full w-full object-cover"
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/55 to-transparent" />
@@ -30,23 +33,30 @@ export function StoryCard({ story }: { story: StorySimple }) {
           <MapPin size={13} strokeWidth={2.5} className="text-[#FF5A5F]" />
           {story.location}
         </span>
-      </button>
+      </div>
       <button
         type="button"
-        onClick={() => setSaved((v) => !v)}
-        aria-label={saved ? "Remove from saved" : "Save story"}
-        className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-neutral-900 shadow-sm backdrop-blur active:scale-95"
+        onClick={() => storyState.actions.toggleSave(story.id)}
+        aria-label={story.saved ? "Remove from saved" : "Save story"}
+        aria-pressed={story.saved}
+        className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-2 text-neutral-900 shadow-sm backdrop-blur transition-transform active:scale-90"
       >
         <Bookmark
           size={17}
           strokeWidth={2.25}
-          fill={saved ? "currentColor" : "none"}
+          fill={story.saved ? "currentColor" : "none"}
         />
       </button>
 
       <div className="px-0.5 pt-3">
         <h3 className="text-[17px] font-bold leading-snug tracking-tight text-neutral-900">
-          {story.title}
+          <Link
+            href={`${BASE}/story/${story.id}`}
+            scroll={false}
+            className="after:absolute after:inset-0 after:content-['']"
+          >
+            {story.title}
+          </Link>
         </h3>
         <p className="mt-1.5 line-clamp-2 text-[14px] leading-relaxed text-neutral-600">
           {story.excerpt}
@@ -71,7 +81,8 @@ export function StoryCard({ story }: { story: StorySimple }) {
             type="button"
             onClick={() => setLiked((v) => !v)}
             aria-label={liked ? "Unlike" : "Like"}
-            className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-neutral-500 active:scale-95"
+            aria-pressed={liked}
+            className="relative z-10 flex shrink-0 items-center gap-1 text-[13px] font-semibold text-neutral-500 active:scale-95"
           >
             <Heart
               size={17}
