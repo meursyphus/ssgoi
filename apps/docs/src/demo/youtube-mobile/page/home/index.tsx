@@ -1,76 +1,74 @@
-import { Compass, MoreVertical } from "lucide-react";
-import { feedVideos, shortVideos } from "../../mock-data";
-import { ShortsMark } from "../shared/brand";
+"use client";
+
+import { Compass } from "lucide-react";
+import { EXPLORE_TOPICS, HOME_CHIPS, homeFeed } from "../../mock-data";
+import { closeActionSheet, openActionSheet } from "../shared/action-sheet";
+import { ChipRow } from "../shared/chip-row";
+import { useRememberedState } from "../shared/remembered-state";
 import { YouTubeTopBar } from "../shared/top-bar";
 import { WideVideoCard } from "../shared/video-card";
-
-const CHIPS = ["All", "For you", "Gaming", "Music", "Design", "Live"];
+import { ShortsShelf } from "./shorts-shelf";
 
 export default function HomePage() {
+  const [chip, setChip] = useRememberedState("home-chip", "All");
+  const feed = homeFeed(chip);
+
+  const openExplore = () =>
+    openActionSheet({
+      title: "Explore",
+      content: (
+        <div className="grid grid-cols-2 gap-2 px-4 pb-2">
+          {EXPLORE_TOPICS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => {
+                setChip(item);
+                closeActionSheet();
+              }}
+              className="h-12 rounded-xl bg-neutral-100 px-4 text-left text-[15px] font-medium active:bg-neutral-200"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      ),
+    });
+
   return (
     <main className="min-h-full bg-white pb-5 text-neutral-950">
       <YouTubeTopBar />
 
-      <div className="scrollbar-hide flex gap-2 overflow-x-auto px-3 pb-3">
-        <button
-          type="button"
-          aria-label="Explore"
-          className="flex h-9 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100"
-        >
-          <Compass className="h-5 w-5" />
-        </button>
-        {CHIPS.map((chip, index) => (
+      <ChipRow
+        items={HOME_CHIPS}
+        value={chip}
+        onChange={setChip}
+        className="px-3 pb-3"
+        leading={
           <button
-            key={chip}
             type="button"
-            className={`h-9 shrink-0 rounded-lg px-4 text-[14px] font-medium ${
-              index === 0
-                ? "bg-neutral-950 text-white"
-                : "bg-neutral-100 text-neutral-900"
-            }`}
+            aria-label="Explore"
+            onClick={openExplore}
+            className="flex h-9 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100 active:bg-neutral-200"
           >
-            {chip}
+            <Compass className="h-5 w-5" />
           </button>
-        ))}
-      </div>
+        }
+      />
 
-      <section className="px-3 pt-2">
-        <div className="mb-3 flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <ShortsMark className="h-7 w-7 text-[#ff0033]" />
-            <h1 className="text-[20px] font-bold">Shorts</h1>
-          </div>
-          <MoreVertical className="h-5 w-5" />
-        </div>
+      {feed.lead.map((video) => (
+        <WideVideoCard key={video.id} video={video} />
+      ))}
 
-        <div className="grid grid-cols-2 gap-2">
-          {shortVideos.map((video) => (
-            <article
-              key={video.title}
-              className="relative aspect-[0.64] overflow-hidden rounded-xl bg-neutral-900"
-            >
-              <img
-                src={video.image}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent px-3 pb-3 pt-14 text-white">
-                <h2 className="line-clamp-2 text-[14px] font-semibold leading-[18px]">
-                  {video.title}
-                </h2>
-                <p className="mt-1 text-[11px] text-white/80">{video.meta}</p>
-              </div>
-              <MoreVertical className="absolute right-2 top-2 h-5 w-5 text-white drop-shadow" />
-            </article>
+      {feed.shorts.length > 0 && <ShortsShelf shorts={feed.shorts} />}
+
+      {feed.rest.length > 0 && (
+        <section className="border-t border-neutral-200 pt-4">
+          {feed.rest.map((video) => (
+            <WideVideoCard key={video.id} video={video} />
           ))}
-        </div>
-      </section>
-
-      <section className="mt-5 border-t border-neutral-200 pt-4">
-        {feedVideos.slice(0, 2).map((video) => (
-          <WideVideoCard key={video.title} video={video} />
-        ))}
-      </section>
+        </section>
+      )}
     </main>
   );
 }

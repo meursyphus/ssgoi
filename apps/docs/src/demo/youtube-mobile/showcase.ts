@@ -5,13 +5,13 @@ const BASE = "/demo/youtube-mobile";
 export const youtubeMobileShowcase: ShowcaseApp = {
   slug: "youtube-mobile",
   name: "YouTube Mobile",
-  tagline: "Slow vertical tab cross-fade with a nav-free create sheet",
+  tagline: "Axis-y tabs + zoom expand into the player + drill to channels",
   platforms: ["mobile"],
   category: "Video & Streaming",
   badge: "New",
   logo: "/youtube-mobile-icon.svg",
   demoOrigin: BASE,
-  transitions: ["axis", "sheet"],
+  transitions: ["axis", "sheet", "zoom", "drill"],
   sourcePath: "apps/docs/src/demo/youtube-mobile",
   previewTransition: "axis",
   clips: [
@@ -31,6 +31,22 @@ export const youtubeMobileShowcase: ShowcaseApp = {
       exitPath: BASE,
       intervalMs: 3000,
       caption: "The create surface rises without carrying the bottom nav",
+    },
+    {
+      title: "Home → Watch (zoom expand)",
+      transition: "zoom",
+      enterPath: `${BASE}/watch/deep-work-desk`,
+      exitPath: BASE,
+      intervalMs: 3000,
+      caption: "The tapped thumbnail grows into the player at the top",
+    },
+    {
+      title: "Subscriptions → Channel (drill)",
+      transition: "drill",
+      enterPath: `${BASE}/channel/maya-builds`,
+      exitPath: `${BASE}/subscriptions`,
+      intervalMs: 2800,
+      caption: "Channel avatars push the channel page in from the right",
     },
   ],
 };
