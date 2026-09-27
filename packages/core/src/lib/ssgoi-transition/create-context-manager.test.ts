@@ -180,11 +180,17 @@ describe("createContextManager", () => {
   it("disconnects scroll observation and invalidates queued restorations", () => {
     const manager = createContextManager();
     const page = createFakeElement({ parentElement: body });
+    // The reset target cannot be held yet, so the follow-up frames are queued.
+    documentElement.scrollTop = 320;
+    documentElement.scrollTo.mockImplementationOnce(() => {});
     manager.initializeContext(page, "/page", false);
     manager.beginTransition(false);
+    const callsBeforeDisconnect = documentElement.scrollTo.mock.calls.length;
     manager.disconnect();
     flushAnimationFrames(20);
-    expect(documentElement.scrollTo).not.toHaveBeenCalled();
+    expect(documentElement.scrollTo.mock.calls.length).toBe(
+      callsBeforeDisconnect,
+    );
     expect(windowListeners.get("scroll")?.size).toBe(0);
     manager.initializeContext(page, "/page", false);
     flushAnimationFrames(20);
@@ -239,6 +245,56 @@ describe("createContextManager", () => {
     documentElement.scrollTop = 480;
     emitWindowScroll();
     expect(manager.getScrollPosition("/feed")).toEqual({ x: 0, y: 480 });
+  });
+
+  it("restores the incoming scroll synchronously when the policy is applied", () => {
+    const manager = createContextManager();
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail", false);
+    flushAnimationFrames(11);
+    expect(documentElement.scrollTop).toBe(0);
+
+    // The transition that brings /feed back prepares and builds its animation
+    // in the same microtask turn as this decision, against the saved scroll.
+    // The container must already be there — no frame in between.
+    const applyFeedPolicy = manager.initializeContext(
+      returningFeedPage,
+      "/feed",
+    );
+    expect(documentElement.scrollTop).toBe(0);
+    applyFeedPolicy(true);
+    expect(documentElement.scrollTop).toBe(480);
+  });
+
+  it("re-asserts the restored position on the next frame when something scrolls it away", () => {
+    const manager = createContextManager();
+    const feedPage = createFakeElement({ parentElement: body });
+    const detailPage = createFakeElement({ parentElement: body });
+    const returningFeedPage = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(feedPage, "/feed", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 480;
+    emitWindowScroll();
+
+    manager.initializeContext(detailPage, "/detail", false);
+    flushAnimationFrames(11);
+
+    manager.initializeContext(returningFeedPage, "/feed", true);
+    expect(documentElement.scrollTop).toBe(480);
+
+    // A router-side scroll reset lands after ours, before the next frame.
+    documentElement.scrollTop = 0;
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(480);
   });
 
   it("restores a saved scroll position on return navigation", () => {

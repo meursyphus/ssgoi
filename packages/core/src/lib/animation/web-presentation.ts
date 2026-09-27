@@ -3,11 +3,12 @@ import type { MotionChannel } from "../runtime/motion-matching";
 
 /**
  * Where the scroll container rests once the run being measured has applied
- * its scroll policy. The incoming page's scroll restores in the rendering
- * update after a run attaches, so a box read at attach time is still offset
- * by the outgoing page's scroll. Expressing every frame at its own run's
- * resting scroll keeps successive runs in one viewport space, which is what
- * a handoff compares.
+ * its scroll policy. The incoming page's scroll is restored before the run
+ * prepares, but the container can still sit elsewhere while a box is read
+ * (a saved offset that only becomes reachable as content grows, a router
+ * scrolling after us), so the live offset is normalised to this resting
+ * position. Expressing every frame at its own run's resting scroll keeps
+ * successive runs in one viewport space, which is what a handoff compares.
  */
 export interface ViewportHint {
   container: HTMLElement;

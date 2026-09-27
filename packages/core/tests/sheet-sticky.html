@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>SSGOI sheet × sticky bottom nav regression</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      font: 16px system-ui;
+      background: #eee;
+      overflow: hidden;
+    }
+    /* App shell: the ONLY scroller is <main>, like a mobile app shell. */
+    #shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+      background: #fff;
+      overflow: hidden;
+    }
+    #scene {
+      position: relative;
+      z-index: 0;
+      flex: 1 1 0%;
+      min-height: 0;
+      overflow-x: clip;
+      overflow-y: auto;
+    }
+    #transition {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      min-height: 100%;
+      background: #fff;
+    }
+    .list .content {
+      flex: 1 1 0%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+    .card {
+      height: 88px;
+      border-radius: 16px;
+      background: #f1f2f6;
+      border: 1px solid #e3e4ea;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .list nav {
+      position: sticky;
+      bottom: 0;
+      z-index: 30;
+      flex-shrink: 0;
+      padding: 8px 12px 10px;
+    }
+    .capsule {
+      position: relative;
+      isolation: isolate;
+      margin: 0 auto;
+      height: 56px;
+      max-width: 336px;
+      border-radius: 999px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: rgba(255, 255, 255, 0.62);
+      -webkit-backdrop-filter: blur(22px) saturate(185%);
+      backdrop-filter: blur(22px) saturate(185%);
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+    .tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transform: translateZ(0);
+    }
+    .sheet {
+      background: linear-gradient(#fff, #f5f5fa);
+      padding: 24px 16px;
+    }
+    .big {
+      font-size: 56px;
+      text-align: center;
+      margin: 120px 0 40px;
+    }
+    #hud {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      z-index: 9999;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font: 12px system-ui;
+      pointer-events: none;
+    }
+    #hud button {
+      pointer-events: auto;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 0;
+      background: #1d4ed8;
+      color: #fff;
+      font-size: 12px;
+    }
+    #out {
+      width: 100%;
+      color: #111;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+    #clock {
+      position: fixed;
+      right: 8px;
+      bottom: 120px;
+      z-index: 9999;
+      font: 700 20px system-ui;
+      color: #c00;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+  </style>
+  <div id="hud">
+    <button id="open">open sheet</button>
+    <button id="close">close sheet</button>
+    <div id="out">ready</div>
+  </div>
+  <div id="clock">idle</div>
+  <div id="shell">
+    <main id="scene"><div id="transition"></div></main>
+  </div>
+  <script type="module" src="./sheet-sticky.ts"></script>
+</html>
