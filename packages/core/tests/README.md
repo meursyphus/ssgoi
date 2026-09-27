@@ -54,13 +54,16 @@ For manual testing, run `pnpm --filter @ssgoi/core dev`, open
 
 ## Sheet over a sticky bar (`sheet-sticky`)
 
-A `sheet` leaves over a scrolled list page whose sticky bottom bar lives inside
-the page. The `blur` and `scale` tones clip and scale that page against its
-saved scroll, so the container must already be restored when the first frame is
-built. The fixture drives the real transition context with unmount-mode pages
-and samples the bar's on-screen box every frame; the suite asserts the scroll
-is at its saved value on every animated frame and that the bar never paints
-below the viewport edge in Chromium and WebKit.
+A `sheet` rises over, then leaves over, a scrolled list page whose sticky
+bottom bar lives inside the page. The `blur` and `scale` tones clip and scale
+that page against its saved scroll, so the container must already be at the
+incoming page's scroll when the first frame is built — otherwise the bar jumps
+out of view until the sheet covers it. The fixture drives the real transition
+context with unmount-mode pages and samples the bar's on-screen box every
+frame. On enter, the suite asserts the container is at the sheet's scroll and
+the bar tracks the (scaled) viewport edge on every frame; on exit, that the
+scroll is at its saved value and the bar never paints below the viewport edge.
+Both directions run in Chromium and WebKit for every sheet type.
 
 For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/sheet-sticky.html` (`?type=blur|scale|static`, `?scroll=500`,
