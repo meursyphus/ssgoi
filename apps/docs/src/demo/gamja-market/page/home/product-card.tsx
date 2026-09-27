@@ -40,6 +40,7 @@ export function ProductCard({ product, pickupDate, pickupPlace }: Props) {
   return (
     <Link
       href={`/demo/gamja-market/products/${product.id}`}
+      scroll={false}
       className="flex gap-4 px-4 py-5 active:bg-black/[0.02]"
     >
       <div className="relative h-[120px] w-[120px] flex-shrink-0 overflow-hidden rounded-[6px] bg-gray-100">

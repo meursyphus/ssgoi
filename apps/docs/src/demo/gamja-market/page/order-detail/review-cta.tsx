@@ -22,6 +22,7 @@ export function ReviewCta({ order }: { order: OrderDetail }) {
     <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 pb-5 pt-3">
       <Link
         href={`/demo/gamja-market/review/${order.id}`}
+        scroll={false}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2db400] py-4 text-[15px] font-bold text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-colors hover:bg-[#25a000]"
       >
         <PenLine className="h-4 w-4" />

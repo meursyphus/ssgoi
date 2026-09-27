@@ -7,7 +7,6 @@ import { HomeHeader } from "./header";
 import { SectionTitle } from "./section-title";
 import { ProductList } from "./product-list";
 import { FloatingBottom } from "./floating-bottom";
-import { BottomNav } from "./bottom-nav";
 export default function HomePage() {
   const product = useProduct((state) => ({
     actions: state.actions,
@@ -27,7 +26,6 @@ export default function HomePage() {
         <ProductList />
       </div>
       <FloatingBottom />
-      <BottomNav />
     </div>
   );
 }

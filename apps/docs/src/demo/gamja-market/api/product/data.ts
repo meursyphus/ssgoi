@@ -10,7 +10,7 @@ const seed: ProductDetail[] = [
     soldCount: 215,
     description:
       "남해안 어포를 그날 새벽 튀겨내어 식감이 살아 있습니다. 달짝지근 짭조름한 시즈닝이 입에 감기는 인기 간식.",
-    images: ["/demo/gamja-market/eopo.jpg"],
+    images: [{ src: "/demo/gamja-market/eopo.jpg", width: 400, height: 480 }],
     pickupDate: "2026년 5월 21일 (수)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "픽업 가능일 익일까지 보관됩니다. 가급적 당일 수령 부탁드려요.",
@@ -24,7 +24,7 @@ const seed: ProductDetail[] = [
     soldCount: 140,
     description:
       "해발 700m 고랭지에서 GAP 인증으로 키운 신선한 샐러드 채소. 아삭한 식감과 향이 살아있습니다.",
-    images: ["/demo/gamja-market/salad.jpg"],
+    images: [{ src: "/demo/gamja-market/salad.jpg", width: 480, height: 480 }],
     pickupDate: "2026년 5월 20일 (화)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "냉장 보관 / 픽업 후 3일 이내 섭취 권장.",
@@ -39,7 +39,13 @@ const seed: ProductDetail[] = [
     stockBadge: "1개 남음",
     description:
       "부산 영자어묵으로 만든 진한 로제 떡볶이. 1인 분량으로 데우기만 하면 완성되는 간편식.",
-    images: ["/demo/gamja-market/tteokbokki-rose.jpg"],
+    images: [
+      {
+        src: "/demo/gamja-market/tteokbokki-rose.jpg",
+        width: 480,
+        height: 480,
+      },
+    ],
     pickupDate: "2026년 5월 18일 (일)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "냉장 보관 / 픽업 후 5일 이내 섭취 권장.",
@@ -54,7 +60,13 @@ const seed: ProductDetail[] = [
     stockBadge: "2개 남음",
     description:
       "부산 영자어묵 오리지널 어묵떡볶이. 매콤달콤 국민 떡볶이 맛 그대로.",
-    images: ["/demo/gamja-market/tteokbokki-original.jpg"],
+    images: [
+      {
+        src: "/demo/gamja-market/tteokbokki-original.jpg",
+        width: 480,
+        height: 480,
+      },
+    ],
     pickupDate: "2026년 5월 18일 (일)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "냉장 보관 / 개봉 후 빨리 드세요.",
@@ -68,7 +80,13 @@ const seed: ProductDetail[] = [
     soldCount: 33,
     description:
       "100% 쌀로 빚은 쫀득한 떡과 부산 영자어묵의 조합. 데우기만 하면 완성.",
-    images: ["/demo/gamja-market/tteokbokki-rice.jpg"],
+    images: [
+      {
+        src: "/demo/gamja-market/tteokbokki-rice.jpg",
+        width: 480,
+        height: 480,
+      },
+    ],
     pickupDate: "2026년 5월 20일 (화)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "냉장 보관 권장 / 픽업 후 즉시 섭취 권장.",
@@ -82,7 +100,7 @@ const seed: ProductDetail[] = [
     soldCount: 87,
     description:
       "60년 전통 가메골 손만두. 국내산 돼지고기와 부추가 듬뿍 들어간 왕만두.",
-    images: ["/demo/gamja-market/mandu.jpg"],
+    images: [{ src: "/demo/gamja-market/mandu.jpg", width: 480, height: 320 }],
     pickupDate: "2026년 5월 22일 (목)",
     pickupPlace: "올림픽파크포레온점 1층 픽업존",
     notice: "냉동 보관 / 찌거나 구워서 드세요.",

@@ -8,7 +8,7 @@ export const gamjaMarketShowcase: ShowcaseApp = {
   category: "Commerce",
   logo: "/gamja-market-icon.svg",
   demoOrigin: "/demo/gamja-market",
-  transitions: ["drill", "sheet"],
+  transitions: ["drill", "sheet", "zoom", "fade"],
   sourcePath: "apps/docs/src/demo/gamja-market",
   previewTransition: "drill",
   clips: [
@@ -25,6 +25,20 @@ export const gamjaMarketShowcase: ShowcaseApp = {
       enterPath: "/demo/gamja-market/review/o-001",
       exitPath: "/demo/gamja-market",
       caption: "Modal sheet rising from below",
+    },
+    {
+      title: "Product → Photo Viewer",
+      transition: "zoom",
+      enterPath: "/demo/gamja-market/products/p-003/photos",
+      exitPath: "/demo/gamja-market/products/p-003",
+      caption: "Listing photo expands into a full-screen viewer",
+    },
+    {
+      title: "Home → 나의당근 Tab",
+      transition: "fade",
+      enterPath: "/demo/gamja-market/my",
+      exitPath: "/demo/gamja-market",
+      caption: "Tab swap while the bottom nav stays put",
     },
   ],
 };

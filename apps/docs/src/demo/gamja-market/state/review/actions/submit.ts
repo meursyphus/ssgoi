@@ -1,17 +1,18 @@
 import { action, OnError } from "comwit";
 import { toast } from "sonner";
-import type { AppContext } from "@/lib/state";
 import { review as reviewAPI } from "@/demo/gamja-market/api/review";
 import { order as orderAPI } from "@/demo/gamja-market/api/order";
 import { order as orderModel } from "@/demo/gamja-market/state/order/model";
+import { chat as chatModel } from "@/demo/gamja-market/state/chat/model";
 import { review } from "../model";
 import type { ReviewActions } from "../types";
 
-export const submitActions = action<Pick<ReviewActions, "submit">, AppContext>(
-  ({ state, context }) => {
+export const submitActions = action<Pick<ReviewActions, "submit">>(
+  ({ state }) => {
     class SubmitActions {
       private model = state(review);
       private orderModel = state(orderModel);
+      private chatModel = state(chatModel);
 
       @OnError((e: unknown) => {
         toast.error(
@@ -19,7 +20,7 @@ export const submitActions = action<Pick<ReviewActions, "submit">, AppContext>(
         );
       })
       async submit(input: { orderId: string; productId: string }) {
-        if (this.model.isSubmitting) return;
+        if (this.model.isSubmitting) return false;
         this.model.isSubmitting = true;
         try {
           await reviewAPI.create({
@@ -29,14 +30,22 @@ export const submitActions = action<Pick<ReviewActions, "submit">, AppContext>(
             content: this.model.content,
           });
           await orderAPI.markReviewWritten(input.orderId);
-          await this.orderModel.orders.refetch();
+          // Keep the reviewed copy: the order page underneath the sheet may be
+          // restored from a cached server payload that still says "not reviewed".
+          const reviewed = await orderAPI.find(input.orderId);
+          this.orderModel.sessionOrders[input.orderId] = reviewed;
           if (this.orderModel.currentOrder?.id === input.orderId) {
-            this.orderModel.currentOrder.reviewWritten = true;
+            this.orderModel.currentOrder = reviewed;
           }
-          this.model.rating = 0;
-          this.model.content = "";
+          await Promise.all([
+            this.orderModel.orders.refetch(),
+            this.orderModel.summary.refetch(),
+            this.chatModel.chats.refetch(),
+          ]);
+          // The form clears itself when the sheet unmounts, so the leaving
+          // sheet keeps its stars while it slides down.
           toast.success("리뷰가 등록되었어요");
-          context.router.push(`/demo/gamja-market/orders/${input.orderId}`);
+          return true;
         } finally {
           this.model.isSubmitting = false;
         }

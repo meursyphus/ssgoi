@@ -7,17 +7,23 @@ import { ProductSummary } from "./product-summary";
 import { PickupInfo } from "./pickup-info";
 import { PaymentSummary } from "./payment-summary";
 import { ReviewCta } from "./review-cta";
+import { OrderNotFound } from "./order-not-found";
 export default function OrderDetailPage({
+  id,
   initialData,
 }: {
-  initialData: OrderDetail;
+  id: string;
+  /** null when the order was placed in this session (server only has the seed). */
+  initialData: OrderDetail | null;
 }) {
   const order = useOrder((state) => ({
-    current: state.currentOrder,
+    sessionOrders: state.sessionOrders,
     actions: state.actions,
   }));
-  order.actions.init(initialData);
-  const data = order.current ?? initialData;
+  if (initialData) order.actions.init(initialData);
+  // This session's copy is newer: a review written here, or a new order.
+  const data = order.sessionOrders[id] ?? initialData;
+  if (!data) return <OrderNotFound />;
   return (
     <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <OrderDetailHeader />

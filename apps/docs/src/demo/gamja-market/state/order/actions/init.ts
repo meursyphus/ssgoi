@@ -7,7 +7,9 @@ export const initActions = action<Pick<OrderActions, "init">>(({ state }) => {
     private model = state(order);
     init(detail: OrderDetail) {
       silent(() => {
-        this.model.currentOrder = detail;
+        // A copy changed in this session (placed, reviewed) is newer than the
+        // server-rendered one — Back can also hand us a cached, stale payload.
+        this.model.currentOrder = this.model.sessionOrders[detail.id] ?? detail;
       });
     }
   }

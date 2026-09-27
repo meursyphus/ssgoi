@@ -11,14 +11,20 @@ export function HomeHeader() {
             alt="감자마켓"
             className="h-6 w-auto"
           />
-          <span className="text-[14px] font-semibold leading-[120%] text-gray-600">
+          {/* The pickup store lives on the 내근처 tab. */}
+          <Link
+            href="/demo/gamja-market/near"
+            scroll={false}
+            className="text-[14px] font-semibold leading-[120%] text-gray-600 active:text-gray-900"
+          >
             올림픽파크포레온점
-          </span>
+          </Link>
         </div>
 
         <div className="flex items-center gap-1">
           <Link
             href="/demo/gamja-market/orders"
+            scroll={false}
             className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
             aria-label="주문내역"
           >
