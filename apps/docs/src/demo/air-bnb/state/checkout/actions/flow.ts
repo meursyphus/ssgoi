@@ -1,36 +1,36 @@
 import { action } from "comwit";
-import { toast } from "sonner";
-import { checkout } from "../model";
-import type { CheckoutActions, CheckoutMethod, CheckoutStep } from "../types";
-
-const ORDER: CheckoutStep[] = ["review", "method", "confirm"];
+import { checkout, MAX_GUESTS } from "../model";
+import type {
+  CheckoutActions,
+  CheckoutMethod,
+  CheckoutPayPlan,
+} from "../types";
 
 export const flowActions = action<CheckoutActions>(({ state }) => {
   class FlowActions {
     private model = state(checkout);
 
     reset() {
-      this.model.step = "review";
       this.model.selectedMethod = "card";
+      this.model.dateLabel = null;
+      this.model.guests = 1;
+      this.model.payPlan = "full";
     }
 
     setMethod(method: CheckoutMethod) {
       this.model.selectedMethod = method;
     }
 
-    goNext() {
-      const idx = ORDER.indexOf(this.model.step);
-      if (idx < 0 || idx === ORDER.length - 1) {
-        toast.success("결제가 완료되었습니다");
-        return;
-      }
-      this.model.step = ORDER[idx + 1];
+    setDates(dateLabel: string) {
+      this.model.dateLabel = dateLabel;
     }
 
-    goPrev() {
-      const idx = ORDER.indexOf(this.model.step);
-      if (idx <= 0) return;
-      this.model.step = ORDER[idx - 1];
+    setGuests(guests: number) {
+      this.model.guests = Math.min(MAX_GUESTS, Math.max(1, guests));
+    }
+
+    setPayPlan(plan: CheckoutPayPlan) {
+      this.model.payPlan = plan;
     }
   }
   return new FlowActions();

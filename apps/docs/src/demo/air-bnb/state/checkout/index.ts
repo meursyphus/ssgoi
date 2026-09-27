@@ -4,6 +4,7 @@ import { flowActions } from "./actions/flow";
 import type { CheckoutState, CheckoutActions } from "./types";
 
 export * from "./types";
+export { MAX_GUESTS } from "./model";
 
 export const useCheckout = create<CheckoutState, CheckoutActions>(checkout, {
   actions: [flowActions],

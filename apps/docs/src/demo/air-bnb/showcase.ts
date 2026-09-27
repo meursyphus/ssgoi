@@ -9,7 +9,7 @@ export const airBnbShowcase: ShowcaseApp = {
   badge: "New",
   logo: "/airbnb-icon.svg",
   demoOrigin: "/demo/air-bnb",
-  transitions: ["zoom", "sheet", "axis"],
+  transitions: ["zoom", "sheet", "axis", "hero"],
   sourcePath: "apps/docs/src/demo/air-bnb",
   previewTransition: "zoom",
   clips: [
@@ -33,6 +33,20 @@ export const airBnbShowcase: ShowcaseApp = {
       enterPath: "/demo/air-bnb/listings/l-003/checkout/method",
       exitPath: "/demo/air-bnb/listings/l-003/checkout/review",
       caption: "Axis x — review ↔ method inside the persistent sheet",
+    },
+    {
+      title: "Explore → Search",
+      transition: "sheet",
+      enterPath: "/demo/air-bnb/search",
+      exitPath: "/demo/air-bnb",
+      caption: "Sheet blur — search rises over a blurred Explore feed",
+    },
+    {
+      title: "Listing → Photo Tour",
+      transition: "hero",
+      enterPath: "/demo/air-bnb/listings/l-003/photos",
+      exitPath: "/demo/air-bnb/listings/l-003",
+      caption: "Hero fade — the cover photo grows into the tour",
     },
   ],
 };
