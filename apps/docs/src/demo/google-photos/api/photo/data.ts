@@ -367,6 +367,8 @@ export const COLLECTION_PHOTO_IDS: Record<string, string[]> = {
   ],
   "col-favorite": ["ph-001", "ph-004", "ph-006", "ph-013", "ph-021"],
   "col-trash": ["ph-009", "ph-010"],
+  "col-video": ["ph-002", "ph-007", "ph-008", "ph-022"],
+  "col-archive": ["ph-011", "ph-012"],
 };
 
 const PAGE_LIMIT = 30;

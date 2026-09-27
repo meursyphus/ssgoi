@@ -3,8 +3,7 @@
 import { Link } from "@/lib/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
-
-const BASE = "/demo/google-photos";
+import { BASE } from "./paths";
 
 const TABS = [
   { key: "photos", label: "Photos", href: BASE },
@@ -32,6 +31,7 @@ export function FloatingBottomNav() {
               <Link
                 key={tab.key}
                 href={tab.href}
+                scroll={false}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex h-10 min-w-[78px] items-center justify-center rounded-full px-4 text-[13px] font-medium transition-colors ${
                   isActive
@@ -44,13 +44,14 @@ export function FloatingBottomNav() {
             );
           })}
         </nav>
-        <button
-          type="button"
+        <Link
+          href={`${BASE}/search`}
+          scroll={false}
           aria-label="Search"
           className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-neutral-700 shadow-[0_4px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5 active:bg-black/[0.05]"
         >
           <Search className="h-5 w-5" />
-        </button>
+        </Link>
       </div>
     </div>
   );

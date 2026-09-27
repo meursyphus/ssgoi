@@ -6,7 +6,7 @@ import type { CollectionSimple } from "../types";
 const COVER_LIMIT = 4;
 
 async function _findAll(): Promise<CollectionSimple[]> {
-  const metas = data.all();
+  const metas = data.listed();
 
   // For each collection, hit the photo api to fill cover thumbs + count.
   // findAll's pagination limit (30) is large enough that one page is enough.

@@ -3,6 +3,7 @@
 import { usePhoto, type PhotoDetail } from "@/demo/google-photos/state/photo";
 import { PhotoCanvas } from "./photo-canvas";
 import { BackButton } from "./back-button";
+import { FavoriteButton } from "./favorite-button";
 import { PhotoMeta } from "./photo-meta";
 export default function PhotoDetailPage({
   initialData,
@@ -16,6 +17,10 @@ export default function PhotoDetailPage({
   return (
     <div className="relative block h-full bg-white">
       <BackButton />
+      <FavoriteButton
+        key={initialData.id}
+        initial={initialData.favorite ?? false}
+      />
       <PhotoCanvas photo={initialData} />
       <PhotoMeta photo={initialData} />
     </div>

@@ -3,7 +3,7 @@ import type { ShowcaseApp } from "@/page/showcase/types";
 export const googlePhotosShowcase: ShowcaseApp = {
   slug: "google-photos",
   name: "Google Photos",
-  tagline: "Hero into photo detail, drill into collections, sheet for collage",
+  tagline: "Hero into photos, drill into collections, axis z into search",
   platforms: ["mobile"],
   category: "Photos & Media",
   badge: "New",
@@ -40,6 +40,20 @@ export const googlePhotosShowcase: ShowcaseApp = {
       enterPath: "/demo/google-photos/collage",
       exitPath: "/demo/google-photos/create",
       caption: "Sheet rises from the Collage tool tile",
+    },
+    {
+      title: "Photos → Search (axis z)",
+      transition: "axis",
+      enterPath: "/demo/google-photos/search",
+      exitPath: "/demo/google-photos",
+      caption: "Search button zooms into full-screen search",
+    },
+    {
+      title: "Search → Photo detail (hero)",
+      transition: "hero",
+      enterPath: "/demo/google-photos/p/ph-002",
+      exitPath: "/demo/google-photos/search",
+      caption: "Recently added thumbnail morphs into the viewer",
     },
   ],
 };
