@@ -3,7 +3,7 @@ export type ShowcasePlatform = "mobile" | "web";
 export type ShowcaseClip = {
   /** human-readable label, e.g. "Home → Product Detail" */
   title: string;
-  /** ssgoi transition name — used by the search bar's transition filter */
+  /** ssgoi transition name; site search matches it and its synonyms */
   transition: string;
   /**
    * Path the iframe routes _to_ when the clip plays the "enter" leg.

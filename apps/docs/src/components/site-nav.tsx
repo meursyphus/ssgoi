@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 import { Link } from "@/lib/link";
 import { SiteLogo } from "@/components/site-logo";
+import { SearchButton } from "@/components/search/search-button";
 
 function GitHubIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -35,6 +36,7 @@ export function SiteNav({
         <SiteLogo />
 
         <span className="ml-auto flex items-center gap-4 text-sm md:gap-5">
+          <SearchButton variant="nav" />
           {SECONDARY.map(({ key, label, href }) => {
             const isActive = key === active;
             return (

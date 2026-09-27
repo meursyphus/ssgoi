@@ -3,3 +3,4 @@ export {
   useShowcasePlatform,
   type ShowcasePlatform,
 } from "./showcase-platform";
+export { useSiteSearch } from "./site-search";

@@ -3,73 +3,93 @@
 import Image from "next/image";
 import { Link } from "@/lib/link";
 import {
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
+  type KeyboardEvent,
+  type Ref,
 } from "react";
+import { Play, Search } from "lucide-react";
 import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import { IframeLoadingOverlay } from "@/components/iframe-loading-overlay";
+import { setOpener } from "@/components/search/load";
+import { useSearchShortcutLabel } from "@/components/search/search-button";
+import { isTypingTarget } from "@/components/search/site-search";
+import { showcaseToDoc } from "@/lib/search/aliases";
+import { prepareDoc, rank, type SearchMatch } from "@/lib/search/match";
 import {
   showcases,
-  allTransitions,
   type ShowcaseApp,
+  type ShowcaseClip,
   type ShowcasePlatform,
 } from "../data";
-import { useShowcasePlatform } from "@/lib/state";
+import { useShowcasePlatform, useSiteSearch } from "@/lib/state";
+
+/** Same documents and matcher as the ⌘K palette, so both agree on demos. */
+const PREPARED = showcases.map((s, i) => prepareDoc(showcaseToDoc(s), i));
+
+const SUGGESTIONS = ["sheet", "drill", "zoom", "hero", "유튜브"];
+
+const PLATFORM_LABEL: Record<ShowcasePlatform, string> = {
+  mobile: "Mobile",
+  web: "Web",
+};
 
 export default function ShowcaseCatalog() {
   const { platform, setPlatform } = useShowcasePlatform((s) => ({
     platform: s.value,
     setPlatform: s.actions.set,
   }));
+  const openSiteSearch = useSiteSearch((s) => s.actions.open);
   const canRenderLivePreviews = useCanRenderShowcasePreviews();
   const [query, setQuery] = useState("");
-  const [activeTransitions, setActiveTransitions] = useState<Set<string>>(
-    () => new Set(),
+  const deferredQuery = useDeferredValue(query);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Both platforms are ranked; the catalog only ever shows the chosen one and
+  // offers the other with a count instead of switching under the user.
+  const search = useMemo(() => {
+    const q = deferredQuery.trim();
+    if (!q) return null;
+    const current = new Map<string, { match: SearchMatch; rank: number }>();
+    const other: ShowcaseApp[] = [];
+    for (const match of rank(PREPARED, q)) {
+      const showcase = showcases[match.order];
+      if (showcase.platforms.includes(platform))
+        current.set(showcase.slug, { match, rank: current.size });
+      else other.push(showcase);
+    }
+    return { query: q, current, other };
+  }, [deferredQuery, platform]);
+
+  const visible = useMemo(
+    () => showcases.filter((s) => s.platforms.includes(platform)),
+    [platform],
   );
+  const otherPlatform: ShowcasePlatform = platform === "web" ? "mobile" : "web";
 
-  const transitions = useMemo(() => allTransitions(), []);
+  // "/" jumps to the search field (the palette leaves "/" to the catalog here).
+  useEffect(() => {
+    function onKeyDown(e: globalThis.KeyboardEvent) {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.defaultPrevented || isTypingTarget(e.target)) return;
+      e.preventDefault();
+      const input = inputRef.current;
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return showcases.filter((s) => {
-      if (!s.platforms.includes(platform)) return false;
-      if (activeTransitions.size > 0) {
-        let hit = false;
-        for (const t of s.transitions) {
-          if (activeTransitions.has(t)) {
-            hit = true;
-            break;
-          }
-        }
-        if (!hit) return false;
-      }
-      if (!q) return true;
-      const haystack = [
-        s.name,
-        s.tagline,
-        s.category,
-        ...s.transitions,
-        ...s.clips.map((c) => c.title),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [platform, query, activeTransitions]);
-
-  const toggleTransition = (t: string) => {
-    setActiveTransitions((prev) => {
-      const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-      return next;
-    });
-  };
+  const currentCount = search?.current.size ?? 0;
+  const otherCount = search?.other.length ?? 0;
 
   return (
     <section
@@ -79,70 +99,163 @@ export default function ShowcaseCatalog() {
       <div className="flex flex-wrap items-center gap-4 border-b border-white/5 pb-5">
         <PlatformToggle value={platform} onChange={setPlatform} />
         <div className="ml-auto flex w-full items-center gap-2 sm:w-[420px]">
-          <SearchInput value={query} onChange={setQuery} />
+          <SearchInput ref={inputRef} value={query} onChange={setQuery} />
         </div>
       </div>
 
-      {transitions.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-xs uppercase tracking-wider text-neutral-500">
-            Transition
+      {/* Always mounted, so screen readers hear each new count. */}
+      <p aria-live="polite" className="sr-only">
+        {search && announce(currentCount, otherCount, platform, otherPlatform)}
+      </p>
+
+      {search && currentCount > 0 && (
+        <p className="mt-4 flex flex-wrap items-center gap-x-2 text-sm text-neutral-400">
+          <span>
+            {currentCount} {PLATFORM_LABEL[platform].toLowerCase()}{" "}
+            {currentCount === 1 ? "demo" : "demos"}
           </span>
-          {transitions.map((t) => {
-            const on = activeTransitions.has(t);
-            return (
+          {otherCount > 0 && (
+            <>
+              <span aria-hidden className="text-neutral-600">
+                ·
+              </span>
               <button
-                key={t}
                 type="button"
-                onClick={() => toggleTransition(t)}
-                className={
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
-                  (on
-                    ? "border-orange-400/60 bg-orange-400/10 text-orange-200"
-                    : "border-white/10 bg-white/[0.02] text-neutral-300 hover:border-white/20 hover:text-neutral-100")
-                }
+                onClick={() => setPlatform(otherPlatform)}
+                className="-my-2 py-2 text-neutral-200 underline-offset-4 transition-colors hover:text-white hover:underline"
               >
-                {t}
+                {otherCount} more on {PLATFORM_LABEL[otherPlatform]} →
               </button>
-            );
-          })}
-        </div>
+            </>
+          )}
+        </p>
       )}
 
       <div
-        className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12"
+        hidden={Boolean(search) && currentCount === 0}
+        className={
+          "grid grid-cols-1 gap-x-6 gap-y-12 " + (search ? "mt-6" : "mt-8")
+        }
         style={{
           gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${
             platform === "web" ? "520px" : "380px"
           }), 1fr))`,
         }}
       >
-        {filtered.map((s) => (
-          <ShowcaseCard
-            key={s.slug}
-            showcase={s}
-            platform={platform}
-            livePreview={canRenderLivePreviews}
-          />
-        ))}
+        {/* Non-matches are hidden, not unmounted, and rank is CSS order: moving
+            or remounting a card would reload its live iframe. */}
+        {visible.map((s) => {
+          const hit = search?.current.get(s.slug);
+          return (
+            <ShowcaseCard
+              key={s.slug}
+              showcase={s}
+              platform={platform}
+              livePreview={canRenderLivePreviews}
+              match={hit?.match}
+              hidden={Boolean(search) && !hit}
+              order={hit?.rank}
+            />
+          );
+        })}
       </div>
 
-      {filtered.length === 0 && (
-        <p className="mt-16 text-center text-sm text-neutral-500">
-          No demos match.{" "}
-          <button
-            type="button"
-            onClick={() => {
-              setQuery("");
-              setActiveTransitions(new Set());
-            }}
-            className="text-neutral-300 underline-offset-2 hover:underline"
-          >
-            Clear filters
-          </button>
-        </p>
+      {search && currentCount === 0 && (
+        <div className="mx-auto mt-12 max-w-xl text-center">
+          {otherCount > 0 ? (
+            <>
+              <p className="text-balance text-sm leading-6 text-neutral-400">
+                No {PLATFORM_LABEL[platform].toLowerCase()} demo matches{" "}
+                <span className="text-neutral-100">“{search.query}”</span> —{" "}
+                {listNames(search.other)} ({PLATFORM_LABEL[otherPlatform]}){" "}
+                {otherCount === 1 ? "does" : "do"}.
+              </p>
+              <button
+                type="button"
+                onClick={() => setPlatform(otherPlatform)}
+                className="mt-5 inline-flex min-h-10 items-center rounded-full bg-orange-500 px-5 text-sm font-semibold text-[#0e0b08] transition-colors hover:bg-orange-400"
+              >
+                Show {PLATFORM_LABEL[otherPlatform].toLowerCase()} demos
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm leading-6 text-neutral-400">
+                No demo matches{" "}
+                <span className="text-neutral-100">“{search.query}”</span>. Try
+                a transition or an app name:
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {SUGGESTIONS.map((word) => (
+                  <button
+                    key={word}
+                    type="button"
+                    onClick={() => setQuery(word)}
+                    className="min-h-9 rounded-full border border-white/10 bg-white/[0.02] px-3.5 text-sm text-neutral-300 transition-colors hover:border-white/20 hover:text-neutral-100"
+                  >
+                    {word}
+                  </button>
+                ))}
+              </div>
+              <DocsSearchLink
+                query={search.query}
+                onOpen={(opener) => {
+                  setOpener(opener);
+                  openSiteSearch(search.query);
+                }}
+              />
+            </>
+          )}
+        </div>
       )}
     </section>
+  );
+}
+
+function announce(
+  current: number,
+  other: number,
+  platform: ShowcasePlatform,
+  otherPlatform: ShowcasePlatform,
+) {
+  const here = PLATFORM_LABEL[platform].toLowerCase();
+  const there = PLATFORM_LABEL[otherPlatform];
+  const found =
+    current === 0
+      ? `No ${here} demo matches.`
+      : `${current} ${here} ${current === 1 ? "demo matches" : "demos match"}.`;
+  if (!other) return found;
+  return `${found} ${other} ${current ? "more " : ""}on ${there}.`;
+}
+
+function listNames(apps: ShowcaseApp[]) {
+  const names = apps.slice(0, 2).map((a) => a.name);
+  if (apps.length > 2) return `${names.join(", ")} and ${apps.length - 2} more`;
+  return names.join(" and ");
+}
+
+function DocsSearchLink({
+  query,
+  onOpen,
+}: {
+  query: string;
+  onOpen: (opener: HTMLElement) => void;
+}) {
+  const shortcut = useSearchShortcutLabel();
+  return (
+    <button
+      type="button"
+      onClick={(e) => onOpen(e.currentTarget)}
+      className="mt-6 inline-flex min-h-10 max-w-full items-center gap-2 rounded-full border border-white/10 px-4 text-sm text-neutral-300 transition-colors hover:border-white/20 hover:text-neutral-100"
+    >
+      <Search aria-hidden className="h-4 w-4 shrink-0 text-neutral-500" />
+      <span className="truncate">Search the docs for “{query}”</span>
+      {shortcut && (
+        <kbd className="hidden rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-sans text-[11px] text-neutral-500 sm:inline">
+          {shortcut}
+        </kbd>
+      )}
+    </button>
   );
 }
 
@@ -234,12 +347,29 @@ function PlatformToggle({
 }
 
 function SearchInput({
+  ref,
   value,
   onChange,
 }: {
+  ref: Ref<HTMLInputElement>;
   value: string;
   onChange: (next: string) => void;
 }) {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (e.key === "Escape") {
+      if (!value) return;
+      e.preventDefault();
+      onChange("");
+    } else if (
+      e.key === "Enter" &&
+      window.matchMedia("(hover: none)").matches
+    ) {
+      // Touch: put the keyboard away so the filtered cards are visible.
+      e.currentTarget.blur();
+    }
+  };
+
   return (
     <label className="flex w-full items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.04] px-5 py-3 text-base shadow-[0_1px_0_rgba(255,255,255,0.04)_inset] transition-colors focus-within:border-orange-400/60 focus-within:bg-white/[0.06] focus-within:shadow-[0_0_0_4px_rgba(251,146,60,0.12)] hover:border-white/25">
       <svg
@@ -247,29 +377,54 @@ function SearchInput({
         fill="none"
         stroke="currentColor"
         strokeWidth={2}
-        className="h-5 w-5 text-neutral-300"
+        className="h-5 w-5 shrink-0 text-neutral-300"
         aria-hidden
       >
         <circle cx="11" cy="11" r="7" />
         <path strokeLinecap="round" d="M20 20l-3-3" />
       </svg>
       <input
-        type="text"
+        ref={ref}
+        type="search"
+        enterKeyHint="search"
+        aria-label="Search demos by app or transition"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search apps or transitions…"
-        className="flex-1 bg-transparent text-base text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
+        onKeyDown={onKeyDown}
+        placeholder="Search — try “sheet” or “유튜브”"
+        className="peer min-w-0 flex-1 bg-transparent text-base text-neutral-100 placeholder:text-neutral-500 focus:outline-none [&::-webkit-search-cancel-button]:appearance-none"
       />
-      {value && (
+      {value ? (
         <button
           type="button"
           onClick={() => onChange("")}
-          className="rounded-full px-2 py-0.5 text-xs font-medium text-neutral-400 hover:bg-white/10 hover:text-neutral-100"
+          className="-my-2 -mr-2 shrink-0 rounded-full px-2.5 py-2 text-xs font-medium text-neutral-400 hover:text-neutral-100"
         >
           Clear
         </button>
+      ) : (
+        <kbd
+          aria-hidden
+          className="hidden h-6 min-w-6 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] font-sans text-xs text-neutral-500 peer-focus:!hidden sm:inline-flex"
+        >
+          /
+        </kbd>
       )}
     </label>
+  );
+}
+
+function defaultPreviewClip(showcase: ShowcaseApp): ShowcaseClip | undefined {
+  return (
+    (showcase.previewTransition &&
+      showcase.clips.find(
+        (c) => c.transition === showcase.previewTransition,
+      )) ||
+    showcase.clips[0]
   );
 }
 
@@ -277,18 +432,31 @@ function ShowcaseCard({
   showcase,
   platform,
   livePreview,
+  match,
+  hidden,
+  order,
 }: {
   showcase: ShowcaseApp;
   platform: ShowcasePlatform;
   livePreview: boolean;
+  /** Set while a query matches this demo. */
+  match?: SearchMatch;
+  hidden: boolean;
+  order?: number;
 }) {
-  const previewClip =
-    (showcase.previewTransition &&
-      showcase.clips.find(
-        (c) => c.transition === showcase.previewTransition,
-      )) ||
-    showcase.clips[0];
-  const previewPath = previewClip?.exitPath ?? showcase.demoOrigin;
+  const matchedIndex = match && match.clip >= 0 ? match.clip : -1;
+  const matchedClip =
+    matchedIndex >= 0 ? showcase.clips[matchedIndex] : undefined;
+  const wantedClip = matchedClip ?? defaultPreviewClip(showcase);
+
+  // The preview follows the matched clip, but only once typing settles.
+  const [previewClip, setPreviewClip] = useState(wantedClip);
+  useEffect(() => {
+    if (wantedClip === previewClip) return;
+    const id = window.setTimeout(() => setPreviewClip(wantedClip), 400);
+    return () => window.clearTimeout(id);
+  }, [wantedClip, previewClip]);
+
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const {
     ref: frameRef,
@@ -297,23 +465,52 @@ function ShowcaseCard({
   } = useInViewport<HTMLDivElement>();
   const showLive = livePreview && hasBeenVisible;
 
+  // The iframe src is fixed when it first goes live; clip changes navigate
+  // inside it, because a new src would reload the whole demo.
+  const [src, setSrc] = useState<string | null>(null);
+  const firstSrc = previewClip?.exitPath ?? showcase.demoOrigin;
+  if (showLive && src === null) setSrc(firstSrc);
+  const liveSrc = src ?? firstSrc;
+
+  const playingClip = useRef<ShowcaseClip | undefined>(undefined);
   useEffect(() => {
     if (!showLive || !inView || !previewClip) return;
-    let onEnter = false;
-    const id = window.setInterval(() => {
-      const next = onEnter ? previewClip.exitPath : previewClip.enterPath;
-      onEnter = !onEnter;
+    const post = (path: string) =>
       iframeRef.current?.contentWindow?.postMessage(
-        { type: showcaseFrameProtocol.messages.navigate, path: next },
+        { type: showcaseFrameProtocol.messages.navigate, path },
         "*",
       );
+    let onEnter = false;
+    let soon: number | undefined;
+    if (playingClip.current && playingClip.current !== previewClip) {
+      // Switched to the clip a search matched: reset to its start now and
+      // play it shortly, instead of waiting out the regular interval.
+      post(previewClip.exitPath);
+      soon = window.setTimeout(() => {
+        onEnter = true;
+        post(previewClip.enterPath);
+      }, 1200);
+    }
+    playingClip.current = previewClip;
+    const id = window.setInterval(() => {
+      onEnter = !onEnter;
+      post(onEnter ? previewClip.enterPath : previewClip.exitPath);
     }, 5000);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      window.clearTimeout(soon);
+    };
   }, [showLive, inView, previewClip]);
 
   return (
     <Link
-      href={`/showcase/${showcase.slug}`}
+      href={
+        matchedIndex >= 0
+          ? `/showcase/${showcase.slug}#clip-${matchedIndex}`
+          : `/showcase/${showcase.slug}`
+      }
+      hidden={hidden}
+      style={order === undefined ? undefined : { order }}
       className="group flex flex-col gap-3"
     >
       <div
@@ -327,16 +524,16 @@ function ShowcaseCard({
           platform === "web" ? (
             <DesktopFrame
               ref={iframeRef}
-              src={previewPath}
+              src={liveSrc}
               title={`${showcase.name} preview`}
               widthClassName="w-full"
               interactive={false}
-              urlLabel={`ssgoi.dev${previewPath === "/" ? "" : previewPath}`}
+              urlLabel={`ssgoi.dev${liveSrc === "/" ? "" : liveSrc}`}
             />
           ) : (
             <ShowcasePhone
               ref={iframeRef}
-              src={previewPath}
+              src={liveSrc}
               title={`${showcase.name} preview`}
               widthClassName="w-[78%] max-w-[380px]"
               interactive={false}
@@ -373,11 +570,28 @@ function ShowcaseCard({
           <p className="truncate text-xs text-neutral-400">
             {showcase.tagline}
           </p>
+          {matchedClip && (
+            <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-orange-200">
+              <Play aria-hidden className="h-2.5 w-2.5 shrink-0 fill-current" />
+              <span className="truncate">
+                {matchedClip.title}
+                <span className="text-neutral-500">
+                  {" "}
+                  · {matchedClip.transition}
+                </span>
+              </span>
+            </p>
+          )}
           <div className="mt-1 flex flex-wrap gap-1">
             {showcase.transitions.map((t) => (
               <span
                 key={t}
-                className="rounded-full bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400"
+                className={
+                  "rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider " +
+                  (t === matchedClip?.transition
+                    ? "bg-orange-400/10 text-orange-200"
+                    : "bg-white/[0.04] text-neutral-400")
+                }
               >
                 {t}
               </span>

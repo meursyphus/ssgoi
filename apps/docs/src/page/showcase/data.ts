@@ -62,10 +62,3 @@ export function representativeClip(
   }
   return undefined;
 }
-
-/** All transition names across the catalog, deduped, sorted. */
-export function allTransitions(): string[] {
-  const seen = new Set<string>();
-  for (const s of showcases) for (const t of s.transitions) seen.add(t);
-  return [...seen].sort();
-}

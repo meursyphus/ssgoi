@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Link } from "@/lib/link";
+import { slugify } from "@/lib/slug";
 
 /* -------------------------------------------------------------------------- */
 /* Class tokens                                                               */
@@ -64,11 +65,16 @@ export function Section({
   id?: string;
   children: ReactNode;
 }) {
+  // Every section is linkable: search results and shared links land on it.
+  const headingId = id ?? slugify(title);
   return (
-    <section className="mt-14 border-t border-line pt-10" aria-labelledby={id}>
+    <section
+      className="mt-14 border-t border-line pt-10"
+      aria-labelledby={headingId}
+    >
       <h2
-        id={id}
-        className="text-xl font-semibold tracking-[-0.01em] text-ink md:text-[1.375rem]"
+        id={headingId}
+        className="scroll-mt-20 text-xl font-semibold tracking-[-0.01em] text-ink md:text-[1.375rem] lg:scroll-mt-24"
       >
         {title}
       </h2>
@@ -133,7 +139,12 @@ export function Step({
       >
         {n}
       </span>
-      <h3 className="text-base font-semibold text-ink">{title}</h3>
+      <h3
+        id={slugify(title)}
+        className="scroll-mt-20 text-base font-semibold text-ink lg:scroll-mt-24"
+      >
+        {title}
+      </h3>
       <div className="col-start-2 mt-3">{children}</div>
     </li>
   );
