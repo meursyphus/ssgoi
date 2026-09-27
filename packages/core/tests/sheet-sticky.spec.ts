@@ -40,6 +40,40 @@ for (const type of ["blur", "scale"] as const) {
   });
 }
 
+// The sheet rises over the scrolled list, which becomes the outgoing
+// background: absolute, offset by its saved scroll, and for blur/scale pinned
+// to its content height, clipped to that viewport slice and scaled about its
+// centre. Its sticky bar must track the viewport edge from the first frame —
+// never parked at the end of the content or cut off by the clip while the
+// rising sheet has not yet covered that edge.
+for (const type of ["static", "scale", "blur"] as const) {
+  test(`sheet ${type} enter keeps the background's sticky bar on the viewport edge`, async ({
+    page,
+  }) => {
+    await page.goto(`/tests/sheet-sticky.html?type=${type}&scroll=500`);
+    await expect(page).toHaveTitle(/ready/);
+
+    const samples = await page.evaluate(() => window.sheetHarness.openSheet());
+    const viewport = await page.evaluate(
+      () => window.sheetHarness.scene.clientHeight,
+    );
+    const during = samples.filter(
+      (sample) =>
+        sample.navBottom !== null && sample.listPosition === "absolute",
+    );
+    expect(during.length).toBeGreaterThan(3);
+
+    for (const sample of during) {
+      // The container is at the sheet's scroll from the first frame …
+      expect(sample.scrollTop).toBe(0);
+      // … so the bar sits on the viewport edge as scaled about the viewport
+      // centre (the edge itself when the background does not scale).
+      const edge = viewport / 2 + (viewport / 2) * sample.listScale;
+      expect(Math.abs(sample.navBottom! - edge)).toBeLessThanOrEqual(1);
+    }
+  });
+}
+
 test("sheet static exit leaves the sticky bar at rest", async ({ page }) => {
   await page.goto("/tests/sheet-sticky.html?type=static&scroll=500");
   await expect(page).toHaveTitle(/ready/);
