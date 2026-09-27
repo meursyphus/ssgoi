@@ -342,6 +342,12 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "z"',
         ux: "Pages scale through depth, similar to a restrained container transform.",
+        demos: [
+          {
+            enterPath: "/demo/material-mail/search",
+            exitPath: "/demo/material-mail",
+          },
+        ],
       },
     ],
   },
@@ -685,6 +691,12 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         args: 'type: "expand", variant: "fade"',
         ux: "Keeps the card-to-surface expansion but fades surrounding content for a softer reveal.",
+        demos: [
+          {
+            enterPath: "/demo/voyage/story/s-001",
+            exitPath: "/demo/voyage",
+          },
+        ],
       },
       {
         label: "blur · default",

@@ -5,3 +5,4 @@ export {
   useShowcaseFrameBridge,
   type ShowcaseFrameStatus,
 } from "./use-showcase-frame-bridge";
+export { useDemoBack, type DemoBackOptions } from "./use-demo-back";

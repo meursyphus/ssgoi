@@ -17,19 +17,22 @@ import type { ShowcaseClip, ShowcasePlatform } from "../data";
  * Mechanism: parent posts `{type: "ssgoi-showcase:navigate", path}` to the
  * iframe and the demo's MobileShowcaseShell calls router.push. We toggle
  * between `enterPath` and `exitPath` on an interval so the ssgoi transition
- * fires repeatedly.
+ * fires repeatedly. The iframe starts at `exitPath`, so the first leg is
+ * exitPath → enterPath like every later one (a demo's landing page is not
+ * always the page the clip's rule leaves from).
  *
  * The animation dock posts `{type: "ssgoi-showcase:host", command}` to control
  * the underlying HostAnimation (play/pause/reverse/rate) — same lever the
  * AnimationDock in apps/dev exposes.
  */
 export function ClipPlayer({
+  id,
   clip,
-  demoOrigin,
   platform = "mobile",
 }: {
+  /** Anchor for deep links (`#clip-i`), e.g. from a catalog search hit. */
+  id?: string;
   clip: ShowcaseClip;
-  demoOrigin: string;
   platform?: ShowcasePlatform;
 }) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -107,15 +110,16 @@ export function ClipPlayer({
 
   return (
     <div
+      id={id}
       className={
-        "flex flex-col gap-3 " +
+        "flex scroll-mt-8 flex-col gap-3 " +
         (platform === "web" ? "w-full max-w-[760px]" : "w-[300px]")
       }
     >
       {platform === "web" ? (
         <DesktopFrame
           ref={iframeRef}
-          src={demoOrigin}
+          src={clip.exitPath}
           title={clip.title}
           widthClassName="w-full"
           interactive={false}
@@ -126,7 +130,7 @@ export function ClipPlayer({
       ) : (
         <ShowcasePhone
           ref={iframeRef}
-          src={demoOrigin}
+          src={clip.exitPath}
           title={clip.title}
           widthClassName="w-full"
           interactive={false}
