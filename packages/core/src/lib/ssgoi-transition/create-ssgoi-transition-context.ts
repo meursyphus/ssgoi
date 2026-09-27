@@ -91,6 +91,9 @@ export function createSggoiTransitionContext(
     // batches (notably when Suspense reveals a child later). When the same
     // side/path repeats before pairing, the outermost DOM boundary owns it.
     keepCurrent: ({ current, next }) => current.element.contains(next.element),
+    // Tells an outer layout that stayed on screen through the last pair from
+    // a late duplicate of that pair when both report the same path.
+    contains: (outer, inner) => outer.element.contains(inner.element),
   });
   const navigationResolver =
     createNavigationTransitionResolver<AnyTransitionConfig>();

@@ -38,6 +38,20 @@ For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/interrupt-reentry.html` (add `?hidden` for Activity pages). Pick a
 preset, press **B**, then **A** before it settles.
 
+## Nested boundary with a shared id (`nested-boundary`)
+
+An outer layout boundary `/a` wraps a nested tab boundary whose default tab is
+also `/a` (a profile grid). The fixture commits routes like React, lets the
+real observer register every boundary, and records each transition that runs.
+After the nested `/a → /a/x` tab switch, leaving the layout for `/b` reports
+`/a` again; the suite asserts it runs `layout → b` instead of being absorbed
+as a late duplicate of the tab switch, and that the nested `/a` arriving with
+(or after, `?streamed`) the layout's IN never runs or shifts later pairs. It
+covers unmount and Activity (`?hidden`) routes in Chromium and WebKit.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev`, open
+`/tests/nested-boundary.html`, and press **Next step** four times.
+
 ## Sheet over a sticky bar (`sheet-sticky`)
 
 A `sheet` leaves over a scrolled list page whose sticky bottom bar lives inside
