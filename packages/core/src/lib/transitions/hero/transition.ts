@@ -22,6 +22,7 @@ import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
   clampOpacity,
   cloneCrossfadeVisual,
+  crossfadeUnderOpacity,
   measureVisual,
   retainOpacity,
   type VisualReference,
@@ -498,11 +499,15 @@ class HeroTileStrategy implements HeroStrategy {
       });
       const style = (t: number, u: number) => ({
         ...morph.styleFor(t, u, reference),
-        opacity: clampOpacity(t) * targetOpacity.opacity,
+        opacity: crossfadeUnderOpacity(
+          t,
+          targetOpacity.opacity,
+          sourceOpacity.opacity,
+        ),
       });
       applyMorphStyle(toVisualEl, style(0, 1));
       Object.assign(source.style, sourceStyle(0, 1));
-      targetOpacity.set(0);
+      targetOpacity.set(style(0, 1).opacity);
       sourceOpacity.set(0);
       // Layout (fit/placeholder) and CSS hooks are restored regardless of
       // ownership: a newer track on the same image only drives transform,

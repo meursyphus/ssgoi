@@ -1,11 +1,20 @@
 # Browser regressions
 
-Two Playwright suites live here. Both run with:
+Playwright suites live here. Run them with:
 
 ```sh
 pnpm --filter @ssgoi/core exec playwright install chromium webkit
 pnpm --filter @ssgoi/core test:browser
 ```
+
+## Shared crossfade (`shared-crossfade`)
+
+Hero and zoom crossfade identical opaque images at identical coordinates so
+any change in the captured pixel is a compositing regression. The suite seeks
+real WAAPI keyframes from start to finish in both directions, across all hero
+and zoom types, and checks authored opacity and cleanup in Chromium and WebKit.
+It catches the backdrop flash caused by fading both overlapping images with
+complementary opacities under normal source-over compositing.
 
 ## Interrupted entry (`interrupt-reentry`)
 

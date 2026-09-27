@@ -6,6 +6,24 @@ export const CROSSFADE_ATTRIBUTE = "data-ssgoi-crossfade";
 export const clampOpacity = (value: number): number =>
   Math.min(1, Math.max(0, value));
 
+/**
+ * The upper visual uses (1 - progress) * overlayOpacity. Under normal
+ * source-over compositing it also attenuates the lower visual. For overlapping
+ * opaque pixels, compensate to keep its contribution at progress * opacity.
+ * Otherwise two opaque images expose 25% of the backdrop halfway through.
+ * With an opaque overlay this keeps the lower image opaque throughout;
+ * at progress=0 it is fully covered, so use the same limiting value.
+ */
+export function crossfadeUnderOpacity(
+  progress: number,
+  opacity: number,
+  overlayOpacity: number,
+): number {
+  const t = clampOpacity(progress);
+  const remaining = t + (1 - t) * (1 - overlayOpacity);
+  return remaining > 0 ? (t / remaining) * opacity : opacity;
+}
+
 /** Preserve source styling when the visual is painted in the other page. */
 export function cloneCrossfadeVisual(source: HTMLElement): HTMLElement {
   const clone = source.cloneNode(true) as HTMLElement;
