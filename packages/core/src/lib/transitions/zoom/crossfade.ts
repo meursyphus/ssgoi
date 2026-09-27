@@ -4,6 +4,7 @@ import {
   alignVisual,
   clampOpacity,
   cloneCrossfadeVisual,
+  crossfadeUnderOpacity,
   measureVisual,
   retainOpacity,
 } from "../crossfade";
@@ -74,7 +75,11 @@ export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
     opacity: clampOpacity(entering ? u : t) * previewOpacity.opacity,
   });
   const detailStyle = (t: number, u: number) => ({
-    opacity: clampOpacity(entering ? t : u) * detailOpacity.opacity,
+    opacity: crossfadeUnderOpacity(
+      entering ? t : u,
+      detailOpacity.opacity,
+      previewOpacity.opacity,
+    ),
   });
   clone.style.opacity = String(previewStyle(0, 1).opacity);
   previewOpacity.set(0);
