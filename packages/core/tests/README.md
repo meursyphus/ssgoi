@@ -29,6 +29,20 @@ For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/interrupt-reentry.html` (add `?hidden` for Activity pages). Pick a
 preset, press **B**, then **A** before it settles.
 
+## Sheet over a sticky bar (`sheet-sticky`)
+
+A `sheet` leaves over a scrolled list page whose sticky bottom bar lives inside
+the page. The `blur` and `scale` tones clip and scale that page against its
+saved scroll, so the container must already be restored when the first frame is
+built. The fixture drives the real transition context with unmount-mode pages
+and samples the bar's on-screen box every frame; the suite asserts the scroll
+is at its saved value on every animated frame and that the bar never paints
+below the viewport edge in Chromium and WebKit.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev` and open
+`/tests/sheet-sticky.html` (`?type=blur|scale|static`, `?scroll=500`,
+`?slow=20` to slow the exit, `?auto=1` to open and close without tapping).
+
 ## Scroll lock (`scroll-lock`)
 
 The suite tests native wheel and keyboard scrolling in Chromium and WebKit,

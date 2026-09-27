@@ -44,7 +44,11 @@ Async preparation has a 5-second deadline; paused animation playback does not.
 | `ordered` | restore | restore |
 
 The outgoing page always keeps its current scroll during its OUT animation.
-Reset or restoration runs only when a page becomes IN.
+Reset or restoration runs only when a page becomes IN, and it is applied
+before the transition builds its first frame, so effects that clip or scale
+the incoming page (sheet, zoom) already see the container at that scroll. It
+is re-asserted on the following frames while the target is not held, for
+content that is still growing or a router that scrolls after SSGOI.
 
 For an `on` rule, paths outside the scope are semantic `from` and paths inside
 are semantic `to`. When both paths are already inside the same `on` scope, both
