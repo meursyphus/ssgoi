@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Animation } from "../animation/animation";
-import type { AnyTransitionConfig } from "@types";
+import { Animation } from "../animation/animation";
+import { MultiAnimation } from "../animation/multi-animation";
+import type { AnyTransitionConfig, PrepareArgs } from "@types";
 import { HostAnimation } from "../animation/host-animation";
 
 const lifecycle = vi.hoisted(() => ({ active: 0, options: [] as boolean[] }));
@@ -241,34 +242,68 @@ describe("createSggoiTransitionContext Activity cleanup", () => {
   });
 });
 
+/** Opaque driver outside the disposal contract: only reports completion. */
+class FakeAnimation extends Animation {
+  private done = false;
+  constructor(private readonly instant = false) {
+    super();
+  }
+  play(): void {
+    if (this.instant) this.complete();
+  }
+  pause(): void {}
+  reverse(): void {}
+  complete(): void {
+    this.done = true;
+    this.onComplete?.();
+  }
+  getPose() {
+    return [];
+  }
+  getTimeline() {
+    return [];
+  }
+  matchInto(): void {}
+  get isAnimating() {
+    return false;
+  }
+  get isPaused() {
+    return false;
+  }
+  get isComplete() {
+    return this.done;
+  }
+  get isReversing() {
+    return false;
+  }
+  get progress() {
+    return 0;
+  }
+  findTimeForProgress() {
+    return null;
+  }
+}
+
 function animation(instant = false): Animation {
-  return {
-    play(this: Animation) {
-      if (instant) this.complete();
-    },
-    pause() {},
-    reverse() {},
-    complete(this: Animation) {
-      this.onComplete?.();
-    },
-    getPose: () => [],
-    getTimeline: () => [],
-    matchInto() {},
-    playbackRate: 1,
-  } as unknown as Animation;
+  return new FakeAnimation(instant);
 }
 
 async function flushPromises() {
-  for (let i = 0; i < 12; i++) await Promise.resolve();
+  for (let i = 0; i < 30; i++) await Promise.resolve();
 }
 
-function navigation(transition: AnyTransitionConfig, scrollLock?: boolean) {
+function activityPages() {
   const pages = ["/a", "/b", "/c"].map((path, i) => {
     const page = new FakeElement();
     page.setAttribute("data-ssgoi-transition", path);
     if (i) page.style.setProperty("display", "none", "important");
     return page;
   });
+  return pages as [FakeElement, FakeElement, FakeElement];
+}
+
+function navigation(transition: AnyTransitionConfig, scrollLock?: boolean) {
+  const pages = activityPages();
   const host = new HostAnimation();
   const context = createSggoiTransitionContext(
     { transitions: [{ on: "/**", transition }], scrollLock },
@@ -428,5 +463,83 @@ describe("transition scroll lifetime", () => {
     expect(lifecycle.active).toBe(0);
     run.onComplete = undefined;
     state.context.disconnect?.();
+  });
+});
+
+describe("preparation ownership", () => {
+  it("aborts stale preparation and never lets a late result replace the latest navigation", async () => {
+    const [a, b, c] = activityPages();
+    let resolveFirst!: (value: object) => void;
+    const first = new Promise<object>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const cleanup = vi.fn(),
+      signals: AbortSignal[] = [];
+    let count = 0;
+    const prepare = vi.fn((args: PrepareArgs) => {
+      signals.push(args.signal!);
+      if (count++ === 0) {
+        args.onCleanup?.(cleanup);
+        return first;
+      }
+      return {};
+    });
+    const animation = vi.fn(() => new MultiAnimation([]));
+    const context = createSggoiTransitionContext({
+      transitions: [{ on: "/**", transition: { prepare, animation } }],
+    });
+    for (const page of [a, b, c])
+      context.register(
+        page.getAttribute("data-ssgoi-transition")!,
+        page as unknown as HTMLElement,
+        { enter: false },
+      );
+    reactHide(a);
+    reactShow(b);
+    await flushPromises();
+    expect(prepare).toHaveBeenCalledOnce();
+    reactHide(b);
+    reactShow(c);
+    await flushPromises();
+    expect(signals[0]?.aborted).toBe(true);
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(animation).toHaveBeenCalledOnce();
+    resolveFirst({});
+    await flushPromises();
+    expect(animation).toHaveBeenCalledOnce();
+    expect(a.style.getPropertyValue("display")).toBe("none");
+    expect(b.style.getPropertyValue("display")).toBe("none");
+    expect(c.style.getPropertyValue("display")).not.toBe("none");
+    context.disconnect?.();
+  });
+  it("releases rejected and disconnected preparations without an unhandled rejection", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const [a, b] = activityPages();
+    const cleanup = vi.fn();
+    const context = createSggoiTransitionContext({
+      transitions: [
+        {
+          on: "/**",
+          transition: {
+            prepare(args) {
+              args.onCleanup?.(cleanup);
+              return Promise.reject(new Error("load failed"));
+            },
+            animation: () => new MultiAnimation([]),
+          },
+        },
+      ],
+    });
+    context.register("/a", a as unknown as HTMLElement, { enter: false });
+    context.register("/b", b as unknown as HTMLElement, { enter: false });
+    reactHide(a);
+    reactShow(b);
+    await flushPromises();
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(a.style.getPropertyValue("display")).toBe("none");
+    expect(b.style.getPropertyValue("display")).not.toBe("none");
+    expect(error).toHaveBeenCalledOnce();
+    context.disconnect?.();
+    error.mockRestore();
   });
 });

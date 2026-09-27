@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFadeChromeStrategy } from "./fade";
 import type { HeroContributeCtx } from "../../types";
+import type { AnimationDisposal } from "../../../../animation/animation";
 
 vi.mock("../../../../animation", () => ({
   IntegratorProvider: { from: () => ({}) },
@@ -23,13 +24,13 @@ class Element {
 }
 
 function run(from: Element, to: Element, visuals: Element[]) {
-  const cleanup: (() => void)[] = [];
+  const cleanup: ((disposal: AnimationDisposal) => void)[] = [];
   const groups = createFadeChromeStrategy().contribute!({
     from,
     to,
     resolved: { pairs: visuals.map((toEl) => ({ toEl })) },
     physics: { spring: { stiffness: 300, damping: 30 } },
-    onComplete: (fn: () => void) => cleanup.push(fn),
+    onDispose: (fn: (disposal: AnimationDisposal) => void) => cleanup.push(fn),
   } as unknown as HeroContributeCtx);
   const tracks = (name: "in" | "out") =>
     (groups[name] ?? []).map(
@@ -49,7 +50,8 @@ function run(from: Element, to: Element, visuals: Element[]) {
   return {
     incoming: tracks("in"),
     outgoing: tracks("out"),
-    cleanup: () => cleanup.forEach((fn) => fn()),
+    cleanup: () =>
+      cleanup.forEach((fn) => fn({ reason: "finished", owns: () => true })),
   };
 }
 

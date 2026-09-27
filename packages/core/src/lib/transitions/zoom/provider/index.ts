@@ -22,7 +22,10 @@ export const ZOOM_PROVIDERS: Record<ZoomType, ZoomProvider> = {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export type BackgroundStrategyWithPhysics = ZoomStrategy & {
+  /** Physics for `enter` (tile expands) — and for `exit` unless overridden. */
   physics: PhysicsOptions;
+  /** Optional faster/slower physics for `exit` (tile shrinks back). */
+  exitPhysics?: PhysicsOptions;
 };
 
 const BACKGROUND_STRATEGIES: Record<ZoomType, () => BackgroundStrategyWithPhysics> = {

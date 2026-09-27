@@ -1,3 +1,4 @@
+import type { AnimationDisposal } from "../../animation/animation";
 import type { NavigationDirection, PhysicsOptions } from "@types";
 import type { AnimationContributions } from "../animation-group";
 import type { MediaFit } from "../media-geometry";
@@ -81,7 +82,7 @@ export interface HeroContributeCtx {
    * fires them on completion. Keeps cleanup local to each strategy instead of
    * leaking back into the dispatcher.
    */
-  onComplete: (fn: () => void) => void;
+  onDispose: (fn: (disposal: AnimationDisposal) => void) => void;
 }
 
 /**

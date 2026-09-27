@@ -1,0 +1,172 @@
+{
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+  "matrix": {
+    "total": 361,
+    "positionContinuous": 361,
+    "finiteStyles": 361,
+    "maxGeometryErrorPx": 0.4202728271484375,
+    "byFirstEffect": [
+      {
+        "effect": "slide",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 3.0517578125e-05
+      },
+      {
+        "effect": "drill",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 3.0517578125e-05
+      },
+      {
+        "effect": "fade",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "axis {\"type\":\"x\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "axis {\"type\":\"y\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "axis {\"type\":\"z\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0.0001220703125
+      },
+      {
+        "effect": "sheet",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "sheet {\"type\":\"scale\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "sheet {\"type\":\"blur\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "zoom {\"type\":\"expand\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "zoom {\"type\":\"blur\",\"variant\":\"fade\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "hero {\"type\":\"fade\"}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "blind",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "blind {\"direction\":\"vertical\",\"blindCount\":20}",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0
+      },
+      {
+        "effect": "scroll",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "rotate",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0.4202728271484375
+      },
+      {
+        "effect": "strip",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0.0076904296875
+      },
+      {
+        "effect": "jaemin",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 6.103515625e-05
+      },
+      {
+        "effect": "film",
+        "total": 19,
+        "passed": 19,
+        "maxErrorPx": 0.0001220703125
+      }
+    ]
+  },
+  "scenarios": {
+    "total": 6,
+    "passed": 6,
+    "results": [
+      {
+        "scenario": "rapid slide",
+        "passed": true,
+        "retiring": 0,
+        "animations": 0
+      },
+      {
+        "scenario": "rapid blind",
+        "passed": true,
+        "retiring": 0,
+        "animations": 0
+      },
+      {
+        "scenario": "rapid blind {\"direction\":\"vertical\",\"blindCount\":20}",
+        "passed": true,
+        "retiring": 0,
+        "animations": 0
+      },
+      {
+        "scenario": "rapid hero {\"type\":\"fade\"}",
+        "passed": true,
+        "retiring": 0,
+        "animations": 0
+      },
+      {
+        "scenario": "rapid film",
+        "passed": true,
+        "retiring": 0,
+        "animations": 0
+      },
+      {
+        "scenario": "incompatible CSS crossfade",
+        "passed": true,
+        "during": 1,
+        "after": 0
+      }
+    ]
+  },
+  "recordedAt": "2026-09-13T12:01:03.973146+00:00",
+  "baseline": "3b7d612",
+  "engineSha256": "7497b3356baf80209676ca1419753558a1238515f6cf619802e6295b710668b9",
+  "coreTests": 234,
+  "scope": "Frozen Chromium fixture; handoff bounding-box continuity is not a proof of all descendant pixels, exact velocity, or mobile compositor behavior."
+}

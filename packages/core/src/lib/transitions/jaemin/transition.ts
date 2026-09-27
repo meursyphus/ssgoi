@@ -74,7 +74,7 @@ export const jaemin = (options: JaeminOptions = {}) => {
         // navigation), so reset every inline style we wrote to it — mirroring
         // the "to" cleanup below. prepare sets opacity and the out style fades
         // it toward 0, so clear opacity or the reused node stays invisible.
-        onComplete: () => {
+        onDispose: () => {
           from.style.opacity = "";
         },
       });
@@ -124,7 +124,7 @@ export const jaemin = (options: JaeminOptions = {}) => {
             "--border-radius-scale": borderRadiusScale.toFixed(4),
           } as Record<string, string | number>;
         },
-        onComplete: () => {
+        onDispose: () => {
           to.style.willChange = "";
           to.style.backfaceVisibility = "";
           to.style.removeProperty("--max-border-radius");

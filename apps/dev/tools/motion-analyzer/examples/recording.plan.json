@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "name": "ScreenRecording_09-07-2026 13-55-16_1.mov",
+    "sha256": "79dcb41d01e695702a122758b674efceba09aa9e94685fc19e903f3f3b6aa202"
+  },
+  "interpretation": "카드 확대/축소와 사진 보기의 좌우 전환을 분리해 분석했습니다. 확대 뒤의 콘텐츠 로딩과 녹화 종료용 제어센터는 별도 동작으로 제외했습니다. 요소 이름과 구간은 Codex가 프레임을 보고 지정했고, 곡선과 물리값은 픽셀 추적으로 측정했습니다.",
+  "segments": [
+    {
+      "name": "01 · 카드에서 상세로 확대",
+      "startMs": 1750,
+      "endMs": 2250,
+      "direction": "forward",
+      "notes": [
+        "사진, 제목, 설명의 움직임을 따로 측정. 초반 크로스페이드로 가려진 부분은 식별이 제한됩니다.",
+        "측정된 가시 구간의 재현 설정입니다. 전체 확대의 유일한 원래 물리값으로 해석하지 않습니다."
+      ],
+      "elements": [
+        {
+          "name": "상세 사진",
+          "box": [
+            75,
+            37,
+            124,
+            94
+          ],
+          "anchor": "end",
+          "role": "shared",
+          "properties": [
+            "x",
+            "y",
+            "scale"
+          ],
+          "evidence": "최근 조회한 첫 카드의 인물 사진이 상세 상단으로 이어짐. 중간 프레임에서 확대 확인."
+        },
+        {
+          "name": "상세 제목",
+          "box": [
+            44,
+            160,
+            204,
+            56
+          ],
+          "anchor": "end",
+          "role": "in",
+          "properties": [
+            "x",
+            "y",
+            "scale"
+          ],
+          "evidence": "상세 제목의 글자 영역. 작은 카드에서는 상세 텍스트가 보이지 않아 초반 가림 발생."
+        },
+        {
+          "name": "상세 설명",
+          "box": [
+            20,
+            218,
+            257,
+            84
+          ],
+          "anchor": "end",
+          "role": "in",
+          "properties": [
+            "y",
+            "scale"
+          ],
+          "evidence": "제목 아래 설명 블록. 제목과 같은 카드 안에서 확대/이동."
+        }
+      ]
+    },
+    {
+      "name": "02 · 상세에서 카드로 축소",
+      "startMs": 2950,
+      "endMs": 3425,
+      "direction": "backward",
+      "notes": [
+        "상세 사진과 제목이 목록 쪽으로 축소됨. 사진 크롭 변화와 배경 블러는 위치·크기 추적과 분리해서 해석."
+      ],
+      "elements": [
+        {
+          "name": "상세 제목 퇴장",
+          "box": [
+            44,
+            160,
+            204,
+            56
+          ],
+          "anchor": "start",
+          "role": "out",
+          "properties": [
+            "x",
+            "y",
+            "scale"
+          ]
+        },
+        {
+          "name": "목록 검색창 복귀",
+          "box": [
+            80,
+            40,
+            150,
+            32
+          ],
+          "anchor": "end",
+          "role": "in",
+          "properties": [
+            "y",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · 같은 카드 다시 확대",
+      "startMs": 4250,
+      "endMs": 4775,
+      "direction": "forward",
+      "notes": [
+        "첫 확대와 동일한 대상으로 반복 측정. 두 결과의 곡선과 설정 차이로 측정 일관성을 비교할 수 있음."
+      ],
+      "elements": [
+        {
+          "name": "상세 사진",
+          "box": [
+            75,
+            37,
+            124,
+            94
+          ],
+          "anchor": "end",
+          "role": "shared",
+          "properties": [
+            "x",
+            "y",
+            "scale"
+          ]
+        },
+        {
+          "name": "상세 제목",
+          "box": [
+            44,
+            160,
+            204,
+            56
+          ],
+          "anchor": "end",
+          "role": "in",
+          "properties": [
+            "x",
+            "y",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · 사진 보기로 밀기",
+      "startMs": 5175,
+      "endMs": 5800,
+      "direction": "forward",
+      "notes": [
+        "사진 뷰어 패널의 경계와 뒤쪽 상세 제목을 따로 측정.",
+        "전경 패널의 화면 전체 이동은 밝은 상단 띠의 경계를 직접 측정했습니다. 후경 제목은 가려진 후반에 1/3 화면 폭 파랄랙스 가정을 사용합니다."
+      ],
+      "elements": [
+        {
+          "name": "사진 뷰어 패널 진입",
+          "role": "in",
+          "anchor": "end",
+          "box": [
+            0,
+            35,
+            296,
+            35
+          ],
+          "method": "edge",
+          "edgeAxis": "x",
+          "edgeSide": "right",
+          "edgeThreshold": 220,
+          "evidence": "35–70 px 상단 띠에서 오른쪽에 붙어 있는 밝은 사진 뷰어 패널의 왼쪽 경계를 직접 측정. 사진 내용의 움직임은 패널과 다르므로 특징점으로 대체하지 않음."
+        },
+        {
+          "name": "상세 제목 파랄랙스",
+          "box": [
+            44,
+            160,
+            204,
+            56
+          ],
+          "anchor": "start",
+          "role": "out",
+          "properties": [
+            "x"
+          ],
+          "offsetToStart": {
+            "x": -98.66666667
+          },
+          "onsetMs": 0,
+          "evidence": "후면 페이지의 1/3 화면 폭 파랄랙스 가정. 가려진 후반은 직접 측정되지 않음."
+        }
+      ]
+    },
+    {
+      "name": "05 · 사진 보기에서 뒤로",
+      "startMs": 6650,
+      "endMs": 7150,
+      "direction": "backward",
+      "notes": [
+        "전경 사진 뷰어의 바깥 경계는 오른쪽으로 이동하지만 내부 사진 내용은 크롭/레이아웃 영향으로 다른 궤적을 보입니다.",
+        "전경은 경계 검출로 직접 측정했고, 뒤쪽 제목의 보이지 않는 초반은 1/3 화면 폭 파랄랙스 가정에 의존합니다."
+      ],
+      "elements": [
+        {
+          "name": "사진 뷰어 패널 퇴장",
+          "role": "out",
+          "anchor": "start",
+          "box": [
+            0,
+            35,
+            296,
+            35
+          ],
+          "method": "edge",
+          "edgeAxis": "x",
+          "edgeSide": "right",
+          "edgeThreshold": 220,
+          "evidence": "35–70 px 상단 띠에서 오른쪽에 붙어 있는 밝은 사진 뷰어 패널의 왼쪽 경계를 직접 측정. 사진 내용의 움직임은 패널과 다르므로 특징점으로 대체하지 않음."
+        },
+        {
+          "name": "상세 제목 복귀",
+          "box": [
+            44,
+            160,
+            204,
+            56
+          ],
+          "anchor": "end",
+          "role": "in",
+          "properties": [
+            "x"
+          ],
+          "offsetFromEnd": {
+            "x": -98.66666667
+          },
+          "onsetMs": 0,
+          "evidence": "뒤 페이지 1/3 화면 폭 파랄랙스 가정. 초반 가려짐."
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "startMs": 0,
+      "endMs": 1750,
+      "reason": "정지 화면과 탭 대기"
+    },
+    {
+      "startMs": 2250,
+      "endMs": 2950,
+      "reason": "스켈레톤에서 실제 콘텐츠로 로딩. 카드 전환 물리와 분리."
+    },
+    {
+      "startMs": 4775,
+      "endMs": 5175,
+      "reason": "정지 및 사진 탭 피드백/페이지 진입 준비"
+    },
+    {
+      "startMs": 7500,
+      "endMs": 8550,
+      "reason": "녹화 종료를 위한 iOS 제어센터. 앱 전환 설계 대상에서 제외."
+    }
+  ]
+}

@@ -100,9 +100,10 @@ export const blind = (options: BlindOptions = {}) => {
   const physicsOptions = options.physics ?? DEFAULT_PHYSICS;
 
   const shared = {
-    prepare: async ({ from, to }): Promise<BlindExtras> => {
+    prepare: async ({ from, to, signal, onCleanup }): Promise<BlindExtras> => {
       const fromEl = await from;
       const toEl = await to;
+      if (signal?.aborted) throw new Error("Blind preparation superseded");
       fromEl.style.zIndex = "1000";
       const fromData = makeBlinds(
         fromEl,
@@ -122,6 +123,10 @@ export const blind = (options: BlindOptions = {}) => {
         "closed",
         "right",
       );
+      onCleanup?.(() => {
+        fromData.container.remove();
+        toData.container.remove();
+      });
       return {
         fromEl,
         fromBlinds: fromData.blinds,
@@ -132,6 +137,7 @@ export const blind = (options: BlindOptions = {}) => {
     },
     animation: ({
       fromEl,
+      to,
       fromBlinds,
       fromContainer,
       toBlinds,
@@ -140,9 +146,15 @@ export const blind = (options: BlindOptions = {}) => {
       // OUT: each blind grows in (t: 0 → 1). IN: each blind shrinks out
       // (`u`: 1 → 0). Default (0, 1) bounds for both.
       const out: Animation[] = fromBlinds.map(
-        (b) =>
+        (b, index) =>
           new WebAnimation({
             element: b,
+            motion: {
+              lifetime: "temporary",
+              role: "occlusion",
+              key: `blind:${direction}:${blindCount}:${index}`,
+              space: fromEl,
+            },
             integrator: IntegratorProvider.from(physicsOptions),
             style: (t) => ({
               transform:
@@ -152,39 +164,39 @@ export const blind = (options: BlindOptions = {}) => {
       );
 
       const inAnims: Animation[] = toBlinds.map(
-        (b, i) =>
+        (b, index) =>
           new WebAnimation({
             element: b,
+            motion: {
+              lifetime: "temporary",
+              role: "occlusion",
+              key: `blind:${direction}:${blindCount}:${index}`,
+              space: to,
+            },
             integrator: IntegratorProvider.from(physicsOptions),
             style: (_t, u) => ({
               transform:
                 direction === "horizontal" ? `scaleX(${u})` : `scaleY(${u})`,
             }),
-            onComplete:
-              i === toBlinds.length - 1
-                ? () => {
-                    toContainer.remove();
-                    fromContainer.remove();
-                    // The OUT (`from`) element is the real, reused page node now
-                    // (React Activity / Next cacheComponents re-show it on the
-                    // next navigation), so strip the inline styles `prepare`
-                    // wrote — `zIndex` (set directly) and `position` (set by
-                    // `makeBlinds` when the host was `static`) — or they stick
-                    // and corrupt the page the next time it appears.
-                    fromEl.style.zIndex = "";
-                    fromEl.style.position = "";
-                  }
-                : undefined,
           }),
       );
 
       const outPhase = new MultiAnimation(out, { mode: "parallel" });
       const inPhase = new MultiAnimation(inAnims, { mode: "parallel" });
 
-      return new MultiAnimation(
+      const animation = new MultiAnimation(
         { out: outPhase, in: inPhase },
         { mode: "sequence" },
       );
+      animation.onDispose = (disposal) => {
+        toContainer.remove();
+        fromContainer.remove();
+        if (disposal.owns(fromEl)) {
+          fromEl.style.zIndex = "";
+          fromEl.style.position = "";
+        }
+      };
+      return animation;
     },
   } satisfies TransitionDirection<BlindExtras>;
 

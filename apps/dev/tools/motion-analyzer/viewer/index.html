@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>__STUDY_TITLE__</title>
+    <style>
+      __STUDY_CSS__
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#">SSGOI motion study</a>
+        <p class="source">
+          <span id="source-name"></span><span id="source-specs"></span>
+        </p>
+        <nav class="topbar-actions" aria-label="보고서 파일">
+          <span class="verified" id="verification"></span>
+          <a href="report.md">요약 문서</a>
+          <a href="report.json" download>JSON</a>
+        </nav>
+      </header>
+      <div class="layout">
+        <nav class="rail" id="segments" aria-label="전환 목록"></nav>
+        <main class="study">
+          <header class="study-head">
+            <p class="study-index" id="segment-index"></p>
+            <h1 id="segment-title"></h1>
+            <p class="study-meta" id="segment-meta"></p>
+          </header>
+          <section class="bench">
+            <div class="player" aria-label="원본 영상">
+              <div class="video-stage" id="video-stage">
+                <video
+                  id="video"
+                  preload="auto"
+                  muted
+                  playsinline
+                  aria-label="선택한 전환의 원본 영상"
+                ></video>
+                <button class="stage-play" id="stage-play" aria-label="영상 재생">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m9 5 11 7-11 7Z" />
+                  </svg>
+                </button>
+                <div class="video-error" id="video-error" hidden>
+                  영상을 불러오지 못했습니다.
+                  <a id="video-fallback">클립 파일 열기</a>
+                </div>
+              </div>
+              <div class="transport">
+                <div class="transport-row">
+                  <button
+                    class="icon-button primary"
+                    id="play"
+                    aria-label="영상 재생"
+                    title="재생 / 일시정지 (Space)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path id="play-icon" d="m9 5 11 7-11 7Z" />
+                    </svg>
+                  </button>
+                  <button
+                    class="icon-button"
+                    id="previous-frame"
+                    aria-label="이전 프레임"
+                    title="이전 프레임 (←)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 5v14m12-14-9 7 9 7Z" />
+                    </svg>
+                  </button>
+                  <button
+                    class="icon-button"
+                    id="next-frame"
+                    aria-label="다음 프레임"
+                    title="다음 프레임 (→)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M17 5v14M5 5l9 7-9 7Z" />
+                    </svg>
+                  </button>
+                  <label class="speed"
+                    ><span class="sr-only">재생 속도</span
+                    ><select id="speed">
+                      <option value="0.25">0.25×</option>
+                      <option value="0.5" selected>0.5×</option>
+                      <option value="1">1×</option>
+                      <option value="2">2×</option>
+                    </select></label
+                  >
+                  <button
+                    class="icon-button loop is-on"
+                    id="loop"
+                    aria-pressed="true"
+                    aria-label="반복 재생"
+                    title="반복 재생"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="m16 3 4 4-4 4M20 7H8a4 4 0 0 0-4 4m4 10-4-4 4-4m-4 4h12a4 4 0 0 0 4-4"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <label class="sr-only" for="scrubber">영상 탐색, 밀리초</label>
+                <input id="scrubber" type="range" min="0" max="500" step="1" value="0" />
+                <p class="time-readout">
+                  <span><b id="time-current">0</b> ms <span id="time-total"></span></span>
+                  <span id="frame-readout"></span>
+                </p>
+              </div>
+              <p class="player-range">녹화 <span id="recording-range"></span></p>
+              <details class="segment-notes">
+                <summary>이 구간의 해석과 관측 한계</summary>
+                <div id="segment-notes"></div>
+              </details>
+              <a class="text-link" id="frame-strip-link" target="_blank" rel="noopener"
+                >프레임 스트립 열기</a
+              >
+            </div>
+            <div class="chart-card">
+              <div class="chart-head">
+                <div>
+                  <h2 id="chart-title">요소별 타이밍</h2>
+                  <p id="chart-subtitle"></p>
+                </div>
+                <div class="segmented" role="group" aria-label="그래프 보기">
+                  <button id="view-timing" class="active" aria-pressed="true">타이밍</button
+                  ><button id="view-curve" aria-pressed="false">곡선과 베지어</button>
+                </div>
+              </div>
+              <p class="legend" id="chart-legend">
+                <span><i class="legend-line"></i>물리 곡선</span>
+                <span><i class="legend-dot"></i>측정점</span>
+                <span><i class="legend-dash"></i>관측 밖 추정</span>
+                <span class="bezier-legend" hidden><i class="legend-bezier"></i>베지어</span>
+              </p>
+              <div class="chart-scroll">
+                <svg
+                  id="plot"
+                  xmlns="http://www.w3.org/2000/svg"
+                  role="group"
+                  tabindex="0"
+                  aria-label="요소별 타이밍. 클릭 또는 화살표 키로 영상 탐색."
+                ></svg>
+              </div>
+              <p class="chart-foot">
+                <a id="chart-download" download>SVG 저장</a>
+              </p>
+            </div>
+          </section>
+          <section class="readout" aria-label="선택한 요소의 설정">
+            <div class="readout-head">
+              <div class="selected">
+                <span id="selected-dot" class="track-dot"></span>
+                <h2 id="selected-title"></h2>
+                <span id="selected-confidence"></span>
+              </div>
+              <button class="copy" id="copy-override" hidden>이 전환의 오버라이드 복사</button>
+            </div>
+            <div class="track-picker" id="track-picker" aria-label="요소 선택"></div>
+            <div id="inspector-content"></div>
+          </section>
+          <section class="relations">
+            <h2>함께 움직이는 타이밍</h2>
+            <div id="relationships"></div>
+          </section>
+          <section class="archive">
+            <details>
+              <summary>분석 근거와 전체 자료</summary>
+              <div class="archive-body">
+                <p id="interpretation"></p>
+                <p class="archive-links">
+                  <a id="code-download" download>SSGOI 코드</a>
+                  <a id="csv-download" download>측정값 CSV</a>
+                  <a id="curves-download" target="_blank" rel="noopener">잔차 그래프</a>
+                  <a href="analysis-plan.json" download>분석 계획 JSON</a>
+                </p>
+                <h3>제외한 구간</h3>
+                <ul id="excluded"></ul>
+                <h3>전체 재현 코드</h3>
+                <pre id="full-code"></pre>
+              </div>
+            </details>
+          </section>
+        </main>
+      </div>
+      <footer>
+        <span>SSGOI motion study</span>
+        <a href="report.md">문서로 읽기</a>
+      </footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <noscript
+      ><p class="no-script">
+        이 뷰어는 JavaScript가 필요합니다.
+        <a href="report.md">정적 보고서</a>에서 그래프와 설정을 확인할 수 있습니다.
+      </p></noscript
+    >
+    <script id="study-data" type="application/json">
+      __STUDY_DATA__
+    </script>
+    <script>
+      __STUDY_JS__;
+    </script>
+  </body>
+</html>

@@ -139,7 +139,7 @@ export const sheet = (options: SheetOptions = {}) => {
           element: sheetEl,
           integrator: IntegratorProvider.from(physics),
           style: sheetStyle,
-          onComplete: () => {
+          onDispose: (disposal) => {
             sheetEl.style.willChange = "auto";
             sheetEl.style.backfaceVisibility = "";
             (
@@ -152,8 +152,8 @@ export const sheet = (options: SheetOptions = {}) => {
             // (the sheet itself on `exit`, the background on `enter`) and the
             // stacking props on the surviving `to` node. The rest of the `from`
             // background props on `enter` are cleared by bgAnim.
-            resetFromInteractionProps();
-            resetToStackProps();
+            if (disposal.owns(from)) resetFromInteractionProps();
+            if (disposal.owns(to)) resetToStackProps();
           },
         });
         releaseFillOnComplete(sheetAnim);
@@ -202,7 +202,7 @@ export const sheet = (options: SheetOptions = {}) => {
             // inline styles must be cleared on settle so the reused node is not
             // left scaled/faded/clipped the next time it is shown. releaseFill
             // below drops the WAAPI fill so these resets actually take effect.
-            onComplete: () => {
+            onDispose: () => {
               backgroundEl.style.willChange = "auto";
               backgroundEl.style.backfaceVisibility = "";
               (
@@ -242,6 +242,7 @@ export const sheet = (options: SheetOptions = {}) => {
           overlay.style.height = `${overlayRect.height}px`;
           anims.overlay = new WebAnimation({
             element: overlay,
+            motion: { lifetime: "temporary", role: "overlay" },
             integrator: IntegratorProvider.from(physics),
             style: (t) => overlayConfig.style(direction, t),
           });

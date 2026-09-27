@@ -17,7 +17,7 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
   contribute(
     ctx: HeroContributeCtx,
   ): AnimationContributions<HeroAnimationName> {
-    const { from, to, resolved, physics, onComplete } = ctx;
+    const { from, to, resolved, physics, onDispose } = ctx;
     const visuals = resolved.pairs.map(
       (pair) => findMediaElement(pair.toEl) ?? pair.toEl,
     );
@@ -61,15 +61,22 @@ class PageCrossfadeChromeStrategy implements HeroStrategy {
     for (const { element } of surfaces)
       element.style.backgroundColor = "transparent";
 
-    onComplete(() => {
-      from.style.opacity = previousFromOpacity;
-      from.style.willChange = previousFromWillChange;
+    // A newer navigation may already own a page or one of its content
+    // targets; only restore what this run still owns.
+    onDispose((disposal) => {
+      if (disposal.owns(from)) {
+        from.style.opacity = previousFromOpacity;
+        from.style.willChange = previousFromWillChange;
+      }
       for (const { element, opacity, willChange } of content) {
+        if (!disposal.owns(element)) continue;
         element.style.opacity = opacity;
         element.style.willChange = willChange;
       }
-      for (const { element, previousColor } of surfaces)
-        element.style.backgroundColor = previousColor;
+      for (const { element, previousColor } of surfaces) {
+        if (disposal.owns(element))
+          element.style.backgroundColor = previousColor;
+      }
     });
 
     return {

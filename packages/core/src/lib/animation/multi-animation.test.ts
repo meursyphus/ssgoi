@@ -223,3 +223,51 @@ describe("named start conditions", () => {
     expect(childComplete).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("interrupted choreography", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("does not activate a pending phase when reversing the active phase", () => {
+    const frames = installAnimationFrameHarness();
+    const cover = new FakeAnimation(),
+      reveal = new FakeAnimation();
+    const animation = new MultiAnimation([cover, reveal], { mode: "sequence" });
+    animation.play();
+    cover.value = 0.3;
+    animation.reverse();
+    frames.flush();
+    expect(cover.reverse).toHaveBeenCalledOnce();
+    expect(reveal.play).not.toHaveBeenCalled();
+    expect(reveal.reverse).not.toHaveBeenCalled();
+    animation.stop();
+  });
+  it("invalidates a waiting phase without running either endpoint or completion", () => {
+    const frames = installAnimationFrameHarness();
+    const first = new FakeAnimation(),
+      second = new FakeAnimation();
+    const animation = new MultiAnimation([first, second], { mode: "sequence" });
+    const done = vi.fn();
+    animation.onComplete = done;
+    animation.play();
+    animation.stop();
+    first.value = 1;
+    frames.flush();
+    expect(second.play).not.toHaveBeenCalled();
+    expect(first.complete).not.toHaveBeenCalled();
+    expect(done).not.toHaveBeenCalled();
+  });
+  it("resumes an unfinished sequence without replaying a completed predecessor", () => {
+    const frames = installAnimationFrameHarness();
+    const first = new FakeAnimation(),
+      second = new FakeAnimation();
+    const animation = new MultiAnimation([first, second], { mode: "sequence" });
+    animation.play();
+    first.complete();
+    frames.flush();
+    animation.pause();
+    animation.play();
+    expect(first.play).toHaveBeenCalledOnce();
+    expect(second.play).toHaveBeenCalledTimes(2);
+    second.complete();
+    expect(animation.isComplete).toBe(true);
+  });
+});

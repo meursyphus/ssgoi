@@ -1,3 +1,4 @@
+import type { AnimationDisposal } from "../../animation/animation";
 import type { PhysicsOptions, SsgoiTransitionContext } from "@types";
 import type { Animation } from "../../animation";
 import type { MediaGeometry } from "../media-geometry";
@@ -57,6 +58,8 @@ export interface ZoomOverlayConfig {
 
 export interface ZoomProvider {
   physics: PhysicsOptions;
+  /** Physics used when the tile shrinks back (`exit`); defaults to `physics`. */
+  exitPhysics?: PhysicsOptions;
   in: (input: ZoomAnimationInput) => ZoomAnimationConfig;
   out: (input: ZoomAnimationInput) => ZoomAnimationConfig;
   backgroundIn: (input: ZoomAnimationInput) => ZoomAnimationConfig;
@@ -119,8 +122,9 @@ export interface ZoomPrepareCtx {
 
 /**
  * Inputs each strategy receives at `contribute` time. `physics` is sourced
- * from the BackgroundStrategy that owns the active `type` and is reused by
- * every other strategy so progress is locked.
+ * from the BackgroundStrategy that owns the active `type` (its `exitPhysics`
+ * when the resolved mode is `exit`) and is reused by every other strategy so
+ * progress is locked.
  */
 export interface ZoomContributeCtx {
   from: HTMLElement;
@@ -139,7 +143,7 @@ export interface ZoomContributeCtx {
    * dispatcher fires them on completion. Keeps cleanup local to each
    * strategy instead of leaking back into the dispatcher.
    */
-  onComplete: (fn: () => void) => void;
+  onDispose: (fn: (disposal: AnimationDisposal) => void) => void;
 }
 
 /**

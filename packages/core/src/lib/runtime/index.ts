@@ -12,3 +12,5 @@ export type {
   Integrator,
   IntegratorState,
 } from "../animation/integrator/types";
+
+export * from "./motion-matching";

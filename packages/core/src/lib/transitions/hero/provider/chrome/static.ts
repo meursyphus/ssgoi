@@ -32,7 +32,8 @@ class SnapHideChromeStrategy implements HeroStrategy {
     // navigation (React Activity / Next cacheComponents), so restore the
     // opacity we snapped to "0" in `prepare` — otherwise the reused page
     // stays invisible.
-    ctx.onComplete(() => {
+    ctx.onDispose((disposal) => {
+      if (!disposal.owns(ctx.from)) return;
       ctx.from.style.opacity = this.previousFromOpacity;
     });
     return {};

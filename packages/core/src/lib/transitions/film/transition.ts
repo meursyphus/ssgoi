@@ -389,7 +389,7 @@ function makeFilmAnimation(
   snapshots: FilmSnapshot[],
   totalDuration: number,
   style: (snap: FilmSnapshot) => StyleObject,
-  onComplete?: () => void,
+  onDispose?: () => void,
 ): WebAnimation {
   const durationSec = totalDuration / 1000;
   return new WebAnimation({
@@ -398,7 +398,7 @@ function makeFilmAnimation(
     lowerBound: 0,
     upperBound: 1,
     style: (t) => style(sampleSnapshot(snapshots, t)),
-    onComplete,
+    onDispose,
   });
 }
 
@@ -414,7 +414,7 @@ export const film = (options: FilmOptions = {}) => {
   const physicsOverride = options.physics;
 
   const shared = {
-    prepare: ({ from, to, context }) => {
+    prepare: ({ from, to, context, onCleanup }) => {
       const fromRect = getViewportRect(context, "from");
       const toRect = getViewportRect(context, "to");
       const containerRect = getRect(document.body, context.positionedParent);
@@ -422,6 +422,9 @@ export const film = (options: FilmOptions = {}) => {
       const borders = makeCornerBorders(borderColor, {
         ...fromRect,
         top: containerRect.top,
+      });
+      onCleanup?.(() => {
+        for (const border of Object.values(borders)) border.remove();
       });
       for (const key of [
         "topLeft",
@@ -509,15 +512,16 @@ export const film = (options: FilmOptions = {}) => {
         );
       });
 
+      for (const animation of borderAnims)
+        if (animation instanceof WebAnimation)
+          animation.motion.lifetime = "temporary";
       const composite = animationGroup({
         out: mainOut,
         in: mainIn,
         borders: borderAnims,
       });
 
-      const prevOnComplete = composite.onComplete;
-      composite.onComplete = () => {
-        prevOnComplete?.();
+      composite.onDispose = () => {
         const positionedParent = context.positionedParent;
         for (const key of [
           "topLeft",
