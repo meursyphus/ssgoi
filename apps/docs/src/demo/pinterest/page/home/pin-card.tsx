@@ -56,6 +56,7 @@ export function PinCard({ pin }: { pin: PinSimple }) {
     <Link
       ref={linkRef}
       href={`/demo/pinterest/feed/${pin.id}`}
+      scroll={false}
       className="group relative block overflow-hidden rounded-2xl bg-neutral-100"
       style={{ aspectRatio: pin.aspectRatio }}
       data-zoom-exit-key={pin.id}

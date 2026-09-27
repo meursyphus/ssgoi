@@ -10,14 +10,17 @@ import type { PinSimple } from "@/demo/pinterest/api/pin";
 export default function FeedDetailPage({
   initialData,
   relatedPins,
+  savedPins,
 }: {
   initialData: PinDetail;
   relatedPins: PinSimple[];
+  savedPins: PinSimple[];
 }) {
   const pinState = usePin((state) => ({
     actions: state.actions,
   }));
   pinState.actions.init(initialData);
+  pinState.actions.initSaved(savedPins);
   return (
     <div className="flex min-h-full flex-col bg-white">
       <div className="relative">

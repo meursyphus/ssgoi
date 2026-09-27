@@ -1,12 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
-import type { PinDetail } from "@/demo/pinterest/state/pin";
+import { Link } from "@/lib/link";
+import { usePin, type PinDetail } from "@/demo/pinterest/state/pin";
 
 export function ActionBar({ pin }: { pin: PinDetail }) {
+  const pinState = usePin((state) => ({
+    saved: state.saved,
+    unsavedIds: state.unsavedIds,
+    actions: state.actions,
+  }));
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(261);
+  const saved =
+    pinState.saved.data.some((item) => item.id === pin.id) &&
+    !pinState.unsavedIds.includes(pin.id);
+  const shareHref = `/demo/pinterest/feed/${pin.id}/share`;
 
   function toggleLike() {
     setLiked((v) => {
@@ -34,19 +45,34 @@ export function ActionBar({ pin }: { pin: PinDetail }) {
       <button type="button" aria-label="댓글" className="text-black">
         <MessageCircle className="h-7 w-7" strokeWidth={2.2} />
       </button>
-      <button type="button" aria-label="공유" className="text-black">
-        <Share2 className="h-7 w-7" strokeWidth={2.2} />
-      </button>
-      <button type="button" aria-label="더보기" className="text-black">
-        <MoreHorizontal className="h-7 w-7" strokeWidth={2.2} />
-      </button>
-      <div className="flex-1" />
-      <button
-        type="button"
-        className="rounded-full bg-[#E60023] px-5 py-2 text-[15px] font-semibold text-white"
+      <Link
+        href={shareHref}
+        scroll={false}
+        aria-label="공유"
+        className="text-black"
       >
-        저장
-      </button>
+        <Share2 className="h-7 w-7" strokeWidth={2.2} />
+      </Link>
+      <Link
+        href={shareHref}
+        scroll={false}
+        aria-label="더보기"
+        className="text-black"
+      >
+        <MoreHorizontal className="h-7 w-7" strokeWidth={2.2} />
+      </Link>
+      <div className="flex-1" />
+      <motion.button
+        type="button"
+        onClick={() => pinState.actions.toggleSave()}
+        aria-pressed={saved}
+        whileTap={{ scale: 0.92 }}
+        className={`rounded-full px-5 py-2 text-[15px] font-semibold text-white transition-colors ${
+          saved ? "bg-black" : "bg-[#E60023]"
+        }`}
+      >
+        {saved ? "저장됨" : "저장"}
+      </motion.button>
       <span className="sr-only">{pin.saves} saves</span>
     </div>
   );

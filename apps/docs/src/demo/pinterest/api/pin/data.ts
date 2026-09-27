@@ -1,4 +1,4 @@
-import type { PinDetail } from "./types";
+import type { Guide, PinDetail } from "./types";
 
 const authors = [
   {
@@ -44,7 +44,7 @@ const seed: PinDetail[] = [
     author: authors[0],
     description:
       "Glittery eye makeup with iridescent highlights. AI generated reference for editorial beauty shoot.",
-    tags: ["beauty", "editorial", "makeup", "ai"],
+    tags: ["beauty", "editorial", "makeup", "ai", "aesthetic"],
     domain: "studio.beauty",
   },
   {
@@ -83,7 +83,7 @@ const seed: PinDetail[] = [
     author: authors[1],
     description:
       "Procreate UI inspiration board — color tokens, type scale and spacing for vertical 2:3 frames.",
-    tags: ["ui", "design-system", "vertical", "ai"],
+    tags: ["ui", "design-system", "vertical", "ai", "aesthetic"],
     domain: "procreate.art",
   },
   {
@@ -157,7 +157,7 @@ const seed: PinDetail[] = [
     author: authors[3],
     description:
       "포근한 무드의 스터디룸. 데스크 램프와 무광 마감 가구로 집중력을 높여보세요.",
-    tags: ["studyroom", "interior", "decor"],
+    tags: ["studyroom", "interior", "decor", "aesthetic"],
     domain: "houzz.com",
   },
   {
@@ -169,7 +169,7 @@ const seed: PinDetail[] = [
     saves: 1890,
     author: authors[1],
     description: "Brush exploration for landscape illustration in Procreate.",
-    tags: ["procreate", "illustration", "study"],
+    tags: ["procreate", "illustration", "study", "aesthetic"],
     domain: "procreate.art",
   },
   {
@@ -193,7 +193,7 @@ const seed: PinDetail[] = [
     saves: 4567,
     author: authors[0],
     description: "Soft pale pink and white floral bouquet for spring wedding.",
-    tags: ["wedding", "bouquet", "florals"],
+    tags: ["wedding", "bouquet", "florals", "aesthetic"],
     domain: "marthastewart.com",
   },
   {
@@ -217,10 +217,235 @@ const seed: PinDetail[] = [
     saves: 3456,
     author: authors[3],
     description: "감성 무드등 컨셉 디자인. 모듈러 조립식 구조.",
-    tags: ["product", "design", "lighting"],
+    tags: ["product", "design", "lighting", "aesthetic"],
     domain: "yankodesign.com",
   },
 ];
+
+/** The mock user's boards; `topics` decide which pins belong to each. */
+const boards = [
+  {
+    name: "멋진 발명품",
+    pinCount: 38,
+    updated: "2일",
+    topics: ["멋진 발명품", "product", "lighting", "design", "procreate"],
+  },
+  {
+    name: "Study room decor",
+    pinCount: 24,
+    updated: "5일",
+    topics: ["study", "room", "decor", "interior", "desk", "lighting"],
+  },
+  {
+    name: "만년필",
+    pinCount: 17,
+    updated: "1주",
+    topics: ["만년필", "fountain-pen", "stationery", "illustration", "study"],
+  },
+  {
+    name: "여자 치마",
+    pinCount: 52,
+    updated: "3주",
+    topics: ["여자치마", "플리츠", "코디", "데일리"],
+  },
+];
+
+/** Pins the mock user saved, newest first. */
+const savedIds = [
+  "pin-15",
+  "pin-10",
+  "pin-2",
+  "pin-5",
+  "pin-12",
+  "pin-4",
+  "pin-6",
+  "pin-11",
+  "pin-13",
+  "pin-7",
+];
+
+/** The signed-in mock user. */
+const me = {
+  name: "서연",
+  handle: "seoyeon.moodboard",
+  avatar: "https://picsum.photos/seed/pinterest-me/192/192",
+  followers: 128,
+  following: 76,
+};
+
+/** Inbox updates, newest first. Every row opens a different pin. */
+const updates = [
+  {
+    id: "u-1",
+    actor: 0,
+    message: "님이 회원님의 핀을 저장했어요",
+    time: "2시간",
+    isNew: true,
+    pinId: "pin-13",
+  },
+  {
+    id: "u-2",
+    actor: null,
+    message: "회원님을 위한 새 아이디어: 여자 치마 코디",
+    time: "5시간",
+    isNew: true,
+    pinId: "pin-6",
+  },
+  {
+    id: "u-3",
+    actor: 1,
+    message: "님이 새 핀을 올렸어요: Vertical 2:3 Inspiration",
+    time: "1일",
+    isNew: false,
+    pinId: "pin-4",
+  },
+  {
+    id: "u-4",
+    actor: null,
+    message: "'Study room decor' 보드에 어울리는 핀 12개",
+    time: "2일",
+    isNew: false,
+    pinId: "pin-10",
+  },
+  {
+    id: "u-5",
+    actor: 2,
+    message: "님이 회원님의 핀에 댓글을 남겼어요: “색감 너무 예뻐요!”",
+    time: "3일",
+    isNew: false,
+    pinId: "pin-3",
+  },
+  {
+    id: "u-6",
+    actor: null,
+    message: "지금 인기 있는 아이디어: 겨울 코디",
+    time: "1주",
+    isNew: false,
+    pinId: "pin-12",
+  },
+];
+
+const chip = (seed: string) => `https://picsum.photos/seed/${seed}/96/96`;
+
+/** Guided-search refinements per topic: [label, thumbnail pin seed]. */
+const guidePresets: Record<string, [string, string][]> = {
+  "여자 치마": [
+    ["코디", "pinterest-pin-5"],
+    ["겨울코디", "pinterest-pin-12"],
+    ["정장", "pinterest-pin-14"],
+    ["청자캐", "pinterest-pin-8"],
+    ["데일리", "pinterest-pin-6"],
+    ["플리츠", "pinterest-pin-3"],
+  ],
+  만년필: [
+    ["촉", "pinterest-pin-2"],
+    ["잉크", "pinterest-pin-11"],
+    ["스터디", "pinterest-pin-10"],
+    ["필사", "pinterest-pin-4"],
+  ],
+  "Study room decor": [
+    ["조명", "pinterest-pin-15"],
+    ["데스크", "pinterest-pin-10"],
+    ["선반", "pinterest-pin-12"],
+    ["포스터", "pinterest-pin-4"],
+  ],
+  겨울코디: [
+    ["코트", "pinterest-pin-12"],
+    ["니트", "pinterest-pin-3"],
+    ["롱부츠", "pinterest-pin-14"],
+    ["톤온톤", "pinterest-pin-5"],
+  ],
+  aesthetic: [
+    ["배경화면", "pinterest-pin-11"],
+    ["무드보드", "pinterest-pin-4"],
+    ["홈 화면", "pinterest-pin-15"],
+    ["필름 사진", "pinterest-pin-13"],
+  ],
+  Beauty: [
+    ["메이크업", "pinterest-pin-1"],
+    ["네일", "pinterest-pin-13"],
+    ["헤어스타일", "pinterest-pin-6"],
+    ["글리터", "pinterest-pin-7"],
+  ],
+  Wedding: [
+    ["부케", "pinterest-pin-13"],
+    ["테이블 세팅", "pinterest-pin-7"],
+    ["웨딩드레스", "pinterest-pin-1"],
+    ["플라워", "pinterest-pin-15"],
+  ],
+  Design: [
+    ["UI", "pinterest-pin-4"],
+    ["타이포그래피", "pinterest-pin-2"],
+    ["컬러 팔레트", "pinterest-pin-11"],
+    ["포스터", "pinterest-pin-10"],
+  ],
+  Art: [
+    ["일러스트", "pinterest-pin-11"],
+    ["드로잉", "pinterest-pin-2"],
+    ["수채화", "pinterest-pin-13"],
+    ["풍경화", "pinterest-pin-7"],
+  ],
+  코디: [
+    ["데일리룩", "pinterest-pin-3"],
+    ["셋업", "pinterest-pin-14"],
+    ["캐주얼", "pinterest-pin-8"],
+    ["데이트룩", "pinterest-pin-12"],
+  ],
+  정장: [
+    ["하객룩", "pinterest-pin-14"],
+    ["면접룩", "pinterest-pin-3"],
+    ["오피스룩", "pinterest-pin-12"],
+    ["포멀", "pinterest-pin-6"],
+  ],
+  "멋진 발명품": [
+    ["무드등", "pinterest-pin-15"],
+    ["조명", "pinterest-pin-10"],
+    ["가구", "pinterest-pin-4"],
+    ["가젯", "pinterest-pin-2"],
+  ],
+};
+
+/** Used for queries without a topic of their own. */
+const guideFallback: [string, string][] = [
+  ["아이디어", "pinterest-pin-5"],
+  ["배경화면", "pinterest-pin-11"],
+  ["감성", "pinterest-pin-13"],
+  ["인테리어", "pinterest-pin-10"],
+];
+
+const guideTints: Guide["tint"][] = ["pink", "slate", "lilac"];
+
+/** Pinterest never shows a near-empty grid: pad with more ideas. */
+const MIN_RESULTS = 8;
+
+function haystack(pin: PinDetail) {
+  return [pin.category, pin.title, pin.description, ...pin.tags]
+    .join(" ")
+    .toLowerCase();
+}
+
+/** Pins matching the most terms first, then more ideas up to MIN_RESULTS. */
+function rank(terms: string[]) {
+  const scored = seed
+    .map((pin) => {
+      const text = haystack(pin);
+      const score = terms.filter((t) => text.includes(t.toLowerCase())).length;
+      return { pin, score };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.pin);
+  // Rotate the filler by the query so every result page looks different.
+  const rest = seed.filter((pin) => !scored.includes(pin));
+  const offset =
+    [...terms.join("")].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) %
+    Math.max(1, rest.length);
+  const more = [...rest.slice(offset), ...rest.slice(0, offset)];
+  return [
+    ...scored,
+    ...more.slice(0, Math.max(0, MIN_RESULTS - scored.length)),
+  ].map((p) => ({ ...p }));
+}
 
 export const data = {
   all: () => seed.map((p) => ({ ...p })),
@@ -228,16 +453,78 @@ export const data = {
     const found = seed.find((p) => p.id === id);
     return found ? { ...found } : null;
   },
+  /** Tokenized OR search ranked by how many words match. */
   search: (query: string) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return seed.map((p) => ({ ...p }));
-    return seed
-      .filter(
-        (p) =>
-          p.category.toLowerCase().includes(q) ||
-          p.title.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q)),
-      )
-      .map((p) => ({ ...p }));
+    const terms = query.trim().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return seed.map((p) => ({ ...p }));
+    return rank(terms);
+  },
+  /** Home feed for one of the user's boards ("모두" = everything). */
+  byBoard: (name: string) => {
+    const board = boards.find((b) => b.name === name);
+    return board ? rank(board.topics) : seed.map((p) => ({ ...p }));
+  },
+  saved: () =>
+    savedIds.flatMap((id) => {
+      const found = seed.find((p) => p.id === id);
+      return found ? [{ ...found }] : [];
+    }),
+  boards: () =>
+    boards.map((board) => ({
+      name: board.name,
+      pinCount: board.pinCount,
+      updated: board.updated,
+      covers: rank(board.topics)
+        .slice(0, 3)
+        .map((p) => p.image),
+    })),
+  me: () => ({ ...me }),
+  updates: () =>
+    updates.flatMap((update) => {
+      const pin = seed.find((p) => p.id === update.pinId);
+      if (!pin) return [];
+      const actor = update.actor === null ? null : authors[update.actor];
+      return [
+        {
+          id: update.id,
+          actor: actor ? { name: actor.name, avatar: actor.avatar } : null,
+          message: update.message,
+          time: update.time,
+          isNew: update.isNew,
+          pin: {
+            id: pin.id,
+            title: pin.title,
+            image: pin.image,
+            aspectRatio: pin.aspectRatio,
+          },
+        },
+      ];
+    }),
+  contacts: () =>
+    authors.map((author) => ({
+      name: author.name,
+      shortName: author.name.split(" ")[0],
+      avatar: author.avatar,
+    })),
+  /**
+   * A refined query ("여자 치마 코디") keeps offering its topic's other
+   * refinements, minus the ones already applied.
+   */
+  guides: (query: string): Guide[] => {
+    const topic = Object.keys(guidePresets).find(
+      (key) => query === key || query.startsWith(`${key} `),
+    );
+    const terms = query.split(/\s+/);
+    const unused = (list: [string, string][]) =>
+      list.filter(
+        ([label]) => !label.split(" ").every((word) => terms.includes(word)),
+      );
+    const remaining = unused(topic ? guidePresets[topic] : guideFallback);
+    const list = remaining.length > 0 ? remaining : unused(guideFallback);
+    return list.map(([label, seed], index) => ({
+      label,
+      thumb: chip(seed),
+      tint: guideTints[index % guideTints.length],
+    }));
   },
 };

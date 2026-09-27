@@ -7,7 +7,11 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [data, allPins] = await Promise.all([pin.find(id), pin.findAll()]);
+  const [data, allPins, savedPins] = await Promise.all([
+    pin.find(id),
+    pin.findAll(),
+    pin.findSaved(),
+  ]);
   const relatedPins = allPins
     .filter((item) => item.id !== id)
     .sort(
@@ -16,5 +20,11 @@ export default async function Page({
         Number(a.category === data.category),
     )
     .slice(0, 8);
-  return <FeedDetailPage initialData={data} relatedPins={relatedPins} />;
+  return (
+    <FeedDetailPage
+      initialData={data}
+      relatedPins={relatedPins}
+      savedPins={savedPins}
+    />
+  );
 }
