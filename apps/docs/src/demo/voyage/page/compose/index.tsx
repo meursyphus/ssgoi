@@ -90,7 +90,12 @@ export default function ComposePage() {
     }
     // Leaving /compose drops the sheet back over the feed (backward sheet).
     close();
-    toast("Story published", { duration: 2500 });
+    // The top toast sits over the feed's top bar, and over Close when "New
+    // story" is tapped again right away; let taps pass through to them.
+    toast("Story published", {
+      duration: 2500,
+      className: "pointer-events-none",
+    });
   }
 
   return (

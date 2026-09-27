@@ -90,6 +90,9 @@ export const TRANSITION_TERMS: Record<string, string[]> = {
   hero: ["shared element", "shared", "morph", "공유 요소", "히어로"],
   sheet: [
     "bottom sheet",
+    // shadcn/ui's Drawer (vaul) is a bottom sheet
+    "drawer",
+    "드로어",
     "modal",
     "overlay",
     "popup",

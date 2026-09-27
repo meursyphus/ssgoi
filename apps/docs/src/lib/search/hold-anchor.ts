@@ -1,11 +1,18 @@
 /*
  * Search results link to #anchors. When the browser loads a page itself it
  * keeps the fragment target in view while the page settles, but a client
- * navigation scrolls to it only once. Content that arrives later then pushes
- * the target away: blog images carry no intrinsic size, WebKit has no scroll
- * anchoring to compensate, and the catalog's SSGOI boundary resets scroll a
- * frame after Next's hash scroll. These helpers re-align the target until the
- * page settles or the reader scrolls.
+ * navigation scrolls to it only once. Two things still move the target after
+ * that:
+ * - The catalog's SSGOI boundary resets a /showcase page to the top right
+ *   after the hash scroll, in every engine and on full loads too (see
+ *   ScrollToHash).
+ * - Blog GIFs shown side by side in a table resize their row when the file
+ *   arrives: auto table layout sizes the columns from the natural width,
+ *   which the img width/height attributes don't supply under `width: 100%`.
+ *   Chromium's scroll anchoring absorbs it; WebKit has none, and headings
+ *   below the table drift by hundreds of pixels.
+ * These helpers re-align the target until the page settles or the reader
+ * scrolls. A same-page result is scrolled by `holdAnchor` alone.
  */
 
 const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
@@ -30,9 +37,14 @@ export function holdAnchor(id: string, ms = 2500): () => void {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(align);
   };
-  // Late images and fonts resize the body; a boundary reset does not, so a
-  // few timed checks cover that case.
-  const resize = new ResizeObserver(schedule);
+  // Late images and fonts resize the body. Re-align inside the observer
+  // callback, which runs after layout and before paint, so WebKit shows fewer
+  // shifted frames; the next-frame check catches a scroll that lands after
+  // it. A boundary reset resizes nothing, so a few timed checks cover that.
+  const resize = new ResizeObserver(() => {
+    align();
+    schedule();
+  });
   const timers = [0, 150, 400, 900].map((t) => window.setTimeout(schedule, t));
 
   const stop = () => {
