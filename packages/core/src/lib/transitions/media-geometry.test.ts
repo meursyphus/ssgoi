@@ -3,6 +3,7 @@ import {
   createMediaGeometry,
   findMediaElement,
   normalizeMediaGeometryPair,
+  parsePixelRadius,
   projectedWindowRect,
   resolveElementMediaGeometry,
   type ElementMediaGeometryOptions,
@@ -524,6 +525,117 @@ describe("media geometry", () => {
     expect(complexRadius.contentAware).toBe(false);
     expect(complexRadius.radiusSource).toBe("unsupported");
     expect(padded.contentAware).toBe(false);
+  });
+
+  it.each([
+    ["3.35544e+07px", 33554400],
+    ["1e2px", 100],
+    ["1E2PX", 100],
+    ["2.5e-1px", 0.25],
+    [".5e1px", 5],
+    ["12px", 12],
+    ["12.5px", 12.5],
+    [".5px", 0.5],
+    ["0px", 0],
+    [" 16px ", 16],
+    ["", 0],
+  ])("parses the computed pixel radius %j", (value, expected) => {
+    expect(parsePixelRadius(value)).toBe(expected);
+  });
+
+  it.each([
+    "calc(infinity * 1px)",
+    "infinitypx",
+    "50%",
+    "12",
+    "12 px",
+    "e2px",
+    "1e+px",
+    "1e2.5px",
+    "1e999px",
+    "-4px",
+    "-1e2px",
+    "10px 20px",
+  ])("rejects the radius %j", (value) => {
+    expect(parsePixelRadius(value)).toBeNull();
+  });
+
+  it("clamps Tailwind v4 rounded-full to a circle on a square image", () => {
+    const geometry = resolve(
+      element({
+        naturalWidth: 150,
+        naturalHeight: 150,
+        objectFit: "cover",
+        radius: "3.35544e+07px",
+      }),
+      rect(0, 0, 78, 78),
+    );
+
+    expect(geometry.contentAware).toBe(true);
+    expect(geometry.radius).toBe(39);
+    expect(geometry.radiusSource).toBe("computed");
+    expect(geometry.bboxRadius).toBe(39);
+  });
+
+  it("clamps an oversized wrapper radius to a pill on the shorter side", () => {
+    const media = element({
+      naturalWidth: 400,
+      naturalHeight: 100,
+      objectFit: "cover",
+    });
+    const wrapper = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "1e2px",
+    });
+    const box = rect(0, 0, 240, 60);
+    const geometry = resolve(wrapper, box, new Map([[media, box]]));
+
+    expect(geometry.window).toEqual(box);
+    expect(geometry.radius).toBe(30);
+    expect(geometry.bboxRadius).toBe(30);
+  });
+
+  it("clamps a rounded-full clipping ancestor to its own box", () => {
+    const media = element({
+      naturalWidth: 100,
+      naturalHeight: 100,
+      objectFit: "cover",
+    });
+    const avatar = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "3.35544e+07px",
+    });
+    const root = element({ tagName: "DIV", children: [avatar] });
+    const box = rect(10, 20, 58, 58);
+    const geometry = resolve(media, box, new Map([[avatar, box]]), {
+      clipRoot: root,
+    });
+
+    expect(geometry.radius).toBe(29);
+    expect(geometry.radiusSource).toBe("computed");
+    expect(geometry.bboxRadius).toBe(29);
+    expect(geometry.cornerRadii).toBeUndefined();
+  });
+
+  it("keeps pixel radii that fit within half the smaller side", () => {
+    const radiusOn = (radius: string, box: MediaRect) =>
+      resolve(
+        element({
+          naturalWidth: 400,
+          naturalHeight: 300,
+          objectFit: "cover",
+          radius,
+        }),
+        box,
+      ).radius;
+
+    expect(radiusOn("1e2px", rect(0, 0, 400, 300))).toBe(100);
+    expect(radiusOn("12px", rect(0, 0, 400, 300))).toBe(12);
+    expect(radiusOn("30px", rect(0, 0, 80, 60))).toBe(30);
   });
 
   it("atomically clears child-only radius and media references on pair fallback", () => {

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>SSGOI rounded-full media geometry</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #fff;
+    }
+    img {
+      display: block;
+      object-fit: cover;
+    }
+    /* Tailwind v4 */
+    .rounded-full {
+      border-radius: calc(infinity * 1px);
+    }
+    #scene {
+      position: relative;
+      width: 400px;
+      height: 400px;
+    }
+    .page {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      background: #fff;
+    }
+    .avatar {
+      position: absolute;
+      left: 40px;
+      top: 40px;
+      width: 80px;
+      height: 80px;
+    }
+    .photo {
+      position: absolute;
+      left: 120px;
+      top: 120px;
+      width: 240px;
+      height: 240px;
+    }
+    #cases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 16px;
+    }
+    .clip {
+      overflow: hidden;
+    }
+  </style>
+  <main id="scene"></main>
+  <section id="cases"></section>
+  <script type="module" src="./rounded-full.ts"></script>
+</html>

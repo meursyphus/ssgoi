@@ -162,9 +162,13 @@ function readMediaStyle(el: HTMLElement): MediaStyle {
   };
 }
 
-function parsePixelRadius(value: string | undefined): number | null {
+/**
+ * Computed lengths can use exponent notation: Tailwind v4's `rounded-full`
+ * is `calc(infinity * 1px)`, which Chromium serializes as `3.35544e+07px`.
+ */
+export function parsePixelRadius(value: string | undefined): number | null {
   if (!value) return 0;
-  const match = /^(-?(?:\d+\.?\d*|\.\d+))px$/.exec(value.trim());
+  const match = /^(-?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)px$/i.exec(value.trim());
   if (!match) return null;
   const radius = Number.parseFloat(match[1] ?? "");
   return Number.isFinite(radius) && radius >= 0 ? radius : null;
@@ -172,7 +176,12 @@ function parsePixelRadius(value: string | undefined): number | null {
 
 type RadiusReading = { radius: number; supported: boolean };
 
-function readUniformRadius(el: HTMLElement): RadiusReading {
+/**
+ * CSS scales overlapping corner curves down until they fit, so a uniform
+ * radius never paints larger than half of `box`'s smaller side. Clamp to that
+ * so a pill or circle interpolates from the corner it shows, not from 9999px.
+ */
+function readUniformRadius(el: HTMLElement, box: MediaRect): RadiusReading {
   const style = styleFor(el);
   const radii = [
     style.borderTopLeftRadius,
@@ -187,7 +196,8 @@ function readUniformRadius(el: HTMLElement): RadiusReading {
   const supported = radii.every(
     (radius) => radius !== null && Math.abs(radius - first) < 0.001,
   );
-  return { radius: supported ? first : 0, supported };
+  const limit = Math.min(box.width, box.height) / 2;
+  return { radius: supported ? Math.min(first, limit) : 0, supported };
 }
 
 function readLegacyRadius(
@@ -406,7 +416,7 @@ function resolveLocalMediaGeometry(
   const legacyRadius = readLegacyRadius(keyedEl, options.legacyRadiusAttribute);
   const keyedDefinesBboxShape = mediaEl === keyedEl || keyedClips;
   const keyedRadius = keyedDefinesBboxShape
-    ? readUniformRadius(keyedEl)
+    ? readUniformRadius(keyedEl, keyedBox)
     : { radius: 0, supported: true };
   const bboxRadius = legacyRadius ?? keyedRadius.radius;
   const bboxRadiusSource: RadiusSource =
@@ -426,7 +436,7 @@ function resolveLocalMediaGeometry(
     radiusReadings.push(keyedRadius);
   }
   if (clippedWindow && mediaEl && sameRect(clippedWindow, mediaBox)) {
-    radiusReadings.push(readUniformRadius(mediaEl));
+    radiusReadings.push(readUniformRadius(mediaEl, mediaBox));
   }
   const radiusSupported = radiusReadings.every((reading) => reading.supported);
   const inferredRadius = Math.max(
@@ -526,7 +536,7 @@ export function resolveElementMediaGeometry(
       };
       const clipped = intersection(window, clipBox);
       if (!clipped) return geometry;
-      const ancestorRadius = readUniformRadius(ancestor);
+      const ancestorRadius = readUniformRadius(ancestor, box);
       if (!ancestorRadius.supported) return geometry;
       if (clipX && clipY && sameRect(window, box)) {
         if (radiusSource !== "legacy") {
