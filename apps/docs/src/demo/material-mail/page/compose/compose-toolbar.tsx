@@ -1,20 +1,66 @@
 "use client";
 
-import { Bold, Italic, Underline, Link2, Smile } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  Link2,
+  Smile,
+  type LucideIcon,
+} from "lucide-react";
+import { toast } from "sonner";
 
-export function ComposeToolbar() {
+export type Formats = { bold: boolean; italic: boolean; underline: boolean };
+
+const TOGGLES: { key: keyof Formats; label: string; icon: LucideIcon }[] = [
+  { key: "bold", label: "Bold", icon: Bold },
+  { key: "italic", label: "Italic", icon: Italic },
+  { key: "underline", label: "Underline", icon: Underline },
+];
+
+const BUTTON = "rounded-full p-2 transition-colors";
+
+export function ComposeToolbar({
+  formats,
+  onToggle,
+}: {
+  formats: Formats;
+  onToggle: (key: keyof Formats) => void;
+}) {
   return (
-    <div className="flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 py-2">
-      {[Bold, Italic, Underline, Link2, Smile].map((Icon, i) => (
+    <div className="sticky bottom-0 z-10 flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 py-2">
+      {TOGGLES.map(({ key, label, icon: Icon }) => (
         <button
-          key={i}
+          key={key}
           type="button"
-          className="rounded-full p-2 text-neutral-600 active:bg-neutral-100"
-          aria-label="Format"
+          onClick={() => onToggle(key)}
+          aria-pressed={formats[key]}
+          aria-label={label}
+          className={`${BUTTON} ${
+            formats[key]
+              ? "bg-indigo-100 text-indigo-700"
+              : "text-neutral-600 active:bg-neutral-100"
+          }`}
         >
-          <Icon size={18} strokeWidth={2} />
+          <Icon size={18} strokeWidth={formats[key] ? 2.5 : 2} />
         </button>
       ))}
+      <button
+        type="button"
+        onClick={() => toast("Insert link is mocked in this demo")}
+        className={`${BUTTON} text-neutral-600 active:bg-neutral-100`}
+        aria-label="Insert link"
+      >
+        <Link2 size={18} strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => toast("Emoji picker is mocked in this demo")}
+        className={`${BUTTON} text-neutral-600 active:bg-neutral-100`}
+        aria-label="Emoji"
+      >
+        <Smile size={18} strokeWidth={2} />
+      </button>
     </div>
   );
 }
