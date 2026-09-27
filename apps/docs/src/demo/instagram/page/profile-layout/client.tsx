@@ -52,8 +52,10 @@ export function InstagramProfileLayoutClient({
       <ProfileTabs id={id} />
       <div className="relative z-0 bg-white">
         {/* 그리드 탭의 논리 id는 바깥 boundary(/profile/:id)와 달라야 한다. 같으면
-            탭 전환 직후 레이아웃을 떠날 때 바깥 OUT이 직전 탭 전환의 중복
-            arrival로 흡수돼 zoom 없이 끊긴다. */}
+            다른 탭으로 레이아웃에 들어온 직후(태그된 게시물·릴스에서 뒤로)
+            그리드 탭을 누를 때, 안쪽 IN이 방금 들어온 바깥 boundary의 중복
+            arrival로 흡수돼 slide 없이 끊긴다. (반대 방향 — 탭 전환 직후
+            레이아웃을 떠날 때 바깥 OUT이 흡수되던 것은 코어가 고쳤다.) */}
         <div
           key={pathname}
           data-ssgoi-transition={pathname === base ? `${base}/posts` : pathname}

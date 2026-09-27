@@ -31,7 +31,7 @@ export function FeedDetailImage({
       alt={username}
       width={32}
       height={32}
-      className="h-8 w-8 rounded-[16px] object-cover"
+      className="h-8 w-8 rounded-full object-cover"
       data-zoom-exit-key={isDetail ? username : undefined}
     />
   ) : (

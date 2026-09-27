@@ -37,13 +37,12 @@ function TrayItem({ item }: { item: StoryTrayItem }) {
         }`}
       >
         <div className="rounded-full bg-white p-[2px]">
-          {/* 픽셀 radius — zoom이 원을 원으로 접을 수 있게 */}
           <img
             src={item.avatar}
             alt={item.label}
             width={58}
             height={58}
-            className="h-[58px] w-[58px] rounded-[29px] object-cover"
+            className="h-[58px] w-[58px] rounded-full object-cover"
             data-zoom-exit-key={item.id}
           />
         </div>

@@ -122,13 +122,12 @@ function AvatarWithStory({
         className="block rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px] active:scale-95 transition-transform"
       >
         <div className="rounded-full bg-white p-[2px]">
-          {/* 픽셀 radius — zoom이 원형 소스를 원으로 인식하도록 (rounded-full은 지수 표기로 계산됨) */}
           <img
             src={avatar}
             alt={name}
             width={78}
             height={78}
-            className="h-[78px] w-[78px] rounded-[39px] object-cover"
+            className="h-[78px] w-[78px] rounded-full object-cover"
             data-zoom-exit-key={storyId}
           />
         </div>
@@ -194,7 +193,7 @@ function HighlightItem({ highlight }: { highlight: Highlight }) {
           alt={highlight.label}
           width={58}
           height={58}
-          className="h-full w-full rounded-[29px] object-cover"
+          className="h-full w-full rounded-full object-cover"
           data-zoom-exit-key={storyId}
         />
       </div>
