@@ -5,13 +5,16 @@ import type { FriendSimple } from "@/demo/kakao-talk/api/friend";
 type Props = {
   friend: FriendSimple;
   action?: ReactNode;
+  /** 프로필을 연 화면 (프로필의 '1:1 채팅'이 history를 어떻게 남길지) */
+  via?: string;
 };
 
-export function FriendRow({ friend, action }: Props) {
+export function FriendRow({ friend, action, via }: Props) {
   return (
     <div className="flex items-center gap-3 px-4 py-2 active:bg-black/[0.03]">
       <Link
-        href={`/demo/kakao-talk/profile/${friend.id}`}
+        href={`/demo/kakao-talk/profile/${friend.id}${via ? `?via=${via}` : ""}`}
+        scroll={false}
         className="flex min-w-0 flex-1 items-center gap-3"
       >
         <img

@@ -10,6 +10,7 @@ export function MeRow({ me }: { me: MeProfile }) {
       </h2>
       <Link
         href={`/demo/kakao-talk/profile/${me.id}`}
+        scroll={false}
         className="flex items-center gap-3 px-4 py-2 active:bg-black/[0.03]"
       >
         {me.avatar ? (
