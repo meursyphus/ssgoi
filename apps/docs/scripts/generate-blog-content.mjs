@@ -8,10 +8,12 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
+import { fetchImageSize, imageSize } from "./image-size.mjs";
 
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const contentDir = path.join(appDir, "src/content/blog");
 const outputFile = path.join(appDir, "src/lib/blog.generated.ts");
+const publicDir = path.join(appDir, "public");
 
 function toAsciiTsString(value) {
   return JSON.stringify(value).replace(/[^\x20-\x7e]/gu, (character) => {
@@ -34,11 +36,67 @@ async function getMdxFiles() {
   }
 }
 
-async function renderMarkdown(content) {
+const remoteSizes = new Map();
+
+/**
+ * Intrinsic size of an image a post links to. Site paths are read from
+ * public/; anything else is fetched once per run, with a timeout.
+ */
+async function resolveImageSize(src, slug) {
+  const url = new URL(
+    src.startsWith("//") ? `https:${src}` : src,
+    `local:/blog/${slug}`,
+  );
+  if (url.protocol === "local:") {
+    const file = path.join(publicDir, decodeURIComponent(url.pathname));
+    return imageSize(await readFile(file));
+  }
+  if (!remoteSizes.has(url.href))
+    remoteSizes.set(url.href, fetchImageSize(url.href));
+  return remoteSizes.get(url.href);
+}
+
+function findImages(node, images = []) {
+  if (node.type === "element" && node.tagName === "img") images.push(node);
+  for (const child of node.children ?? []) findImages(child, images);
+  return images;
+}
+
+/**
+ * Writes each image's intrinsic width/height onto its <img>. The CSS keeps
+ * `height: auto`, so the attributes only fix the aspect ratio: the browser
+ * reserves every image's box up front, and late images no longer push the
+ * text (or a #heading the reader was sent to) down the page.
+ */
+function rehypeImageSize({ slug }) {
+  return async (tree) => {
+    await Promise.all(
+      findImages(tree).map(async ({ properties }) => {
+        const src = String(properties.src ?? "");
+        let problem = "unsupported format";
+        const size = await resolveImageSize(src, slug).catch((error) => {
+          problem = error.message;
+          return null;
+        });
+        if (size) {
+          properties.width = size.width;
+          properties.height = size.height;
+        } else {
+          console.warn(
+            `${slug}: no intrinsic size for ${src} (${problem}); the page will shift when it loads`,
+          );
+        }
+      }),
+    );
+  };
+}
+
+async function renderMarkdown(content, slug) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype)
+    .use(rehypeImageSize, { slug })
     .use(rehypeHighlight, { aliases: { typescript: ["tsx"] } });
 
   const mdast = processor.parse(content);
@@ -58,7 +116,7 @@ for (const file of files) {
   const slug = file.replace(/\.mdx$/, "");
   const raw = await readFile(path.join(contentDir, file), "utf8");
   const { data, content } = matter(raw);
-  const html = await renderMarkdown(content);
+  const html = await renderMarkdown(content, slug);
   lines.push("  {");
   lines.push(`    slug: ${toAsciiTsString(slug)},`);
   lines.push(`    frontmatter: ${toAsciiTsString(JSON.stringify(data))},`);
