@@ -16,6 +16,15 @@ and zoom types, and checks authored opacity and cleanup in Chromium and WebKit.
 It catches the backdrop flash caused by fading both overlapping images with
 complementary opacities under normal source-over compositing.
 
+## Rounded-full radius (`rounded-full`)
+
+Tailwind v4's `rounded-full` is `border-radius: calc(infinity * 1px)`, which
+browsers serialize as huge pixel lengths (`3.35544e+07px` in Chromium, a
+39-digit integer in WebKit). The suite reads those real computed values, checks
+that media geometry resolves them (and a legacy `9999px` pill) to the circle or
+pill they paint, and seeks hero and zoom between a circular avatar and a square
+photo: the avatar end must not paint its bbox corners and the photo end must.
+
 ## Interrupted entry (`interrupt-reentry`)
 
 A page that is still entering when the user navigates away must keep moving
