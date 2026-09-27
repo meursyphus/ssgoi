@@ -131,31 +131,55 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         ? scrollPositions.get(storageKey)!
         : { x: 0, y: 0 };
 
-    let retryCount = 0;
-    const tryRestore = () => {
-      if (
-        !scrollContainer ||
-        contextGeneration !== initGeneration ||
-        myRestorationGeneration !== restorationGeneration
-      ) {
-        return;
-      }
+    const isCurrent = () =>
+      !!scrollContainer &&
+      contextGeneration === initGeneration &&
+      myRestorationGeneration === restorationGeneration;
 
+    // Scroll the container to the target and report whether it got there.
+    const apply = (): boolean => {
       // A reset is also the latest known position for this page. Recording it
       // prevents a later transition that opts into restoration from reviving a
       // stale position that predates this reset.
       if (!preserves) scrollPositions.set(storageKey, target);
 
-      scrollContainer.scrollTo({
+      scrollContainer!.scrollTo({
         top: target.y,
         left: target.x,
         behavior: "instant",
       });
 
-      const targetReached =
-        Math.abs(scrollContainer.scrollTop - target.y) < 1 &&
-        Math.abs(scrollContainer.scrollLeft - target.x) < 1;
+      return (
+        Math.abs(scrollContainer!.scrollTop - target.y) < 1 &&
+        Math.abs(scrollContainer!.scrollLeft - target.x) < 1
+      );
+    };
 
+    // Apply NOW, synchronously. The policy is decided right before the matched
+    // transition prepares and builds its animation, and the effects express
+    // their geometry against the IN page's saved scroll (`context.to.scroll`):
+    // sheet/zoom clip the page to that viewport slice and scale it around its
+    // centre, prepareOutgoing offsets the OUT page by the from/to delta, and
+    // the host reads boxes "where the run rests". If the container only moved
+    // on a later frame, the first frame(s) would paint those effects against
+    // the PREVIOUS page's scroll — a sticky bottom bar inside a scaled page,
+    // for example, lands below its slice and then jumps once the scroll
+    // arrives (visible on iOS, where that frame is not hidden by main-thread
+    // timing). Restoring before the animation is created keeps every frame
+    // consistent.
+    if (!isCurrent()) return;
+    apply();
+
+    // Then keep re-asserting on the following frames while the target is not
+    // held. This covers content that is still growing (images, async data) so
+    // the saved offset only becomes reachable later, and a router-side scroll
+    // restore (e.g. SvelteKit's `afterNavigate`) that lands after ours and
+    // would otherwise win. Bounded so a truly unreachable target does not poll
+    // forever.
+    let retryCount = 0;
+    const tryRestore = () => {
+      if (!isCurrent()) return;
+      const targetReached = apply();
       if (!targetReached && retryCount < RESTORE_MAX_RETRIES) {
         retryCount++;
         requestAnimationFrame(tryRestore);

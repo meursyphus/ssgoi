@@ -582,9 +582,12 @@ export function createSggoiTransitionContext(
           }
         };
 
-        // The incoming page's scroll restores in this frame's rendering
-        // update, after attach. Boxes read now are expressed where this run
-        // rests, so they line up with the frames of the runs before and after.
+        // The incoming page's scroll was restored synchronously when its
+        // policy was applied, before `prepare` ran, so the container already
+        // rests where this run rests. The hint still names that position:
+        // boxes read now, and by the runs before and after, are expressed in
+        // the same resting frame even if the container is briefly elsewhere
+        // (a target that only becomes reachable as content grows).
         const container = getScrollContainer();
         host.attach(animation, {
           targets: [fromOriginal, toElement],
