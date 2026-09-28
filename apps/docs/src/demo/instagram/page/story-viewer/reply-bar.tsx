@@ -11,7 +11,7 @@ export function StoryReplyBar({ story }: { story: StoryDetail }) {
   const [liked, setLiked] = useState(false);
   if (story.isMine) {
     return (
-      <div className="absolute inset-x-0 bottom-0 flex h-16 items-center gap-2 px-4 text-[13px] text-white/85">
+      <div className="absolute inset-x-0 bottom-safe flex h-16 items-center gap-2 px-4 text-[13px] text-white/85">
         {story.viewersLabel ? (
           <>
             <Eye className="h-5 w-5" strokeWidth={1.8} />
@@ -24,7 +24,7 @@ export function StoryReplyBar({ story }: { story: StoryDetail }) {
     );
   }
   return (
-    <div className="absolute inset-x-0 bottom-0 flex h-16 items-center gap-3 px-3">
+    <div className="absolute inset-x-0 bottom-safe flex h-16 items-center gap-3 px-3">
       <Input
         type="text"
         placeholder="메시지 보내기"

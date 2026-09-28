@@ -19,9 +19,12 @@ export function SearchHeader({
   const input = useRef<HTMLInputElement>(null);
 
   // Keyboard up on a fresh search; preventScroll keeps the frame still while
-  // the page fades in.
+  // the page fades in. Only when this document already has focus (the user
+  // opened search here): an embedded preview that navigates the frame from
+  // outside must not pull focus, and keystrokes, out of the host page.
   useEffect(() => {
-    if (!input.current?.value) input.current?.focus({ preventScroll: true });
+    if (input.current?.value || !document.hasFocus()) return;
+    input.current?.focus({ preventScroll: true });
   }, []);
 
   return (

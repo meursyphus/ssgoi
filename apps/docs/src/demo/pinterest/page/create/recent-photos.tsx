@@ -62,7 +62,7 @@ export function RecentPhotos() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 40 }}
-            className="sticky bottom-0 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent px-4 pt-6 pb-5"
+            className="sticky bottom-0 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent px-4 pt-6 pb-safe-5"
           >
             <button
               type="button"

@@ -38,8 +38,11 @@ export function CheckoutBottomBar() {
     }
   };
 
+  // Sticky, so the CTA stays on screen when a step is taller than the screen
+  // (the 288px showcase clip, the desktop bezel). Content keeps 12px above the
+  // home-indicator inset; 20px when there is none.
   return (
-    <div className="border-t border-neutral-100 bg-white px-5 pb-5 pt-3">
+    <div className="sticky bottom-0 z-10 border-t border-neutral-100 bg-white px-5 pt-3 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]">
       <div className="pb-3">
         <StepIndicator step={step} />
       </div>

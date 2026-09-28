@@ -18,7 +18,8 @@ export default function InboxPage() {
   // The FAB row stays outside the scrolled content block so the compose sheet
   // does not drag it along. Same approach as gamja-market's FloatingBottom.
   // It is zero-height so an empty mailbox does not scroll; the bottom nav
-  // lives in the (tabs) shell, 70px below the FAB's sticky line.
+  // lives in the (tabs) shell, 70px plus the bottom safe area below the FAB's
+  // sticky line.
   return (
     <>
       <div className="flex flex-1 flex-col bg-[#FAFAFE]">
@@ -27,7 +28,7 @@ export default function InboxPage() {
           <InboxList />
         </div>
       </div>
-      <div className="pointer-events-none sticky bottom-20 z-20 h-0">
+      <div className="pointer-events-none sticky bottom-safe-20 z-20 h-0">
         <div className="pointer-events-auto absolute right-5 bottom-0">
           <ComposeFab />
         </div>

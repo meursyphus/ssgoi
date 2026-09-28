@@ -12,7 +12,7 @@ export function Composer() {
   const canSend = text.trim().length > 0;
 
   return (
-    <div className="border-t border-black/5 bg-white px-2 py-2">
+    <div className="border-t border-black/5 bg-white px-2 pt-2 pb-safe-2">
       <form
         className="flex items-center gap-1"
         onSubmit={(e) => {

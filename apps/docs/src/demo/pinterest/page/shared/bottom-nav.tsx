@@ -42,7 +42,9 @@ export function BottomNav() {
   const isProfile = pathname === `${BASE}/profile`;
 
   return (
-    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 py-2">
+    // Docked like a native tab bar: the background runs into the
+    // home-indicator inset and the icons sit above it.
+    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 pt-2 pb-safe-2">
       <NavItem
         href={BASE}
         active={isHome}

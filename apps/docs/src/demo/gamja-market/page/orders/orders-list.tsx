@@ -27,7 +27,7 @@ export function OrdersList() {
   }
 
   return (
-    <ul className="flex flex-col gap-2 pb-8">
+    <ul className="flex flex-col gap-2 pb-[max(var(--safe-bottom),2rem)]">
       {order.orders.data.map((o) => (
         <li key={o.id}>
           <OrderRow order={o} />

@@ -26,7 +26,7 @@ export function ComposeToolbar({
   };
 
   return (
-    <div className="sticky bottom-0 z-10 flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 py-2">
+    <div className="sticky bottom-0 z-10 flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 pt-2 pb-safe-2">
       {tools.map(({ id, icon: Icon, label }) => (
         <button
           key={id}

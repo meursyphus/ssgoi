@@ -28,7 +28,7 @@ export default function CreatePage() {
         <X className="h-6 w-6" />
       </DemoBackLink>
 
-      <div className="absolute inset-x-0 bottom-5 z-10 px-5 text-center">
+      <div className="absolute inset-x-0 bottom-safe-5 z-10 px-5 text-center">
         <ShortsMark className="mx-auto h-16 w-16 text-white" />
         <h1 className="mt-5 text-[24px] font-bold leading-8">
           Allow camera and microphone access to create a Short

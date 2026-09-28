@@ -50,19 +50,23 @@ function RailButton({
 
 /**
  * Full-screen Shorts player shared by the Shorts tab and /shorts/[id]. The
- * detail page passes `zoomKey` so the image is the single zoom enter marker.
+ * detail page passes `zoomKey` so the image is the single zoom enter marker,
+ * and `toScreenEdge` because nothing sits below it there: the rail and the
+ * caption then clear the home-indicator inset (on the tab the nav does).
  */
 export function ShortPlayer({
   short,
   leading,
   zoomKey,
   showBell = false,
+  toScreenEdge = false,
   className = "",
 }: {
   short: MockShort;
   leading: ReactNode;
   zoomKey?: string;
   showBell?: boolean;
+  toScreenEdge?: boolean;
   className?: string;
 }) {
   const [reaction, setReaction] = useState<"like" | "dislike" | null>(null);
@@ -117,7 +121,11 @@ export function ShortPlayer({
         </div>
       </header>
 
-      <div className="absolute bottom-6 right-3 z-10 flex flex-col items-center gap-4">
+      <div
+        className={`absolute right-3 z-10 flex flex-col items-center gap-4 ${
+          toScreenEdge ? "bottom-safe-6" : "bottom-6"
+        }`}
+      >
         <RailButton
           label="Like"
           caption={compactCount(likes)}
@@ -167,7 +175,11 @@ export function ShortPlayer({
         </Link>
       </div>
 
-      <div className="absolute bottom-5 left-4 right-20 z-10">
+      <div
+        className={`absolute left-4 right-20 z-10 ${
+          toScreenEdge ? "bottom-safe-5" : "bottom-5"
+        }`}
+      >
         <div className="mb-3 flex items-center gap-2">
           <Link
             href={`${BASE}/channel/${short.channelId}`}

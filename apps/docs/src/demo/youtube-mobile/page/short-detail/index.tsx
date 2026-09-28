@@ -15,6 +15,7 @@ export default function ShortDetailPage({ short }: { short: MockShort }) {
       <ShortPlayer
         short={short}
         zoomKey={`short-${short.id}`}
+        toScreenEdge
         className="h-full"
         leading={
           <DemoBackLink

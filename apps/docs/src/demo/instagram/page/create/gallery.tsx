@@ -15,7 +15,7 @@ export function CreateGallery({
   onSelect: (post: PostSimple) => void;
 }) {
   return (
-    <div className="pb-24">
+    <div className="pb-safe-24">
       <div className="flex items-center gap-1 px-4 py-3 text-[16px] font-semibold">
         최근 항목
         <ChevronDown className="h-4 w-4" strokeWidth={2.4} />

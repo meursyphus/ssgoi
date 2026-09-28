@@ -41,7 +41,7 @@ export default function StoryViewerPage({
 
   return (
     <SsgoiRouteBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
-      <div className="absolute inset-x-0 top-0 bottom-16 overflow-hidden rounded-[14px] bg-neutral-900">
+      <div className="absolute inset-x-0 top-0 bottom-safe-16 overflow-hidden rounded-[14px] bg-neutral-900">
         {/* enter key는 지금 보이는 한 장에만 — 닫으면 누른 원으로 접힌다 */}
         <img
           key={frame.id}

@@ -17,7 +17,10 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 z-30 grid h-[70px] grid-cols-4 border-t border-neutral-200/70 bg-white">
+    // The bar stays 70px (69px of destinations + the 1px top border) and its
+    // surface extends into the home-indicator inset below them (box-content +
+    // pb-safe), like M3 on an edge-to-edge device.
+    <nav className="sticky bottom-0 z-30 box-content grid h-[69px] grid-cols-4 border-t border-neutral-200/70 bg-white pb-safe">
       {items.map(({ label, href, icon: Icon }) => {
         const active = pathname === href;
         return (

@@ -54,6 +54,24 @@ page/layout/
   - air-bnb는 `(tabs)` 그룹만 tabs shell을 쓰고 `(detail)` 그룹은 없다. 상세·검색·컬렉션은 페이지가 자기 `SsgoiRouteBoundary`를 렌더한다 (checkout의 persistent routeKey 시트 유지).
 - **메인 화면이 하나인 데모**: 셸 분리 없이 메인 페이지 컴포넌트 마지막에 sticky 네비를 렌더하면 된다 (`withTransitionBoundary` 기본값 유지 — layout boundary가 페이지째 감싸므로 네비도 트랜지션을 같이 탄다). FAB 등 플로팅 요소는 네비 위로 offset.
 
+## 하단 safe area (모바일 데모 공통)
+
+화면 맨 아래에 붙는 바(바텀 네비, 하단 CTA·입력 바, 플로팅 네비·FAB)는 홈 인디케이터 영역만큼 `--safe-bottom`으로 띄운다. 값은 실기기에선 `env(safe-area-inset-bottom)`, 폰 목업 iframe(`ShowcasePhone`/`PhoneFrame`, 인디케이터를 iframe 위에 그림) 안에선 34px, 데스크탑 직접 보기(`MobileFrame` 베젤이 인디케이터를 콘텐츠 **아래**에 그림)에선 0. 첫 페인트 전에 `app/demo/layout.tsx`가 정하므로(`lib/phone-safe-area.ts`) 데모는 토큰만 쓴다. `env(safe-area-inset-bottom)` 직접 사용 금지 — iframe 안에선 항상 0이다.
+
+```tsx
+// 도킹된 네비: 바 높이는 그대로 두고 배경을 인셋까지 늘린다
+<nav className="sticky bottom-0 box-content h-[68px] border-t pb-safe">…</nav>
+// 하단 padding이 이미 있는 바: 인셋 + spacing
+<div className="sticky bottom-0 px-4 pt-3 pb-safe-3">…</div>
+// 플로팅 네비·FAB: 인셋 위로 띄운다
+<div className="absolute bottom-safe-4 inset-x-0">…</div>
+```
+
+- 유틸: `pb-safe` `mb-safe` `bottom-safe` `h-safe` = 인셋, `pb-safe-<n>` `mb-safe-<n>` `bottom-safe-<n>` = 인셋 + `--spacing(n)`, `pb-safe-[10px]` = 인셋 + 임의값. 그 밖의 조합은 `var(--safe-bottom)` (예: `pb-[max(var(--safe-bottom),12px)]`).
+- 탭바 아이템은 iOS처럼 인셋 바로 위에 붙어도 된다 (`pb-[max(var(--safe-bottom),0.75rem)]`). 버튼·입력 바는 인셋 위로 자기 여백을 둔다 — 직접 보기의 padding이 더 크면 `pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]`처럼 둘 다 지킨다.
+- 플로팅 네비 뒤로 스크롤되는 페이지는 마지막 여백도 인셋을 더한다 (`pb-safe-24`).
+- 하단 바가 없는 화면은 그대로 둔다 — 콘텐츠는 iOS처럼 인디케이터 밑까지 스크롤된다.
+
 ## 뒤로/닫기 (모바일 데모 공통)
 
 뒤로·닫기는 전부 공용 헬퍼로 만든다. 데모별 `use-back`, `history.length > 1`, pathname 스택, `router.back()` 직접 호출은 쓰지 않는다.

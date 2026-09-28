@@ -118,7 +118,8 @@ export default function CollagePage({
         </div>
       </header>
 
-      <div className="flex-1 pb-24">
+      {/* Room for the last row to scroll clear of the floating button. */}
+      <div className="flex-1 pb-safe-24">
         {sections.map((items, i) => {
           const allSelected =
             items.length > 0 && items.every((p) => selected.includes(p.id));
@@ -156,13 +157,18 @@ export default function CollagePage({
         })}
       </div>
 
-      <button
-        type="button"
-        aria-label="Resize"
-        className="absolute bottom-6 right-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-neutral-700 shadow-[0_4px_12px_rgba(0,0,0,0.18)] active:bg-neutral-100"
-      >
-        <Maximize2 className="h-5 w-5" strokeWidth={2.25} />
-      </button>
+      {/* Floats over the grid like the tab bar's pill (`sticky bottom-0 h-0`
+          pins a zero-height anchor to the scroll viewport's bottom), above
+          the home-indicator inset. */}
+      <div className="pointer-events-none sticky bottom-0 z-20 h-0">
+        <button
+          type="button"
+          aria-label="Resize"
+          className="pointer-events-auto absolute right-4 bottom-[max(1.5rem,calc(var(--safe-bottom)+0.5rem))] flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-neutral-700 shadow-[0_4px_12px_rgba(0,0,0,0.18)] active:bg-neutral-100"
+        >
+          <Maximize2 className="h-5 w-5" strokeWidth={2.25} />
+        </button>
+      </div>
     </div>
   );
 }

@@ -56,8 +56,13 @@ export function StoryHeader({
 
   function share() {
     navigator.clipboard?.writeText(window.location.href).catch(() => {});
-    // Bottom: a top toast would sit over these controls.
-    toast("Link copied", { duration: 1500, position: "bottom-center" });
+    // Bottom: a top toast would sit over these controls. mb-safe lifts it
+    // clear of the home indicator.
+    toast("Link copied", {
+      duration: 1500,
+      position: "bottom-center",
+      className: "mb-safe",
+    });
   }
 
   const tone = docked

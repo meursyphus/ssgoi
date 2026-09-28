@@ -15,8 +15,10 @@ const ITEMS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  // Like UITabBar: the white bar runs under the home indicator and the labels
+  // sit on the inset's edge (82px tall in the phone mockup, 60px directly).
   return (
-    <nav className="sticky bottom-0 z-30 flex shrink-0 items-center justify-around border-t border-neutral-200 bg-white px-2 pb-3 pt-2">
+    <nav className="sticky bottom-0 z-30 flex shrink-0 items-center justify-around border-t border-neutral-200 bg-white px-2 pt-2 pb-[max(var(--safe-bottom),0.75rem)]">
       {ITEMS.map(({ href, label, Icon }) => {
         const active = pathname === href;
         return (

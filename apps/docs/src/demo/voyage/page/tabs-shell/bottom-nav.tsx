@@ -16,7 +16,9 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-neutral-200/70 bg-white">
+    // pb-safe: the white bar runs under the home indicator while the icons
+    // and labels stay above it, like a native tab bar.
+    <nav className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-neutral-200/70 bg-white pb-safe">
       {items.map(({ label, icon: Icon, href }) => {
         const active = pathname === href;
         return (

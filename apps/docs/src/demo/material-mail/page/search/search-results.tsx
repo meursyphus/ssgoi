@@ -22,7 +22,7 @@ export function SearchResults() {
   }
 
   return (
-    <section className="pt-2">
+    <section className="pt-2 pb-safe">
       <h2 className="px-4 pb-1 text-[13px] font-medium text-neutral-500">
         Results in all mail
       </h2>

@@ -18,9 +18,10 @@ export function CommentComposer({
   inputRef: RefObject<HTMLInputElement | null>;
   className?: string;
 }) {
+  // 게시물 끝과 댓글 시트 하단, 어디서든 화면 맨 아래 줄 — 홈 인디케이터만큼 띄운다
   return (
     <div
-      className={`flex items-center gap-2 border-t border-neutral-200 bg-white px-3 py-3 ${className}`}
+      className={`flex items-center gap-2 border-t border-neutral-200 bg-white px-3 pt-3 pb-safe-3 ${className}`}
     >
       <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-neutral-100">
         {avatar && (

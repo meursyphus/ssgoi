@@ -141,7 +141,8 @@ export function MoreButton({
  * Bottom action sheet, rendered inside the phone frame's scroll area as the
  * last child of a full-height flex column (`mt-auto` puts it at the end even
  * when the page is absolutely positioned): `sticky bottom-0` keeps it on the
- * visible bottom edge at any scroll position.
+ * visible bottom edge at any scroll position. The panel floats above the
+ * home-indicator inset, like an iOS action sheet.
  */
 export function ActionSheetHost() {
   const sheet = useSyncExternalStore(
@@ -171,7 +172,7 @@ export function ActionSheetHost() {
             <motion.div
               key="panel"
               role="menu"
-              className="pointer-events-auto absolute inset-x-2 bottom-2 max-h-[70dvh] overflow-y-auto rounded-2xl bg-white pb-2 text-neutral-950 shadow-xl"
+              className="pointer-events-auto absolute inset-x-2 bottom-safe-2 max-h-[70dvh] overflow-y-auto rounded-2xl bg-white pb-2 text-neutral-950 shadow-xl"
               initial={{ y: "110%" }}
               animate={{ y: 0 }}
               exit={{ y: "110%" }}

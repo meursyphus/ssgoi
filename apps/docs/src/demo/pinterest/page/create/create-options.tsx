@@ -19,7 +19,9 @@ const OPTIONS: { label: string; icon: LucideIcon; hint: string }[] = [
 
 export function CreateOptions() {
   return (
-    <div className="flex justify-center gap-6 px-4 pt-4 pb-6">
+    // Tiles and gaps shrink on phones narrower than ~380px (the 288px
+    // showcase player) instead of overflowing; 84px/24px from there up.
+    <div className="flex justify-center gap-[min(1.5rem,6.2vw)] px-4 pt-4 pb-6">
       {OPTIONS.map((option) => (
         <button
           key={option.label}
@@ -27,7 +29,7 @@ export function CreateOptions() {
           onClick={() => toast(option.hint, { duration: 1500 })}
           className="flex flex-col items-center gap-2"
         >
-          <span className="grid h-[84px] w-[84px] place-items-center rounded-3xl bg-neutral-100 text-black transition-transform active:scale-95">
+          <span className="grid size-[min(84px,22vw)] place-items-center rounded-3xl bg-neutral-100 text-black transition-transform active:scale-95">
             <option.icon className="h-8 w-8" strokeWidth={2.2} />
           </span>
           <span className="text-[13px] font-semibold text-black">

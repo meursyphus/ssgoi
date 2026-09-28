@@ -28,7 +28,9 @@ export function ActionBar({ pin }: { pin: PinDetail }) {
   }
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3">
+    // Below 360px (the 288px showcase player, 320px phones) the row is
+    // tighter so the save pill keeps its one-line width instead of wrapping.
+    <div className="flex items-center gap-4 px-4 py-3 max-[359px]:gap-2.5 max-[359px]:px-3">
       <button
         type="button"
         onClick={toggleLike}
@@ -61,13 +63,12 @@ export function ActionBar({ pin }: { pin: PinDetail }) {
       >
         <MoreHorizontal className="h-7 w-7" strokeWidth={2.2} />
       </Link>
-      <div className="flex-1" />
       <motion.button
         type="button"
         onClick={() => pinState.actions.toggleSave()}
         aria-pressed={saved}
         whileTap={{ scale: 0.92 }}
-        className={`rounded-full px-5 py-2 text-[15px] font-semibold text-white transition-colors ${
+        className={`ml-auto shrink-0 whitespace-nowrap rounded-full px-5 py-2 text-[15px] font-semibold text-white transition-colors max-[359px]:px-4 ${
           saved ? "bg-black" : "bg-[#E60023]"
         }`}
       >

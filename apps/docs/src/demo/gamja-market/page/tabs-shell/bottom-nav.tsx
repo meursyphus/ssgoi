@@ -21,7 +21,10 @@ export function tabForPath(pathname: string): TabKey {
 
 export function BottomNav({ active }: { active: TabKey }) {
   return (
-    <nav className="sticky bottom-0 z-30 flex shrink-0 items-center justify-around border-t border-gray-200 bg-white px-2 pb-3 pt-2">
+    // Like UITabBar: the white bar runs under the home indicator and the
+    // labels sit on the inset's edge (82px tall in a phone mockup, 60px
+    // directly). home/floating-bottom.tsx floats its cart bar above it.
+    <nav className="sticky bottom-0 z-30 flex shrink-0 items-center justify-around border-t border-gray-200 bg-white px-2 pt-2 pb-[max(var(--safe-bottom),0.75rem)]">
       {ITEMS.map(({ key, label, href, Icon }) => {
         const isActive = key === active;
         const content = (

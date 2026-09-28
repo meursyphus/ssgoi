@@ -15,7 +15,7 @@ export function DrawerToggles({
   const [isMuted, setMuted] = useState(muted);
   const [isFavorite, setFavorite] = useState(pinned);
   return (
-    <div className="sticky bottom-0 z-10 grid grid-cols-2 border-t border-black/5 bg-white">
+    <div className="sticky bottom-0 z-10 grid grid-cols-2 border-t border-black/5 bg-white pb-safe">
       <ToggleButton
         label={isMuted ? "알림 꺼짐" : "알림 켜짐"}
         pressed={!isMuted}

@@ -72,6 +72,48 @@
   }
 }
 
+/*
+ * Bottom safe area for the mobile demos: the home-indicator zone a bottom bar
+ * pads itself out of. On a real device it is env(safe-area-inset-bottom).
+ * Inside a phone mockup iframe env() is 0, so the mockup declares the zone its
+ * home indicator covers and the /demo layout sets --frame-safe-bottom before
+ * first paint (lib/phone-safe-area.ts). On desktop the MobileFrame bezel draws
+ * its indicator below the content, so the token is 0 there.
+ *
+ *   pb-safe      padding-bottom: inset         pb-safe-2   inset + 0.5rem
+ *   mb-safe      margin-bottom: inset          mb-safe-4   inset + 1rem
+ *   bottom-safe  bottom: inset                 bottom-safe-4  inset + 1rem
+ *   h-safe       height: inset (spacer)        pb-safe-[10px] inset + 10px
+ */
+:root {
+  --safe-bottom: var(--frame-safe-bottom, env(safe-area-inset-bottom, 0px));
+}
+
+@utility pb-safe {
+  padding-bottom: var(--safe-bottom);
+}
+@utility pb-safe-* {
+  padding-bottom: calc(var(--safe-bottom) + --spacing(--value(number)));
+  padding-bottom: calc(var(--safe-bottom) + --value([length]));
+}
+@utility mb-safe {
+  margin-bottom: var(--safe-bottom);
+}
+@utility mb-safe-* {
+  margin-bottom: calc(var(--safe-bottom) + --spacing(--value(number)));
+  margin-bottom: calc(var(--safe-bottom) + --value([length]));
+}
+@utility bottom-safe {
+  bottom: var(--safe-bottom);
+}
+@utility bottom-safe-* {
+  bottom: calc(var(--safe-bottom) + --spacing(--value(number)));
+  bottom: calc(var(--safe-bottom) + --value([length]));
+}
+@utility h-safe {
+  height: var(--safe-bottom);
+}
+
 @keyframes ssgoi-loader-slide {
   0% {
     transform: translateX(-100%);

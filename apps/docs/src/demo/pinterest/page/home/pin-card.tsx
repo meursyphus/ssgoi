@@ -1,56 +1,17 @@
 "use client";
 
 import { Link } from "@/lib/link";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { MoreHorizontal } from "lucide-react";
-import {
-  pinImageDimensions,
-  pinImageUrl,
-} from "@/demo/pinterest/api/pin/image";
+import { pinImageDimensions } from "@/demo/pinterest/api/pin/image";
 import type { PinSimple } from "@/demo/pinterest/state/pin";
+import { useHeroPrefetch } from "../shared/use-hero-prefetch";
 
 export function PinCard({ pin }: { pin: PinSimple }) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const imageSize = pinImageDimensions(pin.aspectRatio, 800);
 
-  useEffect(() => {
-    const el = linkRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const conn = (navigator as { connection?: { saveData?: boolean } })
-      .connection;
-    if (conn?.saveData) return;
-
-    let idleHandle: number | undefined;
-    let timeoutHandle: number | undefined;
-    const w = window as Window & {
-      requestIdleCallback?: (cb: () => void) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        io.disconnect();
-        const fire = () => {
-          const img = new Image();
-          img.src = pinImageUrl(pin.image, pin.aspectRatio, 800);
-        };
-        if (typeof w.requestIdleCallback === "function") {
-          idleHandle = w.requestIdleCallback(fire);
-        } else {
-          timeoutHandle = window.setTimeout(fire, 250);
-        }
-      },
-      { rootMargin: "200px" },
-    );
-    io.observe(el);
-
-    return () => {
-      io.disconnect();
-      if (idleHandle != null) w.cancelIdleCallback?.(idleHandle);
-      if (timeoutHandle != null) window.clearTimeout(timeoutHandle);
-    };
-  }, [pin.image, pin.aspectRatio]);
+  useHeroPrefetch(linkRef, pin.image, pin.aspectRatio);
 
   return (
     <Link

@@ -90,7 +90,7 @@ export function NavDrawer({
       />
       <motion.nav
         aria-label="Mailboxes"
-        className="absolute top-0 left-0 flex w-[82%] max-w-[330px] flex-col overflow-y-auto overscroll-contain rounded-r-[28px] bg-[#F3F3FA] pb-4 shadow-2xl"
+        className="absolute top-0 left-0 flex w-[82%] max-w-[330px] flex-col overflow-y-auto overscroll-contain rounded-r-[28px] bg-[#F3F3FA] pb-safe-4 shadow-2xl"
         style={{ height }}
         initial={{ x: "-100%" }}
         animate={{ x: 0, transition: ENTER }}

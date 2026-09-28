@@ -8,8 +8,9 @@ export function SearchBottomBar({
   href: string;
   onClear: () => void;
 }) {
+  // Content keeps 12px above the home-indicator inset; 20px when there is none.
   return (
-    <div className="sticky bottom-0 z-10 flex items-center justify-between border-t border-neutral-200 bg-white px-5 pt-3 pb-5">
+    <div className="sticky bottom-0 z-10 flex items-center justify-between border-t border-neutral-200 bg-white px-5 pt-3 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]">
       <button
         type="button"
         onClick={onClear}

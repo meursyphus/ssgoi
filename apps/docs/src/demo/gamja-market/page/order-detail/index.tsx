@@ -32,7 +32,13 @@ export default function OrderDetailPage({
       <PickupInfo order={data} />
       <PaymentSummary order={data} />
       <div className="flex-1" />
-      <ReviewCta order={data} />
+      {/* The CTA bar pads itself out of the home indicator; an order without
+          one still keeps its last section clear of it. */}
+      {data.status === "picked_up" ? (
+        <ReviewCta order={data} />
+      ) : (
+        <div aria-hidden className="h-safe shrink-0" />
+      )}
     </div>
   );
 }

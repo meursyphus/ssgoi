@@ -54,7 +54,8 @@ function Badge({ value }: { value: number | "dot" }) {
 
 export function BottomTabBar({ active }: { active: ActiveTab }) {
   return (
-    <nav className="grid shrink-0 grid-cols-5 bg-white">
+    // pb-safe: the white bar runs under the home indicator, icons stay above.
+    <nav className="grid shrink-0 grid-cols-5 bg-white pb-safe">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
         const content = (

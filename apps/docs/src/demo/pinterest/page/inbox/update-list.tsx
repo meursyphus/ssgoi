@@ -1,9 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import { Link } from "@/lib/link";
 import { pinImageDimensions } from "@/demo/pinterest/api/pin/image";
 import type { InboxUpdate } from "@/demo/pinterest/state/pin";
 import { PinterestGlyph } from "../shared/pinterest-glyph";
+import { useHeroPrefetch } from "../shared/use-hero-prefetch";
 
 export function UpdateList({ updates }: { updates: InboxUpdate[] }) {
   return (
@@ -24,8 +26,13 @@ export function UpdateList({ updates }: { updates: InboxUpdate[] }) {
 
 function UpdateRow({ update }: { update: InboxUpdate }) {
   const size = pinImageDimensions(update.pin.aspectRatio, 400);
+  const linkRef = useRef<HTMLAnchorElement>(null);
+  // The row's thumbnail is the 400px image; the close-up it zooms into
+  // shows the 800px one.
+  useHeroPrefetch(linkRef, update.pin.image, update.pin.aspectRatio);
   return (
     <Link
+      ref={linkRef}
       href={`/demo/pinterest/feed/${update.pin.id}`}
       scroll={false}
       className="flex items-center gap-3 px-4 py-3 active:bg-neutral-50"

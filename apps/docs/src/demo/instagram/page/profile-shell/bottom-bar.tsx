@@ -18,7 +18,7 @@ export function ProfileBottomBar({
   profileHref?: string;
 }) {
   return (
-    <div className="flex items-center justify-around border-t border-neutral-200 bg-white px-2 pb-2 pt-2">
+    <div className="flex items-center justify-around border-t border-neutral-200 bg-white px-2 pb-safe-2 pt-2">
       <BottomLink href={`${BASE}/home`} label="홈">
         <svg
           width="26"

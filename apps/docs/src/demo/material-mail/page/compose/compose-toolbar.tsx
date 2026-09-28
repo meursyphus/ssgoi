@@ -28,7 +28,9 @@ export function ComposeToolbar({
   onToggle: (key: keyof Formats) => void;
 }) {
   return (
-    <div className="sticky bottom-0 z-10 flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 py-2">
+    // The toolbar's surface runs under the home indicator; its buttons stay
+    // above the inset.
+    <div className="sticky bottom-0 z-10 flex items-center gap-1 border-t border-neutral-200/80 bg-white px-3 pt-2 pb-safe-2">
       {TOGGLES.map(({ key, label, icon: Icon }) => (
         <button
           key={key}

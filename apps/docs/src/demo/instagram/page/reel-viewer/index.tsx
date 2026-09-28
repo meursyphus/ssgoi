@@ -36,7 +36,7 @@ export default function ReelViewerPage({
       <ReelTopBar
         fallbackHref={`/demo/instagram/profile/${reel.author.username}/reels`}
       />
-      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 pb-6 pl-4 pr-2">
+      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 pb-safe-6 pl-4 pr-2">
         <ReelCaption reel={reel} />
         <ReelActionRail reel={reel} />
       </div>

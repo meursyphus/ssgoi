@@ -6,7 +6,9 @@ import type { HubContent } from "./content";
 export function HubFab({ fab }: { fab: NonNullable<HubContent["fab"]> }) {
   const Icon = fab.icon;
   return (
-    <div className="pointer-events-none sticky bottom-20 z-20 h-0">
+    // Same line as the inbox's Compose FAB: 10px above the 70px nav, which
+    // itself sits on the bottom safe area.
+    <div className="pointer-events-none sticky bottom-safe-20 z-20 h-0">
       <button
         type="button"
         onClick={() => toast(fab.toast)}

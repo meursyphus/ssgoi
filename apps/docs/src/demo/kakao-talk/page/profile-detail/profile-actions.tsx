@@ -46,7 +46,7 @@ export function ProfileActions({
   };
 
   return (
-    <div className="px-4 pb-5 pt-2">
+    <div className="px-4 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))] pt-2">
       <div className="flex items-stretch overflow-hidden rounded-2xl bg-white/15 backdrop-blur">
         <div className="flex flex-1 items-center">
           <button type="button" onClick={openChat} className={CELL}>

@@ -21,7 +21,8 @@ export default function FeedPage({
 
   // The compose FAB sits outside the scrolled content block so the rising
   // sheet does not drag it along (same approach as material-mail's inbox).
-  // The bottom nav lives in the tabs shell; bottom-20 keeps the FAB above it.
+  // The bottom nav lives in the tabs shell and grows by the safe-area inset;
+  // bottom-safe-20 keeps the FAB the same distance above its icons.
   return (
     <>
       <div className="flex min-h-full flex-col bg-white">
@@ -30,7 +31,7 @@ export default function FeedPage({
           <StoryList />
         </div>
       </div>
-      <div className="pointer-events-none sticky bottom-20 z-20 flex justify-end px-5">
+      <div className="pointer-events-none sticky bottom-safe-20 z-20 flex justify-end px-5">
         <div className="pointer-events-auto">
           <ComposeFab />
         </div>

@@ -60,7 +60,7 @@ export function ReviewForm({ order }: { order: OrderDetail }) {
         </p>
       </div>
 
-      <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 pb-5 pt-3">
+      <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 pt-3 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]">
         <button
           type="button"
           onClick={handleSubmit}

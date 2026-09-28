@@ -16,7 +16,7 @@ export function CreateModeSwitch({
   onChange: (mode: CreateMode) => void;
 }) {
   return (
-    <div className="pointer-events-none sticky bottom-5 z-20 -mt-14 flex justify-center">
+    <div className="pointer-events-none sticky bottom-safe-5 z-20 -mt-14 flex justify-center">
       <div className="pointer-events-auto flex gap-1 rounded-full bg-neutral-800/90 p-1 backdrop-blur">
         {MODES.map((m) => (
           <button
