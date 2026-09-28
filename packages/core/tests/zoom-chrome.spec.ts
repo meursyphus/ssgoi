@@ -186,9 +186,27 @@ test("a card that shows more than the player keeps the scale uniform and lands i
   const clip = await page.evaluate(() => window.zoomChrome.outgoingClipPath());
   expect(clip).toMatch(/round (?!0% \/ 0%)(?!0% 0% 0% 0% \/)/);
 
-  // Landed: the card's left edge (which the player never rendered) and its
-  // centre both show the picture; nothing pops when the tile goes away.
+  // The copy of the card image rides above the tile and covers the whole
+  // card, sides included, so the tile's narrower strip never shows an edge.
+  const copy = await page.evaluate(() =>
+    window.zoomChrome.box("[data-ssgoi-crossfade]"),
+  );
+  const tile = await page.evaluate(() => window.zoomChrome.box(".detail img"));
+  expect(copy.left).toBeLessThan(tile.left);
+  expect(copy.left + copy.width).toBeGreaterThan(tile.left + tile.width);
+  expect(Math.abs(copy.top - tile.top)).toBeLessThan(0.5);
+  expect(Math.abs(copy.height - tile.height)).toBeLessThan(0.5);
+
+  // Landed: the copy sits exactly on the card, the card's left edge (which
+  // the player never rendered) and its centre both show the picture, and
+  // nothing pops when the tile goes away.
   await page.evaluate(() => window.zoomChrome.seek(1));
+  const landed = await page.evaluate(() =>
+    window.zoomChrome.box("[data-ssgoi-crossfade]"),
+  );
+  const card = await page.evaluate(() => window.zoomChrome.box(".card img"));
+  for (const key of ["left", "top", "width", "height"] as const)
+    expect(Math.abs(landed[key] - card[key]), key).toBeLessThan(0.5);
   near(await pixel(page, 108, 280), BLUE);
   near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
   near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);

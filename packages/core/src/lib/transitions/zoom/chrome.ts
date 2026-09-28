@@ -336,7 +336,8 @@ export class ChromeStrategy implements ZoomStrategy {
       height: `${box.height}px`,
       pointerEvents: "none",
       isolation: "isolate",
-      zIndex: String(Number(Z_FOREGROUND) + 1),
+      // Above the tile and above a shared-image copy that rides outside it.
+      zIndex: String(Number(Z_FOREGROUND) + 2),
       transformOrigin: motion?.transformOrigin ?? "",
       willChange: motion ? "transform, opacity" : "opacity",
     });
