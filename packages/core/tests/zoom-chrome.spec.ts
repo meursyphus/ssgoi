@@ -80,12 +80,16 @@ for (const type of ["static", "expand", "blur"] as const) {
     near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), BLUE);
     near(await pixel(page, CONTROL.x, CONTROL.y), YELLOW);
 
-    // Halfway the copies ride the background page's own motion exactly.
+    // Halfway the copies ride the background page's own motion exactly but
+    // are still invisible: chrome shows only in its page's last stretch.
     await page.evaluate(() => window.zoomChrome.seek(0.5));
     await expectMirrored(page, ".bar");
     await expectMirrored(page, ".badge");
-    if (type === "static")
+    if (type === "static") {
+      near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), BLUE);
+      await page.evaluate(() => window.zoomChrome.seek(0.8));
       between(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED, BLUE);
+    }
 
     // Landed: the chrome is opaque over the tile, the control has faded out
     // and the card shows the shared image where the control would pop.
@@ -133,8 +137,13 @@ for (const type of ["static", "expand", "blur"] as const) {
     await page.evaluate(() => window.zoomChrome.seek(0.5));
     await expectMirrored(page, ".bar");
     await expectMirrored(page, ".badge");
-    if (type === "static")
+    // The list's chrome is gone before halfway; it fades during the first
+    // stretch while the copies are still card sized.
+    if (type === "static") {
+      near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), BLUE);
+      await page.evaluate(() => window.zoomChrome.seek(0.2));
       between(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED, BLUE);
+    }
 
     // Open: the detail page owns the frame and its control is in place.
     await page.evaluate(() => window.zoomChrome.seek(1));

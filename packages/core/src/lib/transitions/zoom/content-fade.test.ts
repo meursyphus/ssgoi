@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { collectOverlappingContent, rectsOverlap } from "./content-fade";
+import {
+  CHROME_SPAN,
+  chromeOpacity,
+  collectOverlappingContent,
+  rectsOverlap,
+} from "./content-fade";
 import type { MediaRect } from "../media-geometry";
 
 class Element {
@@ -26,6 +31,18 @@ const measure = (element: Element) => element.box;
 
 beforeEach(() => vi.stubGlobal("HTMLElement", Element));
 afterEach(() => vi.unstubAllGlobals());
+
+describe("chromeOpacity", () => {
+  it("shows a page's overlays only in the last part of the move toward it", () => {
+    expect(chromeOpacity(0)).toBe(0);
+    expect(chromeOpacity(1 - CHROME_SPAN)).toBe(0);
+    expect(chromeOpacity(1 - CHROME_SPAN / 2)).toBeCloseTo(0.5);
+    expect(chromeOpacity(1)).toBe(1);
+    // A spring overshoot never pushes past the authored range.
+    expect(chromeOpacity(1.05)).toBe(1);
+    expect(chromeOpacity(-0.05)).toBe(0);
+  });
+});
 
 describe("rectsOverlap", () => {
   it("needs a real overlap, not a shared edge", () => {

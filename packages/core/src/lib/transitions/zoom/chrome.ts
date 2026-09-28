@@ -4,9 +4,10 @@ import {
   type Animation,
 } from "../../animation";
 import { getClientRect, getRect } from "@utils";
-import { CROSSFADE_ATTRIBUTE, clampOpacity } from "../crossfade";
+import { CROSSFADE_ATTRIBUTE } from "../crossfade";
 import type { MediaRect } from "../media-geometry";
 import { Z_FOREGROUND } from "../stacking";
+import { chromeOpacity } from "./content-fade";
 import { buildTileGeometry } from "./zoom-element";
 import type { ZoomContributeCtx, ZoomStrategy } from "./types";
 
@@ -380,7 +381,7 @@ export class ChromeStrategy implements ZoomStrategy {
     // looked and dissolve as the tile grows over them.
     const style = (t: number, u: number) => ({
       ...(motion?.style(t, u) ?? {}),
-      opacity: clampOpacity(exiting ? t : u),
+      opacity: chromeOpacity(exiting ? t : u),
     });
     Object.assign(layer.style, style(0, 1));
     positionedParent.appendChild(layer);
