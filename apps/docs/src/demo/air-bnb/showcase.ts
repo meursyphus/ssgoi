@@ -146,7 +146,8 @@ export const airBnbShowcase: ShowcaseApp = {
       transition: "hero",
       enterPath: `${BASE}/listings/l-003/photos`,
       exitPath: `${BASE}/listings/l-003`,
-      caption: "Hero fade — the cover photo grows into the tour",
+      caption:
+        "Hero fade — the cover grows into the tour; Back returns it to the cover",
     },
     {
       title: "Explore → Search (sheet)",
