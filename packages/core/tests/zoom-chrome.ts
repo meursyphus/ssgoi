@@ -32,7 +32,7 @@ function buildList(): HTMLElement {
   list.innerHTML = `
     <div class="card">
       <img data-zoom-exit-key="photo" alt="" />
-      <span class="badge"></span>
+      <span class="badge"><b>12:48</b></span>
     </div>
     <nav class="bar"></nav>`;
   list.querySelector("img")!.src = picture;

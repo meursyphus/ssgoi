@@ -201,6 +201,17 @@ export function cloneChrome(source: HTMLElement): HTMLElement | null {
   if (source.matches(OPAQUE_MEDIA) || source.querySelector(OPAQUE_MEDIA))
     return null;
   const clone = source.cloneNode(true) as HTMLElement;
+  // The copy's root receives resolved values, so a unitless line-height the
+  // original inherited (Tailwind's 1.5) would reach the copy's descendants
+  // as a fixed length and push their text off by a few pixels. Pin every
+  // element's own resolved line-height instead.
+  const sources = [source, ...source.querySelectorAll("*")];
+  const copies = [clone, ...clone.querySelectorAll("*")];
+  copies.forEach((copy, index) => {
+    const original = sources[index];
+    if (copy instanceof HTMLElement && original)
+      copy.style.lineHeight = getComputedStyle(original).lineHeight;
+  });
   for (const stale of clone.querySelectorAll(
     `[${CROSSFADE_ATTRIBUTE}], [${CHROME_ATTRIBUTE}], [${CREATED_ATTRIBUTE}]`,
   ))

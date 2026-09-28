@@ -85,6 +85,7 @@ for (const type of ["static", "expand", "blur"] as const) {
     await page.evaluate(() => window.zoomChrome.seek(0.5));
     await expectMirrored(page, ".bar");
     await expectMirrored(page, ".badge");
+    await expectMirrored(page, ".badge b");
     if (type === "static") {
       near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), BLUE);
       await page.evaluate(() => window.zoomChrome.seek(0.8));
@@ -137,6 +138,7 @@ for (const type of ["static", "expand", "blur"] as const) {
     await page.evaluate(() => window.zoomChrome.seek(0.5));
     await expectMirrored(page, ".bar");
     await expectMirrored(page, ".badge");
+    await expectMirrored(page, ".badge b");
     // The list's chrome is gone before halfway; it fades during the first
     // stretch while the copies are still card sized.
     if (type === "static") {
@@ -236,6 +238,7 @@ for (const direction of ["backward", "forward"] as const) {
       );
       await expectMirrored(page, ".bar");
       await expectMirrored(page, ".badge");
+      await expectMirrored(page, ".badge b");
     }
     const landed = direction === "backward";
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), landed ? GREEN : DETAIL);
