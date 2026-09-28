@@ -82,7 +82,10 @@ export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
     ),
   });
   clone.style.opacity = String(previewStyle(0, 1).opacity);
-  previewOpacity.set(0);
+  // The copy paints the preview's pixels inside the tile. When the tile
+  // covers only part of the preview (`partial`), the preview itself must
+  // keep showing the rest from beneath.
+  if (!geometry.partial) previewOpacity.set(0);
   detailOpacity.set(detailStyle(0, 1).opacity);
   // The clone is this run's own resource; opacity leases arbitrate with a
   // newer run that reuses the same image, so they are released regardless.

@@ -147,6 +147,55 @@ for (const type of ["static", "expand", "blur"] as const) {
   });
 }
 
+test("a card that shows more than the player keeps the scale uniform and lands inside it", async ({
+  page,
+}) => {
+  await page.goto("/tests/zoom-chrome.html");
+  await page.evaluate(() =>
+    window.zoomChrome.setup({ type: "expand", mismatch: true }),
+  );
+  await page.evaluate(() => window.zoomChrome.start());
+  const cardImageOpacity = () =>
+    page.evaluate(() => window.zoomChrome.computedOpacity(".card img"));
+
+  // The tile scales by one factor on both axes instead of stretching the
+  // page to the card's box, and the card stays visible beneath it so its
+  // extra sides can show.
+  await page.evaluate(() => window.zoomChrome.seek(0.5));
+  const matrix = await page.evaluate(() => window.zoomChrome.outgoingMatrix());
+  expect(matrix).not.toBeNull();
+  expect(Math.abs(matrix![0]! - matrix![3]!)).toBeLessThan(0.001);
+  expect(matrix![0]).toBeLessThan(1);
+  expect(await cardImageOpacity()).toBe("1");
+
+  // Landed: the card's left edge (which the player never rendered) and its
+  // centre both show the picture; nothing pops when the tile goes away.
+  await page.evaluate(() => window.zoomChrome.seek(1));
+  near(await pixel(page, 108, 280), BLUE);
+  near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
+  near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
+  await page.evaluate(() => window.zoomChrome.finish());
+  near(await pixel(page, 108, 280), BLUE);
+  near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
+  await expect(page.locator("[data-ssgoi-crossfade]")).toHaveCount(0);
+});
+
+test("a card the player fully contains hides the card while the tile paints it", async ({
+  page,
+}) => {
+  await page.goto("/tests/zoom-chrome.html");
+  await page.evaluate(() => window.zoomChrome.setup({ type: "expand" }));
+  await page.evaluate(() => window.zoomChrome.start());
+  await page.evaluate(() => window.zoomChrome.seek(0.5));
+  expect(
+    await page.evaluate(() => window.zoomChrome.computedOpacity(".card img")),
+  ).toBe("0");
+  await page.evaluate(() => window.zoomChrome.finish());
+  expect(
+    await page.evaluate(() => window.zoomChrome.computedOpacity(".card img")),
+  ).toBe("1");
+});
+
 for (const variant of ["default", "fade"] as const) {
   test(`the ${variant} variant ${variant === "fade" ? "fades" : "leaves"} the page body under the player`, async ({
     page,

@@ -13,6 +13,8 @@ type Options = {
   type?: "static" | "expand" | "blur";
   variant?: "default" | "fade";
   direction?: "forward" | "backward";
+  /** The detail player crops the picture's sides that the card shows. */
+  mismatch?: boolean;
 };
 let animation: Animation | undefined;
 let start: (() => Promise<void>) | undefined;
@@ -52,11 +54,13 @@ async function setup({
   type = "expand",
   variant = "default",
   direction = "backward",
+  mismatch = false,
 }: Options = {}) {
   animation?.cancel({ reason: "disposed", owns: () => true });
   scene.replaceChildren();
   const list = buildList();
   const detail = buildDetail();
+  detail.classList.toggle("mismatch", mismatch);
   const [from, to] = direction === "forward" ? [list, detail] : [detail, list];
   outgoing = from;
   Object.assign(from.style, {
@@ -126,6 +130,13 @@ const harness = {
     scene.querySelector<HTMLElement>(selector)!.style.opacity,
   computedOpacity: (selector: string) =>
     getComputedStyle(scene.querySelector<HTMLElement>(selector)!).opacity,
+  /** The outgoing page's live transform as [a, b, c, d, e, f]. */
+  outgoingMatrix: () => {
+    const match = /matrix\(([^)]+)\)/.exec(
+      getComputedStyle(outgoing).transform,
+    );
+    return match ? match[1]!.split(",").map(Number) : null;
+  },
   complete: () => animation!.complete(),
   finish: () => {
     animation!.complete();

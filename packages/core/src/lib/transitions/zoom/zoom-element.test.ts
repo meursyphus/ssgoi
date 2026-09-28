@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMediaGeometry } from "../media-geometry";
-import { createZoomIn, createZoomOut } from "./zoom-element";
+import { buildTileGeometry, createZoomIn, createZoomOut } from "./zoom-element";
 import type { ZoomAnimationInput } from "./types";
 
 function rect(left: number, top: number, width: number, height: number) {
@@ -139,22 +139,33 @@ describe("zoom-element", () => {
     expect(zoomOutEnd).toEqual(zoomInStart);
   });
 
-  it("falls back to bbox math when the detail image cannot render the projected crop", () => {
+  it("keeps a uniform scale over the shared part when the detail image cannot render the projected crop", () => {
     const enterRect = rect(0, 100, 400, 400);
     const exitRect = rect(20, 30, 100, 100);
-    const animation = createZoomIn(
-      input({
-        enterRect,
-        exitRect,
-        pageRect: rect(0, 0, 400, 800),
-        enterMedia: createMediaGeometry(enterRect, 2, "cover"),
-        exitMedia: createMediaGeometry(exitRect, 2, "contain"),
-      }),
-    );
+    const mediaInput = input({
+      enterRect,
+      exitRect,
+      pageRect: rect(0, 0, 400, 800),
+      // The detail crops the sides of a 2:1 picture the card shows whole.
+      enterMedia: createMediaGeometry(enterRect, 2, "cover"),
+      exitMedia: createMediaGeometry(exitRect, 2, "contain"),
+      exitRadius: 16,
+    });
+    const geometry = buildTileGeometry(mediaInput);
+    expect(geometry.partial).toBe(true);
+    // The tile can show the detail's own window only; the card's rounded
+    // corners lie outside it, so the strip stays square.
+    expect(geometry.startWindow).toEqual(rect(0, 100, 400, 400));
+    expect(geometry.exitCornerRadii).toEqual([0, 0, 0, 0]);
 
-    expect(animation.animate(0).transform).toBe(
-      "translate(-130px, -220px) scale(0.25, 0.25)",
+    const start = createZoomIn(mediaInput).animate(0);
+    // One factor on both axes (100 / 800 of the picture), not the 0.25 ×
+    // 0.25 bbox stretch of the whole page into the card's box.
+    expect(start.transform).toBe(
+      "translate(-130px, -220px) scale(0.125, 0.125)",
     );
+    expect(start.clipPath).toContain("inset(12.5% 0% 37.5% 0%");
+    expect(createZoomOut(mediaInput).animate(0)).toEqual(start);
   });
 
   it("falls back to bbox math when endpoint media ratios differ", () => {

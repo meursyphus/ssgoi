@@ -187,7 +187,10 @@ class TileStrategy implements ZoomStrategy {
     // Only the moving tile should paint the shared visuals. Otherwise its
     // antialiased rounded edge composites over the identical preview edge,
     // making the final corner look fuller despite matching radius geometry.
-    onDispose(hideSharedElement(resolved.exitEl));
+    // Unless the destination shows more of the image than the tile can: then
+    // the tile lands inside the card and the card's own edges must show.
+    if (!buildTileGeometry(input).partial)
+      onDispose(hideSharedElement(resolved.exitEl));
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 

@@ -17,16 +17,59 @@ type TileGeometry = {
   scaleX: number;
   scaleY: number;
   exitCornerRadii?: MediaCornerRadii;
+  /**
+   * The destination shows more of the image than the source renders (a
+   * shelf card showing the whole frame, a full-screen player cropping its
+   * sides). The tile covers only the shared part; the rest of the
+   * destination must show from beneath it, so the shared element is not
+   * hidden.
+   */
+  partial: boolean;
 };
 
+const EPSILON = 0.01;
+
 function containsRect(outer: MediaRect, inner: MediaRect): boolean {
-  const epsilon = 0.01;
   return (
-    inner.left >= outer.left - epsilon &&
-    inner.top >= outer.top - epsilon &&
-    inner.left + inner.width <= outer.left + outer.width + epsilon &&
-    inner.top + inner.height <= outer.top + outer.height + epsilon
+    inner.left >= outer.left - EPSILON &&
+    inner.top >= outer.top - EPSILON &&
+    inner.left + inner.width <= outer.left + outer.width + EPSILON &&
+    inner.top + inner.height <= outer.top + outer.height + EPSILON
   );
+}
+
+function intersectRects(a: MediaRect, b: MediaRect): MediaRect | null {
+  const left = Math.max(a.left, b.left);
+  const top = Math.max(a.top, b.top);
+  const right = Math.min(a.left + a.width, b.left + b.width);
+  const bottom = Math.min(a.top + a.height, b.top + b.height);
+  if (right - left <= EPSILON || bottom - top <= EPSILON) return null;
+  return { left, top, width: right - left, height: bottom - top };
+}
+
+/**
+ * Corner radii for the part of the destination the tile can show. A strip
+ * edge that stops short of the destination's own edge lies inside the card,
+ * so its corners stay square and the card's rounded corner shows from
+ * beneath; an edge that reaches the card's edge keeps that corner's radius.
+ */
+function shownCornerRadii(
+  shown: MediaRect,
+  window: MediaRect,
+  corners: MediaCornerRadii,
+): MediaCornerRadii {
+  const left = shown.left <= window.left + EPSILON;
+  const top = shown.top <= window.top + EPSILON;
+  const right =
+    shown.left + shown.width >= window.left + window.width - EPSILON;
+  const bottom =
+    shown.top + shown.height >= window.top + window.height - EPSILON;
+  return [
+    top && left ? corners[0] : 0,
+    top && right ? corners[1] : 0,
+    bottom && right ? corners[2] : 0,
+    bottom && left ? corners[3] : 0,
+  ];
 }
 
 export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
@@ -37,6 +80,7 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
     startWindow: input.enterRect,
     scaleX: input.exitRect.width / input.enterRect.width,
     scaleY: input.exitRect.height / input.enterRect.height,
+    partial: false,
   });
 
   const { enterMedia, exitMedia } = input;
@@ -64,20 +108,34 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
     scaleY,
   );
 
-  // The zoom tile is the whole detail page, not a media clone. If the
-  // projected source crop needs pixels outside the destination image's own
-  // rendered window, preserve the legacy bbox path instead of revealing an
-  // impossible region.
-  if (!containsRect(enterMedia.window, startWindow)) return fallback();
+  // The zoom tile is the whole detail page, not a media clone: it can only
+  // show pixels the detail image renders. When the projected destination
+  // crop needs more (the card shows the whole frame, the player crops its
+  // sides), the tile keeps the uniform scale and covers the shared part
+  // only; the destination's extra edges show from beneath and the shared
+  // element stays visible. Stretching the page to the card's box instead
+  // would warp the image by the aspect difference. No shared part at all
+  // is the legacy bbox path.
+  const shown = intersectRects(startWindow, enterMedia.window);
+  if (!shown) return fallback();
+  const partial = !containsRect(enterMedia.window, startWindow);
+  const radius = exitMedia.radius;
 
   return {
     contentAware: true,
     enterContent,
     exitContent,
-    startWindow,
+    startWindow: shown,
     scaleX,
     scaleY,
-    exitCornerRadii: exitMedia.cornerRadii,
+    exitCornerRadii: partial
+      ? shownCornerRadii(
+          shown,
+          startWindow,
+          exitMedia.cornerRadii ?? [radius, radius, radius, radius],
+        )
+      : exitMedia.cornerRadii,
+    partial,
   };
 }
 
