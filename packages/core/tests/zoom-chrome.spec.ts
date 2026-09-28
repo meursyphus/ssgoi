@@ -61,6 +61,8 @@ async function expectMirrored(page: Page, selector: string) {
 // lands at the card centre once the tile has shrunk.
 const OVER_BAR = { x: 150, y: 330 };
 const OVER_BADGE = { x: 276, y: 234 };
+// Inside the badge's box but outside the card's 12px rounded corner.
+const CARD_CORNER = { x: 298, y: 222 };
 const CARD_CENTRE = { x: 200, y: 280 };
 const CONTROL = { x: 200, y: 120 };
 
@@ -91,6 +93,8 @@ for (const type of ["static", "expand", "blur"] as const) {
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), GREEN);
     near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
     near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
+    // The badge copy is trimmed to the card's rounded box like the badge.
+    near(await pixel(page, CARD_CORNER.x, CARD_CORNER.y), LIST);
 
     // Settled: identical pixels, nothing left behind, inline styles restored.
     await page.evaluate(() => window.zoomChrome.complete());
@@ -122,6 +126,7 @@ for (const type of ["static", "expand", "blur"] as const) {
     await page.evaluate(() => window.zoomChrome.seek(0));
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), GREEN);
     near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
+    near(await pixel(page, CARD_CORNER.x, CARD_CORNER.y), LIST);
     near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
     near(await pixel(page, CONTROL.x, CONTROL.y), LIST);
 

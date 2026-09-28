@@ -32,6 +32,9 @@
       top: 220px;
       width: 200px;
       height: 120px;
+      /* The card trims its badge to its rounded box. */
+      overflow: hidden;
+      border-radius: 12px;
     }
     /* A long list scrolled by 500px: the card lands on the same screen spot. */
     .list.tall {
@@ -49,8 +52,8 @@
     }
     .badge {
       position: absolute;
-      right: 4px;
-      top: 4px;
+      right: 0;
+      top: 0;
       width: 40px;
       height: 20px;
       background: #d81e1e;

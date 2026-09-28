@@ -242,6 +242,57 @@ export function cloneChrome(source: HTMLElement): HTMLElement | null {
   return clone;
 }
 
+function clipsContent(style: CSSStyleDeclaration): boolean {
+  return (
+    style.overflowX !== "visible" ||
+    style.overflowY !== "visible" ||
+    (style.clipPath !== "none" && style.clipPath !== "") ||
+    /paint|strict|content/.test(style.contain)
+  );
+}
+
+/** Ancestors between `element` and `page` that trim their content, outermost first. */
+export function clippingAncestors(
+  element: HTMLElement,
+  page: HTMLElement,
+): HTMLElement[] {
+  const found: HTMLElement[] = [];
+  for (
+    let ancestor = element.parentElement;
+    ancestor && ancestor !== page;
+    ancestor = ancestor.parentElement
+  ) {
+    if (clipsContent(getComputedStyle(ancestor))) found.unshift(ancestor);
+  }
+  return found;
+}
+
+/** An empty box with the ancestor's trimming: its padding box, corners and clip-path. */
+function cloneClip(
+  ancestor: HTMLElement,
+  box: Box,
+  origin: { left: number; top: number },
+): HTMLElement {
+  const style = getComputedStyle(ancestor);
+  const frame = document.createElement("div");
+  frame.setAttribute(CHROME_ATTRIBUTE, "");
+  Object.assign(frame.style, {
+    position: "absolute",
+    left: `${box.left - origin.left + ancestor.clientLeft}px`,
+    top: `${box.top - origin.top + ancestor.clientTop}px`,
+    width: `${ancestor.clientWidth}px`,
+    height: `${ancestor.clientHeight}px`,
+    overflow: "hidden",
+    borderTopLeftRadius: style.borderTopLeftRadius,
+    borderTopRightRadius: style.borderTopRightRadius,
+    borderBottomRightRadius: style.borderBottomRightRadius,
+    borderBottomLeftRadius: style.borderBottomLeftRadius,
+    clipPath: style.clipPath,
+    pointerEvents: "none",
+  });
+  return frame;
+}
+
 export class ChromeStrategy implements ZoomStrategy {
   readonly name = "chrome";
 
@@ -288,17 +339,39 @@ export class ChromeStrategy implements ZoomStrategy {
       transformOrigin: motion?.transformOrigin ?? "",
       willChange: motion ? "transform, opacity" : "opacity",
     });
+    const measure = (element: HTMLElement): Box => {
+      const rect = getClientRect(background, element);
+      return {
+        left: rect.left + background.scrollLeft,
+        top: rect.top + background.scrollTop,
+        width: rect.width,
+        height: rect.height,
+      };
+    };
     for (const source of chrome) {
       const clone = cloneChrome(source);
       if (!clone) continue;
-      const rect = getClientRect(background, source);
+      // A caption gradient that the card's rounded `overflow: hidden` box
+      // trims must stay trimmed in the copy, or its square corners paint
+      // past the card until the layer goes. Rebuild each clipping ancestor
+      // between the chrome and the page as a nested box around the copy.
+      let host: HTMLElement = layer;
+      let origin = { left: 0, top: 0 };
+      for (const ancestor of clippingAncestors(source, background)) {
+        const box = measure(ancestor);
+        const frame = cloneClip(ancestor, box, origin);
+        host.append(frame);
+        host = frame;
+        origin = { left: box.left, top: box.top };
+      }
+      const rect = measure(source);
       Object.assign(clone.style, {
-        left: `${rect.left + background.scrollLeft}px`,
-        top: `${rect.top + background.scrollTop}px`,
+        left: `${rect.left - origin.left}px`,
+        top: `${rect.top - origin.top}px`,
         width: `${rect.width}px`,
         height: `${rect.height}px`,
       });
-      layer.append(clone);
+      host.append(clone);
     }
     if (!layer.childElementCount) return [];
 
