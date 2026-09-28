@@ -7,44 +7,38 @@ import type { SearchDoc, SearchPlatform } from "./types";
  * table and demo authors never have to think about search.
  */
 export const DEMO_ALIASES: Record<string, string[]> = {
-  "youtube-mobile": ["유튜브", "youtube", "yt"],
-  "youtube-music-web": ["유튜브 뮤직", "youtube music", "yt music"],
-  "google-photos": ["구글 포토", "구글포토", "google photo"],
-  "air-bnb": ["에어비앤비", "에어비엔비", "airbnb"],
-  "airbnb-photo-tour": ["에어비앤비", "에어비엔비", "airbnb"],
-  instagram: ["인스타그램", "인스타", "insta", "ig"],
-  "kakao-talk": ["카카오톡", "카톡", "카카오", "kakao"],
-  pinterest: ["핀터레스트", "핀터", "pin"],
-  "gamja-market": ["감자마켓", "당근마켓", "당근", "gamja", "karrot", "daangn"],
-  "material-mail": ["지메일", "gmail", "메일", "email", "material you"],
-  voyage: ["보야지"],
-  lumen: ["루멘"],
-  "yuzu-club": ["유자"],
+  "youtube-mobile": ["youtube", "yt"],
+  "youtube-music-web": ["youtube music", "yt music"],
+  "google-photos": ["google photo"],
+  "air-bnb": ["airbnb"],
+  "airbnb-photo-tour": ["airbnb"],
+  instagram: ["insta", "ig"],
+  "kakao-talk": ["kakao", "kakaotalk"],
+  pinterest: ["pin"],
+  "gamja-market": ["gamja", "karrot", "daangn", "marketplace"],
+  "material-mail": ["gmail", "mail", "email", "material you"],
 };
 
 /**
  * What people type when they mean a docs page but not its title, keyed by
- * href: task words ("getting started", "debug"), API names the page explains,
- * and Korean. Only terms the page actually answers.
+ * href: task words ("getting started", "debug") and API names the page
+ * explains. Only terms the page actually answers.
  */
 export const DOCS_ALIASES: Record<string, string[]> = {
-  "/docs": ["introduction", "overview", "what is ssgoi", "소개"],
+  "/docs": ["introduction", "overview", "what is ssgoi"],
   "/docs/install": [
     "install",
     "installation",
     "getting started",
     "get started",
     "setup",
-    "설치",
-    "시작하기",
   ],
-  "/docs/transitions": ["presets", "all transitions", "트랜지션", "전환"],
+  "/docs/transitions": ["presets", "all transitions"],
   "/docs/route-rules": [
     "SsgoiConfig",
     "config rules",
     "priority",
     "specificity",
-    "라우트 규칙",
   ],
   "/docs/boundaries": [
     "SsgoiRouteBoundary",
@@ -61,7 +55,7 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "physics",
   ],
   "/docs/custom-transitions": ["defineTransition", "make your own transition"],
-  "/docs/scroll-restoration": ["scroll position", "preserveScroll", "스크롤"],
+  "/docs/scroll-restoration": ["scroll position", "preserveScroll"],
   "/docs/nested-boundaries": ["nested layout", "tab bar", "parallel routes"],
   "/docs/view-transition-api": ["startViewTransition", "view transitions api"],
   "/docs/compatibility": [
@@ -71,15 +65,8 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "firefox",
     "ios",
     "android",
-    "호환성",
   ],
-  "/docs/troubleshooting": [
-    "debug",
-    "not working",
-    "no animation",
-    "broken",
-    "문제 해결",
-  ],
+  "/docs/troubleshooting": ["debug", "not working", "no animation", "broken"],
 };
 
 /**
@@ -87,28 +74,24 @@ export const DOCS_ALIASES: Record<string, string[]> = {
  * Used on the transition's own docs page and on every demo clip that plays it.
  */
 export const TRANSITION_TERMS: Record<string, string[]> = {
-  hero: ["shared element", "shared", "morph", "공유 요소", "히어로"],
+  hero: ["shared element", "shared", "morph"],
   sheet: [
     "bottom sheet",
     // shadcn/ui's Drawer (vaul) is a bottom sheet
     "drawer",
-    "드로어",
     "modal",
     "overlay",
     "popup",
-    "바텀시트",
-    "모달",
-    "시트",
   ],
-  drill: ["push", "stack", "depth", "드릴", "푸시"],
-  axis: ["tab", "tabs", "shared axis", "탭"],
-  slide: ["tab", "tabs", "swipe", "carousel", "슬라이드"],
-  zoom: ["expand", "card", "줌", "확대"],
-  fade: ["crossfade", "dissolve", "페이드"],
-  scroll: ["vertical", "스크롤"],
+  drill: ["push", "stack", "depth"],
+  axis: ["tab", "tabs", "shared axis"],
+  slide: ["tab", "tabs", "swipe", "carousel"],
+  zoom: ["expand", "card"],
+  fade: ["crossfade", "dissolve"],
+  scroll: ["vertical"],
   strip: ["page flip", "perspective"],
   film: ["cinematic"],
-  rotate: ["spin", "회전"],
+  rotate: ["spin"],
   jaemin: ["pop", "playful"],
 };
 

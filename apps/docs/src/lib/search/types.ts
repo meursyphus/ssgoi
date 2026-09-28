@@ -25,7 +25,7 @@ export type SearchDoc = {
   text?: string;
   /** Matched but never shown: SEO copy, slug words, tags, packages. */
   terms?: string;
-  /** Other names for the thing itself (유튜브, 카톡, gmail). */
+  /** Other names for the thing itself (yt, kakao, gmail). */
   aliases?: string[];
   /** What people call a transition instead (bottom sheet, shared element). */
   synonyms?: string[];

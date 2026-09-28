@@ -17,7 +17,12 @@ import { youtubeMobileShowcase } from "@/demo/youtube-mobile/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
 import type { ShowcaseApp, ShowcaseClip } from "./types";
 
-export type { ShowcaseApp, ShowcaseClip, ShowcasePlatform } from "./types";
+export type {
+  ShowcaseApp,
+  ShowcaseClip,
+  ShowcasePlatform,
+  ShowcaseTourStep,
+} from "./types";
 
 /** GitHub tree URL prefix — paths in showcase data are repo-root-relative folders. */
 export const GITHUB_BASE = "https://github.com/meursyphus/ssgoi/tree/HEAD";

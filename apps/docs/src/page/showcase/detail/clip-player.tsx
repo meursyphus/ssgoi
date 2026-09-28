@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { showcaseFrameProtocol, type ShowcaseFrameStatus } from "@/lib/hooks";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { showcaseFrameProtocol } from "@/lib/hooks";
 import { ShowcasePhone } from "@/components/showcase-phone";
 import { DesktopFrame } from "@/components/desktop-frame";
 import {
@@ -9,21 +9,27 @@ import {
   StatusDot,
   type DockController,
 } from "@/lib/components/animation-dock";
+import { clipProgram } from "../preview/program";
+import {
+  PLAY_MIN_RATIO,
+  useDocumentVisible,
+  useLoadSlot,
+  useOnScreen,
+  usePreviewTour,
+} from "../preview/use-preview-tour";
 import type { ShowcaseClip, ShowcasePlatform } from "../data";
 
 /**
- * Plays a single transition clip inside an iframe.
- *
- * Mechanism: parent posts `{type: "ssgoi-showcase:navigate", path}` to the
- * iframe and the demo's MobileShowcaseShell calls router.push. We toggle
- * between `enterPath` and `exitPath` on an interval so the ssgoi transition
- * fires repeatedly. The iframe starts at `exitPath`, so the first leg is
- * exitPath → enterPath like every later one (a demo's landing page is not
- * always the page the clip's rule leaves from).
+ * Plays a single transition clip inside an iframe, on a loop: a history push
+ * from `exitPath` to `enterPath`, then a real `history.back()`, so SSGOI
+ * replays the effect in reverse the way a user's Back would. The moves go
+ * through the page's preview scheduler (`preview/scheduler.ts`): every clip
+ * on the page shares one joint session history, and a back may only undo
+ * this clip's own entry.
  *
  * The animation dock posts `{type: "ssgoi-showcase:host", command}` to control
- * the underlying HostAnimation (play/pause/reverse/rate) — same lever the
- * AnimationDock in apps/dev exposes.
+ * the underlying HostAnimation (play/pause/rate); while it is paused the loop
+ * holds its screen.
  */
 export function ClipPlayer({
   id,
@@ -35,51 +41,27 @@ export function ClipPlayer({
   clip: ShowcaseClip;
   platform?: ShowcasePlatform;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [status, setStatus] = useState<ShowcaseFrameStatus>("idle");
+  const [frame, setFrame] = useState<HTMLIFrameElement | null>(null);
+  const [box, setBox] = useState<HTMLDivElement | null>(null);
   const [rate, setRate] = useState(1);
-  const intervalMs = clip.intervalMs ?? 4800;
+  const onScreen = useOnScreen(box, "0px", PLAY_MIN_RATIO);
+  const near = useOnScreen(box, "600px");
+  const docVisible = useDocumentVisible();
+  const program = useMemo(() => clipProgram(clip), [clip]);
+  const status = useFrameStatus(frame);
 
-  // toggle state — we drive enter/exit ourselves so the dock can pause without
-  // racing the demo's own router state
-  const onEnterRef = useRef(false);
+  const playback = usePreviewTour(frame, program, {
+    name: `clip:${clip.title}`,
+    active: onScreen && docVisible,
+    hold: status === "paused",
+  });
+  // Created only while no other clip is "out" (see `acquireLoad`).
+  const live = useLoadSlot(near, playback.ready);
 
-  const post = useCallback((msg: object) => {
-    const w = iframeRef.current?.contentWindow;
-    if (!w) return;
-    w.postMessage(msg, "*");
-  }, []);
-
-  const navigate = useCallback(
-    (path: string) =>
-      post({ type: showcaseFrameProtocol.messages.navigate, path }),
-    [post],
+  const post = useCallback(
+    (msg: object) => frame?.contentWindow?.postMessage(msg, "*"),
+    [frame],
   );
-
-  // listen for status broadcasts from the iframe
-  useEffect(() => {
-    function onMessage(e: MessageEvent) {
-      if (e.source !== iframeRef.current?.contentWindow) return;
-      const data = e.data;
-      if (!data || typeof data !== "object") return;
-      if (data.type === showcaseFrameProtocol.messages.status) {
-        setStatus(data.status as ShowcaseFrameStatus);
-      }
-    }
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  // auto-toggle enter/exit
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      const next = onEnterRef.current ? clip.exitPath : clip.enterPath;
-      onEnterRef.current = !onEnterRef.current;
-      navigate(next);
-    }, intervalMs);
-    return () => window.clearInterval(id);
-  }, [clip.enterPath, clip.exitPath, intervalMs, navigate]);
-
   const sendHost = (command: string, payload?: number) =>
     post({ type: showcaseFrameProtocol.messages.host, command, payload });
 
@@ -111,15 +93,18 @@ export function ClipPlayer({
   return (
     <div
       id={id}
+      ref={setBox}
       className={
         "flex scroll-mt-8 flex-col gap-3 " +
         (platform === "web" ? "w-full max-w-[760px]" : "w-[300px]")
       }
     >
-      {platform === "web" ? (
+      {!live ? (
+        <ClipPlaceholder platform={platform} />
+      ) : platform === "web" ? (
         <DesktopFrame
-          ref={iframeRef}
-          src={clip.exitPath}
+          ref={setFrame}
+          src={program.start}
           title={clip.title}
           widthClassName="w-full"
           interactive={false}
@@ -129,8 +114,8 @@ export function ClipPlayer({
         </DesktopFrame>
       ) : (
         <ShowcasePhone
-          ref={iframeRef}
-          src={clip.exitPath}
+          ref={setFrame}
+          src={program.start}
           title={clip.title}
           widthClassName="w-full"
           interactive={false}
@@ -159,4 +144,35 @@ export function ClipPlayer({
       )}
     </div>
   );
+}
+
+function ClipPlaceholder({ platform }: { platform: ShowcasePlatform }) {
+  return (
+    <div
+      aria-hidden
+      className={
+        platform === "web"
+          ? "aspect-[1280/828] w-full rounded-[12px] bg-[#1c1611]"
+          : "aspect-[9/19] w-full rounded-[32px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08]"
+      }
+    />
+  );
+}
+
+/** The frame's host status, as the scheduler hears it. */
+function useFrameStatus(frame: HTMLIFrameElement | null) {
+  const [status, setStatus] = useState<DockController["status"]>("idle");
+  useEffect(() => {
+    const win = frame?.contentWindow;
+    if (!win) return;
+    function onMessage(e: MessageEvent) {
+      if (e.source !== win) return;
+      const data = e.data as { type?: unknown; status?: unknown } | null;
+      if (data?.type === showcaseFrameProtocol.messages.status)
+        setStatus(data.status as DockController["status"]);
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [frame]);
+  return status;
 }

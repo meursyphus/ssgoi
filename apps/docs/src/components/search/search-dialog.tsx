@@ -26,6 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { useSiteSearch } from "@/lib/state";
+import { releasePreviews } from "@/page/showcase/preview/scheduler";
 import { loadSearchIndex, peekSearchIndex } from "@/lib/search/client-index";
 import {
   holdAnchor,
@@ -66,7 +67,7 @@ const SUGGESTIONS = [
   "route rules",
   "Next.js",
   "scroll",
-  "유튜브",
+  "youtube",
 ];
 
 function startHere(docs: readonly PreparedDoc[]): SearchResultGroup[] {
@@ -211,9 +212,13 @@ function SearchPanel({
       else requestAnimationFrame(() => window.scrollTo({ top: 0 }));
       return;
     }
-    router.push(href);
-    // Next scrolls to the #hash once; keep it there while the page settles.
-    holdAnchorAfterNavigation(href);
+    // Live previews (landing, showcase pages) return first, or their history
+    // entries would sit under the next page and eat the user's Backs.
+    void releasePreviews().then(() => {
+      router.push(href);
+      // Next scrolls to the #hash once; keep it there while the page settles.
+      holdAnchorAfterNavigation(href);
+    });
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -444,8 +449,7 @@ function NoResults({
         Nothing matches <span className="text-ink">“{query}”</span>
       </p>
       <p className="mx-auto mt-2 max-w-sm text-[13px] leading-6 text-ink-faint">
-        Try a transition, a framework or an app — Korean app names work too
-        (유튜브, 카톡, 당근).
+        Try a transition, a framework or an app name.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-2">
         {SUGGESTIONS.map((s) => (

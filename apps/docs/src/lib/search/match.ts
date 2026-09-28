@@ -4,72 +4,16 @@ import type { SearchDoc, SearchGroup } from "./types";
 /*
  * One matcher for the catalog filter and the ⌘K palette.
  *
- * Text is lower-cased and Hangul is split into compatibility jamo (compound
- * finals and vowels too), so a query typed mid-composition — "당ㄱ", "카토" —
- * is a plain prefix of the finished word. Every query token has to hit some
+ * Text is lower-cased and punctuation collapses to spaces ("next.js" →
+ * "next js", "object-fit" → "object fit"). Every query token has to hit some
  * field; the document's score is the sum of each token's best hit × the
  * field's weight, times a small prior per kind of result.
  */
 
-const CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
-const JUNG = "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ";
-const JONG = ["", ..."ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ"];
-const SPLIT: Record<string, string> = {
-  ㄳ: "ㄱㅅ",
-  ㄵ: "ㄴㅈ",
-  ㄶ: "ㄴㅎ",
-  ㄺ: "ㄹㄱ",
-  ㄻ: "ㄹㅁ",
-  ㄼ: "ㄹㅂ",
-  ㄽ: "ㄹㅅ",
-  ㄾ: "ㄹㅌ",
-  ㄿ: "ㄹㅍ",
-  ㅀ: "ㄹㅎ",
-  ㅄ: "ㅂㅅ",
-  ㅘ: "ㅗㅏ",
-  ㅙ: "ㅗㅐ",
-  ㅚ: "ㅗㅣ",
-  ㅝ: "ㅜㅓ",
-  ㅞ: "ㅜㅔ",
-  ㅟ: "ㅜㅣ",
-  ㅢ: "ㅡㅣ",
-};
-const COMPOUND = /[ㄳㄵㄶㄺㄻㄼㄽㄾㄿㅀㅄㅘㅙㅚㅝㅞㅟㅢ]/g;
-const SYLLABLE = /[가-힣]/g;
-const ONLY_CONSONANTS = /^[ㄱ-ㅎ]{2,}$/;
 const NON_WORD = /[^\p{L}\p{N}]+/gu;
 
-function syllableIndex(c: string) {
-  return c.charCodeAt(0) - 0xac00;
-}
-
-function toJamo(value: string) {
-  return value
-    .replace(SYLLABLE, (c) => {
-      const i = syllableIndex(c);
-      return CHO[(i / 588) | 0] + JUNG[((i % 588) / 28) | 0] + JONG[i % 28];
-    })
-    .replace(COMPOUND, (c) => SPLIT[c]);
-}
-
-/** NFC (not NFKC: that turns a typed ㄱ into a conjoining jamo), lower case, jamo. */
 export function normalize(value: string): string {
-  return toJamo(value.normalize("NFC").toLowerCase())
-    .replace(NON_WORD, " ")
-    .trim();
-}
-
-/** Initial consonants of each Hangul word: "유튜브 뮤직" → ["ㅇㅌㅂ", "ㅁㅈ"]. */
-function initials(value: string): string[] | undefined {
-  const out: string[] = [];
-  for (const word of value.normalize("NFC").split(NON_WORD)) {
-    const syllables = word.match(SYLLABLE);
-    if (syllables)
-      out.push(
-        syllables.map((c) => CHO[(syllableIndex(c) / 588) | 0]).join(""),
-      );
-  }
-  return out.length ? out : undefined;
+  return value.normalize("NFC").toLowerCase().replace(NON_WORD, " ").trim();
 }
 
 /** restore → restor (restoration), matching → match. Keeps at least 4 chars. */
@@ -107,8 +51,6 @@ type Field = {
   exact: boolean;
   /** tolerate one or two typos (titles and aliases only) */
   fuzzy: boolean;
-  ini?: string[];
-  iniCompact?: string;
 };
 
 const W = {
@@ -132,15 +74,12 @@ function makeField(
   if (!text) return null;
   const n = normalize(text);
   if (!n) return null;
-  const ini = initials(text);
   return {
     c: n.replace(/ /g, ""),
     words: n.split(" "),
     weight,
     exact: Boolean(opts.exact),
     fuzzy: Boolean(opts.fuzzy),
-    ini,
-    iniCompact: ini?.join(""),
   };
 }
 
@@ -152,10 +91,6 @@ function tokenHit(token: string, f: Field): number {
   }
   if (hit) return hit;
   if (f.c.startsWith(token)) return 0.7;
-  if (f.ini && ONLY_CONSONANTS.test(token)) {
-    for (const i of f.ini) if (i.startsWith(token)) return 0.7;
-    if (f.iniCompact?.startsWith(token)) return 0.6;
-  }
   const s = stem(token);
   if (s) for (const w of f.words) if (w.startsWith(s)) return 0.6;
   if (token.length >= 2 && f.c.includes(token)) return 0.45;
