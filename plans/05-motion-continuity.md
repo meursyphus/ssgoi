@@ -153,7 +153,7 @@ No package version or release is part of this draft.
 Rebased onto `latest` after 7.2.0 (`cb48248`). Two features landed there in the meantime and were merged with this contract rather than replaced:
 
 - **Scroll lock lifetime (#418).** A run still acquires its container lock before superseding a pending predecessor. It is released exactly once by whichever path ends the run: disposal (finished or retired), supersession before attach, failure, or the 5 s abandoned-prepare bound. Retired runs therefore keep their lock until their release motion is disposed, while the newer run already holds its own.
-- **In-place hero (#415, #416).** The real destination image stays the persistent track and carries the photo key with role `shared-media`; source copies are unkeyed (`shared-media-source`), so a redirected navigation transfers the flight to the new destination node and never matches a copy. Layout restoration (`fitHeroImage`, CSS hooks) runs regardless of ownership: a newer track on the same image only drives transform/clip/opacity, and opacity is arbitrated by the existing lease.
+- **In-place hero (#415, #416).** The real destination image stays the persistent track and carries the photo key with role `shared-media`; source copies are unkeyed (`shared-media-source`), so a redirected navigation transfers the flight to the new destination node and never matches a copy. The destination keeps its layout (no placeholder, fit, or CSS marker since the placeholder-free follow-up); restoring its paint styles runs regardless of ownership: a newer track on the same image only drives transform/clip/opacity, and opacity is arbitrated by the existing lease.
 
 Review changes to the draft itself:
 

@@ -50,9 +50,7 @@ for (const effect of ["hero", "zoom"] as const) {
         await page.evaluate(() => window.sharedCrossfade.finish());
         expect(await pixel(page)).toEqual(before);
         await expect(
-          page.locator(
-            "[data-ssgoi-crossfade], [data-hero-layer], [data-hero-placeholder]",
-          ),
+          page.locator("[data-ssgoi-crossfade], [data-hero-layer]"),
         ).toHaveCount(0);
       });
     }

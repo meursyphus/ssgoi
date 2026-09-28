@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>SSGOI in-place hero</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #fff;
+      font: 14px system-ui;
+    }
+    #scene {
+      position: relative;
+      width: 360px;
+      height: 560px;
+      overflow: clip;
+    }
+    .page {
+      width: 360px;
+      height: 560px;
+      padding: 16px;
+      background: #fff;
+    }
+    h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    img {
+      display: block;
+      object-fit: cover;
+    }
+    .thumb {
+      width: 120px;
+      height: 120px;
+      margin: 300px 0 0 24px;
+    }
+    /* The destination is a flex item: its box must never move or resize. */
+    .detail {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .photo {
+      width: 100%;
+      height: 90px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+    }
+    /* A flow image owns its crop: cover content may paint while the crop
+       opens, and a static clip-path crops it at rest. */
+    .flow .photo {
+      overflow: visible;
+      clip-path: inset(0 round 12px);
+    }
+    /* A fixed frame owns the image's height and clips it. */
+    .gallery {
+      position: relative;
+      flex: 0 0 auto;
+      height: 90px;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #dde5ec;
+    }
+    .gallery .photo {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      border-radius: 0;
+      overflow: visible;
+    }
+    /* An unpositioned clipping cell (Tailwind `overflow-hidden rounded-2xl`):
+       the absolutely positioned copy escapes it, the image does not. */
+    .clip-cell {
+      flex: 0 0 auto;
+      height: 90px;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+    .clip-cell .photo {
+      height: 100%;
+      border-radius: 0;
+    }
+    /* Tailwind v4 `space-y-6`: every child but the last. */
+    .stack > :not(:last-child) {
+      margin-block-end: 24px;
+    }
+    /* Tailwind v3 `space-y-6`: every child after another. */
+    .stack3 > :not([hidden]) ~ :not([hidden]) {
+      margin-top: 24px;
+    }
+    .lead {
+      margin: 0;
+    }
+    .badge {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      color: #fff;
+    }
+    .chips {
+      display: flex;
+      gap: 8px;
+    }
+    .chips span {
+      padding: 4px 8px;
+      background: #eee;
+    }
+  </style>
+  <main id="scene"></main>
+  <script type="module" src="./hero-in-place.ts"></script>
+</html>
