@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createPageMotionPlan,
+  FADE_HANDOFF,
   pageMotionStyle,
   simulate,
   interpolateFrame,
@@ -46,8 +47,14 @@ describe("portable numerical playback", () => {
   it("sequences fade and runs slide tracks together", () => {
     const fade = createPageMotionPlan("fade", "forward");
     const slide = createPageMotionPlan("slide", "forward");
-    expect(fade.in.offset).toBe(fade.out.duration);
-    expect(fade.duration).toBe(fade.out.duration + fade.in.duration);
+    // The fade-in starts when the fade-out first reaches FADE_HANDOFF.
+    const handoff = fade.out.frames.find((f) => f.position >= FADE_HANDOFF);
+    expect(fade.in.offset).toBe(handoff?.time);
+    expect(fade.in.offset).toBeGreaterThan(0);
+    expect(fade.in.offset).toBeLessThan(fade.out.duration);
+    expect(fade.duration).toBe(
+      Math.max(fade.out.duration, fade.in.offset + fade.in.duration),
+    );
     expect(slide.in.offset).toBe(0);
     expect(slide.duration).toBe(
       Math.max(slide.out.duration, slide.in.duration),

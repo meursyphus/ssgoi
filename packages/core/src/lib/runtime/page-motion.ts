@@ -3,12 +3,18 @@ import type { NavigationDirection } from "./types";
 import { IntegratorProvider } from "../animation/integrator/provider";
 import { simulate, type SimFrame } from "./timeline";
 
+// Fade-through: a quick exit, then a softly decelerating entrance that starts
+// once the outgoing page is nearly gone (FADE_HANDOFF), so there is no dead
+// frame between them. Visually done in ~380 ms, settled in ~620 ms. Overshoot
+// on the exit only pushes opacity past 0, which the browser clamps.
 export const FADE_OUT_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 180, damping: 20, doubleSpring: true },
+  spring: { stiffness: 700, damping: 38, restDelta: 0.005, restSpeed: 0.05 },
 };
 export const FADE_IN_PHYSICS: PhysicsOptions = {
-  spring: { stiffness: 170, damping: 20, doubleSpring: true },
+  spring: { stiffness: 300, damping: 33, restDelta: 0.005, restSpeed: 0.05 },
 };
+/** Exit progress at which the fade's incoming page starts. */
+export const FADE_HANDOFF = 0.9;
 export const SLIDE_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 170, damping: 22, doubleSpring: 0.8 },
 };
@@ -41,6 +47,13 @@ function track(physics: PhysicsOptions, offset = 0): MotionTrack {
   return { frames, offset, duration: frames[frames.length - 1]?.time ?? 0 };
 }
 
+/** When the exit first reaches FADE_HANDOFF (its end if it never does). */
+function handoffTime(out: MotionTrack): number {
+  return (
+    out.frames.find((f) => f.position >= FADE_HANDOFF)?.time ?? out.duration
+  );
+}
+
 export function createPageMotionPlan(
   kind: PageMotionKind,
   direction: NavigationDirection,
@@ -51,7 +64,7 @@ export function createPageMotionPlan(
   );
   const incoming = track(
     physics ?? (kind === "fade" ? FADE_IN_PHYSICS : SLIDE_PHYSICS),
-    kind === "fade" ? out.duration : 0,
+    kind === "fade" ? handoffTime(out) : 0,
   );
   return {
     kind,

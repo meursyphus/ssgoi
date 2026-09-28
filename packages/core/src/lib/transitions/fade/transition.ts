@@ -9,6 +9,7 @@ import {
 import {
   FADE_OUT_PHYSICS,
   FADE_IN_PHYSICS,
+  FADE_HANDOFF,
   pageMotionStyle,
 } from "../../runtime/page-motion";
 
@@ -61,9 +62,11 @@ export const fade = (options: FadeOptions = {}) => {
         },
       });
 
+      // Fade-through: the incoming page starts once the outgoing one is
+      // nearly gone rather than fully settled, so no dead frame sits between.
       return new MultiAnimation(
         { out: outAnim, in: inAnim },
-        { mode: "sequence" },
+        { startAt: [0, FADE_HANDOFF] },
       );
     },
   } satisfies TransitionDirection<object>;
