@@ -167,6 +167,10 @@ test("a card that shows more than the player keeps the scale uniform and lands i
   expect(Math.abs(matrix![0]! - matrix![3]!)).toBeLessThan(0.001);
   expect(matrix![0]).toBeLessThan(1);
   expect(await cardImageOpacity()).toBe("1");
+  // The tile still rounds toward the card's 12px corners while it is the
+  // visible shape; landing inside the card must not flatten them.
+  const clip = await page.evaluate(() => window.zoomChrome.outgoingClipPath());
+  expect(clip).toMatch(/round (?!0% \/ 0%)(?!0% 0% 0% 0% \/)/);
 
   // Landed: the card's left edge (which the player never rendered) and its
   // centre both show the picture; nothing pops when the tile goes away.

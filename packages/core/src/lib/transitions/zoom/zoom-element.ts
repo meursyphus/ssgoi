@@ -47,31 +47,6 @@ function intersectRects(a: MediaRect, b: MediaRect): MediaRect | null {
   return { left, top, width: right - left, height: bottom - top };
 }
 
-/**
- * Corner radii for the part of the destination the tile can show. A strip
- * edge that stops short of the destination's own edge lies inside the card,
- * so its corners stay square and the card's rounded corner shows from
- * beneath; an edge that reaches the card's edge keeps that corner's radius.
- */
-function shownCornerRadii(
-  shown: MediaRect,
-  window: MediaRect,
-  corners: MediaCornerRadii,
-): MediaCornerRadii {
-  const left = shown.left <= window.left + EPSILON;
-  const top = shown.top <= window.top + EPSILON;
-  const right =
-    shown.left + shown.width >= window.left + window.width - EPSILON;
-  const bottom =
-    shown.top + shown.height >= window.top + window.height - EPSILON;
-  return [
-    top && left ? corners[0] : 0,
-    top && right ? corners[1] : 0,
-    bottom && right ? corners[2] : 0,
-    bottom && left ? corners[3] : 0,
-  ];
-}
-
 export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   const fallback = (): TileGeometry => ({
     contentAware: false,
@@ -118,9 +93,11 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   // is the legacy bbox path.
   const shown = intersectRects(startWindow, enterMedia.window);
   if (!shown) return fallback();
-  const partial = !containsRect(enterMedia.window, startWindow);
-  const radius = exitMedia.radius;
 
+  // The window keeps rounding toward the destination's corners even when it
+  // lands inside the card: while the tile is still larger than the card its
+  // corners are the visible shape, and once it is smaller a rounded corner
+  // only uncovers the card's own identical pixels beneath.
   return {
     contentAware: true,
     enterContent,
@@ -128,14 +105,8 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
     startWindow: shown,
     scaleX,
     scaleY,
-    exitCornerRadii: partial
-      ? shownCornerRadii(
-          shown,
-          startWindow,
-          exitMedia.cornerRadii ?? [radius, radius, radius, radius],
-        )
-      : exitMedia.cornerRadii,
-    partial,
+    exitCornerRadii: exitMedia.cornerRadii,
+    partial: !containsRect(enterMedia.window, startWindow),
   };
 }
 

@@ -142,6 +142,7 @@ const harness = {
   computedOpacity: (selector: string) =>
     getComputedStyle(scene.querySelector<HTMLElement>(selector)!).opacity,
   /** The outgoing page's live transform as [a, b, c, d, e, f]. */
+  outgoingClipPath: () => getComputedStyle(outgoing).clipPath,
   outgoingMatrix: () => {
     const match = /matrix\(([^)]+)\)/.exec(
       getComputedStyle(outgoing).transform,

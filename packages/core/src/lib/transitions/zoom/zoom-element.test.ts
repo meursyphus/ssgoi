@@ -153,10 +153,13 @@ describe("zoom-element", () => {
     });
     const geometry = buildTileGeometry(mediaInput);
     expect(geometry.partial).toBe(true);
-    // The tile can show the detail's own window only; the card's rounded
-    // corners lie outside it, so the strip stays square.
+    // The tile can show the detail's own window only, and still rounds it
+    // toward the card's corners: 16px visible at the 0.125 scale is 128px
+    // of the 400 x 800 page.
     expect(geometry.startWindow).toEqual(rect(0, 100, 400, 400));
-    expect(geometry.exitCornerRadii).toEqual([0, 0, 0, 0]);
+    expect(createZoomOut(mediaInput).animate(0).clipPath).toContain(
+      "round 32% / 16%",
+    );
 
     const start = createZoomIn(mediaInput).animate(0);
     // One factor on both axes (100 / 800 of the picture), not the 0.25 ×
