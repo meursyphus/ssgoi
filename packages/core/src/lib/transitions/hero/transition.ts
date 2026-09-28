@@ -16,6 +16,7 @@ import {
   resolveElementMediaGeometry,
   type MediaGeometry,
   type MediaFit,
+  type MediaRect,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
 import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
@@ -27,12 +28,7 @@ import {
   retainOpacity,
   type VisualReference,
 } from "../crossfade";
-import {
-  fitHeroImage,
-  markHeroTransitioning,
-  preserveStyles,
-  stackHeroPages,
-} from "./in-place";
+import { placeCrossfadeCopy, preserveStyles, stackHeroPages } from "./in-place";
 import { insetClipPath } from "../inset-clip";
 import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
@@ -199,18 +195,40 @@ type HeroMorphStyle = {
   clipPath: string;
 };
 
+/**
+ * Where a rendered visual sits (`box`, its clip-path reference box) and the
+ * media content it paints (`content`), both in root space. A copy sized to its
+ * content omits `content`. The real destination keeps its own layout box, so
+ * its fitted content can be larger (cover) or smaller (contain) than the box.
+ */
+export type HeroVisualReference = VisualReference & { content?: MediaRect };
+
 type HeroMorphPlan = {
   fromContent: MediaGeometry["content"];
   toContent: MediaGeometry["content"];
+  /** The destination visual's own layout box, in the same space as `toContent`. */
+  toVisualBox: MediaRect;
   fromVisualEl: HTMLElement;
   toVisualEl: HTMLElement;
   resetRadius: boolean;
   styleFor: (
     t: number,
     u: number,
-    reference?: VisualReference,
+    reference?: HeroVisualReference,
   ) => HeroMorphStyle;
 };
+
+/** Re-express `rect`, measured against `from`, against the same box measured as `to`. */
+function relocateRect(rect: MediaRect, from: MediaRect, to: MediaRect) {
+  const sx = from.width > 0 ? to.width / from.width : 1;
+  const sy = from.height > 0 ? to.height / from.height : 1;
+  return {
+    left: to.left + (rect.left - from.left) * sx,
+    top: to.top + (rect.top - from.top) * sy,
+    width: rect.width * sx,
+    height: rect.height * sy,
+  };
+}
 
 export function normalizeHeroGeometryPair(
   from: MediaGeometry,
@@ -296,21 +314,46 @@ export function buildHeroMorphPlan(
     projectedWindowRect(toContent, fromContent, fromWindow, scaleX, scaleY),
   );
 
+  const toVisualEl = toHero.mediaElement ?? toEl;
+
   return {
     fromContent,
     toContent,
+    // Same root space as `toContent` (see getHeroRect).
+    toVisualBox: measureVisual(root, toVisualEl).box,
     fromVisualEl: fromHero.mediaElement ?? fromEl,
-    toVisualEl: toHero.mediaElement ?? toEl,
+    toVisualEl,
     resetRadius: shouldResetHeroRadius(fromHero, toHero),
     styleFor: (t, u, reference) => {
-      const tx =
-        (u * dx + (reference ? cxTo - centerX(reference.box) : 0)) /
-        (reference?.scaleX ?? 1);
-      const ty =
-        (u * dy + (reference ? cyTo - centerY(reference.box) : 0)) /
-        (reference?.scaleY ?? 1);
       const sx = t + u * scaleX;
       const sy = t + u * scaleY;
+      // Without a reference the element is a copy placed at `toContent`.
+      const box = reference?.box ?? toContent;
+      const painted = reference?.content ?? box;
+      // Scale the painted content onto the interpolated content rect.
+      const scaleXOut = reference ? (sx * toContent.width) / painted.width : sx;
+      const scaleYOut = reference
+        ? (sy * toContent.height) / painted.height
+        : sy;
+      // transform-origin is the box center; land the painted content's center
+      // on the interpolated content center. Translation is in local units, so
+      // remove any ancestor scale.
+      const tx =
+        (u * dx +
+          cxTo -
+          centerX(box) -
+          scaleXOut * (centerX(painted) - centerX(box))) /
+        (reference?.scaleX ?? 1);
+      const ty =
+        (u * dy +
+          cyTo -
+          centerY(box) -
+          scaleYOut * (centerY(painted) - centerY(box))) /
+        (reference?.scaleY ?? 1);
+      // Painted units per destination-content unit on each axis (1 for a copy
+      // placed at `toContent`).
+      const kx = painted.width / toContent.width;
+      const ky = painted.height / toContent.height;
       // clip-path is resolved before transform; divide by the current scale
       // so the on-screen corner radius matches the visible hero window.
       const fromCorners = fromHero.cornerRadii ?? [
@@ -328,25 +371,35 @@ export function buildHeroMorphPlan(
       const radii = fromCorners.map((corner, i) => {
         const radius = Math.max(0, corner * u + toCorners[i]! * t);
         return {
-          x: radius / Math.max(Math.abs(sx), 0.000001),
-          y: radius / Math.max(Math.abs(sy), 0.000001),
+          x: (radius / Math.max(Math.abs(sx), 0.000001)) * kx,
+          y: (radius / Math.max(Math.abs(sy), 0.000001)) * ky,
         };
       });
+      // The window is interpolated inside the destination content. Express it
+      // against the element's own box: cover content larger than the box gives
+      // negative insets (painted only where the image's overflow allows it),
+      // contain content smaller than the box gives the letterbox as insets.
       const insetT = fromClipInset.top * u + toClipInset.top * t;
       const insetR = fromClipInset.right * u + toClipInset.right * t;
       const insetB = fromClipInset.bottom * u + toClipInset.bottom * t;
       const insetL = fromClipInset.left * u + toClipInset.left * t;
       return {
-        transform: reference
-          ? `translate(${tx}px, ${ty}px) scale(${(sx * toContent.width) / reference.box.width}, ${(sy * toContent.height) / reference.box.height})`
-          : `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`,
+        transform: `translate(${tx}px, ${ty}px) scale(${scaleXOut}, ${scaleYOut})`,
         clipPath: insetClipPath(
-          toContent,
+          box,
           {
-            top: insetT,
-            right: insetR,
-            bottom: insetB,
-            left: insetL,
+            top: insetT * ky + painted.top - box.top,
+            right:
+              insetR * kx +
+              box.left +
+              box.width -
+              (painted.left + painted.width),
+            bottom:
+              insetB * ky +
+              box.top +
+              box.height -
+              (painted.top + painted.height),
+            left: insetL * kx + painted.left - box.left,
           },
           radii,
         ),
@@ -394,7 +447,7 @@ class HeroTileStrategy implements HeroStrategy {
     const { resolved, physics, positionedParent, maxDistance, onDispose } = ctx;
     const restoreStack = stackHeroPages(ctx.from, ctx.to);
     onDispose((disposal) => restoreStack(disposal.owns));
-    // Measure every pair before changing any visual or caller-owned CSS hook.
+    // Measure every pair before changing any visual's paint styles.
     const matches = resolved.pairs.flatMap((pair) => {
       const plan = buildHeroMorphPlan(
         positionedParent,
@@ -463,61 +516,70 @@ class HeroTileStrategy implements HeroStrategy {
         );
         continue;
       }
-      // Snapshot before hiding the source or changing layout/CSS hooks.
+      // Snapshot before hiding the source or changing any paint style.
       const source = cloneCrossfadeVisual(fromVisualEl);
-      const restoreMarker = markHeroTransitioning(toVisualEl);
       const restoreTo = preserveStyles(toVisualEl, [
         "transform",
         "transform-origin",
         "clip-path",
-        "object-fit",
         "border-radius",
         "will-change",
       ]);
-      // Keep the real decoded image and its parent. The image's fitted content
-      // size uses an empty placeholder to retain its original flow footprint.
-      // Keeping object-fit also avoids SVG viewport changes at completion.
+      // Keep the real decoded image in its parent with its authored position,
+      // size, margins, flex, and object-fit: only paint properties change, so
+      // siblings never move and nothing stands in for the image in layout.
       toVisualEl.style.transform = "none";
       toVisualEl.style.transformOrigin = "center center";
       toVisualEl.style.willChange = "transform, clip-path, opacity";
       if (morph.resetRadius) toVisualEl.style.borderRadius = "0";
-      const restoreFit = fitHeroImage(
-        toVisualEl,
-        morph.toContent,
-        getClientRect(positionedParent, toVisualEl),
-      );
-      const reference = measureVisual(positionedParent, toVisualEl);
+      const placement = placeCrossfadeCopy(toVisualEl, source);
+      const measured = measureVisual(positionedParent, toVisualEl);
+      // Transform and clip are expressed against the image's own box, which
+      // paints the fitted content measured with the plan.
+      const reference: HeroVisualReference = {
+        ...measured,
+        content: relocateRect(morph.toContent, morph.toVisualBox, measured.box),
+      };
       source.style.width = `${morph.fromContent.width / reference.scaleX}px`;
       source.style.height = `${morph.fromContent.height / reference.scaleY}px`;
       source.style.zIndex = getComputedStyle(toVisualEl).zIndex;
       if (morph.resetRadius) source.style.borderRadius = "0";
-      toVisualEl.after(source);
       const sourceReference = measureVisual(positionedParent, source);
+      // The lower visual stays opaque and the upper one fades, so overlapping
+      // opaque pixels never expose the backdrop (see crossfadeUnderOpacity).
+      // Below, the copy also covers what the real image cannot paint.
+      const below = placement === "below";
       const sourceStyle = (t: number, u: number) => ({
         ...morph.styleFor(t, u, sourceReference),
-        opacity: clampOpacity(u) * sourceOpacity.opacity,
+        opacity: below
+          ? crossfadeUnderOpacity(
+              u,
+              sourceOpacity.opacity,
+              targetOpacity.opacity,
+            )
+          : clampOpacity(u) * sourceOpacity.opacity,
       });
       const style = (t: number, u: number) => ({
         ...morph.styleFor(t, u, reference),
-        opacity: crossfadeUnderOpacity(
-          t,
-          targetOpacity.opacity,
-          sourceOpacity.opacity,
-        ),
+        opacity: below
+          ? clampOpacity(t) * targetOpacity.opacity
+          : crossfadeUnderOpacity(
+              t,
+              targetOpacity.opacity,
+              sourceOpacity.opacity,
+            ),
       });
       applyMorphStyle(toVisualEl, style(0, 1));
       Object.assign(source.style, sourceStyle(0, 1));
       targetOpacity.set(style(0, 1).opacity);
       sourceOpacity.set(0);
-      // Layout (fit/placeholder) and CSS hooks are restored regardless of
-      // ownership: a newer track on the same image only drives transform,
-      // clip and opacity, and inline writes under its live WAAPI are inert.
+      // Paint styles are restored regardless of ownership: a newer track on
+      // the same image only drives transform, clip and opacity, and inline
+      // writes under its live WAAPI are inert.
       onDispose(() => {
-        restoreFit();
         restoreTo();
         sourceOpacity.restore();
         targetOpacity.restore();
-        restoreMarker();
         source.remove();
       });
       animations.push(
@@ -586,7 +648,7 @@ export const hero = (options: NormalizedHeroOptions) => {
 
       // Shared `onDispose` registry — strategies push restore callbacks
       // here, and the composite fires them after every child has settled.
-      // Keep the in-place fit/clip until every sibling fade has settled.
+      // Keep the in-place transform/clip until every sibling fade has settled.
       const cleanups: Array<(disposal: AnimationDisposal) => void> = [];
       const onDispose = (fn: (disposal: AnimationDisposal) => void): void => {
         cleanups.push(fn);
@@ -620,7 +682,7 @@ export const hero = (options: NormalizedHeroOptions) => {
       const prevOnDispose = composite.onDispose;
       composite.onDispose = (disposal) => {
         prevOnDispose?.(disposal);
-        // A forwards-filled transform must not override the restored image fit.
+        // A forwards-filled transform/clip must not outlive the restored styles.
         for (const animation of Object.values(groups).flat()) {
           if (animation instanceof WebAnimation) animation.releaseFill();
         }

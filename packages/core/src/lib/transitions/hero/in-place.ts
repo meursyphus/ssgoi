@@ -1,5 +1,5 @@
+import { insertBeside } from "@utils";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
-import type { MediaRect } from "../media-geometry";
 
 /** Restore just the properties owned by this transition, including !important. */
 export function preserveStyles(
@@ -16,16 +16,6 @@ export function preserveStyles(
       if (value) element.style.setProperty(name, value, priority);
       else element.style.removeProperty(name);
     }
-  };
-}
-
-/** CSS hooks are caller-owned; the engine never relaxes ancestor clipping. */
-export function markHeroTransitioning(element: HTMLElement): () => void {
-  const previous = element.getAttribute("data-hero-transitioning");
-  element.setAttribute("data-hero-transitioning", "");
-  return () => {
-    if (previous === null) element.removeAttribute("data-hero-transitioning");
-    else element.setAttribute("data-hero-transitioning", previous);
   };
 }
 
@@ -49,94 +39,28 @@ export function stackHeroPages(
   };
 }
 
-/** Resize the real image to its fitted content while reserving its flow box. */
-export function fitHeroImage(
-  element: HTMLElement,
-  content: MediaRect,
-  box: MediaRect,
-): () => void {
-  if (element.tagName !== "IMG") return () => {};
-  const style = getComputedStyle(element);
-  const number = (value: string) => Number.parseFloat(value) || 0;
-  const borderBox = style.boxSizing === "border-box";
-  const width =
-    number(style.width) +
-    (borderBox
-      ? 0
-      : number(style.paddingLeft) +
-        number(style.paddingRight) +
-        number(style.borderLeftWidth) +
-        number(style.borderRightWidth));
-  const height =
-    number(style.height) +
-    (borderBox
-      ? 0
-      : number(style.paddingTop) +
-        number(style.paddingBottom) +
-        number(style.borderTopWidth) +
-        number(style.borderBottomWidth));
-  const targetWidth = (content.width * width) / box.width;
-  const targetHeight = (content.height * height) / box.height;
-  // An empty layout placeholder is not a shared-image clone. The actual image
-  // never leaves its parent and keeps its decoded bitmap and event listeners.
-  let placeholder: HTMLElement | null = null;
-  if (style.position !== "absolute" && style.position !== "fixed") {
-    placeholder = document.createElement("span");
-    placeholder.setAttribute("data-hero-placeholder", "");
-    placeholder.setAttribute("aria-hidden", "true");
-    Object.assign(placeholder.style, {
-      display: style.display === "inline" ? "inline-block" : style.display,
-      boxSizing: "border-box",
-      width: `${width}px`,
-      height: `${height}px`,
-      margin: style.margin,
-      flex: style.flex,
-      alignSelf: style.alignSelf,
-      gridArea: style.gridArea,
-      order: style.order,
-      verticalAlign: style.verticalAlign,
-      visibility: "hidden",
-      pointerEvents: "none",
-    });
-    element.before(placeholder);
-  }
-  const restore = preserveStyles(element, [
-    "position",
-    "left",
-    "top",
-    "right",
-    "bottom",
-    "width",
-    "height",
-    "min-width",
-    "min-height",
-    "max-width",
-    "max-height",
-    "box-sizing",
-    "margin-top",
-    "margin-right",
-    "margin-bottom",
-    "margin-left",
-    "flex",
+/**
+ * Which side of the real visual its crossfade copy sits on. Both are siblings
+ * in one stacking context and paint in tree order.
+ * - `below`: the copy precedes the visual and stays opaque while the visual
+ *   fades in over it. The absolutely positioned copy also paints the parts of
+ *   the flight the visual cannot: cover content past the image's own box (a
+ *   replaced element clips there unless the browser honors
+ *   `overflow: visible`) and anything an unpositioned clipping ancestor cuts.
+ * - `above`: the copy follows the visual and fades out over it.
+ */
+export type CrossfadePlacement = "below" | "above";
+
+/**
+ * Insert the copy next to the visual without moving anything, preferring
+ * below (see `insertBeside`).
+ */
+export function placeCrossfadeCopy(
+  visual: HTMLElement,
+  copy: HTMLElement,
+): CrossfadePlacement {
+  return insertBeside<CrossfadePlacement>(visual, copy, [
+    ["below", (node) => visual.before(node)],
+    ["above", (node) => visual.after(node)],
   ]);
-  Object.assign(element.style, {
-    position: "absolute",
-    left: "0",
-    top: "0",
-    right: "auto",
-    bottom: "auto",
-    boxSizing: "border-box",
-    width: `${targetWidth}px`,
-    height: `${targetHeight}px`,
-    minWidth: "0",
-    minHeight: "0",
-    maxWidth: "none",
-    maxHeight: "none",
-    margin: "0",
-    flex: "none",
-  });
-  return () => {
-    restore();
-    placeholder?.remove();
-  };
 }

@@ -17,11 +17,7 @@ export function collectContentTargets(
 
   const targets: HTMLElement[] = [];
   const visit = (node: HTMLElement): void => {
-    if (
-      visuals.has(node) ||
-      node.getAttribute?.(CROSSFADE_ATTRIBUTE) != null ||
-      node.getAttribute?.("data-hero-placeholder") != null
-    )
+    if (visuals.has(node) || node.getAttribute?.(CROSSFADE_ATTRIBUTE) != null)
       return;
     if (node !== page && !ancestors.has(node)) {
       targets.push(node);

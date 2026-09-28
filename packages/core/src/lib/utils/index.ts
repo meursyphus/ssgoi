@@ -10,3 +10,4 @@ export { withResolvers } from "./with-resolvers";
 export { waitPaint } from "./wait-paint";
 export { promiseAll, type AwaitedObject } from "./promise-all";
 export { retainOpacity } from "./retain-opacity";
+export { insertBeside } from "./insert-beside";

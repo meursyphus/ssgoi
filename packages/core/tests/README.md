@@ -16,6 +16,30 @@ and zoom types, and checks authored opacity and cleanup in Chromium and WebKit.
 It catches the backdrop flash caused by fading both overlapping images with
 complementary opacities under normal source-over compositing.
 
+## In-place hero (`hero-in-place`)
+
+Hero enter animates the real destination image in its own parent without a
+placeholder or any layout change. The suite builds detail pages where the
+image is a flex item that owns its crop, fills a positioned clipping frame,
+keeps the default replaced-element overflow, fills an unpositioned
+`overflow: hidden` cell, or sits last / first under Tailwind v4 / v3
+`space-y-*` spacing. It seeks real WAAPI keyframes and asserts every element's
+layout box (from `offset*`, so transforms do not count), child count and
+attributes stay as authored before, during and after the transition, that every
+inline style is restored, and that the source copy sits below the image unless
+that position would move a sibling. At the start the real image must show
+exactly the source crop. With the copy visible, every point of the
+interpolated crop must show the image, including cover content past the image
+box and flight outside the clipping cell; the image alone paints past its box
+in Chromium (`overflow: visible`) and never outside the crop. Exit, a
+mid-flight reverse, and the real transition context (unmount and Activity
+pages, interrupted and re-entered on the same image, including the motion
+handoff's frozen copy under `space-y-*`) must also settle to the authored DOM
+with no frame where a sibling moves.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev` and open
+`/tests/hero-in-place.html`, then drive `window.heroInPlace` from the console.
+
 ## Rounded-full radius (`rounded-full`)
 
 Tailwind v4's `rounded-full` is `border-radius: calc(infinity * 1px)`, which

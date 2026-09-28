@@ -50,9 +50,6 @@
     height: 100%;
     object-fit: cover;
   }
-  .crop:has([data-hero-transitioning]) {
-    overflow: visible;
-  }
   .controls {
     position: absolute;
     top: 16px;
@@ -96,6 +93,33 @@
   let animation, from, to, detailImage, previewImage, baseline, records;
   function assert(value, message) {
     if (!value) throw new Error(message);
+  }
+  /** On-screen clip window of a sampled visual (inline transform + clip). */
+  function shownWindow(el) {
+    const transform = el.style.transform;
+    el.style.transform = "none";
+    const box = el.getBoundingClientRect();
+    el.style.transform = transform;
+    const [tx, ty, sx, sy] = /translate\((.+)px, (.+)px\) scale\((.+), (.+)\)/
+      .exec(transform)
+      .slice(1)
+      .map(Number);
+    // inset() serializes one to four percentages like margins.
+    const [t, r = t, b = t, l = r] = /inset\(([^)]*)\)/
+      .exec(el.style.clipPath)[1]
+      .split(" round ")[0]
+      .trim()
+      .split(/\s+/)
+      .map(Number.parseFloat);
+    const cx = box.x + box.width / 2,
+      cy = box.y + box.height / 2;
+    const x = (v) => cx + sx * (v - cx) + tx,
+      y = (v) => cy + sy * (v - cy) + ty;
+    const x0 = x(box.x + (l / 100) * box.width),
+      x1 = x(box.right - (r / 100) * box.width);
+    const y0 = y(box.y + (t / 100) * box.height),
+      y1 = y(box.bottom - (b / 100) * box.height);
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
   }
   async function setup(kind = "hero", differentRatio = false, wrapped = true) {
     animation?.complete();
@@ -194,7 +218,7 @@
     animation.complete();
     from.style.display = "none";
     assert(
-      root.querySelectorAll("[data-ssgoi-crossfade], [data-hero-placeholder]")
+      root.querySelectorAll("[data-ssgoi-crossfade], [data-hero-layer]")
         .length === 0,
       "temporary nodes leaked",
     );
@@ -231,16 +255,16 @@
                 const clone =
                   root.querySelector("[data-hero-layer-source]") ??
                   root.querySelector("[data-ssgoi-crossfade]");
+                // The animated real visual: the image itself, or its keyed
+                // wrapper when incompatible ratios fall back to the bbox.
                 const real =
-                  kind === "hero"
-                    ? (root.querySelector("[data-hero-layer-destination]") ??
-                      to.querySelector("[data-hero-transitioning]"))
-                    : records.find(
-                        ({ element }) =>
-                          element === detailImage ||
-                          element ===
-                            detailImage.closest("[data-zoom-enter-key]"),
-                      ).element;
+                  root.querySelector("[data-hero-layer-destination]") ??
+                  records.find(
+                    ({ element }) =>
+                      element === detailImage ||
+                      element ===
+                        detailImage.closest(`[data-${kind}-enter-key]`),
+                  ).element;
                 assert(clone, `${name}: missing second visual`);
                 assert(
                   clone.getAttribute("aria-hidden") === "true" &&
@@ -258,31 +282,52 @@
                   `${name}: duplicate key`,
                 );
                 const previewAtStart = kind === "hero" || !back;
+                // In-page crossfades keep the lower image opaque and fade the
+                // upper one (#428). Hero enter puts its copy below the real
+                // image, which fades in; zoom keeps the real image below its
+                // fading copy. The hero exit layer adds two weighted copies
+                // with plus-lighter instead.
+                const layered = kind === "hero" && back;
+                const below = kind === "hero" && !back;
+                assert(
+                  below === (clone.nextElementSibling === real),
+                  `${name}: wrong copy placement`,
+                );
                 assert(
                   Number(clone.style.opacity) === (previewAtStart ? 1 : 0),
                   `${name}: wrong clone start`,
                 );
                 assert(
-                  Number(real.style.opacity) === (previewAtStart ? 0 : 1),
+                  Number(real.style.opacity) === (layered || below ? 0 : 1),
                   `${name}: wrong real start`,
                 );
                 sample(0.5);
+                const fading = below ? real : clone;
                 assert(
-                  Number(clone.style.opacity) > 0.25 &&
-                    Number(clone.style.opacity) < 0.75,
+                  Number(fading.style.opacity) > 0.25 &&
+                    Number(fading.style.opacity) < 0.75,
                   `${name}: no midpoint crossfade`,
                 );
                 assert(
-                  Math.abs(
-                    Number(clone.style.opacity) +
-                      Number(real.style.opacity) -
-                      1,
-                  ) < 0.001,
+                  layered
+                    ? Math.abs(
+                        Number(clone.style.opacity) +
+                          Number(real.style.opacity) -
+                          1,
+                      ) < 0.001
+                    : Number((below ? clone : real).style.opacity) === 1,
                   `${name}: opacity tracks diverged`,
                 );
+                // Hero's real image keeps its own box; compare what is shown.
                 if (kind === "hero" || differentRatio) {
-                  const a = clone.getBoundingClientRect(),
-                    b = real.getBoundingClientRect();
+                  const a =
+                      kind === "hero"
+                        ? shownWindow(clone)
+                        : clone.getBoundingClientRect(),
+                    b =
+                      kind === "hero"
+                        ? shownWindow(real)
+                        : real.getBoundingClientRect();
                   for (const key of ["x", "y", "width", "height"])
                     assert(
                       Math.abs(a[key] - b[key]) < 0.1,
@@ -291,8 +336,13 @@
                 }
                 sample(1);
                 assert(
-                  Number(clone.style.opacity) === (previewAtStart ? 0 : 1),
+                  Number(clone.style.opacity) ===
+                    (below || !previewAtStart ? 1 : 0),
                   `${name}: wrong clone end`,
+                );
+                assert(
+                  Number(real.style.opacity) === 1,
+                  `${name}: wrong real end`,
                 );
                 finish();
                 cases.push(name);
