@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { DetailHero } from "./hero";
 import { DetailHeader } from "./header";
@@ -20,10 +21,15 @@ export default function ListingDetailPage({
   }));
   listing.actions.init(initialData);
   const detail = listing.current ?? initialData;
+  // Opened directly? Load Explore now, so Back can zoom into its card: the
+  // zoom needs the card on Explore's first render.
+  useEffect(() => {
+    listing.actions.loadFeed();
+  }, [listing.actions]);
   return (
     <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
       <DetailHero detail={detail} />
-      <DetailHeader />
+      <DetailHeader id={detail.id} title={detail.title} />
       <div className="relative -mt-6 rounded-t-3xl bg-white px-5 pt-5 pb-6">
         <DetailMeta detail={detail} />
         <DetailStats detail={detail} />

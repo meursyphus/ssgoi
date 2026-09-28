@@ -2,18 +2,38 @@ import { Link } from "@/lib/link";
 import { Pin, BellOff } from "lucide-react";
 import type { ChatThreadSimple } from "@/demo/kakao-talk/api/chat";
 
+const AVATAR =
+  "h-12 w-12 flex-shrink-0 rounded-2xl bg-neutral-200 object-cover";
+
 export function ThreadRow({ thread }: { thread: ChatThreadSimple }) {
+  const avatar = (
+    <img
+      src={thread.partnerAvatar}
+      alt={thread.partnerName}
+      className={AVATAR}
+    />
+  );
   return (
-    <Link
-      href={`/demo/kakao-talk/chats/${thread.id}`}
-      className="flex items-start gap-3 px-4 py-3 active:bg-black/[0.03]"
-    >
-      <img
-        src={thread.partnerAvatar}
-        alt={thread.partnerName}
-        className="h-12 w-12 flex-shrink-0 rounded-2xl bg-neutral-200 object-cover"
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
+    <div className="relative flex items-start gap-3 px-4 py-3 active:bg-black/[0.03]">
+      {/* 1:1 방은 아바타를 누르면 상대 프로필. 행 링크는 ::after로 행 전체를
+          덮고, 아바타 링크만 그 위(z-10)에 둬서 <a> 중첩 없이 둘 다 누를 수 있다 */}
+      {thread.profileId ? (
+        <Link
+          href={`/demo/kakao-talk/profile/${thread.profileId}`}
+          scroll={false}
+          aria-label={`${thread.partnerName} 프로필`}
+          className="relative z-10 flex-shrink-0 active:opacity-70"
+        >
+          {avatar}
+        </Link>
+      ) : (
+        avatar
+      )}
+      <Link
+        href={`/demo/kakao-talk/chats/${thread.id}`}
+        scroll={false}
+        className="flex min-w-0 flex-1 flex-col after:absolute after:inset-0"
+      >
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
             <span className="truncate text-[15px] font-semibold text-neutral-900">
@@ -45,7 +65,7 @@ export function ThreadRow({ thread }: { thread: ChatThreadSimple }) {
             </span>
           )}
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

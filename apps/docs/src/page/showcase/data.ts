@@ -10,14 +10,18 @@ import { lumenShowcase } from "@/demo/lumen/showcase";
 import { noraHaleShowcase } from "@/demo/nora-hale/showcase";
 import { pinterestShowcase } from "@/demo/pinterest/showcase";
 import { silentRoomShowcase } from "@/demo/silent-room/showcase";
-import { ssgoiDocsShowcase } from "@/demo/ssgoi-docs/showcase";
 import { voyageShowcase } from "@/demo/voyage/showcase";
 import { youtubeMusicWebShowcase } from "@/demo/youtube-music-web/showcase";
 import { youtubeMobileShowcase } from "@/demo/youtube-mobile/showcase";
 import { yuzuClubShowcase } from "@/demo/yuzu-club/showcase";
 import type { ShowcaseApp, ShowcaseClip } from "./types";
 
-export type { ShowcaseApp, ShowcaseClip, ShowcasePlatform } from "./types";
+export type {
+  ShowcaseApp,
+  ShowcaseClip,
+  ShowcasePlatform,
+  ShowcaseTourStep,
+} from "./types";
 
 /** GitHub tree URL prefix — paths in showcase data are repo-root-relative folders. */
 export const GITHUB_BASE = "https://github.com/meursyphus/ssgoi/tree/HEAD";
@@ -42,7 +46,6 @@ export const showcases: ShowcaseApp[] = [
   airbnbPhotoTourShowcase,
   lumenShowcase,
   yuzuClubShowcase,
-  ssgoiDocsShowcase,
   silentRoomShowcase,
   honeydropShowcase,
   noraHaleShowcase,
@@ -61,11 +64,4 @@ export function representativeClip(
     if (clip) return { showcase: s, clip };
   }
   return undefined;
-}
-
-/** All transition names across the catalog, deduped, sorted. */
-export function allTransitions(): string[] {
-  const seen = new Set<string>();
-  for (const s of showcases) for (const t of s.transitions) seen.add(t);
-  return [...seen].sort();
 }

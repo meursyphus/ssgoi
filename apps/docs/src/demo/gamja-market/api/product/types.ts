@@ -16,9 +16,16 @@ export type ProductSimple = {
   stockBadge?: string;
 };
 
+/** A listing photo with its intrinsic size (zoom/hero need the ratio before load). */
+export type ProductImage = {
+  src: string;
+  width: number;
+  height: number;
+};
+
 export type ProductDetail = ProductSimple & {
   description: string;
-  images: string[];
+  images: ProductImage[];
   pickupDate: string;
   pickupPlace: string;
   notice: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type ComponentType } from "react";
-import { ChevronRight, Menu, Monitor, Smartphone } from "lucide-react";
+import { Menu, Monitor, Smartphone } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/lib/link";
 import {
@@ -23,6 +23,7 @@ import {
   TanStackRouterMark,
 } from "@/components/router-logos";
 import { SiteLogo } from "@/components/site-logo";
+import { SearchButton } from "@/components/search/search-button";
 import {
   DOCS_NAV,
   findDocsLocation,
@@ -255,9 +256,11 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
   const location = findDocsLocation(pathname);
   // Group over ancestors: "Transitions / Drill" places the page, where the
   // literal trail would only say "Guide / Drill".
-  const context = location
-    ? `${location.group.label} / ${location.trail[location.trail.length - 1].title}`
+  const group = location?.group.label;
+  const title = location
+    ? location.trail[location.trail.length - 1].title
     : "Documentation";
+  const context = group ? `${group} / ${title}` : title;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -267,17 +270,23 @@ function DocsMobileNavForPath({ pathname }: { pathname: string }) {
         <SheetTrigger asChild>
           <button
             type="button"
-            className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
+            className="@container flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
             aria-label={`Open documentation navigation. Current page: ${context}`}
           >
             <Menu aria-hidden className="h-4 w-4 shrink-0 text-ink-faint" />
-            <span className="min-w-0 flex-1 truncate">{context}</span>
-            <ChevronRight
-              aria-hidden
-              className="h-4 w-4 shrink-0 text-ink-faint"
-            />
+            {/* Phones share this row with the search button: the page title
+                comes first, and the group joins it once there is room. */}
+            <span className="min-w-0 flex-1 truncate">
+              {group && (
+                <span className="hidden @min-[16rem]:inline">{group} / </span>
+              )}
+              {title}
+            </span>
           </button>
         </SheetTrigger>
+        <span className="-mr-2.5 shrink-0">
+          <SearchButton variant="icon" />
+        </span>
       </div>
 
       <SheetContent

@@ -1,22 +1,30 @@
 "use client";
 
-import { Link } from "@/lib/link";
 import { X, Paperclip, Send, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
+import { DemoBackLink } from "@/lib/components/demo-back-link";
+import { useDemoBack } from "@/lib/hooks";
 
-export function ComposeBar() {
+export function ComposeBar({
+  title,
+  returnTo,
+}: {
+  title: string;
+  returnTo: string;
+}) {
+  const close = useDemoBack(returnTo);
+
   return (
-    <div className="flex items-center gap-1 px-2 py-2.5 border-b border-neutral-200/80 bg-white">
-      <Link
-        href="/demo/material-mail"
-        scroll={false}
+    <div className="sticky top-0 z-10 flex items-center gap-1 border-b border-neutral-200/80 bg-white px-2 py-2.5">
+      <DemoBackLink
+        fallback={returnTo}
         className="rounded-full p-2 text-neutral-700 active:bg-neutral-100"
         aria-label="Close"
       >
         <X size={22} strokeWidth={2.25} />
-      </Link>
+      </DemoBackLink>
       <div className="flex-1 px-2 text-[16px] font-medium text-neutral-900">
-        Compose
+        {title}
       </div>
       <button
         type="button"
@@ -28,7 +36,10 @@ export function ComposeBar() {
       </button>
       <button
         type="button"
-        onClick={() => toast("Send is mocked in this demo")}
+        onClick={() => {
+          close();
+          toast("Message sent", { duration: 2500 });
+        }}
         className="rounded-full p-2 text-indigo-600 active:bg-indigo-50"
         aria-label="Send"
       >

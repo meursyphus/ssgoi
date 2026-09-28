@@ -4,6 +4,7 @@ node_modules
 .wrangler/
 .DS_Store
 apps/docs/src/lib/blog.generated.ts
+apps/docs/src/lib/search/docs-headings.generated.json
 
 # Personal Claude Code agents
 .claude/agents/

@@ -12,6 +12,7 @@ export function OrderRow({ order }: { order: OrderSimple }) {
   return (
     <Link
       href={`/demo/gamja-market/orders/${order.id}`}
+      scroll={false}
       className="block bg-white px-4 py-4 active:bg-black/[0.02]"
     >
       <div className="flex items-center justify-between">

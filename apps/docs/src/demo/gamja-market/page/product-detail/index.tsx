@@ -22,7 +22,11 @@ export default function ProductDetailPage({
   return (
     <div className="flex min-h-full flex-col bg-[#FAF8F6]">
       <DetailHeader />
-      <ProductGallery images={initialData.images} alt={initialData.name} />
+      <ProductGallery
+        productId={initialData.id}
+        images={initialData.images}
+        alt={initialData.name}
+      />
       <ProductInfo product={initialData} />
       <PickupInfo product={initialData} />
       <Description product={initialData} />

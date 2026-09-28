@@ -30,7 +30,13 @@ const TABS: Tab[] = [
   },
   { key: "shorts", label: "쇼츠", Icon: Video, badge: 50 },
   { key: "shop", label: "쇼핑", Icon: ShoppingBag },
-  { key: "more", label: "더보기", Icon: MoreHorizontal, badge: "dot" },
+  {
+    key: "more",
+    label: "더보기",
+    href: "/demo/kakao-talk/more",
+    Icon: MoreHorizontal,
+    badge: "dot",
+  },
 ];
 
 function Badge({ value }: { value: number | "dot" }) {
@@ -48,7 +54,8 @@ function Badge({ value }: { value: number | "dot" }) {
 
 export function BottomTabBar({ active }: { active: ActiveTab }) {
   return (
-    <nav className="grid shrink-0 grid-cols-5 bg-white">
+    // pb-safe: the white bar runs under the home indicator, icons stay above.
+    <nav className="grid shrink-0 grid-cols-5 bg-white pb-safe">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
         const content = (
@@ -69,6 +76,7 @@ export function BottomTabBar({ active }: { active: ActiveTab }) {
             <Link
               key={tab.key}
               href={tab.href}
+              scroll={false}
               aria-label={tab.label}
               className="active:bg-black/[0.04]"
             >

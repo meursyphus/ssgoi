@@ -1,6 +1,7 @@
 "use client";
 
 import { Sparkles, Search } from "lucide-react";
+import { Link } from "@/lib/link";
 import {
   pinImageDimensions,
   pinImageUrl,
@@ -26,13 +27,15 @@ export function HeroImage({ pin }: { pin: PinDetail }) {
         <span>AI 수정</span>
       </div>
 
-      <button
-        type="button"
-        aria-label="검색"
-        className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+      {/* Visual search stand-in: more ideas like this pin. */}
+      <Link
+        href={`/demo/pinterest/search/${encodeURIComponent(pin.category)}`}
+        scroll={false}
+        aria-label="비슷한 아이디어 검색"
+        className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,0.18)] active:scale-95"
       >
         <Search className="h-4 w-4" strokeWidth={2.6} />
-      </button>
+      </Link>
     </div>
   );
 }

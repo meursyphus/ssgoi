@@ -1,17 +1,32 @@
 "use client";
 
+import { Link } from "@/lib/link";
 import type { Highlight, ProfileMe } from "@/demo/instagram/state/profile";
+
+const BASE = "/demo/instagram";
 
 export function ProfileHeader({ me }: { me: ProfileMe }) {
   return (
     <div className="bg-white pb-2">
       {/* avatar + stats row */}
       <div className="flex items-start gap-6 px-4 pt-4">
-        <AvatarWithStory avatar={me.avatar} name={me.name} />
+        <AvatarWithStory
+          avatar={me.avatar}
+          name={me.name}
+          storyId={me.username}
+        />
         <div className="mt-1 flex flex-1 items-center justify-around">
           <Stat label="게시물" value={me.postsLabel} />
-          <Stat label="팔로워" value={me.followersLabel} />
-          <Stat label="팔로잉" value={me.followingLabel} />
+          <Stat
+            label="팔로워"
+            value={me.followersLabel}
+            href={`${BASE}/follows/followers`}
+          />
+          <Stat
+            label="팔로잉"
+            value={me.followingLabel}
+            href={`${BASE}/follows/following`}
+          />
         </div>
       </div>
 
@@ -60,30 +75,69 @@ export function ProfileHeader({ me }: { me: ProfileMe }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col items-center">
+function Stat({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href?: string;
+}) {
+  const body = (
+    <>
       <span className="text-[15px] font-semibold leading-tight text-neutral-900">
         {value}
       </span>
       <span className="mt-0.5 text-[12px] text-neutral-700">{label}</span>
-    </div>
+    </>
+  );
+  if (!href) return <div className="flex flex-col items-center">{body}</div>;
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      className="flex flex-col items-center rounded-md px-1 active:opacity-50"
+    >
+      {body}
+    </Link>
   );
 }
 
-function AvatarWithStory({ avatar, name }: { avatar: string; name: string }) {
+function AvatarWithStory({
+  avatar,
+  name,
+  storyId,
+}: {
+  avatar: string;
+  name: string;
+  storyId: string;
+}) {
   return (
     <div className="relative shrink-0">
-      <div className="rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px]">
+      <Link
+        href={`${BASE}/stories/${storyId}`}
+        scroll={false}
+        aria-label="내 스토리 보기"
+        className="block rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px] active:scale-95 transition-transform"
+      >
         <div className="rounded-full bg-white p-[2px]">
           <img
             src={avatar}
             alt={name}
+            width={78}
+            height={78}
             className="h-[78px] w-[78px] rounded-full object-cover"
+            data-zoom-exit-key={storyId}
           />
         </div>
-      </div>
-      <div className="absolute -bottom-0.5 -right-0.5 grid h-[22px] w-[22px] place-items-center rounded-full border-2 border-white bg-neutral-900 text-white">
+      </Link>
+      <Link
+        href={`${BASE}/create`}
+        scroll={false}
+        aria-label="스토리 추가"
+        className="absolute -bottom-0.5 -right-0.5 grid h-[22px] w-[22px] place-items-center rounded-full border-2 border-white bg-neutral-900 text-white"
+      >
         <svg
           width="11"
           height="11"
@@ -94,14 +148,18 @@ function AvatarWithStory({ avatar, name }: { avatar: string; name: string }) {
         >
           <path d="M12 5v14M5 12h14" strokeLinecap="round" />
         </svg>
-      </div>
+      </Link>
     </div>
   );
 }
 
 function HighlightNew() {
   return (
-    <div className="flex w-[68px] shrink-0 flex-col items-center gap-1">
+    <Link
+      href={`${BASE}/create`}
+      scroll={false}
+      className="flex w-[68px] shrink-0 flex-col items-center gap-1 active:opacity-60"
+    >
       <div className="grid h-[64px] w-[64px] place-items-center rounded-full border border-neutral-300 bg-white">
         <svg
           width="22"
@@ -117,23 +175,31 @@ function HighlightNew() {
       <span className="max-w-full truncate text-[11px] text-neutral-800">
         New
       </span>
-    </div>
+    </Link>
   );
 }
 
 function HighlightItem({ highlight }: { highlight: Highlight }) {
+  const storyId = `hl-${highlight.id}`;
   return (
-    <div className="flex w-[68px] shrink-0 flex-col items-center gap-1">
+    <Link
+      href={`${BASE}/stories/${storyId}`}
+      scroll={false}
+      className="flex w-[68px] shrink-0 flex-col items-center gap-1 active:opacity-60"
+    >
       <div className="h-[64px] w-[64px] rounded-full border border-neutral-200 p-[2px]">
         <img
           src={highlight.cover}
           alt={highlight.label}
+          width={58}
+          height={58}
           className="h-full w-full rounded-full object-cover"
+          data-zoom-exit-key={storyId}
         />
       </div>
       <span className="max-w-full truncate text-[11px] text-neutral-800">
         {highlight.label}
       </span>
-    </div>
+    </Link>
   );
 }

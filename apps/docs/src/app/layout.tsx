@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { DocsSsgoiProvider } from "@/components/docs-ssgoi-provider";
 import { JsonLd } from "@/components/json-ld";
+import { SiteSearch } from "@/components/search/site-search";
 import { StateProvider } from "@/lib/state";
 import {
   SITE_DESCRIPTION as DESCRIPTION,
@@ -82,6 +83,7 @@ export default function RootLayout({
         <JsonLd data={[organizationSchema, websiteSchema]} />
         <StateProvider>
           <DocsSsgoiProvider>{children}</DocsSsgoiProvider>
+          <SiteSearch />
         </StateProvider>
         {process.env.NODE_ENV === "development" && (
           <Script

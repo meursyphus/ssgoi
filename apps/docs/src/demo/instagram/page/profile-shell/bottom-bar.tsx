@@ -1,14 +1,30 @@
 "use client";
 
-export function ProfileBottomBar({ avatar }: { avatar?: string }) {
+import type { ReactNode } from "react";
+import { Link } from "@/lib/link";
+
+const BASE = "/demo/instagram";
+const FIRST_REEL = "r-001";
+
+type Tab = "home" | "explore" | "profile";
+
+export function ProfileBottomBar({
+  avatar,
+  active = "profile",
+  profileHref = `${BASE}/profile/deaseungseung94`,
+}: {
+  avatar?: string;
+  active?: Tab;
+  profileHref?: string;
+}) {
   return (
-    <div className="flex items-center justify-around border-t border-neutral-200 bg-white px-2 pb-2 pt-2">
-      <BottomIcon>
+    <div className="flex items-center justify-around border-t border-neutral-200 bg-white px-2 pb-safe-2 pt-2">
+      <BottomLink href={`${BASE}/home`} label="홈">
         <svg
           width="26"
           height="26"
           viewBox="0 0 24 24"
-          fill="none"
+          fill={active === "home" ? "currentColor" : "none"}
           stroke="currentColor"
           strokeWidth="1.6"
         >
@@ -17,8 +33,8 @@ export function ProfileBottomBar({ avatar }: { avatar?: string }) {
             strokeLinejoin="round"
           />
         </svg>
-      </BottomIcon>
-      <BottomIcon>
+      </BottomLink>
+      <BottomLink href={`${BASE}/reels/${FIRST_REEL}`} label="릴스">
         <svg
           width="26"
           height="26"
@@ -30,8 +46,12 @@ export function ProfileBottomBar({ avatar }: { avatar?: string }) {
           <rect x="4.5" y="3.5" width="15" height="17" rx="2.5" />
           <path d="M10 9l5 3-5 3V9z" fill="currentColor" stroke="none" />
         </svg>
-      </BottomIcon>
-      <BottomIcon>
+      </BottomLink>
+      <button
+        type="button"
+        aria-label="메시지"
+        className="grid h-10 w-10 place-items-center text-neutral-900"
+      >
         <svg
           width="26"
           height="26"
@@ -45,37 +65,54 @@ export function ProfileBottomBar({ avatar }: { avatar?: string }) {
             strokeLinejoin="round"
           />
         </svg>
-      </BottomIcon>
-      <BottomIcon>
+      </button>
+      <BottomLink href={`${BASE}/explore`} label="검색">
         <svg
           width="26"
           height="26"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth={active === "explore" ? 2.6 : 1.6}
         >
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-5-5" strokeLinecap="round" />
         </svg>
-      </BottomIcon>
-      <BottomIcon>
-        <div className="h-7 w-7 overflow-hidden rounded-full ring-2 ring-neutral-900">
+      </BottomLink>
+      <BottomLink href={profileHref} label="프로필">
+        <div
+          className={`h-7 w-7 overflow-hidden rounded-full ${
+            active === "profile" ? "ring-2 ring-neutral-900" : ""
+          }`}
+        >
           {avatar ? (
             <img src={avatar} alt="me" className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full animate-pulse bg-neutral-200" />
           )}
         </div>
-      </BottomIcon>
+      </BottomLink>
     </div>
   );
 }
 
-function BottomIcon({ children }: { children: React.ReactNode }) {
+function BottomLink({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+}) {
   return (
-    <button className="grid h-10 w-10 place-items-center text-neutral-900">
+    <Link
+      href={href}
+      scroll={false}
+      aria-label={label}
+      className="grid h-10 w-10 place-items-center text-neutral-900 transition-transform active:scale-90"
+    >
       {children}
-    </button>
+    </Link>
   );
 }

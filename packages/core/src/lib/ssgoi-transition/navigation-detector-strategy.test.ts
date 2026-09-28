@@ -147,6 +147,47 @@ describe("createNavigationDetector", () => {
     await expect(overviewOut).resolves.toBe(secondPair);
   });
 
+  it("lets an outer layout leave after a nested page with its id left", async () => {
+    type Boundary = {
+      id: string;
+      descendants: Set<string>;
+    };
+    const detector = createNavigationDetector<Boundary>({
+      keepCurrent: ({ current, next }) => current.descendants.has(next.id),
+      contains: (outer, inner) =>
+        outer.id === inner.id || outer.descendants.has(inner.id),
+    });
+    const home = { id: "home", descendants: new Set<string>() };
+    // A profile layout "/a" whose default tab is a nested boundary that also
+    // resolves to "/a".
+    const layout = { id: "layout", descendants: new Set(["grid", "reels"]) };
+    const grid = { id: "grid", descendants: new Set<string>() };
+    const reels = { id: "reels", descendants: new Set<string>() };
+    const b = { id: "b", descendants: new Set<string>() };
+
+    // Entering the layout mounts the grid with it, so only the layout emits.
+    await Promise.all([
+      detector.arrive("/home", "out", home),
+      detector.arrive("/a", "in", layout),
+    ]);
+
+    // Tab switch inside the layout: the grid "/a" leaves for "/a/x".
+    await Promise.all([
+      detector.arrive("/a", "out", grid),
+      detector.arrive("/a/x", "in", reels),
+    ]);
+
+    // Leaving the layout reports "/a" again, from the boundary that still
+    // holds the reels page. It is a new navigation, not a late copy of the
+    // grid's OUT.
+    const layoutOut = detector.arrive("/a", "out", layout);
+    const bIn = detector.arrive("/b", "in", b);
+
+    const expected = { from: "/a", to: "/b", out: layout, in: b };
+    await expect(layoutOut).resolves.toMatchObject(expected);
+    await expect(bIn).resolves.toMatchObject(expected);
+  });
+
   it("allows a follow-up OUT nested under the previous IN owner", async () => {
     type Boundary = {
       id: string;

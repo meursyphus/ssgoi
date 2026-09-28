@@ -2,6 +2,7 @@ import type { Query } from "comwit";
 import type {
   ProductSimple,
   ProductDetail,
+  ProductImage,
 } from "@/demo/gamja-market/api/product";
 
 export type ProductState = {
@@ -12,6 +13,8 @@ export type ProductState = {
 export type ProductActions = {
   init(detail: ProductDetail): void;
   loadProducts(): Promise<void>;
+  /** OS share sheet, or copy the listing link with a toast. */
+  share(): Promise<void>;
 };
 
-export type { ProductSimple, ProductDetail };
+export type { ProductSimple, ProductDetail, ProductImage };

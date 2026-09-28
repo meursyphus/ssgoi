@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/lib/components/ui/input";
 import { Textarea } from "@/lib/components/ui/textarea";
+import type { Formats } from "./compose-toolbar";
 
-export function ComposeForm() {
-  const [to, setTo] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+export type ComposeFields = { to: string; subject: string; body: string };
 
+const FIELD =
+  "h-12 border-0 px-0 text-[15px] text-neutral-900 shadow-none placeholder:text-neutral-400 focus-visible:ring-0";
+
+export function ComposeForm({
+  fields,
+  onChange,
+  formats,
+  compact = false,
+}: {
+  fields: ComposeFields;
+  onChange: (next: ComposeFields) => void;
+  formats: Formats;
+  /** Replies leave room for the quoted original below. */
+  compact?: boolean;
+}) {
   return (
     <div className="flex flex-col">
       <FieldRow label="From">
@@ -18,27 +30,29 @@ export function ComposeForm() {
       </FieldRow>
       <FieldRow label="To">
         <Input
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
+          value={fields.to}
+          onChange={(e) => onChange({ ...fields, to: e.target.value })}
           placeholder="Recipients"
-          className="h-12 border-0 px-0 text-[15px] shadow-none focus-visible:ring-0"
+          className={FIELD}
         />
       </FieldRow>
       <FieldRow label="Subject">
         <Input
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          value={fields.subject}
+          onChange={(e) => onChange({ ...fields, subject: e.target.value })}
           placeholder="Subject"
-          className="h-12 border-0 px-0 text-[15px] shadow-none focus-visible:ring-0"
+          className={FIELD}
         />
       </FieldRow>
       <div className="px-5 py-3">
         <Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
+          value={fields.body}
+          onChange={(e) => onChange({ ...fields, body: e.target.value })}
           placeholder="Compose email"
-          rows={12}
-          className="min-h-[280px] resize-none border-0 px-0 text-[15px] leading-relaxed shadow-none focus-visible:ring-0"
+          rows={compact ? 5 : 12}
+          className={`${compact ? "min-h-[140px]" : "min-h-[280px]"} resize-none border-0 px-0 text-[15px] leading-relaxed text-neutral-900 shadow-none placeholder:text-neutral-400 focus-visible:ring-0 ${
+            formats.bold ? "font-semibold" : ""
+          } ${formats.italic ? "italic" : ""} ${formats.underline ? "underline" : ""}`}
         />
       </div>
     </div>
@@ -54,7 +68,7 @@ function FieldRow({
 }) {
   return (
     <label className="flex items-center gap-3 border-b border-neutral-200/70 px-5">
-      <span className="w-16 shrink-0 text-[13px] uppercase tracking-wide text-neutral-500">
+      <span className="w-16 shrink-0 text-[13px] tracking-wide text-neutral-500 uppercase">
         {label}
       </span>
       <div className="flex-1">{children}</div>

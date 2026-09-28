@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import type { AppContext } from "@/lib/state";
 import { order as orderAPI } from "@/demo/gamja-market/api/order";
 import { order as orderModel } from "@/demo/gamja-market/state/order/model";
+import { chat as chatModel } from "@/demo/gamja-market/state/chat/model";
 import { cart } from "../model";
 import type { CartActions, CartProductMeta } from "../types";
 
@@ -13,6 +14,7 @@ export const checkoutActions = action<
   class CheckoutActions {
     private model = state(cart);
     private orderModel = state(orderModel);
+    private chatModel = state(chatModel);
 
     @OnError((e: unknown) => {
       toast.error(e instanceof Error ? e.message : "주문에 실패했습니다");
@@ -42,7 +44,13 @@ export const checkoutActions = action<
         );
 
         this.model.items = [];
-        await this.orderModel.orders.refetch();
+        // The detail route only knows the seed; new orders are read from here.
+        for (const o of created) this.orderModel.sessionOrders[o.id] = o;
+        await Promise.all([
+          this.orderModel.orders.refetch(),
+          this.orderModel.summary.refetch(),
+          this.chatModel.chats.refetch(),
+        ]);
         toast.success(`${created.length}건 주문이 완료되었어요`);
         context.router.push(`/demo/gamja-market/orders`);
       } finally {

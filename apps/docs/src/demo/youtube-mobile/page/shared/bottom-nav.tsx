@@ -29,9 +29,12 @@ export function YouTubeBottomNav() {
   const pathname = usePathname();
   const dark = pathname === `${BASE}/shorts`;
 
+  // The bar's background runs down through the home-indicator inset while
+  // the tabs keep their 68px row above it. Border-box, so the whole bar is
+  // 68px + inset (the Shorts tab sizes itself to what is left).
   return (
     <nav
-      className={`sticky bottom-0 z-40 grid h-[68px] shrink-0 grid-cols-5 border-t ${
+      className={`sticky bottom-0 z-40 grid h-[calc(68px+var(--safe-bottom))] shrink-0 grid-cols-5 border-t pb-safe ${
         dark
           ? "border-white/10 bg-[#0f0f0f] text-white"
           : "border-neutral-200 bg-white text-neutral-950"

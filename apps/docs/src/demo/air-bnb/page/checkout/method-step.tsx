@@ -1,6 +1,7 @@
 "use client";
 
 import { CreditCard } from "lucide-react";
+import { toast } from "sonner";
 import {
   useCheckout,
   type CheckoutMethod,
@@ -79,7 +80,12 @@ export function MethodStep() {
         </p>
         <button
           type="button"
-          disabled
+          onClick={() =>
+            toast("Paying in KRW", {
+              description:
+                "This host accepts payments in Korean won only, so the currency can't be changed.",
+            })
+          }
           className="text-[13px] font-medium underline text-neutral-900"
         >
           Change currency

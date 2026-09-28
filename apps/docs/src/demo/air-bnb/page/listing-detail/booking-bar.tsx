@@ -2,8 +2,9 @@ import { Link } from "@/lib/link";
 import type { ListingDetail } from "@/demo/air-bnb/state/listing";
 
 export function BookingBar({ detail }: { detail: ListingDetail }) {
+  // Content keeps 12px above the home-indicator inset; 20px when there is none.
   return (
-    <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-between gap-3 border-t border-neutral-200 bg-white px-5 pt-3 pb-5">
+    <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-between gap-3 border-t border-neutral-200 bg-white px-5 pt-3 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]">
       <div className="flex flex-col">
         <span className="text-[15px] font-bold text-neutral-900">
           {detail.priceLabel}

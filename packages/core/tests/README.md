@@ -16,6 +16,15 @@ and zoom types, and checks authored opacity and cleanup in Chromium and WebKit.
 It catches the backdrop flash caused by fading both overlapping images with
 complementary opacities under normal source-over compositing.
 
+## Rounded-full radius (`rounded-full`)
+
+Tailwind v4's `rounded-full` is `border-radius: calc(infinity * 1px)`, which
+browsers serialize as huge pixel lengths (`3.35544e+07px` in Chromium, a
+39-digit integer in WebKit). The suite reads those real computed values, checks
+that media geometry resolves them (and a legacy `9999px` pill) to the circle or
+pill they paint, and seeks hero and zoom between a circular avatar and a square
+photo: the avatar end must not paint its bbox corners and the photo end must.
+
 ## Interrupted entry (`interrupt-reentry`)
 
 A page that is still entering when the user navigates away must keep moving
@@ -29,15 +38,32 @@ For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/interrupt-reentry.html` (add `?hidden` for Activity pages). Pick a
 preset, press **B**, then **A** before it settles.
 
+## Nested boundary with a shared id (`nested-boundary`)
+
+An outer layout boundary `/a` wraps a nested tab boundary whose default tab is
+also `/a` (a profile grid). The fixture commits routes like React, lets the
+real observer register every boundary, and records each transition that runs.
+After the nested `/a → /a/x` tab switch, leaving the layout for `/b` reports
+`/a` again; the suite asserts it runs `layout → b` instead of being absorbed
+as a late duplicate of the tab switch, and that the nested `/a` arriving with
+(or after, `?streamed`) the layout's IN never runs or shifts later pairs. It
+covers unmount and Activity (`?hidden`) routes in Chromium and WebKit.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev`, open
+`/tests/nested-boundary.html`, and press **Next step** four times.
+
 ## Sheet over a sticky bar (`sheet-sticky`)
 
-A `sheet` leaves over a scrolled list page whose sticky bottom bar lives inside
-the page. The `blur` and `scale` tones clip and scale that page against its
-saved scroll, so the container must already be restored when the first frame is
-built. The fixture drives the real transition context with unmount-mode pages
-and samples the bar's on-screen box every frame; the suite asserts the scroll
-is at its saved value on every animated frame and that the bar never paints
-below the viewport edge in Chromium and WebKit.
+A `sheet` rises over, then leaves over, a scrolled list page whose sticky
+bottom bar lives inside the page. The `blur` and `scale` tones clip and scale
+that page against its saved scroll, so the container must already be at the
+incoming page's scroll when the first frame is built — otherwise the bar jumps
+out of view until the sheet covers it. The fixture drives the real transition
+context with unmount-mode pages and samples the bar's on-screen box every
+frame. On enter, the suite asserts the container is at the sheet's scroll and
+the bar tracks the (scaled) viewport edge on every frame; on exit, that the
+scroll is at its saved value and the bar never paints below the viewport edge.
+Both directions run in Chromium and WebKit for every sheet type.
 
 For manual testing, run `pnpm --filter @ssgoi/core dev` and open
 `/tests/sheet-sticky.html` (`?type=blur|scale|static`, `?scroll=500`,

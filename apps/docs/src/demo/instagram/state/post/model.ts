@@ -18,5 +18,16 @@ export const post = model<PostState>({
     queryFn: () => postAPI.findTagged(),
     placeholderData: keepPreviousData,
   }),
+  explore: query<PostState["explore"]["data"], void>({
+    initialData: [],
+    queryFn: () => postAPI.findExplore(),
+    placeholderData: keepPreviousData,
+  }),
+  feed: query<PostState["feed"]["data"], void>({
+    initialData: [],
+    queryFn: () => postAPI.findFeed(),
+    placeholderData: keepPreviousData,
+  }),
   currentPost: null,
+  currentReel: null,
 });

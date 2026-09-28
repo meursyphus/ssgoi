@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { IframeLoadingOverlay } from "./iframe-loading-overlay";
+import {
+  PhoneHomeIndicator,
+  phoneSafeAreaFrameProps,
+} from "./phone-home-indicator";
 
 type Props = {
   src: string;
@@ -32,21 +36,26 @@ export function PhoneFrame({
     <div className={`relative mx-auto shrink-0 ${widthClassName}`}>
       <div className="relative aspect-[320/660] rounded-[52px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[12px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
         <div className="pointer-events-none absolute inset-[12px] rounded-[42px] ring-1 ring-white/5" />
-        <div className="relative h-full w-full overflow-hidden rounded-[40px] bg-white">
+        <div className="relative h-full w-full overflow-clip rounded-[40px] bg-white">
           <StatusBar />
+          {/* Fills the screen below the status bar at 1:1, with the home
+              indicator drawn over its bottom edge; the iframe declares that
+              zone so the demo's bottom bars inset themselves. */}
           <iframe
             src={src}
             title={title}
             loading="lazy"
             onLoad={() => setLoaded(true)}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            className="h-[calc(100%-44px)] w-full border-0 bg-white"
+            className="block h-[calc(100%-44px)] w-full border-0 bg-white"
+            {...phoneSafeAreaFrameProps}
           />
           <IframeLoadingOverlay
             visible={!loaded}
             variant="light"
             style={{ top: 44 }}
           />
+          <PhoneHomeIndicator />
         </div>
       </div>
     </div>

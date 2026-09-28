@@ -30,7 +30,7 @@ export function OrderBar({ product }: { product: ProductDetail }) {
   };
 
   return (
-    <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 pb-5 pt-3">
+    <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 pt-3 pb-[max(1.25rem,calc(var(--safe-bottom)+0.75rem))]">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-[13px] text-gray-600">수량</span>
         <div className="flex items-center">

@@ -4,7 +4,7 @@ import { HeroCard } from "./hero-card";
 import { ToolGrid } from "./tool-grid";
 export default function CreatePage() {
   return (
-    <div className="block min-h-full bg-white">
+    <div className="block min-h-full flex-1 bg-white">
       <div className="space-y-6 px-4 py-4">
         <HeroCard />
         <section>

@@ -1,4 +1,4 @@
-import type { OrderDetail, OrderStatus } from "./types";
+import type { OrderDetail, OrderSimple, OrderStatus } from "./types";
 
 type SeedOrder = OrderDetail;
 
@@ -79,4 +79,19 @@ export function statusToLabel(status: OrderStatus): string {
   if (status === "pending") return "결제 대기";
   if (status === "ready") return "픽업 대기중";
   return "픽업완료";
+}
+
+export function toOrderSimple(o: OrderDetail): OrderSimple {
+  return {
+    id: o.id,
+    productName: o.productName,
+    thumbnail: o.thumbnail,
+    quantity: o.quantity,
+    totalPrice: o.totalPrice,
+    status: o.status,
+    statusLabel: o.statusLabel,
+    orderedAt: o.orderedAt,
+    pickupLabel: o.pickupLabel,
+    reviewWritten: o.reviewWritten,
+  };
 }

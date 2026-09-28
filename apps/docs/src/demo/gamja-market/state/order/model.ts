@@ -8,5 +8,17 @@ export const order = model<OrderState>({
     queryFn: () => orderAPI.findAll(),
     placeholderData: keepPreviousData,
   }),
+  summary: query<OrderState["summary"]["data"], void>({
+    initialData: {
+      totalCount: 0,
+      readyCount: 0,
+      reviewableOrderId: null,
+      reviewableCount: 0,
+      recent: [],
+    },
+    queryFn: () => orderAPI.findSummary(),
+    placeholderData: keepPreviousData,
+  }),
   currentOrder: null,
+  sessionOrders: {},
 });

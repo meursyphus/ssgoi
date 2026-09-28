@@ -1,34 +1,17 @@
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
-import type { ListingFeed, ListingSimple } from "../types";
+import { toSimple } from "../mapper";
+import type { ExploreVertical, ListingFeed } from "../types";
 
-function toSimple({
-  images: _images,
-  locationDesc: _locationDesc,
-  facilityLabel: _facilityLabel,
-  reviewCount: _reviewCount,
-  amenities: _amenities,
-  perks: _perks,
-  priceKRW: _priceKRW,
-  refundLabel: _refundLabel,
-  ...rest
-}: ReturnType<typeof data.feed>["recent"][number]): ListingSimple {
-  void _images;
-  void _locationDesc;
-  void _facilityLabel;
-  void _reviewCount;
-  void _amenities;
-  void _perks;
-  void _priceKRW;
-  void _refundLabel;
-  return rest;
-}
-
-async function _findAll(): Promise<ListingFeed> {
-  const feed = data.feed();
+async function _findAll(
+  vertical: ExploreVertical = "homes",
+): Promise<ListingFeed> {
   return {
-    recent: feed.recent.map(toSimple),
-    popular: feed.popular.map(toSimple),
+    vertical,
+    sections: data.feed(vertical).map((section) => ({
+      ...section,
+      items: section.items.map(toSimple),
+    })),
   };
 }
 
