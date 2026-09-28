@@ -234,6 +234,18 @@ export function cloneChrome(source: HTMLElement): HTMLElement | null {
   const computed = getComputedStyle(source);
   for (const property of Array.from(computed))
     clone.style.setProperty(property, computed.getPropertyValue(property));
+  // Inherited colours that default to `currentcolor` resolve to the root's
+  // own colour and would then override every descendant's colour (a dark
+  // title inside a light-text sheet). Where the source left them at their
+  // default, hand them back to the descendants' own colours.
+  for (const property of [
+    "-webkit-text-fill-color",
+    "-webkit-text-stroke-color",
+    "text-emphasis-color",
+  ]) {
+    if (computed.getPropertyValue(property) === computed.color)
+      clone.style.setProperty(property, "currentcolor");
+  }
   clone.setAttribute(CHROME_ATTRIBUTE, "");
   clone.setAttribute("aria-hidden", "true");
   clone.setAttribute("inert", "");

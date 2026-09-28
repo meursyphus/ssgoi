@@ -100,6 +100,23 @@ for (const type of ["static", "expand", "blur"] as const) {
     near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
     // The badge copy is trimmed to the card's rounded box like the badge.
     near(await pixel(page, CARD_CORNER.x, CARD_CORNER.y), LIST);
+    // Its nested text keeps its own colour rather than the root's resolved
+    // text fill colour.
+    expect(
+      await page.evaluate(() =>
+        window.zoomChrome.computedProperty(
+          "[data-ssgoi-chrome] .badge b",
+          "-webkit-text-fill-color",
+        ),
+      ),
+    ).toBe(
+      await page.evaluate(() =>
+        window.zoomChrome.computedProperty(
+          ".list .badge b",
+          "-webkit-text-fill-color",
+        ),
+      ),
+    );
 
     // Settled: identical pixels, nothing left behind, inline styles restored.
     await page.evaluate(() => window.zoomChrome.complete());
