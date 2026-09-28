@@ -79,17 +79,44 @@ describe("zoom-element", () => {
         const radii = /round ([\d.e-]+)% \/ ([\d.e-]+)%/.exec(clip!);
         expect(radii).not.toBeNull();
         const scale = 0.36 + 0.64 * progress;
+        // The window (and its corner) closes ahead of the shrinking tile.
+        const closing =
+          createAnimation === createZoomOut
+            ? Math.min(1, (1 - progress) / 0.85)
+            : 1 - progress;
         // Percent radii resolve against the whole 400x900 element, not the
         // inset photo window. Both axes must paint the same radius after scale.
         expect((Number(radii![1]) / 100) * 400 * scale).toBeCloseTo(
-          16 * (1 - progress),
+          16 * closing,
         );
         expect((Number(radii![2]) / 100) * 900 * scale).toBeCloseTo(
-          16 * (1 - progress),
+          16 * closing,
         );
       }
     },
   );
+
+  it("closes the zoom-out window onto the visual before the tile settles", () => {
+    const animation = createZoomOut(
+      input({
+        pageRect: rect(0, 0, 400, 900),
+        enterRect: rect(0, 0, 400, 400),
+        exitRect: rect(20, 30, 144, 144),
+        exitRadius: 16,
+      }),
+    );
+    const insets = (progress: number) =>
+      animation.animate(progress).clipPath!.split(" round ")[0];
+    // Same window as the landed tile, while the transform still moves
+    // (the corner percentages differ because they track the live scale).
+    expect(insets(0.1)).toBe(insets(0));
+    expect(animation.animate(0.1).transform).not.toBe(
+      animation.animate(0).transform,
+    );
+    // Half way the window is still opening toward the full page.
+    expect(insets(0.5)).not.toBe(insets(0));
+    expect(insets(1)).toBe("inset(0% 0% 0% 0%");
+  });
 
   it("maps contain content into a cropped cover window without distortion", () => {
     const enterRect = rect(0, 100, 400, 400);

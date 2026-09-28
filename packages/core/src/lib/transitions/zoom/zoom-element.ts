@@ -171,6 +171,16 @@ export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
   };
 }
 
+/**
+ * Progress at which the shrinking tile's window has closed onto the shared
+ * visual. A spring spends its last stretch creeping through the final few
+ * percent, and a window still a few percent open there shows a sliver of the
+ * page body next to the destination's own content until the rest threshold
+ * cuts it. Closing the window slightly ahead of the motion removes that
+ * sliver; the visual itself keeps settling with the transform.
+ */
+const EXIT_WINDOW_SETTLE = 0.85;
+
 export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
   const { pageRect, scrollOffset, enterRadius, exitRadius } = input;
   const geometry = buildTileGeometry(input);
@@ -194,11 +204,12 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
       const t = 1 - progress;
       const sx = 1 + (scaleX - 1) * t;
       const sy = 1 + (scaleY - 1) * t;
+      const closing = Math.min(1, t / EXIT_WINDOW_SETTLE);
       const radii = interpolatedRadii(
         exitRadius,
         enterRadius,
         geometry.exitCornerRadii,
-        t,
+        closing,
         sx,
         sy,
       );
@@ -207,10 +218,10 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
         clipPath: insetClipPath(
           pageRect,
           {
-            top: start.top * t,
-            right: start.right * t,
-            bottom: start.bottom * t,
-            left: start.left * t,
+            top: start.top * closing,
+            right: start.right * closing,
+            bottom: start.bottom * closing,
+            left: start.left * closing,
           },
           radii,
         ),

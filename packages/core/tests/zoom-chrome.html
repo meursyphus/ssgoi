@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>SSGOI zoom chrome crossfade</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #fff;
+      font:
+        14px/1.4 system-ui,
+        sans-serif;
+    }
+    #scene {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      overflow: hidden;
+    }
+    .page {
+      width: 400px;
+      height: 400px;
+    }
+    .list {
+      background: #fff;
+    }
+    .card {
+      position: absolute;
+      left: 100px;
+      top: 220px;
+      width: 200px;
+      height: 120px;
+    }
+    .card img {
+      display: block;
+      width: 200px;
+      height: 120px;
+      object-fit: cover;
+    }
+    .badge {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      width: 40px;
+      height: 20px;
+      background: #d81e1e;
+      /* Decorative overlays commonly opt out of hit testing. */
+      pointer-events: none;
+    }
+    .bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 80px;
+      background: #1e9e3c;
+      z-index: 10;
+    }
+    .detail {
+      background: #eeeeee;
+    }
+    .player {
+      position: relative;
+      width: 400px;
+      height: 240px;
+    }
+    .player img {
+      display: block;
+      width: 400px;
+      height: 240px;
+      object-fit: cover;
+    }
+    .control {
+      position: absolute;
+      left: 170px;
+      top: 90px;
+      width: 60px;
+      height: 60px;
+      background: #f0c419;
+      pointer-events: none;
+    }
+    .body {
+      height: 160px;
+    }
+  </style>
+  <main id="scene"></main>
+  <script type="module" src="./zoom-chrome.ts"></script>
+</html>

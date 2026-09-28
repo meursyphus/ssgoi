@@ -16,6 +16,25 @@ and zoom types, and checks authored opacity and cleanup in Chromium and WebKit.
 It catches the backdrop flash caused by fading both overlapping images with
 complementary opacities under normal source-over compositing.
 
+## Zoom chrome crossfade (`zoom-chrome`)
+
+A zoom tile is a whole page raised above the other page, so the list chrome
+the card sits under (a bottom bar) and the overlays on the card (a badge) are
+covered for the whole run, and the detail's own controls over the player ride
+inside the tile: all of them popped when the tile settled. Zoom now finds the
+chrome painted over the shared element by hit testing, copies it into a layer
+above the tile that rides the background page's transform, and crossfades it;
+the controls over the shared image crossfade the other way. The fixture builds
+a list with a card under a `z-index` bar (its badge opts out of hit testing)
+and a detail with a control over the player, then seeks real WAAPI keyframes
+in both directions for every zoom type. It asserts the probe pixels at the
+start, the landing and after settling, that each copy's box matches the real
+chrome mid-motion, that the `fade` variant still fades the page body while the
+default leaves it, and that no layer, hit-test marker or inline style remains.
+
+For manual testing, run `pnpm --filter @ssgoi/core dev`, open
+`/tests/zoom-chrome.html`, and drive `window.zoomChrome` from the console.
+
 ## In-place hero (`hero-in-place`)
 
 Hero enter animates the real destination image in its own parent without a
