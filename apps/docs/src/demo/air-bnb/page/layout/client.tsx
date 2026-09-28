@@ -50,7 +50,7 @@ const config: SsgoiConfig = {
     { on: `${BASE}/search`, transition: sheet({ type: "blur" }) },
     // "See all" lists push like an iOS navigation stack.
     { on: `${BASE}/collections/*`, transition: drill() },
-    // The listing hero photo grows into the first photo of the tour.
+    // Photo tour is a child route: Back reverses this hero into the listing.
     {
       from: `${BASE}/listings/:id`,
       to: `${BASE}/listings/:id/photos`,
