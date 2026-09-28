@@ -180,6 +180,35 @@ test("a card that shows more than the player keeps the scale uniform and lands i
   await expect(page.locator("[data-ssgoi-crossfade]")).toHaveCount(0);
 });
 
+for (const direction of ["backward", "forward"] as const) {
+  test(`${direction} keeps the copies on the chrome of a scrolled list`, async ({
+    page,
+  }) => {
+    await page.goto("/tests/zoom-chrome.html");
+    await page.evaluate(
+      (direction) =>
+        window.zoomChrome.setup({ type: "expand", scrolled: true, direction }),
+      direction,
+    );
+    await page.evaluate(() => window.zoomChrome.start());
+    // The layer lives in the scrolled container's content space; placing it
+    // by its scroll offset twice sent every copy 500px down the page.
+    for (const progress of [0, 0.5, 1]) {
+      await page.evaluate(
+        (progress) => window.zoomChrome.seek(progress),
+        progress,
+      );
+      await expectMirrored(page, ".bar");
+      await expectMirrored(page, ".badge");
+    }
+    const landed = direction === "backward";
+    near(await pixel(page, OVER_BAR.x, OVER_BAR.y), landed ? GREEN : DETAIL);
+    near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), landed ? RED : BLUE);
+    await page.evaluate(() => window.zoomChrome.finish());
+    await expect(page.locator("[data-ssgoi-zoom-chrome]")).toHaveCount(0);
+  });
+}
+
 test("a card the player fully contains hides the card while the tile paints it", async ({
   page,
 }) => {

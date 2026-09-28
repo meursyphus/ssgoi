@@ -15,6 +15,8 @@ type Options = {
   direction?: "forward" | "backward";
   /** The detail player crops the picture's sides that the card shows. */
   mismatch?: boolean;
+  /** The list is 900px tall and scrolled by 500px while it is on screen. */
+  scrolled?: boolean;
 };
 let animation: Animation | undefined;
 let start: (() => Promise<void>) | undefined;
@@ -55,29 +57,38 @@ async function setup({
   variant = "default",
   direction = "backward",
   mismatch = false,
+  scrolled = false,
 }: Options = {}) {
   animation?.cancel({ reason: "disposed", owns: () => true });
   scene.replaceChildren();
   const list = buildList();
   const detail = buildDetail();
   detail.classList.toggle("mismatch", mismatch);
+  list.classList.toggle("tall", scrolled);
   const [from, to] = direction === "forward" ? [list, detail] : [detail, list];
   outgoing = from;
+  // Like the real context: the container sits at the incoming page's scroll
+  // and the outgoing page is offset by the two pages' scroll difference.
+  const listScroll = scrolled ? 500 : 0;
+  const fromScroll = direction === "forward" ? listScroll : 0;
+  const toScroll = direction === "forward" ? 0 : listScroll;
+  const scrollOffset = { x: 0, y: fromScroll - toScroll };
   Object.assign(from.style, {
     position: "absolute",
     left: "0",
-    top: "0",
+    top: `${-scrollOffset.y}px`,
   });
   scene.append(to, from);
+  scene.scrollTop = toScroll;
   await Promise.all(
     [...scene.querySelectorAll("img")].map((img) => img.decode()),
   );
   const transition = zoom({ type, variant });
   const context: SsgoiTransitionContext = {
     direction,
-    scrollOffset: { x: 0, y: 0 },
-    from: { scroll: { x: 0, y: 0 } },
-    to: { scroll: { x: 0, y: 0 } },
+    scrollOffset,
+    from: { scroll: { x: 0, y: fromScroll } },
+    to: { scroll: { x: 0, y: toScroll } },
     scrollingElement: scene,
     positionedParent: scene,
   };

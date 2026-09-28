@@ -268,6 +268,8 @@ export class ChromeStrategy implements ZoomStrategy {
     if (chrome.length === 0) return [];
 
     const { positionedParent } = context;
+    // Offset-based, so already in the container's content space: an
+    // absolute child of a scrolled container is placed in that same space.
     const box = getRect(positionedParent, background);
     const layer = document.createElement("div");
     layer.setAttribute(CHROME_ATTRIBUTE, "");
@@ -276,8 +278,8 @@ export class ChromeStrategy implements ZoomStrategy {
     const motion = ctx.backgroundMotion;
     Object.assign(layer.style, {
       position: "absolute",
-      left: `${box.left + positionedParent.scrollLeft}px`,
-      top: `${box.top + positionedParent.scrollTop}px`,
+      left: `${box.left}px`,
+      top: `${box.top}px`,
       width: `${box.width}px`,
       height: `${box.height}px`,
       pointerEvents: "none",
