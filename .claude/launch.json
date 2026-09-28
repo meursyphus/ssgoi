@@ -51,6 +51,55 @@
       ],
       "port": 8765,
       "autoPort": false
+    },
+    {
+      "name": "docs-lan",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "docs",
+        "dev",
+        "--hostname",
+        "0.0.0.0",
+        "--port",
+        "3000"
+      ],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "core-tests",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@ssgoi/core",
+        "exec",
+        "vite",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "4174",
+        "--strictPort"
+      ],
+      "port": 4174,
+      "autoPort": false
+    },
+    {
+      "name": "docs-lan-3000",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "docs",
+        "exec",
+        "next",
+        "dev",
+        "-H",
+        "0.0.0.0",
+        "-p",
+        "3000"
+      ],
+      "port": 3000,
+      "autoPort": false
     }
   ]
 }
