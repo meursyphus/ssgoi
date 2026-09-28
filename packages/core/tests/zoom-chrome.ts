@@ -1,4 +1,4 @@
-import { zoom } from "../src/lib/transitions";
+import { hero, zoom } from "../src/lib/transitions";
 import type { Animation } from "../src/lib/animation/animation";
 import type { CreateElement, SsgoiTransitionContext } from "../src/lib/types";
 
@@ -17,6 +17,8 @@ type Options = {
   mismatch?: boolean;
   /** The list is 900px tall and scrolled by 500px while it is on screen. */
   scrolled?: boolean;
+  /** Run the same pages through hero (`type: "fade"`) instead of zoom. */
+  effect?: "zoom" | "hero";
 };
 let animation: Animation | undefined;
 let start: (() => Promise<void>) | undefined;
@@ -58,11 +60,22 @@ async function setup({
   direction = "backward",
   mismatch = false,
   scrolled = false,
+  effect = "zoom",
 }: Options = {}) {
   animation?.cancel({ reason: "disposed", owns: () => true });
   scene.replaceChildren();
   const list = buildList();
   const detail = buildDetail();
+  if (effect === "hero") {
+    for (const [page, role] of [
+      [list, "exit"],
+      [detail, "enter"],
+    ] as const) {
+      const image = page.querySelector("img")!;
+      image.removeAttribute(`data-zoom-${role}-key`);
+      image.setAttribute(`data-hero-${role}-key`, "photo");
+    }
+  }
   detail.classList.toggle("mismatch", mismatch);
   list.classList.toggle("tall", scrolled);
   const [from, to] = direction === "forward" ? [list, detail] : [detail, list];
@@ -83,7 +96,8 @@ async function setup({
   await Promise.all(
     [...scene.querySelectorAll("img")].map((img) => img.decode()),
   );
-  const transition = zoom({ type, variant });
+  const transition =
+    effect === "hero" ? hero({ type: "fade" }) : zoom({ type, variant });
   const context: SsgoiTransitionContext = {
     direction,
     scrollOffset,

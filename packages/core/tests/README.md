@@ -25,12 +25,17 @@ inside the tile: all of them popped when the tile settled. Zoom now finds the
 chrome painted over the shared element by hit testing, copies it into a layer
 above the tile that rides the background page's transform, and crossfades it;
 the controls over the shared image crossfade the other way. The fixture builds
-a list with a card under a `z-index` bar (its badge opts out of hit testing)
-and a detail with a control over the player, then seeks real WAAPI keyframes
-in both directions for every zoom type. It asserts the probe pixels at the
-start, the landing and after settling, that each copy's box matches the real
-chrome mid-motion, that the `fade` variant still fades the page body while the
+a list with a card under a `z-index` bar (its badge opts out of hit testing
+and is trimmed by the card's rounded box) and a detail with a control over the
+player, then seeks real WAAPI keyframes in both directions for every zoom
+type. It asserts the probe pixels at the start, the landing and after
+settling, that each copy's box (and its nested text) matches the real chrome
+mid-motion, also on a list scrolled by 500px, that a card showing more of the
+image than the player keeps a uniform scale with the preview copy covering the
+whole card, that the `fade` variant still fades the page body while the
 default leaves it, and that no layer, hit-test marker or inline style remains.
+The same pages run through hero (`type: "fade"`): its exit flight layer sits
+above the list's chrome too, so the copies must ride above that layer.
 
 For manual testing, run `pnpm --filter @ssgoi/core dev`, open
 `/tests/zoom-chrome.html`, and drive `window.zoomChrome` from the console.

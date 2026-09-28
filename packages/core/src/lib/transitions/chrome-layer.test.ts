@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { gridPoints, outermost, siblingPoints, stackAbove } from "./chrome";
-import type { MediaRect } from "../media-geometry";
+import {
+  gridPoints,
+  outermost,
+  siblingPoints,
+  stackAbove,
+} from "./chrome-layer";
+import type { MediaRect } from "./media-geometry";
 
 class Element {
   parentElement: Element | null = null;

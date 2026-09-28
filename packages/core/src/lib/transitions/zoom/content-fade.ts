@@ -2,22 +2,9 @@ import { IntegratorProvider, WebAnimation } from "../../animation";
 import type { AnimationDisposal } from "../../animation/animation";
 import type { PhysicsOptions } from "@types";
 import { collectContentTargets } from "../content-targets";
-import { CROSSFADE_ATTRIBUTE, clampOpacity } from "../crossfade";
+import { chromeOpacity } from "../chrome-layer";
+import { CROSSFADE_ATTRIBUTE } from "../crossfade";
 import type { MediaRect } from "../media-geometry";
-
-/**
- * Share of the motion during which a page's overlays are visible: they show
- * only once their page owns the last part of the move. A control or caption
- * painted over the shared image at half opacity mid-flight marks the tile's
- * edge against the identical image around it, and a large copy of list
- * chrome would otherwise linger over most of the opening page.
- */
-export const CHROME_SPAN = 0.4;
-
-/** Opacity of a page's overlays given the progress toward that page. */
-export function chromeOpacity(toward: number): number {
-  return clampOpacity((toward - (1 - CHROME_SPAN)) / CHROME_SPAN);
-}
 
 /** Strictly overlapping boxes; a shared edge (a title right under the player) does not count. */
 export function rectsOverlap(

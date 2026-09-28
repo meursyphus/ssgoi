@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  CHROME_SPAN,
-  chromeOpacity,
-  collectOverlappingContent,
-  rectsOverlap,
-} from "./content-fade";
+import { CHROME_SPAN, chromeOpacity } from "../chrome-layer";
+import { collectOverlappingContent, rectsOverlap } from "./content-fade";
 import type { MediaRect } from "../media-geometry";
 
 class Element {

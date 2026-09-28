@@ -43,7 +43,7 @@ function between(actual: number[], a: number[], b: number[]) {
 async function expectMirrored(page: Page, selector: string) {
   const [clone, real] = await page.evaluate(
     (selector) => [
-      window.zoomChrome.box(`[data-ssgoi-zoom-chrome] ${selector}`),
+      window.zoomChrome.box(`[data-ssgoi-chrome] ${selector}`),
       window.zoomChrome.box(`.list ${selector}`),
     ],
     selector,
@@ -110,7 +110,7 @@ for (const type of ["static", "expand", "blur"] as const) {
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), GREEN);
     near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
     near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
-    await expect(page.locator("[data-ssgoi-zoom-chrome]")).toHaveCount(0);
+    await expect(page.locator("[data-ssgoi-chrome]")).toHaveCount(0);
     await expect(page.locator("[data-ssgoi-hit-test]")).toHaveCount(0);
   });
 
@@ -156,7 +156,7 @@ for (const type of ["static", "expand", "blur"] as const) {
     await page.evaluate(() => window.zoomChrome.finish());
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), DETAIL);
     near(await pixel(page, CONTROL.x, CONTROL.y), YELLOW);
-    await expect(page.locator("[data-ssgoi-zoom-chrome]")).toHaveCount(0);
+    await expect(page.locator("[data-ssgoi-chrome]")).toHaveCount(0);
     expect(
       await page.evaluate(() => window.zoomChrome.inlineOpacity(".control")),
     ).toBe("");
@@ -244,9 +244,39 @@ for (const direction of ["backward", "forward"] as const) {
     near(await pixel(page, OVER_BAR.x, OVER_BAR.y), landed ? GREEN : DETAIL);
     near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), landed ? RED : BLUE);
     await page.evaluate(() => window.zoomChrome.finish());
-    await expect(page.locator("[data-ssgoi-zoom-chrome]")).toHaveCount(0);
+    await expect(page.locator("[data-ssgoi-chrome]")).toHaveCount(0);
   });
 }
+
+test("hero exit copies the list's chrome above its flight layer", async ({
+  page,
+}) => {
+  await page.goto("/tests/zoom-chrome.html");
+  await page.evaluate(() => window.zoomChrome.setup({ effect: "hero" }));
+  await page.evaluate(() => window.zoomChrome.start());
+
+  // The flight layer paints both images above the pages, so the list's
+  // badge and bar sit beneath it; their copies ride a layer above.
+  await page.evaluate(() => window.zoomChrome.seek(0.5));
+  await expect(page.locator("[data-hero-layer]")).toHaveCount(1);
+  await expectMirrored(page, ".bar");
+  await expectMirrored(page, ".badge");
+  await expectMirrored(page, ".badge b");
+
+  // Landed: the chrome is already opaque where the image lands, so nothing
+  // appears when the flight layer goes.
+  await page.evaluate(() => window.zoomChrome.seek(1));
+  near(await pixel(page, OVER_BAR.x, OVER_BAR.y), GREEN);
+  near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
+  near(await pixel(page, CARD_CORNER.x, CARD_CORNER.y), LIST);
+  near(await pixel(page, CARD_CENTRE.x, CARD_CENTRE.y), BLUE);
+  await page.evaluate(() => window.zoomChrome.finish());
+  near(await pixel(page, OVER_BAR.x, OVER_BAR.y), GREEN);
+  near(await pixel(page, OVER_BADGE.x, OVER_BADGE.y), RED);
+  await expect(
+    page.locator("[data-ssgoi-chrome], [data-hero-layer]"),
+  ).toHaveCount(0);
+});
 
 test("a card the player fully contains hides the card while the tile paints it", async ({
   page,
