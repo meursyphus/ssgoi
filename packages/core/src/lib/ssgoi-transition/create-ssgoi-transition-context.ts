@@ -11,7 +11,10 @@ import type {
   CreateElement,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
-import { createContextManager } from "./create-context-manager";
+import {
+  createContextManager,
+  type ScrollPolicy,
+} from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { resolveTransitionRule } from "./resolve-transition-rule";
 import { createNavigationTransitionResolver } from "./navigation-transition";
@@ -38,7 +41,7 @@ type PendingSide = {
    * Applies the scroll policy selected by the rule that brings this side IN.
    * OUT payloads do not need it.
    */
-  applyScrollPolicy?: (preserves: boolean) => void;
+  applyScrollPolicy?: (policy: ScrollPolicy, leavingPath?: string) => void;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
@@ -91,6 +94,9 @@ export function createSggoiTransitionContext(
     // batches (notably when Suspense reveals a child later). When the same
     // side/path repeats before pairing, the outermost DOM boundary owns it.
     keepCurrent: ({ current, next }) => current.element.contains(next.element),
+    // Tells an outer layout that stayed on screen through the last pair from
+    // a late duplicate of that pair when both report the same path.
+    contains: (outer, inner) => outer.element.contains(inner.element),
   });
   const navigationResolver =
     createNavigationTransitionResolver<AnyTransitionConfig>();
@@ -661,7 +667,10 @@ export function createSggoiTransitionContext(
         return;
       }
 
-      pair.in.applyScrollPolicy?.(resolved.preserveScroll.to);
+      pair.in.applyScrollPolicy?.(
+        resolved.shareScroll ? "shared" : resolved.preserveScroll.to,
+        pair.from,
+      );
 
       // Native swipe-back owns playback, but the same resolved rule still owns
       // scroll restoration and semantic history.

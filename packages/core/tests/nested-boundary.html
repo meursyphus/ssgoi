@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSGOI nested boundary regression</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font: 18px system-ui;
+      background: #eee;
+    }
+    #scene {
+      position: relative;
+    }
+    [data-name] {
+      display: block;
+      width: 100%;
+      min-height: 320px;
+      padding: 24px;
+    }
+    [data-name="layout"] {
+      background: #f7f1e3;
+    }
+    [data-name="grid"] {
+      background: #c8e8ff;
+    }
+    [data-name="reels"] {
+      background: #ffe3a1;
+    }
+    [data-name="home"],
+    [data-name="b"] {
+      background: #d6f5d6;
+    }
+    nav {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      right: 8px;
+      padding: 8px;
+      background: white;
+    }
+    button {
+      padding: 8px;
+    }
+  </style>
+  <nav>
+    <button id="step">Next step</button>
+    <output id="log"></output>
+  </nav>
+  <main id="scene"></main>
+  <script type="module" src="./nested-boundary.ts"></script>
+</html>

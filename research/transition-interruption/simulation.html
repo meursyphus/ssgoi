@@ -1,0 +1,65 @@
+<section class="sim-section" aria-label="목표 변경의 개념 실험">
+  <p class="sim-title">목표가 바뀔 때, 기존 속도가 남아 있다면</p>
+  <p class="sim-note">A/B/C를 연속으로 눌러 보세요. 같은 critical spring에서 위쪽은 매번 속도를 0으로 초기화하고, 아래쪽은 현재 속도를 이어받습니다. 현재 SSGOI의 제품 동작을 재현한 demo가 아닌, 접합 원리의 비교입니다.</p>
+  <div class="sim-controls" id="motion-buttons">
+    <button type="button" data-target="0.15" aria-pressed="true">A</button>
+    <button type="button" data-target="0.5" aria-pressed="false">B</button>
+    <button type="button" data-target="0.85" aria-pressed="false">C</button>
+  </div>
+  <svg id="motion-stage" role="img" aria-label="속도를 초기화하는 운동과 보존하는 운동의 비교" viewBox="0 0 800 224"></svg>
+  <div class="sim-status" id="motion-status" aria-live="polite">목표 A · 정지 상태</div>
+</section>
+<script>
+(() => {
+  const stage = document.getElementById('motion-stage');
+  const status = document.getElementById('motion-status');
+  const buttons = [...document.querySelectorAll('#motion-buttons button')];
+  let target = 0.15, label = 'A', oldTime = null, raf = 0;
+  const states = [{x:0.15,v:0},{x:0.15,v:0}];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const omega = 7;
+  function advance(s,dt){
+    const r=s.x-target, b=s.v+omega*r, decay=Math.exp(-omega*dt);
+    s.x=target+(r+b*dt)*decay;
+    s.v=(s.v-omega*b*dt)*decay;
+  }
+  function draw(){
+    const width = Math.max(250, stage.parentElement.clientWidth);
+    const x0=30, span=width-60;
+    stage.setAttribute('viewBox',`0 0 ${width} 230`);
+    let out='<title>목표 변경 시 속도의 초기화와 보존</title>';
+    const tx=(x,y,s,extra='')=>`<text x="${x}" y="${y}" fill="#354858" font-size="13" ${extra}>${s}</text>`;
+    for(let i=0;i<2;i++){
+      const y=72+i*108, s=states[i], x=x0+s.x*span, g=x0+target*span;
+      out+=tx(x0,y-29,i===0?'속도 0으로 재시작':'현재 속도 유지');
+      out+=`<line x1="${x0}" x2="${width-30}" y1="${y}" y2="${y}" stroke="#c6cfd8"/><line x1="${g}" x2="${g}" y1="${y-19}" y2="${y+19}" stroke="#93a2b2" stroke-dasharray="4 4"/><circle cx="${x}" cy="${y}" r="10" fill="${i===0?'#697c8e':'#245b9c'}"/>`;
+      if(Math.abs(s.v)>0.015){const end=x+Math.max(-54,Math.min(54,s.v*40));const sign=Math.sign(s.v);out+=`<path d="M${x+sign*14},${y} L${end+sign*14},${y} l${-sign*6},-4 m${sign*6},4 l${-sign*6},4" stroke="${i===0?'#697c8e':'#245b9c'}" fill="none" stroke-width="1.6"/>`;}
+      out+=tx(width-30,y-29,`v = ${s.v.toFixed(2)} /s`,'text-anchor="end"');
+      for(const [p,n] of [[0.15,'A'],[0.5,'B'],[0.85,'C']])out+=tx(x0+p*span,y+34,n,'text-anchor="middle"');
+    }
+    stage.innerHTML=out;
+  }
+  function frame(t){
+    const dt=oldTime===null?0:Math.min((t-oldTime)/1000,0.04); oldTime=t;
+    for(const s of states)advance(s,dt);
+    draw();
+    if(states.some(s=>Math.abs(s.x-target)>0.0002 || Math.abs(s.v)>0.001))raf=requestAnimationFrame(frame);
+    else {for(const s of states){s.x=target;s.v=0;}draw();raf=0;oldTime=null;status.textContent=`목표 ${label} · 정착`}
+  }
+  buttons.forEach(button=>button.addEventListener('click',()=>{
+    const next=Number(button.dataset.target);
+    if(next===target)return;
+    target=next; label=button.textContent;
+    states[0].v=0;
+    buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+    status.textContent=`목표 ${label} · 새로운 목적지로 진행`;
+    if(reduced.matches){for(const s of states){s.x=target;s.v=0;}draw();status.textContent=`목표 ${label} · 동작 줄이기 적용`;return;}
+    if(!raf){oldTime=null;raf=requestAnimationFrame(frame);}
+  }));
+  new ResizeObserver(draw).observe(stage.parentElement);
+  document.addEventListener('visibilitychange',()=>{oldTime=null;});
+  draw();
+  // Read-only state for checking this educational simulation.
+  window.motionResearchSnapshot=()=>({target,label,states:states.map(s=>({...s}))});
+})();
+</script>

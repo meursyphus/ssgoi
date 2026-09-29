@@ -1,6 +1,13 @@
+import { Link } from "@/lib/link";
+
+/** 주말 약속 제안 카드 — 오래 연락 안 한 친구(Jordan)의 프로필로 */
 export function PromoBanner() {
   return (
-    <div className="mx-4 mb-2 mt-1 flex items-center gap-3 overflow-hidden rounded-2xl bg-neutral-100 px-4 py-3">
+    <Link
+      href="/demo/kakao-talk/profile/f-002"
+      scroll={false}
+      className="mx-4 mb-2 mt-1 flex items-center gap-3 overflow-hidden rounded-2xl bg-neutral-100 px-4 py-3 transition-transform active:scale-[0.98]"
+    >
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="text-[15px] font-bold leading-tight text-neutral-900">
           Plans this weekend?
@@ -14,6 +21,6 @@ export function PromoBanner() {
         alt=""
         className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover"
       />
-    </div>
+    </Link>
   );
 }

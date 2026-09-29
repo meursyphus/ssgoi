@@ -1,11 +1,11 @@
 import { createAction } from "@/lib/utils";
 import { data } from "../data";
-import type { ChatThreads } from "../types";
+import type { ChatThreads, ThreadFilter } from "../types";
 
-async function _findThreads(): Promise<ChatThreads> {
+async function _findThreads(filter?: ThreadFilter): Promise<ChatThreads> {
   return {
-    pinned: data.pinned(),
-    recent: data.recent(),
+    pinned: data.pinned(filter),
+    recent: data.recent(filter),
   };
 }
 

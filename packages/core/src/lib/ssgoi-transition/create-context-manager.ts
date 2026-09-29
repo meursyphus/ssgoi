@@ -7,6 +7,8 @@ const RESTORE_MAX_RETRIES = 10;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
+/** Restore the saved position, reset to the top, or adopt the current one. */
+export type ScrollPolicy = boolean | "shared";
 
 export type ContextManagerOptions = {
   /**
@@ -81,6 +83,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   let contextElement: HTMLElement | null = null;
   const scrollPositions: Map<string, ScrollPosition> = new Map();
+  // Where the container last rested, whichever path it was filed under. Nested
+  // boundaries file one scroll under whichever of them entered last, so the
+  // page that is leaving can hold a stale entry; this is where it really was.
+  let lastPosition: ScrollPosition = { x: 0, y: 0 };
   let currentPath: string | null = null;
   // Suppress scroll capture during the transition window so OUT scrolls of
   // an already-unmounted page don't bleed into IN under a wrong currentPath.
@@ -102,10 +108,11 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       !isTransitioning &&
       !activeTransitions.size
     ) {
-      scrollPositions.set(getStorageKey(currentPath), {
+      lastPosition = {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
-      });
+      };
+      scrollPositions.set(getStorageKey(currentPath), lastPosition);
     }
   };
 
@@ -148,6 +155,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         left: target.x,
         behavior: "instant",
       });
+      lastPosition = {
+        x: scrollContainer!.scrollLeft,
+        y: scrollContainer!.scrollTop,
+      };
 
       return (
         Math.abs(scrollContainer!.scrollTop - target.y) < 1 &&
@@ -232,14 +243,23 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     // the position that existed when this page began entering.
     const storageKeyAtEntry = getStorageKey(path);
     const savedPositionAtEntry = scrollPositions.get(storageKeyAtEntry);
+    const lastPositionAtEntry = lastPosition;
 
-    const applyScrollPolicy = (shouldRestore: boolean) => {
+    // `leavingPath` is the page this one replaces. It was on screen until this
+    // registration, so the position at entry is its scroll: filing it there
+    // lets the OUT animation and a later return use where it actually was.
+    const applyScrollPolicy = (policy: ScrollPolicy, leavingPath?: string) => {
       if (myGeneration !== initGeneration) return;
       scrollPolicyDecisionGeneration = myGeneration;
-      if (shouldRestore && savedPositionAtEntry) {
+      if (leavingPath !== undefined) {
+        scrollPositions.set(getStorageKey(leavingPath), lastPositionAtEntry);
+      }
+      if (policy === "shared") {
+        scrollPositions.set(storageKeyAtEntry, lastPositionAtEntry);
+      } else if (policy && savedPositionAtEntry) {
         scrollPositions.set(storageKeyAtEntry, savedPositionAtEntry);
       }
-      restoreScrollPosition(path, shouldRestore, myGeneration);
+      restoreScrollPosition(path, policy !== false, myGeneration);
     };
 
     if (preserves !== undefined) {
@@ -346,6 +366,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       scrollContainer = null;
       contextElement = null;
       currentPath = null;
+      lastPosition = { x: 0, y: 0 };
       isMobileMeasured = false;
     },
     initializeContext,

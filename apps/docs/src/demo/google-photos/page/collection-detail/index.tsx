@@ -16,7 +16,7 @@ export default function CollectionDetailPage({
   }));
   collection.actions.init(initialData);
   return (
-    <div className="block min-h-full bg-white">
+    <div className="block min-h-full bg-white pb-safe">
       <CollectionHeader collection={initialData} />
       <CollectionPhotoGrid photos={initialData.photos} />
     </div>

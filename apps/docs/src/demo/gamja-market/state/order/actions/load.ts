@@ -5,7 +5,7 @@ import { order } from "../model";
 import type { OrderActions } from "../types";
 
 export const loadActions = action<
-  Pick<OrderActions, "loadOrders" | "loadCurrent" | "refresh">
+  Pick<OrderActions, "loadOrders" | "loadSummary" | "loadCurrent" | "refresh">
 >(({ state }) => {
   class LoadActions {
     private model = state(order);
@@ -14,8 +14,15 @@ export const loadActions = action<
       await this.model.orders.query();
     }
 
+    async loadSummary() {
+      await this.model.summary.query();
+    }
+
     async refresh() {
-      await this.model.orders.refetch();
+      await Promise.all([
+        this.model.orders.refetch(),
+        this.model.summary.refetch(),
+      ]);
     }
 
     @OnError((e: unknown) => {

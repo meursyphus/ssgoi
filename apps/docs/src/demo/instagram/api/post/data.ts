@@ -1,4 +1,12 @@
-import type { PostComment, PostDetail, Reel, TaggedPost } from "./types";
+import type {
+  PostAuthor,
+  PostComment,
+  PostDetail,
+  PostSimple,
+  Reel,
+  ReelDetail,
+  TaggedPost,
+} from "./types";
 
 // 공통 댓글 풀 — post마다 4~7개 잘라서 씀
 const COMMENT_POOL: Omit<PostComment, "id">[] = [
@@ -88,18 +96,24 @@ const COMMENT_POOL: Omit<PostComment, "id">[] = [
   },
 ];
 
-function commentsFor(postId: string, count: number): PostComment[] {
+function commentsFor(
+  postId: string,
+  count: number,
+  /** 작성자 본인 댓글은 빼고 채운다 (친구 게시물) */
+  author?: string,
+): PostComment[] {
   // post id를 hash 삼아 시작 index 결정 — 결정적이지만 post마다 다른 댓글 조합
   let h = 0;
   for (let i = 0; i < postId.length; i++)
     h = (h * 31 + postId.charCodeAt(i)) >>> 0;
   const start = h % COMMENT_POOL.length;
-  const out: PostComment[] = [];
-  for (let i = 0; i < count; i++) {
-    const src = COMMENT_POOL[(start + i) % COMMENT_POOL.length];
-    out.push({ ...src, id: `${postId}-c${i + 1}` });
-  }
-  return out;
+  const pool = Array.from(
+    { length: COMMENT_POOL.length },
+    (_, i) => COMMENT_POOL[(start + i) % COMMENT_POOL.length],
+  ).filter((c) => c.user !== author);
+  return pool
+    .slice(0, count)
+    .map((src, i) => ({ ...src, id: `${postId}-c${i + 1}` }));
 }
 
 type PostSeed = Omit<PostDetail, "topComments"> & { commentCount: number };
@@ -239,41 +253,162 @@ const seed: PostSeed[] = [
   },
 ];
 
-const posts: PostDetail[] = seed.map(({ commentCount, ...rest }) => ({
-  ...rest,
-  topComments: commentsFor(rest.id, commentCount),
-}));
+// 친구들이 올리고 나를 태그한 게시물 — 태그됨 탭과 홈 피드에서 열린다
+const FRIENDS: Record<string, PostAuthor> = {
+  miso: {
+    username: "miso_devv",
+    avatar: "https://picsum.photos/seed/comment-miso/160/160",
+  },
+  haru: {
+    username: "haru_oc",
+    avatar: "https://picsum.photos/seed/comment-haru/160/160",
+  },
+  kim: {
+    username: "kim__sj",
+    avatar: "https://picsum.photos/seed/comment-kim/160/160",
+  },
+  rena: {
+    username: "rena_films",
+    avatar: "https://picsum.photos/seed/comment-rena/160/160",
+  },
+};
 
-const reels: Reel[] = [
+const taggedSeed: PostSeed[] = [
+  {
+    id: "t-001",
+    image: "https://picsum.photos/seed/tagged-1/600/600",
+    kind: "image",
+    caption: "주말 성수 카페 투어 ☕️ 사진은 @deaseungseung94 가 찍어줌",
+    likes: 57,
+    comments: 6,
+    likesLabel: "좋아요 57개",
+    commentsLabel: "댓글 6개 모두 보기",
+    publishedAtLabel: "1일 전",
+    commentCount: 5,
+    author: FRIENDS.miso,
+  },
+  {
+    id: "t-002",
+    image: "https://picsum.photos/seed/tagged-2/600/600",
+    kind: "image",
+    caption: "오랜만에 다 같이 한강 🌊 @deaseungseung94 다음엔 자전거 타자",
+    likes: 89,
+    comments: 12,
+    likesLabel: "좋아요 89개",
+    commentsLabel: "댓글 12개 모두 보기",
+    publishedAtLabel: "3일 전",
+    commentCount: 6,
+    author: FRIENDS.haru,
+  },
+  {
+    id: "t-003",
+    image: "https://picsum.photos/seed/tagged-3/600/600",
+    kind: "image",
+    caption: "스터디 끝나고 한 컷. 다음 주 발표도 화이팅 @deaseungseung94",
+    likes: 34,
+    comments: 3,
+    likesLabel: "좋아요 34개",
+    commentsLabel: "댓글 3개 모두 보기",
+    publishedAtLabel: "5일 전",
+    commentCount: 3,
+    author: FRIENDS.kim,
+  },
+  {
+    id: "t-004",
+    image: "https://picsum.photos/seed/tagged-4/600/600",
+    kind: "image",
+    caption: "필름으로 담은 을지로 골목 📷 모델 @deaseungseung94",
+    likes: 126,
+    comments: 9,
+    likesLabel: "좋아요 126개",
+    commentsLabel: "댓글 9개 모두 보기",
+    publishedAtLabel: "1주 전",
+    commentCount: 5,
+    author: FRIENDS.rena,
+  },
+];
+
+const toDetail = ({ commentCount, ...rest }: PostSeed): PostDetail => ({
+  ...rest,
+  topComments: commentsFor(rest.id, commentCount, rest.author?.username),
+});
+
+// 내 게시물(그리드)과 친구 게시물(태그됨) — 상세 조회는 둘 다 가능
+const posts: PostDetail[] = seed.map(toDetail);
+const friendPosts: PostDetail[] = taggedSeed.map(toDetail);
+const allPosts: PostDetail[] = [...posts, ...friendPosts];
+
+const ME: PostAuthor = {
+  username: "deaseungseung94",
+  avatar: "https://picsum.photos/seed/dsmoon-avatar/200/200",
+};
+
+const reels: ReelDetail[] = [
   {
     id: "r-001",
     image: "https://picsum.photos/seed/reel-1/400/700",
     viewsLabel: "1.2만",
+    caption: "퇴근하고 한강까지 30분 러닝 🏃 오늘 페이스 5'40\"",
+    likesLabel: "1,284",
+    commentsLabel: "46",
+    sharesLabel: "112",
+    audioLabel: "deaseungseung94 · 원본 오디오",
+    author: ME,
   },
   {
     id: "r-002",
     image: "https://picsum.photos/seed/reel-2/400/700",
     viewsLabel: "8.8천",
+    caption: "데스크 셋업 타임랩스. 케이블 정리만 두 시간 걸림",
+    likesLabel: "731",
+    commentsLabel: "28",
+    sharesLabel: "54",
+    audioLabel: "Lo-fi Study · Chill Beats",
+    author: ME,
   },
   {
     id: "r-003",
     image: "https://picsum.photos/seed/reel-3/400/700",
     viewsLabel: "2.4만",
+    caption: "ssgoi로 만든 페이지 트랜지션 모음 ✨ 링크는 프로필에",
+    likesLabel: "3,102",
+    commentsLabel: "187",
+    sharesLabel: "640",
+    audioLabel: "deaseungseung94 · 원본 오디오",
+    author: ME,
   },
   {
     id: "r-004",
     image: "https://picsum.photos/seed/reel-4/400/700",
     viewsLabel: "5.9천",
+    caption: "주말 아침 핸드드립 루틴 ☕️",
+    likesLabel: "402",
+    commentsLabel: "15",
+    sharesLabel: "21",
+    audioLabel: "Morning Jazz · Cafe Playlist",
+    author: ME,
   },
   {
     id: "r-005",
     image: "https://picsum.photos/seed/reel-5/400/700",
     viewsLabel: "1.7만",
+    caption: "제주 3박 4일 1분 요약 🍊",
+    likesLabel: "2,245",
+    commentsLabel: "98",
+    sharesLabel: "310",
+    audioLabel: "deaseungseung94 · 원본 오디오",
+    author: ME,
   },
   {
     id: "r-006",
     image: "https://picsum.photos/seed/reel-6/400/700",
     viewsLabel: "3.1천",
+    caption: "새 키보드 타건음 ASMR ⌨️",
+    likesLabel: "268",
+    commentsLabel: "12",
+    sharesLabel: "9",
+    audioLabel: "deaseungseung94 · 원본 오디오",
+    author: ME,
   },
 ];
 
@@ -281,37 +416,80 @@ const tagged: TaggedPost[] = [
   {
     id: "t-001",
     image: "https://picsum.photos/seed/tagged-1/600/600",
-    userLabel: "@friend_a",
+    userLabel: "@miso_devv",
   },
   {
     id: "t-002",
     image: "https://picsum.photos/seed/tagged-2/600/600",
-    userLabel: "@friend_b",
+    userLabel: "@haru_oc",
   },
   {
     id: "t-003",
     image: "https://picsum.photos/seed/tagged-3/600/600",
-    userLabel: "@studio_c",
+    userLabel: "@kim__sj",
   },
   {
     id: "t-004",
     image: "https://picsum.photos/seed/tagged-4/600/600",
-    userLabel: "@friend_d",
+    userLabel: "@rena_films",
   },
 ];
 
+// 탐색 탭: 내 게시물과 친구 게시물을 섞은 고정 순서 (API가 정렬 책임)
+const EXPLORE_ORDER = [
+  "t-001",
+  "p-004",
+  "p-008",
+  "t-002",
+  "p-003",
+  "p-011",
+  "t-004",
+  "p-006",
+  "p-001",
+  "t-003",
+  "p-010",
+  "p-002",
+  "p-009",
+  "p-005",
+  "p-007",
+];
+
+// 홈 피드: 팔로우 중인 친구 게시물 사이에 내 최근 게시물
+const FEED_ORDER = ["t-001", "p-001", "t-002", "t-004", "t-003"];
+
+const clone = (p: PostDetail): PostDetail => ({
+  ...p,
+  topComments: p.topComments.map((c) => ({ ...c })),
+});
+
+const byId = (id: string) => allPosts.find((p) => p.id === id) ?? null;
+
 export const data = {
-  all: () =>
-    posts.map((p) => ({
-      ...p,
-      topComments: p.topComments.map((c) => ({ ...c })),
-    })),
+  all: () => posts.map(clone),
   byId: (id: string) => {
-    const found = posts.find((p) => p.id === id);
-    return found
-      ? { ...found, topComments: found.topComments.map((c) => ({ ...c })) }
-      : null;
+    const found = byId(id);
+    return found ? clone(found) : null;
   },
-  reels: () => reels.map((r) => ({ ...r })),
+  reels: (): Reel[] =>
+    reels.map(({ id, image, viewsLabel }) => ({ id, image, viewsLabel })),
+  reelById: (id: string) => {
+    const found = reels.find((r) => r.id === id);
+    return found ? { ...found, author: { ...found.author } } : null;
+  },
+  // 댓글 시트: "댓글 N개 모두 보기"의 N만큼 (공통 풀 크기까지)
+  comments: (id: string): PostComment[] | null => {
+    const found = byId(id);
+    if (!found) return null;
+    const count = Math.max(found.comments, found.topComments.length);
+    return commentsFor(id, count, found.author?.username);
+  },
   tagged: () => tagged.map((t) => ({ ...t })),
+  explore: (): PostSimple[] =>
+    EXPLORE_ORDER.map((id) => byId(id))
+      .filter((p): p is PostDetail => p !== null)
+      .map(({ id, image, kind }) => ({ id, image, kind })),
+  feed: (): PostDetail[] =>
+    FEED_ORDER.map((id) => byId(id))
+      .filter((p): p is PostDetail => p !== null)
+      .map(clone),
 };

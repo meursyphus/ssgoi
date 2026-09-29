@@ -13,6 +13,9 @@ export function ConfirmStep() {
   const detail = useCurrentListing();
   const checkout = useCheckout((state) => ({
     method: state.selectedMethod,
+    dateLabel: state.dateLabel,
+    guests: state.guests,
+    payPlan: state.payPlan,
   }));
   return (
     <div>
@@ -24,9 +27,23 @@ export function ConfirmStep() {
 
         <div className="mt-4 space-y-3">
           <ConfirmRow label="Stay" value={detail.title} />
-          <ConfirmRow label="Dates" value={detail.dateLabel} />
-          <ConfirmRow label="Guests" value="1 adult" />
+          <ConfirmRow
+            label="Dates"
+            value={checkout.dateLabel ?? detail.dateLabel}
+          />
+          <ConfirmRow
+            label="Guests"
+            value={`${checkout.guests} ${checkout.guests === 1 ? "adult" : "adults"}`}
+          />
           <ConfirmRow label="Payment" value={METHOD_LABEL[checkout.method]} />
+          <ConfirmRow
+            label="Plan"
+            value={
+              checkout.payPlan === "full"
+                ? detail.payPlans.full
+                : detail.payPlans.split
+            }
+          />
           <ConfirmRow
             label="Total"
             value={`₩${detail.priceKRW.toLocaleString()}`}

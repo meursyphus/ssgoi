@@ -1,5 +1,7 @@
 "use client";
 
+import { Link } from "@/lib/link";
+
 export function ProfileTopBar({
   username,
   isPrivate,
@@ -10,7 +12,12 @@ export function ProfileTopBar({
   return (
     <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 pt-3 pb-2">
       {/* + new post */}
-      <button className="-ml-1 grid h-10 w-10 place-items-center text-neutral-900">
+      <Link
+        href="/demo/instagram/create"
+        scroll={false}
+        aria-label="새 게시물"
+        className="-ml-1 grid h-10 w-10 place-items-center text-neutral-900 active:scale-90 transition-transform"
+      >
         <svg
           width="26"
           height="26"
@@ -22,7 +29,7 @@ export function ProfileTopBar({
           <rect x="3.5" y="3.5" width="17" height="17" rx="3.5" />
           <path d="M12 8v8M8 12h8" strokeLinecap="round" />
         </svg>
-      </button>
+      </Link>
 
       {/* username + chevron */}
       <div className="flex flex-1 items-center justify-center gap-1.5">

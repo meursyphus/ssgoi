@@ -8,6 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { IframeLoadingOverlay } from "./iframe-loading-overlay";
+import {
+  PhoneHomeIndicator,
+  phoneSafeAreaFrameProps,
+} from "./phone-home-indicator";
 
 type Props = {
   src: string;
@@ -35,9 +39,16 @@ type Props = {
  * transformed down with `scale` to fit the visible screen area. This keeps the
  * demo's responsive layout intact — small text doesn't get squashed, breakpoints
  * trigger the mobile branch, etc.
+ *
+ * The iframe fills the screen below the status bar exactly, and a home
+ * indicator is drawn over its bottom edge. The iframe declares that zone
+ * (`phoneSafeAreaFrameProps`), so the demo's bottom bars inset themselves
+ * with `--safe-bottom` as they would on a real iPhone.
  */
 const NATIVE_WIDTH = 440;
 const NATIVE_ASPECT = 19 / 9; // matches the outer phone aspect
+/** MiniStatusBar height, in the mockup's own (unscaled) px. */
+const STATUS_BAR_HEIGHT = 22;
 
 export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
   function ShowcasePhone(
@@ -53,7 +64,7 @@ export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
     ref,
   ) {
     const screenRef = useRef<HTMLDivElement>(null);
-    const [screenW, setScreenW] = useState(0);
+    const [screen, setScreen] = useState({ width: 0, height: 0 });
     const [loaded, setLoaded] = useState(false);
 
     // Reset the loading overlay only when `src` ACTUALLY changes — not on a bare
@@ -70,20 +81,35 @@ export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
       if (!scaleViewport) return;
       const el = screenRef.current;
       if (!el) return;
-      const update = () => setScreenW(el.clientWidth);
-      update();
-      const ro = new ResizeObserver(update);
+      const update = (width: number, height: number) =>
+        setScreen((prev) =>
+          prev.width === width && prev.height === height
+            ? prev
+            : { width, height },
+        );
+      // Synchronous first measure so the first paint is already scaled; the
+      // observer then refines it to fractional (untransformed) layout size.
+      update(el.clientWidth, el.clientHeight);
+      const ro = new ResizeObserver(([entry]) =>
+        update(entry.contentRect.width, entry.contentRect.height),
+      );
       ro.observe(el);
       return () => ro.disconnect();
     }, [scaleViewport]);
 
-    const scale = scaleViewport && screenW > 0 ? screenW / NATIVE_WIDTH : 1;
-    const nativeHeight = NATIVE_WIDTH * NATIVE_ASPECT;
+    const measured = scaleViewport && screen.width > 0;
+    const scale = measured ? screen.width / NATIVE_WIDTH : 1;
+    // The viewport height that, scaled, ends exactly at the screen's bottom
+    // edge: a taller one ran past the rounded corners and hid the demo's
+    // bottom bar under them.
+    const nativeHeight = measured
+      ? (screen.height - STATUS_BAR_HEIGHT) / scale
+      : NATIVE_WIDTH * NATIVE_ASPECT;
 
     const iframeStyle: React.CSSProperties = scaleViewport
       ? {
           position: "absolute",
-          top: 22,
+          top: STATUS_BAR_HEIGHT,
           left: 0,
           width: `${NATIVE_WIDTH}px`,
           height: `${nativeHeight}px`,
@@ -95,12 +121,12 @@ export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
         }
       : {
           position: "absolute",
-          top: 22,
+          top: STATUS_BAR_HEIGHT,
           left: 0,
           right: 0,
           bottom: 0,
           width: "100%",
-          height: "calc(100% - 22px)",
+          height: `calc(100% - ${STATUS_BAR_HEIGHT}px)`,
           border: 0,
           background: "white",
           pointerEvents: interactive ? "auto" : "none",
@@ -114,11 +140,14 @@ export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
           (className ? " " + className : "")
         }
       >
-        <div className="relative aspect-[9/19] rounded-[32px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[6px] shadow-[0_22px_50px_-14px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
+        <div className="relative aspect-[9/19] min-h-0 rounded-[32px] bg-gradient-to-b from-[#1c1611] to-[#0f0b08] p-[6px] shadow-[0_22px_50px_-14px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
           <div className="pointer-events-none absolute inset-[6px] rounded-[26px] ring-1 ring-white/5" />
+          {/* overflow-clip, not hidden: a hidden box is still a scroll
+              container, and scrolling the iframe into view used to scroll it,
+              sliding the status bar up. */}
           <div
             ref={screenRef}
-            className="relative h-full w-full overflow-hidden rounded-[26px] bg-white"
+            className="relative h-full w-full overflow-clip rounded-[26px] bg-white"
           >
             <MiniStatusBar />
             <iframe
@@ -126,15 +155,20 @@ export const ShowcasePhone = forwardRef<HTMLIFrameElement, Props>(
               src={src}
               title={title}
               tabIndex={-1}
-              loading="lazy"
+              // Not lazy: the preview scheduler creates this iframe only when
+              // it is near the viewport, and WebKit keeps a lazy iframe's
+              // pushState out of the session history (its back would then
+              // move the embedding page).
               onLoad={() => setLoaded(true)}
               style={iframeStyle}
+              {...phoneSafeAreaFrameProps}
             />
             <IframeLoadingOverlay
               visible={!loaded}
               variant="light"
-              style={{ top: 22 }}
+              style={{ top: STATUS_BAR_HEIGHT }}
             />
+            <PhoneHomeIndicator scale={scale} />
             {children}
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Link } from "@/lib/link";
 import { findShowcase, githubUrl, type ShowcaseClip } from "../data";
 import { ClipPlayer } from "./clip-player";
+import { ScrollToHash } from "./scroll-to-hash";
 
 export default function ShowcaseDetailPage({ slug }: { slug: string }) {
   const showcase = findShowcase(slug);
@@ -57,7 +58,6 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-neutral-100">
             {showcase.name}
           </h1>
-          <p className="mt-2 max-w-xl text-neutral-400">{showcase.tagline}</p>
         </div>
         <div className="flex flex-col items-start gap-3 sm:items-end">
           <div className="flex flex-wrap gap-2">
@@ -88,12 +88,13 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
         </div>
       </header>
 
+      <ScrollToHash />
       <section className="mt-10 flex flex-col items-center gap-y-12 sm:flex-row sm:flex-wrap sm:items-start sm:justify-start sm:gap-x-8">
         {showcase.clips.map((clip, i) => (
           <ClipPlayer
             key={`${clip.transition}-${i}`}
+            id={`clip-${i}`}
             clip={clip}
-            demoOrigin={showcase.demoOrigin}
             platform={showcase.platforms[0] ?? "mobile"}
           />
         ))}

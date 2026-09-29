@@ -15,7 +15,7 @@ export default function ReviewWritePage({
   order.actions.init(initialData);
   return (
     <div className="flex min-h-full flex-col bg-[#FAF8F6]">
-      <ReviewHeader />
+      <ReviewHeader orderId={initialData.id} />
       <ProductCard order={initialData} />
       <ReviewForm order={initialData} />
     </div>

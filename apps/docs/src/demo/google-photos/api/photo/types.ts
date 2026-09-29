@@ -43,4 +43,6 @@ export type PhotoDetail = PhotoSimple & {
   storage: string;
   /** Optional camera/device label, e.g. "iPhone 15 Pro · 24mm · ƒ/1.78" */
   device?: string;
+  /** Whether the photo is in Favorites — filled in by `find` */
+  favorite?: boolean;
 };

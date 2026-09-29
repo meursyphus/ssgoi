@@ -18,7 +18,9 @@ export type CollectionKind =
   | "document"
   | "place"
   | "favorite"
-  | "trash";
+  | "trash"
+  | "video"
+  | "archive";
 
 export type CollectionSimple = {
   id: string;

@@ -16,8 +16,9 @@ export type { HeroOptions, HeroType, HeroVariant } from "./types";
  * - `variant: "smooth"` — use a softer follower spring for the morph.
  * Both types crossfade source and destination visuals. Enter stays in-page;
  * exit uses a temporary layer above both pages.
- * Ancestor overflow belongs to the application. The animated visual carries
- * `data-hero-transitioning` until completion for optional caller-owned CSS.
+ * The destination visual keeps its position, dimensions, margins, flex, and
+ * object-fit: Hero changes paint properties only, with no placeholder or
+ * CSS-state marker. Overflow and layout belong to the application.
  */
 export type HeroConfig = PresetConfig<HeroType, HeroVariant, HeroOptions>;
 

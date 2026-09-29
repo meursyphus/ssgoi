@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePin } from "@/demo/pinterest/state/pin";
+import { usePin, type PinSimple } from "@/demo/pinterest/state/pin";
 import { HomeHeader } from "./header";
 import { TabBar } from "./tab-bar";
 import { Masonry } from "./masonry";
-export default function HomePage() {
+
+export default function HomePage({
+  initialPins,
+}: {
+  initialPins: PinSimple[];
+}) {
   const pinState = usePin((state) => ({
     actions: state.actions,
   }));
+  pinState.actions.initFeed(initialPins);
   useEffect(() => {
     pinState.actions.loadPins();
   }, [pinState.actions]);

@@ -7,7 +7,7 @@ import type { RecommendedCategory } from "@/demo/pinterest/state/category";
 export function CategoryCard({ category }: { category: RecommendedCategory }) {
   const href = `/demo/pinterest/search/${encodeURIComponent(category.label)}`;
   return (
-    <div className="px-4">
+    <Link href={href} scroll={false} className="block px-4">
       <div className="mb-2 flex items-center justify-between">
         <div>
           <p className="text-[12px] font-medium text-neutral-500">
@@ -17,26 +17,25 @@ export function CategoryCard({ category }: { category: RecommendedCategory }) {
             {category.label}
           </h3>
         </div>
-        <Link
-          href={href}
-          aria-label={`${category.label} 검색`}
+        <span
+          aria-hidden
           className="grid h-10 w-10 place-items-center rounded-full bg-neutral-100 text-black"
         >
           <Search className="h-4 w-4" strokeWidth={2.6} />
-        </Link>
+        </span>
       </div>
-      <Link href={href} className="block">
-        <div className="flex gap-1.5 overflow-hidden rounded-2xl">
-          {category.thumbnails.map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt=""
-              className="aspect-[3/4] w-1/4 object-cover"
-            />
-          ))}
-        </div>
-      </Link>
-    </div>
+      <div className="flex gap-1.5 overflow-hidden rounded-2xl">
+        {category.thumbnails.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            width={200}
+            height={267}
+            className="aspect-[3/4] w-1/4 object-cover"
+          />
+        ))}
+      </div>
+    </Link>
   );
 }

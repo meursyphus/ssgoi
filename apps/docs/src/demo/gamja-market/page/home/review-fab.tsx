@@ -13,9 +13,11 @@ export function ReviewFab() {
       (o) => o.status === "picked_up" && !o.reviewWritten,
     );
     if (candidate) {
-      router.push(`/demo/gamja-market/review/${candidate.id}`);
+      router.push(`/demo/gamja-market/review/${candidate.id}`, {
+        scroll: false,
+      });
     } else {
-      router.push(`/demo/gamja-market/orders`);
+      router.push(`/demo/gamja-market/orders`, { scroll: false });
     }
   };
 

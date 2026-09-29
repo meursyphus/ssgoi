@@ -8,4 +8,12 @@ export const story = model<StoryState>({
     queryFn: () => storyAPI.findAll(),
     placeholderData: keepPreviousData,
   }),
+  savedStories: query<StoryState["savedStories"]["data"], void>({
+    initialData: [],
+    queryFn: () => storyAPI.findSaved(),
+  }),
+  current: null,
+  savedTabOpen: false,
+  savedNeedsRefresh: false,
+  hasUnreadActivity: true,
 });

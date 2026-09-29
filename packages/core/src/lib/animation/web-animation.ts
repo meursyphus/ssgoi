@@ -22,6 +22,7 @@ import {
   type PresentationCodec,
   type ViewportHint,
 } from "./web-presentation";
+import { insertBeside } from "../utils/insert-beside";
 
 export interface WebMotionOptions {
   /** Semantic identity, scoped by HostAnimation; never inferred from array position. */
@@ -412,7 +413,14 @@ export class WebAnimation extends Animation {
         });
         clone.setAttribute("aria-hidden", "true");
         clone.inert = true;
-        snapshot.target.parentElement.appendChild(clone);
+        // The fixed, top-most clone paints the same anywhere in the parent;
+        // keep it from changing which sibling is first or last.
+        const target = snapshot.target;
+        const parent = snapshot.target.parentElement;
+        insertBeside(target, clone, [
+          ["end", (node) => parent.appendChild(node)],
+          ["before", (node) => target.before(node)],
+        ]);
         const opacity = Number(visual.displayStyle.opacity ?? 1);
         this.fallbackCopy = new WebAnimation({
           element: clone,

@@ -1,9 +1,10 @@
-// Sheet exit over a page that carries a sticky bottom nav.
+// Sheet enter and exit over a page that carries a sticky bottom nav.
 //
 // The list page is tall and scrolled; the sheet route enters with
 // `sheet({ type })` and leaves again. The fixture drives the REAL transition
 // context with unmount-mode pages (like the React adapter) and samples where
-// the sticky nav is painted relative to the scroller on every frame.
+// the sticky nav is painted relative to the scroller on every frame, while the
+// list is the outgoing background (enter) and the incoming page (exit).
 //
 //   ?type=blur|scale|static   sheet tone (default blur)
 //   ?scroll=500               list scroll before opening the sheet
@@ -69,7 +70,10 @@ type Sample = {
   scrollTop: number;
   navTop: number | null;
   navBottom: number | null;
+  listPosition: string | null;
   listTransform: string;
+  /** Uniform scale of the list page (1 when untransformed). */
+  listScale: number;
 };
 
 let clockStart: number | null = null;
@@ -92,12 +96,35 @@ const sample = (t0: number): Sample => {
     navTop = Math.round(rect.top - sceneRect.top);
     navBottom = Math.round(rect.bottom - sceneRect.top);
   }
+  const style = list ? getComputedStyle(list) : null;
+  const listTransform = style?.transform ?? "none";
   return {
     t: Math.round(performance.now() - t0),
     scrollTop: Math.round(scene.scrollTop),
     navTop,
     navBottom,
-    listTransform: list ? getComputedStyle(list).transform : "none",
+    listPosition: style?.position ?? null,
+    listTransform,
+    listScale:
+      listTransform === "none" ? 1 : new DOMMatrixReadOnly(listTransform).a,
+  };
+};
+
+// Sample every frame until `stop()`; `onFrame` runs after each sample.
+const record = (t0: number, onFrame?: () => void) => {
+  const samples: Sample[] = [];
+  let done = false;
+  const tick = () => {
+    samples.push(sample(t0));
+    onFrame?.();
+    if (!done) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  return {
+    samples,
+    stop: () => {
+      done = true;
+    },
   };
 };
 
@@ -122,33 +149,31 @@ const slowDown = () => {
   }
 };
 
-const openSheet = async () => {
+const openSheet = async (): Promise<Sample[]> => {
   scene.scrollTo({ top: savedScroll, behavior: "instant" });
   // The scroll listener records the position on the next frame; give it a
   // few so the saved /list scroll is what the exit restores to.
   await frames(4);
+  const t0 = performance.now();
+  clockStart = t0;
+  const recording = record(t0);
   await navigate("/sheet", false);
-  clockStart = performance.now();
   // The entry runs at native speed; only the exit is slowed for eyeballing.
   await new Promise((resolve) => setTimeout(resolve, 1500));
+  recording.stop();
   clockStart = null;
   out.textContent = `sheet open · list scroll was ${savedScroll}`;
+  return recording.samples;
 };
 
 const closeSheet = async (): Promise<Sample[]> => {
-  const samples: Sample[] = [];
   const t0 = performance.now();
   clockStart = t0;
-  let done = false;
-  const tick = () => {
-    samples.push(sample(t0));
-    slowDown();
-    if (!done) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  const recording = record(t0, slowDown);
+  const samples = recording.samples;
   await navigate("/list", true);
   await new Promise((resolve) => setTimeout(resolve, 1500 * slow));
-  done = true;
+  recording.stop();
   clockStart = null;
   const withNav = samples.filter((s) => s.navBottom != null);
   const viewport = scene.clientHeight;

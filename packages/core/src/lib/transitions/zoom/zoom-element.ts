@@ -17,16 +17,34 @@ type TileGeometry = {
   scaleX: number;
   scaleY: number;
   exitCornerRadii?: MediaCornerRadii;
+  /**
+   * The destination shows more of the image than the source renders (a
+   * shelf card showing the whole frame, a full-screen player cropping its
+   * sides). The tile covers only the shared part; the rest of the
+   * destination must show from beneath it, so the shared element is not
+   * hidden.
+   */
+  partial: boolean;
 };
 
+const EPSILON = 0.01;
+
 function containsRect(outer: MediaRect, inner: MediaRect): boolean {
-  const epsilon = 0.01;
   return (
-    inner.left >= outer.left - epsilon &&
-    inner.top >= outer.top - epsilon &&
-    inner.left + inner.width <= outer.left + outer.width + epsilon &&
-    inner.top + inner.height <= outer.top + outer.height + epsilon
+    inner.left >= outer.left - EPSILON &&
+    inner.top >= outer.top - EPSILON &&
+    inner.left + inner.width <= outer.left + outer.width + EPSILON &&
+    inner.top + inner.height <= outer.top + outer.height + EPSILON
   );
+}
+
+function intersectRects(a: MediaRect, b: MediaRect): MediaRect | null {
+  const left = Math.max(a.left, b.left);
+  const top = Math.max(a.top, b.top);
+  const right = Math.min(a.left + a.width, b.left + b.width);
+  const bottom = Math.min(a.top + a.height, b.top + b.height);
+  if (right - left <= EPSILON || bottom - top <= EPSILON) return null;
+  return { left, top, width: right - left, height: bottom - top };
 }
 
 export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
@@ -37,6 +55,7 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
     startWindow: input.enterRect,
     scaleX: input.exitRect.width / input.enterRect.width,
     scaleY: input.exitRect.height / input.enterRect.height,
+    partial: false,
   });
 
   const { enterMedia, exitMedia } = input;
@@ -64,20 +83,30 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
     scaleY,
   );
 
-  // The zoom tile is the whole detail page, not a media clone. If the
-  // projected source crop needs pixels outside the destination image's own
-  // rendered window, preserve the legacy bbox path instead of revealing an
-  // impossible region.
-  if (!containsRect(enterMedia.window, startWindow)) return fallback();
+  // The zoom tile is the whole detail page, not a media clone: it can only
+  // show pixels the detail image renders. When the projected destination
+  // crop needs more (the card shows the whole frame, the player crops its
+  // sides), the tile keeps the uniform scale and covers the shared part
+  // only; the destination's extra edges show from beneath and the shared
+  // element stays visible. Stretching the page to the card's box instead
+  // would warp the image by the aspect difference. No shared part at all
+  // is the legacy bbox path.
+  const shown = intersectRects(startWindow, enterMedia.window);
+  if (!shown) return fallback();
 
+  // The window keeps rounding toward the destination's corners even when it
+  // lands inside the card: while the tile is still larger than the card its
+  // corners are the visible shape, and once it is smaller a rounded corner
+  // only uncovers the card's own identical pixels beneath.
   return {
     contentAware: true,
     enterContent,
     exitContent,
-    startWindow,
+    startWindow: shown,
     scaleX,
     scaleY,
     exitCornerRadii: exitMedia.cornerRadii,
+    partial: !containsRect(enterMedia.window, startWindow),
   };
 }
 
@@ -171,6 +200,16 @@ export function createZoomIn(input: ZoomAnimationInput): ZoomAnimationConfig {
   };
 }
 
+/**
+ * Progress at which the shrinking tile's window has closed onto the shared
+ * visual. A spring spends its last stretch creeping through the final few
+ * percent, and a window still a few percent open there shows a sliver of the
+ * page body next to the destination's own content until the rest threshold
+ * cuts it. Closing the window slightly ahead of the motion removes that
+ * sliver; the visual itself keeps settling with the transform.
+ */
+const EXIT_WINDOW_SETTLE = 0.85;
+
 export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
   const { pageRect, scrollOffset, enterRadius, exitRadius } = input;
   const geometry = buildTileGeometry(input);
@@ -194,11 +233,12 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
       const t = 1 - progress;
       const sx = 1 + (scaleX - 1) * t;
       const sy = 1 + (scaleY - 1) * t;
+      const closing = Math.min(1, t / EXIT_WINDOW_SETTLE);
       const radii = interpolatedRadii(
         exitRadius,
         enterRadius,
         geometry.exitCornerRadii,
-        t,
+        closing,
         sx,
         sy,
       );
@@ -207,10 +247,10 @@ export function createZoomOut(input: ZoomAnimationInput): ZoomAnimationConfig {
         clipPath: insetClipPath(
           pageRect,
           {
-            top: start.top * t,
-            right: start.right * t,
-            bottom: start.bottom * t,
-            left: start.left * t,
+            top: start.top * closing,
+            right: start.right * closing,
+            bottom: start.bottom * closing,
+            left: start.left * closing,
           },
           radii,
         ),

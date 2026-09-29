@@ -1,7 +1,7 @@
 import { IntegratorProvider, WebAnimation } from "../../../../animation";
 import type { AnimationContributions } from "../../../animation-group";
 import { findMediaElement } from "../../../media-geometry";
-import { collectContentTargets } from "../../content-targets";
+import { collectContentTargets } from "../../../content-targets";
 import type {
   HeroAnimationName,
   HeroContributeCtx,

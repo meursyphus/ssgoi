@@ -56,11 +56,7 @@ export function cloneCrossfadeVisual(source: HTMLElement): HTMLElement {
     Array.from(from.children).forEach((child, index) => {
       const target = children[index];
       if (!target) return;
-      if (
-        child.hasAttribute(CROSSFADE_ATTRIBUTE) ||
-        child.hasAttribute("data-hero-placeholder")
-      )
-        target.remove();
+      if (child.hasAttribute(CROSSFADE_ATTRIBUTE)) target.remove();
       else copy(child, target);
     });
   };

@@ -124,7 +124,10 @@ export const DesktopFrame = forwardRef<HTMLIFrameElement, Props>(
               src={src}
               title={title}
               tabIndex={-1}
-              loading="lazy"
+              // Not lazy: the preview scheduler creates this iframe only when
+              // it is near the viewport, and WebKit keeps a lazy iframe's
+              // pushState out of the session history (its back would then
+              // move the embedding page).
               onLoad={() => setLoaded(true)}
               style={iframeStyle}
             />

@@ -3,7 +3,10 @@ import { post } from "../model";
 import type { PostActions } from "../types";
 
 export const loadActions = action<
-  Pick<PostActions, "loadPosts" | "loadReels" | "loadTagged">
+  Pick<
+    PostActions,
+    "loadPosts" | "loadReels" | "loadTagged" | "loadExplore" | "loadFeed"
+  >
 >(({ state }) => {
   class LoadActions {
     private model = state(post);
@@ -15,6 +18,12 @@ export const loadActions = action<
     }
     async loadTagged() {
       await this.model.tagged.query();
+    }
+    async loadExplore() {
+      await this.model.explore.query();
+    }
+    async loadFeed() {
+      await this.model.feed.query();
     }
   }
   return new LoadActions();

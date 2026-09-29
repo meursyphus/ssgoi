@@ -39,20 +39,30 @@ export function BottomNav() {
   const pathname = usePathname();
   const isHome = pathname === BASE;
   const isSearch = pathname === `${BASE}/search`;
+  const isProfile = pathname === `${BASE}/profile`;
 
   return (
-    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 py-2">
+    // Docked like a native tab bar: the background runs into the
+    // home-indicator inset and the icons sit above it.
+    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-white/95 backdrop-blur border-t border-black/5 pt-2 pb-safe-2">
       <NavItem
         href={BASE}
         active={isHome}
+        label="홈"
         icon={<HomeIcon active={isHome} />}
       />
       <NavItem
         href={`${BASE}/search`}
         active={isSearch}
+        label="검색"
         icon={<Search className="h-7 w-7" strokeWidth={isSearch ? 2.8 : 2.2} />}
       />
-      <DisabledNavItem icon={<User className="h-7 w-7" strokeWidth={2.2} />} />
+      <NavItem
+        href={`${BASE}/profile`}
+        active={isProfile}
+        label="프로필"
+        icon={<User className="h-7 w-7" strokeWidth={isProfile ? 2.8 : 2.2} />}
+      />
     </nav>
   );
 }
@@ -60,31 +70,23 @@ export function BottomNav() {
 function NavItem({
   href,
   active,
+  label,
   icon,
 }: {
   href: string;
   active: boolean;
+  label: string;
   icon: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
+      scroll={false}
+      aria-label={label}
+      aria-current={active ? "page" : undefined}
       className={`flex h-11 w-16 items-center justify-center ${active ? "text-black" : "text-neutral-700"}`}
     >
       {icon}
     </Link>
-  );
-}
-
-function DisabledNavItem({ icon }: { icon: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      disabled
-      aria-disabled="true"
-      className="flex h-11 w-16 items-center justify-center text-neutral-300 cursor-not-allowed"
-    >
-      {icon}
-    </button>
   );
 }

@@ -80,10 +80,21 @@ the source fades out while the destination fades in, even when the images or
 intrinsic aspect ratios differ. This applies to every type/variant and both
 navigation directions, without an extra option.
 
-An empty, aria-hidden placeholder reserves a flow image's original layout space
-while it uses its fitted content size. Completion removes the copy and placeholder
-and restores the original styles. Overlay content such as a rounded detail sheet
-retains its authored stacking order.
+On enter, Hero does not reparent the destination visual, insert a placeholder,
+or change its position, width, height, margins, flex, or object-fit. Only paint
+properties (transform, clip-path, border-radius, opacity) change, expressed
+against the visual's own box, including images whose fitted content is larger
+than that box. No transition-state attribute is added.
+
+The source copy is an absolutely positioned, inert sibling of the destination.
+It normally goes right before the destination, paints below it, and stays
+opaque while the destination fades in over it, so the flight stays covered
+wherever the destination cannot paint itself. If that position would move
+something through structural selectors (`:first-child`, Tailwind v3
+`space-y-*`), the copy goes right after the destination and fades out over it
+instead. Completion removes the copy and restores the original inline styles.
+Overlay content such as a rounded detail sheet retains its authored stacking
+order.
 
 Hero exit (enter-key to exit-key, usually detail to list) crossfades temporary
 copies of both visuals in a separate image layer above both pages. The layer
@@ -94,17 +105,37 @@ cleanup removes the layer and restores their original opacity.
 Endpoint keys determine enter/exit independently of history direction. Legacy
 data-hero-key pairs use backward history navigation to select the exit layer.
 
-The library never changes ancestor overflow, containment, or scroll positions.
-Those clipping choices belong to the application. If a crop should open during
-the transition, opt in at that specific wrapper:
+Layout is always authored by the application. A fixed-ratio frame can contain an
+image positioned absolutely from the initial render; the frame then owns its
+height before, during, and after the transition. Keep overflow rules static:
+the engine never changes overflow, containment, or scroll positions.
+
+Where the destination cannot paint, the source copy fills that part of the
+flight until the crop closes:
+
+- Cover content past the image's own box. Browsers clip a replaced element at
+  its box by default. Chromium paints beyond it when the image has static
+  `overflow: visible` (and logs a console notice); WebKit always clips.
+- Anything outside an unpositioned clipping ancestor, such as a Tailwind
+  `overflow-hidden rounded-lg` cell around the image. The copy escapes it; the
+  real image stays clipped until it lands.
+
+A positioned clipping ancestor (for example `relative overflow-hidden`, or a
+`fill` image frame) clips the copy too, so the flight is only visible inside
+that frame. When the image flies in from outside such a frame, let the image
+own its crop and corners instead. Hero replaces the clip-path while it runs,
+restores the authored one on completion, and reads the resting corner from
+`border-radius`, so keep both radii equal:
 
 ```css
-.gallery:has([data-hero-transitioning]) {
-  overflow: visible;
+.photo {
+  border-radius: 8px;
+  clip-path: inset(0 round 8px);
 }
 ```
 
-On enter, the marker is on the real animated visual and is restored on completion.
-Exit uses its own layer without marking the real destination. It can
-also be used on a caller-owned carousel viewport. The caller remains responsible
-for clipping other carousel items and preserving native scroll-container layout.
+Changed after 7.3.2: the destination is no longer resized and absolutely
+positioned during the flight, and the `data-hero-transitioning` attribute is
+gone. Rules such as `.gallery:has([data-hero-transitioning]) { overflow: visible }`
+no longer match and can be removed; an unpositioned clipping wrapper needs no
+rule, and a positioned one needs the image-owned crop above.

@@ -1,12 +1,20 @@
 "use client";
 
+import { Link } from "@/lib/link";
+
 export function HeroBanner() {
   return (
     <div>
-      <div className="relative w-full overflow-hidden bg-neutral-200">
+      <Link
+        href="/demo/pinterest/search/aesthetic"
+        scroll={false}
+        className="relative block w-full overflow-hidden bg-neutral-200"
+      >
         <img
           src="https://picsum.photos/seed/pinterest-hero-banner/400/400"
           alt="Level up your screen aesthetics"
+          width={400}
+          height={400}
           className="w-full object-cover"
           style={{ aspectRatio: "1 / 1" }}
         />
@@ -18,7 +26,7 @@ export function HeroBanner() {
             Level up your screen aesthetics
           </h2>
         </div>
-      </div>
+      </Link>
       <div className="mt-3 flex justify-center gap-1.5">
         {Array.from({ length: 7 }).map((_, i) => (
           <span

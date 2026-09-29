@@ -1,7 +1,7 @@
 "use client";
 
 import { useStory } from "@/demo/voyage/state/story";
-import { StoryCard } from "./story-card";
+import { StoryCard } from "../shared/story-card";
 
 export function StoryList() {
   const story = useStory((s) => ({ stories: s.stories }));

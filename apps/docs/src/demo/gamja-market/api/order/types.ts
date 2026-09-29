@@ -5,6 +5,8 @@ export interface OrderAPI {
   find: (id: string) => Promise<OrderDetail>;
   create: (input: CreateOrderInput) => Promise<OrderDetail>;
   markReviewWritten: (id: string) => Promise<void>;
+  /** 나의당근 hub: counts, the next order to review and the newest orders. */
+  findSummary: () => Promise<OrderSummary>;
 }
 
 export type CreateOrderInput = {
@@ -35,4 +37,14 @@ export type OrderDetail = OrderSimple & {
   unitPrice: number;
   pickupPlace: string;
   pickupDate: string;
+};
+
+export type OrderSummary = {
+  totalCount: number;
+  readyCount: number;
+  /** Oldest picked-up order still waiting for a review, or null. */
+  reviewableOrderId: string | null;
+  reviewableCount: number;
+  /** Newest orders, for the 나의당근 preview. */
+  recent: OrderSimple[];
 };

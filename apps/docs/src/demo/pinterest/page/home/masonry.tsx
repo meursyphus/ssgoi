@@ -1,11 +1,15 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { usePin } from "@/demo/pinterest/state/pin";
-import { PinCard } from "./pin-card";
+import { PinGrid } from "../shared/pin-grid";
 
 export function Masonry() {
-  const pinState = usePin((state) => ({ pins: state.pins }));
+  const pinState = usePin((state) => ({
+    pins: state.pins,
+    board: state.board,
+  }));
 
   if (pinState.pins.isLoading) {
     return (
@@ -15,22 +19,21 @@ export function Masonry() {
     );
   }
 
-  const all = pinState.pins.data;
-  const left = all.filter((_, i) => i % 2 === 0);
-  const right = all.filter((_, i) => i % 2 === 1);
-
   return (
-    <div className="grid grid-cols-2 gap-2 px-2">
-      <div className="flex flex-col gap-2">
-        {left.map((p) => (
-          <PinCard key={p.id} pin={p} />
-        ))}
-      </div>
-      <div className="flex flex-col gap-2">
-        {right.map((p) => (
-          <PinCard key={p.id} pin={p} />
-        ))}
-      </div>
-    </div>
+    // Board tabs swap the feed with a short cross-fade; the first render
+    // (including coming back from a pin) shows the grid as-is so the zoom
+    // can find its tile.
+    <AnimatePresence initial={false} mode="wait">
+      <motion.div
+        key={pinState.board}
+        className="px-2"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+      >
+        <PinGrid pins={pinState.pins.data} />
+      </motion.div>
+    </AnimatePresence>
   );
 }

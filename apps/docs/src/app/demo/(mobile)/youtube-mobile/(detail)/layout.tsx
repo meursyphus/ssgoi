@@ -1,6 +1,3 @@
-import type { ReactNode } from "react";
-import { MobileDetailShell } from "@/lib/components/mobile-detail-shell";
+import DetailShell from "@/demo/youtube-mobile/page/detail-shell";
 
-export default function DetailLayout({ children }: { children: ReactNode }) {
-  return <MobileDetailShell className="bg-black">{children}</MobileDetailShell>;
-}
+export default DetailShell;

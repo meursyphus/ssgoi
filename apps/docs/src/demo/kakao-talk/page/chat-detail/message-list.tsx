@@ -3,9 +3,17 @@
 import { Fragment, useEffect, useRef } from "react";
 import type { ChatMessage } from "@/demo/kakao-talk/api/chat";
 import { MessageBubble } from "./message-bubble";
+import { useKeepScrollOnExit } from "./use-keep-scroll-on-exit";
 
-export function MessageList({ messages }: { messages: ChatMessage[] }) {
+export function MessageList({
+  messages,
+  threadId,
+}: {
+  messages: ChatMessage[];
+  threadId: string;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  useKeepScrollOnExit(scrollRef);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -27,7 +35,7 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
       {messages.map((m) => (
         <Fragment key={m.id}>
           {m.dateDividerLabel && <DateDivider label={m.dateDividerLabel} />}
-          <MessageBubble message={m} />
+          <MessageBubble message={m} threadId={threadId} />
         </Fragment>
       ))}
     </div>

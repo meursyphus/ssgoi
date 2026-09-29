@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420" fill="none">
+  <title>Overlay timing during a card opening</title>
+  <desc>Card chrome fades out over the first forty percent of motion. Both overlays are hidden between forty and sixty percent. Player controls fade in over the final forty percent.</desc>
+  <rect width="600" height="420" rx="20" fill="#141414"/>
+  <g font-family="system-ui, -apple-system, sans-serif">
+    <text x="32" y="48" fill="#FAFAFA" font-size="26" font-weight="600">Card opens into player</text>
+    <rect x="100" y="88" width="444" height="204" rx="6" fill="#1C1C1C"/>
+    <rect x="277.6" y="88" width="88.8" height="204" fill="#272727"/>
+    <path d="M100 108H544M100 188H544M100 268H544" stroke="#404040" stroke-dasharray="4 6"/>
+    <path d="M100 88V292M277.6 88V292M366.4 88V292M544 88V292" stroke="#404040"/>
+    <g fill="#A3A3A3" font-size="19">
+      <text x="24" y="114">Visible</text>
+      <text x="24" y="194">50%</text>
+      <text x="24" y="274">Hidden</text>
+    </g>
+    <path d="M100 108L277.6 268H544" stroke="#FB923C" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100 268H366.4L544 108" stroke="#67E8F9" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M277.6 268H366.4" stroke="#E5E5E5" stroke-width="4"/>
+    <g fill="#D4D4D4" font-size="20" text-anchor="middle">
+      <text x="100" y="320">0%</text>
+      <text x="277.6" y="320">40%</text>
+      <text x="366.4" y="320">60%</text>
+      <text x="544" y="320">100%</text>
+    </g>
+    <text x="322" y="352" fill="#A3A3A3" font-size="20" text-anchor="middle">Motion progress</text>
+    <path d="M100 390H126" stroke="#FB923C" stroke-width="4"/>
+    <text x="138" y="397" fill="#FAFAFA" font-size="20">Card chrome</text>
+    <path d="M326 390H352" stroke="#67E8F9" stroke-width="4"/>
+    <text x="364" y="397" fill="#FAFAFA" font-size="20">Player controls</text>
+  </g>
+</svg>

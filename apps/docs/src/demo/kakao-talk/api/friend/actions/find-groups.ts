@@ -1,17 +1,9 @@
 import { createAction } from "@/lib/utils";
-import { data } from "../data";
-import type { FriendGroups, FriendSimple } from "../types";
+import { data, toSimple } from "../data";
+import type { FriendGroups, FriendGroupsFilter, FriendSimple } from "../types";
 
-function toSimple(profile: ReturnType<typeof data.byId>): FriendSimple | null {
-  if (!profile) return null;
-  const { background, joinedAt, ...rest } = profile;
-  void background;
-  void joinedAt;
-  return rest;
-}
-
-async function _findGroups(): Promise<FriendGroups> {
-  const all = data.all();
+async function _findGroups(filter?: FriendGroupsFilter): Promise<FriendGroups> {
+  const sort = filter?.sort ?? "name";
   const me = data.me();
 
   const birthdaySet = new Set(data.birthdayIds);
@@ -19,22 +11,30 @@ async function _findGroups(): Promise<FriendGroups> {
 
   const birthday: FriendSimple[] = [];
   const favorites: FriendSimple[] = [];
-  const friends: FriendSimple[] = [];
+  const rest = [];
 
-  for (const profile of all) {
-    const simple = toSimple(profile);
-    if (!simple) continue;
-    if (birthdaySet.has(profile.id)) birthday.push(simple);
-    else if (favoriteSet.has(profile.id)) favorites.push(simple);
-    else friends.push(simple);
+  for (const profile of data.all()) {
+    if (birthdaySet.has(profile.id)) birthday.push(toSimple(profile));
+    else if (favoriteSet.has(profile.id)) favorites.push(toSimple(profile));
+    else rest.push(profile);
   }
+
+  const ordered =
+    sort === "updated" ? data.sortedByUpdate(rest) : data.sortedByName(rest);
+  const upcoming = data.upcomingBirthdays();
 
   return {
     me,
     birthday,
     favorites,
-    friends,
-    friendsCountLabel: `친구 ${friends.length}`,
+    friends: ordered.map(toSimple),
+    friendsCountLabel: `친구 ${ordered.length}`,
+    sort,
+    upcomingBirthdays: upcoming.map(({ profile, dateLabel }) => ({
+      friend: toSimple(profile),
+      dateLabel,
+    })),
+    upcomingBirthdaysCountLabel: String(upcoming.length),
   };
 }
 

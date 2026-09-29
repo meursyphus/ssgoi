@@ -27,6 +27,12 @@ export type NavigationDetectorOptions<TPayload> = {
    * The default keeps the latest arrival.
    */
   keepCurrent?: (collision: NavigationCollision<TPayload>) => boolean;
+  /**
+   * Whether `outer`'s boundary encloses `inner`'s (for DOM boundaries, the
+   * element contains the other one). Without it, every repeat of the last
+   * pair's path on the same side is treated as a late duplicate.
+   */
+  contains?: (outer: TPayload, inner: TPayload) => boolean;
 };
 
 export interface NavigationDetector<TPayload> {
@@ -111,13 +117,6 @@ export function createNavigationDetector<TPayload>(
   return {
     arrive(path, type, payload) {
       return new Promise<NavigationPair<TPayload> | null>((resolve) => {
-        const lastArrival =
-          lastPair === null
-            ? null
-            : type === "out"
-              ? { path: lastPair.from, payload: lastPair.out }
-              : { path: lastPair.to, payload: lastPair.in };
-
         // One context has one boundary owner per navigation side. Frameworks
         // can report another DOM instance for that same side/path after the
         // pair has resolved (Activity eviction, streamed layout replacement),
@@ -127,7 +126,21 @@ export function createNavigationDetector<TPayload>(
         //
         // Opposite-side arrivals are intentionally unaffected: after A → B,
         // an OUT for B is how a legitimate B → C navigation begins.
-        if (lastArrival?.path === path) {
+        //
+        // The exception is a boundary that encloses the other side of that
+        // pair. An outer layout can share its id with a nested page: after the
+        // nested A → A/x, the layout "A" still holds A/x, so it lived through
+        // that navigation and its OUT is the start of the next one (A → B). A
+        // late copy of the pair's OUT was leaving with it and never holds the
+        // page that entered.
+        if (
+          lastPair &&
+          path === (type === "out" ? lastPair.from : lastPair.to) &&
+          !options.contains?.(
+            payload,
+            type === "out" ? lastPair.in : lastPair.out,
+          )
+        ) {
           resolve(null);
           return;
         }
