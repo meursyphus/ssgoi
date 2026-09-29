@@ -73,6 +73,24 @@ relationship:
 `from` and `to` always refer to the rule's semantic forward relationship.
 Backward navigation reverses their physical OUT/IN roles.
 
+## Share one scroll position
+
+Tabs under one header should not jump when you switch between them. Set
+`preserveScroll: "shared"` and the incoming page opens where the scroll
+container already is, instead of at its own saved or reset position. The
+outgoing page keeps that same position, so it animates out without an offset.
+
+```ts
+{
+  ordered: ["/profile/:id/posts", "/profile/:id/reels", "/profile/:id/tagged"],
+  preserveScroll: "shared",
+  transition: slide(),
+}
+```
+
+A page's own position is still restored by the other rules that bring it back
+(for example Back from a post opened in the grid).
+
 ## Middleware
 
 Rewrite route ids before matching, for example to remove locale prefixes:

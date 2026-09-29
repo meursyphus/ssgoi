@@ -126,6 +126,28 @@ describe("competition", () => {
 describe("scroll preservation policy", () => {
   const effect = transition("effect");
 
+  it("resolves a shared rule to one kept position in both directions", () => {
+    const rules: SsgoiTransitionRule[] = [
+      {
+        ordered: ["/tabs/a", "/tabs/b"],
+        transition: effect,
+        preserveScroll: "shared",
+      },
+      { from: "/gallery", to: "/photo/:id", transition: effect },
+    ];
+
+    for (const [from, to] of [
+      ["/tabs/a", "/tabs/b"],
+      ["/tabs/b", "/tabs/a"],
+    ] as const) {
+      expect(resolve(from, to, rules)).toMatchObject({
+        preserveScroll: { from: true, to: true },
+        shareScroll: true,
+      });
+    }
+    expect(resolve("/gallery", "/photo/1", rules)?.shareScroll).toBe(false);
+  });
+
   it("maps an explicit on override to enter, leave, and in-scope history", () => {
     const rules: SsgoiTransitionRule[] = [
       {

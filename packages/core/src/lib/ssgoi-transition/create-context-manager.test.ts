@@ -508,6 +508,112 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(480);
   });
 
+  it("opens a shared-scroll page where the container rests, not at either page's entry", () => {
+    const manager = createContextManager();
+
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile/reels",
+      true,
+    );
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 900;
+    emitWindowScroll();
+
+    // A layout boundary can file the visible scroll under its own path instead
+    // of the tab that is about to leave (/profile/posts has no entry at all).
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile",
+      false,
+    );
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 220;
+    emitWindowScroll();
+
+    const applyReelsPolicy = manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile/reels",
+    );
+    applyReelsPolicy("shared", "/profile/posts");
+
+    expect(documentElement.scrollTop).toBe(220);
+    expect(manager.getScrollPosition("/profile/reels")).toEqual({
+      x: 0,
+      y: 220,
+    });
+    // The outgoing tab is laid out against the same scroll: no offset.
+    expect(
+      manager.calculateScrollOffset("/profile/posts", "/profile/reels", true),
+    ).toEqual({ x: 0, y: 0 });
+  });
+
+  it("files the resting scroll under the page that left, not a nested boundary's stale entry", () => {
+    const manager = createContextManager();
+
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile",
+      true,
+    );
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 220;
+    emitWindowScroll();
+
+    // A tab boundary nested in the profile layout enters; from now on the
+    // scroll is filed under the tab while the layout stays on screen.
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile/reels",
+      true,
+    );
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 420;
+    emitWindowScroll();
+
+    // The layout leaves for a post.
+    const applyPostPolicy = manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/post/1",
+    );
+    applyPostPolicy(false, "/profile");
+    expect(manager.calculateScrollOffset("/profile", "/post/1")).toEqual({
+      x: 0,
+      y: 420,
+    });
+    flushAnimationFrames(11);
+
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/profile",
+      true,
+    );
+    expect(documentElement.scrollTop).toBe(420);
+  });
+
+  it("keeps the entry position when a shared decision lands after the provisional reset", () => {
+    const manager = createContextManager();
+
+    manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/tabs/a",
+      true,
+    );
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 300;
+    emitWindowScroll();
+
+    const applyPolicy = manager.initializeContext(
+      createFakeElement({ parentElement: body }),
+      "/tabs/b",
+    );
+    flushAnimationFrames(1);
+    expect(documentElement.scrollTop).toBe(0);
+
+    applyPolicy("shared");
+    expect(documentElement.scrollTop).toBe(300);
+  });
+
   it("keys scroll off resolvePath so aliased/rewritten routes share one position", () => {
     const manager = createContextManager({
       // Mirror a config `middleware` that aliases a mobile-only route to its

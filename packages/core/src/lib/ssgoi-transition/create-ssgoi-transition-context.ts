@@ -11,7 +11,10 @@ import type {
   CreateElement,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
-import { createContextManager } from "./create-context-manager";
+import {
+  createContextManager,
+  type ScrollPolicy,
+} from "./create-context-manager";
 import { createSwipeBackDetector } from "./create-swipe-back-detector";
 import { resolveTransitionRule } from "./resolve-transition-rule";
 import { createNavigationTransitionResolver } from "./navigation-transition";
@@ -38,7 +41,7 @@ type PendingSide = {
    * Applies the scroll policy selected by the rule that brings this side IN.
    * OUT payloads do not need it.
    */
-  applyScrollPolicy?: (preserves: boolean) => void;
+  applyScrollPolicy?: (policy: ScrollPolicy, leavingPath?: string) => void;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
@@ -664,7 +667,10 @@ export function createSggoiTransitionContext(
         return;
       }
 
-      pair.in.applyScrollPolicy?.(resolved.preserveScroll.to);
+      pair.in.applyScrollPolicy?.(
+        resolved.shareScroll ? "shared" : resolved.preserveScroll.to,
+        pair.from,
+      );
 
       // Native swipe-back owns playback, but the same resolved rule still owns
       // scroll restoration and semantic history.
