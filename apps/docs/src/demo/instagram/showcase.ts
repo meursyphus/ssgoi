@@ -13,15 +13,15 @@ export const instagramShowcase: ShowcaseApp = {
   badge: "New",
   logo: "/instagram-icon.svg",
   demoOrigin: BASE,
-  transitions: ["zoom", "slide", "sheet", "drill", "fade"],
+  transitions: ["zoom", "slide", "sheet", "drill"],
   sourcePath: "apps/docs/src/demo/instagram",
   previewTransition: "zoom",
   // ~37 s loop: the profile's tabs left to right (grid → reels → tagged),
-  // then the bottom nav in order (Profile → Home → Explore → Profile). Every
-  // screen opened on the way closes with a real history back, so its effect
-  // plays in reverse (post folds into its tile, sheets slide down, followers
-  // drill out). Most moves match a detail clip below,
-  // so a screen found in search opens that clip.
+  // then the bottom nav in order (Profile → Home → Explore → Profile), which
+  // switches without an effect. Every screen opened on the way closes with a
+  // real history back, so its effect plays in reverse (post folds into its
+  // tile, sheets slide down, followers drill out). Most moves match a detail
+  // clip below, so a screen found in search opens that clip.
   tourStart: PROFILE,
   tourStartLabel: "Profile",
   tour: [
@@ -43,12 +43,12 @@ export const instagramShowcase: ShowcaseApp = {
     { push: `${BASE}/reels/r-001`, transition: "zoom", label: "Reel" },
     { back: true },
     { replace: `${PROFILE}/tagged`, transition: "slide", label: "Tagged" },
-    { replace: `${BASE}/home`, transition: "fade", label: "Home" },
+    { replace: `${BASE}/home`, transition: "", label: "Home" },
     { push: `${BASE}/stories/miso_devv`, transition: "sheet", label: "Story" },
     { back: true },
     { push: `${BASE}/create`, transition: "sheet", label: "New post" },
     { back: true },
-    { replace: `${BASE}/explore`, transition: "fade", label: "Explore" },
+    { replace: `${BASE}/explore`, transition: "", label: "Explore" },
     { push: `${BASE}/feed/p-008`, transition: "zoom", label: "Post" },
     {
       push: `${BASE}/feed/p-008/comments`,
@@ -57,19 +57,12 @@ export const instagramShowcase: ShowcaseApp = {
     },
     { back: true },
     { back: true },
-    { replace: PROFILE, transition: "fade", label: "Profile" },
+    { replace: PROFILE, transition: "", label: "Profile" },
   ],
   // Detail page: one player per flow, tabs first, then tiles into their
   // screens, the sheets, and a story opened from inside a post. Each player
   // starts on exitPath, pushes enterPath and returns with a real back.
   clips: [
-    {
-      title: "Home → Explore (fade)",
-      transition: "fade",
-      enterPath: `${BASE}/explore`,
-      exitPath: `${BASE}/home`,
-      caption: "Bottom-nav tabs cross-fade, each keeping its own scroll",
-    },
     {
       title: "Grid → Reels tab (slide)",
       transition: "slide",
