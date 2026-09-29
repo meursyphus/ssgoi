@@ -128,7 +128,6 @@ function AvatarWithStory({
             width={78}
             height={78}
             className="h-[78px] w-[78px] rounded-full object-cover"
-            data-zoom-exit-key={storyId}
           />
         </div>
       </Link>
@@ -194,7 +193,6 @@ function HighlightItem({ highlight }: { highlight: Highlight }) {
           width={58}
           height={58}
           className="h-full w-full rounded-full object-cover"
-          data-zoom-exit-key={storyId}
         />
       </div>
       <span className="max-w-full truncate text-[11px] text-neutral-800">

@@ -18,7 +18,7 @@ export default function StoryViewerPage({
     actions: state.actions,
   }));
   profile.actions.initStory(initialData);
-  // 바로 들어왔다가 닫을 때도 돌아갈 화면의 원(exit key)이 첫 렌더에 있도록
+  // 바로 들어왔다가 닫을 때도 시트 아래로 드러나는 화면이 첫 렌더부터 채워져 있도록
   useEffect(() => {
     profile.actions.loadMe();
     profile.actions.loadStoryTray();
@@ -42,7 +42,6 @@ export default function StoryViewerPage({
   return (
     <SsgoiRouteBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
       <div className="absolute inset-x-0 top-0 bottom-safe-16 overflow-hidden rounded-[14px] bg-neutral-900">
-        {/* enter key는 지금 보이는 한 장에만 — 닫으면 누른 원으로 접힌다 */}
         <img
           key={frame.id}
           src={frame.image}
@@ -50,7 +49,6 @@ export default function StoryViewerPage({
           width={400}
           height={700}
           className="h-full w-full object-cover"
-          data-zoom-enter-key={story.id}
         />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/45 to-transparent" />
         <button

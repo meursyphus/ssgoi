@@ -8,8 +8,7 @@ const BASE = "/demo/instagram";
 
 /**
  * 게시물 헤더 + 이미지. `detail`은 단일 게시물 화면(이미지가 zoom 도착점,
- * 작성자 링은 스토리 zoom 출발점), `feed`는 홈 피드 카드(키 없음 — 홈에서는
- * 스토리 트레이가 스토리 출발점이라 키가 겹치지 않게 한다).
+ * 작성자 링은 스토리 링크), `feed`는 홈 피드 카드(zoom 키·스토리 링크 없음).
  */
 export function FeedDetailImage({
   post,
@@ -32,7 +31,6 @@ export function FeedDetailImage({
       width={32}
       height={32}
       className="h-8 w-8 rounded-full object-cover"
-      data-zoom-exit-key={isDetail ? username : undefined}
     />
   ) : (
     <div className="h-8 w-8 animate-pulse rounded-full bg-neutral-200" />

@@ -19,7 +19,8 @@ const config: SsgoiConfig = {
       to: `${BASE}/feed/*`,
       transition: zoom({ type: "static" }),
     },
-    // 프로필 탭 사이 — 안쪽 boundary만 slide (그리드 탭의 논리 id는 /posts)
+    // 프로필 탭 사이 — 안쪽 boundary만 slide (그리드 탭의 논리 id는 /posts).
+    // 탭들은 헤더 아래 스크롤 하나를 같이 쓴다: 들어오는 탭이 지금 위치를 이어받는다
     {
       ordered: [
         `${BASE}/profile/:id/posts`,
@@ -27,6 +28,7 @@ const config: SsgoiConfig = {
         `${BASE}/profile/:id/remix`,
         `${BASE}/profile/:id/tagged`,
       ],
+      preserveScroll: "shared",
       transition: slide(),
     },
     // 릴스 타일 → 전체 화면 릴스: 타일이 화면 가득 펼쳐진다
@@ -41,13 +43,12 @@ const config: SsgoiConfig = {
       to: `${BASE}/reels/*`,
       transition: fade(),
     },
-    // 스토리 링·하이라이트 원 → 스토리 뷰어
+    // 스토리 링·하이라이트 원 → 스토리 뷰어 · 새 게시물 · 댓글: 아래에서 올라오는 시트
     {
       from: [PROFILE, `${BASE}/home`, `${BASE}/feed/*`],
       to: `${BASE}/stories/*`,
-      transition: zoom({ type: "expand" }),
+      transition: sheet(),
     },
-    // 새 게시물 · 댓글: 아래에서 올라오는 시트
     { on: `${BASE}/create`, transition: sheet() },
     { on: `${BASE}/feed/*/comments`, transition: sheet() },
     // 팔로워/팔로잉 목록: 내비게이션 push

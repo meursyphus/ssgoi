@@ -7,7 +7,7 @@ const PROFILE = `${BASE}/profile/deaseungseung94`;
 export const instagramShowcase: ShowcaseApp = {
   slug: "instagram",
   name: "Instagram",
-  tagline: "Zoom into posts and stories + sheet create + slide between tabs",
+  tagline: "Zoom into posts + sheet stories and create + slide between tabs",
   platforms: ["mobile"],
   category: "Social",
   badge: "New",
@@ -19,8 +19,8 @@ export const instagramShowcase: ShowcaseApp = {
   // ~37 s loop: the profile's tabs left to right (grid → reels → tagged),
   // then the bottom nav in order (Profile → Home → Explore → Profile). Every
   // screen opened on the way closes with a real history back, so its effect
-  // plays in reverse (post folds into its tile, story into its ring, sheet
-  // slides down, followers drill out). Most moves match a detail clip below,
+  // plays in reverse (post folds into its tile, sheets slide down, followers
+  // drill out). Most moves match a detail clip below,
   // so a screen found in search opens that clip.
   tourStart: PROFILE,
   tourStartLabel: "Profile",
@@ -28,7 +28,7 @@ export const instagramShowcase: ShowcaseApp = {
     { push: `${BASE}/feed/p-001`, transition: "zoom", label: "Post" },
     {
       push: `${BASE}/stories/deaseungseung94`,
-      transition: "zoom",
+      transition: "sheet",
       label: "Story",
     },
     { back: true },
@@ -44,7 +44,7 @@ export const instagramShowcase: ShowcaseApp = {
     { back: true },
     { replace: `${PROFILE}/tagged`, transition: "slide", label: "Tagged" },
     { replace: `${BASE}/home`, transition: "fade", label: "Home" },
-    { push: `${BASE}/stories/miso_devv`, transition: "zoom", label: "Story" },
+    { push: `${BASE}/stories/miso_devv`, transition: "sheet", label: "Story" },
     { back: true },
     { push: `${BASE}/create`, transition: "sheet", label: "New post" },
     { back: true },
@@ -99,20 +99,18 @@ export const instagramShowcase: ShowcaseApp = {
       caption: "The 9:16 tile grows into the full-screen reel",
     },
     {
-      title: "Home → Story (zoom expand)",
-      transition: "zoom",
+      title: "Home → Story (sheet)",
+      transition: "sheet",
       enterPath: `${BASE}/stories/miso_devv`,
       exitPath: `${BASE}/home`,
-      caption: "A story-tray ring opens into the story and closes back into it",
+      caption: "A story-tray ring slides the story up over the feed",
     },
     {
-      // 클립 iframe은 exitPath(그리드 탭)에서 시작한다 — 첫 enter부터 줌이
-      // 걸리려면 출발 원(하이라이트)이 exitPath 화면에 있어야 한다.
-      title: "Highlight → Story (zoom expand)",
-      transition: "zoom",
+      title: "Highlight → Story (sheet)",
+      transition: "sheet",
       enterPath: `${BASE}/stories/hl-blog`,
       exitPath: PROFILE,
-      caption: "The highlight circle opens into the story",
+      caption: "A highlight circle slides its story up over the profile",
     },
     {
       title: "Profile → Followers (drill)",
@@ -136,11 +134,11 @@ export const instagramShowcase: ShowcaseApp = {
       caption: "Comments rise over the post and slide back down",
     },
     {
-      title: "Post → Story (zoom expand)",
-      transition: "zoom",
+      title: "Post → Story (sheet)",
+      transition: "sheet",
       enterPath: `${BASE}/stories/deaseungseung94`,
       exitPath: `${BASE}/feed/p-001`,
-      caption: "The author's ring on a post opens their story",
+      caption: "The author's ring on a post slides their story up",
     },
   ],
 };
