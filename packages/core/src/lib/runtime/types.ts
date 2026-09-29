@@ -3,10 +3,16 @@ export type PathPatterns = string | readonly string[];
 
 /** Policy is expressed in the rule's forward orientation, then mapped to OUT/IN. */
 export type PreserveScrollConfig = { from: boolean; to: boolean };
+/**
+ * `"shared"` gives the rule's pages one scroll position: the incoming page
+ * opens where the container already is instead of at its own saved or reset
+ * position (profile tabs under one header, for example).
+ */
+export type PreserveScrollOption = PreserveScrollConfig | "shared";
 
 type RuleBase<T> = {
   transition: T;
-  preserveScroll?: PreserveScrollConfig;
+  preserveScroll?: PreserveScrollOption;
   /** Higher priority wins before path specificity. Defaults to 0. */
   priority?: number;
 };

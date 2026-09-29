@@ -43,7 +43,6 @@ function TrayItem({ item }: { item: StoryTrayItem }) {
             width={58}
             height={58}
             className="h-[58px] w-[58px] rounded-full object-cover"
-            data-zoom-exit-key={item.id}
           />
         </div>
       </div>

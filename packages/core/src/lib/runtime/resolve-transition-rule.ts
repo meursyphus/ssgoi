@@ -17,6 +17,11 @@ export type ResolvedTransitionRule<TTransition = unknown> = {
    * `from` is the outgoing page and `to` is the incoming page.
    */
   preserveScroll: PreserveScrollConfig;
+  /**
+   * `preserveScroll: "shared"`: the incoming page adopts the container's
+   * current scroll, and both pages keep that one position.
+   */
+  shareScroll: boolean;
 };
 
 type Candidate<TTransition> = ResolvedTransitionRule<TTransition>;
@@ -26,6 +31,11 @@ const STACK_SCROLL_DEFAULT: PreserveScrollConfig = {
   to: false,
 };
 const ORDERED_SCROLL_DEFAULT: PreserveScrollConfig = {
+  from: true,
+  to: true,
+};
+// Neither side is reset or evicted; the shared position is applied on top.
+const SHARED_SCROLL: PreserveScrollConfig = {
   from: true,
   to: true,
 };
@@ -68,6 +78,9 @@ export function resolveTransitionRule<TTransition>(
 
   rules.forEach((rule, ruleIndex) => {
     const priority = rule.priority ?? 0;
+    const shareScroll = rule.preserveScroll === "shared";
+    const preserveScroll =
+      rule.preserveScroll === "shared" ? SHARED_SCROLL : rule.preserveScroll;
     let candidate: Candidate<TTransition> | null = null;
 
     if (rule.on !== undefined) {
@@ -92,7 +105,7 @@ export function resolveTransitionRule<TTransition>(
             : fromMatch && !toMatch
               ? "on-leave"
               : "on-history";
-        const scrollPolicy = rule.preserveScroll ?? STACK_SCROLL_DEFAULT;
+        const scrollPolicy = preserveScroll ?? STACK_SCROLL_DEFAULT;
         candidate = {
           transition: rule.transition,
           direction,
@@ -110,6 +123,7 @@ export function resolveTransitionRule<TTransition>(
             reason === "on-history"
               ? { from: scrollPolicy.to, to: scrollPolicy.to }
               : mapDirectionalScroll(scrollPolicy, direction),
+          shareScroll,
         };
       }
     } else if (rule.ordered !== undefined) {
@@ -142,9 +156,10 @@ export function resolveTransitionRule<TTransition>(
           specificity: fromSpecificity + toSpecificity,
           reason: "ordered",
           preserveScroll: mapDirectionalScroll(
-            rule.preserveScroll ?? ORDERED_SCROLL_DEFAULT,
+            preserveScroll ?? ORDERED_SCROLL_DEFAULT,
             direction,
           ),
+          shareScroll,
         };
       }
     } else {
@@ -178,9 +193,10 @@ export function resolveTransitionRule<TTransition>(
           specificity: Math.max(directSpecificity, reverseSpecificity),
           reason: "pair",
           preserveScroll: mapDirectionalScroll(
-            rule.preserveScroll ?? STACK_SCROLL_DEFAULT,
+            preserveScroll ?? STACK_SCROLL_DEFAULT,
             direction,
           ),
+          shareScroll,
         };
       }
     }

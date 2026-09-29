@@ -122,7 +122,8 @@ const config = {
 
 Scroll is automatic: `on` and `from`/`to` restore `from` and reset `to`;
 `ordered` restores both. Override with
-`preserveScroll: { from: boolean, to: boolean }`.
+`preserveScroll: { from: boolean, to: boolean }`, or share one position across
+the rule's pages with `preserveScroll: "shared"`.
 
 ## Effect index
 

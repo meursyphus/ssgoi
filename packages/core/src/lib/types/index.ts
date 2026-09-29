@@ -168,6 +168,7 @@ export type AnyTransitionConfig = TransitionConfig<any>;
 export type {
   PathPatterns,
   PreserveScrollConfig,
+  PreserveScrollOption,
   TransitionsResolverArgs,
 } from "../runtime/types";
 export type SsgoiOnTransitionRule =

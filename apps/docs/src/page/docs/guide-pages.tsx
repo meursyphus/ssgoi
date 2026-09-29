@@ -820,6 +820,27 @@ export function ScrollRestorationBody() {
       </Section>
 
       <Section
+        title="Share one scroll across tabs"
+        lead={`Tabs under one header should not jump when you switch between them. With preserveScroll: "shared" the arriving page opens where the container already is.`}
+      >
+        <CodeBlock
+          className="mt-6"
+          language="ts"
+          code={`{
+  ordered: ["/profile/:id/posts", "/profile/:id/reels", "/profile/:id/tagged"],
+  preserveScroll: "shared",
+  transition: slide(),
+}`}
+        />
+        <p className={`mt-6 ${body}`}>
+          The leaving page keeps that same position, so it animates out without
+          an offset. Each page&apos;s own position is still restored by the
+          other rules that bring it back, such as Back from a post opened in the
+          grid.
+        </p>
+      </Section>
+
+      <Section
         title="Mobile and desktop"
         lead="There is no separate mobile scroll switch. Serve different rule sets and each winning rule brings its own default or override."
       >

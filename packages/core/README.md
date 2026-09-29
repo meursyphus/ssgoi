@@ -54,7 +54,9 @@ Rule forms:
   also rematch. See [history behavior](https://ssgoi.dev/llms/route-rules.txt).
 - Scroll is automatic: `on` and `from`/`to` restore the forward `from` side
   and reset `to`; `ordered` restores both. Use
-  `preserveScroll: { from: boolean, to: boolean }` for an exact override.
+  `preserveScroll: { from: boolean, to: boolean }` for an exact override, or
+  `preserveScroll: "shared"` so the rule's pages share one scroll position
+  (tabs under one header).
 
 Path patterns:
 
