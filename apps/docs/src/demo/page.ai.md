@@ -42,7 +42,7 @@ page/layout/
     </OverlayProvider>
   </StateProvider>
   ```
-- 모바일/데스크탑 분기는 여기서 처리 (`MobileFrame`이 데스크탑에서는 내부 스크롤이 있는 가운데 mock device, 모바일에서는 문서 자체가 스크롤되는 풀스크린). 라우트 페이지에서 매번 분기하지 않는다.
+- 모바일/데스크탑 분기는 여기서 처리 (`MobileFrame`이 데스크탑에서는 가운데 mock device, 모바일에서는 풀스크린). 라우트 페이지에서 매번 분기하지 않는다.
 - 루트 `src/app/layout.tsx`에는 provider를 올리지 않는다 — 각 쇼케이스가 독립적으로 자기 provider 스택을 가진다.
 
 ## Bottom nav 규칙 (모바일 데모 공통)
@@ -102,7 +102,7 @@ const close = useDemoBack(routes.order(orderId));
 ## 규칙
 - `'use client'` 필수 (layout 서버 컴포넌트 제외)
 - `<img />` 사용 (`<Image />` 금지 — Cloudflare Workers 호환)
-- 내부 라우팅은 `<Link>` from `@/lib/link` 사용 (`next/link` 직접 import, `<a>` 금지). `@/lib/link`는 prefetch 기본 on인 `next/link`. 데모 안 링크에는 `scroll={false}` (스크롤은 SSGOI가 모바일 문서/데스크탑 프레임에서 관리). 외부 링크(`http://`, `https://`, `mailto:`, `tel:`, `#앵커`)는 `<a>` 허용
+- 내부 라우팅은 `<Link>` from `@/lib/link` 사용 (`next/link` 직접 import, `<a>` 금지). `@/lib/link`는 prefetch 기본 on인 `next/link`. 데모 안 링크에는 `scroll={false}` (스크롤은 SSGOI가 프레임 컨테이너에서 관리). 외부 링크(`http://`, `https://`, `mailto:`, `tel:`, `#앵커`)는 `<a>` 허용
 - 뒤로/닫기는 `DemoBackLink` / `useDemoBack` (위 "뒤로/닫기" 참고)
 - API 직접 import 금지 → state 경유
 - layout/index.tsx는 서버 컴포넌트, layout/client.tsx는 클라이언트
