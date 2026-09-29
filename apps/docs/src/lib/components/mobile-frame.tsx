@@ -74,12 +74,13 @@ export function MobileFrame({
 }) {
   return (
     <div className="min-h-dvh w-full bg-neutral-950 md:flex md:items-center md:justify-center md:py-10">
-      {/* On a real phone the document must scroll so Safari can collapse its
-          browser bars. Only the desktop phone mockup needs a clipped frame. */}
-      <div className="flex h-dvh w-full flex-col bg-black md:h-[880px] md:w-[440px] md:overflow-hidden md:rounded-[3.5rem] md:border-[14px] md:border-neutral-800 md:shadow-2xl md:shadow-black/60">
+      {/* Let the mobile frame grow with the page: a fixed dvh-height ancestor
+          makes sticky bottom bars jump as Safari resizes its browser chrome.
+          The desktop mockup keeps its own clipped scroll area. */}
+      <div className="flex min-h-dvh w-full flex-col bg-black md:h-[880px] md:min-h-0 md:w-[440px] md:overflow-hidden md:rounded-[3.5rem] md:border-[14px] md:border-neutral-800 md:shadow-2xl md:shadow-black/60">
         <StatusBar />
         <div
-          className={`scrollbar-hide relative z-0 min-h-0 flex-1 overflow-x-clip md:overflow-y-scroll ${contentClassName ?? ""}`}
+          className={`scrollbar-hide relative z-0 flex-1 md:min-h-0 md:overflow-x-clip md:overflow-y-scroll ${contentClassName ?? ""}`}
         >
           {children}
         </div>
