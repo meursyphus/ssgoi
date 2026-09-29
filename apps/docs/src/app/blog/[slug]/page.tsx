@@ -81,7 +81,7 @@ export async function generateMetadata({
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
 }
@@ -149,7 +149,7 @@ export default async function BlogPostPage({
           <header>
             <time
               dateTime={meta.date}
-              className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80"
+              className="font-mono text-xs text-orange-500/80"
             >
               {formatDate(meta.date)}
             </time>

@@ -177,11 +177,8 @@ export function ShowcaseCard({
           <h3 className="truncate text-sm font-semibold text-neutral-100 group-hover:text-white">
             {showcase.name}
           </h3>
-          <p className="truncate text-xs text-neutral-400">
-            {showcase.tagline}
-          </p>
           <p
-            className="mt-1 flex h-4 min-w-0 items-center gap-1.5 text-xs text-orange-200"
+            className="mt-1 flex h-4 min-w-0 items-center gap-1.5 text-xs text-neutral-500"
             data-preview-caption=""
           >
             {step && (
@@ -190,15 +187,17 @@ export function ShowcaseCard({
                   aria-hidden
                   className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400"
                 />
-                <span className="truncate">
-                  {stepCaption(step)}
-                  {step.transition && (
-                    <span className="text-neutral-500">
-                      {" "}
-                      · {step.transition}
+                {step.transition && (
+                  <>
+                    <span className="shrink-0 font-semibold text-orange-200">
+                      {step.transition}
                     </span>
-                  )}
-                </span>
+                    <span aria-hidden className="text-neutral-600">
+                      ·
+                    </span>
+                  </>
+                )}
+                <span className="truncate">{stepCaption(step)}</span>
               </>
             )}
           </p>

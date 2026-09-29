@@ -58,7 +58,6 @@ export default function ShowcaseDetailPage({ slug }: { slug: string }) {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-neutral-100">
             {showcase.name}
           </h1>
-          <p className="mt-2 max-w-xl text-neutral-400">{showcase.tagline}</p>
         </div>
         <div className="flex flex-col items-start gap-3 sm:items-end">
           <div className="flex flex-wrap gap-2">

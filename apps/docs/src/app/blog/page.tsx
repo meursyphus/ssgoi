@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
 }
@@ -62,10 +62,6 @@ export default function BlogIndexPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-100 md:text-4xl">
             Blog.
           </h1>
-          <p className="mt-3 max-w-xl leading-relaxed text-neutral-400">
-            Guides and deep dives on page transitions, animation, and building
-            web apps that feel native.
-          </p>
         </header>
 
         {posts.length === 0 ? (
@@ -80,7 +76,7 @@ export default function BlogIndexPage() {
                 >
                   <time
                     dateTime={p.date}
-                    className="font-mono text-xs uppercase tracking-[0.18em] text-orange-500/80"
+                    className="font-mono text-xs text-orange-500/80"
                   >
                     {formatDate(p.date)}
                   </time>
