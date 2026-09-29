@@ -19,7 +19,7 @@ export function MobileShowcaseShell({
 }: {
   config: SsgoiConfig;
   children: ReactNode;
-  /** Extra classes for the scrollable content area. */
+  /** Extra classes for the demo content region. */
   contentClassName?: string;
   /** Fixed content outside the transition region, such as a bottom nav. */
   bottomSlot?: ReactNode;
