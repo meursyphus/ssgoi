@@ -13,5 +13,19 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "ssgoi"
     }
-  ]
+  ],
+  "env": {
+    "latest": {
+      "name": "ssgoi-latest",
+      "routes": [
+        { "pattern": "latest.ssgoi.dev", "custom_domain": true }
+      ],
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "ssgoi-latest"
+        }
+      ]
+    }
+  }
 }
