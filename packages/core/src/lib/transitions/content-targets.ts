@@ -1,4 +1,4 @@
-import { CROSSFADE_ATTRIBUTE } from "../crossfade";
+import { CROSSFADE_ATTRIBUTE } from "./crossfade";
 
 /** Select disjoint sibling subtrees without dimming shared visuals or their ancestors. */
 export function collectContentTargets(

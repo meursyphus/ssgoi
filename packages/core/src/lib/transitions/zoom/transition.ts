@@ -7,9 +7,11 @@ import type { PhysicsOptions, TransitionDirection } from "@types";
 import { getClientRect } from "@utils";
 import { IntegratorProvider, WebAnimation, Animation } from "../../animation";
 import { OverlayStrategy, createBackgroundStrategy } from "./provider";
-import { createZoomIn, createZoomOut } from "./zoom-element";
+import { buildTileGeometry, createZoomIn, createZoomOut } from "./zoom-element";
 import { crossfadeZoomVisuals } from "./crossfade";
-import { CROSSFADE_ATTRIBUTE } from "../crossfade";
+import { ChromeStrategy } from "./chrome";
+import { collectOverlappingContent, fadeContent } from "./content-fade";
+import { collectContentTargets } from "../content-targets";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 import {
   normalizeMediaGeometryPair,
@@ -45,35 +47,6 @@ function sameRect(
     Math.abs(a.width - b.width) < epsilon &&
     Math.abs(a.height - b.height) < epsilon
   );
-}
-
-/**
- * Walk ancestor chain from `focusEl` up to (but excluding) `page`. At each
- * step collect siblings of the current node — those are elements that share
- * a parent with the focus subtree and can carry an opacity animation without
- * the inherited-opacity trap dimming the focus itself.
- */
-function collectFadeTargets(
-  page: HTMLElement,
-  focusEl: HTMLElement,
-): HTMLElement[] {
-  const targets: HTMLElement[] = [];
-  let current: HTMLElement | null = focusEl;
-  while (current && current !== page) {
-    const parent: HTMLElement | null = current.parentElement;
-    if (!parent) break;
-    for (const sibling of Array.from(parent.children)) {
-      if (
-        sibling !== current &&
-        sibling instanceof HTMLElement &&
-        !sibling.hasAttribute(CROSSFADE_ATTRIBUTE)
-      ) {
-        targets.push(sibling);
-      }
-    }
-    current = parent;
-  }
-  return targets;
 }
 
 function findZoomEnter(node: HTMLElement): HTMLElement | null {
@@ -214,7 +187,10 @@ class TileStrategy implements ZoomStrategy {
     // Only the moving tile should paint the shared visuals. Otherwise its
     // antialiased rounded edge composites over the identical preview edge,
     // making the final corner look fuller despite matching radius geometry.
-    onDispose(hideSharedElement(resolved.exitEl));
+    // Unless the destination shows more of the image than the tile can: then
+    // the tile lands inside the card and the card's own edges must show.
+    if (!buildTileGeometry(input).partial)
+      onDispose(hideSharedElement(resolved.exitEl));
 
     if (tileConfig) tileEl.style.transformOrigin = tileConfig.transformOrigin;
 
@@ -281,60 +257,56 @@ class TileStrategy implements ZoomStrategy {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * FadeStrategy — fades sibling elements around the zoomed tile so the tile
- * stands out against a neutral background. variant `"default"` returns a
- * no-op instance; variant `"fade"` walks the sibling tree and animates each
- * target's opacity in lockstep with the shared physics.
+ * FadeStrategy — fades the zoomed page's own content in lockstep with the
+ * shared physics, leaving the shared visual and its ancestors opaque.
+ *
+ * variant `"default"` fades only the content painted over the shared visual
+ * (player controls, a caption, a scrim): it is what the tile still shows when
+ * it lands on the preview, so without a crossfade it would pop. The rest of
+ * the page keeps being revealed / clipped by the tile window.
+ * variant `"fade"` fades every sibling subtree around the visual.
  *
  * Factory uses a lookup table on `ZoomVariant`, not an inline branch.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 class FadeStrategy implements ZoomStrategy {
   readonly name = "content";
+  constructor(
+    private readonly select: (
+      page: HTMLElement,
+      visual: HTMLElement,
+    ) => HTMLElement[],
+  ) {}
+
   contribute(ctx: ZoomContributeCtx): Animation[] {
-    const { resolved, physics, from, to, onDispose } = ctx;
-    const zoomedPage = resolved.mode === "enter" ? to : from;
-    const targets = collectFadeTargets(zoomedPage, resolved.enterEl);
-    if (targets.length === 0) return [];
-
-    const previousOpacities = targets.map((el) => el.style.opacity);
-    // Seed initial opacity for enter mode so the page doesn't flash at full
-    // opacity before the first animation tick.
-    if (resolved.mode === "enter") {
-      for (const el of targets) el.style.opacity = "0";
-    }
-
-    onDispose((disposal) => {
-      for (let i = 0; i < targets.length; i++) {
-        const el = targets[i];
-        if (el && disposal.owns(el))
-          el.style.opacity = previousOpacities[i] ?? "";
-      }
-    });
-
-    return targets.map(
-      (target) =>
-        new WebAnimation({
-          element: target,
-          integrator: IntegratorProvider.from(physics),
-          style: (t, u) => ({
-            opacity: resolved.mode === "enter" ? t : u,
-          }),
-        }),
+    const { resolved, input, physics, from, to, onDispose } = ctx;
+    const page = resolved.mode === "enter" ? to : from;
+    // The tile lands on the crossfaded visual, so a keyed wrapper's other
+    // children are content over it — the same split the crossfade makes.
+    const visual = buildTileGeometry(input).contentAware
+      ? (input.enterMedia?.mediaElement ?? resolved.enterEl)
+      : resolved.enterEl;
+    return fadeContent(
+      this.select(page, visual),
+      resolved.mode,
+      physics,
+      onDispose,
     );
   }
 }
 
-class NoopStrategy implements ZoomStrategy {
-  readonly name = "content";
-  contribute(): Animation[] {
-    return [];
-  }
-}
-
 const FADE_STRATEGIES: Record<ZoomVariant, () => ZoomStrategy> = {
-  default: () => new NoopStrategy(),
-  fade: () => new FadeStrategy(),
+  default: () =>
+    new FadeStrategy((page, visual) =>
+      collectOverlappingContent(
+        page,
+        [visual],
+        getClientRect(page, visual),
+        (element) => getClientRect(page, element),
+      ),
+    ),
+  fade: () =>
+    new FadeStrategy((page, visual) => collectContentTargets(page, [visual])),
 };
 
 function createFadeStrategy(variant: ZoomVariant): ZoomStrategy {
@@ -364,6 +336,9 @@ function zoomStrategiesFor(opts: NormalizedZoomOptions): AssembledStrategies {
     // that's only `blur`; the table-driven factory above owns the mapping
     // so this conditional is the single line that knows the relationship.
     ...(opts.type === "blur" ? [new OverlayStrategy()] : []),
+    // Reads the background motion the background strategy published, so it
+    // stays after it in this list.
+    new ChromeStrategy(),
   ];
   return {
     strategies,
@@ -435,6 +410,7 @@ export const zoom = (options: NormalizedZoomOptions) => {
             background: [],
             content: [],
             overlay: [],
+            chrome: [],
           });
         }
 
@@ -463,6 +439,7 @@ export const zoom = (options: NormalizedZoomOptions) => {
           background: [],
           content: [],
           overlay: [],
+          chrome: [],
         };
         for (const strategy of strategies) {
           groups[strategy.name].push(...(strategy.contribute?.(ctx) ?? []));

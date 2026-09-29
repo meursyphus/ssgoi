@@ -21,6 +21,12 @@ import {
 import { fallbackHeroFit } from "./fit";
 import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
+  TEMPORARY_SELECTOR,
+  buildChromeLayer,
+  chromeOpacity,
+} from "../chrome-layer";
+import { Z_FOREGROUND } from "../stacking";
+import {
   clampOpacity,
   cloneCrossfadeVisual,
   crossfadeUnderOpacity,
@@ -500,6 +506,33 @@ class HeroTileStrategy implements HeroStrategy {
           sourceOpacity.restore();
           targetOpacity.restore();
         });
+        // The destination page's chrome over the landing image (a counter,
+        // floating buttons) sits beneath the exit layer and would pop when
+        // it goes. Copy it above the layer and let it form as the image
+        // lands, like the in-page chrome does on enter.
+        const chrome = buildChromeLayer({
+          page: ctx.to,
+          shared: toVisualEl,
+          ignore: (element) =>
+            ctx.from.contains(element) ||
+            element.closest(TEMPORARY_SELECTOR) !== null,
+          positionedParent,
+          zIndex: String(Number(Z_FOREGROUND) + 2),
+        });
+        if (chrome) {
+          const chromeStyle = (t: number) => ({ opacity: chromeOpacity(t) });
+          Object.assign(chrome.style, chromeStyle(0));
+          positionedParent.appendChild(chrome);
+          onDispose(() => chrome.remove());
+          animations.push(
+            new WebAnimation({
+              element: chrome,
+              motion: { lifetime: "temporary", role: "chrome" },
+              integrator: IntegratorProvider.from(physics),
+              style: chromeStyle,
+            }),
+          );
+        }
         animations.push(
           new WebAnimation({
             element: source,

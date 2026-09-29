@@ -119,14 +119,20 @@ export class ExpandBackgroundStrategy implements ZoomStrategy {
     const bgConfig = isEnter ? createEnterOut(input) : createExitIn(input);
 
     if (bgConfig) bgEl.style.transformOrigin = bgConfig.transformOrigin;
+    const style = isEnter
+      ? (_t: number, u: number) =>
+          bgConfig.animate(u) as Record<string, string | number>
+      : (t: number) => bgConfig.animate(t) as Record<string, string | number>;
+    ctx.backgroundMotion = {
+      transformOrigin: bgConfig.transformOrigin,
+      style,
+    };
 
     return [
       new WebAnimation({
         element: bgEl,
         integrator: IntegratorProvider.from(physics),
-        style: isEnter
-          ? (_t, u) => bgConfig.animate(u) as Record<string, string | number>
-          : (t) => bgConfig.animate(t) as Record<string, string | number>,
+        style,
       }),
     ];
   }

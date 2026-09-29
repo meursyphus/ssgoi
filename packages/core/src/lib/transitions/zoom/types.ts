@@ -8,6 +8,13 @@ import type { MediaGeometry } from "../media-geometry";
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export type ZoomType = "expand" | "static" | "blur";
+/**
+ * How the zoomed page's own content joins the motion.
+ * - `default`: only content painted over the shared visual (player controls,
+ *   a caption on the image, a scrim) crossfades with it; the rest of the page
+ *   is revealed or clipped by the tile as before.
+ * - `fade`: every sibling subtree around the shared visual fades in and out.
+ */
 export type ZoomVariant = "default" | "fade";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -126,6 +133,12 @@ export interface ZoomPrepareCtx {
  * when the resolved mode is `exit`) and is reused by every other strategy so
  * progress is locked.
  */
+/** The background page's motion, in that page's own transform space. */
+export interface ZoomBackgroundMotion {
+  transformOrigin: string;
+  style: (t: number, u: number) => Record<string, string | number>;
+}
+
 export interface ZoomContributeCtx {
   from: HTMLElement;
   to: HTMLElement;
@@ -133,6 +146,13 @@ export interface ZoomContributeCtx {
   input: ZoomAnimationInput;
   physics: PhysicsOptions;
   extras: ZoomExtras;
+  /**
+   * Published by the background strategy while it contributes, so a layer
+   * that must stay glued to the background page (the chrome crossfade) can
+   * ride the same transform. Strategies that read it are assembled after
+   * the background strategy; `static` publishes nothing.
+   */
+  backgroundMotion?: ZoomBackgroundMotion;
   /**
    * Full transition context — strategies that stage viewport-aligned layers
    * (the blur overlay) need the live scroll position + scrolling element.
@@ -150,7 +170,12 @@ export interface ZoomContributeCtx {
  * Strategy interface. Both methods are optional — a no-op strategy is
  * a legitimate factory return value (e.g. `FadeStrategy.forVariant("default")`).
  */
-export type ZoomAnimationName = "tile" | "background" | "content" | "overlay";
+export type ZoomAnimationName =
+  | "tile"
+  | "background"
+  | "content"
+  | "overlay"
+  | "chrome";
 
 export interface ZoomStrategy {
   readonly name: ZoomAnimationName;

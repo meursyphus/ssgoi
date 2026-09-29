@@ -241,6 +241,58 @@ describe("media geometry", () => {
     expect(geometry.mediaElement).toBe(media);
   });
 
+  it("adopts a rounded card's corners for an image that runs past the card", () => {
+    // WebKit sizes a percentage-height image inside an aspect-ratio card a
+    // few pixels taller than the card; the card's overflow trims it.
+    const media = element({
+      naturalWidth: 600,
+      naturalHeight: 920,
+      objectFit: "cover",
+    });
+    const card = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "12px",
+    });
+    const root = element({ tagName: "DIV", children: [card] });
+    const geometry = resolve(
+      media,
+      rect(0, 0, 179, 286.39),
+      new Map([[card, rect(0, 0, 179, 279.69)]]),
+      { clipRoot: root },
+    );
+    expect(geometry.window).toEqual(rect(0, 0, 179, 279.69));
+    expect(geometry.radius).toBe(12);
+    expect(geometry.cornerRadii).toBeUndefined();
+    expect(geometry.radiusSource).toBe("computed");
+  });
+
+  it("keeps an image that only reaches into a rounded card's corner on the existing path", () => {
+    const media = element({
+      naturalWidth: 600,
+      naturalHeight: 920,
+      objectFit: "cover",
+    });
+    const card = element({
+      tagName: "DIV",
+      children: [media],
+      overflow: "hidden",
+      radius: "12px",
+    });
+    const root = element({ tagName: "DIV", children: [card] });
+    const box = rect(0, 5, 179, 280);
+    const geometry = resolve(
+      media,
+      box,
+      new Map([[card, rect(0, 0, 179, 279.69)]]),
+      { clipRoot: root },
+    );
+    // Its top edge sits inside the card's top arcs without owning them.
+    expect(geometry.window).toEqual(box);
+    expect(geometry.radius).toBe(0);
+  });
+
   it.each(["hidden", "clip", "auto", "scroll"])(
     "detects the Airbnb edge-card crop through an overflow:%s ancestor",
     (overflow) => {

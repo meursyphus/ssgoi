@@ -38,6 +38,8 @@ class TestDOMRect {
 beforeAll(() => {
   vi.stubGlobal("DOMRect", TestDOMRect);
   vi.stubGlobal("getComputedStyle", (element: HTMLElement) => element.style);
+  // The content fade walks real element children; these doubles are not.
+  vi.stubGlobal("HTMLElement", class {});
 });
 afterAll(() => vi.unstubAllGlobals());
 

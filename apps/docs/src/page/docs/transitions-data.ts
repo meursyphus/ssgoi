@@ -643,7 +643,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
         ],
         isDefault: true,
         args: 'type: "static"',
-        ux: "The originating surface stays visually steady while the selected content opens above it.",
+        ux: "The originating surface stays visually steady while the selected content opens above it. Controls drawn over the shared image, and any list chrome the card sits under (a tab bar, a badge), crossfade with the tile instead of popping when it lands.",
         gif: mobileGif(
           "zoom-static-default",
           "A selected post opens into its detail page over a visually steady background.",
@@ -662,7 +662,7 @@ export const TRANSITION_DOCS: TransitionDoc[] = [
           { kind: "variant", value: "fade" },
         ],
         args: 'type: "static", variant: "fade"',
-        ux: "Adds a fade to the static background hand-off while retaining the same anchored zoom.",
+        ux: "Fades the whole detail page around the shared image, not only what overlaps it, while retaining the same anchored zoom.",
       },
       {
         label: "expand · default",

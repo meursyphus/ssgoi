@@ -496,7 +496,7 @@ export function resolveElementMediaGeometry(
 
   let window = geometry.window;
   let radius = geometry.radius;
-  let corners: MediaCornerRadii = [radius, radius, radius, radius];
+  const corners: MediaCornerRadii = [radius, radius, radius, radius];
   let radiusSource = geometry.radiusSource;
   let ancestor = keyedEl.parentElement;
   while (ancestor && ancestor !== options.clipRoot) {
@@ -538,25 +538,7 @@ export function resolveElementMediaGeometry(
       if (!clipped) return geometry;
       const ancestorRadius = readUniformRadius(ancestor, box);
       if (!ancestorRadius.supported) return geometry;
-      if (clipX && clipY && sameRect(window, box)) {
-        if (radiusSource !== "legacy") {
-          radius = Math.max(radius, ancestorRadius.radius);
-          corners = corners.map((corner) =>
-            Math.max(corner, ancestorRadius.radius),
-          ) as MediaCornerRadii;
-          if (radius > 0) radiusSource = "computed";
-        }
-      } else if (ancestorRadius.radius > 0) {
-        // Offset rounded clips can cut through arcs; do not invent a new shape.
-        const inner = {
-          left: box.left + ancestorRadius.radius,
-          top: box.top + ancestorRadius.radius,
-          width: box.width - 2 * ancestorRadius.radius,
-          height: box.height - 2 * ancestorRadius.radius,
-        };
-        if (!sameRect(intersection(window, inner) ?? box, window))
-          return geometry;
-      }
+      // The clip first cuts the window's own corners.
       const cuts = insetWithin(window, clipped);
       const cornerCuts = [
         [cuts.top, cuts.left],
@@ -572,6 +554,48 @@ export function resolveElementMediaGeometry(
         if (amount > 0.01 && amount < corner) return geometry;
         if (amount > 0.01) corners[i] = 0;
       }
+      // Then the ancestor's own rounded corners shape whatever remains at
+      // its corners: the whole window when it fills the box, or the sides
+      // where an image taller than its rounded card runs past it (WebKit
+      // sizes a percentage-height image inside an aspect-ratio box that
+      // way). A window that only reaches into a corner arc without owning
+      // that corner would be cut mid-arc; do not invent a new shape.
+      if (ancestorRadius.radius > 0 && radiusSource !== "legacy") {
+        const arc = ancestorRadius.radius;
+        const boxRight = box.left + box.width;
+        const boxBottom = box.top + box.height;
+        const clippedRight = clipped.left + clipped.width;
+        const clippedBottom = clipped.top + clipped.height;
+        const touches = {
+          left: Math.abs(clipped.left - box.left) < 0.01,
+          top: Math.abs(clipped.top - box.top) < 0.01,
+          right: Math.abs(clippedRight - boxRight) < 0.01,
+          bottom: Math.abs(clippedBottom - boxBottom) < 0.01,
+        };
+        const reaches = {
+          left: clipped.left < box.left + arc,
+          top: clipped.top < box.top + arc,
+          right: clippedRight > boxRight - arc,
+          bottom: clippedBottom > boxBottom - arc,
+        };
+        const owns = [
+          touches.top && touches.left,
+          touches.top && touches.right,
+          touches.bottom && touches.right,
+          touches.bottom && touches.left,
+        ];
+        const inArc = [
+          reaches.top && reaches.left,
+          reaches.top && reaches.right,
+          reaches.bottom && reaches.right,
+          reaches.bottom && reaches.left,
+        ];
+        for (let i = 0; i < 4; i++) {
+          if (owns[i]) corners[i] = Math.max(corners[i]!, arc);
+          else if (inArc[i]) return geometry;
+        }
+        if (owns.some(Boolean)) radiusSource = "computed";
+      }
       // A very narrow remainder can also slice through the opposite arc.
       const largestCorner = Math.max(...corners);
       if (clipped.width < largestCorner || clipped.height < largestCorner)
@@ -580,6 +604,7 @@ export function resolveElementMediaGeometry(
     }
     ancestor = ancestor.parentElement;
   }
+  radius = Math.max(radius, ...corners);
   const bboxMatchesWindow = sameRect(geometry.bbox, window);
   return {
     ...geometry,
