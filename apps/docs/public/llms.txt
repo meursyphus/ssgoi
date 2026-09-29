@@ -3,13 +3,13 @@
 SSGOI adds page transitions without replacing your application router.
 This quick start assumes Next.js App Router. Use the existing router and page files.
 
-Current version: `@ssgoi/core@7.4.0-beta.3` (npm tag `beta`; `latest` stays `7.3.2`). All `@ssgoi/*` packages release together.
+Current version: `@ssgoi/core@7.4.0` (npm tag `latest`). All `@ssgoi/*` packages release together.
 The stable release includes continuous motion handoff across interrupted navigations, transition scroll-input suppression without CSS changes, hero/zoom image crossfades, motion overrides, and optional router helpers.
 
 ## Install
 
 ```bash
-npm install @ssgoi/react@7.3.1
+npm install @ssgoi/react@7.4.0
 ```
 
 ## Add one provider and the Next.js boundary
