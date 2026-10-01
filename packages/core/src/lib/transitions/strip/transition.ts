@@ -5,6 +5,7 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import { PAGE_CONTAIN } from "../containment";
 
 const DEFAULT_PHYSICS: PhysicsOptions = {
   spring: { stiffness: 17, damping: 6 },
@@ -24,7 +25,7 @@ export const strip = (options: StripOptions = {}) => {
         el.style.willChange = "transform";
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
-          "layout paint";
+          PAGE_CONTAIN;
         el.style.pointerEvents = "none";
         el.style.transform = `perspective(${PERSPECTIVE}px) rotateY(0deg) translate3d(0%, 0, 0)`;
       });
@@ -32,7 +33,7 @@ export const strip = (options: StripOptions = {}) => {
         el.style.willChange = "transform";
         el.style.backfaceVisibility = "hidden";
         (el.style as CSSStyleDeclaration & { contain: string }).contain =
-          "layout paint";
+          PAGE_CONTAIN;
         el.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ROTATE_Y}deg) translate3d(-100%, 0, 0)`;
       });
       return {};

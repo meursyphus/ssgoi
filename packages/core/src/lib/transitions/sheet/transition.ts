@@ -12,6 +12,7 @@ import {
 import { SHEET_PROVIDERS } from "./provider";
 import { Z_BACKGROUND, Z_FOREGROUND, Z_OVERLAY } from "../stacking";
 import type { SheetOptions, SheetType } from "./types";
+import { PAGE_CONTAIN } from "../containment";
 
 export type { SheetOptions, SheetType } from "./types";
 
@@ -45,7 +46,7 @@ export const sheet = (options: SheetOptions = {}) => {
           el.style.willChange = SHEET_WILL_CHANGE;
           el.style.backfaceVisibility = "hidden";
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
+            PAGE_CONTAIN;
           // The sheet is always the foreground layer.
           el.style.zIndex = Z_FOREGROUND;
           if (direction === "enter") {
@@ -63,7 +64,7 @@ export const sheet = (options: SheetOptions = {}) => {
             el.style.willChange = bg.willChange;
             el.style.backfaceVisibility = "hidden";
             (el.style as CSSStyleDeclaration & { contain: string }).contain =
-              "layout paint";
+              PAGE_CONTAIN;
           }
           // The background sits beneath the sheet. An explicit z-index forms its
           // own stacking context so its descendants stay trapped below.
@@ -165,16 +166,14 @@ export const sheet = (options: SheetOptions = {}) => {
         };
 
         if (animatesBackground) {
-          // The clip slice below and the `contain: paint` set in prepare both
-          // assume the background's border box equals its full content height —
-          // the clip's `100%` is the element box, and the slice is offset by
-          // `scroll.y` so it lands at the viewport. But prepareOutgoing made the
-          // outgoing page `position: absolute`, under which a page root sized
-          // `height: 100%` (`h-full`) collapses to one viewport. `contain: paint`
-          // would then delete everything the user scrolled past, and the clip's
-          // `100%` would be a viewport — together leaving a white band of height
-          // `scroll.y` below the scrolled-in content. Pin the box to the real
-          // content height so both assumptions hold. Read after re-insertion
+          // The clip slice below assumes the background's border box equals its
+          // full content height — the clip's `100%` is the element box, and the
+          // slice is offset by `scroll.y` so it lands at the viewport. But
+          // prepareOutgoing made the outgoing page `position: absolute`, under
+          // which a page root sized `height: 100%` (`h-full`) collapses to one
+          // viewport. The clip's `100%` would then be a viewport, leaving a white
+          // band of height `scroll.y` below the scrolled-in content. Pin the box
+          // to the real content height so the assumption holds. Read after re-insertion
           // (this runs in `animation`, where the node is laid out); guard against
           // a 0 from an edge-case detached node so we never collapse it.
           const contentHeight = backgroundEl.scrollHeight;

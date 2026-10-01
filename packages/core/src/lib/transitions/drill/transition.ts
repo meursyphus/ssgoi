@@ -10,6 +10,7 @@ import {
 import { DRILL_PROVIDERS } from "./provider";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
 import type { DrillOptions, DrillSideConfig, DrillType } from "./types";
+import { PAGE_CONTAIN } from "../containment";
 
 export type { DrillOptions, DrillType } from "./types";
 
@@ -19,7 +20,7 @@ function applyStartStyle(el: HTMLElement, side: DrillSideConfig): void {
   el.style.willChange = side.willChange;
   el.style.backfaceVisibility = "hidden";
   (el.style as CSSStyleDeclaration & { contain: string }).contain =
-    "layout paint";
+    PAGE_CONTAIN;
   for (const [key, value] of Object.entries(side.startStyle)) {
     (el.style as unknown as Record<string, string | number>)[key] = value;
   }
