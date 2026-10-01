@@ -8,6 +8,7 @@ import {
   WebAnimation,
 } from "../../animation";
 import { Z_BACKGROUND, Z_FOREGROUND } from "../stacking";
+import { PAGE_CONTAIN } from "../containment";
 
 export interface ScrollOptions {
   directional?: boolean;
@@ -39,14 +40,14 @@ export const scroll = (options: ScrollOptions = {}) => {
           el.style.willChange = "transform";
           el.style.backfaceVisibility = "hidden";
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
+            PAGE_CONTAIN;
           el.style.pointerEvents = "none";
         });
         to.then((el) => {
           el.style.willChange = "transform";
           el.style.backfaceVisibility = "hidden";
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
+            PAGE_CONTAIN;
           // `to` is in normal flow; promote it so its z-index takes effect.
           el.style.position = "relative";
           el.style.zIndex = toZ;

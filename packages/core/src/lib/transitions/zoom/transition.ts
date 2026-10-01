@@ -28,6 +28,7 @@ import type {
   ZoomStrategy,
   ZoomVariant,
 } from "./types";
+import { PAGE_CONTAIN } from "../containment";
 
 export type { ZoomType, ZoomVariant, NormalizedZoomOptions } from "./types";
 
@@ -169,7 +170,7 @@ class TileStrategy implements ZoomStrategy {
       el.style.willChange = "transform, clip-path, opacity";
       el.style.backfaceVisibility = "hidden";
       (el.style as CSSStyleDeclaration & { contain: string }).contain =
-        "layout paint";
+        PAGE_CONTAIN;
     });
   }
 

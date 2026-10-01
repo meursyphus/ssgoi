@@ -9,6 +9,7 @@ import {
 import { getViewportRect } from "@utils";
 import { resolveAxisProvider } from "./provider";
 import type { AxisFeel, AxisOptions, AxisSideConfig, AxisType } from "./types";
+import { PAGE_CONTAIN } from "../containment";
 
 export type { AxisFeel, AxisOptions, AxisType } from "./types";
 
@@ -19,7 +20,7 @@ function applyStartStyle(el: HTMLElement, side: AxisSideConfig): void {
   el.style.willChange = side.willChange;
   el.style.backfaceVisibility = "hidden";
   (el.style as CSSStyleDeclaration & { contain: string }).contain =
-    "layout paint";
+    PAGE_CONTAIN;
   for (const [key, value] of Object.entries(side.startStyle)) {
     (el.style as unknown as Record<string, string | number>)[key] = value;
   }

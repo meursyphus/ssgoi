@@ -6,6 +6,7 @@ import {
   MultiAnimation,
   WebAnimation,
 } from "../../animation";
+import { PAGE_CONTAIN } from "../containment";
 
 export interface SlideOptions {
   physics?: PhysicsOptions;
@@ -24,7 +25,7 @@ export const slide = (options: SlideOptions = {}) => {
           el.style.willChange = "transform";
           el.style.backfaceVisibility = "hidden";
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
+            PAGE_CONTAIN;
           el.style.pointerEvents = "none";
         });
         to.then((el) => {
@@ -32,7 +33,7 @@ export const slide = (options: SlideOptions = {}) => {
           el.style.willChange = "transform";
           el.style.backfaceVisibility = "hidden";
           (el.style as CSSStyleDeclaration & { contain: string }).contain =
-            "layout paint";
+            PAGE_CONTAIN;
         });
         return {};
       },
