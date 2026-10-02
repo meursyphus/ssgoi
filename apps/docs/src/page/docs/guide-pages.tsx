@@ -1381,7 +1381,10 @@ export function NativeAppFeelBody() {
           component that wires SSGOI in for you.
         </p>
         <p className={`mt-4 ${body}`}>
-          If you are building a fully native app instead of a WebView, the{" "}
+          A React Native or Expo app can ship these transitions today by
+          rendering the web app in{" "}
+          <code className={inlineCode}>react-native-webview</code>. To animate
+          native screens instead, the{" "}
           <Link href="/docs/frameworks/react-native" className={link}>
             React Native package
           </Link>{" "}

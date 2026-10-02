@@ -76,6 +76,7 @@
     "webview",
     "pwa",
     "capacitor",
+    "react-native-webview",
     "hybrid-app",
     "view-transitions",
     "view-transition-api-alternative",
