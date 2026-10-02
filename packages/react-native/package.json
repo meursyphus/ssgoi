@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/react-native",
   "version": "7.4.0",
-  "description": "React Native screen transitions for SSGOI with optional Expo Router integration",
+  "description": "Experimental SSGOI screen transitions for React Native with Expo Router integration, sharing route rules and spring physics with the web packages.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -71,5 +71,20 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-router",
+    "reanimated",
+    "screen-transition",
+    "navigation-animation",
+    "spring-physics",
+    "ssgoi"
+  ],
+  "homepage": "https://ssgoi.dev/docs/frameworks/react-native",
+  "bugs": {
+    "url": "https://github.com/meursyphus/ssgoi/issues"
+  },
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>"
 }

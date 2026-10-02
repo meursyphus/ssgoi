@@ -1,6 +1,6 @@
 # @ssgoi/core
 
-Framework-agnostic route transition engine for SSGOI.
+Framework-agnostic engine behind SSGOI's native app-like page transitions. Make a web app, PWA or WebView app (Capacitor, Tauri, Ionic) feel like a native app without replacing your router.
 
 [![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 
@@ -92,17 +92,20 @@ Keep the preset's defaults and change only the selected direction or named group
 ```ts
 import { axis, spring } from "@ssgoi/core";
 
-const tuned = axis({ type: "x" }, {
-  override: {
-    forward({ animation }) {
-      const out = animation.select("out");
-      animation.select("in").set({
-        integrator: spring({ stiffness: 320, damping: 30 }),
-        startAt: { after: out, at: 0.3 },
-      });
+const tuned = axis(
+  { type: "x" },
+  {
+    override: {
+      forward({ animation }) {
+        const out = animation.select("out");
+        animation.select("in").set({
+          integrator: spring({ stiffness: 320, damping: 30 }),
+          startAt: { after: out, at: 0.3 },
+        });
+      },
     },
   },
-});
+);
 ```
 
 The callback receives `{ animation, context }`. Named children are inferred from

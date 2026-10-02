@@ -34,6 +34,15 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "setup",
   ],
   "/docs/transitions": ["presets", "all transitions"],
+  "/docs/native-app-feel": [
+    "webview",
+    "pwa",
+    "capacitor",
+    "tauri",
+    "ionic",
+    "hybrid app",
+    "native app",
+  ],
   "/docs/route-rules": [
     "SsgoiConfig",
     "config rules",

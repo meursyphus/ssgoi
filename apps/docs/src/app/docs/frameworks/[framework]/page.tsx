@@ -33,8 +33,14 @@ export async function generateMetadata({
   if (!doc) return {};
 
   const path = `/docs/frameworks/${doc.slug}`;
+  // Lead with the phrase people search for ("Next.js page transitions"), not
+  // the library name; the router names are what most of those searches use.
+  const kind = doc.slug === "react-native" ? "screen" : "page";
+  const routers = new Intl.ListFormat("en", { type: "conjunction" }).format(
+    doc.routers.map((router) => router.name),
+  );
   return {
-    title: `SSGOI with ${doc.name} — setup and route boundary`,
+    title: `${doc.name} ${kind} transitions for ${routers}`,
     description: doc.lead,
     alternates: { canonical: path },
     openGraph: buildOpenGraph({ path }),

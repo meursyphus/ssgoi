@@ -1,6 +1,6 @@
 # @ssgoi/solid
 
-Solid and SolidStart bindings for SSGOI.
+Native app-like page transitions for Solid and SolidStart. Make a web app, PWA or WebView app (Capacitor, Tauri, Ionic) feel like a native app without replacing your router.
 
 [![SSGOI live showcase](https://ssgoi.dev/readme.png)](https://ssgoi.dev)
 

@@ -402,6 +402,13 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         blurb: "What it is for, and what it deliberately leaves alone.",
       },
       {
+        id: "native-app-feel",
+        title: "Native app feel",
+        href: "/docs/native-app-feel",
+        blurb:
+          "WebView, PWA and Capacitor apps that navigate like native ones.",
+      },
+      {
         id: "view-transition-api",
         title: "Why not View Transitions",
         href: "/docs/view-transition-api",
