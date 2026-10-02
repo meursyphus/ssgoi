@@ -28,8 +28,9 @@ export async function generateMetadata({
 
   const path = `/docs/transitions/${doc.name}`;
   const variantList = doc.variants.map((v) => v.label).join(", ");
+  const label = doc.name[0].toUpperCase() + doc.name.slice(1);
   return {
-    title: `${doc.name} — page transition variants & usage | SSGOI`,
+    title: `${label} page transition — variants and usage`,
     description: `${doc.intro} Variants: ${variantList}.`,
     alternates: { canonical: path },
     openGraph: buildOpenGraph({ path }),

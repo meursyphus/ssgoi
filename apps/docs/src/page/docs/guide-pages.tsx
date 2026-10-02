@@ -7,6 +7,7 @@ import {
   caption,
   DocsTable,
   Figure,
+  Heading3,
   inlineCode,
   link,
   measure,
@@ -1226,6 +1227,190 @@ export function FrameworksIndexBody() {
             href: "/docs/boundaries",
             title: "Route boundaries",
             body: "The key and the route id, before you add persistent layouts.",
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Native app feel                                                            */
+/* -------------------------------------------------------------------------- */
+
+const COMWIT_UI_URL = "https://library.comwit.io/ui";
+
+/** Rendered on the page and reused verbatim as its FAQPage JSON-LD. */
+export const NATIVE_APP_FEEL_FAQ = [
+  {
+    question: "How do I make my web app feel like a native app?",
+    answer:
+      "Most of the difference is navigation. Native apps move between screens with direction: a detail screen pushes in from the side, a temporary task rises as a sheet, tabs slide in order, and Back reverses the motion and returns to the same scroll position. SSGOI adds those page transitions to an existing web app without replacing its router, so the same app feels native in a mobile browser, as an installed PWA or inside a WebView.",
+  },
+  {
+    question:
+      "Does SSGOI work inside a WebView app built with Capacitor, Tauri or React Native WebView?",
+    answer:
+      "Yes. SSGOI runs inside the web app itself, so any WebView that renders that app runs it too: Capacitor and Ionic, Tauri, React Native WebView, Flutter WebView and in-app browsers. There is no native plugin to install. It needs the Web Animations API, which WKWebView on iOS and the Chromium-based Android System WebView both provide.",
+  },
+  {
+    question: "Does SSGOI conflict with the iOS or Android back swipe?",
+    answer:
+      "No. An edge swipe from either side of the screen (iOS swipe-back, including inside WKWebView, and the Android system back gesture) is detected as a native gesture, and SSGOI skips its own transition for that navigation so the page never animates twice.",
+  },
+  {
+    question: "Can I add native-style page transitions to a PWA?",
+    answer:
+      "Yes. A PWA is the same web app with an install icon, so SSGOI works unchanged. Use transitions({ isMobile }) to give phones drill and sheet navigation while desktop keeps a lighter fade.",
+  },
+] as const;
+
+export function NativeAppFeelBody() {
+  return (
+    <div className="mt-8">
+      <p className={body}>
+        Capacitor, Tauri, Ionic, React Native WebView and Flutter&apos;s WebView
+        all render your web app as it is, and so does a PWA added to the home
+        screen. The pages still swap instantly, and an instant swap is the
+        clearest sign that a screen is a web page. SSGOI adds what a native
+        navigation stack gives you for free: the next screen arrives from a
+        direction, the previous one leaves, and that direction tells the user
+        where they are.
+      </p>
+      <p className={`mt-4 ${body}`}>
+        It does this inside the web app, with the router you already have. There
+        is no native plugin, no bridge and no second codebase, so the same build
+        behaves the same in Mobile Safari, Chrome, an installed PWA and every
+        WebView shell.
+      </p>
+
+      <Section
+        title="What native navigation does"
+        lead="Each behaviour is a route rule or an option in SSGOI, not code you write per page."
+      >
+        <DocsTable
+          head={["Native behaviour", "In SSGOI"]}
+          rows={[
+            [
+              "A detail screen pushes in; Back pops it",
+              <>
+                <Link href="/docs/transitions/drill" className={link}>
+                  Drill
+                </Link>{" "}
+                on the list and everything under it. Back plays the same motion
+                in reverse.
+              </>,
+            ],
+            [
+              "A compose or filter screen rises as a sheet",
+              <>
+                <Link href="/docs/transitions/sheet" className={link}>
+                  Sheet
+                </Link>{" "}
+                on that route only, above the page that opened it.
+              </>,
+            ],
+            [
+              "Tabs move in their order",
+              <>
+                An <code className={inlineCode}>ordered</code> rule with{" "}
+                <Link href="/docs/transitions/slide" className={link}>
+                  Slide
+                </Link>
+                , so direction follows tab position.
+              </>,
+            ],
+            [
+              "The tab bar stays put",
+              <>
+                Keep the bottom nav outside an inner boundary with{" "}
+                <Link href="/docs/nested-boundaries" className={link}>
+                  persistent layouts
+                </Link>
+                .
+              </>,
+            ],
+            [
+              "Back returns to the same scroll position",
+              <>
+                <Link href="/docs/scroll-restoration" className={link}>
+                  Scroll behavior
+                </Link>{" "}
+                restores the page you come back to and resets the one you open.
+              </>,
+            ],
+            [
+              "The OS owns the back swipe",
+              "Edge swipes on iOS (Safari and WKWebView) and the Android back gesture are detected, and SSGOI stays out of the way.",
+            ],
+          ]}
+          minWidth="560px"
+        />
+      </Section>
+
+      <Section
+        title="Phones and desktop from one config"
+        lead="A PWA or responsive web app usually wants stack navigation on a phone and something quieter on a wide screen."
+      >
+        <p className={`mt-4 ${body}`}>
+          Pass a function to{" "}
+          <code className={inlineCode}>{"transitions({ isMobile })"}</code> and
+          return a different rule set for each.{" "}
+          <Link href="/docs/route-rules" className={link}>
+            Route rules
+          </Link>{" "}
+          has the full example.
+        </p>
+      </Section>
+
+      <Section
+        title="App screens to go with it"
+        lead="Transitions are the motion between screens. The screens themselves still need app chrome."
+      >
+        <p className={`mt-4 ${body}`}>
+          <a
+            href={COMWIT_UI_URL}
+            target="_blank"
+            rel="noreferrer"
+            className={link}
+          >
+            Comwit UI
+          </a>{" "}
+          is a mobile app component kit built on SSGOI: app shell, app bar,
+          bottom nav, bottom sheet, pull to refresh and a page transition
+          component that wires SSGOI in for you.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          If you are building a fully native app instead of a WebView, the{" "}
+          <Link href="/docs/frameworks/react-native" className={link}>
+            React Native package
+          </Link>{" "}
+          shares the same route matching and physics. It is still experimental.
+        </p>
+      </Section>
+
+      <Section title="FAQ">
+        <div className="mt-6 flex flex-col gap-8">
+          {NATIVE_APP_FEEL_FAQ.map((qa) => (
+            <div key={qa.question}>
+              <Heading3>{qa.question}</Heading3>
+              <p className={`mt-3 ${body}`}>{qa.answer}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <NextLinks
+        links={[
+          {
+            href: "/docs/install",
+            title: "Quick start",
+            body: "One provider file and one layout edit.",
+          },
+          {
+            href: "/docs/transitions",
+            title: "Transitions",
+            body: "Pick the motion for each kind of navigation.",
           },
         ]}
       />

@@ -1,6 +1,6 @@
 # SSGOI
 
-Native app-like page transitions for mobile web apps.
+Native app-like page transitions for mobile web apps, PWAs, and WebView apps.
 
 **Router agnostic · Cross-browser · SSR ready · Web Animations API powered**
 
@@ -139,6 +139,11 @@ These are core Web Animations API runtime targets. The blur types in Sheet and
 Zoom also use `backdrop-filter` (Firefox 103+); earlier Firefox keeps the
 transition, scale, and dimming but omits the backdrop blur.
 
+The same build runs inside WebView shells — Capacitor, Ionic, Tauri, React
+Native WebView — and as an installed PWA, with no native plugin. iOS and Android
+back swipes are left to the OS.
+[Make a web app feel native →](https://ssgoi.dev/docs/native-app-feel)
+
 It observes the DOM lifecycle your framework already owns, so routing and SSR
 stay with your existing stack.
 
@@ -152,6 +157,10 @@ adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming
 Try the [Expo template](./templates/expo) for the current implementation and device checks.
 
 [See complete compatibility and framework guides →](https://ssgoi.dev/docs/compatibility)
+
+Need the app screens too? [Comwit UI](https://library.comwit.io/ui) is a mobile
+app component kit built on SSGOI: app shell, app bar, bottom nav, bottom sheet,
+pull to refresh, and page transitions.
 
 ---
 

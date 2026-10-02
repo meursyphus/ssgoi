@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/solid",
   "version": "7.4.0",
-  "description": "Solid.js bindings for SSGOI - Native app-like page transitions for Solid applications",
+  "description": "Native app-like page transitions for Solid and SolidStart. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",
   "files": [
@@ -85,10 +85,27 @@
   "keywords": [
     "solid",
     "solidjs",
+    "solid-router",
+    "solidstart",
     "page-transition",
+    "page-transitions",
+    "route-transition",
+    "navigation-animation",
+    "native-app",
+    "app-like",
+    "mobile-web",
+    "webview",
+    "pwa",
+    "capacitor",
+    "hybrid-app",
+    "view-transitions",
+    "view-transition-api-alternative",
+    "shared-element-transition",
+    "hero-transition",
+    "spring-physics",
+    "web-animations",
     "animation",
-    "ssgoi",
-    "spring-physics"
+    "ssgoi"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

@@ -1,7 +1,7 @@
 {
   "name": "@ssgoi/vue",
   "version": "7.4.0",
-  "description": "Vue bindings for SSGOI - Native app-like page transitions for Vue applications",
+  "description": "Native app-like page transitions for Vue and Nuxt. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",
   "files": [
@@ -80,10 +80,27 @@
   },
   "keywords": [
     "vue",
+    "vue-router",
+    "nuxt",
     "page-transition",
+    "page-transitions",
+    "route-transition",
+    "navigation-animation",
+    "native-app",
+    "app-like",
+    "mobile-web",
+    "webview",
+    "pwa",
+    "capacitor",
+    "hybrid-app",
+    "view-transitions",
+    "view-transition-api-alternative",
+    "shared-element-transition",
+    "hero-transition",
+    "spring-physics",
+    "web-animations",
     "animation",
-    "ssgoi",
-    "spring-physics"
+    "ssgoi"
   ],
   "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
   "license": "MIT",

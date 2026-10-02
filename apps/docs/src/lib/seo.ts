@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 
 export const SITE_URL = "https://ssgoi.dev";
 export const SITE_NAME = "SSGOI";
-export const SITE_TITLE = "SSGOI — Native page transitions on the web";
+export const SITE_TITLE =
+  "SSGOI — Native app-like page transitions for web apps, PWAs and WebViews";
 export const SITE_DESCRIPTION =
-  "Router-agnostic page transitions for React, Svelte, Vue, Solid, Angular, and Qwik. Built on the Web Animations API with spring physics and state preservation.";
+  "Make a web app, PWA or WebView app feel native. Router-agnostic page transitions for Next.js, React, SvelteKit, Vue, Nuxt, Solid, Angular and Qwik, built on the Web Animations API with spring physics.";
 
 /** The single shared social-preview image. Referenced by every page's OG + Twitter card. */
 export const OG_IMAGE = {
@@ -86,7 +87,7 @@ export const softwareApplicationSchema: Schema = {
   operatingSystem: "Web",
   description: SITE_DESCRIPTION,
   url: SITE_URL,
-  softwareRequirements: "React, Svelte, Vue, Solid, or Angular",
+  softwareRequirements: "React, Svelte, Vue, Solid, Angular, or Qwik",
   author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
   license: "https://opensource.org/licenses/MIT",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },

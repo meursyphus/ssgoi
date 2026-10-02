@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   keywords: [
     "page transitions",
+    "native app feel",
+    "app-like web app",
+    "webview app",
+    "pwa page transitions",
+    "capacitor page transitions",
+    "mobile web navigation",
+    "nextjs page transitions",
     "view transitions",
     "web animations api",
     "spring animation",
