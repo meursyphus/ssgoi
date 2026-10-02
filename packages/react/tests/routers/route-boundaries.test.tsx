@@ -12,6 +12,8 @@ import { SsgoiRouteBoundary as TanstackBoundary } from "../../src/routers/tansta
 
 const navigation = vi.hoisted(() => ({
   pathname: "/projects" as string | null,
+  /** TanStack's rendered leaf match; null means "same as pathname". */
+  matchPathname: null as string | null,
   segments: ["(tabs)", "projects"],
   pending: null as Promise<void> | null,
   slot: "",
@@ -30,8 +32,18 @@ vi.mock("@tanstack/react-router", () => ({
   useRouterState: ({
     select,
   }: {
-    select: (state: { location: { pathname: string } }) => string;
-  }) => select({ location: { pathname: navigation.pathname! } }),
+    select: (state: {
+      location: { pathname: string };
+      matches: { pathname: string }[];
+    }) => string;
+  }) =>
+    select({
+      location: { pathname: navigation.pathname! },
+      matches: [
+        { pathname: "/" },
+        { pathname: navigation.matchPathname ?? navigation.pathname! },
+      ],
+    }),
 }));
 
 let host: HTMLDivElement;
@@ -42,6 +54,7 @@ beforeEach(() => {
   document.body.append(host);
   root = createRoot(host);
   navigation.pathname = "/projects";
+  navigation.matchPathname = null;
   navigation.segments = ["(tabs)", "projects"];
   navigation.pending = null;
 });
@@ -69,6 +82,41 @@ it("renders the route marker during SSR", () => {
   ).toContain(
     '<article id="page" class="page" data-ssgoi-transition="/projects">Server content</article>',
   );
+});
+
+describe("TanStack Router boundary", () => {
+  it("keeps the rendered route while the next matches are pending", async () => {
+    navigation.pathname = "/pinterest";
+    await render(<TanstackBoundary>list</TanstackBoundary>);
+    const outgoing = boundary();
+    expect(outgoing.getAttribute("data-ssgoi-transition")).toBe("/pinterest");
+
+    // location moves first; the outlet still renders the list
+    navigation.pathname = "/pinterest/pin-1";
+    navigation.matchPathname = "/pinterest";
+    await render(<TanstackBoundary>list</TanstackBoundary>);
+    expect(boundary()).toBe(outgoing);
+
+    navigation.matchPathname = null;
+    await render(<TanstackBoundary>detail</TanstackBoundary>);
+    expect(boundary()).not.toBe(outgoing);
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe(
+      "/pinterest/pin-1",
+    );
+  });
+
+  it("drops the index match's trailing slash unless the URL has one", async () => {
+    navigation.pathname = "/pinterest";
+    navigation.matchPathname = "/pinterest/";
+    await render(<TanstackBoundary>list</TanstackBoundary>);
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe("/pinterest");
+
+    navigation.pathname = "/pinterest/";
+    await render(<TanstackBoundary>list</TanstackBoundary>);
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe(
+      "/pinterest/",
+    );
+  });
 });
 
 describe.each([NextBoundary, TanstackBoundary])(
