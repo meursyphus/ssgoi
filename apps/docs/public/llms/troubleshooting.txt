@@ -57,6 +57,11 @@ Scroll behavior belongs to the matched route relationship, not to an effect.
 Read the automatic policy before overriding it:
 https://ssgoi.dev/llms/scroll-restoration.txt
 
+If the arriving page scrolls itself (anchor jump, scrollIntoView, focus),
+defer that until the provider's transition state is `idle`: `useSsgoiTransition`
+in React, Vue, Solid and Qwik, `getSsgoiTransition` in Svelte,
+`injectSsgoiTransition` in Angular.
+
 ## Debug the mechanism
 
 Read this only when the checklist is insufficient:

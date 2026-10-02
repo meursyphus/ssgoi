@@ -8,6 +8,7 @@ import {
   observeSsgoiTransitions,
 } from "@ssgoi/core/internal";
 import type { HostAnimation } from "@ssgoi/core/internal";
+import { ssgoiContext } from "./context";
 
 const rootStyle: CSSProperties = { display: "contents" };
 
@@ -38,9 +39,11 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
     }, [ssgoi]);
 
     return (
-      <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
-        {children}
-      </div>
+      <ssgoiContext.Provider value={ssgoi}>
+        <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
+          {children}
+        </div>
+      </ssgoiContext.Provider>
     );
   },
 );

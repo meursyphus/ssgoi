@@ -543,3 +543,127 @@ describe("preparation ownership", () => {
     error.mockRestore();
   });
 });
+
+describe("transition state", () => {
+  it("reports the matched pair while a run prepares and plays, then idle", async () => {
+    let resolve!: (value: object) => void;
+    const prepare = new Promise<object>((done) => {
+      resolve = done;
+    });
+    const runs: Animation[] = [];
+    const state = navigation({
+      prepare: () => prepare,
+      animation: () => {
+        const run = animation();
+        runs.push(run);
+        return run;
+      },
+    });
+    const seen: unknown[] = [];
+    const stop = state.context.subscribe((next) => seen.push(next));
+    const idle = state.context.getTransitionState();
+    expect(idle).toEqual({
+      status: "idle",
+      from: null,
+      to: null,
+      direction: null,
+    });
+
+    state.go(0, 1);
+    await flushPromises();
+    const active = state.context.getTransitionState();
+    expect(active).toEqual({
+      status: "transitioning",
+      from: "/a",
+      to: "/b",
+      direction: "forward",
+    });
+    // Preparation counts: the scroll lock is held for the same span.
+    expect(runs).toHaveLength(0);
+    expect(lifecycle.active).toBe(1);
+
+    resolve({});
+    await flushPromises();
+    expect(runs).toHaveLength(1);
+    expect(state.context.getTransitionState()).toBe(active);
+
+    runs[0]!.complete();
+    expect(state.context.getTransitionState()).toBe(idle);
+    expect(lifecycle.active).toBe(0);
+    expect(seen).toEqual([active, idle]);
+    stop();
+    state.context.disconnect?.();
+  });
+
+  it("stays idle for a navigation without a matching rule", async () => {
+    const pages = activityPages();
+    const context = createSggoiTransitionContext({ transitions: [] });
+    pages.forEach((page, i) =>
+      context.register(["/a", "/b", "/c"][i]!, page as unknown as HTMLElement),
+    );
+    const listener = vi.fn();
+    context.subscribe(listener);
+    reactHide(pages[0]!);
+    reactShow(pages[1]!);
+    await flushPromises();
+    expect(context.getTransitionState().status).toBe("idle");
+    expect(listener).not.toHaveBeenCalled();
+    context.disconnect?.();
+  });
+
+  it("lets the latest run own the state when it interrupts a predecessor", async () => {
+    const runs: Animation[] = [];
+    const state = navigation({
+      animation: () => {
+        const run = animation();
+        runs.push(run);
+        return run;
+      },
+    });
+    // Paused playback keeps both runs attached without driving the DOM.
+    state.host.pause();
+    state.go(0, 1);
+    await flushPromises();
+    state.go(1, 2);
+    await flushPromises();
+    expect(runs).toHaveLength(2);
+    // The first run was retired by the handoff; its release must not report
+    // idle while the second run still owns the provider.
+    expect(state.context.getTransitionState()).toEqual({
+      status: "transitioning",
+      from: "/b",
+      to: "/c",
+      direction: "forward",
+    });
+    state.host.complete();
+    expect(state.context.getTransitionState().status).toBe("idle");
+    state.context.disconnect?.();
+  });
+
+  it("returns to idle on failure and on disconnect", async () => {
+    const report = vi.spyOn(console, "error").mockImplementation(() => {});
+    const failing = navigation({
+      animation: () => {
+        throw new Error("test failure");
+      },
+    });
+    failing.go(0, 1);
+    await flushPromises();
+    expect(failing.context.getTransitionState().status).toBe("idle");
+    failing.context.disconnect?.();
+    report.mockRestore();
+
+    const paused = navigation({ animation: () => animation() });
+    paused.host.pause();
+    paused.go(0, 1);
+    await flushPromises();
+    expect(paused.context.getTransitionState().status).toBe("transitioning");
+    const listener = vi.fn();
+    paused.context.subscribe(listener);
+    paused.context.disconnect?.();
+    expect(paused.context.getTransitionState().status).toBe("idle");
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "idle" }),
+    );
+  });
+});
