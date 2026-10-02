@@ -9,6 +9,7 @@ import type {
   PreserveScrollConfig,
   PrepareArgs,
   CreateElement,
+  SsgoiTransitionState,
 } from "@types";
 import { prepareOutgoing, promiseAll } from "@utils";
 import {
@@ -30,6 +31,14 @@ import {
 // Bound an abandoned async prepare, not animation playback (which may be
 // deliberately slow or paused by a host).
 const PREPARE_TIMEOUT_MS = 5000;
+
+/** The resting lifecycle snapshot. Shared so server renders and idle providers agree by reference. */
+export const IDLE_TRANSITION_STATE: SsgoiTransitionState = Object.freeze({
+  status: "idle",
+  from: null,
+  to: null,
+  direction: null,
+}) as SsgoiTransitionState;
 
 type TransitionMode = "unmount" | "hidden";
 
@@ -214,6 +223,35 @@ export function createSggoiTransitionContext(
   let disconnected = false;
   const restingStyles = new WeakMap<HTMLElement, string>();
 
+  // ── Lifecycle snapshot ──────────────────────────────────────────────────────
+  //
+  // `transitionState` is what the framework hooks read. It flips to
+  // "transitioning" when a matched run begins (preparation included, so it
+  // spans exactly the scroll-input lock) and back to "idle" when the LATEST run
+  // releases. A superseded run's late release must not clear the state its
+  // successor owns, so each run remembers the epoch it published under.
+  let transitionState: SsgoiTransitionState = IDLE_TRANSITION_STATE;
+  let transitionStateEpoch = 0;
+  const transitionListeners = new Set<(state: SsgoiTransitionState) => void>();
+
+  const publishTransitionState = (next: SsgoiTransitionState): void => {
+    if (
+      next.status === transitionState.status &&
+      next.from === transitionState.from &&
+      next.to === transitionState.to &&
+      next.direction === transitionState.direction
+    )
+      return;
+    transitionState = next;
+    for (const listener of [...transitionListeners]) {
+      try {
+        listener(next);
+      } catch (error) {
+        console.error("[ssgoi] transition state listener", error);
+      }
+    }
+  };
+
   const supersedePreparation = () => {
     navigationGeneration++;
     preparation?.abort();
@@ -306,6 +344,13 @@ export function createSggoiTransitionContext(
     const epoch = ++transitionEpoch;
     owner.set(toElement, epoch);
     owner.set(fromOriginal, epoch);
+    transitionStateEpoch = epoch;
+    publishTransitionState({
+      status: "transitioning",
+      from: fromPath,
+      to: toPath,
+      direction,
+    });
     // Acquire before superseding a pending predecessor: shared container locks
     // stay held continuously across interrupted preparations and host handoff.
     const finishScroll = beginTransition(options.scrollLock !== false);
@@ -438,6 +483,10 @@ export function createSggoiTransitionContext(
       // Remove the outgoing scroll extent BEFORE unlocking. Never restore
       // the departure position over the incoming page's scroll policy.
       finishScroll();
+      // Only the latest run speaks for the provider; a retired predecessor
+      // releasing late must not report idle under its successor.
+      if (transitionStateEpoch === epoch)
+        publishTransitionState(IDLE_TRANSITION_STATE);
     };
     const restoreOwnedPages = () => {
       for (const element of [fromOriginal, toElement]) {
@@ -939,9 +988,21 @@ export function createSggoiTransitionContext(
     return cb;
   };
 
+  const getTransitionState: SsgoiContext["getTransitionState"] = () =>
+    transitionState;
+
+  const subscribe: SsgoiContext["subscribe"] = (listener) => {
+    transitionListeners.add(listener);
+    return () => {
+      transitionListeners.delete(listener);
+    };
+  };
+
   return {
     register,
     refFor,
+    getTransitionState,
+    subscribe,
     disconnect() {
       disconnected = true;
       connectionGeneration++;
@@ -950,6 +1011,7 @@ export function createSggoiTransitionContext(
       try {
         host.cancel({ reason: "disposed", owns: () => true });
       } finally {
+        publishTransitionState(IDLE_TRANSITION_STATE);
         for (const visibility of visibilityHandles) visibility.stop();
         visibilityHandles.clear();
         for (const stopUnmount of unmountHandles.values()) stopUnmount();

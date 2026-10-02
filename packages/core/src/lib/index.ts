@@ -43,6 +43,8 @@ export type {
   AnimationFactoryArgs,
   CreateElement,
   SsgoiTransitionContext,
+  SsgoiTransitionState,
+  SsgoiTransitionStatus,
   Pose,
   Timeline,
   TimelineFrame,

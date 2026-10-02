@@ -203,14 +203,59 @@ export type SsgoiConfig =
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
+ * Where a provider is in its page-transition lifecycle.
+ *
+ *  - `"idle"`: no transition owns the page region. Navigations without a
+ *    matching rule, and native swipe-back, never leave this state.
+ *  - `"transitioning"`: a matched navigation is preparing or playing. The
+ *    provider also holds its scroll-input lock for exactly this span.
+ */
+export type SsgoiTransitionStatus = "idle" | "transitioning";
+
+/**
+ * Snapshot of the provider's transition lifecycle, as exposed by the
+ * framework hooks (`useSsgoiTransition`, `getSsgoiTransition`,
+ * `injectSsgoiTransition`). Each change produces a new object, so adapters
+ * can compare by reference.
+ */
+export type SsgoiTransitionState =
+  | {
+      status: "idle";
+      from: null;
+      to: null;
+      direction: null;
+    }
+  | {
+      status: "transitioning";
+      /** Route id of the page animating out. */
+      from: string;
+      /** Route id of the page animating in. */
+      to: string;
+      /** Semantic direction resolved from the matched rule. */
+      direction: NavigationDirection;
+    };
+
+/**
  * Adapter-facing API surface exposed by `createSsgoiTransitionContext`.
  *
- * Wrapped in an object so we can add fields later (e.g. status getters,
- * cancellation helpers) without breaking call sites that destructure.
+ * Wrapped in an object so we can add fields later (e.g. cancellation
+ * helpers) without breaking call sites that destructure.
  */
 export type SsgoiContext = {
   /** Finish transitions and release scroll locks and observers on disconnect. */
   disconnect?: () => void;
+
+  /**
+   * Current transition lifecycle snapshot. Stable by reference until the
+   * next change, so it can back `useSyncExternalStore`-style hooks directly.
+   */
+  getTransitionState: () => SsgoiTransitionState;
+
+  /**
+   * Notifies on every transition lifecycle change with the new snapshot.
+   * Returns an unsubscribe function.
+   */
+  subscribe: (listener: (state: SsgoiTransitionState) => void) => () => void;
   /**
    * Tell the dispatcher this DOM node has mounted under `path`. The
    * dispatcher handles pairing with the outgoing page, running the matched

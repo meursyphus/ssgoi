@@ -50,6 +50,21 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 }`,
       },
       {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers.",
+        code: `import { useEffect } from "react";
+import { useSsgoiTransition } from "@ssgoi/react";
+
+export function Comments({ anchor }: { anchor: string }) {
+  const { status } = useSsgoiTransition();
+  useEffect(() => {
+    if (status !== "idle") return;
+    document.getElementById(anchor)?.scrollIntoView();
+  }, [status, anchor]);
+  return null;
+}`,
+      },
+      {
         heading: "Using another router",
         body: "A dedicated helper is not required. Connect your router’s committed pathname to a keyed DOM boundary in the same render as its children. The Route boundaries guide explains the general pattern.",
       },
@@ -216,6 +231,21 @@ import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
 import { drill } from "@ssgoi/svelte/view-transitions";`,
         language: "ts",
       },
+      {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. getSsgoiTransition returns a readable store; call it during component initialisation.",
+        language: "svelte",
+        code: `<script lang="ts">
+  import { getSsgoiTransition } from "@ssgoi/svelte";
+
+  const transition = getSsgoiTransition();
+
+  $effect(() => {
+    if ($transition.status !== "idle") return;
+    document.getElementById("comments")?.scrollIntoView();
+  });
+</script>`,
+      },
     ],
     routers: [
       {
@@ -278,6 +308,26 @@ boundary component         : onNavigate → unmount old route   (OUT captured)
         code: `import { Ssgoi } from "@ssgoi/vue";
 import { drill } from "@ssgoi/vue/view-transitions";`,
         language: "ts",
+      },
+      {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. useSsgoiTransition returns a readonly ref; call it in setup.",
+        language: "vue",
+        code: `<script setup lang="ts">
+import { watch } from "vue";
+import { useSsgoiTransition } from "@ssgoi/vue";
+
+const transition = useSsgoiTransition();
+
+watch(
+  () => transition.value.status,
+  (status) => {
+    if (status !== "idle") return;
+    document.getElementById("comments")?.scrollIntoView();
+  },
+  { immediate: true },
+);
+</script>`,
       },
     ],
     routers: [
@@ -349,6 +399,21 @@ import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
         code: `import { Ssgoi } from "@ssgoi/solid";
 import { drill } from "@ssgoi/solid/view-transitions";`,
         language: "ts",
+      },
+      {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. useSsgoiTransition returns a signal accessor.",
+        code: `import { createEffect } from "solid-js";
+import { useSsgoiTransition } from "@ssgoi/solid";
+
+export function Comments() {
+  const transition = useSsgoiTransition();
+  createEffect(() => {
+    if (transition().status !== "idle") return;
+    document.getElementById("comments")?.scrollIntoView();
+  });
+  return null;
+}`,
       },
     ],
     routers: [
@@ -460,6 +525,21 @@ export default component$(() => (
   <article data-ssgoi-transition="/posts">{/* page */}</article>
 ));`,
       },
+      {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. useSsgoiTransition returns a serialisable store provided by useSsgoi, so call it in a component below the layout that attached SSGOI.",
+        code: `import { component$, useVisibleTask$ } from "@builder.io/qwik";
+import { useSsgoiTransition } from "@ssgoi/qwik";
+
+export const Comments = component$(() => {
+  const transition = useSsgoiTransition();
+  useVisibleTask$(({ track }) => {
+    if (track(() => transition.status) !== "idle") return;
+    document.getElementById("comments")?.scrollIntoView();
+  });
+  return null;
+});`,
+      },
     ],
     routers: [
       {
@@ -529,6 +609,25 @@ export class AppComponent {
       { on: "/posts/**", except: "/posts", transition: drill() },
     ],
   });
+}`,
+      },
+      {
+        heading: "Transition state",
+        body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. injectSsgoiTransition returns a readonly signal and stays idle during SSR.",
+        language: "ts",
+        code: `import { Component, effect } from "@angular/core";
+import { injectSsgoiTransition } from "@ssgoi/angular";
+
+@Component({ selector: "app-comments", standalone: true, template: "" })
+export class CommentsComponent {
+  private readonly transition = injectSsgoiTransition();
+
+  constructor() {
+    effect(() => {
+      if (this.transition().status !== "idle") return;
+      document.getElementById("comments")?.scrollIntoView();
+    });
+  }
 }`,
       },
     ],

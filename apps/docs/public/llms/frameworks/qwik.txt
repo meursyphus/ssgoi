@@ -50,6 +50,31 @@ export default component$(() => {
 });
 ```
 
+## Transition state
+
+A page that scrolls itself on arrival (anchor jump, scrollIntoView) fights
+the animation. Read the provider's transition state and act once it is idle.
+The status is `idle` or `transitioning`; while transitioning it also carries
+`from`, `to` and `direction`. It flips as soon as the navigation is paired,
+one microtask after the DOM changed, and returns to `idle` when the run
+releases, the same span the scroll-input lock covers.
+`useSsgoiTransition` returns a serialisable store provided by `useSsgoi`, so
+call it in a component below the layout that attached SSGOI.
+
+```tsx
+import { component$, useVisibleTask$ } from "@builder.io/qwik";
+import { useSsgoiTransition } from "@ssgoi/qwik";
+
+export const Comments = component$(() => {
+  const transition = useSsgoiTransition();
+  useVisibleTask$(({ track }) => {
+    if (track(() => transition.status) !== "idle") return;
+    document.getElementById("comments")?.scrollIntoView();
+  });
+  return null;
+});
+```
+
 ## Router boundary helper
 
 The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.

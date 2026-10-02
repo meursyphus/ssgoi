@@ -804,6 +804,49 @@ export function ScrollRestorationBody() {
       </Section>
 
       <Section
+        title="Wait for the transition from your code"
+        lead="A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation and the scroll policy. Read the provider's transition state and act once it is idle."
+      >
+        <CodeBlock
+          className="mt-6"
+          language="tsx"
+          code={`import { useEffect } from "react";
+import { useSsgoiTransition } from "@ssgoi/react";
+
+export function Comments({ anchor }: { anchor: string }) {
+  const { status } = useSsgoiTransition();
+  useEffect(() => {
+    if (status !== "idle") return;
+    document.getElementById(anchor)?.scrollIntoView();
+  }, [status, anchor]);
+  return null;
+}`}
+        />
+        <p className={`mt-6 ${body}`}>
+          The status is <code className={inlineCode}>idle</code> or{" "}
+          <code className={inlineCode}>transitioning</code>; while transitioning
+          it also carries <code className={inlineCode}>from</code>,{" "}
+          <code className={inlineCode}>to</code> and{" "}
+          <code className={inlineCode}>direction</code>. It flips as soon as the
+          navigation is paired, one microtask after the DOM changed, and returns
+          to idle when the run releases, the same span the scroll-input lock
+          covers. A navigation without a matching rule never leaves idle.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          The same snapshot is{" "}
+          <code className={inlineCode}>getSsgoiTransition()</code> in Svelte (a
+          store), <code className={inlineCode}>useSsgoiTransition()</code> in
+          Vue (a ref), Solid (a signal) and Qwik (a store), and{" "}
+          <code className={inlineCode}>injectSsgoiTransition()</code> in Angular
+          (a signal). Each{" "}
+          <Link href="/docs/frameworks" className={link}>
+            framework guide
+          </Link>{" "}
+          shows its form.
+        </p>
+      </Section>
+
+      <Section
         title="Override one relationship"
         lead="Reach for preserveScroll only when the automatic behaviour is wrong for that rule. Both keys are required."
       >
@@ -1052,6 +1095,7 @@ const TROUBLE_CHECKS: Array<{ title: string; items: ReactNode[] }> = [
       "Check middleware if the visible URL and the logical route id differ.",
       "Remove preserveScroll and confirm the automatic default first.",
       "Define the config object outside render, or memoize it. A new object on every render rebuilds the context and drops every recorded scroll position.",
+      "If the arriving page scrolls itself (anchor jump, scrollIntoView, focus), defer it until the provider's transition state is idle. See Scroll restoration.",
     ],
   },
 ];

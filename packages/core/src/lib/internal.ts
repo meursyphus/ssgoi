@@ -1,4 +1,7 @@
-export { createSggoiTransitionContext } from "./ssgoi-transition/create-ssgoi-transition-context";
+export {
+  createSggoiTransitionContext,
+  IDLE_TRANSITION_STATE,
+} from "./ssgoi-transition/create-ssgoi-transition-context";
 export { observeSsgoiTransitions } from "./ssgoi-transition/observe-ssgoi-transitions";
 export {
   Animation,
@@ -21,6 +24,8 @@ export type {
   AnimationFactoryArgs,
   CreateElement,
   SsgoiTransitionContext,
+  SsgoiTransitionState,
+  SsgoiTransitionStatus,
   Pose,
   Timeline,
 } from "@types";
