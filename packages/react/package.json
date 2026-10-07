@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "7.4.0",
+  "version": "7.4.1",
   "description": "Native app-like page transitions for React and Next.js. Make a web app, PWA or WebView app feel native, with Remix, React Router and TanStack Router support.",
   "private": false,
   "type": "module",

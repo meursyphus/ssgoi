@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "7.4.0",
+  "version": "7.4.1",
   "description": "Native app-like page transitions for Vue and Nuxt. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",

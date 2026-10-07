@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react-native",
-  "version": "7.4.0",
+  "version": "7.4.1",
   "description": "Experimental SSGOI screen transitions for React Native with Expo Router integration, sharing route rules and spring physics with the web packages.",
   "type": "module",
   "main": "./dist/index.js",
