@@ -16,7 +16,8 @@ from creating or reading the weak references. The suite checks natural
 completion and mid-flight cancellation/navigation, plus a no-animation control.
 It checks a fixed retention bound independent of how many transitions have
 run: the context's most recent outgoing page (two for interrupted transitions),
-plus one conservative GC survivor. GC is not guaranteed to collect every
+plus one conservative GC survivor, with additional GC requests at the end to
+let transient survivors clear. GC is not guaranteed to collect every
 unreachable object immediately, including in the no-animation control.
 It also weakly tracks native animations and requires
 zero detached targets reachable through their effects after settling.
