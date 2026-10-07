@@ -7,6 +7,49 @@ pnpm --filter @ssgoi/core exec playwright install chromium webkit
 pnpm --filter @ssgoi/core test:browser
 ```
 
+## Detached animation pages (`animation-retention`, #447)
+
+The fixture creates fresh 257-node pages, keeps only `WeakRef`s to departed
+nodes, and runs real WAAPI animations and the real SSGOI transition context.
+Playwright requests GC four times after each cycle, in separate browser tasks
+from creating or reading the weak references. The suite checks natural
+completion and mid-flight cancellation/navigation, plus a no-animation control.
+It checks a fixed retention bound independent of how many transitions have
+run: the context's most recent outgoing page (two for interrupted transitions),
+plus one conservative GC survivor. GC is not guaranteed to collect every
+unreachable object immediately, including in the no-animation control.
+It also weakly tracks native animations and requires
+zero detached targets reachable through their effects after settling.
+
+```sh
+pnpm --filter @ssgoi/core exec playwright test animation-retention --workers=2
+```
+
+Each test attaches JSON measurements at 5/10/15/20 cycles. Interrupted context
+cycles navigate twice and assert the second navigation really interrupts an
+active transition. The fixture also asserts one attached page and no remaining
+WAAPI effects after settling.
+
+For engine-only controls, open `/tests/animation-retention.html?mode=raw` or
+`?mode=raw-cleared` / `?mode=raw-released` (append `&interrupted` for cancellation) and drive
+`window.animationRetention.cycle()` / `.measure()` using Playwright's
+`page.evaluate()` and `page.requestGC()`. Those modes differ only in removing
+the finish handler and, for `raw-released`, clearing the canceled animation's
+effect. They do not use SSGOI to animate the departing page.
+
+Reproduction on macOS 26.5.1, Playwright 1.58.2, WebKit 26.0 (build 2248), and
+Chromium 145.0.7632.6 confirmed linear retention in npm 7.0.1 and 7.4.0:
+after 10/20/30/40 departures WebKit retained 2,570/5,140/7,710/10,280 nodes,
+including after 20 additional GC requests. Chromium retained a fixed 257 nodes
+(514 with interrupted pairs). The raw WAAPI control reproduced the growth;
+clearing its handler reduced retained DOM wrappers to zero, but all 40 native
+effects could still return their original detached target subtrees. Clearing
+the canceled effect too removes that remaining path. The fix applies this
+cleanup to both playback animations and the paused holds used in handoffs.
+These measurements
+establish the tested WebKit behavior, not a direct physical iOS Safari test or
+a claim about every browser version or every native allocation.
+
 ## Shared crossfade (`shared-crossfade`)
 
 Hero and zoom crossfade identical opaque images at identical coordinates so

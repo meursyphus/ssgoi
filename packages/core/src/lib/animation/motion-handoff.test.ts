@@ -219,6 +219,8 @@ describe("handoff boundaries", () => {
     expect(hold.frames[0]!.opacity).toEqual(hold.frames[1]!.opacity);
     expect(Number(hold.frames[0]!.opacity)).toBeGreaterThan(0);
     host.cancel({ reason: "disposed", owns: () => true });
+    expect(hold.waapi.cancel).toHaveBeenCalledOnce();
+    expect(hold.waapi.effect).toBeNull();
   });
   it("samples the final frame after WAAPI fill has been released", () => {
     const el = node(),

@@ -181,13 +181,86 @@ describe("WebAnimation", () => {
       style: (t) => ({ opacity: t }),
     });
     animation.play();
+    const onfinish = waapi.onfinish;
     advance(20);
     animation.pause();
     expect(animation.isPaused).toBe(true);
+    expect(waapi.onfinish).toBe(onfinish);
     animation.play();
     expect(calls).toEqual(["seek", "pause", "play"]);
     expect(element.animate).toHaveBeenCalledTimes(1);
     expect(animation.isAnimating).toBe(true);
+    expect(waapi.onfinish).toBe(onfinish);
+  });
+
+  it.each(["finish", "complete", "stop", "cancel"] as const)(
+    "releases the finish listener before canceling WAAPI on %s",
+    (exit) => {
+      const { waapi } = createFakeWaapi();
+      const { element } = createFakeElement(waapi);
+      const onComplete = vi.fn();
+      const onDispose = vi.fn();
+      const animation = new WebAnimation({
+        element,
+        integrator: testIntegrator,
+        style: (t) => ({ opacity: t }),
+        onComplete,
+        onDispose,
+      });
+      vi.mocked(waapi.cancel).mockImplementation(() => {
+        expect(waapi.onfinish).toBeNull();
+      });
+      animation.play();
+      expect(waapi.onfinish).toBeTypeOf("function");
+
+      if (exit === "finish") {
+        waapi.onfinish!.call(waapi, {} as AnimationPlaybackEvent);
+      } else if (exit === "cancel") {
+        animation.cancel({ reason: "disposed", owns: () => true });
+      } else {
+        animation[exit]();
+      }
+
+      expect(waapi.onfinish).toBeNull();
+      expect(waapi.effect).toBeNull();
+      expect(waapi.cancel).toHaveBeenCalledOnce();
+      expect(animation.isAnimating).toBe(false);
+      const completed = exit === "finish" || exit === "complete";
+      expect(animation.isComplete).toBe(completed);
+      expect(onComplete).toHaveBeenCalledTimes(completed ? 1 : 0);
+      expect(onDispose).toHaveBeenCalledTimes(exit === "stop" ? 0 : 1);
+      if (completed) expect(element.style.opacity).toBe("1");
+    },
+  );
+
+  it("ignores a queued finish from a canceled run after restarting", () => {
+    const first = createFakeWaapi().waapi;
+    const second = createFakeWaapi().waapi;
+    const { element } = createFakeElement(first);
+    vi.mocked(element.animate)
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(second);
+    const onComplete = vi.fn();
+    const animation = new WebAnimation({
+      element,
+      integrator: testIntegrator,
+      style: (t) => ({ opacity: t }),
+      onComplete,
+    });
+    animation.play();
+    const queuedFinish = first.onfinish!;
+    animation.stop();
+    animation.play();
+    const currentFinish = second.onfinish;
+    queuedFinish.call(first, {} as AnimationPlaybackEvent);
+
+    expect(first.onfinish).toBeNull();
+    expect(second.onfinish).toBe(currentFinish);
+    expect(animation.isAnimating).toBe(true);
+    expect(onComplete).not.toHaveBeenCalled();
+    second.onfinish!.call(second, {} as AnimationPlaybackEvent);
+    expect(second.onfinish).toBeNull();
+    expect(onComplete).toHaveBeenCalledOnce();
   });
 
   it("samples live pose from WAAPI currentTime", () => {

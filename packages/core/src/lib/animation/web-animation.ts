@@ -244,8 +244,7 @@ export class WebAnimation extends Animation {
   stop(): void {
     this.captureLiveState();
     this.clearWaapi();
-    this.hold?.cancel();
-    this.hold = null;
+    this.clearHold();
     this.fallbackCopy?.cancel({ reason: "disposed", owns: () => true });
     this.fallbackCopy = null;
     this.running = false;
@@ -272,8 +271,7 @@ export class WebAnimation extends Animation {
   private finish(): void {
     this.presentationTime = this.frames[this.frames.length - 1]?.time ?? 0;
     this.solverState = undefined;
-    this.hold?.cancel();
-    this.hold = null;
+    this.clearHold();
     this.applyStyleAt(this.currentValue);
     this.clearWaapi();
     this.fallbackCopy?.cancel({ reason: "disposed", owns: () => true });
@@ -446,7 +444,7 @@ export class WebAnimation extends Animation {
     // A delayed child holds its transferred presentation until its dependency
     // actually starts it. It does not borrow the previous sequence's clock.
     const style = this.codec.write(this.adopted.channels);
-    this.hold?.cancel();
+    this.clearHold();
     if (Object.keys(style).length) {
       // Both keyframes carry the pose. A lone keyframe sits at offset 1 and
       // interpolates from the underlying style, so a hold paused at 0 would
@@ -682,8 +680,7 @@ export class WebAnimation extends Animation {
 
     this.waapi = waapi;
     this.fallbackCopy?.play();
-    this.hold?.cancel();
-    this.hold = null;
+    this.clearHold();
     this.running = true;
 
     waapi.onfinish = () => {
@@ -818,8 +815,13 @@ export class WebAnimation extends Animation {
 
   private clearWaapi() {
     this.runId++;
-    this.waapi?.cancel();
+    releaseAnimation(this.waapi);
     this.waapi = null;
+  }
+
+  private clearHold() {
+    releaseAnimation(this.hold);
+    this.hold = null;
   }
 
   private captureLiveState() {
@@ -877,6 +879,17 @@ export class WebAnimation extends Animation {
 /* ────────────────────────────────────────────────────────────────────────────
  * Simulation helpers
  * ──────────────────────────────────────────────────────────────────────────── */
+
+function releaseAnimation(animation: globalThis.Animation | null): void {
+  if (!animation) return;
+  // WebKit can retain canceled Animation objects. Release both the finish
+  // closure (which captures the driver) and the native effect's DOM target.
+  // Clearing only the handler allows JS wrappers to be collected while the
+  // detached subtree is still reachable through animation.effect.target.
+  animation.onfinish = null;
+  animation.cancel();
+  animation.effect = null;
+}
 
 function readAnimationTime(
   animation: globalThis.Animation | null,
