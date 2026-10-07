@@ -37,17 +37,25 @@ for (const mode of ["none", "driver", "context"] as const) {
         expect(sample.attachedPages).toBe(1);
         expect(sample.activeAnimations).toBe(0);
         expect(sample.detachedEffectTargets).toBe(0);
-        // GC need not collect every unreachable object immediately: WebKit
-        // can retain a local even in the no-animation control. Allow one
-        // conservative survivor in addition to the context's latest outgoing
-        // page (two for interrupted runs), never growth with the run count.
-        // Native effect targets must be zero, without any such allowance.
-        const allowance = 1 + (mode === "context" ? (interrupted ? 2 : 1) : 0);
-        expect(sample.detached).toBeLessThanOrEqual(257 * allowance);
         expect(sample.interruptions).toBe(
           mode === "context" && interrupted ? sample.cycle : 0,
         );
       }
+      // Intermediate GC requests can leave conservative survivors even in
+      // the no-animation control. Allow GC to catch up before asserting the
+      // final, fixed bound; effect targets above must be zero at every sample.
+      const allowance = 1 + (mode === "context" ? (interrupted ? 2 : 1) : 0);
+      await expect
+        .poll(
+          async () => {
+            for (let gc = 0; gc < 4; gc++) await page.requestGC();
+            return page.evaluate(
+              () => window.animationRetention.measure().detached,
+            );
+          },
+          { timeout: 5_000 },
+        )
+        .toBeLessThanOrEqual(257 * allowance);
     });
   }
 }
