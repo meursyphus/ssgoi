@@ -1,17 +1,12 @@
 import { defineConfig, type UserConfig } from "vite";
-import { qwikVite } from "@builder.io/qwik/optimizer";
-import { qwikCity } from "@builder.io/qwik-city/vite";
+import { qwikVite } from "@qwik.dev/core/optimizer";
+import { qwikRouter } from "@qwik.dev/router/vite";
 import tailwindcss from "@tailwindcss/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ command, mode }): UserConfig => {
   return {
-    plugins: [
-      tailwindcss(),
-      qwikCity(),
-      qwikVite(),
-      tsconfigPaths({ root: "." }),
-    ],
+    plugins: [tailwindcss(), qwikRouter(), qwikVite()],
+    resolve: { tsconfigPaths: true },
     optimizeDeps: {
       exclude: [],
     },

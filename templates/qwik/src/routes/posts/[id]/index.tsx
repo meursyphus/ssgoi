@@ -1,6 +1,6 @@
-import { component$ } from "@builder.io/qwik";
-import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
-import { Link, useLocation } from "@builder.io/qwik-city";
+import { component$ } from "@qwik.dev/core";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-router";
+import { Link, useLocation } from "@qwik.dev/router";
 import { getPost, getRelatedPosts } from "~/data/posts";
 
 export default component$(() => {

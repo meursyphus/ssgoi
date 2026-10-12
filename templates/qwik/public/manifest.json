@@ -5,5 +5,5 @@
   "start_url": ".",
   "display": "standalone",
   "background_color": "#121212",
-  "description": "A Qwik City SSR template showcasing SSGOI page transitions."
+  "description": "A Qwik Router SSR template showcasing SSGOI page transitions."
 }

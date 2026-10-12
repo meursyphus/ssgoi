@@ -43,8 +43,8 @@ try {
   const variants = [
     {
       name: "qwik",
-      framework: ["@builder.io/qwik@1.20.0"],
-      router: "@builder.io/qwik-city",
+      framework: ["@qwik.dev/core@2.0.0-rc.2"],
+      router: "@qwik.dev/router",
     },
     {
       name: "angular",
@@ -79,14 +79,10 @@ try {
       join(cwd, "consumer.ts"),
       `import { Ssgoi } from "@ssgoi/${name}";\nexport const Provider = Ssgoi;\n`,
     );
-    // Qwik 1.20.0 ships an invalid ambient `{ JSX };` statement in core.d.ts.
-    // Keep application checks strict, matching its template's skipLibCheck setting.
-    const dependencyTypeOptions = name === "qwik" ? ["--skipLibCheck"] : [];
     run(
       "node",
       [
         local.resolve("typescript/bin/tsc"),
-        ...dependencyTypeOptions,
         "--noEmit",
         "--strict",
         "--target",
@@ -114,8 +110,74 @@ try {
       ),
     );
     console.log(
-      `${name}: packed root installs, type-checks${name === "qwik" ? " (upstream declaration checks skipped)" : ""}, and bundles without ${router}.`,
+      `${name}: packed root installs, type-checks, and bundles without ${router}.`,
     );
+    if (name === "qwik") {
+      run(
+        "npm",
+        [
+          "install",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund",
+          "@qwik.dev/router@2.0.0-rc.2",
+        ],
+        cwd,
+      );
+      for (const legacy of ["@builder.io/qwik", "@builder.io/qwik-city"]) {
+        assert.throws(() => consumer.resolve(legacy), {
+          code: "MODULE_NOT_FOUND",
+        });
+      }
+      writeFileSync(
+        join(cwd, "router-consumer.ts"),
+        `
+import type { Signal } from "@qwik.dev/core";
+import { useSsgoiRouteBoundary, type RouteBoundaryState } from "@ssgoi/qwik/qwik-router";
+import { useSsgoiRouteBoundary as legacyAlias } from "@ssgoi/qwik/qwik-city";
+export const boundary: () => Signal<RouteBoundaryState> = useSsgoiRouteBoundary;
+export const persistent: () => Signal<RouteBoundaryState> = () => legacyAlias("shell");
+`,
+      );
+      run(
+        "node",
+        [
+          local.resolve("typescript/bin/tsc"),
+          "--noEmit",
+          "--strict",
+          "--target",
+          "es2022",
+          "--module",
+          "esnext",
+          "--moduleResolution",
+          "bundler",
+          "--types",
+          "node",
+          "router-consumer.ts",
+        ],
+        cwd,
+      );
+      run(
+        "node",
+        [
+          "--input-type=module",
+          "-e",
+          `
+import assert from "node:assert/strict";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-router";
+import { useSsgoiRouteBoundary as legacyAlias } from "@ssgoi/qwik/qwik-city";
+assert.equal(typeof useSsgoiRouteBoundary, "function");
+assert.equal(useSsgoiRouteBoundary, legacyAlias);
+// Qwik can keep Node handles alive; the import-only assertions are complete.
+process.exit(0);
+`,
+        ],
+        cwd,
+      );
+      console.log(
+        "qwik: packed Qwik Router export and deprecated alias type-check and import with Qwik 2 RC, without Qwik 1.",
+      );
+    }
   }
 } finally {
   rmSync(fixture, { recursive: true, force: true });

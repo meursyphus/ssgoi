@@ -27,12 +27,12 @@ Next.js is the only router helper not marked experimental.
 | Vue | Nuxt | `@ssgoi/vue/nuxt` | Experimental |
 | Solid | Solid Router | `@ssgoi/solid/solid-router` | Experimental |
 | Solid | SolidStart | `@ssgoi/solid/solidstart` | Experimental |
-| Qwik | Qwik City | `@ssgoi/qwik/qwik-city` | Experimental |
+| Qwik | Qwik Router | `@ssgoi/qwik/qwik-router` | Experimental |
 | Angular | Angular Router | `@ssgoi/angular/router` | Experimental |
 | React Native | Expo Router | `@ssgoi/react-native/expo-router` | Experimental |
 
 React, Vue, Solid, and Svelte helpers supply SsgoiRouteBoundary. Angular supplies
-a structural directive with that name. Qwik City supplies useSsgoiRouteBoundary
+a structural directive with that name. Qwik Router supplies useSsgoiRouteBoundary
 so the page retains ownership of its DOM and projected slots. Expo supplies a
 native file-based boundary; web presets and DOM attributes do not apply.
 

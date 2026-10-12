@@ -1,4 +1,4 @@
-import { createContextId, useContext } from "@builder.io/qwik";
+import { createContextId, useContext } from "@qwik.dev/core";
 import type { SsgoiTransitionState } from "@ssgoi/core/types";
 
 /** Serialisable store of the provider's lifecycle, mutated in place by `useSsgoi`. */

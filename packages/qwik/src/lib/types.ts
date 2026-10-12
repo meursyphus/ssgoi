@@ -1,4 +1,4 @@
-import type { QRL } from "@builder.io/qwik";
+import type { QRL } from "@qwik.dev/core";
 import type { HostAnimation } from "@ssgoi/core/internal";
 import type { SsgoiConfig } from "@ssgoi/core/types";
 

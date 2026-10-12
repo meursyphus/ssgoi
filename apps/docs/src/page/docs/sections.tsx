@@ -605,7 +605,7 @@ const ROUTERS: Array<{
   { name: "SolidStart", icon: SolidStartMark, templatePath: "solidstart" },
   { name: "SvelteKit", icon: SvelteKitMark, templatePath: "sveltekit" },
   { name: "Nuxt", icon: NuxtMark, templatePath: "nuxt" },
-  { name: "Qwik City", icon: QwikMark, templatePath: "qwik" },
+  { name: "Qwik Router", icon: QwikMark, templatePath: "qwik" },
 ];
 
 const TEMPLATES_URL = "https://github.com/meursyphus/ssgoi/tree/HEAD/templates";

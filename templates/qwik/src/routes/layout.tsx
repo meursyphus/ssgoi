@@ -1,5 +1,5 @@
-import { Slot, component$, useSignal } from "@builder.io/qwik";
-import { Link, useLocation } from "@builder.io/qwik-city";
+import { Slot, component$, useSignal } from "@qwik.dev/core";
+import { Link, useLocation } from "@qwik.dev/router";
 import { useSsgoi } from "@ssgoi/qwik";
 import { ssgoiConfig$ } from "../lib/ssgoi-config";
 

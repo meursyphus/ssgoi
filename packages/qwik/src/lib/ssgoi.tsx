@@ -1,4 +1,4 @@
-import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { Slot, component$, useSignal } from "@qwik.dev/core";
 import type { SsgoiConfigQrl, SsgoiHostQrl } from "./types";
 import { useSsgoi } from "./use-ssgoi";
 

@@ -1,4 +1,4 @@
-import { $ } from "@builder.io/qwik";
+import { $ } from "@qwik.dev/core";
 import { drill, slide, zoom } from "@ssgoi/qwik/view-transitions";
 
 export const PRODUCT_CATEGORIES = [

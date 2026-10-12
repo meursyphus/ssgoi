@@ -1,5 +1,5 @@
-import { Slot, component$ } from "@builder.io/qwik";
-import { Link, useLocation } from "@builder.io/qwik-city";
+import { Slot, component$ } from "@qwik.dev/core";
+import { Link, useLocation } from "@qwik.dev/router";
 import { PRODUCT_CATEGORIES } from "../../lib/ssgoi-config";
 
 export default component$(() => {

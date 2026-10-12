@@ -22,7 +22,7 @@ const entries = {
   svelte: ["sveltekit"],
   vue: ["vue-router", "nuxt"],
   solid: ["solid-router", "solidstart"],
-  qwik: ["qwik-city"],
+  qwik: ["qwik-city", "qwik-router"],
   angular: ["router"],
   "react-native": ["expo-router"],
 };

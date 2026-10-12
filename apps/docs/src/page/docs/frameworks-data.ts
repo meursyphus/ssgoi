@@ -488,14 +488,14 @@ export default function App() {
     slug: "qwik",
     name: "Qwik",
     pkg: "@ssgoi/qwik",
-    lead: "Qwik keeps ownership of projected content and serializes state. Supply transition functions through a QRL factory and attach SSGOI to the layout that owns the routed slot.",
+    lead: "Requires Qwik 2 RC (@qwik.dev/core and @qwik.dev/router >= 2.0.0-rc.2) and Vite 8. Migrate Qwik 1 apps before upgrading this adapter. Qwik keeps ownership of projected content and serializes state. Supply transition functions through a QRL factory and attach SSGOI to the layout that owns the routed slot.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/qwik.txt",
     sections: [
       {
         heading: "Setup",
         body: "Don't wrap the route <Slot /> in another component — forwarding it can keep routed content out of the live DOM during navigation.",
         code: `// src/lib/ssgoi-config.ts
-import { $ } from "@builder.io/qwik";
+import { $ } from "@qwik.dev/core";
 import { drill } from "@ssgoi/qwik/view-transitions";
 
 export const config$ = $(() => ({
@@ -503,7 +503,7 @@ export const config$ = $(() => ({
 }));
 
 // src/routes/layout.tsx
-import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { Slot, component$, useSignal } from "@qwik.dev/core";
 import { useSsgoi } from "@ssgoi/qwik";
 import { config$ } from "../lib/ssgoi-config";
 
@@ -519,7 +519,7 @@ export default component$(() => {
 });
 
 // src/routes/posts/index.tsx — each routed page marks its own root
-import { component$ } from "@builder.io/qwik";
+import { component$ } from "@qwik.dev/core";
 
 export default component$(() => (
   <article data-ssgoi-transition="/posts">{/* page */}</article>
@@ -528,7 +528,7 @@ export default component$(() => (
       {
         heading: "Transition state",
         body: "A page that scrolls itself on arrival, such as an anchor jump or scrollIntoView, fights the animation. Read the provider's transition state and act once it is idle. The status is idle or transitioning; while transitioning it also carries from, to and direction. It flips as soon as the navigation is paired, one microtask after the DOM changed, and returns to idle when the run releases, the same span the scroll-input lock covers. useSsgoiTransition returns a serialisable store provided by useSsgoi, so call it in a component below the layout that attached SSGOI.",
-        code: `import { component$, useVisibleTask$ } from "@builder.io/qwik";
+        code: `import { component$, useVisibleTask$ } from "@qwik.dev/core";
 import { useSsgoiTransition } from "@ssgoi/qwik";
 
 export const Comments = component$(() => {
@@ -543,16 +543,16 @@ export const Comments = component$(() => {
     ],
     routers: [
       {
-        slug: "qwik-city",
-        name: "Qwik City",
-        lead: "The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
+        slug: "qwik-router",
+        name: "Qwik Router",
+        lead: "The computed boundary helper reads Qwik Router’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
         experimental: true,
         sections: [
           {
             heading: "Mark the page root",
-            body: "Call the hook in a Qwik City page or layout, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key.",
-            code: `import { component$ } from "@builder.io/qwik";
-import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
+            body: "Call the hook in a Qwik Router page or layout, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key.",
+            code: `import { component$ } from "@qwik.dev/core";
+import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-router";
 
 export default component$(() => {
   const boundary = useSsgoiRouteBoundary();

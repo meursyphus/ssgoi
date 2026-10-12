@@ -9,7 +9,7 @@ const path = "/docs/frameworks";
 export const metadata: Metadata = {
   title: "Frameworks — Next.js, React, Svelte, Vue, Solid, Qwik, Angular",
   description:
-    "Pick the SSGOI setup guide for Next.js, React Router, TanStack Router, SvelteKit, Nuxt, SolidStart, Qwik City, or Angular.",
+    "Pick the SSGOI setup guide for Next.js, React Router, TanStack Router, SvelteKit, Nuxt, SolidStart, Qwik Router, or Angular.",
   alternates: { canonical: path },
   openGraph: buildOpenGraph({ path }),
 };

@@ -1,5 +1,5 @@
-import { component$ } from "@builder.io/qwik";
-import { Link } from "@builder.io/qwik-city";
+import { component$ } from "@qwik.dev/core";
+import { Link } from "@qwik.dev/router";
 import { pinterestItems, type PinterestItem } from "~/data/pinterest";
 
 const leftColumnItems = pinterestItems.filter((_, index) => index % 2 === 0);
