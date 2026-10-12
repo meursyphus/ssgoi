@@ -1,4 +1,4 @@
-import type { RequestHandler } from "@builder.io/qwik-city";
+import type { RequestHandler } from "@qwik.dev/router";
 
 export const onGet: RequestHandler = ({ redirect }) => {
   throw redirect(302, "/products/all/");

@@ -18,3 +18,10 @@ overrides:
   # types in sync with the plugins, so vue-tsc no longer sees a Plugin<any>
   # structural mismatch (see packages/vue/vite.config.ts).
   rollup: "4.62.2"
+
+# Qwik RC imports Vite through its optimizer package. Give that package its
+# own Vite 8 peer so it does not resolve the hoisted Vite 6 used by other apps.
+packageExtensions:
+  "@qwik.dev/optimizer@2.1.0-beta.9":
+    peerDependencies:
+      vite: ">=8 <9"

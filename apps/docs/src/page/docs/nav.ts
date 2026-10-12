@@ -343,11 +343,11 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
           "Qwik keeps ownership of projected content and serializes state. Supply transition functions through a QRL factory and attach SSGOI to the layout that owns the routed slot.",
         children: [
           {
-            id: "router-qwik-city",
-            title: "Qwik City",
-            href: "/docs/frameworks/qwik#qwik-city",
+            id: "router-qwik-router",
+            title: "Qwik Router",
+            href: "/docs/frameworks/qwik#qwik-router",
             blurb:
-              "The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
+              "The computed boundary helper reads Qwik Router’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
           },
         ],
       },

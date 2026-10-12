@@ -1,5 +1,5 @@
-import { component$ } from "@builder.io/qwik";
-import { Link, useLocation } from "@builder.io/qwik-city";
+import { component$ } from "@qwik.dev/core";
+import { Link, useLocation } from "@qwik.dev/router";
 import { getPost } from "~/data/profile";
 
 const imageHeightFromRatio = (aspectRatio: string) => {

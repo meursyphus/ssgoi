@@ -23,6 +23,7 @@ const routers = [
   "next",
   "@remix-run/react",
   "@builder.io/qwik-city",
+  "@qwik.dev/router",
   "@angular/router",
   "react-router",
   "@tanstack/react-router",

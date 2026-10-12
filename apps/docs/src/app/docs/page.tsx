@@ -36,7 +36,7 @@ const DOCS_FAQ = faqSchema([
   {
     question: "Which frameworks does SSGOI support?",
     answer:
-      "React (with Next.js, React Router or TanStack Router), Svelte and SvelteKit, Vue and Nuxt, Solid and SolidStart, Qwik City, and Angular. SSGOI does not replace your router: it watches the page node your router already swaps, so whichever router you use keeps owning URLs, history and data loading.",
+      "React (with Next.js, React Router or TanStack Router), Svelte and SvelteKit, Vue and Nuxt, Solid and SolidStart, Qwik Router, and Angular. SSGOI does not replace your router: it watches the page node your router already swaps, so whichever router you use keeps owning URLs, history and data loading.",
   },
   {
     question: "How do SSGOI page transitions work?",

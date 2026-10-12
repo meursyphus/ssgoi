@@ -3,7 +3,7 @@ import {
   useContextProvider,
   useStore,
   useVisibleTask$,
-} from "@builder.io/qwik";
+} from "@qwik.dev/core";
 import {
   createSggoiTransitionContext,
   observeSsgoiTransitions,

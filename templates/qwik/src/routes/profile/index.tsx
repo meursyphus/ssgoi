@@ -1,4 +1,4 @@
-import { component$ } from "@builder.io/qwik";
+import { component$ } from "@qwik.dev/core";
 import { ProfileFeed } from "~/components/profile-feed";
 import { profile } from "~/data/profile";
 

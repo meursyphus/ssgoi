@@ -1,4 +1,6 @@
-# SSGOI + Qwik City
+# SSGOI + Qwik Router
+
+Requires Qwik 2 (`@qwik.dev/core` and `@qwik.dev/router` >= 2.0.0-rc.2), Vite 8, and Node.js 20.19+ or 22.12+. Qwik 1 / `@builder.io/*` apps must migrate before upgrading this adapter.
 
 The router helper used by this template is an experimental API.
 

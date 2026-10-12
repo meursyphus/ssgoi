@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
-import { qwikVite } from "@builder.io/qwik/optimizer";
+import { qwikVite } from "@qwik.dev/core/optimizer";
 import { resolve } from "node:path";
-import tsconfigPaths from "vite-tsconfig-paths";
-import pkg from "./package.json";
+import pkg from "./package.json" with { type: "json" };
 
 type DependencyMap = Record<string, string>;
 const { dependencies = {}, peerDependencies = {} } = pkg as {
@@ -19,16 +18,25 @@ export default defineConfig({
     target: "es2020",
     lib: {
       entry: {
-        index: resolve(__dirname, "src/lib/index.ts"),
-        "qwik-city": resolve(__dirname, "src/lib/routers/qwik-city.ts"),
-        types: resolve(__dirname, "src/lib/types.ts"),
-        "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
+        index: resolve(import.meta.dirname, "src/lib/index.ts"),
+        "qwik-city": resolve(
+          import.meta.dirname,
+          "src/lib/routers/qwik-city.ts",
+        ),
+        "qwik-router": resolve(
+          import.meta.dirname,
+          "src/lib/routers/qwik-router.ts",
+        ),
+        types: resolve(import.meta.dirname, "src/lib/types.ts"),
+        "view-transitions": resolve(
+          import.meta.dirname,
+          "src/lib/view-transitions.ts",
+        ),
       },
-      formats: ["es", "cjs"],
-      fileName: (format, entryName) =>
-        `${entryName}.qwik.${format === "es" ? "mjs" : "cjs"}`,
+      formats: ["es"],
+      fileName: (_format, entryName) => `${entryName}.qwik.mjs`,
     },
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         preserveModules: true,
         preserveModulesRoot: "src/lib",
@@ -40,5 +48,5 @@ export default defineConfig({
       ],
     },
   },
-  plugins: [qwikVite(), tsconfigPaths({ root: "." })],
+  plugins: [qwikVite()],
 });

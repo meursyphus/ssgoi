@@ -1,3 +1,3 @@
-# SSGOI Qwik City guide moved
+# SSGOI Qwik Router guide moved
 
 Current guide: https://ssgoi.dev/llms/frameworks/qwik.txt
