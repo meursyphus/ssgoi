@@ -9,7 +9,7 @@ The stable release includes continuous motion handoff across interrupted navigat
 ## Install
 
 ```bash
-npm install @ssgoi/react@7.4.0
+npm install @ssgoi/react@7.4.1
 ```
 
 ## Add one provider and the Next.js boundary
@@ -50,6 +50,7 @@ For persistent headers or tabs, follow the nested-layout guide before changing b
 
 | Need | Guide |
 | --- | --- |
+| use another framework, including Preact, Lit, or Alpine.js | https://ssgoi.dev/llms/frameworks.txt |
 | complete Next.js setup and supported versions | https://ssgoi.dev/llms/frameworks/nextjs.txt |
 | choose and configure an effect | https://ssgoi.dev/llms/transitions.txt |
 | configure route patterns and navigation direction | https://ssgoi.dev/llms/route-rules.txt |

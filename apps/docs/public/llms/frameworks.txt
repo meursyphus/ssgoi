@@ -12,6 +12,9 @@ Next.js is the only router helper not marked experimental.
 | Solid | `@ssgoi/solid` | https://ssgoi.dev/llms/frameworks/solid.txt |
 | Qwik | `@ssgoi/qwik` | https://ssgoi.dev/llms/frameworks/qwik.txt |
 | Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/frameworks/angular.txt |
+| Preact | `@ssgoi/preact` | https://ssgoi.dev/llms/frameworks/preact.txt |
+| Lit | `@ssgoi/lit` | https://ssgoi.dev/llms/frameworks/lit.txt |
+| Alpine.js | `@ssgoi/alpine` | https://ssgoi.dev/llms/frameworks/alpine.txt |
 | React Native | `@ssgoi/react-native` | https://ssgoi.dev/llms/frameworks/react-native.txt |
 
 ## Router helper imports
@@ -42,3 +45,8 @@ guide for the tested versions. Remix 2 follows its own React 18 requirements.
 
 Direct/custom integration: https://ssgoi.dev/llms/manual-boundaries.txt
 Transition catalog: https://ssgoi.dev/llms/transitions.txt
+
+Preact uses native hooks and a keyed SsgoiRouteBoundary with a committed pathname.
+Lit uses SsgoiController and keyed templates in light DOM. Alpine uses plugin
+directives around DOM-replacing navigation; x-show alone is not a page transition.
+These adapters do not install a router. Read each framework guide for its lifecycle rules.

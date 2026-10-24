@@ -1,0 +1,114 @@
+# @ssgoi/alpine
+
+SSGOI page transitions for Alpine.js 3, using Alpine directives and the shared SSGOI animation engine.
+
+```sh
+pnpm add @ssgoi/alpine alpinejs
+```
+
+Register the plugin before starting Alpine:
+
+```ts
+import Alpine from "alpinejs";
+import ssgoi, { fade } from "@ssgoi/alpine";
+
+Alpine.plugin(ssgoi);
+Alpine.data("app", () => ({
+  page: "home",
+  config: {
+    transitions: [{ on: "/**", transition: fade() }],
+  },
+}));
+Alpine.start();
+```
+
+```html
+<main
+  x-data="app"
+  x-ssgoi="config"
+  style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip"
+>
+  <nav>
+    <button @click="page = 'home'">Home</button>
+    <button @click="page = 'about'">About</button>
+  </nav>
+  <template x-if="page === 'home'">
+    <article x-ssgoi-page="'/home'">Home</article>
+  </template>
+  <template x-if="page === 'about'">
+    <article x-ssgoi-page="'/about'">About</article>
+  </template>
+  <output x-text="$ssgoi.status"></output>
+</main>
+```
+
+Keep the provider mounted while Alpine replaces the page nodes. SSGOI preserves the original outgoing DOM until the animation settles, including current input values. The retired page's Alpine effects have already been cleaned up; the adapter prevents Alpine from initializing that outgoing subtree again during its exit animation.
+
+The example switches local application state. It does not change the URL or add a router. Your router or History API integration must update the application state that controls page replacement; full document navigation cannot animate through this provider.
+
+## Directives and transition state
+
+| API                             | Purpose                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `x-ssgoi="config"`              | Creates a scoped SSGOI provider. Replacing the config recreates its context and cancels active transitions. Omit the expression for an empty config.                                             |
+| `x-ssgoi-page="path"`           | Evaluates a non-empty string and sets `data-ssgoi-transition`. Reactively updates the page identity when the expression changes.                                                                 |
+| `:data-ssgoi-transition="path"` | Equivalent page marker for applications using ordinary Alpine bindings.                                                                                                                          |
+| `x-ssgoi-motion="factory"`      | Creates and plays an element animation from `(element) => Animation`. A new evaluated factory cancels the previous animation; removing the directive or element disposes it. `null` disables it. |
+| `$ssgoi`                        | Reactive transition snapshot from the nearest provider: `status`, `from`, `to`, and `direction`. Outside a provider it returns the idle snapshot.                                                |
+
+`$ssgoi.status` is `"idle"` or `"transitioning"`. The other fields are `null` while idle. Display the status or use it to defer application-driven scrolling until the transition returns to idle. Core manages scroll suppression during transitions; changing overflow styles can cause layout shifts.
+
+```html
+<div x-ssgoi="config">
+  <output x-text="$ssgoi.status"></output>
+  <!-- x-if or keyed x-for page boundaries -->
+</div>
+```
+
+Nested providers own their own page markers and state. The outer provider does not animate an inner provider's pages. Keep the provider root outside the replacing `x-if`/`x-for` nodes. Configuration, page and motion expressions should evaluate synchronously.
+
+## Keyed pages
+
+For one dynamically rendered page, give `x-for` an identity that changes on navigation. Updating only the contents or path on the same DOM node does not preserve a separate outgoing page.
+
+```html
+<template x-for="item in [page]" :key="item">
+  <article :data-ssgoi-transition="'/' + item">
+    <h1 x-text="item"></h1>
+  </article>
+</template>
+```
+
+Use `x-if` or keyed `x-for` replacement for page transitions. `x-show`, `x-transition`, Alpine Morph and teleport-based page swaps are not supported page-navigation mechanisms by this adapter. Use connected light DOM under `document.body`; Shadow DOM is not supported by the shared removal observer.
+
+## Element animations
+
+The motion directive uses the same core animation primitives as page transitions. Return a fresh animation each time the factory is evaluated:
+
+```ts
+import { WebAnimation, spring } from "@ssgoi/alpine";
+import type { SsgoiMotionFactory } from "@ssgoi/alpine";
+
+const enter: SsgoiMotionFactory = (element) =>
+  new WebAnimation({
+    element,
+    integrator: spring({ stiffness: 180, damping: 24 }),
+    style: (t) => ({ opacity: t, transform: `translateY(${(1 - t) * 12}px)` }),
+  });
+
+Alpine.data("card", () => ({ enter }));
+```
+
+```html
+<article x-data="card" x-ssgoi-motion="enter">Animated content</article>
+```
+
+This runs on mount or when the factory expression changes. It does not defer removal to provide an element exit animation, and does not integrate with `x-show` visibility. Use page transitions for paired outgoing/incoming page animation.
+
+The entry point also exports core presets, integrators and animation primitives. `@ssgoi/alpine/view-transitions` and `@ssgoi/alpine/types` mirror the shared core exports. Importing the adapter itself is SSR-safe; Alpine initialization and directive execution require a browser. Import Alpine only in your client entry point.
+
+## Validation and references
+
+`pnpm --filter @ssgoi/alpine build` and `pnpm --filter @ssgoi/alpine test:run` build the package and exercise real Alpine with the real core dispatcher in jsdom, including repeated `x-if` navigation, keyed `x-for`, DOM preservation, nested providers, config replacement, reactive paths/state and cleanup. These tests verify framework lifecycle behavior; they do not visually validate browser Web Animations rendering.
+
+The integration follows Alpine's documented [plugin/directive lifecycle](https://alpinejs.dev/advanced/extending), [x-if replacement](https://alpinejs.dev/directives/if), and [keyed x-for](https://alpinejs.dev/directives/for) APIs.

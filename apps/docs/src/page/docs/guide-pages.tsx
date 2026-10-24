@@ -1196,7 +1196,9 @@ export function FrameworksIndexBody() {
         Choose your rendering framework first, then the helper for your router.
         Transition factories and route rules are identical everywhere; the
         provider and boundary wiring differ per stack — Qwik takes a QRL config
-        factory, Angular an <code className={inlineCode}>ssgoi</code> directive.
+        factory, Angular an <code className={inlineCode}>ssgoi</code> directive,
+        Preact native hooks, Lit a controller in light DOM, and Alpine.js a
+        plugin.
       </p>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">

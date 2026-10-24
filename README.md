@@ -31,8 +31,8 @@ Give this URL to Claude, Codex, Cursor, or another coding agent:
 https://ssgoi.dev/llms.txt
 ```
 
-It contains the full setup for React and Next.js, Svelte and SvelteKit, Vue and
-Nuxt, Solid and SolidStart, Angular, and Qwik.
+It starts with Next.js and links to framework guides for React, Preact, Svelte,
+Vue, Solid, Angular, Qwik, Lit, and Alpine.js.
 
 ---
 
@@ -150,7 +150,12 @@ stay with your existing stack.
 | <img src="./apps/docs/public/logos/nextjs.svg" alt="Next.js" width="42" /><br />Next.js | <img src="./apps/docs/public/logos/react-router.svg" alt="React Router" width="42" /><br />React Router | <img src="./apps/docs/public/logos/tanstack.svg" alt="TanStack Router" width="42" /><br />TanStack Router | <img src="./apps/docs/public/logos/svelte.svg" alt="SvelteKit" width="42" /><br />SvelteKit | <img src="./apps/docs/public/logos/nuxt.svg" alt="Nuxt" width="42" /><br />Nuxt |
 | :-------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
 
-React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
+React · Preact · Svelte · Vue · Solid · Angular · Qwik · Lit · Alpine.js · framework-agnostic core
+
+Native adapters are available for [Preact](./packages/preact/README.md),
+[Lit](./packages/lit/README.md), and [Alpine.js](./packages/alpine/README.md).
+Lit page transitions use light DOM; Alpine page transitions require DOM replacement
+(such as keyed `x-for` or `x-if`), rather than visibility-only `x-show` changes.
 
 An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
 adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.

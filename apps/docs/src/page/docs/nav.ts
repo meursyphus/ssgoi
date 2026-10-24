@@ -368,6 +368,27 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         ],
       },
       {
+        id: "framework-preact",
+        title: "Preact",
+        href: "/docs/frameworks/preact",
+        blurb:
+          "Native Preact context, hooks, and keyed page boundaries, independent of your router.",
+      },
+      {
+        id: "framework-lit",
+        title: "Lit",
+        href: "/docs/frameworks/lit",
+        blurb:
+          "A Lit reactive controller observes keyed page boundaries in light DOM.",
+      },
+      {
+        id: "framework-alpine",
+        title: "Alpine.js",
+        href: "/docs/frameworks/alpine",
+        blurb:
+          "Register the Alpine plugin and mark provider roots, pages, and element motion with directives.",
+      },
+      {
         id: "framework-react-native",
         title: "React Native",
         href: "/docs/frameworks/react-native",

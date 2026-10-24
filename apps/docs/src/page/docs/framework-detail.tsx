@@ -25,16 +25,18 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
         </Section>
       ))}
 
-      <nav
-        aria-label={`${doc.name} router helpers`}
-        className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm"
-      >
-        {doc.routers.map((router) => (
-          <Link key={router.slug} href={`#${router.slug}`} className={link}>
-            {router.name}
-          </Link>
-        ))}
-      </nav>
+      {doc.routers.length > 0 && (
+        <nav
+          aria-label={`${doc.name} router helpers`}
+          className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm"
+        >
+          {doc.routers.map((router) => (
+            <Link key={router.slug} href={`#${router.slug}`} className={link}>
+              {router.name}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {doc.routers.map((router) => (
         <section

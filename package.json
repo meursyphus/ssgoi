@@ -3,7 +3,7 @@
   "homepage": "https://ssgoi.dev",
   "version": "2.0.0",
   "private": true,
-  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Qwik).",
+  "description": "SSGOI is a page transition library for React, Preact, Svelte, Vue, Solid, Angular, Qwik, Lit, and Alpine.js.",
   "scripts": {
     "motion:inspect": "bash apps/dev/tools/motion-analyzer/run.sh inspect",
     "motion:analyze": "bash apps/dev/tools/motion-analyzer/run.sh measure",
@@ -45,7 +45,12 @@
     "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs",
     "test:router-exports": "node scripts/check-router-exports.mjs",
     "test:router-docs": "node scripts/check-router-docs.mjs",
-    "test:router-isolation": "node scripts/check-router-isolation.mjs && node scripts/check-isolated-platforms.mjs && node scripts/check-native-isolation.mjs"
+    "test:router-isolation": "node scripts/check-router-isolation.mjs && node scripts/check-isolated-platforms.mjs && node scripts/check-native-isolation.mjs",
+    "preact:build": "pnpm --filter @ssgoi/preact build",
+    "lit:build": "pnpm --filter @ssgoi/lit build",
+    "alpine:build": "pnpm --filter @ssgoi/alpine build",
+    "test:framework-adapters": "pnpm --filter @ssgoi/preact --filter @ssgoi/lit --filter @ssgoi/alpine test:run",
+    "test:framework-exports": "node scripts/check-framework-adapters.mjs"
   },
   "author": "meursyphus",
   "license": "MIT",
@@ -67,7 +72,10 @@
     "qwik",
     "qwik-city",
     "page-transition",
-    "animation"
+    "animation",
+    "preact",
+    "lit",
+    "alpinejs"
   ],
   "packageManager": "pnpm@10.13.1",
   "dependencies": {

@@ -20,9 +20,8 @@ async function sourceModule(path) {
     `data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`
   );
 }
-const { FRAMEWORK_DOCS, LEGACY_FRAMEWORK_PATHS, getLegacyFrameworkPath } = await sourceModule(
-  "apps/docs/src/page/docs/frameworks-data.ts",
-);
+const { FRAMEWORK_DOCS, LEGACY_FRAMEWORK_PATHS, getLegacyFrameworkPath } =
+  await sourceModule("apps/docs/src/page/docs/frameworks-data.ts");
 const { DOCS_NAV, DOCS_NAV_FLAT } = await sourceModule(
   "apps/docs/src/page/docs/nav.ts",
 );
@@ -33,6 +32,19 @@ for (const framework of FRAMEWORK_DOCS) {
   const path = `/docs/frameworks/${framework.slug}`;
   anchors.add(path);
   assert(!/experimental|preview/i.test(framework.name));
+  if (framework.llmsUrl) {
+    const guide = join(
+      root,
+      "apps/docs/public",
+      new URL(framework.llmsUrl).pathname,
+    );
+    assert(existsSync(guide), `Missing framework guide ${guide}`);
+    assert(
+      readFileSync(guide, "utf8").includes(framework.pkg),
+      `${framework.slug} guide package`,
+    );
+  }
+
   for (const router of framework.routers) {
     anchors.add(`${path}#${router.slug}`);
     assert.equal(router.experimental, router.slug !== "nextjs", router.slug);

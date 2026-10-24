@@ -1,0 +1,139 @@
+# @ssgoi/lit
+
+SSGOI page transitions for Lit 3. A reactive controller owns the page transition context; a directive connects individual elements to core animations. No custom element registration or decorators are required by the adapter.
+
+## Install
+
+```sh
+pnpm add @ssgoi/lit lit
+```
+
+## Page transitions
+
+Use this as `src/main.js` in a Vite vanilla app, with `<script type="module" src="/src/main.js"></script>` in `index.html`:
+
+```js
+import { LitElement, html } from "lit";
+import { ref } from "lit/directives/ref.js";
+import { keyed } from "lit/directives/keyed.js";
+import { SsgoiController, fade } from "@ssgoi/lit";
+
+class TransitionApp extends LitElement {
+  static properties = { page: { state: true } };
+
+  constructor() {
+    super();
+    this.page = "/home";
+    this.ssgoi = new SsgoiController(this, {
+      transitions: [{ on: "/**", transition: fade() }],
+    });
+  }
+
+  // Required for page transitions: core observes removals in document.body.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const page = this.page;
+    return html`
+      <nav>
+        <button
+          @click=${() => {
+            this.page = "/home";
+          }}
+        >
+          Home
+        </button>
+        <button
+          @click=${() => {
+            this.page = "/about";
+          }}
+        >
+          About
+        </button>
+      </nav>
+      <main
+        style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip"
+        ${ref(this.ssgoi.ref)}
+      >
+        ${keyed(
+          page,
+          html`
+            <article data-ssgoi-transition=${page}>
+              <h1>${page === "/home" ? "Home" : "About"}</h1>
+              <p>${page === "/home" ? "Welcome home." : "About this app."}</p>
+            </article>
+          `,
+        )}
+      </main>
+      <output aria-live="polite">${this.ssgoi.state.status}</output>
+    `;
+  }
+}
+
+customElements.define("transition-app", TransitionApp);
+document.body.append(document.createElement("transition-app"));
+```
+
+Keep the `main` root mounted and use `keyed(page, template)` to replace the page DOM when the route changes. Updating only `data-ssgoi-transition` and the content on a reused node does not produce a removal/insertion transition. Connect your router's resolved path to `page`; no router-specific package is required. This example uses local state and does not change the browser URL.
+
+`controller.state` exposes `{ status, from, to, direction }`; the controller requests a Lit update when the snapshot changes. `status` is `"idle"` or `"transitioning"` (including asynchronous preparation). Call `controller.setConfig(nextConfig)` to replace configuration; this cancels existing work and starts observing the same root with the new configuration. An optional `{ host }` constructor/setConfig option accepts a core `HostAnimation` imported from `@ssgoi/core/internal`.
+
+The controller automatically releases observers, subscriptions, and animations when the Lit host disconnects. Reconnecting it creates a fresh context for the current page. Applications overriding Lit's `connectedCallback` or `disconnectedCallback` must call `super` so controllers and directives receive their lifecycle callbacks.
+
+### Shadow DOM and rendering boundaries
+
+Page transitions currently require **light DOM connected under `document.body`**. `SsgoiController` throws for a root inside a shadow tree: core's shared removal observer does not cross shadow boundaries. Set `createRenderRoot() { return this; }` on the route host and keep page boundary elements in its light DOM. Light DOM styles are global; put scoped selectors in an application stylesheet instead of relying on Lit's shadow-root `static styles`.
+
+Shadow-root descendants are not discovered as page boundaries or shared-element targets. Slot contents and nested custom-element shadow trees require their own design; the adapter does not pierce them. Lit's `cache()` directive is not supported as a substitute for keyed replacement: moving a cached node into a fragment has different ownership from removing an outgoing page. Do not reuse an outgoing page node while its transition is active.
+
+Imports and controller construction are safe without DOM globals. Transitions start on the client after the host's first committed update; the adapter does not claim Lit SSR hydration integration. It is ESM-only, matching Lit's distribution.
+
+## Individual element animations
+
+`animate(factory)` is an element-position directive. It calls the factory after Lit commits the DOM and plays the returned core `Animation`. Keep the factory identity stable to avoid restarting on unrelated renders:
+
+```js
+import { LitElement, html } from "lit";
+import { animate, WebAnimation, SpringIntegrator } from "@ssgoi/lit";
+
+class AnimatedNotice extends LitElement {
+  constructor() {
+    super();
+    this.enter = (element) =>
+      new WebAnimation({
+        element,
+        integrator: new SpringIntegrator({ stiffness: 170, damping: 26 }),
+        style: (t) => ({
+          opacity: t,
+          transform: `translateY(${(1 - t) * 12}px)`,
+        }),
+      });
+  }
+
+  render() {
+    return html`<p ${animate(this.enter)}>Saved successfully.</p>`;
+  }
+}
+
+customElements.define("animated-notice", AnimatedNotice);
+```
+
+This directive works in light or shadow DOM. Removing its template, disconnecting the host, or replacing the factory cancels and disposes the previous animation. Reconnection runs a fresh animation. It animates entry and factory changes; it does not retain removed elements for exit playback. Use page transitions for retained outgoing pages, or explicitly finish an imperative animation before changing an element's visibility.
+
+When using standalone `render()` instead of `LitElement`, call the returned root part's `setConnected(false)` before disconnecting its container and `setConnected(true)` after reconnecting it, as required by Lit's async directive lifecycle.
+
+## Exports and development
+
+- `@ssgoi/lit`: `SsgoiController`, `animate`, their types, and all public core exports.
+- `@ssgoi/lit/view-transitions`: the core transition presets and animation APIs.
+- `@ssgoi/lit/types`: core types and adapter option/factory types.
+
+```sh
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/lit build
+pnpm --filter @ssgoi/lit test:run
+```
+
+The adapter follows Lit's [reactive controllers](https://lit.dev/docs/composition/controllers/), [async directive lifecycle](https://lit.dev/docs/templates/custom-directives/#async-directives), [keyed directive](https://lit.dev/docs/templates/directives/#keyed), and [light DOM rendering](https://lit.dev/docs/components/shadow-dom/#implementing-createrenderroot) contracts.

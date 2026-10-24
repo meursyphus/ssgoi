@@ -666,6 +666,256 @@ export class PageComponent {}`,
     ],
   },
   {
+    slug: "preact",
+    name: "Preact",
+    pkg: "@ssgoi/preact",
+    lead: "Native Preact hooks and context connect the shared SSGOI engine to keyed page boundaries. React and preact/compat are not required.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/preact.txt",
+    sections: [
+      {
+        heading: "Install",
+        body: 'Supports Preact 10.23 and later 10.x releases. Use jsxImportSource: "preact" in your TypeScript configuration.',
+        language: "bash",
+        code: `npm install @ssgoi/preact preact`,
+      },
+      {
+        heading: "A complete page switch",
+        body: "Keep the provider and config stable. In a Preact Vite app with a div#app host, this example switches pages with local state. Your router can supply the committed pathname and page content instead.",
+        language: "tsx",
+        code: `import { render } from "preact";
+import { useState } from "preact/hooks";
+import {
+  Ssgoi,
+  SsgoiRouteBoundary,
+  useSsgoiTransition,
+  type SsgoiConfig,
+} from "@ssgoi/preact";
+import { fade } from "@ssgoi/preact/view-transitions";
+
+const config: SsgoiConfig = {
+  transitions: [{ on: "/**", transition: fade() }],
+};
+
+function TransitionStatus() {
+  const transition = useSsgoiTransition();
+  return <output aria-live="polite">{transition.status}</output>;
+}
+
+function App() {
+  const [page, setPage] = useState("/home");
+  return (
+    <div
+      style={{
+        position: "relative",
+        zIndex: 0,
+        minHeight: "100dvh",
+        overflowX: "clip",
+      }}
+    >
+      <nav>
+        <button onClick={() => setPage("/home")}>Home</button>
+        <button onClick={() => setPage("/about")}>About</button>
+      </nav>
+      <Ssgoi config={config}>
+        <TransitionStatus />
+        <SsgoiRouteBoundary id={page} as="main">
+          <h1>{page === "/home" ? "Home" : "About"}</h1>
+          <p>Native Preact, shared SSGOI transitions.</p>
+        </SsgoiRouteBoundary>
+      </Ssgoi>
+    </div>
+  );
+}
+
+render(<App />, document.getElementById("app")!);`,
+      },
+      {
+        heading: "Connect your router",
+        body: "SsgoiRouteBoundary uses id as the logical path and as the default DOM key. Changing routeKey replaces the page even when id stays the same. A stable routeKey preserves a layout; put a separate keyed boundary inside it for child pages. Updating only the path attribute on a reused page does not create an outgoing page. There is no router-specific subpath to install.",
+      },
+      {
+        heading: "Transition state and lifecycle",
+        body: "useSsgoiTransition() returns the nearest provider snapshot with status, from, to, and direction. Wait for idle before programmatic scrolling. Observation begins after the DOM commit and stops on unmount or config replacement. SSR and hydration use normal Preact markup. Outgoing DOM remains visible for playback after its Preact component unmounts; it is not an interactive page cache. Preact 11 and page boundaries inside shadow roots are not supported.",
+      },
+    ],
+    routers: [],
+  },
+  {
+    slug: "lit",
+    name: "Lit",
+    pkg: "@ssgoi/lit",
+    lead: "A reactive controller manages page transitions in Lit light DOM. An async directive connects individual elements to the shared animation engine.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/lit.txt",
+    sections: [
+      {
+        heading: "Install",
+        body: "Supports Lit 3 and ESM. The adapter does not register custom elements or require decorators.",
+        language: "bash",
+        code: `npm install @ssgoi/lit lit`,
+      },
+      {
+        heading: "A complete page switch",
+        body: "Use this as src/main.js in a Vite vanilla app. The index.html file needs a module script pointing to /src/main.js. Keep the controller root mounted and replace page content with Lit’s keyed directive.",
+        language: "js",
+        code: `import { LitElement, html } from "lit";
+import { ref } from "lit/directives/ref.js";
+import { keyed } from "lit/directives/keyed.js";
+import { SsgoiController, fade } from "@ssgoi/lit";
+
+class TransitionApp extends LitElement {
+  static properties = { page: { state: true } };
+
+  constructor() {
+    super();
+    this.page = "/home";
+    this.ssgoi = new SsgoiController(this, {
+      transitions: [{ on: "/**", transition: fade() }],
+    });
+  }
+
+  // Required for page transitions: core observes removals in document.body.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const page = this.page;
+    return html\`
+      <nav>
+        <button
+          @click=\${() => {
+            this.page = "/home";
+          }}
+        >
+          Home
+        </button>
+        <button
+          @click=\${() => {
+            this.page = "/about";
+          }}
+        >
+          About
+        </button>
+      </nav>
+      <main style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip" \${ref(this.ssgoi.ref)}>
+        \${keyed(
+          page,
+          html\`
+            <article data-ssgoi-transition=\${page}>
+              <h1>\${page === "/home" ? "Home" : "About"}</h1>
+              <p>\${page === "/home" ? "Welcome home." : "About this app."}</p>
+            </article>
+          \`,
+        )}
+      </main>
+      <output aria-live="polite">\${this.ssgoi.state.status}</output>
+    \`;
+  }
+}
+
+customElements.define("transition-app", TransitionApp);
+document.body.append(document.createElement("transition-app"));`,
+      },
+      {
+        heading: "Light DOM is required for pages",
+        body: "Override createRenderRoot() to return this and keep the page root under document.body. The core removal observer cannot see through shadow roots; the controller rejects them. Light DOM styles belong in an application stylesheet. Shadow descendants are not discovered as shared-element targets. Do not use cache() or recycle an outgoing node during playback.",
+      },
+      {
+        heading: "Transition state and configuration",
+        body: "Read controller.state.status in render(); the controller requests updates when state changes. Wait for idle before scrolling. setConfig(nextConfig) replaces configuration and cancels previous work. Host disconnection releases observers and animations; reconnection creates a fresh context. Custom connectedCallback/disconnectedCallback methods must call super. Imports are safe on the server; Lit SSR hydration is not validated.",
+      },
+      {
+        heading: "Element animations",
+        body: "Use animate(factory) in element position, with a stable factory returning a fresh core Animation. It plays on entry and factory changes and cancels on removal. Reconnection starts a fresh animation. This directive works in both light and shadow DOM; it does not retain removed elements for exit playback.",
+        language: "js",
+        code: `import { html } from "lit";
+import { animate, WebAnimation, SpringIntegrator } from "@ssgoi/lit";
+
+const enter = (element) => new WebAnimation({
+  element,
+  integrator: new SpringIntegrator({ stiffness: 170, damping: 26 }),
+  style: (t) => ({ opacity: t }),
+});
+
+// Inside render():
+html\`<p \${animate(enter)}>Saved successfully.</p>\`;`,
+      },
+    ],
+    routers: [],
+  },
+  {
+    slug: "alpine",
+    name: "Alpine.js",
+    pkg: "@ssgoi/alpine",
+    lead: "An Alpine plugin connects scoped directives and reactive transition state to the shared SSGOI engine. Replace pages with x-if or keyed x-for while the provider stays mounted.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/alpine.txt",
+    sections: [
+      {
+        heading: "Install",
+        body: "Supports Alpine.js 3.14 and later 3.x releases. Register the plugin before Alpine.start(). Your existing Alpine application keeps ownership of state and navigation.",
+        language: "bash",
+        code: `npm install @ssgoi/alpine alpinejs`,
+      },
+      {
+        heading: "Register the plugin",
+        body: "Place this in a client module loaded by your HTML page. In a Vite vanilla app, use src/main.ts and a module script pointing to that file. This example changes local state; a router or History API integration can supply that state instead.",
+        language: "ts",
+        code: `import Alpine from "alpinejs";
+import ssgoi, { fade } from "@ssgoi/alpine";
+
+Alpine.plugin(ssgoi);
+Alpine.data("app", () => ({
+  page: "home",
+  config: {
+    transitions: [{ on: "/**", transition: fade() }],
+  },
+}));
+Alpine.start();`,
+      },
+      {
+        heading: "Replace the page DOM",
+        body: "Add this to index.html. The provider supplies a stable observer root; x-if creates the arriving page and removes the outgoing page. SSGOI retains the outgoing DOM until playback completes.",
+        language: "html",
+        code: `<main x-data="app" x-ssgoi="config" style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip">
+  <nav>
+    <button @click="page = 'home'">Home</button>
+    <button @click="page = 'about'">About</button>
+  </nav>
+  <template x-if="page === 'home'">
+    <article x-ssgoi-page="'/home'">Home</article>
+  </template>
+  <template x-if="page === 'about'">
+    <article x-ssgoi-page="'/about'">About</article>
+  </template>
+  <output x-text="$ssgoi.status"></output>
+</main>`,
+      },
+      {
+        heading: "Directive API and transition state",
+        body: "x-ssgoi accepts config; replacing it cancels the old context. x-ssgoi-page evaluates a non-empty path string, or use :data-ssgoi-transition with a normal Alpine binding. $ssgoi exposes status, from, to, and direction from the nearest provider. Wait for idle before programmatic scrolling. Nested providers own their own state and pages.",
+      },
+      {
+        heading: "Keyed dynamic pages",
+        body: "For one dynamic page, use a key that changes with the committed route. Updating only the path attribute on the same element does not produce a separate outgoing page. Keep route expressions synchronous.",
+        language: "html",
+        code: `<template x-for="item in [page]" :key="item">
+  <article :data-ssgoi-transition="'/' + item">
+    <h1 x-text="item"></h1>
+  </article>
+</template>`,
+      },
+      {
+        heading: "Element animations and lifecycle",
+        body: "x-ssgoi-motion accepts a factory (element) => Animation and plays it on entry or factory changes. Replacing the factory or removing the directive cancels its animation. It does not defer removal for element exit playback. Core animation classes and presets are exported from the package.",
+      },
+      {
+        heading: "Supported rendering",
+        body: "Page transitions require connected light DOM under document.body. Use x-if or keyed x-for; x-show, x-transition, Morph, and teleport swaps are not supported page-navigation mechanisms. Outgoing pages are visual remnants whose Alpine effects have been cleaned up; the adapter prevents reinitialization during exit playback. Importing the adapter is SSR-safe, but initialize Alpine only on the client.",
+      },
+    ],
+    routers: [],
+  },
+  {
     slug: "react-native",
     name: "React Native",
     pkg: "@ssgoi/react-native",
