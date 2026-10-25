@@ -21,6 +21,7 @@ export type FrameworkDoc = {
   pkg: string;
   lead: string;
   llmsUrl?: string;
+  templateUrl?: string;
   native?: boolean;
   sections: FrameworkSection[];
   routers: RouterGuide[];
@@ -662,6 +663,71 @@ export class PageComponent {}`,
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",
+      },
+    ],
+  },
+  {
+    slug: "mithril",
+    name: "Mithril",
+    pkg: "@ssgoi/mithril",
+    lead: "Use a native Mithril provider with explicit transition state and scoped DOM ownership. The optional router boundary handles keyed page replacement while Mithril keeps ownership of navigation.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/mithril.txt",
+    templateUrl:
+      "https://github.com/meursyphus/ssgoi/tree/HEAD/templates/mithril",
+    sections: [
+      {
+        heading: "Common setup",
+        body: "Install @ssgoi/mithril and mithril. Keep Ssgoi and a stable config above changing pages. Pass a separate createSsgoi() controller for each provider when state is needed. Use a positioned light-DOM shell beneath document.body.",
+        language: "ts",
+        code: `import m from "mithril";
+import { Ssgoi, createSsgoi, fade } from "@ssgoi/mithril";
+
+const controller = createSsgoi();
+const config = { transitions: [{ on: "/**", transition: fade() }] };
+
+// Inside a Mithril component view; pathname and page are application-owned:
+m(Ssgoi, { controller, config }, [
+  m("section", { key: pathname, "data-ssgoi-transition": pathname }, page),
+]);`,
+      },
+      {
+        heading: "Transition state and cleanup",
+        body: "Read controller.getTransitionState() in a view; Ssgoi schedules redraws as the state changes. Pass the controller to descendants through normal vnode attrs. subscribe(listener) returns a cleanup for non-view consumers. Replacing config or controller cancels active work, and provider removal disconnects observation. Wait for idle before application-controlled scrolling.",
+      },
+      {
+        heading: "Supported page lifetime",
+        body: "Use a keyed sibling list even for one manual page. A key on a lone component root is not sufficient in Mithril. Core retains outgoing DOM after Mithril's removal lifecycle; do not wait for SSGOI from an onbeforeremove promise. Shadow DOM, CSS-hidden pages and full document navigations are outside this integration. Imports are SSR-safe; the template is client-rendered and does not claim hydration support.",
+      },
+    ],
+    routers: [
+      {
+        slug: "mithril-router",
+        name: "Mithril Router",
+        lead: "Keep the provider in a persistent RouteResolver.render layout. The helper reads the last resolved pathname and uses a keyed fragment so parameter-only changes replace the page DOM.",
+        experimental: true,
+        llmsUrl: "https://ssgoi.dev/llms/frameworks/mithril.txt",
+        templateUrl:
+          "https://github.com/meursyphus/ssgoi/tree/HEAD/templates/mithril",
+        sections: [
+          {
+            heading: "Connect m.route",
+            language: "ts",
+            code: `import { SsgoiRouteBoundary } from "@ssgoi/mithril/router";
+
+m.route(document.getElementById("app")!, "/items/1", {
+  "/items/:id": {
+    onmatch: () => Item,
+    render: (page) => m(Ssgoi, { config, controller },
+      m(SsgoiRouteBoundary, page),
+    ),
+  },
+});`,
+          },
+          {
+            heading: "Keys and query changes",
+            body: "The default id/key is m.parsePathname(m.route.get()).path, excluding query and hash. Query-only navigation preserves DOM. Set path to override the id and routeKey to control lifetime independently. For persistent section layouts, use a stable outer routeKey and an inner boundary around the changing page. The template verifies /items/1 to /items/2 reuse and browser Back/Forward.",
+          },
+        ],
       },
     ],
   },

@@ -353,6 +353,37 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.0)(jiti@2.6.1)(jsdom@26.1.0)(less@4.4.2)(lightningcss@1.30.2)(sass@1.93.3)(terser@5.44.0)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/mithril:
+    dependencies:
+      '@ssgoi/core':
+        specifier: workspace:^
+        version: link:../core
+      '@types/mithril':
+        specifier: ^2.2.7
+        version: 2.2.9
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.6
+        version: 22.19.0
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
+      mithril:
+        specifier: ^2.3.6
+        version: 2.3.8
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.7
+        version: 6.4.1(@types/node@22.19.0)(jiti@2.6.1)(less@4.4.2)(lightningcss@1.30.2)(sass@1.93.3)(terser@5.44.0)(tsx@4.21.0)(yaml@2.8.2)
+      vite-plugin-dts:
+        specifier: ^4.5.4
+        version: 4.5.4(@types/node@22.19.0)(rollup@4.62.2)(typescript@5.8.3)(vite@6.4.1(@types/node@22.19.0)(jiti@2.6.1)(less@4.4.2)(lightningcss@1.30.2)(sass@1.93.3)(terser@5.44.0)(tsx@4.21.0)(yaml@2.8.2))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.0)(jiti@2.6.1)(jsdom@26.1.0)(less@4.4.2)(lightningcss@1.30.2)(sass@1.93.3)(terser@5.44.0)(tsx@4.21.0)(yaml@2.8.2)
+
   packages/qwik:
     dependencies:
       '@ssgoi/core':
@@ -749,6 +780,25 @@ importers:
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
+
+  templates/mithril:
+    dependencies:
+      '@ssgoi/mithril':
+        specifier: workspace:^
+        version: link:../../packages/mithril
+      mithril:
+        specifier: ^2.3.6
+        version: 2.3.8
+    devDependencies:
+      '@types/mithril':
+        specifier: ^2.2.7
+        version: 2.2.9
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.7
+        version: 6.4.1(@types/node@24.10.3)(jiti@2.6.1)(less@4.4.2)(lightningcss@1.30.2)(sass@1.93.3)(terser@5.44.0)(tsx@4.21.0)(yaml@2.8.2)
 
   templates/nextjs:
     dependencies:
@@ -5896,6 +5946,9 @@ packages:
   '@types/micromatch@4.0.10':
     resolution: {integrity: sha512-5jOhFDElqr4DKTrTEbnW8DZ4Hz5LRUEmyrGpCMrD/NphYv3nUnaF08xmSLx1rGGnyEs/kFnhiw6dCgcDqMr5PQ==}
 
+  '@types/mithril@2.2.9':
+    resolution: {integrity: sha512-iYsECKwDTTdL3eYKFE5I+qEPmnh9U/gcDYXqBiX1B4emKWf1A9jYw5d/ULqe4tI/C4lBPPQUfWMQ0I9FdVDCEA==}
+
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
@@ -10320,6 +10373,9 @@ packages:
   minizlib@3.1.0:
     resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
     engines: {node: '>= 18'}
+
+  mithril@2.3.8:
+    resolution: {integrity: sha512-za/Yo7qXEckjm5syrSfaaI9Utf4tCUT3T1IOIYqH6Lrj7G0OZuYYLAY9SV4ygoaAf0+CNqU92MBt+7pmo53JVQ==}
 
   mitt@3.0.1:
     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
@@ -20021,6 +20077,8 @@ snapshots:
     dependencies:
       '@types/braces': 3.0.5
 
+  '@types/mithril@2.2.9': {}
+
   '@types/ms@2.1.0': {}
 
   '@types/node-fetch@2.6.13':
@@ -26268,6 +26326,8 @@ snapshots:
   minizlib@3.1.0:
     dependencies:
       minipass: 7.1.2
+
+  mithril@2.3.8: {}
 
   mitt@3.0.1: {}
 

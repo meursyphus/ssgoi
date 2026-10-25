@@ -12,6 +12,7 @@ Next.js is the only router helper not marked experimental.
 | Solid | `@ssgoi/solid` | https://ssgoi.dev/llms/frameworks/solid.txt |
 | Qwik | `@ssgoi/qwik` | https://ssgoi.dev/llms/frameworks/qwik.txt |
 | Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/frameworks/angular.txt |
+| Mithril | `@ssgoi/mithril` | https://ssgoi.dev/llms/frameworks/mithril.txt |
 | React Native | `@ssgoi/react-native` | https://ssgoi.dev/llms/frameworks/react-native.txt |
 
 ## Router helper imports
@@ -29,6 +30,7 @@ Next.js is the only router helper not marked experimental.
 | Solid | SolidStart | `@ssgoi/solid/solidstart` | Experimental |
 | Qwik | Qwik City | `@ssgoi/qwik/qwik-city` | Experimental |
 | Angular | Angular Router | `@ssgoi/angular/router` | Experimental |
+| Mithril | Mithril Router | `@ssgoi/mithril/router` | Experimental |
 | React Native | Expo Router | `@ssgoi/react-native/expo-router` | Experimental |
 
 React, Vue, Solid, and Svelte helpers supply SsgoiRouteBoundary. Angular supplies

@@ -1,0 +1,94 @@
+# @ssgoi/mithril
+
+SSGOI page transitions for Mithril.js 2. The native `Ssgoi` component owns observation and cleanup, connects configuration updates, and redraws Mithril when transition state changes. An explicit controller lets descendants read state without a global provider or an invented vnode context API.
+
+```sh
+pnpm add @ssgoi/mithril mithril
+```
+
+## Runnable example
+
+The [Mithril template](https://github.com/meursyphus/ssgoi/tree/HEAD/templates/mithril) includes routed links, two detail URLs using the same component, a local counter and transition status. In this repository:
+
+```sh
+pnpm install
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/mithril build
+pnpm --filter ssgoi-mithril-template dev
+```
+
+## Provider and page boundary
+
+Keep one `Ssgoi` component mounted above the region that changes. Keep `config` stable between redraws; replacing it cancels active transitions and starts a fresh context. Provide a stable DOM shell with a containing block and horizontal clipping.
+
+```ts
+import m from "mithril";
+import { Ssgoi, createSsgoi, fade } from "@ssgoi/mithril";
+import { SsgoiRouteBoundary } from "@ssgoi/mithril/router";
+
+const controller = createSsgoi();
+const config = { transitions: [{ on: "/**", transition: fade() }] };
+
+const Item: m.Component<{ id: string }> = {
+  view: ({ attrs }) => m("article", [
+    m("h1", `Item ${attrs.id}`),
+    m(m.route.Link, { href: `/items/${attrs.id === "1" ? "2" : "1"}` }, "Next item"),
+  ]),
+};
+
+m.route(document.getElementById("app")!, "/items/1", {
+  "/items/:id": {
+    onmatch: () => Item,
+    render: (page) => m(Ssgoi, { config, controller },
+      m("main", { style: { position: "relative", zIndex: 0, minHeight: "100dvh", overflowX: "clip" } }, [
+        m("output", controller.getTransitionState().status),
+        m(SsgoiRouteBoundary, page),
+      ]),
+    ),
+  },
+});
+```
+
+## Optional router helper
+
+Experimental API: `@ssgoi/mithril/router` exports `SsgoiRouteBoundary`. Mithril routing remains responsible for links, URL/history and route resolution. The helper reads the pathname from the last resolved `m.route.get()` value, excluding query and hash, and renders a single-child keyed fragment around the page. This matters because parameter changes can reuse the same routed component, and a key on a lone returned root is not sufficient to replace its DOM in Mithril.
+
+- `path?: string` overrides the transition id. Outside an active `m.route`, pass this explicitly. Include query/hash in this override only when they represent distinct pages in your app.
+- `routeKey?: string | number` controls the DOM lifetime separately; it defaults to the resolved pathname or explicit `path`.
+- `class?: string` applies to the boundary div.
+
+Query/hash-only changes preserve the page by default. Use a persistent `RouteResolver.render` layout and let the helper key the changing page beneath the provider. For a layout that should stay mounted, give its outer boundary a stable `routeKey` and use an inner boundary for its changing child region. Async route loading, cancellation, query behavior and unusual nested routes remain your router's concern; validate your application's route hierarchy.
+
+## Manual boundaries and state
+
+No router helper is needed when the application already owns page replacement. Render a **keyed sibling list**, even for a single page:
+
+```ts
+m(Ssgoi, { config, controller }, [
+  m("section", { key: pathname, "data-ssgoi-transition": pathname }, page),
+]);
+```
+
+The provider automatically observes transition markers under its own root. Nested providers are independent: create a separate controller for each, and pass the intended controller to descendants through ordinary vnode attrs. Sharing one controller between mounted roots is rejected.
+
+`controller.getTransitionState()` returns `{ status, from, to, direction }`. Status is `idle` or `transitioning`; the other fields are `null` when idle. `Ssgoi` schedules Mithril redraws when this changes. `controller.subscribe(listener)` returns an unsubscribe function for non-view consumers; unsubscribe in their teardown. Defer application-controlled scrolling until the state returns to idle.
+
+`createSsgoi()` itself does not access the DOM. Advanced integrations can use `controller.attach(root, config)` and `controller.detach()` directly; in that case they own redraw scheduling and must detach during teardown. `Ssgoi` handles these operations automatically, including a changed controller prop.
+
+The entry point and `/view-transitions` re-export core presets, integrators and animation primitives; `/types` exposes the core and adapter types. For individual element animations, create a core `WebAnimation` from a vnode's `oncreate` and cancel it from `onremove`.
+
+## Scope and verification
+
+Use connected light DOM beneath `document.body`. Core retains outgoing DOM until the animation settles, but Mithril has already run that page's removal lifecycle; this is not a component keep-alive mechanism. Do not add an `onbeforeremove` promise that waits for SSGOI, because core detects a page departure after the DOM is detached. Shadow DOM, full document navigation and hiding pages with CSS are outside this adapter's page replacement contract.
+
+Imports are safe without `window` or `document`; browser mounting starts the runtime. This package does not provide an SSR renderer or hydration/router integration. The runnable template is a client-rendered Vite application.
+
+```sh
+pnpm --filter @ssgoi/mithril build
+pnpm --filter @ssgoi/mithril test:run
+pnpm --filter ssgoi-mithril-template build
+```
+
+Tests use real Mithril and the real core dispatcher to cover retained outgoing DOM, reactive state, parameter changes, query/hash reuse, nested providers, config/controller changes and teardown. Browser checks additionally exercise actual Web Animations and Back/Forward navigation.
+
+Design follows the primary [Mithril lifecycle documentation](https://mithril.js.org/lifecycle-methods.html), [route resolver and keyed-route documentation](https://mithril.js.org/route.html), and [pathname parser API](https://mithril.js.org/parsePathname.html). The lifecycle bridge and keyed fragment are framework-specific behavior; animation selection and playback stay in SSGOI core.

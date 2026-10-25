@@ -50,6 +50,7 @@ For persistent headers or tabs, follow the nested-layout guide before changing b
 
 | Need | Guide |
 | --- | --- |
+| use another rendering framework | https://ssgoi.dev/llms/frameworks.txt |
 | complete Next.js setup and supported versions | https://ssgoi.dev/llms/frameworks/nextjs.txt |
 | choose and configure an effect | https://ssgoi.dev/llms/transitions.txt |
 | configure route patterns and navigation direction | https://ssgoi.dev/llms/route-rules.txt |

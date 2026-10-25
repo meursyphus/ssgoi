@@ -1,0 +1,21 @@
+{
+  "name": "ssgoi-mithril-template",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ssgoi/mithril": "workspace:^",
+    "mithril": "^2.3.6"
+  },
+  "devDependencies": {
+    "@types/mithril": "^2.2.7",
+    "typescript": "~5.8.3",
+    "vite": "^6.0.7"
+  }
+}

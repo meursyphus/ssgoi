@@ -368,6 +368,22 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         ],
       },
       {
+        id: "framework-mithril",
+        title: "Mithril",
+        href: "/docs/frameworks/mithril",
+        blurb:
+          "A native provider with explicit state and keyed page boundaries for Mithril's own router.",
+        children: [
+          {
+            id: "router-mithril-router",
+            title: "Mithril Router",
+            href: "/docs/frameworks/mithril#mithril-router",
+            blurb:
+              "Connect a persistent RouteResolver layout and preserve query-only page lifetime.",
+          },
+        ],
+      },
+      {
         id: "framework-react-native",
         title: "React Native",
         href: "/docs/frameworks/react-native",
