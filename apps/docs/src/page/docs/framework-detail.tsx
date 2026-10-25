@@ -8,6 +8,20 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
   return (
     <div className="mt-8">
       <NpmPill pkg={doc.pkg} />
+      {(doc.llmsUrl || doc.templateUrl) && (
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {doc.llmsUrl && (
+            <a href={doc.llmsUrl} className={link}>
+              Agent guide
+            </a>
+          )}
+          {doc.templateUrl && (
+            <a href={doc.templateUrl} className={link}>
+              Runnable template
+            </a>
+          )}
+        </div>
+      )}
 
       {doc.sections.map((section) => (
         <Section
@@ -25,16 +39,18 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
         </Section>
       ))}
 
-      <nav
-        aria-label={`${doc.name} router helpers`}
-        className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm"
-      >
-        {doc.routers.map((router) => (
-          <Link key={router.slug} href={`#${router.slug}`} className={link}>
-            {router.name}
-          </Link>
-        ))}
-      </nav>
+      {doc.routers.length > 0 && (
+        <nav
+          aria-label={`${doc.name} router helpers`}
+          className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm"
+        >
+          {doc.routers.map((router) => (
+            <Link key={router.slug} href={`#${router.slug}`} className={link}>
+              {router.name}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {doc.routers.map((router) => (
         <section
@@ -95,7 +111,7 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
           </>
         ) : (
           <>
-            The helpers connect your router to the common implementation.{" "}
+            Connect your router to the common implementation.{" "}
             <Link href="/docs/boundaries" className={link}>
               Route boundaries
             </Link>{" "}

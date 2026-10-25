@@ -21,6 +21,7 @@ export type FrameworkDoc = {
   pkg: string;
   lead: string;
   llmsUrl?: string;
+  templateUrl?: string;
   native?: boolean;
   sections: FrameworkSection[];
   routers: RouterGuide[];
@@ -216,6 +217,59 @@ import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
         llmsUrl: "https://ssgoi.dev/llms/frameworks/tanstack-router.txt",
       },
     ],
+  },
+  {
+    slug: "preact",
+    name: "Preact",
+    pkg: "@ssgoi/preact",
+    lead: "Native Preact hooks and context connect the shared SSGOI engine to keyed page boundaries. Keep your existing router; React and preact/compat are not required.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/preact.txt",
+    templateUrl:
+      "https://github.com/meursyphus/ssgoi/tree/HEAD/templates/preact",
+    sections: [
+      {
+        heading: "Install",
+        body: 'Supports Preact 10.23 and later 10.x releases. Use jsxImportSource: "preact" in TypeScript. Before the adapter is published, use the repository template or the local tarball instructions in its README.',
+        language: "bash",
+        code: `npm install @ssgoi/preact preact`,
+      },
+      {
+        heading: "Run the URL routing template",
+        body: "The starter uses preact-iso with ordinary links, browser Back/Forward, keyed pages, and a persistent shell. Query-only changes preserve page inputs; replacing a page resets its local state. Run these commands from the repository root.",
+        language: "bash",
+        code: `pnpm install
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/preact build
+pnpm template:preact`,
+      },
+      {
+        heading: "Connect a committed page",
+        body: "Keep the config and provider stable above your router. Pass the committed page pathname to SsgoiRouteBoundary; its HTML element is keyed by id unless you supply routeKey. Give the surrounding shell position: relative, z-index: 0, min-height: 100dvh, and overflow-x: clip. Your router supplies pathname and pageContent below.",
+        language: "tsx",
+        code: `import { Ssgoi, SsgoiRouteBoundary, type SsgoiConfig } from "@ssgoi/preact";
+import { fade } from "@ssgoi/preact/view-transitions";
+
+const config: SsgoiConfig = {
+  transitions: [{ on: "/**", transition: fade() }],
+};
+
+// Inside the persistent application shell:
+<Ssgoi config={config}>
+  <SsgoiRouteBoundary id={pathname} as="main">
+    {pageContent}
+  </SsgoiRouteBoundary>
+</Ssgoi>;`,
+      },
+      {
+        heading: "Page lifetime and state",
+        body: "useSsgoiTransition() returns status, from, to, and direction from the nearest provider. Wait for idle before programmatic scrolling. Changing routeKey replaces a page even if its id stays the same. A stable key preserves a layout; use a separate keyed boundary for its child pages. For lazy routes, mark the committed route content, not the loading router's requested URL. The template uses eager routes.",
+      },
+      {
+        heading: "Lifecycle and supported scope",
+        body: "SSR and hydration use normal Preact markup. Observation begins after the DOM commit and stops on unmount or config/host replacement. Outgoing DOM stays visible after its Preact component unmounts; this is not an interactive page cache. Preact 11 and page boundaries inside shadow roots are not supported. Core exports, /view-transitions, and /types are available; there is no router-specific package subpath.",
+      },
+    ],
+    routers: [],
   },
   {
     slug: "svelte",

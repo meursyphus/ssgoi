@@ -1,0 +1,78 @@
+# SSGOI with Preact
+
+Package: @ssgoi/preact. Supports Preact 10.23+ within 10.x; no React or preact/compat.
+Use the application's existing router. There is no router-specific package subpath.
+
+## Start with the runnable template
+
+https://github.com/meursyphus/ssgoi/tree/HEAD/templates/preact
+
+The Vite + TypeScript template uses preact-iso LocationProvider/Router, real links,
+Back/Forward, a persistent shell, and a keyed pathname page boundary. It includes
+same-path query changes that preserve page inputs and a shell draft that persists
+across routes. All routes are eager; see the README before adding lazy routing.
+
+From the repository root:
+
+```sh
+pnpm install
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/preact build
+pnpm template:preact
+```
+
+Before the adapter is published, use this workspace or follow the template README's
+core + adapter tarball instructions for a standalone copy. After publication:
+
+```sh
+npm install @ssgoi/preact preact
+```
+
+Configure TypeScript with jsx: "react-jsx" and jsxImportSource: "preact".
+
+## Persistent provider and committed page
+
+```tsx
+import { Ssgoi, SsgoiRouteBoundary, type SsgoiConfig } from "@ssgoi/preact";
+import { fade } from "@ssgoi/preact/view-transitions";
+
+const config: SsgoiConfig = {
+  transitions: [{ on: "/**", transition: fade() }],
+};
+
+// Inside your persistent app shell; your router supplies pathname/pageContent:
+<Ssgoi config={config}>
+  <SsgoiRouteBoundary id={pathname} as="main">
+    {pageContent}
+  </SsgoiRouteBoundary>
+</Ssgoi>;
+```
+
+Apply position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip to the shell.
+Keep Ssgoi and config stable. Do not key the provider. Changing config or host
+replaces its context and disconnects the old observer.
+
+SsgoiRouteBoundary keys its HTML element by routeKey ?? id. id is the logical path,
+not a DOM id. Use a pathname for query-only updates that should preserve inputs.
+Use a new routeKey when a new page instance is intended. For async/lazy routes,
+mark committed route content, not the loading router's requested URL.
+A raw <main key={pathname} data-ssgoi-transition={pathname}> also works.
+SsgoiTransition is a compatibility marker; it does not automatically key the page.
+
+useSsgoiTransition() reads the nearest provider and returns status, from, to, and
+direction. status is idle or transitioning. Wait for idle before programmatic
+scrolling. Calling the hook outside Ssgoi throws.
+
+## Scope and checks
+
+- SSR with preact-render-to-string and Preact hydration use ordinary markup.
+- Page observers and subscriptions disconnect on unmount.
+- Outgoing DOM remains visible while animating after its component unmounts;
+  it is not a live component cache. Keep persistent state above the keyed page.
+- Preact 11 and page boundaries inside shadow roots are not supported.
+- Core presets, motion helpers, animation classes, and types are re-exported;
+  /view-transitions and /types are also available.
+- Static hosting needs an index.html fallback for direct /about requests.
+
+Validate real link navigation, browser Back/Forward, same-path input preservation,
+provider unmount, and an idle state with one remaining page after playback.

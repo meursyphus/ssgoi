@@ -7,6 +7,7 @@ Next.js is the only router helper not marked experimental.
 | Framework | Package | Guide |
 | --- | --- | --- |
 | React | `@ssgoi/react` | https://ssgoi.dev/llms/frameworks/react.txt |
+| Preact | `@ssgoi/preact` | https://ssgoi.dev/llms/frameworks/preact.txt |
 | Svelte | `@ssgoi/svelte` | https://ssgoi.dev/llms/frameworks/svelte.txt |
 | Vue | `@ssgoi/vue` | https://ssgoi.dev/llms/frameworks/vue.txt |
 | Solid | `@ssgoi/solid` | https://ssgoi.dev/llms/frameworks/solid.txt |
@@ -42,3 +43,7 @@ guide for the tested versions. Remix 2 follows its own React 18 requirements.
 
 Direct/custom integration: https://ssgoi.dev/llms/manual-boundaries.txt
 Transition catalog: https://ssgoi.dev/llms/transitions.txt
+
+Preact uses SsgoiRouteBoundary from @ssgoi/preact directly with a committed pathname.
+No router-specific subpath is required. Runnable URL routing template:
+https://github.com/meursyphus/ssgoi/tree/HEAD/templates/preact

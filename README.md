@@ -32,7 +32,7 @@ https://ssgoi.dev/llms.txt
 ```
 
 It contains the full setup for React and Next.js, Svelte and SvelteKit, Vue and
-Nuxt, Solid and SolidStart, Angular, and Qwik.
+Nuxt, Solid and SolidStart, Angular, Qwik, and Preact.
 
 ---
 
@@ -150,7 +150,10 @@ stay with your existing stack.
 | <img src="./apps/docs/public/logos/nextjs.svg" alt="Next.js" width="42" /><br />Next.js | <img src="./apps/docs/public/logos/react-router.svg" alt="React Router" width="42" /><br />React Router | <img src="./apps/docs/public/logos/tanstack.svg" alt="TanStack Router" width="42" /><br />TanStack Router | <img src="./apps/docs/public/logos/svelte.svg" alt="SvelteKit" width="42" /><br />SvelteKit | <img src="./apps/docs/public/logos/nuxt.svg" alt="Nuxt" width="42" /><br />Nuxt |
 | :-------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
 
-React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
+React · Preact · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
+
+Try the [Preact template](./templates/preact) for real URL routing with preact-iso,
+Back/Forward navigation, and a persistent application shell.
 
 An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
 adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.

@@ -1,0 +1,175 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #1c2632;
+  background: #f3f4ef;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #c1c8bd;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  padding: 0.45rem 0.8rem;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #236a49;
+  outline-offset: 4px;
+}
+input {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #bac5b6;
+  border-radius: 8px;
+  margin-top: 0.4rem;
+}
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.app-shell {
+  position: relative;
+  z-index: 0;
+  min-height: 100dvh;
+  overflow-x: clip;
+  max-width: 1120px;
+  margin: auto;
+  padding: 0 5%;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid #d1d7ce;
+}
+.brand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: -0.04em;
+}
+.brand span {
+  color: #687666;
+  font-weight: 500;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+nav a[aria-current="page"] {
+  color: #236a49;
+  font-weight: 700;
+}
+.shell-draft {
+  margin-top: 1.5rem;
+  max-width: 28rem;
+}
+.transition-status {
+  display: block;
+  min-height: 2.5rem;
+  padding-top: 1rem;
+  font-size: 0.75rem;
+  color: #62725d;
+}
+.page {
+  padding: 2rem 0 4rem;
+  min-height: 38rem;
+}
+.eyebrow {
+  color: #236a49;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+h1 {
+  margin: 1rem 0;
+  font-size: clamp(2.5rem, 7vw, 4.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.06em;
+}
+h2 {
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+.lede {
+  max-width: 38rem;
+  color: #596355;
+  font-size: 1.1rem;
+}
+.card {
+  max-width: 40rem;
+  margin: 2rem 0;
+  padding: 1.4rem 1.8rem;
+  border: 1px solid #cbd6c5;
+  background: #e9eee3;
+  border-radius: 14px;
+}
+.card button {
+  margin-top: 1rem;
+}
+.card li {
+  margin: 0.6rem 0;
+}
+.card ol {
+  padding-left: 1.3rem;
+}
+.hint {
+  font-size: 0.85rem;
+  color: #596355;
+}
+.primary-link {
+  display: inline-flex;
+  gap: 2rem;
+  background: #235e43;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 9px;
+  text-decoration: none;
+}
+footer {
+  border-top: 1px solid #d1d7ce;
+  padding: 1.5rem 0;
+  font-size: 0.8rem;
+  color: #62725d;
+}
+@media (max-width: 600px) {
+  header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  nav {
+    gap: 0.8rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+}

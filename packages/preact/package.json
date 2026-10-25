@@ -1,0 +1,77 @@
+{
+  "name": "@ssgoi/preact",
+  "version": "7.4.1",
+  "description": "Native app-like page transitions for Preact, using native Preact context and hooks.",
+  "type": "module",
+  "private": false,
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "default": "./dist/types.js"
+    },
+    "./view-transitions": {
+      "types": "./dist/view-transitions.d.ts",
+      "import": "./dist/view-transitions.js",
+      "require": "./dist/view-transitions.cjs",
+      "default": "./dist/view-transitions.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite build --watch",
+    "package": "vite build",
+    "prepublishOnly": "pnpm run build",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@ssgoi/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "preact": "^10.23.0"
+  },
+  "devDependencies": {
+    "preact": "^10.23.0",
+    "preact-render-to-string": "^6.5.13",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "@types/node": "^24.10.1"
+  },
+  "keywords": [
+    "preact",
+    "page-transition",
+    "ssgoi",
+    "animation"
+  ],
+  "author": "MeurSyphus <tmdeoans@snu.ac.kr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meursyphus/ssgoi.git",
+    "directory": "packages/preact"
+  },
+  "homepage": "https://ssgoi.dev",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

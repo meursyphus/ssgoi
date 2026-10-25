@@ -274,6 +274,13 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         ],
       },
       {
+        id: "framework-preact",
+        title: "Preact",
+        href: "/docs/frameworks/preact",
+        blurb:
+          "Native Preact hooks, keyed page boundaries, and a runnable URL routing template.",
+      },
+      {
         id: "framework-svelte",
         title: "Svelte",
         href: "/docs/frameworks/svelte",
