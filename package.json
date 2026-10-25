@@ -3,7 +3,7 @@
   "homepage": "https://ssgoi.dev",
   "version": "2.0.0",
   "private": true,
-  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Qwik).",
+  "description": "SSGOI is a powerful and easy-to-use page transition library for modern web frameworks (Angular, React, Svelte, Vue, Solid, Qwik, Lit).",
   "scripts": {
     "motion:inspect": "bash apps/dev/tools/motion-analyzer/run.sh inspect",
     "motion:analyze": "bash apps/dev/tools/motion-analyzer/run.sh measure",
@@ -15,6 +15,8 @@
     "core:watch": "pnpm --filter @ssgoi/core watch",
     "core:build": "pnpm --filter @ssgoi/core build",
     "angular:build": "pnpm --filter @ssgoi/angular build",
+    "lit:build": "pnpm --filter @ssgoi/lit build",
+    "test:lit": "pnpm --filter @ssgoi/lit test:run",
     "react:build": "pnpm --filter @ssgoi/react build",
     "svelte:build": "pnpm --filter @ssgoi/svelte build",
     "vue:build": "pnpm --filter @ssgoi/vue build",
@@ -25,6 +27,7 @@
     "docs:build": "pnpm --filter docs build",
     "template:nextjs": "pnpm --filter ssgoi-nextjs-template dev",
     "template:nuxt": "pnpm --filter ssgoi-nuxt-template dev",
+    "template:lit": "pnpm --filter ssgoi-lit-template dev",
     "template:react-router": "pnpm --filter ssgoi-react-router-template dev",
     "template:solidstart": "pnpm --filter ssgoi-solidstart-template dev",
     "template:sveltekit": "pnpm --filter ssgoi-sveltekit-template dev",
@@ -67,7 +70,8 @@
     "qwik",
     "qwik-city",
     "page-transition",
-    "animation"
+    "animation",
+    "lit"
   ],
   "packageManager": "pnpm@10.13.1",
   "dependencies": {

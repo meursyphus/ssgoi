@@ -21,6 +21,7 @@ export type FrameworkDoc = {
   pkg: string;
   lead: string;
   llmsUrl?: string;
+  templateUrl?: string;
   native?: boolean;
   sections: FrameworkSection[];
   routers: RouterGuide[];
@@ -664,6 +665,114 @@ export class PageComponent {}`,
         llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",
       },
     ],
+  },
+  {
+    slug: "lit",
+    name: "Lit",
+    pkg: "@ssgoi/lit",
+    lead: "A reactive controller manages page transitions in Lit light DOM. An async directive connects individual elements to the shared animation engine.",
+    llmsUrl: "https://ssgoi.dev/llms/frameworks/lit.txt",
+    templateUrl:
+      "https://github.com/meursyphus/ssgoi/tree/latest/templates/lit",
+    sections: [
+      {
+        heading: "Run the template",
+        body: "The Lit 3 / TypeScript / Vite template includes real links, History API navigation, browser Back/Forward, and an editable input. Run it from this monorepo while the new adapter awaits publication; workspace dependencies cannot be installed in a standalone copy. After publication, a standalone app can install an available @ssgoi/lit version with lit. The adapter supports ESM and does not register custom elements or require decorators.",
+        language: "bash",
+        code: `pnpm install
+pnpm --filter @ssgoi/core build
+pnpm --filter @ssgoi/lit build
+pnpm template:lit`,
+      },
+      {
+        heading: "A complete page switch",
+        body: "Use this as src/main.js in a Vite vanilla app. The index.html file needs a module script pointing to /src/main.js. Keep the controller root mounted and replace page content with Lit’s keyed directive. This minimal example changes local state; the runnable template above connects real URLs, pushState, and popstate.",
+        language: "js",
+        code: `import { LitElement, html } from "lit";
+import { ref } from "lit/directives/ref.js";
+import { keyed } from "lit/directives/keyed.js";
+import { SsgoiController, fade } from "@ssgoi/lit";
+
+class TransitionApp extends LitElement {
+  static properties = { page: { state: true } };
+
+  constructor() {
+    super();
+    this.page = "/home";
+    this.ssgoi = new SsgoiController(this, {
+      transitions: [{ on: "/**", transition: fade() }],
+    });
+  }
+
+  // Required for page transitions: core observes removals in document.body.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const page = this.page;
+    return html\`
+      <nav>
+        <button
+          @click=\${() => {
+            this.page = "/home";
+          }}
+        >
+          Home
+        </button>
+        <button
+          @click=\${() => {
+            this.page = "/about";
+          }}
+        >
+          About
+        </button>
+      </nav>
+      <main style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip" \${ref(this.ssgoi.ref)}>
+        \${keyed(
+          page,
+          html\`
+            <article data-ssgoi-transition=\${page}>
+              <h1>\${page === "/home" ? "Home" : "About"}</h1>
+              <p>\${page === "/home" ? "Welcome home." : "About this app."}</p>
+            </article>
+          \`,
+        )}
+      </main>
+      <output aria-live="polite">\${this.ssgoi.state.status}</output>
+    \`;
+  }
+}
+
+customElements.define("transition-app", TransitionApp);
+document.body.append(document.createElement("transition-app"));`,
+      },
+      {
+        heading: "Light DOM is required for pages",
+        body: "Override createRenderRoot() to return this and keep the page root under document.body. The core removal observer cannot see through shadow roots; the controller rejects them. Light DOM styles belong in an application stylesheet. Shadow descendants are not discovered as shared-element targets. Do not use cache() or recycle an outgoing node during playback.",
+      },
+      {
+        heading: "Transition state and configuration",
+        body: "Read controller.state.status in render(); the controller requests updates when state changes. Wait for idle before scrolling. setConfig(nextConfig) replaces configuration and cancels previous work. Host disconnection releases observers and animations; reconnection creates a fresh context. Custom connectedCallback/disconnectedCallback methods must call super. Imports are safe on the server; Lit SSR hydration is not validated.",
+      },
+      {
+        heading: "Element animations",
+        body: "Use animate(factory) in element position, with a stable factory returning a fresh core Animation. It plays on entry and factory changes and cancels on removal. Reconnection starts a fresh animation. This directive works in both light and shadow DOM; it does not retain removed elements for exit playback.",
+        language: "js",
+        code: `import { html } from "lit";
+import { animate, WebAnimation, SpringIntegrator } from "@ssgoi/lit";
+
+const enter = (element) => new WebAnimation({
+  element,
+  integrator: new SpringIntegrator({ stiffness: 170, damping: 26 }),
+  style: (t) => ({ opacity: t }),
+});
+
+// Inside render():
+html\`<p \${animate(enter)}>Saved successfully.</p>\`;`,
+      },
+    ],
+    routers: [],
   },
   {
     slug: "react-native",

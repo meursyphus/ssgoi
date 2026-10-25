@@ -32,7 +32,7 @@ https://ssgoi.dev/llms.txt
 ```
 
 It contains the full setup for React and Next.js, Svelte and SvelteKit, Vue and
-Nuxt, Solid and SolidStart, Angular, and Qwik.
+Nuxt, Solid and SolidStart, Angular, Qwik, and Lit.
 
 ---
 
@@ -150,7 +150,12 @@ stay with your existing stack.
 | <img src="./apps/docs/public/logos/nextjs.svg" alt="Next.js" width="42" /><br />Next.js | <img src="./apps/docs/public/logos/react-router.svg" alt="React Router" width="42" /><br />React Router | <img src="./apps/docs/public/logos/tanstack.svg" alt="TanStack Router" width="42" /><br />TanStack Router | <img src="./apps/docs/public/logos/svelte.svg" alt="SvelteKit" width="42" /><br />SvelteKit | <img src="./apps/docs/public/logos/nuxt.svg" alt="Nuxt" width="42" /><br />Nuxt |
 | :-------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
 
-React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
+React · Svelte · Vue · Solid · Angular · Qwik · Lit · framework-agnostic core
+
+The native [Lit adapter](./packages/lit/README.md) uses a reactive controller and
+light-DOM keyed pages. Try the [runnable Lit / Vite template](./templates/lit/README.md)
+with real navigation links and browser Back/Forward. The new adapter is not assumed
+to be published yet; the template runs from this monorepo using workspace dependencies.
 
 An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
 adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.

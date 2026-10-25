@@ -368,6 +368,13 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         ],
       },
       {
+        id: "framework-lit",
+        title: "Lit",
+        href: "/docs/frameworks/lit",
+        blurb:
+          "A Lit reactive controller observes keyed page boundaries in light DOM.",
+      },
+      {
         id: "framework-react-native",
         title: "React Native",
         href: "/docs/frameworks/react-native",

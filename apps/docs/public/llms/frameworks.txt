@@ -12,7 +12,10 @@ Next.js is the only router helper not marked experimental.
 | Solid | `@ssgoi/solid` | https://ssgoi.dev/llms/frameworks/solid.txt |
 | Qwik | `@ssgoi/qwik` | https://ssgoi.dev/llms/frameworks/qwik.txt |
 | Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/frameworks/angular.txt |
+| Lit | `@ssgoi/lit` | https://ssgoi.dev/llms/frameworks/lit.txt |
 | React Native | `@ssgoi/react-native` | https://ssgoi.dev/llms/frameworks/react-native.txt |
+
+Lit uses a reactive controller with light-DOM keyed page boundaries. It does not need a router-specific helper. Run its History API template from the monorepo while the adapter awaits publication: https://github.com/meursyphus/ssgoi/tree/latest/templates/lit
 
 ## Router helper imports
 

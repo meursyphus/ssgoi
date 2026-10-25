@@ -40,7 +40,7 @@ export async function generateMetadata({
     doc.routers.map((router) => router.name),
   );
   return {
-    title: `${doc.name} ${kind} transitions for ${routers}`,
+    title: `${doc.name} ${kind} transitions${routers ? ` for ${routers}` : ""}`,
     description: doc.lead,
     alternates: { canonical: path },
     openGraph: buildOpenGraph({ path }),
