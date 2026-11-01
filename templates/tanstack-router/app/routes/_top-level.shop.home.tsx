@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import ProductGrid from "../components/products/product-grid";
 import { getProductsByCategory } from "../components/products/mock-data";
 
-function ProductsElectronicsRoute() {
-  const products = getProductsByCategory("electronics");
+function ProductsHomeRoute() {
+  const products = getProductsByCategory("home");
   return <ProductGrid products={products} />;
 }
 
-export const Route = createFileRoute("/_top-level/products/electronics")({
-  component: ProductsElectronicsRoute,
+export const Route = createFileRoute("/_top-level/shop/home")({
+  component: ProductsHomeRoute,
 });

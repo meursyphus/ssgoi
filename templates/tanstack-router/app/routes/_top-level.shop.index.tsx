@@ -6,6 +6,6 @@ function ProductsAllRoute() {
   return <ProductGrid products={products} />;
 }
 
-export const Route = createFileRoute("/_top-level/products/all")({
+export const Route = createFileRoute("/_top-level/shop/")({
   component: ProductsAllRoute,
 });

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { PRODUCT_CATEGORIES } from "@/components/ssgoi-config";
 
-export default function ProductsLayout({
+export default function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ export default function ProductsLayout({
         </div>
       </div>
 
-      {/* Tab Content - Slide transitions here (depth 2, the /products/** scope) */}
+      {/* Tab Content - Slide transitions here (depth 2, the /shop/** scope) */}
       <div className="flex-1 overflow-hidden relative">
         <SsgoiLayoutBoundary className="min-h-full bg-[#121212]">
           {children}

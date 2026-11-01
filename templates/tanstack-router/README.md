@@ -19,7 +19,8 @@ app/routes/
   __root.tsx                    <Ssgoi> + depth-0 boundary (demo-layout.tsx)
   _top-level.tsx                depth-1 boundary, bottom nav outside it
     _top-level.posts.tsx  _top-level.pinterest.tsx  _top-level.profile.tsx
-    _top-level.products.tsx     header + category tabs, depth-2 boundary
+    _top-level.shop.tsx         header + category tabs, depth-2 boundary
+      _top-level.shop.index.tsx (All)  _top-level.shop.electronics.tsx ...
   _detail.tsx                   depth-1 boundary
     _detail.posts.$postId.tsx  _detail.pinterest.$pinId.tsx  _detail.profile.$postId.tsx
 ```
@@ -28,17 +29,18 @@ app/routes/
 - Tab → detail: the depth-0 boundary changes, so the whole top level,
   bottom nav included, leaves.
 - Detail → detail (a related post): only the detail boundary changes.
-- Category → category: only the depth-2 boundary slides; the products header
+- Category → category (`/shop` is All, then `/shop/electronics`, ...): only
+  the depth-2 boundary slides; the shop header
   and tabs stay.
 
 `app/components/ssgoi-config.ts` mirrors that tree:
 
 ```ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig = {
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [

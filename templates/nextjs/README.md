@@ -17,7 +17,8 @@ src/app/
   layout.tsx              <Ssgoi> + depth-0 boundary (demo-layout.tsx)
   (top-level)/layout.tsx  depth-1 boundary, bottom nav outside it
     posts/  pinterest/  profile/
-    products/layout.tsx   header + category tabs, depth-2 boundary
+    shop/layout.tsx       header + category tabs, depth-2 boundary
+    shop/page.tsx         the "All" category; electronics/ fashion/ ... beside it
   (detail)/layout.tsx     depth-1 boundary
     posts/[id]/  pinterest/[id]/  profile/[id]/
 ```
@@ -26,17 +27,18 @@ src/app/
 - Tab → detail: the depth-0 boundary changes, so the whole top level,
   bottom nav included, leaves.
 - Detail → detail (a related post): only the `(detail)` boundary changes.
-- Category → category: only the depth-2 boundary slides; the products header
+- Category → category (`/shop` is All, then `/shop/electronics`, ...): only
+  the depth-2 boundary slides; the shop header
   and tabs stay.
 
 `src/components/ssgoi-config.ts` mirrors that tree:
 
 ```ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig = {
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [
@@ -103,7 +105,7 @@ demonstrates ordinary App Router setup.
 - Profile: static `zoom`.
 - Product categories: `ordered` `slide`.
 - Tab ↔ tab: `fade` on the depth-1 content. The exact category paths in the
-  `ordered` rule outrank `/products/**`, so categories still slide.
+  `ordered` rule outrank `/shop/**`, so categories still slide.
 
 ```ts
 {
@@ -125,9 +127,9 @@ prop-less boundaries; only their `framework` differs.
 
 ## Verify boundary ownership
 
-- Shop → Tech → Fashion: the product header and tabs keep their DOM; only the
+- Shop (All) → Tech → Fashion: the shop header and tabs keep their DOM; only the
   depth-2 boundary changes. Its outgoing DOM still contains the old category.
-- Shop → Posts: the products content leaves, the bottom nav stays.
+- Shop → Posts: the shop content fades out, the bottom nav stays.
 - Post list → detail → browser Back: the whole top level, bottom nav included,
   leaves and enters, and the list scroll position is restored.
 - Detail → related post: only the detail boundary changes.

@@ -7,7 +7,7 @@ import {
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { PRODUCT_CATEGORIES } from "../components/ssgoi-config";
 
-function ProductsLayout() {
+function ShopLayout() {
   const location = useRouterState({
     select: (s) => s.location,
   });
@@ -38,7 +38,7 @@ function ProductsLayout() {
         </div>
       </div>
 
-      {/* Tab Content - Slide transitions here (depth 2, the /products/** scope) */}
+      {/* Tab Content - Slide transitions here (depth 2, the /shop/** scope) */}
       <div className="flex-1 overflow-hidden relative">
         <SsgoiLayoutBoundary className="min-h-full bg-[#121212]">
           <Outlet />
@@ -47,6 +47,6 @@ function ProductsLayout() {
     </div>
   );
 }
-export const Route = createFileRoute("/_top-level/products")({
-  component: ProductsLayout,
+export const Route = createFileRoute("/_top-level/shop")({
+  component: ShopLayout,
 });

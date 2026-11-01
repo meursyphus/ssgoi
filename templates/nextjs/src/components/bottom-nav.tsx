@@ -28,9 +28,9 @@ export default function BottomNav() {
         }
       />
       <NavItem
-        href="/products/all"
+        href="/shop"
         label="Shop"
-        isActive={pathname.startsWith("/products")}
+        isActive={pathname.startsWith("/shop")}
         icon={
           <svg
             width="24"
