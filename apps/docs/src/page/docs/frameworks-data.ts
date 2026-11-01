@@ -154,21 +154,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           },
           {
             heading: "Persistent layouts",
-            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Boundary depth is automatic: each boundary inside another is one level deeper.',
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/shop/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /shop route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Boundary depth is automatic: each boundary inside another is one level deeper.',
             code: `// app/ssgoi-provider.tsx
 const config = {
-  layouts: [{ paths: "/products/**" }],
+  layouts: [{ paths: "/shop/**" }],
   transitions: [/* ... */],
 };
 
-// app/products/layout.tsx
+// app/shop/layout.tsx
 import type { ReactNode } from "react";
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
-export default function ProductsLayout({ children }: { children: ReactNode }) {
+export default function ShopLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <header>Products</header>
+      <header>Shop</header>
       <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
     </>
   );
@@ -218,7 +218,7 @@ export default function Layout() {
           },
           {
             heading: "Persistent route families",
-            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps.',
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/shop/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /shop route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/remix.txt",
@@ -270,7 +270,7 @@ export default [
           },
           {
             heading: "Beyond the basics",
-            body: 'A persistent shell needs two lifetimes. Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the root boundary is the pathless page-boundary layout and the inner one wraps the section layout’s <Outlet />; the complete pattern is in the agent guide and template.',
+            body: 'A persistent shell needs two lifetimes. Declare the section in config.layouts, for example layouts: [{ paths: "/shop/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /shop route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the root boundary is the pathless page-boundary layout and the inner one wraps the section layout’s <Outlet />; the complete pattern is in the agent guide and template.',
           },
         ],
         templateUrl:
@@ -316,7 +316,7 @@ const framework: SsgoiFramework = {
           },
           {
             heading: "Beyond the basics",
-            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the inner boundary wraps the section route’s <Outlet />.',
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/shop/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /shop route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the inner boundary wraps the section route’s <Outlet />.',
           },
         ],
         templateUrl:
@@ -413,7 +413,7 @@ boundary component         : onNavigate → unmount old route   (OUT captured)
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in routes/products/+layout.svelte. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
+            body: 'For a persistent /shop shell, declare it in config.layouts as [{ paths: "/shop/**" }] and put a prop-less boundary only around the changing content in routes/shop/+layout.svelte. The root boundary (depth 0) keeps one key for every /shop route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -487,7 +487,7 @@ const framework = {
           },
           {
             heading: "Persistent shells",
-            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in the section’s own RouterView layout. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
+            body: 'For a persistent /shop shell, declare it in config.layouts as [{ paths: "/shop/**" }] and put a prop-less boundary only around the changing content in the section’s own RouterView layout. The root boundary (depth 0) keeps one key for every /shop route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/vue-router.txt",
@@ -520,7 +520,7 @@ const framework = {
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in pages/products.vue, around the nested <NuxtPage />. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
+            body: 'For a persistent /shop shell, declare it in config.layouts as [{ paths: "/shop/**" }] and put a prop-less boundary only around the changing content in pages/shop.vue, around the nested <NuxtPage />. The root boundary (depth 0) keeps one key for every /shop route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -633,7 +633,7 @@ export default function App() {
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in routes/products.tsx, around props.children. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
+            body: 'For a persistent /shop shell, declare it in config.layouts as [{ paths: "/shop/**" }] and put a prop-less boundary only around the changing content in routes/shop.tsx, around props.children. The root boundary (depth 0) keeps one key for every /shop route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -738,12 +738,12 @@ export default component$(() => {
           },
           {
             heading: "Config and navigation",
-            body: "Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A products layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /products/** scope) while each category page root is depth 2.",
-            code: `const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+            body: "Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A shop layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /shop/** scope) while each category page root is depth 2.",
+            code: `const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const config$ = $(() => ({
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [{ from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() } /* , ... */],
@@ -857,7 +857,7 @@ export class PageComponent {}`,
           },
           {
             heading: "Persistent shells",
-            body: 'Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.',
+            body: 'Declare an outer shell in config.layouts, for example [{ paths: "/shop/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",

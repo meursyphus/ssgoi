@@ -117,18 +117,18 @@ export default component$(() => {
 
 ```ts
 // src/lib/ssgoi-config.ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const config$ = $(() => ({
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [{ from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() } /* , ... */],
 }));
 ```
 
-Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A products layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /products/** scope) while each category page root is depth 2.
+Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A shop layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /shop/** scope) while each category page root is depth 2.
 
 `useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` still works but is
 deprecated and will be removed in 8.0.0.

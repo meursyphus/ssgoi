@@ -130,10 +130,10 @@ https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs
   HTML `id` is not the transition id. The boundary owns `data-ssgoi-transition`
   and its React `key`; do not set `key` yourself.
 
-Persistent layouts are declared in config, not on the boundary. For a products
-section with header and tabs, add `layouts: [{ paths: "/products/**" }]` and put
-a boundary around the changing content in `app/products/layout.tsx`: the root
-boundary keeps one key for every products route, the inner one swaps. For a
+Persistent layouts are declared in config, not on the boundary. For a shop
+section with header and tabs, add `layouts: [{ paths: "/shop/**" }]` and put
+a boundary around the changing content in `app/shop/layout.tsx`: the root
+boundary keeps one key for every shop route, the inner one swaps. For a
 per-project shell, `{ paths: "/projects/:id/**" }` gives each project its own
 instance. Full patterns: https://ssgoi.dev/llms/complex-routing.txt
 

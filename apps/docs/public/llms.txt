@@ -119,17 +119,17 @@ above. Siblings are first-match; `layouts` is the next depth inside a scope; a
 app/ssgoi-provider.tsx              <Ssgoi> + boundary (step 1)       depth 0
 app/(top-level)/layout.tsx          boundary + <BottomNav /> outside  depth 1
 app/(top-level)/posts, pinterest, profile/page.tsx
-app/(top-level)/products/layout.tsx header + category tabs + boundary depth 2
+app/(top-level)/shop/layout.tsx     header + category tabs + boundary depth 2
 app/(detail)/layout.tsx             boundary                          depth 1
 app/(detail)/posts/[id], pinterest/[id], profile/[id]/page.tsx
 ```
 
 ```ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 const config = {
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [{ from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() } /* , step 2 rules */],
@@ -137,7 +137,7 @@ const config = {
 ```
 
 ```tsx
-// app/(top-level)/layout.tsx — (detail) and products layouts wrap a boundary the same way
+// app/(top-level)/layout.tsx — (detail) and shop layouts wrap a boundary the same way
 export default function TopLevelLayout({ children }: { children: ReactNode }) {
   return (
     <>
@@ -151,7 +151,7 @@ export default function TopLevelLayout({ children }: { children: ReactNode }) {
 Tab → tab keeps the depth-0 key, so only tab content moves and the nav stays.
 Category → category keeps depths 0 and 1, so only depth 2 slides. Tab → detail
 changes the depth-0 key, so the whole tab shell leaves, nav included. Use
-`/products/**`, not `/products/*`: a `*` makes each category its own instance.
+`/shop/**`, not `/shop/*`: a `*` makes each category its own instance.
 
 Intercepted modals need no setup: during a soft intercept the URL becomes the
 modal's while `renderedPath` stays the background, so nothing behind it moves.

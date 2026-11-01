@@ -92,9 +92,8 @@ export function NestedBoundariesBody() {
           <code className={inlineCode}>/projects/1</code> and{" "}
           <code className={inlineCode}>/projects/2</code> get separate shells
           while a <code className={inlineCode}>**</code> tail does not (which is
-          why the products section uses{" "}
-          <code className={inlineCode}>/products/**</code>, not{" "}
-          <code className={inlineCode}>/products/*</code>). This is the layout
+          why the shop section uses <code className={inlineCode}>/shop/**</code>
+          , not <code className={inlineCode}>/shop/*</code>). This is the layout
           of the{" "}
           <a
             href="https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs"
@@ -109,13 +108,13 @@ export function NestedBoundariesBody() {
         <CodeBlock
           className="mt-6"
           language="ts"
-          code={`// Bottom-nav tabs, including every product category.
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+          code={`// Bottom-nav tabs, including every shop category.
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 const config = {
   layouts: [
-    // depth 0: one shell for the tabs; depth 1: the products section inside it
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    // depth 0: one shell for the tabs; depth 1: the shop section inside it
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     // depth 0: one shell for every detail page
     { paths: "/**", except: TOP_LEVEL },
   ],
@@ -141,8 +140,9 @@ const config = {
 │  ├─ posts/page.tsx               /posts
 │  ├─ pinterest/page.tsx           /pinterest
 │  ├─ profile/page.tsx             /profile
-│  └─ products/layout.tsx          header + category tabs + boundary depth 2
-│     └─ all/, electronics/, ...   /products/all, /products/electronics
+│  └─ shop/layout.tsx              header + category tabs + boundary depth 2
+│     ├─ page.tsx                  /shop (All)
+│     └─ electronics/, ...         /shop/electronics, /shop/fashion, ...
 └─ (detail)/layout.tsx             boundary                         depth 1
    └─ posts/[id], pinterest/[id], profile/[id]
 

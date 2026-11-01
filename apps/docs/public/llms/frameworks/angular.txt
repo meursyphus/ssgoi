@@ -87,7 +87,7 @@ export class PageComponent {}
 
 ### Persistent shells
 
-Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+Declare an outer shell in config.layouts, for example [{ paths: "/shop/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
 
 SsgoiRouteBoundary from @ssgoi/angular/router still works but is deprecated and will be removed in 8.0.0.
 

@@ -43,8 +43,9 @@ app/
 │  ├─ posts/page.tsx               /posts
 │  ├─ pinterest/page.tsx           /pinterest
 │  ├─ profile/page.tsx             /profile
-│  └─ products/layout.tsx          header + category tabs + boundary depth 2
-│     └─ all/, electronics/, ...   /products/all, /products/electronics
+│  └─ shop/layout.tsx              header + category tabs + boundary depth 2
+│     ├─ page.tsx                  /shop (All)
+│     └─ electronics/, ...         /shop/electronics, /shop/fashion, ...
 └─ (detail)/layout.tsx             boundary                         depth 1
    └─ posts/[id], pinterest/[id], profile/[id]
 ```
@@ -52,15 +53,13 @@ app/
 ```ts
 import { drill, fade, slide, zoom } from "@ssgoi/react/view-transitions";
 
-const CATEGORIES = ["all", "electronics", "fashion", "home", "beauty"];
-
-// Bottom-nav tabs, including every product category.
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+// Bottom-nav tabs, including every shop category.
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 const config = {
   layouts: [
-    // depth 0: one shell for the tabs; depth 1: the products section inside it
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    // depth 0: one shell for the tabs; depth 1: the shop section inside it
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     // depth 0: one shell for every detail page
     { paths: "/**", except: TOP_LEVEL },
   ],
@@ -68,13 +67,13 @@ const config = {
     { from: "/pinterest", to: "/pinterest/*", transition: zoom({ type: "expand" }) },
     { on: "/posts/**", except: "/posts", transition: drill() },
     { from: "/profile", to: "/profile/*", transition: zoom({ type: "static" }) },
-    { ordered: CATEGORIES.map((id) => `/products/${id}`), transition: slide() },
+    { ordered: ["/shop", "/shop/electronics", "/shop/fashion", "/shop/home", "/shop/beauty"], transition: slide() },
     { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
   ],
 };
 ```
 
-Use `/products/**`, not `/products/*`: a `*` captures, so each category would
+Use `/shop/**`, not `/shop/*`: a `*` captures, so each category would
 become its own scope instance and the category tabs would remount.
 
 ```tsx
@@ -92,7 +91,7 @@ export default function TopLevelLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// app/(top-level)/products/layout.tsx: header + category tabs + <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+// app/(top-level)/shop/layout.tsx: header + category tabs + <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
 // app/(detail)/layout.tsx: <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
 ```
 

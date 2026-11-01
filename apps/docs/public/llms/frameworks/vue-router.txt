@@ -32,7 +32,7 @@ const framework = {
 
 ## Persistent shells
 
-Declare a persistent shell in config.layouts, for example [{ paths: "/products/**" }], and put a prop-less boundary around the nested RouterView in that section’s layout. The outer boundary keeps one key for the section; the inner one (one level deeper) keys by the path.
+Declare a persistent shell in config.layouts, for example [{ paths: "/shop/**" }], and put a prop-less boundary around the nested RouterView in that section’s layout. The outer boundary keeps one key for the section; the inner one (one level deeper) keys by the path.
 
 SsgoiRouteBoundary from @ssgoi/vue/vue-router still works but is deprecated and will be removed in 8.0.0.
 
