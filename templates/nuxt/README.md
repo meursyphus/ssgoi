@@ -20,8 +20,8 @@ layouts/detail.vue            depth-1 boundary
 pages/
   (top-level)/                definePageMeta({ layout: "top-level" })
     posts/index.vue  pinterest/index.vue  profile/index.vue
-    products.vue              depth-2 boundary; header and category tabs outside it
-    products/all.vue  electronics.vue  fashion.vue  home.vue  beauty.vue
+    shop.vue                  depth-2 boundary; header and category tabs outside it
+    shop/index.vue (All)  electronics.vue  fashion.vue  home.vue  beauty.vue
   (detail)/                   definePageMeta({ layout: "detail" })
     posts/[id].vue  pinterest/[id].vue  profile/[id].vue
 ```
@@ -35,16 +35,16 @@ tool for a shared shell that adds no URL segment is `layouts/`. So each group
 folder only organizes files, and its pages pick their shell with
 `definePageMeta({ layout })`. `<NuxtLayout>` keeps one layout instance while
 consecutive pages use the same layout and swaps it when the layout changes,
-which lines up with the depth-0 scopes below. `products.vue` is an ordinary
-nested page (it adds `/products`), and its children inherit
+which lines up with the depth-0 scopes below. `shop.vue` is an ordinary
+nested page (it adds `/shop`), and its children inherit
 `layout: "top-level"` through merged route meta.
 
 ```ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig = {
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [
@@ -88,8 +88,8 @@ What moves:
 - Tab to tab (`/posts` → `/pinterest`): every top-level page shares the depth-0
   scope, so only the depth-1 boundary changes. The content fades and the bottom
   nav stays.
-- Category to category (`/products/all` → `/products/fashion`): depth 0 and 1
-  stay inside `/products/**`; the depth-2 boundary slides.
+- Category to category (`/shop` → `/shop/fashion`): depth 0 and 1
+  stay inside `/shop/**`; the depth-2 boundary slides.
 - Tab to detail (`/posts` → `/posts/1`): the depth-0 scope changes, so the whole
   top-level page, bottom nav included, drills or zooms away.
 - Detail to detail (`/posts/1` → `/posts/2`): depth 0 stays in the detail scope;
@@ -97,14 +97,14 @@ What moves:
 
 A boundary's key is its depth's scope instance and falls back to the route
 path past the declared scopes. Without `layouts`, every boundary follows the
-route path. Use `/products/**`, not `/products/*`, in `TOP_LEVEL`: a `*`
+route path. Use `/shop/**`, not `/shop/*`, in `TOP_LEVEL`: a `*`
 segment is captured, so each category would get its own depth-0 instance.
 
 Effects:
 
 - Top-level tabs: `fade`.
 - Posts: `drill`.
-- Product tabs: ordered `slide`.
+- Shop categories: ordered `slide`.
 - Gallery and profile: `zoom`.
 
 The single scroll container (`main#demo-content`) stays outside every boundary;

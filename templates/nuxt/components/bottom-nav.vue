@@ -22,9 +22,9 @@
       </svg>
     </NavItem>
     <NavItem
-      href="/products/all"
+      href="/shop"
       label="Shop"
-      :isActive="pathname.startsWith('/products')"
+      :isActive="pathname.startsWith('/shop')"
     >
       <svg
         width="24"

@@ -18,8 +18,8 @@ src/routes/
   (top-level).tsx             depth-1 boundary around the tab content; bottom nav outside it
   (top-level)/
     posts/  pinterest/  profile/
-    products.tsx              depth-2 boundary; header and category tabs outside it
-    products/all.tsx  electronics.tsx  fashion.tsx  home.tsx  beauty.tsx
+    shop.tsx                  depth-2 boundary; header and category tabs outside it
+    shop/index.tsx (All)  electronics.tsx  fashion.tsx  home.tsx  beauty.tsx
   (detail).tsx                depth-1 boundary
   (detail)/
     posts/[postId].tsx  pinterest/[pinId].tsx  profile/[postId].tsx
@@ -29,11 +29,11 @@ src/routes/
 layout for the files in `(group)/` and adds no URL segment.
 
 ```ts
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig = {
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [
@@ -66,8 +66,8 @@ What moves:
 - Tab to tab (`/posts` → `/pinterest`): every top-level page shares the depth-0
   scope, so only the depth-1 boundary changes. The content fades and the bottom
   nav stays.
-- Category to category (`/products/all` → `/products/fashion`): depth 0 and 1
-  stay inside `/products/**`; the depth-2 boundary slides.
+- Category to category (`/shop` → `/shop/fashion`): depth 0 and 1
+  stay inside `/shop/**`; the depth-2 boundary slides.
 - Tab to detail (`/posts` → `/posts/1`): the depth-0 scope changes, so the whole
   top-level page, bottom nav included, drills or zooms away.
 - Detail to detail (`/posts/1` → `/posts/2`): depth 0 stays in the detail scope;
@@ -75,14 +75,14 @@ What moves:
 
 A boundary's key is its depth's scope instance and falls back to the route
 path past the declared scopes. Without `layouts`, every boundary follows the
-route path. Use `/products/**`, not `/products/*`, in `TOP_LEVEL`: a `*`
+route path. Use `/shop/**`, not `/shop/*`, in `TOP_LEVEL`: a `*`
 segment is captured, so each category would get its own depth-0 instance.
 
 Effects:
 
 - Top-level tabs: `fade`.
 - Posts: `drill`.
-- Product tabs: ordered `slide`.
+- Shop categories: ordered `slide`.
 - Gallery and profile: `zoom`.
 
 The single scroll container (`main#demo-content`) stays outside every boundary;

@@ -1,24 +1,24 @@
 import type { SsgoiConfig } from "@ssgoi/svelte";
 import { drill, fade, slide, zoom } from "@ssgoi/svelte/view-transitions";
 
-export const PRODUCT_CATEGORIES = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
+export const SHOP_CATEGORIES = [
+  { id: "all", label: "All", path: "/shop" },
+  { id: "electronics", label: "Tech", path: "/shop/electronics" },
+  { id: "fashion", label: "Fashion", path: "/shop/fashion" },
+  { id: "home", label: "Home", path: "/shop/home" },
+  { id: "beauty", label: "Beauty", path: "/shop/beauty" },
 ];
 
-// Pages under the bottom nav. `/products/**` (not `/products/*`) keeps every
+// Pages under the bottom nav. `/shop/**` (not `/shop/*`) keeps every
 // category in one scope: a `*` segment would make each category its own
 // instance.
-const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig = {
-  // Mirrors routes/: the (top-level) and (detail) groups, plus the products
-  // layout nested inside (top-level).
+  // Mirrors routes/: the (top-level) and (detail) groups, plus the shop layout
+  // nested inside (top-level).
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [
@@ -35,7 +35,7 @@ export const ssgoiConfig = {
       transition: zoom({ type: "static" }),
     },
     {
-      ordered: PRODUCT_CATEGORIES.map((category) => category.path),
+      ordered: SHOP_CATEGORIES.map((category) => category.path),
       transition: slide(),
     },
   ],

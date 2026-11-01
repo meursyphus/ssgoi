@@ -28,9 +28,9 @@
     {/snippet}
   </NavItem>
   <NavItem
-    href="/products/all"
+    href="/shop"
     label="Shop"
-    isActive={page.url.pathname.startsWith("/products")}
+    isActive={page.url.pathname.startsWith("/shop")}
   >
     {#snippet icon()}
       <svg

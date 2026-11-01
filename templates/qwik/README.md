@@ -31,8 +31,8 @@ src/routes/
   layout.tsx                  useSsgoi(root, { framework }) around <Slot />
   (top-level)/layout.tsx      depth 0 on its root; <Slot /> above the bottom nav
     posts/  pinterest/  profile/   depth 1 on each page's root
-    products/layout.tsx       depth 1 on its root; header and category tabs
-      all/  electronics/  fashion/  home/  beauty/   depth 2 (ProductGrid's root)
+    shop/layout.tsx           depth 1 on its root; header and category tabs
+      index.tsx (All)  electronics/  fashion/  home/  beauty/   depth 2 (ProductGrid's root)
   (detail)/layout.tsx         depth 0 on its root
     posts/[id]/  pinterest/[id]/  profile/[id]/    depth 1 on each page's root
 ```
@@ -54,11 +54,11 @@ group layouts' keys stay fixed while they are mounted, and the page roots
 under them change.
 
 ```ts
-export const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+export const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
 
 export const ssgoiConfig$ = $(() => ({
   layouts: [
-    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
     { paths: "/**", except: TOP_LEVEL },
   ],
   transitions: [
@@ -74,8 +74,8 @@ What moves:
 
 - Tab to tab (`/posts` → `/pinterest`): the `(top-level)` layout stays; only
   the page root (depth 1) changes. The content fades and the bottom nav stays.
-- Category to category (`/products/all` → `/products/fashion`): the products
-  layout stays inside `/products/**`; the category root (depth 2) slides.
+- Category to category (`/shop` → `/shop/fashion`): the shop
+  layout stays inside `/shop/**`; the category root (depth 2) slides.
 - Tab to detail (`/posts` → `/posts/1`): the `(top-level)` layout, bottom nav
   included, leaves as a whole and drills or zooms into the `(detail)` layout.
 - Detail to detail (`/posts/1` → `/posts/2`): the `(detail)` layout stays; the
@@ -84,14 +84,14 @@ What moves:
 
 A boundary's key is its depth's scope instance and falls back to the route
 path past the declared scopes. Without `layouts`, every boundary follows the
-route path. Use `/products/**`, not `/products/*`, in `TOP_LEVEL`: a `*`
+route path. Use `/shop/**`, not `/shop/*`, in `TOP_LEVEL`: a `*`
 segment is captured, so each category would get its own scope instance.
 
 Effects:
 
 - Top-level tabs: `fade`.
 - Posts: `drill`.
-- Product tabs: ordered `slide`.
+- Shop categories: ordered `slide`.
 - Gallery and profile: `zoom`.
 
 The single scroll container (`main#demo-content`) stays outside every boundary;

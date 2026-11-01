@@ -1,10 +1,10 @@
 import { Slot, component$ } from "@builder.io/qwik";
 import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
-import { PRODUCT_CATEGORIES } from "~/lib/ssgoi-config";
+import { SHOP_CATEGORIES } from "~/lib/ssgoi-config";
 
 export default component$(() => {
-  // Depth 1, kept across categories by the `/products/**` scope. Each
+  // Depth 1, kept across categories by the `/shop/**` scope. Each
   // category's ProductGrid root is a depth-2 boundary and slides.
   const boundary = useSsgoiLayoutBoundary();
   const location = useLocation();
@@ -23,7 +23,7 @@ export default component$(() => {
 
       <div class="px-4 mb-4 flex-shrink-0">
         <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {PRODUCT_CATEGORIES.map((category) => (
+          {SHOP_CATEGORIES.map((category) => (
             <Link
               key={category.id}
               href={`${category.path}/`}

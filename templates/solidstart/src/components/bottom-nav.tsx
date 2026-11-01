@@ -21,9 +21,9 @@ export function BottomNav() {
         </svg>
       </NavItem>
       <NavItem
-        href="/products/all"
+        href="/shop"
         label="Shop"
-        active={active("/products")}
+        active={active("/shop")}
       >
         <svg
           width="24"

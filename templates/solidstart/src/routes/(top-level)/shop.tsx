@@ -1,7 +1,7 @@
 import { A, useLocation } from "@solidjs/router";
 import { For, type JSX } from "solid-js";
 import { SsgoiLayoutBoundary } from "@ssgoi/solid";
-import { PRODUCT_CATEGORIES } from "../../ssgoi-config";
+import { SHOP_CATEGORIES } from "../../ssgoi-config";
 
 export default function ProductsLayout(props: { children?: JSX.Element }) {
   const location = useLocation();
@@ -15,7 +15,7 @@ export default function ProductsLayout(props: { children?: JSX.Element }) {
 
       <div class="px-4 mb-4 flex-shrink-0">
         <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          <For each={PRODUCT_CATEGORIES}>
+          <For each={SHOP_CATEGORIES}>
             {(category) => (
               <A
                 href={category.path}

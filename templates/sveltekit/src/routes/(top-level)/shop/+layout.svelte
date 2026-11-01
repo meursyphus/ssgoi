@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { SsgoiLayoutBoundary } from "@ssgoi/svelte";
-  import { PRODUCT_CATEGORIES } from "$lib/ssgoi-config";
+  import { SHOP_CATEGORIES } from "$lib/ssgoi-config";
 
   let { children } = $props();
 </script>
@@ -16,7 +16,7 @@
   <!-- Category Tabs - Fixed -->
   <div class="px-4 mb-4 shrink-0">
     <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-      {#each PRODUCT_CATEGORIES as cat}
+      {#each SHOP_CATEGORIES as cat}
         <a
           href={cat.path}
           class="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 {page.url

@@ -10,7 +10,7 @@
     <div class="px-4 mb-4 flex-shrink-0">
       <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
         <NuxtLink
-          v-for="cat in PRODUCT_CATEGORIES"
+          v-for="cat in SHOP_CATEGORIES"
           :key="cat.id"
           :to="cat.path"
           :class="[
@@ -38,9 +38,9 @@
 import { SsgoiLayoutBoundary } from "@ssgoi/vue";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { PRODUCT_CATEGORIES } from "~/utils/ssgoi-config";
+import { SHOP_CATEGORIES } from "~/utils/ssgoi-config";
 
-// Its children (/products/*) inherit the layout through merged route meta.
+// Its children (/shop/*) inherit the layout through merged route meta.
 definePageMeta({ layout: "top-level" });
 
 const route = useRoute();

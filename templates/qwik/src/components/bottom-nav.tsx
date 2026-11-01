@@ -32,9 +32,9 @@ export const BottomNav = component$(() => {
       </Link>
 
       <Link
-        href="/products/all/"
+        href="/shop/"
         class={`flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 ${
-          pathname.startsWith("/products")
+          pathname.startsWith("/shop")
             ? "text-white"
             : "text-neutral-500 hover:text-neutral-400"
         }`}
