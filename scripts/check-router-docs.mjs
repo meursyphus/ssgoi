@@ -79,8 +79,8 @@ assert(llms.includes("framework={framework}"));
 assert(!llms.includes('from "@ssgoi/react/nextjs"'));
 assert(!llms.includes("manual-boundaries"));
 assert(
-  llms.split("\n").length < 100,
-  "The minimal Next.js guide grew beyond its intended scope",
+  llms.trimEnd().split("\n").length <= 200,
+  "The Next.js llms.txt guide grew beyond its intended 200-line scope",
 );
 const version = JSON.parse(
   readFileSync(join(root, "packages/core/package.json")),

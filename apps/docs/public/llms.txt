@@ -1,18 +1,26 @@
-# SSGOI quick start for Next.js
+# SSGOI setup guide for Next.js App Router
 
-SSGOI adds page transitions without replacing your application router.
-This quick start assumes Next.js App Router. Use the existing router and page files.
+This is the complete SSGOI setup guide for Next.js App Router. SSGOI adds page
+transitions without replacing your router, layouts, or page files.
 
 Current version: `@ssgoi/core@7.5.0-beta.0` (npm tag `beta`). All `@ssgoi/*` packages release together.
-This beta reads your router through `<Ssgoi framework>` and imports `SsgoiLayoutBoundary` from the root `@ssgoi/react` entry.
 
-## Install
+## Using another framework?
+
+| Framework | Guide | Framework | Guide |
+| --- | --- | --- | --- |
+| React Router | https://ssgoi.dev/llms/frameworks/react-router.txt | Remix | https://ssgoi.dev/llms/frameworks/remix.txt |
+| TanStack Router | https://ssgoi.dev/llms/frameworks/tanstack-router.txt | SvelteKit | https://ssgoi.dev/llms/frameworks/sveltekit.txt |
+| Vue Router | https://ssgoi.dev/llms/frameworks/vue-router.txt | Nuxt | https://ssgoi.dev/llms/frameworks/nuxt.txt |
+| Solid Router | https://ssgoi.dev/llms/frameworks/solid-router.txt | SolidStart | https://ssgoi.dev/llms/frameworks/solidstart.txt |
+| Qwik City | https://ssgoi.dev/llms/frameworks/qwik.txt | Angular | https://ssgoi.dev/llms/frameworks/angular.txt |
+| Expo Router | https://ssgoi.dev/llms/frameworks/expo.txt | | |
+
+## 1. Install and add the provider
 
 ```bash
 npm install @ssgoi/react@7.5.0-beta.0
 ```
-
-## Add one provider and the layout boundary
 
 ```tsx
 // app/ssgoi-provider.tsx
@@ -46,19 +54,136 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-In app/layout.tsx, wrap the existing children with SsgoiProvider inside body.
-Keep one provider above the routed region. `SsgoiLayoutBoundary` calls
-`framework.useRoute`, keys by the returned pathname, and supplies the transition
-marker and URL-hook Suspense handling (`null` renders its `fallback`). It throws
-if `<Ssgoi>` has no `framework`.
-Define `config` and `framework` at module scope so they stay stable.
-Use overflow-x: clip rather than hidden so the wrapper does not become a scroll container.
+In app/layout.tsx, wrap the existing `{children}` with `<SsgoiProvider>` inside
+`<body>`. `SsgoiLayoutBoundary` calls `framework.useRoute`, keys its element by
+the pathname, and handles URL-hook Suspense (`null` renders `fallback`).
 
-Verify a link navigation and browser Back: the page should animate in and out.
-For persistent headers or tabs, follow the nested-layout guide before changing boundary keys.
+## 2. Route rules
 
-`SsgoiRouteBoundary` from `@ssgoi/react/nextjs` still works but is deprecated
-and will be removed in 8.0.0.
+`config.transitions` is a list of rules. Each rule names a navigation
+relationship, the `transition` it plays, and which way is forward:
+
+| Rule | Forward | Backward |
+| --- | --- | --- |
+| `on` (+ optional `except`) | entering the scope | leaving the scope |
+| `from` / `to` | `from` → `to` as written | the reverse (unless `bidirectional: false`) |
+| `ordered: [...]` | increasing index | decreasing index |
+
+`on`, `except`, `from` and `to` take one pattern or an array. `/posts` matches
+exactly `/posts`; `/posts/*` exactly one more segment (`/posts/42`);
+`/posts/**` `/posts` and every descendant. When several rules match, higher
+`priority` (default 0) wins, then the more specific path, then declaration
+order. Browser Back/Forward replay the effect recorded for that history entry
+in reverse; a fresh link or `router.push` matches the current rules. Rules may
+also be a function, `({ isMobile }) => rules`, for per-device motion.
+
+```ts
+import { drill, sheet, slide, zoom, fade } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [
+    { on: "/posts/**", except: "/posts", transition: drill() }, // list → detail
+    { ordered: ["/home", "/search", "/profile"], transition: slide() }, // tabs
+    { on: "/compose", transition: sheet({ type: "blur" }) }, // temporary task
+    { from: "/gallery", to: "/photo/*", transition: zoom() }, // needs zoom markup
+    { priority: -100, on: "/**", transition: fade() }, // fallback for the rest
+  ],
+};
+```
+
+## 3. Place boundaries by route structure
+
+A boundary has two values: `key` decides when its DOM is replaced (lifetime),
+and `id` is the route SSGOI matches rules against. Both default to the pathname.
+Set them with one `boundary` prop: a string is a fixed key (the id keeps
+following the pathname), `{ id?, key? }` fixes either, and a function receives
+the route `useRoute` returned and returns either form. Do not set React `key`.
+A simple app needs only the single boundary from step 1.
+
+**Persistent header, tabs, or bottom nav:** give the whole section one fixed key
+on the root boundary, and put a default boundary only around the changing
+content inside the section layout:
+
+```tsx
+// app/ssgoi-provider.tsx — replaces the root boundary from step 1
+const inProducts = (path: string) => path === "/products" || path.startsWith("/products/");
+
+<SsgoiLayoutBoundary boundary={({ pathname }) => (inProducts(pathname) ? "shell" : pathname)}>
+  {children}
+</SsgoiLayoutBoundary>
+// app/products/layout.tsx
+<ProductHeaderAndTabs />
+<SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+```
+
+Tab → tab keeps the `"shell"` key, so only the inner content animates; leaving
+/products changes the root key, so the whole section leaves together.
+
+**Parallel slot or intercepted modal:** during a soft intercept the URL becomes
+the modal's (`/p/42`) while the `children` slot still renders the background.
+Every boundary above the background must follow `selectedSegments` (the slot),
+not the URL; render `{modal}` outside them. Function props need a client module:
+
+```tsx
+// app/slot-boundaries.tsx
+"use client";
+
+import type { ReactNode } from "react";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
+
+type Route = { pathname: string; selectedSegments: string[] };
+
+// Route groups such as (tabs) are layout ownership, not URL.
+const pathOf = (segments: string[]) =>
+  "/" + segments.filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join("/");
+
+// Provider: <SsgoiLayoutBoundary boundary={rootBoundary}> replaces the root boundary.
+// One key for the (tabs) group keeps BottomNav mounted across tabs and modals.
+export const rootBoundary = ({ selectedSegments }: Route) => ({
+  id: pathOf(selectedSegments),
+  key: selectedSegments.includes("(tabs)") ? "tabs" : pathOf(selectedSegments),
+});
+
+// app/(tabs)/layout.tsx renders: <TabContent>{children}</TabContent> <BottomNav /> {modal}
+export function TabContent({ children }: { children: ReactNode }) {
+  return (
+    <SsgoiLayoutBoundary boundary={({ selectedSegments }: Route) => ({ id: pathOf(selectedSegments) })}>
+      {children}
+    </SsgoiLayoutBoundary>
+  );
+}
+```
+
+Both layouts sit at the URL root; in a nested layout, prefix its base path. An
+empty slot is the layout's index route. To read a named slot instead of
+`children`, pass `parallelRoutesKey="modal"`. Your app still owns the `@modal`
+route files, `default.tsx`, and any middleware/proxy rewrites.
+
+## 4. Pick an effect (all from `@ssgoi/react/view-transitions`)
+
+- `drill()`: list → detail, hierarchical depth (`on` + `except`).
+- `slide()`: tabs or ordered horizontal steps (`ordered`).
+- `axis()`: sibling pages with Material shared-axis motion (`ordered`).
+- `sheet()`: compose, filters, temporary tasks (`on`).
+- `zoom()` / `hero()`: a card or image expands into its detail, or a shared
+  object moves across two pages (`from` / `to`, element markup required).
+- `scroll()`: vertical full-page sequence on web (`ordered`).
+- `fade()`: quiet fade-through; a good low-priority fallback.
+- `film()`, `strip()`, `rotate()`, `jaemin()`: expressive page swaps.
+
+## 5. Verify and avoid common mistakes
+
+Verify: a link animates the new page in and browser Back animates it out; with a
+persistent shell, tab changes keep the header and nav still.
+
+- Use `overflow-x: clip`, not `hidden`, on the element around `<Ssgoi>`: `hidden`
+  makes it the scroll container. Keep `position: relative` and `z-index: 0`.
+- Keep exactly one `<Ssgoi>` above both routes; do not nest providers.
+- `SsgoiLayoutBoundary` throws if `<Ssgoi>` has no `framework`.
+- Define `config` and `framework` at module scope: a new object every render
+  rebuilds the engine and loses saved scroll positions.
+- No animation: the boundary key must change and one rule must match the pair.
+  Wrong region: keep persistent UI outside the inner boundary whose key changes.
 
 ## Read next when needed
 
