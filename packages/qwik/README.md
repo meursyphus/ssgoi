@@ -51,18 +51,18 @@ does the same.
 
 ## Layout boundary
 
-Call the layout boundary hook in a route layout or page and apply it to that
+Call the layout boundary hook in a route page or layout and apply it to that
 component's own root. It takes no arguments:
 
 ```tsx
-import { Slot, component$ } from "@builder.io/qwik";
+import { component$ } from "@builder.io/qwik";
 import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
 export default component$(() => {
   const boundary = useSsgoiLayoutBoundary();
   return (
     <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
-      <Slot />
+      Page
     </section>
   );
 });
@@ -72,8 +72,13 @@ The id is the route path. Depth is automatic: a boundary under another one is
 one level deeper. Its key is that depth's scope instance from `config.layouts`,
 or the route path when the chain is shorter, so without `layouts` every
 boundary replaces its root on each path change, including parameterized pages
-City reuses. Keep Slot ownership in the route/layout. Without `framework` on
-the root, the hook throws.
+City reuses. Without `framework` on the root, the hook throws.
+
+A boundary whose root wraps `<Slot />` must keep its key while that layout is
+mounted: when a keyed element around `<Slot />` is replaced, Qwik moves the
+projected content into the new element and the outgoing one animates empty.
+Give such a layout a scope that covers all of its child routes (below), and
+let City replace the layout itself when navigation leaves it.
 
 ## Layout scopes
 
@@ -94,10 +99,18 @@ const config$ = $(() => ({
 }));
 ```
 
-Here a depth-0 boundary in the root layout keeps the tab shell (and its bottom
-nav) mounted between `/posts` and `/products`, and moves it as a whole into a
-detail page. A depth-1 boundary inside `/products/:category/...` stays mounted
-across that category's pages.
+With `routes/(top-level)/layout.tsx` and `routes/(detail)/layout.tsx` each
+putting a depth-0 boundary on their own root (around `<Slot />`), and pages
+putting a depth-1 boundary on theirs:
+
+- tab ↔ tab keeps the `(top-level)` layout, including a bottom nav outside the
+  pages, and moves only the page roots;
+- a tab → a detail page replaces the whole `(top-level)` layout, bottom nav
+  included;
+- inside `/products/:category/...` the depth-1 key stays the same across that
+  category's pages.
+
+The root layout only calls `useSsgoi`.
 
 `useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` is deprecated and will be
 removed in 8.0.0; it reads `useLocation()` itself and keeps working without

@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import type { Product } from "~/data/products";
 
 interface ProductGridProps {
@@ -6,8 +7,9 @@ interface ProductGridProps {
 }
 
 export const ProductGrid = component$<ProductGridProps>(({ products }) => {
+  const boundary = useSsgoiLayoutBoundary();
   return (
-    <div>
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       <div class="px-4 pb-6 h-full overflow-y-auto">
         {products.length === 0 ? (
           <div class="text-center py-12">

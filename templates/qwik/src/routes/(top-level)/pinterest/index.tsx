@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { Link } from "@builder.io/qwik-city";
 import { pinterestItems, type PinterestItem } from "~/data/pinterest";
 
@@ -10,8 +11,9 @@ const imageHeightFromRatio = (aspectRatio: string) => {
 };
 
 export default component$(() => {
+  const boundary = useSsgoiLayoutBoundary();
   return (
-    <div>
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       <div class="min-h-screen bg-[#121212] px-4 py-6">
         <div class="mb-6">
           <h1 class="text-sm font-medium text-white mb-1">Gallery</h1>

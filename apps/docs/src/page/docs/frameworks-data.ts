@@ -704,27 +704,50 @@ export const Comments = component$(() => {
       {
         slug: "qwik-city",
         name: "Qwik City",
-        lead: "Pass Qwik City’s location store as framework where SSGOI is attached. The computed boundary hook reads it; the page keeps ownership of its DOM and slots and applies the returned id and key to its own root.",
+        lead: "Pass Qwik City’s location store as framework where SSGOI is attached. Route group layouts and pages call the boundary hook and apply the returned id and key to their own roots, so each keeps ownership of its DOM and slots.",
         experimental: true,
         sections: [
           {
-            heading: "Mark the page root",
-            body: "Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. It takes no arguments: the id is the path, and the key is the config.layouts scope at the hook’s depth (each useSsgoiLayoutBoundary inside another is one deeper), or the path. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.",
-            code: `import { component$ } from "@builder.io/qwik";
+            heading: "Layout scopes",
+            body: "useSsgoiLayoutBoundary() takes no arguments: the id is the path, and the key is the config.layouts scope at the hook’s depth (each boundary inside another is one deeper), or the path. Apply both to the component’s own root. A keyed boundary that wraps <Slot /> must keep a constant key: if its key changed, Qwik would move the projected children into the new element and the outgoing page would animate empty. So the root layout only calls useSsgoi, each route group layout puts a depth-0 boundary on its own root (one key per scope, and Qwik City replaces the whole group layout when you cross groups), and pages put a depth-1 boundary on their own root. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.",
+            code: `// src/routes/(top-level)/layout.tsx — (detail)/layout.tsx is the same without the nav
+import { Slot, component$ } from "@builder.io/qwik";
 import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
+import { BottomNav } from "~/components/bottom-nav";
 
 export default component$(() => {
+  // Depth 0: one key for every tab, so it stays while you move between tabs.
   const boundary = useSsgoiLayoutBoundary();
   return (
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+      <Slot />
+      <BottomNav />
+    </div>
+  );
+});
+
+// src/routes/(top-level)/posts/index.tsx — every page marks its own root
+export default component$(() => {
+  const boundary = useSsgoiLayoutBoundary(); // depth 1: keyed by the path
+  return (
     <article key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
-      {/* Page content */}
+      {/* page */}
     </article>
   );
 });`,
           },
           {
-            heading: "Persistent layouts",
-            body: 'Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], call the hook in that section layout, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.',
+            heading: "Config and navigation",
+            body: "Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A products layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /products/** scope) while each category page root is depth 2.",
+            code: `const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+
+export const config$ = $(() => ({
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [{ from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() } /* , ... */],
+}));`,
           },
         ],
         templateUrl:

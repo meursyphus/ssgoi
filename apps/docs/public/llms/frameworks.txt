@@ -47,8 +47,9 @@ Full patterns: https://ssgoi.dev/llms/complex-routing.txt
 | Angular | Angular Router | `getRoute(injector)` + `onNavigate(injector, callback)` | `*ssgoiLayoutBoundary` | Experimental |
 | React Native | Expo Router | `{ StackRouter, unstable_integrateWithRouter }` | `SsgoiLayoutBoundary` | Experimental |
 
-Qwik's hook returns an id and key so the page retains ownership of its DOM and
-projected slots. Angular binds the framework on the provider element
+Qwik's hook returns an id and key for a page or route group layout to put on its
+own root, so it retains ownership of its DOM and projected slots; a boundary
+around `<Slot />` must keep a constant key. Angular binds the framework on the provider element
 (`<main ssgoi [config]="config" [ssgoiFramework]="framework">`) and marks pages
 with the `*ssgoiLayoutBoundary` structural directive. Expo's boundary is a native file-based navigator; web presets
 and DOM attributes do not apply.

@@ -29,7 +29,9 @@ const SsgoiLayoutDepthContextId = createContextId<{ depth: number }>(
 
 /**
  * Keyed boundary for the route or layout that calls it. Apply id and key to
- * that component's own DOM root and keep Slot ownership in the route.
+ * that component's own DOM root. A root that wraps `<Slot />` must keep its
+ * key while the layout is mounted: Qwik moves projected content into a
+ * replacing element, leaving the outgoing one empty.
  *
  * Depth is automatic: a boundary under another one is one level deeper. The
  * key is the depth's scope instance from `config.layouts`, falling back to

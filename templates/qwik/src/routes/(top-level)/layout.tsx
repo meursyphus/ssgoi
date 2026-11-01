@@ -3,20 +3,20 @@ import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { BottomNav } from "~/components/bottom-nav";
 
 export default component$(() => {
-  // Depth 1: only the tab content moves between tabs.
+  // Depth 0: stays while you move between tabs and leaves as a whole (bottom
+  // nav included) for a detail page. Each tab page's root is a depth-1
+  // boundary, so between tabs only the content above the nav moves.
   const boundary = useSsgoiLayoutBoundary();
 
   return (
-    <div class="flex-1 flex flex-col">
-      <div
-        key={boundary.value.key}
-        data-ssgoi-transition={boundary.value.id}
-        class="flex-1 flex flex-col bg-[#121212]"
-      >
+    <div
+      key={boundary.value.key}
+      data-ssgoi-transition={boundary.value.id}
+      class="min-h-full flex flex-col bg-[#121212]"
+    >
+      <div class="flex-1 flex flex-col">
         <Slot />
       </div>
-
-      {/* Outside the depth-1 boundary, inside the depth-0 one. */}
       <BottomNav />
     </div>
   );

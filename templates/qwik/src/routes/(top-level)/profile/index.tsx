@@ -1,10 +1,12 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { ProfileFeed } from "~/components/profile-feed";
 import { profile } from "~/data/profile";
 
 export default component$(() => {
+  const boundary = useSsgoiLayoutBoundary();
   return (
-    <div>
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       <div class="bg-[#121212]">
         <div class="relative">
           <div class="h-24 relative">

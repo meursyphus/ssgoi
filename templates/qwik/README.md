@@ -9,37 +9,49 @@ pnpm dev
 
 `src/lib/ssgoi-config.ts` exports one QRL config factory with the transitions
 and the layout tree. The root route layout passes Qwik City's location store
-as `framework` and holds the depth-0 boundary:
+as `framework`:
 
 ```tsx
 const location = useLocation();
 useSsgoi(root, { config$: ssgoiConfig$, framework: { location } });
-const boundary = useSsgoiLayoutBoundary();
-
-<main ref={root}>
-  <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
-    <Slot />
-  </div>
-</main>
 ```
 
-`useSsgoiLayoutBoundary()` from `@ssgoi/qwik` takes no arguments. Its depth
+`useSsgoiLayoutBoundary()` from `@ssgoi/qwik` takes no arguments. Call it in a
+route layout or page and apply it to that component's own root. Its depth
 comes from how many boundaries sit above it, and `config.layouts` decides
-when the boundary at each depth stays mounted. Pages carry no markers.
+when the boundary at each depth stays mounted:
+
+```tsx
+const boundary = useSsgoiLayoutBoundary();
+<div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>...</div>
+```
 
 ```
 src/routes/
-  layout.tsx                  useSsgoi(root, { framework }) + depth-0 boundary
-  (top-level)/layout.tsx      depth-1 boundary around <Slot />; bottom nav outside it
-    posts/  pinterest/  profile/
-    products/layout.tsx       depth-2 boundary; header and category tabs outside it
-      all/  electronics/  fashion/  home/  beauty/
-  (detail)/layout.tsx         depth-1 boundary
-    posts/[id]/  pinterest/[id]/  profile/[id]/
+  layout.tsx                  useSsgoi(root, { framework }) around <Slot />
+  (top-level)/layout.tsx      depth 0 on its root; <Slot /> above the bottom nav
+    posts/  pinterest/  profile/   depth 1 on each page's root
+    products/layout.tsx       depth 1 on its root; header and category tabs
+      all/  electronics/  fashion/  home/  beauty/   depth 2 (ProductGrid's root)
+  (detail)/layout.tsx         depth 0 on its root
+    posts/[id]/  pinterest/[id]/  profile/[id]/    depth 1 on each page's root
 ```
 
 `(top-level)` and `(detail)` are Qwik City route groups: a `layout.tsx` inside
 `(group)/` wraps the group's routes without adding a URL segment.
+
+### Why the boundaries sit one level lower than in other templates
+
+The other templates put the depth-0 boundary next to `<Ssgoi>` and a depth-1
+boundary around each group layout's children. In Qwik that would put a keyed
+element around a `<Slot />`, and the outgoing page loses its content
+mid-transition: when that key changes, Qwik moves the projected content into
+the new element, so a tab page leaving for a detail page animates as an
+empty screen with only the bottom nav. So each boundary goes on the root of
+the component that owns it. Qwik City swaps the group layout between a tab
+and a detail page and removes the old one with its page still inside. The
+group layouts' keys stay fixed while they are mounted, and the page roots
+under them change.
 
 ```ts
 export const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
@@ -60,21 +72,20 @@ export const ssgoiConfig$ = $(() => ({
 
 What moves:
 
-- Tab to tab (`/posts` → `/pinterest`): every top-level page shares the depth-0
-  scope, so only the depth-1 boundary changes. The content fades and the bottom
-  nav stays.
-- Category to category (`/products/all` → `/products/fashion`): depth 0 and 1
-  stay inside `/products/**`; the depth-2 boundary slides.
-- Tab to detail (`/posts` → `/posts/1`): the depth-0 scope changes, so the whole
-  top-level page, bottom nav included, drills or zooms away.
-- Detail to detail (`/posts/1` → `/posts/2`): depth 0 stays in the detail scope;
-  the depth-1 boundary is keyed by the route path, so City's reused page
+- Tab to tab (`/posts` → `/pinterest`): the `(top-level)` layout stays; only
+  the page root (depth 1) changes. The content fades and the bottom nav stays.
+- Category to category (`/products/all` → `/products/fashion`): the products
+  layout stays inside `/products/**`; the category root (depth 2) slides.
+- Tab to detail (`/posts` → `/posts/1`): the `(top-level)` layout, bottom nav
+  included, leaves as a whole and drills or zooms into the `(detail)` layout.
+- Detail to detail (`/posts/1` → `/posts/2`): the `(detail)` layout stays; the
+  page root (depth 1) is keyed by the route path, so City's reused page
   component still gets a new root.
 
 A boundary's key is its depth's scope instance and falls back to the route
 path past the declared scopes. Without `layouts`, every boundary follows the
 route path. Use `/products/**`, not `/products/*`, in `TOP_LEVEL`: a `*`
-segment is captured, so each category would get its own depth-0 instance.
+segment is captured, so each category would get its own scope instance.
 
 Effects:
 

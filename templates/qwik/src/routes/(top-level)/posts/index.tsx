@@ -1,12 +1,18 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { Link } from "@builder.io/qwik-city";
 import { getAllPosts } from "~/data/posts";
 
 export default component$(() => {
+  const boundary = useSsgoiLayoutBoundary();
   const posts = getAllPosts();
 
   return (
-    <div class="min-h-full bg-[#121212]">
+    <div
+      key={boundary.value.key}
+      data-ssgoi-transition={boundary.value.id}
+      class="min-h-full bg-[#121212]"
+    >
       <div class="min-h-full bg-[#121212] px-4 py-6">
         <div class="mb-6">
           <h1 class="text-sm font-medium text-white mb-1">Latest Posts</h1>

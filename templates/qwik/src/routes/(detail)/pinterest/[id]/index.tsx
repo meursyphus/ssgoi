@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
 import { getPinterestItem } from "~/data/pinterest";
 
@@ -8,13 +9,14 @@ const imageHeightFromRatio = (aspectRatio: string) => {
 };
 
 export default component$(() => {
+  const boundary = useSsgoiLayoutBoundary();
   const location = useLocation();
   const pinId = location.params.id;
   const item = getPinterestItem(pinId);
 
   if (!item) {
     return (
-      <div>
+      <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
         <div class="min-h-screen bg-[#121212] px-4 py-8">
           <p class="text-gray-400">Pin not found</p>
         </div>
@@ -23,7 +25,7 @@ export default component$(() => {
   }
 
   return (
-    <div>
+    <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       <div class="min-h-screen bg-[#121212]">
         <div class="px-4 py-4">
           <Link
