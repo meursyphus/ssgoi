@@ -12,15 +12,47 @@ npm install @ssgoi/vue
 
 Agent setup guide: https://ssgoi.dev/llms/vue.txt
 
-## Router helpers
+## Layout boundary
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
+Pass a reactive route getter to `<Ssgoi>` once, then wrap routed content in
+`SsgoiLayoutBoundary`. It marks the current path with `data-ssgoi-transition`
+and remounts when the path changes.
 
-| Router     | Import                  | API                  |
-| ---------- | ----------------------- | -------------------- |
-| Vue Router | `@ssgoi/vue/vue-router` | `SsgoiRouteBoundary` |
-| Nuxt       | `@ssgoi/vue/nuxt`       | `SsgoiRouteBoundary` |
+```vue
+<script setup lang="ts">
+import { useRouter } from "vue-router"; // Nuxt: auto-imported
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
+</script>
+
+<template>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary>
+      <RouterView />
+    </SsgoiLayoutBoundary>
+  </Ssgoi>
+</template>
+```
+
+By default the transition id is the pathname and the DOM is keyed by that id.
+Change either with `boundary`:
+
+```vue
+<SsgoiLayoutBoundary boundary="products-layout">   <!-- fixed key: keep one DOM node -->
+<SsgoiLayoutBoundary :boundary="{ id: '/feed' }">   <!-- fixed id -->
+<SsgoiLayoutBoundary :boundary="(route) => ({ id: route.pathname, key: 'shell' })">
+```
+
+A function receives the object `getRoute` returns (extra fields included) and
+may return a key string or `{ id?, key? }`. `as` sets the element.
+`SsgoiLayoutBoundary` throws without `framework` on `<Ssgoi>`.
+
+`SsgoiRouteBoundary` from `@ssgoi/vue/vue-router` and `@ssgoi/vue/nuxt` is
+deprecated; use `SsgoiLayoutBoundary` with `framework` instead.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and limits.
 
@@ -31,6 +63,10 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and 
 import { Ssgoi } from "@ssgoi/vue";
 import { drill } from "@ssgoi/vue/view-transitions";
 
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 const config = {
   transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
 };
@@ -38,7 +74,7 @@ const config = {
 
 <template>
   <main class="ssgoi-shell">
-    <Ssgoi :config="config">
+    <Ssgoi :config="config" :framework="framework">
       <NuxtPage />
     </Ssgoi>
   </main>

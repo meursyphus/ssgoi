@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { useCheckout } from "@/demo/air-bnb/state/checkout";
 import { CheckoutHeader } from "./header";
@@ -26,17 +26,17 @@ export default function CheckoutLayoutClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <SsgoiRouteBoundary
-      routeKey={`${initialData.id}/checkout`}
+    <SsgoiLayoutBoundary
+      boundary={`${initialData.id}/checkout`}
       className="relative flex min-h-full w-full flex-col bg-white"
     >
       <CheckoutHeader />
       <div className="relative z-0 flex-1 pb-3">
-        <SsgoiRouteBoundary className="min-h-full bg-white">
+        <SsgoiLayoutBoundary className="min-h-full bg-white">
           {children}
-        </SsgoiRouteBoundary>
+        </SsgoiLayoutBoundary>
       </div>
       <CheckoutBottomBar />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

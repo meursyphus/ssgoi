@@ -7,18 +7,13 @@
         id="demo-content"
         class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
       >
-        <Ssgoi :config="ssgoiConfig">
-          <SsgoiRouteBoundary
-            :resolve="
-              ({ pathname }) => ({
-                id: pathname,
-                key: getRootTransitionId(pathname),
-              })
-            "
+        <Ssgoi :config="ssgoiConfig" :framework="framework">
+          <SsgoiLayoutBoundary
+            :boundary="({ pathname }) => getRootTransitionId(pathname)"
             class="min-h-full bg-[#121212]"
           >
             <slot />
-          </SsgoiRouteBoundary>
+          </SsgoiLayoutBoundary>
         </Ssgoi>
       </main>
 
@@ -107,13 +102,16 @@
 </template>
 
 <script setup lang="ts">
-import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
 import { computed } from "vue";
-import { useRoute } from "vue-router";
-import { Ssgoi } from "@ssgoi/vue";
+import { useRoute, useRouter } from "vue-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
 import { ssgoiConfig } from "~/utils/ssgoi-config";
 
 const route = useRoute();
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 const pathname = computed(() => route.path);
 const getRootTransitionId = (path: string) =>
   path === "/products" || path.startsWith("/products/") ? "/products" : path;

@@ -13,7 +13,7 @@ import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
 import { slide } from "@ssgoi/react-native/view-transitions";
 ```
 
-## Router helpers
+## Router integrations
 
 - Expo Router (experimental): https://ssgoi.dev/llms/frameworks/expo.txt
 

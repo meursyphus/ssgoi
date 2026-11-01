@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import {
   useProfile,
   type Follows,
@@ -41,7 +41,7 @@ export default function FollowsPage({
     setSwitched(true);
   };
   return (
-    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white text-neutral-900">
+    <SsgoiLayoutBoundary className="relative block min-h-full w-full bg-white text-neutral-900">
       <div className="sticky top-0 z-20 bg-white">
         <FollowsHeader
           username={me.username}
@@ -72,6 +72,6 @@ export default function FollowsPage({
           <UserRow key={u.id} user={u} />
         ))}
       </motion.div>
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

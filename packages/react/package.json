@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/react",
-  "version": "7.4.1",
+  "version": "7.5.0-beta.0",
   "description": "Native app-like page transitions for React and Next.js. Make a web app, PWA or WebView app feel native, with Remix, React Router and TanStack Router support.",
   "private": false,
   "type": "module",
@@ -33,55 +33,55 @@
       "default": "./dist/view-transitions.js"
     },
     "./unplugin": {
-      "types": "./dist/unplugin/index.d.ts",
+      "types": "./dist/legacy/unplugin/index.d.ts",
       "import": "./dist/unplugin/index.js",
       "require": "./dist/unplugin/index.cjs",
       "default": "./dist/unplugin/index.js"
     },
     "./unplugin/webpack": {
-      "types": "./dist/unplugin/webpack.d.ts",
+      "types": "./dist/legacy/unplugin/webpack.d.ts",
       "import": "./dist/unplugin/webpack.js",
       "require": "./dist/unplugin/webpack.cjs",
       "default": "./dist/unplugin/webpack.js"
     },
     "./unplugin/vite": {
-      "types": "./dist/unplugin/vite.d.ts",
+      "types": "./dist/legacy/unplugin/vite.d.ts",
       "import": "./dist/unplugin/vite.js",
       "require": "./dist/unplugin/vite.cjs",
       "default": "./dist/unplugin/vite.js"
     },
     "./unplugin/rollup": {
-      "types": "./dist/unplugin/rollup.d.ts",
+      "types": "./dist/legacy/unplugin/rollup.d.ts",
       "import": "./dist/unplugin/rollup.js",
       "require": "./dist/unplugin/rollup.cjs",
       "default": "./dist/unplugin/rollup.js"
     },
     "./unplugin/esbuild": {
-      "types": "./dist/unplugin/esbuild.d.ts",
+      "types": "./dist/legacy/unplugin/esbuild.d.ts",
       "import": "./dist/unplugin/esbuild.js",
       "require": "./dist/unplugin/esbuild.cjs",
       "default": "./dist/unplugin/esbuild.js"
     },
     "./nextjs": {
-      "types": "./dist/routers/nextjs/index.d.ts",
+      "types": "./dist/legacy/nextjs/index.d.ts",
       "import": "./dist/nextjs.js",
       "require": "./dist/nextjs.cjs",
       "default": "./dist/nextjs.js"
     },
     "./react-router": {
-      "types": "./dist/routers/react-router.d.ts",
+      "types": "./dist/legacy/react-router.d.ts",
       "import": "./dist/react-router.js",
       "require": "./dist/react-router.cjs",
       "default": "./dist/react-router.js"
     },
     "./tanstack-router": {
-      "types": "./dist/routers/tanstack-router.d.ts",
+      "types": "./dist/legacy/tanstack-router.d.ts",
       "import": "./dist/tanstack-router.js",
       "require": "./dist/tanstack-router.cjs",
       "default": "./dist/tanstack-router.js"
     },
     "./remix": {
-      "types": "./dist/routers/remix.d.ts",
+      "types": "./dist/legacy/remix.d.ts",
       "import": "./dist/remix.js",
       "require": "./dist/remix.cjs",
       "default": "./dist/remix.js"

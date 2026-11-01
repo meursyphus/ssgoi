@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Ssgoi } from "@ssgoi/svelte";
-  import { page } from "$app/stores";
+  import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/svelte";
+  import { page } from "$app/state";
+  import { onNavigate } from "$app/navigation";
   import { ssgoiConfig } from "$lib/ssgoi-config";
   import NavItem from "./nav-item.svelte";
-  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
 
   let { children } = $props();
 
@@ -22,16 +22,19 @@
       id="demo-content"
       class="flex-1 w-full overflow-y-scroll overflow-x-hidden relative z-0 bg-[#121212] scrollbar-hide"
     >
-      <Ssgoi config={ssgoiConfig}>
-        <SsgoiRouteBoundary
-          resolve={({ url }) => ({
-            id: url.pathname,
-            key: getRootTransitionId(url),
-          })}
+      <Ssgoi
+        config={ssgoiConfig}
+        framework={{
+          getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+          onNavigate,
+        }}
+      >
+        <SsgoiLayoutBoundary
+          boundary={({ url }) => getRootTransitionId(url)}
           class="min-h-full bg-[#121212]"
         >
           {@render children()}
-        </SsgoiRouteBoundary>
+        </SsgoiLayoutBoundary>
       </Ssgoi>
     </main>
 
@@ -42,7 +45,7 @@
       <NavItem
         href="/posts"
         label="Posts"
-        isActive={$page.url.pathname.startsWith("/posts")}
+        isActive={page.url.pathname.startsWith("/posts")}
       >
         {#snippet icon()}
           <svg
@@ -63,7 +66,7 @@
       <NavItem
         href="/products"
         label="Shop"
-        isActive={$page.url.pathname.startsWith("/products")}
+        isActive={page.url.pathname.startsWith("/products")}
       >
         {#snippet icon()}
           <svg
@@ -85,7 +88,7 @@
       <NavItem
         href="/pinterest"
         label="Gallery"
-        isActive={$page.url.pathname.startsWith("/pinterest")}
+        isActive={page.url.pathname.startsWith("/pinterest")}
       >
         {#snippet icon()}
           <svg
@@ -106,7 +109,7 @@
       <NavItem
         href="/profile"
         label="Profile"
-        isActive={$page.url.pathname.startsWith("/profile")}
+        isActive={page.url.pathname.startsWith("/profile")}
       >
         {#snippet icon()}
           <svg

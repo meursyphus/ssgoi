@@ -2,8 +2,9 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/svelte/sveltekit`. The router is an
-optional peer and is loaded only by this entry.
+Pass a route getter from SvelteKit's page state and `onNavigate` to
+`<Ssgoi framework>` and import `SsgoiLayoutBoundary` from `@ssgoi/svelte`.
+The package itself never imports `@sveltejs/kit`.
 
 ```bash
 pnpm install
@@ -11,18 +12,34 @@ pnpm dev
 ```
 
 The root layout uses one config from `src/lib/ssgoi-config.ts` and one
-`<Ssgoi>`. Its shipped route boundary owns the outgoing and incoming page
+`<Ssgoi>`. Its shipped layout boundary owns the outgoing and incoming page
 DOM:
 
 ```svelte
-<Ssgoi config={ssgoiConfig}>
-  <SsgoiRouteBoundary
-    resolve={({ url }) => ({ id: url.pathname, key: getRootTransitionId(url) })}
+<script lang="ts">
+  import { page } from "$app/state";
+  import { onNavigate } from "$app/navigation";
+  import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/svelte";
+</script>
+
+<Ssgoi
+  config={ssgoiConfig}
+  framework={{
+    getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+    onNavigate,
+  }}
+>
+  <SsgoiLayoutBoundary
+    boundary={({ url }) => getRootTransitionId(url)}
   >
     {@render children()}
-  </SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
 </Ssgoi>
 ```
+
+On SvelteKit < 2.12 (no `$app/state`), use the store instead:
+`getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url })`
+with `page` from `$app/stores` and `get` from `svelte/store`.
 
 The root boundary keeps a `/products` key for that route family while its id tracks the real pathname.
 `routes/products/+layout.svelte` stays mounted and puts a second boundary

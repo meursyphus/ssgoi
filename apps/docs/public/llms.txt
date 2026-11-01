@@ -3,35 +3,43 @@
 SSGOI adds page transitions without replacing your application router.
 This quick start assumes Next.js App Router. Use the existing router and page files.
 
-Current version: `@ssgoi/core@7.4.1` (npm tag `latest`). All `@ssgoi/*` packages release together.
-The stable release includes continuous motion handoff across interrupted navigations, transition scroll-input suppression without CSS changes, hero/zoom image crossfades, motion overrides, and optional router helpers.
+Current version: `@ssgoi/core@7.5.0-beta.0` (npm tag `beta`). All `@ssgoi/*` packages release together.
+This beta reads your router through `<Ssgoi framework>` and imports `SsgoiLayoutBoundary` from the root `@ssgoi/react` entry.
 
 ## Install
 
 ```bash
-npm install @ssgoi/react@7.4.0
+npm install @ssgoi/react@7.5.0-beta.0
 ```
 
-## Add one provider and the Next.js boundary
+## Add one provider and the layout boundary
 
 ```tsx
 // app/ssgoi-provider.tsx
 "use client";
 
 import type { ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
 import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
+};
+
 export function SsgoiProvider({ children }: { children: ReactNode }) {
   return (
     <main style={{ position: "relative", zIndex: 0, minHeight: "100dvh", overflowX: "clip" }}>
-      <Ssgoi config={config}>
-        <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+      <Ssgoi config={config} framework={framework}>
+        <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
       </Ssgoi>
     </main>
   );
@@ -39,12 +47,18 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 ```
 
 In app/layout.tsx, wrap the existing children with SsgoiProvider inside body.
-Keep one provider above the routed region. The Next.js helper supplies the
-pathname, DOM key, transition marker, and URL-hook Suspense handling.
+Keep one provider above the routed region. `SsgoiLayoutBoundary` calls
+`framework.useRoute`, keys by the returned pathname, and supplies the transition
+marker and URL-hook Suspense handling (`null` renders its `fallback`). It throws
+if `<Ssgoi>` has no `framework`.
+Define `config` and `framework` at module scope so they stay stable.
 Use overflow-x: clip rather than hidden so the wrapper does not become a scroll container.
 
 Verify a link navigation and browser Back: the page should animate in and out.
 For persistent headers or tabs, follow the nested-layout guide before changing boundary keys.
+
+`SsgoiRouteBoundary` from `@ssgoi/react/nextjs` still works but is deprecated
+and will be removed in 8.0.0.
 
 ## Read next when needed
 

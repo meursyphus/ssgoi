@@ -2,7 +2,7 @@
   import {
     SsgoiRouteBoundary,
     type SsgoiRouteBoundaryProps,
-  } from "../src/lib/routers/sveltekit";
+  } from "../src/lib/legacy/sveltekit";
   import { content } from "./navigation";
   let {
     resolve,

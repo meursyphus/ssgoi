@@ -2,7 +2,10 @@
 
 Experimental API: the router integration may change.
 
-Create one SSGOI root above the router outlet.
+Create one SSGOI root above the router outlet and give it an `ssgoiFramework`
+that reads Angular Router: `getRoute(injector)` returns the route at a
+boundary's position and `onNavigate(injector, callback)` reports committed
+navigations. `@ssgoi/angular` never imports `@angular/router` itself.
 
 ```bash
 npm install @ssgoi/angular
@@ -14,9 +17,33 @@ restore then targets the wrong element. Add `min-height:100dvh`.
 
 ```ts
 import { Component, signal } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/angular";
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterOutlet,
+  createUrlTreeFromSnapshot,
+} from "@angular/router";
+import { Ssgoi, type SsgoiConfig, type SsgoiFramework } from "@ssgoi/angular";
 import { drill } from "@ssgoi/angular/view-transitions";
+
+// Called with each boundary's own Injector, so ActivatedRoute resolves at its position.
+const framework: SsgoiFramework = {
+  getRoute: (injector) => {
+    const route = injector.get(ActivatedRoute).snapshot;
+    const router = injector.get(Router);
+    return {
+      pathname: router.serializeUrl(createUrlTreeFromSnapshot(route, [], null, null)),
+      route,
+    };
+  },
+  onNavigate: (injector, callback) => {
+    const subscription = injector.get(Router).events.subscribe((event) => {
+      if (event instanceof NavigationEnd) callback();
+    });
+    return () => subscription.unsubscribe();
+  },
+};
 
 @Component({
   selector: "app-root",
@@ -26,6 +53,7 @@ import { drill } from "@ssgoi/angular/view-transitions";
     <main
       ssgoi
       [config]="config()"
+      [ssgoiFramework]="framework"
       style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip"
     >
       <router-outlet />
@@ -38,26 +66,27 @@ export class AppComponent {
       { on: "/posts/**", except: "/posts", transition: drill() },
     ],
   });
+  protected readonly framework = framework;
 }
 ```
 
-## Router boundary helper
+## Layout boundary
 
 A structural directive marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.
 
 ### Connect a routed page
 
-Import the standalone directive in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component.
+Import the standalone directive from @ssgoi/angular in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component. It throws if the ssgoi element has no ssgoiFramework.
 
 ```ts
 import { Component } from "@angular/core";
-import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
+import { SsgoiLayoutBoundary } from "@ssgoi/angular";
 
 @Component({
   standalone: true,
-  imports: [SsgoiRouteBoundary],
+  imports: [SsgoiLayoutBoundary],
   template: `
-    <article *ssgoiRouteBoundary="let boundary">
+    <article *ssgoiLayoutBoundary="let boundary">
       {{ boundary.id }}
     </article>
   `,
@@ -67,7 +96,9 @@ export class PageComponent {}
 
 ### Persistent shells
 
-Use *ssgoiRouteBoundary="let boundary; key: 'shell'" to preserve the embedded view. A resolver can return { id, key? }. Query-only and cancelled navigation preserve the default view. This helper does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+Use *ssgoiLayoutBoundary="'shell'" (a fixed key) to preserve the embedded view. The directive's input also takes { id?, key? } or a function that receives the route getRoute returned, here { pathname, route }, as-is and returns a key string or { id?, key? }. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+
+SsgoiRouteBoundary from @ssgoi/angular/router still works but is deprecated and will be removed in 8.0.0.
 
 
 ## Transition state

@@ -17,27 +17,42 @@ container, and scroll restore then targets the wrong element. Fall back to
 
 ## Setup
 
-Everything wires in the root layout — one `<Ssgoi>`, the shell classes, and
-the boundary component:
+Everything wires in the root layout — one `<Ssgoi>` whose `framework` returns
+the current route from SvelteKit's page URL and passes `onNavigate`, the shell
+classes, and the boundary component:
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
-  import { Ssgoi } from "@ssgoi/svelte";
+  import { page } from "$app/state";
+  import { onNavigate } from "$app/navigation";
+  import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/svelte";
   import { config } from "$lib/ssgoi-config";
-  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
 
   let { children } = $props();
+
+  const framework = {
+    getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+    onNavigate,
+  };
 </script>
 
 <main class="relative z-0 min-h-dvh overflow-x-clip">
-  <Ssgoi {config}>
-    <SsgoiRouteBoundary class="min-h-full">
+  <Ssgoi {config} {framework}>
+    <SsgoiLayoutBoundary class="min-h-full">
       {@render children()}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   </Ssgoi>
 </main>
 ```
+
+SvelteKit before 2.12 has no `$app/state`; use the store instead:
+`import { page } from "$app/stores"`, `import { get } from "svelte/store"`, and
+`getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url })`.
+The function form of `boundary` receives the `{ pathname, url }` route as-is;
+on navigation the boundary builds the next one from the target URL and runs
+the same function. `SsgoiLayoutBoundary` throws if
+`<Ssgoi>` has no `framework`.
 
 ```ts
 // src/lib/ssgoi-config.ts
@@ -56,15 +71,16 @@ snippet updates, so a marker on that wrapper has no outgoing node. The
 component detaches the old routed region in `onNavigate` first, then remounts
 under the new id:
 
-Import `SsgoiRouteBoundary` from `@ssgoi/svelte/sveltekit`; the package owns this
-lifecycle. Svelte 5 and SvelteKit 2 are supported. Kit is an optional peer and
-is never imported through the root `@ssgoi/svelte` entry.
+Import `SsgoiLayoutBoundary` from `@ssgoi/svelte`; the package owns this
+lifecycle and calls the `onNavigate` you passed. Svelte 5 and SvelteKit 2 are
+supported. The root `@ssgoi/svelte` entry never imports Kit.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 
 ## Beyond the basics
 
-For a persistent `/products` shell, collapse that family at the root:
+For a persistent `/products` shell, collapse that family's key at the root (a
+returned string is the key; the id keeps the full pathname):
 
 ```svelte
 <script lang="ts">
@@ -76,9 +92,9 @@ For a persistent `/products` shell, collapse that family at the root:
   }
 </script>
 
-<SsgoiRouteBoundary resolve={({ url }) => ({ id: url.pathname, key: getRootTransitionId(url) })}>
+<SsgoiLayoutBoundary boundary={({ url }) => getRootTransitionId(url)}>
   {@render children()}
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 Then add a default pathname boundary only around the changing child:
@@ -86,9 +102,9 @@ Then add a default pathname boundary only around the changing child:
 ```svelte
 <!-- src/routes/products/+layout.svelte -->
 <ProductHeaderAndTabs />
-<SsgoiRouteBoundary>
+<SsgoiLayoutBoundary>
   {@render children()}
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 The stable outer key preserves the shell; the inner pathname boundary produces
@@ -98,11 +114,14 @@ no child transition.
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/sveltekit
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-`as`, HTML attributes, `routeKey`, and `resolve({ pathname, url })` are supported.
-The resolver returns `{ id, key? }`; omitted key defaults to id. Keep a shell's
-key stable while its id tracks the full pathname. `routeKey` overrides that key.
-Search/hash-only changes do not remount by default. Use the URL in `resolve`
-when query changes should animate. Use router navigation for those changes;
+`as`, HTML attributes, and `boundary` are supported: a string key,
+`{ id?, key? }`, or a function of `{ pathname, url }` returning either.
+Defaults: id = pathname, key = id. Keep a shell's key stable while its id tracks
+the full pathname. Search/hash-only changes do not remount by default. Use the
+URL in the function form when query changes should animate. Use router navigation for those changes;
 shallow `pushState`/`replaceState` calls do not trigger `onNavigate`.
 
 Custom router/manual guide: https://ssgoi.dev/llms/manual-boundaries.txt
+
+`SsgoiRouteBoundary` from `@ssgoi/svelte/sveltekit` still works but is
+deprecated and will be removed in 8.0.0.

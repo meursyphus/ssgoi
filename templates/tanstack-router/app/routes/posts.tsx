@@ -1,10 +1,10 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export const Route = createFileRoute("/posts")({
   component: () => (
-    <SsgoiRouteBoundary className="min-h-full bg-[#121212]">
+    <SsgoiLayoutBoundary className="min-h-full bg-[#121212]">
       <Outlet />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   ),
 });

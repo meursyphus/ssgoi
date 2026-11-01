@@ -13,6 +13,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { nativePlatform } from "./native-platform.js";
+import type { SsgoiFramework } from "./layout-boundary.js";
 import type { SsgoiConfig } from "./types.js";
 
 export interface SsgoiProps {
@@ -22,12 +23,15 @@ export interface SsgoiProps {
   reducedMotion?: "system" | "always" | "never";
   /** Report failed preparation; the navigator still reveals the latest screen. */
   onTransitionError?: (error: Error) => void;
+  /** Expo Router primitives for SsgoiLayoutBoundary: `{ StackRouter, unstable_integrateWithRouter }`. */
+  framework?: SsgoiFramework;
 }
 type Context = {
   config: SsgoiConfig;
   platform: typeof nativePlatform;
   reducedMotion: boolean;
   onTransitionError?: (error: Error) => void;
+  framework?: SsgoiFramework;
 };
 const SsgoiContext = createContext<Context | null>(null);
 
@@ -37,6 +41,7 @@ export function Ssgoi({
   style,
   reducedMotion = "system",
   onTransitionError,
+  framework,
 }: SsgoiProps) {
   // Respect reduced motion while the asynchronous system preference is loading.
   const [systemReducedMotion, setSystemReducedMotion] = useState(true);
@@ -69,8 +74,9 @@ export function Ssgoi({
         reducedMotion === "always" ||
         (reducedMotion === "system" && systemReducedMotion),
       onTransitionError,
+      framework,
     }),
-    [config, reducedMotion, systemReducedMotion, onTransitionError],
+    [config, reducedMotion, systemReducedMotion, onTransitionError, framework],
   );
   return (
     <SsgoiContext.Provider value={context}>
@@ -83,7 +89,7 @@ export function useSsgoi() {
   const context = useContext(SsgoiContext);
   if (!context)
     throw new Error(
-      "SSGOI: render SsgoiRouteBoundary inside <Ssgoi config={config}>.",
+      "SSGOI: render SsgoiLayoutBoundary inside <Ssgoi config={config}>.",
     );
   return context;
 }

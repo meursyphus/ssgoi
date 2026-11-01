@@ -1,5 +1,5 @@
 import { ChevronLeft, Heart } from "lucide-react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { DemoBackLink } from "@/lib/components/demo-back-link";
 import type { ListingCollection } from "@/demo/air-bnb/state/listing";
 import { isCollectionParent } from "@/demo/air-bnb/page/shared/routes";
@@ -16,7 +16,7 @@ export function CollectionView({
   loading?: boolean;
 }) {
   return (
-    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
+    <SsgoiLayoutBoundary className="relative block min-h-full w-full bg-white">
       <div className="sticky top-0 z-20 flex h-14 items-center bg-white/95 px-3 backdrop-blur">
         {/* Back to whichever page opened the list (Explore, Wishlists or
             Search); `fallback` when it was opened directly. */}
@@ -63,6 +63,6 @@ export function CollectionView({
           ))}
         </div>
       )}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

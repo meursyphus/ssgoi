@@ -27,17 +27,19 @@ export const config$ = $(() => ({
 }));
 ```
 
-Attach SSGOI to the element that directly owns `<Slot />`.
+Attach SSGOI to the element that directly owns `<Slot />`. Pass Qwik City's
+location store as `framework` so page boundaries below can read it.
 
 ```tsx
 // src/routes/layout.tsx
 import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { useLocation } from "@builder.io/qwik-city";
 import { useSsgoi } from "@ssgoi/qwik";
 import { config$ } from "../lib/ssgoi-config";
 
 export default component$(() => {
   const root = useSignal<HTMLElement>();
-  useSsgoi(root, { config$ });
+  useSsgoi(root, { config$, framework: { location: useLocation() } });
 
   return (
     <main
@@ -75,20 +77,20 @@ export const Comments = component$(() => {
 });
 ```
 
-## Router boundary helper
+## Layout boundary
 
-The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.
+The computed boundary hook reads the location you passed as `framework`. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.
 
 ### Mark the page root
 
-Call the hook in a Qwik City page or layout, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key.
+Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.
 
 ```tsx
 import { component$ } from "@builder.io/qwik";
-import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
 export default component$(() => {
-  const boundary = useSsgoiRouteBoundary();
+  const boundary = useSsgoiLayoutBoundary();
   return (
     <article key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       {/* Page content */}
@@ -99,7 +101,9 @@ export default component$(() => {
 
 ### Persistent layouts
 
-Pass a stable route key to useSsgoiRouteBoundary("shell") for an outer shell, and retain separately keyed page roots below it. The helper does not wrap or move Slot content.
+Pass a fixed key, useSsgoiLayoutBoundary("shell"), for an outer shell, or { id?, key? } to fix the id too, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.
+
+useSsgoiRouteBoundary from @ssgoi/qwik/qwik-city still works but is deprecated and will be removed in 8.0.0.
 
 
 ## Persistent layout

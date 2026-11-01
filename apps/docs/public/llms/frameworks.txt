@@ -1,8 +1,9 @@
 # SSGOI framework guides
 
 Choose your rendering framework first. Each package supplies a common implementation;
-router helpers are optional subpaths, not separate packages to install.
-Next.js is the only router helper not marked experimental.
+routers connect through a `framework` object on the provider that reads the router,
+so there is no router package or subpath to install.
+Next.js is the only router integration not marked experimental.
 
 | Framework | Package | Guide |
 | --- | --- | --- |
@@ -14,31 +15,52 @@ Next.js is the only router helper not marked experimental.
 | Angular | `@ssgoi/angular` | https://ssgoi.dev/llms/frameworks/angular.txt |
 | React Native | `@ssgoi/react-native` | https://ssgoi.dev/llms/frameworks/react-native.txt |
 
-## Router helper imports
+## Router integration
 
-| Framework | Router | Import | Status |
-| --- | --- | --- | --- |
-| React | Next.js | `@ssgoi/react/nextjs` | Next.js App Router |
-| React | Remix | `@ssgoi/react/remix` | Experimental |
-| React | React Router | `@ssgoi/react/react-router` | Experimental |
-| React | TanStack Router | `@ssgoi/react/tanstack-router` | Experimental |
-| Svelte | SvelteKit | `@ssgoi/svelte/sveltekit` | Experimental |
-| Vue | Vue Router | `@ssgoi/vue/vue-router` | Experimental |
-| Vue | Nuxt | `@ssgoi/vue/nuxt` | Experimental |
-| Solid | Solid Router | `@ssgoi/solid/solid-router` | Experimental |
-| Solid | SolidStart | `@ssgoi/solid/solidstart` | Experimental |
-| Qwik | Qwik City | `@ssgoi/qwik/qwik-city` | Experimental |
-| Angular | Angular Router | `@ssgoi/angular/router` | Experimental |
-| React Native | Expo Router | `@ssgoi/react-native/expo-router` | Experimental |
+Pass `framework` to the provider and use the layout boundary from the
+binding's root entry. The framework returns a route object (at least
+`{ pathname }`). The boundary throws if its provider has no `framework`. Each
+guide has the copy-pasteable object.
 
-React, Vue, Solid, and Svelte helpers supply SsgoiRouteBoundary. Angular supplies
-a structural directive with that name. Qwik City supplies useSsgoiRouteBoundary
-so the page retains ownership of its DOM and projected slots. Expo supplies a
-native file-based boundary; web presets and DOM attributes do not apply.
+Every layout boundary takes one `boundary` input that sets two values: `key`
+is when the DOM is replaced (its lifetime), and `id` is which route SSGOI
+matches transition rules against. Defaults: id = pathname, key = id.
 
-Router peers are optional and external to the library build. Their broad peer
-ranges avoid constraining applications that do not use a helper. Check each
-guide for the tested versions. Remix 2 follows its own React 18 requirements.
+- a string is a fixed key, e.g. `boundary="products-layout"` for a persistent
+  layout; the id keeps following the pathname
+- `{ id?, key? }` fixes either value
+- `(route) => string | { id?, key? }` computes them; the function form
+  receives the route object the framework returned, as-is. Qwik's
+  `useSsgoiLayoutBoundary(boundary?)` takes only the string and object forms
+
+| Framework | Router | `framework` | Boundary | Status |
+| --- | --- | --- | --- | --- |
+| React | Next.js | `useRoute` from `usePathname` + `useSelectedLayoutSegments` | `SsgoiLayoutBoundary` | Next.js App Router |
+| React | Remix | `{ useRoute: () => useLocation() }` | `SsgoiLayoutBoundary` | Experimental |
+| React | React Router | `{ useRoute: () => useLocation() }` | `SsgoiLayoutBoundary` | Experimental |
+| React | TanStack Router | `useRoute` from the rendered leaf match | `SsgoiLayoutBoundary` | Experimental |
+| Svelte | SvelteKit | `{ getRoute: () => ({ pathname: page.url.pathname, url: page.url }), onNavigate }` | `SsgoiLayoutBoundary` | Experimental |
+| Vue | Vue Router | `{ getRoute: () => ({ pathname: router.currentRoute.value.path }) }` | `SsgoiLayoutBoundary` | Experimental |
+| Vue | Nuxt | `{ getRoute: () => ({ pathname: router.currentRoute.value.path }) }` | `SsgoiLayoutBoundary` | Experimental |
+| Solid | Solid Router | `{ getRoute: () => ({ pathname: location.pathname }) }` | `SsgoiLayoutBoundary` | Experimental |
+| Solid | SolidStart | `{ getRoute: () => ({ pathname: location.pathname }) }` | `SsgoiLayoutBoundary` | Experimental |
+| Qwik | Qwik City | `{ location: useLocation() }` | `useSsgoiLayoutBoundary` | Experimental |
+| Angular | Angular Router | `getRoute(injector)` + `onNavigate(injector, callback)` | `*ssgoiLayoutBoundary` | Experimental |
+| React Native | Expo Router | `{ StackRouter, unstable_integrateWithRouter }` | `SsgoiLayoutBoundary` | Experimental |
+
+Qwik's hook returns an id and key so the page retains ownership of its DOM and
+projected slots. Angular binds the framework on the provider element
+(`<main ssgoi [config]="config" [ssgoiFramework]="framework">`) and marks pages
+with the `*ssgoiLayoutBoundary` structural directive. Expo's boundary is a native file-based navigator; web presets
+and DOM attributes do not apply.
+
+The older router subpaths (`@ssgoi/react/nextjs`, `@ssgoi/svelte/sveltekit`,
+`@ssgoi/vue/nuxt`, ...) and their `SsgoiRouteBoundary` still work but are
+deprecated and will be removed in 8.0.0.
+
+Root entries never import a router; your `framework` object does the reading.
+Check each guide for the tested versions. Remix 2 follows its own React 18
+requirements.
 
 Direct/custom integration: https://ssgoi.dev/llms/manual-boundaries.txt
 Transition catalog: https://ssgoi.dev/llms/transitions.txt

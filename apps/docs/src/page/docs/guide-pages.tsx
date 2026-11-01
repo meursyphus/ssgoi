@@ -56,7 +56,7 @@ export function WhySsgoiBody() {
           className="mt-6"
           language="text"
           code={`app/
-  ssgoi-provider.tsx         # new — config + <Ssgoi>
+  ssgoi-provider.tsx         # new — config + framework + <Ssgoi>
   layout.tsx                 # already yours — wrap routed content`}
         />
         <p className={`mt-4 ${body}`}>
@@ -325,8 +325,10 @@ export function BoundariesBody() {
       <p className={body}>
         A route boundary is the real DOM element that owns a changing page. The
         framework creates and removes it; SSGOI observes that lifetime and
-        animates the region. Router helpers are optional conveniences around
-        this pattern, so a router does not need a dedicated SSGOI package.
+        animates the region. The layout boundary each package ships builds this
+        element from the route your provider&apos;s{" "}
+        <code className={inlineCode}>framework</code> object reads, so a router
+        does not need a dedicated SSGOI package.
       </p>
       <CodeBlock
         className="mt-6"
@@ -338,12 +340,14 @@ export function BoundariesBody() {
       <p className={`mt-6 ${body}`}>
         Place the boundary inside one provider. Get the pathname from the router
         in the same render as its children; a mount-time window.location read or
-        an effect-delayed key can miss the outgoing page. Ready-made helpers are
-        listed within each{" "}
+        an effect-delayed key can miss the outgoing page. The ready-made{" "}
+        <code className={inlineCode}>SsgoiLayoutBoundary</code> does this for
+        you and throws if its provider has no{" "}
+        <code className={inlineCode}>framework</code>; each{" "}
         <Link href="/docs/frameworks" className={link}>
           framework guide
-        </Link>
-        .
+        </Link>{" "}
+        shows the object for its router.
       </p>
 
       <Section
@@ -378,6 +382,16 @@ export function BoundariesBody() {
             remount triggers it.
           </Note>
         </div>
+        <p className={`mt-6 ${body}`}>
+          <code className={inlineCode}>SsgoiLayoutBoundary</code> sets both
+          through one <code className={inlineCode}>boundary</code> prop. By
+          default the id is the pathname and the key is the id. A string fixes
+          the key, as a persistent layout needs, while the id keeps following
+          the pathname; <code className={inlineCode}>{"{ id?, key? }"}</code>{" "}
+          fixes either; a function receives the route your{" "}
+          <code className={inlineCode}>framework</code> returned and returns
+          either form.
+        </p>
       </Section>
 
       <Section
@@ -1193,10 +1207,20 @@ export function FrameworksIndexBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        Choose your rendering framework first, then the helper for your router.
-        Transition factories and route rules are identical everywhere; the
-        provider and boundary wiring differ per stack — Qwik takes a QRL config
-        factory, Angular an <code className={inlineCode}>ssgoi</code> directive.
+        Choose your rendering framework first, then give the provider a{" "}
+        <code className={inlineCode}>framework</code> object that reads your
+        router and wrap routed content in the package&apos;s layout boundary.
+        The framework returns a route object, and the function form of the
+        boundary&apos;s <code className={inlineCode}>boundary</code> prop
+        receives that object as-is. Transition factories and route rules are
+        identical everywhere; the provider and boundary wiring differ per stack
+        — Qwik takes a QRL config factory, Angular an{" "}
+        <code className={inlineCode}>ssgoi</code> directive.
+      </p>
+      <p className={`mt-4 ${body}`}>
+        The older router subpaths, such as{" "}
+        <code className={inlineCode}>@ssgoi/react/nextjs</code>, still work but
+        are deprecated and will be removed in 8.0.0.
       </p>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">

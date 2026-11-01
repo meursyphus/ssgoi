@@ -1,4 +1,4 @@
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function ProfileLayout({
   children,
@@ -6,8 +6,8 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SsgoiRouteBoundary className="min-h-full bg-[#121212]">
+    <SsgoiLayoutBoundary className="min-h-full bg-[#121212]">
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

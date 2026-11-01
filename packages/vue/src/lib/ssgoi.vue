@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import type { SsgoiConfig } from "./types";
+import type { SsgoiConfig, SsgoiFramework } from "./types";
 import type { HostAnimation } from "@ssgoi/core/internal";
 import { provideSsgoi } from "./context";
 import {
@@ -21,6 +21,7 @@ import {
 interface Props {
   config: SsgoiConfig;
   host?: HostAnimation;
+  framework?: SsgoiFramework;
 }
 
 const props = defineProps<Props>();
@@ -28,7 +29,10 @@ const props = defineProps<Props>();
 const contextValue = computed(() =>
   createSggoiTransitionContext(props.config, { host: props.host }),
 );
-provideSsgoi(contextValue);
+provideSsgoi(
+  contextValue,
+  computed(() => props.framework),
+);
 
 const root = ref<HTMLElement | null>(null);
 let stopObserving: (() => void) | undefined;

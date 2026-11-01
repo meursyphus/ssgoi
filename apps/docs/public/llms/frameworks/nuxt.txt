@@ -18,27 +18,36 @@ container, and scroll restore then targets the wrong element. Fall back to
 
 ## Setup
 
-Everything wires in the app root — one `<Ssgoi>`, the shell classes, and the
-boundary component around `<NuxtPage />`:
+Everything wires in the app root — one `<Ssgoi>` whose `framework.getRoute`
+returns the router's current path, the shell classes, and the boundary component around
+`<NuxtPage />`:
 
 ```vue
 <!-- app.vue -->
 <script setup>
-import { Ssgoi } from "@ssgoi/vue";
-import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
 import { config } from "~/utils/ssgoi-config";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 </script>
 
 <template>
   <main class="relative z-0 min-h-dvh overflow-x-clip">
-    <Ssgoi :config="config">
-      <SsgoiRouteBoundary>
+    <Ssgoi :config="config" :framework="framework">
+      <SsgoiLayoutBoundary>
         <NuxtPage />
-      </SsgoiRouteBoundary>
+      </SsgoiLayoutBoundary>
     </Ssgoi>
   </main>
 </template>
 ```
+
+`useRouter` is Nuxt's auto-import. Read `router.currentRoute`, the committed
+router state, rather than Nuxt's delayed `useRoute()` value.
+`SsgoiLayoutBoundary` throws if `<Ssgoi>` has no `framework`.
 
 ```ts
 // utils/ssgoi-config.ts
@@ -55,29 +64,33 @@ export const config: SsgoiConfig = {
 A changed key remounts the subtree; that unmount/mount pair is what SSGOI
 animates. By default, key and marker both follow the router pathname.
 
-The route boundary is shipped in `@ssgoi/vue/nuxt`; no local component is needed.
+`SsgoiLayoutBoundary` is shipped in `@ssgoi/vue`; no local component is needed.
 
 ## Plain Vue Router
 
-Import the Vue Router entry and wrap the current RouterView component:
+Pass the same `framework` from Vue Router's `useRouter` and wrap the current
+RouterView component:
 
 ```vue
 <!-- App.vue -->
 <script setup lang="ts">
-import { RouterView } from "vue-router";
-import { Ssgoi } from "@ssgoi/vue";
-import { SsgoiRouteBoundary } from "@ssgoi/vue/vue-router";
+import { RouterView, useRouter } from "vue-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
 import { config } from "./ssgoi-config";
 
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 </script>
 
 <template>
   <main class="relative z-0 min-h-dvh overflow-x-clip">
-    <Ssgoi :config="config">
+    <Ssgoi :config="config" :framework="framework">
       <RouterView v-slot="{ Component }">
-        <SsgoiRouteBoundary>
+        <SsgoiLayoutBoundary>
           <component :is="Component" />
-        </SsgoiRouteBoundary>
+        </SsgoiLayoutBoundary>
       </RouterView>
     </Ssgoi>
   </main>
@@ -88,7 +101,8 @@ Verify: navigate `/` → any page slides in from the right; back slides out.
 
 ## Beyond the basics
 
-For a persistent `/products` shell, collapse that family in the root boundary:
+For a persistent `/products` shell, collapse that family's key in the root
+boundary (a returned string is the key; the id keeps the full pathname):
 
 ```vue
 <script setup lang="ts">
@@ -98,9 +112,9 @@ const getRootTransitionId = (path: string) =>
     : path;
 </script>
 
-<SsgoiRouteBoundary :resolve="({ pathname }) => ({ id: pathname, key: getRootTransitionId(pathname) })">
+<SsgoiLayoutBoundary :boundary="({ pathname }) => getRootTransitionId(pathname)">
   <NuxtPage />
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 Then put a default pathname boundary only around the nested child:
@@ -108,9 +122,9 @@ Then put a default pathname boundary only around the nested child:
 ```vue
 <!-- pages/products.vue -->
 <ProductHeaderAndTabs />
-<SsgoiRouteBoundary>
+<SsgoiLayoutBoundary>
   <NuxtPage />
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 The stable outer key preserves the shell; the inner pathname boundary produces
@@ -120,13 +134,15 @@ in plain Vue Router.
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nuxt
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-`@ssgoi/vue/nuxt` loads only its optional Nuxt 3/4 peer.
-The root `@ssgoi/vue` import has no router dependency. The boundary accepts
-`as`, DOM attributes, `routeKey`, and `resolve({ pathname })`. Return `{ id, key? }`;
-key defaults to id and routeKey overrides it. Query/hash-only changes keep the
-boundary by default. Keep the logical id current even when the key is stable.
+Nuxt 3/4 is supported. The root `@ssgoi/vue` import has no router or Nuxt
+dependency; it calls the `getRoute` you pass. The boundary accepts
+`as`, DOM attributes, and `boundary`: a string key, `{ id?, key? }`, or a
+function of the route `getRoute` returned that returns either (a returned
+string is the key). Defaults: id = pathname, key = id. Query/hash-only changes
+keep the boundary by default. Keep the logical id current even when the key is
+stable.
 
 Manual/custom-router guide: https://ssgoi.dev/llms/manual-boundaries.txt
 
-Plain Vue Router users can import the same component from `@ssgoi/vue/vue-router`.
-The Nuxt entry uses nuxt/app and does not install Vue Router as a separate peer.
+`SsgoiRouteBoundary` from `@ssgoi/vue/nuxt` or `@ssgoi/vue/vue-router` still
+works but is deprecated and will be removed in 8.0.0.

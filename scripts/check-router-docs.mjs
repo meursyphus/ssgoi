@@ -73,7 +73,10 @@ assert(
 );
 const llms = readFileSync(join(root, "apps/docs/public/llms.txt"), "utf8");
 assert(llms.includes("Next.js App Router"));
-assert(llms.includes('from "@ssgoi/react/nextjs"'));
+assert(llms.includes('import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";'));
+assert(llms.includes("useRoute:"));
+assert(llms.includes("framework={framework}"));
+assert(!llms.includes('from "@ssgoi/react/nextjs"'));
 assert(!llms.includes("manual-boundaries"));
 assert(
   llms.split("\n").length < 100,

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from "$app/stores";
-  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
+  import { page } from "$app/state";
+  import { SsgoiLayoutBoundary } from "@ssgoi/svelte";
   import { PRODUCT_CATEGORIES } from "$lib/ssgoi-config";
 
   let { children } = $props();
@@ -19,8 +19,8 @@
       {#each PRODUCT_CATEGORIES as cat}
         <a
           href={cat.path}
-          class="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 {$page
-            .url.pathname === cat.path
+          class="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 {page.url
+            .pathname === cat.path
             ? 'bg-white text-black'
             : 'bg-white/10 text-neutral-400 hover:bg-white/15'}"
         >
@@ -32,8 +32,8 @@
 
   <!-- Tab Content - Slide transitions here -->
   <div class="flex-1 overflow-hidden relative">
-    <SsgoiRouteBoundary class="min-h-full bg-[#121212]">
+    <SsgoiLayoutBoundary class="min-h-full bg-[#121212]">
       {@render children()}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   </div>
 </div>

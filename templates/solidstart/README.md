@@ -2,27 +2,28 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/solid/solidstart`. The router is an
-optional peer and is loaded only by this entry.
+Pass a route getter to `<Ssgoi framework>` and import
+`SsgoiLayoutBoundary` from `@ssgoi/solid`. The package itself never imports
+`@solidjs/router`.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` and one
-centralized route boundary:
+The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` inside the
+router's `root`, and one centralized layout boundary:
 
 ```tsx
-<Ssgoi config={ssgoiConfig}>
-  <SsgoiRouteBoundary
-    resolve={({ pathname }) => ({
-      id: pathname,
-      key: getRootTransitionId(pathname),
-    })}
+const location = useLocation();
+const framework = { getRoute: () => ({ pathname: location.pathname }) };
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  <SsgoiLayoutBoundary
+    boundary={({ pathname }) => getRootTransitionId(pathname)}
   >
     {props.children}
-  </SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
 </Ssgoi>
 ```
 

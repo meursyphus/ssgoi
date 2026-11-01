@@ -2,7 +2,18 @@
 
 The router helper used by this template is an experimental API.
 
-Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
+Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiLayoutBoundary` integration. Expo Router's navigator primitives are passed to `<Ssgoi framework>`; the package itself never imports `expo-router`.
+
+```tsx
+import { StackRouter, unstable_integrateWithRouter } from "expo-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/react-native";
+
+const framework = { StackRouter, unstable_integrateWithRouter };
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary />
+</Ssgoi>;
+```
 
 From the repository root:
 

@@ -49,9 +49,9 @@ export const prepareOutgoing = (element, context) => {
 
 `data-ssgoi-transition` supplies the logical route id used to pair OUT and IN
 and match transition config. SSGOI observes the lifecycle; it does not navigate
-or change React keys. The deprecated React `<SsgoiTransition>` component only
-rendered this attribute, so applications should set it directly on their keyed
-route boundary.
+or change React keys. The deprecated React `<SsgoiTransition>` component
+(removed in 8.0.0) only rendered this attribute, so applications should set it
+directly on their keyed route boundary.
 
 ## Nested boundary ownership
 

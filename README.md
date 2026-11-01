@@ -62,8 +62,8 @@ app's existing router and layout structure.
 
 ## Or add it in just two files
 
-The Next.js setup is one config, one provider, and one simple
-ready-made route boundary.
+The Next.js setup is one config, one provider that knows how to read the
+Next.js route, and one ready-made layout boundary.
 
 ```bash
 npm install @ssgoi/react
@@ -74,31 +74,45 @@ npm install @ssgoi/react
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
+};
+
 export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return <Ssgoi config={config}>{children}</Ssgoi>;
+  return (
+    <Ssgoi config={config} framework={framework}>
+      {children}
+    </Ssgoi>
+  );
 }
 ```
 
-Import the route boundary directly; it reads the pathname and handles URL-hook Suspense:
+Import the layout boundary from the same package; it calls `framework.useRoute`
+(and throws without a `framework`) and handles URL-hook Suspense:
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
-<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>;
+<SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>;
 ```
 
 ```tsx
 // app/layout.tsx
 import { type ReactNode } from "react";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -106,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>
-            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+            <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
           </SsgoiProvider>
         </main>
       </body>
@@ -119,9 +133,11 @@ The class string above is Tailwind shorthand. Without Tailwind, apply
 `position: relative; z-index: 0; min-height: 100dvh; overflow-x: clip` to the
 shell. Use `100vh` only where `dvh` is unsupported.
 
-That is enough for a simple app. Router subpaths use optional peers, so importing
-`@ssgoi/react` does not install or load Next.js. Other frameworks use the same small boundary
-model with their own router state. For complete files, persistent layouts,
+That is enough for a simple app. `@ssgoi/react` never imports Next.js; it calls
+the `useRoute` hook you wrote. Other frameworks use the same small boundary
+model with their own router state passed as `framework`. The older router
+subpaths such as `@ssgoi/react/nextjs` still work but are deprecated and will be
+removed in 8.0.0. For complete files, persistent layouts,
 nested boundaries, and framework-specific setup, see the
 [documentation](https://ssgoi.dev/docs/install).
 
@@ -153,7 +169,7 @@ stay with your existing stack.
 React · Svelte · Vue · Solid · Angular · Qwik · framework-agnostic core
 
 An experimental [React Native / Expo Router integration](./packages/react-native/README.md)
-adds native `fade`/`slide` transitions with the same `SsgoiRouteBoundary` naming.
+adds native `fade`/`slide` transitions with the same `SsgoiLayoutBoundary` naming.
 Try the [Expo template](./templates/expo) for the current implementation and device checks.
 
 [See complete compatibility and framework guides →](https://ssgoi.dev/docs/compatibility)

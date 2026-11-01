@@ -1,4 +1,4 @@
 {
   "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
-  "lib": { "entryFile": "public-api.ts" }
+  "lib": { "entryFile": "../src/lib/legacy/ssgoi-route-boundary.ts" }
 }

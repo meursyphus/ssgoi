@@ -33,8 +33,8 @@ export default tseslint.config([
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [{
-          group: ["next", "next/*", "react-router", "react-router/*", "@remix-run/*", "@tanstack/react-router", "./routers/*", "./routers/**"],
-          message: "Keep router imports in src/routers and expose them only through router subpaths.",
+          group: ["next", "next/*", "react-router", "react-router/*", "@remix-run/*", "@tanstack/react-router", "./legacy/*", "./legacy/**", "!./legacy/ssgoi-transition"],
+          message: "Keep router imports in src/legacy and expose them only through the deprecated subpaths.",
         }],
       }],
     },

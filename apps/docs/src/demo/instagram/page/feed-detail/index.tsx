@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePost, type PostDetail } from "@/demo/instagram/state/post";
 import { useProfile } from "@/demo/instagram/state/profile";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { FeedDetailHeader } from "./header";
 import { FeedDetailImage } from "./image";
 import { FeedDetailActions } from "./actions";
@@ -38,13 +38,13 @@ export default function FeedDetailPage({
   const me = profile.me.data;
   const profileHref = `/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`;
   return (
-    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
+    <SsgoiLayoutBoundary className="relative block min-h-full w-full bg-white">
       <FeedDetailHeader
         fallbackHref={isTagged ? `${profileHref}/tagged` : profileHref}
       />
       <FeedDetailImage post={detail} author={me} />
       <FeedDetailActions postId={detail.id} />
       <FeedDetailMeta post={detail} author={me} />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

@@ -28,18 +28,21 @@ export const config = {
 };
 ```
 
-Root — one `<Ssgoi>` + the shell classes:
+Root — one `<Ssgoi>` + the shell classes + a `framework` whose `useRoute`
+returns React Router's location:
 
 ```tsx
 // app/root.tsx — the App component
-import { Outlet } from "react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { Outlet, useLocation } from "react-router";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { config } from "./components/ssgoi-config";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
 
 export default function App() {
   return (
     <main className="relative z-0 min-h-dvh overflow-x-clip">
-      <Ssgoi config={config}>
+      <Ssgoi config={config} framework={framework}>
         <Outlet />
       </Ssgoi>
     </main>
@@ -47,19 +50,22 @@ export default function App() {
 }
 ```
 
+Keep `framework` at module scope so it stays stable. `SsgoiLayoutBoundary`
+throws if `<Ssgoi>` has no `framework`.
+
 Boundary — pathname as both React key and transition id, wired once with a
 pathless layout route:
 
 ```tsx
 // app/routes/page-boundary.layout.tsx
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function PageBoundaryLayout() {
   return (
-    <SsgoiRouteBoundary>
+    <SsgoiLayoutBoundary>
       <Outlet />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 
@@ -88,16 +94,16 @@ A persistent route family needs two boundaries:
 ```tsx
 // app/routes/products_.layout.tsx
 import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function ProductsLayout() {
   return (
-    <SsgoiRouteBoundary routeKey="products-layout">
+    <SsgoiLayoutBoundary boundary="products-layout">
       <ProductHeaderAndTabs />
-      <SsgoiRouteBoundary>
+      <SsgoiLayoutBoundary>
         <Outlet />
-      </SsgoiRouteBoundary>
-    </SsgoiRouteBoundary>
+      </SsgoiLayoutBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 ```
@@ -111,12 +117,16 @@ preserves state but produces no child transition.
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/react-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-The `@ssgoi/react/react-router` subpath uses only its optional router peer.
-Root imports and other router entries do not load it. `as`, DOM attributes,
-`routeKey`, and `resolve` are supported. Resolve returns `{ id, key? }`; key
-defaults to id, and routeKey overrides it. Query-only navigation keeps the
-boundary by default. For direct control or a custom router:
-https://ssgoi.dev/llms/manual-boundaries.txt
+`@ssgoi/react` never imports `react-router`; it calls the `useRoute` you wrote.
+`as`, DOM attributes, and `boundary` are supported. `boundary` sets the key
+(when the DOM is replaced) and id (which route rules match): a string key,
+`{ id?, key? }`, or a function that receives the `useLocation()` value as-is
+and returns either. Defaults: id = pathname, key = id. Query-only
+navigation keeps the boundary by default. For direct control or a custom
+router: https://ssgoi.dev/llms/manual-boundaries.txt
+
+`SsgoiRouteBoundary` from `@ssgoi/react/react-router` still works but is
+deprecated and will be removed in 8.0.0.
 
 If a React Router 6 app only lists react-router-dom, add the matching version
 of react-router as a direct dependency too (especially with strict pnpm layouts).

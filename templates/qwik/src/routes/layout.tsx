@@ -8,7 +8,10 @@ export default component$(() => {
   const pathname = location.url.pathname;
   const ssgoiRoot = useSignal<HTMLElement>();
 
-  useSsgoi(ssgoiRoot, { config$: ssgoiConfig$ });
+  useSsgoi(ssgoiRoot, {
+    config$: ssgoiConfig$,
+    framework: { location },
+  });
 
   return (
     <div class="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] relative overflow-hidden lg:p-6">

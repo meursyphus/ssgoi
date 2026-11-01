@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { usePost } from "@/demo/instagram/state/post";
 import { useProfile } from "@/demo/instagram/state/profile";
 import { ProfileBottomBar } from "../profile-shell/bottom-bar";
@@ -29,7 +29,7 @@ export default function HomePage() {
   const me = profile.me.data;
   const feedLoading = post.feed.isLoading && post.feed.data.length === 0;
   return (
-    <SsgoiRouteBoundary className="relative flex min-h-full w-full flex-col bg-white text-neutral-900">
+    <SsgoiLayoutBoundary className="relative flex min-h-full w-full flex-col bg-white text-neutral-900">
       <HomeHeader />
       <StoryTray items={profile.storyTray.data} />
       <div className="flex-1 border-t border-neutral-100">
@@ -48,6 +48,6 @@ export default function HomePage() {
           profileHref={`/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`}
         />
       </div>
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

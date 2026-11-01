@@ -12,14 +12,13 @@ npm install @ssgoi/svelte
 
 Agent setup guide: https://ssgoi.dev/llms/svelte.txt
 
-## Router helpers
+## Router wiring
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
+Install this framework package once. The root entry never imports a router:
+pass the router members SSGOI needs through `<Ssgoi framework>`.
 
-| Router    | Import                    | API                  |
-| --------- | ------------------------- | -------------------- |
-| SvelteKit | `@ssgoi/svelte/sveltekit` | `SsgoiRouteBoundary` |
+The `@ssgoi/svelte/sveltekit` subpath (`SsgoiRouteBoundary`) is deprecated.
+Use `SsgoiLayoutBoundary` from `@ssgoi/svelte` with `framework` instead.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring and limits.
 
@@ -28,6 +27,8 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring a
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script lang="ts">
+  import { onNavigate } from "$app/navigation";
+  import { page } from "$app/state";
   import { Ssgoi } from "@ssgoi/svelte";
   import { drill } from "@ssgoi/svelte/view-transitions";
 
@@ -39,7 +40,13 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring a
 </script>
 
 <main class="ssgoi-shell">
-  <Ssgoi {config}>
+  <Ssgoi
+    {config}
+    framework={{
+      getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+      onNavigate,
+    }}
+  >
     {@render children()}
   </Ssgoi>
 </main>
@@ -52,6 +59,26 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring a
   min-height: 100dvh;
   overflow-x: clip;
 }
+```
+
+SvelteKit before 2.12 has no `$app/state`; read the store instead:
+
+```svelte
+<script lang="ts">
+  import { get } from "svelte/store";
+  import { onNavigate } from "$app/navigation";
+  import { page } from "$app/stores";
+</script>
+
+<Ssgoi
+  {config}
+  framework={{
+    getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url }),
+    onNavigate,
+  }}
+>
+  {@render children()}
+</Ssgoi>
 ```
 
 ## Route boundary
@@ -83,6 +110,38 @@ inner boundaries:
 
 SvelteKit keeps the layout DOM during child navigation. Leaving the layout
 uses the outer boundary; changing a child route uses the child boundary.
+
+`SsgoiLayoutBoundary` does this for you. It reads the router from
+`<Ssgoi framework>`, keeps the outgoing DOM intact when the route changes, and
+keeps a persistent shell's DOM while its `key` stays the same:
+
+```svelte
+<!-- src/routes/projects/[id]/+layout.svelte -->
+<script lang="ts">
+  import { SsgoiLayoutBoundary } from "@ssgoi/svelte";
+
+  let { children } = $props();
+</script>
+
+<SsgoiLayoutBoundary
+  as="section"
+  boundary={({ pathname }) => ({
+    id: pathname,
+    key: pathname.match(/^\/projects\/[^/]+/)?.[0],
+  })}
+>
+  {@render children()}
+</SsgoiLayoutBoundary>
+```
+
+Without `boundary`, the id and key are the pathname. `boundary` also accepts:
+
+- a string: a fixed key, e.g. `boundary="products-layout"` for a shell that
+  never remounts; the id stays the pathname.
+- an object: a fixed `id` and/or `key`, e.g. `boundary={{ id: "/feed" }}`.
+- a function of the route (`{ pathname, url }` plus any fields `getRoute`
+  returns) that returns either of the above. Use `url` to react to search
+  changes.
 
 Use a keyed block only when the router reuses the same DOM node and a new
 boundary must be forced:

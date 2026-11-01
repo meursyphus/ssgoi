@@ -12,15 +12,40 @@ npm install @ssgoi/solid
 
 Agent setup guide: https://ssgoi.dev/llms/solid.txt
 
-## Router helpers
+## Layout boundary
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
+Pass a reactive route getter to `<Ssgoi>` once (inside `<Router>`, see [Root](#root)),
+then wrap routed content in `SsgoiLayoutBoundary`. It marks the current path with
+`data-ssgoi-transition` and remounts when the path changes.
 
-| Router       | Import                      | API                  |
-| ------------ | --------------------------- | -------------------- |
-| Solid Router | `@ssgoi/solid/solid-router` | `SsgoiRouteBoundary` |
-| SolidStart   | `@ssgoi/solid/solidstart`   | `SsgoiRouteBoundary` |
+```tsx
+import { SsgoiLayoutBoundary } from "@ssgoi/solid";
+
+export default function ProductsLayout(props) {
+  return (
+    <SsgoiLayoutBoundary as="section">
+      <div>{props.children}</div>
+    </SsgoiLayoutBoundary>
+  );
+}
+```
+
+By default the transition id is the pathname and the DOM is keyed by that id.
+Change either with `boundary`:
+
+```tsx
+<SsgoiLayoutBoundary boundary="products-layout">   {/* fixed key: keep one DOM node */}
+<SsgoiLayoutBoundary boundary={{ id: "/feed" }}>    {/* fixed id */}
+<SsgoiLayoutBoundary boundary={(route) => ({ id: route.pathname, key: "shell" })}>
+```
+
+A function receives the object `getRoute` returns (extra fields included) and
+may return a key string or `{ id?, key? }`. `as` sets the element.
+`SsgoiLayoutBoundary` throws without `framework` on `<Ssgoi>`.
+
+`SsgoiRouteBoundary` from `@ssgoi/solid/solid-router` and
+`@ssgoi/solid/solidstart` is deprecated; use `SsgoiLayoutBoundary` with
+`framework` instead.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/solid) for wiring and limits.
 
@@ -29,7 +54,7 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/solid) for wiring an
 Use one `<Ssgoi>` around file routes.
 
 ```tsx
-import { Router } from "@solidjs/router";
+import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Ssgoi } from "@ssgoi/solid";
 import { drill } from "@ssgoi/solid/view-transitions";
@@ -38,15 +63,24 @@ const config = {
   transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
 };
 
+function Root(props: RouteSectionProps) {
+  const location = useLocation();
+
+  return (
+    <main class="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi
+        config={config}
+        framework={{ getRoute: () => ({ pathname: location.pathname }) }}
+      >
+        {props.children}
+      </Ssgoi>
+    </main>
+  );
+}
+
 export default function App() {
   return (
-    <Router
-      root={(props) => (
-        <main class="relative z-0 min-h-dvh overflow-x-clip">
-          <Ssgoi config={config}>{props.children}</Ssgoi>
-        </main>
-      )}
-    >
+    <Router root={Root}>
       <FileRoutes />
     </Router>
   );

@@ -8,9 +8,23 @@ pnpm dev
 ```
 
 `src/lib/ssgoi-config.ts` exports one QRL config factory. The root route layout
-calls `useSsgoi(root, { config$ })`.
+passes Qwik City's location store as `framework`:
 
-Route components mark their DOM roots:
+```tsx
+const location = useLocation();
+useSsgoi(root, { config$: ssgoiConfig$, framework: { location } });
+```
+
+Route components that follow the pathname use `useSsgoiLayoutBoundary()` from
+`@ssgoi/qwik`. Its id and key default to the pathname; pass a key string or a
+fixed `{ id, key }` to override them:
+
+```tsx
+const boundary = useSsgoiLayoutBoundary();
+<div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>...</div>
+```
+
+Other route components mark their DOM roots directly:
 
 ```tsx
 <main data-ssgoi-transition="/posts">...</main>

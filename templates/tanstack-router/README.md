@@ -2,8 +2,9 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router`. The router is an
-optional peer and is loaded only by this entry.
+Pass TanStack Router's rendered pathname to `<Ssgoi framework>` and import
+`SsgoiLayoutBoundary` from `@ssgoi/react`. The package itself never imports
+`@tanstack/react-router`.
 
 ```bash
 pnpm install
@@ -15,16 +16,42 @@ pnpm dev
 - `app/components/ssgoi-config.ts`: one transition config.
 - `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
   `relative z-0 overflow-x-clip` shell.
-- `@ssgoi/react/tanstack-router`: the shipped pathname boundary.
+- `SsgoiLayoutBoundary`: the shipped pathname boundary.
 - Route layouts place a stable shell boundary around a pathname child boundary.
 
 ```tsx
-<SsgoiRouteBoundary routeKey="products-layout">
+import { useRouterState } from "@tanstack/react-router";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+
+// Key by the leaf match the outlet renders, not location (location moves
+// before pending matches render; index routes match "/parent/").
+const framework: SsgoiFramework = {
+  useRoute: () => ({
+    pathname: useRouterState({
+      select: (state) => {
+        const location = state.location.pathname;
+        const leaf = state.matches.at(-1)?.pathname;
+        if (!leaf) return location;
+        return leaf.length > 1 && leaf.endsWith("/") && !location.endsWith("/")
+          ? leaf.slice(0, -1)
+          : leaf;
+      },
+    }),
+  }),
+};
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  {children}
+</Ssgoi>;
+```
+
+```tsx
+<SsgoiLayoutBoundary boundary="products-layout">
   <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary>
+  <SsgoiLayoutBoundary>
     <Outlet />
-  </SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 The products route owns the stable outer lifetime. Its marker follows the full

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { usePost, type ReelDetail } from "@/demo/instagram/state/post";
 import { ReelTopBar } from "./top-bar";
 import { ReelActionRail } from "./action-rail";
@@ -22,7 +22,7 @@ export default function ReelViewerPage({
   }, [post.actions]);
   const reel = initialData;
   return (
-    <SsgoiRouteBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
+    <SsgoiLayoutBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
       <img
         src={reel.image}
         alt=""
@@ -40,6 +40,6 @@ export default function ReelViewerPage({
         <ReelCaption reel={reel} />
         <ReelActionRail reel={reel} />
       </div>
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

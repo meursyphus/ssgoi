@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "declarationMap": false,
+    "inlineSources": false,
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": { "@ssgoi/angular": ["./src/public-api.ts"] }
+  },
+  "include": ["src", "router", "tests"],
+  "exclude": []
+}

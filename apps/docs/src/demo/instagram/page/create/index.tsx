@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { usePost, type PostSimple } from "@/demo/instagram/state/post";
 import { CreateHeader } from "./header";
 import { CreatePreview } from "./preview";
@@ -20,7 +20,7 @@ export default function CreatePage() {
   const [mode, setMode] = useState<CreateMode>("post");
   const selected = picked ?? post.posts.data[0] ?? null;
   return (
-    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-black text-white">
+    <SsgoiLayoutBoundary className="relative block min-h-full w-full bg-black text-white">
       <CreateHeader mode={mode} />
       <CreatePreview image={selected?.image} picked={picked !== null} />
       <CreateGallery
@@ -30,6 +30,6 @@ export default function CreatePage() {
         onSelect={setPicked}
       />
       <CreateModeSwitch mode={mode} onChange={setMode} />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

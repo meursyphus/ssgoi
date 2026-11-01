@@ -5,11 +5,22 @@ import {
   useContext,
   type Accessor,
 } from "solid-js";
-import type { SsgoiContext, SsgoiTransitionState } from "./types";
+import type {
+  SsgoiContext,
+  SsgoiFramework,
+  SsgoiTransitionState,
+} from "./types";
 
 const SsgoiContextInstance = createContext<SsgoiContext | null>(null);
+const SsgoiFrameworkContext = createContext<
+  Accessor<SsgoiFramework | undefined> | undefined
+>(undefined);
 
 export const SsgoiProvider = SsgoiContextInstance.Provider;
+export const SsgoiFrameworkProvider = SsgoiFrameworkContext.Provider;
+
+/** Accessor of the `framework` passed to the nearest `<Ssgoi>`, if any. */
+export const useSsgoiFramework = () => useContext(SsgoiFrameworkContext);
 
 export const useSsgoi = () => {
   const context = useContext(SsgoiContextInstance);

@@ -2,8 +2,9 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/react-router`. The router is an
-optional peer and is loaded only by this entry.
+Pass a `useRoute` built on React Router's `useLocation` to
+`<Ssgoi framework>` and import `SsgoiLayoutBoundary` from `@ssgoi/react`.
+The package itself never imports `react-router`.
 
 ```bash
 pnpm install
@@ -15,16 +16,27 @@ pnpm dev
 - `app/components/ssgoi-config.ts`: one transition config.
 - `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
   `relative z-0 overflow-x-clip` shell.
-- `@ssgoi/react/react-router`: the shipped pathname boundary.
+- `SsgoiLayoutBoundary`: the shipped pathname boundary.
 - Route layouts place a stable shell boundary around a pathname child boundary.
 
 ```tsx
-<SsgoiRouteBoundary routeKey="products-layout">
+import { useLocation } from "react-router";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  {children}
+</Ssgoi>;
+```
+
+```tsx
+<SsgoiLayoutBoundary boundary="products-layout">
   <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary>
+  <SsgoiLayoutBoundary>
     <Outlet />
-  </SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 The products route owns the stable outer lifetime. Its marker follows the full

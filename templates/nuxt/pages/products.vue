@@ -27,15 +27,15 @@
 
     <!-- Tab Content - Slide transitions here -->
     <div class="flex-1 overflow-hidden relative">
-      <SsgoiRouteBoundary class="min-h-full bg-[#121212]">
+      <SsgoiLayoutBoundary class="min-h-full bg-[#121212]">
         <NuxtPage />
-      </SsgoiRouteBoundary>
+      </SsgoiLayoutBoundary>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
+import { SsgoiLayoutBoundary } from "@ssgoi/vue";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { PRODUCT_CATEGORIES } from "~/utils/ssgoi-config";

@@ -1,29 +1,34 @@
 # SSGOI complex routing and persistent layouts
 
-Start with `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. Keep one `<Ssgoi>`
-and config. Add boundaries only where routed DOM lifetimes differ.
+Start with `SsgoiLayoutBoundary` from `@ssgoi/react`. Keep one `<Ssgoi>`,
+config, and the Next.js `framework` whose `useRoute` returns
+`{ pathname, selectedSegments }`, as in
+https://ssgoi.dev/llms/frameworks/nextjs.txt.
+Add boundaries only where routed DOM lifetimes differ.
 
-- `id` is the route matched by SSGOI rules.
-- `key` controls DOM lifetime; omitted key defaults to id.
-- `routeKey` overrides the resolved key for a layout-owned persistent shell.
-- `resolve` runs synchronously with routed children. Do not defer keys to effects.
+- `id` is the route SSGOI matches transition rules against; default pathname.
+- `key` is when the DOM is replaced (its lifetime); omitted key defaults to id.
+- Both come from one `boundary` prop: a string (a fixed key for a layout-owned
+  persistent shell), `{ id?, key? }`, or `(route) => string | { id?, key? }`.
+- The function form runs synchronously with routed children. Do not defer keys
+  to effects.
 
 ## 1. Persistent header or bottom navigation
 
-If a route layout already owns a whole section, no resolver is needed:
+If a route layout already owns a whole section, a fixed key is enough:
 
 ```tsx
 // app/products/layout.tsx
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { ProductHeaderAndTabs } from "./product-header-and-tabs";
 
 export default function ProductsLayout({ children }: { children: ReactNode }) {
   return (
-    <SsgoiRouteBoundary routeKey="products-layout">
+    <SsgoiLayoutBoundary boundary="products-layout">
       <ProductHeaderAndTabs />
-      <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-    </SsgoiRouteBoundary>
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 ```
@@ -40,8 +45,10 @@ The child animates only while its parent stays mounted.
 ## 2. Tabs, dynamic projects, and intercepted backgrounds
 
 For an app-shell shared across tabs, details, and projects, define the policy
-once in a client component. The adapter already reads Next's hooks and handles
-Suspense. There is no local hook/lifecycle implementation to copy.
+once in a client component. The boundary already calls `framework.useRoute` and
+handles Suspense; the function form of `boundary` receives the route object it
+returned, as-is. There is no
+local hook/lifecycle implementation to copy.
 
 Example tree (route groups do not appear in URLs):
 
@@ -61,16 +68,26 @@ app/(app)/(detail)/projects/[id]/layout.tsx  # project header + child boundary
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  SsgoiRouteBoundary,
-  selectedSegmentsToPath,
-  type NextjsRouteLocation,
-} from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
-function resolveApp({ selectedSegments }: NextjsRouteLocation) {
+type Route = { pathname: string; selectedSegments: string[] };
+
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+// Route groups are layout ownership, not URL; interception markers are dropped.
+export function pathOf(segments: string[], base = "") {
+  const path = segments
+    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+    .filter(Boolean)
+    .join("/");
+  return `${base}/${path}`.replace(/\/$/, "") || "/";
+}
+
+function appBoundary({ selectedSegments }: Route) {
   // This boundary is at a URL-root layout. [] means its actual index route,
   // even when the browser URL points at an intercepted modal.
-  const id = selectedSegmentsToPath(selectedSegments);
+  const id = pathOf(selectedSegments);
   const key = selectedSegments.includes("(tabs)")
     ? "app-tabs"
     : id.match(/^\/projects\/[^/]+/)?.[0] ?? id;
@@ -78,18 +95,18 @@ function resolveApp({ selectedSegments }: NextjsRouteLocation) {
 }
 
 export function AppBoundary({ children }: { children: ReactNode }) {
-  return <SsgoiRouteBoundary resolve={resolveApp}>{children}</SsgoiRouteBoundary>;
+  return <SsgoiLayoutBoundary boundary={appBoundary}>{children}</SsgoiLayoutBoundary>;
 }
 
 export function TabContent({ children }: { children: ReactNode }) {
   return (
-    <SsgoiRouteBoundary
-      resolve={({ selectedSegments }) => ({
-        id: selectedSegmentsToPath(selectedSegments),
+    <SsgoiLayoutBoundary
+      boundary={({ selectedSegments }: Route) => ({
+        id: pathOf(selectedSegments),
       })}
     >
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 ```
@@ -102,8 +119,8 @@ entry resolves the full-page detail. `parallelRoutesKey="modal"` reads a named
 slot instead of `children` when that is the region you own.
 
 For a nested project layout, pass its known base path:
-`selectedSegmentsToPath(selectedSegments, "/projects/" + projectId)`.
-The helper strips route groups and interception prefixes, and keeps catch-all
+`pathOf(selectedSegments, "/projects/" + projectId)`.
+`pathOf` strips route groups and interception prefixes, and keeps catch-all
 segments. It joins segments under the base you provide; it is not a general
 resolver for the relative ancestry of `( .. )` interception destinations.
 For a modal destination, use a canonical id from the route's params if needed.
@@ -122,14 +139,14 @@ export function ProjectContent({
   children: ReactNode;
 }) {
   return (
-    <SsgoiRouteBoundary
-      resolve={({ selectedSegments }) => ({
-        id: selectedSegmentsToPath(selectedSegments, `/projects/${projectId}`),
+    <SsgoiLayoutBoundary
+      boundary={({ selectedSegments }: Route) => ({
+        id: pathOf(selectedSegments, `/projects/${projectId}`),
       })}
       fallback={<div className="min-h-px" aria-hidden="true" />}
     >
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 ```
@@ -143,15 +160,15 @@ empty slot, since that pathname may already describe the intercepted modal.
 ## Existing named boundary policies
 
 Applications may retain their own names (landing-content, app-shell,
-main-content, project-content) and pure resolver. Replace only the hook,
-Suspense, and keyed-DOM implementation with the adapter:
+main-content, project-content) and pure policy function. Replace only the hook,
+Suspense, and keyed-DOM implementation with `SsgoiLayoutBoundary`:
 
 ```tsx
 "use client";
 
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
-import { resolveBoundary, type BoundaryName } from "./boundary-policy";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
+import { boundaryFor, type BoundaryName } from "./boundary-policy";
 
 export function AppRouteBoundary({
   name,
@@ -161,23 +178,24 @@ export function AppRouteBoundary({
   children: ReactNode;
 }) {
   return (
-    <SsgoiRouteBoundary
-      resolve={(location) => resolveBoundary(name, location)}
+    <SsgoiLayoutBoundary
+      boundary={(route) => boundaryFor(name, route)}
       fallback={<div className="min-h-px" aria-hidden="true" />}
     >
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 ```
 
-The policy receives `{ pathname, selectedSegments }` and returns `{ id, key? }`.
+The policy receives the route `useRoute` returned, `{ pathname, selectedSegments }`,
+and returns `{ id?, key? }` (or a string key).
 The library does not need application-specific boundary names. A boundary's
-HTML `id` prop is an ordinary DOM attribute; use `resolve` for its transition id.
+HTML `id` prop is an ordinary DOM attribute; use `boundary` for its transition id.
 Setting a fixed transition id alone does not preserve a shell: set its key too.
 The Instagram demo uses `{ id: profileBase, key: profileBase }` for its profile
 shell and a pathname boundary for its tabs; the checkout and mobile-tab demos
-use `routeKey` for their persistent shells.
+use a fixed key for their persistent shells.
 
 ## 3. Middleware / proxy remains app configuration
 

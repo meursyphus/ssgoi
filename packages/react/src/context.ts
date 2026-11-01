@@ -4,9 +4,13 @@ import { createContext, useContext, useSyncExternalStore } from "react";
 import type { SsgoiContext } from "@ssgoi/core/internal";
 import type { SsgoiTransitionState } from "@ssgoi/core/types";
 import { IDLE_TRANSITION_STATE } from "@ssgoi/core/internal";
+import type { SsgoiFramework } from "./layout-boundary";
 
-/** Provider-scoped dispatcher; `<Ssgoi>` owns the only value. */
-export const ssgoiContext = createContext<SsgoiContext | null>(null);
+/** Provider-scoped dispatcher and router hooks; `<Ssgoi>` owns the only value. */
+export const ssgoiContext = createContext<{
+  ssgoi: SsgoiContext;
+  framework?: SsgoiFramework;
+} | null>(null);
 
 const getServerSnapshot = () => IDLE_TRANSITION_STATE;
 
@@ -22,7 +26,7 @@ const getServerSnapshot = () => IDLE_TRANSITION_STATE;
  * Must be called under `<Ssgoi>`.
  */
 export function useSsgoiTransition(): SsgoiTransitionState {
-  const ssgoi = useContext(ssgoiContext);
+  const ssgoi = useContext(ssgoiContext)?.ssgoi;
   if (!ssgoi) {
     throw new Error("useSsgoiTransition must be used within <Ssgoi>");
   }

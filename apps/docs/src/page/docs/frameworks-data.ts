@@ -31,7 +31,7 @@ export const FRAMEWORK_DOCS: FrameworkDoc[] = [
     slug: "react",
     name: "React",
     pkg: "@ssgoi/react",
-    lead: "Use SSGOI with React independently of your router. Router helpers are optional conveniences that connect a pathname and a page lifetime to the same React implementation.",
+    lead: "Use SSGOI with React independently of your router. Tell the provider how to read your router’s route through framework, and SsgoiLayoutBoundary connects it to a page lifetime.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/react.txt",
     sections: [
       {
@@ -65,32 +65,68 @@ export function Comments({ anchor }: { anchor: string }) {
 }`,
       },
       {
+        heading: "Connect a router",
+        body: "Pass framework to <Ssgoi>, then wrap routed children in SsgoiLayoutBoundary from @ssgoi/react. framework.useRoute is a hook you write with your router’s own hooks: it returns the current route ({ pathname, ...anything }) or null while the router is not ready, which renders fallback. The function form of the boundary prop receives that route object as-is. Keep the object at module scope so it stays stable. SsgoiLayoutBoundary throws if the nearest <Ssgoi> has no framework.",
+        code: `import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = {
+  useRoute: () => ({ pathname: useYourRouterPathname() }),
+};
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+</Ssgoi>`,
+      },
+      {
         heading: "Using another router",
-        body: "A dedicated helper is not required. Connect your router’s committed pathname to a keyed DOM boundary in the same render as its children. The Route boundaries guide explains the general pattern.",
+        body: "Any router works without a dedicated integration: return its committed pathname from useRoute, read in the same render as its children. You can also skip framework and render a keyed DOM boundary yourself. The Route boundaries guide explains the general pattern.",
       },
     ],
     routers: [
       {
         slug: "nextjs",
         name: "Next.js",
-        lead: "Use the App Router helper to read the committed pathname, handle URL-hook suspension, and mark the routed region. It is included in @ssgoi/react.",
+        lead: "Read the App Router’s pathname and selected segments in framework.useRoute. SsgoiLayoutBoundary keys by the committed pathname, handles URL-hook suspension, and marks the routed region.",
         experimental: false,
         sections: [
           {
             heading: "Connect the App Router",
-            body: 'Place the common provider and config in app/ssgoi-provider.tsx, add "use client", and export it as SsgoiProvider. Import the ready-made boundary in your layout; no local router wrapper is needed.',
-            code: `import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+            body: 'Place the common provider and config in app/ssgoi-provider.tsx, add "use client", and build framework.useRoute from usePathname and useSelectedLayoutSegments in next/navigation. The provider is a client component, so passing a function is fine. A null pathname (mixed app/pages projects) returns null, so no guessed route is registered.',
+            code: `// app/ssgoi-provider.tsx
+"use client";
 
-// Inside your provider, around the layout's changing children:
-<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`,
+import type { ReactNode } from "react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+import { drill } from "@ssgoi/react/view-transitions";
+
+const config = {
+  transitions: [{ on: "/**", except: "/", transition: drill() }],
+};
+
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
+};
+
+export function SsgoiProvider({ children }: { children: ReactNode }) {
+  return (
+    <Ssgoi config={config} framework={framework}>
+      {children}
+    </Ssgoi>
+  );
+}`,
           },
           {
-            heading: "3. Root layout",
-            body: "Place both pieces inside the layout shell. The wrapper supplies the containing block, stacking context, and horizontal clipping needed by the leaving page.",
+            heading: "Root layout",
+            body: "Place both pieces inside the layout shell; no local router wrapper is needed. The wrapper supplies the containing block, stacking context, and horizontal clipping needed by the leaving page.",
             code: `// app/layout.tsx
 import { type ReactNode } from "react";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -98,7 +134,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>
-            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+            <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
           </SsgoiProvider>
         </main>
       </body>
@@ -108,23 +144,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           },
           {
             heading: "Persistent layouts",
-            body: "A layout-owned routeKey preserves the header while the inner boundary replaces the changing content. Keep the provider above these section layouts, without a full-path boundary remounting every section from above.",
+            body: 'A layout-owned fixed key, boundary="products-layout", preserves the header while the inner boundary replaces the changing content. Keep the provider above these section layouts, without a full-path boundary remounting every section from above.',
             code: `// app/products/layout.tsx
 import type { ReactNode } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function ProductsLayout({ children }: { children: ReactNode }) {
   return (
-    <SsgoiRouteBoundary routeKey="products-layout">
+    <SsgoiLayoutBoundary boundary="products-layout">
       <header>Products</header>
-      <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-    </SsgoiRouteBoundary>
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+    </SsgoiLayoutBoundary>
   );
 }`,
           },
           {
             heading: "Parallel slots and interception",
-            body: "Use resolve({ pathname, selectedSegments }) for slot-specific ids and keys. Function props belong in a client component. selectedSegmentsToPath(selectedSegments, basePath) resolves the owned slot beneath its layout; an empty slot is its index route, even when the browser URL points at a modal. Interception also needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry; the boundary includes URL-hook Suspense and accepts a fallback for Cache Components.",
+            body: "Pass a function as boundary for slot-specific ids and keys; it receives the { pathname, selectedSegments } that useRoute returned, as-is, and returns a key string or { id?, key? }. Annotate its parameter. parallelRoutesKey is passed to useRoute to read a named slot. Function props belong in a client component. Join selectedSegments under the layout’s base path, dropping route groups, to get the owned slot’s route; an empty slot is its index route, even when the browser URL points at a modal. Interception also needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry; the boundary includes URL-hook Suspense and accepts a fallback for Cache Components.",
           },
         ],
         templateUrl:
@@ -134,22 +170,39 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
       {
         slug: "remix",
         name: "Remix",
-        lead: "Use the Remix 2 entry with @remix-run/react. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.",
+        lead: "Return Remix 2’s location from framework.useRoute. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.",
         experimental: true,
         sections: [
           {
+            heading: "Pass the framework",
+            body: "In root.tsx, give the common provider a useRoute that returns Remix’s location. Keep the object at module scope so it stays stable. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
+            code: `import { Outlet, useLocation } from "@remix-run/react";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+import { config } from "./ssgoi-config";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+
+export default function App() {
+  return (
+    <Ssgoi config={config} framework={framework}>
+      <Outlet />
+    </Ssgoi>
+  );
+}`,
+          },
+          {
             heading: "Wrap a layout outlet",
-            body: "Keep the common provider in root.tsx and place this boundary in a route layout. Follow Remix 2’s own React 18 dependency requirements. React Router 7 framework mode uses the React Router helper instead.",
+            body: "Place the boundary in a route layout. Follow Remix 2’s own React 18 dependency requirements. React Router 7 framework mode returns React Router’s location instead.",
             code: `import { Outlet } from "@remix-run/react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/remix";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function Layout() {
-  return <SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>;
+  return <SsgoiLayoutBoundary><Outlet /></SsgoiLayoutBoundary>;
 }`,
           },
           {
             heading: "Persistent route families",
-            body: "Use routeKey for a persistent shell and a separate inner boundary for changing content. resolve receives Remix’s location and returns { id, key? }; keys are resolved during render.",
+            body: 'Use a fixed key such as boundary="shell" for a persistent shell and a separate inner boundary for changing content. The function form of boundary receives Remix’s location as useRoute returned it and returns a key string or { id?, key? }; keys are computed during render.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/remix.txt",
@@ -157,21 +210,37 @@ export default function Layout() {
       {
         slug: "react-router",
         name: "React Router",
-        lead: "Use the helper inside React Router 6 or 7. It follows the committed location; query-only navigation preserves the boundary.",
+        lead: "Return React Router 6 or 7’s location from framework.useRoute. The boundary follows the committed location; query-only navigation preserves it.",
         experimental: true,
         sections: [
+          {
+            heading: "Pass the framework",
+            body: "In app/root.tsx, give the common provider a useRoute that returns React Router’s location. The function form of boundary receives that location as-is.",
+            code: `import { Outlet, useLocation } from "react-router";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+
+export default function App() {
+  return (
+    <Ssgoi config={config} framework={framework}>
+      <Outlet />
+    </Ssgoi>
+  );
+}`,
+          },
           {
             heading: "Wrap the outlet",
             body: "Put this pathless layout inside the common provider. Register the layout around the pages that should transition.",
             code: `import { Outlet } from "react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/react-router";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function PageBoundaryLayout() {
-  return <SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>;
+  return <SsgoiLayoutBoundary><Outlet /></SsgoiLayoutBoundary>;
 }`,
           },
           {
-            heading: "3. Route registration",
+            heading: "Route registration",
             body: "In framework mode, put existing page routes under the boundary layout. Keep the document Layout and other root exports from your React Router app.",
             code: `// app/routes.ts
 import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
@@ -195,20 +264,43 @@ export default [
       {
         slug: "tanstack-router",
         name: "TanStack Router",
-        lead: "Use this entry for TanStack Router 1, including React applications built with TanStack Start. Both use the same router context.",
+        lead: "Return TanStack Router 1’s rendered pathname from framework.useRoute, including React applications built with TanStack Start. Both use the same router context.",
         experimental: true,
         sections: [
           {
             heading: "Wrap the root outlet",
-            body: "Keep the common provider outside this boundary. For persistent sections, put boundaries in the owning route layouts instead.",
-            code: `import { Outlet } from "@tanstack/react-router";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+            body: "useRoute reads the leaf match the outlet is rendering rather than location, which TanStack moves before pending matches render. For persistent sections, put boundaries in the owning route layouts instead.",
+            code: `import { Outlet, useRouterState } from "@tanstack/react-router";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiFramework,
+} from "@ssgoi/react";
 
-<SsgoiRouteBoundary><Outlet /></SsgoiRouteBoundary>`,
+// Key by the leaf match the outlet renders, not location: location moves
+// before pending matches render, and index routes match "/parent/".
+const framework: SsgoiFramework = {
+  useRoute: () => ({
+    pathname: useRouterState({
+      select: (state) => {
+        const location = state.location.pathname;
+        const leaf = state.matches.at(-1)?.pathname;
+        if (!leaf) return location;
+        return leaf.length > 1 && leaf.endsWith("/") && !location.endsWith("/")
+          ? leaf.slice(0, -1)
+          : leaf;
+      },
+    }),
+  }),
+};
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary><Outlet /></SsgoiLayoutBoundary>
+</Ssgoi>`,
           },
           {
             heading: "Beyond the basics",
-            body: "For a persistent section, keep the root as one <Ssgoi><Outlet /></Ssgoi>, then let the section route own a stable outer shell boundary and a pathname-keyed inner boundary around <Outlet />. Holding only the outer boundary constant preserves state but produces no child transition.",
+            body: "For a persistent section, keep the root as one <Ssgoi framework={framework}><Outlet /></Ssgoi>, then let the section route own a stable outer shell boundary and a pathname-keyed inner boundary around <Outlet />. Holding only the outer boundary constant preserves state but produces no child transition.",
           },
         ],
         templateUrl:
@@ -221,7 +313,7 @@ import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
     slug: "svelte",
     name: "Svelte",
     pkg: "@ssgoi/svelte",
-    lead: "The Svelte package provides the common provider and transition API. Add the SvelteKit helper when Kit owns navigation.",
+    lead: "The Svelte package provides the common provider, transition API, and layout boundary. Pass a SvelteKit route getter and onNavigate as framework when Kit owns navigation.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/svelte.txt",
     sections: [
       {
@@ -251,7 +343,7 @@ import { drill } from "@ssgoi/svelte/view-transitions";`,
       {
         slug: "sveltekit",
         name: "SvelteKit",
-        lead: "Use onNavigate to detach outgoing content before SvelteKit updates its live children snippet. A key around that snippet alone is not sufficient.",
+        lead: "Pass a getRoute that returns { pathname, url } from page.url, plus onNavigate, as framework. The function form of boundary receives that route as-is. The boundary uses onNavigate to detach outgoing content before SvelteKit updates its live children snippet; a key around that snippet alone is not sufficient.",
         experimental: true,
         sections: [
           {
@@ -259,24 +351,43 @@ import { drill } from "@ssgoi/svelte/view-transitions";`,
             language: "xml",
             code: `<!-- src/routes/+layout.svelte -->
 <script>
-  import { Ssgoi } from "@ssgoi/svelte";
+  import { page } from "$app/state";
+  import { onNavigate } from "$app/navigation";
+  import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/svelte";
   import { config } from "$lib/ssgoi-config";
-  import { SsgoiRouteBoundary } from "@ssgoi/svelte/sveltekit";
 
   let { children } = $props();
+
+  const framework = {
+    getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+    onNavigate,
+  };
 </script>
 
 <main class="relative z-0 min-h-dvh overflow-x-clip">
-  <Ssgoi {config}>
-    <SsgoiRouteBoundary class="min-h-full">
+  <Ssgoi {config} {framework}>
+    <SsgoiLayoutBoundary class="min-h-full">
       {@render children()}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   </Ssgoi>
 </main>`,
           },
           {
+            heading: "SvelteKit before 2.12",
+            body: "Without $app/state, read the page store instead. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
+            language: "ts",
+            code: `import { get } from "svelte/store";
+import { page } from "$app/stores";
+import { onNavigate } from "$app/navigation";
+
+const framework = {
+  getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url }),
+  onNavigate,
+};`,
+          },
+          {
             heading: "Why a boundary component",
-            body: "The root layout wrapper stays mounted while the live children snippet updates, so a marker on that wrapper has no OUT node. The component detaches the old routed region first — the lifecycle is included in the package; no copied component is needed.",
+            body: "The root layout wrapper stays mounted while the live children snippet updates, so a marker on that wrapper has no OUT node. The component detaches the old routed region first — the lifecycle is included in @ssgoi/svelte; no copied component is needed.",
             language: "text",
             code: `plain {@render children()} : route change mutates DOM in place → no OUT node
 
@@ -286,7 +397,7 @@ boundary component         : onNavigate → unmount old route   (OUT captured)
           },
           {
             heading: "Beyond the basics",
-            body: "For a persistent /products shell, return the full pathname as id and /products as key from resolve, then put a second default pathname boundary only around the child content in routes/products/+layout.svelte. The stable outer key preserves header/tabs; the inner boundary produces tab transitions.",
+            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around the child content in routes/products/+layout.svelte. The stable outer key preserves header/tabs; the inner boundary produces tab transitions.',
           },
         ],
         templateUrl:
@@ -299,7 +410,7 @@ boundary component         : onNavigate → unmount old route   (OUT captured)
     slug: "vue",
     name: "Vue",
     pkg: "@ssgoi/vue",
-    lead: "Use the Vue package for the provider and effects. Choose the helper for the router already installed in your app.",
+    lead: "Use the Vue package for the provider, effects, and layout boundary. Pass a reactive getRoute for the router already installed in your app as framework.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/vue.txt",
     sections: [
       {
@@ -334,25 +445,33 @@ watch(
       {
         slug: "vue-router",
         name: "Vue Router",
-        lead: "Use the helper with Vue Router 4 inside the common Vue provider.",
+        lead: "Return Vue Router 4’s current path from framework.getRoute on the common Vue provider.",
         experimental: true,
         sections: [
           {
             heading: "Wrap the routed region",
-            body: "The boundary follows the committed router path and replaces its DOM root when the route key changes.",
+            body: "The boundary follows the committed router path and replaces its DOM root when the route key changes. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
             code: `<script setup lang="ts">
-import { RouterView } from "vue-router";
-import { SsgoiRouteBoundary } from "@ssgoi/vue/vue-router";
+import { RouterView, useRouter } from "vue-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+import { config } from "./ssgoi-config";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 </script>
 
 <template>
-  <SsgoiRouteBoundary><RouterView /></SsgoiRouteBoundary>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary><RouterView /></SsgoiLayoutBoundary>
+  </Ssgoi>
 </template>`,
             language: "vue",
           },
           {
             heading: "Persistent shells",
-            body: "Use routeKey for the outer shell and a changing inner boundary for the page. resolve receives { pathname } and returns { id, key? }.",
+            body: 'Use a fixed key such as boundary="shell" for the outer shell and a changing inner boundary for the page. The function form of boundary receives the route getRoute returned, here { pathname }, as-is and returns a key string or { id?, key? }.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/vue-router.txt",
@@ -360,24 +479,32 @@ import { SsgoiRouteBoundary } from "@ssgoi/vue/vue-router";
       {
         slug: "nuxt",
         name: "Nuxt",
-        lead: "Use the Nuxt-specific entry inside the common Vue provider. It observes the committed router state rather than Nuxt’s delayed useRoute value.",
+        lead: "Return Nuxt’s router state from framework.getRoute on the common Vue provider. Read router.currentRoute, the committed state, rather than Nuxt’s delayed useRoute value.",
         experimental: true,
         sections: [
           {
             heading: "Wrap NuxtPage",
-            body: "Keep the provider above the layout and page. Do not add a provider for every page.",
+            body: "Keep the provider in app.vue, above the layout and page. Do not add a provider for every page. useRouter is Nuxt’s auto-import.",
             code: `<script setup lang="ts">
-import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+import { config } from "~/utils/ssgoi-config";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 </script>
 
 <template>
-  <SsgoiRouteBoundary><NuxtPage /></SsgoiRouteBoundary>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary><NuxtPage /></SsgoiLayoutBoundary>
+  </Ssgoi>
 </template>`,
             language: "vue",
           },
           {
             heading: "Beyond the basics",
-            body: "For a persistent /products shell, return the full pathname as id and /products as key from the root boundary's resolve, then put a second default pathname boundary only around the nested <NuxtPage />. The stable outer key preserves header/tabs; the inner boundary produces child transitions.",
+            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around the nested <NuxtPage />. The stable outer key preserves header/tabs; the inner boundary produces child transitions.',
           },
         ],
         templateUrl:
@@ -390,7 +517,7 @@ import { SsgoiRouteBoundary } from "@ssgoi/vue/nuxt";
     slug: "solid",
     name: "Solid",
     pkg: "@ssgoi/solid",
-    lead: "Use the Solid package for common rendering and effects. Solid Router and SolidStart share the same boundary implementation.",
+    lead: "Use the Solid package for common rendering, effects, and the layout boundary. Solid Router and SolidStart pass the same getRoute as framework.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/solid.txt",
     sections: [
       {
@@ -420,19 +547,30 @@ export function Comments() {
       {
         slug: "solid-router",
         name: "Solid Router",
-        lead: "Use the Solid Router entry for Solid applications. SolidStart’s existing entry uses this same implementation.",
+        lead: "Return Solid Router’s location pathname from framework.getRoute on the common provider. SolidStart uses this same setup.",
         experimental: true,
         sections: [
           {
             heading: "Wrap the routed children",
-            body: "The keyed boundary recreates the changing region while routeKey can preserve an outer shell.",
-            code: `import { SsgoiRouteBoundary } from "@ssgoi/solid/solid-router";
+            body: "Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region while a fixed boundary key can preserve an outer shell. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
+            code: `import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
+import { config } from "./ssgoi-config";
 
-<SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>`,
+function Root(props: RouteSectionProps) {
+  const location = useLocation();
+  return (
+    <Ssgoi config={config} framework={{ getRoute: () => ({ pathname: location.pathname }) }}>
+      <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+    </Ssgoi>
+  );
+}
+
+<Router root={Root}>{/* routes */}</Router>`,
           },
           {
             heading: "Route lifetime",
-            body: "The default key follows the pathname. resolve can return separate id and key values; use a stable shell key only around content that should remain mounted.",
+            body: "The default key follows the pathname. The function form of boundary receives the route getRoute returned, as-is, and can return separate id and key values; use a stable shell key only around content that should remain mounted.",
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/solid-router.txt",
@@ -440,34 +578,38 @@ export function Comments() {
       {
         slug: "solidstart",
         name: "SolidStart",
-        lead: "Use the same Solid Router boundary through the SolidStart entry.",
+        lead: "Return Solid Router’s location pathname from framework.getRoute in the SolidStart router root.",
         experimental: true,
         sections: [
           {
             heading: "Setup",
             code: `// src/app.tsx
-import { Router } from "@solidjs/router";
+import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
-import { Ssgoi } from "@ssgoi/solid";
-import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
 import { drill } from "@ssgoi/solid/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+function Root(props: RouteSectionProps) {
+  const location = useLocation();
+  return (
+    <main class="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={config} framework={{ getRoute: () => ({ pathname: location.pathname }) }}>
+        <Suspense>
+          <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+        </Suspense>
+      </Ssgoi>
+    </main>
+  );
+}
+
 export default function App() {
   return (
-    <Router root={(props) => (
-      <main class="relative z-0 min-h-dvh overflow-x-clip">
-        <Ssgoi config={config}>
-          <Suspense>
-            <SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
-          </Suspense>
-        </Ssgoi>
-      </main>
-    )}>
+    <Router root={Root}>
       <FileRoutes />
     </Router>
   );
@@ -475,7 +617,7 @@ export default function App() {
           },
           {
             heading: "Beyond the basics",
-            body: "For a persistent /products shell, return the full pathname as id and /products as key from the root boundary's resolve, then put a second default pathname boundary only around props.children in routes/products.tsx. The stable outer key preserves header/tabs; the inner boundary produces child transitions.",
+            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around props.children in routes/products.tsx. The stable outer key preserves header/tabs; the inner boundary produces child transitions.',
           },
         ],
         templateUrl:
@@ -504,12 +646,13 @@ export const config$ = $(() => ({
 
 // src/routes/layout.tsx
 import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { useLocation } from "@builder.io/qwik-city";
 import { useSsgoi } from "@ssgoi/qwik";
 import { config$ } from "../lib/ssgoi-config";
 
 export default component$(() => {
   const root = useSignal<HTMLElement>();
-  useSsgoi(root, { config$ });
+  useSsgoi(root, { config$, framework: { location: useLocation() } });
 
   return (
     <main ref={root} class="relative z-0 min-h-dvh overflow-x-clip">
@@ -545,17 +688,17 @@ export const Comments = component$(() => {
       {
         slug: "qwik-city",
         name: "Qwik City",
-        lead: "The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
+        lead: "Pass Qwik City’s location store as framework where SSGOI is attached. The computed boundary hook reads it; the page keeps ownership of its DOM and slots and applies the returned id and key to its own root.",
         experimental: true,
         sections: [
           {
             heading: "Mark the page root",
-            body: "Call the hook in a Qwik City page or layout, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key.",
+            body: "Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.",
             code: `import { component$ } from "@builder.io/qwik";
-import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
 export default component$(() => {
-  const boundary = useSsgoiRouteBoundary();
+  const boundary = useSsgoiLayoutBoundary();
   return (
     <article key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       {/* Page content */}
@@ -565,7 +708,7 @@ export default component$(() => {
           },
           {
             heading: "Persistent layouts",
-            body: 'Pass a stable route key to useSsgoiRouteBoundary("shell") for an outer shell, and retain separately keyed page roots below it. The helper does not wrap or move Slot content.',
+            body: 'Pass a fixed key, useSsgoiLayoutBoundary("shell"), for an outer shell, or { id?, key? } to fix the id too, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.',
           },
         ],
         templateUrl:
@@ -578,16 +721,40 @@ export default component$(() => {
     slug: "angular",
     name: "Angular",
     pkg: "@ssgoi/angular",
-    lead: "Use the common ssgoi directive above the changing page region. The optional Angular Router directive supplies each page’s boundary.",
+    lead: "Use the common ssgoi directive above the changing page region and give it an ssgoiFramework that reads Angular Router. The layout boundary directive supplies each page’s boundary.",
     llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",
     sections: [
       {
         heading: "Setup",
         language: "ts",
         code: `import { Component, signal } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/angular";
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterOutlet,
+  createUrlTreeFromSnapshot,
+} from "@angular/router";
+import { Ssgoi, type SsgoiConfig, type SsgoiFramework } from "@ssgoi/angular";
 import { drill } from "@ssgoi/angular/view-transitions";
+
+// Called with each boundary's own Injector, so ActivatedRoute resolves at its position.
+const framework: SsgoiFramework = {
+  getRoute: (injector) => {
+    const route = injector.get(ActivatedRoute).snapshot;
+    const router = injector.get(Router);
+    return {
+      pathname: router.serializeUrl(createUrlTreeFromSnapshot(route, [], null, null)),
+      route,
+    };
+  },
+  onNavigate: (injector, callback) => {
+    const subscription = injector.get(Router).events.subscribe((event) => {
+      if (event instanceof NavigationEnd) callback();
+    });
+    return () => subscription.unsubscribe();
+  },
+};
 
 @Component({
   selector: "app-root",
@@ -597,6 +764,7 @@ import { drill } from "@ssgoi/angular/view-transitions";
     <main
       ssgoi
       [config]="config()"
+      [ssgoiFramework]="framework"
       style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip"
     >
       <router-outlet />
@@ -609,6 +777,7 @@ export class AppComponent {
       { on: "/posts/**", except: "/posts", transition: drill() },
     ],
   });
+  protected readonly framework = framework;
 }`,
       },
       {
@@ -635,20 +804,20 @@ export class CommentsComponent {
       {
         slug: "angular-router",
         name: "Angular Router",
-        lead: "A structural directive marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.",
+        lead: "Bind a framework with getRoute(injector) and onNavigate(injector, callback) to [ssgoiFramework] on the ssgoi element; the Setup above has the complete object. A structural directive then marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.",
         experimental: true,
         sections: [
           {
             heading: "Connect a routed page",
-            body: "Import the standalone directive in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component.",
+            body: "Import the standalone directive from @ssgoi/angular in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component. It throws if the ssgoi element has no ssgoiFramework.",
             code: `import { Component } from "@angular/core";
-import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
+import { SsgoiLayoutBoundary } from "@ssgoi/angular";
 
 @Component({
   standalone: true,
-  imports: [SsgoiRouteBoundary],
+  imports: [SsgoiLayoutBoundary],
   template: \`
-    <article *ssgoiRouteBoundary="let boundary">
+    <article *ssgoiLayoutBoundary="let boundary">
       {{ boundary.id }}
     </article>
   \`,
@@ -658,7 +827,7 @@ export class PageComponent {}`,
           },
           {
             heading: "Persistent shells",
-            body: "Use *ssgoiRouteBoundary=\"let boundary; key: 'shell'\" to preserve the embedded view. A resolver can return { id, key? }. Query-only and cancelled navigation preserve the default view. This helper does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.",
+            body: "Use *ssgoiLayoutBoundary=\"'shell'\" (a fixed key) to preserve the embedded view. The directive's input also takes { id?, key? } or a function that receives the route getRoute returned, here { pathname, route }, as-is and returns a key string or { id?, key? }. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.",
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",
@@ -684,7 +853,7 @@ import { slide } from "@ssgoi/react-native/view-transitions";`,
       {
         slug: "expo-router",
         name: "Expo Router",
-        lead: "The file-based boundary discovers screens and retains outgoing native views until playback completes. It replaces the Stack in that layout.",
+        lead: "Pass Expo Router’s StackRouter and unstable_integrateWithRouter as framework. The file-based boundary discovers screens and retains outgoing native views until playback completes. It replaces the Stack in that layout.",
         experimental: true,
         sections: [
           {
@@ -698,23 +867,33 @@ pnpm --filter ssgoi-expo-template start`,
           },
           {
             heading: "Provider and file-based route boundary",
-            body: "Create page files normally and keep using Expo Link and router.push/replace/back. The boundary supplies one native surface per screen and retains outgoing instances until animation completion. It replaces the layout navigator; do not wrap an existing Stack or Slot inside it. The app supplies safe areas and screen backgrounds.",
+            body: "Create page files normally and keep using Expo Link and router.push/replace/back. Keep framework at module scope so the navigator is built once; SsgoiLayoutBoundary throws if <Ssgoi> has no framework. The boundary supplies one native surface per screen and retains outgoing instances until animation completion. It replaces the layout navigator; do not wrap an existing Stack or Slot inside it. The app supplies safe areas and screen backgrounds.",
             code: `// app/_layout.tsx
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
-import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
+import { StackRouter, unstable_integrateWithRouter } from "expo-router";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiConfig,
+} from "@ssgoi/react-native";
 import { slide } from "@ssgoi/react-native/view-transitions";
 
 const config = {
   transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
 } satisfies SsgoiConfig;
 
+const framework = { StackRouter, unstable_integrateWithRouter };
+
 export default function Layout() {
-  return <Ssgoi config={config}><SsgoiRouteBoundary /></Ssgoi>;
+  return (
+    <Ssgoi config={config} framework={framework}>
+      <SsgoiLayoutBoundary />
+    </Ssgoi>
+  );
 }`,
           },
           {
             heading: "Configuration and scope",
-            body: "Route rules and middleware share the web semantics. The native provider selects Reanimated playback automatically. resolve and routeKey use each screen's own route and keep pushed instances separate. Mounted screens preserve input and scroll state. Explicit scroll restoration is rejected. The preview targets one iOS/Android stack with fade/slide; headers, modal presentation, interactive gestures, shared elements, nested navigator coordination, and Expo Web are follow-up work.",
+            body: "Route rules and middleware share the web semantics. The native provider selects Reanimated playback automatically. The boundary option uses each screen's own route and keeps pushed instances separate. Mounted screens preserve input and scroll state. Explicit scroll restoration is rejected. The preview targets one iOS/Android stack with fade/slide; headers, modal presentation, interactive gestures, shared elements, nested navigator coordination, and Expo Web are follow-up work.",
           },
           {
             heading: "Verify on devices",

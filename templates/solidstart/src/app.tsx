@@ -1,8 +1,7 @@
 import { Router, A, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, type JSX } from "solid-js";
-import { Ssgoi } from "@ssgoi/solid";
-import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
 import { ssgoiConfig } from "./ssgoi-config";
 import "./app.css";
 
@@ -20,6 +19,7 @@ export default function App() {
 function AppFrame(props: { children?: JSX.Element }) {
   const location = useLocation();
   const active = (prefix: string) => location.pathname.startsWith(prefix);
+  const framework = { getRoute: () => ({ pathname: location.pathname }) };
 
   return (
     <div class="h-[100svh] md:h-screen grow flex items-center justify-center bg-[#121212] relative overflow-hidden lg:p-6">
@@ -32,17 +32,14 @@ function AppFrame(props: { children?: JSX.Element }) {
               data-ssgoi-root=""
               class="flex-1 min-h-0 w-full overflow-y-scroll overflow-x-clip relative z-0 bg-[#121212] scrollbar-hide"
             >
-              <Ssgoi config={ssgoiConfig}>
+              <Ssgoi config={ssgoiConfig} framework={framework}>
                 <Suspense>
-                  <SsgoiRouteBoundary
-                    resolve={({ pathname }) => ({
-                      id: pathname,
-                      key: getRootTransitionId(pathname),
-                    })}
+                  <SsgoiLayoutBoundary
+                    boundary={({ pathname }) => getRootTransitionId(pathname)}
                     class="min-h-full bg-[#121212]"
                   >
                     {props.children}
-                  </SsgoiRouteBoundary>
+                  </SsgoiLayoutBoundary>
                 </Suspense>
               </Ssgoi>
             </main>

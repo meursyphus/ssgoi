@@ -10,10 +10,15 @@ import {
 } from "@ssgoi/core/internal";
 import type { SsgoiConfigQrl, SsgoiHostQrl } from "./types";
 import { SsgoiTransitionContextId, type SsgoiTransitionStore } from "./context";
+import {
+  SsgoiFrameworkContextId,
+  type SsgoiFramework,
+} from "./layout-boundary";
 
 export interface UseSsgoiOptions {
   config$?: SsgoiConfigQrl;
   host$?: SsgoiHostQrl;
+  framework?: SsgoiFramework;
 }
 
 export const useSsgoi = (
@@ -30,6 +35,7 @@ export const useSsgoi = (
     direction: null,
   });
   useContextProvider(SsgoiTransitionContextId, transition);
+  useContextProvider(SsgoiFrameworkContextId, options.framework ?? null);
 
   useVisibleTask$(
     async ({ cleanup, track }) => {

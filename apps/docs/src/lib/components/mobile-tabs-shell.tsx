@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  *   tabs while the nav stays still.
  *
  * Both are plain elements carrying `key` + `data-ssgoi-transition`, the
- * boundary contract from the React guide, instead of `SsgoiRouteBoundary`,
+ * boundary contract from the React guide, instead of `SsgoiLayoutBoundary`,
  * which wraps itself in a `<Suspense>`. A tab page whose chunk is not loaded
  * yet (a detail opened directly, then back to its tab) suspends on first
  * mount. With a Suspense inside the shell, React committed around it: the

@@ -1,8 +1,13 @@
 import { getContext, setContext } from "svelte";
 import { readable, type Readable } from "svelte/store";
-import type { SsgoiContext, SsgoiTransitionState } from "./types.js";
+import type {
+  SsgoiContext,
+  SsgoiFramework,
+  SsgoiTransitionState,
+} from "./types.js";
 
 const SSGOI_CONTEXT_KEY = Symbol("ssgoi");
+const SSGOI_FRAMEWORK_KEY = Symbol("ssgoi-framework");
 
 export function setSsgoiContext(context: SsgoiContext) {
   setContext(SSGOI_CONTEXT_KEY, context);
@@ -14,6 +19,24 @@ export function getSsgoiContext(): SsgoiContext {
     throw new Error("getSsgoiContext must be called within Ssgoi component");
   }
   return context;
+}
+
+export function setSsgoiFramework(
+  getFramework: () => SsgoiFramework | undefined,
+) {
+  setContext(SSGOI_FRAMEWORK_KEY, getFramework);
+}
+
+export function getSsgoiFramework(): SsgoiFramework {
+  const framework = getContext<(() => SsgoiFramework | undefined) | undefined>(
+    SSGOI_FRAMEWORK_KEY,
+  )?.();
+  if (!framework) {
+    throw new Error(
+      "SSGOI: SsgoiLayoutBoundary requires a framework. Pass it to <Ssgoi framework={{ getRoute: () => ({ pathname: page.url.pathname, url: page.url }), onNavigate }}>.",
+    );
+  }
+  return framework;
 }
 
 /**

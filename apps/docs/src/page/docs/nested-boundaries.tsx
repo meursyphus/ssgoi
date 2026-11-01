@@ -119,33 +119,44 @@ detail → tab    : app-shell key changes · the shell re-enters with the nav`}
           <code className={inlineCode}>/projects</code>. Derive the background
           boundary&apos;s id and key from{" "}
           <code className={inlineCode}>useSelectedLayoutSegments()</code>, as
-          supplied to the adapter’s resolve callback. For nested layouts, pass
-          the owning layout’s base path to selectedSegmentsToPath.
+          which the Next.js{" "}
+          <code className={inlineCode}>framework.useRoute</code> returns and the
+          boundary passes, as-is, to the function form of its{" "}
+          <code className={inlineCode}>boundary</code> prop. Join the segments
+          into a path yourself, dropping route groups; for nested layouts, start
+          from the owning layout’s base path.
         </p>
         <p className={`mt-4 ${measure} ${prose}`}>
-          The adapter reads the hooks and supplies Suspense. Use a stable
-          routeKey when a layout owns the shell, or define one resolve policy
-          that returns its logical id and lifetime key. Function props belong in
-          a client component. The complete pattern is linked below.
+          The boundary calls useRoute and supplies Suspense. Use a stable key
+          such as{" "}
+          <code className={inlineCode}>boundary=&quot;app-shell&quot;</code>{" "}
+          when a layout owns the shell, or pass one function that returns its
+          logical id and lifetime key. Function props belong in a client
+          component. The complete pattern is linked below.
         </p>
         <CodeBlock
           className="mt-6"
           language="tsx"
-          code={`import {
-  SsgoiRouteBoundary,
-  selectedSegmentsToPath,
-} from "@ssgoi/react/nextjs";
+          code={`import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
-<SsgoiRouteBoundary
-  resolve={({ selectedSegments }) => ({
-    id: selectedSegmentsToPath(selectedSegments),
+// useRoute returns { pathname, selectedSegments } (see the Next.js guide).
+// Route groups such as (top-level) are layout ownership, not URL.
+const pathOf = (segments: string[]) =>
+  "/" +
+  segments
+    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+    .join("/");
+
+<SsgoiLayoutBoundary
+  boundary={({ selectedSegments }: { selectedSegments: string[] }) => ({
+    id: pathOf(selectedSegments),
     key: selectedSegments.includes("(top-level)")
       ? "app-shell"
-      : selectedSegmentsToPath(selectedSegments),
+      : pathOf(selectedSegments),
   })}
 >
   {children}
-</SsgoiRouteBoundary>`}
+</SsgoiLayoutBoundary>`}
         />
       </Section>
 
@@ -356,7 +367,7 @@ detail → tab    : app-shell key changes · the shell re-enters with the nav`}
         </ul>
 
         <p className={`mt-8 ${measure} ${prose}`}>
-          A copy-ready resolver, layouts and checklist live in{" "}
+          A copy-ready boundary policy, layouts and checklist live in{" "}
           <a
             href={LLMS_PATTERN}
             target="_blank"

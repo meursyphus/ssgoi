@@ -12,14 +12,11 @@ npm install @ssgoi/qwik
 
 Agent setup guide: https://ssgoi.dev/llms/qwik.txt
 
-## Router helpers
+## Router integration
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
-
-| Router    | Import                  | API                     |
-| --------- | ----------------------- | ----------------------- |
-| Qwik City | `@ssgoi/qwik/qwik-city` | `useSsgoiRouteBoundary` |
+Pass Qwik City's location store to the root as `framework`; the layout
+boundary hook reads it from SSGOI's context. The store is a value, so it
+serializes like any other Qwik state.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/qwik) for wiring and limits.
 
@@ -29,6 +26,7 @@ Qwik configs contain functions, so pass a QRL factory.
 
 ```tsx
 import { $, Slot, component$, useSignal } from "@builder.io/qwik";
+import { useLocation } from "@builder.io/qwik-city";
 import { useSsgoi } from "@ssgoi/qwik";
 import { drill } from "@ssgoi/qwik/view-transitions";
 
@@ -38,7 +36,7 @@ const config$ = $(() => ({
 
 export default component$(() => {
   const root = useSignal<HTMLElement>();
-  useSsgoi(root, { config$ });
+  useSsgoi(root, { config$, framework: { location: useLocation() } });
 
   return (
     <main ref={root} class="relative z-0 min-h-dvh overflow-x-clip">
@@ -48,16 +46,19 @@ export default component$(() => {
 });
 ```
 
-## Route boundary
+With concrete children, `<Ssgoi config$={config$} framework={{ location: useLocation() }}>`
+does the same.
 
-Use the experimental Qwik City helper on the page's own root:
+## Layout boundary
+
+Use the layout boundary hook on the page's own root:
 
 ```tsx
 import { component$ } from "@builder.io/qwik";
-import { useSsgoiRouteBoundary } from "@ssgoi/qwik/qwik-city";
+import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
 export default component$(() => {
-  const boundary = useSsgoiRouteBoundary();
+  const boundary = useSsgoiLayoutBoundary();
   return (
     <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
       Page
@@ -66,8 +67,16 @@ export default component$(() => {
 });
 ```
 
-The key replaces the root when City reuses a parameterized page. A stable key
-can be passed for a persistent shell. Keep Slot ownership in the route/layout.
+The key replaces the root when City reuses a parameterized page. The id
+defaults to the pathname and the key to the id. Pass a fixed key for a
+persistent shell, `useSsgoiLayoutBoundary("products-layout")`, or a fixed id
+and/or key, `useSsgoiLayoutBoundary({ id: "/feed" })`. Keep Slot ownership in
+the route/layout.
+Without `framework` on the root, the hook throws.
+
+`useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` is deprecated and will be
+removed in 8.0.0; it reads `useLocation()` itself and keeps working without
+`framework`.
 
 ## Persistent layouts
 

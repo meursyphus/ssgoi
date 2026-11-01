@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { usePost } from "@/demo/instagram/state/post";
 import { useProfile } from "@/demo/instagram/state/profile";
 import { GridItem } from "../profile-grid/grid-item";
@@ -26,7 +26,7 @@ export default function ExplorePage() {
   }, [profile.actions]);
   const me = profile.me.data;
   return (
-    <SsgoiRouteBoundary className="relative flex min-h-full w-full flex-col bg-white text-neutral-900">
+    <SsgoiLayoutBoundary className="relative flex min-h-full w-full flex-col bg-white text-neutral-900">
       <ExploreSearchBar />
       <div className="flex-1">
         {post.explore.isLoading && post.explore.data.length === 0 ? (
@@ -46,6 +46,6 @@ export default function ExplorePage() {
           profileHref={`/demo/instagram/profile/${me?.username ?? "deaseungseung94"}`}
         />
       </div>
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

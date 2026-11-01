@@ -1,7 +1,9 @@
 import React from "react";
 import { Link, useLocation } from "react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { ssgoiConfig } from "./ssgoi-config";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -20,7 +22,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="relative z-0 flex-1 w-full overflow-y-scroll overflow-x-clip bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
+          <Ssgoi config={ssgoiConfig} framework={framework}>
+            {children}
+          </Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

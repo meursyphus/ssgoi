@@ -1,15 +1,27 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiConfig,
+  type SsgoiFramework,
+} from "@ssgoi/react";
 import { HostAnimation } from "@ssgoi/core/internal";
 import { HostContext } from "@/lib/components/host-context";
 import { useShowcaseFrameBridge } from "@/lib/hooks";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 const config: SsgoiConfig = {
   transitions: [],
+};
+
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
 };
 
 function DocsRouteBoundary({ children }: { children: ReactNode }) {
@@ -22,9 +34,9 @@ function DocsRouteBoundary({ children }: { children: ReactNode }) {
   if (!isShowcaseRoute) return <>{children}</>;
 
   return (
-    <SsgoiRouteBoundary className="min-h-dvh bg-black">
+    <SsgoiLayoutBoundary className="min-h-dvh bg-black">
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }
 
@@ -46,7 +58,7 @@ export function DocsSsgoiProvider({ children }: { children: ReactNode }) {
   return (
     <HostContext.Provider value={host}>
       {isCatalogRoute ? (
-        <Ssgoi config={config} host={host}>
+        <Ssgoi config={config} host={host} framework={framework}>
           <DocsRouteBoundary>{children}</DocsRouteBoundary>
         </Ssgoi>
       ) : (

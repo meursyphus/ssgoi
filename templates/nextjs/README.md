@@ -1,7 +1,26 @@
 # SSGOI + Next.js
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
-optional peer and is loaded only by this entry.
+Pass a `useRoute` built from the Next.js navigation hooks to
+`<Ssgoi framework>` and import `SsgoiLayoutBoundary` from `@ssgoi/react`.
+The package itself never imports `next`.
+
+```tsx
+"use client";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
+};
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  {children}
+</Ssgoi>;
+```
 
 ```bash
 pnpm install
@@ -11,24 +30,25 @@ pnpm dev
 ## Structure
 
 - `src/components/ssgoi-config.ts`: one transition config.
-- `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
+- `src/components/demo-layout.tsx`: one root `<Ssgoi>` with `framework`.
+- `SsgoiLayoutBoundary`: shipped pathname boundary with Suspense.
 - `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
 
-The default boundary uses the pathname for its id and key. `routeKey` keeps a
-layout shell mounted while its transition id follows the actual route.
+The default boundary uses the pathname for its id and key. A string `boundary`
+fixes the key, which keeps a layout shell mounted while its transition id
+follows the actual route.
 
 ## Product tabs
 
 The products layout has two boundaries:
 
 ```tsx
-<SsgoiRouteBoundary routeKey="products-layout">
+<SsgoiLayoutBoundary boundary="products-layout">
   <ProductHeader />
   <ProductTabs />
 
-  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+  <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+</SsgoiLayoutBoundary>
 ```
 
 - Category → category: inner boundary slides; header and tabs stay.
@@ -36,8 +56,8 @@ The products layout has two boundaries:
 
 The constant outer key is safe here because `app/products/layout.tsx` itself
 unmounts outside `/products`. If the boundary moves into a common app layout,
-its resolve callback must return `"products-layout"` only for product category
-paths and a different key for routes outside them.
+its `boundary` function must return `"products-layout"` only for product
+category paths and a different key for routes outside them.
 
 Direction comes from the single config:
 
@@ -64,28 +84,29 @@ if the app manages transition input itself; see the
 
 ## Shared boundary contract
 
-This template uses the shipped adapter directly in every routed section;
+This template uses the shipped boundary directly in every routed section;
 there is no local keyed-DOM wrapper. The React Router, TanStack Router,
-SvelteKit, and Nuxt templates use their corresponding router entries with
-the same `{ id, key? }` resolver contract.
+SvelteKit, and Nuxt templates pass their own router to `<Ssgoi framework>` and
+use the same `SsgoiLayoutBoundary` with the same `boundary` contract: a key
+string, a fixed `{ id?, key? }`, or a function of the route returning either.
 
 For an application with named boundaries, keep its policy in a client component:
 
 ```tsx
-<SsgoiRouteBoundary
-  resolve={(location) => resolveBoundary("app-shell", location)}
+<SsgoiLayoutBoundary
+  boundary={(route) => resolveBoundary("app-shell", route)}
   fallback={<div className="min-h-px" aria-hidden="true" />}
 >
   {children}
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
-`resolveBoundary` is application code, not an extra library API. Next.js passes
-both `pathname` and the owning layout's `selectedSegments`. Use
-`selectedSegmentsToPath(selectedSegments, projectBase)` from the same entry for
-a nested slot; a soft `@modal` navigation must keep its background's slot id
-and key even though the browser URL changes. An empty slot is the index route.
-The adapter includes Suspense for Cache Components, but the template leaves
+`resolveBoundary` is application code, not an extra library API. It receives
+the object `useRoute` returns: here both `pathname` and the owning layout's
+`selectedSegments`. Join `selectedSegments` under the project base to get a
+nested slot's path; a soft `@modal` navigation must keep its background's slot
+id and key even though the browser URL changes. An empty slot is the index route.
+The boundary includes Suspense for Cache Components, but the template leaves
 Cache Components disabled so it also demonstrates ordinary App Router setup.
 
 The complete policy example is in

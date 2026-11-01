@@ -2,9 +2,17 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Ssgoi } from "@ssgoi/react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { ssgoiConfig } from "./ssgoi-config";
+
+const framework: SsgoiFramework = {
+  useRoute: ({ parallelRoutesKey = "children" }) => {
+    const pathname = usePathname();
+    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+    return pathname == null ? null : { pathname, selectedSegments };
+  },
+};
 
 interface DemoLayoutProps {
   children: React.ReactNode;
@@ -22,7 +30,9 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="relative z-0 flex-1 w-full overflow-y-scroll overflow-x-clip bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
+          <Ssgoi config={ssgoiConfig} framework={framework}>
+            {children}
+          </Ssgoi>
         </main>
 
         {/* Bottom Navigation */}

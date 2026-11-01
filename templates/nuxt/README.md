@@ -2,8 +2,9 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/vue/nuxt`. The router is an
-optional peer and is loaded only by this entry.
+Pass a route getter to `<Ssgoi :framework>` and import
+`SsgoiLayoutBoundary` from `@ssgoi/vue`. The package itself never imports
+`nuxt` or `vue-router`.
 
 ```bash
 pnpm install
@@ -11,14 +12,24 @@ pnpm dev
 ```
 
 `utils/ssgoi-config.ts` contains one config. `components/demo-layout.vue`
-creates one `<Ssgoi>` and one centralized route boundary:
+creates one `<Ssgoi>` and one centralized layout boundary:
 
 ```vue
-<Ssgoi :config="ssgoiConfig">
-  <SsgoiRouteBoundary :resolve="({ pathname }) => ({ id: pathname, key: getRootTransitionId(pathname) })">
+<Ssgoi :config="ssgoiConfig" :framework="framework">
+  <SsgoiLayoutBoundary :boundary="({ pathname }) => getRootTransitionId(pathname)">
     <slot />
-  </SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
 </Ssgoi>
+
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
+</script>
 ```
 
 The root boundary keeps a `/products` key for that route family while its id tracks the real pathname.

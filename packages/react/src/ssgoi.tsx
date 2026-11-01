@@ -9,6 +9,7 @@ import {
 } from "@ssgoi/core/internal";
 import type { HostAnimation } from "@ssgoi/core/internal";
 import { ssgoiContext } from "./context";
+import type { SsgoiFramework } from "./layout-boundary";
 
 const rootStyle: CSSProperties = { display: "contents" };
 
@@ -20,11 +21,17 @@ interface SsgoiProps {
    * outside the tree.
    */
   host?: HostAnimation;
+  /**
+   * Router hooks for `SsgoiLayoutBoundary`, e.g.
+   * `{ usePathname, useSelectedLayoutSegments }` from `next/navigation`.
+   * Keep the object stable: its hooks are called on every boundary render.
+   */
+  framework?: SsgoiFramework;
   children: ReactNode;
 }
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
-  ({ config, host, children }) => {
+  ({ config, host, framework, children }) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
     const ssgoi = useMemo(
       () => createSggoiTransitionContext(config, { host }),
@@ -38,8 +45,10 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
       return observeSsgoiTransitions(root, ssgoi);
     }, [ssgoi]);
 
+    const value = useMemo(() => ({ ssgoi, framework }), [ssgoi, framework]);
+
     return (
-      <ssgoiContext.Provider value={ssgoi}>
+      <ssgoiContext.Provider value={value}>
         <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
           {children}
         </div>

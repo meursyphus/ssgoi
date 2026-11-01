@@ -9,15 +9,30 @@ import {
   type InjectionKey,
   type ShallowRef,
 } from "vue";
-import type { SsgoiContext, SsgoiTransitionState } from "./types";
+import type {
+  SsgoiContext,
+  SsgoiFramework,
+  SsgoiTransitionState,
+} from "./types";
 
 type SsgoiContextRef = ComputedRef<SsgoiContext>;
+type SsgoiFrameworkRef = ComputedRef<SsgoiFramework | undefined>;
 
 const SsgoiContextKey: InjectionKey<SsgoiContextRef> = Symbol("ssgoi-context");
+const SsgoiFrameworkKey: InjectionKey<SsgoiFrameworkRef> =
+  Symbol("ssgoi-framework");
 
-export const provideSsgoi = (context: SsgoiContextRef) => {
+export const provideSsgoi = (
+  context: SsgoiContextRef,
+  framework: SsgoiFrameworkRef,
+) => {
   provide(SsgoiContextKey, context);
+  provide(SsgoiFrameworkKey, framework);
 };
+
+/** The `framework` passed to the nearest `<Ssgoi>`, if any. */
+export const useSsgoiFramework = (): SsgoiFrameworkRef | undefined =>
+  inject(SsgoiFrameworkKey, undefined);
 
 export const useSsgoi = (): SsgoiContextRef => {
   const context = inject(SsgoiContextKey);

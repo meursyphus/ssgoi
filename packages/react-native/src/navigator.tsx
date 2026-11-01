@@ -31,20 +31,28 @@ import {
 import { NativeRouteSurface } from "./native-route-surface.js";
 import { useNativePlayback } from "./playback.js";
 import { useSsgoi } from "./ssgoi.js";
-import type { RouteBoundaryState } from "./types.js";
 import type { NativeSurfaceHandle } from "./native-surface-handle.js";
 
 export interface ExpoRouteLocation {
   pathname: string;
   route: Readonly<NavigatorRoute>;
 }
+export type BoundaryResult = { id?: string; key?: string | number };
 export interface BoundaryOptions {
   style?: StyleProp<ViewStyle>;
-  /** Evaluated against each screen's own route, including retained screens. */
-  resolve?: (location: ExpoRouteLocation) => RouteBoundaryState;
-  /** Scoped by the native route key; never merges distinct pushed screen instances. */
-  routeKey?: string | number;
+  /**
+   * A fixed key, a fixed `{ id?, key? }`, or a function evaluated against each screen's
+   * own route, including retained screens. Keys are scoped by the native route key and
+   * default to it; ids default to the route pathname.
+   */
+  boundary?:
+    | string
+    | BoundaryResult
+    | ((location: ExpoRouteLocation) => string | BoundaryResult);
 }
+type Resolver = (
+  location: ExpoRouteLocation,
+) => string | BoundaryResult | undefined;
 export type NavigatorEvents = {
   transitionStart: { data: { closing: boolean }; canPreventDefault: false };
   transitionEnd: { data: { closing: boolean }; canPreventDefault: false };
@@ -61,27 +69,24 @@ function screenFor(
   route: NavigatorRoute,
   descriptor: NavigatorDescriptor<ScreenOptions>,
   namespace: string,
-  options: BoundaryOptions,
+  resolver: Resolver,
   target?: NativeSurfaceHandle,
 ): Screen<Scene> {
   const pathname = route.href?.startsWith("/")
     ? normalizePath(route.href)
     : null;
-  const resolved =
-    pathname === null
-      ? null
-      : (options.resolve?.({ pathname, route }) ?? { id: pathname });
-  if (
-    resolved &&
-    (typeof resolved.id !== "string" || !resolved.id.startsWith("/"))
-  ) {
+  const result = pathname === null ? undefined : resolver({ pathname, route });
+  const normalized =
+    typeof result === "string" ? { key: result } : (result ?? {});
+  const id = pathname === null ? null : (normalized.id ?? pathname);
+  if (id !== null && (typeof id !== "string" || !id.startsWith("/"))) {
     throw new Error(
-      "SSGOI: resolve must return an absolute route id such as /posts/42.",
+      "SSGOI: boundary must return an absolute route id such as /posts/42.",
     );
   }
   return {
     key: route.key,
-    path: resolved?.id ?? null,
+    path: id,
     target: target ?? {
       key: JSON.stringify([namespace, route.key]),
       ref: createRef<View>(),
@@ -91,7 +96,7 @@ function screenFor(
       boundaryKey: JSON.stringify([
         namespace,
         route.key,
-        options.routeKey ?? resolved?.key ?? route.key,
+        normalized.key ?? route.key,
       ]),
     },
   };
@@ -103,9 +108,10 @@ export function NativeNavigator({
   descriptors,
   emitter,
   style,
-  resolve,
-  routeKey,
+  boundary,
 }: ContentProps) {
+  const resolver: Resolver =
+    typeof boundary === "function" ? boundary : () => boundary;
   const ssgoi = useSsgoi();
   const namespace = useId();
   const window = useWindowDimensions();
@@ -116,8 +122,7 @@ export function NativeNavigator({
   const activeKey = state.routes[state.index]?.key ?? null;
   const [snapshot, setSnapshot] = useState(() => ({
     navigation: null as typeof state | null,
-    resolve,
-    routeKey,
+    boundary,
     presence: createPresence<NativeSurfaceHandle, Scene>([], null),
   }));
   const targets = new Map(
@@ -133,7 +138,7 @@ export function NativeNavigator({
       route,
       descriptor,
       namespace,
-      { resolve, routeKey },
+      resolver,
       targets.get(route.key),
     );
   });
@@ -141,15 +146,10 @@ export function NativeNavigator({
     screens.map((screen) => [screen.key, screen.value]),
   );
   let current = snapshot;
-  if (
-    snapshot.navigation !== state ||
-    snapshot.resolve !== resolve ||
-    snapshot.routeKey !== routeKey
-  ) {
+  if (snapshot.navigation !== state || snapshot.boundary !== boundary) {
     current = {
       navigation: state,
-      resolve,
-      routeKey,
+      boundary,
       presence: reconcilePresence(snapshot.presence, screens, activeKey),
     };
     // Derive retained siblings before commit: effect cleanup would already be too late.

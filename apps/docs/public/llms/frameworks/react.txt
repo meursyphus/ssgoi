@@ -1,6 +1,6 @@
 # SSGOI with React
 
-Use SSGOI with React independently of your router. Router helpers are optional conveniences that connect a pathname and a page lifetime to the same React implementation.
+Use SSGOI with React independently of your router. Tell the provider how to read your router’s route through framework, and SsgoiLayoutBoundary connects it to a page lifetime.
 
 Install @ssgoi/react. Keep one provider above the changing page region.
 
@@ -45,11 +45,32 @@ export function Comments({ anchor }: { anchor: string }) {
 }
 ```
 
+## Connect a router
+
+Pass `framework` to `<Ssgoi>`, then wrap routed children in `SsgoiLayoutBoundary`
+from `@ssgoi/react`. `framework.useRoute` is a hook you write with your router's
+own hooks: it returns the current route (`{ pathname, ...anything }`) or `null`
+while the router is not ready, which renders `fallback`. The function form of the
+boundary's `boundary` prop receives that route object as-is. Keep the object at module scope so it stays stable. `SsgoiLayoutBoundary` throws if the nearest `<Ssgoi>` has no
+`framework`. The router guides below show the object for each router.
+
+```tsx
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = {
+  useRoute: () => ({ pathname: useYourRouterPathname() }),
+};
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+</Ssgoi>
+```
+
 ## Using another router
 
-A dedicated helper is not required. Connect your router’s committed pathname to a keyed DOM boundary in the same render as its children. The Route boundaries guide explains the general pattern.
+Any router works without a dedicated integration: return its committed pathname from `useRoute`, read in the same render as its children. You can also skip `framework` and render a keyed DOM boundary yourself. The Route boundaries guide explains the general pattern.
 
-## Router helpers
+## Router integrations
 
 - Next.js: https://ssgoi.dev/llms/frameworks/nextjs.txt
 - Remix (experimental): https://ssgoi.dev/llms/frameworks/remix.txt

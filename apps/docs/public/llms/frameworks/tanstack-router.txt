@@ -28,31 +28,55 @@ export const config = {
 };
 ```
 
-Everything wires in the root route — one `<Ssgoi>`, the shell classes, and
-the boundary around `<Outlet />`:
+Everything wires in the root route — one `<Ssgoi>` whose `framework.useRoute`
+reads TanStack's router state, the shell classes, and the boundary around
+`<Outlet />`:
 
 ```tsx
 // app/routes/__root.tsx
-import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiFramework,
+} from "@ssgoi/react";
 import { config } from "~/components/ssgoi-config";
-import { SsgoiRouteBoundary } from "@ssgoi/react/tanstack-router";
+
+// Key by the leaf match the outlet renders, not location: location moves
+// before pending matches render, and index routes match "/parent/".
+const framework: SsgoiFramework = {
+  useRoute: () => ({
+    pathname: useRouterState({
+      select: (state) => {
+        const location = state.location.pathname;
+        const leaf = state.matches.at(-1)?.pathname;
+        if (!leaf) return location;
+        return leaf.length > 1 && leaf.endsWith("/") && !location.endsWith("/")
+          ? leaf.slice(0, -1)
+          : leaf;
+      },
+    }),
+  }),
+};
 
 export const Route = createRootRoute({
   component: () => (
     <main className="relative z-0 min-h-dvh overflow-x-clip">
-      <Ssgoi config={config}>
-        <SsgoiRouteBoundary>
+      <Ssgoi config={config} framework={framework}>
+        <SsgoiLayoutBoundary>
           <Outlet />
-        </SsgoiRouteBoundary>
+        </SsgoiLayoutBoundary>
       </Ssgoi>
     </main>
   ),
 });
 ```
 
-The imported boundary uses the committed pathname as both its React key and
-transition id. No local router hook or boundary component is needed.
+The selector picks the path of the match the outlet is rendering, not
+`location`, which TanStack moves before pending matches render. The
+boundary uses that pathname as both its React key and transition id. No local
+boundary component is needed. Keep `framework` at module scope;
+`SsgoiLayoutBoundary` throws if `<Ssgoi>` has no `framework`.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 
@@ -62,7 +86,7 @@ When a section must persist, remove the full-path boundary from the root and
 leave only one provider there:
 
 ```tsx
-<Ssgoi config={config}>
+<Ssgoi config={config} framework={framework}>
   <Outlet />
 </Ssgoi>
 ```
@@ -72,24 +96,27 @@ a stable outer boundary plus a pathname boundary around its child outlet:
 
 ```tsx
 // app/routes/products.tsx
-<SsgoiRouteBoundary routeKey="products-layout">
+<SsgoiLayoutBoundary boundary="products-layout">
   <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary>
+  <SsgoiLayoutBoundary>
     <Outlet />
-  </SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+  </SsgoiLayoutBoundary>
+</SsgoiLayoutBoundary>
 ```
 
-The outer `routeKey` is stable; the inner boundary defaults to the pathname. The stable outer key
+The outer key is fixed; the inner boundary defaults to the pathname. The stable outer key
 preserves the shell; the inner pathname key produces child OUT/IN.
 
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-The `@ssgoi/react/tanstack-router` subpath uses only its optional router peer.
-Root imports and other router entries do not load it. `as`, DOM attributes,
-`routeKey`, and `resolve` are supported. Resolve returns `{ id, key? }`; key
-defaults to id, and routeKey overrides it. Query-only navigation keeps the
+`@ssgoi/react` never imports `@tanstack/react-router`; it calls the `useRoute`
+you wrote. `as`, DOM attributes,
+and `boundary` (a string key, `{ id?, key? }`, or a function of the route
+`useRoute` returned) are supported. Defaults: id = pathname, key = id. Query-only navigation keeps the
 boundary by default. For direct control or a custom router:
 https://ssgoi.dev/llms/manual-boundaries.txt
+
+`SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router` still works but is
+deprecated and will be removed in 8.0.0.

@@ -1,6 +1,6 @@
 import { createEffect, createMemo, onCleanup, type JSX } from "solid-js";
-import type { SsgoiConfig, SsgoiContext } from "./types";
-import { SsgoiProvider } from "./context";
+import type { SsgoiConfig, SsgoiContext, SsgoiFramework } from "./types";
+import { SsgoiFrameworkProvider, SsgoiProvider } from "./context";
 import {
   createSggoiTransitionContext,
   observeSsgoiTransitions,
@@ -10,6 +10,7 @@ import type { HostAnimation } from "@ssgoi/core/internal";
 interface SsgoiProps {
   config: SsgoiConfig;
   host?: HostAnimation;
+  framework?: SsgoiFramework;
   children: JSX.Element;
 }
 
@@ -27,9 +28,11 @@ export const Ssgoi = (props: SsgoiProps) => {
 
   return (
     <SsgoiProvider value={contextValue()}>
-      <div ref={root} data-ssgoi-root="" style={{ display: "contents" }}>
-        {props.children}
-      </div>
+      <SsgoiFrameworkProvider value={() => props.framework}>
+        <div ref={root} data-ssgoi-root="" style={{ display: "contents" }}>
+          {props.children}
+        </div>
+      </SsgoiFrameworkProvider>
     </SsgoiProvider>
   );
 };
