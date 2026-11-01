@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/core",
-  "version": "7.5.0-beta.3",
+  "version": "7.5.0-beta.4",
   "description": "Native app-like page transitions for web apps, PWAs and WebViews. Framework-agnostic core with spring physics on the Web Animations API.",
   "private": false,
   "type": "module",
