@@ -22,6 +22,7 @@ import { createNavigationTransitionResolver } from "./navigation-transition";
 import { createNavigationDetector } from "./navigation-detector-strategy";
 import { watchUnmount, type UnmountAnchor } from "./unmount-observer";
 import { watchVisibility, type VisibilityHandle } from "./visibility-observer";
+import { restoreScrollOffsets, trackScrollOffsets } from "./scroll-offsets";
 import { HostAnimation } from "../animation/host-animation";
 import {
   finishedDisposal,
@@ -585,6 +586,8 @@ export function createSggoiTransitionContext(
           } else {
             parent.appendChild(fromElement);
           }
+          // Detaching dropped every inner scroller's offset.
+          restoreScrollOffsets(fromElement, getScrollContainer());
         }
 
         const animation = config.animation({
@@ -808,6 +811,10 @@ export function createSggoiTransitionContext(
     element.style.position = "absolute";
     element.style.width = "100%";
     element.style.left = "0";
+    // React may have moved the hidden node in this commit, which drops its
+    // inner scrollers' offsets. Restore them before anything measures the
+    // page (a hero card inside a scrolled list) or paints it.
+    restoreScrollOffsets(element, getScrollContainer());
 
     if (alreadyHidden) return; // duplicate hide — kept revealed, don't re-pair
 
@@ -876,6 +883,10 @@ export function createSggoiTransitionContext(
       }
       return;
     }
+
+    // Kept alive, but its inner scrollers lost their offsets if React moved
+    // the node while it was hidden.
+    restoreScrollOffsets(element, getScrollContainer());
 
     const currentPath = state.currentPath;
     const applyScrollPolicy = initializeContext(element, currentPath);
@@ -968,6 +979,7 @@ export function createSggoiTransitionContext(
     }
     registered.add(element);
     const registeredGeneration = connectionGeneration;
+    trackScrollOffsets(element);
 
     captureAnchor(element);
 
