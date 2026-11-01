@@ -4,7 +4,11 @@ import {
   createContext,
   Suspense,
   useContext,
+  useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
+  useState,
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
@@ -134,6 +138,75 @@ function KeyedBoundary({
       data-ssgoi-transition={routePath}
     >
       <layoutContext.Provider value={inner}>{children}</layoutContext.Provider>
+    </Component>
+  );
+}
+
+export type SsgoiPageBoundaryProps<T extends ElementType = "div"> = {
+  children?: ReactNode;
+  as?: T;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "children">;
+
+/**
+ * A route boundary that is never keyed, for routes the router itself keeps
+ * alive (Next.js Cache Components hides visited routes in React `<Activity>`).
+ * React's hide/show of the route is the OUT/IN. Its id follows the route only
+ * while it is visible, so when it is hidden it still names the route the user
+ * left from. Reads the route itself and keys by `pathname` only, ignoring
+ * `renderedPath` and `config.layouts`.
+ */
+export function SsgoiPageBoundary<T extends ElementType = "div">(
+  props: SsgoiPageBoundaryProps<T>,
+) {
+  const setup = useContext(frameworkContext);
+  if (!setup) {
+    throw new Error(
+      "SSGOI: SsgoiPageBoundary requires a framework. Pass it to <Ssgoi framework={{ useRoute }}>.",
+    );
+  }
+  return (
+    // Catches URL suspension (Next.js Cache Components) outside the hook.
+    <Suspense fallback={null}>
+      <PageRoute {...props} framework={setup.framework} />
+    </Suspense>
+  );
+}
+
+function PageRoute({
+  framework,
+  ...props
+}: BoundaryProps & { framework: SsgoiFramework }) {
+  // `renderedPath` is ignored: Next.js computes it relative to the caller's
+  // layout, and this boundary sits in group layouts and pages, not the root.
+  const routePath = framework.useRoute()?.pathname;
+  // Never register an empty or invented route with SSGOI.
+  if (routePath == null) return null;
+  return <PageElement {...props} routePath={routePath} />;
+}
+
+// No layout effects run on the server; avoids React 18's SSR warning.
+const useClientLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+function PageElement({
+  routePath,
+  as,
+  children,
+  ...rest
+}: BoundaryProps & { routePath: string }) {
+  const ref = useRef<HTMLElement>(null);
+  // The rendered attribute never changes, so React never overwrites the
+  // imperative id below. It is in the server HTML.
+  const [initialPath] = useState(routePath);
+  // React runs no layout effects inside a hidden Activity, so the id stops
+  // at the last route this element was visible for and catches up on reveal.
+  useClientLayoutEffect(() => {
+    ref.current?.setAttribute("data-ssgoi-transition", routePath);
+  }, [routePath]);
+  const Component: ElementType = as ?? "div";
+  return (
+    <Component {...rest} ref={ref} data-ssgoi-transition={initialPath}>
+      {children}
     </Component>
   );
 }

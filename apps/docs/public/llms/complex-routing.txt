@@ -175,6 +175,19 @@ Next.js references:
 - https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes
 - https://nextjs.org/docs/app/api-reference/file-conventions/proxy
 
+## 5. Next.js Cache Components
+
+With `cacheComponents: true`, Next.js keeps visited routes mounted inside React
+`<Activity>` and hides them instead of unmounting. `SsgoiLayoutBoundary`'s key
+change would remount them and discard their state, so this mode uses
+`SsgoiPageBoundary` instead and the `config.layouts` tree above does not apply.
+The root layout keeps `<Ssgoi>` with no boundary; each route-group layout wraps
+its content in `<SsgoiPageBoundary>` with BottomNav inside it, so tab → detail
+takes the nav away; each page wraps itself too. Intercepted `@modal` pages are
+not wrapped, and the two boundaries are not mixed in one region. Full setup:
+the "Next.js Cache Components" section of
+https://ssgoi.dev/llms/frameworks/nextjs.txt
+
 Basic setup and route rules: https://ssgoi.dev/llms.txt
 Complete Next.js setup: https://ssgoi.dev/llms/frameworks/nextjs.txt
 Manual/custom-router setup: https://ssgoi.dev/llms/manual-boundaries.txt

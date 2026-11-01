@@ -178,6 +178,29 @@ export default function ShopLayout({ children }: { children: ReactNode }) {
             heading: "Parallel slots and interception",
             body: "During a soft intercept the URL points at the modal while the children slot still renders the background. Because useRoute returns renderedPath from the selected segments, no background boundary moves. Render the {modal} slot outside the boundaries; it animates by itself and needs no SSGOI setup. Interception still needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry.",
           },
+          {
+            heading: "Cache Components: SsgoiPageBoundary",
+            body: "With cacheComponents enabled, Next.js keeps visited routes mounted inside React <Activity> and hides them, so their state is still there on Back. SsgoiLayoutBoundary changes its key to force a remount, which discards that state. SsgoiPageBoundary never sets a key: Next hides the route you leave and reveals the one you open, and SSGOI animates that hide and reveal. It uses the same provider and framework.useRoute, takes no SSGOI props, takes its id from pathname (renderedPath is ignored), and throws if <Ssgoi> has no framework. A custom as component must forward its ref to its DOM root, or the id never updates. The root layout keeps the provider but no boundary. Every route-group layout wraps its whole content in SsgoiPageBoundary, bottom nav included, so the nav leaves with its group; every page wraps itself too. config.layouts is not used, intercepted @modal pages are not wrapped, and the two boundaries are not mixed in one region. In this beta, while a soft-intercepted modal is open the background boundaries’ id follows the URL. Wrapping it once in your own screen component, such as an AppScreen, keeps pages from forgetting it.",
+            code: `// app/layout.tsx: <SsgoiProvider>{children}</SsgoiProvider>, no boundary
+
+// app/(top-level)/layout.tsx
+import type { ReactNode } from "react";
+import { SsgoiPageBoundary } from "@ssgoi/react";
+
+export default function TopLevelLayout({ children }: { children: ReactNode }) {
+  return (
+    <SsgoiPageBoundary className="flex min-h-dvh flex-col">
+      {children}
+      <BottomNav />
+    </SsgoiPageBoundary>
+  );
+}
+
+// app/(top-level)/posts/page.tsx, and every other page
+export default function PostsPage() {
+  return <SsgoiPageBoundary>{/* page content */}</SsgoiPageBoundary>;
+}`,
+          },
         ],
         templateUrl:
           "https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs",

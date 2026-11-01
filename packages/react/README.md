@@ -41,6 +41,7 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring an
 
 - Next.js
 - Persistent layouts and sliding tabs
+- Next.js Cache Components: SsgoiPageBoundary
 - React Router
 - TanStack Router
 - Config
@@ -232,6 +233,67 @@ With the config above:
   renders the detail page and keys it as one.
 
 Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
+
+## Next.js Cache Components: SsgoiPageBoundary
+
+With `cacheComponents` enabled, Next.js keeps visited routes alive inside React
+`<Activity>` instead of unmounting them, so Back restores their state.
+`SsgoiLayoutBoundary` keys its element by the route, which forces a remount and
+throws that state away. `SsgoiPageBoundary` is never keyed: React hiding the
+route (`display: none !important` on its top-most element) is the OUT, showing
+it again is the IN.
+
+```text
+app/
+  (app)/layout.tsx              # <Ssgoi> only, no boundary
+  (app)/(top-level)/layout.tsx  # <SsgoiPageBoundary> around content + bottom nav
+  (app)/(top-level)/page.tsx    # <SsgoiPageBoundary> around the page
+  (app)/(detail)/layout.tsx     # <SsgoiPageBoundary> around content
+  (app)/(detail)/posts/[id]/page.tsx  # <SsgoiPageBoundary> around the page
+  (app)/@modal/(.)posts/[id]/page.tsx # not wrapped
+```
+
+```tsx
+// app/(app)/(top-level)/layout.tsx
+import { SsgoiPageBoundary } from "@ssgoi/react";
+
+export default function TopLevelLayout({ children }) {
+  return (
+    <SsgoiPageBoundary>
+      {children}
+      <BottomNav />
+    </SsgoiPageBoundary>
+  );
+}
+
+// app/(app)/(top-level)/search/page.tsx
+export default function SearchPage() {
+  return <SsgoiPageBoundary>…</SsgoiPageBoundary>;
+}
+```
+
+- Every route-group layout wraps its content in one, with persistent chrome
+  such as a bottom nav inside it so the chrome leaves with the group. Every
+  page wraps itself in one. Intercepted `@modal` pages are not wrapped; the
+  `{modal}` slot animates by itself.
+- Tab → tab: the page swaps, the group and its nav stay. Tab → detail: the
+  whole group, nav included, leaves. Detail → detail: the page swaps. Back
+  reveals the kept route with its state.
+- The id is `pathname` (`renderedPath` is ignored), rendered on the server and
+  then updated only while the boundary is visible. A hidden group keeps the id
+  of the route the user left from. The same `framework` object works for both
+  boundaries.
+- Known beta limitation: while a soft-intercepted modal is open, the visible
+  background boundaries' id follows the URL (the modal's path), not the page
+  they show.
+- It takes no SSGOI props: `as` picks the element (default `div`; a component
+  must pass `ref` to its DOM node) and every other prop is forwarded. It reads
+  the route itself, inside its own `Suspense`, and renders nothing until the
+  route is known.
+- `config.layouts` is not used in this mode. Don't mix `SsgoiLayoutBoundary`
+  and `SsgoiPageBoundary` in the same region.
+- Wrap it once in your own screen component (for example an `AppScreen`) so a
+  page can't forget it.
 
 ## React Router
 

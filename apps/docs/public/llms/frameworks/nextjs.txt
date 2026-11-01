@@ -137,6 +137,88 @@ boundary keeps one key for every shop route, the inner one swaps. For a
 per-project shell, `{ paths: "/projects/:id/**" }` gives each project its own
 instance. Full patterns: https://ssgoi.dev/llms/complex-routing.txt
 
+## Next.js Cache Components: SsgoiPageBoundary
+
+Use this only when `next.config` sets `cacheComponents: true` and you want
+visited routes kept alive. In that mode the App Router keeps a route you leave
+mounted inside React `<Activity>` and hides it, so its state is still there
+when the user comes back. `SsgoiLayoutBoundary` changes its React `key` to
+force a remount, which throws that state away. `SsgoiPageBoundary` never sets
+a `key`: Next hides the route you leave and reveals the one you open, and SSGOI
+animates the hide out and the reveal in.
+
+`SsgoiPageBoundary` comes from the root `@ssgoi/react` entry and uses the same
+`<Ssgoi framework={framework}>` provider as above; nothing changes in it. Like
+the layout boundary it takes no SSGOI props (`as` and DOM attributes pass
+through), reads `framework.useRoute` itself, renders nothing until the route is
+known, and throws if `<Ssgoi>` has no `framework`. Its id is the route's
+`pathname`; it ignores `renderedPath` and keys nothing.
+A custom `as` component must forward its `ref` to its DOM root, or the id never
+updates after the first render.
+
+Beta limitation: while a soft-intercepted modal is open, the background
+boundaries' id follows the URL (the modal's path). Nothing remounts or animates
+behind the modal; only the id changes until it closes.
+
+The structure changes in two places compared with the layout boundary setup:
+
+1. The root layout keeps `<SsgoiProvider>` but no boundary.
+2. Every route-group layout wraps its whole content in `<SsgoiPageBoundary>`,
+   persistent chrome such as a bottom nav included, so the nav leaves with its
+   group. Every page also wraps itself in `<SsgoiPageBoundary>`.
+
+`config.layouts` is not used in this mode; `config.transitions` works as usual.
+Do not wrap intercepted `@modal` pages.
+
+```text
+app/
+├─ layout.tsx                  <SsgoiProvider>{children}</SsgoiProvider>, no boundary
+├─ (top-level)/layout.tsx      <SsgoiPageBoundary> children + <BottomNav /> </SsgoiPageBoundary>
+│  ├─ posts/page.tsx           <SsgoiPageBoundary> page </SsgoiPageBoundary>
+│  └─ profile/page.tsx         <SsgoiPageBoundary> page </SsgoiPageBoundary>
+└─ (detail)/layout.tsx         <SsgoiPageBoundary>{children}</SsgoiPageBoundary>
+   └─ posts/[id]/page.tsx      <SsgoiPageBoundary> page </SsgoiPageBoundary>
+```
+
+```tsx
+// app/(top-level)/layout.tsx
+import type { ReactNode } from "react";
+import { SsgoiPageBoundary } from "@ssgoi/react";
+import { BottomNav } from "@/components/bottom-nav";
+
+export default function TopLevelLayout({ children }: { children: ReactNode }) {
+  return (
+    <SsgoiPageBoundary className="flex min-h-dvh flex-col">
+      {children}
+      <BottomNav />
+    </SsgoiPageBoundary>
+  );
+}
+
+// app/(top-level)/posts/page.tsx
+import { SsgoiPageBoundary } from "@ssgoi/react";
+
+export default function PostsPage() {
+  return <SsgoiPageBoundary>{/* page content */}</SsgoiPageBoundary>;
+}
+```
+
+| Navigation | Result |
+| --- | --- |
+| tab → tab | the group stays visible; only the page boundary swaps, BottomNav stays |
+| tab → detail | the whole `(top-level)` group is hidden, so it leaves with BottomNav |
+| detail → detail | the `(detail)` group stays; only the page swaps |
+| Back | the hidden route is revealed with its state intact and animates in |
+
+A group boundary's id follows the route while the group is visible and freezes
+while it is hidden, so the group leaves as the route the user left from.
+
+Wrap the boundary once in your own screen component (for example an
+`AppScreen` that every page returns) so no page can forget it. Do not mix
+`SsgoiLayoutBoundary` and `SsgoiPageBoundary` in the same region: a layout
+boundary's key change remounts the routes that page boundaries rely on staying
+alive.
+
 ## Interception and middleware / proxy
 
 The component manages DOM lifetime. Your application still owns intercepted

@@ -456,6 +456,78 @@ export function RouteBoundary({ children, pathname, routeKey, ...props }: Props)
         </div>
       </Section>
 
+      <Section
+        title="When the framework hides instead of unmounting"
+        id="cache-components"
+        lead="Next.js Cache Components keeps visited routes alive, so there is no remount for a key to trigger."
+      >
+        <p className={`mt-4 ${body}`}>
+          With <code className={inlineCode}>cacheComponents</code> enabled,
+          Next.js keeps a route you leave mounted inside React{" "}
+          <code className={inlineCode}>&lt;Activity&gt;</code> and hides it, so
+          Back brings it back with its state. SSGOI treats that hide as the
+          route leaving and the reveal as it arriving.{" "}
+          <code className={inlineCode}>SsgoiLayoutBoundary</code> would defeat
+          this: its key change remounts the route and discards the state.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          <code className={inlineCode}>SsgoiPageBoundary</code> is the exception
+          to the note above: it sets only the id and never a key, because the
+          lifetime comes from the hide, not from a remount. Its id is the
+          route&apos;s <code className={inlineCode}>pathname</code> and follows
+          it only while the boundary is visible, so a hidden group boundary
+          still names the route the user left from. It uses the same provider
+          and <code className={inlineCode}>framework</code>, takes no SSGOI
+          props, ignores <code className={inlineCode}>config.layouts</code>, and
+          throws if its provider has no{" "}
+          <code className={inlineCode}>framework</code>.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          The root layout keeps the provider with no boundary. Every route-group
+          layout wraps its whole content in{" "}
+          <code className={inlineCode}>SsgoiPageBoundary</code>, bottom nav
+          included, so the nav leaves with its group. Every page wraps itself in
+          one too. Intercepted <code className={inlineCode}>@modal</code> pages
+          are not wrapped. The{" "}
+          <Link href="/docs/frameworks/react#nextjs" className={link}>
+            Next.js guide
+          </Link>{" "}
+          shows the files.
+        </p>
+        <DocsTable
+          head={["Navigation", "What happens"]}
+          rows={[
+            [
+              "Tab → tab",
+              "The group stays visible; only the page boundary swaps, so the nav stays.",
+            ],
+            [
+              "Tab → detail",
+              "The whole tab group is hidden and leaves with its nav.",
+            ],
+            ["Detail → detail", "The detail group stays; only the page swaps."],
+            [
+              "Back",
+              "The hidden route is revealed with its state intact and animates in.",
+            ],
+          ]}
+          minWidth="560px"
+        />
+        <p className={`mt-6 ${body}`}>
+          Wrap it once in your own screen component, such as an{" "}
+          <code className={inlineCode}>AppScreen</code> every page returns, so
+          no page can forget it.
+        </p>
+        <div className="mt-6">
+          <Note>
+            Do not mix <code className={inlineCode}>SsgoiLayoutBoundary</code>{" "}
+            and <code className={inlineCode}>SsgoiPageBoundary</code> in the
+            same region. A layout boundary&apos;s key change remounts the routes
+            the page boundaries rely on staying alive.
+          </Note>
+        </div>
+      </Section>
+
       <NextLinks
         links={[
           {

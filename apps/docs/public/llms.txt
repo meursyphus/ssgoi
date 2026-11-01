@@ -192,6 +192,7 @@ persistent shell, tab changes keep the header and nav still.
 | choose and configure an effect | https://ssgoi.dev/llms/transitions.txt |
 | configure route patterns and navigation direction | https://ssgoi.dev/llms/route-rules.txt |
 | keep layouts, parallel slots, or intercepted backgrounds persistent | https://ssgoi.dev/llms/complex-routing.txt |
+| `cacheComponents: true` keeps visited routes alive (`SsgoiPageBoundary`) | "Next.js Cache Components" in https://ssgoi.dev/llms/frameworks/nextjs.txt |
 | configure scroll restoration, or wait for a transition before scrolling | https://ssgoi.dev/llms/scroll-restoration.txt |
 | diagnose a broken transition | https://ssgoi.dev/llms/troubleshooting.txt |
 | check browser support | https://ssgoi.dev/docs/compatibility |
