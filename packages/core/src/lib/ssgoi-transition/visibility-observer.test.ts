@@ -65,10 +65,10 @@ function reactShow(el: FakeEl, value = "flex"): void {
   el.__priority = "";
 }
 
-/** Flush the observer as if the element's `style` attribute mutated. */
-function flush(el: FakeEl): void {
+/** Flush the observer as if the elements' `style` attributes mutated. */
+function flush(...els: FakeEl[]): void {
   lastObserverCb?.(
-    [{ target: el } as unknown as MutationRecord],
+    els.map((el) => ({ target: el }) as unknown as MutationRecord),
     {} as MutationObserver,
   );
 }
@@ -261,5 +261,63 @@ describe("watchVisibility", () => {
     expect(handle.isHidden).toBe(false);
     reactHide(el);
     expect(handle.isHidden).toBe(true);
+  });
+
+  describe("nested edges", () => {
+    function nest(parent: FakeEl, child: FakeEl): void {
+      (child as { parentElement: unknown }).parentElement = parent;
+    }
+
+    it("marks a child edge nested when its parent flips in the same batch", () => {
+      // Re-entering a route group: React reveals the group and, inside it,
+      // hides the last page — one commit. Either record order.
+      for (const childFirst of [false, true]) {
+        const group = makeEl("none");
+        group.__priority = "important";
+        const page = makeEl("");
+        nest(group, page);
+        const groupHide = vi.fn();
+        const groupShow = vi.fn();
+        const pageHide = vi.fn();
+        watchVisibility(group, { onHide: groupHide, onShow: groupShow });
+        watchVisibility(page, { onHide: pageHide, onShow: vi.fn() });
+
+        reactShow(group, "block");
+        reactHide(page);
+        if (childFirst) flush(page, group);
+        else flush(group, page);
+
+        expect(groupShow).toHaveBeenCalledWith({ nested: false });
+        expect(pageHide).toHaveBeenCalledWith({ nested: true });
+      }
+    });
+
+    it("marks a child edge nested while its parent is React-hidden", () => {
+      const group = makeEl("none");
+      group.__priority = "important";
+      const page = makeEl("none");
+      page.__priority = "important";
+      nest(group, page);
+      watchVisibility(group, { onHide: vi.fn(), onShow: vi.fn() });
+      const pageShow = vi.fn();
+      watchVisibility(page, { onHide: vi.fn(), onShow: pageShow });
+
+      reactShow(page, "block");
+      flush(page);
+      expect(pageShow).toHaveBeenCalledWith({ nested: true });
+    });
+
+    it("does not mark a child edge nested under a steady visible parent", () => {
+      const group = makeEl("block");
+      const page = makeEl("");
+      nest(group, page);
+      watchVisibility(group, { onHide: vi.fn(), onShow: vi.fn() });
+      const pageHide = vi.fn();
+      watchVisibility(page, { onHide: pageHide, onShow: vi.fn() });
+
+      reactHide(page);
+      flush(page);
+      expect(pageHide).toHaveBeenCalledWith({ nested: false });
+    });
   });
 });

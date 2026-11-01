@@ -324,6 +324,24 @@ export function createSggoiTransitionContext(
     for (const element of elements) reconcileResting(element, epoch);
   };
 
+  // Settle a node no run owns to React's latest intent, wiping any reveal or
+  // out-of-flow placement a hide left on it.
+  const settleUnowned = (element: HTMLElement): void => {
+    const epoch = ++transitionEpoch;
+    owner.set(element, epoch);
+    reconcileResting(element, epoch);
+  };
+
+  // Whether `from` or a boundary above it is registered with this context and
+  // React-hidden (still hidden, revealed by us for its OUT, or about to be
+  // revealed by an edge the visibility observer has not dispatched yet).
+  const insideHiddenBoundary = (from: Node | null): boolean => {
+    for (let a = from; a; a = a.parentNode) {
+      if (hiddenState.get(a as HTMLElement)?.intent === "hidden") return true;
+    }
+    return false;
+  };
+
   let connectionGeneration = 0;
 
   const runTransition = (
@@ -750,7 +768,7 @@ export function createSggoiTransitionContext(
   // microtask, before the browser paints — so it animates out from where it sat
   // instead of flashing away, and take it out of flow so the incoming page
   // claims its slot. The run itself starts once the IN side pairs.
-  const handleHide = (element: HTMLElement, path: string) => {
+  const handleHide = (element: HTMLElement, path: string, nested = false) => {
     const state = hiddenState.get(element);
     if (!state) return;
     // React's <Activity> can commit the SAME hide more than once (dev re-commit
@@ -760,6 +778,19 @@ export function createSggoiTransitionContext(
     // always FLIPS intent, so it is never deduped here.
     const alreadyHidden = state.intent === "hidden";
     state.intent = "hidden";
+
+    // Hidden inside an ancestor boundary that is itself hidden, or that
+    // changes visibility in the same commit (a route group re-entered from
+    // another group hides its last page as it reveals): this page was not on
+    // screen to animate out, and the ancestor's edge is the navigation. Leave
+    // React's hide in place and send no OUT — an OUT here has no partner and
+    // would wait, revealed, until it mis-pairs with a later navigation. A run
+    // that still owns the node reconciles it to this intent when it ends.
+    if (nested && !alreadyHidden) {
+      state.pendingOutPath = null;
+      if (!owner.has(element)) settleUnowned(element);
+      return;
+    }
 
     // Snapshot inline styles once, on idle→active entry, so settle can wipe
     // transition leakage off this reused node. These are the node's resting
@@ -799,7 +830,7 @@ export function createSggoiTransitionContext(
   // React revealed `element` (an <Activity> went mode="visible"): it is entering
   // again, with its state preserved. Drive an IN exactly like a fresh mount,
   // minus the mount.
-  const handleShow = (element: HTMLElement, path: string) => {
+  const handleShow = (element: HTMLElement, path: string, nested = false) => {
     const state = hiddenState.get(element);
     if (!state) return;
     // Dedupe redundant reveals (see handleHide): only an intent flip enters.
@@ -832,6 +863,18 @@ export function createSggoiTransitionContext(
       } else {
         state.vis.setDisplay(null);
       }
+    }
+
+    // Revealed inside an ancestor boundary that is hidden or changes
+    // visibility in the same commit: the ancestor carries it, like a boundary
+    // mounted inside another one of the same batch (`enter: false`).
+    if (nested) {
+      // An OUT this node still waits with in the detector is void now: React
+      // shows it again and no IN of its own follows to cancel that OUT.
+      if (state.savedCss !== null && !owner.has(element)) {
+        detector.cancel((pendingSide) => pendingSide.element === element);
+      }
+      return;
     }
 
     const currentPath = state.currentPath;
@@ -875,6 +918,10 @@ export function createSggoiTransitionContext(
     if (!emit) return;
 
     const anchor = removalAnchor ?? readAnchor(element);
+    // Removed from inside a React-hidden boundary (Next.js evicting a page kept
+    // alive in a hidden route group): it was off screen, not navigated away
+    // from, and its OUT would pair with whatever arrives next.
+    if (insideHiddenBoundary(anchor.parent)) return;
     const pendingSide: PendingSide = {
       element,
       parent: anchor.parent,
@@ -928,8 +975,8 @@ export function createSggoiTransitionContext(
     // the rest of its life. The node is registered ONCE; subsequent OUT/IN come
     // from these handlers (display:none flips), not from mount/unmount.
     const vis = watchVisibility(element, {
-      onHide: () => handleHide(element, path),
-      onShow: () => handleShow(element, path),
+      onHide: (edge) => handleHide(element, path, edge?.nested),
+      onShow: (edge) => handleShow(element, path, edge?.nested),
     });
     visibilityHandles.add(vis);
     const state: HiddenState = {
@@ -946,9 +993,11 @@ export function createSggoiTransitionContext(
 
     // A node that mounts already hidden (e.g. an inactive Activity sibling) is
     // not "entering" — set it up but don't fire an IN until React reveals it.
+    // Neither is one that mounts inside a React-hidden boundary: it is off
+    // screen, or the ancestor's reveal in this same commit is the IN.
     if (!vis.isHidden) {
       captureVisibleDisplay(element, state);
-      if (enter) {
+      if (enter && !insideHiddenBoundary(element.parentNode)) {
         const applyScrollPolicy = initializeContext(element, path);
         const pendingSide: PendingSide = {
           element,
