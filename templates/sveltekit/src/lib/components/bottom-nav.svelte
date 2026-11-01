@@ -28,7 +28,7 @@
     {/snippet}
   </NavItem>
   <NavItem
-    href="/products"
+    href="/products/all"
     label="Shop"
     isActive={page.url.pathname.startsWith("/products")}
   >

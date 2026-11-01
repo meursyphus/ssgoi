@@ -22,7 +22,7 @@
       </svg>
     </NavItem>
     <NavItem
-      href="/products"
+      href="/products/all"
       label="Shop"
       :isActive="pathname.startsWith('/products')"
     >

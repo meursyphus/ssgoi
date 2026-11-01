@@ -54,7 +54,7 @@ export function setSsgoiLayoutRoutes(
   framework.onNavigate((navigation) => {
     if (!navigation.to) return;
     const next = boundaryAt(navigation.to.url.pathname);
-    const finish = [...listeners].map((listener) => listener(next));
+    const finish = Array.from(listeners, (listener) => listener(next));
     return () => {
       for (const callback of finish) callback?.();
     };

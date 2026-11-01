@@ -26,7 +26,7 @@ export default function BottomNav() {
         }
       />
       <NavItem
-        href="/products"
+        href="/products/all"
         label="Shop"
         isActive={pathname.startsWith("/products")}
         icon={

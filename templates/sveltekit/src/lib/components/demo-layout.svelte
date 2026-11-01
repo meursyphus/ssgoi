@@ -19,7 +19,7 @@
         config={ssgoiConfig}
         framework={{
           getRoute: () => ({ pathname: page.url.pathname }),
-          onNavigate: (cb) => { console.log("SSGOI-DBG register"); onNavigate((n) => { console.log("SSGOI-DBG nav", n.to?.url.pathname); try { const r = cb(n); console.log("SSGOI-DBG ret", typeof r); return r ? () => { try { r(); console.log("SSGOI-DBG finished"); } catch (e) { console.log("SSGOI-DBG finish err", e.stack); } } : r; } catch (e) { console.log("SSGOI-DBG err", e.stack); } }); },
+          onNavigate,
         }}
       >
         <!-- Depth 0: stays while you move between tabs, moves as a whole
