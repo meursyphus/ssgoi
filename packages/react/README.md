@@ -286,6 +286,11 @@ export default function SearchPage() {
 - Known beta limitation: while a soft-intercepted modal is open, the visible
   background boundaries' id follows the URL (the modal's path), not the page
   they show.
+- Known Next.js issue ([vercel/next.js#98623](https://github.com/vercel/next.js/issues/98623)):
+  from the second visit on, Next reorders the kept-alive `<Activity>` routes and
+  React moves their DOM, which resets DOM state inside them — iframes reload,
+  media restarts, inner scroll containers return to the start. SSGOI cannot
+  prevent that move; it is fixed in Next itself.
 - It takes no SSGOI props: `as` picks the element (default `div`; a component
   must pass `ref` to its DOM node) and every other prop is forwarded. It reads
   the route itself, inside its own `Suspense`, and renders nothing until the

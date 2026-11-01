@@ -160,6 +160,11 @@ Beta limitation: while a soft-intercepted modal is open, the background
 boundaries' id follows the URL (the modal's path). Nothing remounts or animates
 behind the modal; only the id changes until it closes.
 
+Known Next.js issue (https://github.com/vercel/next.js/issues/98623): from the
+second visit on, Next reorders kept-alive <Activity> routes and React moves their
+DOM, resetting DOM state inside them (iframes reload, media restarts, inner scroll
+containers go back to the start). SSGOI cannot prevent that move.
+
 The structure changes in two places compared with the layout boundary setup:
 
 1. The root layout keeps `<SsgoiProvider>` but no boundary.
