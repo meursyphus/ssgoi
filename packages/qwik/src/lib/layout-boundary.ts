@@ -2,59 +2,53 @@ import {
   createContextId,
   useComputed$,
   useContext,
+  useContextProvider,
   type Signal,
 } from "@builder.io/qwik";
 
 /**
- * Router values `useSsgoiLayoutBoundary` reads. Pass Qwik City's location
- * store as a value: `{ location: useLocation() }`.
+ * Router values the provider reads. Pass Qwik City's location store as a
+ * value: `{ location: useLocation() }`.
  */
 export interface SsgoiFramework {
   location: { url: URL };
 }
 
-export interface SsgoiLayoutBoundaryState {
-  id: string;
-  key: string | number;
+/** The route resolved once at the provider and shared with every boundary. */
+export interface SsgoiLayoutRoute {
+  routePath: string;
+  chain: string[];
 }
 
-/** A fixed key (string), or a fixed id and/or key. Defaults: id = pathname, key = id. */
-type BoundaryInput = string | { id?: string; key?: string | number };
+export const SsgoiRouteContextId =
+  createContextId<Signal<SsgoiLayoutRoute> | null>("ssgoi.route");
 
-export const SsgoiFrameworkContextId = createContextId<SsgoiFramework | null>(
-  "ssgoi.framework",
+const SsgoiLayoutDepthContextId = createContextId<{ depth: number }>(
+  "ssgoi.layout-depth",
 );
 
-/** @internal Shared by `useSsgoiLayoutBoundary` and the deprecated `useSsgoiRouteBoundary`. */
-export const useLocationBoundary = (
-  location: SsgoiFramework["location"],
-  boundary?: BoundaryInput,
-): Signal<SsgoiLayoutBoundaryState> => {
-  return useComputed$(() => {
-    const result =
-      typeof boundary === "string" ? { key: boundary } : (boundary ?? {});
-    const id = result.id ?? location.url.pathname;
-    return { id, key: result.key ?? id };
-  });
-};
-
 /**
- * Route boundary for a page or layout root under `<Ssgoi framework>` (or
- * `useSsgoi(root, { framework })`). Apply id and key to the route's own DOM
- * root. Keeping Slot ownership in the route avoids moving projected content
- * between outgoing and incoming pages.
+ * Keyed boundary for the route or layout that calls it. Apply id and key to
+ * that component's own DOM root and keep Slot ownership in the route.
  *
- * `boundary` is a fixed key (e.g. `"products-layout"` for a persistent shell)
- * or `{ id?, key? }`. Defaults: id = pathname, key = id.
+ * Depth is automatic: a boundary under another one is one level deeper. The
+ * key is the depth's scope instance from `config.layouts`, falling back to
+ * the route path, so the root stays mounted while navigation stays inside
+ * that scope.
  */
-export function useSsgoiLayoutBoundary(
-  boundary?: BoundaryInput,
-): Signal<SsgoiLayoutBoundaryState> {
-  const framework = useContext(SsgoiFrameworkContextId, null);
-  if (!framework) {
+export function useSsgoiLayoutBoundary(): Signal<{ id: string; key: string }> {
+  const route = useContext(SsgoiRouteContextId, null);
+  if (!route) {
     throw new Error(
       "SSGOI: useSsgoiLayoutBoundary requires a framework. Pass it to <Ssgoi framework={{ location: useLocation() }}> or useSsgoi(root, { framework: { location: useLocation() } }).",
     );
   }
-  return useLocationBoundary(framework.location, boundary);
+  const parent = useContext(SsgoiLayoutDepthContextId, null);
+  const depth = parent ? parent.depth + 1 : 0;
+  useContextProvider(SsgoiLayoutDepthContextId, { depth });
+
+  return useComputed$(() => {
+    const { routePath, chain } = route.value;
+    return { id: routePath, key: chain[depth] ?? routePath };
+  });
 }

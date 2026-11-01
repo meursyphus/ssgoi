@@ -7,22 +7,28 @@
   import { onNavigate } from "$app/navigation";
   // Stores work throughout SvelteKit 2, including releases before $app/state.
   import { page } from "$app/stores";
-  import { setSsgoiFramework } from "../../context.js";
+  import { setSsgoiLayoutOverride } from "../../context.js";
   import SsgoiLayoutBoundary from "../../ssgoi-layout-boundary.svelte";
   import type { SsgoiRouteBoundaryProps } from "./types.js";
 
   let { resolve, routeKey, ...props }: SsgoiRouteBoundaryProps = $props();
 
-  setSsgoiFramework(() => ({
-    getRoute: () => ({ pathname: $page.url.pathname, url: $page.url }),
-    onNavigate,
-  }));
+  const getBoundary = (url: URL) => {
+    const boundary = resolve?.({ pathname: url.pathname, url }) ?? {
+      id: url.pathname,
+    };
+    return { id: boundary.id, key: routeKey ?? boundary.key ?? boundary.id };
+  };
+
+  setSsgoiLayoutOverride({
+    current: () => getBoundary($page.url),
+    onNavigate: (listener) =>
+      onNavigate((navigation) => {
+        if (!navigation.to) return;
+        const { url } = navigation.to;
+        return listener(() => getBoundary(url));
+      }),
+  });
 </script>
 
-<SsgoiLayoutBoundary
-  {...props}
-  boundary={(route) => {
-    const boundary = resolve?.(route) ?? { id: route.pathname };
-    return { id: boundary.id, key: routeKey ?? boundary.key ?? boundary.id };
-  }}
-/>
+<SsgoiLayoutBoundary {...props} />

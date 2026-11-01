@@ -1,6 +1,8 @@
 import {
+  createContext,
   createRef,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -31,28 +33,25 @@ import {
 import { NativeRouteSurface } from "./native-route-surface.js";
 import { useNativePlayback } from "./playback.js";
 import { useSsgoi } from "./ssgoi.js";
+import type { RouteBoundaryState } from "./types.js";
 import type { NativeSurfaceHandle } from "./native-surface-handle.js";
 
 export interface ExpoRouteLocation {
   pathname: string;
   route: Readonly<NavigatorRoute>;
 }
-export type BoundaryResult = { id?: string; key?: string | number };
 export interface BoundaryOptions {
   style?: StyleProp<ViewStyle>;
-  /**
-   * A fixed key, a fixed `{ id?, key? }`, or a function evaluated against each screen's
-   * own route, including retained screens. Keys are scoped by the native route key and
-   * default to it; ids default to the route pathname.
-   */
-  boundary?:
-    | string
-    | BoundaryResult
-    | ((location: ExpoRouteLocation) => string | BoundaryResult);
 }
-type Resolver = (
-  location: ExpoRouteLocation,
-) => string | BoundaryResult | undefined;
+export interface LegacyBoundaryOptions {
+  /** Evaluated against each screen's own route, including retained screens. */
+  resolve?: (location: ExpoRouteLocation) => RouteBoundaryState;
+  /** Scoped by the native route key; never merges distinct pushed screen instances. */
+  routeKey?: string | number;
+}
+// TODO(8.0.0): remove with the deprecated Expo Router entry.
+// Carries the deprecated entry's resolve/routeKey; SsgoiLayoutBoundary keys screens by native route.
+export const LegacyBoundaryContext = createContext<LegacyBoundaryOptions>({});
 export type NavigatorEvents = {
   transitionStart: { data: { closing: boolean }; canPreventDefault: false };
   transitionEnd: { data: { closing: boolean }; canPreventDefault: false };
@@ -69,24 +68,27 @@ function screenFor(
   route: NavigatorRoute,
   descriptor: NavigatorDescriptor<ScreenOptions>,
   namespace: string,
-  resolver: Resolver,
+  options: LegacyBoundaryOptions,
   target?: NativeSurfaceHandle,
 ): Screen<Scene> {
   const pathname = route.href?.startsWith("/")
     ? normalizePath(route.href)
     : null;
-  const result = pathname === null ? undefined : resolver({ pathname, route });
-  const normalized =
-    typeof result === "string" ? { key: result } : (result ?? {});
-  const id = pathname === null ? null : (normalized.id ?? pathname);
-  if (id !== null && (typeof id !== "string" || !id.startsWith("/"))) {
+  const resolved =
+    pathname === null
+      ? null
+      : (options.resolve?.({ pathname, route }) ?? { id: pathname });
+  if (
+    resolved &&
+    (typeof resolved.id !== "string" || !resolved.id.startsWith("/"))
+  ) {
     throw new Error(
-      "SSGOI: boundary must return an absolute route id such as /posts/42.",
+      "SSGOI: resolve must return an absolute route id such as /posts/42.",
     );
   }
   return {
     key: route.key,
-    path: id,
+    path: resolved?.id ?? null,
     target: target ?? {
       key: JSON.stringify([namespace, route.key]),
       ref: createRef<View>(),
@@ -96,7 +98,7 @@ function screenFor(
       boundaryKey: JSON.stringify([
         namespace,
         route.key,
-        normalized.key ?? route.key,
+        options.routeKey ?? resolved?.key ?? route.key,
       ]),
     },
   };
@@ -108,10 +110,8 @@ export function NativeNavigator({
   descriptors,
   emitter,
   style,
-  boundary,
 }: ContentProps) {
-  const resolver: Resolver =
-    typeof boundary === "function" ? boundary : () => boundary;
+  const { resolve, routeKey } = useContext(LegacyBoundaryContext);
   const ssgoi = useSsgoi();
   const namespace = useId();
   const window = useWindowDimensions();
@@ -122,7 +122,8 @@ export function NativeNavigator({
   const activeKey = state.routes[state.index]?.key ?? null;
   const [snapshot, setSnapshot] = useState(() => ({
     navigation: null as typeof state | null,
-    boundary,
+    resolve,
+    routeKey,
     presence: createPresence<NativeSurfaceHandle, Scene>([], null),
   }));
   const targets = new Map(
@@ -138,7 +139,7 @@ export function NativeNavigator({
       route,
       descriptor,
       namespace,
-      resolver,
+      { resolve, routeKey },
       targets.get(route.key),
     );
   });
@@ -146,10 +147,15 @@ export function NativeNavigator({
     screens.map((screen) => [screen.key, screen.value]),
   );
   let current = snapshot;
-  if (snapshot.navigation !== state || snapshot.boundary !== boundary) {
+  if (
+    snapshot.navigation !== state ||
+    snapshot.resolve !== resolve ||
+    snapshot.routeKey !== routeKey
+  ) {
     current = {
       navigation: state,
-      boundary,
+      resolve,
+      routeKey,
       presence: reconcilePresence(snapshot.presence, screens, activeKey),
     };
     // Derive retained siblings before commit: effect cleanup would already be too late.

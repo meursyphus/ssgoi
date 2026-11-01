@@ -6,7 +6,10 @@ import {
   type SsgoiFramework,
   type SsgoiLayoutBoundaryProps,
 } from "../layout-boundary.js";
-import type { ExpoRouteLocation as RootExpoRouteLocation } from "../navigator.js";
+import {
+  LegacyBoundaryContext,
+  type ExpoRouteLocation as RootExpoRouteLocation,
+} from "../navigator.js";
 import type { RouteBoundaryState as RootRouteBoundaryState } from "../types.js";
 
 // Keep the alpha Expo API confined to this optional entry point.
@@ -16,8 +19,7 @@ const ExpoBoundary = integrateExpoBoundary(framework, "the expo-router entry");
 /**
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from "@ssgoi/react-native" with `<Ssgoi framework={{ StackRouter, unstable_integrateWithRouter }}>` instead.
  */
-export interface SsgoiRouteBoundaryProps
-  extends Omit<SsgoiLayoutBoundaryProps, "boundary"> {
+export interface SsgoiRouteBoundaryProps extends SsgoiLayoutBoundaryProps {
   /** Evaluated against each screen's own route, including retained screens. */
   resolve?: (location: RootExpoRouteLocation) => RootRouteBoundaryState;
   /** Scoped by the native route key; never merges distinct pushed screen instances. */
@@ -33,15 +35,12 @@ export function SsgoiRouteBoundary({
   routeKey,
   ...props
 }: SsgoiRouteBoundaryProps) {
-  // Memoized so an unchanged resolve/routeKey does not reconcile the stack on every render.
-  const boundary = useMemo<SsgoiLayoutBoundaryProps["boundary"]>(
-    () => (location) => {
-      const resolved = resolve?.(location) ?? { id: location.pathname };
-      return { id: resolved.id, key: routeKey ?? resolved.key };
-    },
-    [resolve, routeKey],
+  const options = useMemo(() => ({ resolve, routeKey }), [resolve, routeKey]);
+  return (
+    <LegacyBoundaryContext.Provider value={options}>
+      <ExpoBoundary {...props} />
+    </LegacyBoundaryContext.Provider>
   );
-  return <ExpoBoundary {...props} boundary={boundary} />;
 }
 /**
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from "@ssgoi/react-native" with `<Ssgoi framework={{ StackRouter, unstable_integrateWithRouter }}>` instead.

@@ -8,10 +8,7 @@ export default function ProductsLayout() {
   const pathname = location.pathname;
 
   return (
-    <SsgoiLayoutBoundary
-      boundary="products-layout"
-      className="min-h-screen bg-[#121212] flex flex-col"
-    >
+    <div className="flex-1 flex flex-col">
       {/* Header - Fixed */}
       <div className="px-4 pt-6 pb-3 flex-shrink-0">
         <h1 className="text-sm font-medium text-white mb-1">Shop</h1>
@@ -35,12 +32,12 @@ export default function ProductsLayout() {
         </div>
       </div>
 
-      {/* Tab Content - Slide transitions here */}
+      {/* Tab Content - Slide transitions here (depth 2, the /products/** scope) */}
       <div className="flex-1 overflow-hidden relative">
         <SsgoiLayoutBoundary className="min-h-full bg-[#121212]">
           <Outlet />
         </SsgoiLayoutBoundary>
       </div>
-    </SsgoiLayoutBoundary>
+    </div>
   );
 }

@@ -5,22 +5,30 @@ import {
   useContext,
   type Accessor,
 } from "solid-js";
-import type {
-  SsgoiContext,
-  SsgoiFramework,
-  SsgoiTransitionState,
-} from "./types";
+import type { SsgoiContext, SsgoiTransitionState } from "./types";
+
+/** Route state `<Ssgoi>` resolves once for every layout boundary below it. */
+export interface SsgoiLayoutState {
+  routePath: string;
+  chain: string[];
+}
 
 const SsgoiContextInstance = createContext<SsgoiContext | null>(null);
-const SsgoiFrameworkContext = createContext<
-  Accessor<SsgoiFramework | undefined> | undefined
+const SsgoiLayoutContext = createContext<
+  Accessor<SsgoiLayoutState | undefined> | undefined
 >(undefined);
+const SsgoiLayoutDepthContext = createContext(0);
 
 export const SsgoiProvider = SsgoiContextInstance.Provider;
-export const SsgoiFrameworkProvider = SsgoiFrameworkContext.Provider;
+export const SsgoiLayoutProvider = SsgoiLayoutContext.Provider;
+/** Gives descendants of a layout boundary their depth. */
+export const SsgoiLayoutDepthProvider = SsgoiLayoutDepthContext.Provider;
 
-/** Accessor of the `framework` passed to the nearest `<Ssgoi>`, if any. */
-export const useSsgoiFramework = () => useContext(SsgoiFrameworkContext);
+/** Layout state of the nearest `<Ssgoi>`; undefined without a framework. */
+export const useSsgoiLayout = () => useContext(SsgoiLayoutContext);
+
+/** Depth of the calling layout boundary: 0 unless inside another. */
+export const useLayoutDepth = () => useContext(SsgoiLayoutDepthContext);
 
 export const useSsgoi = () => {
   const context = useContext(SsgoiContextInstance);

@@ -51,7 +51,7 @@ page/layout/
 
 - **탭이 여러 개인 데모** (google-photos, kakao-talk, pinterest, youtube-mobile, gamja-market, material-mail, voyage, air-bnb): `@/lib/components/mobile-tabs-shell`의 `MobileTabsShell` + `mobile-detail-shell`의 `MobileDetailShell` 사용. 라우트를 `(tabs)`/`(detail)` 그룹으로 나누고, `(tabs)/layout.tsx`가 데모별 tabs-shell(탭 전환 config + nav만 정의)을, `(detail)/layout.tsx`가 `MobileDetailShell`을 렌더한다. 패턴 설명은 `MobileTabsShell` JSDoc 참고. 이때 데모 layout은 `withTransitionBoundary={false}`.
   - 탭 콘텐츠 boundary는 top bar와 nav 사이를 채우는 flex column이다. 내용이 짧은 탭 페이지가 배경을 화면 끝까지 칠하려면 페이지 루트에 `flex-1`을 준다 (`min-h-full`은 여기서 풀리지 않는다).
-  - air-bnb는 `(tabs)` 그룹만 tabs shell을 쓰고 `(detail)` 그룹은 없다. 상세·검색·컬렉션은 페이지가 자기 `SsgoiLayoutBoundary`를 렌더한다 (checkout의 persistent `boundary` 키 시트 유지).
+  - air-bnb는 `(tabs)` 그룹만 tabs shell을 쓰고 `(detail)` 그룹은 없다. 상세·검색·컬렉션은 페이지가 자기 `SsgoiLayoutBoundary`를 렌더한다 (checkout은 config `layouts`의 `listings/:id/checkout/**` 스코프로 시트 유지).
 - **메인 화면이 하나인 데모**: 셸 분리 없이 메인 페이지 컴포넌트 마지막에 sticky 네비를 렌더하면 된다 (`withTransitionBoundary` 기본값 유지 — layout boundary가 페이지째 감싸므로 네비도 트랜지션을 같이 탄다). FAB 등 플로팅 요소는 네비 위로 offset.
 
 ## 하단 safe area (모바일 데모 공통)

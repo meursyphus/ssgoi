@@ -1,7 +1,6 @@
 // TODO(8.0.0): remove this entry (deprecated in 7.5.0).
-import type { Signal } from "@builder.io/qwik";
+import { useComputed$, type Signal } from "@builder.io/qwik";
 import { useLocation } from "@builder.io/qwik-city";
-import { useLocationBoundary } from "../layout-boundary";
 
 /**
  * @deprecated Will be removed in 8.0.0. Use the state returned by
@@ -23,8 +22,9 @@ export interface RouteBoundaryState {
 export function useSsgoiRouteBoundary(
   routeKey?: string | number,
 ): Signal<RouteBoundaryState> {
-  return useLocationBoundary(
-    useLocation(),
-    routeKey === undefined ? undefined : { key: routeKey },
-  );
+  const location = useLocation();
+  return useComputed$(() => ({
+    id: location.url.pathname,
+    key: routeKey ?? location.url.pathname,
+  }));
 }

@@ -7,38 +7,84 @@ pnpm install
 pnpm dev
 ```
 
-`src/lib/ssgoi-config.ts` exports one QRL config factory. The root route layout
-passes Qwik City's location store as `framework`:
+`src/lib/ssgoi-config.ts` exports one QRL config factory with the transitions
+and the layout tree. The root route layout passes Qwik City's location store
+as `framework` and holds the depth-0 boundary:
 
 ```tsx
 const location = useLocation();
 useSsgoi(root, { config$: ssgoiConfig$, framework: { location } });
-```
-
-Route components that follow the pathname use `useSsgoiLayoutBoundary()` from
-`@ssgoi/qwik`. Its id and key default to the pathname; pass a key string or a
-fixed `{ id, key }` to override them:
-
-```tsx
 const boundary = useSsgoiLayoutBoundary();
-<div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>...</div>
+
+<main ref={root}>
+  <div key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+    <Slot />
+  </div>
+</main>
 ```
 
-Other route components mark their DOM roots directly:
+`useSsgoiLayoutBoundary()` from `@ssgoi/qwik` takes no arguments. Its depth
+comes from how many boundaries sit above it, and `config.layouts` decides
+when the boundary at each depth stays mounted. Pages carry no markers.
 
-```tsx
-<main data-ssgoi-transition="/posts">...</main>
+```
+src/routes/
+  layout.tsx                  useSsgoi(root, { framework }) + depth-0 boundary
+  (top-level)/layout.tsx      depth-1 boundary around <Slot />; bottom nav outside it
+    posts/  pinterest/  profile/
+    products/layout.tsx       depth-2 boundary; header and category tabs outside it
+      all/  electronics/  fashion/  home/  beauty/
+  (detail)/layout.tsx         depth-1 boundary
+    posts/[id]/  pinterest/[id]/  profile/[id]/
 ```
 
-The products route layout is the persistent outer boundary. Category route
-components under `<Slot />` render inner boundaries. Child navigation slides
-the inner content; leaving products uses the outer boundary.
+`(top-level)` and `(detail)` are Qwik City route groups: a `layout.tsx` inside
+`(group)/` wraps the group's routes without adding a URL segment.
+
+```ts
+export const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+
+export const ssgoiConfig$ = $(() => ({
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
+    // drill, zoom, ordered slide ...
+  ],
+}));
+```
+
+`TOP_LEVEL` is exported so the `$()` factory can capture it.
+
+What moves:
+
+- Tab to tab (`/posts` → `/pinterest`): every top-level page shares the depth-0
+  scope, so only the depth-1 boundary changes. The content fades and the bottom
+  nav stays.
+- Category to category (`/products/all` → `/products/fashion`): depth 0 and 1
+  stay inside `/products/**`; the depth-2 boundary slides.
+- Tab to detail (`/posts` → `/posts/1`): the depth-0 scope changes, so the whole
+  top-level page, bottom nav included, drills or zooms away.
+- Detail to detail (`/posts/1` → `/posts/2`): depth 0 stays in the detail scope;
+  the depth-1 boundary is keyed by the route path, so City's reused page
+  component still gets a new root.
+
+A boundary's key is its depth's scope instance and falls back to the route
+path past the declared scopes. Without `layouts`, every boundary follows the
+route path. Use `/products/**`, not `/products/*`, in `TOP_LEVEL`: a `*`
+segment is captured, so each category would get its own depth-0 instance.
 
 Effects:
 
+- Top-level tabs: `fade`.
 - Posts: `drill`.
 - Product tabs: ordered `slide`.
 - Gallery and profile: `zoom`.
+
+The single scroll container (`main#demo-content`) stays outside every boundary;
+the bottom nav is `sticky` inside the `(top-level)` layout.
 
 Guide: https://ssgoi.dev/llms/qwik.txt
 

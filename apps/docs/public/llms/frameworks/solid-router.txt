@@ -9,7 +9,7 @@ Keep one common provider above the following boundary.
 
 ## Wrap the routed children
 
-Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region while a fixed boundary key can preserve an outer shell. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.
+Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region; config.layouts can keep an outer shell mounted. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.
 
 ```tsx
 import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
@@ -30,7 +30,7 @@ function Root(props: RouteSectionProps) {
 
 ## Route lifetime
 
-The default key follows the pathname. The function form of boundary receives the route getRoute returned, as-is, and can return separate id and key values; use a stable shell key only around content that should remain mounted.
+The default key follows the pathname. A boundary at depth N instead keys by the config.layouts scope that matches at depth N, so a section declared there stays mounted while its inner boundary swaps.
 
 SsgoiRouteBoundary from @ssgoi/solid/solid-router still works but is deprecated and will be removed in 8.0.0.
 

@@ -26,7 +26,7 @@ pnpm --filter ssgoi-expo-template start
 
 Use a compatible Expo Go SDK 56 build or a development build matching this template. React Native 0.85.3, Reanimated 4.3.1, and Worklets 0.8.3 are pinned. Newer Expo Go/SDK versions are not part of this preview's compatibility claim. The app contains no SSGOI custom native module.
 
-`app/_layout.tsx` owns the provider, config, and boundary. No `.Screen` list is needed. The app supplies safe-area insets and screen backgrounds.
+`app/_layout.tsx` owns the provider, config, and boundary. No `.Screen` list is needed. Native stacks don't use `config.layouts`: every pushed screen is its own instance, so one root `<SsgoiLayoutBoundary />` is enough. The app supplies safe-area insets and screen backgrounds.
 
 Try these on both iOS and Android:
 

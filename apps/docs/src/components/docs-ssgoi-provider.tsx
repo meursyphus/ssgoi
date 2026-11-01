@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Ssgoi,
   SsgoiLayoutBoundary,
@@ -16,11 +16,12 @@ const config: SsgoiConfig = {
   transitions: [],
 };
 
+// The catalog has no intercepted routes, so the URL pathname is the
+// rendered path.
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    return pathname == null ? null : { pathname };
   },
 };
 

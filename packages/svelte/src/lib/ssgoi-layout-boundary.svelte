@@ -1,32 +1,16 @@
 <!-- @component
-Route boundary for a layout. Reads the router through `<Ssgoi framework>`.
+Route boundary for a layout. Keyed by `config.layouts` at its nesting depth.
 -->
 <script lang="ts">
   import { flushSync, onDestroy, untrack } from "svelte";
-  import { getSsgoiFramework } from "./context.js";
+  import { enterSsgoiLayoutBoundary } from "./context.js";
   import type { SsgoiLayoutBoundaryProps } from "./types.js";
 
-  let {
-    children,
-    as = "div",
-    boundary: input,
-    ...rest
-  }: SsgoiLayoutBoundaryProps = $props();
+  let { children, as = "div", ...rest }: SsgoiLayoutBoundaryProps = $props();
 
-  const framework = getSsgoiFramework();
-  const resolver = untrack(() =>
-    typeof input === "function" ? input : () => input,
-  );
+  const { routes, depth } = enterSsgoiLayoutBoundary();
 
-  const getBoundary = (route: { pathname: string; url: URL }) => {
-    const result = resolver(route);
-    const normalized =
-      typeof result === "string" ? { key: result } : (result ?? {});
-    const id = normalized.id ?? route.pathname;
-    return { id, key: normalized.key ?? id };
-  };
-
-  let current = $state(untrack(() => getBoundary(framework.getRoute())));
+  let current = $state(untrack(() => routes.current(depth)));
   let mounted = $state(true);
   let alive = true;
 
@@ -34,10 +18,9 @@ Route boundary for a layout. Reads the router through `<Ssgoi framework>`.
     alive = false;
   });
 
-  framework.onNavigate((navigation) => {
-    if (!alive || !navigation.to) return;
-    const { url } = navigation.to;
-    const next = getBoundary({ pathname: url.pathname, url });
+  routes.onNavigate((boundaryAt) => {
+    if (!alive) return;
+    const next = boundaryAt(depth);
 
     if (next.key === current.key) {
       // A persistent shell keeps its DOM, but its outgoing id must stay current.

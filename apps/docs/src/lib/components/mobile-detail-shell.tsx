@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
  * detail screens are nav-free by construction.
  *
  * Like `MobileTabsShell`, this is a plain element carrying `key` +
- * `data-ssgoi-transition`, not `SsgoiLayoutBoundary`, which wraps itself in a
- * `<Suspense>`. That Suspense is new on tab → detail, so a detail whose
+ * `data-ssgoi-transition`, with no `<Suspense>` of its own (a root
+ * `SsgoiLayoutBoundary` wraps itself in one). Such a Suspense is new on tab → detail, so a detail whose
  * client chunk was not loaded yet committed as its empty fallback: the tab
  * shell was already gone and the frame stayed blank for React's ~300 ms
  * reveal throttle. The scroll container clamped to 0 in that gap and SSGOI

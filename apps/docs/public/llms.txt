@@ -35,11 +35,21 @@ const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = `/${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}`;
+    return { pathname, renderedPath };
   },
 };
 
@@ -55,8 +65,9 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 ```
 
 In app/layout.tsx, wrap the existing `{children}` with `<SsgoiProvider>` inside
-`<body>`. `SsgoiLayoutBoundary` calls `framework.useRoute`, keys its element by
-the pathname, and handles URL-hook Suspense (`null` renders `fallback`).
+`<body>`. `SsgoiLayoutBoundary` takes no props. Keep the first one in the same
+layout as `<Ssgoi>`: it reads the route for every boundary inside it, and
+`renderedPath` is relative to that layout.
 
 ## 2. Route rules
 
@@ -93,71 +104,59 @@ const config = {
 
 ## 3. Place boundaries by route structure
 
-A boundary has two values: `key` decides when its DOM is replaced (lifetime),
-and `id` is the route SSGOI matches rules against. Both default to the pathname.
-Set them with one `boundary` prop: a string is a fixed key (the id keeps
-following the pathname), `{ id?, key? }` fixes either, and a function receives
-the route `useRoute` returned and returns either form. Do not set React `key`.
-A simple app needs only the single boundary from step 1.
+A boundary has two values: `key` decides when its DOM is replaced, and `id` is
+the route SSGOI matches rules against. The id is always the route path. The key
+comes from `config.layouts`: a boundary at depth N (the number of boundaries
+above it) keys by the scope that matches at depth N, else by the route path.
+Without `layouts`, the single boundary from step 1 replaces the page each time.
 
-**Persistent header, tabs, or bottom nav:** give the whole section one fixed key
-on the root boundary, and put a default boundary only around the changing
-content inside the section layout:
+`layouts` is a tree of `{ paths, except?, layouts? }` using the rule patterns
+above. Siblings are first-match; `layouts` is the next depth inside a scope; a
+`*` or `:id` segment makes each captured value its own instance
+(`/projects/:id/**`: one shell per project). Mirror your layout files:
 
-```tsx
-// app/ssgoi-provider.tsx — replaces the root boundary from step 1
-const inProducts = (path: string) => path === "/products" || path.startsWith("/products/");
-
-<SsgoiLayoutBoundary boundary={({ pathname }) => (inProducts(pathname) ? "shell" : pathname)}>
-  {children}
-</SsgoiLayoutBoundary>
-// app/products/layout.tsx
-<ProductHeaderAndTabs />
-<SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+```text
+app/ssgoi-provider.tsx              <Ssgoi> + boundary (step 1)       depth 0
+app/(top-level)/layout.tsx          boundary + <BottomNav /> outside  depth 1
+app/(top-level)/posts, pinterest, profile/page.tsx
+app/(top-level)/products/layout.tsx header + category tabs + boundary depth 2
+app/(detail)/layout.tsx             boundary                          depth 1
+app/(detail)/posts/[id], pinterest/[id], profile/[id]/page.tsx
 ```
 
-Tab → tab keeps the `"shell"` key, so only the inner content animates; leaving
-/products changes the root key, so the whole section leaves together.
+```ts
+const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
 
-**Parallel slot or intercepted modal:** during a soft intercept the URL becomes
-the modal's (`/p/42`) while the `children` slot still renders the background.
-Every boundary above the background must follow `selectedSegments` (the slot),
-not the URL; render `{modal}` outside them. Function props need a client module:
+const config = {
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [{ from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() } /* , step 2 rules */],
+};
+```
 
 ```tsx
-// app/slot-boundaries.tsx
-"use client";
-
-import type { ReactNode } from "react";
-import { SsgoiLayoutBoundary } from "@ssgoi/react";
-
-type Route = { pathname: string; selectedSegments: string[] };
-
-// Route groups such as (tabs) are layout ownership, not URL.
-const pathOf = (segments: string[]) =>
-  "/" + segments.filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join("/");
-
-// Provider: <SsgoiLayoutBoundary boundary={rootBoundary}> replaces the root boundary.
-// One key for the (tabs) group keeps BottomNav mounted across tabs and modals.
-export const rootBoundary = ({ selectedSegments }: Route) => ({
-  id: pathOf(selectedSegments),
-  key: selectedSegments.includes("(tabs)") ? "tabs" : pathOf(selectedSegments),
-});
-
-// app/(tabs)/layout.tsx renders: <TabContent>{children}</TabContent> <BottomNav /> {modal}
-export function TabContent({ children }: { children: ReactNode }) {
+// app/(top-level)/layout.tsx — (detail) and products layouts wrap a boundary the same way
+export default function TopLevelLayout({ children }: { children: ReactNode }) {
   return (
-    <SsgoiLayoutBoundary boundary={({ selectedSegments }: Route) => ({ id: pathOf(selectedSegments) })}>
-      {children}
-    </SsgoiLayoutBoundary>
+    <>
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+      <BottomNav />
+    </>
   );
 }
 ```
 
-Both layouts sit at the URL root; in a nested layout, prefix its base path. An
-empty slot is the layout's index route. To read a named slot instead of
-`children`, pass `parallelRoutesKey="modal"`. Your app still owns the `@modal`
-route files, `default.tsx`, and any middleware/proxy rewrites.
+Tab → tab keeps the depth-0 key, so only tab content moves and the nav stays.
+Category → category keeps depths 0 and 1, so only depth 2 slides. Tab → detail
+changes the depth-0 key, so the whole tab shell leaves, nav included. Use
+`/products/**`, not `/products/*`: a `*` makes each category its own instance.
+
+Intercepted modals need no setup: during a soft intercept the URL becomes the
+modal's while `renderedPath` stays the background, so nothing behind it moves.
+Render the `{modal}` slot outside the boundaries. Your app still owns the
+`@modal` route files, `default.tsx`, and any middleware/proxy rewrites.
 
 ## 4. Pick an effect (all from `@ssgoi/react/view-transitions`)
 

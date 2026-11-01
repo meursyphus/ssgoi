@@ -3,7 +3,7 @@
   import type { SsgoiConfig } from "@ssgoi/core/types";
   import type { HostAnimation } from "@ssgoi/core/internal";
   import type { SsgoiFramework } from "./types.js";
-  import { setSsgoiContext, setSsgoiFramework } from "./context";
+  import { setSsgoiContext, setSsgoiLayoutRoutes } from "./context";
   import {
     createSggoiTransitionContext,
     observeSsgoiTransitions,
@@ -22,7 +22,7 @@
 
   const contextValue = createSggoiTransitionContext(config, { host });
   setSsgoiContext(contextValue);
-  setSsgoiFramework(() => framework);
+  setSsgoiLayoutRoutes(framework, config.layouts);
 
   let root: HTMLDivElement;
 

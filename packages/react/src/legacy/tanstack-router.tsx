@@ -3,9 +3,9 @@
 
 import type { ElementType } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { FrameworkBoundary, type SsgoiFramework } from "../layout-boundary";
 import {
-  toBoundary,
+  RouteBoundary,
+  type UseRoute,
   type RouteBoundaryProps,
   type RouteBoundaryState as RootRouteBoundaryState,
   type RouteLocation,
@@ -18,9 +18,9 @@ import {
 export type SsgoiRouteBoundaryProps<T extends ElementType = "div"> =
   RouteBoundaryProps<RouteLocation, T>;
 
-const framework: SsgoiFramework = {
-  useRoute: () => ({ pathname: useRouterState({ select: renderedPathname }) }),
-};
+const useRoute: UseRoute = () => ({
+  pathname: useRouterState({ select: renderedPathname }),
+});
 
 /**
  * @experimental TanStack Router integration. The API may change.
@@ -28,18 +28,10 @@ const framework: SsgoiFramework = {
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
  * "@ssgoi/react" with `<Ssgoi framework={...}>` instead.
  */
-export function SsgoiRouteBoundary<T extends ElementType = "div">({
-  resolve,
-  routeKey,
-  ...props
-}: SsgoiRouteBoundaryProps<T>) {
-  return (
-    <FrameworkBoundary
-      {...props}
-      boundary={toBoundary(resolve, routeKey)}
-      framework={framework}
-    />
-  );
+export function SsgoiRouteBoundary<T extends ElementType = "div">(
+  props: SsgoiRouteBoundaryProps<T>,
+) {
+  return <RouteBoundary {...props} useRoute={useRoute} />;
 }
 
 /**

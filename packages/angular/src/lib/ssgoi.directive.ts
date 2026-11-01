@@ -16,14 +16,22 @@ import {
 import type { HostAnimation } from "@ssgoi/core/internal";
 import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core/types";
 import { SSGOI_CONTEXT } from "./context";
-import { SSGOI_FRAMEWORK, type SsgoiFramework } from "./layout-boundary";
+import {
+  LayoutRouteSource,
+  SSGOI_LAYOUT_ROUTE,
+  type SsgoiFramework,
+} from "./layout-boundary";
 
 function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
   return component.getContext();
 }
 
-function createSsgoiFramework(component: Ssgoi) {
-  return component.ssgoiFramework;
+// Resolves the route with this element's Injector, once for all boundaries.
+function createLayoutRoute(component: Ssgoi): LayoutRouteSource {
+  return new LayoutRouteSource(
+    () => component.ssgoiFramework(),
+    () => component.config().layouts,
+  );
 }
 
 @Directive({
@@ -36,8 +44,8 @@ function createSsgoiFramework(component: Ssgoi) {
       deps: [forwardRef(() => Ssgoi)],
     },
     {
-      provide: SSGOI_FRAMEWORK,
-      useFactory: createSsgoiFramework,
+      provide: SSGOI_LAYOUT_ROUTE,
+      useFactory: createLayoutRoute,
       deps: [forwardRef(() => Ssgoi)],
     },
   ],

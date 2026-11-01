@@ -54,7 +54,22 @@ export type TransitionsFn<T> = (
   args: TransitionsResolverArgs,
 ) => readonly RouteRule<T>[];
 export type TransitionsOption<T> = readonly RouteRule<T>[] | TransitionsFn<T>;
+/**
+ * A region of routes that share one layout instance. Siblings are tried in
+ * order and the first match wins; `layouts` scopes nest inside the chosen one.
+ */
+export type LayoutScope = {
+  paths: PathPatterns;
+  except?: PathPatterns;
+  layouts?: readonly LayoutScope[];
+};
+
 export type RouteConfig<T> = {
   transitions?: TransitionsOption<T>;
+  /**
+   * The application's layout tree. A layout boundary at depth N stays mounted
+   * while navigation stays inside the same depth-N scope instance.
+   */
+  layouts?: readonly LayoutScope[];
   middleware?: (from: string, to: string) => { from: string; to: string };
 };

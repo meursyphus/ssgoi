@@ -51,54 +51,57 @@ does the same.
 
 ## Layout boundary
 
-Use the layout boundary hook on the page's own root:
+Call the layout boundary hook in a route layout or page and apply it to that
+component's own root. It takes no arguments:
 
 ```tsx
-import { component$ } from "@builder.io/qwik";
+import { Slot, component$ } from "@builder.io/qwik";
 import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
 export default component$(() => {
   const boundary = useSsgoiLayoutBoundary();
   return (
     <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
-      Page
-    </section>
-  );
-});
-```
-
-The key replaces the root when City reuses a parameterized page. The id
-defaults to the pathname and the key to the id. Pass a fixed key for a
-persistent shell, `useSsgoiLayoutBoundary("products-layout")`, or a fixed id
-and/or key, `useSsgoiLayoutBoundary({ id: "/feed" })`. Keep Slot ownership in
-the route/layout.
-Without `framework` on the root, the hook throws.
-
-`useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` is deprecated and will be
-removed in 8.0.0; it reads `useLocation()` itself and keeps working without
-`framework`.
-
-## Persistent layouts
-
-Put an outer marker in the persistent route layout and markers on child route
-roots:
-
-```tsx
-export default component$(() => {
-  const location = useLocation();
-  const pathname = location.url.pathname.replace(/\/$/, "");
-
-  return (
-    <section data-ssgoi-transition={pathname}>
-      <ProductTabs />
       <Slot />
     </section>
   );
 });
 ```
 
-Qwik City replaces child route roots under `<Slot />`. Child navigation uses
-the child boundary; leaving the layout uses the outer boundary.
+The id is the route path. Depth is automatic: a boundary under another one is
+one level deeper. Its key is that depth's scope instance from `config.layouts`,
+or the route path when the chain is shorter, so without `layouts` every
+boundary replaces its root on each path change, including parameterized pages
+City reuses. Keep Slot ownership in the route/layout. Without `framework` on
+the root, the hook throws.
+
+## Layout scopes
+
+Declare the layout tree in the config. At each level the first matching scope
+wins; `layouts` nests inside it. A boundary stays mounted while navigation
+stays inside its depth's scope instance (values captured by `*` / `:id` are
+part of the instance; `**` tails are not):
+
+```tsx
+const TOP_LEVEL = ["/posts", "/products"];
+
+const config$ = $(() => ({
+  layouts: [
+    { paths: TOP_LEVEL },
+    { paths: "/**", except: TOP_LEVEL, layouts: [{ paths: "/products/*/**" }] },
+  ],
+  transitions: [/* ... */],
+}));
+```
+
+Here a depth-0 boundary in the root layout keeps the tab shell (and its bottom
+nav) mounted between `/posts` and `/products`, and moves it as a whole into a
+detail page. A depth-1 boundary inside `/products/:category/...` stays mounted
+across that category's pages.
+
+`useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` is deprecated and will be
+removed in 8.0.0; it reads `useLocation()` itself and keeps working without
+`framework`.
 
 ## Config
 

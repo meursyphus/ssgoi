@@ -154,11 +154,21 @@ const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\\(\\.\\.\\.\\)|\\(\\.\\.\\)|\\(\\.\\))+/;
+
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = \`/\${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}\`;
+    return { pathname, renderedPath };
   },
 };
 
@@ -172,7 +182,10 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
             />
             <p className={`mt-4 ${measure} ${prose}`}>
               <code className={inlineCode}>framework.useRoute</code> is a hook
-              the boundary calls to read the current route;{" "}
+              the first boundary calls to read the route for every boundary
+              inside it. <code className={inlineCode}>renderedPath</code> is the
+              path the layout rendering that boundary actually shows, so an
+              intercepted modal leaves the background in place;{" "}
               <code className={inlineCode}>@ssgoi/react</code> never imports{" "}
               <code className={inlineCode}>next</code> itself. The provider and
               boundary are client components because SSGOI reads and moves real
@@ -230,11 +243,11 @@ const config = {
 <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              It keys by the pathname the provider&apos;s{" "}
-              <code className={inlineCode}>framework.useRoute</code> returns and
-              throws if <code className={inlineCode}>framework</code> is
-              missing. If the wrong part of the screen moves, adjust the
-              boundary lifetime —{" "}
+              It takes no SSGOI props: it reads the route through the
+              provider&apos;s <code className={inlineCode}>framework</code>,
+              keys by the route path, and throws if{" "}
+              <code className={inlineCode}>framework</code> is missing. If the
+              wrong part of the screen moves, adjust the boundary lifetime —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
               </Link>{" "}

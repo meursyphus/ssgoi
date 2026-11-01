@@ -6,51 +6,26 @@ import {
   type JSX,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import { useSsgoiFramework } from "./context";
-import type { SsgoiFramework } from "./types";
-
-type Route = ReturnType<SsgoiFramework["getRoute"]>;
-type BoundaryResult = { id?: string; key?: string | number };
-type BoundaryInput =
-  | string
-  | BoundaryResult
-  | ((route: Route) => string | BoundaryResult);
+import {
+  SsgoiLayoutDepthProvider,
+  useLayoutDepth,
+  useSsgoiLayout,
+} from "./context";
 
 export type SsgoiLayoutBoundaryProps = JSX.HTMLAttributes<HTMLElement> & {
   as?: keyof JSX.IntrinsicElements;
-  /**
-   * A string is a fixed lifetime key; an object fixes `id` and/or `key`; a
-   * function computes either from the framework route. Defaults: `id` is the
-   * pathname, `key` is the `id`.
-   */
-  boundary?: BoundaryInput;
 };
 
-/** Shared rendering; callers supply the framework the boundary reads. */
+/** Shared rendering; remounts its element whenever `state().key` changes. */
 export function RouteBoundary(
-  props: SsgoiLayoutBoundaryProps & { framework: Accessor<SsgoiFramework> },
+  props: SsgoiLayoutBoundaryProps & {
+    state: Accessor<{ id: string; key: string | number }>;
+  },
 ) {
-  const [local, rest] = splitProps(props, [
-    "children",
-    "as",
-    "boundary",
-    "framework",
-  ]);
-  const resolver = createMemo(() => {
-    const input = local.boundary;
-    return typeof input === "function" ? input : () => input;
-  });
-  const boundary = createMemo(() => {
-    const route = local.framework().getRoute();
-    const result = resolver()(route);
-    const normalized =
-      typeof result === "string" ? { key: result } : (result ?? {});
-    const id = normalized.id ?? route.pathname;
-    return { id, key: normalized.key ?? id };
-  });
+  const [local, rest] = splitProps(props, ["children", "as", "state"]);
   // Show uses truthiness. A token also supports valid keys such as 0 and "".
   const lifetime = createMemo<{ key: string | number }>((previous) => {
-    const key = boundary().key;
+    const key = local.state().key;
     return previous?.key === key ? previous : { key };
   });
 
@@ -60,7 +35,7 @@ export function RouteBoundary(
         <Dynamic
           component={local.as ?? "div"}
           {...rest}
-          data-ssgoi-transition={boundary().id}
+          data-ssgoi-transition={local.state().id}
         >
           {local.children}
         </Dynamic>
@@ -76,13 +51,22 @@ function throwMissingFramework(): never {
 }
 
 export function SsgoiLayoutBoundary(props: SsgoiLayoutBoundaryProps) {
-  const framework = useSsgoiFramework();
-  if (!framework?.()) throwMissingFramework();
-  // Read the framework inside the accessor so a replaced object is tracked too.
+  const layout = useSsgoiLayout();
+  if (!layout?.()) throwMissingFramework();
+  const depth = useLayoutDepth();
+  const [local, rest] = splitProps(props, ["children"]);
+  // The config's layout scope at this depth keeps the DOM; past the declared
+  // scopes every route path remounts.
+  const state = createMemo(() => {
+    const { routePath, chain } = layout() ?? throwMissingFramework();
+    return { id: routePath, key: chain[depth] ?? routePath };
+  });
+
   return (
-    <RouteBoundary
-      {...props}
-      framework={() => framework() ?? throwMissingFramework()}
-    />
+    <RouteBoundary {...rest} state={state}>
+      <SsgoiLayoutDepthProvider value={depth + 1}>
+        {local.children}
+      </SsgoiLayoutDepthProvider>
+    </RouteBoundary>
   );
 }

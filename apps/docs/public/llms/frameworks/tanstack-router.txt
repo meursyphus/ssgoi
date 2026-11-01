@@ -82,40 +82,38 @@ Verify: navigate `/` → any page slides in from the right; back slides out.
 
 ## Beyond the basics
 
-When a section must persist, remove the full-path boundary from the root and
-leave only one provider there:
+When a section must persist, declare it in config and give its route an inner
+boundary around its child outlet; keep the root boundary as it is:
 
-```tsx
-<Ssgoi config={config} framework={framework}>
-  <Outlet />
-</Ssgoi>
+```ts
+// app/components/ssgoi-config.ts
+export const config = {
+  layouts: [{ paths: "/products/**" }],
+  transitions: [/* ... */],
+};
 ```
-
-Give ordinary routes their own pathname boundary. Give the persistent section
-a stable outer boundary plus a pathname boundary around its child outlet:
 
 ```tsx
 // app/routes/products.tsx
-<SsgoiLayoutBoundary boundary="products-layout">
-  <ProductHeaderAndTabs />
-  <SsgoiLayoutBoundary>
-    <Outlet />
-  </SsgoiLayoutBoundary>
+<ProductHeaderAndTabs />
+<SsgoiLayoutBoundary>
+  <Outlet />
 </SsgoiLayoutBoundary>
 ```
 
-The outer key is fixed; the inner boundary defaults to the pathname. The stable outer key
-preserves the shell; the inner pathname key produces child OUT/IN.
+The root boundary (depth 0) keys every `/products` route by the one scope, so
+the shell stays; the inner boundary (depth 1) keys by the path and produces
+child OUT/IN.
 
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/tanstack-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
 `@ssgoi/react` never imports `@tanstack/react-router`; it calls the `useRoute`
-you wrote. `as`, DOM attributes,
-and `boundary` (a string key, `{ id?, key? }`, or a function of the route
-`useRoute` returned) are supported. Defaults: id = pathname, key = id. Query-only navigation keeps the
-boundary by default. For direct control or a custom router:
+you wrote. `as` and DOM attributes pass through; the boundary takes no SSGOI props. Its id
+is the route path; its key is the `config.layouts` scope at its depth (the
+number of boundaries above it), or the route path. Query-only navigation keeps
+the boundary by default. For direct control or a custom router:
 https://ssgoi.dev/llms/manual-boundaries.txt
 
 `SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router` still works but is

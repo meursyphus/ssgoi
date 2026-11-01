@@ -53,7 +53,7 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "SsgoiLayoutBoundary",
     "SsgoiRouteBoundary",
     "framework",
-    "boundary prop",
+    "config.layouts",
     "routeKey",
     "data-ssgoi-transition",
   ],

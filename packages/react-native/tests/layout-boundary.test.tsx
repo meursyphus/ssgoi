@@ -18,6 +18,7 @@ import {
 import { Ssgoi } from "../src/ssgoi";
 import {
   SsgoiLayoutBoundary,
+  type SsgoiConfig,
   type SsgoiFramework,
   type SsgoiLayoutBoundaryProps,
 } from "../src";
@@ -47,10 +48,7 @@ afterEach(() => {
 
 test("integrates the native navigator once per set of primitives and passes props through", () => {
   const fake = fakeFramework();
-  const boundary = ({ pathname }: { pathname: string }) => ({
-    id: pathname,
-    key: "shell",
-  });
+  const style = { backgroundColor: "white" };
   const app = (initialRouteName: string) => (
     // A fresh framework object every render must not rebuild the navigator.
     <Ssgoi
@@ -61,10 +59,7 @@ test("integrates the native navigator once per set of primitives and passes prop
         unstable_integrateWithRouter: fake.unstable_integrateWithRouter,
       }}
     >
-      <SsgoiLayoutBoundary
-        initialRouteName={initialRouteName}
-        boundary={boundary}
-      />
+      <SsgoiLayoutBoundary initialRouteName={initialRouteName} style={style} />
     </Ssgoi>
   );
   const rendered = render(app("index"));
@@ -80,7 +75,7 @@ test("integrates the native navigator once per set of primitives and passes prop
     "index",
     "posts",
   ]);
-  expect(fake.rendered[1]).toMatchObject({ boundary });
+  expect(fake.rendered[1]).toMatchObject({ style });
 
   const other = {
     StackRouter: () => ({}),
@@ -145,11 +140,11 @@ function Post() {
   }, []);
   return <Text testID={`post-${id}`}>Post {id}</Text>;
 }
-function start(boundary?: SsgoiLayoutBoundaryProps["boundary"]) {
+function start(layoutConfig: SsgoiConfig = config) {
   function Layout() {
     return (
-      <Ssgoi config={config} reducedMotion="never" framework={expo}>
-        <SsgoiLayoutBoundary boundary={boundary} />
+      <Ssgoi config={layoutConfig} reducedMotion="never" framework={expo}>
+        <SsgoiLayoutBoundary />
       </Ssgoi>
     );
   }
@@ -197,36 +192,18 @@ test("drives file-discovered Expo routes through the injected framework", async 
   expect(activeClocks()).toBe(0);
 });
 
-test("a fixed boundary key is scoped to the native route instance", async () => {
-  start("shell");
+test("layout scopes never merge native route instances", async () => {
+  // Expo's navigator nesting already defines layout instances; each pushed screen stays its own.
+  start({ ...config, layouts: [{ paths: "/posts/*" }] });
   layoutViews();
   await act(async () => router.push("/posts/43"));
   layoutViews();
   expect(mounts).toEqual(["post:42", "post:43"]);
+  expect(activeClocks()).toBe(1);
   await finishAnimation();
   await act(async () => router.back());
   layoutViews();
   await finishAnimation();
   expect(mounts).toEqual(["post:42", "post:43"]);
   expect(unmounts).toEqual(["post:43"]);
-});
-
-test("a fixed boundary id replaces the route pathname for matching", async () => {
-  // Both screens resolve to /feed, which no rule matches, so replace settles at once.
-  start({ id: "/feed" });
-  layoutViews();
-  await act(async () => router.replace("/posts/43"));
-  expect(unmounts).toEqual(["post:42"]);
-  expect(activeClocks()).toBe(0);
-});
-
-test("a computed boundary must return an absolute id", () => {
-  const errors = silenceErrors();
-  try {
-    expect(() => start(() => ({ id: "posts" }))).toThrow(
-      "SSGOI: boundary must return an absolute route id such as /posts/42.",
-    );
-  } finally {
-    errors.mockRestore();
-  }
 });

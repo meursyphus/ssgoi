@@ -3,13 +3,13 @@ import { defineComponent, type PropType } from "vue";
 import { setupRouteBoundary } from "../layout-boundary";
 import type { SsgoiFramework } from "../types";
 
-/** @deprecated Will be removed in 8.0.0. Use the object form of `SsgoiLayoutBoundary`'s `boundary` prop from "@ssgoi/vue" instead. */
+/** @deprecated Will be removed in 8.0.0. Declare layout scopes in `config.layouts` and use `SsgoiLayoutBoundary` from "@ssgoi/vue" instead. */
 export interface RouteBoundaryState {
   id: string;
   key?: string | number;
 }
 
-/** @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundaryProps` from "@ssgoi/vue" instead. */
+/** @deprecated Will be removed in 8.0.0. Declare layout scopes in `config.layouts` and use `SsgoiLayoutBoundary` from "@ssgoi/vue" instead. */
 export interface SsgoiRouteBoundaryProps {
   as?: keyof HTMLElementTagNameMap;
   routeKey?: string | number;
@@ -40,13 +40,15 @@ export const createSubpathRouteBoundary = (
     },
     setup(props, context) {
       const framework = useFramework();
+      // Observe the committed router path before routed content is patched.
+      // Nuxt's delayed useRoute updates after page content and is too late for OUT.
       return setupRouteBoundary(
-        () => framework,
-        () => (route) => {
-          const boundary = props.resolve?.(route) ?? { id: route.pathname };
+        () => {
+          const route = framework.getRoute();
+          const state = props.resolve?.(route) ?? { id: route.pathname };
           return {
-            id: boundary.id,
-            key: props.routeKey ?? boundary.key ?? boundary.id,
+            id: state.id,
+            key: props.routeKey ?? state.key ?? state.id,
           };
         },
         () => props.as,

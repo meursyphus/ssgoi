@@ -9,42 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ProductsRouteImport } from './routes/products'
-import { Route as PostsRouteImport } from './routes/posts'
-import { Route as PinterestRouteImport } from './routes/pinterest'
+import { Route as TopLevelRouteImport } from './routes/_top-level'
+import { Route as DetailRouteImport } from './routes/_detail'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProfileIndexRouteImport } from './routes/profile.index'
-import { Route as ProductsIndexRouteImport } from './routes/products.index'
-import { Route as PostsIndexRouteImport } from './routes/posts.index'
-import { Route as PinterestIndexRouteImport } from './routes/pinterest.index'
-import { Route as ProfilePostIdRouteImport } from './routes/profile.$postId'
-import { Route as ProductsHomeRouteImport } from './routes/products.home'
-import { Route as ProductsFashionRouteImport } from './routes/products.fashion'
-import { Route as ProductsElectronicsRouteImport } from './routes/products.electronics'
-import { Route as ProductsBeautyRouteImport } from './routes/products.beauty'
-import { Route as ProductsAllRouteImport } from './routes/products.all'
-import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
-import { Route as PinterestPinIdRouteImport } from './routes/pinterest.$pinId'
+import { Route as TopLevelProfileRouteImport } from './routes/_top-level.profile'
+import { Route as TopLevelProductsRouteImport } from './routes/_top-level.products'
+import { Route as TopLevelPostsRouteImport } from './routes/_top-level.posts'
+import { Route as TopLevelPinterestRouteImport } from './routes/_top-level.pinterest'
+import { Route as TopLevelProductsIndexRouteImport } from './routes/_top-level.products.index'
+import { Route as TopLevelProductsHomeRouteImport } from './routes/_top-level.products.home'
+import { Route as TopLevelProductsFashionRouteImport } from './routes/_top-level.products.fashion'
+import { Route as TopLevelProductsElectronicsRouteImport } from './routes/_top-level.products.electronics'
+import { Route as TopLevelProductsBeautyRouteImport } from './routes/_top-level.products.beauty'
+import { Route as TopLevelProductsAllRouteImport } from './routes/_top-level.products.all'
+import { Route as DetailProfilePostIdRouteImport } from './routes/_detail.profile.$postId'
+import { Route as DetailPostsPostIdRouteImport } from './routes/_detail.posts.$postId'
+import { Route as DetailPinterestPinIdRouteImport } from './routes/_detail.pinterest.$pinId'
 
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const TopLevelRoute = TopLevelRouteImport.update({
+  id: '/_top-level',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductsRoute = ProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsRoute = PostsRouteImport.update({
-  id: '/posts',
-  path: '/posts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PinterestRoute = PinterestRouteImport.update({
-  id: '/pinterest',
-  path: '/pinterest',
+const DetailRoute = DetailRouteImport.update({
+  id: '/_detail',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -52,120 +39,122 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileIndexRoute = ProfileIndexRouteImport.update({
+const TopLevelProfileRoute = TopLevelProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => TopLevelRoute,
+} as any)
+const TopLevelProductsRoute = TopLevelProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => TopLevelRoute,
+} as any)
+const TopLevelPostsRoute = TopLevelPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => TopLevelRoute,
+} as any)
+const TopLevelPinterestRoute = TopLevelPinterestRouteImport.update({
+  id: '/pinterest',
+  path: '/pinterest',
+  getParentRoute: () => TopLevelRoute,
+} as any)
+const TopLevelProductsIndexRoute = TopLevelProductsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ProfileRoute,
+  getParentRoute: () => TopLevelProductsRoute,
 } as any)
-const ProductsIndexRoute = ProductsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProductsRoute,
-} as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PostsRoute,
-} as any)
-const PinterestIndexRoute = PinterestIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PinterestRoute,
-} as any)
-const ProfilePostIdRoute = ProfilePostIdRouteImport.update({
-  id: '/$postId',
-  path: '/$postId',
-  getParentRoute: () => ProfileRoute,
-} as any)
-const ProductsHomeRoute = ProductsHomeRouteImport.update({
+const TopLevelProductsHomeRoute = TopLevelProductsHomeRouteImport.update({
   id: '/home',
   path: '/home',
-  getParentRoute: () => ProductsRoute,
+  getParentRoute: () => TopLevelProductsRoute,
 } as any)
-const ProductsFashionRoute = ProductsFashionRouteImport.update({
+const TopLevelProductsFashionRoute = TopLevelProductsFashionRouteImport.update({
   id: '/fashion',
   path: '/fashion',
-  getParentRoute: () => ProductsRoute,
+  getParentRoute: () => TopLevelProductsRoute,
 } as any)
-const ProductsElectronicsRoute = ProductsElectronicsRouteImport.update({
-  id: '/electronics',
-  path: '/electronics',
-  getParentRoute: () => ProductsRoute,
-} as any)
-const ProductsBeautyRoute = ProductsBeautyRouteImport.update({
+const TopLevelProductsElectronicsRoute =
+  TopLevelProductsElectronicsRouteImport.update({
+    id: '/electronics',
+    path: '/electronics',
+    getParentRoute: () => TopLevelProductsRoute,
+  } as any)
+const TopLevelProductsBeautyRoute = TopLevelProductsBeautyRouteImport.update({
   id: '/beauty',
   path: '/beauty',
-  getParentRoute: () => ProductsRoute,
+  getParentRoute: () => TopLevelProductsRoute,
 } as any)
-const ProductsAllRoute = ProductsAllRouteImport.update({
+const TopLevelProductsAllRoute = TopLevelProductsAllRouteImport.update({
   id: '/all',
   path: '/all',
-  getParentRoute: () => ProductsRoute,
+  getParentRoute: () => TopLevelProductsRoute,
 } as any)
-const PostsPostIdRoute = PostsPostIdRouteImport.update({
-  id: '/$postId',
-  path: '/$postId',
-  getParentRoute: () => PostsRoute,
+const DetailProfilePostIdRoute = DetailProfilePostIdRouteImport.update({
+  id: '/profile/$postId',
+  path: '/profile/$postId',
+  getParentRoute: () => DetailRoute,
 } as any)
-const PinterestPinIdRoute = PinterestPinIdRouteImport.update({
-  id: '/$pinId',
-  path: '/$pinId',
-  getParentRoute: () => PinterestRoute,
+const DetailPostsPostIdRoute = DetailPostsPostIdRouteImport.update({
+  id: '/posts/$postId',
+  path: '/posts/$postId',
+  getParentRoute: () => DetailRoute,
+} as any)
+const DetailPinterestPinIdRoute = DetailPinterestPinIdRouteImport.update({
+  id: '/pinterest/$pinId',
+  path: '/pinterest/$pinId',
+  getParentRoute: () => DetailRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/pinterest': typeof PinterestRouteWithChildren
-  '/posts': typeof PostsRouteWithChildren
-  '/products': typeof ProductsRouteWithChildren
-  '/profile': typeof ProfileRouteWithChildren
-  '/pinterest/$pinId': typeof PinterestPinIdRoute
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/products/all': typeof ProductsAllRoute
-  '/products/beauty': typeof ProductsBeautyRoute
-  '/products/electronics': typeof ProductsElectronicsRoute
-  '/products/fashion': typeof ProductsFashionRoute
-  '/products/home': typeof ProductsHomeRoute
-  '/profile/$postId': typeof ProfilePostIdRoute
-  '/pinterest/': typeof PinterestIndexRoute
-  '/posts/': typeof PostsIndexRoute
-  '/products/': typeof ProductsIndexRoute
-  '/profile/': typeof ProfileIndexRoute
+  '/pinterest': typeof TopLevelPinterestRoute
+  '/posts': typeof TopLevelPostsRoute
+  '/products': typeof TopLevelProductsRouteWithChildren
+  '/profile': typeof TopLevelProfileRoute
+  '/pinterest/$pinId': typeof DetailPinterestPinIdRoute
+  '/posts/$postId': typeof DetailPostsPostIdRoute
+  '/profile/$postId': typeof DetailProfilePostIdRoute
+  '/products/all': typeof TopLevelProductsAllRoute
+  '/products/beauty': typeof TopLevelProductsBeautyRoute
+  '/products/electronics': typeof TopLevelProductsElectronicsRoute
+  '/products/fashion': typeof TopLevelProductsFashionRoute
+  '/products/home': typeof TopLevelProductsHomeRoute
+  '/products/': typeof TopLevelProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/pinterest/$pinId': typeof PinterestPinIdRoute
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/products/all': typeof ProductsAllRoute
-  '/products/beauty': typeof ProductsBeautyRoute
-  '/products/electronics': typeof ProductsElectronicsRoute
-  '/products/fashion': typeof ProductsFashionRoute
-  '/products/home': typeof ProductsHomeRoute
-  '/profile/$postId': typeof ProfilePostIdRoute
-  '/pinterest': typeof PinterestIndexRoute
-  '/posts': typeof PostsIndexRoute
-  '/products': typeof ProductsIndexRoute
-  '/profile': typeof ProfileIndexRoute
+  '/pinterest': typeof TopLevelPinterestRoute
+  '/posts': typeof TopLevelPostsRoute
+  '/profile': typeof TopLevelProfileRoute
+  '/pinterest/$pinId': typeof DetailPinterestPinIdRoute
+  '/posts/$postId': typeof DetailPostsPostIdRoute
+  '/profile/$postId': typeof DetailProfilePostIdRoute
+  '/products/all': typeof TopLevelProductsAllRoute
+  '/products/beauty': typeof TopLevelProductsBeautyRoute
+  '/products/electronics': typeof TopLevelProductsElectronicsRoute
+  '/products/fashion': typeof TopLevelProductsFashionRoute
+  '/products/home': typeof TopLevelProductsHomeRoute
+  '/products': typeof TopLevelProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/pinterest': typeof PinterestRouteWithChildren
-  '/posts': typeof PostsRouteWithChildren
-  '/products': typeof ProductsRouteWithChildren
-  '/profile': typeof ProfileRouteWithChildren
-  '/pinterest/$pinId': typeof PinterestPinIdRoute
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/products/all': typeof ProductsAllRoute
-  '/products/beauty': typeof ProductsBeautyRoute
-  '/products/electronics': typeof ProductsElectronicsRoute
-  '/products/fashion': typeof ProductsFashionRoute
-  '/products/home': typeof ProductsHomeRoute
-  '/profile/$postId': typeof ProfilePostIdRoute
-  '/pinterest/': typeof PinterestIndexRoute
-  '/posts/': typeof PostsIndexRoute
-  '/products/': typeof ProductsIndexRoute
-  '/profile/': typeof ProfileIndexRoute
+  '/_detail': typeof DetailRouteWithChildren
+  '/_top-level': typeof TopLevelRouteWithChildren
+  '/_top-level/pinterest': typeof TopLevelPinterestRoute
+  '/_top-level/posts': typeof TopLevelPostsRoute
+  '/_top-level/products': typeof TopLevelProductsRouteWithChildren
+  '/_top-level/profile': typeof TopLevelProfileRoute
+  '/_detail/pinterest/$pinId': typeof DetailPinterestPinIdRoute
+  '/_detail/posts/$postId': typeof DetailPostsPostIdRoute
+  '/_detail/profile/$postId': typeof DetailProfilePostIdRoute
+  '/_top-level/products/all': typeof TopLevelProductsAllRoute
+  '/_top-level/products/beauty': typeof TopLevelProductsBeautyRoute
+  '/_top-level/products/electronics': typeof TopLevelProductsElectronicsRoute
+  '/_top-level/products/fashion': typeof TopLevelProductsFashionRoute
+  '/_top-level/products/home': typeof TopLevelProductsHomeRoute
+  '/_top-level/products/': typeof TopLevelProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,88 +166,68 @@ export interface FileRouteTypes {
     | '/profile'
     | '/pinterest/$pinId'
     | '/posts/$postId'
+    | '/profile/$postId'
     | '/products/all'
     | '/products/beauty'
     | '/products/electronics'
     | '/products/fashion'
     | '/products/home'
-    | '/profile/$postId'
-    | '/pinterest/'
-    | '/posts/'
     | '/products/'
-    | '/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/pinterest'
+    | '/posts'
+    | '/profile'
     | '/pinterest/$pinId'
     | '/posts/$postId'
+    | '/profile/$postId'
     | '/products/all'
     | '/products/beauty'
     | '/products/electronics'
     | '/products/fashion'
     | '/products/home'
-    | '/profile/$postId'
-    | '/pinterest'
-    | '/posts'
     | '/products'
-    | '/profile'
   id:
     | '__root__'
     | '/'
-    | '/pinterest'
-    | '/posts'
-    | '/products'
-    | '/profile'
-    | '/pinterest/$pinId'
-    | '/posts/$postId'
-    | '/products/all'
-    | '/products/beauty'
-    | '/products/electronics'
-    | '/products/fashion'
-    | '/products/home'
-    | '/profile/$postId'
-    | '/pinterest/'
-    | '/posts/'
-    | '/products/'
-    | '/profile/'
+    | '/_detail'
+    | '/_top-level'
+    | '/_top-level/pinterest'
+    | '/_top-level/posts'
+    | '/_top-level/products'
+    | '/_top-level/profile'
+    | '/_detail/pinterest/$pinId'
+    | '/_detail/posts/$postId'
+    | '/_detail/profile/$postId'
+    | '/_top-level/products/all'
+    | '/_top-level/products/beauty'
+    | '/_top-level/products/electronics'
+    | '/_top-level/products/fashion'
+    | '/_top-level/products/home'
+    | '/_top-level/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PinterestRoute: typeof PinterestRouteWithChildren
-  PostsRoute: typeof PostsRouteWithChildren
-  ProductsRoute: typeof ProductsRouteWithChildren
-  ProfileRoute: typeof ProfileRouteWithChildren
+  DetailRoute: typeof DetailRouteWithChildren
+  TopLevelRoute: typeof TopLevelRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
+    '/_top-level': {
+      id: '/_top-level'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof TopLevelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/products': {
-      id: '/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof ProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/posts': {
-      id: '/posts'
-      path: '/posts'
-      fullPath: '/posts'
-      preLoaderRoute: typeof PostsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pinterest': {
-      id: '/pinterest'
-      path: '/pinterest'
-      fullPath: '/pinterest'
-      preLoaderRoute: typeof PinterestRouteImport
+    '/_detail': {
+      id: '/_detail'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof DetailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -268,160 +237,158 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/': {
-      id: '/profile/'
-      path: '/'
-      fullPath: '/profile/'
-      preLoaderRoute: typeof ProfileIndexRouteImport
-      parentRoute: typeof ProfileRoute
+    '/_top-level/profile': {
+      id: '/_top-level/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof TopLevelProfileRouteImport
+      parentRoute: typeof TopLevelRoute
     }
-    '/products/': {
-      id: '/products/'
+    '/_top-level/products': {
+      id: '/_top-level/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof TopLevelProductsRouteImport
+      parentRoute: typeof TopLevelRoute
+    }
+    '/_top-level/posts': {
+      id: '/_top-level/posts'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof TopLevelPostsRouteImport
+      parentRoute: typeof TopLevelRoute
+    }
+    '/_top-level/pinterest': {
+      id: '/_top-level/pinterest'
+      path: '/pinterest'
+      fullPath: '/pinterest'
+      preLoaderRoute: typeof TopLevelPinterestRouteImport
+      parentRoute: typeof TopLevelRoute
+    }
+    '/_top-level/products/': {
+      id: '/_top-level/products/'
       path: '/'
       fullPath: '/products/'
-      preLoaderRoute: typeof ProductsIndexRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsIndexRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/posts/': {
-      id: '/posts/'
-      path: '/'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
-      parentRoute: typeof PostsRoute
-    }
-    '/pinterest/': {
-      id: '/pinterest/'
-      path: '/'
-      fullPath: '/pinterest/'
-      preLoaderRoute: typeof PinterestIndexRouteImport
-      parentRoute: typeof PinterestRoute
-    }
-    '/profile/$postId': {
-      id: '/profile/$postId'
-      path: '/$postId'
-      fullPath: '/profile/$postId'
-      preLoaderRoute: typeof ProfilePostIdRouteImport
-      parentRoute: typeof ProfileRoute
-    }
-    '/products/home': {
-      id: '/products/home'
+    '/_top-level/products/home': {
+      id: '/_top-level/products/home'
       path: '/home'
       fullPath: '/products/home'
-      preLoaderRoute: typeof ProductsHomeRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsHomeRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/products/fashion': {
-      id: '/products/fashion'
+    '/_top-level/products/fashion': {
+      id: '/_top-level/products/fashion'
       path: '/fashion'
       fullPath: '/products/fashion'
-      preLoaderRoute: typeof ProductsFashionRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsFashionRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/products/electronics': {
-      id: '/products/electronics'
+    '/_top-level/products/electronics': {
+      id: '/_top-level/products/electronics'
       path: '/electronics'
       fullPath: '/products/electronics'
-      preLoaderRoute: typeof ProductsElectronicsRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsElectronicsRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/products/beauty': {
-      id: '/products/beauty'
+    '/_top-level/products/beauty': {
+      id: '/_top-level/products/beauty'
       path: '/beauty'
       fullPath: '/products/beauty'
-      preLoaderRoute: typeof ProductsBeautyRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsBeautyRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/products/all': {
-      id: '/products/all'
+    '/_top-level/products/all': {
+      id: '/_top-level/products/all'
       path: '/all'
       fullPath: '/products/all'
-      preLoaderRoute: typeof ProductsAllRouteImport
-      parentRoute: typeof ProductsRoute
+      preLoaderRoute: typeof TopLevelProductsAllRouteImport
+      parentRoute: typeof TopLevelProductsRoute
     }
-    '/posts/$postId': {
-      id: '/posts/$postId'
-      path: '/$postId'
+    '/_detail/profile/$postId': {
+      id: '/_detail/profile/$postId'
+      path: '/profile/$postId'
+      fullPath: '/profile/$postId'
+      preLoaderRoute: typeof DetailProfilePostIdRouteImport
+      parentRoute: typeof DetailRoute
+    }
+    '/_detail/posts/$postId': {
+      id: '/_detail/posts/$postId'
+      path: '/posts/$postId'
       fullPath: '/posts/$postId'
-      preLoaderRoute: typeof PostsPostIdRouteImport
-      parentRoute: typeof PostsRoute
+      preLoaderRoute: typeof DetailPostsPostIdRouteImport
+      parentRoute: typeof DetailRoute
     }
-    '/pinterest/$pinId': {
-      id: '/pinterest/$pinId'
-      path: '/$pinId'
+    '/_detail/pinterest/$pinId': {
+      id: '/_detail/pinterest/$pinId'
+      path: '/pinterest/$pinId'
       fullPath: '/pinterest/$pinId'
-      preLoaderRoute: typeof PinterestPinIdRouteImport
-      parentRoute: typeof PinterestRoute
+      preLoaderRoute: typeof DetailPinterestPinIdRouteImport
+      parentRoute: typeof DetailRoute
     }
   }
 }
 
-interface PinterestRouteChildren {
-  PinterestPinIdRoute: typeof PinterestPinIdRoute
-  PinterestIndexRoute: typeof PinterestIndexRoute
+interface DetailRouteChildren {
+  DetailPinterestPinIdRoute: typeof DetailPinterestPinIdRoute
+  DetailPostsPostIdRoute: typeof DetailPostsPostIdRoute
+  DetailProfilePostIdRoute: typeof DetailProfilePostIdRoute
 }
 
-const PinterestRouteChildren: PinterestRouteChildren = {
-  PinterestPinIdRoute: PinterestPinIdRoute,
-  PinterestIndexRoute: PinterestIndexRoute,
+const DetailRouteChildren: DetailRouteChildren = {
+  DetailPinterestPinIdRoute: DetailPinterestPinIdRoute,
+  DetailPostsPostIdRoute: DetailPostsPostIdRoute,
+  DetailProfilePostIdRoute: DetailProfilePostIdRoute,
 }
 
-const PinterestRouteWithChildren = PinterestRoute._addFileChildren(
-  PinterestRouteChildren,
+const DetailRouteWithChildren =
+  DetailRoute._addFileChildren(DetailRouteChildren)
+
+interface TopLevelProductsRouteChildren {
+  TopLevelProductsAllRoute: typeof TopLevelProductsAllRoute
+  TopLevelProductsBeautyRoute: typeof TopLevelProductsBeautyRoute
+  TopLevelProductsElectronicsRoute: typeof TopLevelProductsElectronicsRoute
+  TopLevelProductsFashionRoute: typeof TopLevelProductsFashionRoute
+  TopLevelProductsHomeRoute: typeof TopLevelProductsHomeRoute
+  TopLevelProductsIndexRoute: typeof TopLevelProductsIndexRoute
+}
+
+const TopLevelProductsRouteChildren: TopLevelProductsRouteChildren = {
+  TopLevelProductsAllRoute: TopLevelProductsAllRoute,
+  TopLevelProductsBeautyRoute: TopLevelProductsBeautyRoute,
+  TopLevelProductsElectronicsRoute: TopLevelProductsElectronicsRoute,
+  TopLevelProductsFashionRoute: TopLevelProductsFashionRoute,
+  TopLevelProductsHomeRoute: TopLevelProductsHomeRoute,
+  TopLevelProductsIndexRoute: TopLevelProductsIndexRoute,
+}
+
+const TopLevelProductsRouteWithChildren =
+  TopLevelProductsRoute._addFileChildren(TopLevelProductsRouteChildren)
+
+interface TopLevelRouteChildren {
+  TopLevelPinterestRoute: typeof TopLevelPinterestRoute
+  TopLevelPostsRoute: typeof TopLevelPostsRoute
+  TopLevelProductsRoute: typeof TopLevelProductsRouteWithChildren
+  TopLevelProfileRoute: typeof TopLevelProfileRoute
+}
+
+const TopLevelRouteChildren: TopLevelRouteChildren = {
+  TopLevelPinterestRoute: TopLevelPinterestRoute,
+  TopLevelPostsRoute: TopLevelPostsRoute,
+  TopLevelProductsRoute: TopLevelProductsRouteWithChildren,
+  TopLevelProfileRoute: TopLevelProfileRoute,
+}
+
+const TopLevelRouteWithChildren = TopLevelRoute._addFileChildren(
+  TopLevelRouteChildren,
 )
-
-interface PostsRouteChildren {
-  PostsPostIdRoute: typeof PostsPostIdRoute
-  PostsIndexRoute: typeof PostsIndexRoute
-}
-
-const PostsRouteChildren: PostsRouteChildren = {
-  PostsPostIdRoute: PostsPostIdRoute,
-  PostsIndexRoute: PostsIndexRoute,
-}
-
-const PostsRouteWithChildren = PostsRoute._addFileChildren(PostsRouteChildren)
-
-interface ProductsRouteChildren {
-  ProductsAllRoute: typeof ProductsAllRoute
-  ProductsBeautyRoute: typeof ProductsBeautyRoute
-  ProductsElectronicsRoute: typeof ProductsElectronicsRoute
-  ProductsFashionRoute: typeof ProductsFashionRoute
-  ProductsHomeRoute: typeof ProductsHomeRoute
-  ProductsIndexRoute: typeof ProductsIndexRoute
-}
-
-const ProductsRouteChildren: ProductsRouteChildren = {
-  ProductsAllRoute: ProductsAllRoute,
-  ProductsBeautyRoute: ProductsBeautyRoute,
-  ProductsElectronicsRoute: ProductsElectronicsRoute,
-  ProductsFashionRoute: ProductsFashionRoute,
-  ProductsHomeRoute: ProductsHomeRoute,
-  ProductsIndexRoute: ProductsIndexRoute,
-}
-
-const ProductsRouteWithChildren = ProductsRoute._addFileChildren(
-  ProductsRouteChildren,
-)
-
-interface ProfileRouteChildren {
-  ProfilePostIdRoute: typeof ProfilePostIdRoute
-  ProfileIndexRoute: typeof ProfileIndexRoute
-}
-
-const ProfileRouteChildren: ProfileRouteChildren = {
-  ProfilePostIdRoute: ProfilePostIdRoute,
-  ProfileIndexRoute: ProfileIndexRoute,
-}
-
-const ProfileRouteWithChildren =
-  ProfileRoute._addFileChildren(ProfileRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PinterestRoute: PinterestRouteWithChildren,
-  PostsRoute: PostsRouteWithChildren,
-  ProductsRoute: ProductsRouteWithChildren,
-  ProfileRoute: ProfileRouteWithChildren,
+  DetailRoute: DetailRouteWithChildren,
+  TopLevelRoute: TopLevelRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

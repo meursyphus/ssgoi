@@ -1,134 +1,139 @@
 "use client";
 
 import {
+  createContext,
   Suspense,
   useContext,
+  useMemo,
   type ComponentPropsWithoutRef,
   type ElementType,
-  type HTMLAttributes,
   type ReactNode,
 } from "react";
-import { ssgoiContext } from "./context";
+import type { SsgoiLayoutScope } from "@ssgoi/core/types";
+import { resolveLayoutChain } from "@ssgoi/core/internal";
 
 /**
- * How `SsgoiLayoutBoundary` reads the router, passed to `<Ssgoi framework>`.
- * Keep the object stable.
+ * How `<Ssgoi>` reads the router, passed to `<Ssgoi framework>`. Keep the
+ * object stable.
  */
 export interface SsgoiFramework {
   /**
    * A hook returning the current route, or `null` while the router isn't
-   * ready (renders `fallback`). `resolve` receives the returned object, so
-   * extra fields such as `search` or `selectedSegments` pass through.
+   * ready. `renderedPath` is the path the routed region actually shows when it
+   * differs from the URL (a soft-intercepted Next.js route); boundaries key by
+   * it instead of `pathname`.
    */
-  useRoute: (options: { parallelRoutesKey?: string }) => {
-    pathname: string;
-  } | null;
+  useRoute: () => { pathname: string; renderedPath?: string } | null;
 }
 
-/** A fixed id and/or key; id defaults to the pathname, key to the id. */
-type BoundaryResult = { id?: string; key?: string | number };
-
-/**
- * A string is the boundary's key (its lifetime) and leaves the id as the
- * pathname. A function computes either form from the route.
- */
-type BoundaryInput<Route> =
-  | string
-  | BoundaryResult
-  | ((route: Route) => string | BoundaryResult);
-
-export interface SsgoiLayoutLocation {
-  pathname: string;
-  /** The rest of the object `framework.useRoute` returned. */
-  [key: string]: unknown;
-}
-
-/**
- * `Route` is what a `boundary` function receives: annotate its parameter with
- * the shape your `framework.useRoute` returns.
- */
-export type SsgoiLayoutBoundaryProps<
-  T extends ElementType = "div",
-  Route extends object = SsgoiLayoutLocation,
-> = {
-  children?: ReactNode;
-  as?: T;
-  /** The boundary's key, id and key, or a function of the route returning either. */
-  boundary?: BoundaryInput<Route>;
-  /** Passed to `framework.useRoute`, e.g. a Next.js slot without @. */
-  parallelRoutesKey?: string;
-  /** Shown while the router resolves URL data (including Cache Components). */
-  fallback?: ReactNode;
-} & Omit<
-  ComponentPropsWithoutRef<T>,
-  "as" | "children" | "boundary" | "parallelRoutesKey" | "fallback"
->;
-
-type FrameworkBoundaryProps = HTMLAttributes<HTMLElement> & {
+type FrameworkSetup = {
   framework: SsgoiFramework;
-  as?: ElementType;
-  // Every route function is assignable to this; each caller types its own route.
-  boundary?: BoundaryInput<never>;
-  parallelRoutesKey?: string;
-  fallback?: ReactNode;
+  layouts: readonly SsgoiLayoutScope[] | undefined;
 };
 
+/** What a boundary passes to the boundaries inside it. */
+type LayoutState = {
+  routePath: string;
+  chain: readonly string[];
+  depth: number;
+};
+
+const frameworkContext = createContext<FrameworkSetup | null>(null);
+const layoutContext = createContext<LayoutState | null>(null);
+
+/** @internal `<Ssgoi>`'s framework and layout tree, for the first boundary. */
+export function SsgoiFrameworkProvider({
+  framework,
+  layouts,
+  children,
+}: {
+  framework: SsgoiFramework | undefined;
+  layouts: readonly SsgoiLayoutScope[] | undefined;
+  children: ReactNode;
+}) {
+  const setup = useMemo(
+    () => (framework ? { framework, layouts } : null),
+    [framework, layouts],
+  );
+  return (
+    <frameworkContext.Provider value={setup}>
+      {children}
+    </frameworkContext.Provider>
+  );
+}
+
+export type SsgoiLayoutBoundaryProps<T extends ElementType = "div"> = {
+  children?: ReactNode;
+  as?: T;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "children">;
+
 /**
- * A keyed route boundary for the layout that renders it. Reads the router
- * hooks from `<Ssgoi framework>`.
+ * A keyed route boundary for the layout that renders it. Its depth is the
+ * number of boundaries above it; it stays mounted while navigation stays in
+ * the same `config.layouts` scope at that depth, and otherwise keys by the
+ * route. The first boundary reads the route for the ones inside it.
  */
-export function SsgoiLayoutBoundary<
-  T extends ElementType = "div",
-  Route extends object = SsgoiLayoutLocation,
->(props: SsgoiLayoutBoundaryProps<T, Route>) {
-  const framework = useContext(ssgoiContext)?.framework;
-  if (!framework) {
+export function SsgoiLayoutBoundary<T extends ElementType = "div">(
+  props: SsgoiLayoutBoundaryProps<T>,
+) {
+  const setup = useContext(frameworkContext);
+  const parent = useContext(layoutContext);
+  if (parent) return <KeyedBoundary {...props} state={parent} />;
+  if (!setup) {
     throw new Error(
       "SSGOI: SsgoiLayoutBoundary requires a framework. Pass it to <Ssgoi framework={{ useRoute }}>.",
     );
   }
   return (
-    <SuspendedFrameworkBoundary
-      {...(props as Omit<FrameworkBoundaryProps, "framework">)}
-      framework={framework}
-    />
-  );
-}
-
-/** @internal Catches URL suspension outside the hooks that throw it. */
-export function SuspendedFrameworkBoundary(props: FrameworkBoundaryProps) {
-  return (
-    <Suspense fallback={props.fallback ?? null}>
-      <FrameworkBoundary {...props} />
+    // Catches URL suspension (Next.js Cache Components) outside the hook.
+    <Suspense fallback={null}>
+      <RootBoundary {...props} setup={setup} />
     </Suspense>
   );
 }
 
-/** @internal Shared by the deprecated router subpaths. */
-export function FrameworkBoundary({
-  framework,
-  boundary,
-  parallelRoutesKey,
-  fallback,
-  as,
-  children,
-  ...rest
-}: FrameworkBoundaryProps) {
-  const resolver = typeof boundary === "function" ? boundary : () => boundary;
-  const route = framework.useRoute({ parallelRoutesKey });
+type BoundaryProps = SsgoiLayoutBoundaryProps<ElementType>;
+
+function RootBoundary({
+  setup: { framework, layouts },
+  ...props
+}: BoundaryProps & { setup: FrameworkSetup }) {
+  const route = framework.useRoute();
+  const routePath = route && (route.renderedPath ?? route.pathname);
+  const state = useMemo(
+    () =>
+      routePath == null
+        ? null
+        : {
+            routePath,
+            chain: resolveLayoutChain(layouts, routePath),
+            depth: 0,
+          },
+    [layouts, routePath],
+  );
 
   // In a mixed app/pages project Next may not have initialized the router yet.
   // Never register an empty or invented route with SSGOI.
-  if (route == null) return fallback ?? null;
+  if (!state) return null;
+  return <KeyedBoundary {...props} state={state} />;
+}
 
-  const result = resolver(route as never);
-  const normalized =
-    typeof result === "string" ? { key: result } : (result ?? {});
-  const id = normalized.id ?? route.pathname;
+function KeyedBoundary({
+  state,
+  as,
+  children,
+  ...rest
+}: BoundaryProps & { state: LayoutState }) {
+  const inner = useMemo(() => ({ ...state, depth: state.depth + 1 }), [state]);
+  const { routePath, chain, depth } = state;
   const Component: ElementType = as ?? "div";
   return (
-    <Component {...rest} key={normalized.key ?? id} data-ssgoi-transition={id}>
-      {children}
+    <Component
+      {...rest}
+      key={chain[depth] ?? routePath}
+      data-ssgoi-transition={routePath}
+    >
+      <layoutContext.Provider value={inner}>{children}</layoutContext.Provider>
     </Component>
   );
 }

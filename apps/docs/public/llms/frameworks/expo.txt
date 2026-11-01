@@ -72,10 +72,11 @@ units for isMobile. Import fade/slide from the native view-transitions entry.
 fade runs OUT then IN; slide moves both screens together. Both reuse the
 existing numerical physics and play on Reanimated's UI runtime.
 
-The boundary option takes a string key, { id?, key? }, or a function of
-{ pathname, route } returning either. The function sees each screen's own
-route, even while retained. id is an absolute matching path. Keys are scoped
-by the native route instance and cannot merge distinct pushes. Defaults require no configuration.
+The boundary takes `initialRouteName?` and `style?` and no route options: each
+screen's id is its own absolute path, even while retained, and each pushed
+screen keeps its own native instance, so distinct pushes never merge.
+`config.layouts` is accepted but has no effect on native stacks; Expo nested
+navigators handle grouping, so use one root boundary. Defaults require no configuration.
 
 Ssgoi reducedMotion defaults to "system"; "always" and "never" are supported.
 onTransitionError receives preparation errors while the latest route is

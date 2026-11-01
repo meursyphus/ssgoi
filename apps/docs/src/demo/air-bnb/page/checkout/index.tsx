@@ -26,10 +26,9 @@ export default function CheckoutLayoutClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <SsgoiLayoutBoundary
-      boundary={`${initialData.id}/checkout`}
-      className="relative flex min-h-full w-full flex-col bg-white"
-    >
+    // Depth 0 is keyed by the checkout layout scope in the demo config, so the
+    // sheet stays mounted across checkout steps; depth 1 swaps each step.
+    <SsgoiLayoutBoundary className="relative flex min-h-full w-full flex-col bg-white">
       <CheckoutHeader />
       <div className="relative z-0 flex-1 pb-3">
         <SsgoiLayoutBoundary className="min-h-full bg-white">

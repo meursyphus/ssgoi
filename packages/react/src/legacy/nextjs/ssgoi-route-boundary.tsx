@@ -4,10 +4,10 @@
 import type { ElementType, ReactNode } from "react";
 import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import {
-  SuspendedFrameworkBoundary,
-  type SsgoiFramework,
-} from "../../layout-boundary";
-import { toBoundary, type RouteBoundaryProps } from "../route-boundary";
+  SuspendedRouteBoundary,
+  type UseRoute,
+  type RouteBoundaryProps,
+} from "../route-boundary";
 
 /**
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
@@ -31,12 +31,10 @@ export type SsgoiRouteBoundaryProps<T extends ElementType = "div"> =
     fallback?: ReactNode;
   };
 
-const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
-    const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
-  },
+const useRoute: UseRoute = ({ parallelRoutesKey = "children" }) => {
+  const pathname = usePathname();
+  const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
+  return pathname == null ? null : { pathname, selectedSegments };
 };
 
 /**
@@ -45,16 +43,8 @@ const framework: SsgoiFramework = {
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
  * "@ssgoi/react" with `<Ssgoi framework={...}>` instead.
  */
-export function SsgoiRouteBoundary<T extends ElementType = "div">({
-  resolve,
-  routeKey,
-  ...props
-}: SsgoiRouteBoundaryProps<T>) {
-  return (
-    <SuspendedFrameworkBoundary
-      {...props}
-      boundary={toBoundary(resolve, routeKey)}
-      framework={framework}
-    />
-  );
+export function SsgoiRouteBoundary<T extends ElementType = "div">(
+  props: SsgoiRouteBoundaryProps<T>,
+) {
+  return <SuspendedRouteBoundary {...props} useRoute={useRoute} />;
 }

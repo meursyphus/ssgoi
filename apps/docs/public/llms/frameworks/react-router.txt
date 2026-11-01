@@ -89,40 +89,47 @@ Verify: navigate `/` → any page slides in from the right; back slides out.
 
 ## Beyond the basics
 
-A persistent route family needs two boundaries:
+A persistent route family needs two lifetimes. Declare it in config, then nest
+its layout under the page-boundary layout and wrap only its `<Outlet />`:
+
+```ts
+// app/components/ssgoi-config.ts
+export const config = {
+  layouts: [{ paths: "/products/**" }],
+  transitions: [/* ... */],
+};
+```
 
 ```tsx
-// app/routes/products_.layout.tsx
+// app/routes/products.layout.tsx — inside layout("routes/page-boundary.layout.tsx", [...])
 import { Outlet } from "react-router";
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function ProductsLayout() {
   return (
-    <SsgoiLayoutBoundary boundary="products-layout">
+    <>
       <ProductHeaderAndTabs />
       <SsgoiLayoutBoundary>
         <Outlet />
       </SsgoiLayoutBoundary>
-    </SsgoiLayoutBoundary>
+    </>
   );
 }
 ```
 
-Mount the products children under this layout, not under the global pathless
-`page-boundary` layout. The stable outer key preserves the shell; the inner
-pathname key produces child OUT/IN. Holding only one boundary constant
-preserves state but produces no child transition.
+The page boundary (depth 0) keys every `/products` route by the one scope, so
+the header and tabs stay; the inner boundary (depth 1) keys by the path and
+produces child OUT/IN.
 
 - Key-scope reasoning: https://ssgoi.dev/llms/complex-routing.txt
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/react-router
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
 `@ssgoi/react` never imports `react-router`; it calls the `useRoute` you wrote.
-`as`, DOM attributes, and `boundary` are supported. `boundary` sets the key
-(when the DOM is replaced) and id (which route rules match): a string key,
-`{ id?, key? }`, or a function that receives the `useLocation()` value as-is
-and returns either. Defaults: id = pathname, key = id. Query-only
-navigation keeps the boundary by default. For direct control or a custom
+`as` and DOM attributes pass through; the boundary takes no SSGOI props. Its id
+is the route path; its key is the `config.layouts` scope at its depth (the
+number of boundaries above it), or the route path. Query-only navigation keeps
+the boundary by default. For direct control or a custom
 router: https://ssgoi.dev/llms/manual-boundaries.txt
 
 `SsgoiRouteBoundary` from `@ssgoi/react/react-router` still works but is

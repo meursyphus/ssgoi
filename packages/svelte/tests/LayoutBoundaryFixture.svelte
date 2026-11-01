@@ -1,22 +1,29 @@
 <script lang="ts">
   import { get } from "svelte/store";
-  import {
-    Ssgoi,
-    SsgoiLayoutBoundary,
-    type SsgoiFramework,
-    type SsgoiLayoutBoundaryProps,
-  } from "../src/lib";
+  import { Ssgoi, SsgoiLayoutBoundary, type SsgoiConfig } from "../src/lib";
   import { content, onNavigate, page } from "./navigation";
   let {
-    boundary,
-    getRoute = () => ({ pathname: get(page).url.pathname, url: get(page).url }),
-  }: Pick<SsgoiLayoutBoundaryProps, "boundary"> &
-    Partial<Pick<SsgoiFramework, "getRoute">> = $props();
+    layouts,
+    nested = false,
+  }: { layouts?: SsgoiConfig["layouts"]; nested?: boolean } = $props();
 </script>
 
-<Ssgoi config={{ transitions: [] }} framework={{ getRoute, onNavigate }}>
-  <SsgoiLayoutBoundary {boundary} as="section" class="page" aria-label="Page">
-    <input value={$content} />
-    <p>{$content}</p>
+<Ssgoi
+  config={{ transitions: [], layouts }}
+  framework={{
+    getRoute: () => ({ pathname: get(page).url.pathname }),
+    onNavigate,
+  }}
+>
+  <SsgoiLayoutBoundary as="section" class="page" aria-label="Page">
+    {#if nested}
+      <SsgoiLayoutBoundary as="article">
+        <input value={$content} />
+        <p>{$content}</p>
+      </SsgoiLayoutBoundary>
+    {:else}
+      <input value={$content} />
+      <p>{$content}</p>
+    {/if}
   </SsgoiLayoutBoundary>
 </Ssgoi>

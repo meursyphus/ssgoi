@@ -22,24 +22,23 @@ binding's root entry. The framework returns a route object (at least
 `{ pathname }`). The boundary throws if its provider has no `framework`. Each
 guide has the copy-pasteable object.
 
-Every layout boundary takes one `boundary` input that sets two values: `key`
-is when the DOM is replaced (its lifetime), and `id` is which route SSGOI
-matches transition rules against. Defaults: id = pathname, key = id.
-
-- a string is a fixed key, e.g. `boundary="products-layout"` for a persistent
-  layout; the id keeps following the pathname
-- `{ id?, key? }` fixes either value
-- `(route) => string | { id?, key? }` computes them; the function form
-  receives the route object the framework returned, as-is. Qwik's
-  `useSsgoiLayoutBoundary(boundary?)` takes only the string and object forms
+Layout boundaries take no SSGOI props. Each sets two values: `key` is when the
+DOM is replaced (its lifetime), and `id` is which route SSGOI matches
+transition rules against. The id is always the route path. The key comes from
+`config.layouts`, a tree of `{ paths, except?, layouts? }` scopes: a boundary
+at depth N (the number of boundaries above it) keys by the scope instance that
+matches at depth N, and by the route path when none does. Siblings are
+first-match, and a `*` or `:id` segment makes each captured value its own
+instance. Without `layouts`, every boundary keys by the route path.
+Full patterns: https://ssgoi.dev/llms/complex-routing.txt
 
 | Framework | Router | `framework` | Boundary | Status |
 | --- | --- | --- | --- | --- |
-| React | Next.js | `useRoute` from `usePathname` + `useSelectedLayoutSegments` | `SsgoiLayoutBoundary` | Next.js App Router |
+| React | Next.js | `useRoute` returning `{ pathname, renderedPath }` from `usePathname` + `useSelectedLayoutSegments` | `SsgoiLayoutBoundary` | Next.js App Router |
 | React | Remix | `{ useRoute: () => useLocation() }` | `SsgoiLayoutBoundary` | Experimental |
 | React | React Router | `{ useRoute: () => useLocation() }` | `SsgoiLayoutBoundary` | Experimental |
 | React | TanStack Router | `useRoute` from the rendered leaf match | `SsgoiLayoutBoundary` | Experimental |
-| Svelte | SvelteKit | `{ getRoute: () => ({ pathname: page.url.pathname, url: page.url }), onNavigate }` | `SsgoiLayoutBoundary` | Experimental |
+| Svelte | SvelteKit | `{ getRoute: () => ({ pathname: page.url.pathname }), onNavigate }` | `SsgoiLayoutBoundary` | Experimental |
 | Vue | Vue Router | `{ getRoute: () => ({ pathname: router.currentRoute.value.path }) }` | `SsgoiLayoutBoundary` | Experimental |
 | Vue | Nuxt | `{ getRoute: () => ({ pathname: router.currentRoute.value.path }) }` | `SsgoiLayoutBoundary` | Experimental |
 | Solid | Solid Router | `{ getRoute: () => ({ pathname: location.pathname }) }` | `SsgoiLayoutBoundary` | Experimental |

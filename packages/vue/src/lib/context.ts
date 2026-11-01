@@ -9,30 +9,39 @@ import {
   type InjectionKey,
   type ShallowRef,
 } from "vue";
-import type {
-  SsgoiContext,
-  SsgoiFramework,
-  SsgoiTransitionState,
-} from "./types";
+import type { SsgoiContext, SsgoiTransitionState } from "./types";
+
+/** Route state `<Ssgoi>` resolves once for every layout boundary below it. */
+export interface SsgoiLayoutState {
+  routePath: string;
+  chain: string[];
+}
 
 type SsgoiContextRef = ComputedRef<SsgoiContext>;
-type SsgoiFrameworkRef = ComputedRef<SsgoiFramework | undefined>;
+type SsgoiLayoutRef = ComputedRef<SsgoiLayoutState | undefined>;
 
 const SsgoiContextKey: InjectionKey<SsgoiContextRef> = Symbol("ssgoi-context");
-const SsgoiFrameworkKey: InjectionKey<SsgoiFrameworkRef> =
-  Symbol("ssgoi-framework");
+const SsgoiLayoutKey: InjectionKey<SsgoiLayoutRef> = Symbol("ssgoi-layout");
+const SsgoiLayoutDepthKey: InjectionKey<number> = Symbol("ssgoi-layout-depth");
 
 export const provideSsgoi = (
   context: SsgoiContextRef,
-  framework: SsgoiFrameworkRef,
+  layout: SsgoiLayoutRef,
 ) => {
   provide(SsgoiContextKey, context);
-  provide(SsgoiFrameworkKey, framework);
+  provide(SsgoiLayoutKey, layout);
 };
 
-/** The `framework` passed to the nearest `<Ssgoi>`, if any. */
-export const useSsgoiFramework = (): SsgoiFrameworkRef | undefined =>
-  inject(SsgoiFrameworkKey, undefined);
+/** Layout state of the nearest `<Ssgoi>`; undefined without a framework. */
+export const useSsgoiLayout = (): SsgoiLayoutRef | undefined =>
+  inject(SsgoiLayoutKey, undefined);
+
+/** Depth of the calling layout boundary; its descendants see one deeper. */
+export const useLayoutDepth = (): number => {
+  const depth = inject(SsgoiLayoutDepthKey, 0);
+  provide(SsgoiLayoutDepthKey, depth + 1);
+  return depth;
+};
 
 export const useSsgoi = (): SsgoiContextRef => {
   const context = inject(SsgoiContextKey);

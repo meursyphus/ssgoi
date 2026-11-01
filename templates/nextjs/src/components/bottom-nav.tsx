@@ -1,0 +1,110 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function BottomNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="sticky bottom-0 z-10 flex justify-around items-center bg-[#121212] border-t border-white/5 py-2 flex-shrink-0">
+      <NavItem
+        href="/posts"
+        label="Posts"
+        isActive={pathname.startsWith("/posts")}
+        icon={
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        }
+      />
+      <NavItem
+        href="/products"
+        label="Shop"
+        isActive={pathname.startsWith("/products")}
+        icon={
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        }
+      />
+      <NavItem
+        href="/pinterest"
+        label="Gallery"
+        isActive={pathname.startsWith("/pinterest")}
+        icon={
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        }
+      />
+      <NavItem
+        href="/profile"
+        label="Profile"
+        isActive={pathname.startsWith("/profile")}
+        icon={
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        }
+      />
+    </nav>
+  );
+}
+
+interface NavItemProps {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  isActive?: boolean;
+}
+
+function NavItem({ href, label, icon, isActive }: NavItemProps) {
+  return (
+    <Link
+      href={href}
+      className={`flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 ${
+        isActive ? "text-white" : "text-neutral-500 hover:text-neutral-400"
+      }`}
+    >
+      <div className="w-5 h-5">{icon}</div>
+      <span>{label}</span>
+    </Link>
+  );
+}

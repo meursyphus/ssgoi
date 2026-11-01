@@ -1,5 +1,5 @@
 import type { SsgoiConfig } from "@ssgoi/vue";
-import { drill, slide, zoom } from "@ssgoi/vue/view-transitions";
+import { drill, fade, slide, zoom } from "@ssgoi/vue/view-transitions";
 
 export const PRODUCT_CATEGORIES = [
   { id: "all", label: "All", path: "/products/all" },
@@ -9,8 +9,20 @@ export const PRODUCT_CATEGORIES = [
   { id: "beauty", label: "Beauty", path: "/products/beauty" },
 ];
 
+// Pages under the bottom nav. `/products/**` (not `/products/*`) keeps every
+// category in one scope: a `*` segment would make each category its own
+// instance.
+const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+
 export const ssgoiConfig = {
+  // Mirrors layouts/top-level.vue and layouts/detail.vue, plus the products
+  // page (pages/(top-level)/products.vue) nested inside top-level.
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
   transitions: [
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
     {
       from: "/pinterest",
       to: "/pinterest/*",

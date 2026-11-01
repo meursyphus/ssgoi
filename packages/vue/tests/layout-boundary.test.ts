@@ -1,23 +1,25 @@
 import { afterEach, beforeEach, expect, it } from "vitest";
-import { createApp, defineComponent, h, nextTick, ref, type App } from "vue";
-import { createMemoryHistory, createRouter, RouterView } from "vue-router";
-import type { SsgoiConfig } from "@ssgoi/core/types";
-import Ssgoi from "../src/lib/ssgoi.vue";
 import {
-  SsgoiLayoutBoundary,
-  type SsgoiLayoutBoundaryProps,
-} from "../src/lib/layout-boundary";
+  createApp,
+  defineComponent,
+  h,
+  nextTick,
+  ref,
+  type App,
+  type VNode,
+} from "vue";
+import { createMemoryHistory, createRouter, RouterView } from "vue-router";
+import type { SsgoiConfig, SsgoiLayoutScope } from "@ssgoi/core/types";
+import Ssgoi from "../src/lib/ssgoi.vue";
+import { SsgoiLayoutBoundary } from "../src/lib/layout-boundary";
 import type { SsgoiFramework } from "../src/lib/types";
 import { SsgoiRouteBoundary } from "../src/lib/legacy/vue-router";
 
 const config: SsgoiConfig = { transitions: [] };
 const path = ref("/a");
-// `project` is an extra route field that must reach `resolve` untouched.
+const renderedPath = ref<string | undefined>();
 const framework: SsgoiFramework = {
-  getRoute: () => ({
-    pathname: path.value,
-    project: path.value.match(/^\/projects\/([^/]+)/)?.[1],
-  }),
+  getRoute: () => ({ pathname: path.value, renderedPath: renderedPath.value }),
 };
 
 let host: HTMLDivElement;
@@ -27,6 +29,7 @@ beforeEach(() => {
   Element.prototype.scrollTo ??= () => {};
   window.scrollTo ??= () => {};
   path.value = "/a";
+  renderedPath.value = undefined;
   host = document.createElement("div");
   document.body.append(host);
 });
@@ -36,83 +39,107 @@ afterEach(() => {
   host.remove();
 });
 
-const boundary = () => host.querySelector<HTMLElement>("[data-boundary]")!;
+const boundary = (depth = 0) =>
+  host.querySelector<HTMLElement>(`[data-boundary="${depth}"]`)!;
 
-function mount(props: Record<string, unknown>, withFramework = true) {
+/** Mounts `depths` nested prop-less boundaries under one `<Ssgoi>`. */
+function mount(
+  layouts?: SsgoiLayoutScope[],
+  depths = 1,
+  as?: keyof HTMLElementTagNameMap,
+) {
+  const nest = (depth: number): VNode =>
+    h(
+      SsgoiLayoutBoundary,
+      { "data-boundary": String(depth), ...(as ? { as } : {}) },
+      () => (depth + 1 < depths ? nest(depth + 1) : h("p", "page")),
+    );
   app = createApp(() =>
-    h(Ssgoi, { config, framework: withFramework ? framework : undefined }, () =>
-      h(SsgoiLayoutBoundary, { "data-boundary": "", ...props }, () =>
-        h("p", "page"),
-      ),
-    ),
+    h(Ssgoi, { config: { ...config, layouts }, framework }, () => nest(0)),
   );
   app.mount(host);
 }
 
-it("re-keys the boundary when the framework pathname changes", async () => {
-  mount({ as: "section" });
+async function navigate(to: string) {
+  path.value = to;
+  await nextTick();
+}
+
+it("keys every boundary by the route path without config.layouts", async () => {
+  mount(undefined, 1, "section");
   const first = boundary();
   expect(first.tagName).toBe("SECTION");
   expect(first.dataset.ssgoiTransition).toBe("/a");
 
-  path.value = "/b";
-  await nextTick();
+  await navigate("/b");
   expect(boundary().dataset.ssgoiTransition).toBe("/b");
   expect(boundary()).not.toBe(first);
   expect(first.isConnected).toBe(false);
 });
 
-it("treats a string boundary as a fixed key while the id follows the path", async () => {
-  mount({ boundary: "shell" });
+it("keeps the DOM within the first matching sibling scope", async () => {
+  const tabs = ["/home", "/search"];
+  path.value = "/home";
+  mount([{ paths: tabs }, { paths: "/**", except: tabs }]);
   const first = boundary();
 
-  path.value = "/b";
-  await nextTick();
+  await navigate("/search");
   expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("/b");
+  expect(first.dataset.ssgoiTransition).toBe("/search");
+
+  await navigate("/post/1");
+  expect(boundary()).not.toBe(first);
+  const detail = boundary();
+  await navigate("/post/2");
+  expect(boundary()).toBe(detail);
 });
 
-it("uses an object boundary's id, keyed by that id by default", async () => {
-  mount({ boundary: { id: "/feed" } });
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("/feed");
+it("reads nested scopes by boundary depth", async () => {
+  const tabs = ["/home", "/search"];
+  path.value = "/products/a";
+  mount(
+    [
+      { paths: tabs },
+      { paths: "/**", except: tabs, layouts: [{ paths: "/products/**" }] },
+    ],
+    3,
+  );
+  const [outer, section, page] = [boundary(0), boundary(1), boundary(2)];
 
-  path.value = "/b";
-  await nextTick();
-  expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("/feed");
+  // Inside the nested scope only the page past the declared depth remounts.
+  await navigate("/products/b");
+  expect(boundary(0)).toBe(outer);
+  expect(boundary(1)).toBe(section);
+  expect(boundary(2)).not.toBe(page);
+  expect(boundary(2).dataset.ssgoiTransition).toBe("/products/b");
+
+  // Leaving it keeps the outer scope and remounts the section.
+  await navigate("/post/1");
+  expect(boundary(0)).toBe(outer);
+  expect(boundary(1)).not.toBe(section);
+
+  await navigate("/home");
+  expect(boundary(0)).not.toBe(outer);
 });
 
-it("passes the framework route, extra fields included, to a boundary function", async () => {
+it("splits scope instances by captured segments, not by ** tails", async () => {
   path.value = "/projects/1/files";
-  const input: SsgoiLayoutBoundaryProps["boundary"] = (route) => ({
-    id: route.pathname,
-    key: typeof route.project === "string" ? route.project : route.pathname,
-  });
-  mount({ boundary: input });
+  mount([{ paths: "/projects/:id/**" }]);
   const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("/projects/1/files");
 
-  path.value = "/projects/1/settings";
-  await nextTick();
+  await navigate("/projects/1/members");
   expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("/projects/1/settings");
+  expect(first.dataset.ssgoiTransition).toBe("/projects/1/members");
 
-  path.value = "/projects/2/files";
-  await nextTick();
+  await navigate("/projects/2/files");
   expect(boundary()).not.toBe(first);
 });
 
-it("treats a string returned by a boundary function as the key", async () => {
-  path.value = "/projects/1/files";
-  mount({ boundary: () => "workspace" });
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("/projects/1/files");
-
-  path.value = "/settings";
-  await nextTick();
-  expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("/settings");
+it("prefers the framework's renderedPath over pathname", async () => {
+  renderedPath.value = "/feed";
+  path.value = "/photo/1";
+  mount();
+  expect(boundary().dataset.ssgoiTransition).toBe("/feed");
 });
 
 it("throws when <Ssgoi> has no framework", () => {
@@ -143,7 +170,7 @@ async function mountRouter(props: Record<string, unknown> = {}) {
   await router.push("/a");
   app = createApp(() =>
     h(Ssgoi, { config }, () =>
-      h(SsgoiRouteBoundary, { "data-boundary": "", ...props }, () =>
+      h(SsgoiRouteBoundary, { "data-boundary": "0", ...props }, () =>
         h(RouterView),
       ),
     ),

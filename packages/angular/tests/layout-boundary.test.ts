@@ -11,17 +11,16 @@ import {
   platformBrowserDynamicTesting,
 } from "@angular/platform-browser-dynamic/testing";
 import {
-  ActivatedRoute,
   NavigationEnd,
   Router,
   RouterOutlet,
-  createUrlTreeFromSnapshot,
+  UrlTree,
   provideRouter,
-  type ActivatedRouteSnapshot,
 } from "@angular/router";
 import {
   Ssgoi,
   SsgoiLayoutBoundary,
+  type SsgoiConfig,
   type SsgoiFramework,
 } from "../src/public-api";
 
@@ -35,14 +34,9 @@ Element.prototype.scrollTo = () => {};
 // The framework the README documents, built from Angular Router.
 const framework: SsgoiFramework = {
   getRoute: (injector) => {
-    const route = injector.get(ActivatedRoute).snapshot;
     const router = injector.get(Router);
-    return {
-      pathname: router.serializeUrl(
-        createUrlTreeFromSnapshot(route, [], null, null),
-      ),
-      route,
-    };
+    const { root } = router.parseUrl(router.url);
+    return { pathname: router.serializeUrl(new UrlTree(root)) };
   },
   onNavigate: (injector, callback) => {
     const subscription = injector.get(Router).events.subscribe((event) => {
@@ -52,59 +46,46 @@ const framework: SsgoiFramework = {
   },
 };
 
+const config: SsgoiConfig = {
+  layouts: [
+    { paths: "/posts/**" },
+    { paths: "/products/**", layouts: [{ paths: "/products/*/**" }] },
+  ],
+};
+
 @Component({
   standalone: true,
   imports: [SsgoiLayoutBoundary],
   template:
-    '<article *ssgoiLayoutBoundary="let route"><input /><span>{{ route.id }}</span></article>',
+    '<article *ssgoiLayoutBoundary="let boundary"><input /><span>{{ boundary.key }}</span></article>',
 })
 class Page {}
 
 @Component({
   standalone: true,
-  imports: [SsgoiLayoutBoundary],
+  imports: [RouterOutlet, SsgoiLayoutBoundary],
   template:
-    "<article *ssgoiLayoutBoundary=\"'shell'; let route\"><input /><span>{{ route.id }}</span></article>",
+    '<section *ssgoiLayoutBoundary="let boundary"><b>{{ boundary.key }}</b><router-outlet /></section>',
 })
 class Shell {}
 
 @Component({
   standalone: true,
-  imports: [SsgoiLayoutBoundary],
+  imports: [RouterOutlet, Ssgoi],
   template:
-    "<article *ssgoiLayoutBoundary=\"{ id: '/feed' }; let route\"><input />{{ route.key }}</article>",
+    '<main ssgoi [config]="config" [ssgoiFramework]="framework"><router-outlet /></main>',
 })
-class Feed {}
-
-@Component({
-  standalone: true,
-  imports: [SsgoiLayoutBoundary],
-  template:
-    '<article *ssgoiLayoutBoundary="boundary; let route">{{ route.key }}</article>',
-})
-class Resolved {
-  // A function may annotate the extra fields `getRoute` returns.
-  boundary = ({
-    route,
-  }: {
-    pathname: string;
-    route: ActivatedRouteSnapshot;
-  }) => ({
-    id: `/resolved/${route.paramMap.get("id")}`,
-    key: "resolved",
-  });
+class App {
+  config = config;
+  framework = framework;
 }
-
-// What strict template checking does for the `boundary` binding above.
-export const boundaryIsAssignable: SsgoiLayoutBoundary["ssgoiLayoutBoundary"] =
-  new Resolved().boundary;
 
 @Component({
   standalone: true,
   imports: [RouterOutlet, Ssgoi],
   template: '<main ssgoi [ssgoiFramework]="framework"><router-outlet /></main>',
 })
-class App {
+class AppWithoutLayouts {
   framework = framework;
 }
 
@@ -112,7 +93,7 @@ class App {
   standalone: true,
   imports: [Ssgoi, SsgoiLayoutBoundary],
   template:
-    '<main ssgoi [ssgoiFramework]="framework"><article *ssgoiLayoutBoundary="let route">{{ route.id }}</article></main>',
+    '<main ssgoi [ssgoiFramework]="framework"><article *ssgoiLayoutBoundary="let boundary">{{ boundary.id }}</article></main>',
 })
 class Inline {
   framework = framework;
@@ -131,9 +112,11 @@ beforeEach(() => {
       provideZonelessChangeDetection(),
       provideRouter([
         { path: "posts/:id", component: Page },
-        { path: "shell/:id", component: Shell },
-        { path: "resolved/:id", component: Resolved },
-        { path: "feed/:id", component: Feed },
+        {
+          path: "products/:category",
+          component: Shell,
+          children: [{ path: ":id", component: Page }],
+        },
         { path: "inline/:id", component: Inline },
         { path: "blocked", component: Page, canActivate: [() => false] },
       ]),
@@ -153,15 +136,15 @@ async function navigate(fixture: ComponentFixture<unknown>, url: string) {
   await fixture.whenStable();
 }
 
-const article = (fixture: ComponentFixture<unknown>) =>
-  (fixture.nativeElement as HTMLElement).querySelector("article")!;
+const query = (fixture: ComponentFixture<unknown>, selector: string) =>
+  (fixture.nativeElement as HTMLElement).querySelector(selector)!;
 
-it("replaces a reused parameterized page before patching its outgoing DOM", async () => {
-  const fixture = await create(App, "/posts/1");
-  const outgoing = article(fixture);
+it("keys by the route path without config.layouts, replacing a reused page before patching it", async () => {
+  const fixture = await create(AppWithoutLayouts, "/posts/1");
+  const outgoing = query(fixture, "article");
   outgoing.querySelector("input")!.value = "draft";
   await navigate(fixture, "/posts/2");
-  const incoming = article(fixture);
+  const incoming = query(fixture, "article");
   expect(incoming).not.toBe(outgoing);
   expect(incoming.getAttribute("data-ssgoi-transition")).toBe("/posts/2");
   expect(outgoing.textContent).toBe("/posts/1");
@@ -170,47 +153,47 @@ it("replaces a reused parameterized page before patching its outgoing DOM", asyn
 });
 
 it("preserves the page on query-only and cancelled navigation", async () => {
-  const fixture = await create(App, "/posts/1?q=one");
-  const page = article(fixture);
+  const fixture = await create(AppWithoutLayouts, "/posts/1?q=one");
+  const page = query(fixture, "article");
   await navigate(fixture, "/posts/1?q=two#section");
-  expect(article(fixture)).toBe(page);
+  expect(query(fixture, "article")).toBe(page);
   expect(page.getAttribute("data-ssgoi-transition")).toBe("/posts/1");
   await navigate(fixture, "/blocked");
-  expect(article(fixture)).toBe(page);
+  expect(query(fixture, "article")).toBe(page);
 });
 
-it("keeps a string boundary as the key and updates its id without losing local input", async () => {
-  const fixture = await create(App, "/shell/1");
-  const shell = article(fixture);
-  shell.querySelector("input")!.value = "draft";
-  await navigate(fixture, "/shell/2");
-  expect(article(fixture)).toBe(shell);
-  expect(shell.getAttribute("data-ssgoi-transition")).toBe("/shell/2");
-  expect(shell.querySelector("input")!.value).toBe("draft");
+it("keeps a depth-0 boundary mounted inside its scope and updates its id", async () => {
+  const fixture = await create(App, "/posts/1");
+  const page = query(fixture, "article");
+  expect(page.textContent).toBe("0");
+  page.querySelector("input")!.value = "draft";
+  await navigate(fixture, "/posts/2");
+  expect(query(fixture, "article")).toBe(page);
+  expect(page.getAttribute("data-ssgoi-transition")).toBe("/posts/2");
+  expect(page.querySelector("input")!.value).toBe("draft");
 });
 
-it("uses a fixed id from an object boundary as the default key", async () => {
-  const fixture = await create(App, "/feed/1");
-  const feed = article(fixture);
-  expect(feed.getAttribute("data-ssgoi-transition")).toBe("/feed");
-  expect(feed.textContent).toBe("/feed");
-  await navigate(fixture, "/feed/2");
-  expect(article(fixture)).toBe(feed);
-});
+it("nests depth through parent boundaries and keys each by its scope instance", async () => {
+  const fixture = await create(App, "/products/shoes/1");
+  const shell = query(fixture, "section");
+  const item = query(fixture, "article");
+  expect(query(fixture, "b").textContent).toBe("1");
+  expect(item.textContent).toBe("1.0/shoes");
 
-it("passes the route getRoute returns to a boundary function", async () => {
-  const fixture = await create(App, "/resolved/7");
-  const page = article(fixture);
-  expect(page.getAttribute("data-ssgoi-transition")).toBe("/resolved/7");
-  expect(page.textContent).toBe("resolved");
-  await navigate(fixture, "/resolved/8");
-  expect(article(fixture)).toBe(page);
-  expect(page.getAttribute("data-ssgoi-transition")).toBe("/resolved/8");
+  await navigate(fixture, "/products/shoes/2");
+  expect(query(fixture, "section")).toBe(shell);
+  expect(query(fixture, "article")).toBe(item);
+  expect(item.getAttribute("data-ssgoi-transition")).toBe("/products/shoes/2");
+
+  await navigate(fixture, "/products/hats/1");
+  expect(query(fixture, "section")).toBe(shell);
+  expect(query(fixture, "article")).not.toBe(item);
+  expect(query(fixture, "article").textContent).toBe("1.0/hats");
 });
 
 it("reads [ssgoiFramework] bound in the same template", async () => {
   const fixture = await create(App, "/inline/3");
-  expect(article(fixture).getAttribute("data-ssgoi-transition")).toBe(
+  expect(query(fixture, "article").getAttribute("data-ssgoi-transition")).toBe(
     "/inline/3",
   );
 });

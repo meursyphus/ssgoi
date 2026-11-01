@@ -1,11 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  act,
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { act, useState, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import {
@@ -14,38 +8,33 @@ import {
   useNavigate,
   type NavigateFunction,
 } from "react-router";
-import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "../src";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiConfig,
+  type SsgoiFramework,
+} from "../src";
 import { SsgoiRouteBoundary as DeprecatedNextBoundary } from "../src/legacy/nextjs";
 
 const navigation = vi.hoisted(() => ({
-  pathname: "/projects" as string | null,
+  pathname: "/" as string | null,
+  /** The path the routed region shows; null means "same as pathname". */
+  renderedPath: null as string | null,
   /** TanStack's rendered leaf match; null means "same as pathname". */
   matchPathname: null as string | null,
   pending: null as Promise<void> | null,
-  slot: undefined as string | undefined,
 }));
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
   useSelectedLayoutSegments: () => ["projects"],
 }));
 
-// Next-like: segments come from the owning layout, as in the App Router.
-const pathOf = (segments: readonly string[]) =>
-  `/${segments.filter((segment) => !segment.startsWith("(")).join("/")}`;
-const Slots = createContext<Record<string, string[]>>({ children: [] });
-const usePathname = () => {
-  if (navigation.pending) throw navigation.pending;
-  return navigation.pathname;
-};
-const useSelectedLayoutSegments = (slot: string) => {
-  navigation.slot = slot;
-  return useContext(Slots)[slot] ?? null;
-};
 const next: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
-    const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+  useRoute: () => {
+    if (navigation.pending) throw navigation.pending;
+    const { pathname, renderedPath } = navigation;
+    if (pathname == null) return null;
+    return renderedPath ? { pathname, renderedPath } : { pathname };
   },
 };
 
@@ -80,7 +69,20 @@ const tanstack: SsgoiFramework = {
   }),
 };
 
-const config = { transitions: [] };
+const TOP_LEVEL = ["/", "/search"];
+const layouts: SsgoiConfig = {
+  transitions: [],
+  layouts: [
+    { paths: TOP_LEVEL },
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/**" }, { paths: "/projects/:id/**" }],
+    },
+  ],
+};
+const noLayouts: SsgoiConfig = { transitions: [] };
+
 let host: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
@@ -91,16 +93,45 @@ beforeEach(() => {
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
-  navigation.pathname = "/projects";
+  navigation.pathname = "/";
+  navigation.renderedPath = null;
   navigation.matchPathname = null;
   navigation.pending = null;
-  navigation.slot = undefined;
 });
 afterEach(async () => {
   await act(() => root.unmount());
   host.remove();
 });
-const render = async (framework: SsgoiFramework, node: ReactNode) => {
+
+function Counter({ name }: { name: string }) {
+  const [count, setCount] = useState(0);
+  return (
+    <button data-counter={name} onClick={() => setCount(count + 1)}>
+      {count}
+    </button>
+  );
+}
+
+/** Region root > (layout) > nested section, plus chrome outside the inner boundary. */
+const app = () => (
+  <SsgoiLayoutBoundary data-depth="0">
+    <SsgoiLayoutBoundary data-depth="1">
+      <SsgoiLayoutBoundary data-depth="2">
+        <Counter name="page" />
+      </SsgoiLayoutBoundary>
+      <Counter name="section" />
+    </SsgoiLayoutBoundary>
+    <nav>
+      <Counter name="nav" />
+    </nav>
+  </SsgoiLayoutBoundary>
+);
+
+const render = async (
+  node: ReactNode,
+  framework: SsgoiFramework = next,
+  config: SsgoiConfig = layouts,
+) => {
   await act(() =>
     root.render(
       <Ssgoi config={config} framework={framework}>
@@ -109,13 +140,171 @@ const render = async (framework: SsgoiFramework, node: ReactNode) => {
     ),
   );
 };
-const boundary = () => host.querySelector("[data-ssgoi-transition]")!;
-const routeId = () => boundary().getAttribute("data-ssgoi-transition");
+const go = async (pathname: string, renderedPath: string | null = null) => {
+  navigation.pathname = pathname;
+  navigation.renderedPath = renderedPath;
+  await render(app());
+};
+const at = (depth: number) =>
+  host.querySelector(`[data-depth="${depth}"]`) as HTMLElement;
+const snapshot = () => [0, 1, 2].map(at);
+const ids = () => snapshot().map((node) => node.dataset.ssgoiTransition);
+const click = (name: string) =>
+  act(() =>
+    host.querySelector<HTMLButtonElement>(`[data-counter="${name}"]`)!.click(),
+  );
 
-function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
-}
+describe("depth keys from config.layouts", () => {
+  it("moves only the content between top-level tabs and keeps the nav", async () => {
+    await go("/");
+    const [shell, section, page] = snapshot();
+    await click("nav");
+    await go("/search");
+    expect(at(0)).toBe(shell);
+    expect(at(1)).not.toBe(section);
+    expect(at(2)).not.toBe(page);
+    expect(host.querySelector("nav")!.textContent).toBe("1");
+    expect(ids()).toEqual(["/search", "/search", "/search"]);
+  });
+
+  it("moves the whole top level, nav included, into a detail page", async () => {
+    await go("/search");
+    const shell = at(0);
+    const nav = host.querySelector("nav");
+    await go("/posts/1");
+    expect(at(0)).not.toBe(shell);
+    expect(host.querySelector("nav")).not.toBe(nav);
+    expect(ids()).toEqual(["/posts/1", "/posts/1", "/posts/1"]);
+  });
+
+  it("keeps the detail layout between detail pages", async () => {
+    await go("/posts/1");
+    const [shell, section] = snapshot();
+    await go("/posts/2");
+    expect(at(0)).toBe(shell);
+    expect(at(1)).not.toBe(section);
+  });
+
+  it("keeps a nested section while its sub-pages change", async () => {
+    await go("/products/all");
+    const [shell, section, page] = snapshot();
+    await click("section");
+    await go("/products/fashion");
+    expect(at(0)).toBe(shell);
+    expect(at(1)).toBe(section);
+    expect(at(1).querySelector('[data-counter="section"]')!.textContent).toBe(
+      "1",
+    );
+    expect(at(2)).not.toBe(page);
+    expect(ids()).toEqual([
+      "/products/fashion",
+      "/products/fashion",
+      "/products/fashion",
+    ]);
+  });
+
+  it("shares a scope instance per captured segment", async () => {
+    await go("/projects/1/files");
+    const [shell, project] = snapshot();
+    await go("/projects/1/members");
+    expect(at(1)).toBe(project);
+    await go("/projects/2/members");
+    expect(at(0)).toBe(shell);
+    expect(at(1)).not.toBe(project);
+  });
+
+  it("keeps the background while a soft intercept leaves renderedPath alone", async () => {
+    await go("/search");
+    const before = snapshot();
+    await go("/p/42", "/search");
+    expect(snapshot()).toEqual(before);
+    expect(ids()).toEqual(["/search", "/search", "/search"]);
+    // Direct entry renders the detail page itself.
+    await go("/p/42");
+    expect(at(0)).not.toBe(before[0]);
+    expect(ids()).toEqual(["/p/42", "/p/42", "/p/42"]);
+  });
+
+  it("reads the route only in the depth-0 boundary", async () => {
+    const useRoute = vi.fn(next.useRoute);
+    await render(app(), { useRoute });
+    expect(useRoute).toHaveBeenCalledTimes(1);
+  });
+
+  it("keys every boundary by the route without config.layouts", async () => {
+    await render(app(), next, noLayouts);
+    const before = snapshot();
+    navigation.pathname = "/search";
+    await render(app(), next, noLayouts);
+    snapshot().forEach((node, depth) => expect(node).not.toBe(before[depth]));
+    expect(ids()).toEqual(["/search", "/search", "/search"]);
+  });
+});
+
+describe("route readiness", () => {
+  it("renders the route marker and DOM attributes during SSR", () => {
+    expect(
+      renderToString(
+        <Ssgoi config={layouts} framework={next}>
+          <SsgoiLayoutBoundary as="article" id="page" className="page">
+            Server content
+          </SsgoiLayoutBoundary>
+        </Ssgoi>,
+      ),
+    ).toContain(
+      '<article id="page" class="page" data-ssgoi-transition="/">Server content</article>',
+    );
+  });
+
+  const region = () => (
+    <>
+      <SsgoiLayoutBoundary>Ready</SsgoiLayoutBoundary>
+      <aside>Outside</aside>
+    </>
+  );
+
+  it("renders no depth-0 boundary until the router is ready", async () => {
+    navigation.pathname = null;
+    await render(region());
+    expect(host.textContent).toBe("Outside");
+    navigation.pathname = "/search";
+    await render(region());
+    expect(host.querySelector("[data-ssgoi-transition]")!.textContent).toBe(
+      "Ready",
+    );
+  });
+
+  it("keeps content outside the boundary rendered while the route suspends", async () => {
+    let finish!: () => void;
+    navigation.pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    await render(region());
+    expect(host.textContent).toBe("Outside");
+    expect(host.querySelector("aside")!.textContent).toBe("Outside");
+    await act(async () => {
+      navigation.pending = null;
+      finish();
+    });
+    expect(host.textContent).toBe("ReadyOutside");
+  });
+
+  it("catches URL suspension at the depth-0 boundary and mounts the resolved route", async () => {
+    let finish!: () => void;
+    navigation.pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    await render(<SsgoiLayoutBoundary>Ready</SsgoiLayoutBoundary>);
+    expect(host.textContent).toBe("");
+    await act(async () => {
+      navigation.pending = null;
+      finish();
+    });
+    expect(host.querySelector("[data-ssgoi-transition]")!.textContent).toBe(
+      "Ready",
+    );
+  });
+});
 
 describe("without a framework", () => {
   const message =
@@ -128,7 +317,7 @@ describe("without a framework", () => {
   it("throws under <Ssgoi> without framework", () => {
     expect(() =>
       renderToString(
-        <Ssgoi config={config}>
+        <Ssgoi config={layouts}>
           <SsgoiLayoutBoundary />
         </Ssgoi>,
       ),
@@ -138,10 +327,10 @@ describe("without a framework", () => {
   it("leaves the deprecated subpath working on its own router imports", () => {
     expect(
       renderToString(
-        <Ssgoi config={config}>
+        <Ssgoi config={layouts}>
           <DeprecatedNextBoundary
             resolve={({ selectedSegments }) => ({
-              id: pathOf(selectedSegments),
+              id: `/${selectedSegments.join("/")}`,
             })}
           />
         </Ssgoi>,
@@ -150,242 +339,77 @@ describe("without a framework", () => {
   });
 });
 
-describe("Next-like framework", () => {
-  it("renders the route marker during SSR", () => {
-    expect(
-      renderToString(
-        <Ssgoi config={config} framework={next}>
-          <SsgoiLayoutBoundary as="article" id="page" className="page">
-            Server content
-          </SsgoiLayoutBoundary>
-        </Ssgoi>,
-      ),
-    ).toContain(
-      '<article id="page" class="page" data-ssgoi-transition="/projects">Server content</article>',
-    );
-  });
-
-  it("replaces the real DOM on navigation while preserving the outgoing content", async () => {
-    const view = () => (
-      <SsgoiLayoutBoundary as="section" title="route">
-        <Counter />
-      </SsgoiLayoutBoundary>
-    );
-    await render(next, view());
-    const outgoing = boundary();
-    await act(() => host.querySelector("button")!.click());
-    navigation.pathname = "/projects/42";
-    await render(next, view());
-    expect(boundary()).not.toBe(outgoing);
-    expect(outgoing.textContent).toBe("1");
-    expect(boundary().textContent).toBe("0");
-    expect(routeId()).toBe("/projects/42");
-    expect(boundary().tagName).toBe("SECTION");
-    expect(boundary().getAttribute("title")).toBe("route");
-  });
-
-  it("keeps a string boundary as the key and the pathname as the id", async () => {
-    const view = () => (
-      <SsgoiLayoutBoundary boundary="shell">
-        <Counter />
-      </SsgoiLayoutBoundary>
-    );
-    await render(next, view());
-    const shell = boundary();
-    await act(() => host.querySelector("button")!.click());
-    navigation.pathname = "/collections";
-    await render(next, view());
-    expect(boundary()).toBe(shell);
-    expect(boundary().textContent).toBe("1");
-    expect(routeId()).toBe("/collections");
-  });
-
-  it("resolves from the owning layout's selected segments", async () => {
-    const resolve = ({ selectedSegments }: { selectedSegments: string[] }) => {
-      const id = pathOf(selectedSegments);
-      return { id, key: selectedSegments.includes("(tabs)") ? "tabs" : id };
-    };
-    const view = (segments: string[]) => (
-      <Slots.Provider value={{ children: segments }}>
-        <SsgoiLayoutBoundary boundary={resolve}>
-          <Counter />
-        </SsgoiLayoutBoundary>
-      </Slots.Provider>
-    );
-    await render(next, view(["(tabs)", "projects"]));
-    const background = boundary();
-    expect(navigation.slot).toBe("children");
-    // A soft intercept moves the URL but not the children slot.
-    navigation.pathname = "/p/42";
-    await render(next, view(["(tabs)", "projects"]));
-    expect(boundary()).toBe(background);
-    expect(routeId()).toBe("/projects");
-    await render(next, view(["(detail)", "p", "42"]));
-    expect(boundary()).not.toBe(background);
-    expect(routeId()).toBe("/p/42");
-  });
-
-  it("passes the requested parallel slot and treats a null slot as empty", async () => {
-    const resolve = vi.fn(({ pathname }: { pathname: string }) => ({
-      id: pathname,
-    }));
-    await render(
-      next,
-      <SsgoiLayoutBoundary parallelRoutesKey="modal" boundary={resolve} />,
-    );
-    expect(navigation.slot).toBe("modal");
-    expect(resolve).toHaveBeenLastCalledWith({
-      pathname: "/projects",
-      selectedSegments: [],
-    });
-    expect(boundary().hasAttribute("parallelRoutesKey")).toBe(false);
-  });
-
-  it("shows the fallback for a nullable pathname without resolving an invented route", async () => {
-    navigation.pathname = null;
-    await render(
-      next,
-      <SsgoiLayoutBoundary
-        fallback={<p>Loading</p>}
-        boundary={() => {
-          throw new Error("not ready");
-        }}
-      />,
-    );
-    expect(host.textContent).toBe("Loading");
-    expect(boundary()).toBeNull();
-    navigation.pathname = "/ready";
-    await render(
-      next,
-      <SsgoiLayoutBoundary fallback={<p>Loading</p>}>
-        Ready
-      </SsgoiLayoutBoundary>,
-    );
-    expect(routeId()).toBe("/ready");
-  });
-
-  it("catches URL suspension outside the hook and mounts the resolved route", async () => {
-    let finish!: () => void;
-    navigation.pending = new Promise<void>((resolve) => {
-      finish = resolve;
-    });
-    await render(
-      next,
-      <SsgoiLayoutBoundary fallback={<p>Loading</p>}>
-        Ready
-      </SsgoiLayoutBoundary>,
-    );
-    expect(host.textContent).toBe("Loading");
-    expect(boundary()).toBeNull();
-    await act(async () => {
-      navigation.pending = null;
-      finish();
-    });
-    expect(boundary().textContent).toBe("Ready");
-  });
-});
-
-describe("boundary input", () => {
-  const navigate = async (node: () => ReactNode, to: string) => {
-    await render(next, node());
-    const before = boundary();
-    navigation.pathname = to;
-    await render(next, node());
-    return before;
-  };
-
-  it.each([
-    ["an object id", { id: "/feed" }, "/feed", true],
-    ["an object key", { key: "shell" }, "/projects/42", true],
-    ["a function's string", () => "shell", "/projects/42", true],
-    ["a function's id", () => ({ id: "/feed" }), "/feed", true],
-    [
-      "a function of the route",
-      ({ pathname }: { pathname: string }) => ({ id: pathname }),
-      "/projects/42",
-      false,
-    ],
-    ["no input", undefined, "/projects/42", false],
-  ] as const)(
-    "resolves %s into the id and a key defaulting to it",
-    async (_, input, id, kept) => {
-      const before = await navigate(
-        () => <SsgoiLayoutBoundary boundary={input}>Page</SsgoiLayoutBoundary>,
-        "/projects/42",
-      );
-      expect(routeId()).toBe(id);
-      expect(boundary() === before).toBe(kept);
-    },
-  );
-});
-
 describe("React Router-like framework", () => {
   const reactRouter: SsgoiFramework = { useRoute: () => useLocation() };
 
-  it("passes the location to a boundary function and ignores query-only changes by default", async () => {
+  it("ignores query-only changes and replaces the page on a new path", async () => {
     let navigate!: NavigateFunction;
-    const resolve = vi.fn(({ pathname }: { pathname: string }) => ({
-      id: pathname,
-    }));
     function Page() {
       navigate = useNavigate();
       return (
-        <SsgoiLayoutBoundary boundary={resolve}>
-          <Counter />
+        <SsgoiLayoutBoundary>
+          <Counter name="page" />
         </SsgoiLayoutBoundary>
       );
     }
     await act(() =>
       root.render(
         <MemoryRouter initialEntries={["/posts"]}>
-          <Ssgoi config={config} framework={reactRouter}>
+          <Ssgoi config={noLayouts} framework={reactRouter}>
             <Page />
           </Ssgoi>
         </MemoryRouter>,
       ),
     );
+    const boundary = () => host.querySelector("[data-ssgoi-transition]")!;
     const outgoing = boundary();
     await act(async () => {
       await navigate("/posts?q=one");
     });
     expect(boundary()).toBe(outgoing);
-    const location = resolve.mock.lastCall![0];
-    expect(location).toMatchObject({ pathname: "/posts", search: "?q=one" });
     await act(async () => {
       await navigate("/posts/42");
     });
     expect(boundary()).not.toBe(outgoing);
-    expect(routeId()).toBe("/posts/42");
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe("/posts/42");
   });
 });
 
 describe("TanStack-like framework", () => {
+  const boundary = () => host.querySelector("[data-ssgoi-transition]")!;
+  const view = (text: string) => (
+    <SsgoiLayoutBoundary>{text}</SsgoiLayoutBoundary>
+  );
+
   it("keeps the rendered route while the next matches are pending", async () => {
     navigation.pathname = "/pinterest";
-    await render(tanstack, <SsgoiLayoutBoundary>list</SsgoiLayoutBoundary>);
+    await render(view("list"), tanstack, noLayouts);
     const outgoing = boundary();
-    expect(routeId()).toBe("/pinterest");
 
     // location moves first; the outlet still renders the list
     navigation.pathname = "/pinterest/pin-1";
     navigation.matchPathname = "/pinterest";
-    await render(tanstack, <SsgoiLayoutBoundary>list</SsgoiLayoutBoundary>);
+    await render(view("list"), tanstack, noLayouts);
     expect(boundary()).toBe(outgoing);
 
     navigation.matchPathname = null;
-    await render(tanstack, <SsgoiLayoutBoundary>detail</SsgoiLayoutBoundary>);
+    await render(view("detail"), tanstack, noLayouts);
     expect(boundary()).not.toBe(outgoing);
-    expect(routeId()).toBe("/pinterest/pin-1");
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe(
+      "/pinterest/pin-1",
+    );
   });
 
   it("drops the index match's trailing slash unless the URL has one", async () => {
     navigation.pathname = "/pinterest";
     navigation.matchPathname = "/pinterest/";
-    await render(tanstack, <SsgoiLayoutBoundary>list</SsgoiLayoutBoundary>);
-    expect(routeId()).toBe("/pinterest");
+    await render(view("list"), tanstack, noLayouts);
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe("/pinterest");
 
     navigation.pathname = "/pinterest/";
-    await render(tanstack, <SsgoiLayoutBoundary>list</SsgoiLayoutBoundary>);
-    expect(routeId()).toBe("/pinterest/");
+    await render(view("list"), tanstack, noLayouts);
+    expect(boundary().getAttribute("data-ssgoi-transition")).toBe(
+      "/pinterest/",
+    );
   });
 });

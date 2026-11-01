@@ -49,9 +49,10 @@ export function Comments({ anchor }: { anchor: string }) {
 
 Pass `framework` to `<Ssgoi>`, then wrap routed children in `SsgoiLayoutBoundary`
 from `@ssgoi/react`. `framework.useRoute` is a hook you write with your router's
-own hooks: it returns the current route (`{ pathname, ...anything }`) or `null`
-while the router is not ready, which renders `fallback`. The function form of the
-boundary's `boundary` prop receives that route object as-is. Keep the object at module scope so it stays stable. `SsgoiLayoutBoundary` throws if the nearest `<Ssgoi>` has no
+own hooks: it returns the current route (`{ pathname, renderedPath? }`) or `null`
+while the router is not ready. The first boundary reads it for the ones inside it,
+and boundaries take no SSGOI props: a boundary's key is the `config.layouts` scope at its depth, or
+the route path. Keep the object at module scope so it stays stable. `SsgoiLayoutBoundary` throws if the nearest `<Ssgoi>` has no
 `framework`. The router guides below show the object for each router.
 
 ```tsx

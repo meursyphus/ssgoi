@@ -3,9 +3,9 @@
 
 import type { ElementType } from "react";
 import { useLocation, type Location } from "react-router";
-import { FrameworkBoundary, type SsgoiFramework } from "../layout-boundary";
 import {
-  toBoundary,
+  RouteBoundary,
+  type UseRoute,
   type RouteBoundaryProps,
   type RouteBoundaryState as RootRouteBoundaryState,
 } from "./route-boundary";
@@ -17,7 +17,7 @@ import {
 export type SsgoiRouteBoundaryProps<T extends ElementType = "div"> =
   RouteBoundaryProps<Location, T>;
 
-const framework: SsgoiFramework = { useRoute: () => useLocation() };
+const useRoute: UseRoute = () => useLocation();
 
 /**
  * @experimental React Router integration. The API may change.
@@ -25,18 +25,10 @@ const framework: SsgoiFramework = { useRoute: () => useLocation() };
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
  * "@ssgoi/react" with `<Ssgoi framework={...}>` instead.
  */
-export function SsgoiRouteBoundary<T extends ElementType = "div">({
-  resolve,
-  routeKey,
-  ...props
-}: SsgoiRouteBoundaryProps<T>) {
-  return (
-    <FrameworkBoundary
-      {...props}
-      boundary={toBoundary(resolve, routeKey)}
-      framework={framework}
-    />
-  );
+export function SsgoiRouteBoundary<T extends ElementType = "div">(
+  props: SsgoiRouteBoundaryProps<T>,
+) {
+  return <RouteBoundary {...props} useRoute={useRoute} />;
 }
 
 /**

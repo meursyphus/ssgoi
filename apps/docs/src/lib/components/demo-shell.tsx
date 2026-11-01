@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Ssgoi,
   SsgoiLayoutBoundary,
@@ -14,11 +14,12 @@ import { useShowcaseHost } from "./host-context";
 // working after the host moved up to `DocsSsgoiProvider`.
 export { useShowcaseHost } from "./host-context";
 
+// Demo layouts mount their own provider below the app root and use no
+// intercepted routes, so the URL pathname is the rendered path.
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    return pathname == null ? null : { pathname };
   },
 };
 

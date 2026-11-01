@@ -383,14 +383,11 @@ export function BoundariesBody() {
           </Note>
         </div>
         <p className={`mt-6 ${body}`}>
-          <code className={inlineCode}>SsgoiLayoutBoundary</code> sets both
-          through one <code className={inlineCode}>boundary</code> prop. By
-          default the id is the pathname and the key is the id. A string fixes
-          the key, as a persistent layout needs, while the id keeps following
-          the pathname; <code className={inlineCode}>{"{ id?, key? }"}</code>{" "}
-          fixes either; a function receives the route your{" "}
-          <code className={inlineCode}>framework</code> returned and returns
-          either form.
+          <code className={inlineCode}>SsgoiLayoutBoundary</code> takes no SSGOI
+          props and sets both itself. The id is always the route path. The key
+          is the <code className={inlineCode}>config.layouts</code> scope that
+          matches at the boundary&apos;s depth — the number of boundaries above
+          it — and the route path when no scope matches there.
         </p>
       </Section>
 
@@ -441,7 +438,8 @@ export function RouteBoundary({ children, pathname, routeKey, ...props }: Props)
           A bottom-nav app is the usual case. Tab → tab should remount only the
           page content; tab → detail should remount the whole shell and take the
           nav with it. That needs an outer shell boundary and an inner content
-          boundary.
+          boundary, plus one <code className={inlineCode}>config.layouts</code>{" "}
+          scope that lists the tab routes so the outer key holds across them.
         </p>
         <p className={`mt-4 ${body}`}>
           When both change in the same navigation, the outer one owns the
@@ -1210,11 +1208,10 @@ export function FrameworksIndexBody() {
         Choose your rendering framework first, then give the provider a{" "}
         <code className={inlineCode}>framework</code> object that reads your
         router and wrap routed content in the package&apos;s layout boundary.
-        The framework returns a route object, and the function form of the
-        boundary&apos;s <code className={inlineCode}>boundary</code> prop
-        receives that object as-is. Transition factories and route rules are
-        identical everywhere; the provider and boundary wiring differ per stack
-        — Qwik takes a QRL config factory, Angular an{" "}
+        Boundaries take no SSGOI props and key themselves from{" "}
+        <code className={inlineCode}>config.layouts</code>. Transition factories
+        and route rules are identical everywhere; the provider and boundary
+        wiring differ per stack — Qwik takes a QRL config factory, Angular an{" "}
         <code className={inlineCode}>ssgoi</code> directive.
       </p>
       <p className={`mt-4 ${body}`}>

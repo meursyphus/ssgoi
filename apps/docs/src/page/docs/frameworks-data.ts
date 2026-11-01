@@ -66,7 +66,7 @@ export function Comments({ anchor }: { anchor: string }) {
       },
       {
         heading: "Connect a router",
-        body: "Pass framework to <Ssgoi>, then wrap routed children in SsgoiLayoutBoundary from @ssgoi/react. framework.useRoute is a hook you write with your router’s own hooks: it returns the current route ({ pathname, ...anything }) or null while the router is not ready, which renders fallback. The function form of the boundary prop receives that route object as-is. Keep the object at module scope so it stays stable. SsgoiLayoutBoundary throws if the nearest <Ssgoi> has no framework.",
+        body: "Pass framework to <Ssgoi>, then wrap routed children in SsgoiLayoutBoundary from @ssgoi/react. framework.useRoute is a hook you write with your router’s own hooks: it returns the current route ({ pathname, renderedPath? }) or null while the router is not ready. The first boundary reads it for every boundary inside it; boundaries take no SSGOI props. Keep the object at module scope so it stays stable. SsgoiLayoutBoundary throws if the nearest <Ssgoi> has no framework.",
         code: `import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
 
 const framework: SsgoiFramework = {
@@ -86,12 +86,12 @@ const framework: SsgoiFramework = {
       {
         slug: "nextjs",
         name: "Next.js",
-        lead: "Read the App Router’s pathname and selected segments in framework.useRoute. SsgoiLayoutBoundary keys by the committed pathname, handles URL-hook suspension, and marks the routed region.",
+        lead: "Return the App Router’s pathname and the path its layout segments render from framework.useRoute. SsgoiLayoutBoundary keys by that path or its config.layouts scope, handles URL-hook suspension, and marks the routed region.",
         experimental: false,
         sections: [
           {
             heading: "Connect the App Router",
-            body: 'Place the common provider and config in app/ssgoi-provider.tsx, add "use client", and build framework.useRoute from usePathname and useSelectedLayoutSegments in next/navigation. The provider is a client component, so passing a function is fine. A null pathname (mixed app/pages projects) returns null, so no guessed route is registered.',
+            body: 'Place the common provider and config in app/ssgoi-provider.tsx, add "use client", and build framework.useRoute from usePathname and useSelectedLayoutSegments in next/navigation. renderedPath is what the children slot actually shows, so a soft intercepted modal leaves the background in place. The provider is a client component, so passing a function is fine. A null pathname (mixed app/pages projects) returns null, so no guessed route is registered.',
             code: `// app/ssgoi-provider.tsx
 "use client";
 
@@ -104,11 +104,21 @@ const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\\(\\.\\.\\.\\)|\\(\\.\\.\\)|\\(\\.\\))+/;
+
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = \`/\${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}\`;
+    return { pathname, renderedPath };
   },
 };
 
@@ -144,23 +154,29 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           },
           {
             heading: "Persistent layouts",
-            body: 'A layout-owned fixed key, boundary="products-layout", preserves the header while the inner boundary replaces the changing content. Keep the provider above these section layouts, without a full-path boundary remounting every section from above.',
-            code: `// app/products/layout.tsx
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Boundary depth is automatic: each boundary inside another is one level deeper.',
+            code: `// app/ssgoi-provider.tsx
+const config = {
+  layouts: [{ paths: "/products/**" }],
+  transitions: [/* ... */],
+};
+
+// app/products/layout.tsx
 import type { ReactNode } from "react";
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
 export default function ProductsLayout({ children }: { children: ReactNode }) {
   return (
-    <SsgoiLayoutBoundary boundary="products-layout">
+    <>
       <header>Products</header>
       <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
-    </SsgoiLayoutBoundary>
+    </>
   );
 }`,
           },
           {
             heading: "Parallel slots and interception",
-            body: "Pass a function as boundary for slot-specific ids and keys; it receives the { pathname, selectedSegments } that useRoute returned, as-is, and returns a key string or { id?, key? }. Annotate its parameter. parallelRoutesKey is passed to useRoute to read a named slot. Function props belong in a client component. Join selectedSegments under the layout’s base path, dropping route groups, to get the owned slot’s route; an empty slot is its index route, even when the browser URL points at a modal. Interception also needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry; the boundary includes URL-hook Suspense and accepts a fallback for Cache Components.",
+            body: "During a soft intercept the URL points at the modal while the children slot still renders the background. Because useRoute returns renderedPath from the selected segments, no background boundary moves. Render the {modal} slot outside the boundaries; it animates by itself and needs no SSGOI setup. Interception still needs the app’s route/slot files and compatible middleware or proxy rules. Verify soft navigation, back, and direct entry.",
           },
         ],
         templateUrl:
@@ -202,7 +218,7 @@ export default function Layout() {
           },
           {
             heading: "Persistent route families",
-            body: 'Use a fixed key such as boundary="shell" for a persistent shell and a separate inner boundary for changing content. The function form of boundary receives Remix’s location as useRoute returned it and returns a key string or { id?, key? }; keys are computed during render.',
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/remix.txt",
@@ -215,7 +231,7 @@ export default function Layout() {
         sections: [
           {
             heading: "Pass the framework",
-            body: "In app/root.tsx, give the common provider a useRoute that returns React Router’s location. The function form of boundary receives that location as-is.",
+            body: "In app/root.tsx, give the common provider a useRoute that returns React Router’s location.",
             code: `import { Outlet, useLocation } from "react-router";
 import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 
@@ -254,7 +270,7 @@ export default [
           },
           {
             heading: "Beyond the basics",
-            body: "A persistent shell needs two lifetimes: a stable outer key around the header/tabs and a pathname-keyed inner boundary around <Outlet />. Holding one boundary constant preserves the shell but produces no child OUT/IN. Mount that route family under its own layout instead of the global pathless page boundary; the complete pattern is in the agent guide and template.",
+            body: 'A persistent shell needs two lifetimes. Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the root boundary is the pathless page-boundary layout and the inner one wraps the section layout’s <Outlet />; the complete pattern is in the agent guide and template.',
           },
         ],
         templateUrl:
@@ -300,7 +316,7 @@ const framework: SsgoiFramework = {
           },
           {
             heading: "Beyond the basics",
-            body: "For a persistent section, keep the root as one <Ssgoi framework={framework}><Outlet /></Ssgoi>, then let the section route own a stable outer shell boundary and a pathname-keyed inner boundary around <Outlet />. Holding only the outer boundary constant preserves state but produces no child transition.",
+            body: 'Declare the section in config.layouts, for example layouts: [{ paths: "/products/**" }], and put a prop-less boundary around the changing content in its layout. The root boundary (depth 0) keys every /products route by that one scope, so the header stays; the inner boundary (depth 1) keys by the path, so the content swaps. Here the inner boundary wraps the section route’s <Outlet />.',
           },
         ],
         templateUrl:
@@ -343,7 +359,7 @@ import { drill } from "@ssgoi/svelte/view-transitions";`,
       {
         slug: "sveltekit",
         name: "SvelteKit",
-        lead: "Pass a getRoute that returns { pathname, url } from page.url, plus onNavigate, as framework. The function form of boundary receives that route as-is. The boundary uses onNavigate to detach outgoing content before SvelteKit updates its live children snippet; a key around that snippet alone is not sufficient.",
+        lead: "Pass a getRoute that returns { pathname } from page.url, plus onNavigate, as framework. The boundary uses onNavigate to detach outgoing content before SvelteKit updates its live children snippet; a key around that snippet alone is not sufficient.",
         experimental: true,
         sections: [
           {
@@ -359,7 +375,7 @@ import { drill } from "@ssgoi/svelte/view-transitions";`,
   let { children } = $props();
 
   const framework = {
-    getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+    getRoute: () => ({ pathname: page.url.pathname }),
     onNavigate,
   };
 </script>
@@ -381,7 +397,7 @@ import { page } from "$app/stores";
 import { onNavigate } from "$app/navigation";
 
 const framework = {
-  getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url }),
+  getRoute: () => ({ pathname: get(page).url.pathname }),
   onNavigate,
 };`,
           },
@@ -397,7 +413,7 @@ boundary component         : onNavigate → unmount old route   (OUT captured)
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around the child content in routes/products/+layout.svelte. The stable outer key preserves header/tabs; the inner boundary produces tab transitions.',
+            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in routes/products/+layout.svelte. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -471,7 +487,7 @@ const framework = {
           },
           {
             heading: "Persistent shells",
-            body: 'Use a fixed key such as boundary="shell" for the outer shell and a changing inner boundary for the page. The function form of boundary receives the route getRoute returned, here { pathname }, as-is and returns a key string or { id?, key? }.',
+            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in the section’s own RouterView layout. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/vue-router.txt",
@@ -504,7 +520,7 @@ const framework = {
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around the nested <NuxtPage />. The stable outer key preserves header/tabs; the inner boundary produces child transitions.',
+            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in pages/products.vue, around the nested <NuxtPage />. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -552,7 +568,7 @@ export function Comments() {
         sections: [
           {
             heading: "Wrap the routed children",
-            body: "Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region while a fixed boundary key can preserve an outer shell. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
+            body: "Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region; config.layouts can keep an outer shell mounted. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.",
             code: `import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
 import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
 import { config } from "./ssgoi-config";
@@ -570,7 +586,7 @@ function Root(props: RouteSectionProps) {
           },
           {
             heading: "Route lifetime",
-            body: "The default key follows the pathname. The function form of boundary receives the route getRoute returned, as-is, and can return separate id and key values; use a stable shell key only around content that should remain mounted.",
+            body: "The default key follows the pathname. A boundary at depth N instead keys by the config.layouts scope that matches at depth N, so a section declared there stays mounted while its inner boundary swaps.",
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/solid-router.txt",
@@ -617,7 +633,7 @@ export default function App() {
           },
           {
             heading: "Beyond the basics",
-            body: 'For a persistent /products shell, return "/products" from the root boundary’s function form (a returned string is the key; the id keeps the full pathname), then put a second default pathname boundary only around props.children in routes/products.tsx. The stable outer key preserves header/tabs; the inner boundary produces child transitions.',
+            body: 'For a persistent /products shell, declare it in config.layouts as [{ paths: "/products/**" }] and put a prop-less boundary only around the changing content in routes/products.tsx, around props.children. The root boundary (depth 0) keeps one key for every /products route, so the header and tabs stay; the inner boundary (depth 1) keys by the path and produces the child transitions.',
           },
         ],
         templateUrl:
@@ -693,7 +709,7 @@ export const Comments = component$(() => {
         sections: [
           {
             heading: "Mark the page root",
-            body: "Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.",
+            body: "Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. It takes no arguments: the id is the path, and the key is the config.layouts scope at the hook’s depth (each useSsgoiLayoutBoundary inside another is one deeper), or the path. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.",
             code: `import { component$ } from "@builder.io/qwik";
 import { useSsgoiLayoutBoundary } from "@ssgoi/qwik";
 
@@ -708,7 +724,7 @@ export default component$(() => {
           },
           {
             heading: "Persistent layouts",
-            body: 'Pass a fixed key, useSsgoiLayoutBoundary("shell"), for an outer shell, or { id?, key? } to fix the id too, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.',
+            body: 'Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], call the hook in that section layout, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.',
           },
         ],
         templateUrl:
@@ -728,25 +744,16 @@ export default component$(() => {
         heading: "Setup",
         language: "ts",
         code: `import { Component, signal } from "@angular/core";
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterOutlet,
-  createUrlTreeFromSnapshot,
-} from "@angular/router";
+import { NavigationEnd, Router, RouterOutlet, UrlTree } from "@angular/router";
 import { Ssgoi, type SsgoiConfig, type SsgoiFramework } from "@ssgoi/angular";
 import { drill } from "@ssgoi/angular/view-transitions";
 
-// Called with each boundary's own Injector, so ActivatedRoute resolves at its position.
+// Read once by [ssgoi]; the path drops the query string and fragment.
 const framework: SsgoiFramework = {
   getRoute: (injector) => {
-    const route = injector.get(ActivatedRoute).snapshot;
     const router = injector.get(Router);
-    return {
-      pathname: router.serializeUrl(createUrlTreeFromSnapshot(route, [], null, null)),
-      route,
-    };
+    const { root } = router.parseUrl(router.url);
+    return { pathname: router.serializeUrl(new UrlTree(root)) };
   },
   onNavigate: (injector, callback) => {
     const subscription = injector.get(Router).events.subscribe((event) => {
@@ -804,7 +811,7 @@ export class CommentsComponent {
       {
         slug: "angular-router",
         name: "Angular Router",
-        lead: "Bind a framework with getRoute(injector) and onNavigate(injector, callback) to [ssgoiFramework] on the ssgoi element; the Setup above has the complete object. A structural directive then marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.",
+        lead: "Bind a framework with getRoute(injector) and onNavigate(injector, callback) to [ssgoiFramework] on the ssgoi element; [ssgoi] reads the route once and shares it with every boundary. The Setup above has the complete object. A structural directive then marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.",
         experimental: true,
         sections: [
           {
@@ -827,7 +834,7 @@ export class PageComponent {}`,
           },
           {
             heading: "Persistent shells",
-            body: "Use *ssgoiLayoutBoundary=\"'shell'\" (a fixed key) to preserve the embedded view. The directive's input also takes { id?, key? } or a function that receives the route getRoute returned, here { pathname, route }, as-is and returns a key string or { id?, key? }. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.",
+            body: 'Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.',
           },
         ],
         llmsUrl: "https://ssgoi.dev/llms/frameworks/angular.txt",
@@ -893,7 +900,7 @@ export default function Layout() {
           },
           {
             heading: "Configuration and scope",
-            body: "Route rules and middleware share the web semantics. The native provider selects Reanimated playback automatically. The boundary option uses each screen's own route and keeps pushed instances separate. Mounted screens preserve input and scroll state. Explicit scroll restoration is rejected. The preview targets one iOS/Android stack with fade/slide; headers, modal presentation, interactive gestures, shared elements, nested navigator coordination, and Expo Web are follow-up work.",
+            body: "Route rules and middleware share the web semantics. The native provider selects Reanimated playback automatically. Each screen keeps its own native instance, so pushed screens stay separate. Mounted screens preserve input and scroll state. Explicit scroll restoration is rejected. config.layouts is accepted but has no effect on native stacks: every push is its own screen, and Expo nested navigators handle grouping, so use one root boundary. The preview targets one iOS/Android stack with fade/slide; headers, modal presentation, interactive gestures, shared elements, nested navigator coordination, and Expo Web are follow-up work.",
           },
           {
             heading: "Verify on devices",

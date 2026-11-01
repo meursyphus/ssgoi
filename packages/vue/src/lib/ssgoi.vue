@@ -16,6 +16,7 @@ import { provideSsgoi } from "./context";
 import {
   createSggoiTransitionContext,
   observeSsgoiTransitions,
+  resolveLayoutChain,
 } from "@ssgoi/core/internal";
 
 interface Props {
@@ -29,10 +30,17 @@ const props = defineProps<Props>();
 const contextValue = computed(() =>
   createSggoiTransitionContext(props.config, { host: props.host }),
 );
-provideSsgoi(
-  contextValue,
-  computed(() => props.framework),
-);
+// Resolve the route once; every SsgoiLayoutBoundary keys off this chain.
+const layout = computed(() => {
+  const route = props.framework?.getRoute();
+  if (!route) return undefined;
+  const routePath = route.renderedPath ?? route.pathname;
+  return {
+    routePath,
+    chain: resolveLayoutChain(props.config.layouts, routePath),
+  };
+});
+provideSsgoi(contextValue, layout);
 
 const root = ref<HTMLElement | null>(null);
 let stopObserving: (() => void) | undefined;

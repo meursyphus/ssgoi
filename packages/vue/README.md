@@ -15,8 +15,7 @@ Agent setup guide: https://ssgoi.dev/llms/vue.txt
 ## Layout boundary
 
 Pass a reactive route getter to `<Ssgoi>` once, then wrap routed content in
-`SsgoiLayoutBoundary`. It marks the current path with `data-ssgoi-transition`
-and remounts when the path changes.
+`SsgoiLayoutBoundary`.
 
 ```vue
 <script setup lang="ts">
@@ -38,18 +37,31 @@ const framework = {
 </template>
 ```
 
-By default the transition id is the pathname and the DOM is keyed by that id.
-Change either with `boundary`:
+Each boundary marks the current path with `data-ssgoi-transition`. Nest them
+freely: depth is automatic. Declare which paths share a layout in
+`config.layouts`; the scope matched at a boundary's depth keeps its DOM, and
+past the declared scopes a boundary remounts on every path change (the default
+without `layouts`).
 
-```vue
-<SsgoiLayoutBoundary boundary="products-layout">   <!-- fixed key: keep one DOM node -->
-<SsgoiLayoutBoundary :boundary="{ id: '/feed' }">   <!-- fixed id -->
-<SsgoiLayoutBoundary :boundary="(route) => ({ id: route.pathname, key: 'shell' })">
+```ts
+const TOP_LEVEL = ["/home", "/search", "/profile"];
+const config = {
+  layouts: [
+    { paths: TOP_LEVEL }, // tabs share one depth-0 layout
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/**" }], // depth-1 scope inside details
+    },
+  ],
+  transitions: [/* ... */],
+};
 ```
 
-A function receives the object `getRoute` returns (extra fields included) and
-may return a key string or `{ id?, key? }`. `as` sets the element.
-`SsgoiLayoutBoundary` throws without `framework` on `<Ssgoi>`.
+The first matching scope at each level wins. Single-segment captures (`*`,
+`:id`, `[id]`) split instances, so `/projects/:id/**` keeps one layout per
+project; `**` tails do not. `SsgoiLayoutBoundary` takes no SSGOI props (`as`
+sets the element) and throws without `framework` on `<Ssgoi>`.
 
 `SsgoiRouteBoundary` from `@ssgoi/vue/vue-router` and `@ssgoi/vue/nuxt` is
 deprecated; use `SsgoiLayoutBoundary` with `framework` instead.

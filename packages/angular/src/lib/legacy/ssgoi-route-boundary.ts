@@ -2,6 +2,7 @@
 import {
   Directive,
   Input,
+  inject,
   type OnChanges,
   type OnDestroy,
   type OnInit,
@@ -13,11 +14,11 @@ import {
   createUrlTreeFromSnapshot,
   type ActivatedRouteSnapshot,
 } from "@angular/router";
-import { ɵLayoutBoundaryView, type SsgoiFramework } from "@ssgoi/angular";
+import { ɵLayoutBoundaryView } from "@ssgoi/angular";
 
 /**
- * @deprecated Will be removed in 8.0.0. Use the `boundary` input of
- * `SsgoiLayoutBoundary` from "@ssgoi/angular" instead.
+ * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
+ * "@ssgoi/angular" instead.
  */
 export interface RouteBoundaryState {
   id: string;
@@ -25,9 +26,8 @@ export interface RouteBoundaryState {
 }
 
 /**
- * @deprecated Will be removed in 8.0.0. Use the route your
- * `SsgoiFramework.getRoute` returns, with `SsgoiLayoutBoundary` from
- * "@ssgoi/angular", instead.
+ * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary` from
+ * "@ssgoi/angular" instead.
  */
 export interface AngularRouteLocation {
   pathname: string;
@@ -36,27 +36,6 @@ export interface AngularRouteLocation {
 
 type BoundaryContext = { $implicit: RouteBoundaryState };
 type ResolveBoundary = (location: AngularRouteLocation) => RouteBoundaryState;
-
-const framework: SsgoiFramework = {
-  getRoute: (injector): AngularRouteLocation => {
-    const route = injector.get(ActivatedRoute).snapshot;
-    const router = injector.get(Router);
-    return {
-      pathname: router.serializeUrl(
-        createUrlTreeFromSnapshot(route, [], null, null),
-      ),
-      route,
-    };
-  },
-  // Read committed snapshots once per successful navigation. Ancestor URL
-  // streams may emit separately while the router advances its route tree.
-  onNavigate: (injector, callback) => {
-    const subscription = injector.get(Router).events.subscribe((event) => {
-      if (event instanceof NavigationEnd) callback();
-    });
-    return () => subscription.unsubscribe();
-  },
-};
 
 /**
  * @deprecated Will be removed in 8.0.0. Use `SsgoiLayoutBoundary`
@@ -73,31 +52,43 @@ export class SsgoiRouteBoundary implements OnInit, OnChanges, OnDestroy {
   @Input() ssgoiRouteBoundary?: ResolveBoundary | "";
   @Input() ssgoiRouteBoundaryKey?: string | number;
 
-  // Maps the old resolve/key inputs onto the layout boundary's `boundary`.
-  private readonly boundary = new ɵLayoutBoundaryView(
-    "*ssgoiRouteBoundary",
-    () => (route: AngularRouteLocation) => {
-      const boundary =
-        typeof this.ssgoiRouteBoundary === "function"
-          ? this.ssgoiRouteBoundary(route)
-          : { id: route.pathname };
-      return {
-        id: boundary.id,
-        key: this.ssgoiRouteBoundaryKey ?? boundary.key ?? boundary.id,
-      };
-    },
-  );
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly view = new ɵLayoutBoundaryView("*ssgoiRouteBoundary");
+  private subscription?: { unsubscribe(): void };
+  private initialized = false;
 
   ngOnInit(): void {
-    this.boundary.start(framework);
+    this.initialized = true;
+    this.renderBoundary();
+    // Read committed snapshots once per successful navigation. Ancestor URL
+    // streams may emit separately while the router advances its route tree.
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) this.renderBoundary();
+    });
   }
 
   ngOnChanges(): void {
-    this.boundary.render();
+    if (this.initialized) this.renderBoundary();
   }
 
   ngOnDestroy(): void {
-    this.boundary.stop();
+    this.subscription?.unsubscribe();
+  }
+
+  private renderBoundary(): void {
+    const route = this.route.snapshot;
+    const pathname = this.router.serializeUrl(
+      createUrlTreeFromSnapshot(route, [], null, null),
+    );
+    const boundary =
+      typeof this.ssgoiRouteBoundary === "function"
+        ? this.ssgoiRouteBoundary({ pathname, route })
+        : { id: pathname };
+    this.view.render({
+      id: boundary.id,
+      key: this.ssgoiRouteBoundaryKey ?? boundary.key ?? boundary.id,
+    });
   }
 
   static ngTemplateContextGuard(

@@ -43,7 +43,7 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring a
   <Ssgoi
     {config}
     framework={{
-      getRoute: () => ({ pathname: page.url.pathname, url: page.url }),
+      getRoute: () => ({ pathname: page.url.pathname }),
       onNavigate,
     }}
   >
@@ -73,7 +73,7 @@ SvelteKit before 2.12 has no `$app/state`; read the store instead:
 <Ssgoi
   {config}
   framework={{
-    getRoute: () => ({ pathname: get(page).url.pathname, url: get(page).url }),
+    getRoute: () => ({ pathname: get(page).url.pathname }),
     onNavigate,
   }}
 >
@@ -111,37 +111,58 @@ inner boundaries:
 SvelteKit keeps the layout DOM during child navigation. Leaving the layout
 uses the outer boundary; changing a child route uses the child boundary.
 
-`SsgoiLayoutBoundary` does this for you. It reads the router from
-`<Ssgoi framework>`, keeps the outgoing DOM intact when the route changes, and
-keeps a persistent shell's DOM while its `key` stays the same:
+`SsgoiLayoutBoundary` does this for you. Declare the layout tree once in
+`config.layouts`, and put a prop-less boundary in each layout:
+
+```ts
+const TOP_LEVEL = ["/home", "/search", "/profile"];
+
+const config = {
+  transitions: [
+    /* ... */
+  ],
+  layouts: [
+    { paths: TOP_LEVEL },
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/:category/**" }],
+    },
+  ],
+};
+```
 
 ```svelte
-<!-- src/routes/projects/[id]/+layout.svelte -->
+<!-- src/routes/+layout.svelte, inside <Ssgoi>: depth 0 -->
+<SsgoiLayoutBoundary>
+  {@render children()}
+</SsgoiLayoutBoundary>
+```
+
+```svelte
+<!-- src/routes/(top-level)/+layout.svelte: depth 1 -->
 <script lang="ts">
   import { SsgoiLayoutBoundary } from "@ssgoi/svelte";
 
   let { children } = $props();
 </script>
 
-<SsgoiLayoutBoundary
-  as="section"
-  boundary={({ pathname }) => ({
-    id: pathname,
-    key: pathname.match(/^\/projects\/[^/]+/)?.[0],
-  })}
->
+<SsgoiLayoutBoundary as="section">
   {@render children()}
 </SsgoiLayoutBoundary>
+<BottomNav />
 ```
 
-Without `boundary`, the id and key are the pathname. `boundary` also accepts:
-
-- a string: a fixed key, e.g. `boundary="products-layout"` for a shell that
-  never remounts; the id stays the pathname.
-- an object: a fixed `id` and/or `key`, e.g. `boundary={{ id: "/feed" }}`.
-- a function of the route (`{ pathname, url }` plus any fields `getRoute`
-  returns) that returns either of the above. Use `url` to react to search
-  changes.
+Here top-level tabs swap only the depth-1 content, while opening a detail page
+moves the whole depth-0 boundary, bottom nav included. A boundary's depth is the
+number of boundaries around it. At depth N it stays mounted while navigation
+stays inside the same depth-N scope, and remounts (keeping the outgoing DOM
+intact for the transition) when the scope changes. Siblings take the first scope
+that matches, `except` excludes paths, and single-segment captures (`*`, `:id`,
+`[id]`) are part of a scope instance, so `/products/shoes/1` and
+`/products/shoes/2` share one while `/products/bags` does not. Below the
+declared tree, or without `layouts`, a boundary remounts on every pathname
+change. Its `data-ssgoi-transition` id is always the pathname.
 
 Use a keyed block only when the router reuses the same DOM node and a new
 boundary must be forced:

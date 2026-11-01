@@ -55,7 +55,7 @@ Web `TransitionConfig`/`WebAnimation` objects cannot be passed to native config.
 
 Basic usage needs no props. `initialRouteName` selects the initial file-discovered screen, and `style` styles the native host.
 
-`boundary` takes a fixed key (`boundary="shell"`), a fixed `{ id?, key? }` (`boundary={{ id: "/feed" }}`), or a function of `{ pathname, route }` returning either (`boundary={({ pathname }) => ({ id: pathname, key: "content" })}`); a returned string is also a key. The function receives each screen's own route, including its params and instance key, rather than the currently focused global pathname. `id` defaults to the route pathname and must be absolute. `key` defaults to the native route key, and every key is scoped by native route instance: a constant key never merges two pushed screens or keeps a popped screen alive after exit. Changing the key recreates that route's boundary content; navigation animations follow changes in the active native route key. The deprecated `SsgoiRouteBoundary` keeps its `resolve`/`routeKey` props.
+`SsgoiLayoutBoundary` takes no SSGOI props. Each screen is matched by its own route pathname, including retained screens, and keeps its content for the lifetime of its native route instance: two pushed screens never merge, and a popped screen is released after its exit. Navigation animations follow changes in the active native route key. Web `config.layouts` scopes are accepted so a config can be shared, but have no effect here: Expo's nested navigators already define which screens share a layout. The deprecated `SsgoiRouteBoundary` keeps its `resolve`/`routeKey` props.
 
 ## Current scope
 

@@ -83,7 +83,7 @@ The computed boundary hook reads the location you passed as `framework`. The pag
 
 ### Mark the page root
 
-Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. An explicit key replaces the page root when a parameterized route is reused. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.
+Call the hook in a Qwik City page or layout below the layout that attached SSGOI, not root.tsx. It takes no arguments: the id is the path, and the key is the config.layouts scope at the hook’s depth (each useSsgoiLayoutBoundary inside another is one deeper), or the path. Query and hash changes keep the same key. useSsgoiLayoutBoundary throws if SSGOI was attached without framework.
 
 ```tsx
 import { component$ } from "@builder.io/qwik";
@@ -101,7 +101,7 @@ export default component$(() => {
 
 ### Persistent layouts
 
-Pass a fixed key, useSsgoiLayoutBoundary("shell"), for an outer shell, or { id?, key? } to fix the id too, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.
+Declare an outer shell in config.layouts, for example [{ paths: "/products/**" }], call the hook in that section layout, and retain separately keyed page roots below it. The hook does not wrap or move Slot content.
 
 useSsgoiRouteBoundary from @ssgoi/qwik/qwik-city still works but is deprecated and will be removed in 8.0.0.
 

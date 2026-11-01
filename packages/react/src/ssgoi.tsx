@@ -9,7 +9,7 @@ import {
 } from "@ssgoi/core/internal";
 import type { HostAnimation } from "@ssgoi/core/internal";
 import { ssgoiContext } from "./context";
-import type { SsgoiFramework } from "./layout-boundary";
+import { SsgoiFrameworkProvider, type SsgoiFramework } from "./layout-boundary";
 
 const rootStyle: CSSProperties = { display: "contents" };
 
@@ -22,9 +22,8 @@ interface SsgoiProps {
    */
   host?: HostAnimation;
   /**
-   * Router hooks for `SsgoiLayoutBoundary`, e.g.
-   * `{ usePathname, useSelectedLayoutSegments }` from `next/navigation`.
-   * Keep the object stable: its hooks are called on every boundary render.
+   * How to read the router for `SsgoiLayoutBoundary`. The first boundary reads
+   * the route and keys it against `config.layouts`. Keep the object stable.
    */
   framework?: SsgoiFramework;
   children: ReactNode;
@@ -45,12 +44,15 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
       return observeSsgoiTransitions(root, ssgoi);
     }, [ssgoi]);
 
-    const value = useMemo(() => ({ ssgoi, framework }), [ssgoi, framework]);
-
     return (
-      <ssgoiContext.Provider value={value}>
+      <ssgoiContext.Provider value={ssgoi}>
         <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
-          {children}
+          <SsgoiFrameworkProvider
+            framework={framework}
+            layouts={config.layouts}
+          >
+            {children}
+          </SsgoiFrameworkProvider>
         </div>
       </ssgoiContext.Provider>
     );

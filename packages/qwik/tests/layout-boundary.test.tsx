@@ -6,41 +6,53 @@ import { describe, expect, it } from "vitest";
 import { Ssgoi, useSsgoiLayoutBoundary } from "../src/lib";
 import { useSsgoiRouteBoundary } from "../src/lib/legacy/qwik-city";
 
-const Page = component$(() => {
-  const boundary = useSsgoiLayoutBoundary();
-  return (
-    <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
-      Page
-    </section>
-  );
-});
+const TOP_LEVEL = ["/posts", "/products"];
+const config$ = $(() => ({
+  layouts: [
+    { paths: TOP_LEVEL },
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/*/**" }],
+    },
+  ],
+}));
 
 // A listener that captures the boundary makes Qwik pause its computed signal
-// and everything it closes over, as an interactive page would.
-const InteractivePage = component$(() => {
+// and everything it closes over, as an interactive layout would.
+const Layout = component$(() => {
   const boundary = useSsgoiLayoutBoundary();
   const clicked = useSignal("");
   return (
-    <section key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+    <main
+      key={boundary.value.key}
+      data-key={boundary.value.key}
+      data-ssgoi-transition={boundary.value.id}
+    >
       <button onClick$={() => (clicked.value = boundary.value.id)} />
-    </section>
-  );
-});
-
-const CityRoot = component$(() => {
-  const location = useLocation();
-  return (
-    <Ssgoi config$={$(() => ({}))} framework={{ location }}>
-      <InteractivePage />
-    </Ssgoi>
-  );
-});
-
-const FeedRoot = component$(() => {
-  const location = useLocation();
-  return (
-    <Ssgoi framework={{ location }}>
       <Slot />
+    </main>
+  );
+});
+
+const Page = component$(() => {
+  const boundary = useSsgoiLayoutBoundary();
+  return (
+    <section
+      key={boundary.value.key}
+      data-key={boundary.value.key}
+      data-ssgoi-transition={boundary.value.id}
+    />
+  );
+});
+
+const CityRoot = component$<{ layouts?: boolean }>(({ layouts }) => {
+  const location = useLocation();
+  return (
+    <Ssgoi config$={layouts ? config$ : undefined} framework={{ location }}>
+      <Layout>
+        <Page />
+      </Layout>
     </Ssgoi>
   );
 });
@@ -53,71 +65,57 @@ const render = (jsx: Parameters<typeof renderToString>[0]) =>
     symbolMapper: (symbol) => [symbol, `/${symbol}.js`],
   });
 
+const renderCity = (url: string, layouts = true) =>
+  render(
+    <QwikCityMockProvider url={`http://localhost${url}`}>
+      <CityRoot layouts={layouts} />
+    </QwikCityMockProvider>,
+  );
+
 describe("useSsgoiLayoutBoundary", () => {
-  it("pauses with the Qwik City location store passed as framework", async () => {
-    const { html } = await render(
-      <QwikCityMockProvider url="http://localhost/posts/1">
-        <CityRoot />
-      </QwikCityMockProvider>,
-    );
+  it("keys each depth by its config.layouts scope on the server", async () => {
+    const { html } = await renderCity("/products/shoes/42");
 
     // Dev SSR verifies every context value is serializable before pausing.
-    expect(html).toContain('data-ssgoi-transition="/posts/1"');
+    expect(html).toContain('<main data-key="1"');
+    expect(html).toContain('data-key="1.0/shoes"');
+    expect(
+      html.match(/data-ssgoi-transition="\/products\/shoes\/42"/g),
+    ).toHaveLength(2);
     const state = html.match(
       /<script type="qwik\/json">([\s\S]*?)<\/script>/,
     )?.[1];
-    expect(state).toContain('"/posts/1"');
+    expect(state).toContain('"/products/shoes/42"');
   });
 
-  it("follows the location store when its url changes", async () => {
-    const Root = component$(() => {
-      const location = useStore({ url: new URL("http://localhost/posts/1") });
-      return (
-        <>
-          <button
-            onClick$={() => {
-              location.url = new URL("http://localhost/posts/2");
-            }}
-          />
-          <Ssgoi framework={{ location }}>
-            <Page />
-          </Ssgoi>
-        </>
-      );
-    });
-    const { screen, render, userEvent } = await createDOM();
-    await render(<Root />);
-
-    const section = () => screen.querySelector("section")!;
-    expect(section().getAttribute("data-ssgoi-transition")).toBe("/posts/1");
-    await userEvent("button", "click");
-    expect(section().getAttribute("data-ssgoi-transition")).toBe("/posts/2");
+  it("falls back to the route path below the chain", async () => {
+    const { html } = await renderCity("/posts");
+    expect(html).toContain('<main data-key="0"');
+    expect(html).toContain('<section data-key="/posts"');
   });
 
-  it("keeps a string boundary as the key while the id follows the route", async () => {
-    const Shell = component$(() => {
-      const boundary = useSsgoiLayoutBoundary("products-layout");
-      return (
-        <section
-          key={boundary.value.key}
-          data-key={boundary.value.key}
-          data-ssgoi-transition={boundary.value.id}
-        />
-      );
-    });
+  it("keys every depth by the route path without config.layouts", async () => {
+    const { html } = await renderCity("/products/shoes/42", false);
+    expect(html.match(/data-key="\/products\/shoes\/42"/g)).toHaveLength(2);
+  });
+
+  it("keeps an outer scope mounted while an inner key follows the location store", async () => {
     const Root = component$(() => {
       const location = useStore({
-        url: new URL("http://localhost/products/1"),
+        url: new URL("http://localhost/products/shoes/1"),
       });
       return (
         <>
           <button
+            id="next"
             onClick$={() => {
-              location.url = new URL("http://localhost/products/2");
+              location.url = new URL("http://localhost/products/hats/2");
             }}
           />
-          <Ssgoi framework={{ location }}>
-            <Shell />
+          <Ssgoi config$={config$} framework={{ location }}>
+            <Layout>
+              <Page />
+            </Layout>
           </Ssgoi>
         </>
       );
@@ -125,33 +123,16 @@ describe("useSsgoiLayoutBoundary", () => {
     const { screen, render, userEvent } = await createDOM();
     await render(<Root />);
 
-    const shell = screen.querySelector("section")!;
-    expect(shell.getAttribute("data-key")).toBe("products-layout");
-    await userEvent("button", "click");
-    expect(screen.querySelector("section")).toBe(shell);
-    expect(shell.getAttribute("data-ssgoi-transition")).toBe("/products/2");
-  });
-
-  it("uses a fixed id from an object boundary", async () => {
-    const Feed = component$(() => {
-      const boundary = useSsgoiLayoutBoundary({ id: "/feed" });
-      return (
-        <section
-          data-key={boundary.value.key}
-          data-ssgoi-transition={boundary.value.id}
-        />
-      );
-    });
-    const { html } = await render(
-      <QwikCityMockProvider url="http://localhost/feed/7">
-        <FeedRoot>
-          <Feed />
-        </FeedRoot>
-      </QwikCityMockProvider>,
+    const main = screen.querySelector("main")!;
+    expect(screen.querySelector("section")!.getAttribute("data-key")).toBe(
+      "1.0/shoes",
     );
-
-    expect(html).toContain('data-key="/feed"');
-    expect(html).toContain('data-ssgoi-transition="/feed"');
+    await userEvent("#next", "click");
+    expect(screen.querySelector("main")).toBe(main);
+    expect(main.getAttribute("data-ssgoi-transition")).toBe("/products/hats/2");
+    expect(screen.querySelector("section")!.getAttribute("data-key")).toBe(
+      "1.0/hats",
+    );
   });
 
   it("throws without a framework", async () => {

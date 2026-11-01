@@ -1,203 +1,149 @@
 # SSGOI complex routing and persistent layouts
 
-Start with `SsgoiLayoutBoundary` from `@ssgoi/react`. Keep one `<Ssgoi>`,
+Start from https://ssgoi.dev/llms/frameworks/nextjs.txt: one `<Ssgoi>`, one
 config, and the Next.js `framework` whose `useRoute` returns
-`{ pathname, selectedSegments }`, as in
-https://ssgoi.dev/llms/frameworks/nextjs.txt.
-Add boundaries only where routed DOM lifetimes differ.
+`{ pathname, renderedPath }`. Boundaries take no SSGOI props. You describe
+which routes share a layout in `config.layouts`, and place one
+`<SsgoiLayoutBoundary>` in each layout that owns a lifetime.
 
-- `id` is the route SSGOI matches transition rules against; default pathname.
-- `key` is when the DOM is replaced (its lifetime); omitted key defaults to id.
-- Both come from one `boundary` prop: a string (a fixed key for a layout-owned
-  persistent shell), `{ id?, key? }`, or `(route) => string | { id?, key? }`.
-- The function form runs synchronously with routed children. Do not defer keys
-  to effects.
+- `id` (`data-ssgoi-transition`) is the route path; route rules match it.
+- `key` decides when the DOM is replaced. A boundary at depth N keys by the
+  `config.layouts` scope instance that matches at depth N, or by the route path
+  when no scope matches there.
+- Depth is automatic: no boundary above → depth 0; inside one → one deeper.
+- Without `layouts`, every boundary keys by the route path.
 
-## 1. Persistent header or bottom navigation
+## 1. `config.layouts`
 
-If a route layout already owns a whole section, a fixed key is enough:
-
-```tsx
-// app/products/layout.tsx
-import type { ReactNode } from "react";
-import { SsgoiLayoutBoundary } from "@ssgoi/react";
-import { ProductHeaderAndTabs } from "./product-header-and-tabs";
-
-export default function ProductsLayout({ children }: { children: ReactNode }) {
-  return (
-    <SsgoiLayoutBoundary boundary="products-layout">
-      <ProductHeaderAndTabs />
-      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
-    </SsgoiLayoutBoundary>
-  );
-}
+```ts
+// SsgoiLayoutScope, from "@ssgoi/react"
+type SsgoiLayoutScope = {
+  paths: string | string[];      // route-rule patterns: /x, /x/*, /x/**, /x/:id
+  except?: string | string[];
+  layouts?: SsgoiLayoutScope[];  // the next depth inside this scope
+};
 ```
 
-The outer marker keeps the current pathname while its key stays stable. Child
-navigation animates only the inner content. The section layout unmounts when
-leaving /products; a changed ancestor boundary must not wrap this whole section
-on each child navigation. Put one provider above all sections and boundaries
-at the route layouts that own them.
+- Siblings in one array are tried in order; the first scope whose `paths`
+  match (and whose `except` does not) is chosen. Put narrow scopes first.
+- `layouts` lists the child scopes for the next depth.
+- A `*` or `:id` segment makes each captured value its own instance:
+  `/projects/:id/**` gives `/projects/1/files` and `/projects/1/members` one
+  shared shell, and `/projects/2` another. A `**` tail is not captured.
 
-When outer and inner boundaries leave together, the outer one owns the motion.
-The child animates only while its parent stays mounted.
+## 2. Tabs with a bottom nav, details, and a nested section
 
-## 2. Tabs, dynamic projects, and intercepted backgrounds
-
-For an app-shell shared across tabs, details, and projects, define the policy
-once in a client component. The boundary already calls `framework.useRoute` and
-handles Suspense; the function form of `boundary` receives the route object it
-returned, as-is. There is no
-local hook/lifecycle implementation to copy.
-
-Example tree (route groups do not appear in URLs):
+This is the layout of the Next.js template
+(https://github.com/meursyphus/ssgoi/tree/HEAD/templates/nextjs):
 
 ```text
-app/(app)/layout.tsx                     # one provider + AppBoundary
-app/(app)/(tabs)/layout.tsx              # TabContent + BottomNav + @modal
-app/(app)/(tabs)/projects/page.tsx       # /projects
-app/(app)/(tabs)/profile/page.tsx        # /profile
-app/(app)/(tabs)/@modal/default.tsx      # returns null
-app/(app)/(tabs)/@modal/(.)p/[id]/page.tsx
-app/(app)/(detail)/p/[id]/page.tsx       # direct /p/:id
-app/(app)/(detail)/projects/[id]/layout.tsx  # project header + child boundary
+app/
+├─ layout.tsx                      <Ssgoi> + boundary               depth 0
+├─ (top-level)/layout.tsx          boundary + <BottomNav /> outside depth 1
+│  ├─ posts/page.tsx               /posts
+│  ├─ pinterest/page.tsx           /pinterest
+│  ├─ profile/page.tsx             /profile
+│  └─ products/layout.tsx          header + category tabs + boundary depth 2
+│     └─ all/, electronics/, ...   /products/all, /products/electronics
+└─ (detail)/layout.tsx             boundary                         depth 1
+   └─ posts/[id], pinterest/[id], profile/[id]
 ```
 
-```tsx
-// app/app-boundaries.tsx
-"use client";
+```ts
+import { drill, fade, slide, zoom } from "@ssgoi/react/view-transitions";
 
+const CATEGORIES = ["all", "electronics", "fashion", "home", "beauty"];
+
+// Bottom-nav tabs, including every product category.
+const TOP_LEVEL = ["/posts", "/products/**", "/pinterest", "/profile"];
+
+const config = {
+  layouts: [
+    // depth 0: one shell for the tabs; depth 1: the products section inside it
+    { paths: TOP_LEVEL, layouts: [{ paths: "/products/**" }] },
+    // depth 0: one shell for every detail page
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [
+    { from: "/pinterest", to: "/pinterest/*", transition: zoom({ type: "expand" }) },
+    { on: "/posts/**", except: "/posts", transition: drill() },
+    { from: "/profile", to: "/profile/*", transition: zoom({ type: "static" }) },
+    { ordered: CATEGORIES.map((id) => `/products/${id}`), transition: slide() },
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
+  ],
+};
+```
+
+Use `/products/**`, not `/products/*`: a `*` captures, so each category would
+become its own scope instance and the category tabs would remount.
+
+```tsx
+// app/(top-level)/layout.tsx
 import type { ReactNode } from "react";
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
+import { BottomNav } from "@/components/bottom-nav";
 
-type Route = { pathname: string; selectedSegments: string[] };
-
-const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
-
-// Route groups are layout ownership, not URL; interception markers are dropped.
-export function pathOf(segments: string[], base = "") {
-  const path = segments
-    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
-    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
-    .filter(Boolean)
-    .join("/");
-  return `${base}/${path}`.replace(/\/$/, "") || "/";
-}
-
-function appBoundary({ selectedSegments }: Route) {
-  // This boundary is at a URL-root layout. [] means its actual index route,
-  // even when the browser URL points at an intercepted modal.
-  const id = pathOf(selectedSegments);
-  const key = selectedSegments.includes("(tabs)")
-    ? "app-tabs"
-    : id.match(/^\/projects\/[^/]+/)?.[0] ?? id;
-  return { id, key };
-}
-
-export function AppBoundary({ children }: { children: ReactNode }) {
-  return <SsgoiLayoutBoundary boundary={appBoundary}>{children}</SsgoiLayoutBoundary>;
-}
-
-export function TabContent({ children }: { children: ReactNode }) {
+export default function TopLevelLayout({ children }: { children: ReactNode }) {
   return (
-    <SsgoiLayoutBoundary
-      boundary={({ selectedSegments }: Route) => ({
-        id: pathOf(selectedSegments),
-      })}
-    >
-      {children}
-    </SsgoiLayoutBoundary>
+    <div className="flex flex-1 flex-col">
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+      <BottomNav />
+    </div>
   );
 }
+
+// app/(top-level)/products/layout.tsx: header + category tabs + <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+// app/(detail)/layout.tsx: <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
 ```
 
-Render `<TabContent>{children}</TabContent>`, `<BottomNav />`, and `{modal}` as
-siblings in the tabs layout. The modal goes outside the background boundary.
-`usePathname()` follows the modal URL; `selectedSegments` follows the owned
-slot. Thus a soft modal leaves the background DOM/state intact, while a direct
-entry resolves the full-page detail. `parallelRoutesKey="modal"` reads a named
-slot instead of `children` when that is the region you own.
+| Navigation | depth 0 | depth 1 | depth 2 | Result |
+| --- | --- | --- | --- | --- |
+| tab → tab | same | changes | — | only tab content fades; BottomNav stays |
+| category → category | same | same | changes | category content slides; header and tabs stay |
+| tab → detail | changes | — | — | the whole tab shell leaves, BottomNav included |
+| detail → detail | same | changes | — | detail content swaps |
 
-For a nested project layout, pass its known base path:
-`pathOf(selectedSegments, "/projects/" + projectId)`.
-`pathOf` strips route groups and interception prefixes, and keeps catch-all
-segments. It joins segments under the base you provide; it is not a general
-resolver for the relative ancestry of `( .. )` interception destinations.
-For a modal destination, use a canonical id from the route's params if needed.
+When an outer and an inner boundary leave in the same navigation, the outer
+one owns the motion and the inner one goes with it. Keep persistent UI inside
+the boundary that should take it away, and outside the one that changes.
 
-A project child boundary belongs around only its changing content. The outer
-project key stays `/projects/:id`; inner tabs can animate independently.
-If child transitions are not wanted, omit that inner boundary.
+## 3. Intercepted modals and parallel slots
+
+During a soft intercept the URL becomes the modal's (`/p/42`) while the
+`children` slot still renders the background. The Next.js `useRoute` returns
+`renderedPath` from `useSelectedLayoutSegments()` at the provider, with route
+groups and interception markers removed, so every boundary keeps following the
+background and nothing behind the modal moves. Render the `{modal}` slot
+outside the boundaries; it animates by itself. Direct entry to `/p/42` renders
+the full page, whose rendered path is `/p/42`.
 
 ```tsx
-// Render inside app/(app)/(detail)/projects/[id]/layout.tsx, passing its id param.
-export function ProjectContent({
-  projectId,
-  children,
-}: {
-  projectId: string;
-  children: ReactNode;
-}) {
+// app/(top-level)/layout.tsx with an @modal slot
+export default function TopLevelLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   return (
-    <SsgoiLayoutBoundary
-      boundary={({ selectedSegments }: Route) => ({
-        id: pathOf(selectedSegments, `/projects/${projectId}`),
-      })}
-      fallback={<div className="min-h-px" aria-hidden="true" />}
-    >
-      {children}
-    </SsgoiLayoutBoundary>
+    <>
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+      <BottomNav />
+      {modal}
+    </>
   );
 }
 ```
 
-Use the owning layout's projectId for the base, so an intercepted sidebar URL
-cannot change the background's identity. Empty selected segments mean the
-layout's index route, not "unknown": at the root this is `/`, and inside a
-project it is `/projects/:id`. Do not fall back to the browser pathname for an
-empty slot, since that pathname may already describe the intercepted modal.
+For a per-instance shell such as a project workspace, capture the id:
 
-## Existing named boundary policies
-
-Applications may retain their own names (landing-content, app-shell,
-main-content, project-content) and pure policy function. Replace only the hook,
-Suspense, and keyed-DOM implementation with `SsgoiLayoutBoundary`:
-
-```tsx
-"use client";
-
-import type { ReactNode } from "react";
-import { SsgoiLayoutBoundary } from "@ssgoi/react";
-import { boundaryFor, type BoundaryName } from "./boundary-policy";
-
-export function AppRouteBoundary({
-  name,
-  children,
-}: {
-  name: BoundaryName;
-  children: ReactNode;
-}) {
-  return (
-    <SsgoiLayoutBoundary
-      boundary={(route) => boundaryFor(name, route)}
-      fallback={<div className="min-h-px" aria-hidden="true" />}
-    >
-      {children}
-    </SsgoiLayoutBoundary>
-  );
-}
+```ts
+layouts: [
+  { paths: ["/projects", "/profile"] },   // top-level tabs
+  { paths: "/projects/:id/**" },          // one instance per project
+]
 ```
 
-The policy receives the route `useRoute` returned, `{ pathname, selectedSegments }`,
-and returns `{ id?, key? }` (or a string key).
-The library does not need application-specific boundary names. A boundary's
-HTML `id` prop is an ordinary DOM attribute; use `boundary` for its transition id.
-Setting a fixed transition id alone does not preserve a shell: set its key too.
-The Instagram demo uses `{ id: profileBase, key: profileBase }` for its profile
-shell and a pathname boundary for its tabs; the checkout and mobile-tab demos
-use a fixed key for their persistent shells.
+Everything under `/projects/acme` shares one depth-0 instance, so the project
+header survives while the id keeps following the full route. Leave a project
+child without a boundary when overview → docs should be a plain swap.
 
-## 3. Middleware / proxy remains app configuration
+## 4. Middleware / proxy remains app configuration
 
 Next.js route interception is provided by your route/slot tree. SSGOI does not
 create intercepting routes, rewrite URLs, or configure request middleware.
@@ -212,9 +158,9 @@ review its matcher and redirect/rewrite behavior for intercepted routes too:
   (`new Headers(request.headers)`) so Next's routing headers survive.
 - Keep direct-entry URLs valid, provide the parallel slot's `default.tsx` and
   close/fallback routes, and retain server authorization checks.
-- Rewrites can make SSR and browser pathnames differ. Resolve a stable slot id
-  where possible; follow Next's stable-fallback hydration pattern for custom
-  wrappers. Suspense alone does not normalize rewritten paths.
+- Rewrites can make SSR and browser pathnames differ. Prefer the rendered path
+  from the selected segments; follow Next's stable-fallback hydration pattern
+  for custom wrappers. Suspense alone does not normalize rewritten paths.
 
 There is no universal rewrite to paste: rules depend on the application's
 routing and auth design. This is also separate from SSGOI's animation
@@ -231,5 +177,5 @@ Next.js references:
 - https://nextjs.org/docs/app/api-reference/file-conventions/proxy
 
 Basic setup and route rules: https://ssgoi.dev/llms.txt
-All boundary props: https://ssgoi.dev/llms/frameworks/nextjs.txt
+Complete Next.js setup: https://ssgoi.dev/llms/frameworks/nextjs.txt
 Manual/custom-router setup: https://ssgoi.dev/llms/manual-boundaries.txt

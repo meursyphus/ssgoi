@@ -82,11 +82,21 @@ const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
 const framework: SsgoiFramework = {
-  useRoute: ({ parallelRoutesKey = "children" }) => {
+  useRoute: () => {
     const pathname = usePathname();
-    const selectedSegments = useSelectedLayoutSegments(parallelRoutesKey) ?? [];
-    return pathname == null ? null : { pathname, selectedSegments };
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = `/${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}`;
+    return { pathname, renderedPath };
   },
 };
 
@@ -99,8 +109,10 @@ export function SsgoiProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-Import the layout boundary from the same package; it calls `framework.useRoute`
-(and throws without a `framework`) and handles URL-hook Suspense:
+Import the layout boundary from the same package. It takes no props: the first
+boundary reads the route for the ones inside it (and throws without a
+`framework`), and
+`renderedPath` keeps an intercepted modal's background in place:
 
 ```tsx
 import { SsgoiLayoutBoundary } from "@ssgoi/react";
