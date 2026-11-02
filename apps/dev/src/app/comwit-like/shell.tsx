@@ -115,7 +115,22 @@ function useTrace() {
       attributes: true,
       attributeFilter: ["style"],
     });
-    return () => observer.disconnect();
+    // Scroll events on whichever element scrolls at this viewport.
+    const main = document.querySelector<HTMLElement>("[data-scroller]");
+    const docScrolls = !main || getComputedStyle(main).overflowY === "visible";
+    const scroller = docScrolls ? document.documentElement : main;
+    const target: EventTarget = docScrolls ? window : scroller;
+    const onScroll = () =>
+      trace.push({
+        t: performance.now(),
+        type: "scroll",
+        detail: `${scroller.scrollTop} h=${scroller.scrollHeight}`,
+      });
+    target.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      target.removeEventListener("scroll", onScroll);
+    };
   }, []);
 }
 

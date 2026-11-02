@@ -52,6 +52,11 @@ type PendingSide = {
    */
   applyScrollPolicy?: (policy: ScrollPolicy, leavingPath?: string) => void;
   /**
+   * Ends the scroll-capture hold taken when this OUT left the screen. Called
+   * once its arrival is paired, superseded or cancelled.
+   */
+  releaseLeaving?: () => void;
+  /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
    *    cacheComponents). The detached real node is reinserted for the OUT
@@ -138,6 +143,7 @@ export function createSggoiTransitionContext(
   const {
     initializeContext,
     beginTransition,
+    beginLeaving,
     disconnect: disconnectScroll,
     calculateScrollOffset,
     evictScrollPosition,
@@ -343,6 +349,8 @@ export function createSggoiTransitionContext(
   };
 
   let connectionGeneration = 0;
+  // The route of the latest OUT still waiting for its IN.
+  let leavingPath: string | null = null;
 
   const runTransition = (
     config: AnyTransitionConfig,
@@ -683,6 +691,9 @@ export function createSggoiTransitionContext(
 
     // .then chain — handleArrival returns immediately, dispatcher never blocks.
     detector.arrive(path, side, pendingSide).then((pair) => {
+      // The OUT's hold ends here whatever happened to it; a paired run holds
+      // the container itself from this same microtask on.
+      if (side === "out") pendingSide.releaseLeaving?.();
       if (disconnected || generation !== connectionGeneration) return;
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) {
@@ -690,8 +701,15 @@ export function createSggoiTransitionContext(
         // it (same-path mismatch, superseded side, or a late duplicate), return
         // the real node to React's latest visible/hidden intent.
         if (side === "out") settleHiddenWithoutTransition(pendingSide);
+        // The page that just left is back before its successor ever arrived
+        // (the user returned while a slow route was still loading): no
+        // navigation happened, so it keeps the position it left with.
+        if (side === "in" && path === leavingPath) {
+          pendingSide.applyScrollPolicy?.(true);
+        }
         return;
       }
+      leavingPath = null;
 
       // Only the IN side drives the run — by then both sides have arrived.
       if (side !== "in") return;
@@ -824,6 +842,8 @@ export function createSggoiTransitionContext(
     // attribute here would turn a real B -> A navigation into A -> A.
     const currentPath = state.pendingOutPath ?? state.currentPath ?? path;
     state.pendingOutPath = null;
+    leavingPath = currentPath;
+    pendingSide.releaseLeaving = beginLeaving(currentPath);
     handleArrival(currentPath, "out", pendingSide);
   };
 
@@ -928,6 +948,8 @@ export function createSggoiTransitionContext(
       nextSibling: anchor.nextSibling,
       mode: "unmount",
     };
+    leavingPath = removalPath;
+    pendingSide.releaseLeaving = beginLeaving(removalPath);
     handleArrival(removalPath, "out", pendingSide);
   };
 

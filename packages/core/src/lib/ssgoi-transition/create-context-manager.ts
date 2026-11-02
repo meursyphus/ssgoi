@@ -88,6 +88,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // page that is leaving can hold a stale entry; this is where it really was.
   let lastPosition: ScrollPosition = { x: 0, y: 0 };
   let currentPath: string | null = null;
+  // Where a page sat when the framework hid or removed it, taken before the
+  // incoming page exists. Until the IN pairs, the container is left with no
+  // page in flow (the OUT is out of flow for its animation) and a slow route
+  // can take frames to arrive; the browser or the router scrolling the empty
+  // container meanwhile must not become the departing page's position.
+  const leavingPositions: Map<string, ScrollPosition> = new Map();
   // Suppress scroll capture during the transition window so OUT scrolls of
   // an already-unmounted page don't bleed into IN under a wrong currentPath.
   let isTransitioning = false;
@@ -114,6 +120,23 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       };
       scrollPositions.set(getStorageKey(currentPath), lastPosition);
     }
+  };
+
+  // The framework took `path` off screen before its successor arrived. File
+  // the position it had, and stop capturing until the OUT is paired or
+  // dropped so nothing that moves the emptied container overwrites it.
+  const beginLeaving = (path: string): (() => void) => {
+    const key = getStorageKey(path);
+    // The last captured position, never the live scrollTop: the framework
+    // has already hidden the page, so reading the container now forces a
+    // layout in which it has no height and the offset is clamped.
+    const position =
+      currentPath === path
+        ? lastPosition
+        : (scrollPositions.get(key) ?? lastPosition);
+    scrollPositions.set(key, position);
+    leavingPositions.set(key, position);
+    return beginTransition(false);
   };
 
   // Apply the policy chosen by the transition that is bringing this path IN.
@@ -252,7 +275,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       if (myGeneration !== initGeneration) return;
       scrollPolicyDecisionGeneration = myGeneration;
       if (leavingPath !== undefined) {
-        scrollPositions.set(getStorageKey(leavingPath), lastPositionAtEntry);
+        // A page hidden before this one arrived filed its position then;
+        // the container may have moved since.
+        const leavingKey = getStorageKey(leavingPath);
+        const leaving = leavingPositions.get(leavingKey);
+        leavingPositions.delete(leavingKey);
+        scrollPositions.set(leavingKey, leaving ?? lastPositionAtEntry);
       }
       if (policy === "shared") {
         scrollPositions.set(storageKeyAtEntry, lastPositionAtEntry);
@@ -328,6 +356,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // across navigations.
   const evictScrollPosition = (path: string) => {
     scrollPositions.delete(getStorageKey(path));
+    leavingPositions.delete(getStorageKey(path));
   };
 
   const getScrollContainer = () => scrollContainer;
@@ -366,10 +395,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       scrollContainer = null;
       contextElement = null;
       currentPath = null;
+      leavingPositions.clear();
       lastPosition = { x: 0, y: 0 };
       isMobileMeasured = false;
     },
     initializeContext,
+    beginLeaving,
     calculateScrollOffset,
     evictScrollPosition,
     getScrollContainer,

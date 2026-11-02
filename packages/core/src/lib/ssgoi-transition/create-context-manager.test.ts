@@ -650,4 +650,60 @@ describe("createContextManager", () => {
     flushAnimationFrames(2);
     expect(documentElement.scrollTop).toBe(540);
   });
+
+  it("keeps the departing page's position when the container moves before the incoming page arrives", () => {
+    const manager = createContextManager();
+    const list = createFakeElement({ parentElement: body });
+    const detail = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(list, "/list", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 850;
+    emitWindowScroll();
+
+    // The framework hides the list; the detail's shell is still on the wire.
+    const releaseLeaving = manager.beginLeaving("/list");
+    // Meanwhile the emptied container is scrolled to the top (browser clamp,
+    // router scroll-to-top): not the list's position.
+    documentElement.scrollTop = 0;
+    emitWindowScroll();
+    flushAnimationFrames(12);
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 850 });
+
+    // The detail arrives and the pair resolves: reset the detail, file the list.
+    const applyDetail = manager.initializeContext(detail, "/detail");
+    applyDetail(false, "/list");
+    releaseLeaving();
+    flushAnimationFrames(12);
+    expect(documentElement.scrollTop).toBe(0);
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 850 });
+
+    // Back: the list restores where it was.
+    const applyList = manager.initializeContext(list, "/list");
+    applyList(true, "/detail");
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(850);
+  });
+
+  it("restores the page that left when it returns before any successor arrived", () => {
+    const manager = createContextManager();
+    const list = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(list, "/list", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 620;
+    emitWindowScroll();
+
+    const releaseLeaving = manager.beginLeaving("/list");
+    documentElement.scrollTop = 0;
+    emitWindowScroll();
+    releaseLeaving();
+
+    // The user went back while the next route was still loading: the list is
+    // revealed again with no pair, and the dispatcher restores it.
+    const applyList = manager.initializeContext(list, "/list");
+    applyList(true);
+    flushAnimationFrames(2);
+    expect(documentElement.scrollTop).toBe(620);
+  });
 });

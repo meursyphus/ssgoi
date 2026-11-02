@@ -51,6 +51,7 @@ vi.mock("./create-context-manager", () => ({
         released = true;
       };
     },
+    beginLeaving: () => () => {},
     disconnect: () => {},
     calculateScrollOffset: () => ({ x: 0, y: 0 }),
     evictScrollPosition: () => {},

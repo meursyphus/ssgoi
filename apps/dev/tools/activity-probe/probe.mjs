@@ -28,6 +28,7 @@ const RUNS = Number(args.runs ?? 10);
 const DELAYS = String(args.delay ?? "0,80").split(",").map(Number);
 const VIEWPORTS = String(args.viewport ?? "mobile,desktop").split(",");
 const CPU = Number(args.cpu ?? 1);
+const LATENCY = Number(args.latency ?? 0);
 const SCROLL_Y = Number(args.scroll ?? 1200);
 const REVISIT = args.revisit === "true";
 
@@ -45,8 +46,22 @@ async function runOnce(context, { delay, viewport }) {
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   if (CPU > 1) await cdp.send("Emulation.setCPUThrottlingRate", { rate: CPU });
+  if (LATENCY > 0) {
+    // A slow network delays the incoming route's shell past the outgoing
+    // page's hide, so the OUT arrives frames before the IN.
+    await cdp.send("Network.enable");
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: LATENCY,
+      downloadThroughput: 1.5e6 / 8,
+      uploadThroughput: 750e3 / 8,
+    });
+  }
   await context.addCookies([
     { name: "ssgoi-delay", value: String(delay), url: BASE },
+    ...(args.noprefetch === "true"
+      ? [{ name: "ssgoi-noprefetch", value: "1", url: BASE }]
+      : []),
   ]);
 
   if (args.verbose === "true") {
@@ -57,9 +72,12 @@ async function runOnce(context, { delay, viewport }) {
       if (m.type() === "error") console.log("    console:", m.text());
     });
   }
-  await page.goto(`${BASE}/comwit-like/list`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE}/comwit-like/list`, {
+    waitUntil: LATENCY > 0 ? "load" : "networkidle",
+    timeout: 90000,
+  });
   // Next dev may reload once after compiling a route; let that settle.
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(LATENCY > 0 ? 4000 : 1200);
   await page.evaluate(
     ([expr, y]) => {
       // eslint-disable-next-line no-eval
@@ -286,7 +304,7 @@ for (const viewport of VIEWPORTS) {
         }
       }
     }
-    const line = `${viewport} delay=${delay}ms cpu=${CPU}x revisit=${REVISIT}: scroll fail ${scrollFail}/${RUNS}` +
+    const line = `${viewport} delay=${delay}ms cpu=${CPU}x latency=${LATENCY}ms revisit=${REVISIT}: scroll fail ${scrollFail}/${RUNS}` +
       (viewport === "desktop"
         ? `, hero fail ${heroFail}/${RUNS} ${JSON.stringify(outcomes)}`
         : "");

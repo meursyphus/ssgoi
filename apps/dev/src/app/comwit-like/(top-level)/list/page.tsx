@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { SsgoiPageBoundary } from "@ssgoi/react";
+import { CardLink } from "../../card-link";
 import { ITEM_COUNT, itemImage } from "../../media";
 
 export default function ListPage() {
@@ -11,7 +11,7 @@ export default function ListPage() {
       <ul className="grid grid-cols-2 gap-3 p-4 md:grid-cols-4">
         {Array.from({ length: ITEM_COUNT }, (_, i) => i + 1).map((id) => (
           <li key={id}>
-            <Link
+            <CardLink
               href={`/comwit-like/item/${id}`}
               data-card={id}
               className="flex flex-col gap-2"
@@ -28,7 +28,7 @@ export default function ListPage() {
                 />
               </div>
               <span className="text-xs text-neutral-400">Item {id}</span>
-            </Link>
+            </CardLink>
           </li>
         ))}
       </ul>
