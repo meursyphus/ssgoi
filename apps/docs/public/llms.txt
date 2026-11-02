@@ -3,7 +3,7 @@
 This is the complete SSGOI setup guide for Next.js App Router. SSGOI adds page
 transitions without replacing your router, layouts, or page files.
 
-Current version: `@ssgoi/core@7.5.0-beta.5` (npm tag `beta`). All `@ssgoi/*` packages release together.
+Current version: `@ssgoi/core@7.5.0-beta.6` (npm tag `beta`). All `@ssgoi/*` packages release together.
 
 ## Using another framework?
 
