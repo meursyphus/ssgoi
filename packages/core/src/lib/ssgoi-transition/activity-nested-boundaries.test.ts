@@ -334,7 +334,7 @@ describe("boundary removed inside a hidden group", () => {
 });
 
 describe("hidden OUT that never animates", () => {
-  it("restores its temporary reveal when superseded by another OUT", async () => {
+  it("stays hidden and settles when superseded by another OUT", async () => {
     const { root, context, pairs, teardown } = setup();
     const A = boundary("/a");
     root.append(A);
@@ -344,11 +344,11 @@ describe("hidden OUT that never animates", () => {
     context.register("/d", D, { enter: false });
     await flush();
 
-    // A hides with no incoming page yet: it is revealed while it waits.
+    // A hides with no incoming page yet: like a removed node, it stays off
+    // screen until a run is prepared for it.
     reactHide(A);
     await flush();
-    expect(A.style.getPropertyValue("display")).toBe("block");
-    expect(A.style.position).toBe("absolute");
+    expectSettled(A, true);
 
     // A different-path OUT before any IN supersedes A's.
     reactHide(D);
@@ -358,7 +358,7 @@ describe("hidden OUT that never animates", () => {
     teardown();
   });
 
-  it("restores its temporary reveal when absorbed as a late duplicate", async () => {
+  it("stays hidden and settles when absorbed as a late duplicate", async () => {
     const { root, host, pairs, teardown } = setup();
     const A = boundary("/a");
     const A2 = boundary("/a");

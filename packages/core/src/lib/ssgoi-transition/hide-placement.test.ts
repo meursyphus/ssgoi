@@ -6,10 +6,11 @@ import { HostAnimation } from "../animation/host-animation";
 import type { SsgoiContext } from "@types";
 
 /**
- * A page React hides whose successor has not arrived yet (its segment is
- * still on the wire) must be placed at the offset the user left it at right
- * away, not when the pair resolves: the router scrolls the emptied container
- * to the top meanwhile.
+ * A page React hides follows the same lifecycle as a node the framework
+ * removed: it stays off screen while its successor is still loading and
+ * while the run is prepared, then is placed out of flow at the offset the
+ * user left it at and revealed — in the same microtask as a same-commit IN,
+ * so nothing paints in between.
  */
 
 const container = document.createElement("main");
@@ -94,7 +95,7 @@ afterEach(() => {
 });
 
 describe("a hidden page whose successor is still loading", () => {
-  it("is placed at its last scroll offset at once and the container reset to the top", async () => {
+  it("stays hidden until the run is prepared, then is revealed at its last offset", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     const host = new HostAnimation();
@@ -115,26 +116,36 @@ describe("a hidden page whose successor is still loading", () => {
     root.appendChild(lounge);
     await flush();
 
-    // The router hides the lounge; no incoming page exists yet.
+    // The router hides the lounge; no incoming page exists yet. Nothing is
+    // put on screen for it, exactly like a node the framework removed.
     reactHide(lounge);
     await flush();
-    expect(lounge.style.position).toBe("absolute");
-    expect(lounge.style.top).toBe("-850px");
-    expect(scrollTo).toHaveBeenCalledWith({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
+    expect(lounge.style.getPropertyValue("display")).toBe("none");
+    expect(lounge.style.getPropertyPriority("display")).toBe("important");
+    expect(lounge.style.position).toBe("");
+    expect(lounge.style.top).toBe("");
+    expect(scrollTo).not.toHaveBeenCalled();
 
-    // A round trip later the detail mounts: the run keeps the same offset.
+    // A round trip later the detail mounts: the pair resolves, the plan is
+    // prepared, and the lounge is placed and revealed for its out-animation.
     const detail = boundary("/blog/x");
     root.appendChild(detail);
     await flush();
+    expect(lounge.style.getPropertyValue("display")).toBe("block");
+    expect(lounge.style.getPropertyPriority("display")).toBe("important");
+    expect(lounge.style.position).toBe("absolute");
     expect(lounge.style.top).toBe("-850px");
+
+    // A duplicate React hide while the run plays keeps it on screen.
+    reactHide(lounge);
+    await flush();
+    expect(lounge.style.getPropertyValue("display")).toBe("block");
+
     host.complete();
     await flush();
     // Settled back to React's intent, with no placement left behind.
     expect(lounge.style.top).toBe("");
+    expect(lounge.style.position).toBe("");
     expect(lounge.style.getPropertyValue("display")).toBe("none");
 
     stop();

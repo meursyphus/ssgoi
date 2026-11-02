@@ -178,18 +178,18 @@ describe("createSggoiTransitionContext Activity cleanup", () => {
     context.register("/a", pageA as unknown as HTMLElement);
     context.register("/b", pageB as unknown as HTMLElement);
 
-    // Activity hides A first. SSGOI reveals and takes it out of flow for OUT,
-    // even though route matching has not established an animation rule yet.
+    // Activity hides A first. SSGOI leaves it hidden: a run reveals it only
+    // once its plan is prepared, and no rule will match here.
     reactHide(pageA);
-    expect(pageA.style.getPropertyValue("display")).toBe("block");
+    expect(pageA.style.getPropertyValue("display")).toBe("none");
     expect(pageA.style.getPropertyPriority("display")).toBe("important");
-    expect(pageA.style.position).toBe("absolute");
+    expect(pageA.style.position).toBe("");
 
     reactShow(pageB);
     await Promise.resolve();
 
-    // An unmatched pair must settle that temporary reveal back to React's
-    // intent instead of leaving both Activity pages visible and out of flow.
+    // An unmatched pair settles both nodes to React's intent, leaving no
+    // placement behind.
     expect(pageA.style.getPropertyValue("display")).toBe("none");
     expect(pageA.style.getPropertyPriority("display")).toBe("important");
     expect(pageA.style.position).toBe("");

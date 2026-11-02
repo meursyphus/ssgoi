@@ -197,10 +197,11 @@ function resolvePairs(fromNode: HTMLElement, toNode: HTMLElement): HeroPair[] {
   return resolveLegacyPairs(fromNode, toNode);
 }
 
-const pairRendered = (pair: HeroPair) =>
-  isRendered(pair.fromEl) && isRendered(pair.toEl);
+// Only the incoming end has to be laid out: the outgoing page is off screen
+// (detached or React-hidden) while the plan is prepared, in both modes.
+const pairRendered = (pair: HeroPair) => isRendered(pair.toEl);
 
-/** Pairs whose both ends are mounted and laid out, so they can be measured. */
+/** Pairs whose incoming end is mounted and laid out, so it can be measured. */
 function resolveRenderedPairs(
   fromNode: HTMLElement,
   toNode: HTMLElement,

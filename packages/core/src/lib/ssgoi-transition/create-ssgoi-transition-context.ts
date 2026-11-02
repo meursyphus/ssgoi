@@ -221,6 +221,8 @@ export function createSggoiTransitionContext(
     currentPath: string;
     pendingOutPath: string | null;
     pathRevision: number;
+    /** A run has revealed this React-hidden node for its out-animation. */
+    revealed: boolean;
   };
   const hiddenState = new WeakMap<HTMLElement, HiddenState>();
   const owner = new WeakMap<HTMLElement, number>();
@@ -296,6 +298,7 @@ export function createSggoiTransitionContext(
       el.style.cssText = state.savedCss;
       state.savedCss = null;
     }
+    state.revealed = false;
     if (state.intent === "hidden") {
       // Match React's own hidden form so a later React reveal is observable.
       state.vis.setDisplay("none", true);
@@ -309,9 +312,9 @@ export function createSggoiTransitionContext(
     }
   };
 
-  // handleHide reveals a React-hidden node before route matching so an OUT can
-  // start without a flash. Every path that decides not to run an animation must
-  // therefore settle that library-owned reveal explicitly; otherwise an
+  // A run reveals a React-hidden node for its out-animation once its plan is
+  // prepared. Every path that decides not to run (or not to keep running) an
+  // animation must settle that library-owned reveal explicitly; otherwise an
   // unmatched/cancelled Activity navigation leaves the outgoing page visible.
   // Claim the affected real nodes before completing a prior run, mirroring
   // runTransition's ownership handoff, so the older cleanup cannot overwrite
@@ -423,19 +426,20 @@ export function createSggoiTransitionContext(
       },
     };
 
-    // The element handed to the animation as `from`:
-    //  - unmount mode: the detached real node, reinserted after `prepare` and
+    // The element handed to the animation as `from` is the REAL outgoing node
+    // in both modes, so DOM state (input values, canvas contents, media state)
+    // survives the out-animation and a follow-up navigation can hand its
+    // motion back continuously (matchInto keys on element identity):
+    //  - unmount mode: the detached node, reinserted after `prepare` and
     //    removed on settle.
-    //  - hidden mode: the REAL outgoing node, already revealed + taken out of
-    //    flow by `handleHide`. Reusing it keeps page state alive AND lets a
-    //    follow-up navigation hand its motion back continuously (matchInto keys
-    //    on element identity) — a fresh clone every nav never could.
-    let fromElement: HTMLElement;
+    //  - hidden mode: the node React hid, revealed after `prepare` and
+    //    returned to React's intent on settle.
+    // Either way it is off screen while the plan is prepared and goes
+    // absolute, offset by the prior scroll, so the incoming page takes its
+    // slot. Style only here; it is put on screen once the plan is ready.
+    const fromElement: HTMLElement = fromOriginal;
+    prepareOutgoing(fromElement, ssgoiContext);
     if (isHidden) {
-      fromElement = fromOriginal;
-      // scrollOffset is only known now — finish the out-of-flow placement begun
-      // in handleHide so the incoming page lines up with the prior scroll.
-      fromElement.style.top = `${-1 * (scrollOffset?.y ?? 0)}px`;
       // Snapshot the incoming node's clean inline styles BEFORE `prepare` paints
       // starting styles onto it, so settle can wipe transition leakage off this
       // reused real node. (The outgoing node was snapshotted in handleHide.)
@@ -443,15 +447,6 @@ export function createSggoiTransitionContext(
       if (toState && toState.savedCss === null) {
         toState.savedCss = toElement.style.cssText;
       }
-    } else {
-      // The host framework already detached the original. Reuse that exact
-      // node so DOM state (input values, canvas contents, media state, etc.)
-      // survives through the outgoing animation instead of being flattened by
-      // cloneNode().
-      fromElement = fromOriginal;
-      // Outgoing page goes absolute so the incoming page can take its slot.
-      // Style only; insertion is deferred until after `prepare`.
-      prepareOutgoing(fromElement, ssgoiContext);
     }
 
     // The OUT page has already contributed its original position to the
@@ -586,10 +581,21 @@ export function createSggoiTransitionContext(
         clearTimeout(prepareTimer);
         releasePreparation = null;
         // Now that prepare's microtasks have all run (initial styles, extras
-        // built), drop the outgoing node into place. Order is:
-        //   prepare → out insert → animation create/play
-        // Hidden mode skips insertion: the real node is already in place.
-        if (!isHidden && parent) {
+        // built), put the outgoing node on screen. Order is:
+        //   prepare → out insert/reveal → animation create/play
+        // Hidden mode: the real node is already in place; reveal it over
+        // React's `display:none !important` with a concrete value, WITH
+        // !important, so an interrupting React reveal stays observable.
+        if (isHidden) {
+          const fromState = hiddenState.get(fromOriginal);
+          if (fromState) {
+            fromState.vis.setDisplay(
+              fromState.computedDisplay || "block",
+              true,
+            );
+            fromState.revealed = true;
+          }
+        } else if (parent) {
           if (nextSibling && parent.contains(nextSibling)) {
             parent.insertBefore(fromElement, nextSibling);
           } else {
@@ -786,10 +792,10 @@ export function createSggoiTransitionContext(
   };
 
   // React drove `element` to display:none (an <Activity> went mode="hidden").
-  // Reveal the REAL node immediately — synchronously, inside the observer's
-  // microtask, before the browser paints — so it animates out from where it sat
-  // instead of flashing away, and take it out of flow so the incoming page
-  // claims its slot. The run itself starts once the IN side pairs.
+  // Like a node the framework removed, it stays off screen while the run is
+  // prepared; `runTransition` places it out of flow and reveals it once the
+  // plan is ready, in the same microtask as a same-commit IN, so nothing
+  // paints in between.
   const handleHide = (element: HTMLElement, path: string, nested = false) => {
     const state = hiddenState.get(element);
     if (!state) return;
@@ -821,17 +827,14 @@ export function createSggoiTransitionContext(
     // If already mid-flight (savedCss set), keep the original snapshot.
     if (state.savedCss === null) state.savedCss = element.style.cssText;
 
-    // (Re-)reveal over React's `display:none !important`, every time — so the
-    // node stays visible for its out-animation even when React re-asserts the
-    // hide. A concrete computed value WITH !important keeps our reveal
-    // observably distinct from React's plain `display:` reveal, so an
-    // interrupting React reveal is still caught.
-    state.vis.setDisplay(state.computedDisplay || "block", true);
-    element.style.position = "absolute";
-    element.style.width = "100%";
-    element.style.left = "0";
-
-    if (alreadyHidden) return; // duplicate hide — kept revealed, don't re-pair
+    if (alreadyHidden) {
+      // Duplicate hide (dev re-commit / follow-up render). If a run has this
+      // node on screen for its out-animation, keep it there; don't re-pair.
+      if (state.revealed) {
+        state.vis.setDisplay(state.computedDisplay || "block", true);
+      }
+      return;
+    }
 
     const anchor = readAnchor(element);
     const pendingSide: PendingSide = {
@@ -848,18 +851,6 @@ export function createSggoiTransitionContext(
     state.pendingOutPath = null;
     leavingPath = currentPath;
     pendingSide.releaseLeaving = beginLeaving(currentPath);
-    // The successor may still be loading (its segment arrives a round trip
-    // after the router hid this page), and the router scrolls the emptied
-    // container to the top meanwhile. Place the page where the user left it
-    // now, not when the pair resolves: the content they were reading stays
-    // under the viewport top until the run re-expresses the same offset
-    // against the incoming page's scroll.
-    const container = getScrollContainer();
-    if (container) {
-      const leaving = getScrollPosition(currentPath);
-      element.style.top = `${-leaving.y}px`;
-      container.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }
     handleArrival(currentPath, "out", pendingSide);
   };
 
@@ -892,6 +883,7 @@ export function createSggoiTransitionContext(
     // visible display (the snapshot carries React's display:none from the hide).
     // savedCss is kept for the eventual settle; the spring handoff (matchInto)
     // carries motion continuity, so wiping the stale inline transform is fine.
+    state.revealed = false;
     if (state.savedCss !== null) {
       element.style.cssText = state.savedCss;
       if (state.visibleDisplay) {
@@ -1027,6 +1019,7 @@ export function createSggoiTransitionContext(
       currentPath: path,
       pendingOutPath: null,
       pathRevision: 0,
+      revealed: false,
     };
     hiddenState.set(element, state);
 

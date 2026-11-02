@@ -381,11 +381,12 @@ export const zoom = (options: NormalizedZoomOptions) => {
         // Same wait as hero: the enter/exit element may stream in after the
         // page boundary, or sit hidden while its Suspense body re-suspends.
         const [fromEl, toEl] = await Promise.all([args.from, args.to]);
+        // Only the element on the incoming page has to be laid out: the
+        // outgoing page is off screen while the plan is prepared.
         const ready = () => {
           const pair = resolveZoom(fromEl, toEl, navigationDirection);
-          return (
-            pair !== null && isRendered(pair.enterEl) && isRendered(pair.exitEl)
-          );
+          if (pair === null) return false;
+          return isRendered(pair.mode === "enter" ? pair.enterEl : pair.exitEl);
         };
         if (!ready()) {
           await waitForSharedTarget(toEl, ready, { signal: args.signal });
