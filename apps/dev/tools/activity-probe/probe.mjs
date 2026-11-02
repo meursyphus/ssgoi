@@ -248,6 +248,7 @@ for (const viewport of VIEWPORTS) {
   for (const delay of DELAYS) {
     let scrollFail = 0;
     let heroFail = 0;
+    const outcomes = {};
     const rows = [];
     for (let i = 0; i < RUNS; i++) {
       const context = await browser.newContext({ viewport: viewportSize(viewport) });
@@ -256,7 +257,16 @@ for (const viewport of VIEWPORTS) {
       await context.close();
       const scrollOk = Math.abs(r.after - r.before) <= 1;
       // Hero rule only exists on desktop; on mobile only scroll is judged.
-      const heroOk = viewport !== "desktop" || r.hero.morphed || r.hero.exitLayer;
+      // morph = shared element animated; fade = pages crossfaded without it;
+      // none = no animation at all (hard cut).
+      const outcome =
+        r.hero.morphed || r.hero.exitLayer
+          ? "morph"
+          : r.hero.animated.length
+            ? "fade"
+            : "none";
+      outcomes[outcome] = (outcomes[outcome] ?? 0) + 1;
+      const heroOk = viewport !== "desktop" || outcome !== "none";
       if (!scrollOk) scrollFail++;
       if (!heroOk) heroFail++;
       rows.push({ card, before: r.before, after: r.after, hero: r.hero });
@@ -277,7 +287,9 @@ for (const viewport of VIEWPORTS) {
       }
     }
     const line = `${viewport} delay=${delay}ms cpu=${CPU}x revisit=${REVISIT}: scroll fail ${scrollFail}/${RUNS}` +
-      (viewport === "desktop" ? `, hero fail ${heroFail}/${RUNS}` : "");
+      (viewport === "desktop"
+        ? `, hero fail ${heroFail}/${RUNS} ${JSON.stringify(outcomes)}`
+        : "");
     console.log(line);
     results.push({ viewport, delay, scrollFail, heroFail, rows });
   }

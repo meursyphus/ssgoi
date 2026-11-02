@@ -19,6 +19,7 @@ import {
   type MediaRect,
 } from "../media-geometry";
 import { fallbackHeroFit } from "./fit";
+import { isRendered, waitForSharedTarget } from "../shared-target";
 import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
   TEMPORARY_SELECTOR,
@@ -194,6 +195,17 @@ function resolvePairs(fromNode: HTMLElement, toNode: HTMLElement): HeroPair[] {
   const pairs = resolveNewStylePairs(fromNode, toNode);
   if (pairs.length > 0) return pairs;
   return resolveLegacyPairs(fromNode, toNode);
+}
+
+const pairRendered = (pair: HeroPair) =>
+  isRendered(pair.fromEl) && isRendered(pair.toEl);
+
+/** Pairs whose both ends are mounted and laid out, so they can be measured. */
+function resolveRenderedPairs(
+  fromNode: HTMLElement,
+  toNode: HTMLElement,
+): HeroPair[] {
+  return resolvePairs(fromNode, toNode).filter(pairRendered);
 }
 
 type HeroMorphStyle = {
@@ -661,22 +673,41 @@ export const hero = (options: NormalizedHeroOptions) => {
       const resolved: Promise<HeroResolved> = Promise.all([
         args.from,
         args.to,
-      ]).then(([fromEl, toEl]) => ({ pairs: resolvePairs(fromEl, toEl) }));
+      ]).then(async ([fromEl, toEl]) => {
+        // The incoming page can arrive before the body that holds its hero
+        // (a streamed Suspense boundary) or with that body hidden while it
+        // re-suspends. Hold the plan briefly for the target to become
+        // measurable instead of resolving no pair at all.
+        const ready = () => resolveRenderedPairs(fromEl, toEl).length > 0;
+        if (!ready()) {
+          await waitForSharedTarget(toEl, ready, { signal: args.signal });
+        }
+        return { pairs: resolveRenderedPairs(fromEl, toEl) };
+      });
 
       const ctx: HeroPrepareCtx = {
         from: args.from,
         to: args.to,
         resolved,
       };
-      for (const strategy of strategies) {
-        strategy.prepare?.(ctx);
-      }
+      // Strategies snap starting styles (static chrome blanks the outgoing
+      // page); do that once the wait is over, not while it still shows.
+      const prepared = resolved.then((r) => {
+        for (const strategy of strategies) {
+          strategy.prepare?.(ctx);
+        }
+        return { resolved: r, strategies };
+      });
 
-      return resolved.then((r) => ({ resolved: r, strategies }));
+      return prepared;
     },
     animation: ({ from, to, context, resolved, strategies }) => {
-      if (resolved.pairs.length === 0) {
-        return animationGroup({ shared: [], out: [], in: [] });
+      // A pair that lost an end since prepare (the body was replaced) is
+      // re-resolved against what is on screen now. With no pair at all the
+      // chrome strategy still plays, so the pages crossfade instead of
+      // cutting.
+      if (!resolved.pairs.every(pairRendered)) {
+        resolved = { pairs: resolveRenderedPairs(from, to) };
       }
 
       // Shared `onDispose` registry — strategies push restore callbacks
