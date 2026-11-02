@@ -178,12 +178,12 @@ describe("createSggoiTransitionContext Activity cleanup", () => {
     context.register("/a", pageA as unknown as HTMLElement);
     context.register("/b", pageB as unknown as HTMLElement);
 
-    // Activity hides A first. SSGOI leaves it hidden: a run reveals it only
-    // once its plan is prepared, and no rule will match here.
+    // Activity hides A first. SSGOI puts it back on screen at once, out of
+    // flow, to wait for its successor.
     reactHide(pageA);
-    expect(pageA.style.getPropertyValue("display")).toBe("none");
+    expect(pageA.style.getPropertyValue("display")).toBe("block");
     expect(pageA.style.getPropertyPriority("display")).toBe("important");
-    expect(pageA.style.position).toBe("");
+    expect(pageA.style.position).toBe("absolute");
 
     reactShow(pageB);
     await Promise.resolve();

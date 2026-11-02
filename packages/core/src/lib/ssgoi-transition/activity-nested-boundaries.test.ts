@@ -344,13 +344,15 @@ describe("hidden OUT that never animates", () => {
     context.register("/d", D, { enter: false });
     await flush();
 
-    // A hides with no incoming page yet: like a removed node, it stays off
-    // screen until a run is prepared for it.
+    // A hides with no incoming page yet: like a removed node, it is put back
+    // on screen at once, out of flow, and waits there for its successor.
     reactHide(A);
     await flush();
-    expectSettled(A, true);
+    expect(A.style.getPropertyValue("display")).toBe("block");
+    expect(A.style.getPropertyPriority("display")).toBe("important");
+    expect(A.style.position).toBe("absolute");
 
-    // A different-path OUT before any IN supersedes A's.
+    // A different-path OUT before any IN supersedes A's: A goes off screen.
     reactHide(D);
     await flush();
     expectSettled(A, true);

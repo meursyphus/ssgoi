@@ -31,6 +31,10 @@ import {
 // Bound an abandoned async prepare, not animation playback (which may be
 // deliberately slow or paused by a host).
 const PREPARE_TIMEOUT_MS = 5000;
+// A departing page waits on screen for its successor at most this long; a
+// page that leaves for good is withdrawn after it. A late pair presents it
+// again.
+const PRESENCE_TIMEOUT_MS = 5000;
 
 /** The resting lifecycle snapshot. Shared so server renders and idle providers agree by reference. */
 export const IDLE_TRANSITION_STATE: SsgoiTransitionState = Object.freeze({
@@ -40,7 +44,25 @@ export const IDLE_TRANSITION_STATE: SsgoiTransitionState = Object.freeze({
   direction: null,
 }) as SsgoiTransitionState;
 
-type TransitionMode = "unmount" | "hidden";
+/**
+ * How the departing page is kept on screen for its out-animation. Chosen
+ * where the framework's edge is detected (React hid the node, or removed it
+ * from the DOM); the run and its settle only call these and never ask which
+ * kind they hold.
+ */
+type OutgoingPresence = {
+  /** The node's clean inline styles, snapshotted before any placement. */
+  readonly restingCss: string;
+  /**
+   * Put the node on screen for its out-animation: as soon as it departs, and
+   * again when a run claims it after a withdrawal. Idempotent.
+   */
+  present(): void;
+  /** Take it off screen: no run claims it (unpaired, superseded, abandoned). */
+  withdraw(): void;
+  /** A run that still owns the node under `epoch` has ended. */
+  settle(epoch: number): void;
+};
 
 type PendingSide = {
   element: HTMLElement;
@@ -58,17 +80,8 @@ type PendingSide = {
   releaseLeaving?: () => void;
   /** This IN is a kept-alive page React revealed again, not a fresh mount. */
   revealed?: boolean;
-  /**
-   * How the outgoing page left (meaningful on the OUT side only):
-   *  - "unmount": real DOM removal (SPA frameworks, Next without
-   *    cacheComponents). The detached real node is reinserted for the OUT
-   *    animation, then removed on settle.
-   *  - "hidden":  React `<Activity>` / Next `cacheComponents` toggled it to
-   *    `display:none`. The REAL node is reused (page state preserved) and
-   *    re-hidden on settle.
-   * Absent on the IN side; defaults to "unmount".
-   */
-  mode?: TransitionMode;
+  /** OUT side only: how this departing page is kept on screen. */
+  presence?: OutgoingPresence;
 };
 
 type ElementAnchor = {
@@ -312,27 +325,121 @@ export function createSggoiTransitionContext(
     }
   };
 
-  // A run reveals a React-hidden node for its out-animation once its plan is
-  // prepared. Every path that decides not to run (or not to keep running) an
-  // animation must settle that library-owned reveal explicitly; otherwise an
-  // unmatched/cancelled Activity navigation leaves the outgoing page visible.
-  // Claim the affected real nodes before completing a prior run, mirroring
-  // runTransition's ownership handoff, so the older cleanup cannot overwrite
-  // the latest React visibility intent.
-  const settleHiddenWithoutTransition = (
-    outSide: PendingSide,
-    inSide?: PendingSide,
-  ): void => {
-    if (outSide.mode !== "hidden") return;
+  // ── Outgoing presence ───────────────────────────────────────────────────────
+  //
+  // The framework takes a page off screen before its successor is on screen:
+  // React hides it (`<Activity>` / cacheComponents) or removes it from the DOM,
+  // and the successor's segment can land a round trip later. SSGOI puts the
+  // page back on screen at once, out of flow at the offset the user left it,
+  // so what they were reading stays under the viewport until the run starts
+  // — nothing paints blank or from the top in between. How "on screen" is
+  // achieved is the one thing that differs per framework edge, so it is a
+  // strategy chosen at that edge; everything downstream calls it blind.
 
-    const elements = Array.from(
-      new Set([outSide.element, inSide?.element].filter(Boolean)),
-    ) as HTMLElement[];
-    const epoch = ++transitionEpoch;
-    for (const element of elements) owner.set(element, epoch);
+  // The real node React hid: reveal it over `display:none !important` and
+  // return it to React's latest intent when done.
+  const hiddenPresence = (
+    element: HTMLElement,
+    state: HiddenState,
+  ): OutgoingPresence => ({
+    get restingCss() {
+      return state.savedCss ?? element.style.cssText;
+    },
+    present() {
+      // A concrete value, WITH !important, so an interrupting React reveal
+      // stays observable.
+      state.vis.setDisplay(state.computedDisplay || "block", true);
+      state.revealed = true;
+    },
+    withdraw() {
+      // Claim the node before completing a prior run, mirroring
+      // runTransition's ownership handoff, so the older cleanup cannot
+      // overwrite the latest React visibility intent.
+      const epoch = ++transitionEpoch;
+      owner.set(element, epoch);
+      host.complete();
+      reconcileResting(element, epoch);
+    },
+    settle(epoch) {
+      reconcileResting(element, epoch);
+    },
+  });
 
-    host.complete();
-    for (const element of elements) reconcileResting(element, epoch);
+  // The real node the framework removed: reinsert it at its old anchor and
+  // remove it when done.
+  const unmountPresence = (
+    element: HTMLElement,
+    anchor: ElementAnchor,
+  ): OutgoingPresence => {
+    const restingCss = element.style.cssText;
+    const remove = () => {
+      element.parentNode?.removeChild(element);
+    };
+    return {
+      restingCss,
+      present() {
+        const { parent, nextSibling } = anchor;
+        if (!parent || element.parentNode === parent) return;
+        if (nextSibling && parent.contains(nextSibling)) {
+          parent.insertBefore(element, nextSibling);
+        } else {
+          parent.appendChild(element);
+        }
+      },
+      withdraw: remove,
+      settle(epoch) {
+        if (owner.get(element) === epoch) owner.delete(element);
+        if (!owner.has(element)) remove();
+      },
+    };
+  };
+
+  // Place a departing node out of flow where the user left it: the position
+  // filed for its path, against a container scrolled to the top (the router
+  // or the browser scrolls the emptied container there anyway). The run
+  // re-expresses the same offset against the incoming page's scroll.
+  const placeDeparting = (element: HTMLElement, path: string): void => {
+    prepareOutgoing(element, { scrollOffset: getScrollPosition(path) });
+    getScrollContainer()?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
+
+  // Present a departing node now and bound how long it may wait for a run:
+  // a page that leaves for good (a failed or abandoned navigation, a boundary
+  // unmounted for no navigation) must not stay on screen as a ghost. A pair
+  // that resolves later presents it again through the run.
+  const presentDeparting = (
+    presence: OutgoingPresence,
+    element: HTMLElement,
+    path: string,
+  ): OutgoingPresence => {
+    placeDeparting(element, path);
+    presence.present();
+    let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+      timer = null;
+      presence.withdraw();
+    }, PRESENCE_TIMEOUT_MS);
+    const claim = () => {
+      if (timer === null) return;
+      clearTimeout(timer);
+      timer = null;
+    };
+    return {
+      get restingCss() {
+        return presence.restingCss;
+      },
+      present() {
+        claim();
+        presence.present();
+      },
+      withdraw() {
+        claim();
+        presence.withdraw();
+      },
+      settle(epoch) {
+        claim();
+        presence.settle(epoch);
+      },
+    };
   };
 
   // Settle a node no run owns to React's latest intent, wiping any reveal or
@@ -341,6 +448,19 @@ export function createSggoiTransitionContext(
     const epoch = ++transitionEpoch;
     owner.set(element, epoch);
     reconcileResting(element, epoch);
+  };
+
+  // A paired navigation that runs no animation (no rule owns it, or native
+  // swipe-back owns playback): the departing page goes off screen and a
+  // kept-alive incoming page returns to React's intent.
+  const settleWithoutTransition = (
+    outSide: PendingSide,
+    inSide?: PendingSide,
+  ): void => {
+    outSide.presence?.withdraw();
+    if (inSide && hiddenState.has(inSide.element)) {
+      settleUnowned(inSide.element);
+    }
   };
 
   // Whether `from` or a boundary above it is registered with this context and
@@ -390,20 +510,21 @@ export function createSggoiTransitionContext(
     preparation = new AbortController();
     const signal = preparation.signal;
     host.prepareHandoff();
-    for (const element of [fromOriginal, toElement]) {
-      if (!restingStyles.has(element)) {
-        restingStyles.set(
-          element,
-          hiddenState.get(element)?.savedCss ?? element.style.cssText,
-        );
-      }
+    // Clean inline styles to settle back to: the outgoing page's were
+    // snapshotted before it was placed, a kept-alive incoming page's before
+    // it was revealed.
+    if (!restingStyles.has(fromOriginal)) {
+      restingStyles.set(
+        fromOriginal,
+        outSide.presence?.restingCss ?? fromOriginal.style.cssText,
+      );
     }
-    const outMode: TransitionMode = outSide.mode ?? "unmount";
-    const isHidden = outMode === "hidden";
-
-    const { parent, nextSibling } = outSide.parent
-      ? { parent: outSide.parent, nextSibling: outSide.nextSibling }
-      : readAnchor(fromOriginal);
+    if (!restingStyles.has(toElement)) {
+      restingStyles.set(
+        toElement,
+        hiddenState.get(toElement)?.savedCss ?? toElement.style.cssText,
+      );
+    }
 
     const scrollOffset = calculateScrollOffset(
       fromPath,
@@ -426,27 +547,22 @@ export function createSggoiTransitionContext(
       },
     };
 
-    // The element handed to the animation as `from` is the REAL outgoing node
-    // in both modes, so DOM state (input values, canvas contents, media state)
-    // survives the out-animation and a follow-up navigation can hand its
-    // motion back continuously (matchInto keys on element identity):
-    //  - unmount mode: the detached node, reinserted after `prepare` and
-    //    removed on settle.
-    //  - hidden mode: the node React hid, revealed after `prepare` and
-    //    returned to React's intent on settle.
-    // Either way it is off screen while the plan is prepared and goes
-    // absolute, offset by the prior scroll, so the incoming page takes its
-    // slot. Style only here; it is put on screen once the plan is ready.
+    // The element handed to the animation as `from` is the REAL outgoing node,
+    // so DOM state (input values, canvas contents, media state) survives the
+    // out-animation and a follow-up navigation can hand its motion back
+    // continuously (matchInto keys on element identity). Its presence put it
+    // on screen when it departed; re-express its offset against the incoming
+    // page's scroll and make sure it is on screen again in case it was
+    // withdrawn while waiting for this pair.
     const fromElement: HTMLElement = fromOriginal;
     prepareOutgoing(fromElement, ssgoiContext);
-    if (isHidden) {
-      // Snapshot the incoming node's clean inline styles BEFORE `prepare` paints
-      // starting styles onto it, so settle can wipe transition leakage off this
-      // reused real node. (The outgoing node was snapshotted in handleHide.)
-      const toState = hiddenState.get(toElement);
-      if (toState && toState.savedCss === null) {
-        toState.savedCss = toElement.style.cssText;
-      }
+    outSide.presence?.present();
+    // Snapshot a kept-alive incoming node's clean inline styles BEFORE
+    // `prepare` paints starting styles onto it, so settle can wipe transition
+    // leakage off this reused real node.
+    const toState = hiddenState.get(toElement);
+    if (toState && toState.savedCss === null) {
+      toState.savedCss = toElement.style.cssText;
     }
 
     // The OUT page has already contributed its original position to the
@@ -517,7 +633,11 @@ export function createSggoiTransitionContext(
         const baseline = restingStyles.get(element);
         if (baseline !== undefined) element.style.cssText = baseline;
         restingStyles.delete(element);
-        reconcileResting(element, epoch);
+        if (element === fromOriginal && outSide.presence) {
+          outSide.presence.settle(epoch);
+        } else {
+          reconcileResting(element, epoch);
+        }
       }
     };
     releasePreparation = () => {
@@ -542,7 +662,6 @@ export function createSggoiTransitionContext(
       // failed plan, so settle the whole scope to its resting state.
       host.cancel({ reason: "disposed", owns: () => true });
       restoreOwnedPages();
-      if (!isHidden) fromElement.remove();
       finishRun();
       console.error("[SSGOI] Page transition failed", error);
     };
@@ -580,28 +699,6 @@ export function createSggoiTransitionContext(
         attached = true;
         clearTimeout(prepareTimer);
         releasePreparation = null;
-        // Now that prepare's microtasks have all run (initial styles, extras
-        // built), put the outgoing node on screen. Order is:
-        //   prepare → out insert/reveal → animation create/play
-        // Hidden mode: the real node is already in place; reveal it over
-        // React's `display:none !important` with a concrete value, WITH
-        // !important, so an interrupting React reveal stays observable.
-        if (isHidden) {
-          const fromState = hiddenState.get(fromOriginal);
-          if (fromState) {
-            fromState.vis.setDisplay(
-              fromState.computedDisplay || "block",
-              true,
-            );
-            fromState.revealed = true;
-          }
-        } else if (parent) {
-          if (nextSibling && parent.contains(nextSibling)) {
-            parent.insertBefore(fromElement, nextSibling);
-          } else {
-            parent.appendChild(fromElement);
-          }
-        }
 
         const animation = config.animation({
           from: resolvedFrom,
@@ -643,16 +740,14 @@ export function createSggoiTransitionContext(
               const baseline = restingStyles.get(element);
               if (baseline !== undefined) element.style.cssText = baseline;
               restingStyles.delete(element);
-              if (hiddenState.has(element)) reconcileResting(element, epoch);
-              else owner.delete(element);
+              if (element === fromOriginal && outSide.presence) {
+                outSide.presence.settle(epoch);
+              } else if (hiddenState.has(element)) {
+                reconcileResting(element, epoch);
+              } else {
+                owner.delete(element);
+              }
             }
-            if (
-              !isHidden &&
-              disposal.owns(fromElement) &&
-              fromElement.parentNode &&
-              !owner.has(fromElement)
-            )
-              fromElement.parentNode.removeChild(fromElement);
           } finally {
             finishRun();
           }
@@ -705,10 +800,10 @@ export function createSggoiTransitionContext(
       if (disconnected || generation !== connectionGeneration) return;
       if (side === "in") swipeDetector.onPageEnter();
       if (!pair) {
-        // A hidden OUT was already revealed by handleHide. If pairing rejects
-        // it (same-path mismatch, superseded side, or a late duplicate), return
-        // the real node to React's latest visible/hidden intent.
-        if (side === "out") settleHiddenWithoutTransition(pendingSide);
+        // The OUT was put on screen when it departed. If pairing rejects it
+        // (same-path mismatch, superseded side, or a late duplicate), take it
+        // off screen again.
+        if (side === "out") pendingSide.presence?.withdraw();
         // The page that just left is revealed again before its successor
         // ever arrived (the user returned while a slow route was still
         // loading): no navigation happened, so it keeps the position it left
@@ -757,7 +852,7 @@ export function createSggoiTransitionContext(
         evictScrollPosition(pair.from);
         // This paired navigation supersedes any preparation still pending.
         supersedePreparation();
-        settleHiddenWithoutTransition(pair.out, pair.in);
+        settleWithoutTransition(pair.out, pair.in);
         host.complete();
         return;
       }
@@ -774,7 +869,7 @@ export function createSggoiTransitionContext(
           evictScrollPosition(pair.from);
         }
         supersedePreparation();
-        settleHiddenWithoutTransition(pair.out, pair.in);
+        settleWithoutTransition(pair.out, pair.in);
         host.complete();
         return;
       }
@@ -792,10 +887,8 @@ export function createSggoiTransitionContext(
   };
 
   // React drove `element` to display:none (an <Activity> went mode="hidden").
-  // Like a node the framework removed, it stays off screen while the run is
-  // prepared; `runTransition` places it out of flow and reveals it once the
-  // plan is ready, in the same microtask as a same-commit IN, so nothing
-  // paints in between.
+  // Like a node the framework removed, it is put back on screen at once, out
+  // of flow where the user left it, and waits there for its successor.
   const handleHide = (element: HTMLElement, path: string, nested = false) => {
     const state = hiddenState.get(element);
     if (!state) return;
@@ -841,7 +934,6 @@ export function createSggoiTransitionContext(
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
-      mode: "hidden",
     };
     // A usePathname-driven boundary can receive its NEXT route id in the same
     // React commit that hides it. Repeated register() calls preserve the route
@@ -851,6 +943,11 @@ export function createSggoiTransitionContext(
     state.pendingOutPath = null;
     leavingPath = currentPath;
     pendingSide.releaseLeaving = beginLeaving(currentPath);
+    pendingSide.presence = presentDeparting(
+      hiddenPresence(element, state),
+      element,
+      currentPath,
+    );
     handleArrival(currentPath, "out", pendingSide);
   };
 
@@ -955,10 +1052,14 @@ export function createSggoiTransitionContext(
       element,
       parent: anchor.parent,
       nextSibling: anchor.nextSibling,
-      mode: "unmount",
     };
     leavingPath = removalPath;
     pendingSide.releaseLeaving = beginLeaving(removalPath);
+    pendingSide.presence = presentDeparting(
+      unmountPresence(element, anchor),
+      element,
+      removalPath,
+    );
     handleArrival(removalPath, "out", pendingSide);
   };
 
