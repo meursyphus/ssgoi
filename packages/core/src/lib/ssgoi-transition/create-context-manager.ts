@@ -4,6 +4,8 @@ import { lockScroll } from "../utils/scroll-lock";
 
 const MOBILE_BREAKPOINT_PX = 768;
 const RESTORE_MAX_RETRIES = 10;
+// Matches the dispatcher's bound on an abandoned preparation.
+const LEAVING_HOLD_TIMEOUT_MS = 5000;
 const TRANSITION_SETTLE_FRAMES = 10;
 
 type ScrollPosition = { x: number; y: number };
@@ -136,7 +138,14 @@ export function createContextManager(options: ContextManagerOptions = {}) {
         : (scrollPositions.get(key) ?? lastPosition);
     scrollPositions.set(key, position);
     leavingPositions.set(key, position);
-    return beginTransition(false);
+    // The hold ends with the OUT's pairing. If no successor ever arrives (a
+    // failed or abandoned navigation), capture must not stay off for good.
+    const finish = beginTransition(false);
+    const timer = setTimeout(finish, LEAVING_HOLD_TIMEOUT_MS);
+    return () => {
+      clearTimeout(timer);
+      finish();
+    };
   };
 
   // Apply the policy chosen by the transition that is bringing this path IN.

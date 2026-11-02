@@ -685,6 +685,32 @@ describe("createContextManager", () => {
     expect(documentElement.scrollTop).toBe(850);
   });
 
+  it("resumes scroll capture on its own if the departing page is never paired", () => {
+    // Only timers: the harness drives requestAnimationFrame itself.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      const manager = createContextManager();
+      const list = createFakeElement({ parentElement: body });
+      manager.initializeContext(list, "/list", true);
+      flushAnimationFrames(11);
+      documentElement.scrollTop = 300;
+      emitWindowScroll();
+
+      manager.beginLeaving("/list");
+      documentElement.scrollTop = 0;
+      emitWindowScroll();
+      expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 300 });
+
+      // The navigation never completes; after the bound, scrolling records again.
+      vi.advanceTimersByTime(5000);
+      documentElement.scrollTop = 120;
+      emitWindowScroll();
+      expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 120 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("restores the page that left when it returns before any successor arrived", () => {
     const manager = createContextManager();
     const list = createFakeElement({ parentElement: body });

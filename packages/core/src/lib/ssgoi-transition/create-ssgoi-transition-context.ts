@@ -56,6 +56,8 @@ type PendingSide = {
    * once its arrival is paired, superseded or cancelled.
    */
   releaseLeaving?: () => void;
+  /** This IN is a kept-alive page React revealed again, not a fresh mount. */
+  revealed?: boolean;
   /**
    * How the outgoing page left (meaningful on the OUT side only):
    *  - "unmount": real DOM removal (SPA frameworks, Next without
@@ -701,10 +703,12 @@ export function createSggoiTransitionContext(
         // it (same-path mismatch, superseded side, or a late duplicate), return
         // the real node to React's latest visible/hidden intent.
         if (side === "out") settleHiddenWithoutTransition(pendingSide);
-        // The page that just left is back before its successor ever arrived
-        // (the user returned while a slow route was still loading): no
-        // navigation happened, so it keeps the position it left with.
-        if (side === "in" && path === leavingPath) {
+        // The page that just left is revealed again before its successor
+        // ever arrived (the user returned while a slow route was still
+        // loading): no navigation happened, so it keeps the position it left
+        // with. Only a reveal qualifies — the first page's own pending IN is
+        // also voided by its OUT, and that page is leaving, not returning.
+        if (side === "in" && pendingSide.revealed && path === leavingPath) {
           pendingSide.applyScrollPolicy?.(true);
         }
         return;
@@ -904,6 +908,7 @@ export function createSggoiTransitionContext(
       parent: element.parentElement,
       nextSibling: element.nextElementSibling,
       applyScrollPolicy,
+      revealed: true,
     };
     handleArrival(currentPath, "in", pendingSide);
   };
