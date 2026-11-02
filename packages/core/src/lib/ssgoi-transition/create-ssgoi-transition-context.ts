@@ -848,6 +848,18 @@ export function createSggoiTransitionContext(
     state.pendingOutPath = null;
     leavingPath = currentPath;
     pendingSide.releaseLeaving = beginLeaving(currentPath);
+    // The successor may still be loading (its segment arrives a round trip
+    // after the router hid this page), and the router scrolls the emptied
+    // container to the top meanwhile. Place the page where the user left it
+    // now, not when the pair resolves: the content they were reading stays
+    // under the viewport top until the run re-expresses the same offset
+    // against the incoming page's scroll.
+    const container = getScrollContainer();
+    if (container) {
+      const leaving = getScrollPosition(currentPath);
+      element.style.top = `${-leaving.y}px`;
+      container.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     handleArrival(currentPath, "out", pendingSide);
   };
 
