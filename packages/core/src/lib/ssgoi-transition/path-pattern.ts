@@ -4,6 +4,8 @@ export type PathMatch = {
   matched: boolean;
   specificity: number;
   pattern: string;
+  /** Path segments matched by `*` and dynamic segments, in order. */
+  captures: string[];
 };
 
 const EXACT_MATCH_BONUS = 1_000_000;
@@ -72,12 +74,14 @@ export function getPathMatch(path: string, pattern: string): PathMatch {
         EXACT_MATCH_BONUS +
         splitSegments(normalizedPattern).length * STATIC_SEGMENT_SCORE,
       pattern,
+      captures: [],
     };
   }
 
   const pathSegments = splitSegments(normalizedPath);
   const patternSegments = splitSegments(normalizedPattern);
   let specificity = 0;
+  const captures: string[] = [];
 
   for (let index = 0; index < patternSegments.length; index++) {
     const patternSegment = patternSegments[index];
@@ -91,25 +95,28 @@ export function getPathMatch(path: string, pattern: string): PathMatch {
         matched: isLastPatternSegment && pathSegments.length >= index,
         specificity,
         pattern,
+        captures,
       };
     }
 
     if (pathSegment === undefined || patternSegment === undefined) {
-      return { matched: false, specificity: 0, pattern };
+      return { matched: false, specificity: 0, pattern, captures: [] };
     }
 
     if (patternSegment === "*") {
       specificity += SINGLE_WILDCARD_SCORE;
+      captures.push(pathSegment);
       continue;
     }
 
     if (isDynamicSegment(patternSegment)) {
       specificity += DYNAMIC_SEGMENT_SCORE;
+      captures.push(pathSegment);
       continue;
     }
 
     if (patternSegment !== pathSegment) {
-      return { matched: false, specificity: 0, pattern };
+      return { matched: false, specificity: 0, pattern, captures: [] };
     }
 
     specificity += STATIC_SEGMENT_SCORE;
@@ -119,6 +126,7 @@ export function getPathMatch(path: string, pattern: string): PathMatch {
     matched: pathSegments.length === patternSegments.length,
     specificity,
     pattern,
+    captures,
   };
 }
 

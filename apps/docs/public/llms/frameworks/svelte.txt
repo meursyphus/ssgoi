@@ -1,6 +1,6 @@
 # SSGOI with Svelte
 
-The Svelte package provides the common provider and transition API. Add the SvelteKit helper when Kit owns navigation.
+The Svelte package provides the common provider, transition API, and layout boundary. Pass a SvelteKit route getter and onNavigate as framework when Kit owns navigation.
 
 Install @ssgoi/svelte. Keep one provider above the changing page region.
 
@@ -37,7 +37,7 @@ initialisation.
 </script>
 ```
 
-## Router helpers
+## Router integrations
 
 - SvelteKit (experimental): https://ssgoi.dev/llms/frameworks/sveltekit.txt
 

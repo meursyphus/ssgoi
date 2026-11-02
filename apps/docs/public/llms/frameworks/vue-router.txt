@@ -1,29 +1,39 @@
 # SSGOI with Vue Router
 
-Experimental API: this router helper may change.
+Experimental API: this router integration may change.
 
 Install @ssgoi/vue in an existing Vue Router application.
-Use the helper with Vue Router 4 inside the common Vue provider.
+Return Vue Router 4's current path from `framework.getRoute` on the common Vue provider.
 
 Keep one common provider above the following boundary.
 
 ## Wrap the routed region
 
-The boundary follows the committed router path and replaces its DOM root when the route key changes.
+The boundary follows the committed router path and replaces its DOM root when the route key changes. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.
 
 ```vue
 <script setup lang="ts">
-import { RouterView } from "vue-router";
-import { SsgoiRouteBoundary } from "@ssgoi/vue/vue-router";
+import { RouterView, useRouter } from "vue-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+import { config } from "./ssgoi-config";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 </script>
 
 <template>
-  <SsgoiRouteBoundary><RouterView /></SsgoiRouteBoundary>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary><RouterView /></SsgoiLayoutBoundary>
+  </Ssgoi>
 </template>
 ```
 
 ## Persistent shells
 
-Use routeKey for the outer shell and a changing inner boundary for the page. resolve receives { pathname } and returns { id, key? }.
+Declare a persistent shell in config.layouts, for example [{ paths: "/shop/**" }], and put a prop-less boundary around the nested RouterView in that section’s layout. The outer boundary keeps one key for the section; the inner one (one level deeper) keys by the path.
+
+SsgoiRouteBoundary from @ssgoi/vue/vue-router still works but is deprecated and will be removed in 8.0.0.
 
 Common setup: https://ssgoi.dev/llms/frameworks/vue.txt

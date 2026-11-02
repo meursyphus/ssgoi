@@ -1,13 +1,27 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react";
+import { usePathname } from "next/navigation";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiConfig,
+  type SsgoiFramework,
+} from "@ssgoi/react";
 import { useShowcaseHost } from "./host-context";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 // Re-export so existing imports (`from "@/lib/components/demo-shell"`) keep
 // working after the host moved up to `DocsSsgoiProvider`.
 export { useShowcaseHost } from "./host-context";
+
+// Demo layouts mount their own provider below the app root and use no
+// intercepted routes, so the URL pathname is the rendered path.
+const framework: SsgoiFramework = {
+  useRoute: () => {
+    const pathname = usePathname();
+    return pathname == null ? null : { pathname };
+  },
+};
 
 /**
  * Per-demo top wrapper. Now a thin passthrough: the `HostAnimation`, the
@@ -39,15 +53,15 @@ export function SsgoiWithHost({
 }) {
   const host = useShowcaseHost();
   const content = withTransitionBoundary ? (
-    <SsgoiRouteBoundary className={boundaryClassName}>
+    <SsgoiLayoutBoundary className={boundaryClassName}>
       {children}
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   ) : (
     children
   );
 
   return (
-    <Ssgoi config={config} host={host}>
+    <Ssgoi config={config} host={host} framework={framework}>
       {content}
     </Ssgoi>
   );

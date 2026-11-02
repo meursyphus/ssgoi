@@ -1,6 +1,7 @@
 export { default as Ssgoi } from "./ssgoi.svelte";
+export { default as SsgoiLayoutBoundary } from "./ssgoi-layout-boundary.svelte";
 export { getSsgoiTransition } from "./context.js";
-/** @deprecated Set `data-ssgoi-transition` directly on an element inside `<Ssgoi>` instead. */
-export { default as SsgoiTransition } from "./ssgoi-transition.svelte";
+/** @deprecated Will be removed in 8.0.0. */
+export { default as SsgoiTransition } from "./legacy/ssgoi-transition.svelte";
 export * from "./types.js";
 export * from "@ssgoi/core";

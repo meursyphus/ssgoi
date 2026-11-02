@@ -1,15 +1,25 @@
 import type { SsgoiConfig } from "@ssgoi/react";
-import { drill, slide, zoom } from "@ssgoi/react/view-transitions";
+import { drill, fade, slide, zoom } from "@ssgoi/react/view-transitions";
 
 export const PRODUCT_CATEGORIES = [
-  { id: "all", label: "All", path: "/products/all" },
-  { id: "electronics", label: "Tech", path: "/products/electronics" },
-  { id: "fashion", label: "Fashion", path: "/products/fashion" },
-  { id: "home", label: "Home", path: "/products/home" },
-  { id: "beauty", label: "Beauty", path: "/products/beauty" },
+  { id: "all", label: "All", path: "/shop" },
+  { id: "electronics", label: "Tech", path: "/shop/electronics" },
+  { id: "fashion", label: "Fashion", path: "/shop/fashion" },
+  { id: "home", label: "Home", path: "/shop/home" },
+  { id: "beauty", label: "Beauty", path: "/shop/beauty" },
 ] as const;
 
+// Bottom-nav tabs, including every product category.
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
+
 export const ssgoiConfig = {
+  // Mirrors the pathless layout routes: depth 0 picks top level vs detail, depth 1 is
+  // the boundary inside each group, and the shop scope gives its
+  // category tabs their own depth-2 boundary.
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
   transitions: [
     {
       from: "/pinterest",
@@ -29,6 +39,13 @@ export const ssgoiConfig = {
     {
       ordered: PRODUCT_CATEGORIES.map((category) => category.path),
       transition: slide(),
+    },
+    // Tab <-> tab: only the depth-1 content fades; the bottom nav stays.
+    // The exact category paths above outrank `/shop/**` here.
+    {
+      from: TOP_LEVEL,
+      to: TOP_LEVEL,
+      transition: fade(),
     },
   ],
 } satisfies SsgoiConfig;

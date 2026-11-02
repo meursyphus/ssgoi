@@ -2,8 +2,10 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/react-router`. The router is an
-optional peer and is loaded only by this entry.
+Pass a `useRoute` built on React Router's `useLocation` to
+`<Ssgoi framework>`, declare the layout tree in `config.layouts`, and place
+`SsgoiLayoutBoundary` (from `@ssgoi/react`, no props) in each layout route
+that should animate. The package itself never imports `react-router`.
 
 ```bash
 pnpm install
@@ -12,30 +14,69 @@ pnpm dev
 
 ## Structure
 
-- `app/components/ssgoi-config.ts`: one transition config.
-- `app/components/demo-layout.tsx`: one root `<Ssgoi>` inside a
-  `relative z-0 overflow-x-clip` shell.
-- `@ssgoi/react/react-router`: the shipped pathname boundary.
-- Route layouts place a stable shell boundary around a pathname child boundary.
-
-```tsx
-<SsgoiRouteBoundary routeKey="products-layout">
-  <ProductHeaderAndTabs />
-  <SsgoiRouteBoundary>
-    <Outlet />
-  </SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+```
+app/root.tsx                      <Ssgoi> + depth-0 boundary (demo-layout.tsx)
+app/routes.ts
+  layout top-level.layout.tsx     depth-1 boundary, bottom nav outside it
+    posts  pinterest  profile
+    layout shop.layout.tsx        header + category tabs, depth-2 boundary
+      shop (All)  shop/electronics  shop/fashion  shop/home  shop/beauty
+  layout detail.layout.tsx        depth-1 boundary
+    posts/:postId  pinterest/:pinId  profile/:postId
 ```
 
-The products route owns the stable outer lifetime. Its marker follows the full
-pathname while category navigation replaces only the inner content. The root
-contains one provider; it does not remount the products shell for each tab.
+- Tab → tab: only the depth-1 content changes; the bottom nav stays.
+- Tab → detail: the depth-0 boundary changes, so the whole top level,
+  bottom nav included, leaves.
+- Detail → detail (a related post): only the detail boundary changes.
+- Category → category (`/shop` is All, then `/shop/electronics`, ...): only
+  the depth-2 boundary slides; the shop header
+  and tabs stay.
+
+`app/components/ssgoi-config.ts` mirrors that tree:
+
+```ts
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
+
+export const ssgoiConfig = {
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [
+    /* drill, zoom, category slide */
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
+  ],
+};
+```
+
+A boundary's depth is the number of boundaries above it. At depth N it keys by
+the scope chosen at level N of `layouts` (the first sibling whose `paths`
+match), so it stays mounted while the route stays inside that scope. With no
+scope at that level it keys by the route path. Every boundary's transition id
+is the route path.
+
+`app/components/demo-layout.tsx` owns `<Ssgoi>` and the depth-0 boundary:
+
+```tsx
+import { useLocation } from "react-router";
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  <SsgoiLayoutBoundary className="min-h-full flex flex-col">
+    {children}
+  </SsgoiLayoutBoundary>
+</Ssgoi>;
+```
 
 Effects:
 
 - Posts: `drill`.
 - Product tabs: ordered `slide`.
 - Gallery and profile: `zoom`.
+- Tab ↔ tab: `fade` on the depth-1 content.
 
 Guide: https://ssgoi.dev/llms/frameworks/react-router.txt
 

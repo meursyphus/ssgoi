@@ -50,7 +50,10 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "specificity",
   ],
   "/docs/boundaries": [
+    "SsgoiLayoutBoundary",
     "SsgoiRouteBoundary",
+    "framework",
+    "config.layouts",
     "routeKey",
     "data-ssgoi-transition",
   ],

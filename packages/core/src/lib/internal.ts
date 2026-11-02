@@ -3,6 +3,7 @@ export {
   IDLE_TRANSITION_STATE,
 } from "./ssgoi-transition/create-ssgoi-transition-context";
 export { observeSsgoiTransitions } from "./ssgoi-transition/observe-ssgoi-transitions";
+export { resolveLayoutChain } from "./ssgoi-transition/layout-chain";
 export {
   Animation,
   WebAnimation,
@@ -17,6 +18,7 @@ export type {
   SsgoiOnTransitionRule,
   SsgoiPairTransitionRule,
   SsgoiOrderedTransitionRule,
+  SsgoiLayoutScope,
   PathPatterns,
   NavigationDirection,
   TransitionConfig,

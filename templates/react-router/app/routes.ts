@@ -7,20 +7,21 @@ import {
 
 export default [
   index("routes/home.tsx"),
-  layout("routes/page-boundary.layout.tsx", [
+  layout("routes/top-level.layout.tsx", [
     route("posts", "routes/posts.tsx"),
-    route("posts/:postId", "routes/posts.$postId.tsx"),
+    layout("routes/shop.layout.tsx", [
+      route("shop", "routes/shop.tsx"),
+      route("shop/electronics", "routes/shop.electronics.tsx"),
+      route("shop/fashion", "routes/shop.fashion.tsx"),
+      route("shop/home", "routes/shop.home.tsx"),
+      route("shop/beauty", "routes/shop.beauty.tsx"),
+    ]),
     route("pinterest", "routes/pinterest.tsx"),
-    route("pinterest/:pinId", "routes/pinterest.$pinId.tsx"),
     route("profile", "routes/profile.tsx"),
-    route("profile/:postId", "routes/profile.$postId.tsx"),
   ]),
-  route("products", "routes/products.tsx"),
-  layout("routes/products_.layout.tsx", [
-    route("products/all", "routes/products_.all.tsx"),
-    route("products/electronics", "routes/products_.electronics.tsx"),
-    route("products/fashion", "routes/products_.fashion.tsx"),
-    route("products/home", "routes/products_.home.tsx"),
-    route("products/beauty", "routes/products_.beauty.tsx"),
+  layout("routes/detail.layout.tsx", [
+    route("posts/:postId", "routes/posts.$postId.tsx"),
+    route("pinterest/:pinId", "routes/pinterest.$pinId.tsx"),
+    route("profile/:postId", "routes/profile.$postId.tsx"),
   ]),
 ] satisfies RouteConfig;

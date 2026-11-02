@@ -1,6 +1,6 @@
 "use client";
 
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { useListing, type ListingDetail } from "@/demo/air-bnb/state/listing";
 import { TourHeader } from "./header";
 import { PhotoGrid } from "./photo-grid";
@@ -18,7 +18,7 @@ export default function PhotoTourPage({
   const detail =
     listing.current?.id === initialData.id ? listing.current : initialData;
   return (
-    <SsgoiRouteBoundary className="relative block min-h-full w-full bg-white">
+    <SsgoiLayoutBoundary className="relative block min-h-full w-full bg-white">
       <TourHeader id={detail.id} />
       <div className="px-4 pb-4">
         <h1 className="text-[26px] font-bold text-neutral-900">Photo tour</h1>
@@ -28,6 +28,6 @@ export default function PhotoTourPage({
         </p>
       </div>
       <PhotoGrid detail={detail} />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

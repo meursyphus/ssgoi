@@ -1,6 +1,6 @@
 # SSGOI with Solid
 
-Use the Solid package for common rendering and effects. Solid Router and SolidStart share the same boundary implementation.
+Use the Solid package for common rendering, effects, and the layout boundary. Solid Router and SolidStart pass the same getRoute as framework.
 
 Install @ssgoi/solid. Keep one provider above the changing page region.
 
@@ -37,7 +37,7 @@ export function Comments() {
 }
 ```
 
-## Router helpers
+## Router integrations
 
 - Solid Router (experimental): https://ssgoi.dev/llms/frameworks/solid-router.txt
 - SolidStart (experimental): https://ssgoi.dev/llms/frameworks/solidstart.txt

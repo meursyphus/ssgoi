@@ -1,19 +1,25 @@
 import {
   type Signal,
+  useComputed$,
   useContextProvider,
+  useSignal,
   useStore,
+  useTask$,
   useVisibleTask$,
 } from "@builder.io/qwik";
 import {
   createSggoiTransitionContext,
   observeSsgoiTransitions,
+  resolveLayoutChain,
 } from "@ssgoi/core/internal";
-import type { SsgoiConfigQrl, SsgoiHostQrl } from "./types";
+import type { SsgoiConfigQrl, SsgoiHostQrl, SsgoiLayoutScope } from "./types";
 import { SsgoiTransitionContextId, type SsgoiTransitionStore } from "./context";
+import { SsgoiRouteContextId, type SsgoiFramework } from "./layout-boundary";
 
 export interface UseSsgoiOptions {
   config$?: SsgoiConfigQrl;
   host$?: SsgoiHostQrl;
+  framework?: SsgoiFramework;
 }
 
 export const useSsgoi = (
@@ -30,6 +36,21 @@ export const useSsgoi = (
     direction: null,
   });
   useContextProvider(SsgoiTransitionContextId, transition);
+
+  // Only the serialisable layout tree is kept from the config. The task runs
+  // before children render, so boundaries see the chain on the server too.
+  const location = options.framework?.location;
+  const layouts = useSignal<readonly SsgoiLayoutScope[]>();
+  useTask$(async () => {
+    if (!location || !configQrl) return;
+    const config = await (await configQrl.resolve())();
+    layouts.value = config.layouts;
+  });
+  const route = useComputed$(() => {
+    const routePath = location?.url.pathname ?? "";
+    return { routePath, chain: resolveLayoutChain(layouts.value, routePath) };
+  });
+  useContextProvider(SsgoiRouteContextId, location ? route : null);
 
   useVisibleTask$(
     async ({ cleanup, track }) => {

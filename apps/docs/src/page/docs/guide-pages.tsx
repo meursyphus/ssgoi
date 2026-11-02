@@ -56,7 +56,7 @@ export function WhySsgoiBody() {
           className="mt-6"
           language="text"
           code={`app/
-  ssgoi-provider.tsx         # new — config + <Ssgoi>
+  ssgoi-provider.tsx         # new — config + framework + <Ssgoi>
   layout.tsx                 # already yours — wrap routed content`}
         />
         <p className={`mt-4 ${body}`}>
@@ -325,8 +325,10 @@ export function BoundariesBody() {
       <p className={body}>
         A route boundary is the real DOM element that owns a changing page. The
         framework creates and removes it; SSGOI observes that lifetime and
-        animates the region. Router helpers are optional conveniences around
-        this pattern, so a router does not need a dedicated SSGOI package.
+        animates the region. The layout boundary each package ships builds this
+        element from the route your provider&apos;s{" "}
+        <code className={inlineCode}>framework</code> object reads, so a router
+        does not need a dedicated SSGOI package.
       </p>
       <CodeBlock
         className="mt-6"
@@ -338,12 +340,14 @@ export function BoundariesBody() {
       <p className={`mt-6 ${body}`}>
         Place the boundary inside one provider. Get the pathname from the router
         in the same render as its children; a mount-time window.location read or
-        an effect-delayed key can miss the outgoing page. Ready-made helpers are
-        listed within each{" "}
+        an effect-delayed key can miss the outgoing page. The ready-made{" "}
+        <code className={inlineCode}>SsgoiLayoutBoundary</code> does this for
+        you and throws if its provider has no{" "}
+        <code className={inlineCode}>framework</code>; each{" "}
         <Link href="/docs/frameworks" className={link}>
           framework guide
-        </Link>
-        .
+        </Link>{" "}
+        shows the object for its router.
       </p>
 
       <Section
@@ -378,6 +382,13 @@ export function BoundariesBody() {
             remount triggers it.
           </Note>
         </div>
+        <p className={`mt-6 ${body}`}>
+          <code className={inlineCode}>SsgoiLayoutBoundary</code> takes no SSGOI
+          props and sets both itself. The id is always the route path. The key
+          is the <code className={inlineCode}>config.layouts</code> scope that
+          matches at the boundary&apos;s depth — the number of boundaries above
+          it — and the route path when no scope matches there.
+        </p>
       </Section>
 
       <Section
@@ -427,7 +438,8 @@ export function RouteBoundary({ children, pathname, routeKey, ...props }: Props)
           A bottom-nav app is the usual case. Tab → tab should remount only the
           page content; tab → detail should remount the whole shell and take the
           nav with it. That needs an outer shell boundary and an inner content
-          boundary.
+          boundary, plus one <code className={inlineCode}>config.layouts</code>{" "}
+          scope that lists the tab routes so the outer key holds across them.
         </p>
         <p className={`mt-4 ${body}`}>
           When both change in the same navigation, the outer one owns the
@@ -440,6 +452,78 @@ export function RouteBoundary({ children, pathname, routeKey, ...props }: Props)
           <Note>
             Keep one <code className={inlineCode}>&lt;Ssgoi&gt;</code> provider.
             Add boundaries to express ownership; never nest providers.
+          </Note>
+        </div>
+      </Section>
+
+      <Section
+        title="When the framework hides instead of unmounting"
+        id="cache-components"
+        lead="Next.js Cache Components keeps visited routes alive, so there is no remount for a key to trigger."
+      >
+        <p className={`mt-4 ${body}`}>
+          With <code className={inlineCode}>cacheComponents</code> enabled,
+          Next.js keeps a route you leave mounted inside React{" "}
+          <code className={inlineCode}>&lt;Activity&gt;</code> and hides it, so
+          Back brings it back with its state. SSGOI treats that hide as the
+          route leaving and the reveal as it arriving.{" "}
+          <code className={inlineCode}>SsgoiLayoutBoundary</code> would defeat
+          this: its key change remounts the route and discards the state.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          <code className={inlineCode}>SsgoiPageBoundary</code> is the exception
+          to the note above: it sets only the id and never a key, because the
+          lifetime comes from the hide, not from a remount. Its id is the
+          route&apos;s <code className={inlineCode}>pathname</code> and follows
+          it only while the boundary is visible, so a hidden group boundary
+          still names the route the user left from. It uses the same provider
+          and <code className={inlineCode}>framework</code>, takes no SSGOI
+          props, ignores <code className={inlineCode}>config.layouts</code>, and
+          throws if its provider has no{" "}
+          <code className={inlineCode}>framework</code>.
+        </p>
+        <p className={`mt-4 ${body}`}>
+          The root layout keeps the provider with no boundary. Every route-group
+          layout wraps its whole content in{" "}
+          <code className={inlineCode}>SsgoiPageBoundary</code>, bottom nav
+          included, so the nav leaves with its group. Every page wraps itself in
+          one too. Intercepted <code className={inlineCode}>@modal</code> pages
+          are not wrapped. The{" "}
+          <Link href="/docs/frameworks/react#nextjs" className={link}>
+            Next.js guide
+          </Link>{" "}
+          shows the files.
+        </p>
+        <DocsTable
+          head={["Navigation", "What happens"]}
+          rows={[
+            [
+              "Tab → tab",
+              "The group stays visible; only the page boundary swaps, so the nav stays.",
+            ],
+            [
+              "Tab → detail",
+              "The whole tab group is hidden and leaves with its nav.",
+            ],
+            ["Detail → detail", "The detail group stays; only the page swaps."],
+            [
+              "Back",
+              "The hidden route is revealed with its state intact and animates in.",
+            ],
+          ]}
+          minWidth="560px"
+        />
+        <p className={`mt-6 ${body}`}>
+          Wrap it once in your own screen component, such as an{" "}
+          <code className={inlineCode}>AppScreen</code> every page returns, so
+          no page can forget it.
+        </p>
+        <div className="mt-6">
+          <Note>
+            Do not mix <code className={inlineCode}>SsgoiLayoutBoundary</code>{" "}
+            and <code className={inlineCode}>SsgoiPageBoundary</code> in the
+            same region. A layout boundary&apos;s key change remounts the routes
+            the page boundaries rely on staying alive.
           </Note>
         </div>
       </Section>
@@ -1193,10 +1277,19 @@ export function FrameworksIndexBody() {
   return (
     <div className="mt-8">
       <p className={body}>
-        Choose your rendering framework first, then the helper for your router.
-        Transition factories and route rules are identical everywhere; the
-        provider and boundary wiring differ per stack — Qwik takes a QRL config
-        factory, Angular an <code className={inlineCode}>ssgoi</code> directive.
+        Choose your rendering framework first, then give the provider a{" "}
+        <code className={inlineCode}>framework</code> object that reads your
+        router and wrap routed content in the package&apos;s layout boundary.
+        Boundaries take no SSGOI props and key themselves from{" "}
+        <code className={inlineCode}>config.layouts</code>. Transition factories
+        and route rules are identical everywhere; the provider and boundary
+        wiring differ per stack — Qwik takes a QRL config factory, Angular an{" "}
+        <code className={inlineCode}>ssgoi</code> directive.
+      </p>
+      <p className={`mt-4 ${body}`}>
+        The older router subpaths, such as{" "}
+        <code className={inlineCode}>@ssgoi/react/nextjs</code>, still work but
+        are deprecated and will be removed in 8.0.0.
       </p>
 
       <ul className="mt-8 divide-y divide-line border-y border-line">

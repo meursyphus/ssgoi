@@ -1,6 +1,8 @@
 import {
+  createContext,
   createRef,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -40,11 +42,16 @@ export interface ExpoRouteLocation {
 }
 export interface BoundaryOptions {
   style?: StyleProp<ViewStyle>;
+}
+export interface LegacyBoundaryOptions {
   /** Evaluated against each screen's own route, including retained screens. */
   resolve?: (location: ExpoRouteLocation) => RouteBoundaryState;
   /** Scoped by the native route key; never merges distinct pushed screen instances. */
   routeKey?: string | number;
 }
+// TODO(8.0.0): remove with the deprecated Expo Router entry.
+// Carries the deprecated entry's resolve/routeKey; SsgoiLayoutBoundary keys screens by native route.
+export const LegacyBoundaryContext = createContext<LegacyBoundaryOptions>({});
 export type NavigatorEvents = {
   transitionStart: { data: { closing: boolean }; canPreventDefault: false };
   transitionEnd: { data: { closing: boolean }; canPreventDefault: false };
@@ -61,7 +68,7 @@ function screenFor(
   route: NavigatorRoute,
   descriptor: NavigatorDescriptor<ScreenOptions>,
   namespace: string,
-  options: BoundaryOptions,
+  options: LegacyBoundaryOptions,
   target?: NativeSurfaceHandle,
 ): Screen<Scene> {
   const pathname = route.href?.startsWith("/")
@@ -103,9 +110,8 @@ export function NativeNavigator({
   descriptors,
   emitter,
   style,
-  resolve,
-  routeKey,
 }: ContentProps) {
+  const { resolve, routeKey } = useContext(LegacyBoundaryContext);
   const ssgoi = useSsgoi();
   const namespace = useId();
   const window = useWindowDimensions();

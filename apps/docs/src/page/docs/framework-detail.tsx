@@ -26,7 +26,7 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
       ))}
 
       <nav
-        aria-label={`${doc.name} router helpers`}
+        aria-label={`${doc.name} router integrations`}
         className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm"
       >
         {doc.routers.map((router) => (
@@ -95,7 +95,7 @@ export function FrameworkDetailBody({ doc }: { doc: FrameworkDoc }) {
           </>
         ) : (
           <>
-            The helpers connect your router to the common implementation.{" "}
+            Each router connects through the provider&apos;s framework prop.{" "}
             <Link href="/docs/boundaries" className={link}>
               Route boundaries
             </Link>{" "}

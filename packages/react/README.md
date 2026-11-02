@@ -12,17 +12,28 @@ npm install @ssgoi/react
 
 Agent setup guide: https://ssgoi.dev/llms.txt
 
-## Router helpers
+## Router integration
 
-Install this framework package once; router helpers are optional subpaths.
-Next.js is the only helper not marked experimental. The other router helpers are experimental APIs.
+Tell `<Ssgoi framework>` how to read your router once, describe your layout
+tree in `config.layouts`, and put a prop-less `SsgoiLayoutBoundary` from
+`@ssgoi/react` in each layout that owns routed content. The root entry imports
+no router package: `framework.useRoute` is a hook you write with your router's
+own hooks, returning `{ pathname, renderedPath? }` or `null` while the router
+isn't ready. The first boundary calls it once for every boundary inside it.
 
-| Router                  | Import                         | API                  |
-| ----------------------- | ------------------------------ | -------------------- |
-| Next.js                 | `@ssgoi/react/nextjs`          | `SsgoiRouteBoundary` |
-| Remix 2                 | `@ssgoi/react/remix`           | `SsgoiRouteBoundary` |
-| React Router            | `@ssgoi/react/react-router`    | `SsgoiRouteBoundary` |
-| TanStack Router / Start | `@ssgoi/react/tanstack-router` | `SsgoiRouteBoundary` |
+| Router                  | `useRoute`                                                       |
+| ----------------------- | ---------------------------------------------------------------- |
+| Next.js App Router      | `usePathname` + `useSelectedLayoutSegments` ([Next.js](#nextjs)) |
+| React Router / Remix 2  | `() => useLocation()`                                            |
+| TanStack Router / Start | the rendered leaf match ([TanStack Router](#tanstack-router))    |
+
+Define the object at module scope so it stays stable. `SsgoiLayoutBoundary`
+throws if the nearest `<Ssgoi>` has no `framework`.
+
+The router subpaths `@ssgoi/react/nextjs`, `@ssgoi/react/remix`,
+`@ssgoi/react/react-router` and `@ssgoi/react/tanstack-router` (and their
+`SsgoiRouteBoundary`) still work but are deprecated and will be removed in
+8.0.0.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring and limits.
 
@@ -30,6 +41,7 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring an
 
 - Next.js
 - Persistent layouts and sliding tabs
+- Next.js Cache Components: SsgoiPageBoundary
 - React Router
 - TanStack Router
 - Config
@@ -55,10 +67,21 @@ Keep one config and one `<Ssgoi>` above route boundaries.
 // app/ssgoi-provider.tsx
 "use client";
 
-import { Ssgoi } from "@ssgoi/react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { drill, slide } from "@ssgoi/react/view-transitions";
 
+const TOP_LEVEL = ["/", "/search", "/profile"];
+
 const config = {
+  layouts: [
+    { paths: TOP_LEVEL },
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/**" }],
+    },
+  ],
   transitions: [
     { on: "/posts/**", except: "/posts", transition: drill() },
     {
@@ -68,23 +91,49 @@ const config = {
   ],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+const framework: SsgoiFramework = {
+  useRoute: () => {
+    const pathname = usePathname();
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = `/${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}`;
+    return { pathname, renderedPath };
+  },
+};
+
 export function SsgoiProvider({ children }) {
-  return <Ssgoi config={config}>{children}</Ssgoi>;
+  return (
+    <Ssgoi config={config} framework={framework}>
+      {children}
+    </Ssgoi>
+  );
 }
 ```
 
-Build the layout shell next:
+Render the provider in the root layout with the depth-0 boundary:
 
 ```tsx
 // app/layout.tsx
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { SsgoiProvider } from "./ssgoi-provider";
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children, modal }) {
   return (
     <html>
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
-          <SsgoiProvider>{children}</SsgoiProvider>
+          <SsgoiProvider>
+            <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+            {modal}
+          </SsgoiProvider>
         </main>
       </body>
     </html>
@@ -98,12 +147,18 @@ block, `z-0` creates the local stacking context, and `overflow-x-clip` prevents
 horizontal transition flashes. These classes belong on the shell around
 `<Ssgoi>`, not on route boundaries.
 
+Put the first `SsgoiLayoutBoundary` in the same layout as `<Ssgoi>`:
+`renderedPath` is computed relative to that layout. That boundary reads the
+route for every boundary inside it, within its own `Suspense`, so Next.js Cache
+Components can suspend on the URL. Until the route is known it renders nothing,
+while content outside it (such as `{modal}`) renders as usual.
+
 ### Route boundary
 
 A React route boundary is a keyed element marked with a route id:
 
 ```tsx
-<div key={boundary.key} data-ssgoi-transition={boundary.id}>
+<div key={key} data-ssgoi-transition={routePath}>
   {children}
 </div>
 ```
@@ -113,165 +168,196 @@ A React route boundary is a keyed element marked with a route id:
 - `<Ssgoi>` observes that lifecycle and runs OUT/IN; it does not navigate or
   change the key.
 
+`SsgoiLayoutBoundary` renders that element for you and takes no SSGOI props:
+`as` picks the element (default `div`) and every other prop is forwarded.
+
+- Its depth is the number of boundaries above it: 0 in the root layout, 1 in a
+  layout under it, and so on.
+- `routePath` is `renderedPath ?? pathname`; it is the id of every boundary.
+- The key at depth N is the depth-N scope instance `config.layouts` resolves for
+  `routePath`, or `routePath` itself when there is none. Without
+  `config.layouts`, every boundary keys by the route.
+
 The legacy `<SsgoiTransition>` wrapper only added this attribute and is
-deprecated. Set `data-ssgoi-transition` directly on the keyed application
-boundary.
-
-Use `@ssgoi/react/nextjs` for the ready-made boundary. If the application needs
-its own policy layer, the following manual example keeps route logic behind
-semantic names so layouts cannot invent inconsistent keys:
-
-```tsx
-// app/ssgoi-route-boundary.tsx
-"use client";
-
-import { type ReactNode } from "react";
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
-
-type BoundaryName = "app-shell" | "main-content" | "project-content";
-type BoundaryIdentity = { id: string; key: string };
-
-const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
-
-function isRouteGroup(segment: string) {
-  return segment.startsWith("(") && segment.endsWith(")");
-}
-
-function pathFromSegments(segments: string[]) {
-  const path = segments
-    .filter((segment) => !isRouteGroup(segment))
-    .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
-    .filter(Boolean)
-    .join("/");
-
-  return path ? `/${path}` : null;
-}
-
-function resolveBoundary(
-  name: BoundaryName,
-  pathname: string,
-  segments: string[],
-): BoundaryIdentity {
-  const ownedRoute = pathFromSegments(segments) ?? pathname;
-
-  switch (name) {
-    case "app-shell": {
-      const routeGroup = segments.find(isRouteGroup);
-      if (routeGroup === "(main)") {
-        return { id: ownedRoute, key: "main-shell" };
-      }
-
-      const project = ownedRoute.match(/^\/projects\/[^/]+/)?.[0];
-      return { id: ownedRoute, key: project ?? ownedRoute };
-    }
-    case "project-content": {
-      const project = pathname.match(/^\/projects\/[^/]+/)?.[0];
-      const child = pathFromSegments(segments);
-      const id = project
-        ? child
-          ? `${project}${child}`
-          : project
-        : ownedRoute;
-      return { id, key: id };
-    }
-    case "main-content":
-      return { id: ownedRoute, key: ownedRoute };
-  }
-}
-
-export function SsgoiRouteBoundary({
-  children,
-  name,
-}: {
-  children: ReactNode;
-  name: BoundaryName;
-}) {
-  const pathname = usePathname();
-  const segments = useSelectedLayoutSegments("children");
-  const boundary = resolveBoundary(name, pathname, segments);
-
-  return (
-    <div key={boundary.key} data-ssgoi-transition={boundary.id}>
-      {children}
-    </div>
-  );
-}
-```
+deprecated (removed in 8.0.0). Set `data-ssgoi-transition` directly on the keyed
+application boundary.
 
 ## Persistent layouts
 
-Place one named boundary in the common app layout, then add child boundaries
-only around routed content that changes while its parent remains mounted.
+`config.layouts` mirrors the layouts that own boundaries. Siblings in one array
+are tried in order and the first match wins (`except` excludes paths); a scope's
+`layouts` is the next depth inside it. Patterns use the transition-rule syntax.
+`*`, `:id` and `[id]` segments make one instance per value, so
+`{ paths: "/projects/:id/**" }` keeps `/projects/1/files` and
+`/projects/1/members` in one layout and gives `/projects/2` another; `**`
+tails do not.
 
-```tsx
-// app/layout.tsx — replace the provider line from the shell example.
-<SsgoiProvider>
-  <SsgoiRouteBoundary name="app-shell">{children}</SsgoiRouteBoundary>
-</SsgoiProvider>
+```text
+app/
+  layout.tsx                  # <Ssgoi> + depth-0 boundary, {modal} outside it
+  (top-level)/layout.tsx      # depth-1 boundary + bottom nav outside it
+  (top-level)/page.tsx
+  (top-level)/search/page.tsx
+  (detail)/layout.tsx         # depth-1 boundary
+  (detail)/posts/[id]/page.tsx
+  (detail)/products/layout.tsx  # depth-2 boundary + category tabs
+  @modal/(.)posts/[id]/page.tsx
 ```
 
 ```tsx
-// app/(main)/layout.tsx
-export default function MainLayout({ children }) {
+// app/(top-level)/layout.tsx
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
+
+export default function TopLevelLayout({ children }) {
   return (
     <>
-      <SsgoiRouteBoundary name="main-content">{children}</SsgoiRouteBoundary>
+      <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
       <BottomNav />
     </>
   );
 }
 ```
 
-- Main → main: only the inner content boundary changes; the nav stays.
-- Main → detail: the common app-shell key changes; the nav leaves with it.
-- Project tab → project tab: the current project base-path key stays; a project
-  content boundary can change below its header and tabs.
+With the config above:
 
-Use Next.js route groups to describe layout ownership, not to duplicate the
-outer boundary:
-
-```text
-app/
-  layout.tsx                 # one <Ssgoi> + one named app-shell boundary
-  (main)/layout.tsx
-  (main)/page.tsx
-  (main)/search/page.tsx
-  (detail)/post/[id]/page.tsx
-```
-
-For Next.js parallel and intercepting routes, the browser pathname may point at
-a modal while the background `children` slot has not changed. Resolve that
-boundary’s id/key from `useSelectedLayoutSegments("children")`. In the layout
-that owns `@modal`, `useSelectedLayoutSegment("modal") !== null` is an explicit
-active-modal check. A soft intercept keeps the background key; direct entry to
-the same URL resolves to the detail slot and receives a detail key.
+- Tab → tab (`/` → `/search`): the depth-0 key stays, so the bottom nav stays;
+  only the depth-1 content changes.
+- Top level → detail (`/search` → `/posts/1`): the depth-0 key changes; the
+  whole top level, bottom nav included, leaves.
+- Detail → detail and category → category under `/products/**`: the enclosing
+  layouts stay; the boundary one level deeper changes, so `slide` moves only
+  the category content.
+- A soft intercept (`/posts/1` opened over `/search`) keeps `renderedPath` at
+  `/search`, so nothing in the background moves; the `{modal}` slot sits
+  outside every boundary and animates by itself. Direct entry to `/posts/1`
+  renders the detail page and keys it as one.
 
 Full pattern: https://ssgoi.dev/llms/bottom-nav.txt
 
-## React Router
+## Next.js Cache Components: SsgoiPageBoundary
 
-Replace `usePathname()` with `useLocation()` and render the boundary in a
-nested layout route:
+With `cacheComponents` enabled, Next.js keeps visited routes alive inside React
+`<Activity>` instead of unmounting them, so Back restores their state.
+`SsgoiLayoutBoundary` keys its element by the route, which forces a remount and
+throws that state away. `SsgoiPageBoundary` is never keyed: React hiding the
+route (`display: none !important` on its top-most element) is the OUT, showing
+it again is the IN.
+
+```text
+app/
+  (app)/layout.tsx              # <Ssgoi> only, no boundary
+  (app)/(top-level)/layout.tsx  # <SsgoiPageBoundary> around content + bottom nav
+  (app)/(top-level)/page.tsx    # <SsgoiPageBoundary> around the page
+  (app)/(detail)/layout.tsx     # <SsgoiPageBoundary> around content
+  (app)/(detail)/posts/[id]/page.tsx  # <SsgoiPageBoundary> around the page
+  (app)/@modal/(.)posts/[id]/page.tsx # not wrapped
+```
 
 ```tsx
-const { pathname } = useLocation();
+// app/(app)/(top-level)/layout.tsx
+import { SsgoiPageBoundary } from "@ssgoi/react";
 
-return (
-  <div key={pathname} data-ssgoi-transition={pathname}>
-    <Outlet />
-  </div>
-);
+export default function TopLevelLayout({ children }) {
+  return (
+    <SsgoiPageBoundary>
+      {children}
+      <BottomNav />
+    </SsgoiPageBoundary>
+  );
+}
+
+// app/(app)/(top-level)/search/page.tsx
+export default function SearchPage() {
+  return <SsgoiPageBoundary>…</SsgoiPageBoundary>;
+}
 ```
+
+- Every route-group layout wraps its content in one, with persistent chrome
+  such as a bottom nav inside it so the chrome leaves with the group. Every
+  page wraps itself in one. Intercepted `@modal` pages are not wrapped; the
+  `{modal}` slot animates by itself.
+- Tab → tab: the page swaps, the group and its nav stay. Tab → detail: the
+  whole group, nav included, leaves. Detail → detail: the page swaps. Back
+  reveals the kept route with its state.
+- The id is `pathname` (`renderedPath` is ignored), rendered on the server and
+  then updated only while the boundary is visible. A hidden group keeps the id
+  of the route the user left from. The same `framework` object works for both
+  boundaries.
+- Known beta limitation: while a soft-intercepted modal is open, the visible
+  background boundaries' id follows the URL (the modal's path), not the page
+  they show.
+- Known Next.js issue ([vercel/next.js#98623](https://github.com/vercel/next.js/issues/98623)):
+  from the second visit on, Next reorders the kept-alive `<Activity>` routes and
+  React moves their DOM, which resets DOM state inside them — iframes reload,
+  media restarts, inner scroll containers return to the start. SSGOI cannot
+  prevent that move; it is fixed in Next itself.
+- It takes no SSGOI props: `as` picks the element (default `div`; a component
+  must pass `ref` to its DOM node) and every other prop is forwarded. It reads
+  the route itself, inside its own `Suspense`, and renders nothing until the
+  route is known.
+- `config.layouts` is not used in this mode. Don't mix `SsgoiLayoutBoundary`
+  and `SsgoiPageBoundary` in the same region.
+- Wrap it once in your own screen component (for example an `AppScreen`) so a
+  page can't forget it.
+
+## React Router
+
+Render `<Ssgoi>` inside the router and the boundary in a layout route:
+
+```tsx
+import { Outlet, useLocation } from "react-router"; // Remix 2: "@remix-run/react"
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+
+export default function Layout() {
+  return (
+    <Ssgoi config={config} framework={framework}>
+      <SsgoiLayoutBoundary>
+        <Outlet />
+      </SsgoiLayoutBoundary>
+    </Ssgoi>
+  );
+}
+```
+
+Query-only navigation keeps the boundary. Nested layout routes add deeper
+boundaries, keyed by `config.layouts` as above.
 
 ## TanStack Router
 
-Read the pathname from router state and place the boundary in a parent route:
+Key by the leaf match the outlet renders, not `location`: TanStack Router moves
+`location` before pending matches render, so keying by it re-keys the boundary
+while the outgoing page is still on screen. Index routes match as "/parent/",
+so the location's own trailing-slash style wins.
 
 ```tsx
-const pathname = useRouterState({
-  select: (state) => state.location.pathname,
-});
+import { Outlet, useRouterState } from "@tanstack/react-router";
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const framework: SsgoiFramework = {
+  useRoute: () => ({
+    pathname: useRouterState({
+      select: (state) => {
+        const location = state.location.pathname;
+        const leaf = state.matches.at(-1)?.pathname;
+        if (!leaf) return location;
+        return leaf.length > 1 && leaf.endsWith("/") && !location.endsWith("/")
+          ? leaf.slice(0, -1)
+          : leaf;
+      },
+    }),
+  }),
+};
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary>
+    <Outlet />
+  </SsgoiLayoutBoundary>
+</Ssgoi>;
 ```
+
+Pathless `_layout` routes add deeper boundaries, keyed by `config.layouts`.
 
 ## Config
 
@@ -298,6 +384,8 @@ const config = {
 };
 ```
 
+- `layouts`: the layout tree for `SsgoiLayoutBoundary` keys (see
+  [Persistent layouts](#persistent-layouts)).
 - `on`: route family.
 - `from`/`to`: precise pair.
 - `ordered`: directional sequence.
@@ -324,8 +412,9 @@ References: https://ssgoi.dev/llms.txt#7-transition-index
 
 ## Low-level APIs
 
-`transition()` and the auto-key plugins remain available for element-level
-mount/unmount animations; they are separate from route boundaries.
+`transition()` remains available for element-level mount/unmount animations;
+it is separate from route boundaries. The `@ssgoi/react/unplugin` auto-key
+plugins are deprecated and will be removed in 8.0.0.
 
 ## License
 

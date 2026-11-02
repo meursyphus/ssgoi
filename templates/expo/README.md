@@ -2,7 +2,18 @@
 
 The router helper used by this template is an experimental API.
 
-Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiRouteBoundary` integration.
+Experimental example for `@ssgoi/react-native`, using the file-based `SsgoiLayoutBoundary` integration. Expo Router's navigator primitives are passed to `<Ssgoi framework>`; the package itself never imports `expo-router`.
+
+```tsx
+import { StackRouter, unstable_integrateWithRouter } from "expo-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/react-native";
+
+const framework = { StackRouter, unstable_integrateWithRouter };
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary />
+</Ssgoi>;
+```
 
 From the repository root:
 
@@ -15,7 +26,7 @@ pnpm --filter ssgoi-expo-template start
 
 Use a compatible Expo Go SDK 56 build or a development build matching this template. React Native 0.85.3, Reanimated 4.3.1, and Worklets 0.8.3 are pinned. Newer Expo Go/SDK versions are not part of this preview's compatibility claim. The app contains no SSGOI custom native module.
 
-`app/_layout.tsx` owns the provider, config, and boundary. No `.Screen` list is needed. The app supplies safe-area insets and screen backgrounds.
+`app/_layout.tsx` owns the provider, config, and boundary. No `.Screen` list is needed. Native stacks don't use `config.layouts`: every pushed screen is its own instance, so one root `<SsgoiLayoutBoundary />` is enough. The app supplies safe-area insets and screen backgrounds.
 
 Try these on both iOS and Android:
 

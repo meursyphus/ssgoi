@@ -1,24 +1,37 @@
 # SSGOI with Solid Router
 
-Experimental API: this router helper may change.
+Experimental API: this router integration may change.
 
 Install @ssgoi/solid in an existing Solid Router application.
-Use the Solid Router entry for Solid applications. SolidStart’s existing entry uses this same implementation.
+Return Solid Router's location pathname from `framework.getRoute` on the common provider. SolidStart uses this same setup.
 
 Keep one common provider above the following boundary.
 
 ## Wrap the routed children
 
-The keyed boundary recreates the changing region while routeKey can preserve an outer shell.
+Render the provider inside <Router> so useLocation works. The keyed boundary recreates the changing region; config.layouts can keep an outer shell mounted. SsgoiLayoutBoundary throws if <Ssgoi> has no framework.
 
 ```tsx
-import { SsgoiRouteBoundary } from "@ssgoi/solid/solid-router";
+import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
+import { config } from "./ssgoi-config";
 
-<SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
+function Root(props: RouteSectionProps) {
+  const location = useLocation();
+  return (
+    <Ssgoi config={config} framework={{ getRoute: () => ({ pathname: location.pathname }) }}>
+      <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+    </Ssgoi>
+  );
+}
+
+<Router root={Root}>{/* routes */}</Router>
 ```
 
 ## Route lifetime
 
-The default key follows the pathname. resolve can return separate id and key values; use a stable shell key only around content that should remain mounted.
+The default key follows the pathname. A boundary at depth N instead keys by the config.layouts scope that matches at depth N, so a section declared there stays mounted while its inner boundary swaps.
+
+SsgoiRouteBoundary from @ssgoi/solid/solid-router still works but is deprecated and will be removed in 8.0.0.
 
 Common setup: https://ssgoi.dev/llms/frameworks/solid.txt

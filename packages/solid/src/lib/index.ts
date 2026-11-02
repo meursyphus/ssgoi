@@ -1,6 +1,8 @@
 export * from "./types";
 export { Ssgoi } from "./ssgoi";
 export { useSsgoiTransition } from "./context";
-/** @deprecated Set `data-ssgoi-transition` directly on an element inside `<Ssgoi>` instead. */
-export { SsgoiTransition } from "./ssgoi-transition";
+export { SsgoiLayoutBoundary } from "./layout-boundary";
+export type { SsgoiLayoutBoundaryProps } from "./layout-boundary";
+/** @deprecated Will be removed in 8.0.0. */
+export { SsgoiTransition } from "./legacy/ssgoi-transition";
 export * from "@ssgoi/core";

@@ -17,33 +17,42 @@ container, and scroll restore then targets the wrong element. Fall back to
 
 ## Setup
 
-Everything wires at the router root — one `<Ssgoi>`, the shell classes, and
-the boundary component around the routed children:
+Everything wires at the router root — one `<Ssgoi>` whose `framework.getRoute`
+reads Solid Router's location, the shell classes, and the boundary component around
+the routed children:
 
 ```tsx
 // src/app.tsx
-import { Router } from "@solidjs/router";
+import { Router, useLocation, type RouteSectionProps } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Ssgoi } from "@ssgoi/solid";
+import { Suspense } from "solid-js";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/solid";
 import { config } from "./ssgoi-config";
-import { SsgoiRouteBoundary } from "@ssgoi/solid/solidstart";
+
+function Root(props: RouteSectionProps) {
+  const location = useLocation();
+  return (
+    <main class="relative z-0 min-h-dvh overflow-x-clip">
+      <Ssgoi config={config} framework={{ getRoute: () => ({ pathname: location.pathname }) }}>
+        <Suspense>
+          <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+        </Suspense>
+      </Ssgoi>
+    </main>
+  );
+}
 
 export default function App() {
   return (
-    <Router
-      root={(props) => (
-        <main class="relative z-0 min-h-dvh overflow-x-clip">
-          <Ssgoi config={config}>
-            <SsgoiRouteBoundary>{props.children}</SsgoiRouteBoundary>
-          </Ssgoi>
-        </main>
-      )}
-    >
+    <Router root={Root}>
       <FileRoutes />
     </Router>
   );
 }
 ```
+
+`useLocation` only works inside `<Router>`, so the provider lives in the router
+root. `SsgoiLayoutBoundary` throws if `<Ssgoi>` has no `framework`.
 
 ```ts
 // src/ssgoi-config.ts
@@ -60,46 +69,48 @@ export const config: SsgoiConfig = {
 `<Show keyed>` recreates its child when the id changes — that unmount/mount
 pair is what SSGOI animates:
 
-The route boundary is shipped in `@ssgoi/solid/solidstart`; no local component is needed.
+`SsgoiLayoutBoundary` is shipped in `@ssgoi/solid`; no local component is needed.
 
 Verify: navigate `/` → any page slides in from the right; back slides out.
 
 ## Beyond the basics
 
-For a persistent `/products` shell, collapse that family at the root:
+For a persistent `/shop` shell, declare it in config and keep the root
+boundary as it is:
 
-```tsx
-const getRootTransitionId = (path: string) =>
-  path === "/products" || path.startsWith("/products/")
-    ? "/products"
-    : path;
-
-<SsgoiRouteBoundary resolve={({ pathname }) => ({ id: pathname, key: getRootTransitionId(pathname) })}>
-  {props.children}
-</SsgoiRouteBoundary>
+```ts
+export const config = {
+  layouts: [{ paths: "/shop/**" }],
+  transitions: [/* ... */],
+};
 ```
 
-Then add a default pathname boundary only around the changing child:
+Then add a boundary only around the changing child:
 
 ```tsx
-// src/routes/products.tsx
-<ProductHeaderAndTabs />
-<SsgoiRouteBoundary>
+// src/routes/shop.tsx
+<ShopHeaderAndTabs />
+<SsgoiLayoutBoundary>
   {props.children}
-</SsgoiRouteBoundary>
+</SsgoiLayoutBoundary>
 ```
 
-The stable outer key preserves the shell; the inner pathname boundary produces
-child OUT/IN. Holding only one boundary constant preserves state but produces
-no child transition.
+The root boundary (depth 0) keys every `/shop` route by the one scope, so
+the shell stays; the inner boundary (depth 1) keys by the path and produces
+child OUT/IN.
 
 - Full example: https://github.com/meursyphus/ssgoi/tree/HEAD/templates/solidstart
 - Framework index: https://ssgoi.dev/llms/frameworks.txt
 
-`@ssgoi/solid/solidstart` loads only its optional Solid Router 0.15–0.16 peer.
-The root `@ssgoi/solid` import has no router dependency. The boundary accepts
-`as`, DOM attributes, `routeKey`, and `resolve({ pathname })`. Return `{ id, key? }`;
-key defaults to id and routeKey overrides it. Query/hash-only changes keep the
-boundary by default. Keep the logical id current even when the key is stable.
+Solid Router 0.15–0.16 is supported. The root `@ssgoi/solid` import has no
+router dependency; it calls the `getRoute` you pass. The boundary accepts
+`as` and DOM attributes and takes no SSGOI props: its id is the route path and
+its key is the `config.layouts` scope at its depth (the number of boundaries
+above it), or the route path. Query/hash-only changes keep the boundary by
+default.
 
 Manual/custom-router guide: https://ssgoi.dev/llms/manual-boundaries.txt
+
+`SsgoiRouteBoundary` from `@ssgoi/solid/solidstart` or
+`@ssgoi/solid/solid-router` still works but is deprecated and will be removed
+in 8.0.0.

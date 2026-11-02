@@ -2,7 +2,10 @@
 
 Experimental API: the router integration may change.
 
-Create one SSGOI root above the router outlet.
+Create one SSGOI root above the router outlet and give it an `ssgoiFramework`
+that reads Angular Router: `getRoute(injector)` returns the current route and
+`onNavigate(injector, callback)` reports committed navigations. `[ssgoi]` reads
+the route once and shares it with every boundary. `@ssgoi/angular` never imports `@angular/router` itself.
 
 ```bash
 npm install @ssgoi/angular
@@ -14,9 +17,24 @@ restore then targets the wrong element. Add `min-height:100dvh`.
 
 ```ts
 import { Component, signal } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/angular";
+import { NavigationEnd, Router, RouterOutlet, UrlTree } from "@angular/router";
+import { Ssgoi, type SsgoiConfig, type SsgoiFramework } from "@ssgoi/angular";
 import { drill } from "@ssgoi/angular/view-transitions";
+
+// Read once by [ssgoi]; the path drops the query string and fragment.
+const framework: SsgoiFramework = {
+  getRoute: (injector) => {
+    const router = injector.get(Router);
+    const { root } = router.parseUrl(router.url);
+    return { pathname: router.serializeUrl(new UrlTree(root)) };
+  },
+  onNavigate: (injector, callback) => {
+    const subscription = injector.get(Router).events.subscribe((event) => {
+      if (event instanceof NavigationEnd) callback();
+    });
+    return () => subscription.unsubscribe();
+  },
+};
 
 @Component({
   selector: "app-root",
@@ -26,6 +44,7 @@ import { drill } from "@ssgoi/angular/view-transitions";
     <main
       ssgoi
       [config]="config()"
+      [ssgoiFramework]="framework"
       style="position:relative;z-index:0;min-height:100dvh;overflow-x:clip"
     >
       <router-outlet />
@@ -38,26 +57,27 @@ export class AppComponent {
       { on: "/posts/**", except: "/posts", transition: drill() },
     ],
   });
+  protected readonly framework = framework;
 }
 ```
 
-## Router boundary helper
+## Layout boundary
 
 A structural directive marks a page’s real DOM root and recreates its embedded view when its route key changes. The application keeps its RouterOutlet.
 
 ### Connect a routed page
 
-Import the standalone directive in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component.
+Import the standalone directive from @ssgoi/angular in the routed component. The template must have exactly one DOM root. This also handles parameter changes that reuse the same route component. It throws if the ssgoi element has no ssgoiFramework.
 
 ```ts
 import { Component } from "@angular/core";
-import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
+import { SsgoiLayoutBoundary } from "@ssgoi/angular";
 
 @Component({
   standalone: true,
-  imports: [SsgoiRouteBoundary],
+  imports: [SsgoiLayoutBoundary],
   template: `
-    <article *ssgoiRouteBoundary="let boundary">
+    <article *ssgoiLayoutBoundary="let boundary">
       {{ boundary.id }}
     </article>
   `,
@@ -67,7 +87,9 @@ export class PageComponent {}
 
 ### Persistent shells
 
-Use *ssgoiRouteBoundary="let boundary; key: 'shell'" to preserve the embedded view. A resolver can return { id, key? }. Query-only and cancelled navigation preserve the default view. This helper does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+Declare an outer shell in config.layouts, for example [{ paths: "/shop/**" }], and put *ssgoiLayoutBoundary on both the section layout’s root and its pages’ roots. Depth is automatic; the outer view is kept while navigation stays in the scope, and the inner one is recreated per path. The directive takes no input. Query-only and cancelled navigation preserve the default view. This directive does not coordinate custom RouteReuseStrategy caches, detached outlets, or auxiliary outlet transitions.
+
+SsgoiRouteBoundary from @ssgoi/angular/router still works but is deprecated and will be removed in 8.0.0.
 
 
 ## Transition state

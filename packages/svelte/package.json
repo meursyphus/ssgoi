@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/svelte",
-  "version": "7.4.1",
+  "version": "7.5.0-beta.4",
   "description": "Native app-like page transitions for Svelte and SvelteKit. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "main": "./dist/index.js",
@@ -108,9 +108,9 @@
       "import": "./dist/view-transitions.js"
     },
     "./sveltekit": {
-      "types": "./dist/routers/sveltekit/index.d.ts",
-      "svelte": "./dist/routers/sveltekit/index.js",
-      "import": "./dist/routers/sveltekit/index.js"
+      "types": "./dist/legacy/sveltekit/index.d.ts",
+      "svelte": "./dist/legacy/sveltekit/index.js",
+      "import": "./dist/legacy/sveltekit/index.js"
     }
   },
   "peerDependenciesMeta": {

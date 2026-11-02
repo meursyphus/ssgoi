@@ -30,13 +30,31 @@
  *     write that left display untouched) is ignored. Only React's writes — which
  *     we did not account — surface as `onHide` / `onShow` edges. A `reactHidden`
  *     latch ensures `onShow` only fires for a node we previously saw React hide.
+ *
+ * Edges are classified for the whole batch before any is dispatched, so each
+ * one can say whether it is NESTED: a watched ancestor is React-hidden, or has
+ * an edge of its own in the same batch. Next.js nests Activities (a route
+ * group's layout and the pages inside it), and re-entering a group reveals it
+ * while, inside it, the last page hides and another reveals — one commit. Those
+ * inner edges happened off screen; the ancestor's edge carries them, like a
+ * boundary mounted inside another boundary of the same batch. Record order
+ * cannot tell this apart (the ancestor's edge may come before or after its
+ * children's), so it is decided here, where the batch is known.
  */
+
+export type VisibilityEdge = {
+  /**
+   * A watched ancestor is React-hidden or has its own edge in the same batch,
+   * so this element was not on screen on one side of the edge.
+   */
+  nested: boolean;
+};
 
 export type VisibilityHandlers = {
   /** React drove this element to `display:none !important`. */
-  onHide: () => void;
+  onHide: (edge: VisibilityEdge) => void;
   /** React drove this element from its hidden state back to a visible display. */
-  onShow: () => void;
+  onShow: (edge: VisibilityEdge) => void;
 };
 
 export type VisibilityHandle = {
@@ -63,8 +81,8 @@ export type VisibilityHandle = {
 type Rec = {
   accounted: string;
   reactHidden: boolean;
-  onHide: () => void;
-  onShow: () => void;
+  onHide: (edge: VisibilityEdge) => void;
+  onShow: (edge: VisibilityEdge) => void;
 };
 
 // One shared observer watches every registered element's `style` attribute.
@@ -82,9 +100,26 @@ function readDisplay(el: HTMLElement): string {
   return priority ? `${value} !important` : value;
 }
 
+type Edge = { el: HTMLElement; rec: Rec; type: "hide" | "show" };
+
+function isNested(el: HTMLElement, changed: ReadonlySet<HTMLElement>): boolean {
+  for (
+    let ancestor = el.parentElement;
+    ancestor;
+    ancestor = ancestor.parentElement
+  ) {
+    const rec = records.get(ancestor);
+    if (rec && (rec.reactHidden || changed.has(ancestor))) return true;
+  }
+  return false;
+}
+
 function ensureObserver(): MutationObserver {
   if (sharedObserver) return sharedObserver;
   sharedObserver = new MutationObserver((mutations) => {
+    // Pass 1: classify every edge of the batch.
+    const edges: Edge[] = [];
+    const changed = new Set<HTMLElement>();
     for (const m of mutations) {
       const el = m.target as HTMLElement;
       const rec = records.get(el);
@@ -98,14 +133,25 @@ function ensureObserver(): MutationObserver {
         // React Activity hide signature. (A plain `display:none` is some other
         // code's doing — ignore it so we never hijack it into a hidden-mode OUT.)
         rec.reactHidden = true;
-        rec.onHide();
+        edges.push({ el, rec, type: "hide" });
+        changed.add(el);
       } else if (current !== "none") {
         // Became visible. Only meaningful if we previously saw React hide it.
         if (rec.reactHidden) {
           rec.reactHidden = false;
-          rec.onShow();
+          edges.push({ el, rec, type: "show" });
+          changed.add(el);
         }
       }
+    }
+
+    // Pass 2: dispatch, each edge knowing whether an ancestor carries it.
+    for (const { el, rec, type } of edges) {
+      // An earlier handler may have stopped watching this element.
+      if (records.get(el) !== rec) continue;
+      const edge: VisibilityEdge = { nested: isNested(el, changed) };
+      if (type === "hide") rec.onHide(edge);
+      else rec.onShow(edge);
     }
   });
   return sharedObserver;

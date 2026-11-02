@@ -2,7 +2,8 @@
   import type { Snippet } from "svelte";
   import type { SsgoiConfig } from "@ssgoi/core/types";
   import type { HostAnimation } from "@ssgoi/core/internal";
-  import { setSsgoiContext } from "./context";
+  import type { SsgoiFramework } from "./types.js";
+  import { setSsgoiContext, setSsgoiLayoutRoutes } from "./context";
   import {
     createSggoiTransitionContext,
     observeSsgoiTransitions,
@@ -12,13 +13,16 @@
   interface Props {
     config: SsgoiConfig;
     host?: HostAnimation;
+    /** Router members for `SsgoiLayoutBoundary`. */
+    framework?: SsgoiFramework;
     children: Snippet;
   }
 
-  let { config, host, children }: Props = $props();
+  let { config, host, framework, children }: Props = $props();
 
   const contextValue = createSggoiTransitionContext(config, { host });
   setSsgoiContext(contextValue);
+  setSsgoiLayoutRoutes(framework, config.layouts);
 
   let root: HTMLDivElement;
 

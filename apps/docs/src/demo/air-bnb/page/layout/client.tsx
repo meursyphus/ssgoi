@@ -24,6 +24,8 @@ const TABS = [
 ];
 
 const config: SsgoiConfig = {
+  // One checkout instance per listing: its steps swap inside a persistent sheet.
+  layouts: [{ paths: `${BASE}/listings/:id/checkout/**` }],
   transitions: [
     // Any list with listing cards → listing detail. A pair scores both
     // sides, so collections → listing stays zoom instead of the drill below.

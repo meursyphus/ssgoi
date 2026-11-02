@@ -1,16 +1,34 @@
 import React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Ssgoi } from "@ssgoi/react";
+import { useRouterState } from "@tanstack/react-router";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiFramework,
+} from "@ssgoi/react";
 import { ssgoiConfig } from "./ssgoi-config";
+
+// Key by the leaf match the outlet renders, not location (location moves
+// before pending matches render; index routes match "/parent/").
+const framework: SsgoiFramework = {
+  useRoute: () => ({
+    pathname: useRouterState({
+      select: (state) => {
+        const location = state.location.pathname;
+        const leaf = state.matches.at(-1)?.pathname;
+        if (!leaf) return location;
+        return leaf.length > 1 && leaf.endsWith("/") && !location.endsWith("/")
+          ? leaf.slice(0, -1)
+          : leaf;
+      },
+    }),
+  }),
+};
 
 interface DemoLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DemoLayout({ children }: DemoLayoutProps) {
-  const location = useRouterState({ select: (s) => s.location });
-  const pathname = location.pathname;
-
   return (
     <div className="h-full bg-[#121212] flex z-0">
       {/* Mobile Frame */}
@@ -20,109 +38,14 @@ export default function DemoLayout({ children }: DemoLayoutProps) {
           id="demo-content"
           className="relative z-0 flex-1 w-full overflow-y-scroll overflow-x-clip bg-[#121212] scrollbar-hide"
         >
-          <Ssgoi config={ssgoiConfig}>{children}</Ssgoi>
+          <Ssgoi config={ssgoiConfig} framework={framework}>
+            {/* Depth 0: top-level tabs <-> detail pages */}
+            <SsgoiLayoutBoundary className="min-h-full flex flex-col bg-[#121212]">
+              {children}
+            </SsgoiLayoutBoundary>
+          </Ssgoi>
         </main>
-
-        {/* Bottom Navigation */}
-        <nav className="flex justify-around items-center bg-[#121212] border-t border-white/5 py-2 flex-shrink-0">
-          <NavItem
-            href="/posts"
-            label="Posts"
-            isActive={pathname.startsWith("/posts")}
-            icon={
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-            }
-          />
-          <NavItem
-            href="/products"
-            label="Shop"
-            isActive={pathname.startsWith("/products")}
-            icon={
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            }
-          />
-          <NavItem
-            href="/pinterest"
-            label="Gallery"
-            isActive={pathname.startsWith("/pinterest")}
-            icon={
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-            }
-          />
-          <NavItem
-            href="/profile"
-            label="Profile"
-            isActive={pathname.startsWith("/profile")}
-            icon={
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            }
-          />
-        </nav>
       </div>
     </div>
-  );
-}
-
-interface NavItemProps {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  isActive?: boolean;
-}
-
-function NavItem({ href, label, icon, isActive }: NavItemProps) {
-  return (
-    <Link
-      to={href}
-      className={`flex flex-col items-center gap-1 px-4 py-2 text-xs min-w-[64px] transition-colors duration-200 ${
-        isActive ? "text-white" : "text-neutral-500 hover:text-neutral-400"
-      }`}
-    >
-      <div className="w-5 h-5">{icon}</div>
-      <span>{label}</span>
-    </Link>
   );
 }

@@ -13,8 +13,8 @@ import { ProfileBottomBar } from "../profile-shell/bottom-bar";
  * 프로필 레이아웃 — 바깥 boundary(/profile/:id, 탭과 무관하게 유지)와 탭 내용만
  * 바뀌는 안쪽 boundary.
  *
- * 둘 다 `SsgoiRouteBoundary`가 아니라 `key` + `data-ssgoi-transition`을 단
- * 평범한 요소다. `SsgoiRouteBoundary`는 스스로 `<Suspense>`로 감싸서, 탭 페이지
+ * 둘 다 `SsgoiLayoutBoundary`가 아니라 `key` + `data-ssgoi-transition`을 단
+ * 평범한 요소라 레이아웃 안에 `<Suspense>`가 없다. 루트 `SsgoiLayoutBoundary`는 스스로 `<Suspense>`로 감싸서, 탭 페이지
  * 청크가 아직 없을 때(게시물·릴스로 바로 들어왔다가 뒤로) 레이아웃이 빈 채로
  * 먼저 커밋되고 SSGOI가 타일 없이 짝을 지어 zoom 없이 끊겼다. Suspense가 없으면
  * 대기가 데모 레이아웃의 이미 보이는 `<Suspense>`까지 올라가, 떠나는 화면을

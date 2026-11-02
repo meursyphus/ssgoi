@@ -21,22 +21,32 @@ pnpm --filter ssgoi-expo-template start
 
 ```tsx
 // app/_layout.tsx
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/react-native";
-import { SsgoiRouteBoundary } from "@ssgoi/react-native/expo-router";
+import { StackRouter, unstable_integrateWithRouter } from "expo-router";
+import {
+  Ssgoi,
+  SsgoiLayoutBoundary,
+  type SsgoiConfig,
+} from "@ssgoi/react-native";
 import { slide } from "@ssgoi/react-native/view-transitions";
 
 const config = {
   transitions: [{ from: "/posts", to: "/posts/*", transition: slide() }],
 } satisfies SsgoiConfig;
 
+const framework = { StackRouter, unstable_integrateWithRouter };
+
 export default function Layout() {
   return (
-    <Ssgoi config={config}>
-      <SsgoiRouteBoundary />
+    <Ssgoi config={config} framework={framework}>
+      <SsgoiLayoutBoundary />
     </Ssgoi>
   );
 }
 ```
+
+`framework` hands the boundary Expo Router's stack router and integration
+API; keep it at module scope so the navigator is built once.
+`SsgoiLayoutBoundary` throws if `<Ssgoi>` has no `framework`.
 
 Create app/posts/index.tsx and app/posts/[id].tsx normally. Expo discovers
 the files; users do not list every page in .Screen declarations. Keep using
@@ -50,7 +60,9 @@ in the application. DOM attributes, CSS, Next.js Suspense props, and web
 TransitionConfig objects do not apply to native screens.
 
 Ssgoi selects native playback automatically. The root package does not import
-Expo Router; only the optional /expo-router entry loads that router.
+Expo Router; it uses the primitives you pass. `SsgoiRouteBoundary` from the
+`@ssgoi/react-native/expo-router` subpath still works but is deprecated and
+will be removed in 8.0.0.
 
 ## Rules and options
 
@@ -60,10 +72,11 @@ units for isMobile. Import fade/slide from the native view-transitions entry.
 fade runs OUT then IN; slide moves both screens together. Both reuse the
 existing numerical physics and play on Reanimated's UI runtime.
 
-Boundary resolve({ pathname, route }) returns { id, key? }. It sees each
-screen's own route, even while retained. id is an absolute matching path.
-routeKey overrides key; both are scoped by the native route instance and
-cannot merge distinct pushes. Defaults require no configuration.
+The boundary takes `initialRouteName?` and `style?` and no route options: each
+screen's id is its own absolute path, even while retained, and each pushed
+screen keeps its own native instance, so distinct pushes never merge.
+`config.layouts` is accepted but has no effect on native stacks; Expo nested
+navigators handle grouping, so use one root boundary. Defaults require no configuration.
 
 Ssgoi reducedMotion defaults to "system"; "always" and "never" are supported.
 onTransitionError receives preparation errors while the latest route is

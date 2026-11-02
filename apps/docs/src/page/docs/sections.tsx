@@ -146,23 +146,50 @@ export function InstallBody() {
 "use client";
 
 import { type ReactNode } from "react";
-import { Ssgoi } from "@ssgoi/react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
 import { drill } from "@ssgoi/react/view-transitions";
 
 const config = {
   transitions: [{ on: "/**", except: "/", transition: drill() }],
 };
 
+const INTERCEPTION_PREFIX = /^(?:\\(\\.\\.\\.\\)|\\(\\.\\.\\)|\\(\\.\\))+/;
+
+const framework: SsgoiFramework = {
+  useRoute: () => {
+    const pathname = usePathname();
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = \`/\${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}\`;
+    return { pathname, renderedPath };
+  },
+};
+
 export function SsgoiProvider({ children }: { children: ReactNode }) {
-  return <Ssgoi config={config}>{children}</Ssgoi>;
+  return (
+    <Ssgoi config={config} framework={framework}>
+      {children}
+    </Ssgoi>
+  );
 }`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              The provider and shipped boundary are client components. SSGOI
-              reads and moves real DOM nodes, and{" "}
-              <code className={inlineCode}>usePathname</code> is read inside the
-              shipped boundary. The pages passed into it can stay server
-              components.
+              <code className={inlineCode}>framework.useRoute</code> is a hook
+              the first boundary calls to read the route for every boundary
+              inside it. <code className={inlineCode}>renderedPath</code> is the
+              path the layout rendering that boundary actually shows, so an
+              intercepted modal leaves the background in place;{" "}
+              <code className={inlineCode}>@ssgoi/react</code> never imports{" "}
+              <code className={inlineCode}>next</code> itself. The provider and
+              boundary are client components because SSGOI reads and moves real
+              DOM nodes. The pages passed into them can stay server components.
             </p>
             <p className={`mt-4 ${measure} ${prose}`}>
               <code className={inlineCode}>transitions</code> also accepts a
@@ -201,7 +228,7 @@ const config = {
             </p>
           </Step>
 
-          <Step n={2} title="Import the route boundary">
+          <Step n={2} title="Import the layout boundary">
             <p className={`${measure} ${prose}`}>
               The <code className={inlineCode}>key</code> is what makes the
               framework throw the old page away — SSGOI reacts to the framework
@@ -211,12 +238,15 @@ const config = {
             </p>
             <CodeBlock
               className="mt-4"
-              code={`import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+              code={`import { SsgoiLayoutBoundary } from "@ssgoi/react";
 
-<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>`}
+<SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>`}
             />
             <p className={`mt-4 ${measure} ${prose}`}>
-              Next.js is an optional peer, loaded only by this subpath. If the
+              It takes no SSGOI props: it reads the route through the
+              provider&apos;s <code className={inlineCode}>framework</code>,
+              keys by the route path, and throws if{" "}
+              <code className={inlineCode}>framework</code> is missing. If the
               wrong part of the screen moves, adjust the boundary lifetime —{" "}
               <Link href="/docs/boundaries" className={link}>
                 Route boundaries
@@ -236,8 +266,8 @@ const config = {
               className="mt-4"
               code={`// app/layout.tsx
 import { type ReactNode } from "react";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { SsgoiProvider } from "./ssgoi-provider";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -245,7 +275,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <main className="relative z-0 min-h-dvh overflow-x-clip">
           <SsgoiProvider>
-            <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+            <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
           </SsgoiProvider>
         </main>
       </body>
@@ -636,9 +666,11 @@ export function RoutersBody() {
         Router integrations other than Next.js are experimental APIs.
       </p>
       <p className={`mt-6 ${measure} ${prose}`}>
-        Router helpers are grouped under their rendering framework. Qwik keeps
-        the key and marker on the page root; Angular offers a structural
-        directive that recreates that root when its key changes.{" "}
+        Router integrations are grouped under their rendering framework: each
+        gives the provider a <code className={inlineCode}>framework</code>{" "}
+        object that reads its router. Qwik keeps the key and marker on the page
+        root; Angular offers a structural directive that recreates that root
+        when its key changes.{" "}
         <a
           href={TEMPLATES_URL}
           target="_blank"

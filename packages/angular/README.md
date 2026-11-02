@@ -12,14 +12,11 @@ npm install @ssgoi/angular
 
 Agent setup guide: https://ssgoi.dev/llms.txt
 
-## Router helpers
+## Router integration
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
-
-| Router         | Import                  | API                  |
-| -------------- | ----------------------- | -------------------- |
-| Angular Router | `@ssgoi/angular/router` | `SsgoiRouteBoundary` |
+Pass the Angular Router logic to the root as `[ssgoiFramework]`. `[ssgoi]`
+resolves the route once, with its own `Injector`, on every committed
+navigation and shares it with the layout boundaries below it.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/angular) for wiring and limits.
 
@@ -29,9 +26,24 @@ Create one SSGOI root above the router outlet.
 
 ```ts
 import { Component, signal } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { Ssgoi, type SsgoiConfig } from "@ssgoi/angular";
+import { NavigationEnd, Router, RouterOutlet, UrlTree } from "@angular/router";
+import { Ssgoi, type SsgoiConfig, type SsgoiFramework } from "@ssgoi/angular";
 import { drill } from "@ssgoi/angular/view-transitions";
+
+const framework: SsgoiFramework = {
+  // The committed path without query or fragment.
+  getRoute: (injector) => {
+    const router = injector.get(Router);
+    const { root } = router.parseUrl(router.url);
+    return { pathname: router.serializeUrl(new UrlTree(root)) };
+  },
+  onNavigate: (injector, callback) => {
+    const subscription = injector.get(Router).events.subscribe((event) => {
+      if (event instanceof NavigationEnd) callback();
+    });
+    return () => subscription.unsubscribe();
+  },
+};
 
 @Component({
   selector: "app-root",
@@ -41,6 +53,7 @@ import { drill } from "@ssgoi/angular/view-transitions";
     <main
       ssgoi
       [config]="config()"
+      [ssgoiFramework]="framework"
       style="position:relative;z-index:0;overflow-x:clip"
     >
       <router-outlet />
@@ -51,29 +64,68 @@ export class AppComponent {
   protected readonly config = signal<SsgoiConfig>({
     transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
   });
+  protected readonly framework = framework;
 }
 ```
 
-## Route boundary
+## Layout boundary
 
-Use the experimental standalone directive on the routed page's single DOM root:
+Use the standalone directive, without a value, on a routed layout's or page's
+single DOM root:
 
 ```ts
 import { Component } from "@angular/core";
-import { SsgoiRouteBoundary } from "@ssgoi/angular/router";
+import { RouterOutlet } from "@angular/router";
+import { SsgoiLayoutBoundary } from "@ssgoi/angular";
 
 @Component({
   standalone: true,
-  imports: [SsgoiRouteBoundary],
-  template: `<article *ssgoiRouteBoundary="let route">{{ route.id }}</article>`,
+  imports: [RouterOutlet, SsgoiLayoutBoundary],
+  template: `<section *ssgoiLayoutBoundary><router-outlet /></section>`,
 })
-export class PostComponent {}
+export class ShellComponent {}
 ```
 
-It recreates the embedded view on pathname changes, including parameterized
-routes that reuse the same component. Query-only navigation preserves it. Use
-`key: 'shell'` for a persistent region. Keep RouterOutlet in the application;
-custom reuse caches and auxiliary outlet coordination are not handled.
+The id (`data-ssgoi-transition`) is the route path. Depth is automatic: a
+boundary inside another one's view, including routed children of its
+`<router-outlet>`, is one level deeper. Its key is that depth's scope instance
+from `config.layouts`, or the route path when the chain is shorter, and the
+embedded view is recreated when the key changes. Without `layouts`, every
+boundary is recreated on each path change, including parameterized routes that
+reuse the same component; query-only navigation preserves it. The template
+context (`let boundary`) is `{ id, key }`.
+
+Keep RouterOutlet in the application; custom reuse caches and auxiliary outlet
+coordination are not handled. Without `[ssgoiFramework]` on `[ssgoi]`, the
+directive throws.
+
+## Layout scopes
+
+Declare the layout tree in the config. At each level the first matching scope
+wins; `layouts` nests inside it. A boundary stays mounted while navigation
+stays inside its depth's scope instance (values captured by `*` / `:id` are
+part of the instance; `**` tails are not):
+
+```ts
+const TOP_LEVEL = ["/posts", "/products"];
+
+const config: SsgoiConfig = {
+  layouts: [
+    { paths: TOP_LEVEL },
+    { paths: "/**", except: TOP_LEVEL, layouts: [{ paths: "/products/*/**" }] },
+  ],
+  transitions: [/* ... */],
+};
+```
+
+A depth-0 boundary in the root layout keeps the tab shell (and its bottom nav)
+mounted between `/posts` and `/products`, and moves it as a whole into a
+detail page. A depth-1 boundary inside `/products/:category/...` stays mounted
+across that category's pages.
+
+`SsgoiRouteBoundary` from `@ssgoi/angular/router` is deprecated and will be
+removed in 8.0.0; it imports Angular Router itself and keeps working without
+`[ssgoiFramework]`.
 
 ## Config
 
@@ -130,9 +182,11 @@ Options: https://ssgoi.dev/llms.txt#7-transition-index
 - `[ssgoi]`: creates the root transition context.
 - `[config]`: accepts `SsgoiConfig`.
 - `[host]`: accepts an optional `HostAnimation`.
+- `[ssgoiFramework]`: accepts `SsgoiFramework` for `*ssgoiLayoutBoundary`.
+- `*ssgoiLayoutBoundary`: marks a routed page's root as a layout boundary.
 - `data-ssgoi-transition`: marks a route boundary.
 - `injectSsgoi()`: returns the transition context.
-- `[ssgoiTransition]`: deprecated; use the data attribute.
+- `[ssgoiTransition]`: deprecated; will be removed in 8.0.0.
 
 ## License
 

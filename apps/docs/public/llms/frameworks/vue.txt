@@ -1,6 +1,6 @@
 # SSGOI with Vue
 
-Use the Vue package for the provider and effects. Choose the helper for the router already installed in your app.
+Use the Vue package for the provider, effects, and layout boundary. Pass a reactive getRoute for the router already installed in your app as framework.
 
 Install @ssgoi/vue. Keep one provider above the changing page region.
 
@@ -41,7 +41,7 @@ watch(
 </script>
 ```
 
-## Router helpers
+## Router integrations
 
 - Vue Router (experimental): https://ssgoi.dev/llms/frameworks/vue-router.txt
 - Nuxt (experimental): https://ssgoi.dev/llms/frameworks/nuxt.txt

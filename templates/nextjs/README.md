@@ -1,7 +1,9 @@
 # SSGOI + Next.js
 
-Import `SsgoiRouteBoundary` from `@ssgoi/react/nextjs`. The router is an
-optional peer and is loaded only by this entry.
+Pass a `useRoute` built from the Next.js navigation hooks to
+`<Ssgoi framework>`, declare the layout tree in `config.layouts`, and place
+`SsgoiLayoutBoundary` (from `@ssgoi/react`, no props) in each layout that
+should animate. The package itself never imports `next`.
 
 ```bash
 pnpm install
@@ -10,36 +12,100 @@ pnpm dev
 
 ## Structure
 
-- `src/components/ssgoi-config.ts`: one transition config.
-- `src/components/demo-layout.tsx`: one root `<Ssgoi>`.
-- `@ssgoi/react/nextjs`: shipped pathname boundary with Suspense.
-- `src/app/*/layout.tsx`: boundaries placed at persistent layout levels.
-
-The default boundary uses the pathname for its id and key. `routeKey` keeps a
-layout shell mounted while its transition id follows the actual route.
-
-## Product tabs
-
-The products layout has two boundaries:
-
-```tsx
-<SsgoiRouteBoundary routeKey="products-layout">
-  <ProductHeader />
-  <ProductTabs />
-
-  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
-</SsgoiRouteBoundary>
+```
+src/app/
+  layout.tsx              <Ssgoi> + depth-0 boundary (demo-layout.tsx)
+  (top-level)/layout.tsx  depth-1 boundary, bottom nav outside it
+    posts/  pinterest/  profile/
+    shop/layout.tsx       header + category tabs, depth-2 boundary
+    shop/page.tsx         the "All" category; electronics/ fashion/ ... beside it
+  (detail)/layout.tsx     depth-1 boundary
+    posts/[id]/  pinterest/[id]/  profile/[id]/
 ```
 
-- Category → category: inner boundary slides; header and tabs stay.
-- Products → another section: the outer products layout leaves.
+- Tab → tab: only the depth-1 content changes; the bottom nav stays.
+- Tab → detail: the depth-0 boundary changes, so the whole top level,
+  bottom nav included, leaves.
+- Detail → detail (a related post): only the `(detail)` boundary changes.
+- Category → category (`/shop` is All, then `/shop/electronics`, ...): only
+  the depth-2 boundary slides; the shop header
+  and tabs stay.
 
-The constant outer key is safe here because `app/products/layout.tsx` itself
-unmounts outside `/products`. If the boundary moves into a common app layout,
-its resolve callback must return `"products-layout"` only for product category
-paths and a different key for routes outside them.
+`src/components/ssgoi-config.ts` mirrors that tree:
 
-Direction comes from the single config:
+```ts
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
+
+export const ssgoiConfig = {
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [
+    /* drill, zoom, category slide */
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
+  ],
+};
+```
+
+A boundary's depth is the number of boundaries above it. At depth N it keys by
+the scope chosen at level N of `layouts` (the first sibling whose `paths`
+match), so it stays mounted while the route stays inside that scope. With no
+scope at that level it keys by the route path. Every boundary's transition id
+is the route path.
+
+`src/components/demo-layout.tsx` is the client component that owns `<Ssgoi>`:
+
+```tsx
+"use client";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, SsgoiLayoutBoundary, type SsgoiFramework } from "@ssgoi/react";
+
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+const framework: SsgoiFramework = {
+  useRoute: () => {
+    const pathname = usePathname();
+    // The page the children slot renders. During a soft intercept it is still
+    // the background page, so no background boundary moves.
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = `/${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}`;
+    return { pathname, renderedPath };
+  },
+};
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  <SsgoiLayoutBoundary className="min-h-full flex flex-col">
+    {children}
+  </SsgoiLayoutBoundary>
+</Ssgoi>;
+```
+
+Keep the first boundary in the same component as `<Ssgoi>`: `renderedPath` is
+relative to the layout that renders it, and nested boundaries go in the group
+layouts below.
+
+`renderedPath` is the path the root layout actually renders: its selected
+segments without route groups `(x)` or interception markers `(.)`. During a
+soft-intercepted navigation the `children` slot keeps showing the background,
+so no boundary moves; render a `@modal` slot outside the boundaries and let it
+animate on its own. The route read is wrapped in Suspense for Cache
+Components, but the template leaves Cache Components disabled so it also
+demonstrates ordinary App Router setup.
+
+## Transitions
+
+- Posts: `drill` for list → detail.
+- Gallery: expanding `zoom`.
+- Profile: static `zoom`.
+- Product categories: `ordered` `slide`.
+- Tab ↔ tab: `fade` on the depth-1 content. The exact category paths in the
+  `ordered` rule outrank `/shop/**`, so categories still slide.
 
 ```ts
 {
@@ -56,53 +122,18 @@ scrollbar behavior alone. Set `scrollLock: false` in the top-level config only
 if the app manages transition input itself; see the
 [scroll restoration guide](https://ssgoi.dev/llms/scroll-restoration.txt).
 
-## Other demos
-
-- Posts: `drill` for list → detail.
-- Gallery: expanding `zoom`.
-- Profile: static `zoom`.
-
-## Shared boundary contract
-
-This template uses the shipped adapter directly in every routed section;
-there is no local keyed-DOM wrapper. The React Router, TanStack Router,
-SvelteKit, and Nuxt templates use their corresponding router entries with
-the same `{ id, key? }` resolver contract.
-
-For an application with named boundaries, keep its policy in a client component:
-
-```tsx
-<SsgoiRouteBoundary
-  resolve={(location) => resolveBoundary("app-shell", location)}
-  fallback={<div className="min-h-px" aria-hidden="true" />}
->
-  {children}
-</SsgoiRouteBoundary>
-```
-
-`resolveBoundary` is application code, not an extra library API. Next.js passes
-both `pathname` and the owning layout's `selectedSegments`. Use
-`selectedSegmentsToPath(selectedSegments, projectBase)` from the same entry for
-a nested slot; a soft `@modal` navigation must keep its background's slot id
-and key even though the browser URL changes. An empty slot is the index route.
-The adapter includes Suspense for Cache Components, but the template leaves
-Cache Components disabled so it also demonstrates ordinary App Router setup.
-
-The complete policy example is in
-[complex routing](https://ssgoi.dev/llms/complex-routing.txt).
+The React Router and TanStack Router templates use the same tree, config and
+prop-less boundaries; only their `framework` differs.
 
 ## Verify boundary ownership
 
-- Shop → Tech → Fashion: the product header and tabs keep their DOM; only the
-  inner boundary changes. Its outgoing DOM still contains the old category.
-- Shop → Posts: the products shell leaves and the post boundary enters.
-- Post list → detail → browser Back: the real routed roots leave and enter,
-  and the list scroll position is restored.
-- Query-only navigation keeps a boundary mounted by default.
-
-The React adapter regression suite also covers an app shell shared across
-top-level tabs, per-project shell lifetimes, intercepted modal open/back/forward,
-direct detail entry, index backgrounds, nested sidebars, and unresolved URLs:
+- Shop (All) → Tech → Fashion: the shop header and tabs keep their DOM; only the
+  depth-2 boundary changes. Its outgoing DOM still contains the old category.
+- Shop → Posts: the shop content fades out, the bottom nav stays.
+- Post list → detail → browser Back: the whole top level, bottom nav included,
+  leaves and enters, and the list scroll position is restored.
+- Detail → related post: only the detail boundary changes.
+- Query-only navigation keeps every boundary mounted.
 
 ```bash
 pnpm --filter @ssgoi/react test:run

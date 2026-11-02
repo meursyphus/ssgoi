@@ -2,40 +2,91 @@
 
 The router helper used by this template is an experimental API.
 
-Import `SsgoiRouteBoundary` from `@ssgoi/solid/solidstart`. The router is an
-optional peer and is loaded only by this entry.
-
 ```bash
 pnpm install
 pnpm dev
 ```
 
-The root app creates one `<Ssgoi>` with `src/ssgoi-config.ts` and one
-centralized route boundary:
+One config (`src/ssgoi-config.ts`) declares the transitions and the layout
+tree. `SsgoiLayoutBoundary` takes no SSGOI props: its depth comes from how
+many boundaries sit above it, and `config.layouts` decides when the boundary
+at each depth stays mounted.
 
-```tsx
-<Ssgoi config={ssgoiConfig}>
-  <SsgoiRouteBoundary
-    resolve={({ pathname }) => ({
-      id: pathname,
-      key: getRootTransitionId(pathname),
-    })}
-  >
-    {props.children}
-  </SsgoiRouteBoundary>
-</Ssgoi>
+```
+src/app.tsx                   <Ssgoi framework> + depth-0 boundary in the router root
+src/routes/
+  (top-level).tsx             depth-1 boundary around the tab content; bottom nav outside it
+  (top-level)/
+    posts/  pinterest/  profile/
+    shop.tsx                  depth-2 boundary; header and category tabs outside it
+    shop/index.tsx (All)  electronics.tsx  fashion.tsx  home.tsx  beauty.tsx
+  (detail).tsx                depth-1 boundary
+  (detail)/
+    posts/[postId].tsx  pinterest/[pinId].tsx  profile/[postId].tsx
 ```
 
-The root boundary keeps a `/products` key for that route family while its id tracks the real pathname. The persistent
-products route wraps its child route in a second boundary, so category
-navigation replaces only the inner content while the header and tabs stay
-mounted.
+`(top-level)` and `(detail)` are SolidStart route groups: `(group).tsx` is a
+layout for the files in `(group)/` and adds no URL segment.
+
+```ts
+const TOP_LEVEL = ["/posts", "/shop/**", "/pinterest", "/profile"];
+
+export const ssgoiConfig = {
+  layouts: [
+    { paths: TOP_LEVEL, layouts: [{ paths: "/shop/**" }] },
+    { paths: "/**", except: TOP_LEVEL },
+  ],
+  transitions: [
+    { from: TOP_LEVEL, to: TOP_LEVEL, transition: fade() },
+    // drill, zoom, ordered slide ...
+  ],
+} satisfies SsgoiConfig;
+```
+
+```tsx
+// src/app.tsx (inside <Router root>)
+const location = useLocation();
+const framework = { getRoute: () => ({ pathname: location.pathname }) };
+
+<Ssgoi config={ssgoiConfig} framework={framework}>
+  <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+</Ssgoi>
+
+// src/routes/(top-level).tsx
+<div>
+  <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+  <BottomNav />
+</div>
+```
+
+The package itself never imports `@solidjs/router`.
+
+What moves:
+
+- Tab to tab (`/posts` → `/pinterest`): every top-level page shares the depth-0
+  scope, so only the depth-1 boundary changes. The content fades and the bottom
+  nav stays.
+- Category to category (`/shop` → `/shop/fashion`): depth 0 and 1
+  stay inside `/shop/**`; the depth-2 boundary slides.
+- Tab to detail (`/posts` → `/posts/1`): the depth-0 scope changes, so the whole
+  top-level page, bottom nav included, drills or zooms away.
+- Detail to detail (`/posts/1` → `/posts/2`): depth 0 stays in the detail scope;
+  the depth-1 boundary changes.
+
+A boundary's key is its depth's scope instance and falls back to the route
+path past the declared scopes. Without `layouts`, every boundary follows the
+route path. Use `/shop/**`, not `/shop/*`, in `TOP_LEVEL`: a `*`
+segment is captured, so each category would get its own depth-0 instance.
 
 Effects:
 
+- Top-level tabs: `fade`.
 - Posts: `drill`.
-- Product tabs: ordered `slide`.
+- Shop categories: ordered `slide`.
 - Gallery and profile: `zoom`.
+
+The single scroll container (`main#demo-content`) stays outside every boundary;
+the bottom nav is `sticky` inside the top-level layout.
 
 Guide: https://ssgoi.dev/llms/solid.txt
 

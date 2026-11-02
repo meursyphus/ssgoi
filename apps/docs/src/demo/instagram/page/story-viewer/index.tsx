@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import { useProfile, type StoryDetail } from "@/demo/instagram/state/profile";
 import { useDemoBack } from "@/lib/hooks";
 import { StoryProgress } from "./progress";
@@ -40,7 +40,7 @@ export default function StoryViewerPage({
   const prev = () => (index === 0 ? setRun(run + 1) : setIndex(index - 1));
 
   return (
-    <SsgoiRouteBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
+    <SsgoiLayoutBoundary className="relative block h-full min-h-full w-full overflow-hidden bg-black text-white">
       <div className="absolute inset-x-0 top-0 bottom-safe-16 overflow-hidden rounded-[14px] bg-neutral-900">
         <img
           key={frame.id}
@@ -76,6 +76,6 @@ export default function StoryViewerPage({
         </div>
       </div>
       <StoryReplyBar story={story} />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

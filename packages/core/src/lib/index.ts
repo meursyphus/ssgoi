@@ -36,6 +36,7 @@ export type {
   SsgoiOnTransitionRule,
   SsgoiPairTransitionRule,
   SsgoiOrderedTransitionRule,
+  SsgoiLayoutScope,
   PathPatterns,
   NavigationDirection,
   TransitionConfig,

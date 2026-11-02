@@ -12,15 +12,59 @@ npm install @ssgoi/vue
 
 Agent setup guide: https://ssgoi.dev/llms/vue.txt
 
-## Router helpers
+## Layout boundary
 
-Install this framework package once; router helpers are optional subpaths.
-These router helpers are experimental APIs and may change.
+Pass a reactive route getter to `<Ssgoi>` once, then wrap routed content in
+`SsgoiLayoutBoundary`.
 
-| Router     | Import                  | API                  |
-| ---------- | ----------------------- | -------------------- |
-| Vue Router | `@ssgoi/vue/vue-router` | `SsgoiRouteBoundary` |
-| Nuxt       | `@ssgoi/vue/nuxt`       | `SsgoiRouteBoundary` |
+```vue
+<script setup lang="ts">
+import { useRouter } from "vue-router"; // Nuxt: auto-imported
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
+</script>
+
+<template>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary>
+      <RouterView />
+    </SsgoiLayoutBoundary>
+  </Ssgoi>
+</template>
+```
+
+Each boundary marks the current path with `data-ssgoi-transition`. Nest them
+freely: depth is automatic. Declare which paths share a layout in
+`config.layouts`; the scope matched at a boundary's depth keeps its DOM, and
+past the declared scopes a boundary remounts on every path change (the default
+without `layouts`).
+
+```ts
+const TOP_LEVEL = ["/home", "/search", "/profile"];
+const config = {
+  layouts: [
+    { paths: TOP_LEVEL }, // tabs share one depth-0 layout
+    {
+      paths: "/**",
+      except: TOP_LEVEL,
+      layouts: [{ paths: "/products/**" }], // depth-1 scope inside details
+    },
+  ],
+  transitions: [/* ... */],
+};
+```
+
+The first matching scope at each level wins. Single-segment captures (`*`,
+`:id`, `[id]`) split instances, so `/projects/:id/**` keeps one layout per
+project; `**` tails do not. `SsgoiLayoutBoundary` takes no SSGOI props (`as`
+sets the element) and throws without `framework` on `<Ssgoi>`.
+
+`SsgoiRouteBoundary` from `@ssgoi/vue/vue-router` and `@ssgoi/vue/nuxt` is
+deprecated; use `SsgoiLayoutBoundary` with `framework` instead.
 
 See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and limits.
 
@@ -31,6 +75,10 @@ See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and 
 import { Ssgoi } from "@ssgoi/vue";
 import { drill } from "@ssgoi/vue/view-transitions";
 
+const router = useRouter();
+const framework = {
+  getRoute: () => ({ pathname: router.currentRoute.value.path }),
+};
 const config = {
   transitions: [{ on: "/posts/**", except: "/posts", transition: drill() }],
 };
@@ -38,7 +86,7 @@ const config = {
 
 <template>
   <main class="ssgoi-shell">
-    <Ssgoi :config="config">
+    <Ssgoi :config="config" :framework="framework">
       <NuxtPage />
     </Ssgoi>
   </main>

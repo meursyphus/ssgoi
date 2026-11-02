@@ -179,6 +179,7 @@ export type SsgoiOrderedTransitionRule =
   import("../runtime/types").OrderedRouteRule<AnyTransitionConfig>;
 export type SsgoiTransitionRule =
   import("../runtime/types").RouteRule<AnyTransitionConfig>;
+export type SsgoiLayoutScope = import("../runtime/types").LayoutScope;
 export type SsgoiTransitionsFn =
   import("../runtime/types").TransitionsFn<AnyTransitionConfig>;
 export type SsgoiTransitionsOption =

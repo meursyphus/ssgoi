@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
 import {
   usePost,
   type PostComment,
@@ -36,7 +36,7 @@ export default function CommentsSheetPage({
   const me = profile.me.data;
   const { text, setText, inputRef, replyTo } = useCommentDraft();
   return (
-    <SsgoiRouteBoundary className="relative flex min-h-full w-full flex-col bg-white text-[13px] text-neutral-900">
+    <SsgoiLayoutBoundary className="relative flex min-h-full w-full flex-col bg-white text-[13px] text-neutral-900">
       <CommentsSheetHeader
         fallbackHref={`/demo/instagram/feed/${initialData.id}`}
       />
@@ -51,6 +51,6 @@ export default function CommentsSheetPage({
         inputRef={inputRef}
         className="sticky bottom-0 z-10 mt-0"
       />
-    </SsgoiRouteBoundary>
+    </SsgoiLayoutBoundary>
   );
 }

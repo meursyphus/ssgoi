@@ -16,9 +16,22 @@ import {
 import type { HostAnimation } from "@ssgoi/core/internal";
 import type { SsgoiConfig, SsgoiContext } from "@ssgoi/core/types";
 import { SSGOI_CONTEXT } from "./context";
+import {
+  LayoutRouteSource,
+  SSGOI_LAYOUT_ROUTE,
+  type SsgoiFramework,
+} from "./layout-boundary";
 
 function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
   return component.getContext();
+}
+
+// Resolves the route with this element's Injector, once for all boundaries.
+function createLayoutRoute(component: Ssgoi): LayoutRouteSource {
+  return new LayoutRouteSource(
+    () => component.ssgoiFramework(),
+    () => component.config().layouts,
+  );
 }
 
 @Directive({
@@ -30,11 +43,17 @@ function createSsgoiContext(component: Ssgoi): SsgoiContext | undefined {
       useFactory: createSsgoiContext,
       deps: [forwardRef(() => Ssgoi)],
     },
+    {
+      provide: SSGOI_LAYOUT_ROUTE,
+      useFactory: createLayoutRoute,
+      deps: [forwardRef(() => Ssgoi)],
+    },
   ],
 })
 export class Ssgoi implements AfterViewInit, OnDestroy {
   readonly config = input<SsgoiConfig>({});
   readonly host = input<HostAnimation | undefined>(undefined);
+  readonly ssgoiFramework = input<SsgoiFramework | undefined>(undefined);
 
   private readonly el = inject(ElementRef<HTMLElement>);
   private readonly platformId = inject(PLATFORM_ID);

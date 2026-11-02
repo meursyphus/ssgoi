@@ -9,6 +9,7 @@ import {
 } from "@ssgoi/core/internal";
 import type { HostAnimation } from "@ssgoi/core/internal";
 import { ssgoiContext } from "./context";
+import { SsgoiFrameworkProvider, type SsgoiFramework } from "./layout-boundary";
 
 const rootStyle: CSSProperties = { display: "contents" };
 
@@ -20,11 +21,16 @@ interface SsgoiProps {
    * outside the tree.
    */
   host?: HostAnimation;
+  /**
+   * How to read the router for `SsgoiLayoutBoundary`. The first boundary reads
+   * the route and keys it against `config.layouts`. Keep the object stable.
+   */
+  framework?: SsgoiFramework;
   children: ReactNode;
 }
 
 export const Ssgoi: React.FC<SsgoiProps> = React.memo(
-  ({ config, host, children }) => {
+  ({ config, host, framework, children }) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
     const ssgoi = useMemo(
       () => createSggoiTransitionContext(config, { host }),
@@ -41,7 +47,12 @@ export const Ssgoi: React.FC<SsgoiProps> = React.memo(
     return (
       <ssgoiContext.Provider value={ssgoi}>
         <div ref={rootRef} data-ssgoi-root="" style={rootStyle}>
-          {children}
+          <SsgoiFrameworkProvider
+            framework={framework}
+            layouts={config.layouts}
+          >
+            {children}
+          </SsgoiFrameworkProvider>
         </div>
       </ssgoiContext.Provider>
     );
