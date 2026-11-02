@@ -319,6 +319,89 @@ function navigation(transition: AnyTransitionConfig, scrollLock?: boolean) {
   return { pages, context, host, go };
 }
 
+function touchWindow() {
+  const listeners = new Map<string, (event: unknown) => void>();
+  const target = {
+    innerWidth: 400,
+    location: { href: "https://app.test/a" },
+    history: {
+      state: null as unknown,
+      pushState(data: unknown) {
+        this.state = data;
+      },
+      replaceState(data: unknown) {
+        this.state = data;
+      },
+    },
+    addEventListener: vi.fn(
+      (type: string, listener: (event: unknown) => void) => {
+        listeners.set(type, listener);
+      },
+    ),
+    removeEventListener: vi.fn(
+      (type: string, listener: (event: unknown) => void) => {
+        if (listeners.get(type) === listener) listeners.delete(type);
+      },
+    ),
+  };
+  vi.stubGlobal("window", target);
+  return { target, listeners };
+}
+
+describe("committed swipe listener lifetime", () => {
+  it("acquires no listeners during construction, then initializes once and cleans up on disconnect", () => {
+    const { target, listeners } = touchWindow();
+    const context = createSggoiTransitionContext({});
+    const abandoned = createSggoiTransitionContext({});
+    expect(target.addEventListener).not.toHaveBeenCalled();
+    const page = new FakeElement() as unknown as HTMLElement;
+    try {
+      context.register("/a", page);
+      context.register("/a", page);
+      expect([...listeners.keys()].sort()).toEqual([
+        "touchcancel",
+        "touchend",
+        "touchmove",
+        "touchstart",
+      ]);
+      expect(target.addEventListener).toHaveBeenCalledTimes(4);
+      context.disconnect?.();
+      expect(target.removeEventListener).toHaveBeenCalledTimes(4);
+      expect(listeners.size).toBe(0);
+      context.register("/a", page);
+      expect(target.addEventListener).toHaveBeenCalledTimes(8);
+      expect(listeners.size).toBe(4);
+    } finally {
+      context.disconnect?.();
+      abandoned.disconnect?.();
+    }
+    expect(target.removeEventListener).toHaveBeenCalledTimes(8);
+    expect(listeners.size).toBe(0);
+  });
+
+  it("still recognizes native edge swipes after the first page registers", async () => {
+    const { listeners } = touchWindow();
+    const createAnimation = vi.fn(() => animation());
+    const state = navigation({ animation: createAnimation });
+    const touches = (x: number) => ({
+      length: 1,
+      item: () => ({ identifier: 1, clientX: x, clientY: 20 }),
+    });
+    try {
+      await flushPromises();
+      listeners.get("touchstart")?.({ touches: touches(5) });
+      listeners.get("touchmove")?.({ touches: touches(50) });
+      listeners.get("touchend")?.({ changedTouches: touches(80) });
+      state.go(0, 1);
+      await flushPromises();
+      expect(createAnimation).not.toHaveBeenCalled();
+      expect(state.context.getTransitionState().status).toBe("idle");
+    } finally {
+      state.context.disconnect?.();
+    }
+  });
+});
+
 describe("transition scroll lifetime", () => {
   it("holds through preparation and paused playback; hands off without unlocking", async () => {
     const runs: Animation[] = [];

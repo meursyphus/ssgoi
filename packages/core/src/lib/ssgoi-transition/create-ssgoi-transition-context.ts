@@ -117,8 +117,9 @@ export function createSggoiTransitionContext(
   const resolveTransitions: SsgoiTransitionsFn =
     typeof transitions === "function" ? transitions : () => transitions;
 
+  // Construction can happen during an abandoned render or SSR. Acquire
+  // browser listeners only when register() observes a committed page.
   const swipeDetector = createSwipeBackDetector();
-  swipeDetector.initialize();
 
   // Single-path scroll identity, derived from the SAME `middleware` the matcher
   // uses, so an aliased/rewritten route records & restores scroll under one key.
