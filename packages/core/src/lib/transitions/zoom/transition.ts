@@ -29,6 +29,7 @@ import type {
   ZoomVariant,
 } from "./types";
 import { PAGE_CONTAIN } from "../containment";
+import { isRendered, waitForSharedTarget } from "../shared-target";
 
 export type { ZoomType, ZoomVariant, NormalizedZoomOptions } from "./types";
 
@@ -376,7 +377,21 @@ export const zoom = (options: NormalizedZoomOptions) => {
 
   const createDirection = (navigationDirection: NavigationDirection) =>
     ({
-      prepare: (args) => {
+      prepare: async (args) => {
+        // Same wait as hero: the enter/exit element may stream in after the
+        // page boundary, or sit hidden while its Suspense body re-suspends.
+        const [fromEl, toEl] = await Promise.all([args.from, args.to]);
+        // Only the element on the incoming page has to be laid out: the
+        // outgoing page is off screen while the plan is prepared.
+        const ready = () => {
+          const pair = resolveZoom(fromEl, toEl, navigationDirection);
+          if (pair === null) return false;
+          return isRendered(pair.mode === "enter" ? pair.enterEl : pair.exitEl);
+        };
+        if (!ready()) {
+          await waitForSharedTarget(toEl, ready, { signal: args.signal });
+        }
+
         const { strategies } = zoomStrategiesFor(options);
         const ctx: ZoomPrepareCtx = {
           from: args.from,

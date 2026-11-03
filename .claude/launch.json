@@ -2,6 +2,21 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "dev-3100",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "dev",
+        "exec",
+        "next",
+        "dev",
+        "-p",
+        "3100"
+      ],
+      "port": 3100,
+      "autoPort": false
+    },
+    {
       "name": "docs",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
