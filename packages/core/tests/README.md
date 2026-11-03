@@ -1,6 +1,21 @@
+# Tests
+
+All of core's tests live under this folder, not next to the source. Vitest only
+collects `tests/**/*.test.ts`, so a test placed in `src/` does not run.
+
+## Unit tests
+
+`tests/lib/` mirrors `src/lib/`: the test for `src/lib/motion/spring.ts` is
+`tests/lib/motion/spring.test.ts`. Run them with:
+
+```sh
+pnpm --filter @ssgoi/core test:run
+```
+
 # Browser regressions
 
-Playwright suites live here. Run them with:
+Playwright suites (`tests/*.spec.ts`) and their fixtures live at the top of this
+folder. Run them with:
 
 ```sh
 pnpm --filter @ssgoi/core exec playwright install chromium webkit
