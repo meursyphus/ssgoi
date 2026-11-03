@@ -1,0 +1,186 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+/**
+ * The shared unmount-observer must fire a node's leave callback ONLY on a real
+ * unmount — never on a MOVE. A `childList` "removed" record also fires when a
+ * node is detached and re-attached within one commit (e.g. Next.js reordering
+ * its bfcache `<Activity>` siblings on back/forward navigation). Firing on a
+ * move would tear down a kept-alive page's tracking and break later
+ * transitions. The package test env is `node`, so we fake the slice the module
+ * touches: HTMLElement, a MutationObserver whose records we dispatch by hand,
+ * and a minimal document.
+ */
+
+class FakeNode {
+  childNodes: FakeNode[] = [];
+  parentElement: FakeNode | null = null;
+  isConnected = false;
+}
+
+let observerCb: ((mutations: unknown[]) => void) | null = null;
+
+class FakeMutationObserver {
+  constructor(cb: (mutations: unknown[]) => void) {
+    observerCb = cb;
+  }
+  observe(): void {}
+  disconnect(): void {}
+  takeRecords(): unknown[] {
+    return [];
+  }
+}
+
+function fireRemoval(
+  node: FakeNode,
+  record: { target?: FakeNode; nextSibling?: FakeNode | null } = {},
+): void {
+  observerCb?.([
+    {
+      target: record.target ?? new FakeNode(),
+      nextSibling: record.nextSibling ?? null,
+      removedNodes: [node],
+    },
+  ]);
+}
+
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
+beforeEach(() => {
+  vi.stubGlobal("HTMLElement", FakeNode);
+  vi.stubGlobal("Node", FakeNode);
+  vi.stubGlobal("MutationObserver", FakeMutationObserver);
+  vi.stubGlobal("document", {
+    body: new FakeNode(),
+    addEventListener() {},
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe("watchUnmount", () => {
+  it("fires the leave callback on a real unmount (node stays detached)", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const node = new FakeNode();
+    node.isConnected = false;
+    const cb = vi.fn();
+    watchUnmount(node as unknown as HTMLElement, cb);
+
+    fireRemoval(node);
+    await flushMicrotasks();
+
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the removal anchor to the leave callback", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const parent = new FakeNode();
+    const nextSibling = new FakeNode();
+    const node = new FakeNode();
+    const child = new FakeNode();
+    node.childNodes = [child];
+    child.parentElement = node;
+    node.isConnected = false;
+    child.isConnected = false;
+
+    const cb = vi.fn();
+    watchUnmount(child as unknown as HTMLElement, cb);
+
+    fireRemoval(node, { target: parent, nextSibling });
+    await flushMicrotasks();
+
+    const anchor = cb.mock.calls[0]?.[0];
+    expect(anchor?.parent).toBe(parent);
+    expect(anchor?.nextSibling).toBe(nextSibling);
+  });
+
+  it("emits only the outer boundary when a watched subtree is removed", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const group = {};
+    const outer = new FakeNode();
+    const inner = new FakeNode();
+    outer.childNodes = [inner];
+    inner.parentElement = outer;
+    outer.isConnected = false;
+    inner.isConnected = false;
+
+    const outerCb = vi.fn();
+    const innerCb = vi.fn();
+    watchUnmount(outer as unknown as HTMLElement, outerCb, group);
+    watchUnmount(inner as unknown as HTMLElement, innerCb, group);
+
+    fireRemoval(outer);
+    await flushMicrotasks();
+
+    expect(outerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
+    expect(innerCb.mock.calls[0]?.[1]).toEqual({ emit: false });
+  });
+
+  it("keeps nested boundaries independent across different contexts", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const outer = new FakeNode();
+    const inner = new FakeNode();
+    outer.childNodes = [inner];
+    inner.parentElement = outer;
+    outer.isConnected = false;
+    inner.isConnected = false;
+
+    const outerCb = vi.fn();
+    const innerCb = vi.fn();
+    watchUnmount(outer as unknown as HTMLElement, outerCb, {});
+    watchUnmount(inner as unknown as HTMLElement, innerCb, {});
+
+    fireRemoval(outer);
+    await flushMicrotasks();
+
+    expect(outerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
+    expect(innerCb.mock.calls[0]?.[1]).toEqual({ emit: true });
+  });
+
+  it("does NOT fire on a MOVE (node reattached -> isConnected), and keeps watching", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const node = new FakeNode();
+    node.isConnected = true; // re-inserted within the same commit (a reorder)
+    const cb = vi.fn();
+    watchUnmount(node as unknown as HTMLElement, cb);
+
+    fireRemoval(node);
+    await flushMicrotasks();
+    expect(cb).not.toHaveBeenCalled();
+
+    // The watch must survive the move: a later REAL removal still fires.
+    node.isConnected = false;
+    fireRemoval(node);
+    await flushMicrotasks();
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops firing after the returned disposer runs", async () => {
+    const { watchUnmount } = await import(
+      "../../../src/lib/ssgoi-transition/unmount-observer"
+    );
+    const node = new FakeNode();
+    node.isConnected = false;
+    const cb = vi.fn();
+    const dispose = watchUnmount(node as unknown as HTMLElement, cb);
+
+    dispose();
+    fireRemoval(node);
+    await flushMicrotasks();
+    expect(cb).not.toHaveBeenCalled();
+  });
+});
