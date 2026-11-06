@@ -111,8 +111,9 @@ export function createContextManager(options: ContextManagerOptions = {}) {
 
   // Departing pages whose successor has not paired yet (beginLeaving). While
   // any is held, the container may have no page in flow and what moves it is
-  // not a page's position.
-  let leavingHolds = 0;
+  // not a page's position. A set, so a release that lands after disconnect
+  // cannot push the count below zero and leave capture off for good.
+  const leavingHolds = new Set<() => void>();
 
   // A paired run does NOT suppress capture: `currentPath` is the page that
   // entered, it is in normal flow under the out-of-flow OUT, and a scrollbar
@@ -124,7 +125,12 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // An OUT extent inflating the scrollable height self-corrects: withdrawing
   // it clamps the container, and that scroll event is recorded too.
   const recordPosition = () => {
-    if (scrollContainer && currentPath && !isTransitioning && !leavingHolds) {
+    if (
+      scrollContainer &&
+      currentPath &&
+      !isTransitioning &&
+      !leavingHolds.size
+    ) {
       lastPosition = {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
@@ -150,13 +156,10 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     leavingPositions.set(key, position);
     // The hold ends with the OUT's pairing. If no successor ever arrives (a
     // failed or abandoned navigation), capture must not stay off for good.
-    leavingHolds++;
-    let held = true;
     const release = () => {
-      if (!held) return;
-      held = false;
-      leavingHolds--;
+      leavingHolds.delete(release);
     };
+    leavingHolds.add(release);
     const finish = beginTransition(false);
     const timer = setTimeout(() => {
       release();
@@ -416,7 +419,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       ++initGeneration;
       ++restorationGeneration;
       for (const finish of activeTransitions) finish();
-      leavingHolds = 0;
+      leavingHolds.clear();
       if (scrollContainer) {
         const target =
           scrollContainer === document.documentElement

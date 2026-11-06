@@ -796,6 +796,23 @@ describe("createContextManager", () => {
     }
   });
 
+  it("keeps capturing after a departing page's hold is released past disconnect", () => {
+    const manager = createContextManager();
+    const list = createFakeElement({ parentElement: body });
+    manager.initializeContext(list, "/list", true);
+    flushAnimationFrames(11);
+    const releaseLeaving = manager.beginLeaving("/list");
+    manager.disconnect();
+    // The pairing promise still releases the hold after the teardown.
+    releaseLeaving();
+
+    manager.initializeContext(list, "/list", true);
+    flushAnimationFrames(11);
+    documentElement.scrollTop = 420;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 420 });
+  });
+
   it("restores the page that left when it returns before any successor arrived", () => {
     const manager = createContextManager();
     const list = createFakeElement({ parentElement: body });
