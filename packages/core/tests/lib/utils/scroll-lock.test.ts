@@ -36,7 +36,102 @@ function touch(target: EventTarget, fingers = 1) {
   return event.defaultPrevented;
 }
 
+/**
+ * A page with a nested scroller: `view` stands in for the window so overflow
+ * can be read from computed style; the locked element itself still throws on
+ * any CSS/geometry read.
+ */
+function nestedFixture(root = false) {
+  class Element {}
+  const view = {
+    Element,
+    getComputedStyle: (node: { overflow: string }) => ({
+      overflowX: node.overflow,
+      overflowY: "visible",
+    }),
+  };
+  const document = Object.assign(new EventTarget(), {
+    documentElement: null as unknown,
+    body: null as unknown,
+    scrollingElement: null as unknown,
+    defaultView: view,
+  });
+  const element = Object.assign(new EventTarget(), {
+    ownerDocument: document,
+  }) as unknown as HTMLElement;
+  for (const key of ["style", "clientWidth", "scrollWidth", "scrollLeft"]) {
+    Object.defineProperty(element, key, {
+      get() {
+        throw new Error(`Unexpected ${key} access`);
+      },
+    });
+  }
+  if (root) {
+    document.documentElement = element;
+    document.scrollingElement = element;
+  }
+  const carousel = Object.assign(new Element(), {
+    overflow: "auto",
+    scrollWidth: 2000,
+    clientWidth: 600,
+    scrollLeft: 0,
+  });
+  const card = Object.assign(new Element(), {
+    overflow: "visible",
+    scrollWidth: 300,
+    clientWidth: 300,
+    scrollLeft: 0,
+  });
+  const path = [card, carousel, element, document];
+  const target = root ? document : element;
+  const dispatch = (type: string, init: Record<string, unknown>) => {
+    const event = Object.assign(new Event(type, { cancelable: true }), init, {
+      composedPath: () => path,
+    });
+    target.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  return { element, target, carousel, dispatch };
+}
+
 describe("transition input scroll lock", () => {
+  it.each([false, true])(
+    "lets a nested scroller take the input it can consume, root=%s",
+    (root) => {
+      const { element, carousel, dispatch } = nestedFixture(root);
+      const release = lockScroll(element);
+      // A horizontal wheel over the carousel with room to the right: its own.
+      expect(dispatch("wheel", { deltaX: 40, deltaY: 0 })).toBe(false);
+      // Shift+wheel is a horizontal scroll too.
+      expect(dispatch("wheel", { deltaX: 0, deltaY: 40, shiftKey: true })).toBe(
+        false,
+      );
+      // A vertical wheel over it would scroll the page: blocked.
+      expect(dispatch("wheel", { deltaX: 0, deltaY: 40 })).toBe(true);
+      // At its left edge, a wheel to the left would chain to the page.
+      expect(dispatch("wheel", { deltaX: -40, deltaY: 0 })).toBe(true);
+      carousel.scrollLeft = 1400;
+      expect(dispatch("wheel", { deltaX: -40, deltaY: 0 })).toBe(false);
+      expect(dispatch("wheel", { deltaX: 40, deltaY: 0 })).toBe(true);
+      release();
+    },
+  );
+
+  it("tells a nested touch scroll apart by where the finger went down", () => {
+    const { element, dispatch } = nestedFixture();
+    const release = lockScroll(element);
+    dispatch("touchstart", { touches: [{ clientX: 300, clientY: 300 }] });
+    // Finger moving left scrolls the carousel right: its own.
+    expect(
+      dispatch("touchmove", { touches: [{ clientX: 240, clientY: 305 }] }),
+    ).toBe(false);
+    // Finger moving up would scroll the page: blocked.
+    expect(
+      dispatch("touchmove", { touches: [{ clientX: 302, clientY: 220 }] }),
+    ).toBe(true);
+    release();
+  });
+
   it.each([false, true])(
     "blocks scroll input without touching CSS or geometry, root=%s",
     (root) => {
@@ -118,6 +213,6 @@ describe("transition input scroll lock", () => {
     expect(wheel(second.target)).toBe(false);
     const spy = vi.spyOn(first.target, "removeEventListener");
     release();
-    expect(spy).toHaveBeenCalledTimes(3);
+    expect(spy).toHaveBeenCalledTimes(4);
   });
 });

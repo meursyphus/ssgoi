@@ -31,7 +31,10 @@ const makePage = (name: string) => {
   const page = document.createElement("article");
   page.className = `page ${name}`;
   page.setAttribute("data-ssgoi-transition", `/${name}`);
-  page.innerHTML = `<h1>${name} page</h1><p>Transition scroll regression fixture</p>`;
+  page.innerHTML = `<h1>${name} page</h1><p>Transition scroll regression fixture</p>
+    <div class="carousel" style="overflow-x:auto;overflow-y:hidden;width:400px;height:120px;overscroll-behavior-x:contain">
+      <div style="width:2400px;height:100px;background:linear-gradient(90deg,#f6c,#6cf)"></div>
+    </div>`;
   return page;
 };
 let current = makePage("long");
@@ -62,6 +65,8 @@ async function navigate() {
 }
 function state() {
   return {
+    carousel:
+      current.querySelector<HTMLElement>(".carousel")?.scrollLeft ?? null,
     x: scroller.scrollLeft,
     y: scroller.scrollTop,
     height: scroller.scrollHeight,

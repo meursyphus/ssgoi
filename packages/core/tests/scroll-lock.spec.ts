@@ -86,6 +86,32 @@ for (const custom of [false, true]) {
   }
 }
 
+test("a scroller nested in the page keeps taking wheel input during the lock", async ({
+  page,
+}) => {
+  await page.goto("/tests/scroll-lock.html");
+  await page.waitForFunction(() => document.title.includes("ready"));
+  await page.evaluate(() => window.harness.navigate());
+  expect(await page.evaluate(() => window.harness.state().locked)).toBe(true);
+  // The incoming page's carousel; the departing page lies over it, out of
+  // flow, and must not take the input.
+  const box = await page.locator(".page.short .carousel").boundingBox();
+  if (!box) throw new Error("carousel not laid out");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  // Horizontal wheel over the carousel: the carousel scrolls, the page does not.
+  await page.mouse.wheel(600, 0);
+  await expect
+    .poll(() => page.evaluate(() => window.harness.state().carousel))
+    .toBeGreaterThan(100);
+  // Vertical wheel over it would scroll the page: still blocked.
+  await page.mouse.wheel(0, 900);
+  await page.evaluate(() => window.harness.frames(20));
+  const state = await page.evaluate(() => window.harness.state());
+  expect(state.y).toBe(0);
+  expect(state.locked).toBe(true);
+  await page.evaluate(() => window.harness.finish());
+});
+
 test("opt-out reproduces the long OUT scroll extent and end-of-transition jump", async ({
   page,
 }) => {
