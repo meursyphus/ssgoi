@@ -139,24 +139,32 @@ describe("createContextManager", () => {
     vi.unstubAllGlobals();
   });
 
-  it("holds scroll capture for the full transition, including overlapping runs", () => {
+  it("records scroll during a run but not while a departing page waits for its successor", () => {
     const manager = createContextManager();
     manager.initializeContext(
       createFakeElement({ parentElement: body }),
       "/page",
       true,
     );
+    flushAnimationFrames(30);
+    // Overlapping runs hold the input lock only: the page in flow is the one
+    // the user sees, and a scrollbar drag during playback is its position.
     const finishFirst = manager.beginTransition(false);
     const finishSecond = manager.beginTransition(false);
-    flushAnimationFrames(30);
     documentElement.scrollTop = 900;
     emitWindowScroll();
-    expect(manager.getScrollPosition("/page").y).toBe(0);
+    expect(manager.getScrollPosition("/page").y).toBe(900);
     finishFirst();
     finishFirst();
-    emitWindowScroll();
-    expect(manager.getScrollPosition("/page").y).toBe(0);
     finishSecond();
+
+    // A departing page with no successor yet: whatever moves the emptied
+    // container is not a page's position.
+    const releaseLeaving = manager.beginLeaving("/page");
+    documentElement.scrollTop = 0;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/page").y).toBe(900);
+    releaseLeaving();
     documentElement.scrollTop = 100;
     emitWindowScroll();
     expect(manager.getScrollPosition("/page").y).toBe(100);
@@ -706,6 +714,83 @@ describe("createContextManager", () => {
       documentElement.scrollTop = 120;
       emitWindowScroll();
       expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 120 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("files where the user scrolled during the return run, not the restored position", () => {
+    const manager = createContextManager();
+    const list = createFakeElement({ parentElement: body });
+    const detail = createFakeElement({ parentElement: body });
+
+    // list (at 0) → detail.
+    manager.initializeContext(list, "/list", true);
+    flushAnimationFrames(11);
+    const releaseListLeaving = manager.beginLeaving("/list");
+    const applyDetail = manager.initializeContext(detail, "/detail");
+    applyDetail(false, "/list");
+    releaseListLeaving();
+    const finishForward = manager.beginTransition(false);
+    flushAnimationFrames(11);
+    finishForward();
+
+    // Back: the list is revealed and restored to 0 while the run plays.
+    const releaseDetailLeaving = manager.beginLeaving("/detail");
+    const applyList = manager.initializeContext(list, "/list");
+    applyList(true, "/detail");
+    releaseDetailLeaving();
+    const finishBack = manager.beginTransition(false);
+    flushAnimationFrames(11);
+    expect(documentElement.scrollTop).toBe(0);
+
+    // The user scrolls the revealed list while the run is still playing, then
+    // navigates again before it ends: the leave must file where the user
+    // scrolled, not the 0 the restore wrote.
+    documentElement.scrollTop = 250;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 250 });
+    manager.beginLeaving("/list");
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 250 });
+    expect(manager.calculateScrollOffset("/list", "/detail")).toEqual({
+      x: 0,
+      y: 250,
+    });
+    finishBack();
+  });
+
+  it("records the resting position when the settle window closes without a run", () => {
+    const manager = createContextManager();
+    const list = createFakeElement({ parentElement: body });
+
+    manager.initializeContext(list, "/list", true);
+    // Scrolled inside the 10-frame settle window: dropped while it is open...
+    flushAnimationFrames(2);
+    documentElement.scrollTop = 180;
+    emitWindowScroll();
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 0 });
+    // ...and taken as the page's position when it closes.
+    flushAnimationFrames(10);
+    expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 180 });
+  });
+
+  it("does not read the emptied container when a departing page's hold lapses", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      const manager = createContextManager();
+      const list = createFakeElement({ parentElement: body });
+      manager.initializeContext(list, "/list", true);
+      flushAnimationFrames(11);
+      documentElement.scrollTop = 300;
+      emitWindowScroll();
+
+      manager.beginLeaving("/list");
+      // The framework hid the list and the container clamped to the top.
+      documentElement.scrollTop = 0;
+      emitWindowScroll();
+      vi.advanceTimersByTime(5000);
+      // The lapse resumes capture but must not file the clamp as the list's.
+      expect(manager.getScrollPosition("/list")).toEqual({ x: 0, y: 300 });
     } finally {
       vi.useRealTimers();
     }

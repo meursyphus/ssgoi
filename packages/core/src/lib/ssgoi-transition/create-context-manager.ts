@@ -109,13 +109,22 @@ export function createContextManager(options: ContextManagerOptions = {}) {
   // Nested IN boundaries for the same path share one resolved rule decision.
   let scrollPolicyDecisionGeneration = 0;
 
-  const scrollListener = () => {
-    if (
-      scrollContainer &&
-      currentPath &&
-      !isTransitioning &&
-      !activeTransitions.size
-    ) {
+  // Departing pages whose successor has not paired yet (beginLeaving). While
+  // any is held, the container may have no page in flow and what moves it is
+  // not a page's position.
+  let leavingHolds = 0;
+
+  // A paired run does NOT suppress capture: `currentPath` is the page that
+  // entered, it is in normal flow under the out-of-flow OUT, and a scrollbar
+  // drag, momentum or scrollTo during playback moves the page the user sees.
+  // The next leave files that position (hero/zoom source offset, a later
+  // restore), so it must be recorded even if the run is still playing when
+  // the user navigates again. #418's input lock still applies for the run;
+  // only its capture hold is narrowed to the departing-page window above.
+  // An OUT extent inflating the scrollable height self-corrects: withdrawing
+  // it clamps the container, and that scroll event is recorded too.
+  const recordPosition = () => {
+    if (scrollContainer && currentPath && !isTransitioning && !leavingHolds) {
       lastPosition = {
         x: scrollContainer.scrollLeft,
         y: scrollContainer.scrollTop,
@@ -123,6 +132,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       scrollPositions.set(getStorageKey(currentPath), lastPosition);
     }
   };
+  const scrollListener = recordPosition;
 
   // The framework took `path` off screen before its successor arrived. File
   // the position it had, and stop capturing until the OUT is paired or
@@ -140,10 +150,21 @@ export function createContextManager(options: ContextManagerOptions = {}) {
     leavingPositions.set(key, position);
     // The hold ends with the OUT's pairing. If no successor ever arrives (a
     // failed or abandoned navigation), capture must not stay off for good.
+    leavingHolds++;
+    let held = true;
+    const release = () => {
+      if (!held) return;
+      held = false;
+      leavingHolds--;
+    };
     const finish = beginTransition(false);
-    const timer = setTimeout(finish, LEAVING_HOLD_TIMEOUT_MS);
+    const timer = setTimeout(() => {
+      release();
+      finish();
+    }, LEAVING_HOLD_TIMEOUT_MS);
     return () => {
       clearTimeout(timer);
+      release();
       finish();
     };
   };
@@ -326,6 +347,9 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       settleCount++;
       if (settleCount >= TRANSITION_SETTLE_FRAMES) {
         isTransitioning = false;
+        // A scroll inside the settle window was dropped; the page is in flow
+        // where it rests now.
+        recordPosition();
       } else {
         requestAnimationFrame(trySettle);
       }
@@ -392,6 +416,7 @@ export function createContextManager(options: ContextManagerOptions = {}) {
       ++initGeneration;
       ++restorationGeneration;
       for (const finish of activeTransitions) finish();
+      leavingHolds = 0;
       if (scrollContainer) {
         const target =
           scrollContainer === document.documentElement
