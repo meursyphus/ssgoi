@@ -74,6 +74,9 @@ it("keys every boundary by the route path without config.layouts", async () => {
   await navigate("/b");
   expect(boundary().dataset.ssgoiTransition).toBe("/b");
   expect(boundary()).not.toBe(first);
+  // Core puts a removed page back until its navigation pairs. With no rule to
+  // run, that resolves in microtasks, so the page is gone before the next task.
+  await new Promise((resolve) => setTimeout(resolve));
   expect(first.isConnected).toBe(false);
 });
 
