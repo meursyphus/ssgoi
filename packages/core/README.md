@@ -64,9 +64,8 @@ Path patterns:
 - `/posts/*`: exactly one arbitrary segment.
 - `/posts/**`: the parent and every descendant.
 
-A bare `*` remains a compatibility alias for `/**`. Named single-segment forms
-remain supported and rank above a single-segment `*` when rules overlap, but
-their names are not captured or exposed.
+Named single-segment forms remain supported and rank above a single-segment `*`
+when rules overlap, but their names are not captured or exposed.
 
 ## Boundary model
 

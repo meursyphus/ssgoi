@@ -13,12 +13,9 @@ export default defineConfig({
       include: ["src/lib/**/*"],
       exclude: ["src/vite-env.d.ts"],
       tsconfigPath: "./tsconfig.app.json",
-      // Legacy declarations keep the dist/routers paths that `exports` publish.
       beforeWriteFile: (filePath, content) => ({
-        filePath: filePath
-          .replace("/src/lib", "")
-          .replace("/legacy/", "/routers/"),
-        content: content.replaceAll("./legacy/", "./routers/"),
+        filePath: filePath.replace("/src/lib", ""),
+        content,
       }),
     }) as PluginOption,
   ],
@@ -26,8 +23,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        "vue-router": resolve(__dirname, "src/lib/legacy/vue-router.ts"),
-        nuxt: resolve(__dirname, "src/lib/legacy/nuxt.ts"),
         types: resolve(__dirname, "src/lib/types.ts"),
         "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },
@@ -35,8 +30,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        /^nuxt(?:\/|$)/,
-        /^vue-router(?:\/|$)/,
         "vue",
         "@ssgoi/core",
         "@ssgoi/core/internal",

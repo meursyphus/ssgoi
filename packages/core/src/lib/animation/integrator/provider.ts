@@ -91,12 +91,4 @@ export class IntegratorProvider {
       restSpeed: spring.restSpeed,
     });
   }
-
-  /**
-   * Create an Integrator from SpringConfig (legacy support)
-   * @deprecated Use from({ spring: config }) instead
-   */
-  static fromSpring(config: SpringConfig): Integrator {
-    return IntegratorProvider.from({ spring: config });
-  }
 }

@@ -59,9 +59,8 @@ interface BakedSpringItem {
 }
 
 /**
- * Run a stagger schedule of springs offline, frame by frame. Mirrors the
- * legacy multi-animator: items tick in array order each frame, and items
- * with stagger offsets start when the previous item's progress crosses
+ * Run a stagger schedule of springs offline, frame by frame. Items tick in
+ * array order each frame, and items with stagger offsets start when the previous item's progress crosses
  * their threshold. After every frame's ticks, `recordFrame` snapshots the
  * shared state the ticks wrote to.
  */

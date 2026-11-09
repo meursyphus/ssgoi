@@ -182,8 +182,6 @@ export type SsgoiTransitionRule =
 export type SsgoiLayoutScope = import("../runtime/types").LayoutScope;
 export type SsgoiTransitionsFn =
   import("../runtime/types").TransitionsFn<AnyTransitionConfig>;
-export type SsgoiTransitionsOption =
-  import("../runtime/types").TransitionsOption<AnyTransitionConfig>;
 export type SsgoiConfig =
   import("../runtime/types").RouteConfig<AnyTransitionConfig> & {
     /**

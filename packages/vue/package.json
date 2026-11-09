@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/vue",
-  "version": "7.5.0",
+  "version": "8.0.0-beta.0",
   "description": "Native app-like page transitions for Vue and Nuxt. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",
@@ -30,18 +30,6 @@
       "import": "./dist/view-transitions.js",
       "require": "./dist/view-transitions.cjs",
       "default": "./dist/view-transitions.js"
-    },
-    "./vue-router": {
-      "types": "./dist/routers/vue-router.d.ts",
-      "import": "./dist/vue-router.js",
-      "require": "./dist/vue-router.cjs",
-      "default": "./dist/vue-router.js"
-    },
-    "./nuxt": {
-      "types": "./dist/routers/nuxt.d.ts",
-      "import": "./dist/nuxt.js",
-      "require": "./dist/nuxt.cjs",
-      "default": "./dist/nuxt.js"
     }
   },
   "scripts": {
@@ -58,9 +46,7 @@
     "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
-    "nuxt": "*",
-    "vue": "^3.5.0",
-    "vue-router": "*"
+    "vue": "^3.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
@@ -70,7 +56,6 @@
     "eslint-plugin-vue": "^9.33.0",
     "globals": "^16.3.0",
     "jsdom": "^26.1.0",
-    "nuxt": "^3.20.2",
     "prettier": "^3.6.2",
     "rollup-plugin-preserve-directives": "^0.4.0",
     "typescript": "~5.8.3",
@@ -78,7 +63,6 @@
     "vite": "^7.0.4",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.2.4",
-    "vue-router": "^4.6.3",
     "vue-tsc": "^2.2.12"
   },
   "keywords": [
@@ -122,13 +106,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "vue-router": {
-      "optional": true
-    },
-    "nuxt": {
-      "optional": true
-    }
   }
 }

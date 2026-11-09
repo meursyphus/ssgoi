@@ -11,8 +11,8 @@ export interface SsgoiLayoutBoundaryProps {
   as?: keyof HTMLElementTagNameMap;
 }
 
-/** Shared setup; renders an element keyed by `state().key`. */
-export function setupRouteBoundary(
+/** Renders an element keyed by `state().key`. */
+function setupRouteBoundary(
   state: () => { id: string; key: string | number },
   as: () => keyof HTMLElementTagNameMap,
   { attrs, slots }: Pick<SetupContext, "attrs" | "slots">,

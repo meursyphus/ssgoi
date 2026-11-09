@@ -138,6 +138,3 @@ above it), or the route path. Query/hash-only changes keep the boundary by
 default.
 
 Manual/custom-router guide: https://ssgoi.dev/llms/manual-boundaries.txt
-
-`SsgoiRouteBoundary` from `@ssgoi/vue/nuxt` or `@ssgoi/vue/vue-router` still
-works but is deprecated and will be removed in 8.0.0.

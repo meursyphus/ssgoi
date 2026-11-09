@@ -1,19 +1,9 @@
 import { afterEach, beforeEach, expect, it } from "vitest";
-import {
-  createApp,
-  defineComponent,
-  h,
-  nextTick,
-  ref,
-  type App,
-  type VNode,
-} from "vue";
-import { createMemoryHistory, createRouter, RouterView } from "vue-router";
+import { createApp, h, nextTick, ref, type App, type VNode } from "vue";
 import type { SsgoiConfig, SsgoiLayoutScope } from "@ssgoi/core/types";
 import Ssgoi from "../src/lib/ssgoi.vue";
 import { SsgoiLayoutBoundary } from "../src/lib/layout-boundary";
 import type { SsgoiFramework } from "../src/lib/types";
-import { SsgoiRouteBoundary } from "../src/lib/legacy/vue-router";
 
 const config: SsgoiConfig = { transitions: [] };
 const path = ref("/a");
@@ -159,55 +149,4 @@ it("throws when <Ssgoi> has no framework", () => {
   expect((errors[0] as Error).message).toMatch(
     /^SSGOI: SsgoiLayoutBoundary requires a framework/,
   );
-});
-
-async function mountRouter(props: Record<string, unknown> = {}) {
-  const Page = defineComponent({ render: () => h("p", "page") });
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: "/a", component: Page },
-      { path: "/b", component: Page },
-    ],
-  });
-  await router.push("/a");
-  app = createApp(() =>
-    h(Ssgoi, { config }, () =>
-      h(SsgoiRouteBoundary, { "data-boundary": "0", ...props }, () =>
-        h(RouterView),
-      ),
-    ),
-  );
-  app.use(router);
-  app.mount(host);
-  await router.isReady();
-  await nextTick();
-  return router;
-}
-
-it("keeps the deprecated vue-router boundary working without a framework", async () => {
-  const router = await mountRouter();
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("/a");
-
-  await router.push("/b");
-  await nextTick();
-  expect(boundary().dataset.ssgoiTransition).toBe("/b");
-  expect(boundary()).not.toBe(first);
-});
-
-it("keeps the deprecated resolve and routeKey props", async () => {
-  const router = await mountRouter({
-    resolve: ({ pathname }: { pathname: string }) => ({
-      id: `page:${pathname}`,
-    }),
-    routeKey: "shell",
-  });
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("page:/a");
-
-  await router.push("/b");
-  await nextTick();
-  expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("page:/b");
 });

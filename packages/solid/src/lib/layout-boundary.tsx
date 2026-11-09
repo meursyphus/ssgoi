@@ -17,7 +17,7 @@ export type SsgoiLayoutBoundaryProps = JSX.HTMLAttributes<HTMLElement> & {
 };
 
 /** Shared rendering; remounts its element whenever `state().key` changes. */
-export function RouteBoundary(
+function RouteBoundary(
   props: SsgoiLayoutBoundaryProps & {
     state: Accessor<{ id: string; key: string | number }>;
   },

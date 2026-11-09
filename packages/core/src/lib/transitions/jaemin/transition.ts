@@ -83,7 +83,7 @@ export const jaemin = (options: JaeminOptions = {}) => {
         element: to,
         integrator: IntegratorProvider.from(inPhysics),
         style: (t) => {
-          // Multi-phase scale curve (matches legacy tick branches).
+          // Multi-phase scale curve.
           let currentScale: number;
           if (t <= 0.05) {
             currentScale = initialScale;

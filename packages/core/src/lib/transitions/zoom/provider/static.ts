@@ -1,12 +1,6 @@
 import type { PhysicsOptions } from "@types";
-import type {
-  ZoomAnimationConfig,
-  ZoomContributeCtx,
-  ZoomProvider,
-  ZoomStrategy,
-} from "../types";
+import type { ZoomContributeCtx, ZoomStrategy } from "../types";
 import { Animation } from "../../../animation";
-import { createZoomIn, createZoomOut } from "../zoom-element";
 
 export const STATIC_PHYSICS: PhysicsOptions = {
   spring: {
@@ -15,13 +9,6 @@ export const STATIC_PHYSICS: PhysicsOptions = {
     doubleSpring: 1,
   },
 };
-
-function noopAnimation(): ZoomAnimationConfig {
-  return {
-    transformOrigin: "",
-    animate: () => ({}),
-  };
-}
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Strategy: the `static` type leaves the background page untouched. The
@@ -37,18 +24,4 @@ export class StaticBackgroundStrategy implements ZoomStrategy {
   contribute(_ctx: ZoomContributeCtx): Animation[] {
     return [];
   }
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Legacy provider export — preserves the v5 shape for back-compat.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-export function createStaticProvider(): ZoomProvider {
-  return {
-    physics: STATIC_PHYSICS,
-    in: createZoomIn,
-    out: createZoomOut,
-    backgroundIn: () => noopAnimation(),
-    backgroundOut: () => noopAnimation(),
-  };
 }

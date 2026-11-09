@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/solid",
-  "version": "7.5.0",
+  "version": "8.0.0-beta.0",
   "description": "Native app-like page transitions for Solid and SolidStart. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",
@@ -36,20 +36,6 @@
       "import": "./dist/view-transitions.js",
       "require": "./dist/view-transitions.cjs",
       "default": "./dist/view-transitions.js"
-    },
-    "./solidstart": {
-      "solid": "./src/lib/legacy/solidstart.ts",
-      "types": "./dist/routers/solidstart.d.ts",
-      "import": "./dist/solidstart.js",
-      "require": "./dist/solidstart.cjs",
-      "default": "./dist/solidstart.js"
-    },
-    "./solid-router": {
-      "solid": "./src/lib/legacy/solid-router.tsx",
-      "types": "./dist/routers/solid-router.d.ts",
-      "import": "./dist/solid-router.js",
-      "require": "./dist/solid-router.cjs",
-      "default": "./dist/solid-router.js"
     }
   },
   "scripts": {
@@ -67,7 +53,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
-    "@solidjs/router": "^0.16.1",
     "@types/node": "^24.10.1",
     "eslint": "^9.30.1",
     "globals": "^16.3.0",
@@ -82,7 +67,6 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@solidjs/router": "*",
     "solid-js": "^1.0.0"
   },
   "keywords": [
@@ -127,10 +111,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@solidjs/router": {
-      "optional": true
-    }
   }
 }

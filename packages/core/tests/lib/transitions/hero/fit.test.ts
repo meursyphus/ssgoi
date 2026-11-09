@@ -1,13 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createMediaGeometry } from "../../../../src/lib/transitions/media-geometry";
-import {
-  fallbackHeroFit,
-  type HeroEndpoint,
-} from "../../../../src/lib/transitions/hero/fit";
 import { usesHeroExitLayer } from "../../../../src/lib/transitions/hero/exit-layer";
 import {
   normalizeHeroGeometryPair,
-  resolveNewStylePairs,
+  resolvePairs,
   shouldResetHeroRadius,
 } from "../../../../src/lib/transitions/hero/transition";
 
@@ -29,70 +25,37 @@ function page(elements: HTMLElement[]): HTMLElement {
 }
 
 describe("hero fit inference", () => {
-  it.each(["forward", "backward"] as const)(
-    "uses a layer only for semantic exits even with %s history direction",
-    (direction) => {
-      const exit = element({
-        "data-hero-exit-key": "photo",
-        "data-hero-key": "photo",
-      });
-      const enter = element({
-        "data-hero-enter-key": "photo",
-        "data-hero-key": "photo",
-      });
-      const [inPair] = resolveNewStylePairs(page([exit]), page([enter]));
-      const [outPair] = resolveNewStylePairs(page([enter]), page([exit]));
-      expect(usesHeroExitLayer(inPair!, direction)).toBe(false);
-      expect(usesHeroExitLayer(outPair!, direction)).toBe(true);
-    },
-  );
-
-  it("uses history direction for legacy symmetric hero keys", () => {
-    const pair = {
-      key: "photo",
-      fromEl: element({ "data-hero-key": "photo" }),
-      toEl: element({ "data-hero-key": "photo" }),
-      fromFit: "contain" as const,
-      toFit: "contain" as const,
-    };
-    expect(usesHeroExitLayer(pair, "forward")).toBe(false);
-    expect(usesHeroExitLayer(pair, "backward")).toBe(true);
+  it("uses a layer only for semantic exits", () => {
+    const exit = element({ "data-hero-exit-key": "photo" });
+    const enter = element({ "data-hero-enter-key": "photo" });
+    const [inPair] = resolvePairs(page([exit]), page([enter]));
+    const [outPair] = resolvePairs(page([enter]), page([exit]));
+    expect(usesHeroExitLayer(inPair!)).toBe(false);
+    expect(usesHeroExitLayer(outPair!)).toBe(true);
   });
 
-  it.each<[HeroEndpoint, "contain" | "cover"]>([
-    ["enter", "contain"],
-    ["exit", "cover"],
-    ["legacy", "contain"],
-  ])("infers %s endpoints as %s", (endpoint, expected) => {
-    expect(fallbackHeroFit(endpoint)).toBe(expected);
-  });
-
-  it("preserves semantic defaults for a forward exit-to-enter pair", () => {
+  it("pairs a forward exit-to-enter navigation", () => {
     const exitEl = element({ "data-hero-exit-key": "photo" });
     const enterEl = element({ "data-hero-enter-key": "photo" });
 
-    expect(resolveNewStylePairs(page([exitEl]), page([enterEl]))).toEqual([
+    expect(resolvePairs(page([exitEl]), page([enterEl]))).toEqual([
       {
         key: "photo",
         fromEl: exitEl,
         toEl: enterEl,
-        fromFit: "cover",
-        toFit: "contain",
       },
     ]);
   });
 
-  it("preserves semantic fit defaults for a reverse enter-to-exit pair", () => {
+  it("pairs a reverse enter-to-exit navigation", () => {
     const enterEl = element({ "data-hero-enter-key": "photo" });
     const exitEl = element({ "data-hero-exit-key": "photo" });
 
-    expect(resolveNewStylePairs(page([enterEl]), page([exitEl]))).toEqual([
+    expect(resolvePairs(page([enterEl]), page([exitEl]))).toEqual([
       {
         key: "photo",
         fromEl: enterEl,
         toEl: exitEl,
-        fromFit: "contain",
-        toFit: "cover",
       },
     ]);
   });

@@ -38,8 +38,6 @@ Keep page files such as `app/posts/index.tsx` and `app/posts/[id].tsx`, and use 
 
 `Ssgoi` provides config, selects the native platform, and carries the Expo Router primitives passed as `framework`; the root entry never imports `expo-router` itself. `SsgoiLayoutBoundary` builds an internal Expo navigator from those primitives once and supplies a boundary for each screen. It throws if `<Ssgoi>` has no `framework`. Popped/replaced screens keep their actual React instance and route context until completion. Routes still in the stack remain mounted and retain input and scroll state.
 
-`@ssgoi/react-native/expo-router` and its `SsgoiRouteBoundary` are deprecated but keep working unchanged; it imports Expo Router directly and does not need `framework`. Replace it with `SsgoiLayoutBoundary` as above.
-
 ## Configuration
 
 - `transitions`: `on`/`except`, `from`/`to`, `ordered`, `priority`, and `bidirectional` have the same matching semantics as the web.
@@ -55,7 +53,7 @@ Web `TransitionConfig`/`WebAnimation` objects cannot be passed to native config.
 
 Basic usage needs no props. `initialRouteName` selects the initial file-discovered screen, and `style` styles the native host.
 
-`SsgoiLayoutBoundary` takes no SSGOI props. Each screen is matched by its own route pathname, including retained screens, and keeps its content for the lifetime of its native route instance: two pushed screens never merge, and a popped screen is released after its exit. Navigation animations follow changes in the active native route key. Web `config.layouts` scopes are accepted so a config can be shared, but have no effect here: Expo's nested navigators already define which screens share a layout. The deprecated `SsgoiRouteBoundary` keeps its `resolve`/`routeKey` props.
+`SsgoiLayoutBoundary` takes no SSGOI props. Each screen is matched by its own route pathname, including retained screens, and keeps its content for the lifetime of its native route instance: two pushed screens never merge, and a popped screen is released after its exit. Navigation animations follow changes in the active native route key. Web `config.layouts` scopes are accepted so a config can be shared, but have no effect here: Expo's nested navigators already define which screens share a layout.
 
 ## Current scope
 

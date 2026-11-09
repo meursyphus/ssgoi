@@ -1,25 +1,13 @@
-import type { PhysicsOptions, Pose, Timeline } from "@types";
+import type { Pose, Timeline } from "@types";
 import {
   Animation,
-  type AnimationPatch,
   type AnimationStart,
   type AnimationDisposal,
   finishedDisposal,
 } from "./animation";
 import { frameScheduler } from "./frame-scheduler";
-import { IntegratorProvider, type Integrator } from "./integrator";
+import type { Integrator } from "./integrator";
 import type { WebAnimation } from "./web-animation";
-
-export interface TrackPatch {
-  /** New physics — an `Integrator` instance or the `{ spring | inertia }` shape. */
-  integrator?: Integrator | PhysicsOptions;
-}
-
-function toIntegrator(value: Integrator | PhysicsOptions): Integrator {
-  return typeof (value as Integrator).step === "function"
-    ? (value as Integrator)
-    : IntegratorProvider.from(value as PhysicsOptions);
-}
 
 export type MultiAnimationMode = "parallel" | "sequence";
 
@@ -43,7 +31,7 @@ export interface MultiAnimationOptions {
  * Composite that drives several child Animations.
  *
  * - `parallel`: all children play together (optionally staggered via `startAt`)
- * - `sequence`: legacy numeric first-arrival chaining; use startCondition with
+ * - `sequence`: numeric first-arrival chaining; use startCondition with
  *   at: "settled" for explicit completion dependencies
  *
  * Pose/Timeline reads fan out to every child for diagnostic / inspection use.
@@ -132,20 +120,6 @@ export class MultiAnimation<Name extends string = string> extends Animation {
     return child;
   }
 
-  set(patch: AnimationPatch): this;
-  /** @deprecated Prefer select(name).set({ integrator }). */
-  set(name: Name, patch: TrackPatch): this;
-  set(patchOrName: AnimationPatch | Name, patch?: TrackPatch): this {
-    if (typeof patchOrName === "string") {
-      const target = this.select(patchOrName);
-      if (patch?.integrator !== undefined) {
-        target.set({ integrator: toIntegrator(patch.integrator) });
-      }
-      return this;
-    }
-    return super.set(patchOrName);
-  }
-
   /** Setting the composite explicitly retunes every child in the group. */
   protected setIntegrator(integrator: Integrator): void {
     for (const child of this._children) child.set({ integrator });
@@ -224,7 +198,7 @@ export class MultiAnimation<Name extends string = string> extends Animation {
   }
 
   matchInto(poses: Pose[]): void {
-    // Explicit legacy scalar handoff only; Host uses typed presentation channels.
+    // Explicit scalar handoff only; Host uses typed presentation channels.
     // Matching changes initial state, never dependency timing or child activation.
     for (const child of this._children) child.matchInto(poses);
   }
@@ -389,7 +363,7 @@ export class MultiAnimation<Name extends string = string> extends Animation {
         }
         dependencies.set(child, { ...explicit });
       } else if (index > 0 && this._startAt.some((value) => value > 0)) {
-        // Legacy constructor thresholds retain their first-crossing behavior.
+        // Constructor thresholds fire on first crossing.
         // Even zero waits for the predecessor to start, preserving chained
         // schedules such as [0, 0.4, 0] without changing preset defaults.
         dependencies.set(child, {

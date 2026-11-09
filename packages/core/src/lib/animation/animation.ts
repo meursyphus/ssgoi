@@ -48,7 +48,7 @@ export abstract class Animation<
   /** Validate authored scheduling before a host transfers ownership. */
   validate(): void {}
 
-  /** Opaque custom drivers retain the explicit legacy finish-on-interrupt fallback. */
+  /** Opaque custom drivers finish on interrupt instead of handing off. */
   get supportsInterruption(): boolean {
     return false;
   }

@@ -14,7 +14,6 @@ import {
   type SsgoiConfig,
   type SsgoiFramework,
 } from "../src";
-import { SsgoiRouteBoundary as DeprecatedNextBoundary } from "../src/legacy/nextjs";
 
 const navigation = vi.hoisted(() => ({
   pathname: "/" as string | null,
@@ -23,10 +22,6 @@ const navigation = vi.hoisted(() => ({
   /** TanStack's rendered leaf match; null means "same as pathname". */
   matchPathname: null as string | null,
   pending: null as Promise<void> | null,
-}));
-vi.mock("next/navigation", () => ({
-  usePathname: () => navigation.pathname,
-  useSelectedLayoutSegments: () => ["projects"],
 }));
 
 const next: SsgoiFramework = {
@@ -322,20 +317,6 @@ describe("without a framework", () => {
         </Ssgoi>,
       ),
     ).toThrow(message);
-  });
-
-  it("leaves the deprecated subpath working on its own router imports", () => {
-    expect(
-      renderToString(
-        <Ssgoi config={layouts}>
-          <DeprecatedNextBoundary
-            resolve={({ selectedSegments }) => ({
-              id: `/${selectedSegments.join("/")}`,
-            })}
-          />
-        </Ssgoi>,
-      ),
-    ).toContain('data-ssgoi-transition="/projects"');
   });
 });
 

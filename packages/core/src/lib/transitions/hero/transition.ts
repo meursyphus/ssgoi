@@ -15,10 +15,8 @@ import {
   projectedWindowRect,
   resolveElementMediaGeometry,
   type MediaGeometry,
-  type MediaFit,
   type MediaRect,
 } from "../media-geometry";
-import { fallbackHeroFit } from "./fit";
 import { isRendered, waitForSharedTarget } from "../shared-target";
 import { createHeroExitLayer, usesHeroExitLayer } from "./exit-layer";
 import {
@@ -37,7 +35,7 @@ import {
 } from "../crossfade";
 import { placeCrossfadeCopy, preserveStyles, stackHeroPages } from "./in-place";
 import { insetClipPath } from "../inset-clip";
-import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
+import { HERO_ENTER_KEY, HERO_EXIT_KEY } from "./keys";
 import { HERO_CHROME_PROVIDERS, HERO_VARIANT_PROVIDERS } from "./provider";
 import type {
   HeroAnimationName,
@@ -53,24 +51,17 @@ export type { HeroType, HeroVariant, NormalizedHeroOptions } from "./types";
 
 const DEFAULT_MAX_DISTANCE = 700;
 
-/** @deprecated Intrinsic media dimensions are inferred automatically. */
-const LEGACY_HERO_ASPECT_KEY = "data-hero-aspect-ratio";
-/** @deprecated Border radius is inferred from the keyed clipping window. */
-const LEGACY_HERO_RADIUS_KEY = "data-hero-radius";
-
 /* ────────────────────────────────────────────────────────────────────────────
  * Content/window rect resolution
  *
  * A direct image or one unambiguous direct image child auto-resolves intrinsic
  * ratio, computed object-fit, clipping window, and simple uniform CSS radius.
- * Ambiguous structures retain bbox geometry. Deprecated aspect/radius data
- * attributes remain compatibility overrides for already-published markup.
+ * Ambiguous structures retain bbox geometry.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 function getHeroRect(
   container: HTMLElement,
   el: HTMLElement,
-  fit: MediaFit,
   clipRoot: HTMLElement,
 ): MediaGeometry {
   const measure = (target: HTMLElement) => {
@@ -85,12 +76,7 @@ function getHeroRect(
     };
   };
   const bbox = measure(el);
-  return resolveElementMediaGeometry(el, bbox, measure, {
-    clipRoot,
-    fallbackFit: fit,
-    legacyAspectRatioAttribute: LEGACY_HERO_ASPECT_KEY,
-    legacyRadiusAttribute: LEGACY_HERO_RADIUS_KEY,
-  });
+  return resolveElementMediaGeometry(el, bbox, measure, { clipRoot });
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -120,7 +106,7 @@ function collectByAttr(
  * cases the pair crossfades: in the destination parent on enter, above both
  * pages on exit.
  */
-export function resolveNewStylePairs(
+export function resolvePairs(
   fromNode: HTMLElement,
   toNode: HTMLElement,
 ): HeroPair[] {
@@ -135,8 +121,6 @@ export function resolveNewStylePairs(
       key,
       fromEl,
       toEl,
-      fromFit: fallbackHeroFit("exit"),
-      toFit: fallbackHeroFit("enter"),
     });
   }
 
@@ -149,52 +133,10 @@ export function resolveNewStylePairs(
       key,
       fromEl,
       toEl,
-      fromFit: fallbackHeroFit("enter"),
-      toFit: fallbackHeroFit("exit"),
     });
   }
 
   return pairs;
-}
-
-/**
- * Legacy fallback. `data-hero-key` is kept for backwards compatibility for
- * animation matching. New code should use `data-hero-enter-key` (detail side)
- * + `data-hero-exit-key` (list side). This branch only runs when no
- * new-style pair resolved.
- *
- * @deprecated for animation matching — use the enter/exit pair.
- */
-function resolveLegacyPairs(
-  fromNode: HTMLElement,
-  toNode: HTMLElement,
-): HeroPair[] {
-  const pairs: HeroPair[] = [];
-  const legacyEls = Array.from(
-    toNode.querySelectorAll<HTMLElement>(`[${HERO_LEGACY_KEY}]`),
-  );
-  for (const toEl of legacyEls) {
-    const key = toEl.getAttribute(HERO_LEGACY_KEY);
-    if (!key) continue;
-    const fromEl = fromNode.querySelector<HTMLElement>(
-      `[${HERO_LEGACY_KEY}="${key}"]`,
-    );
-    if (!fromEl) continue;
-    pairs.push({
-      key,
-      fromEl,
-      toEl,
-      fromFit: fallbackHeroFit("legacy"),
-      toFit: fallbackHeroFit("legacy"),
-    });
-  }
-  return pairs;
-}
-
-function resolvePairs(fromNode: HTMLElement, toNode: HTMLElement): HeroPair[] {
-  const pairs = resolveNewStylePairs(fromNode, toNode);
-  if (pairs.length > 0) return pairs;
-  return resolveLegacyPairs(fromNode, toNode);
 }
 
 // Only the incoming end has to be laid out: the outgoing page is off screen
@@ -270,9 +212,7 @@ export function shouldResetHeroRadius(
     from.mediaElement !== null ||
     to.mediaElement !== null ||
     from.radiusSource === "computed" ||
-    from.radiusSource === "legacy" ||
-    to.radiusSource === "computed" ||
-    to.radiusSource === "legacy"
+    to.radiusSource === "computed"
   );
 }
 
@@ -285,8 +225,8 @@ export function buildHeroMorphPlan(
 ): HeroMorphPlan | null {
   const { fromEl, toEl } = pair;
   const [fromHero, toHero] = normalizeHeroGeometryPair(
-    getHeroRect(root, fromEl, pair.fromFit, fromPage),
-    getHeroRect(root, toEl, pair.toFit, toPage),
+    getHeroRect(root, fromEl, fromPage),
+    getHeroRect(root, toEl, toPage),
   );
   const fromContent = fromHero.content;
   const fromWindow = fromHero.window;
@@ -486,7 +426,7 @@ class HeroTileStrategy implements HeroStrategy {
       const { fromVisualEl, toVisualEl } = morph;
       const sourceOpacity = retainOpacity(fromVisualEl);
       const targetOpacity = retainOpacity(toVisualEl);
-      if (usesHeroExitLayer(pair, ctx.direction)) {
+      if (usesHeroExitLayer(pair)) {
         const { layer, source, destination } = createHeroExitLayer(
           fromVisualEl,
           toVisualEl,

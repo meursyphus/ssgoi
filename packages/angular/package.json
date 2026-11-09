@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/angular",
-  "version": "7.5.0",
+  "version": "8.0.0-beta.0",
   "description": "Native app-like page transitions for Angular. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "type": "module",
@@ -20,10 +20,6 @@
     },
     "./package.json": {
       "default": "./package.json"
-    },
-    "./router": {
-      "types": "./dist/router/index.d.ts",
-      "default": "./dist/fesm2022/ssgoi-angular-router.mjs"
     }
   },
   "scripts": {
@@ -39,8 +35,7 @@
   },
   "peerDependencies": {
     "@angular/common": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/router": "*"
+    "@angular/core": "^20.0.0"
   },
   "devDependencies": {
     "@angular-eslint/builder": "^20.3.0",
@@ -105,10 +100,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "sideEffects": false,
-  "peerDependenciesMeta": {
-    "@angular/router": {
-      "optional": true
-    }
-  }
+  "sideEffects": false
 }

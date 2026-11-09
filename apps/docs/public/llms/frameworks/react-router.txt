@@ -132,8 +132,5 @@ number of boundaries above it), or the route path. Query-only navigation keeps
 the boundary by default. For direct control or a custom
 router: https://ssgoi.dev/llms/manual-boundaries.txt
 
-`SsgoiRouteBoundary` from `@ssgoi/react/react-router` still works but is
-deprecated and will be removed in 8.0.0.
-
 If a React Router 6 app only lists react-router-dom, add the matching version
 of react-router as a direct dependency too (especially with strict pnpm layouts).

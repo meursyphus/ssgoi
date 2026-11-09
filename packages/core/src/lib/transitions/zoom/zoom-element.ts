@@ -90,7 +90,7 @@ export function buildTileGeometry(input: ZoomAnimationInput): TileGeometry {
   // only; the destination's extra edges show from beneath and the shared
   // element stays visible. Stretching the page to the card's box instead
   // would warp the image by the aspect difference. No shared part at all
-  // is the legacy bbox path.
+  // falls back to the bbox path.
   const shown = intersectRects(startWindow, enterMedia.window);
   if (!shown) return fallback();
 

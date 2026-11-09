@@ -63,9 +63,6 @@ The first matching scope at each level wins. Single-segment captures (`*`,
 project; `**` tails do not. `SsgoiLayoutBoundary` takes no SSGOI props (`as`
 sets the element) and throws without `framework` on `<Ssgoi>`.
 
-`SsgoiRouteBoundary` from `@ssgoi/vue/vue-router` and `@ssgoi/vue/nuxt` is
-deprecated; use `SsgoiLayoutBoundary` with `framework` instead.
-
 See the [framework guide](https://ssgoi.dev/docs/frameworks/vue) for wiring and limits.
 
 ## Root
@@ -186,8 +183,6 @@ the rule's pages with `preserveScroll: "shared"`.
 - `scroll`: vertical sequences.
 
 All effects: https://ssgoi.dev/llms.txt#7-transition-index
-
-`SsgoiTransition` is deprecated. Use the data attribute directly.
 
 ## License
 

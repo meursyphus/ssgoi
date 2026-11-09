@@ -177,7 +177,7 @@ export function crossfadeZoomVisuals(ctx: ZoomContributeCtx): WebAnimation[] {
       resolved.enterEl,
       input.enterRect,
       (element) => getClientRect(tile, element),
-      { clipRoot: tile, legacyRadiusAttribute: "data-zoom-radius" },
+      { clipRoot: tile },
     );
   const radiusSource = geometry.contentAware
     ? detailGeometry.radiusSource

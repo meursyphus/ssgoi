@@ -280,26 +280,6 @@ describe("zoom transition media inference", () => {
     );
   });
 
-  it("keeps deprecated zero and px radius overrides working", () => {
-    const zeroExit = buildInput(
-      resolvedPair({ exitAttributes: { "data-zoom-radius": "0" } }),
-      page(),
-      page(),
-      { x: 0, y: 0 },
-    );
-    const legacyEnter = buildInput(
-      resolvedPair({
-        enterAttributes: { "data-zoom-radius": "12px" },
-      }),
-      page(),
-      page(),
-      { x: 0, y: 0 },
-    );
-
-    expect(zeroExit.exitRadius).toBe(0);
-    expect(legacyEnter.enterRadius).toBe(12);
-  });
-
   it("atomically omits media geometry when one endpoint is unresolved", () => {
     const input = buildInput(
       resolvedPair({ enterFit: "fill" }),

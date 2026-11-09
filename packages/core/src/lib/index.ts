@@ -16,7 +16,6 @@ export {
   LinearIntegrator,
   IntegratorProvider,
 } from "./animation/integrator";
-export type { TrackPatch } from "./animation/multi-animation";
 export type {
   Integrator,
   IntegratorState,

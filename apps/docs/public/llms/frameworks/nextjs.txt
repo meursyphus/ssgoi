@@ -256,7 +256,3 @@ References:
 - https://nextjs.org/docs/app/api-reference/file-conventions/proxy
 
 Manual/custom-router setup: https://ssgoi.dev/llms/manual-boundaries.txt
-
-`SsgoiRouteBoundary` and `selectedSegmentsToPath` from `@ssgoi/react/nextjs`
-still work but are deprecated and will be removed in 8.0.0; the old boundary
-reads `next/navigation` itself and ignores `framework`.

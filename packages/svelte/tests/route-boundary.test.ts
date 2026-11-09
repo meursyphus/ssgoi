@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { flushSync, mount, unmount, type Component } from "svelte";
-import BoundaryFixture from "./BoundaryFixture.svelte";
 import LayoutBoundaryFixture from "./LayoutBoundaryFixture.svelte";
 import MissingFrameworkFixture from "./MissingFrameworkFixture.svelte";
 import { page, content, startNavigation } from "./navigation";
@@ -40,10 +39,9 @@ it("SsgoiLayoutBoundary throws without a framework on <Ssgoi>", () => {
   );
 });
 
-describe.each([
-  { name: "SsgoiRouteBoundary (sveltekit)", Fixture: BoundaryFixture },
-  { name: "SsgoiLayoutBoundary (no layouts)", Fixture: LayoutBoundaryFixture },
-])("$name", ({ Fixture }) => {
+describe("SsgoiLayoutBoundary (no layouts)", () => {
+  const Fixture = LayoutBoundaryFixture;
+
   it("detaches the outgoing content before Kit updates its live snippet", () => {
     render(Fixture as Component<object>);
     const outgoing = boundary()!;
@@ -75,51 +73,6 @@ describe.each([
     finish();
     flushSync();
     expect(host.children).toHaveLength(0);
-  });
-});
-
-describe("SsgoiRouteBoundary (sveltekit) resolve and routeKey", () => {
-  it("keeps a shell's DOM and edits while updating its outgoing route id", () => {
-    render(BoundaryFixture, {
-      resolve: ({ pathname }) => ({
-        id: pathname,
-        key: pathname.match(/^\/projects\/[^/]+/)?.[0],
-      }),
-    });
-    const shell = boundary();
-    const input = host.querySelector("input")!;
-    input.value = "Unsaved";
-    const finish = startNavigation("/projects/42/docs");
-    expect(boundary()).toBe(shell);
-    finish();
-    flushSync();
-    expect(boundary()).toBe(shell);
-    expect(host.querySelector("input")).toBe(input);
-    expect(input.value).toBe("Unsaved");
-    expect(idOf(boundary())).toBe("/projects/42/docs");
-    const finishOther = startNavigation("/projects/43");
-    expect(boundary()).toBeNull();
-    finishOther();
-    expect(boundary()).not.toBe(shell);
-  });
-
-  it("can opt into search changes through the URL resolver", () => {
-    render(BoundaryFixture, {
-      resolve: ({ url }) => ({ id: url.pathname + url.search }),
-    });
-    const element = boundary();
-    startNavigation("/projects/42?q=two")();
-    expect(boundary()).not.toBe(element);
-    expect(idOf(boundary())).toBe("/projects/42?q=two");
-  });
-
-  it("accepts zero as a stable route key", () => {
-    render(BoundaryFixture, { routeKey: 0 });
-    const element = boundary();
-    startNavigation("/other")();
-    flushSync();
-    expect(boundary()).toBe(element);
-    expect(idOf(boundary())).toBe("/other");
   });
 });
 

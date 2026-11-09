@@ -1,8 +1,6 @@
 import {
-  createContext,
   createRef,
   useCallback,
-  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -33,25 +31,11 @@ import {
 import { NativeRouteSurface } from "./native-route-surface.js";
 import { useNativePlayback } from "./playback.js";
 import { useSsgoi } from "./ssgoi.js";
-import type { RouteBoundaryState } from "./types.js";
 import type { NativeSurfaceHandle } from "./native-surface-handle.js";
 
-export interface ExpoRouteLocation {
-  pathname: string;
-  route: Readonly<NavigatorRoute>;
-}
 export interface BoundaryOptions {
   style?: StyleProp<ViewStyle>;
 }
-export interface LegacyBoundaryOptions {
-  /** Evaluated against each screen's own route, including retained screens. */
-  resolve?: (location: ExpoRouteLocation) => RouteBoundaryState;
-  /** Scoped by the native route key; never merges distinct pushed screen instances. */
-  routeKey?: string | number;
-}
-// TODO(8.0.0): remove with the deprecated Expo Router entry.
-// Carries the deprecated entry's resolve/routeKey; SsgoiLayoutBoundary keys screens by native route.
-export const LegacyBoundaryContext = createContext<LegacyBoundaryOptions>({});
 export type NavigatorEvents = {
   transitionStart: { data: { closing: boolean }; canPreventDefault: false };
   transitionEnd: { data: { closing: boolean }; canPreventDefault: false };
@@ -68,50 +52,32 @@ function screenFor(
   route: NavigatorRoute,
   descriptor: NavigatorDescriptor<ScreenOptions>,
   namespace: string,
-  options: LegacyBoundaryOptions,
   target?: NativeSurfaceHandle,
 ): Screen<Scene> {
   const pathname = route.href?.startsWith("/")
     ? normalizePath(route.href)
     : null;
-  const resolved =
-    pathname === null
-      ? null
-      : (options.resolve?.({ pathname, route }) ?? { id: pathname });
-  if (
-    resolved &&
-    (typeof resolved.id !== "string" || !resolved.id.startsWith("/"))
-  ) {
-    throw new Error(
-      "SSGOI: resolve must return an absolute route id such as /posts/42.",
-    );
-  }
   return {
     key: route.key,
-    path: resolved?.id ?? null,
+    path: pathname,
     target: target ?? {
       key: JSON.stringify([namespace, route.key]),
       ref: createRef<View>(),
     },
     value: {
       descriptor,
-      boundaryKey: JSON.stringify([
-        namespace,
-        route.key,
-        options.routeKey ?? resolved?.key ?? route.key,
-      ]),
+      boundaryKey: JSON.stringify([namespace, route.key]),
     },
   };
 }
 
-/** The Expo subpath supplies router descriptors; native rendering remains independent of Expo. */
+/** Expo Router supplies route descriptors; native rendering remains independent of Expo. */
 export function NativeNavigator({
   state,
   descriptors,
   emitter,
   style,
 }: ContentProps) {
-  const { resolve, routeKey } = useContext(LegacyBoundaryContext);
   const ssgoi = useSsgoi();
   const namespace = useId();
   const window = useWindowDimensions();
@@ -122,8 +88,6 @@ export function NativeNavigator({
   const activeKey = state.routes[state.index]?.key ?? null;
   const [snapshot, setSnapshot] = useState(() => ({
     navigation: null as typeof state | null,
-    resolve,
-    routeKey,
     presence: createPresence<NativeSurfaceHandle, Scene>([], null),
   }));
   const targets = new Map(
@@ -135,27 +99,15 @@ export function NativeNavigator({
     const descriptor = descriptors[route.key];
     if (!descriptor)
       throw new Error(`SSGOI: missing route descriptor for ${route.name}.`);
-    return screenFor(
-      route,
-      descriptor,
-      namespace,
-      { resolve, routeKey },
-      targets.get(route.key),
-    );
+    return screenFor(route, descriptor, namespace, targets.get(route.key));
   });
   const liveScenes = new Map(
     screens.map((screen) => [screen.key, screen.value]),
   );
   let current = snapshot;
-  if (
-    snapshot.navigation !== state ||
-    snapshot.resolve !== resolve ||
-    snapshot.routeKey !== routeKey
-  ) {
+  if (snapshot.navigation !== state) {
     current = {
       navigation: state,
-      resolve,
-      routeKey,
       presence: reconcilePresence(snapshot.presence, screens, activeKey),
     };
     // Derive retained siblings before commit: effect cleanup would already be too late.

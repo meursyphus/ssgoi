@@ -81,8 +81,7 @@ const SSGOI_LAYOUT_DEPTH = new InjectionToken<number>("ssgoi-layout-depth");
 
 /**
  * @internal Renders a boundary's embedded view and keeps it while the key
- * holds. Shared by `SsgoiLayoutBoundary` and the deprecated
- * `SsgoiRouteBoundary`; create it in the directive's injection context.
+ * holds. Create it in the directive's injection context.
  */
 export class ɵLayoutBoundaryView {
   private readonly template = inject<TemplateRef<BoundaryContext>>(TemplateRef);

@@ -13,12 +13,9 @@ export default defineConfig({
       include: ["src/lib/**/*"],
       exclude: ["src/vite-env.d.ts"],
       tsconfigPath: "./tsconfig.app.json",
-      // Legacy declarations keep the dist/routers paths that `exports` publish.
       beforeWriteFile: (filePath, content) => ({
-        filePath: filePath
-          .replace("/src/lib", "")
-          .replace("/legacy/", "/routers/"),
-        content: content.replaceAll("./legacy/", "./routers/"),
+        filePath: filePath.replace("/src/lib", ""),
+        content,
       }),
     }),
   ],
@@ -26,8 +23,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        solidstart: resolve(__dirname, "src/lib/legacy/solidstart.ts"),
-        "solid-router": resolve(__dirname, "src/lib/legacy/solid-router.tsx"),
         types: resolve(__dirname, "src/lib/types.ts"),
         "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },
@@ -35,7 +30,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        /^@solidjs\/router(?:\/|$)/,
         "solid-js",
         "solid-js/web",
         "@ssgoi/core",

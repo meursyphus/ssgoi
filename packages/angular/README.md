@@ -123,10 +123,6 @@ mounted between `/posts` and `/products`, and moves it as a whole into a
 detail page. A depth-1 boundary inside `/products/:category/...` stays mounted
 across that category's pages.
 
-`SsgoiRouteBoundary` from `@ssgoi/angular/router` is deprecated and will be
-removed in 8.0.0; it imports Angular Router itself and keeps working without
-`[ssgoiFramework]`.
-
 ## Config
 
 ```ts
@@ -186,7 +182,6 @@ Options: https://ssgoi.dev/llms.txt#7-transition-index
 - `*ssgoiLayoutBoundary`: marks a routed page's root as a layout boundary.
 - `data-ssgoi-transition`: marks a route boundary.
 - `injectSsgoi()`: returns the transition context.
-- `[ssgoiTransition]`: deprecated; will be removed in 8.0.0.
 
 ## License
 

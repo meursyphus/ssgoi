@@ -54,10 +54,6 @@ around `<Slot />` must keep a constant key. Angular binds the framework on the p
 with the `*ssgoiLayoutBoundary` structural directive. Expo's boundary is a native file-based navigator; web presets
 and DOM attributes do not apply.
 
-The older router subpaths (`@ssgoi/react/nextjs`, `@ssgoi/svelte/sveltekit`,
-`@ssgoi/vue/nuxt`, ...) and their `SsgoiRouteBoundary` still work but are
-deprecated and will be removed in 8.0.0.
-
 Root entries never import a router; your `framework` object does the reading.
 Check each guide for the tested versions. Remix 2 follows its own React 18
 requirements.
