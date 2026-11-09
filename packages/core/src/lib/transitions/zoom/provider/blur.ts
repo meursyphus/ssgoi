@@ -5,7 +5,6 @@ import type {
   ZoomExtras,
   ZoomOverlayConfig,
   ZoomPrepareCtx,
-  ZoomProvider,
   ZoomStrategy,
 } from "../types";
 import {
@@ -13,7 +12,6 @@ import {
   IntegratorProvider,
   WebAnimation,
 } from "../../../animation";
-import { createZoomIn, createZoomOut } from "../zoom-element";
 import { Z_OVERLAY } from "../../stacking";
 import { getOverlayRect } from "@utils";
 
@@ -206,20 +204,4 @@ export class OverlayStrategy implements ZoomStrategy {
       }),
     ];
   }
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Legacy provider export.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-export function createBlurProvider(): ZoomProvider {
-  return {
-    physics: BLUR_PHYSICS,
-    exitPhysics: BLUR_EXIT_PHYSICS,
-    in: createZoomIn,
-    out: createZoomOut,
-    backgroundIn,
-    backgroundOut,
-    overlay,
-  };
 }

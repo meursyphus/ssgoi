@@ -63,11 +63,7 @@ function element({
   return result;
 }
 
-const options: ElementMediaGeometryOptions = {
-  fallbackFit: "contain",
-  legacyAspectRatioAttribute: "data-test-aspect-ratio",
-  legacyRadiusAttribute: "data-test-radius",
-};
+const options: ElementMediaGeometryOptions = {};
 
 function resolve(
   keyedEl: HTMLElement,
@@ -420,49 +416,6 @@ describe("media geometry", () => {
 
     expect(findMediaElement(wrapper)).toBeNull();
     expect(resolve(wrapper, bbox).content).toBe(bbox);
-  });
-
-  it("retains deprecated aspect and radius overrides for compatibility", () => {
-    const geometry = resolve(
-      element({
-        tagName: "DIV",
-        attributes: {
-          "data-test-aspect-ratio": "2/1",
-          "data-test-radius": "10",
-        },
-      }),
-      rect(0, 0, 100, 100),
-    );
-
-    expect(geometry.content).toEqual(rect(0, 25, 100, 50));
-    expect(geometry.radius).toBe(10);
-    expect(geometry.radiusSource).toBe("legacy");
-  });
-
-  it("treats a deprecated zero radius as an explicit override", () => {
-    const geometry = resolve(
-      element({
-        naturalWidth: 100,
-        naturalHeight: 100,
-        objectFit: "cover",
-        radius: "12px",
-        attributes: { "data-test-radius": "0" },
-      }),
-      rect(0, 0, 100, 100),
-    );
-
-    expect(geometry.radius).toBe(0);
-    expect(geometry.radiusSource).toBe("legacy");
-  });
-
-  it("retains the legacy radius parser for px-suffixed values", () => {
-    const geometry = resolve(
-      element({ attributes: { "data-test-radius": "12px" } }),
-      rect(0, 0, 100, 100),
-    );
-
-    expect(geometry.radius).toBe(12);
-    expect(geometry.radiusSource).toBe("legacy");
   });
 
   it("uses an image radius when the visible image is smaller than its wrapper", () => {

@@ -10,7 +10,6 @@ import type {
 
 const SSGOI_CONTEXT_KEY = Symbol("ssgoi");
 const SSGOI_LAYOUT_ROUTES_KEY = Symbol("ssgoi-layout-routes");
-const SSGOI_LAYOUT_OVERRIDE_KEY = Symbol("ssgoi-layout-override");
 const SSGOI_LAYOUT_DEPTH_KEY = Symbol("ssgoi-layout-depth");
 
 export function setSsgoiContext(context: SsgoiContext) {
@@ -69,23 +68,15 @@ export function setSsgoiLayoutRoutes(
   });
 }
 
-/** Routes for the next layout boundary only; its descendants use the provider's. */
-export function setSsgoiLayoutOverride(routes: LayoutRoutes) {
-  setContext(SSGOI_LAYOUT_OVERRIDE_KEY, routes);
-}
-
 /** Reads a layout boundary's routes and depth, and nests its descendants. */
 export function enterSsgoiLayoutBoundary() {
-  const routes =
-    getContext<LayoutRoutes | undefined>(SSGOI_LAYOUT_OVERRIDE_KEY) ??
-    getContext<LayoutRoutes | undefined>(SSGOI_LAYOUT_ROUTES_KEY);
+  const routes = getContext<LayoutRoutes | undefined>(SSGOI_LAYOUT_ROUTES_KEY);
   if (!routes) {
     throw new Error(
       "SSGOI: SsgoiLayoutBoundary requires a framework. Pass it to <Ssgoi framework={{ getRoute: () => ({ pathname: page.url.pathname }), onNavigate }}>.",
     );
   }
   const depth = getContext<number | undefined>(SSGOI_LAYOUT_DEPTH_KEY) ?? 0;
-  setContext(SSGOI_LAYOUT_OVERRIDE_KEY, undefined);
   setContext(SSGOI_LAYOUT_DEPTH_KEY, depth + 1);
   return { routes, depth };
 }

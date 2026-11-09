@@ -1,30 +1,14 @@
-import type { NavigationDirection } from "@types";
 import { cloneCrossfadeVisual } from "../crossfade";
 import type { MediaRect } from "../media-geometry";
 import { Z_FOREGROUND } from "../stacking";
-import { HERO_ENTER_KEY, HERO_EXIT_KEY, HERO_LEGACY_KEY } from "./keys";
+import { HERO_ENTER_KEY, HERO_EXIT_KEY } from "./keys";
 import type { HeroPair } from "./types";
 
 /** Endpoint roles define hero enter/exit even when browser history disagrees. */
-export function usesHeroExitLayer(
-  pair: HeroPair,
-  direction: NavigationDirection,
-): boolean {
-  if (
+export function usesHeroExitLayer(pair: HeroPair): boolean {
+  return (
     pair.fromEl.getAttribute(HERO_ENTER_KEY) === pair.key &&
     pair.toEl.getAttribute(HERO_EXIT_KEY) === pair.key
-  )
-    return true;
-  if (
-    pair.fromEl.getAttribute(HERO_EXIT_KEY) === pair.key &&
-    pair.toEl.getAttribute(HERO_ENTER_KEY) === pair.key
-  )
-    return false;
-  // Legacy symmetric keys have no endpoint roles, so use core navigation.
-  return (
-    direction === "backward" &&
-    pair.fromEl.getAttribute(HERO_LEGACY_KEY) === pair.key &&
-    pair.toEl.getAttribute(HERO_LEGACY_KEY) === pair.key
   );
 }
 

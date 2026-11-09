@@ -702,7 +702,7 @@ export function RouteRulesBody() {
               <code key="e" className={inlineCode}>
                 {"/**"}
               </code>,
-              "Every path. A bare * is an alias for it.",
+              "Every path.",
             ],
           ]}
           minWidth="560px"
@@ -1286,12 +1286,6 @@ export function FrameworksIndexBody() {
         wiring differ per stack — Qwik takes a QRL config factory, Angular an{" "}
         <code className={inlineCode}>ssgoi</code> directive.
       </p>
-      <p className={`mt-4 ${body}`}>
-        The older router subpaths, such as{" "}
-        <code className={inlineCode}>@ssgoi/react/nextjs</code>, still work but
-        are deprecated and will be removed in 8.0.0.
-      </p>
-
       <ul className="mt-8 divide-y divide-line border-y border-line">
         {FRAMEWORK_DOCS.map((doc) => {
           const href = `/docs/frameworks/${doc.slug}`;

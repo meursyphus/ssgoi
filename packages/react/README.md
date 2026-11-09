@@ -30,11 +30,6 @@ isn't ready. The first boundary calls it once for every boundary inside it.
 Define the object at module scope so it stays stable. `SsgoiLayoutBoundary`
 throws if the nearest `<Ssgoi>` has no `framework`.
 
-The router subpaths `@ssgoi/react/nextjs`, `@ssgoi/react/remix`,
-`@ssgoi/react/react-router` and `@ssgoi/react/tanstack-router` (and their
-`SsgoiRouteBoundary`) still work but are deprecated and will be removed in
-8.0.0.
-
 See the [framework guide](https://ssgoi.dev/docs/frameworks/react) for wiring and limits.
 
 ## Contents
@@ -177,10 +172,6 @@ A React route boundary is a keyed element marked with a route id:
 - The key at depth N is the depth-N scope instance `config.layouts` resolves for
   `routePath`, or `routePath` itself when there is none. Without
   `config.layouts`, every boundary keys by the route.
-
-The legacy `<SsgoiTransition>` wrapper only added this attribute and is
-deprecated (removed in 8.0.0). Set `data-ssgoi-transition` directly on the keyed
-application boundary.
 
 ## Persistent layouts
 
@@ -413,8 +404,7 @@ References: https://ssgoi.dev/llms.txt#7-transition-index
 ## Low-level APIs
 
 `transition()` remains available for element-level mount/unmount animations;
-it is separate from route boundaries. The `@ssgoi/react/unplugin` auto-key
-plugins are deprecated and will be removed in 8.0.0.
+it is separate from route boundaries.
 
 ## License
 

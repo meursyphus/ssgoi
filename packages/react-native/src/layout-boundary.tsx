@@ -44,15 +44,14 @@ const boundaries = new WeakMap<
 >();
 
 /** Integrates the native navigator with Expo Router once per pair of primitives. */
-export function integrateExpoBoundary(
+function integrateExpoBoundary(
   framework: SsgoiFramework,
-  owner: string,
 ): ComponentType<SsgoiLayoutBoundaryProps> {
   const integrate = framework.unstable_integrateWithRouter;
   // Keep the alpha Expo API behind a runtime check; its shape may change between releases.
   if (typeof integrate !== "function") {
     throw new Error(
-      `SSGOI: ${owner} requires Expo Router's standard navigator API (validated with 56.2.20).`,
+      "SSGOI: SsgoiLayoutBoundary requires Expo Router's standard navigator API (validated with 56.2.20).",
     );
   }
   let byRouter = boundaries.get(integrate);
@@ -81,6 +80,6 @@ export function SsgoiLayoutBoundary(props: SsgoiLayoutBoundaryProps) {
       "SSGOI: SsgoiLayoutBoundary requires a framework. Pass it to <Ssgoi framework={{ StackRouter, unstable_integrateWithRouter }}>.",
     );
   }
-  const Boundary = integrateExpoBoundary(framework, "SsgoiLayoutBoundary");
+  const Boundary = integrateExpoBoundary(framework);
   return <Boundary {...props} />;
 }

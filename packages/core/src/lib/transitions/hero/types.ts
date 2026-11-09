@@ -1,7 +1,6 @@
 import type { AnimationDisposal } from "../../animation/animation";
 import type { NavigationDirection, PhysicsOptions } from "@types";
 import type { AnimationContributions } from "../animation-group";
-import type { MediaFit } from "../media-geometry";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Public option surface (v6 unified `{type?, variant?, options?}` shape)
@@ -27,8 +26,6 @@ export type HeroType = "static" | "fade";
 export type HeroVariant = "default" | "smooth";
 export type HeroOptions = Record<string, never>;
 
-export type HeroFit = MediaFit;
-
 /* ────────────────────────────────────────────────────────────────────────────
  * Internal normalized options — `index.ts` is the single place that fills in
  * defaults so the rest of the module never branches on `undefined`.
@@ -47,8 +44,6 @@ export interface HeroPair {
   key: string;
   fromEl: HTMLElement;
   toEl: HTMLElement;
-  fromFit: HeroFit;
-  toFit: HeroFit;
 }
 
 export interface HeroResolved {

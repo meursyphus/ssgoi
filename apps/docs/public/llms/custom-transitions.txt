@@ -147,9 +147,8 @@ many exit-marked related thumbnails. Zoom follows the core direction to choose
 exit -> enter or enter -> exit. Missing/ambiguous pairs retain the preset's
 existing no-op behavior; there is no effect-direction resolver.
 
-## Compatibility
+## Plain configs
 
-Legacy custom { prepare, animation } configs remain accepted by the dispatcher.
-Use defineTransition for new definitions and concrete direction-specific override
-inference. Existing type/variant defaults and deprecated public option aliases
-remain supported.
+Custom { prepare, animation } configs are accepted by the dispatcher. Use
+defineTransition for new definitions and concrete direction-specific override
+inference.

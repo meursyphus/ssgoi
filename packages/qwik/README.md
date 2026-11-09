@@ -112,10 +112,6 @@ putting a depth-1 boundary on theirs:
 
 The root layout only calls `useSsgoi`.
 
-`useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` is deprecated and will be
-removed in 8.0.0; it reads `useLocation()` itself and keeps working without
-`framework`.
-
 ## Config
 
 ```tsx

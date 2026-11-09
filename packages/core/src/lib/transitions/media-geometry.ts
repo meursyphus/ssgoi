@@ -14,7 +14,7 @@ export interface MediaInsets {
   left: number;
 }
 
-type RadiusSource = "computed" | "legacy" | "none" | "unsupported";
+type RadiusSource = "computed" | "none" | "unsupported";
 
 /** Clockwise from top left. Only present when clipping removes some corners. */
 export type MediaCornerRadii = [number, number, number, number];
@@ -38,37 +38,12 @@ export interface MediaGeometry {
 export interface ElementMediaGeometryOptions {
   /** Ancestors inside this page can clip the shared visual. Excludes the page. */
   clipRoot?: HTMLElement;
-  /** Compatibility fit used only when a legacy aspect-ratio hint is present. */
-  fallbackFit?: MediaFit;
-  /** @deprecated Compatibility only. Intrinsic media dimensions are inferred. */
-  legacyAspectRatioAttribute?: string;
-  /** @deprecated Compatibility only. Border radius is inferred from CSS. */
-  legacyRadiusAttribute?: string;
 }
 
 type MediaStyle = {
   fit: MediaFit | null;
   centered: boolean;
 };
-
-function parseAspectRatio(value: string | null): number | null {
-  if (!value) return null;
-  if (value.includes("/")) {
-    const parts = value.split("/");
-    if (parts.length !== 2) return null;
-    const width = Number.parseFloat(parts[0] ?? "");
-    const height = Number.parseFloat(parts[1] ?? "");
-    return Number.isFinite(width) &&
-      Number.isFinite(height) &&
-      width > 0 &&
-      height > 0
-      ? width / height
-      : null;
-  }
-
-  const ratio = Number.parseFloat(value);
-  return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
-}
 
 function parseMediaFit(value: string | null): MediaFit | null {
   return value === "contain" || value === "cover" ? value : null;
@@ -198,19 +173,6 @@ function readUniformRadius(el: HTMLElement, box: MediaRect): RadiusReading {
   );
   const limit = Math.min(box.width, box.height) / 2;
   return { radius: supported ? Math.min(first, limit) : 0, supported };
-}
-
-function readLegacyRadius(
-  keyedEl: HTMLElement,
-  attribute: string | undefined,
-): number | null {
-  if (!attribute) return null;
-  const value = keyedEl.getAttribute(attribute)?.trim();
-  if (value === undefined || value === null || value === "") return null;
-  // Preserve the pre-deprecation parser, which accepted values such as
-  // `data-*-radius="12px"`, while also treating zero as an explicit override.
-  const radius = Number.parseFloat(value);
-  return Number.isFinite(radius) && radius >= 0 ? radius : null;
 }
 
 function hasSimpleImageBox(el: HTMLElement): boolean {
@@ -385,26 +347,16 @@ function resolveLocalMediaGeometry(
   keyedEl: HTMLElement,
   keyedBox: MediaRect,
   measure: (el: HTMLElement) => MediaRect,
-  options: ElementMediaGeometryOptions,
 ): MediaGeometry {
   const mediaEl = findMediaElement(keyedEl);
   const mediaBox = mediaEl ? measure(mediaEl) : keyedBox;
-  const legacyAspectRatio = options.legacyAspectRatioAttribute
-    ? parseAspectRatio(
-        keyedEl.getAttribute(options.legacyAspectRatioAttribute) ??
-          mediaEl?.getAttribute(options.legacyAspectRatioAttribute) ??
-          null,
-      )
-    : null;
-  const aspectRatio =
-    legacyAspectRatio ?? (mediaEl ? readIntrinsicAspectRatio(mediaEl) : null);
+  const aspectRatio = mediaEl ? readIntrinsicAspectRatio(mediaEl) : null;
   const mediaStyle = mediaEl
     ? readMediaStyle(mediaEl)
     : { fit: null, centered: true };
   const fit =
     mediaStyle.centered && (mediaEl === null || hasSimpleImageBox(mediaEl))
-      ? (mediaStyle.fit ??
-        (legacyAspectRatio !== null ? (options.fallbackFit ?? null) : null))
+      ? mediaStyle.fit
       : null;
   const base = createMediaGeometry(mediaBox, aspectRatio, fit);
 
@@ -413,20 +365,16 @@ function resolveLocalMediaGeometry(
   const clippedWindow = wrapperClips
     ? intersection(base.window, keyedBox)
     : base.window;
-  const legacyRadius = readLegacyRadius(keyedEl, options.legacyRadiusAttribute);
   const keyedDefinesBboxShape = mediaEl === keyedEl || keyedClips;
   const keyedRadius = keyedDefinesBboxShape
     ? readUniformRadius(keyedEl, keyedBox)
     : { radius: 0, supported: true };
-  const bboxRadius = legacyRadius ?? keyedRadius.radius;
-  const bboxRadiusSource: RadiusSource =
-    legacyRadius !== null
-      ? "legacy"
-      : !keyedRadius.supported
-        ? "unsupported"
-        : keyedRadius.radius > 0
-          ? "computed"
-          : "none";
+  const bboxRadius = keyedRadius.radius;
+  const bboxRadiusSource: RadiusSource = !keyedRadius.supported
+    ? "unsupported"
+    : keyedRadius.radius > 0
+      ? "computed"
+      : "none";
   const radiusReadings: RadiusReading[] = [];
   if (
     clippedWindow &&
@@ -443,15 +391,12 @@ function resolveLocalMediaGeometry(
     0,
     ...radiusReadings.map((reading) => reading.radius),
   );
-  const radius = legacyRadius ?? inferredRadius;
-  const radiusSource: MediaGeometry["radiusSource"] =
-    legacyRadius !== null
-      ? "legacy"
-      : !radiusSupported
-        ? "unsupported"
-        : inferredRadius > 0
-          ? "computed"
-          : "none";
+  const radius = inferredRadius;
+  const radiusSource: MediaGeometry["radiusSource"] = !radiusSupported
+    ? "unsupported"
+    : inferredRadius > 0
+      ? "computed"
+      : "none";
 
   if (!clippedWindow) {
     return bboxGeometry(keyedBox, bboxRadius, bboxRadiusSource);
@@ -485,12 +430,7 @@ export function resolveElementMediaGeometry(
   measure: (el: HTMLElement) => MediaRect,
   options: ElementMediaGeometryOptions,
 ): MediaGeometry {
-  const geometry = resolveLocalMediaGeometry(
-    keyedEl,
-    keyedBox,
-    measure,
-    options,
-  );
+  const geometry = resolveLocalMediaGeometry(keyedEl, keyedBox, measure);
   if (!options.clipRoot || geometry.radiusSource === "unsupported")
     return geometry;
 
@@ -560,7 +500,7 @@ export function resolveElementMediaGeometry(
       // sizes a percentage-height image inside an aspect-ratio box that
       // way). A window that only reaches into a corner arc without owning
       // that corner would be cut mid-arc; do not invent a new shape.
-      if (ancestorRadius.radius > 0 && radiusSource !== "legacy") {
+      if (ancestorRadius.radius > 0) {
         const arc = ancestorRadius.radius;
         const boxRight = box.left + box.width;
         const boxBottom = box.top + box.height;

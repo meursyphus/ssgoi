@@ -4,7 +4,6 @@ import { renderToString } from "@builder.io/qwik/server";
 import { createDOM } from "@builder.io/qwik/testing";
 import { describe, expect, it } from "vitest";
 import { Ssgoi, useSsgoiLayoutBoundary } from "../src/lib";
-import { useSsgoiRouteBoundary } from "../src/lib/legacy/qwik-city";
 
 const TOP_LEVEL = ["/posts", "/products"];
 const config$ = $(() => ({
@@ -143,30 +142,5 @@ describe("useSsgoiLayoutBoundary", () => {
         </Ssgoi>,
       ),
     ).rejects.toThrow(/^SSGOI: useSsgoiLayoutBoundary requires a framework/);
-  });
-});
-
-describe("deprecated useSsgoiRouteBoundary", () => {
-  it("still reads Qwik City's location without a framework", async () => {
-    const CityPage = component$(() => {
-      const boundary = useSsgoiRouteBoundary();
-      return (
-        <section
-          key={boundary.value.key}
-          data-ssgoi-transition={boundary.value.id}
-        >
-          Page
-        </section>
-      );
-    });
-    const { html } = await render(
-      <QwikCityMockProvider url="http://localhost/posts/3">
-        <Ssgoi>
-          <CityPage />
-        </Ssgoi>
-      </QwikCityMockProvider>,
-    );
-
-    expect(html).toContain('data-ssgoi-transition="/posts/3"');
   });
 });

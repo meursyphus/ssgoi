@@ -32,6 +32,4 @@ function Root(props: RouteSectionProps) {
 
 The default key follows the pathname. A boundary at depth N instead keys by the config.layouts scope that matches at depth N, so a section declared there stays mounted while its inner boundary swaps.
 
-SsgoiRouteBoundary from @ssgoi/solid/solid-router still works but is deprecated and will be removed in 8.0.0.
-
 Common setup: https://ssgoi.dev/llms/frameworks/solid.txt

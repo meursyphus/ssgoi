@@ -3,7 +3,6 @@ import type {
   ZoomAnimationConfig,
   ZoomAnimationInput,
   ZoomContributeCtx,
-  ZoomProvider,
   ZoomStrategy,
 } from "../types";
 import {
@@ -136,22 +135,4 @@ export class ExpandBackgroundStrategy implements ZoomStrategy {
       }),
     ];
   }
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Legacy provider export — kept so `ZOOM_PROVIDERS` and the public
- * `ZoomProvider` shape stay intact for any external consumer or test that
- * still reaches in. The strategy above is the new entry point.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-import { createZoomIn, createZoomOut } from "../zoom-element";
-
-export function createExpandProvider(): ZoomProvider {
-  return {
-    physics: EXPAND_PHYSICS,
-    in: createZoomIn,
-    out: createZoomOut,
-    backgroundIn: createExitIn,
-    backgroundOut: createEnterOut,
-  };
 }

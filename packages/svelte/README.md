@@ -17,9 +17,6 @@ Agent setup guide: https://ssgoi.dev/llms/svelte.txt
 Install this framework package once. The root entry never imports a router:
 pass the router members SSGOI needs through `<Ssgoi framework>`.
 
-The `@ssgoi/svelte/sveltekit` subpath (`SsgoiRouteBoundary`) is deprecated.
-Use `SsgoiLayoutBoundary` from `@ssgoi/svelte` with `framework` instead.
-
 See the [framework guide](https://ssgoi.dev/docs/frameworks/svelte) for wiring and limits.
 
 ## Root
@@ -215,8 +212,6 @@ the rule's pages with `preserveScroll: "shared"`.
 - `scroll`: vertical sequences.
 
 All effects: https://ssgoi.dev/llms.txt#7-transition-index
-
-`SsgoiTransition` is deprecated. Use the data attribute directly.
 
 ## License
 

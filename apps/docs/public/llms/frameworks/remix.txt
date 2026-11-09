@@ -44,6 +44,4 @@ export default function Layout() {
 
 Declare a persistent section in config.layouts, for example [{ paths: "/shop/**" }], and put a prop-less boundary around the changing content in its layout. The outer boundary keeps one key for the whole section; the inner one (one level deeper) keys by the path.
 
-SsgoiRouteBoundary from @ssgoi/react/remix still works but is deprecated and will be removed in 8.0.0.
-
 Common setup: https://ssgoi.dev/llms/frameworks/react.txt

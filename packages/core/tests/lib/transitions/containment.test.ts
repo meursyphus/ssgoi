@@ -23,7 +23,7 @@ describe("moving page containment", () => {
     ["axis", axis()],
     ["strip", strip()],
     ["scroll", scroll()],
-    ["sheet", sheet({ type: "background-scale" })],
+    ["sheet", sheet({ type: "scale" })],
   ])(
     "%s contains layout but never paint, which drops SVG backdrop filters",
     (_name, transition) => {

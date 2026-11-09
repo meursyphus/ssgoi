@@ -115,6 +115,3 @@ is the route path; its key is the `config.layouts` scope at its depth (the
 number of boundaries above it), or the route path. Query-only navigation keeps
 the boundary by default. For direct control or a custom router:
 https://ssgoi.dev/llms/manual-boundaries.txt
-
-`SsgoiRouteBoundary` from `@ssgoi/react/tanstack-router` still works but is
-deprecated and will be removed in 8.0.0.

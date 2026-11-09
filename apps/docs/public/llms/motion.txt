@@ -91,9 +91,8 @@ animation.select("in").set({
 - after must reference a sibling in the same MultiAnimation. Cycles, references
   outside the parent, and invalid progress values throw before playback.
 - startAt: null restores the parent's original scheduling for this child.
-- Existing positional constructor startAt arrays remain supported. Their
-  numeric thresholds, including 1, keep their original first-crossing behavior.
-  Existing mode: "sequence" is the legacy [0, 1, ...] shorthand; use an explicit
+- Positional constructor startAt arrays use numeric first-crossing thresholds,
+  including 1. mode: "sequence" is the [0, 1, ...] shorthand; use an explicit
   "settled" condition when completion rather than first arrival is required.
 - Configure timing before playback. A run captures its dependency graph once;
   changing it does not reschedule an animation already playing.

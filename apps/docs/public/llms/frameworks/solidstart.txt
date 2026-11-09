@@ -110,7 +110,3 @@ above it), or the route path. Query/hash-only changes keep the boundary by
 default.
 
 Manual/custom-router guide: https://ssgoi.dev/llms/manual-boundaries.txt
-
-`SsgoiRouteBoundary` from `@ssgoi/solid/solidstart` or
-`@ssgoi/solid/solid-router` still works but is deprecated and will be removed
-in 8.0.0.

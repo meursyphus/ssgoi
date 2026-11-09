@@ -159,9 +159,8 @@ export { SvelteSsgoi, VueSsgoi, SolidSsgoi };
   ]) {
     assert(consumer(entry), `${entry} CommonJS entry failed`);
   }
-  // An installed legacy router must not constrain a consumer of root exports.
-  // npm cannot scope peer ranges to subpath imports, so optional router peers
-  // deliberately use *. Supported adapter versions are documented separately.
+  // An installed router of any version must not constrain a consumer of root
+  // exports: the packages declare no router peers.
   run("npm", [
     "install",
     "--ignore-scripts",
@@ -172,7 +171,7 @@ export { SvelteSsgoi, VueSsgoi, SolidSsgoi };
   assert.equal(consumer("react-router/package.json").version, "5.3.4");
   assert(consumer("@ssgoi/react"));
   console.log(
-    "Router isolation passed: clean npm install, strict root types, browser bundle, CommonJS root imports without routers, and coexistence with an unused legacy router.",
+    "Router isolation passed: clean npm install, strict root types, browser bundle, CommonJS root imports without routers, and coexistence with an unused old router.",
   );
 } finally {
   rmSync(fixture, { recursive: true, force: true });

@@ -35,8 +35,6 @@ export type { ZoomType, ZoomVariant, NormalizedZoomOptions } from "./types";
 
 const ZOOM_ENTER_KEY = "data-zoom-enter-key";
 const ZOOM_EXIT_KEY = "data-zoom-exit-key";
-/** @deprecated Border radius is inferred from the keyed clipping window. */
-const LEGACY_ZOOM_RADIUS_KEY = "data-zoom-radius";
 
 function sameRect(
   a: { left: number; top: number; width: number; height: number },
@@ -105,19 +103,13 @@ export function buildInput(
     resolved.enterEl,
     enterRect,
     (mediaEl) => getClientRect(enterPage, mediaEl),
-    {
-      clipRoot: enterPage,
-      legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
-    },
+    { clipRoot: enterPage },
   );
   const exitMedia = resolveElementMediaGeometry(
     resolved.exitEl,
     exitRect,
     (mediaEl) => getClientRect(exitPage, mediaEl),
-    {
-      clipRoot: exitPage,
-      legacyRadiusAttribute: LEGACY_ZOOM_RADIUS_KEY,
-    },
+    { clipRoot: exitPage },
   );
   const [normalizedEnterMedia, normalizedExitMedia] =
     normalizeMediaGeometryPair(enterMedia, exitMedia);
@@ -133,11 +125,9 @@ export function buildInput(
     width: pageRect.width,
     height: pageRect.height,
   };
-  const enterRadius =
-    normalizedEnterMedia.radiusSource === "legacy" ||
-    sameRect(normalizedEnterMedia.window, pageBounds)
-      ? normalizedEnterMedia.radius
-      : 0;
+  const enterRadius = sameRect(normalizedEnterMedia.window, pageBounds)
+    ? normalizedEnterMedia.radius
+    : 0;
 
   return {
     enterRect,
@@ -245,9 +235,9 @@ class TileStrategy implements ZoomStrategy {
       new WebAnimation({
         element: tileEl,
         integrator: IntegratorProvider.from(physics),
-        // Enter: tile expands as `t` (0 → 1). Exit: tile shrinks as `u` —
-        // the legacy convention from v5's outAnim path. Either way, feed
-        // the progress that matches the tileConfig's authored direction.
+        // Enter: tile expands as `t` (0 → 1). Exit: tile shrinks as `u`.
+        // Either way, feed the progress that matches the tileConfig's
+        // authored direction.
         style:
           feedDir === "t"
             ? (t) => tileConfig.animate(t) as Record<string, string | number>

@@ -130,9 +130,6 @@ export const config$ = $(() => ({
 
 Tab ↔ tab keeps the (top-level) layout, bottom nav included, and moves only the page roots. Tab → detail replaces the whole (top-level) layout with the (detail) one, nav included. A shop layout under (top-level) can keep a depth-1 boundary with a constant key across categories (the nested /shop/** scope) while each category page root is depth 2.
 
-`useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city` still works but is
-deprecated and will be removed in 8.0.0.
-
 ## Reference
 
 - Shared config and route patterns: https://ssgoi.dev/llms/route-rules.txt

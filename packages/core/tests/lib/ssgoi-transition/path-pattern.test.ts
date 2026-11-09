@@ -30,8 +30,7 @@ describe("path patterns", () => {
     expect(matchPath("/posts/1/comments", "/posts/**/comments")).toBe(false);
   });
 
-  it("keeps bare * as a compatibility alias for /**", () => {
-    expect(matchPath("/", "*")).toBe(true);
-    expect(matchPath("/anything/deep", "*")).toBe(true);
+  it("does not treat bare * as a global wildcard", () => {
+    expect(matchPath("/anything/deep", "*")).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@ssgoi/qwik",
-  "version": "7.5.0",
+  "version": "8.0.0-beta.0",
   "description": "Native app-like page transitions for Qwik and Qwik City. Make a web app, PWA or WebView app feel native.",
   "private": false,
   "sideEffects": false,
@@ -23,11 +23,6 @@
       "types": "./lib-types/view-transitions.d.ts",
       "import": "./lib/view-transitions.qwik.mjs",
       "require": "./lib/view-transitions.qwik.cjs"
-    },
-    "./qwik-city": {
-      "types": "./lib-types/legacy/qwik-city.d.ts",
-      "import": "./lib/qwik-city.qwik.mjs",
-      "require": "./lib/qwik-city.qwik.cjs"
     }
   },
   "files": [
@@ -48,8 +43,7 @@
     "@ssgoi/core": "workspace:^"
   },
   "peerDependencies": {
-    "@builder.io/qwik": "^1.20.0",
-    "@builder.io/qwik-city": "*"
+    "@builder.io/qwik": "^1.20.0"
   },
   "devDependencies": {
     "@builder.io/qwik": "^1.20.0",
@@ -105,10 +99,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@builder.io/qwik-city": {
-      "optional": true
-    }
   }
 }

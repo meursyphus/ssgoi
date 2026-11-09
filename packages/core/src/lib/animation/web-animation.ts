@@ -94,7 +94,7 @@ export interface WebAnimationOptions {
  *      using WAAPI's `currentTime`, so browser setup latency is not counted as
  *      animation progress.
  *
- * Scalar matchInto is a legacy, same-coordinate operation. Host handoff uses
+ * Scalar matchInto is a same-coordinate operation. Host handoff uses
  * scoped target identities and typed presentation channels instead.
  */
 export class WebAnimation extends Animation {

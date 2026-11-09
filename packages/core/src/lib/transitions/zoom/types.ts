@@ -19,9 +19,6 @@ export type ZoomVariant = "default" | "fade";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Internal normalized options used by transition.ts / strategy factory.
- * `index.ts` is the single place that converts public + deprecated config
- * (`fade: boolean`) into this shape, so the rest of the module never branches
- * on legacy fields.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export interface NormalizedZoomOptions {
@@ -30,7 +27,7 @@ export interface NormalizedZoomOptions {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Provider plumbing (kept stable for v5 BackgroundStrategy implementations).
+ * Tile and background animation shapes.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export type ZoomStyleObject = Record<string, string>;
@@ -61,23 +58,6 @@ export interface ZoomOverlayConfig {
     mode: "enter" | "exit",
     progress: number,
   ) => Record<string, string | number>;
-}
-
-export interface ZoomProvider {
-  physics: PhysicsOptions;
-  /** Physics used when the tile shrinks back (`exit`); defaults to `physics`. */
-  exitPhysics?: PhysicsOptions;
-  in: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  out: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  backgroundIn: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  backgroundOut: (input: ZoomAnimationInput) => ZoomAnimationConfig;
-  overlay?: ZoomOverlayConfig;
-}
-
-export interface ZoomAnimationHandlers {
-  mode: "enter" | "exit";
-  inAnimation?: ZoomAnimationFunc;
-  outAnimation?: ZoomAnimationFunc;
 }
 
 /* ────────────────────────────────────────────────────────────────────────────

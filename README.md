@@ -147,10 +147,8 @@ shell. Use `100vh` only where `dvh` is unsupported.
 
 That is enough for a simple app. `@ssgoi/react` never imports Next.js; it calls
 the `useRoute` hook you wrote. Other frameworks use the same small boundary
-model with their own router state passed as `framework`. The older router
-subpaths such as `@ssgoi/react/nextjs` still work but are deprecated and will be
-removed in 8.0.0. For complete files, persistent layouts,
-nested boundaries, and framework-specific setup, see the
+model with their own router state passed as `framework`. For complete files,
+persistent layouts, nested boundaries, and framework-specific setup, see the
 [documentation](https://ssgoi.dev/docs/install).
 
 ---

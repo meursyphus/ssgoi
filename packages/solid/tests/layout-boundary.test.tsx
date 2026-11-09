@@ -1,14 +1,9 @@
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { createSignal, type JSX } from "solid-js";
 import { render } from "solid-js/web";
-import { MemoryRouter, Route, createMemoryHistory } from "@solidjs/router";
 import type { SsgoiConfig, SsgoiLayoutScope } from "@ssgoi/core/types";
 import { Ssgoi } from "../src/lib/ssgoi";
 import { SsgoiLayoutBoundary } from "../src/lib/layout-boundary";
-import {
-  SsgoiRouteBoundary,
-  type SsgoiRouteBoundaryProps,
-} from "../src/lib/legacy/solid-router";
 
 const config: SsgoiConfig = { transitions: [] };
 const [path, setPath] = createSignal("/a");
@@ -146,52 +141,4 @@ it("throws when <Ssgoi> has no framework", () => {
       host,
     ),
   ).toThrow(/^SSGOI: SsgoiLayoutBoundary requires a framework/);
-});
-
-function mountRouter(props: SsgoiRouteBoundaryProps = {}) {
-  const history = createMemoryHistory();
-  history.set({ value: "/a" });
-  const Layout = (layout: { children?: JSX.Element }) => (
-    <Ssgoi config={config}>
-      <SsgoiRouteBoundary data-boundary="0" {...props}>
-        {layout.children}
-      </SsgoiRouteBoundary>
-    </Ssgoi>
-  );
-  dispose = render(
-    () => (
-      <MemoryRouter history={history} root={Layout}>
-        <Route path="/a" component={() => <p>a</p>} />
-        <Route path="/b" component={() => <p>b</p>} />
-      </MemoryRouter>
-    ),
-    host,
-  );
-  return history;
-}
-
-it("keeps the deprecated solid-router boundary working without a framework", async () => {
-  const history = mountRouter();
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("/a");
-
-  history.set({ value: "/b" });
-  await Promise.resolve();
-  expect(boundary().dataset.ssgoiTransition).toBe("/b");
-  expect(boundary()).not.toBe(first);
-});
-
-it("keeps the deprecated resolve and routeKey props", async () => {
-  const history = mountRouter({
-    resolve: ({ pathname }) => ({ id: `page:${pathname}` }),
-    routeKey: "shell",
-  });
-  const first = boundary();
-  expect(first.dataset.ssgoiTransition).toBe("page:/a");
-  expect(first.hasAttribute("routeKey")).toBe(false);
-
-  history.set({ value: "/b" });
-  await Promise.resolve();
-  expect(boundary()).toBe(first);
-  expect(first.dataset.ssgoiTransition).toBe("page:/b");
 });

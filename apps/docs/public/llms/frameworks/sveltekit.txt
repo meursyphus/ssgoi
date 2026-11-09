@@ -110,6 +110,3 @@ pathname. Search/hash-only changes do not remount. Use router navigation;
 shallow `pushState`/`replaceState` calls do not trigger `onNavigate`.
 
 Custom router/manual guide: https://ssgoi.dev/llms/manual-boundaries.txt
-
-`SsgoiRouteBoundary` from `@ssgoi/svelte/sveltekit` still works but is
-deprecated and will be removed in 8.0.0.

@@ -26,5 +26,3 @@ export type {
   InertiaConfig,
   NavigationDirection,
 } from "@ssgoi/core/runtime";
-
-export type RouteBoundaryState = { id: string; key?: string | number };

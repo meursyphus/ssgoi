@@ -20,7 +20,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, "src/lib/index.ts"),
-        "qwik-city": resolve(__dirname, "src/lib/legacy/qwik-city.ts"),
         types: resolve(__dirname, "src/lib/types.ts"),
         "view-transitions": resolve(__dirname, "src/lib/view-transitions.ts"),
       },

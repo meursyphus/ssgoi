@@ -59,11 +59,6 @@ wrap Stack or Slot inside it. Supply safe areas and native screen backgrounds
 in the application. DOM attributes, CSS, Next.js Suspense props, and web
 TransitionConfig objects do not apply to native screens.
 
-Ssgoi selects native playback automatically. The root package does not import
-Expo Router; it uses the primitives you pass. `SsgoiRouteBoundary` from the
-`@ssgoi/react-native/expo-router` subpath still works but is deprecated and
-will be removed in 8.0.0.
-
 ## Rules and options
 
 on/except, from/to, ordered, priority, bidirectional and middleware share the

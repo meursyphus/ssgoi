@@ -44,10 +44,7 @@ export function normalizePath(path: string): string {
 }
 
 function normalizePattern(pattern: string): string {
-  const trimmed = pattern.trim();
-  // Compatibility alias. New configs should prefer the explicit `/**`.
-  if (trimmed === "*") return "/**";
-  return normalizePath(trimmed);
+  return normalizePath(pattern.trim());
 }
 
 function splitSegments(path: string): string[] {
