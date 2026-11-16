@@ -77,6 +77,14 @@ export const DOCS_ALIASES: Record<string, string[]> = {
     "android",
   ],
   "/docs/troubleshooting": ["debug", "not working", "no animation", "broken"],
+  "/docs/migration-v8": [
+    "upgrade",
+    "migration",
+    "8.0",
+    "breaking changes",
+    "SsgoiRouteBoundary",
+    "SsgoiTransition",
+  ],
 };
 
 /**

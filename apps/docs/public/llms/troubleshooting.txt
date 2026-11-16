@@ -62,6 +62,12 @@ defer that until the provider's transition state is `idle`: `useSsgoiTransition`
 in React, Vue, Solid and Qwik, `getSsgoiTransition` in Svelte,
 `injectSsgoiTransition` in Angular.
 
+## After upgrading from 7.x
+
+A build error naming a removed subpath or export, or a preset option that no
+longer changes anything, is an 8.0 removal:
+https://ssgoi.dev/llms/migration-v8.txt
+
 ## Debug the mechanism
 
 Read this only when the checklist is insufficient:

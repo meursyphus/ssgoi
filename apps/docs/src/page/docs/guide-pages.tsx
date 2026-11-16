@@ -1286,6 +1286,15 @@ export function FrameworksIndexBody() {
         wiring differ per stack — Qwik takes a QRL config factory, Angular an{" "}
         <code className={inlineCode}>ssgoi</code> directive.
       </p>
+      <p className={`mt-4 ${body}`}>
+        Coming from a 7.x router subpath such as{" "}
+        <code className={inlineCode}>@ssgoi/react/nextjs</code>? 8.0 removed
+        them; the{" "}
+        <Link href="/docs/migration-v8" className={link}>
+          migration guide
+        </Link>{" "}
+        shows the framework object that replaces each one.
+      </p>
       <ul className="mt-8 divide-y divide-line border-y border-line">
         {FRAMEWORK_DOCS.map((doc) => {
           const href = `/docs/frameworks/${doc.slug}`;

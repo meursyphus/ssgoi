@@ -149,7 +149,9 @@ That is enough for a simple app. `@ssgoi/react` never imports Next.js; it calls
 the `useRoute` hook you wrote. Other frameworks use the same small boundary
 model with their own router state passed as `framework`. For complete files,
 persistent layouts, nested boundaries, and framework-specific setup, see the
-[documentation](https://ssgoi.dev/docs/install).
+[documentation](https://ssgoi.dev/docs/install). Upgrading from 7.x, where
+router subpaths such as `@ssgoi/react/nextjs` were still available? See the
+[8.0 migration guide](https://ssgoi.dev/docs/migration-v8).
 
 ---
 
