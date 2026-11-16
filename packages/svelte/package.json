@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "scripts": {
     "watch": "svelte-package --watch",
-    "build": "svelte-package",
+    "build": "svelte-package && node ../../scripts/fix-dts-extensions.mjs dist",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "prepublishOnly": "pnpm run build",

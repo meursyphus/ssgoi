@@ -32,7 +32,7 @@
   "scripts": {
     "build": "pnpm run build.lib && pnpm run build.types",
     "build.lib": "vite build --mode lib",
-    "build.types": "tsc --emitDeclarationOnly",
+    "build.types": "tsc --emitDeclarationOnly && node ../../scripts/fix-dts-extensions.mjs lib-types",
     "dev": "vite build --watch --mode lib",
     "watch": "vite build --watch --mode lib",
     "lint": "eslint \"src/**/*.ts*\"",

@@ -34,7 +34,7 @@
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node ../../scripts/fix-dts-extensions.mjs dist",
     "watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
