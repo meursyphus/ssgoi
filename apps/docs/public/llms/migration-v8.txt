@@ -9,10 +9,15 @@ Website version: https://ssgoi.dev/docs/migration-v8
 ## 1. Find usages
 
 ```bash
-grep -rnE '@ssgoi/[a-z-]+/(nextjs|remix|react-router|tanstack-router|sveltekit|vue-router|nuxt|solid-router|solidstart|qwik-city|router|expo-router|unplugin)|(^|[^A-Za-z])SsgoiTransition\b|SsgoiRouteBoundary|ssgoiRouteBoundary|ssgoiTransition|routeKey|feel:|"crossfade"|background-scale|fade: true|data-hero-key|data-hero-aspect-ratio|data-hero-radius|data-zoom-radius|fromSpring|TrackPatch|SsgoiTransitionsOption' src
+grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '@ssgoi/[a-z-]+/(nextjs|remix|react-router|tanstack-router|sveltekit|vue-router|nuxt|solid-router|solidstart|qwik-city|router|expo-router|unplugin)|(^|[^A-Za-z])SsgoiTransition\b|SsgoiRouteBoundary|ssgoiRouteBoundary|ssgoiTransition|routeKey|parallelRoutesKey|feel:|"crossfade"|background-scale|fade: true|data-hero-key|data-hero-aspect-ratio|data-hero-radius|data-zoom-radius|fromSpring|TrackPatch|SsgoiTransitionsOption' .
+
+# Patterns too generic for one search; review these hits by hand:
+grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '["'"'"']\*["'"'"']|\.set\(["'"'"']' .
 ```
 
-Also check route patterns for a bare `"*"`.
+The second search is noisy (any `"*"` string or `Map.set("key")` call); check
+route patterns and MultiAnimation calls among its hits. Review every hit of the
+first; `routeKey` can also match an app's own props.
 
 Removed subpaths and exports fail at build time; TypeScript flags removed
 options. These fail silently in untyped code:
@@ -34,9 +39,10 @@ options. These fail silently in untyped code:
 | --- | --- |
 | router subpaths (`@ssgoi/react/nextjs`, `/remix`, `/react-router`, `/tanstack-router`, `@ssgoi/svelte/sveltekit`, `@ssgoi/vue/vue-router`, `/nuxt`, `@ssgoi/solid/solid-router`, `/solidstart`, `@ssgoi/qwik/qwik-city`, `@ssgoi/angular/router`, `@ssgoi/react-native/expo-router`) and their `SsgoiRouteBoundary` / `useSsgoiRouteBoundary` / `*ssgoiRouteBoundary` | `framework` on the provider + `SsgoiLayoutBoundary` (Qwik `useSsgoiLayoutBoundary`, Angular `*ssgoiLayoutBoundary`) from the package root |
 | `routeKey`, Angular `key:`, `useSsgoiRouteBoundary(key)` | a scope in `config.layouts` |
-| `resolve` | id = route path from `framework`; normalize with `config.middleware` or in `useRoute`/`getRoute`; otherwise a manual keyed boundary |
+| `resolve` | id = the route path; normalize URL structure with `config.middleware` (React: or return the path from `useRoute`); otherwise a manual keyed boundary |
 | Next.js `resolve` + `selectedSegments` for modals | `renderedPath` from `useRoute` |
-| Next.js `parallelRoutesKey`, `fallback`, `selectedSegmentsToPath` | no replacement (boundary follows the `children` slot; renders nothing until the route is known; compute `renderedPath` inline) |
+| Next.js `parallelRoutesKey` | pass the slot name to `useSelectedLayoutSegments(slot)` inside your `useRoute` |
+| Next.js `fallback`, `selectedSegmentsToPath` | no replacement (the first boundary renders nothing until the route is known; compute `renderedPath` inside `useRoute`) |
 | Expo `resolve`, `routeKey` | no replacement (screens key by native route) |
 | `SsgoiTransition` (all frameworks), Angular `[ssgoiTransition]` | `data-ssgoi-transition` on an element the framework keys |
 | `@ssgoi/react/unplugin` (+ `/vite`, `/webpack`, `/rollup`, `/esbuild`) | remove from the bundler config; no replacement |
@@ -224,4 +230,5 @@ the `{ spring }` shape throws.
 ## 6. Staying on 7
 
 `npm install @ssgoi/react@7` (or the matching framework package). 7.5 has both
-interfaces, so call sites can move one at a time before upgrading to 8.
+interfaces, so you can migrate to the current names there first and upgrade to 8
+afterwards.

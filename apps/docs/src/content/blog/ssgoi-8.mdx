@@ -42,7 +42,7 @@ npm install @ssgoi/react@8
 
 Use the framework package you already have: `@ssgoi/svelte`, `@ssgoi/vue`, `@ssgoi/solid`, `@ssgoi/qwik`, `@ssgoi/angular` or `@ssgoi/react-native`. If you also import `@ssgoi/core` directly, upgrade it too.
 
-Most removals fail loudly. A removed subpath or export breaks the build, TypeScript rejects the removed options, and `SsgoiLayoutBoundary` throws an `SSGOI:` error when the provider has no `framework`. A few do not. In untyped code, `drill({ type: "crossfade" })` falls back to the default parallax drill, `data-hero-key` leaves Hero with no pair, and a bare `"*"` now matches only single-segment paths. The guide starts with a search command that finds all of them before you upgrade.
+Most removals fail loudly. A removed subpath or export breaks the build, TypeScript rejects the removed options, and `SsgoiLayoutBoundary` throws an `SSGOI:` error when the provider has no `framework`. A few do not. In untyped code, `drill({ type: "crossfade" })` falls back to the default parallax drill, `data-hero-key` leaves Hero with no pair, and a bare `"*"` now matches only single-segment paths. The guide starts with search commands that surface these call sites before you upgrade.
 
 For a router subpath, the change is a small object on the provider and a different import for the boundary. In Next.js:
 
@@ -64,4 +64,4 @@ The `framework` object for each router, from Next.js to Expo Router, is in the [
 
 ## Staying on 7.5
 
-Nothing forces the upgrade. `npm install @ssgoi/react@7` keeps installing 7.5.x, which has both interfaces side by side. That makes it a reasonable place to migrate gradually: move call sites to `<Ssgoi framework>`, `config.layouts` and the current option names while still on 7.5, then switch to 8 once the search comes back empty.
+Nothing forces the upgrade. `npm install @ssgoi/react@7` keeps installing 7.5.x, which has both interfaces side by side. That makes it a reasonable place to migrate first: move to `<Ssgoi framework>`, `config.layouts` and the current option names while still on 7.5, then switch to 8 once nothing from the removed list is left.

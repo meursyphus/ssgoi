@@ -167,9 +167,9 @@ const BOUNDARY_PROPS: ReactNode[][] = [
   [
     <>{c("resolve(location)")} returning a custom id</>,
     <>
-      The id is the route path your {c("framework")} returns. Strip locale or
-      tenant prefixes with {c("config.middleware")}, or return the path you want
-      matched from {c("useRoute")}/{c("getRoute")}. For anything else, write a{" "}
+      The id is the route path. Strip locale or tenant prefixes with{" "}
+      {c("config.middleware")}; in React you can also return the path you want
+      matched from {c("useRoute")}. For anything else, write a{" "}
       <Link href="/docs/boundaries#manual-boundary" className={link}>
         keyed boundary yourself
       </Link>
@@ -188,8 +188,9 @@ const BOUNDARY_PROPS: ReactNode[][] = [
   [
     <>Next.js {c("parallelRoutesKey")}</>,
     <>
-      No replacement. The first boundary follows the {c("children")} slot of the
-      layout that renders it; render other slots outside boundaries.
+      Pass the slot name to {c("useSelectedLayoutSegments(slot)")} inside your{" "}
+      {c("useRoute")}. One {c("useRoute")} serves every boundary under the
+      provider.
     </>,
   ],
   [
@@ -265,9 +266,15 @@ export function MigrationV8Body() {
 
       <Section
         title="Find what needs to change"
-        lead="Search the source for every removed name before you upgrade."
+        lead="Search the project for every removed name before you upgrade."
       >
         <CodeBlock className="mt-6" language="bash" code={FIND_USAGES} />
+        <p className={`mt-5 ${body}`}>
+          Review every hit of the first search; {c("routeKey")} can also match
+          your own props. The second is noisy on purpose: a bare {c('"*"')}{" "}
+          pattern and a two-argument {c('animation.set("in", …)')} cannot be
+          told apart from other strings and {c("Map.set")} calls by a pattern.
+        </p>
         <p className={`mt-5 ${body}`}>
           Removed subpaths and exports fail at build time, and TypeScript flags
           the removed options. A missing {c("framework")} makes{" "}
@@ -408,7 +415,9 @@ export function MigrationV8Body() {
         title="Hero and zoom markup"
         lead="Shared elements are paired by explicit enter and exit keys, and their geometry is read from the DOM."
       >
-        <Heading3>data-hero-key</Heading3>
+        <div className="mt-8">
+          <Heading3>data-hero-key</Heading3>
+        </div>
         <p className={`mt-2 ${body}`}>
           Put {c("data-hero-exit-key")} on the element you leave from and{" "}
           {c("data-hero-enter-key")} on the element you arrive at, with the same
@@ -492,8 +501,8 @@ export function MigrationV8Body() {
         />
         <p className={`mt-5 ${body}`}>
           7.5 has the new interface alongside the deprecated one, so you can
-          move one call site at a time there and upgrade to 8 once the search
-          above comes back empty.
+          migrate to the current names there first and upgrade to 8 once nothing
+          from the tables above is left.
         </p>
       </Section>
 

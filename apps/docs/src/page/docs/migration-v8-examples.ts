@@ -15,7 +15,10 @@ export type MigrationExample = {
   after: string;
 };
 
-export const FIND_USAGES = `grep -rnE '@ssgoi/[a-z-]+/(nextjs|remix|react-router|tanstack-router|sveltekit|vue-router|nuxt|solid-router|solidstart|qwik-city|router|expo-router|unplugin)|(^|[^A-Za-z])SsgoiTransition\\b|SsgoiRouteBoundary|ssgoiRouteBoundary|ssgoiTransition|routeKey|feel:|"crossfade"|background-scale|fade: true|data-hero-key|data-hero-aspect-ratio|data-hero-radius|data-zoom-radius|fromSpring|TrackPatch|SsgoiTransitionsOption' src`;
+export const FIND_USAGES = `grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '@ssgoi/[a-z-]+/(nextjs|remix|react-router|tanstack-router|sveltekit|vue-router|nuxt|solid-router|solidstart|qwik-city|router|expo-router|unplugin)|(^|[^A-Za-z])SsgoiTransition\\b|SsgoiRouteBoundary|ssgoiRouteBoundary|ssgoiTransition|routeKey|parallelRoutesKey|feel:|"crossfade"|background-scale|fade: true|data-hero-key|data-hero-aspect-ratio|data-hero-radius|data-zoom-radius|fromSpring|TrackPatch|SsgoiTransitionsOption' .
+
+# Patterns too generic for one search; review these hits by hand:
+grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '["'"'"']\\*["'"'"']|\\.set\\(["'"'"']' .`;
 
 /* -------------------------------------------------------------------------- */
 /* Router subpaths → <Ssgoi framework> + SsgoiLayoutBoundary                  */
