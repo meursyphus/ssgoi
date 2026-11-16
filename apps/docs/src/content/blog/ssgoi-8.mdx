@@ -1,0 +1,67 @@
+---
+title: "SSGOI 8.0: Removing the Compatibility Layer"
+description: "SSGOI 8.0.0 adds no new behavior. It removes the router subpaths, SsgoiTransition, the React unplugin and the old option names that 7.x kept for compatibility."
+date: "2026-11-16"
+author: "MeurSyphus"
+tags: ["ssgoi", "release", "migration", "page transition", "breaking changes"]
+---
+
+SSGOI 8.0.0 is a major release with nothing new in it. Code written against the current interface behaves exactly as it did in 7.5: the presets play the same motion, the config format is the same, and the route rules match the same paths. What changes is the size of the public surface: the compatibility code that 7.x carried for older apps is gone.
+
+If your app already gives `<Ssgoi>` a `framework` object and uses `SsgoiLayoutBoundary`, upgrading is a version bump. If it still imports a router subpath such as `@ssgoi/react/nextjs`, the [migration guide](/docs/migration-v8) has a before and after for every removed API.
+
+## Why a major release for removals
+
+SSGOI 7.5 changed how the packages connect to a router. Before it, every router had its own entry point, `@ssgoi/react/nextjs`, `@ssgoi/svelte/sveltekit`, `@ssgoi/vue/nuxt` and so on, and each one imported its router and exported a `SsgoiRouteBoundary`. In 7.5 the provider started reading the route through a `framework` object that the application passes in, and one `SsgoiLayoutBoundary` from the package root replaced the per-router boundaries. Persistent shells moved from a `routeKey` prop to `config.layouts`.
+
+7.5 kept the old entries working and marked them as deprecated, so apps could move one call site at a time. The same applied to older leftovers: option spellings such as `drill({ type: "crossfade" })` that had been renamed to the `{ type, variant, options }` shape, the symmetric `data-hero-key`, and hints such as `data-hero-radius` that the presets no longer needed because they read the geometry from the DOM and CSS.
+
+Each of those paths stayed in the published packages: a second boundary implementation per adapter, routers listed as optional peer dependencies, branches in the presets that translated old option names, and documentation that described both interfaces. Removing them breaks code that still uses them, so it waited for a major version.
+
+## What 8.0 removes
+
+- **Router subpaths and their boundaries.** `@ssgoi/react/nextjs`, `/remix`, `/react-router` and `/tanstack-router`; `@ssgoi/svelte/sveltekit`; `@ssgoi/vue/vue-router` and `/nuxt`; `@ssgoi/solid/solid-router` and `/solidstart`; `@ssgoi/qwik/qwik-city`; `@ssgoi/angular/router`; `@ssgoi/react-native/expo-router`. With them go `SsgoiRouteBoundary`, `useSsgoiRouteBoundary`, the Angular `*ssgoiRouteBoundary` directive, and their `routeKey` and `resolve` props.
+- **`SsgoiTransition`** in every framework, including Angular's `[ssgoiTransition]`. It only wrote `data-ssgoi-transition`, which you can write yourself.
+- **`@ssgoi/react/unplugin`** and its bundler entries. It injected keys into an element-level `transition()` helper that the packages no longer export.
+- **Old preset option names:** axis `feel`, drill type `"crossfade"`, sheet type `"background-scale"` and zoom `fade`. Their replacements, `variant: "snappy"`, `type: "slide"`, `type: "scale"` and `variant: "fade"`, play the same motion.
+- **Legacy shared-element attributes:** `data-hero-key`, `data-hero-aspect-ratio`, `data-hero-radius` and `data-zoom-radius`. Hero pairs elements with `data-hero-exit-key` and `data-hero-enter-key`, and both presets read the image's ratio, fit and corner radius from the page.
+- **Two motion helpers:** `IntegratorProvider.fromSpring()` and the two-argument `MultiAnimation.set(name, patch)`. Use `IntegratorProvider.from({ spring })` and `animation.select(name).set({ integrator })`.
+- **The bare `"*"` route pattern alias.** Write `"/**"` for every path.
+
+A few type-only exports that described these APIs are removed with them, such as `TrackPatch` and `SsgoiTransitionsOption`. The [migration guide](/docs/migration-v8#removed-types) lists each one with its replacement.
+
+Removing the subpaths also shortens what the packages declare. No package lists a router as an optional peer dependency anymore, and `@ssgoi/react` no longer depends on `unplugin` or `@babel/core`.
+
+## How to upgrade
+
+All `@ssgoi/*` packages are versioned together, so move every one you install to 8:
+
+```bash
+npm install @ssgoi/react@8
+```
+
+Use the framework package you already have: `@ssgoi/svelte`, `@ssgoi/vue`, `@ssgoi/solid`, `@ssgoi/qwik`, `@ssgoi/angular` or `@ssgoi/react-native`. If you also import `@ssgoi/core` directly, upgrade it too.
+
+Most removals fail loudly. A removed subpath or export breaks the build, TypeScript rejects the removed options, and `SsgoiLayoutBoundary` throws an `SSGOI:` error when the provider has no `framework`. A few do not. In untyped code, `drill({ type: "crossfade" })` falls back to the default parallax drill, `data-hero-key` leaves Hero with no pair, and a bare `"*"` now matches only single-segment paths. The guide starts with a search command that finds all of them before you upgrade.
+
+For a router subpath, the change is a small object on the provider and a different import for the boundary. In Next.js:
+
+```tsx
+// 7.x
+import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs";
+
+<SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+
+// 8.0
+import { SsgoiLayoutBoundary } from "@ssgoi/react";
+
+<Ssgoi config={config} framework={framework}>
+  <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+</Ssgoi>
+```
+
+The `framework` object for each router, from Next.js to Expo Router, is in the [migration guide](/docs/migration-v8#router-subpaths-and-ssgoirouteboundary) and the [framework guides](/docs/frameworks).
+
+## Staying on 7.5
+
+Nothing forces the upgrade. `npm install @ssgoi/react@7` keeps installing 7.5.x, which has both interfaces side by side. That makes it a reasonable place to migrate gradually: move call sites to `<Ssgoi framework>`, `config.layouts` and the current option names while still on 7.5, then switch to 8 once the search comes back empty.
