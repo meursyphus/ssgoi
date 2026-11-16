@@ -41,7 +41,7 @@
   "scripts": {
     "dev": "vite",
     "watch": "vite build --watch",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node ../../scripts/fix-dts-extensions.mjs dist",
     "preview": "vite preview",
     "prepare": "pnpm run build",
     "lint": "eslint .",

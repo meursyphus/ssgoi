@@ -44,6 +44,7 @@
     "test:transition-examples": "node scripts/check-transition-examples.mjs",
     "test:transition-parity:prepare": "node scripts/prepare-transition-parity.mjs",
     "test:router-exports": "node scripts/check-router-exports.mjs",
+    "test:dts-resolution": "node scripts/check-dts-resolution.mjs",
     "test:router-docs": "node scripts/check-router-docs.mjs",
     "test:router-isolation": "node scripts/check-router-isolation.mjs && node scripts/check-isolated-platforms.mjs && node scripts/check-native-isolation.mjs"
   },
