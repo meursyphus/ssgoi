@@ -1,8 +1,9 @@
 # Manual SSGOI boundaries and custom routers
 
-The root framework packages are router agnostic. Importing `@ssgoi/react`,
+The framework packages are router agnostic. Importing `@ssgoi/react`,
 `@ssgoi/svelte`, `@ssgoi/vue`, or `@ssgoi/solid` does not import or require a router.
-The ready-made router entries are optional conveniences, not required wrappers.
+`SsgoiLayoutBoundary` with a `framework` object on `<Ssgoi>` is the ready-made
+boundary; this guide is for wiring the boundary yourself instead.
 
 Use one `<Ssgoi>` and mark the real DOM element the framework removes when
 routed content changes. `data-ssgoi-transition` is the logical route id matched
@@ -62,18 +63,20 @@ DOM lifetime:
 SvelteKit's live `children` snippet needs more care: detach the outgoing region
 in `onNavigate` before Kit changes the snippet, then remount in the callback
 returned from `onNavigate` (after Kit updates the DOM). A key around the live
-snippet alone is not sufficient. The complete optional implementation is:
-https://github.com/meursyphus/ssgoi/blob/HEAD/packages/svelte/src/lib/routers/sveltekit/ssgoi-route-boundary.svelte
-It can be copied into an app when custom lifecycle control is needed.
+snippet alone is not sufficient. `SsgoiLayoutBoundary` from `@ssgoi/svelte`
+implements exactly this lifecycle with the `onNavigate` you pass in
+`framework`; prefer it over a hand-written copy. Its source shows the pattern:
+https://github.com/meursyphus/ssgoi/blob/HEAD/packages/svelte/src/lib/ssgoi-layout-boundary.svelte
 
 ## Vue and Solid
 
 Vue: key a DOM wrapper around the current RouterView component or NuxtPage.
 Solid: use a keyed Show/Dynamic boundary that recreates its child when the
 route's lifetime changes. Keep the transition id reactive even for stable keys.
-The optional adapters contain the corresponding implementations:
-- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/vue/src/lib/routers/vue-router.ts
-- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/solid/src/lib/routers/solid-router.tsx
+The packages' own `SsgoiLayoutBoundary` implementations show the pattern (they
+read the route from the `framework` passed to `<Ssgoi>`):
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/vue/src/lib/layout-boundary.ts
+- https://github.com/meursyphus/ssgoi/blob/HEAD/packages/solid/src/lib/layout-boundary.tsx
 
 Qwik and Angular own routed DOM differently; use their page-root markers:
 - https://ssgoi.dev/llms/frameworks/qwik.txt

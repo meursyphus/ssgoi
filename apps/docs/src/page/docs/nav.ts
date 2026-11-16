@@ -241,35 +241,35 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "React",
         href: "/docs/frameworks/react",
         blurb:
-          "Use SSGOI with React independently of your router. Router helpers are optional conveniences that connect a pathname and a page lifetime to the same React implementation.",
+          "Use SSGOI with React independently of your router. A framework object on the provider reads the route, and SsgoiLayoutBoundary turns it into a page lifetime.",
         children: [
           {
             id: "router-nextjs",
             title: "Next.js",
             href: "/docs/frameworks/react#nextjs",
             blurb:
-              "Use the App Router helper to read the committed pathname, handle URL-hook suspension, and mark the routed region. It is included in @ssgoi/react.",
+              "Build framework.useRoute from usePathname and useSelectedLayoutSegments. SsgoiLayoutBoundary handles URL-hook suspension and marks the routed region.",
           },
           {
             id: "router-remix",
             title: "Remix",
             href: "/docs/frameworks/react#remix",
             blurb:
-              "Use the Remix 2 entry with @remix-run/react. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.",
+              "Return Remix 2’s location from framework.useRoute. It reads Remix’s own router context, so it does not depend on a separately installed React Router version.",
           },
           {
             id: "router-react-router",
             title: "React Router",
             href: "/docs/frameworks/react#react-router",
             blurb:
-              "Use the helper inside React Router 6 or 7. It follows the committed location; query-only navigation preserves the boundary.",
+              "Return React Router 6 or 7’s location from framework.useRoute. The boundary follows the committed location; query-only navigation preserves it.",
           },
           {
             id: "router-tanstack-router",
             title: "TanStack Router",
             href: "/docs/frameworks/react#tanstack-router",
             blurb:
-              "Use this entry for TanStack Router 1, including React applications built with TanStack Start. Both use the same router context.",
+              "Return TanStack Router 1’s rendered pathname from framework.useRoute, including React applications built with TanStack Start.",
           },
         ],
       },
@@ -278,14 +278,14 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "Svelte",
         href: "/docs/frameworks/svelte",
         blurb:
-          "The Svelte package provides the common provider and transition API. Add the SvelteKit helper when Kit owns navigation.",
+          "The Svelte package provides the provider, transition API, and layout boundary. Pass a SvelteKit route getter and onNavigate as framework when Kit owns navigation.",
         children: [
           {
             id: "router-sveltekit",
             title: "SvelteKit",
             href: "/docs/frameworks/svelte#sveltekit",
             blurb:
-              "Use onNavigate to detach outgoing content before SvelteKit updates its live children snippet. A key around that snippet alone is not sufficient.",
+              "Pass getRoute and onNavigate as framework. The boundary uses onNavigate to detach outgoing content before SvelteKit updates its live children snippet.",
           },
         ],
       },
@@ -294,21 +294,21 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "Vue",
         href: "/docs/frameworks/vue",
         blurb:
-          "Use the Vue package for the provider and effects. Choose the helper for the router already installed in your app.",
+          "Use the Vue package for the provider, effects, and layout boundary. Pass a reactive getRoute for the router already installed in your app as framework.",
         children: [
           {
             id: "router-vue-router",
             title: "Vue Router",
             href: "/docs/frameworks/vue#vue-router",
             blurb:
-              "Use the helper with Vue Router 4 inside the common Vue provider.",
+              "Return Vue Router 4’s current path from framework.getRoute on the common Vue provider.",
           },
           {
             id: "router-nuxt",
             title: "Nuxt",
             href: "/docs/frameworks/vue#nuxt",
             blurb:
-              "Use the Nuxt-specific entry inside the common Vue provider. It observes the committed router state rather than Nuxt’s delayed useRoute value.",
+              "Return Nuxt’s router state from framework.getRoute. Read router.currentRoute, the committed state, rather than Nuxt’s delayed useRoute value.",
           },
         ],
       },
@@ -317,21 +317,21 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "Solid",
         href: "/docs/frameworks/solid",
         blurb:
-          "Use the Solid package for common rendering and effects. Solid Router and SolidStart share the same boundary implementation.",
+          "Use the Solid package for the provider, effects, and layout boundary. Solid Router and SolidStart pass the same getRoute as framework.",
         children: [
           {
             id: "router-solid-router",
             title: "Solid Router",
             href: "/docs/frameworks/solid#solid-router",
             blurb:
-              "Use the Solid Router entry for Solid applications. SolidStart’s existing entry uses this same implementation.",
+              "Return Solid Router’s location pathname from framework.getRoute on the common provider.",
           },
           {
             id: "router-solidstart",
             title: "SolidStart",
             href: "/docs/frameworks/solid#solidstart",
             blurb:
-              "Use the same Solid Router boundary through the SolidStart entry.",
+              "Return Solid Router’s location pathname from framework.getRoute in the SolidStart router root.",
           },
         ],
       },
@@ -347,7 +347,7 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             title: "Qwik City",
             href: "/docs/frameworks/qwik#qwik-city",
             blurb:
-              "The computed boundary helper reads Qwik City’s location. The page keeps ownership of its DOM and slots; apply the returned id and key to its own root.",
+              "Pass Qwik City’s location as framework. useSsgoiLayoutBoundary returns an id and key that layouts and pages apply to their own roots.",
           },
         ],
       },
@@ -356,7 +356,7 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "Angular",
         href: "/docs/frameworks/angular",
         blurb:
-          "Use the common ssgoi directive above the changing page region. The optional Angular Router directive supplies each page’s boundary.",
+          "Use the ssgoi directive above the changing page region with an ssgoiFramework that reads Angular Router. The layout boundary directive supplies each page’s boundary.",
         children: [
           {
             id: "router-angular-router",
@@ -379,7 +379,7 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
             title: "Expo Router",
             href: "/docs/frameworks/react-native#expo-router",
             blurb:
-              "The file-based boundary discovers screens and retains outgoing native views until playback completes. It replaces the Stack in that layout.",
+              "Pass Expo Router’s StackRouter and unstable_integrateWithRouter as framework. The boundary discovers screens, retains outgoing native views, and replaces the Stack in that layout.",
           },
         ],
       },
@@ -431,6 +431,12 @@ export const DOCS_NAV: readonly DocsNavGroup[] = [
         title: "Troubleshooting",
         href: "/docs/troubleshooting",
         blurb: "Nothing moves, the wrong thing moves, or the page jumps.",
+      },
+      {
+        id: "migration-v8",
+        title: "Migrate to 8.0",
+        href: "/docs/migration-v8",
+        blurb: "Every API removed in 8.0 and what replaces it.",
       },
     ],
   },
