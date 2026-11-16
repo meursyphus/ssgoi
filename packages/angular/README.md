@@ -171,7 +171,7 @@ const config: SsgoiConfig = {
 - `scroll`: vertical sequences.
 - `strip`, `film`, `rotate`, `blind`, `jaemin`: expressive transitions.
 
-Options: https://ssgoi.dev/llms.txt#7-transition-index
+Options: https://ssgoi.dev/llms/transitions.txt
 
 ## API
 

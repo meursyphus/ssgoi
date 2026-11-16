@@ -399,12 +399,9 @@ const config = {
 - `scroll`: vertical sequences.
 - `strip`, `film`, `rotate`, `blind`, `jaemin`: expressive transitions.
 
-References: https://ssgoi.dev/llms.txt#7-transition-index
+References: https://ssgoi.dev/llms/transitions.txt
 
-## Low-level APIs
-
-`transition()` remains available for element-level mount/unmount animations;
-it is separate from route boundaries.
+Upgrading from 7.x: https://ssgoi.dev/docs/migration-v8
 
 ## License
 

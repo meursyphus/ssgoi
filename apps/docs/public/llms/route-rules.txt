@@ -112,7 +112,8 @@ Both routes must be present in the array.
 | `/posts/**` | `/posts` and all descendants |
 
 Higher `priority` wins first, then more-specific paths, then declaration order.
-A bare `*` remains a compatibility alias for `/**`.
+Write `/**` for every path. A bare `*` is not an alias for it: it is read as
+`/*` and matches only single-segment paths such as `/posts`.
 
 ```ts
 const config = {

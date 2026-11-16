@@ -1,0 +1,234 @@
+# Migrate SSGOI 7.x to 8.0
+
+SSGOI 8.0.0 removes the compatibility code 7.x kept. It adds no new behavior.
+Every removed API already had a replacement in 7.x. Upgrade every `@ssgoi/*`
+package to the same 8.x version; they release in lockstep.
+
+Website version: https://ssgoi.dev/docs/migration-v8
+
+## 1. Find usages
+
+```bash
+grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '@ssgoi/[a-z-]+/(nextjs|remix|react-router|tanstack-router|sveltekit|vue-router|nuxt|solid-router|solidstart|qwik-city|router|expo-router|unplugin)|(^|[^A-Za-z])SsgoiTransition\b|SsgoiRouteBoundary|ssgoiRouteBoundary|ssgoiTransition|routeKey|parallelRoutesKey|feel:|"crossfade"|background-scale|fade: true|data-hero-key|data-hero-aspect-ratio|data-hero-radius|data-zoom-radius|fromSpring|TrackPatch|SsgoiTransitionsOption' .
+
+# Patterns too generic for one search; review these hits by hand:
+grep -rnE --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist '["'"'"']\*["'"'"']|\.set\(["'"'"']' .
+```
+
+The second search is noisy (any `"*"` string or `Map.set("key")` call); check
+route patterns and MultiAnimation calls among its hits. Review every hit of the
+first; `routeKey` can also match an app's own props.
+
+Removed subpaths and exports fail at build time; TypeScript flags removed
+options. These fail silently in untyped code:
+
+| 7.x code | On 8.0 |
+| --- | --- |
+| `drill({ type: "crossfade" })` | plays the default parallax drill |
+| `sheet({ type: "background-scale" })` | plays the default static sheet |
+| `axis({ feel: "snappy" })` | `feel` ignored; default x axis |
+| `zoom({ fade: true })` | `fade` ignored; default variant |
+| `data-hero-key` | no pair found; Hero does nothing |
+| `data-hero-aspect-ratio`, `data-hero-radius`, `data-zoom-radius` | ignored |
+| route pattern `"*"` | read as `/*`: single-segment paths only |
+| `animation.set("in", { ... })` | string taken as an empty patch; no change |
+
+## 2. Replacement table
+
+| Removed | Use instead |
+| --- | --- |
+| router subpaths (`@ssgoi/react/nextjs`, `/remix`, `/react-router`, `/tanstack-router`, `@ssgoi/svelte/sveltekit`, `@ssgoi/vue/vue-router`, `/nuxt`, `@ssgoi/solid/solid-router`, `/solidstart`, `@ssgoi/qwik/qwik-city`, `@ssgoi/angular/router`, `@ssgoi/react-native/expo-router`) and their `SsgoiRouteBoundary` / `useSsgoiRouteBoundary` / `*ssgoiRouteBoundary` | `framework` on the provider + `SsgoiLayoutBoundary` (Qwik `useSsgoiLayoutBoundary`, Angular `*ssgoiLayoutBoundary`) from the package root |
+| `routeKey`, Angular `key:`, `useSsgoiRouteBoundary(key)` | a scope in `config.layouts` |
+| `resolve` | id = the route path; normalize URL structure with `config.middleware` (React: or return the path from `useRoute`); otherwise a manual keyed boundary |
+| Next.js `resolve` + `selectedSegments` for modals | `renderedPath` from `useRoute` |
+| Next.js `parallelRoutesKey` | pass the slot name to `useSelectedLayoutSegments(slot)` inside your `useRoute` |
+| Next.js `fallback`, `selectedSegmentsToPath` | no replacement (the first boundary renders nothing until the route is known; compute `renderedPath` inside `useRoute`) |
+| Expo `resolve`, `routeKey` | no replacement (screens key by native route) |
+| `SsgoiTransition` (all frameworks), Angular `[ssgoiTransition]` | `data-ssgoi-transition` on an element the framework keys |
+| `@ssgoi/react/unplugin` (+ `/vite`, `/webpack`, `/rollup`, `/esbuild`) | remove from the bundler config; no replacement |
+| `axis({ feel: "snappy" })` / `axis({ feel: "fluid" })` | `axis({ variant: "snappy" })` / `axis()` |
+| `drill({ type: "crossfade" })` | `drill({ type: "slide" })` |
+| `sheet({ type: "background-scale" })` | `sheet({ type: "scale" })` |
+| `zoom({ fade: true })` | `zoom({ variant: "fade" })` |
+| `data-hero-key` | `data-hero-exit-key` (page you leave) + `data-hero-enter-key` (page you arrive at) |
+| `data-hero-aspect-ratio` | none: key an `<img>` or a wrapper with one direct `<img>`; natural size or `width`/`height` attributes and centered `object-fit` are read |
+| `data-hero-radius`, `data-zoom-radius` | none: CSS `border-radius` on the keyed element or a clipping ancestor |
+| pattern `"*"` | `"/**"` |
+| `IntegratorProvider.fromSpring(c)` | `IntegratorProvider.from({ spring: c })` or `spring(c)` |
+| `multi.set(name, { integrator })` | `multi.select(name).set({ integrator })` with an Integrator instance |
+| type `TrackPatch` | `AnimationPatch` |
+| type `SsgoiTransitionsOption` | `NonNullable<SsgoiConfig["transitions"]>` |
+| types `AxisFeelDeprecated`, `DrillTypeDeprecated`, `SheetTypeDeprecated` | `AxisXVariant`, `DrillType`, `SheetType` |
+| types `RouteBoundaryState`, `SsgoiRouteBoundaryProps`, `*RouteLocation` | `SsgoiFramework`; `SsgoiLayoutBoundaryProps` where exported |
+
+Routers are no longer optional peer dependencies of any package.
+
+## 3. Router subpaths
+
+Pass a `framework` object (module scope) to the provider; replace the boundary
+with the root-entry `SsgoiLayoutBoundary`. `SsgoiLayoutBoundary` throws an
+`SSGOI:` error if the provider has no `framework`. Config is unchanged.
+
+Next.js (7.x: `import { SsgoiRouteBoundary } from "@ssgoi/react/nextjs"`):
+
+```tsx
+// app/ssgoi-provider.tsx
+"use client";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Ssgoi, type SsgoiFramework } from "@ssgoi/react";
+
+const INTERCEPTION_PREFIX = /^(?:\(\.\.\.\)|\(\.\.\)|\(\.\))+/;
+
+const framework: SsgoiFramework = {
+  useRoute: () => {
+    const pathname = usePathname();
+    const segments = useSelectedLayoutSegments();
+    if (pathname == null) return null;
+    const renderedPath = `/${segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => segment.replace(INTERCEPTION_PREFIX, ""))
+      .filter(Boolean)
+      .join("/")}`;
+    return { pathname, renderedPath };
+  },
+};
+
+// <Ssgoi config={config} framework={framework}>{children}</Ssgoi>
+// app/layout.tsx: <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+```
+
+Remix / React Router (7.x `@ssgoi/react/remix`, `@ssgoi/react/react-router`):
+
+```tsx
+import { useLocation } from "react-router"; // Remix 2: "@remix-run/react"
+const framework: SsgoiFramework = { useRoute: () => useLocation() };
+```
+
+TanStack Router (7.x `@ssgoi/react/tanstack-router`): return the leaf match
+path; see https://ssgoi.dev/llms/frameworks/tanstack-router.txt
+
+SvelteKit (7.x `@ssgoi/svelte/sveltekit`):
+
+```svelte
+<script>
+  import { page } from "$app/state";
+  import { onNavigate } from "$app/navigation";
+  import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/svelte";
+  let { children } = $props();
+  const framework = { getRoute: () => ({ pathname: page.url.pathname }), onNavigate };
+</script>
+
+<Ssgoi {config} {framework}>
+  <SsgoiLayoutBoundary>{@render children()}</SsgoiLayoutBoundary>
+</Ssgoi>
+```
+
+Nuxt / Vue Router (7.x `@ssgoi/vue/nuxt`, `@ssgoi/vue/vue-router`):
+
+```vue
+<script setup>
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/vue";
+const router = useRouter(); // Vue Router: import { useRouter } from "vue-router"
+const framework = { getRoute: () => ({ pathname: router.currentRoute.value.path }) };
+</script>
+
+<template>
+  <Ssgoi :config="config" :framework="framework">
+    <SsgoiLayoutBoundary><NuxtPage /></SsgoiLayoutBoundary>
+  </Ssgoi>
+</template>
+```
+
+Solid Router / SolidStart (7.x `@ssgoi/solid/solid-router`, `/solidstart`):
+
+```tsx
+const location = useLocation(); // inside <Router root={Root}>
+<Ssgoi config={config} framework={{ getRoute: () => ({ pathname: location.pathname }) }}>
+  <SsgoiLayoutBoundary>{props.children}</SsgoiLayoutBoundary>
+</Ssgoi>
+```
+
+Qwik City (7.x `useSsgoiRouteBoundary` from `@ssgoi/qwik/qwik-city`):
+
+```tsx
+useSsgoi(root, { config$, framework: { location: useLocation() } }); // root layout
+const boundary = useSsgoiLayoutBoundary(); // group layouts and pages, no arguments
+<article key={boundary.value.key} data-ssgoi-transition={boundary.value.id}>
+```
+
+Angular (7.x `*ssgoiRouteBoundary` from `@ssgoi/angular/router`): bind
+`[ssgoiFramework]="framework"` on the `ssgoi` element with
+`getRoute(injector)` and `onNavigate(injector, callback)` (full object:
+https://ssgoi.dev/llms/frameworks/angular.txt), then use
+`<article *ssgoiLayoutBoundary="let boundary">` with `SsgoiLayoutBoundary`
+imported from `@ssgoi/angular`.
+
+Expo Router (7.x `@ssgoi/react-native/expo-router`):
+
+```tsx
+import { StackRouter, unstable_integrateWithRouter } from "expo-router";
+import { Ssgoi, SsgoiLayoutBoundary } from "@ssgoi/react-native";
+const framework = { StackRouter, unstable_integrateWithRouter };
+// <Ssgoi config={config} framework={framework}><SsgoiLayoutBoundary /></Ssgoi>
+```
+
+## 4. routeKey → config.layouts
+
+7.x:
+
+```tsx
+<SsgoiRouteBoundary routeKey="shop">
+  <ShopTabs />
+  <SsgoiRouteBoundary>{children}</SsgoiRouteBoundary>
+</SsgoiRouteBoundary>
+```
+
+8.0:
+
+```tsx
+const config = { layouts: [{ paths: "/shop/**" }], transitions: [/* ... */] };
+
+// app/shop/layout.tsx: the root boundary keeps one key for /shop/**
+<>
+  <ShopTabs />
+  <SsgoiLayoutBoundary>{children}</SsgoiLayoutBoundary>
+</>
+```
+
+Details: https://ssgoi.dev/llms/complex-routing.txt
+
+## 5. Markup and motion
+
+```tsx
+// SsgoiTransition → attribute on a keyed element
+<div key={pathname} data-ssgoi-transition={pathname}>…</div>
+
+// hero keys
+<img data-hero-exit-key={item.id} src={item.thumbnail} />  // list
+<img data-hero-enter-key={item.id} src={item.full} />      // detail
+```
+
+```ts
+import { IntegratorProvider, drill, spring } from "@ssgoi/core";
+
+IntegratorProvider.from({ spring: { stiffness: 300, damping: 30 } });
+
+drill({}, {
+  override: {
+    forward({ animation }) {
+      animation.select("in").set({
+        integrator: spring({ stiffness: 300, damping: 30 }),
+      });
+    },
+  },
+});
+```
+
+`select(name).set()` requires an Integrator instance (`step` and `isSettled`);
+the `{ spring }` shape throws.
+
+## 6. Staying on 7
+
+`npm install @ssgoi/react@7` (or the matching framework package). 7.5 has both
+interfaces, so you can migrate to the current names there first and upgrade to 8
+afterwards.

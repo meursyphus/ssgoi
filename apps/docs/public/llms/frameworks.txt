@@ -59,4 +59,5 @@ Check each guide for the tested versions. Remix 2 follows its own React 18
 requirements.
 
 Direct/custom integration: https://ssgoi.dev/llms/manual-boundaries.txt
+Upgrading from 7.x router subpaths (`@ssgoi/react/nextjs`, ...): https://ssgoi.dev/llms/migration-v8.txt
 Transition catalog: https://ssgoi.dev/llms/transitions.txt

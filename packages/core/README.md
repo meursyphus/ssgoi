@@ -166,7 +166,7 @@ closures and restore styles when reusable page nodes finish animating.
 - `scroll`: vertical sequences.
 - `strip`, `film`, `rotate`, `blind`, `jaemin`: expressive transitions.
 
-Effect references: https://ssgoi.dev/llms.txt#7-transition-index
+Effect references: https://ssgoi.dev/llms/transitions.txt
 
 ## Layout requirements
 

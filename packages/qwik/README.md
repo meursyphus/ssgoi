@@ -152,7 +152,7 @@ the rule's pages with `preserveScroll: "shared"`.
 - `zoom` or `hero`: shared-element details.
 - `scroll`: vertical sequences.
 
-All effects: https://ssgoi.dev/llms.txt#7-transition-index
+All effects: https://ssgoi.dev/llms/transitions.txt
 
 `Ssgoi` remains available for concrete projected children. In Qwik City route
 layouts, prefer `useSsgoi()` so `<Slot />` stays directly under the observed
